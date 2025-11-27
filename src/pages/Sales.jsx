@@ -6,7 +6,7 @@ import StoreSelector, { STORES } from '@/components/StoreSelector';
 import ShiftRecordForm from '@/components/forms/ShiftRecordForm';
 import DailySalesForm from '@/components/forms/DailySalesForm';
 import CashierForm from '@/components/forms/CashierForm';
-import AnimatedIcon from '@/components/AnimatedIcon';
+import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
 import { ArrowLeft, TrendingUp, Clock, Calendar } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -28,24 +28,22 @@ export default function Sales() {
   const selectedStoreName = STORES.find(s => s.code === selectedStore)?.name || '';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-fuchsia-50/30 to-purple-50 p-4 md:p-6">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-white relative">
+      <FloatingIceCreamsBg />
+      <div className="max-w-4xl mx-auto px-4 py-6 relative z-10">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div className="flex items-center gap-4">
             <Link to={createPageUrl('Home')}>
-              <Button variant="ghost" size="icon" className="rounded-full hover:bg-fuchsia-100">
-                <ArrowLeft className="w-5 h-5 text-fuchsia-600" />
+              <Button variant="ghost" size="icon" className="rounded-full hover:bg-pink-50">
+                <ArrowLeft className="w-5 h-5 text-pink-600" />
               </Button>
             </Link>
-            <div className="flex items-center gap-3">
-              <AnimatedIcon icon={TrendingUp} color="green" size="md" />
-              <div>
-                <h1 className="text-2xl md:text-3xl font-bold text-fuchsia-800">Registrar Ventas</h1>
-                {selectedStore && (
-                  <p className="text-sm text-fuchsia-600/70">{selectedStore} - {selectedStoreName}</p>
-                )}
-              </div>
+            <div>
+              <h1 className="text-2xl md:text-3xl font-black text-gray-800">Registrar Ventas</h1>
+              {selectedStore && (
+                <p className="text-sm text-gray-500">{selectedStore} - {selectedStoreName}</p>
+              )}
             </div>
           </div>
           <div className="flex gap-3 items-center">
@@ -60,17 +58,17 @@ export default function Sales() {
             animate={{ opacity: 1, y: 0 }}
           >
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-              <TabsList className="w-full bg-white/80 backdrop-blur-sm border border-fuchsia-100 p-1 rounded-xl">
+              <TabsList className="w-full bg-white border border-gray-100 p-1 rounded-xl shadow-sm">
                 <TabsTrigger 
                   value="shift" 
-                  className="flex-1 data-[state=active]:bg-gradient-to-r data-[state=active]:from-fuchsia-500 data-[state=active]:to-pink-500 data-[state=active]:text-white rounded-lg"
+                  className="flex-1 data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500 data-[state=active]:to-rose-500 data-[state=active]:text-white rounded-lg"
                 >
                   <Clock className="w-4 h-4 mr-2" />
                   Por Turno
                 </TabsTrigger>
                 <TabsTrigger 
                   value="daily" 
-                  className="flex-1 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white rounded-lg"
+                  className="flex-1 data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-green-500 data-[state=active]:text-white rounded-lg"
                 >
                   <Calendar className="w-4 h-4 mr-2" />
                   Total del Día
@@ -89,14 +87,14 @@ export default function Sales() {
         ) : (
           <div className="text-center py-20">
             <motion.div
-              animate={{ y: [0, -10, 0] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="text-6xl mb-4"
+              animate={{ y: [0, -15, 0], rotate: [0, 5, -5, 0] }}
+              transition={{ duration: 3, repeat: Infinity }}
+              className="text-7xl mb-4"
             >
               📝
             </motion.div>
-            <h2 className="text-xl font-bold text-fuchsia-700 mb-2">Selecciona una tienda</h2>
-            <p className="text-fuchsia-600/60">Para registrar ventas y turnos</p>
+            <h2 className="text-xl font-bold text-gray-700 mb-2">Selecciona una tienda</h2>
+            <p className="text-gray-400">Para registrar ventas y turnos</p>
           </div>
         )}
       </div>

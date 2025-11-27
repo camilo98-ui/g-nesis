@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import StoreSelector, { STORES } from '@/components/StoreSelector';
 import BudgetForm from '@/components/forms/BudgetForm';
-import AnimatedIcon from '@/components/AnimatedIcon';
+import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
 import { ArrowLeft, Target, DollarSign, Receipt, Zap, Gift, Calendar } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -52,24 +52,22 @@ export default function Budget() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-fuchsia-50/30 to-purple-50 p-4 md:p-6">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-white relative">
+      <FloatingIceCreamsBg />
+      <div className="max-w-4xl mx-auto px-4 py-6 relative z-10">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div className="flex items-center gap-4">
             <Link to={createPageUrl('Home')}>
-              <Button variant="ghost" size="icon" className="rounded-full hover:bg-fuchsia-100">
-                <ArrowLeft className="w-5 h-5 text-fuchsia-600" />
+              <Button variant="ghost" size="icon" className="rounded-full hover:bg-pink-50">
+                <ArrowLeft className="w-5 h-5 text-pink-600" />
               </Button>
             </Link>
-            <div className="flex items-center gap-3">
-              <AnimatedIcon icon={Target} color="blue" size="md" />
-              <div>
-                <h1 className="text-2xl md:text-3xl font-bold text-fuchsia-800">Presupuestos</h1>
-                {selectedStore && (
-                  <p className="text-sm text-fuchsia-600/70">{selectedStore} - {selectedStoreName}</p>
-                )}
-              </div>
+            <div>
+              <h1 className="text-2xl md:text-3xl font-black text-gray-800">Presupuestos</h1>
+              {selectedStore && (
+                <p className="text-sm text-gray-500">{selectedStore} - {selectedStoreName}</p>
+              )}
             </div>
           </div>
           <StoreSelector selectedStore={selectedStore} onStoreChange={handleStoreChange} />
@@ -164,14 +162,14 @@ export default function Budget() {
         ) : (
           <div className="text-center py-20">
             <motion.div
-              animate={{ y: [0, -10, 0] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="text-6xl mb-4"
+              animate={{ y: [0, -15, 0], rotate: [0, 5, -5, 0] }}
+              transition={{ duration: 3, repeat: Infinity }}
+              className="text-7xl mb-4"
             >
               🎯
             </motion.div>
-            <h2 className="text-xl font-bold text-fuchsia-700 mb-2">Selecciona una tienda</h2>
-            <p className="text-fuchsia-600/60">Para configurar presupuestos mensuales</p>
+            <h2 className="text-xl font-bold text-gray-700 mb-2">Selecciona una tienda</h2>
+            <p className="text-gray-400">Para configurar presupuestos mensuales</p>
           </div>
         )}
       </div>
