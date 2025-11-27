@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import StoreSelector, { STORES } from '@/components/StoreSelector';
 import CashierForm from '@/components/forms/CashierForm';
+import AnimatedIcon from '@/components/AnimatedIcon';
 import { ArrowLeft, Users, User, Mail, Phone, Calendar, MoreVertical, Trash2, Edit, UserCheck, UserX } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -74,26 +75,24 @@ export default function Team() {
   const selectedStoreName = STORES.find(s => s.code === selectedStore)?.name || '';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-red-50 p-4 md:p-6">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-fuchsia-50/30 to-purple-50 p-4 md:p-6">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div className="flex items-center gap-4">
             <Link to={createPageUrl('Home')}>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <ArrowLeft className="w-5 h-5" />
+              <Button variant="ghost" size="icon" className="rounded-full hover:bg-fuchsia-100">
+                <ArrowLeft className="w-5 h-5 text-fuchsia-600" />
               </Button>
             </Link>
-            <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-3">
-                <div className="p-2 bg-gradient-to-br from-cyan-500 to-teal-500 rounded-xl text-white">
-                  <Users className="w-6 h-6" />
-                </div>
-                Equipo
-              </h1>
-              {selectedStore && (
-                <p className="text-sm text-gray-500 mt-1">{selectedStore} - {selectedStoreName}</p>
-              )}
+            <div className="flex items-center gap-3">
+              <AnimatedIcon icon={Users} color="cyan" size="md" />
+              <div>
+                <h1 className="text-2xl md:text-3xl font-bold text-fuchsia-800">Equipo</h1>
+                {selectedStore && (
+                  <p className="text-sm text-fuchsia-600/70">{selectedStore} - {selectedStoreName}</p>
+                )}
+              </div>
             </div>
           </div>
           <div className="flex gap-3 items-center">
@@ -240,9 +239,15 @@ export default function Team() {
           </motion.div>
         ) : (
           <div className="text-center py-20">
-            <Users className="w-16 h-16 text-cyan-300 mx-auto mb-4" />
-            <h2 className="text-xl font-bold text-gray-800 mb-2">Selecciona una tienda</h2>
-            <p className="text-gray-500">Para gestionar el equipo de cajeros</p>
+            <motion.div
+              animate={{ y: [0, -10, 0] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="text-6xl mb-4"
+            >
+              👥
+            </motion.div>
+            <h2 className="text-xl font-bold text-fuchsia-700 mb-2">Selecciona una tienda</h2>
+            <p className="text-fuchsia-600/60">Para gestionar el equipo de cajeros</p>
           </div>
         )}
 
