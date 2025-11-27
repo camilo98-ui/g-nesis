@@ -8,7 +8,8 @@ import StoreSelector, { STORES } from '@/components/StoreSelector';
 import DateFilter from '@/components/DateFilter';
 import CashierRankingCard from '@/components/ranking/CashierRankingCard';
 import CashierRecommendation from '@/components/CashierRecommendation';
-import { ArrowLeft, Award, Gift, Trophy, Star } from 'lucide-react';
+import AnimatedIcon from '@/components/AnimatedIcon';
+import { ArrowLeft, Award, Gift, Trophy, Star, Receipt } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { startOfMonth } from 'date-fns';
@@ -73,6 +74,11 @@ export default function Rankings() {
       cashierStats[record.cashier_id].shifts += 1;
     });
 
+    // Calculate average ticket
+    Object.values(cashierStats).forEach(stats => {
+      stats.avgTicket = stats.totalTickets > 0 ? stats.totalSales / stats.totalTickets : 0;
+    });
+
     // Sort by sales
     const salesRanking = Object.values(cashierStats)
       .sort((a, b) => b.totalSales - a.totalSales)
@@ -91,37 +97,43 @@ export default function Rankings() {
         cashier: cashiers.find(c => c.id === stats.cashier_id) || { name: 'Desconocido' }
       }));
 
-    return { salesRanking, suggestedRanking };
+    // Sort by average ticket
+    const ticketRanking = Object.values(cashierStats)
+      .filter(s => s.totalTickets > 0)
+      .sort((a, b) => b.avgTicket - a.avgTicket)
+      .map((stats, index) => ({
+        ...stats,
+        rank: index + 1,
+        cashier: cashiers.find(c => c.id === stats.cashier_id) || { name: 'Desconocido' }
+      }));
+
+    return { salesRanking, suggestedRanking, ticketRanking };
   }, [filteredRecords, cashiers]);
 
   const selectedStoreName = STORES.find(s => s.code === selectedStore)?.name || '';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-red-50 p-4 md:p-6">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-fuchsia-50/30 to-purple-50 p-4 md:p-6">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div className="flex items-center gap-4">
             <Link to={createPageUrl('Home')}>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <ArrowLeft className="w-5 h-5" />
+              <Button variant="ghost" size="icon" className="rounded-full hover:bg-fuchsia-100">
+                <ArrowLeft className="w-5 h-5 text-fuchsia-600" />
               </Button>
             </Link>
-            <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-3">
-                <div className="p-2 bg-gradient-to-br from-yellow-500 to-amber-500 rounded-xl text-white">
-                  <Award className="w-6 h-6" />
-                </div>
-                Rankings
-              </h1>
-              {selectedStore && (
-                <p className="text-sm text-gray-500 mt-1">{selectedStore} - {selectedStoreName}</p>
-              )}
+            <div className="flex items-center gap-3">
+              <AnimatedIcon icon={Award} color="yellow" size="md" />
+              <div>
+                <h1 className="text-2xl md:text-3xl font-bold text-fuchsia-800">Rankings</h1>
+                {selectedStore && (
+                  <p className="text-sm text-fuchsia-600/70">{selectedStore} - {selectedStoreName}</p>
+                )}
+              </div>
             </div>
           </div>
-          <div className="flex flex-col md:flex-row gap-3">
-            <StoreSelector selectedStore={selectedStore} onStoreChange={handleStoreChange} />
-          </div>
+          <StoreSelector selectedStore={selectedStore} onStoreChange={handleStoreChange} />
         </div>
 
         {/* Date Filter */}
@@ -138,20 +150,27 @@ export default function Rankings() {
             className="space-y-6"
           >
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="w-full bg-white/80 backdrop-blur-sm border border-orange-100 p-1 rounded-xl mb-6">
+              <TabsList className="w-full bg-white/80 backdrop-blur-sm border border-fuchsia-100 p-1 rounded-xl mb-6 grid grid-cols-3">
                 <TabsTrigger 
                   value="sales" 
-                  className="flex-1 data-[state=active]:bg-gradient-to-r data-[state=active]:from-yellow-500 data-[state=active]:to-amber-500 data-[state=active]:text-white rounded-lg"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-fuchsia-500 data-[state=active]:to-pink-500 data-[state=active]:text-white rounded-lg"
                 >
                   <Trophy className="w-4 h-4 mr-2" />
-                  Top Ventas
+                  <span className="hidden sm:inline">Top</span> Ventas
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="ticket" 
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white rounded-lg"
+                >
+                  <Receipt className="w-4 h-4 mr-2" />
+                  <span className="hidden sm:inline">Top</span> Ticket
                 </TabsTrigger>
                 <TabsTrigger 
                   value="suggested" 
-                  className="flex-1 data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500 data-[state=active]:to-rose-500 data-[state=active]:text-white rounded-lg"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500 data-[state=active]:to-rose-500 data-[state=active]:text-white rounded-lg"
                 >
                   <Star className="w-4 h-4 mr-2" />
-                  Top Sugeridos
+                  <span className="hidden sm:inline">Top</span> Sugeridos
                 </TabsTrigger>
               </TabsList>
 
@@ -171,9 +190,33 @@ export default function Rankings() {
                     />
                   ))
                 ) : (
-                  <div className="text-center py-12 bg-white rounded-2xl border border-orange-100">
-                    <Trophy className="w-12 h-12 text-yellow-300 mx-auto mb-3" />
-                    <p className="text-gray-500">No hay registros en el período seleccionado</p>
+                  <div className="text-center py-12 bg-white/70 rounded-2xl border border-fuchsia-100">
+                    <Trophy className="w-12 h-12 text-fuchsia-300 mx-auto mb-3" />
+                    <p className="text-fuchsia-600/70">No hay registros en el período seleccionado</p>
+                  </div>
+                )}
+              </TabsContent>
+
+              <TabsContent value="ticket" className="space-y-3">
+                {rankings.ticketRanking.length > 0 ? (
+                  rankings.ticketRanking.map((item, index) => (
+                    <CashierRankingCard
+                      key={item.cashier_id}
+                      cashier={item.cashier}
+                      rank={item.rank}
+                      sales={item.totalSales}
+                      tickets={item.totalTickets}
+                      transactions={item.totalTransactions}
+                      suggestedSales={item.totalSuggested}
+                      avgTicket={item.avgTicket}
+                      rankType="ticket"
+                      delay={index * 0.05}
+                    />
+                  ))
+                ) : (
+                  <div className="text-center py-12 bg-white/70 rounded-2xl border border-fuchsia-100">
+                    <Receipt className="w-12 h-12 text-blue-300 mx-auto mb-3" />
+                    <p className="text-fuchsia-600/70">No hay registros en el período seleccionado</p>
                   </div>
                 )}
               </TabsContent>
@@ -194,9 +237,9 @@ export default function Rankings() {
                     />
                   ))
                 ) : (
-                  <div className="text-center py-12 bg-white rounded-2xl border border-orange-100">
+                  <div className="text-center py-12 bg-white/70 rounded-2xl border border-fuchsia-100">
                     <Gift className="w-12 h-12 text-pink-300 mx-auto mb-3" />
-                    <p className="text-gray-500">No hay registros en el período seleccionado</p>
+                    <p className="text-fuchsia-600/70">No hay registros en el período seleccionado</p>
                   </div>
                 )}
               </TabsContent>
@@ -211,9 +254,15 @@ export default function Rankings() {
           </motion.div>
         ) : (
           <div className="text-center py-20">
-            <Award className="w-16 h-16 text-yellow-300 mx-auto mb-4" />
-            <h2 className="text-xl font-bold text-gray-800 mb-2">Selecciona una tienda</h2>
-            <p className="text-gray-500">Para ver los rankings de cajeros</p>
+            <motion.div
+              animate={{ y: [0, -10, 0], rotate: [0, 5, -5, 0] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="text-6xl mb-4"
+            >
+              🏆
+            </motion.div>
+            <h2 className="text-xl font-bold text-fuchsia-700 mb-2">Selecciona una tienda</h2>
+            <p className="text-fuchsia-600/60">Para ver los rankings de cajeros</p>
           </div>
         )}
       </div>
