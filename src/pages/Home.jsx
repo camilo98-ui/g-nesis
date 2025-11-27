@@ -9,6 +9,8 @@ import {
   Award, Target, ChevronRight, FileText
 } from 'lucide-react';
 
+const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/c3a36de58_Capturadepantalla2025-11-251251441.png";
+
 const MENU_ITEMS = [
   { 
     name: 'Dashboard', 
@@ -86,25 +88,22 @@ export default function Home() {
       <FloatingIceCreamsBg />
 
       <div className="max-w-6xl mx-auto px-4 py-6 relative z-10">
-        {/* Header con logo texto */}
+        {/* Header con logo imagen */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-8"
         >
-          <motion.div 
-            className="mb-4"
+          <motion.img 
+            src={LOGO_URL}
+            alt="Popsy - Helado Gourmet"
+            className="h-20 md:h-24 mx-auto mb-4"
             initial={{ scale: 0.9 }}
             animate={{ scale: 1 }}
-          >
-            <h1 className="text-4xl md:text-5xl font-black">
-              <span className="text-gray-400 text-lg font-normal block">HELADO GOURMET</span>
-              <span className="bg-gradient-to-r from-pink-500 via-rose-500 to-pink-600 bg-clip-text text-transparent">
-                Popsy
-              </span>
-            </h1>
-          </motion.div>
-          
+            whileHover={{ scale: 1.05 }}
+            transition={{ type: "spring", stiffness: 300 }}
+          />
+
           <p className="text-gray-500 text-sm mb-6">Sistema de Gestión de Ventas</p>
           
           {/* Store Selector prominente */}
@@ -147,15 +146,21 @@ export default function Home() {
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.08 }}
-                  whileHover={{ y: -8, scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={{ y: -10, scale: 1.05, rotate: 1 }}
+                  whileTap={{ scale: 0.95 }}
                 >
                   <Link to={createPageUrl(item.page)}>
-                    <div className={`${item.bgColor} rounded-2xl p-5 h-full shadow-sm hover:shadow-xl transition-all duration-300 border border-white/50`}>
+                    <motion.div 
+                      className={`${item.bgColor} rounded-2xl p-5 h-full shadow-sm hover:shadow-2xl transition-all duration-300 border border-white/50`}
+                      animate={{ 
+                        boxShadow: ["0 4px 6px rgba(0,0,0,0.1)", "0 8px 15px rgba(0,0,0,0.15)", "0 4px 6px rgba(0,0,0,0.1)"]
+                      }}
+                      transition={{ duration: 3, repeat: Infinity, delay: index * 0.2 }}
+                    >
                       <motion.div 
                         className={`w-12 h-12 ${item.iconBg} rounded-xl flex items-center justify-center mb-3`}
-                        whileHover={{ rotate: [0, -10, 10, 0] }}
-                        transition={{ duration: 0.5 }}
+                        whileHover={{ rotate: [0, -15, 15, -10, 10, 0], scale: 1.1 }}
+                        transition={{ duration: 0.6 }}
                       >
                         <Icon className={`w-6 h-6 ${item.iconColor}`} />
                       </motion.div>
@@ -163,7 +168,7 @@ export default function Home() {
                         {item.name}
                       </h3>
                       <p className="text-xs text-gray-500">{item.description}</p>
-                    </div>
+                    </motion.div>
                   </Link>
                 </motion.div>
               );
