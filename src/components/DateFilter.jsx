@@ -52,7 +52,7 @@ export default function DateFilter({ dateRange, onDateChange }) {
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <div className="flex flex-wrap gap-1 bg-white/80 backdrop-blur-sm rounded-xl p-1 shadow-lg border border-fuchsia-100">
+      <div className="flex flex-wrap gap-1 bg-white rounded-xl p-1 shadow-sm border border-gray-100">
         {Object.entries(presets).map(([key, { label }]) => (
           <Button
             key={key}
@@ -60,8 +60,8 @@ export default function DateFilter({ dateRange, onDateChange }) {
             size="sm"
             onClick={() => handlePresetChange(key)}
             className={`text-xs ${selectedTab === key 
-              ? 'bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white shadow-md' 
-              : 'text-gray-600 hover:text-fuchsia-600 hover:bg-fuchsia-50'}`}
+              ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-md' 
+              : 'text-gray-600 hover:text-pink-600 hover:bg-pink-50'}`}
           >
             {label}
           </Button>
@@ -74,9 +74,9 @@ export default function DateFilter({ dateRange, onDateChange }) {
             variant="outline" 
             size="sm"
             onClick={() => setSelectedTab("custom")}
-            className={`gap-2 border-fuchsia-200 ${selectedTab === "custom" 
-              ? 'bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white border-none' 
-              : 'hover:bg-fuchsia-50 hover:border-fuchsia-300'}`}
+            className={`gap-2 border-gray-200 ${selectedTab === "custom" 
+              ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white border-none' 
+              : 'hover:bg-pink-50 hover:border-pink-300'}`}
           >
             <CalendarRange className="w-4 h-4" />
             <span className="hidden md:inline">
@@ -86,7 +86,7 @@ export default function DateFilter({ dateRange, onDateChange }) {
             </span>
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0 bg-white border-fuchsia-200" align="end">
+        <PopoverContent className="w-auto p-0 bg-white border-gray-200 rounded-xl" align="end">
           <Calendar
             initialFocus
             mode="range"

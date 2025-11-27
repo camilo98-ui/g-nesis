@@ -1,5 +1,5 @@
 import React from 'react';
-import { Store, MapPin } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -34,30 +34,28 @@ export { STORES };
 
 export default function StoreSelector({ selectedStore, onStoreChange }) {
   return (
-    <div className="relative">
-      <Select value={selectedStore} onValueChange={onStoreChange}>
-        <SelectTrigger className="w-full md:w-[280px] bg-white/90 backdrop-blur-sm border-fuchsia-200 hover:border-fuchsia-400 transition-all shadow-lg">
-          <div className="flex items-center gap-2">
-            <MapPin className="w-4 h-4 text-fuchsia-500" />
-            <SelectValue placeholder="Selecciona una tienda" />
-          </div>
-        </SelectTrigger>
-        <SelectContent className="max-h-[400px] bg-white/95 backdrop-blur-lg border-fuchsia-200">
-          {STORES.map((store) => (
-            <SelectItem 
-              key={store.code} 
-              value={store.code}
-              className="hover:bg-fuchsia-50 cursor-pointer transition-colors"
-            >
-              <div className="flex items-center gap-2">
-                <Store className="w-4 h-4 text-fuchsia-400" />
-                <span className="font-medium text-gray-800">{store.code}</span>
-                <span className="text-gray-500 text-sm">({store.name})</span>
-              </div>
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
+    <Select value={selectedStore} onValueChange={onStoreChange}>
+      <SelectTrigger className="w-full md:w-[300px] bg-white border-gray-200 hover:border-pink-300 transition-all shadow-sm rounded-xl">
+        <div className="flex items-center gap-2">
+          <MapPin className="w-4 h-4 text-pink-500" />
+          <SelectValue placeholder="Selecciona una tienda" />
+        </div>
+      </SelectTrigger>
+      <SelectContent className="max-h-[400px] bg-white border-gray-200 rounded-xl">
+        {STORES.map((store) => (
+          <SelectItem 
+            key={store.code} 
+            value={store.code}
+            className="hover:bg-pink-50 cursor-pointer transition-colors rounded-lg"
+          >
+            <div className="flex items-center gap-2">
+              <span className="text-lg">🍦</span>
+              <span className="font-medium text-gray-800">{store.code}</span>
+              <span className="text-gray-400 text-sm">- {store.name}</span>
+            </div>
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }
