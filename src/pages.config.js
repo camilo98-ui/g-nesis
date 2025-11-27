@@ -5,6 +5,8 @@ import Rankings from './pages/Rankings';
 import SearchCashier from './pages/SearchCashier';
 import Budget from './pages/Budget';
 import Team from './pages/Team';
+import Reports from './pages/Reports';
+import Settings from './pages/Settings';
 import __Layout from './Layout.jsx';
 
 
@@ -16,6 +18,8 @@ export const PAGES = {
     "SearchCashier": SearchCashier,
     "Budget": Budget,
     "Team": Team,
+    "Reports": Reports,
+    "Settings": Settings,
 }
 
 export const pagesConfig = {
