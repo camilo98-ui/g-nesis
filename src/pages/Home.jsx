@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
-import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import WelcomeModal from '@/components/WelcomeModal';
 import StoreSelector, { STORES } from '@/components/StoreSelector';
+import FloatingCones from '@/components/FloatingCones';
+import AnimatedIcon from '@/components/AnimatedIcon';
 import { 
-  LayoutDashboard, Users, TrendingUp, Search, 
-  Award, Target, ChevronRight, Sparkles, Store
+  LayoutDashboard, Users, TrendingUp, 
+  Award, Target, ChevronRight, Store, FileText
 } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -18,48 +19,42 @@ const MENU_ITEMS = [
     page: 'Dashboard',
     icon: LayoutDashboard, 
     description: 'Estadísticas y métricas de venta',
-    color: 'from-orange-500 to-red-500',
-    lightColor: 'bg-orange-100'
+    color: 'purple'
   },
   { 
     name: 'Registrar Ventas', 
     page: 'Sales',
     icon: TrendingUp, 
     description: 'Agregar ventas diarias y por turno',
-    color: 'from-green-500 to-emerald-500',
-    lightColor: 'bg-green-100'
+    color: 'green'
   },
   { 
     name: 'Rankings', 
     page: 'Rankings',
     icon: Award, 
-    description: 'Top cajeros y sugeridos',
-    color: 'from-yellow-500 to-amber-500',
-    lightColor: 'bg-yellow-100'
-  },
-  { 
-    name: 'Buscar Cajero', 
-    page: 'SearchCashier',
-    icon: Search, 
-    description: 'Consultar información por cajero',
-    color: 'from-blue-500 to-indigo-500',
-    lightColor: 'bg-blue-100'
+    description: 'Top cajeros, ventas y sugeridos',
+    color: 'yellow'
   },
   { 
     name: 'Presupuestos', 
     page: 'Budget',
     icon: Target, 
     description: 'Configurar metas mensuales',
-    color: 'from-purple-500 to-pink-500',
-    lightColor: 'bg-purple-100'
+    color: 'blue'
   },
   { 
     name: 'Equipo', 
     page: 'Team',
     icon: Users, 
     description: 'Gestionar cajeros',
-    color: 'from-cyan-500 to-teal-500',
-    lightColor: 'bg-cyan-100'
+    color: 'cyan'
+  },
+  { 
+    name: 'Reportes', 
+    page: 'Reports',
+    icon: FileText, 
+    description: 'Generar reportes gerenciales',
+    color: 'fuchsia'
   },
 ];
 
@@ -72,7 +67,6 @@ export default function Home() {
     const saved = localStorage.getItem('selectedStore');
     if (saved) setSelectedStore(saved);
     
-    // Get user name
     base44.auth.me().then(user => {
       if (user?.full_name) setUserName(user.full_name);
     }).catch(() => {});
@@ -86,27 +80,34 @@ export default function Home() {
   const selectedStoreName = STORES.find(s => s.code === selectedStore)?.name || '';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-red-50">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-fuchsia-50/50 to-purple-50 relative overflow-hidden">
       <AnimatePresence>
         {showWelcome && <WelcomeModal userName={userName} onClose={() => setShowWelcome(false)} />}
       </AnimatePresence>
 
-      <div className="max-w-6xl mx-auto px-4 py-8">
+      <FloatingCones count={10} className="opacity-30" />
+
+      <div className="max-w-6xl mx-auto px-4 py-8 relative z-10">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-10"
         >
-          <div className="flex justify-center mb-4">
-            <div className="w-20 h-20 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl flex items-center justify-center shadow-xl shadow-orange-500/30">
-              <Sparkles className="w-10 h-10 text-white" />
-            </div>
+          <div className="flex justify-center mb-6">
+            <motion.img 
+              src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/abbf8c276_Capturadepantalla2025-11-25125144.jpg"
+              alt="Popsy Logo"
+              className="h-24 md:h-32 object-contain drop-shadow-lg"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+            />
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">
-            Sistema de Ventas
+          <h1 className="text-2xl md:text-3xl font-bold text-fuchsia-800 mb-2">
+            Sistema de Gestión de Ventas
           </h1>
-          <p className="text-gray-500 mb-6">Seguimiento y análisis de rendimiento</p>
+          <p className="text-fuchsia-600/70 mb-6">Seguimiento y análisis de rendimiento</p>
           
           {/* Store Selector */}
           <div className="flex justify-center">
@@ -117,14 +118,14 @@ export default function Home() {
           </div>
           
           {selectedStore && (
-            <motion.p 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="mt-3 text-sm text-orange-600 font-medium"
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-white/60 backdrop-blur-sm rounded-full border border-fuchsia-200"
             >
-              <Store className="w-4 h-4 inline mr-1" />
-              {selectedStore} - {selectedStoreName}
-            </motion.p>
+              <Store className="w-4 h-4 text-fuchsia-500" />
+              <span className="text-sm font-medium text-fuchsia-700">{selectedStore} - {selectedStoreName}</span>
+            </motion.div>
           )}
         </motion.div>
 
@@ -141,19 +142,22 @@ export default function Home() {
                   transition={{ delay: index * 0.1 }}
                 >
                   <Link to={createPageUrl(item.page)}>
-                    <Card className="group h-full bg-white/80 backdrop-blur-sm border-orange-100 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden">
+                    <Card className="group h-full bg-white/70 backdrop-blur-sm border-fuchsia-100 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden">
                       <CardContent className="p-6">
                         <div className="flex items-start gap-4">
-                          <div className={`p-4 rounded-2xl bg-gradient-to-br ${item.color} text-white shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                            <Icon className="w-6 h-6" />
-                          </div>
+                          <AnimatedIcon icon={Icon} color={item.color} size="md" />
                           <div className="flex-grow">
-                            <h3 className="font-bold text-gray-800 text-lg mb-1 group-hover:text-orange-600 transition-colors">
+                            <h3 className="font-bold text-gray-800 text-lg mb-1 group-hover:text-fuchsia-600 transition-colors">
                               {item.name}
                             </h3>
                             <p className="text-sm text-gray-500">{item.description}</p>
                           </div>
-                          <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-orange-500 group-hover:translate-x-1 transition-all" />
+                          <motion.div
+                            className="text-gray-300 group-hover:text-fuchsia-500"
+                            whileHover={{ x: 5 }}
+                          >
+                            <ChevronRight className="w-5 h-5" />
+                          </motion.div>
                         </div>
                       </CardContent>
                     </Card>
@@ -168,11 +172,15 @@ export default function Home() {
             animate={{ opacity: 1 }}
             className="text-center py-20"
           >
-            <div className="w-24 h-24 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Store className="w-12 h-12 text-orange-400" />
-            </div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Selecciona una tienda</h2>
-            <p className="text-gray-500 max-w-md mx-auto">
+            <motion.div 
+              className="text-7xl mb-6"
+              animate={{ y: [0, -10, 0], rotate: [0, 5, -5, 0] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              🍦
+            </motion.div>
+            <h2 className="text-2xl font-bold text-fuchsia-700 mb-2">Selecciona una tienda</h2>
+            <p className="text-fuchsia-600/60 max-w-md mx-auto">
               Para comenzar, elige la tienda con la que deseas trabajar del menú superior
             </p>
           </motion.div>

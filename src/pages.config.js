@@ -5,6 +5,7 @@ import Rankings from './pages/Rankings';
 import SearchCashier from './pages/SearchCashier';
 import Budget from './pages/Budget';
 import Team from './pages/Team';
+import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
@@ -20,4 +21,5 @@ export const PAGES = {
 export const pagesConfig = {
     mainPage: "Home",
     Pages: PAGES,
+    Layout: __Layout,
 };
