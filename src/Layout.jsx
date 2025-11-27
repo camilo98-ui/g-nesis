@@ -3,24 +3,23 @@ import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
 import GoodbyeModal from '@/components/GoodbyeModal';
-import HeaderCones from '@/components/HeaderCones';
 import QuickSearch from '@/components/QuickSearch';
-import AnimatedIcon from '@/components/AnimatedIcon';
 import { 
-  Home, LayoutDashboard, TrendingUp, Award, Search, 
-  Target, Users, LogOut, Menu, X, FileText, Settings
+  Home, LayoutDashboard, TrendingUp, Award,
+  Target, Users, LogOut, Menu, X, FileText
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { motion } from 'framer-motion';
 
 const NAV_ITEMS = [
-  { name: 'Inicio', page: 'Home', icon: Home, color: 'pink' },
-  { name: 'Dashboard', page: 'Dashboard', icon: LayoutDashboard, color: 'purple' },
-  { name: 'Ventas', page: 'Sales', icon: TrendingUp, color: 'green' },
-  { name: 'Rankings', page: 'Rankings', icon: Award, color: 'yellow' },
-  { name: 'Presupuestos', page: 'Budget', icon: Target, color: 'blue' },
-  { name: 'Equipo', page: 'Team', icon: Users, color: 'cyan' },
+  { name: 'Inicio', page: 'Home', icon: Home },
+  { name: 'Dashboard', page: 'Dashboard', icon: LayoutDashboard },
+  { name: 'Ventas', page: 'Sales', icon: TrendingUp },
+  { name: 'Rankings', page: 'Rankings', icon: Award },
+  { name: 'Presupuestos', page: 'Budget', icon: Target },
+  { name: 'Equipo', page: 'Team', icon: Users },
+  { name: 'Reportes', page: 'Reports', icon: FileText },
 ];
 
 export default function Layout({ children, currentPageName }) {
@@ -47,115 +46,72 @@ export default function Layout({ children, currentPageName }) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-fuchsia-50/30 to-purple-50">
-      <style>{`
-        :root {
-          --primary: 219 39 119;
-          --primary-foreground: 255 255 255;
-        }
-        
-        .gradient-text {
-          background: linear-gradient(135deg, #be185d 0%, #a21caf 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-        }
-      `}</style>
+    <div className="min-h-screen bg-white">
+      {/* Top Header Bar */}
+      <header className="fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-100 z-50 px-4 flex items-center justify-between shadow-sm">
+        {/* Logo */}
+        <Link to={createPageUrl('Home')} className="flex items-center gap-2">
+          <div className="flex flex-col items-start">
+            <span className="text-[10px] text-gray-400 leading-none">HELADO GOURMET</span>
+            <span className="text-2xl font-black bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent leading-none">
+              Popsy
+            </span>
+          </div>
+        </Link>
 
-      {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex fixed left-0 top-0 h-screen w-64 bg-white/70 backdrop-blur-xl border-r border-fuchsia-100 flex-col z-40">
-        <div className="p-6 border-b border-fuchsia-100">
-          <Link to={createPageUrl('Home')} className="flex items-center gap-3">
-            <img 
-              src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/abbf8c276_Capturadepantalla2025-11-25125144.jpg"
-              alt="Popsy Logo"
-              className="h-14 object-contain"
-            />
-          </Link>
-        </div>
-
-        <nav className="flex-grow p-4 space-y-2">
-          {NAV_ITEMS.map((item) => {
+        {/* Center Nav - Desktop */}
+        <nav className="hidden lg:flex items-center gap-1">
+          {NAV_ITEMS.slice(0, 5).map((item) => {
             const Icon = item.icon;
             const isActive = currentPageName === item.page;
             return (
-              <Link
-                key={item.page}
-                to={createPageUrl(item.page)}
-              >
-                <motion.div
-                  whileHover={{ x: 4 }}
-                  whileTap={{ scale: 0.98 }}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                    isActive 
-                      ? 'bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white shadow-lg shadow-fuchsia-500/30' 
-                      : 'text-gray-600 hover:bg-fuchsia-50'
-                  }`}
+              <Link key={item.page} to={createPageUrl(item.page)}>
+                <Button
+                  variant={isActive ? "default" : "ghost"}
+                  size="sm"
+                  className={`gap-2 ${isActive 
+                    ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg shadow-pink-500/20' 
+                    : 'text-gray-600 hover:text-pink-600 hover:bg-pink-50'}`}
                 >
-                  <motion.div
-                    animate={isActive ? { rotate: [0, -10, 10, 0] } : {}}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <Icon className="w-5 h-5" />
-                  </motion.div>
-                  <span className="font-medium">{item.name}</span>
-                </motion.div>
+                  <Icon className="w-4 h-4" />
+                  <span className="hidden xl:inline">{item.name}</span>
+                </Button>
               </Link>
             );
           })}
         </nav>
 
-        <div className="p-4 border-t border-fuchsia-100 space-y-2">
-          <Button 
-            variant="ghost" 
-            className="w-full justify-start text-gray-500 hover:text-fuchsia-600 hover:bg-fuchsia-50"
-            onClick={() => navigate(createPageUrl('Settings'))}
-          >
-            <Settings className="w-5 h-5 mr-3" />
-            Configuración
-          </Button>
-          <Button 
-            variant="ghost" 
-            className="w-full justify-start text-gray-500 hover:text-red-600 hover:bg-red-50"
-            onClick={handleLogout}
-          >
-            <LogOut className="w-5 h-5 mr-3" />
-            Cerrar Sesión
-          </Button>
-        </div>
-      </aside>
-
-      {/* Mobile Header */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white/80 backdrop-blur-xl border-b border-fuchsia-100 z-40 px-4 flex items-center justify-between">
-        <HeaderCones />
-        
-        <Link to={createPageUrl('Home')} className="flex items-center gap-2 relative z-10">
-          <img 
-            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/abbf8c276_Capturadepantalla2025-11-25125144.jpg"
-            alt="Popsy Logo"
-            className="h-10 object-contain"
-          />
-        </Link>
-
-        <div className="flex items-center gap-2 relative z-10">
+        {/* Right Actions */}
+        <div className="flex items-center gap-2">
           {selectedStore && <QuickSearch storeId={selectedStore} />}
           
+          {/* Logout Button - Always visible */}
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={handleLogout}
+            className="gap-2 border-pink-200 text-pink-600 hover:bg-pink-50 hover:text-pink-700"
+          >
+            <LogOut className="w-4 h-4" />
+            <span className="hidden sm:inline">Salir</span>
+          </Button>
+
+          {/* Mobile Menu */}
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full hover:bg-fuchsia-50">
-                <Menu className="w-6 h-6 text-fuchsia-600" />
+            <SheetTrigger asChild className="lg:hidden">
+              <Button variant="ghost" size="icon" className="rounded-full">
+                <Menu className="w-6 h-6 text-gray-600" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-72 bg-white/95 backdrop-blur-xl border-fuchsia-100">
+            <SheetContent side="right" className="w-72 bg-white">
               <div className="mt-4 mb-6">
-                <img 
-                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/abbf8c276_Capturadepantalla2025-11-25125144.jpg"
-                  alt="Popsy Logo"
-                  className="h-12 object-contain"
-                />
+                <span className="text-[10px] text-gray-400 block">HELADO GOURMET</span>
+                <span className="text-2xl font-black bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent">
+                  Popsy
+                </span>
               </div>
               
-              <nav className="space-y-2">
+              <nav className="space-y-1">
                 {NAV_ITEMS.map((item) => {
                   const Icon = item.icon;
                   const isActive = currentPageName === item.page;
@@ -169,8 +125,8 @@ export default function Layout({ children, currentPageName }) {
                         whileTap={{ scale: 0.98 }}
                         className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
                           isActive 
-                            ? 'bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white' 
-                            : 'text-gray-600 hover:bg-fuchsia-50'
+                            ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white' 
+                            : 'text-gray-600 hover:bg-pink-50'
                         }`}
                       >
                         <Icon className="w-5 h-5" />
@@ -181,21 +137,10 @@ export default function Layout({ children, currentPageName }) {
                 })}
               </nav>
 
-              <div className="absolute bottom-8 left-4 right-4 space-y-2">
+              <div className="absolute bottom-8 left-4 right-4">
                 <Button 
-                  variant="ghost" 
-                  className="w-full justify-start text-gray-500 hover:text-fuchsia-600"
-                  onClick={() => {
-                    setMobileOpen(false);
-                    navigate(createPageUrl('Settings'));
-                  }}
-                >
-                  <Settings className="w-5 h-5 mr-3" />
-                  Configuración
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  className="w-full justify-start text-gray-500 hover:text-red-600 hover:bg-red-50"
+                  variant="outline" 
+                  className="w-full justify-start text-pink-600 border-pink-200 hover:bg-pink-50"
                   onClick={handleLogout}
                 >
                   <LogOut className="w-5 h-5 mr-3" />
@@ -207,13 +152,8 @@ export default function Layout({ children, currentPageName }) {
         </div>
       </header>
 
-      {/* Desktop Quick Search */}
-      <div className="hidden lg:block fixed top-4 right-4 z-50">
-        {selectedStore && <QuickSearch storeId={selectedStore} />}
-      </div>
-
       {/* Main Content */}
-      <main className="lg:ml-64 pt-16 lg:pt-0 min-h-screen">
+      <main className="pt-16 min-h-screen">
         {children}
       </main>
     </div>
