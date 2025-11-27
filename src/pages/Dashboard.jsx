@@ -7,9 +7,10 @@ import { createPageUrl } from '@/utils';
 import StoreSelector, { STORES } from '@/components/StoreSelector';
 import DateFilter from '@/components/DateFilter';
 import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
+import ExportExcel from '@/components/ExportExcel';
 import { 
   DollarSign, Receipt, Zap, Gift, TrendingUp, TrendingDown, ArrowLeft,
-  BarChart3, AlertTriangle, CheckCircle2, X
+  BarChart3, AlertTriangle, CheckCircle2, X, FileSpreadsheet
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -388,6 +389,7 @@ export default function Dashboard() {
     to: new Date()
   });
   const [activeMetric, setActiveMetric] = useState(null);
+  const [showExport, setShowExport] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem('selectedStore');
@@ -416,6 +418,25 @@ export default function Dashboard() {
     queryFn: () => base44.entities.ShiftRecord.filter({ store_id: selectedStore }),
     enabled: !!selectedStore
   });
+
+  const { data: cashiers = [] } = useQuery({
+    queryKey: ['cashiers', selectedStore],
+    queryFn: () => base44.entities.Cashier.filter({ store_id: selectedStore }),
+    enabled: !!selectedStore
+  });
+
+  // Preparar datos de cajeros para exportación
+  const cashierExportData = useMemo(() => {
+    return shiftRecords
+      .filter(r => {
+        const date = new Date(r.date);
+        return date >= dateRange.from && date <= dateRange.to;
+      })
+      .map(r => ({
+        ...r,
+        cashierName: cashiers.find(c => c.id === r.cashier_id)?.name || 'N/A'
+      }));
+  }, [shiftRecords, cashiers, dateRange]);
 
   const currentBudget = useMemo(() => {
     const now = new Date();
@@ -503,6 +524,32 @@ export default function Dashboard() {
 
         {selectedStore ? (
           <div className="space-y-6">
+            {/* Export Section */}
+            <div className="flex justify-end">
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button
+                  variant={showExport ? "default" : "outline"}
+                  onClick={() => setShowExport(!showExport)}
+                  className={`gap-2 ${showExport ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white' : 'border-green-300 text-green-600 hover:bg-green-50'}`}
+                >
+                  <FileSpreadsheet className="w-4 h-4" />
+                  Exportar Excel
+                </Button>
+              </motion.div>
+            </div>
+
+            <AnimatePresence>
+              {showExport && (
+                <ExportExcel
+                  storeData={filteredSales}
+                  cashierData={cashierExportData}
+                  storeName={selectedStore}
+                  dateRange={dateRange}
+                  onClose={() => setShowExport(false)}
+                />
+              )}
+            </AnimatePresence>
+
             {/* Metrics Grid - Clickeable */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {metrics.map((metric) => (
@@ -540,6 +587,159 @@ export default function Dashboard() {
               )}
             </AnimatePresence>
 
+            {/* Overview Charts - Always visible */}
+            {!activeMetric && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="space-y-6"
+              >
+                {/* Main Charts Row */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Sales Trend */}
+                  <Card className="border-none shadow-lg">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+                        <DollarSign className="w-4 h-4 text-emerald-500" />
+                        Tendencia de Ventas
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="h-52">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <AreaChart data={chartData}>
+                            <defs>
+                              <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#10b981" stopOpacity={0.4}/>
+                                <stop offset="95%" stopColor="#10b981" stopOpacity={0.05}/>
+                              </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                            <XAxis dataKey="date" tick={{ fill: '#6b7280', fontSize: 10 }} />
+                            <YAxis tick={{ fill: '#6b7280', fontSize: 10 }} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} />
+                            <Tooltip formatter={(v) => formatCurrency(v)} />
+                            <Area type="monotone" dataKey="ventas" stroke="#10b981" strokeWidth={2} fill="url(#salesGrad)" />
+                          </AreaChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Tickets Bar */}
+                  <Card className="border-none shadow-lg">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+                        <Receipt className="w-4 h-4 text-blue-500" />
+                        Tickets Diarios
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="h-52">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart data={chartData}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                            <XAxis dataKey="date" tick={{ fill: '#6b7280', fontSize: 10 }} />
+                            <YAxis tick={{ fill: '#6b7280', fontSize: 10 }} />
+                            <Tooltip />
+                            <Bar dataKey="tickets" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Second Row */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* Transactions vs Tickets */}
+                  <Card className="border-none shadow-lg">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+                        <Zap className="w-4 h-4 text-purple-500" />
+                        Trans. vs Tickets
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="h-44">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <ComposedChart data={chartData}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                            <XAxis dataKey="date" tick={{ fill: '#6b7280', fontSize: 9 }} />
+                            <YAxis tick={{ fill: '#6b7280', fontSize: 9 }} />
+                            <Tooltip />
+                            <Bar dataKey="transactions" fill="#8b5cf6" radius={[3, 3, 0, 0]} />
+                            <Line type="monotone" dataKey="tickets" stroke="#06b6d4" strokeWidth={2} dot={false} />
+                          </ComposedChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Suggested Trend */}
+                  <Card className="border-none shadow-lg">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+                        <Gift className="w-4 h-4 text-pink-500" />
+                        Sugeridos
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="h-44">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <AreaChart data={chartData}>
+                            <defs>
+                              <linearGradient id="sugGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#ec4899" stopOpacity={0.4}/>
+                                <stop offset="95%" stopColor="#ec4899" stopOpacity={0.05}/>
+                              </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                            <XAxis dataKey="date" tick={{ fill: '#6b7280', fontSize: 9 }} />
+                            <YAxis tick={{ fill: '#6b7280', fontSize: 9 }} />
+                            <Tooltip />
+                            <Area type="monotone" dataKey="suggested" stroke="#ec4899" strokeWidth={2} fill="url(#sugGrad)" />
+                          </AreaChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Distribution Pie */}
+                  <Card className="border-none shadow-lg">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium text-gray-600">
+                        📊 Distribución
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="h-44">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <PieChart>
+                            <Pie
+                              data={[
+                                { name: 'Ventas', value: totals.sales, fill: '#10b981' },
+                                { name: 'Tickets', value: totals.tickets * 10000, fill: '#3b82f6' },
+                                { name: 'Sugeridos', value: totals.suggested * 5000, fill: '#ec4899' }
+                              ]}
+                              cx="50%"
+                              cy="50%"
+                              innerRadius={35}
+                              outerRadius={60}
+                              paddingAngle={3}
+                              dataKey="value"
+                            >
+                            </Pie>
+                            <Tooltip />
+                            <Legend iconSize={8} wrapperStyle={{ fontSize: 10 }} />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </motion.div>
+            )}
+
             {/* Quick Stats */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -551,22 +751,22 @@ export default function Dashboard() {
                 Indicadores Clave
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                <motion.div whileHover={{ scale: 1.05, y: -3 }} className="bg-white/10 backdrop-blur-sm rounded-xl p-4 cursor-pointer">
                   <p className="text-white/70 text-sm">Ticket Promedio</p>
                   <p className="text-2xl font-bold">{formatCurrency(totals.tickets > 0 ? totals.sales / totals.tickets : 0)}</p>
-                </div>
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                </motion.div>
+                <motion.div whileHover={{ scale: 1.05, y: -3 }} className="bg-white/10 backdrop-blur-sm rounded-xl p-4 cursor-pointer">
                   <p className="text-white/70 text-sm">Trans/Ticket</p>
                   <p className="text-2xl font-bold">{totals.tickets > 0 ? (totals.transactions / totals.tickets).toFixed(2) : '0'}</p>
-                </div>
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                </motion.div>
+                <motion.div whileHover={{ scale: 1.05, y: -3 }} className="bg-white/10 backdrop-blur-sm rounded-xl p-4 cursor-pointer">
                   <p className="text-white/70 text-sm">Sugeridos/Ticket</p>
                   <p className="text-2xl font-bold">{totals.tickets > 0 ? (totals.suggested / totals.tickets).toFixed(2) : '0'}</p>
-                </div>
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                </motion.div>
+                <motion.div whileHover={{ scale: 1.05, y: -3 }} className="bg-white/10 backdrop-blur-sm rounded-xl p-4 cursor-pointer">
                   <p className="text-white/70 text-sm">Días Registrados</p>
                   <p className="text-2xl font-bold">{filteredSales.length}</p>
-                </div>
+                </motion.div>
               </div>
             </motion.div>
           </div>
