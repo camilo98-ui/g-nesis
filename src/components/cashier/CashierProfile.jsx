@@ -24,12 +24,12 @@ export default function CashierProfile({ cashier, stats }) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <Card className="bg-gradient-to-br from-orange-500 to-red-500 text-white shadow-xl border-none overflow-hidden">
+        <Card className="bg-gradient-to-br from-fuchsia-500 to-pink-500 text-white shadow-xl border-none overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-32 translate-x-32" />
           <CardContent className="relative pt-8 pb-6">
             <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
               <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                <User className="w-12 h-12 text-white" />
+                <span className="text-5xl">🍦</span>
               </div>
               <div className="flex-grow text-center md:text-left">
                 <h2 className="text-2xl md:text-3xl font-bold mb-2">{cashier.name}</h2>
@@ -155,10 +155,10 @@ export default function CashierProfile({ cashier, stats }) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
       >
-        <Card className="bg-white border-orange-100 shadow-md">
+        <Card className="bg-white/80 backdrop-blur-sm border-fuchsia-100 shadow-md">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-gray-800">
-              <TrendingUp className="w-5 h-5 text-orange-500" />
+              <TrendingUp className="w-5 h-5 text-fuchsia-500" />
               Rendimiento General
             </CardTitle>
           </CardHeader>
