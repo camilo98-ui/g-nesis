@@ -41,18 +41,23 @@ function MetricCard({ title, value, budget, icon: Icon, bgColor, iconBg, iconCol
 
   return (
     <motion.div
-      whileHover={{ y: -4 }}
-      whileTap={{ scale: 0.98 }}
+      whileHover={{ y: -8, scale: 1.03, rotate: 1 }}
+      whileTap={{ scale: 0.97 }}
       onClick={onClick}
+      animate={isActive ? { 
+        boxShadow: ["0 10px 40px rgba(236,72,153,0.3)", "0 15px 50px rgba(236,72,153,0.4)", "0 10px 40px rgba(236,72,153,0.3)"]
+      } : {}}
+      transition={{ duration: 2, repeat: isActive ? Infinity : 0 }}
       className={`cursor-pointer rounded-2xl p-5 transition-all duration-300 border-2 ${
-        isActive ? 'border-pink-400 shadow-xl shadow-pink-500/20' : 'border-transparent shadow-md hover:shadow-lg'
+        isActive ? 'border-pink-400 shadow-xl shadow-pink-500/20' : 'border-transparent shadow-md hover:shadow-xl'
       } ${bgColor}`}
     >
       <div className="flex items-start justify-between mb-3">
         <motion.div 
           className={`w-12 h-12 ${iconBg} rounded-xl flex items-center justify-center`}
-          animate={isActive ? { rotate: [0, -10, 10, 0] } : {}}
-          transition={{ duration: 0.5 }}
+          animate={isActive ? { rotate: [0, -15, 15, -10, 10, 0], scale: [1, 1.1, 1] } : {}}
+          transition={{ duration: 0.6, repeat: isActive ? Infinity : 0, repeatDelay: 2 }}
+          whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1 }}
         >
           <Icon className={`w-6 h-6 ${iconColor}`} />
         </motion.div>

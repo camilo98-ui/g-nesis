@@ -52,21 +52,23 @@ export default function CashierRankingCard({
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay, duration: 0.3 }}
-      whileHover={{ scale: 1.02, x: 5 }}
-      className={`relative overflow-hidden rounded-xl ${
+      whileHover={{ scale: 1.03, x: 8, y: -3 }}
+      whileTap={{ scale: 0.98 }}
+      className={`relative overflow-hidden rounded-xl cursor-pointer ${
         isTopThree 
           ? `bg-gradient-to-r ${rankStyle.bg} text-gray-800 shadow-xl ${rankStyle.ring}` 
-          : 'bg-white/80 backdrop-blur-sm border border-fuchsia-100 shadow-md hover:shadow-lg'
+          : 'bg-white border border-gray-100 shadow-md hover:shadow-xl'
       } transition-all duration-300`}
     >
       <div className="p-4 flex items-center gap-4">
         {/* Rank badge */}
         <motion.div 
-          whileHover={{ rotate: [0, -10, 10, 0] }}
+          whileHover={{ rotate: [0, -15, 15, -10, 10, 0], scale: 1.1 }}
+          transition={{ duration: 0.5 }}
           className={`flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center ${
             isTopThree 
               ? 'bg-white/30 backdrop-blur-sm' 
-              : 'bg-gradient-to-br from-fuchsia-100 to-pink-100'
+              : 'bg-gradient-to-br from-pink-50 to-rose-100'
           }`}
         >
           {isTopThree ? (
