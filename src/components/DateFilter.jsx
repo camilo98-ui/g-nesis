@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { Calendar, CalendarDays, CalendarRange } from 'lucide-react';
+import { CalendarRange } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subDays, subWeeks, subMonths } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -21,18 +20,18 @@ export default function DateFilter({ dateRange, onDateChange }) {
       getValue: () => ({ from: subDays(new Date(), 1), to: subDays(new Date(), 1) }) 
     },
     thisWeek: { 
-      label: "Esta semana", 
+      label: "Semana", 
       getValue: () => ({ from: startOfWeek(new Date(), { weekStartsOn: 1 }), to: new Date() }) 
     },
     lastWeek: { 
-      label: "Semana pasada", 
+      label: "Sem. pasada", 
       getValue: () => ({ 
         from: startOfWeek(subWeeks(new Date(), 1), { weekStartsOn: 1 }), 
         to: endOfWeek(subWeeks(new Date(), 1), { weekStartsOn: 1 }) 
       }) 
     },
     thisMonth: { 
-      label: "Este mes", 
+      label: "Mes", 
       getValue: () => ({ from: startOfMonth(new Date()), to: new Date() }) 
     },
     lastMonth: { 
@@ -53,7 +52,7 @@ export default function DateFilter({ dateRange, onDateChange }) {
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <div className="flex flex-wrap gap-1 bg-white/90 backdrop-blur-sm rounded-xl p-1 shadow-lg border border-orange-100">
+      <div className="flex flex-wrap gap-1 bg-white/80 backdrop-blur-sm rounded-xl p-1 shadow-lg border border-fuchsia-100">
         {Object.entries(presets).map(([key, { label }]) => (
           <Button
             key={key}
@@ -61,8 +60,8 @@ export default function DateFilter({ dateRange, onDateChange }) {
             size="sm"
             onClick={() => handlePresetChange(key)}
             className={`text-xs ${selectedTab === key 
-              ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md' 
-              : 'text-gray-600 hover:text-orange-600 hover:bg-orange-50'}`}
+              ? 'bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white shadow-md' 
+              : 'text-gray-600 hover:text-fuchsia-600 hover:bg-fuchsia-50'}`}
           >
             {label}
           </Button>
@@ -75,9 +74,9 @@ export default function DateFilter({ dateRange, onDateChange }) {
             variant="outline" 
             size="sm"
             onClick={() => setSelectedTab("custom")}
-            className={`gap-2 border-orange-200 ${selectedTab === "custom" 
-              ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white border-none' 
-              : 'hover:bg-orange-50'}`}
+            className={`gap-2 border-fuchsia-200 ${selectedTab === "custom" 
+              ? 'bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white border-none' 
+              : 'hover:bg-fuchsia-50 hover:border-fuchsia-300'}`}
           >
             <CalendarRange className="w-4 h-4" />
             <span className="hidden md:inline">
@@ -87,8 +86,8 @@ export default function DateFilter({ dateRange, onDateChange }) {
             </span>
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0 bg-white border-orange-200" align="end">
-          <CalendarComponent
+        <PopoverContent className="w-auto p-0 bg-white border-fuchsia-200" align="end">
+          <Calendar
             initialFocus
             mode="range"
             defaultMonth={dateRange.from}
