@@ -8,6 +8,7 @@ import StoreSelector, { STORES } from '@/components/StoreSelector';
 import DateFilter from '@/components/DateFilter';
 import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
 import ExportExcel from '@/components/ExportExcel';
+import DailyGoalsCard from '@/components/gamification/DailyGoalsCard';
 import { 
   DollarSign, Receipt, Zap, Gift, TrendingUp, TrendingDown, ArrowLeft,
   BarChart3, AlertTriangle, CheckCircle2, X, FileSpreadsheet
@@ -752,6 +753,9 @@ export default function Dashboard() {
                 </div>
               </motion.div>
             )}
+
+            {/* Daily Goals */}
+            <DailyGoalsCard storeId={selectedStore} />
 
             {/* Quick Stats */}
             <motion.div
