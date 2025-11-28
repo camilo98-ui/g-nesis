@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import StoreSelector, { STORES } from '@/components/StoreSelector';
 import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
 import MascotCone from '@/components/MascotCone';
 import ExportExcel from '@/components/ExportExcel';
+import NotificationSetup from '@/components/NotificationSetup';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { 
   LayoutDashboard, Users, TrendingUp, 
-  Award, Target, ChevronRight, FileText, FileSpreadsheet
+  Award, Target, ChevronRight, FileText, FileSpreadsheet, Bell, MessageCircle
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { startOfMonth } from 'date-fns';
@@ -78,6 +79,7 @@ export default function Home() {
   const [selectedStore, setSelectedStore] = useState('');
   const [showMascot, setShowMascot] = useState(false);
   const [showExport, setShowExport] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem('selectedStore');
@@ -166,13 +168,14 @@ export default function Home() {
           )}
         </motion.div>
 
-        {/* Export Section */}
+        {/* Quick Actions: Export & Notifications */}
         {selectedStore && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-6"
+            className="mb-6 space-y-3"
           >
+            {/* Export Button */}
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -197,7 +200,6 @@ export default function Home() {
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
-                className="mt-3"
               >
                 <ExportExcel
                   storeData={filteredSales}
@@ -207,6 +209,30 @@ export default function Home() {
                 />
               </motion.div>
             )}
+
+            {/* Notifications Button */}
+            <motion.button
+              whileHover={{ scale: 1.02, y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setShowNotifications(true)}
+              className="w-full p-4 rounded-2xl flex items-center justify-between bg-gradient-to-r from-pink-50 to-rose-50 border-2 border-pink-200 hover:border-pink-300 transition-all"
+            >
+              <div className="flex items-center gap-3">
+                <motion.div
+                  animate={{ rotate: [0, 15, -15, 0] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  <Bell className="w-6 h-6 text-pink-600" />
+                </motion.div>
+                <div className="text-left">
+                  <p className="font-bold text-gray-800">Configurar Alertas</p>
+                  <p className="text-xs text-gray-500 flex items-center gap-1">
+                    <MessageCircle className="w-3 h-3" /> WhatsApp y Correo
+                  </p>
+                </div>
+              </div>
+              <ChevronRight className="w-5 h-5 text-pink-600" />
+            </motion.button>
           </motion.div>
         )}
 
@@ -281,6 +307,17 @@ export default function Home() {
         isOpen={showMascot} 
         onToggle={() => setShowMascot(!showMascot)} 
       />
+
+      {/* Notifications Setup Modal */}
+      <AnimatePresence>
+        {showNotifications && (
+          <NotificationSetup
+            storeId={selectedStore}
+            isOpen={showNotifications}
+            onClose={() => setShowNotifications(false)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
