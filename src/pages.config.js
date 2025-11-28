@@ -7,6 +7,7 @@ import Budget from './pages/Budget';
 import Team from './pages/Team';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
+import CashierProfile from './pages/CashierProfile';
 import __Layout from './Layout.jsx';
 
 
@@ -20,6 +21,7 @@ export const PAGES = {
     "Team": Team,
     "Reports": Reports,
     "Settings": Settings,
+    "CashierProfile": CashierProfile,
 }
 
 export const pagesConfig = {
