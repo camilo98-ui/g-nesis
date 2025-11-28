@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import QuickSearch from '@/components/QuickSearch';
+import SmartSearch from '@/components/SmartSearch';
+import MotivationalHeader from '@/components/MotivationalHeader';
 import { 
   Home, LayoutDashboard, TrendingUp, Award,
   Target, Users, Menu, X, FileText
@@ -33,8 +34,13 @@ export default function Layout({ children, currentPageName }) {
 
   return (
     <div className="min-h-screen bg-white">
+      {/* Motivational Banner */}
+      <div className="fixed top-0 left-0 right-0 h-8 bg-gradient-to-r from-pink-50 via-rose-50 to-amber-50 z-50 border-b border-pink-100">
+        <MotivationalHeader />
+      </div>
+
       {/* Top Header Bar */}
-      <header className="fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-100 z-50 px-4 flex items-center justify-between shadow-sm">
+      <header className="fixed top-8 left-0 right-0 h-16 bg-white border-b border-gray-100 z-50 px-4 flex items-center justify-between shadow-sm">
         {/* Logo */}
         <Link to={createPageUrl('Home')} className="flex items-center">
           <motion.img 
@@ -76,7 +82,7 @@ export default function Layout({ children, currentPageName }) {
 
         {/* Right Actions */}
         <div className="flex items-center gap-2">
-          {selectedStore && <QuickSearch storeId={selectedStore} />}
+          <SmartSearch storeId={selectedStore} />
 
           {/* Mobile Menu */}
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
@@ -122,7 +128,7 @@ export default function Layout({ children, currentPageName }) {
       </header>
 
       {/* Main Content */}
-      <main className="pt-16 min-h-screen">
+      <main className="pt-24 min-h-screen">
         {children}
       </main>
     </div>

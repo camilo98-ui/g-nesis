@@ -4,10 +4,16 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import StoreSelector, { STORES } from '@/components/StoreSelector';
 import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
+import MascotCone from '@/components/MascotCone';
+import ExportExcel from '@/components/ExportExcel';
+import { base44 } from '@/api/base44Client';
+import { useQuery } from '@tanstack/react-query';
 import { 
   LayoutDashboard, Users, TrendingUp, 
-  Award, Target, ChevronRight, FileText
+  Award, Target, ChevronRight, FileText, FileSpreadsheet
 } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { startOfMonth } from 'date-fns';
 
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/c3a36de58_Capturadepantalla2025-11-251251441.png";
 
@@ -17,59 +23,61 @@ const MENU_ITEMS = [
     page: 'Dashboard',
     icon: LayoutDashboard, 
     description: 'Estadísticas y métricas',
-    bgColor: 'bg-gradient-to-br from-purple-50 to-purple-100',
-    iconBg: 'bg-purple-100',
-    iconColor: 'text-purple-500'
+    bgColor: 'bg-gradient-to-br from-violet-100 to-purple-200',
+    iconBg: 'bg-violet-200',
+    iconColor: 'text-violet-600'
   },
   { 
     name: 'Registrar Ventas', 
     page: 'Sales',
     icon: TrendingUp, 
     description: 'Agregar ventas diarias',
-    bgColor: 'bg-gradient-to-br from-emerald-50 to-emerald-100',
-    iconBg: 'bg-emerald-100',
-    iconColor: 'text-emerald-500'
+    bgColor: 'bg-gradient-to-br from-mint-100 to-emerald-200',
+    iconBg: 'bg-emerald-200',
+    iconColor: 'text-emerald-600'
   },
   { 
     name: 'Rankings', 
     page: 'Rankings',
     icon: Award, 
     description: 'Top cajeros',
-    bgColor: 'bg-gradient-to-br from-amber-50 to-amber-100',
-    iconBg: 'bg-amber-100',
-    iconColor: 'text-amber-500'
+    bgColor: 'bg-gradient-to-br from-amber-100 to-orange-200',
+    iconBg: 'bg-amber-200',
+    iconColor: 'text-amber-600'
   },
   { 
     name: 'Presupuestos', 
     page: 'Budget',
     icon: Target, 
     description: 'Metas mensuales',
-    bgColor: 'bg-gradient-to-br from-blue-50 to-blue-100',
-    iconBg: 'bg-blue-100',
-    iconColor: 'text-blue-500'
+    bgColor: 'bg-gradient-to-br from-sky-100 to-blue-200',
+    iconBg: 'bg-sky-200',
+    iconColor: 'text-sky-600'
   },
   { 
     name: 'Equipo', 
     page: 'Team',
     icon: Users, 
     description: 'Gestionar cajeros',
-    bgColor: 'bg-gradient-to-br from-cyan-50 to-cyan-100',
-    iconBg: 'bg-cyan-100',
-    iconColor: 'text-cyan-500'
+    bgColor: 'bg-gradient-to-br from-teal-100 to-cyan-200',
+    iconBg: 'bg-teal-200',
+    iconColor: 'text-teal-600'
   },
   { 
     name: 'Reportes', 
     page: 'Reports',
     icon: FileText, 
     description: 'Reportes gerenciales',
-    bgColor: 'bg-gradient-to-br from-rose-50 to-rose-100',
-    iconBg: 'bg-rose-100',
-    iconColor: 'text-rose-500'
+    bgColor: 'bg-gradient-to-br from-pink-100 to-rose-200',
+    iconBg: 'bg-pink-200',
+    iconColor: 'text-pink-600'
   },
 ];
 
 export default function Home() {
   const [selectedStore, setSelectedStore] = useState('');
+  const [showMascot, setShowMascot] = useState(false);
+  const [showExport, setShowExport] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem('selectedStore');
@@ -80,6 +88,33 @@ export default function Home() {
     setSelectedStore(store);
     localStorage.setItem('selectedStore', store);
   };
+
+  const { data: dailySales = [] } = useQuery({
+    queryKey: ['dailySales', selectedStore],
+    queryFn: () => base44.entities.DailySales.filter({ store_id: selectedStore }),
+    enabled: !!selectedStore
+  });
+
+  const { data: shiftRecords = [] } = useQuery({
+    queryKey: ['shiftRecords', selectedStore],
+    queryFn: () => base44.entities.ShiftRecord.filter({ store_id: selectedStore }),
+    enabled: !!selectedStore
+  });
+
+  const { data: cashiers = [] } = useQuery({
+    queryKey: ['cashiers', selectedStore],
+    queryFn: () => base44.entities.Cashier.filter({ store_id: selectedStore }),
+    enabled: !!selectedStore
+  });
+
+  const monthStart = startOfMonth(new Date());
+  const filteredSales = dailySales.filter(s => new Date(s.date) >= monthStart);
+  const cashierExportData = shiftRecords
+    .filter(r => new Date(r.date) >= monthStart)
+    .map(r => ({
+      ...r,
+      cashierName: cashiers.find(c => c.id === r.cashier_id)?.name || 'N/A'
+    }));
 
   const selectedStoreName = STORES.find(s => s.code === selectedStore)?.name || '';
 
@@ -130,6 +165,50 @@ export default function Home() {
             </motion.div>
           )}
         </motion.div>
+
+        {/* Export Section */}
+        {selectedStore && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6"
+          >
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setShowExport(!showExport)}
+              className={`w-full p-4 rounded-2xl flex items-center justify-between transition-all ${
+                showExport 
+                  ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg' 
+                  : 'bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 hover:border-green-300'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <FileSpreadsheet className={`w-6 h-6 ${showExport ? 'text-white' : 'text-green-600'}`} />
+                <div className="text-left">
+                  <p className={`font-bold ${showExport ? 'text-white' : 'text-gray-800'}`}>Exportar Datos a Excel</p>
+                  <p className={`text-xs ${showExport ? 'text-white/80' : 'text-gray-500'}`}>Indicadores de tienda y cajeros</p>
+                </div>
+              </div>
+              <ChevronRight className={`w-5 h-5 transition-transform ${showExport ? 'rotate-90 text-white' : 'text-green-600'}`} />
+            </motion.button>
+
+            {showExport && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                className="mt-3"
+              >
+                <ExportExcel
+                  storeData={filteredSales}
+                  cashierData={cashierExportData}
+                  storeName={selectedStore}
+                  dateRange={{ from: monthStart, to: new Date() }}
+                />
+              </motion.div>
+            )}
+          </motion.div>
+        )}
 
         {/* Menu Grid estilo Popsy */}
         {selectedStore ? (
