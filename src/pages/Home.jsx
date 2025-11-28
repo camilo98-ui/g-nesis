@@ -24,54 +24,54 @@ const MENU_ITEMS = [
     page: 'Dashboard',
     icon: LayoutDashboard, 
     description: 'Estadísticas y métricas',
-    bgColor: 'bg-gradient-to-br from-violet-100 to-purple-200',
-    iconBg: 'bg-violet-200',
-    iconColor: 'text-violet-600'
+    bgColor: 'bg-gradient-to-br from-slate-50 to-gray-100',
+    iconBg: 'bg-white',
+    iconColor: 'text-slate-500'
   },
   { 
     name: 'Registrar Ventas', 
     page: 'Sales',
     icon: TrendingUp, 
     description: 'Agregar ventas diarias',
-    bgColor: 'bg-gradient-to-br from-mint-100 to-emerald-200',
-    iconBg: 'bg-emerald-200',
-    iconColor: 'text-emerald-600'
+    bgColor: 'bg-gradient-to-br from-gray-50 to-slate-100',
+    iconBg: 'bg-white',
+    iconColor: 'text-emerald-400'
   },
   { 
     name: 'Rankings', 
     page: 'Rankings',
     icon: Award, 
     description: 'Top cajeros',
-    bgColor: 'bg-gradient-to-br from-amber-100 to-orange-200',
-    iconBg: 'bg-amber-200',
-    iconColor: 'text-amber-600'
+    bgColor: 'bg-gradient-to-br from-stone-50 to-gray-100',
+    iconBg: 'bg-white',
+    iconColor: 'text-amber-400'
   },
   { 
     name: 'Presupuestos', 
     page: 'Budget',
     icon: Target, 
     description: 'Metas mensuales',
-    bgColor: 'bg-gradient-to-br from-sky-100 to-blue-200',
-    iconBg: 'bg-sky-200',
-    iconColor: 'text-sky-600'
+    bgColor: 'bg-gradient-to-br from-slate-50 to-stone-100',
+    iconBg: 'bg-white',
+    iconColor: 'text-sky-400'
   },
   { 
     name: 'Equipo', 
     page: 'Team',
     icon: Users, 
     description: 'Gestionar cajeros',
-    bgColor: 'bg-gradient-to-br from-teal-100 to-cyan-200',
-    iconBg: 'bg-teal-200',
-    iconColor: 'text-teal-600'
+    bgColor: 'bg-gradient-to-br from-gray-50 to-slate-100',
+    iconBg: 'bg-white',
+    iconColor: 'text-teal-400'
   },
   { 
     name: 'Reportes', 
     page: 'Reports',
     icon: FileText, 
     description: 'Reportes gerenciales',
-    bgColor: 'bg-gradient-to-br from-pink-100 to-rose-200',
-    iconBg: 'bg-pink-200',
-    iconColor: 'text-pink-600'
+    bgColor: 'bg-gradient-to-br from-stone-50 to-gray-100',
+    iconBg: 'bg-white',
+    iconColor: 'text-rose-400'
   },
 ];
 
