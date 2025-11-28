@@ -20,13 +20,22 @@ const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/pub
 
 const MENU_ITEMS = [
   { 
-    name: 'Dashboard', 
+    name: 'Dashboard Tienda', 
     page: 'Dashboard',
     icon: LayoutDashboard, 
-    description: 'Estadísticas y métricas',
+    description: 'Ventas y métricas',
     bgColor: 'bg-gradient-to-br from-violet-50/80 to-purple-100/60',
     iconBg: 'bg-violet-100/80',
     iconColor: 'text-violet-400'
+  },
+  { 
+    name: 'Dashboard Cajeros', 
+    page: 'CashiersDashboard',
+    icon: Users, 
+    description: 'Rendimiento del equipo',
+    bgColor: 'bg-gradient-to-br from-pink-50/80 to-rose-100/60',
+    iconBg: 'bg-pink-100/80',
+    iconColor: 'text-pink-400'
   },
   { 
     name: 'Registrar Ventas', 
@@ -56,22 +65,13 @@ const MENU_ITEMS = [
     iconColor: 'text-sky-400'
   },
   { 
-    name: 'Equipo', 
-    page: 'Team',
-    icon: Users, 
-    description: 'Gestionar cajeros',
-    bgColor: 'bg-gradient-to-br from-teal-50/80 to-cyan-100/60',
-    iconBg: 'bg-teal-100/80',
-    iconColor: 'text-teal-400'
-  },
-  { 
     name: 'Reportes', 
     page: 'Reports',
     icon: FileText, 
     description: 'Reportes gerenciales',
-    bgColor: 'bg-gradient-to-br from-rose-50/80 to-pink-100/60',
-    iconBg: 'bg-rose-100/80',
-    iconColor: 'text-rose-400'
+    bgColor: 'bg-gradient-to-br from-teal-50/80 to-cyan-100/60',
+    iconBg: 'bg-teal-100/80',
+    iconColor: 'text-teal-400'
   },
 ];
 

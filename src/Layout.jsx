@@ -15,11 +15,11 @@ const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/pub
 
 const NAV_ITEMS = [
   { name: 'Inicio', page: 'Home', icon: Home },
-  { name: 'Dashboard', page: 'Dashboard', icon: LayoutDashboard },
+  { name: 'Tienda', page: 'Dashboard', icon: LayoutDashboard },
+  { name: 'Cajeros', page: 'CashiersDashboard', icon: Users },
   { name: 'Ventas', page: 'Sales', icon: TrendingUp },
   { name: 'Rankings', page: 'Rankings', icon: Award },
   { name: 'Presupuestos', page: 'Budget', icon: Target },
-  { name: 'Equipo', page: 'Team', icon: Users },
   { name: 'Reportes', page: 'Reports', icon: FileText },
 ];
 
@@ -41,16 +41,32 @@ export default function Layout({ children, currentPageName }) {
 
       {/* Top Header Bar */}
       <header className="fixed top-8 left-0 right-0 h-16 bg-white border-b border-gray-100 z-50 px-4 flex items-center justify-between shadow-sm">
-        {/* Logo */}
-        <Link to={createPageUrl('Home')} className="flex items-center">
-          <motion.img 
-            src={LOGO_URL} 
-            alt="Popsy" 
-            className="h-12 md:h-14 object-contain"
-            whileHover={{ scale: 1.05 }}
-            transition={{ type: "spring", stiffness: 300 }}
-          />
-        </Link>
+        {/* Logo + Region */}
+                  <div className="flex items-center gap-3">
+                    <Link to={createPageUrl('Home')} className="flex items-center">
+                      <motion.img 
+                        src={LOGO_URL} 
+                        alt="Popsy" 
+                        className="h-10 md:h-12 object-contain"
+                        whileHover={{ scale: 1.05 }}
+                        transition={{ type: "spring", stiffness: 300 }}
+                      />
+                    </Link>
+                    <motion.div 
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      className="hidden md:flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-pink-50 to-rose-50 rounded-full border border-pink-100"
+                    >
+                      <motion.span 
+                        animate={{ scale: [1, 1.2, 1] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                        className="text-xs"
+                      >
+                        📍
+                      </motion.span>
+                      <span className="text-xs font-medium text-gray-600">Bogotá Noroccidente</span>
+                    </motion.div>
+                  </div>
 
         {/* Center Nav - Desktop */}
         <nav className="hidden lg:flex items-center gap-1">

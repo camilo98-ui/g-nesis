@@ -1,70 +1,94 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-// Helados sin color - solo contornos grises claros
-const IceCreamOutline = ({ className }) => (
-  <svg viewBox="0 0 40 80" className={className}>
-    <path 
-      d="M20 0 C8 0 0 10 0 22 C0 34 8 40 20 45 C32 40 40 34 40 22 C40 10 32 0 20 0"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1"
-      opacity="0.3"
-    />
-    <path 
-      d="M8 45 L20 78 L32 45"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1"
-      opacity="0.3"
-    />
-    <line x1="10" y1="50" x2="30" y2="50" stroke="currentColor" strokeWidth="0.5" opacity="0.2" />
-    <line x1="12" y1="55" x2="28" y2="55" stroke="currentColor" strokeWidth="0.5" opacity="0.2" />
-    <line x1="14" y1="60" x2="26" y2="60" stroke="currentColor" strokeWidth="0.5" opacity="0.2" />
+// Cono de helado con colores pastel
+const IceCreamCone = ({ color1, color2 }) => (
+  <svg viewBox="0 0 40 80" className="w-full h-full">
+    <defs>
+      <linearGradient id={`grad-${color1}`} x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor={color1} stopOpacity="0.6" />
+        <stop offset="100%" stopColor={color2} stopOpacity="0.4" />
+      </linearGradient>
+    </defs>
+    <ellipse cx="20" cy="20" rx="18" ry="20" fill={`url(#grad-${color1})`} />
+    <ellipse cx="20" cy="15" rx="14" ry="12" fill={color2} opacity="0.5" />
+    <path d="M6 28 L20 75 L34 28 Z" fill="#F5D6BA" opacity="0.7" />
+    <line x1="10" y1="35" x2="30" y2="35" stroke="#E8C4A0" strokeWidth="1" opacity="0.5" />
+    <line x1="12" y1="45" x2="28" y2="45" stroke="#E8C4A0" strokeWidth="1" opacity="0.5" />
+    <line x1="15" y1="55" x2="25" y2="55" stroke="#E8C4A0" strokeWidth="1" opacity="0.5" />
   </svg>
 );
 
-const positions = [
-  { x: '5%', y: '10%', size: 60, delay: 0 },
-  { x: '15%', y: '60%', size: 45, delay: 1.5 },
-  { x: '25%', y: '25%', size: 35, delay: 0.8 },
-  { x: '35%', y: '75%', size: 50, delay: 2.2 },
-  { x: '50%', y: '15%', size: 40, delay: 1.2 },
-  { x: '60%', y: '50%', size: 55, delay: 0.5 },
-  { x: '70%', y: '80%', size: 38, delay: 1.8 },
-  { x: '80%', y: '30%', size: 48, delay: 2.5 },
-  { x: '90%', y: '65%', size: 42, delay: 0.3 },
-  { x: '95%', y: '10%', size: 35, delay: 1.0 },
-  { x: '45%', y: '85%', size: 52, delay: 2.0 },
-  { x: '75%', y: '5%', size: 45, delay: 0.7 },
+// Malteada
+const Milkshake = ({ color }) => (
+  <svg viewBox="0 0 50 80" className="w-full h-full">
+    <defs>
+      <linearGradient id={`shake-${color}`} x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stopColor={color} stopOpacity="0.7" />
+        <stop offset="100%" stopColor={color} stopOpacity="0.4" />
+      </linearGradient>
+    </defs>
+    {/* Crema */}
+    <ellipse cx="25" cy="18" rx="16" ry="14" fill="white" opacity="0.8" />
+    <ellipse cx="20" cy="12" rx="8" ry="8" fill="white" opacity="0.6" />
+    <ellipse cx="30" cy="14" rx="6" ry="6" fill="white" opacity="0.6" />
+    {/* Vaso */}
+    <path d="M10 22 L14 70 L36 70 L40 22 Z" fill={`url(#shake-${color})`} />
+    {/* Cereza */}
+    <circle cx="25" cy="6" r="5" fill="#FF6B8A" opacity="0.8" />
+    <line x1="25" y1="1" x2="25" y2="6" stroke="#4A7C4E" strokeWidth="1.5" />
+    {/* Pajilla */}
+    <rect x="30" y="5" width="3" height="50" fill="#FF9EAA" opacity="0.7" rx="1" />
+  </svg>
+);
+
+const elements = [
+  { x: '3%', y: '8%', size: 55, type: 'cone', color1: '#FFB5C5', color2: '#FFC0CB', delay: 0 },
+  { x: '12%', y: '55%', size: 50, type: 'shake', color: '#B5E8FF', delay: 1.2 },
+  { x: '22%', y: '20%', size: 45, type: 'cone', color1: '#C5B5FF', color2: '#D8CFFF', delay: 0.6 },
+  { x: '32%', y: '70%', size: 48, type: 'shake', color: '#FFD5B5', delay: 1.8 },
+  { x: '48%', y: '12%', size: 52, type: 'cone', color1: '#B5FFD5', color2: '#C8FFE0', delay: 0.9 },
+  { x: '58%', y: '45%', size: 46, type: 'shake', color: '#FFB5E8', delay: 2.1 },
+  { x: '68%', y: '75%', size: 50, type: 'cone', color1: '#FFE5B5', color2: '#FFF0D5', delay: 1.5 },
+  { x: '78%', y: '25%', size: 54, type: 'shake', color: '#B5D5FF', delay: 0.3 },
+  { x: '88%', y: '60%', size: 48, type: 'cone', color1: '#E8B5FF', color2: '#F0CFFF', delay: 2.4 },
+  { x: '93%', y: '8%', size: 44, type: 'shake', color: '#FFB5B5', delay: 0.7 },
+  { x: '42%', y: '82%', size: 52, type: 'cone', color1: '#B5FFE8', color2: '#C8FFF0', delay: 1.1 },
+  { x: '72%', y: '5%', size: 46, type: 'shake', color: '#D5FFB5', delay: 2.0 },
 ];
 
 export default function FloatingIceCreamsBg() {
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden">
-      {positions.map((pos, i) => (
+      {elements.map((el, i) => (
         <motion.div
           key={i}
-          className="absolute text-gray-300"
+          className="absolute"
           style={{ 
-            left: pos.x, 
-            top: pos.y,
-            width: pos.size,
-            height: pos.size * 2
+            left: el.x, 
+            top: el.y,
+            width: el.size,
+            height: el.size * 1.6
           }}
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30, scale: 0.8 }}
           animate={{ 
             opacity: 1,
-            y: [0, -15, 0],
-            rotate: [0, 3, -3, 0]
+            y: [0, -12, 0],
+            rotate: [0, 4, -4, 0],
+            scale: [1, 1.02, 1]
           }}
           transition={{ 
-            opacity: { duration: 0.5, delay: pos.delay * 0.3 },
-            y: { duration: 4 + i * 0.5, repeat: Infinity, ease: "easeInOut" },
-            rotate: { duration: 6 + i * 0.3, repeat: Infinity, ease: "easeInOut" }
+            opacity: { duration: 0.8, delay: el.delay * 0.2 },
+            y: { duration: 5 + i * 0.3, repeat: Infinity, ease: "easeInOut" },
+            rotate: { duration: 7 + i * 0.2, repeat: Infinity, ease: "easeInOut" },
+            scale: { duration: 4 + i * 0.4, repeat: Infinity, ease: "easeInOut" }
           }}
         >
-          <IceCreamOutline className="w-full h-full" />
+          {el.type === 'cone' ? (
+            <IceCreamCone color1={el.color1} color2={el.color2} />
+          ) : (
+            <Milkshake color={el.color} />
+          )}
         </motion.div>
       ))}
     </div>
