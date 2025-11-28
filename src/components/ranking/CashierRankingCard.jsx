@@ -1,25 +1,28 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Trophy, Medal, Award, Crown, Receipt, Zap } from 'lucide-react';
+import { Trophy, Medal, Award, Crown, Receipt, Zap, Star, Flame, Sparkles } from 'lucide-react';
 
 const RANK_STYLES = {
   1: { 
     bg: "from-yellow-300 via-amber-300 to-yellow-400", 
     icon: Crown, 
-    badge: "🥇",
-    ring: "ring-4 ring-yellow-200/50"
+    badge: "👑",
+    ring: "ring-4 ring-yellow-200/50",
+    sparkle: true
   },
   2: { 
-    bg: "from-gray-200 via-slate-200 to-gray-300", 
+    bg: "from-slate-300 via-gray-200 to-slate-300", 
     icon: Medal, 
     badge: "🥈",
-    ring: "ring-4 ring-gray-200/50"
+    ring: "ring-4 ring-gray-200/50",
+    sparkle: false
   },
   3: { 
-    bg: "from-amber-500 via-orange-400 to-amber-500", 
+    bg: "from-amber-400 via-orange-300 to-amber-400", 
     icon: Award, 
     badge: "🥉",
-    ring: "ring-4 ring-amber-300/50"
+    ring: "ring-4 ring-amber-300/50",
+    sparkle: false
   },
 };
 
@@ -137,6 +140,42 @@ export default function CashierRankingCard({
         <>
           <div className="absolute top-0 right-0 w-20 h-20 bg-white/20 rounded-full -translate-y-10 translate-x-10" />
           <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/20 rounded-full translate-y-8 -translate-x-8" />
+          {rank === 1 && (
+            <>
+              <motion.div
+                className="absolute top-2 right-2"
+                animate={{ rotate: [0, 15, -15, 0], scale: [1, 1.2, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                <Sparkles className="w-5 h-5 text-yellow-600" />
+              </motion.div>
+              <motion.div
+                className="absolute top-2 left-10"
+                animate={{ rotate: [0, -15, 15, 0], scale: [1, 1.1, 1] }}
+                transition={{ duration: 2.5, repeat: Infinity, delay: 0.5 }}
+              >
+                <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+              </motion.div>
+            </>
+          )}
+          {rank === 2 && (
+            <motion.div
+              className="absolute top-2 right-2"
+              animate={{ scale: [1, 1.1, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              <Star className="w-4 h-4 text-gray-500 fill-gray-400" />
+            </motion.div>
+          )}
+          {rank === 3 && (
+            <motion.div
+              className="absolute top-2 right-2"
+              animate={{ y: [0, -3, 0] }}
+              transition={{ duration: 1.5, repeat: Infinity }}
+            >
+              <Flame className="w-4 h-4 text-orange-600" />
+            </motion.div>
+          )}
         </>
       )}
     </motion.div>

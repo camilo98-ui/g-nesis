@@ -24,6 +24,14 @@ import {
 
 const COLORS = ['#f472b6', '#a78bfa', '#60a5fa', '#34d399', '#fbbf24', '#f87171'];
 
+// Colores pastel más vibrantes estilo heladería
+const PASTEL_COLORS = {
+  sales: 'from-emerald-100 to-green-200',
+  tickets: 'from-sky-100 to-blue-200',
+  transactions: 'from-violet-100 to-purple-200',
+  suggested: 'from-pink-100 to-rose-200'
+};
+
 // Metric Card con panel expandible
 function MetricCard({ title, value, budget, icon: Icon, bgColor, iconBg, iconColor, format: formatType = "number", onClick, isActive, insight }) {
   const percentage = budget ? ((value / budget) * 100).toFixed(1) : 0;
@@ -495,10 +503,10 @@ export default function Dashboard() {
   };
 
   const metrics = [
-    { id: 'sales', title: 'Ventas Totales', value: totals.sales, budget: currentBudget.sales_budget, icon: DollarSign, bgColor: 'bg-gradient-to-br from-emerald-50 to-emerald-100', iconBg: 'bg-emerald-100', iconColor: 'text-emerald-600', format: 'currency' },
-    { id: 'tickets', title: 'Tickets', value: totals.tickets, budget: currentBudget.tickets_budget, icon: Receipt, bgColor: 'bg-gradient-to-br from-blue-50 to-blue-100', iconBg: 'bg-blue-100', iconColor: 'text-blue-600' },
-    { id: 'transactions', title: 'Transacciones', value: totals.transactions, budget: currentBudget.transactions_budget, icon: Zap, bgColor: 'bg-gradient-to-br from-purple-50 to-purple-100', iconBg: 'bg-purple-100', iconColor: 'text-purple-600' },
-    { id: 'suggested', title: 'Sugeridos', value: totals.suggested, budget: currentBudget.suggested_budget, icon: Gift, bgColor: 'bg-gradient-to-br from-rose-50 to-rose-100', iconBg: 'bg-rose-100', iconColor: 'text-rose-600' },
+    { id: 'sales', title: 'Ventas Totales', value: totals.sales, budget: currentBudget.sales_budget, icon: DollarSign, bgColor: 'bg-gradient-to-br from-emerald-100 to-green-200', iconBg: 'bg-emerald-200', iconColor: 'text-emerald-700', format: 'currency' },
+    { id: 'tickets', title: 'Tickets', value: totals.tickets, budget: currentBudget.tickets_budget, icon: Receipt, bgColor: 'bg-gradient-to-br from-sky-100 to-blue-200', iconBg: 'bg-sky-200', iconColor: 'text-sky-700' },
+    { id: 'transactions', title: 'Transacciones', value: totals.transactions, budget: currentBudget.transactions_budget, icon: Zap, bgColor: 'bg-gradient-to-br from-violet-100 to-purple-200', iconBg: 'bg-violet-200', iconColor: 'text-violet-700' },
+    { id: 'suggested', title: 'Sugeridos', value: totals.suggested, budget: currentBudget.suggested_budget, icon: Gift, bgColor: 'bg-gradient-to-br from-pink-100 to-rose-200', iconBg: 'bg-pink-200', iconColor: 'text-pink-700' },
   ];
 
   return (

@@ -274,6 +274,13 @@ export default function Home() {
           </motion.div>
         )}
       </div>
+
+      {/* Mascot */}
+      <MascotCone 
+        storeId={selectedStore} 
+        isOpen={showMascot} 
+        onToggle={() => setShowMascot(!showMascot)} 
+      />
     </div>
   );
 }
