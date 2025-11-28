@@ -7,7 +7,8 @@ import { createPageUrl } from '@/utils';
 import StoreSelector, { STORES } from '@/components/StoreSelector';
 import CashierForm from '@/components/forms/CashierForm';
 import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
-import { ArrowLeft, Users, User, Mail, Phone, Calendar, MoreVertical, Trash2, Edit, UserCheck, UserX } from 'lucide-react';
+import { ArrowLeft, Users, User, Mail, Phone, Calendar, MoreVertical, Trash2, Edit, UserCheck, UserX, BarChart3 } from 'lucide-react';
+import BadgesDisplay from '@/components/gamification/BadgesDisplay';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -150,31 +151,42 @@ export default function Team() {
                                     </span>
                                   )}
                                 </div>
+                                <div className="mt-2">
+                                  <BadgesDisplay cashierId={cashier.id} compact />
+                                </div>
                               </div>
                             </div>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="rounded-full">
-                                  <MoreVertical className="w-4 h-4" />
+                            <div className="flex items-center gap-2">
+                              <Link to={createPageUrl(`CashierProfile?id=${cashier.id}`)}>
+                                <Button variant="outline" size="sm" className="gap-1 text-pink-600 border-pink-200 hover:bg-pink-50">
+                                  <BarChart3 className="w-4 h-4" />
+                                  Análisis
                                 </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem 
-                                  onClick={() => toggleActiveMutation.mutate({ id: cashier.id, is_active: false })}
-                                  className="text-yellow-600"
-                                >
-                                  <UserX className="w-4 h-4 mr-2" />
-                                  Desactivar
-                                </DropdownMenuItem>
-                                <DropdownMenuItem 
-                                  onClick={() => setDeleteDialog({ open: true, cashier })}
-                                  className="text-red-600"
-                                >
-                                  <Trash2 className="w-4 h-4 mr-2" />
-                                  Eliminar
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
+                              </Link>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="rounded-full">
+                                    <MoreVertical className="w-4 h-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem 
+                                    onClick={() => toggleActiveMutation.mutate({ id: cashier.id, is_active: false })}
+                                    className="text-yellow-600"
+                                  >
+                                    <UserX className="w-4 h-4 mr-2" />
+                                    Desactivar
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem 
+                                    onClick={() => setDeleteDialog({ open: true, cashier })}
+                                    className="text-red-600"
+                                  >
+                                    <Trash2 className="w-4 h-4 mr-2" />
+                                    Eliminar
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
                           </div>
                         </CardContent>
                       </Card>
