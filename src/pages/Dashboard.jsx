@@ -708,8 +708,11 @@ export default function Dashboard() {
                             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                             <XAxis dataKey="date" tick={{ fill: '#6b7280', fontSize: 10 }} />
                             <YAxis tick={{ fill: '#6b7280', fontSize: 10 }} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} />
-                            <Tooltip formatter={(v) => formatCurrency(v)} />
-                            <Area type="monotone" dataKey="ventas" stroke="#10b981" strokeWidth={2} fill="url(#salesGrad)" />
+                            <Tooltip 
+                              formatter={(v) => [formatCurrency(v), 'Venta']}
+                              labelFormatter={(label, payload) => payload?.[0]?.payload?.fullDate || label}
+                            />
+                            <Area type="monotone" dataKey="ventas" stroke="#10b981" strokeWidth={2} fill="url(#salesGrad)" name="Venta" />
                           </AreaChart>
                         </ResponsiveContainer>
                       </div>
@@ -771,8 +774,8 @@ export default function Dashboard() {
                               formatter={(v, name) => [name === 'ventas' ? formatCurrency(v) : v.toLocaleString(), name === 'ventas' ? 'Venta' : 'Transacciones']}
                               labelFormatter={(label, payload) => payload?.[0]?.payload?.fullDate || label}
                             />
-                            <Bar yAxisId="left" dataKey="transactions" fill="#8b5cf6" radius={[3, 3, 0, 0]} name="Transacciones" />
-                            <Line yAxisId="right" type="monotone" dataKey="ventas" stroke="#ec4899" strokeWidth={2} dot={false} name="Venta" />
+                            <Bar yAxisId="left" dataKey="transactions" fill="#8b5cf6" radius={[3, 3, 0, 0]} name="transactions" />
+                            <Line yAxisId="right" type="monotone" dataKey="ventas" stroke="#ec4899" strokeWidth={2} dot={false} name="ventas" />
                           </ComposedChart>
                         </ResponsiveContainer>
                       </div>

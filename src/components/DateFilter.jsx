@@ -19,28 +19,6 @@ export default function DateFilter({ dateRange, onDateChange }) {
       label: "Ayer", 
       getValue: () => ({ from: subDays(new Date(), 1), to: subDays(new Date(), 1) }) 
     },
-    thisWeek: { 
-      label: "Semana", 
-      getValue: () => ({ from: startOfWeek(new Date(), { weekStartsOn: 1 }), to: new Date() }) 
-    },
-    lastWeek: { 
-      label: "Sem. pasada", 
-      getValue: () => ({ 
-        from: startOfWeek(subWeeks(new Date(), 1), { weekStartsOn: 1 }), 
-        to: endOfWeek(subWeeks(new Date(), 1), { weekStartsOn: 1 }) 
-      }) 
-    },
-    thisMonth: { 
-      label: "Mes", 
-      getValue: () => ({ from: startOfMonth(new Date()), to: new Date() }) 
-    },
-    lastMonth: { 
-      label: "Mes pasado", 
-      getValue: () => ({ 
-        from: startOfMonth(subMonths(new Date(), 1)), 
-        to: endOfMonth(subMonths(new Date(), 1)) 
-      }) 
-    },
   };
 
   const handlePresetChange = (preset) => {
