@@ -121,36 +121,53 @@ export default function CashierRecommendation({ cashiers, shiftRecords, selected
               <Calendar className="w-4 h-4" />
               Mejor cajero por día de la semana
             </h4>
+            
+            {/* Nota sobre fines de semana */}
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-3">
+              <p className="text-xs text-amber-700 flex items-center gap-1">
+                <Star className="w-3 h-3" />
+                <strong>Tip:</strong> Los fines de semana (Sáb/Dom) tienen mayor volumen de ventas. Asigna a tus mejores cajeros estos días.
+              </p>
+            </div>
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {recommendations.map((rec, index) => (
-                <motion.div
-                  key={rec.dayOfWeek}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  className={`flex items-center gap-3 p-3 rounded-lg border ${
-                    rec.dayOfWeek === getDay(selectedDate || new Date())
-                      ? 'bg-orange-50 border-orange-200'
-                      : 'bg-white border-gray-100'
-                  }`}
-                >
-                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-xs font-bold ${
-                    rec.dayOfWeek === 0 || rec.dayOfWeek === 6
-                      ? 'bg-purple-100 text-purple-600'
-                      : 'bg-blue-100 text-blue-600'
-                  }`}>
-                    {DAY_NAMES[rec.dayOfWeek].slice(0, 3)}
-                  </div>
-                  <div className="flex-grow min-w-0">
-                    <p className="font-medium text-gray-800 truncate">{rec.cashier.name}</p>
-                    <p className="text-xs text-gray-400">{rec.shiftsCount} turnos analizados</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-semibold text-green-600">{formatCurrency(rec.avgSales)}</p>
-                    <p className="text-xs text-gray-400">{rec.avgSuggested.toFixed(0)} sug.</p>
-                  </div>
-                </motion.div>
-              ))}
+              {recommendations.map((rec, index) => {
+                const isWeekend = rec.dayOfWeek === 0 || rec.dayOfWeek === 6;
+                return (
+                  <motion.div
+                    key={rec.dayOfWeek}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className={`flex items-center gap-3 p-3 rounded-lg border ${
+                      rec.dayOfWeek === getDay(selectedDate || new Date())
+                        ? 'bg-pink-50 border-pink-200'
+                        : isWeekend
+                          ? 'bg-purple-50 border-purple-200'
+                          : 'bg-white border-gray-100'
+                    }`}
+                  >
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-xs font-bold ${
+                      isWeekend
+                        ? 'bg-purple-200 text-purple-700'
+                        : 'bg-blue-100 text-blue-600'
+                    }`}>
+                      {DAY_NAMES[rec.dayOfWeek].slice(0, 3)}
+                      {isWeekend && <span className="ml-0.5">🔥</span>}
+                    </div>
+                    <div className="flex-grow min-w-0">
+                      <p className="font-medium text-gray-800 truncate">{rec.cashier.name}</p>
+                      <p className="text-xs text-gray-400">
+                        {rec.shiftsCount} turnos {isWeekend && '• Alto volumen'}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-semibold text-green-600">{formatCurrency(rec.avgSales)}</p>
+                      <p className="text-xs text-gray-400">{rec.avgSuggested.toFixed(0)} sug.</p>
+                    </div>
+                  </motion.div>
+                );
+              })}
             </div>
           </div>
 
