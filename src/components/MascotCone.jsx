@@ -119,35 +119,56 @@ export default function MascotCone({ storeId, isOpen, onToggle }) {
     try {
       const formatCurrency = (v) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(v);
       
-      const prompt = `Eres "Cony", una malteada de helado animada y amigable que es la mascota de Popsy. Genera un análisis breve, amigable y motivador (máximo 150 palabras) sobre el desempeño de la tienda con estos datos:
+      const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+      const projectedSales = analysis.daysWorked > 0 ? (analysis.totals.sales / analysis.daysWorked) * daysInMonth : 0;
+      const salesGap = (analysis.budget?.sales_budget || 0) - analysis.totals.sales;
+      const daysRemaining = daysInMonth - analysis.daysWorked;
+      const requiredDaily = daysRemaining > 0 ? salesGap / daysRemaining : 0;
+      
+      const prompt = `Eres "Cony", una malteada de helado animada y amigable que es la mascota de Popsy. Genera un análisis DETALLADO, profesional pero amigable (máximo 250 palabras) sobre el desempeño de la tienda con estos datos:
 
-- Ventas del mes: ${formatCurrency(analysis.totals.sales)}
-- Presupuesto: ${formatCurrency(analysis.budget?.sales_budget || 0)}
-- Cumplimiento: ${analysis.compliance.toFixed(1)}%
-- Tickets: ${analysis.totals.tickets}
-- Ticket promedio: ${formatCurrency(analysis.avgTicket)}
-- Sugeridos: ${analysis.totals.suggested}
+DATOS DE VENTA:
+- Ventas acumuladas del mes: ${formatCurrency(analysis.totals.sales)}
+- Presupuesto del mes: ${formatCurrency(analysis.budget?.sales_budget || 0)}
+- Cumplimiento actual: ${analysis.compliance.toFixed(1)}%
+- Proyección de cierre: ${formatCurrency(projectedSales)}
+- Brecha por cubrir: ${formatCurrency(salesGap)}
+- Días restantes: ${daysRemaining}
+- Venta diaria requerida para alcanzar meta: ${formatCurrency(requiredDaily)}
+
+INDICADORES CLAVE:
+- Ticket promedio actual: ${formatCurrency(analysis.avgTicket)}
+- Total transacciones: ${analysis.totals.tickets}
+- Sugeridos vendidos: ${analysis.totals.suggested}
+- Tasa de sugeridos: ${analysis.totals.tickets > 0 ? ((analysis.totals.suggested / analysis.totals.tickets) * 100).toFixed(1) : 0}%
 - Días trabajados: ${analysis.daysWorked}
-- Cajeros con oportunidad: ${analysis.opportunities.map(o => o.cashier?.name).filter(Boolean).join(', ') || 'Ninguno'}
-- Top vendedores: ${analysis.topPerformers.map(t => t.cashier?.name).filter(Boolean).join(', ')}
 
-Incluye:
-1. Resumen del estado actual (positivo o áreas de mejora)
-2. Reconocimiento a top performers
-3. Mensaje de ánimo para cajeros con oportunidad (sin ser negativo)
-4. Un tip concreto para mejorar
-5. Usa emojis de helados 🍦🍨 y sé muy motivador
+EQUIPO:
+- Cajeros con oportunidad de mejora: ${analysis.opportunities.map(o => `${o.cashier?.name} (${formatCurrency(o.sales)})`).filter(Boolean).join(', ') || 'Ninguno'}
+- Top vendedores: ${analysis.topPerformers.map(t => `${t.cashier?.name} (${formatCurrency(t.sales)})`).filter(Boolean).join(', ')}
 
-Habla como si fueras un helado animado y simpático.`;
+DEBE INCLUIR:
+1. 📊 Estado actual: ¿Vamos bien o mal? Con números concretos
+2. 📈 Proyección: Si seguimos así, ¿cumplimos o no? ¿Qué debemos hacer?
+3. 💰 Acción inmediata: Cuánto debemos vender DIARIO para llegar a la meta
+4. 🏆 Reconocimiento específico a top performers con sus cifras
+5. 💪 Plan de apoyo para cajeros que necesitan mejorar (sin ser negativo)
+6. 🎯 3 tips CONCRETOS y accionables para mejorar ventas HOY
+7. 📌 Recomendación sobre días de mayor venta (fines de semana)
+
+Usa emojis de helados 🍦🍨 y sé muy motivador pero con sustento en datos.`;
 
       const result = await base44.integrations.Core.InvokeLLM({
         prompt,
         response_json_schema: {
           type: "object",
           properties: {
-            mensaje: { type: "string" },
+            mensaje: { type: "string", description: "Análisis principal detallado" },
             estado: { type: "string", enum: ["excelente", "bueno", "oportunidad"] },
-            tip: { type: "string" }
+            tip: { type: "string", description: "Tip principal del día" },
+            proyeccion: { type: "string", description: "Resumen de proyección de cierre" },
+            acciones: { type: "array", items: { type: "string" }, description: "Lista de 3 acciones concretas" },
+            alertas: { type: "array", items: { type: "string" }, description: "Alertas o puntos de atención" }
           }
         }
       });
@@ -318,22 +339,84 @@ Habla como si fueras un helado animado y simpático.`;
                     animate={{ opacity: 1 }}
                     className="bg-gradient-to-br from-pink-50 to-rose-50 rounded-2xl p-4 border border-pink-100"
                   >
-                    <p className="text-gray-700 text-sm leading-relaxed">{aiMessage.mensaje}</p>
+                    <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">{aiMessage.mensaje}</p>
                   </motion.div>
+
+                  {/* Proyección */}
+                  {aiMessage.proyeccion && (
+                    <motion.div 
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.2 }}
+                      className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl p-3 border border-blue-200"
+                    >
+                      <p className="text-xs font-medium text-blue-800 flex items-center gap-2">
+                        <TrendingUp className="w-4 h-4" />
+                        Proyección de Cierre
+                      </p>
+                      <p className="text-sm text-blue-700 mt-1">{aiMessage.proyeccion}</p>
+                    </motion.div>
+                  )}
+
+                  {/* Acciones */}
+                  {aiMessage.acciones?.length > 0 && (
+                    <motion.div 
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.3 }}
+                      className="bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl p-3 border border-emerald-200"
+                    >
+                      <p className="text-xs font-medium text-emerald-800 flex items-center gap-2 mb-2">
+                        <Sparkles className="w-4 h-4" />
+                        Acciones para HOY
+                      </p>
+                      <ul className="space-y-1">
+                        {aiMessage.acciones.map((accion, i) => (
+                          <li key={i} className="text-sm text-emerald-700 flex items-start gap-2">
+                            <span className="text-emerald-500">•</span>
+                            {accion}
+                          </li>
+                        ))}
+                      </ul>
+                    </motion.div>
+                  )}
+
+                  {/* Alertas */}
+                  {aiMessage.alertas?.length > 0 && (
+                    <motion.div 
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.4 }}
+                      className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-3 border border-amber-200"
+                    >
+                      <p className="text-xs font-medium text-amber-800 flex items-center gap-2 mb-2">
+                        <AlertTriangle className="w-4 h-4" />
+                        Puntos de Atención
+                      </p>
+                      <ul className="space-y-1">
+                        {aiMessage.alertas.map((alerta, i) => (
+                          <li key={i} className="text-sm text-amber-700 flex items-start gap-2">
+                            <span className="text-amber-500">⚠</span>
+                            {alerta}
+                          </li>
+                        ))}
+                      </ul>
+                    </motion.div>
+                  )}
 
                   {/* Tip */}
                   {aiMessage.tip && (
                     <motion.div 
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.3 }}
-                      className="bg-gradient-to-r from-amber-50 to-yellow-50 rounded-xl p-3 border border-amber-200"
+                      transition={{ delay: 0.5 }}
+                      className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-3 border border-purple-200"
                     >
-                      <p className="text-xs font-medium text-amber-800 flex items-center gap-2">
+                      <p className="text-xs font-medium text-purple-800 flex items-center gap-2">
                         <Sparkles className="w-4 h-4" />
-                        Tip del día
+                        💡 Tip Principal
                       </p>
-                      <p className="text-sm text-amber-700 mt-1">{aiMessage.tip}</p>
+                      <p className="text-sm text-purple-700 mt-1">{aiMessage.tip}</p>
                     </motion.div>
                   )}
 

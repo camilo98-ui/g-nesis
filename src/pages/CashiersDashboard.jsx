@@ -371,7 +371,7 @@ export default function CashiersDashboard() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-gradient-to-r from-amber-500 via-orange-500 to-pink-500 rounded-2xl shadow-xl p-6 text-white"
+              className="bg-gradient-to-r from-pink-500 via-rose-500 to-pink-600 rounded-2xl shadow-xl p-6 text-white"
             >
               <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
                 <Award className="w-6 h-6" />
