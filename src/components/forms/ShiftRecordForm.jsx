@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,7 @@ const SHIFTS = [
 
 export default function ShiftRecordForm({ storeId, onSuccess }) {
   const queryClient = useQueryClient();
+  const [showSuccess, setShowSuccess] = useState(false);
   const [formData, setFormData] = useState({
     cashier_id: '',
     date: new Date().toISOString().split('T')[0],
@@ -46,13 +47,8 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
       average_ticket: data.tickets > 0 ? (parseFloat(data.sales) || 0) / parseInt(data.tickets) : 0
     }),
     onSuccess: () => {
-      toast.success(
-        <div className="flex items-center gap-2">
-          <CheckCircle className="w-5 h-5 text-green-500" />
-          <span>¡Venta registrada correctamente!</span>
-        </div>,
-        { duration: 3000 }
-      );
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 2500);
       queryClient.invalidateQueries(['shiftRecords']);
       queryClient.invalidateQueries(['dailySales']);
       setFormData({
@@ -85,7 +81,44 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
+      className="relative"
     >
+      {/* Success Animation Overlay */}
+      <AnimatePresence>
+        {showSuccess && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            className="absolute inset-0 z-50 flex items-center justify-center bg-white/90 backdrop-blur-sm rounded-2xl"
+          >
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: [0, 1.2, 1] }}
+              transition={{ duration: 0.5 }}
+              className="text-center"
+            >
+              <motion.div
+                animate={{ rotate: [0, 10, -10, 0] }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                className="text-6xl mb-3"
+              >
+                🍦
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="flex items-center gap-2 justify-center"
+              >
+                <CheckCircle className="w-6 h-6 text-green-500" />
+                <span className="text-lg font-bold text-gray-800">¡Guardado!</span>
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <Card className="bg-white/80 backdrop-blur-lg border-pink-100 shadow-xl">
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-3 text-gray-800">
