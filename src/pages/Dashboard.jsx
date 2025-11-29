@@ -11,7 +11,7 @@ import ExportExcel from '@/components/ExportExcel';
 import DailyGoalsCard from '@/components/gamification/DailyGoalsCard';
 import { 
   DollarSign, Receipt, Zap, Gift, TrendingUp, TrendingDown, ArrowLeft,
-  BarChart3, AlertTriangle, CheckCircle2, X, FileSpreadsheet, Target
+  BarChart3, AlertTriangle, CheckCircle2, X, FileSpreadsheet
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
