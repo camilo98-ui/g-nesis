@@ -15,7 +15,8 @@ import {
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { startOfMonth, endOfMonth, differenceInDays, format, eachDayOfInterval } from 'date-fns';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { startOfMonth, endOfMonth, differenceInDays, format, eachDayOfInterval, getWeek, startOfWeek, endOfWeek, addWeeks, startOfYear } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
@@ -23,7 +24,9 @@ import {
   Treemap, ScatterChart, Scatter, ZAxis
 } from 'recharts';
 
-const COLORS = ['#f472b6', '#a78bfa', '#60a5fa', '#34d399', '#fbbf24', '#f87171'];
+const COLORS = ['#ec4899', '#f43f5e', '#fb7185', '#fda4af', '#fecdd3', '#fff1f2'];
+const POPSY_PINK = '#ec4899';
+const POPSY_ROSE = '#f43f5e';
 
 // Colores pastel más vibrantes estilo heladería
 const PASTEL_COLORS = {
@@ -480,15 +483,76 @@ export default function Dashboard() {
     return days.map(day => {
       const dayStr = format(day, 'yyyy-MM-dd');
       const dayData = dailySales.find(s => s.date === dayStr) || {};
+      const transactions = dayData.total_transactions || 0;
+      const sales = dayData.total_sales || 0;
       return {
         date: format(day, 'dd', { locale: es }),
-        ventas: dayData.total_sales || 0,
-        tickets: dayData.total_tickets || 0,
-        transactions: dayData.total_transactions || 0,
+        fullDate: format(day, 'EEEE dd MMM', { locale: es }),
+        dayName: format(day, 'EEEE', { locale: es }),
+        ventas: sales,
+        ticketPromedio: transactions > 0 ? sales / transactions : 0,
+        transactions: transactions,
         suggested: dayData.total_suggested || 0
       };
     });
   }, [dateRange, dailySales]);
+
+  // Generar opciones de semanas del año
+  const weekOptions = useMemo(() => {
+    const weeks = [];
+    const year = new Date().getFullYear();
+    const yearStart = startOfYear(new Date(year, 0, 1));
+    for (let i = 1; i <= 52; i++) {
+      const weekStart = addWeeks(startOfWeek(yearStart, { weekStartsOn: 1 }), i - 1);
+      const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
+      weeks.push({
+        value: i,
+        label: `Semana ${i}`,
+        from: weekStart,
+        to: weekEnd
+      });
+    }
+    return weeks;
+  }, []);
+
+  const currentWeek = getWeek(new Date(), { weekStartsOn: 1 });
+
+  const handleWeekChange = (weekNum) => {
+    const week = weekOptions.find(w => w.value === parseInt(weekNum));
+    if (week) {
+      setDateRange({ from: week.from, to: week.to });
+    }
+  };
+
+  // Proyecciones
+  const projections = useMemo(() => {
+    if (!currentBudget?.sales_budget) return null;
+    const now = new Date();
+    const monthStart = startOfMonth(now);
+    const monthEnd = endOfMonth(now);
+    const totalDays = differenceInDays(monthEnd, monthStart) + 1;
+    const daysElapsed = filteredSales.length || 1;
+    const daysRemaining = totalDays - daysElapsed;
+
+    const dailyAvgSales = totals.sales / daysElapsed;
+    const projectedSales = totals.sales + (dailyAvgSales * daysRemaining);
+    const salesGap = currentBudget.sales_budget - totals.sales;
+    const requiredDailySales = daysRemaining > 0 ? salesGap / daysRemaining : 0;
+
+    const avgTicket = totals.transactions > 0 ? totals.sales / totals.transactions : 0;
+    const budgetTicket = currentBudget.tickets_budget || avgTicket;
+    
+    return {
+      projectedSales,
+      salesGap,
+      requiredDailySales,
+      daysRemaining,
+      avgTicket,
+      budgetTicket,
+      salesOnTrack: projectedSales >= currentBudget.sales_budget * 0.95,
+      ticketOnTrack: avgTicket >= budgetTicket * 0.95
+    };
+  }, [currentBudget, totals, filteredSales]);
 
   const formatCurrency = (val) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(val);
   const selectedStoreName = STORES.find(s => s.code === selectedStore)?.name || '';
@@ -505,7 +569,7 @@ export default function Dashboard() {
 
   const metrics = [
     { id: 'sales', title: 'Ventas Totales', value: totals.sales, budget: currentBudget.sales_budget, icon: DollarSign, bgColor: 'bg-gradient-to-br from-emerald-100 to-green-200', iconBg: 'bg-emerald-200', iconColor: 'text-emerald-700', format: 'currency' },
-    { id: 'tickets', title: 'Tickets', value: totals.tickets, budget: currentBudget.tickets_budget, icon: Receipt, bgColor: 'bg-gradient-to-br from-sky-100 to-blue-200', iconBg: 'bg-sky-200', iconColor: 'text-sky-700' },
+    { id: 'tickets', title: 'Ticket Promedio', value: totals.tickets > 0 ? totals.sales / totals.transactions : 0, budget: currentBudget.tickets_budget, icon: Receipt, bgColor: 'bg-gradient-to-br from-sky-100 to-blue-200', iconBg: 'bg-sky-200', iconColor: 'text-sky-700', format: 'currency' },
     { id: 'transactions', title: 'Transacciones', value: totals.transactions, budget: currentBudget.transactions_budget, icon: Zap, bgColor: 'bg-gradient-to-br from-violet-100 to-purple-200', iconBg: 'bg-violet-200', iconColor: 'text-violet-700' },
     { id: 'suggested', title: 'Sugeridos', value: totals.suggested, budget: currentBudget.suggested_budget, icon: Gift, bgColor: 'bg-gradient-to-br from-pink-100 to-rose-200', iconBg: 'bg-pink-200', iconColor: 'text-pink-700' },
   ];
@@ -530,24 +594,37 @@ export default function Dashboard() {
               )}
             </div>
           </div>
-          <div className="flex flex-col md:flex-row gap-3">
+          <div className="flex flex-col md:flex-row gap-3 items-center">
             <StoreSelector selectedStore={selectedStore} onStoreChange={handleStoreChange} />
+            <Select onValueChange={handleWeekChange} defaultValue="">
+              <SelectTrigger className="w-[140px] border-gray-200">
+                <SelectValue placeholder={`Sem ${currentWeek}`} />
+              </SelectTrigger>
+              <SelectContent className="max-h-60">
+                {weekOptions.map(w => (
+                  <SelectItem key={w.value} value={w.value.toString()}>
+                    {w.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <DateFilter dateRange={dateRange} onDateChange={setDateRange} />
           </div>
         </div>
 
         {selectedStore ? (
           <div className="space-y-6">
-            {/* Export Section */}
-            <div className="flex justify-end">
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            {/* Acciones rápidas - más sutil */}
+            <div className="flex justify-end gap-2">
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button
-                  variant={showExport ? "default" : "outline"}
+                  variant="ghost"
+                  size="sm"
                   onClick={() => setShowExport(!showExport)}
-                  className={`gap-2 ${showExport ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white' : 'border-green-300 text-green-600 hover:bg-green-50'}`}
+                  className="text-gray-500 hover:text-green-600 hover:bg-green-50"
                 >
-                  <FileSpreadsheet className="w-4 h-4" />
-                  Exportar Excel
+                  <FileSpreadsheet className="w-4 h-4 mr-1" />
+                  Excel
                 </Button>
               </motion.div>
             </div>
@@ -639,24 +716,33 @@ export default function Dashboard() {
                     </CardContent>
                   </Card>
 
-                  {/* Tickets Bar */}
+                  {/* Ticket Promedio */}
                   <Card className="border-none shadow-lg">
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
                         <Receipt className="w-4 h-4 text-blue-500" />
-                        Tickets Diarios
+                        Ticket Promedio Diario
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="h-52">
                         <ResponsiveContainer width="100%" height="100%">
-                          <BarChart data={chartData}>
+                          <AreaChart data={chartData}>
+                            <defs>
+                              <linearGradient id="ticketGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4}/>
+                                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.05}/>
+                              </linearGradient>
+                            </defs>
                             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                             <XAxis dataKey="date" tick={{ fill: '#6b7280', fontSize: 10 }} />
-                            <YAxis tick={{ fill: '#6b7280', fontSize: 10 }} />
-                            <Tooltip />
-                            <Bar dataKey="tickets" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                          </BarChart>
+                            <YAxis tick={{ fill: '#6b7280', fontSize: 10 }} tickFormatter={(v) => `$${(v/1000).toFixed(0)}K`} />
+                            <Tooltip 
+                              formatter={(v) => [formatCurrency(v), 'Ticket Promedio']}
+                              labelFormatter={(label, payload) => payload?.[0]?.payload?.fullDate || label}
+                            />
+                            <Area type="monotone" dataKey="ticketPromedio" stroke="#3b82f6" strokeWidth={2} fill="url(#ticketGrad)" name="Ticket Promedio" />
+                          </AreaChart>
                         </ResponsiveContainer>
                       </div>
                     </CardContent>
@@ -665,12 +751,12 @@ export default function Dashboard() {
 
                 {/* Second Row */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  {/* Transactions vs Tickets */}
+                  {/* Transacciones vs Venta */}
                   <Card className="border-none shadow-lg">
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
                         <Zap className="w-4 h-4 text-purple-500" />
-                        Trans. vs Tickets
+                        Transacciones vs Venta
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -679,10 +765,14 @@ export default function Dashboard() {
                           <ComposedChart data={chartData}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                             <XAxis dataKey="date" tick={{ fill: '#6b7280', fontSize: 9 }} />
-                            <YAxis tick={{ fill: '#6b7280', fontSize: 9 }} />
-                            <Tooltip />
-                            <Bar dataKey="transactions" fill="#8b5cf6" radius={[3, 3, 0, 0]} />
-                            <Line type="monotone" dataKey="tickets" stroke="#06b6d4" strokeWidth={2} dot={false} />
+                            <YAxis yAxisId="left" tick={{ fill: '#6b7280', fontSize: 9 }} />
+                            <YAxis yAxisId="right" orientation="right" tick={{ fill: '#6b7280', fontSize: 9 }} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} />
+                            <Tooltip 
+                              formatter={(v, name) => [name === 'ventas' ? formatCurrency(v) : v.toLocaleString(), name === 'ventas' ? 'Venta' : 'Transacciones']}
+                              labelFormatter={(label, payload) => payload?.[0]?.payload?.fullDate || label}
+                            />
+                            <Bar yAxisId="left" dataKey="transactions" fill="#8b5cf6" radius={[3, 3, 0, 0]} name="Transacciones" />
+                            <Line yAxisId="right" type="monotone" dataKey="ventas" stroke="#ec4899" strokeWidth={2} dot={false} name="Venta" />
                           </ComposedChart>
                         </ResponsiveContainer>
                       </div>
@@ -757,7 +847,54 @@ export default function Dashboard() {
             {/* Daily Goals */}
             <DailyGoalsCard storeId={selectedStore} />
 
-            {/* Quick Stats */}
+            {/* Proyecciones */}
+            {projections && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-gradient-to-r from-slate-800 to-slate-900 rounded-2xl shadow-xl p-6 text-white"
+              >
+                <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+                  <Target className="w-5 h-5 text-pink-400" />
+                  Proyección del Mes
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="bg-white/5 rounded-xl p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-white/70 text-sm">Venta Proyectada</span>
+                      <span className={`text-xs px-2 py-1 rounded-full ${projections.salesOnTrack ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                        {projections.salesOnTrack ? '✓ En ruta' : '⚠ Atención'}
+                      </span>
+                    </div>
+                    <p className="text-2xl font-bold">{formatCurrency(projections.projectedSales)}</p>
+                    <p className="text-xs text-white/50 mt-1">
+                      Faltan {formatCurrency(projections.salesGap)} para la meta
+                    </p>
+                  </div>
+                  <div className="bg-white/5 rounded-xl p-4">
+                    <p className="text-white/70 text-sm mb-2">Venta Diaria Requerida</p>
+                    <p className="text-2xl font-bold text-amber-400">{formatCurrency(projections.requiredDailySales)}</p>
+                    <p className="text-xs text-white/50 mt-1">
+                      Para alcanzar el 100% en {projections.daysRemaining} días
+                    </p>
+                  </div>
+                  <div className="bg-white/5 rounded-xl p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-white/70 text-sm">Ticket Promedio</span>
+                      <span className={`text-xs px-2 py-1 rounded-full ${projections.ticketOnTrack ? 'bg-green-500/20 text-green-400' : 'bg-amber-500/20 text-amber-400'}`}>
+                        {projections.ticketOnTrack ? '✓ OK' : 'Mejorar'}
+                      </span>
+                    </div>
+                    <p className="text-2xl font-bold">{formatCurrency(projections.avgTicket)}</p>
+                    <p className="text-xs text-white/50 mt-1">
+                      Meta: {formatCurrency(projections.budgetTicket)}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Resumen Ejecutivo */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -765,24 +902,28 @@ export default function Dashboard() {
             >
               <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
                 <BarChart3 className="w-5 h-5" />
-                Indicadores Clave
+                Resumen del Período
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <motion.div whileHover={{ scale: 1.05, y: -3 }} className="bg-white/10 backdrop-blur-sm rounded-xl p-4 cursor-pointer">
+                <motion.div whileHover={{ scale: 1.05, y: -3 }} className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                  <p className="text-white/70 text-sm">Venta Total</p>
+                  <p className="text-2xl font-bold">{formatCurrency(totals.sales)}</p>
+                  <p className="text-xs text-white/50 mt-1">{filteredSales.length} días</p>
+                </motion.div>
+                <motion.div whileHover={{ scale: 1.05, y: -3 }} className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
                   <p className="text-white/70 text-sm">Ticket Promedio</p>
-                  <p className="text-2xl font-bold">{formatCurrency(totals.tickets > 0 ? totals.sales / totals.tickets : 0)}</p>
+                  <p className="text-2xl font-bold">{formatCurrency(totals.transactions > 0 ? totals.sales / totals.transactions : 0)}</p>
+                  <p className="text-xs text-white/50 mt-1">Venta ÷ Transacciones</p>
                 </motion.div>
-                <motion.div whileHover={{ scale: 1.05, y: -3 }} className="bg-white/10 backdrop-blur-sm rounded-xl p-4 cursor-pointer">
-                  <p className="text-white/70 text-sm">Trans/Ticket</p>
-                  <p className="text-2xl font-bold">{totals.tickets > 0 ? (totals.transactions / totals.tickets).toFixed(2) : '0'}</p>
+                <motion.div whileHover={{ scale: 1.05, y: -3 }} className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                  <p className="text-white/70 text-sm">Total Transacciones</p>
+                  <p className="text-2xl font-bold">{totals.transactions.toLocaleString()}</p>
+                  <p className="text-xs text-white/50 mt-1">Ventas realizadas</p>
                 </motion.div>
-                <motion.div whileHover={{ scale: 1.05, y: -3 }} className="bg-white/10 backdrop-blur-sm rounded-xl p-4 cursor-pointer">
-                  <p className="text-white/70 text-sm">Sugeridos/Ticket</p>
-                  <p className="text-2xl font-bold">{totals.tickets > 0 ? (totals.suggested / totals.tickets).toFixed(2) : '0'}</p>
-                </motion.div>
-                <motion.div whileHover={{ scale: 1.05, y: -3 }} className="bg-white/10 backdrop-blur-sm rounded-xl p-4 cursor-pointer">
-                  <p className="text-white/70 text-sm">Días Registrados</p>
-                  <p className="text-2xl font-bold">{filteredSales.length}</p>
+                <motion.div whileHover={{ scale: 1.05, y: -3 }} className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                  <p className="text-white/70 text-sm">Sugeridos Vendidos</p>
+                  <p className="text-2xl font-bold">{totals.suggested.toLocaleString()}</p>
+                  <p className="text-xs text-white/50 mt-1">{totals.transactions > 0 ? ((totals.suggested / totals.transactions) * 100).toFixed(0) : 0}% de conversión</p>
                 </motion.div>
               </div>
             </motion.div>

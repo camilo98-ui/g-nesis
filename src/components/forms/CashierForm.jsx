@@ -50,15 +50,14 @@ export default function CashierForm({ storeId, onSuccess }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="gap-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 shadow-lg shadow-orange-500/30">
+        <Button size="icon" className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 shadow-lg shadow-pink-500/30">
           <UserPlus className="w-4 h-4" />
-          Nuevo Cajero
         </Button>
       </DialogTrigger>
-      <DialogContent className="bg-white/95 backdrop-blur-lg border-orange-100">
+      <DialogContent className="bg-white/95 backdrop-blur-lg border-pink-100">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3 text-gray-800">
-            <div className="p-2 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl text-white">
+            <div className="p-2 bg-gradient-to-br from-pink-500 to-rose-500 rounded-xl text-white">
               <User className="w-5 h-5" />
             </div>
             Registrar Nuevo Cajero
@@ -67,14 +66,14 @@ export default function CashierForm({ storeId, onSuccess }) {
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
           <div className="space-y-2">
             <Label className="text-gray-600 flex items-center gap-2">
-              <User className="w-4 h-4 text-orange-500" />
+              <User className="w-4 h-4 text-pink-500" />
               Nombre completo *
             </Label>
             <Input 
               placeholder="Ej: María García"
               value={formData.name}
               onChange={(e) => setFormData({...formData, name: e.target.value})}
-              className="border-orange-200 focus:ring-orange-500"
+              className="border-pink-200 focus:ring-pink-500"
             />
           </div>
 
@@ -88,7 +87,7 @@ export default function CashierForm({ storeId, onSuccess }) {
               placeholder="correo@ejemplo.com"
               value={formData.email}
               onChange={(e) => setFormData({...formData, email: e.target.value})}
-              className="border-orange-200 focus:ring-orange-500"
+              className="border-pink-200 focus:ring-pink-500"
             />
           </div>
 
@@ -101,7 +100,7 @@ export default function CashierForm({ storeId, onSuccess }) {
               placeholder="300 123 4567"
               value={formData.phone}
               onChange={(e) => setFormData({...formData, phone: e.target.value})}
-              className="border-orange-200 focus:ring-orange-500"
+              className="border-pink-200 focus:ring-pink-500"
             />
           </div>
 
@@ -114,14 +113,14 @@ export default function CashierForm({ storeId, onSuccess }) {
               type="date"
               value={formData.hire_date}
               onChange={(e) => setFormData({...formData, hire_date: e.target.value})}
-              className="border-orange-200 focus:ring-orange-500"
+              className="border-pink-200 focus:ring-pink-500"
             />
           </div>
 
           <Button 
             type="submit" 
             disabled={createMutation.isPending}
-            className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-lg shadow-orange-500/30"
+            className="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white shadow-lg shadow-pink-500/30"
           >
             {createMutation.isPending ? (
               <Loader2 className="w-5 h-5 animate-spin mr-2" />

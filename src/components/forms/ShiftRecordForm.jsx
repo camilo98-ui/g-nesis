@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Save, User, DollarSign, Receipt, Zap, Gift, Loader2, CheckCircle, Sun, Sunset, Moon } from 'lucide-react';
+import { Save, User, DollarSign, Receipt, Zap, Gift, Loader2, CheckCircle, Sun, Sunset, Moon, UserPlus } from 'lucide-react';
+import CashierForm from './CashierForm';
 import { toast } from 'sonner';
 
 const SHIFTS = [
@@ -45,7 +46,13 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
       average_ticket: data.tickets > 0 ? (parseFloat(data.sales) || 0) / parseInt(data.tickets) : 0
     }),
     onSuccess: () => {
-      toast.success('¡Registro guardado exitosamente!');
+      toast.success(
+        <div className="flex items-center gap-2">
+          <CheckCircle className="w-5 h-5 text-green-500" />
+          <span>¡Venta registrada correctamente!</span>
+        </div>,
+        { duration: 3000 }
+      );
       queryClient.invalidateQueries(['shiftRecords']);
       queryClient.invalidateQueries(['dailySales']);
       setFormData({
@@ -79,10 +86,10 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
     >
-      <Card className="bg-white/80 backdrop-blur-lg border-orange-100 shadow-xl">
+      <Card className="bg-white/80 backdrop-blur-lg border-pink-100 shadow-xl">
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-3 text-gray-800">
-            <div className="p-2 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl text-white">
+            <div className="p-2 bg-gradient-to-br from-pink-500 to-rose-500 rounded-xl text-white">
               <Receipt className="w-5 h-5" />
             </div>
             Registrar Turno
@@ -94,22 +101,25 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
               {/* Cajero */}
               <div className="space-y-2">
                 <Label className="text-gray-600 flex items-center gap-2">
-                  <User className="w-4 h-4 text-orange-500" />
+                  <User className="w-4 h-4 text-pink-500" />
                   Cajero
                 </Label>
-                <Select 
-                  value={formData.cashier_id} 
-                  onValueChange={(val) => setFormData({...formData, cashier_id: val})}
-                >
-                  <SelectTrigger className="border-orange-200 focus:ring-orange-500">
-                    <SelectValue placeholder="Selecciona cajero" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {cashiers.map(c => (
-                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="flex gap-2">
+                  <Select 
+                    value={formData.cashier_id} 
+                    onValueChange={(val) => setFormData({...formData, cashier_id: val})}
+                  >
+                    <SelectTrigger className="border-pink-200 focus:ring-pink-500 flex-1">
+                      <SelectValue placeholder="Selecciona cajero" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {cashiers.map(c => (
+                        <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <CashierForm storeId={storeId} />
+                </div>
               </div>
 
               {/* Fecha */}
@@ -119,7 +129,7 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
                   type="date" 
                   value={formData.date}
                   onChange={(e) => setFormData({...formData, date: e.target.value})}
-                  className="border-orange-200 focus:ring-orange-500"
+                  className="border-pink-200 focus:ring-pink-500"
                 />
               </div>
 
@@ -137,8 +147,8 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
                         onClick={() => setFormData({...formData, shift: shift.value})}
                         className={`p-3 rounded-xl border-2 transition-all flex items-center justify-center gap-2 ${
                           isSelected 
-                            ? 'border-orange-500 bg-orange-50 text-orange-600' 
-                            : 'border-gray-200 hover:border-orange-300 text-gray-600'
+                            ? 'border-pink-500 bg-pink-50 text-pink-600' 
+                            : 'border-gray-200 hover:border-pink-300 text-gray-600'
                         }`}
                       >
                         <Icon className={`w-5 h-5 ${isSelected ? shift.color : ''}`} />
@@ -150,7 +160,7 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
               </div>
             </div>
 
-            <div className="h-px bg-gradient-to-r from-transparent via-orange-200 to-transparent my-6" />
+            <div className="h-px bg-gradient-to-r from-transparent via-pink-200 to-transparent my-6" />
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {/* Ventas */}
@@ -164,7 +174,7 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
                   placeholder="0"
                   value={formData.sales}
                   onChange={(e) => setFormData({...formData, sales: e.target.value})}
-                  className="border-orange-200 focus:ring-orange-500"
+                  className="border-pink-200 focus:ring-pink-500"
                 />
               </div>
 
@@ -179,7 +189,7 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
                   placeholder="0"
                   value={formData.tickets}
                   onChange={(e) => setFormData({...formData, tickets: e.target.value})}
-                  className="border-orange-200 focus:ring-orange-500"
+                  className="border-pink-200 focus:ring-pink-500"
                 />
               </div>
 
@@ -194,7 +204,7 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
                   placeholder="0"
                   value={formData.transactions}
                   onChange={(e) => setFormData({...formData, transactions: e.target.value})}
-                  className="border-orange-200 focus:ring-orange-500"
+                  className="border-pink-200 focus:ring-pink-500"
                 />
               </div>
 
@@ -209,7 +219,7 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
                   placeholder="0"
                   value={formData.suggested_sales}
                   onChange={(e) => setFormData({...formData, suggested_sales: e.target.value})}
-                  className="border-orange-200 focus:ring-orange-500"
+                  className="border-pink-200 focus:ring-pink-500"
                 />
               </div>
             </div>
@@ -217,7 +227,7 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
             <Button 
               type="submit" 
               disabled={createMutation.isPending}
-              className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-lg shadow-orange-500/30"
+              className="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white shadow-lg shadow-pink-500/30"
             >
               {createMutation.isPending ? (
                 <Loader2 className="w-5 h-5 animate-spin mr-2" />

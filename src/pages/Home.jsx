@@ -131,15 +131,7 @@ export default function Home() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-8"
         >
-          <motion.img 
-            src={LOGO_URL}
-            alt="Popsy - Helado Gourmet"
-            className="h-20 md:h-24 mx-auto mb-4"
-            initial={{ scale: 0.9 }}
-            animate={{ scale: 1 }}
-            whileHover={{ scale: 1.05 }}
-            transition={{ type: "spring", stiffness: 300 }}
-          />
+          {/* Logo removido del inicio */}
 
           <p className="text-gray-500 text-sm mb-6">Sistema de Gestión de Ventas</p>
           
@@ -168,73 +160,48 @@ export default function Home() {
           )}
         </motion.div>
 
-        {/* Quick Actions: Export & Notifications */}
-        {selectedStore && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-6 space-y-3"
-          >
-            {/* Export Button */}
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => setShowExport(!showExport)}
-              className={`w-full p-4 rounded-2xl flex items-center justify-between transition-all ${
-                showExport 
-                  ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg' 
-                  : 'bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 hover:border-green-300'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <FileSpreadsheet className={`w-6 h-6 ${showExport ? 'text-white' : 'text-green-600'}`} />
-                <div className="text-left">
-                  <p className={`font-bold ${showExport ? 'text-white' : 'text-gray-800'}`}>Exportar Datos a Excel</p>
-                  <p className={`text-xs ${showExport ? 'text-white/80' : 'text-gray-500'}`}>Indicadores de tienda y cajeros</p>
-                </div>
-              </div>
-              <ChevronRight className={`w-5 h-5 transition-transform ${showExport ? 'rotate-90 text-white' : 'text-green-600'}`} />
-            </motion.button>
+        {/* Quick Actions sutiles */}
+                      {selectedStore && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="mb-6 flex justify-center gap-3"
+                        >
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setShowExport(!showExport)}
+                            className="text-gray-500 hover:text-green-600 hover:bg-green-50"
+                          >
+                            <FileSpreadsheet className="w-4 h-4 mr-1" />
+                            Exportar
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setShowNotifications(true)}
+                            className="text-gray-500 hover:text-pink-600 hover:bg-pink-50"
+                          >
+                            <Bell className="w-4 h-4 mr-1" />
+                            Alertas
+                          </Button>
+                        </motion.div>
+                      )}
 
-            {showExport && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-              >
-                <ExportExcel
-                  storeData={filteredSales}
-                  cashierData={cashierExportData}
-                  storeName={selectedStore}
-                  dateRange={{ from: monthStart, to: new Date() }}
-                />
-              </motion.div>
-            )}
-
-            {/* Notifications Button */}
-            <motion.button
-              whileHover={{ scale: 1.02, y: -2 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => setShowNotifications(true)}
-              className="w-full p-4 rounded-2xl flex items-center justify-between bg-gradient-to-r from-pink-50 to-rose-50 border-2 border-pink-200 hover:border-pink-300 transition-all"
-            >
-              <div className="flex items-center gap-3">
-                <motion.div
-                  animate={{ rotate: [0, 15, -15, 0] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
-                  <Bell className="w-6 h-6 text-pink-600" />
-                </motion.div>
-                <div className="text-left">
-                  <p className="font-bold text-gray-800">Configurar Alertas</p>
-                  <p className="text-xs text-gray-500 flex items-center gap-1">
-                    <MessageCircle className="w-3 h-3" /> WhatsApp y Correo
-                  </p>
-                </div>
-              </div>
-              <ChevronRight className="w-5 h-5 text-pink-600" />
-            </motion.button>
-          </motion.div>
-        )}
+                      {showExport && selectedStore && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          className="mb-6"
+                        >
+                          <ExportExcel
+                            storeData={filteredSales}
+                            cashierData={cashierExportData}
+                            storeName={selectedStore}
+                            dateRange={{ from: monthStart, to: new Date() }}
+                          />
+                        </motion.div>
+                      )}
 
         {/* Menu Grid estilo Popsy */}
         {selectedStore ? (
