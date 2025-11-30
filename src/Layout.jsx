@@ -5,7 +5,7 @@ import SmartSearch from '@/components/SmartSearch';
 import MotivationalHeader from '@/components/MotivationalHeader';
 import { 
   Home, LayoutDashboard, TrendingUp, Award,
-  Target, Users, Menu, X, FileText
+  Target, Users, Menu, X, FileText, Snowflake
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -81,16 +81,28 @@ export default function Layout({ children, currentPageName }) {
                   whileTap={{ scale: 0.95 }}
                   transition={{ type: "spring", stiffness: 400, damping: 17 }}
                 >
-                  <Button
-                    variant={isActive ? "default" : "ghost"}
-                    size="sm"
-                    className={`gap-2 transition-all duration-200 ${isActive 
-                      ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg shadow-pink-500/20' 
-                      : 'text-gray-600 hover:text-pink-600 hover:bg-pink-50'}`}
-                  >
-                    <Icon className="w-4 h-4" />
-                    <span className="hidden xl:inline">{item.name}</span>
-                  </Button>
+                  {item.isIcon ? (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className={`transition-all duration-200 ${isActive 
+                        ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg' 
+                        : 'text-cyan-600 hover:text-cyan-700 hover:bg-cyan-50'}`}
+                    >
+                      <Icon className="w-4 h-4" />
+                    </Button>
+                  ) : (
+                    <Button
+                      variant={isActive ? "default" : "ghost"}
+                      size="sm"
+                      className={`gap-2 transition-all duration-200 ${isActive 
+                        ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg shadow-pink-500/20' 
+                        : 'text-gray-600 hover:text-pink-600 hover:bg-pink-50'}`}
+                    >
+                      <Icon className="w-4 h-4" />
+                      <span className="hidden xl:inline">{item.name}</span>
+                    </Button>
+                  )}
                 </motion.div>
               </Link>
             );
@@ -128,12 +140,14 @@ export default function Layout({ children, currentPageName }) {
                         whileTap={{ scale: 0.98 }}
                         className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
                           isActive 
-                            ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white' 
+                            ? item.isIcon 
+                              ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white' 
+                              : 'bg-gradient-to-r from-pink-500 to-rose-500 text-white' 
                             : 'text-gray-600 hover:bg-pink-50'
                         }`}
                       >
                         <Icon className="w-5 h-5" />
-                        <span className="font-medium">{item.name}</span>
+                        <span className="font-medium">{item.isIcon ? 'Mapa Nevera' : item.name}</span>
                       </motion.div>
                     </Link>
                   );
