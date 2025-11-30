@@ -12,6 +12,7 @@ import CashiersDashboard from './pages/CashiersDashboard';
 import FreezerMap from './pages/FreezerMap';
 import Training from './pages/Training';
 import Quality from './pages/Quality';
+import Management from './pages/Management';
 import __Layout from './Layout.jsx';
 
 
@@ -30,6 +31,7 @@ export const PAGES = {
     "FreezerMap": FreezerMap,
     "Training": Training,
     "Quality": Quality,
+    "Management": Management,
 }
 
 export const pagesConfig = {

@@ -211,7 +211,25 @@ export default function Rankings() {
               </Button>
             </Link>
             <div>
-              <h1 className="text-2xl md:text-3xl font-semibold text-gray-700">Rankings</h1>
+              <h1 className="text-2xl md:text-3xl font-semibold text-gray-700 flex items-center gap-1">
+                {'PopsyStars'.split('').map((letter, i) => (
+                  <motion.span
+                    key={i}
+                    animate={{ y: [0, -4, 0] }}
+                    transition={{ duration: 0.5, delay: i * 0.05, repeat: Infinity, repeatDelay: 2 }}
+                    className={i >= 5 ? 'text-amber-500' : 'text-pink-500'}
+                  >
+                    {letter}
+                  </motion.span>
+                ))}
+                <motion.span
+                  animate={{ rotate: [0, 15, -15, 0], scale: [1, 1.2, 1] }}
+                  transition={{ duration: 1, repeat: Infinity, repeatDelay: 1 }}
+                  className="ml-1"
+                >
+                  ⭐
+                </motion.span>
+              </h1>
               {selectedStore && (
                 <p className="text-sm text-gray-500">{selectedStore} - {selectedStoreName}</p>
               )}

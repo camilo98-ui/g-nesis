@@ -47,7 +47,7 @@ const MENU_ITEMS = [
     iconColor: 'text-emerald-400'
   },
   { 
-    name: 'Rankings', 
+    name: 'PopsyStars', 
     page: 'Rankings',
     icon: Award, 
     description: 'Top cajeros',
@@ -65,13 +65,13 @@ const MENU_ITEMS = [
     iconColor: 'text-sky-400'
   },
   { 
-    name: 'Reportes', 
-    page: 'Reports',
+    name: 'Gerencia', 
+    page: 'Management',
     icon: FileText, 
-    description: 'Reportes gerenciales',
-    bgColor: 'bg-gradient-to-br from-teal-50/80 to-cyan-100/60',
-    iconBg: 'bg-teal-100/80',
-    iconColor: 'text-teal-400'
+    description: 'Dashboard gerencial',
+    bgColor: 'bg-gradient-to-br from-indigo-50/80 to-purple-100/60',
+    iconBg: 'bg-indigo-100/80',
+    iconColor: 'text-indigo-400'
   },
 ];
 
