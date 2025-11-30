@@ -5,6 +5,7 @@ import { createPageUrl } from '@/utils';
 import StoreSelector, { STORES } from '@/components/StoreSelector';
 import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
 import NotificationSetup from '@/components/NotificationSetup';
+import PopsyStoryModal from '@/components/PopsyStoryModal';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { 
@@ -79,6 +80,7 @@ const MENU_ITEMS = [
 export default function Home() {
   const [selectedStore, setSelectedStore] = useState('');
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showStory, setShowStory] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem('selectedStore');
@@ -106,10 +108,21 @@ export default function Home() {
           <motion.img 
             src={LOGO_URL} 
             alt="Popsy" 
-            className="h-28 md:h-32 object-contain mx-auto mb-1"
+            className="h-28 md:h-32 object-contain mx-auto mb-1 cursor-pointer"
             initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            whileHover={{ scale: 1.05 }}
+            animate={{ 
+              opacity: 1, 
+              scale: [1, 1.02, 1],
+              rotate: [0, 0.5, -0.5, 0],
+            }}
+            transition={{
+              opacity: { duration: 0.5 },
+              scale: { duration: 4, repeat: Infinity, ease: "easeInOut" },
+              rotate: { duration: 6, repeat: Infinity, ease: "easeInOut" }
+            }}
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowStory(true)}
           />
           <p className="text-gray-500 text-sm mb-3">Sistema de Gestión</p>
           
@@ -237,6 +250,13 @@ export default function Home() {
             isOpen={showNotifications}
             onClose={() => setShowNotifications(false)}
           />
+        )}
+      </AnimatePresence>
+
+      {/* Popsy Story Modal */}
+      <AnimatePresence>
+        {showStory && (
+          <PopsyStoryModal onClose={() => setShowStory(false)} />
         )}
       </AnimatePresence>
     </div>
