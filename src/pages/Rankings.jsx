@@ -367,7 +367,7 @@ export default function Rankings() {
               selectedDate={new Date()}
             />
           </motion.div>
-        )}
+        ) : null}
 
         {/* Global Rankings Modal */}
         <AnimatePresence>
