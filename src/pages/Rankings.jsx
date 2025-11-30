@@ -11,7 +11,7 @@ import CashierRankingCard from '@/components/ranking/CashierRankingCard';
 import CashierRecommendation from '@/components/CashierRecommendation';
 import TrendChart from '@/components/ranking/TrendChart';
 import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
-import { ArrowLeft, Award, Gift, Trophy, Star, Receipt, TrendingUp, Globe, X, Medal, Search } from 'lucide-react';
+import { ArrowLeft, Award, Gift, Trophy, Star, Receipt, TrendingUp, Globe, X, Medal, Search, Crown, Sparkles } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -189,7 +189,39 @@ export default function Rankings() {
         storeName: STORES.find(s => s.code === stats.store_id)?.name || stats.store_id
       }));
 
-    return { salesRanking, ticketRanking, transactionsRanking };
+    const suggestedRanking = Object.values(cashierStats)
+      .sort((a, b) => b.totalSuggested - a.totalSuggested)
+      .map((stats, index) => ({
+        ...stats,
+        rank: index + 1,
+        cashier: allCashiers.find(c => c.id === stats.cashier_id) || { name: 'Desconocido' },
+        storeName: STORES.find(s => s.code === stats.store_id)?.name || stats.store_id
+      }));
+
+    // Best overall cashier - normalize and combine scores
+    const maxSales = Math.max(...Object.values(cashierStats).map(s => s.totalSales), 1);
+    const maxTransactions = Math.max(...Object.values(cashierStats).map(s => s.totalTransactions), 1);
+    const maxTicket = Math.max(...Object.values(cashierStats).map(s => s.avgTicket), 1);
+    const maxSuggested = Math.max(...Object.values(cashierStats).map(s => s.totalSuggested), 1);
+
+    const bestOverallRanking = Object.values(cashierStats)
+      .map(stats => {
+        const salesScore = (stats.totalSales / maxSales) * 25;
+        const transactionsScore = (stats.totalTransactions / maxTransactions) * 25;
+        const ticketScore = (stats.avgTicket / maxTicket) * 25;
+        const suggestedScore = (stats.totalSuggested / maxSuggested) * 25;
+        const overallScore = salesScore + transactionsScore + ticketScore + suggestedScore;
+        return { ...stats, overallScore, salesScore, transactionsScore, ticketScore, suggestedScore };
+      })
+      .sort((a, b) => b.overallScore - a.overallScore)
+      .map((stats, index) => ({
+        ...stats,
+        rank: index + 1,
+        cashier: allCashiers.find(c => c.id === stats.cashier_id) || { name: 'Desconocido' },
+        storeName: STORES.find(s => s.code === stats.store_id)?.name || stats.store_id
+      }));
+
+    return { salesRanking, ticketRanking, transactionsRanking, suggestedRanking, bestOverallRanking };
   }, [showGlobal, allShiftRecords, allCashiers, dateRange]);
 
   const selectedStoreName = STORES.find(s => s.code === selectedStore)?.name || '';
@@ -442,26 +474,81 @@ export default function Rankings() {
 
                 {/* Content */}
                 <div className="flex-1 overflow-y-auto p-5">
-                  <Tabs defaultValue="sales" className="w-full">
-                    <TabsList className="w-full grid grid-cols-3 mb-6 bg-gray-100 p-1 rounded-xl">
-                      <TabsTrigger value="sales" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-green-500 data-[state=active]:text-white rounded-lg gap-1">
-                        <Trophy className="w-4 h-4" />
-                        Ventas
+                  <Tabs defaultValue="best" className="w-full">
+                    <TabsList className="w-full grid grid-cols-5 mb-6 bg-gray-100 p-1 rounded-xl">
+                      <TabsTrigger value="best" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white rounded-lg gap-1 text-xs">
+                        <Crown className="w-3 h-3" />
+                        <span className="hidden sm:inline">Mejor</span>
                       </TabsTrigger>
-                      <TabsTrigger value="transactions" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white rounded-lg gap-1">
-                        <Receipt className="w-4 h-4" />
-                        Transacciones
+                      <TabsTrigger value="sales" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-green-500 data-[state=active]:text-white rounded-lg gap-1 text-xs">
+                        <Trophy className="w-3 h-3" />
+                        <span className="hidden sm:inline">Ventas</span>
                       </TabsTrigger>
-                      <TabsTrigger value="ticket" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500 data-[state=active]:to-orange-500 data-[state=active]:text-white rounded-lg gap-1">
-                        <TrendingUp className="w-4 h-4" />
-                        Ticket Prom.
+                      <TabsTrigger value="transactions" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white rounded-lg gap-1 text-xs">
+                        <Receipt className="w-3 h-3" />
+                        <span className="hidden sm:inline">Trans.</span>
+                      </TabsTrigger>
+                      <TabsTrigger value="ticket" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500 data-[state=active]:to-orange-500 data-[state=active]:text-white rounded-lg gap-1 text-xs">
+                        <TrendingUp className="w-3 h-3" />
+                        <span className="hidden sm:inline">Ticket</span>
+                      </TabsTrigger>
+                      <TabsTrigger value="suggested" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-rose-500 data-[state=active]:to-red-500 data-[state=active]:text-white rounded-lg gap-1 text-xs">
+                        <Sparkles className="w-3 h-3" />
+                        <span className="hidden sm:inline">Sugeridos</span>
                       </TabsTrigger>
                     </TabsList>
+
+                    {/* Mejor Cajero Overall */}
+                    <TabsContent value="best" className="space-y-3">
+                      <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl p-3 mb-4">
+                        <p className="text-xs text-purple-700 text-center">
+                          🏆 Ranking basado en promedio de: Ventas (25%) + Transacciones (25%) + Ticket Promedio (25%) + Sugeridos (25%)
+                        </p>
+                      </div>
+                      {globalRankings.bestOverallRanking
+                        ?.filter(item => !globalSearch || item.cashier?.name?.toLowerCase().includes(globalSearch.toLowerCase()))
+                        .map((item) => (
+                        <motion.div
+                          key={item.cashier_id}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.03 }}
+                          className={`flex items-center gap-4 p-4 rounded-xl border ${
+                            item.rank <= 3 
+                              ? 'bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200' 
+                              : 'bg-white border-gray-100'
+                          }`}
+                        >
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${
+                            item.rank === 1 ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-white' :
+                            item.rank === 2 ? 'bg-gradient-to-r from-gray-300 to-gray-400 text-white' :
+                            item.rank === 3 ? 'bg-gradient-to-r from-orange-400 to-amber-600 text-white' :
+                            'bg-gray-100 text-gray-600'
+                          }`}>
+                            {item.rank <= 3 ? <Crown className="w-5 h-5" /> : item.rank}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-bold text-gray-800 truncate">{item.cashier?.name}</p>
+                            <p className="text-xs text-gray-500 truncate">📍 {item.storeName}</p>
+                            <div className="flex gap-2 mt-1">
+                              <span className="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded">V:{item.salesScore?.toFixed(0)}</span>
+                              <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">T:{item.transactionsScore?.toFixed(0)}</span>
+                              <span className="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded">TK:{item.ticketScore?.toFixed(0)}</span>
+                              <span className="text-[10px] bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded">S:{item.suggestedScore?.toFixed(0)}</span>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-bold text-purple-600">{item.overallScore?.toFixed(1)} pts</p>
+                            <p className="text-xs text-gray-400">{item.shifts} turnos</p>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </TabsContent>
 
                     {/* Ventas */}
                     <TabsContent value="sales" className="space-y-3">
                       {globalRankings.salesRanking
-                        .filter(item => !globalSearch || item.cashier?.name?.toLowerCase().includes(globalSearch.toLowerCase()))
+                        ?.filter(item => !globalSearch || item.cashier?.name?.toLowerCase().includes(globalSearch.toLowerCase()))
                         .map((item) => (
                         <motion.div
                           key={item.cashier_id}
@@ -533,7 +620,7 @@ export default function Rankings() {
                     {/* Ticket Promedio */}
                     <TabsContent value="ticket" className="space-y-3">
                       {globalRankings.ticketRanking
-                        .filter(item => !globalSearch || item.cashier?.name?.toLowerCase().includes(globalSearch.toLowerCase()))
+                        ?.filter(item => !globalSearch || item.cashier?.name?.toLowerCase().includes(globalSearch.toLowerCase()))
                         .map((item) => (
                         <motion.div
                           key={item.cashier_id}
@@ -565,13 +652,49 @@ export default function Rankings() {
                         </motion.div>
                       ))}
                     </TabsContent>
+
+                    {/* Sugeridos */}
+                    <TabsContent value="suggested" className="space-y-3">
+                      {globalRankings.suggestedRanking
+                        ?.filter(item => !globalSearch || item.cashier?.name?.toLowerCase().includes(globalSearch.toLowerCase()))
+                        .map((item) => (
+                        <motion.div
+                          key={item.cashier_id}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.03 }}
+                          className={`flex items-center gap-4 p-4 rounded-xl border ${
+                            item.rank <= 3 
+                              ? 'bg-gradient-to-r from-rose-50 to-red-50 border-rose-200' 
+                              : 'bg-white border-gray-100'
+                          }`}
+                        >
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${
+                            item.rank === 1 ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-white' :
+                            item.rank === 2 ? 'bg-gradient-to-r from-gray-300 to-gray-400 text-white' :
+                            item.rank === 3 ? 'bg-gradient-to-r from-orange-400 to-amber-600 text-white' :
+                            'bg-gray-100 text-gray-600'
+                          }`}>
+                            {item.rank <= 3 ? <Sparkles className="w-5 h-5" /> : item.rank}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-bold text-gray-800 truncate">{item.cashier?.name}</p>
+                            <p className="text-xs text-gray-500 truncate">📍 {item.storeName}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-bold text-rose-600">{item.totalSuggested?.toLocaleString()}</p>
+                            <p className="text-xs text-gray-400">sugeridos</p>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </TabsContent>
                   </Tabs>
                 </div>
 
                 {/* Footer */}
                 <div className="p-4 bg-gray-50 border-t text-center">
                   <p className="text-sm text-gray-500">
-                    🏆 Mostrando top 20 de {globalRankings.salesRanking.length} cajeros en todas las tiendas
+                    🏆 Mostrando todos los {globalRankings.salesRanking?.length || 0} cajeros de todas las tiendas
                   </p>
                 </div>
               </motion.div>
