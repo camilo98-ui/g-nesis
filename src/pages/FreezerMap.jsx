@@ -65,7 +65,7 @@ const TYPE_BORDERS = {
 };
 
 // Componente de slot individual 3D
-function FreezerSlot3D({ slot, onClick, isSelected, isDarkMode, onDragStart, onDragEnd, onDrop }) {
+function FreezerSlot3D({ slot, onClick, isSelected, isDarkMode, onDragStart, onDragEnd, onDrop, savingState }) {
   const isEmpty = slot.is_empty || !slot.flavor_name;
   const stockColors = {
     full: 'bg-green-400',
@@ -151,13 +151,38 @@ function FreezerSlot3D({ slot, onClick, isSelected, isDarkMode, onDragStart, onD
       </div>
 
       {/* Badge de tipo */}
-      {!isEmpty && slot.flavor_type === 'premium' && (
+      {!isEmpty && (slot.flavor_type === 'premium' || slot.flavor_type === 'exclusivo') && (
         <div className="absolute top-1 right-1">
           <Sparkles className="w-3 h-3 text-purple-500" />
         </div>
       )}
       {!isEmpty && slot.flavor_type === 'nuevo' && (
         <div className="absolute top-1 left-1 bg-cyan-500 text-white text-[6px] px-1 rounded">NEW</div>
+      )}
+      
+      {/* Indicador de guardado */}
+      {savingState?.saving && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="absolute inset-0 bg-white/80 rounded-xl flex items-center justify-center"
+        >
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            className="w-6 h-6 border-2 border-pink-500 border-t-transparent rounded-full"
+          />
+        </motion.div>
+      )}
+      {savingState?.success && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0 }}
+          className="absolute inset-0 bg-green-500/90 rounded-xl flex items-center justify-center"
+        >
+          <Check className="w-6 h-6 text-white" />
+        </motion.div>
       )}
     </motion.div>
   );
@@ -300,6 +325,8 @@ export default function FreezerMap() {
     return grid;
   }, [slots, selectedStore]);
 
+  const [savingSlot, setSavingSlot] = useState(null);
+
   const updateSlotMutation = useMutation({
     mutationFn: async ({ slotData, isNew }) => {
       if (isNew) {
@@ -308,9 +335,15 @@ export default function FreezerMap() {
         return base44.entities.FreezerSlot.update(slotData.id, slotData);
       }
     },
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
       queryClient.invalidateQueries(['freezerSlots']);
-      toast.success('¡Nevera actualizada!');
+      setSavingSlot({ row: variables.slotData.row, position: variables.slotData.position, success: true });
+      toast.success('✅ ¡Sabor guardado correctamente!');
+      setTimeout(() => setSavingSlot(null), 2000);
+    },
+    onError: () => {
+      toast.error('❌ Error al guardar el sabor');
+      setSavingSlot(null);
     }
   });
 
@@ -322,11 +355,13 @@ export default function FreezerMap() {
   const handleFlavorSelect = (flavor) => {
     if (!selectedSlot) return;
     
+    setSavingSlot({ row: selectedSlot.row, position: selectedSlot.position, saving: true });
+    
     const slotData = {
       ...selectedSlot,
       store_id: selectedStore,
       flavor_name: flavor.name,
-      flavor_type: flavor.type,
+      flavor_type: flavor.type || flavor.line,
       color: flavor.color,
       is_empty: flavor.is_empty || false
     };
@@ -420,6 +455,32 @@ export default function FreezerMap() {
 
         {selectedStore ? (
           <>
+            {/* Filtros arriba */}
+            <div className="flex flex-wrap items-center gap-3 mb-4">
+              <span className={`text-xs font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Filtrar:</span>
+              <div className="flex gap-2">
+                {[
+                  { key: 'all', label: 'Todos', color: 'bg-gray-100 text-gray-600' },
+                  { key: 'gourmet', label: '🍦 Gourmet', color: 'bg-pink-100 text-pink-600' },
+                  { key: 'exclusivo', label: '✨ Exclusivos', color: 'bg-purple-100 text-purple-600' },
+                ].map((f) => (
+                  <motion.button
+                    key={f.key}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setFilterLine(f.key)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                      filterLine === f.key 
+                        ? f.key === 'gourmet' ? 'bg-pink-500 text-white' : f.key === 'exclusivo' ? 'bg-purple-500 text-white' : 'bg-gray-700 text-white'
+                        : f.color
+                    }`}
+                  >
+                    {f.label}
+                  </motion.button>
+                ))}
+              </div>
+            </div>
+
             {/* Controls */}
             <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
               <div className="flex items-center gap-2">
@@ -453,15 +514,6 @@ export default function FreezerMap() {
               </div>
 
               <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsDarkMode(!isDarkMode)}
-                  className={`${isDarkMode ? 'border-pink-500 text-pink-400 bg-pink-500/10' : ''}`}
-                >
-                  {isDarkMode ? <Sun className="w-4 h-4 mr-1" /> : <Moon className="w-4 h-4 mr-1" />}
-                  {isDarkMode ? 'Claro' : 'Gourmet'}
-                </Button>
                 <Button
                   size="sm"
                   onClick={handleAIReorder}
@@ -537,6 +589,7 @@ export default function FreezerMap() {
                             onDragStart={handleDragStart}
                             onDragEnd={handleDragEnd}
                             onDrop={handleDrop}
+                            savingState={savingSlot?.row === slot.row && savingSlot?.position === slot.position ? savingSlot : null}
                           />
                         ))}
                       </div>
@@ -551,104 +604,21 @@ export default function FreezerMap() {
               </div>
             </motion.div>
 
-            {/* Panel inferior con filtros y agregar sabor */}
-            <div className={`mt-8 p-4 rounded-xl ${isDarkMode ? 'bg-gray-900/50' : 'bg-white/80'} shadow-lg max-w-2xl mx-auto space-y-4`}>
-              {/* Filtros por línea */}
-              <div className="flex flex-wrap items-center gap-3">
-                <span className={`text-xs font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Filtrar:</span>
-                <div className="flex gap-2">
-                  {[
-                    { key: 'all', label: 'Todos', color: 'bg-gray-100 text-gray-600' },
-                    { key: 'gourmet', label: '🍦 Gourmet', color: 'bg-pink-100 text-pink-600' },
-                    { key: 'exclusivo', label: '✨ Exclusivos', color: 'bg-purple-100 text-purple-600' },
-                  ].map((f) => (
-                    <motion.button
-                      key={f.key}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => setFilterLine(f.key)}
-                      className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                        filterLine === f.key 
-                          ? f.key === 'gourmet' ? 'bg-pink-500 text-white' : f.key === 'exclusivo' ? 'bg-purple-500 text-white' : 'bg-gray-700 text-white'
-                          : f.color
-                      }`}
-                    >
-                      {f.label}
-                    </motion.button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Agregar sabor manualmente */}
-              <div className={`p-3 rounded-lg border ${isDarkMode ? 'border-gray-700 bg-gray-800/50' : 'border-gray-200 bg-gray-50'}`}>
-                <div className="flex items-center justify-between mb-2">
-                  <span className={`text-xs font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                    ➕ Agregar Sabor Personalizado
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowAddFlavor(!showAddFlavor)}
-                    className="text-xs"
-                  >
-                    {showAddFlavor ? 'Cerrar' : 'Abrir'}
-                  </Button>
-                </div>
-                
-                <AnimatePresence>
-                  {showAddFlavor && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="space-y-2 mt-2"
-                    >
-                      <Input
-                        placeholder="Nombre del sabor"
-                        value={newFlavor.name}
-                        onChange={(e) => setNewFlavor({ ...newFlavor, name: e.target.value })}
-                        className="text-sm"
-                      />
-                      <div className="flex gap-2">
-                        <Input
-                          type="color"
-                          value={newFlavor.color}
-                          onChange={(e) => setNewFlavor({ ...newFlavor, color: e.target.value })}
-                          className="w-12 h-9 p-1"
-                        />
-                        <select
-                          value={newFlavor.line}
-                          onChange={(e) => setNewFlavor({ ...newFlavor, line: e.target.value })}
-                          className="flex-1 text-sm border rounded-md px-2"
-                        >
-                          <option value="gourmet">Gourmet</option>
-                          <option value="exclusivo">Exclusivo</option>
-                        </select>
-                        <Button size="sm" className="bg-pink-500 hover:bg-pink-600 text-white">
-                          <Check className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
+            {/* Panel inferior - Solo leyenda */}
+            <div className={`mt-8 p-4 rounded-xl ${isDarkMode ? 'bg-gray-900/50' : 'bg-white/80'} shadow-lg max-w-2xl mx-auto`}>
               {/* Leyenda */}
-              <div className="pt-3 border-t border-gray-200">
-                <div className="flex flex-wrap gap-4">
-                  {[
-                    { type: 'gourmet', label: 'Gourmet' },
-                    { type: 'exclusivo', label: 'Exclusivo', icon: <Sparkles className="w-3 h-3 text-purple-500" /> },
-                  ].map((item) => (
-                    <div key={item.type} className="flex items-center gap-2">
-                      <div className={`w-4 h-4 rounded bg-gradient-to-br ${TYPE_COLORS[item.type]} border ${TYPE_BORDERS[item.type]}`} />
-                      <span className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{item.label}</span>
-                      {item.icon}
-                    </div>
-                  ))}
-                </div>
-                <div className="flex flex-wrap gap-4 mt-2">
-                  <span className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Stock:</span>
+              <div className="flex flex-wrap gap-4">
+                {[
+                  { type: 'gourmet', label: 'Gourmet' },
+                  { type: 'exclusivo', label: 'Exclusivo', icon: <Sparkles className="w-3 h-3 text-purple-500" /> },
+                ].map((item) => (
+                  <div key={item.type} className="flex items-center gap-2">
+                    <div className={`w-4 h-4 rounded bg-gradient-to-br ${TYPE_COLORS[item.type]} border ${TYPE_BORDERS[item.type]}`} />
+                    <span className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{item.label}</span>
+                    {item.icon}
+                  </div>
+                ))}
+                <div className="border-l border-gray-300 pl-4 flex flex-wrap gap-3">
                   {[
                     { level: 'full', label: 'Completo', color: 'bg-green-400' },
                     { level: 'medium', label: 'Medio', color: 'bg-yellow-400' },

@@ -73,15 +73,7 @@ const MENU_ITEMS = [
     iconBg: 'bg-teal-100/80',
     iconColor: 'text-teal-400'
   },
-  { 
-    name: 'Mapa Nevera', 
-    page: 'FreezerMap',
-    icon: Snowflake, 
-    description: 'Gestión de sabores 3D',
-    bgColor: 'bg-gradient-to-br from-cyan-50/80 to-sky-100/60',
-    iconBg: 'bg-cyan-100/80',
-    iconColor: 'text-cyan-400'
-  },
+  
 ];
 
 export default function Home() {

@@ -57,7 +57,7 @@ const elements = [
 
 export default function FloatingIceCreamsBg() {
   return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden opacity-30">
+    <div className="fixed inset-0 pointer-events-none overflow-hidden opacity-50">
       {elements.map((el, i) => (
         <motion.div
           key={i}
@@ -65,21 +65,21 @@ export default function FloatingIceCreamsBg() {
           style={{ 
             left: el.x, 
             top: el.y,
-            width: el.size,
-            height: el.size * 1.6
+            width: el.size * 1.3,
+            height: el.size * 2
           }}
           initial={{ opacity: 0, y: 30, scale: 0.8 }}
           animate={{ 
-            opacity: 0.6,
-            y: [0, -8, 0],
-            rotate: [0, 2, -2, 0],
-            scale: [1, 1.01, 1]
+            opacity: 0.8,
+            y: [0, -15, 0],
+            rotate: [0, 5, -5, 0],
+            scale: [1, 1.05, 1]
           }}
           transition={{ 
-            opacity: { duration: 1.2, delay: el.delay * 0.3 },
-            y: { duration: 8 + i * 0.5, repeat: Infinity, ease: "easeInOut" },
-            rotate: { duration: 10 + i * 0.3, repeat: Infinity, ease: "easeInOut" },
-            scale: { duration: 6 + i * 0.5, repeat: Infinity, ease: "easeInOut" }
+            opacity: { duration: 1, delay: el.delay * 0.2 },
+            y: { duration: 5 + i * 0.3, repeat: Infinity, ease: "easeInOut" },
+            rotate: { duration: 6 + i * 0.2, repeat: Infinity, ease: "easeInOut" },
+            scale: { duration: 4 + i * 0.3, repeat: Infinity, ease: "easeInOut" }
           }}
         >
           {el.type === 'cone' ? (

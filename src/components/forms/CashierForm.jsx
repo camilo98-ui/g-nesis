@@ -7,18 +7,36 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { UserPlus, Save, Loader2, User, Mail, Phone, Calendar } from 'lucide-react';
+import { UserPlus, Save, Loader2, User, Mail, Phone, Calendar, Camera, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function CashierForm({ storeId, onSuccess }) {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
-    hire_date: new Date().toISOString().split('T')[0]
+    hire_date: new Date().toISOString().split('T')[0],
+    photo_url: ''
   });
+
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    setUploading(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      setFormData({ ...formData, photo_url: file_url });
+      toast.success('Foto subida correctamente');
+    } catch (error) {
+      toast.error('Error al subir la foto');
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Cashier.create({
@@ -29,7 +47,7 @@ export default function CashierForm({ storeId, onSuccess }) {
     onSuccess: () => {
       toast.success('¡Cajero registrado exitosamente!');
       queryClient.invalidateQueries(['cashiers']);
-      setFormData({ name: '', email: '', phone: '', hire_date: new Date().toISOString().split('T')[0] });
+      setFormData({ name: '', email: '', phone: '', hire_date: new Date().toISOString().split('T')[0], photo_url: '' });
       setOpen(false);
       onSuccess?.();
     },
@@ -64,6 +82,32 @@ export default function CashierForm({ storeId, onSuccess }) {
           </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+          {/* Foto del cajero */}
+          <div className="flex justify-center">
+            <div className="relative">
+              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-pink-100 to-rose-100 flex items-center justify-center overflow-hidden border-4 border-white shadow-lg">
+                {formData.photo_url ? (
+                  <img src={formData.photo_url} alt="Foto" className="w-full h-full object-cover" />
+                ) : (
+                  <User className="w-10 h-10 text-pink-300" />
+                )}
+              </div>
+              <label className="absolute bottom-0 right-0 p-2 bg-gradient-to-r from-pink-500 to-rose-500 rounded-full cursor-pointer shadow-lg hover:shadow-xl transition-shadow">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePhotoUpload}
+                  className="hidden"
+                />
+                {uploading ? (
+                  <Loader2 className="w-4 h-4 text-white animate-spin" />
+                ) : (
+                  <Camera className="w-4 h-4 text-white" />
+                )}
+              </label>
+            </div>
+          </div>
+
           <div className="space-y-2">
             <Label className="text-gray-600 flex items-center gap-2">
               <User className="w-4 h-4 text-pink-500" />

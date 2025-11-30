@@ -237,16 +237,152 @@ ${(analysis.recomendaciones || []).map(p => `   • ${p}`).join('\n') || '   •
 ═══════════════════════════════════════════════════════════════════
 `;
 
-      // Create and download
-      const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8' });
+      // Create PDF-style HTML and download
+      const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Reporte Gerencial Popsy - ${selectedStore}</title>
+  <style>
+    @page { size: A4; margin: 20mm; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; }
+    .header { text-align: center; border-bottom: 3px solid #ec4899; padding-bottom: 20px; margin-bottom: 30px; }
+    .header h1 { color: #ec4899; margin: 0; font-size: 28px; }
+    .header p { color: #666; margin: 5px 0; }
+    .section { margin-bottom: 25px; page-break-inside: avoid; }
+    .section-title { background: linear-gradient(135deg, #ec4899, #f43f5e); color: white; padding: 10px 15px; border-radius: 8px; margin-bottom: 15px; font-size: 16px; }
+    .info-box { background: #fdf2f8; border-radius: 8px; padding: 15px; margin-bottom: 15px; }
+    .metric { display: inline-block; width: 48%; margin-bottom: 10px; }
+    .metric-label { font-size: 12px; color: #666; }
+    .metric-value { font-size: 20px; font-weight: bold; color: #ec4899; }
+    .ranking-item { padding: 8px 0; border-bottom: 1px solid #fce7f3; }
+    .ranking-medal { font-size: 18px; margin-right: 10px; }
+    .analysis-point { padding: 8px 12px; background: #fdf2f8; border-radius: 6px; margin: 5px 0; border-left: 3px solid #ec4899; }
+    .footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 2px solid #fce7f3; color: #666; }
+    @media print { body { print-color-adjust: exact; -webkit-print-color-adjust: exact; } }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🍦 REPORTE GERENCIAL POPSY</h1>
+    <p><strong>${selectedStore} - ${storeName}</strong></p>
+    <p>Período: ${format(dateRange.from, 'dd/MM/yyyy', { locale: es })} al ${format(dateRange.to, 'dd/MM/yyyy', { locale: es })}</p>
+    <p style="font-size: 12px;">Generado: ${format(new Date(), "dd 'de' MMMM 'de' yyyy, HH:mm", { locale: es })}</p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📊 RESUMEN EJECUTIVO</div>
+    <div class="info-box">
+      <div class="metric">
+        <div class="metric-label">💰 Ventas Totales</div>
+        <div class="metric-value">${formatCurrency(reportData.totals.sales)}</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">📋 Presupuesto</div>
+        <div class="metric-value">${formatCurrency(reportData.budget.sales_budget)}</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">📈 Cumplimiento</div>
+        <div class="metric-value" style="color: ${parseFloat(compliance) >= 100 ? '#10b981' : parseFloat(compliance) >= 80 ? '#f59e0b' : '#ef4444'}">${compliance}%</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">🎯 Proyección</div>
+        <div class="metric-value">${formatCurrency(reportData.projection)}</div>
+      </div>
+    </div>
+    <div class="info-box">
+      <div class="metric">
+        <div class="metric-label">🎫 Total Tickets</div>
+        <div class="metric-value">${reportData.totals.tickets.toLocaleString()}</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">💵 Ticket Promedio</div>
+        <div class="metric-value">${formatCurrency(reportData.avgTicket)}</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">⚡ Transacciones</div>
+        <div class="metric-value">${reportData.totals.transactions.toLocaleString()}</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">🎁 Sugeridos</div>
+        <div class="metric-value">${reportData.totals.suggested.toLocaleString()}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🏆 TOP CAJEROS</div>
+    <div class="info-box">
+      <strong>Mejores Vendedores</strong>
+      ${reportData.topSellers.map((s, i) => `
+        <div class="ranking-item">
+          <span class="ranking-medal">${['🥇', '🥈', '🥉'][i]}</span>
+          <strong>${s.cashier?.name || 'N/A'}</strong>: ${formatCurrency(s.sales)} (${s.shifts} turnos)
+        </div>
+      `).join('')}
+    </div>
+    <div class="info-box">
+      <strong>Top en Sugeridos</strong>
+      ${reportData.topSuggested.map((s, i) => `
+        <div class="ranking-item">
+          <span class="ranking-medal">${['🥇', '🥈', '🥉'][i]}</span>
+          <strong>${s.cashier?.name || 'N/A'}</strong>: ${s.suggested} sugeridos
+        </div>
+      `).join('')}
+    </div>
+  </div>
+
+  ${analysis ? `
+  <div class="section">
+    <div class="section-title">📝 ANÁLISIS Y RECOMENDACIONES</div>
+    <div class="info-box">
+      <strong>Resumen</strong>
+      <p>${analysis.resumen || 'Sin análisis disponible'}</p>
+    </div>
+    ${(analysis.puntos_destacados || []).length > 0 ? `
+    <div class="info-box">
+      <strong>✨ Puntos Destacados</strong>
+      ${(analysis.puntos_destacados || []).map(p => `<div class="analysis-point">${p}</div>`).join('')}
+    </div>
+    ` : ''}
+    ${(analysis.areas_mejora || []).length > 0 ? `
+    <div class="info-box">
+      <strong>⚠️ Áreas de Mejora</strong>
+      ${(analysis.areas_mejora || []).map(p => `<div class="analysis-point">${p}</div>`).join('')}
+    </div>
+    ` : ''}
+    ${(analysis.recomendaciones || []).length > 0 ? `
+    <div class="info-box">
+      <strong>💡 Recomendaciones</strong>
+      ${(analysis.recomendaciones || []).map(p => `<div class="analysis-point">${p}</div>`).join('')}
+    </div>
+    ` : ''}
+  </div>
+  ` : ''}
+
+  <div class="footer">
+    <p>🍦 <strong>POPSY</strong> - Helado Gourmet</p>
+    <p><em>"Hacemos del mundo un lugar más dulce"</em></p>
+  </div>
+</body>
+</html>`;
+
+      // Create blob and trigger print/PDF dialog
+      const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `Reporte_Popsy_${selectedStore}_${format(new Date(), 'yyyyMMdd_HHmm')}.txt`;
-      document.body.appendChild(a);
-      a.click();
+      
+      // Open in new window for PDF printing
+      const printWindow = window.open(url, '_blank');
+      if (printWindow) {
+        printWindow.onload = () => {
+          setTimeout(() => {
+            printWindow.print();
+          }, 500);
+        };
+      }
+      
       window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
     } finally {
       setGenerating(false);
     }
@@ -334,7 +470,7 @@ ${(analysis.recomendaciones || []).map(p => `   • ${p}`).join('\n') || '   •
                     {generating ? 'Generando reporte...' : 'Generar Reporte Gerencial'}
                   </h3>
                   <p className="text-white/80 mb-4">
-                    {generating ? 'Analizando datos y creando recomendaciones...' : 'Incluye análisis, rankings y recomendaciones'}
+                    {generating ? 'Analizando datos y creando recomendaciones...' : 'Incluye análisis, rankings y recomendaciones (PDF)'}
                   </p>
                   {!generating && (
                     <Button size="lg" className="bg-white text-pink-600 hover:bg-white/90 shadow-lg">
