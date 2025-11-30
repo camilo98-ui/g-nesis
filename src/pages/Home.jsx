@@ -11,7 +11,8 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { 
   LayoutDashboard, Users, TrendingUp, 
-  Award, Target, ChevronRight, FileText, FileSpreadsheet, Bell, MessageCircle, Snowflake
+  Award, Target, ChevronRight, FileText, FileSpreadsheet, Bell, MessageCircle, Snowflake,
+  GraduationCap, ClipboardCheck
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { startOfMonth } from 'date-fns';
@@ -73,7 +74,6 @@ const MENU_ITEMS = [
     iconBg: 'bg-teal-100/80',
     iconColor: 'text-teal-400'
   },
-  
 ];
 
 // Icono flotante para Mapa de Nevera en Home
@@ -99,6 +99,53 @@ function FreezerMapIcon() {
         </motion.div>
       </motion.div>
     </Link>
+  );
+}
+
+// Iconos flotantes adicionales
+function FloatingButtons() {
+  return (
+    <>
+      {/* Academia / Cursos */}
+      <Link to={createPageUrl('Training')}>
+        <motion.div
+          className="fixed bottom-24 left-6 z-40"
+          whileHover={{ scale: 1.1, rotate: -5 }}
+          whileTap={{ scale: 0.95 }}
+          animate={{ y: [0, -4, 0] }}
+          transition={{ y: { duration: 2.5, repeat: Infinity, delay: 0.3 } }}
+        >
+          <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-violet-500 rounded-2xl shadow-xl shadow-purple-500/30 flex items-center justify-center">
+            <GraduationCap className="w-6 h-6 text-white" />
+          </div>
+          <motion.div 
+            className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-white text-purple-600 text-[7px] font-bold px-1.5 py-0.5 rounded-full shadow-md whitespace-nowrap"
+          >
+            Academia
+          </motion.div>
+        </motion.div>
+      </Link>
+
+      {/* Calidad & Aseo */}
+      <Link to={createPageUrl('Quality')}>
+        <motion.div
+          className="fixed bottom-40 left-6 z-40"
+          whileHover={{ scale: 1.1, rotate: 5 }}
+          whileTap={{ scale: 0.95 }}
+          animate={{ y: [0, -4, 0] }}
+          transition={{ y: { duration: 2.2, repeat: Infinity, delay: 0.6 } }}
+        >
+          <div className="w-12 h-12 bg-gradient-to-br from-teal-400 to-emerald-500 rounded-2xl shadow-xl shadow-teal-500/30 flex items-center justify-center">
+            <ClipboardCheck className="w-6 h-6 text-white" />
+          </div>
+          <motion.div 
+            className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-white text-teal-600 text-[7px] font-bold px-1.5 py-0.5 rounded-full shadow-md whitespace-nowrap"
+          >
+            Calidad
+          </motion.div>
+        </motion.div>
+      </Link>
+    </>
   );
 }
 
@@ -163,10 +210,24 @@ export default function Home() {
           <motion.img 
                   src={LOGO_URL} 
                   alt="Popsy" 
-                  className="h-16 md:h-20 object-contain mx-auto mb-4"
+                  className="h-16 md:h-20 object-contain mx-auto mb-4 cursor-pointer"
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
+                  whileHover={{ scale: 1.1, rotate: [0, -5, 5, 0] }}
+                  whileTap={{ scale: 0.95 }}
                   transition={{ duration: 0.5 }}
+                  onClick={() => {
+                    const phrases = [
+                      "🍦 ¡Popsy, el sabor de la felicidad!",
+                      "🎉 ¡Hoy es un gran día para vender helados!",
+                      "💪 ¡Juntos somos más fuertes!",
+                      "🌟 ¡Cada cliente merece una sonrisa!",
+                      "🍨 ¡El mejor helado del mundo!",
+                      "❤️ ¡Gracias por ser parte de Popsy!"
+                    ];
+                    const randomPhrase = phrases[Math.floor(Math.random() * phrases.length)];
+                    alert(randomPhrase);
+                  }}
                 />
                 <p className="text-gray-500 text-sm mb-6">Sistema de Gestión de Ventas</p>
           
@@ -305,6 +366,9 @@ export default function Home() {
 
       {/* Icono Mapa Nevera */}
       <FreezerMapIcon />
+
+      {/* Botones flotantes adicionales */}
+      <FloatingButtons />
 
       {/* Mascot */}
       <MascotCone 
