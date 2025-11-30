@@ -11,7 +11,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { 
   LayoutDashboard, Users, TrendingUp, 
-  Award, Target, ChevronRight, FileText, FileSpreadsheet, Bell, MessageCircle
+  Award, Target, ChevronRight, FileText, FileSpreadsheet, Bell, MessageCircle, Snowflake
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { startOfMonth } from 'date-fns';
@@ -76,7 +76,7 @@ const MENU_ITEMS = [
   { 
     name: 'Mapa Nevera', 
     page: 'FreezerMap',
-    icon: LayoutDashboard, 
+    icon: Snowflake, 
     description: 'Gestión de sabores 3D',
     bgColor: 'bg-gradient-to-br from-cyan-50/80 to-sky-100/60',
     iconBg: 'bg-cyan-100/80',
