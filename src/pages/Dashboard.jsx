@@ -891,8 +891,10 @@ export default function Dashboard() {
                 animate={{ opacity: 1, y: 0 }}
                 className="bg-gradient-to-r from-slate-800 to-slate-900 rounded-2xl shadow-xl p-6 text-white"
               >
-                <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-                  <Target className="w-5 h-5 text-pink-400" />
+                <h3 className="text-base font-medium mb-4 flex items-center gap-2">
+                  <motion.div animate={{ rotate: [0, 360] }} transition={{ duration: 8, repeat: Infinity, ease: "linear" }}>
+                    <Target className="w-5 h-5 text-pink-400" />
+                  </motion.div>
                   Proyección del Mes
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -903,14 +905,14 @@ export default function Dashboard() {
                         {projections.salesOnTrack ? '✓ En ruta' : '⚠ Atención'}
                       </span>
                     </div>
-                    <p className="text-2xl font-bold">{formatCurrency(projections.projectedSales)}</p>
+                    <p className="text-2xl font-semibold">{formatCurrency(projections.projectedSales)}</p>
                     <p className="text-xs text-white/50 mt-1">
                       Faltan {formatCurrency(projections.salesGap)} para la meta
                     </p>
                   </div>
                   <div className="bg-white/5 rounded-xl p-4">
                     <p className="text-white/70 text-sm mb-2">Venta Diaria Requerida</p>
-                    <p className="text-2xl font-bold text-amber-400">{formatCurrency(projections.requiredDailySales)}</p>
+                    <p className="text-2xl font-semibold text-amber-400">{formatCurrency(projections.requiredDailySales)}</p>
                     <p className="text-xs text-white/50 mt-1">
                       Para alcanzar el 100% en {projections.daysRemaining} días
                     </p>
@@ -922,7 +924,7 @@ export default function Dashboard() {
                         {projections.ticketOnTrack ? '✓ OK' : 'Mejorar'}
                       </span>
                     </div>
-                    <p className="text-2xl font-bold">{formatCurrency(projections.avgTicket)}</p>
+                    <p className="text-2xl font-semibold">{formatCurrency(projections.avgTicket)}</p>
                     <p className="text-xs text-white/50 mt-1">
                       Meta: {formatCurrency(projections.budgetTicket)}
                     </p>
@@ -937,29 +939,31 @@ export default function Dashboard() {
               animate={{ opacity: 1, y: 0 }}
               className="bg-gradient-to-r from-pink-500 to-rose-500 rounded-2xl shadow-xl p-6 text-white"
             >
-              <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-                <BarChart3 className="w-5 h-5" />
+              <h3 className="text-base font-medium mb-4 flex items-center gap-2">
+                <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 2, repeat: Infinity }}>
+                  <BarChart3 className="w-5 h-5" />
+                </motion.div>
                 Resumen del Período
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <motion.div whileHover={{ scale: 1.05, y: -3 }} className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
                   <p className="text-white/70 text-sm">Venta Total</p>
-                  <p className="text-2xl font-bold">{formatCurrency(totals.sales)}</p>
+                  <p className="text-2xl font-semibold">{formatCurrency(totals.sales)}</p>
                   <p className="text-xs text-white/50 mt-1">{filteredSales.length} días</p>
                 </motion.div>
                 <motion.div whileHover={{ scale: 1.05, y: -3 }} className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
                   <p className="text-white/70 text-sm">Ticket Promedio</p>
-                  <p className="text-2xl font-bold">{formatCurrency(totals.transactions > 0 ? totals.sales / totals.transactions : 0)}</p>
+                  <p className="text-2xl font-semibold">{formatCurrency(totals.transactions > 0 ? totals.sales / totals.transactions : 0)}</p>
                   <p className="text-xs text-white/50 mt-1">Venta ÷ Transacciones</p>
                 </motion.div>
                 <motion.div whileHover={{ scale: 1.05, y: -3 }} className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
                   <p className="text-white/70 text-sm">Total Transacciones</p>
-                  <p className="text-2xl font-bold">{totals.transactions.toLocaleString()}</p>
+                  <p className="text-2xl font-semibold">{totals.transactions.toLocaleString()}</p>
                   <p className="text-xs text-white/50 mt-1">Ventas realizadas</p>
                 </motion.div>
                 <motion.div whileHover={{ scale: 1.05, y: -3 }} className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
                   <p className="text-white/70 text-sm">Sugeridos Vendidos</p>
-                  <p className="text-2xl font-bold">{totals.suggested.toLocaleString()}</p>
+                  <p className="text-2xl font-semibold">{totals.suggested.toLocaleString()}</p>
                   <p className="text-xs text-white/50 mt-1">{totals.transactions > 0 ? ((totals.suggested / totals.transactions) * 100).toFixed(0) : 0}% de conversión</p>
                 </motion.div>
               </div>
