@@ -132,37 +132,60 @@ export default function Reports() {
       const compliance = reportData.compliance.toFixed(1);
       const formatCurrency = (val) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(val || 0);
       
-      // Generar análisis con LLM
-      const analysisPrompt = `Genera un análisis ejecutivo breve (máximo 200 palabras) para un reporte gerencial de una tienda Popsy (helados) con estos datos:
+      // Generar análisis con LLM - Más completo con plan de acción
+      const analysisPrompt = `Genera un análisis ejecutivo DETALLADO y PROFESIONAL (máximo 400 palabras) para un reporte gerencial de una tienda Popsy (helados) con estos datos:
       
+      DATOS DE LA TIENDA:
       - Tienda: ${selectedStore} - ${storeName}
       - Período: ${format(dateRange.from, 'dd/MM/yyyy')} - ${format(dateRange.to, 'dd/MM/yyyy')}
-      - Ventas totales: ${formatCurrency(reportData.totals.sales)}
-      - Presupuesto: ${formatCurrency(reportData.budget.sales_budget)}
-      - Cumplimiento: ${compliance}%
-      - Tickets: ${reportData.totals.tickets}
-      - Ticket promedio: ${formatCurrency(reportData.avgTicket)}
-      - Sugeridos vendidos: ${reportData.totals.suggested}
-      - Días trabajados: ${reportData.daysWorked}
-      - Proyección de cierre: ${formatCurrency(reportData.projection)}
-      - Top vendedor: ${reportData.topSellers[0]?.cashier?.name || 'N/A'}
       
-      Incluye: resumen ejecutivo, puntos destacados, áreas de mejora, y recomendaciones concretas. Tono profesional pero cercano.`;
+      MÉTRICAS DE VENTA:
+      - Ventas totales: ${formatCurrency(reportData.totals.sales)}
+      - Presupuesto mensual: ${formatCurrency(reportData.budget.sales_budget)}
+      - Cumplimiento actual: ${compliance}%
+      - Proyección de cierre: ${formatCurrency(reportData.projection)}
+      - Días trabajados: ${reportData.daysWorked}
+      - Venta promedio diaria: ${formatCurrency(reportData.avgDaily)}
+      
+      INDICADORES CLAVE:
+      - Total tickets: ${reportData.totals.tickets}
+      - Ticket promedio: ${formatCurrency(reportData.avgTicket)}
+      - Total transacciones: ${reportData.totals.transactions}
+      - Sugeridos vendidos: ${reportData.totals.suggested}
+      - Tasa sugeridos: ${reportData.totals.tickets > 0 ? ((reportData.totals.suggested / reportData.totals.tickets) * 100).toFixed(1) : 0}%
+      
+      EQUIPO:
+      - Top vendedor: ${reportData.topSellers[0]?.cashier?.name || 'N/A'} (${formatCurrency(reportData.topSellers[0]?.sales || 0)})
+      - Segundo lugar: ${reportData.topSellers[1]?.cashier?.name || 'N/A'} (${formatCurrency(reportData.topSellers[1]?.sales || 0)})
+      - Tercer lugar: ${reportData.topSellers[2]?.cashier?.name || 'N/A'} (${formatCurrency(reportData.topSellers[2]?.sales || 0)})
+      - Top en sugeridos: ${reportData.topSuggested[0]?.cashier?.name || 'N/A'} (${reportData.topSuggested[0]?.suggested || 0} sugeridos)
+      
+      INCLUIR EN EL ANÁLISIS:
+      1. Resumen ejecutivo con diagnóstico claro del estado actual
+      2. Puntos destacados y logros del período
+      3. Áreas de mejora identificadas con datos específicos
+      4. PLAN DE ACCIÓN con 5-7 acciones concretas, medibles y con responsable
+      5. Recomendaciones para el próximo período
+      6. Metas sugeridas para el siguiente mes
+      
+      Tono profesional pero cercano. Usar datos específicos.`;
 
       let analysis = "";
       try {
         const result = await base44.integrations.Core.InvokeLLM({
-          prompt: analysisPrompt,
-          response_json_schema: {
-            type: "object",
-            properties: {
-              resumen: { type: "string" },
-              puntos_destacados: { type: "array", items: { type: "string" } },
-              areas_mejora: { type: "array", items: { type: "string" } },
-              recomendaciones: { type: "array", items: { type: "string" } }
-            }
-          }
-        });
+                prompt: analysisPrompt,
+                response_json_schema: {
+                  type: "object",
+                  properties: {
+                    resumen: { type: "string", description: "Resumen ejecutivo de 2-3 párrafos" },
+                    puntos_destacados: { type: "array", items: { type: "string" }, description: "3-5 puntos positivos" },
+                    areas_mejora: { type: "array", items: { type: "string" }, description: "3-5 áreas a mejorar" },
+                    plan_accion: { type: "array", items: { type: "string" }, description: "5-7 acciones concretas con responsable" },
+                    recomendaciones: { type: "array", items: { type: "string" }, description: "4-6 recomendaciones" },
+                    metas_siguiente_mes: { type: "array", items: { type: "string" }, description: "3-4 metas específicas" }
+                  }
+                }
+              });
         analysis = result;
       } catch (e) {
         analysis = null;
@@ -335,27 +358,56 @@ ${(analysis.recomendaciones || []).map(p => `   • ${p}`).join('\n') || '   •
 
   ${analysis ? `
   <div class="section">
-    <div class="section-title">📝 ANÁLISIS Y RECOMENDACIONES</div>
+    <div class="section-title">📝 ANÁLISIS EJECUTIVO</div>
     <div class="info-box">
       <strong>Resumen</strong>
-      <p>${analysis.resumen || 'Sin análisis disponible'}</p>
+      <p style="white-space: pre-line;">${analysis.resumen || 'Sin análisis disponible'}</p>
     </div>
     ${(analysis.puntos_destacados || []).length > 0 ? `
-    <div class="info-box">
-      <strong>✨ Puntos Destacados</strong>
-      ${(analysis.puntos_destacados || []).map(p => `<div class="analysis-point">${p}</div>`).join('')}
+    <div class="info-box" style="background: #ecfdf5; border-left: 4px solid #10b981;">
+      <strong style="color: #059669;">✨ Puntos Destacados</strong>
+      ${(analysis.puntos_destacados || []).map(p => `<div class="analysis-point" style="background: #d1fae5; border-color: #10b981;">${p}</div>`).join('')}
     </div>
     ` : ''}
     ${(analysis.areas_mejora || []).length > 0 ? `
-    <div class="info-box">
-      <strong>⚠️ Áreas de Mejora</strong>
-      ${(analysis.areas_mejora || []).map(p => `<div class="analysis-point">${p}</div>`).join('')}
+    <div class="info-box" style="background: #fef3c7; border-left: 4px solid #f59e0b;">
+      <strong style="color: #d97706;">⚠️ Áreas de Mejora</strong>
+      ${(analysis.areas_mejora || []).map(p => `<div class="analysis-point" style="background: #fde68a; border-color: #f59e0b;">${p}</div>`).join('')}
     </div>
     ` : ''}
+  </div>
+
+  <div class="section" style="page-break-before: always;">
+    <div class="section-title">🎯 PLAN DE ACCIÓN</div>
+    ${(analysis.plan_accion || []).length > 0 ? `
+    <div class="info-box" style="background: #eff6ff; border-left: 4px solid #3b82f6;">
+      <strong style="color: #2563eb;">📋 Acciones Concretas</strong>
+      <table style="width: 100%; margin-top: 10px; border-collapse: collapse;">
+        <tr style="background: #dbeafe;">
+          <th style="padding: 8px; text-align: left; border: 1px solid #93c5fd;">#</th>
+          <th style="padding: 8px; text-align: left; border: 1px solid #93c5fd;">Acción</th>
+        </tr>
+        ${(analysis.plan_accion || []).map((p, i) => `
+        <tr>
+          <td style="padding: 8px; border: 1px solid #93c5fd; font-weight: bold; color: #2563eb;">${i + 1}</td>
+          <td style="padding: 8px; border: 1px solid #93c5fd;">${p}</td>
+        </tr>
+        `).join('')}
+      </table>
+    </div>
+    ` : ''}
+    
     ${(analysis.recomendaciones || []).length > 0 ? `
-    <div class="info-box">
-      <strong>💡 Recomendaciones</strong>
-      ${(analysis.recomendaciones || []).map(p => `<div class="analysis-point">${p}</div>`).join('')}
+    <div class="info-box" style="background: #fdf4ff; border-left: 4px solid #a855f7;">
+      <strong style="color: #9333ea;">💡 Recomendaciones Estratégicas</strong>
+      ${(analysis.recomendaciones || []).map(p => `<div class="analysis-point" style="background: #f3e8ff; border-color: #a855f7;">${p}</div>`).join('')}
+    </div>
+    ` : ''}
+
+    ${(analysis.metas_siguiente_mes || []).length > 0 ? `
+    <div class="info-box" style="background: #fdf2f8; border-left: 4px solid #ec4899;">
+      <strong style="color: #db2777;">🎯 Metas para el Próximo Período</strong>
+      ${(analysis.metas_siguiente_mes || []).map(p => `<div class="analysis-point" style="background: #fce7f3; border-color: #ec4899;">${p}</div>`).join('')}
     </div>
     ` : ''}
   </div>
