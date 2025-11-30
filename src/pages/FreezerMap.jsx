@@ -642,80 +642,71 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                           <Copy className="w-3 h-3" />
                         </button>
 
-                        {/* Bajadas - cada una con F y T */}
-                        <div className="grid grid-cols-6 gap-2 p-2 rounded-xl bg-gray-100/50">
+                        {/* Bajadas - cada una con F y T en columna vertical */}
+                        <div className="grid grid-cols-6 gap-3 p-2 rounded-xl bg-gray-100/50">
                           {row.map((bajada, bajadaIndex) => (
                             <div 
                               key={`${rowIndex}-${bajadaIndex}`} 
-                              className="relative"
-                              style={{ perspective: '200px' }}
+                              className="flex flex-col gap-1"
                             >
-                              {/* Contenedor 3D de la bajada */}
-                              <div className="relative">
-                                {/* Slot Trasero (T) - atrás con sombra */}
-                                <div 
-                                  className="absolute inset-x-0 -top-1 transform translate-z-0 opacity-80"
-                                  style={{ transform: 'translateY(-4px) scale(0.95)' }}
-                                >
-                                  <div
-                                    onClick={() => {
-                                      setSelectedSlot({ ...bajada.back, row: bajada.row, position: bajada.position, slot_type: 'T' });
-                                      setShowFlavorSelector(true);
-                                    }}
-                                    onDoubleClick={() => clearSlot(bajada.back)}
-                                    className={`h-10 sm:h-12 rounded-lg cursor-pointer transition-all border-2 ${
-                                      bajada.back.is_empty 
-                                        ? 'bg-gray-200/60 border-dashed border-gray-300' 
-                                        : 'border-purple-300 shadow-sm'
-                                    }`}
-                                    style={!bajada.back.is_empty ? { 
-                                      background: `linear-gradient(135deg, ${bajada.back.color}dd, ${bajada.back.color}99)` 
-                                    } : {}}
-                                  >
-                                    <div className="absolute top-0.5 left-0.5 bg-purple-500 text-white text-[7px] px-1 rounded font-bold">T</div>
-                                    {!bajada.back.is_empty && (
-                                      <div className="h-full flex items-center justify-center">
-                                        <span className="text-[8px] font-medium text-white drop-shadow-sm text-center leading-tight px-0.5 line-clamp-2">
-                                          {bajada.back.flavor_name}
-                                        </span>
-                                      </div>
-                                    )}
+                              {/* Slot Trasero (T) - arriba */}
+                              <div
+                                onClick={() => {
+                                  setSelectedSlot({ ...bajada.back, row: bajada.row, position: bajada.position, slot_type: 'T' });
+                                  setShowFlavorSelector(true);
+                                }}
+                                onDoubleClick={() => clearSlot(bajada.back)}
+                                className={`h-10 sm:h-11 rounded-lg cursor-pointer transition-all border-2 relative ${
+                                  bajada.back.is_empty 
+                                    ? 'bg-purple-50/50 border-dashed border-purple-200 hover:border-purple-400' 
+                                    : 'border-purple-300 shadow-sm hover:scale-105'
+                                }`}
+                                style={!bajada.back.is_empty ? { 
+                                  background: `linear-gradient(135deg, ${bajada.back.color}cc, ${bajada.back.color}88)` 
+                                } : {}}
+                              >
+                                <div className="absolute top-0.5 left-0.5 bg-purple-500 text-white text-[6px] px-1 rounded font-bold z-10">T</div>
+                                {bajada.back.is_empty ? (
+                                  <div className="h-full flex items-center justify-center">
+                                    <Plus className="w-3 h-3 text-purple-300" />
                                   </div>
-                                </div>
-                                
-                                {/* Slot Frontal (F) - adelante */}
-                                <div 
-                                  className="relative z-10 mt-2"
-                                >
-                                  <div
-                                    onClick={() => {
-                                      setSelectedSlot({ ...bajada.front, row: bajada.row, position: bajada.position, slot_type: 'F' });
-                                      setShowFlavorSelector(true);
-                                    }}
-                                    onDoubleClick={() => clearSlot(bajada.front)}
-                                    className={`h-12 sm:h-14 rounded-lg cursor-pointer transition-all border-2 shadow-md ${
-                                      bajada.front.is_empty 
-                                        ? 'bg-white border-dashed border-gray-300 hover:border-pink-400' 
-                                        : 'border-pink-300 hover:scale-105'
-                                    }`}
-                                    style={!bajada.front.is_empty ? { 
-                                      background: `linear-gradient(135deg, ${bajada.front.color}ee, ${bajada.front.color}aa)` 
-                                    } : {}}
-                                  >
-                                    <div className="absolute top-0.5 left-0.5 bg-pink-500 text-white text-[7px] px-1 rounded font-bold">F</div>
-                                    {bajada.front.is_empty ? (
-                                      <div className="h-full flex items-center justify-center">
-                                        <Plus className="w-4 h-4 text-gray-400" />
-                                      </div>
-                                    ) : (
-                                      <div className="h-full flex items-center justify-center pt-2">
-                                        <span className="text-[9px] font-bold text-white drop-shadow-md text-center leading-tight px-0.5 line-clamp-2">
-                                          {bajada.front.flavor_name}
-                                        </span>
-                                      </div>
-                                    )}
+                                ) : (
+                                  <div className="h-full flex items-center justify-center pt-1.5">
+                                    <span className="text-[7px] sm:text-[8px] font-medium text-white drop-shadow-sm text-center leading-tight px-0.5 line-clamp-2">
+                                      {bajada.back.flavor_name}
+                                    </span>
                                   </div>
-                                </div>
+                                )}
+                              </div>
+                              
+                              {/* Slot Frontal (F) - abajo */}
+                              <div
+                                onClick={() => {
+                                  setSelectedSlot({ ...bajada.front, row: bajada.row, position: bajada.position, slot_type: 'F' });
+                                  setShowFlavorSelector(true);
+                                }}
+                                onDoubleClick={() => clearSlot(bajada.front)}
+                                className={`h-11 sm:h-12 rounded-lg cursor-pointer transition-all border-2 shadow-md relative ${
+                                  bajada.front.is_empty 
+                                    ? 'bg-white border-dashed border-pink-200 hover:border-pink-400' 
+                                    : 'border-pink-300 hover:scale-105'
+                                }`}
+                                style={!bajada.front.is_empty ? { 
+                                  background: `linear-gradient(135deg, ${bajada.front.color}ee, ${bajada.front.color}aa)` 
+                                } : {}}
+                              >
+                                <div className="absolute top-0.5 left-0.5 bg-pink-500 text-white text-[6px] px-1 rounded font-bold z-10">F</div>
+                                {bajada.front.is_empty ? (
+                                  <div className="h-full flex items-center justify-center">
+                                    <Plus className="w-4 h-4 text-pink-300" />
+                                  </div>
+                                ) : (
+                                  <div className="h-full flex items-center justify-center pt-1.5">
+                                    <span className="text-[8px] sm:text-[9px] font-bold text-white drop-shadow-md text-center leading-tight px-0.5 line-clamp-2">
+                                      {bajada.front.flavor_name}
+                                    </span>
+                                  </div>
+                                )}
                               </div>
                             </div>
                           ))}

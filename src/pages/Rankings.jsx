@@ -139,7 +139,6 @@ export default function Rankings() {
         {/* Date Filter */}
         {selectedStore && (
           <div className="mb-6 flex flex-wrap items-center gap-3">
-            <WeekFilter onWeekChange={(w) => setDateRange({ from: w.from, to: w.to })} />
             <DateFilter dateRange={dateRange} onDateChange={setDateRange} />
           </div>
         )}
