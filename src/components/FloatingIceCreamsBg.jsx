@@ -43,23 +43,21 @@ const Milkshake = ({ color }) => (
 );
 
 const elements = [
-  { x: '3%', y: '8%', size: 55, type: 'cone', color1: '#FFB5C5', color2: '#FFC0CB', delay: 0 },
-  { x: '12%', y: '55%', size: 50, type: 'shake', color: '#B5E8FF', delay: 1.2 },
-  { x: '22%', y: '20%', size: 45, type: 'cone', color1: '#C5B5FF', color2: '#D8CFFF', delay: 0.6 },
-  { x: '32%', y: '70%', size: 48, type: 'shake', color: '#FFD5B5', delay: 1.8 },
-  { x: '48%', y: '12%', size: 52, type: 'cone', color1: '#B5FFD5', color2: '#C8FFE0', delay: 0.9 },
-  { x: '58%', y: '45%', size: 46, type: 'shake', color: '#FFB5E8', delay: 2.1 },
-  { x: '68%', y: '75%', size: 50, type: 'cone', color1: '#FFE5B5', color2: '#FFF0D5', delay: 1.5 },
-  { x: '78%', y: '25%', size: 54, type: 'shake', color: '#B5D5FF', delay: 0.3 },
-  { x: '88%', y: '60%', size: 48, type: 'cone', color1: '#E8B5FF', color2: '#F0CFFF', delay: 2.4 },
-  { x: '93%', y: '8%', size: 44, type: 'shake', color: '#FFB5B5', delay: 0.7 },
-  { x: '42%', y: '82%', size: 52, type: 'cone', color1: '#B5FFE8', color2: '#C8FFF0', delay: 1.1 },
-  { x: '72%', y: '5%', size: 46, type: 'shake', color: '#D5FFB5', delay: 2.0 },
+  { x: '3%', y: '8%', size: 35, type: 'cone', color1: '#FFB5C5', color2: '#FFC0CB', delay: 0 },
+  { x: '12%', y: '55%', size: 32, type: 'shake', color: '#B5E8FF', delay: 1.2 },
+  { x: '22%', y: '20%', size: 28, type: 'cone', color1: '#C5B5FF', color2: '#D8CFFF', delay: 0.6 },
+  { x: '32%', y: '70%', size: 30, type: 'shake', color: '#FFD5B5', delay: 1.8 },
+  { x: '48%', y: '12%', size: 32, type: 'cone', color1: '#B5FFD5', color2: '#C8FFE0', delay: 0.9 },
+  { x: '58%', y: '45%', size: 28, type: 'shake', color: '#FFB5E8', delay: 2.1 },
+  { x: '68%', y: '75%', size: 30, type: 'cone', color1: '#FFE5B5', color2: '#FFF0D5', delay: 1.5 },
+  { x: '78%', y: '25%', size: 34, type: 'shake', color: '#B5D5FF', delay: 0.3 },
+  { x: '88%', y: '60%', size: 28, type: 'cone', color1: '#E8B5FF', color2: '#F0CFFF', delay: 2.4 },
+  { x: '93%', y: '8%', size: 26, type: 'shake', color: '#FFB5B5', delay: 0.7 },
 ];
 
 export default function FloatingIceCreamsBg() {
   return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden">
+    <div className="fixed inset-0 pointer-events-none overflow-hidden opacity-30">
       {elements.map((el, i) => (
         <motion.div
           key={i}
@@ -72,16 +70,16 @@ export default function FloatingIceCreamsBg() {
           }}
           initial={{ opacity: 0, y: 30, scale: 0.8 }}
           animate={{ 
-            opacity: 1,
-            y: [0, -12, 0],
-            rotate: [0, 4, -4, 0],
-            scale: [1, 1.02, 1]
+            opacity: 0.6,
+            y: [0, -8, 0],
+            rotate: [0, 2, -2, 0],
+            scale: [1, 1.01, 1]
           }}
           transition={{ 
-            opacity: { duration: 0.8, delay: el.delay * 0.2 },
-            y: { duration: 5 + i * 0.3, repeat: Infinity, ease: "easeInOut" },
-            rotate: { duration: 7 + i * 0.2, repeat: Infinity, ease: "easeInOut" },
-            scale: { duration: 4 + i * 0.4, repeat: Infinity, ease: "easeInOut" }
+            opacity: { duration: 1.2, delay: el.delay * 0.3 },
+            y: { duration: 8 + i * 0.5, repeat: Infinity, ease: "easeInOut" },
+            rotate: { duration: 10 + i * 0.3, repeat: Infinity, ease: "easeInOut" },
+            scale: { duration: 6 + i * 0.5, repeat: Infinity, ease: "easeInOut" }
           }}
         >
           {el.type === 'cone' ? (
