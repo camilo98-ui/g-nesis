@@ -42,78 +42,54 @@ export default function ExportExcel({
       .sort((a, b) => b.sales - a.sales);
   }, [cashierData]);
 
+  // Escapar valores para CSV estándar
+  const escapeCSV = (value) => {
+    if (value === null || value === undefined) return '""';
+    const str = String(value).replace(/"/g, '""').replace(/\r?\n/g, ' ');
+    return `"${str}"`;
+  };
+
   const convertToCSV = (data, type) => {
-    if (!data.length && type !== 'store') return '';
-    
-    let headers, rows;
-    const formatCurr = (v) => `$${Math.round(v).toLocaleString()}`;
+    if (!data.length) return '';
     
     if (type === 'store') {
-      // Reporte enriquecido de tienda
-      headers = ['REPORTE DE TIENDA - ' + storeName, '', '', '', ''];
-      const summaryRows = [
-        [''],
-        ['=== RESUMEN EJECUTIVO ===', '', '', '', ''],
-        ['Período', dateRange?.from ? `${format(dateRange.from, 'dd/MM/yyyy')} - ${format(dateRange.to, 'dd/MM/yyyy')}` : 'N/A', '', '', ''],
-        ['Ventas Totales', formatCurr(storeStats.totalSales), '', '', ''],
-        ['Total Transacciones', storeStats.totalTrans, '', '', ''],
-        ['Ticket Promedio', formatCurr(storeStats.avgTicket), '', '', ''],
-        ['Venta Diaria Promedio', formatCurr(storeStats.avgDailySales), '', '', ''],
-        ['Total Sugeridos', storeStats.totalSuggested, '', '', ''],
-        ['Días Trabajados', storeData.length, '', '', ''],
-        [''],
-        ['Mejor Día', storeStats.bestDay?.date || 'N/A', formatCurr(storeStats.bestDay?.total_sales || 0), '', ''],
-        ['Día Más Bajo', storeStats.worstDay?.date || 'N/A', formatCurr(storeStats.worstDay?.total_sales || 0), '', ''],
-        [''],
-        ['=== DETALLE DIARIO ===', '', '', '', ''],
-        ['Fecha', 'Ventas', 'Tickets', 'Transacciones', 'Sugeridos']
-      ];
-      rows = [
-        ...summaryRows,
-        ...storeData.map(d => [
-          d.date,
-          formatCurr(d.total_sales || 0),
+      // CSV limpio de tienda - una fila por registro
+      const headers = ['Fecha', 'Tienda', 'Ventas', 'Tickets', 'Transacciones', 'Sugeridos', 'Ticket Promedio'];
+      const rows = storeData.map(d => {
+        const avgTicket = (d.total_transactions || 0) > 0 ? Math.round((d.total_sales || 0) / d.total_transactions) : 0;
+        return [
+          d.date || '',
+          storeName || '',
+          d.total_sales || 0,
           d.total_tickets || 0,
           d.total_transactions || 0,
-          d.total_suggested || 0
-        ])
-      ];
-      return rows.map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+          d.total_suggested || 0,
+          avgTicket
+        ];
+      });
+      return [headers, ...rows].map(row => row.map(escapeCSV).join(',')).join('\r\n');
     } else {
-      // Reporte enriquecido de cajeros
-      const summaryRows = [
-        ['REPORTE DE CAJEROS - ' + storeName, '', '', '', '', '', ''],
-        [''],
-        ['=== RANKING DE CAJEROS ===', '', '', '', '', '', ''],
-        ['Posición', 'Cajero', 'Ventas Totales', 'Turnos', 'Ticket Prom.', 'Sugeridos', ''],
-        ...cashierStats.map((c, i) => [
-          i + 1,
-          c.name,
-          formatCurr(c.sales),
-          c.shifts,
-          formatCurr(c.avgTicket),
-          c.suggested,
-          ''
-        ]),
-        [''],
-        ['=== TOP 3 DESTACADOS ===', '', '', '', '', '', ''],
-        ['🥇 Mejor Vendedor', cashierStats[0]?.name || 'N/A', formatCurr(cashierStats[0]?.sales || 0), '', '', '', ''],
-        ['🥈 Segundo Lugar', cashierStats[1]?.name || 'N/A', formatCurr(cashierStats[1]?.sales || 0), '', '', '', ''],
-        ['🥉 Tercer Lugar', cashierStats[2]?.name || 'N/A', formatCurr(cashierStats[2]?.sales || 0), '', '', '', ''],
-        [''],
-        ['=== DETALLE DE TURNOS ===', '', '', '', '', '', ''],
-        ['Cajero', 'Fecha', 'Turno', 'Ventas', 'Tickets', 'Transacciones', 'Sugeridos'],
-        ...cashierData.map(d => [
-          d.cashierName || 'N/A',
-          d.date,
-          d.shift === 'morning' ? 'Mañana' : d.shift === 'afternoon' ? 'Tarde' : 'Noche',
-          formatCurr(d.sales || 0),
+      // CSV limpio de cajeros - una fila por turno
+      const headers = ['Fecha', 'Hora', 'Cajero', 'Tienda', 'Turno', 'Ventas', 'Tickets', 'Transacciones', 'Sugeridos', 'Ticket Promedio'];
+      const shiftHours = { morning: '08:00', afternoon: '14:00', night: '19:00' };
+      const shiftNames = { morning: 'Manana', afternoon: 'Tarde', night: 'Noche' };
+      
+      const rows = cashierData.map(d => {
+        const avgTicket = (d.tickets || 0) > 0 ? Math.round((d.sales || 0) / d.tickets) : 0;
+        return [
+          d.date || '',
+          shiftHours[d.shift] || '',
+          d.cashierName || '',
+          storeName || '',
+          shiftNames[d.shift] || '',
+          d.sales || 0,
           d.tickets || 0,
           d.transactions || 0,
-          d.suggested_sales || 0
-        ])
-      ];
-      return summaryRows.map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+          d.suggested_sales || 0,
+          avgTicket
+        ];
+      });
+      return [headers, ...rows].map(row => row.map(escapeCSV).join(',')).join('\r\n');
     }
   };
 
