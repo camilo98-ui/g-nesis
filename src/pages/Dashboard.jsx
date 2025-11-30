@@ -150,7 +150,7 @@ function DetailPanel({ metric, data, onClose, chartData, formatCurrency, shiftDa
             {/* Gráfica principal combinada */}
             <div>
               <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                📈 Ventas vs Tickets (Comparativo)
+                📈 Ventas vs Ticket Promedio
               </h4>
               <div className="h-72 bg-white rounded-xl p-4 shadow-inner">
                 <ResponsiveContainer width="100%" height="100%">
@@ -164,14 +164,15 @@ function DetailPanel({ metric, data, onClose, chartData, formatCurrency, shiftDa
                     <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                     <XAxis dataKey="date" tick={{ fill: '#6b7280', fontSize: 11 }} />
                     <YAxis yAxisId="left" tick={{ fill: '#6b7280', fontSize: 11 }} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} />
-                    <YAxis yAxisId="right" orientation="right" tick={{ fill: '#6b7280', fontSize: 11 }} />
+                    <YAxis yAxisId="right" orientation="right" tick={{ fill: '#6b7280', fontSize: 11 }} tickFormatter={(v) => `$${(v/1000).toFixed(0)}K`} />
                     <Tooltip 
                       contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
-                      formatter={(v, name) => [name === 'ventas' ? formatCurrency(v) : v, name === 'ventas' ? 'Ventas' : 'Tickets']}
+                      labelFormatter={(label, payload) => payload?.[0]?.payload?.fullDate || label}
+                      formatter={(v, name) => [name === 'Ventas' ? formatCurrency(v) : formatCurrency(v), name]}
                     />
                     <Legend />
                     <Area yAxisId="left" type="monotone" dataKey="ventas" stroke="#10b981" strokeWidth={3} fill="url(#colorSales)" name="Ventas" />
-                    <Line yAxisId="right" type="monotone" dataKey="tickets" stroke="#3b82f6" strokeWidth={2} dot={{ fill: '#3b82f6', r: 4 }} name="Tickets" />
+                    <Line yAxisId="right" type="monotone" dataKey="ticketPromedio" stroke="#f59e0b" strokeWidth={2} dot={{ fill: '#f59e0b', r: 4 }} name="Ticket Prom." />
                   </ComposedChart>
                 </ResponsiveContainer>
               </div>
@@ -241,25 +242,26 @@ function DetailPanel({ metric, data, onClose, chartData, formatCurrency, shiftDa
         return (
           <div className="space-y-6">
             <div>
-              <h4 className="font-semibold text-gray-700 mb-3">🎫 Tickets y Ticket Promedio</h4>
+              <h4 className="font-semibold text-gray-700 mb-3">🎫 Tendencia Ticket Promedio por Día</h4>
               <div className="h-72 bg-white rounded-xl p-4 shadow-inner">
                 <ResponsiveContainer width="100%" height="100%">
-                  <ComposedChart data={chartData}>
+                  <AreaChart data={chartData}>
                     <defs>
-                      <linearGradient id="colorTickets" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4}/>
-                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.05}/>
+                      <linearGradient id="colorTicketAvg" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.4}/>
+                        <stop offset="95%" stopColor="#f59e0b" stopOpacity={0.05}/>
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                     <XAxis dataKey="date" tick={{ fill: '#6b7280', fontSize: 11 }} />
-                    <YAxis yAxisId="left" tick={{ fill: '#6b7280', fontSize: 11 }} />
-                    <YAxis yAxisId="right" orientation="right" tick={{ fill: '#6b7280', fontSize: 11 }} tickFormatter={(v) => `$${(v/1000).toFixed(0)}K`} />
-                    <Tooltip contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }} />
-                    <Legend />
-                    <Bar yAxisId="left" dataKey="tickets" fill="url(#colorTickets)" radius={[6, 6, 0, 0]} name="Tickets" />
-                    <Line yAxisId="right" type="monotone" dataKey="avgTicket" stroke="#f59e0b" strokeWidth={3} dot={{ fill: '#f59e0b', r: 4 }} name="Ticket Prom." />
-                  </ComposedChart>
+                    <YAxis tick={{ fill: '#6b7280', fontSize: 11 }} tickFormatter={(v) => `$${(v/1000).toFixed(0)}K`} />
+                    <Tooltip 
+                      contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
+                      labelFormatter={(label, payload) => payload?.[0]?.payload?.fullDate || label}
+                      formatter={(v) => [formatCurrency(v), 'Ticket Promedio']}
+                    />
+                    <Area type="monotone" dataKey="ticketPromedio" stroke="#f59e0b" strokeWidth={3} fill="url(#colorTicketAvg)" name="Ticket Promedio" />
+                  </AreaChart>
                 </ResponsiveContainer>
               </div>
             </div>
