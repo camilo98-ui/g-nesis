@@ -486,12 +486,14 @@ export default function Dashboard() {
       const dayStr = format(day, 'yyyy-MM-dd');
       const dayData = dailySales.find(s => s.date === dayStr) || {};
       const transactions = dayData.total_transactions || 0;
+      const tickets = dayData.total_tickets || 0;
       const sales = dayData.total_sales || 0;
       return {
         date: format(day, 'dd', { locale: es }),
         fullDate: format(day, 'EEEE dd MMM', { locale: es }),
         dayName: format(day, 'EEEE', { locale: es }),
         ventas: sales,
+        tickets: tickets,
         ticketPromedio: transactions > 0 ? sales / transactions : 0,
         transactions: transactions,
         suggested: dayData.total_suggested || 0
