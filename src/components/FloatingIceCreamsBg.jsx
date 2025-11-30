@@ -103,18 +103,18 @@ const IceCreamCup = ({ opacity = 0.55 }) => (
 );
 
 const sketchElements = [
-  { x: '5%', y: '12%', size: 35, type: 'cone' },
-  { x: '88%', y: '8%', size: 38, type: 'cone' },
-  { x: '15%', y: '65%', size: 32, type: 'cone' },
-  { x: '82%', y: '72%', size: 36, type: 'cone' },
-  { x: '25%', y: '28%', size: 30, type: 'shake' },
-  { x: '72%', y: '38%', size: 28, type: 'shake' },
-  { x: '50%', y: '85%', size: 50, type: 'banana' },
-  { x: '8%', y: '42%', size: 32, type: 'tub' },
-  { x: '92%', y: '50%', size: 30, type: 'tub' },
-  { x: '35%', y: '75%', size: 34, type: 'cup' },
-  { x: '68%', y: '15%', size: 32, type: 'cup' },
-  { x: '18%', y: '88%', size: 45, type: 'banana' },
+  { x: '5%', size: 35, type: 'cone', delay: 0 },
+  { x: '15%', size: 30, type: 'shake', delay: 2 },
+  { x: '25%', size: 32, type: 'tub', delay: 5 },
+  { x: '35%', size: 28, type: 'cup', delay: 1 },
+  { x: '45%', size: 45, type: 'banana', delay: 4 },
+  { x: '55%', size: 34, type: 'cone', delay: 3 },
+  { x: '65%', size: 30, type: 'shake', delay: 6 },
+  { x: '75%', size: 32, type: 'tub', delay: 2.5 },
+  { x: '85%', size: 36, type: 'cup', delay: 4.5 },
+  { x: '95%', size: 38, type: 'cone', delay: 1.5 },
+  { x: '10%', size: 28, type: 'banana', delay: 7 },
+  { x: '50%', size: 32, type: 'tub', delay: 3.5 },
 ];
 
 // Destellos pastel
@@ -153,32 +153,33 @@ export default function FloatingIceCreamsBg() {
         </motion.div>
       ))}
       
-      {/* Elementos sketch */}
+      {/* Elementos sketch - lluvia cayendo */}
       {sketchElements.map((el, i) => (
         <motion.div
           key={`sketch-${i}`}
           className="absolute"
           style={{ 
             left: el.x, 
-            top: el.y,
             width: el.size,
             height: el.size * 1.5
           }}
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: -100 }}
           animate={{ 
-            opacity: 1,
-            y: [0, -6, 0],
+            opacity: [0, 0.6, 0.6, 0],
+            y: [-100, window.innerHeight + 100],
           }}
           transition={{ 
-            opacity: { duration: 1, delay: i * 0.1 },
-            y: { duration: 4 + i * 0.3, repeat: Infinity, ease: "easeInOut" }
+            duration: 12 + i * 0.5,
+            delay: el.delay,
+            repeat: Infinity,
+            ease: "linear"
           }}
         >
-          {el.type === 'cone' && <IceCreamCone opacity={0.5} />}
-          {el.type === 'shake' && <Milkshake opacity={0.45} />}
-          {el.type === 'banana' && <BananaSplit opacity={0.45} />}
-          {el.type === 'tub' && <IceCreamTub opacity={0.45} />}
-          {el.type === 'cup' && <IceCreamCup opacity={0.45} />}
+          {el.type === 'cone' && <IceCreamCone opacity={0.55} />}
+          {el.type === 'shake' && <Milkshake opacity={0.5} />}
+          {el.type === 'banana' && <BananaSplit opacity={0.5} />}
+          {el.type === 'tub' && <IceCreamTub opacity={0.5} />}
+          {el.type === 'cup' && <IceCreamCup opacity={0.5} />}
         </motion.div>
       ))}
     </div>

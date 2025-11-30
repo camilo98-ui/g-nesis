@@ -205,17 +205,8 @@ export default function Home() {
                           <Icon className={`w-5 h-5 sm:w-6 sm:h-6 ${item.iconColor}`} />
                         </motion.div>
                       </motion.div>
-                      <h3 className="font-bold text-gray-600 text-xs sm:text-sm mb-0.5 sm:mb-1 flex items-center gap-0.5">
-                        {item.name.split('').map((letter, i) => (
-                          <motion.span
-                            key={i}
-                            initial={{ opacity: 0.8 }}
-                            whileHover={{ y: -2, opacity: 1 }}
-                            transition={{ delay: i * 0.02 }}
-                          >
-                            {letter}
-                          </motion.span>
-                        ))}
+                      <h3 className="font-bold text-gray-800 text-xs sm:text-sm mb-0.5 sm:mb-1">
+                        {item.name}
                       </h3>
                       <p className="text-[10px] sm:text-xs text-gray-400 hidden sm:block">{item.description}</p>
                     </motion.div>
