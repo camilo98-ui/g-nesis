@@ -1,287 +1,56 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import StoreSelector, { STORES } from '@/components/StoreSelector';
+import FreezerSlotCell from '@/components/freezer/FreezerSlotCell';
+import FreezerAuditPanel from '@/components/freezer/FreezerAuditPanel';
+import FreezerHistoryPanel from '@/components/freezer/FreezerHistoryPanel';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
 import { 
-  ArrowLeft, Sparkles, RotateCcw, ZoomIn, ZoomOut, Save, 
-  Wand2, Moon, Sun, Camera, X, GripVertical, Check
+  ArrowLeft, Sparkles, RotateCcw, ZoomIn, ZoomOut, 
+  Wand2, Trash2, History, BarChart3, Undo2, Copy, Check, X, Plus
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { format } from 'date-fns';
 
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/c3a36de58_Capturadepantalla2025-11-251251441.png";
 
-// Sabores predefinidos Popsy - Línea Gourmet y Exclusivos con marcas reconocidas
+// Sabores predefinidos
 const POPSY_FLAVORS = [
-  // Línea Gourmet
-  { name: 'Chocolate', color: '#5D3A1A', type: 'gourmet', line: 'gourmet', logo: '🍫' },
-  { name: 'Vainilla', color: '#FFF8DC', type: 'gourmet', line: 'gourmet', logo: '🍦' },
-  { name: 'Fresa', color: '#FFB5C5', type: 'gourmet', line: 'gourmet', logo: '🍓' },
-  { name: 'Arequipe', color: '#D4A574', type: 'gourmet', line: 'gourmet', logo: '🥛' },
-  { name: 'Maracuyá', color: '#FFB347', type: 'gourmet', line: 'gourmet', logo: '🥭' },
-  { name: 'Limón', color: '#FFFACD', type: 'gourmet', line: 'gourmet', logo: '🍋' },
-  { name: 'Mora', color: '#4B0082', type: 'gourmet', line: 'gourmet', logo: '🫐' },
-  { name: 'Coco', color: '#FFFFFF', type: 'gourmet', line: 'gourmet', logo: '🥥' },
-  { name: 'Café', color: '#6F4E37', type: 'gourmet', line: 'gourmet', logo: '☕' },
-  { name: 'Dulce de Leche', color: '#C19A6B', type: 'gourmet', line: 'gourmet', logo: '🍯' },
-  // Línea Exclusivos - Marcas reconocidas
-  { name: 'OREO', color: '#1A1A1A', type: 'exclusivo', line: 'exclusivo', logo: '🔵', brand: true },
-  { name: "M&M's", color: '#E31837', type: 'exclusivo', line: 'exclusivo', logo: '🔴', brand: true },
-  { name: 'SNICKERS', color: '#6B3E26', type: 'exclusivo', line: 'exclusivo', logo: '🟤', brand: true },
-  { name: 'MILKY WAY', color: '#4169E1', type: 'exclusivo', line: 'exclusivo', logo: '🌌', brand: true },
-  { name: 'TWIX', color: '#C4A35A', type: 'exclusivo', line: 'exclusivo', logo: '🟡', brand: true },
-  { name: 'KIT KAT', color: '#D42027', type: 'exclusivo', line: 'exclusivo', logo: '🔴', brand: true },
-  { name: 'Nutella', color: '#4A2C2A', type: 'exclusivo', line: 'exclusivo', logo: '🟤', brand: true },
-  { name: 'Brownie', color: '#3D2314', type: 'exclusivo', line: 'exclusivo', logo: '🍫' },
-  { name: 'Cheesecake', color: '#FFF5EE', type: 'exclusivo', line: 'exclusivo', logo: '🍰' },
-  { name: 'Red Velvet', color: '#C41E3A', type: 'exclusivo', line: 'exclusivo', logo: '❤️' },
-  { name: 'Tiramisú', color: '#D2B48C', type: 'exclusivo', line: 'exclusivo', logo: '☕' },
-  { name: 'Cookies & Cream', color: '#2F2F2F', type: 'exclusivo', line: 'exclusivo', logo: '🍪' },
+  { name: 'Chocolate', color: '#5D3A1A', type: 'gourmet', line: 'gourmet' },
+  { name: 'Vainilla', color: '#FFF8DC', type: 'gourmet', line: 'gourmet' },
+  { name: 'Fresa', color: '#FFB5C5', type: 'gourmet', line: 'gourmet' },
+  { name: 'Arequipe', color: '#D4A574', type: 'gourmet', line: 'gourmet' },
+  { name: 'Maracuyá', color: '#FFB347', type: 'gourmet', line: 'gourmet' },
+  { name: 'Limón', color: '#FFFACD', type: 'gourmet', line: 'gourmet' },
+  { name: 'Mora', color: '#4B0082', type: 'gourmet', line: 'gourmet' },
+  { name: 'Coco', color: '#FFFFFF', type: 'gourmet', line: 'gourmet' },
+  { name: 'Café', color: '#6F4E37', type: 'gourmet', line: 'gourmet' },
+  { name: 'Dulce de Leche', color: '#C19A6B', type: 'gourmet', line: 'gourmet' },
+  { name: 'OREO', color: '#1A1A1A', type: 'exclusivo', line: 'exclusivo', brand: true },
+  { name: "M&M's", color: '#E31837', type: 'exclusivo', line: 'exclusivo', brand: true },
+  { name: 'SNICKERS', color: '#6B3E26', type: 'exclusivo', line: 'exclusivo', brand: true },
+  { name: 'MILKY WAY', color: '#4169E1', type: 'exclusivo', line: 'exclusivo', brand: true },
+  { name: 'TWIX', color: '#C4A35A', type: 'exclusivo', line: 'exclusivo', brand: true },
+  { name: 'KIT KAT', color: '#D42027', type: 'exclusivo', line: 'exclusivo', brand: true },
+  { name: 'Nutella', color: '#4A2C2A', type: 'exclusivo', line: 'exclusivo', brand: true },
+  { name: 'Brownie', color: '#3D2314', type: 'exclusivo', line: 'exclusivo' },
+  { name: 'Cheesecake', color: '#FFF5EE', type: 'exclusivo', line: 'exclusivo' },
+  { name: 'Red Velvet', color: '#C41E3A', type: 'exclusivo', line: 'exclusivo' },
+  { name: 'Tiramisú', color: '#D2B48C', type: 'exclusivo', line: 'exclusivo' },
+  { name: 'Cookies & Cream', color: '#2F2F2F', type: 'exclusivo', line: 'exclusivo' },
 ];
 
-const TYPE_COLORS = {
-  gourmet: 'from-pink-100 to-pink-200',
-  exclusivo: 'from-purple-100 to-purple-200',
-  helado: 'from-pink-100 to-pink-200',
-  premium: 'from-purple-100 to-purple-200',
-  light: 'from-green-100 to-green-200',
-  especial: 'from-amber-100 to-amber-200',
-  nuevo: 'from-cyan-100 to-cyan-200',
-  vacio: 'from-gray-100 to-gray-200'
+// Reglas de ubicación ideal
+const IDEAL_RULES = {
+  1: ['gourmet'], // Fila 1: Gourmet
+  2: ['exclusivo'], // Fila 2: Exclusivos
+  3: ['gourmet', 'exclusivo'], // Fila 3: Mixto
 };
-
-const TYPE_BORDERS = {
-  gourmet: 'border-pink-300',
-  exclusivo: 'border-purple-300',
-  helado: 'border-pink-300',
-  premium: 'border-purple-300',
-  light: 'border-green-300',
-  especial: 'border-amber-300',
-  nuevo: 'border-cyan-300',
-  vacio: 'border-gray-300'
-};
-
-// Componente de slot individual 3D
-function FreezerSlot3D({ slot, onClick, isSelected, isDarkMode, onDragStart, onDragEnd, onDrop, savingState }) {
-  const isEmpty = slot.is_empty || !slot.flavor_name;
-  const stockColors = {
-    full: 'bg-green-400',
-    medium: 'bg-yellow-400',
-    low: 'bg-orange-400',
-    empty: 'bg-red-400'
-  };
-
-  return (
-    <motion.div
-      draggable={!isEmpty}
-      onDragStart={(e) => onDragStart(e, slot)}
-      onDragEnd={onDragEnd}
-      onDragOver={(e) => e.preventDefault()}
-      onDrop={(e) => onDrop(e, slot)}
-      whileHover={{ scale: 1.08, y: -5, rotateY: 5 }}
-      whileTap={{ scale: 0.95 }}
-      animate={isSelected ? { 
-        scale: 1.1, 
-        boxShadow: '0 20px 40px rgba(236,72,153,0.4)',
-        rotateY: [0, 5, -5, 0]
-      } : {}}
-      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-      onClick={() => onClick(slot)}
-      className={`
-        relative w-full aspect-square rounded-lg sm:rounded-xl cursor-pointer
-        transform-gpu perspective-1000
-        ${isDarkMode ? 'bg-gradient-to-br from-gray-800 to-gray-900' : `bg-gradient-to-br ${TYPE_COLORS[slot.flavor_type || 'vacio']}`}
-        ${isSelected ? 'ring-2 sm:ring-4 ring-pink-400 ring-offset-1 sm:ring-offset-2' : ''}
-        ${isDarkMode ? 'border border-pink-500/30' : `border sm:border-2 ${TYPE_BORDERS[slot.flavor_type || 'vacio']}`}
-        shadow-md sm:shadow-lg hover:shadow-xl sm:hover:shadow-2xl
-        overflow-hidden
-      `}
-      style={{
-        transformStyle: 'preserve-3d',
-        boxShadow: isDarkMode 
-          ? '0 10px 30px rgba(236,72,153,0.2), inset 0 1px 0 rgba(255,255,255,0.1)' 
-          : '0 10px 30px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.5)'
-      }}
-    >
-      {/* Efecto de brillo */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-transparent rounded-xl pointer-events-none" />
-      
-      {/* Contenido */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center p-1">
-        {isEmpty ? (
-          <motion.div 
-            animate={{ opacity: [0.3, 0.6, 0.3] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="text-gray-400 text-center"
-          >
-            <div className="text-2xl mb-1">+</div>
-            <span className="text-[8px]">Vacío</span>
-          </motion.div>
-        ) : (
-          <>
-            {/* Bola de helado 3D */}
-            <motion.div
-              animate={{ y: [0, -3, 0] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="relative"
-            >
-              <div 
-                className="w-7 h-7 sm:w-10 sm:h-10 rounded-full shadow-lg"
-                style={{ 
-                  background: `radial-gradient(circle at 30% 30%, ${slot.color || '#FFB5C5'}ee, ${slot.color || '#FFB5C5'}88)`,
-                  boxShadow: `0 4px 15px ${slot.color || '#FFB5C5'}66, inset 0 -5px 10px rgba(0,0,0,0.2), inset 0 5px 10px rgba(255,255,255,0.3)`
-                }}
-              />
-              {/* Brillo de la bola */}
-              <div className="absolute top-0.5 sm:top-1 left-1 sm:left-2 w-2 sm:w-3 h-1.5 sm:h-2 bg-white/50 rounded-full blur-sm" />
-            </motion.div>
-            
-            {/* Nombre del sabor */}
-            <p className={`text-[7px] sm:text-[9px] font-bold text-center mt-0.5 sm:mt-1 leading-tight line-clamp-2 ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>
-              {slot.flavor_name}
-            </p>
-            
-            {/* Indicador de stock */}
-            <div className={`absolute bottom-1 right-1 w-2 h-2 rounded-full ${stockColors[slot.stock_level || 'full']}`} />
-          </>
-        )}
-      </div>
-
-      {/* Badge de tipo */}
-      {!isEmpty && (slot.flavor_type === 'premium' || slot.flavor_type === 'exclusivo') && (
-        <div className="absolute top-1 right-1">
-          <Sparkles className="w-3 h-3 text-purple-500" />
-        </div>
-      )}
-      {!isEmpty && slot.flavor_type === 'nuevo' && (
-        <div className="absolute top-1 left-1 bg-cyan-500 text-white text-[6px] px-1 rounded">NEW</div>
-      )}
-      
-      {/* Indicador de guardado */}
-      {savingState?.saving && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="absolute inset-0 bg-white/80 rounded-xl flex items-center justify-center"
-        >
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-            className="w-6 h-6 border-2 border-pink-500 border-t-transparent rounded-full"
-          />
-        </motion.div>
-      )}
-      {savingState?.success && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.5 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0 }}
-          className="absolute inset-0 bg-green-500/90 rounded-xl flex items-center justify-center"
-        >
-          <Check className="w-6 h-6 text-white" />
-        </motion.div>
-      )}
-    </motion.div>
-  );
-}
-
-// Modal de selección de sabor
-function FlavorSelector({ isOpen, onClose, onSelect, currentSlot, isDarkMode }) {
-  const [search, setSearch] = useState('');
-  
-  const filteredFlavors = POPSY_FLAVORS.filter(f => 
-    f.name.toLowerCase().includes(search.toLowerCase())
-  );
-
-  if (!isOpen) return null;
-
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-      onClick={onClose}
-    >
-      <motion.div
-        initial={{ scale: 0.9, y: 20 }}
-        animate={{ scale: 1, y: 0 }}
-        exit={{ scale: 0.9, y: 20 }}
-        onClick={(e) => e.stopPropagation()}
-        className={`w-full max-w-sm sm:max-w-md rounded-2xl shadow-2xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-white'}`}
-      >
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-bold">Seleccionar Sabor</h3>
-          <Button variant="ghost" size="icon" onClick={onClose}>
-            <X className="w-5 h-5" />
-          </Button>
-        </div>
-        
-        <p className="text-sm text-gray-500 mb-4">
-          Bajada {currentSlot?.row}, Posición {currentSlot?.position}
-        </p>
-
-        <Input
-          placeholder="Buscar sabor..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="mb-4"
-        />
-
-        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-3 max-h-60 sm:max-h-80 overflow-y-auto">
-          {/* Opción vacío */}
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => onSelect({ name: '', color: '', type: 'vacio', is_empty: true })}
-            className="flex flex-col items-center p-3 rounded-xl border-2 border-dashed border-gray-300 hover:border-gray-400"
-          >
-            <div className="w-8 h-8 rounded-full bg-gray-200 mb-2" />
-            <span className="text-xs text-gray-500">Vacío</span>
-          </motion.button>
-          
-          {filteredFlavors.map((flavor) => (
-            <motion.button
-              key={flavor.name}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => onSelect(flavor)}
-              className={`flex flex-col items-center p-3 rounded-xl border-2 transition-all ${
-                isDarkMode ? 'border-gray-700 hover:border-pink-500' : 'border-gray-200 hover:border-pink-400'
-              } ${flavor.brand ? 'bg-gradient-to-br from-gray-50 to-gray-100' : ''}`}
-            >
-              <div className="relative">
-                <div 
-                  className="w-8 h-8 rounded-full shadow-md mb-1 flex items-center justify-center text-sm"
-                  style={{ 
-                    background: `radial-gradient(circle at 30% 30%, ${flavor.color}ee, ${flavor.color}88)`,
-                    boxShadow: `0 2px 8px ${flavor.color}44`
-                  }}
-                >
-                  {flavor.logo && <span className="text-xs">{flavor.logo}</span>}
-                </div>
-                {flavor.brand && (
-                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full flex items-center justify-center">
-                    <span className="text-[6px]">⭐</span>
-                  </div>
-                )}
-              </div>
-              <span className={`text-xs font-medium text-center leading-tight ${flavor.brand ? 'font-bold' : ''}`}>{flavor.name}</span>
-              {(flavor.type === 'exclusivo' || flavor.type === 'premium') && (
-                <Sparkles className="w-3 h-3 text-purple-500 mt-1" />
-              )}
-            </motion.button>
-          ))}
-        </div>
-      </motion.div>
-    </motion.div>
-  );
-}
 
 export default function FreezerMap() {
   const queryClient = useQueryClient();
@@ -290,12 +59,14 @@ export default function FreezerMap() {
   const [showFlavorSelector, setShowFlavorSelector] = useState(false);
   const [showAddFlavor, setShowAddFlavor] = useState(false);
   const [newFlavor, setNewFlavor] = useState({ name: '', color: '#FFB5C5', line: 'gourmet' });
-  const [filterLine, setFilterLine] = useState('all');
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const [zoom, setZoom] = useState(1);
-  const [rotation, setRotation] = useState(0);
+  const [showAudit, setShowAudit] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [auditData, setAuditData] = useState(null);
+  const [undoStack, setUndoStack] = useState([]);
+  const [savingSlot, setSavingSlot] = useState(null);
   const [draggedSlot, setDraggedSlot] = useState(null);
-  const freezerRef = useRef(null);
+  const [isOptimizing, setIsOptimizing] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem('selectedStore');
@@ -305,6 +76,7 @@ export default function FreezerMap() {
   const handleStoreChange = (store) => {
     setSelectedStore(store);
     localStorage.setItem('selectedStore', store);
+    setUndoStack([]);
   };
 
   const { data: slots = [], isLoading } = useQuery({
@@ -313,7 +85,13 @@ export default function FreezerMap() {
     enabled: !!selectedStore
   });
 
-  // Crear grid inicial si no existe
+  const { data: history = [] } = useQuery({
+    queryKey: ['freezerHistory', selectedStore],
+    queryFn: () => base44.entities.FreezerHistory.filter({ store_id: selectedStore }, '-created_date', 20),
+    enabled: !!selectedStore && showHistory
+  });
+
+  // Grid de la nevera
   const freezerGrid = useMemo(() => {
     const grid = [];
     for (let row = 1; row <= 7; row++) {
@@ -321,14 +99,8 @@ export default function FreezerMap() {
       for (let pos = 1; pos <= 6; pos++) {
         const existingSlot = slots.find(s => s.row === row && s.position === pos);
         rowSlots.push(existingSlot || {
-          row,
-          position: pos,
-          flavor_name: '',
-          flavor_type: 'vacio',
-          color: '',
-          is_empty: true,
-          stock_level: 'full',
-          store_id: selectedStore
+          row, position: pos, flavor_name: '', flavor_type: 'vacio',
+          color: '', is_empty: true, stock_level: 'full', store_id: selectedStore
         });
       }
       grid.push(rowSlots);
@@ -336,391 +108,488 @@ export default function FreezerMap() {
     return grid;
   }, [slots, selectedStore]);
 
-  const [savingSlot, setSavingSlot] = useState(null);
+  // Guardar en historial
+  const saveToHistory = useCallback(async () => {
+    if (!selectedStore || slots.length === 0) return;
+    try {
+      await base44.entities.FreezerHistory.create({
+        store_id: selectedStore,
+        date: format(new Date(), 'yyyy-MM-dd'),
+        snapshot: JSON.stringify(slots),
+        filled_slots: slots.filter(s => !s.is_empty && s.flavor_name).length,
+        changes_count: 1
+      });
+    } catch (e) { console.error(e); }
+  }, [selectedStore, slots]);
 
+  // Mutation para actualizar slot
   const updateSlotMutation = useMutation({
     mutationFn: async ({ slotData, isNew }) => {
-      if (isNew) {
-        return base44.entities.FreezerSlot.create(slotData);
-      } else {
-        return base44.entities.FreezerSlot.update(slotData.id, slotData);
-      }
+      if (isNew) return base44.entities.FreezerSlot.create(slotData);
+      return base44.entities.FreezerSlot.update(slotData.id, slotData);
     },
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries(['freezerSlots']);
       setSavingSlot({ row: variables.slotData.row, position: variables.slotData.position, success: true });
-      toast.success('✅ ¡Sabor guardado correctamente!');
-      setTimeout(() => setSavingSlot(null), 2000);
+      setTimeout(() => setSavingSlot(null), 1000);
     },
     onError: () => {
-      toast.error('❌ Error al guardar el sabor');
+      toast.error('Error al guardar');
       setSavingSlot(null);
     }
   });
 
+  // Borrar slot
+  const clearSlot = useCallback(async (slot) => {
+    if (!slot || slot.is_empty) return;
+    
+    // Guardar para undo
+    setUndoStack(prev => [...prev.slice(-9), { action: 'clear', slot: { ...slot } }]);
+    
+    const existing = slots.find(s => s.row === slot.row && s.position === slot.position);
+    if (existing?.id) {
+      setSavingSlot({ row: slot.row, position: slot.position, saving: true });
+      await base44.entities.FreezerSlot.update(existing.id, {
+        flavor_name: '', flavor_type: 'vacio', color: '', is_empty: true
+      });
+      queryClient.invalidateQueries(['freezerSlots']);
+      setSavingSlot({ row: slot.row, position: slot.position, success: true });
+      setTimeout(() => setSavingSlot(null), 800);
+      toast.success('Slot vaciado');
+    }
+  }, [slots, queryClient]);
+
+  // Doble click para borrar
+  const handleDoubleClick = useCallback((slot) => {
+    clearSlot(slot);
+  }, [clearSlot]);
+
+  // Click para seleccionar/editar
   const handleSlotClick = (slot) => {
     setSelectedSlot(slot);
     setShowFlavorSelector(true);
   };
 
+  // Seleccionar sabor
   const handleFlavorSelect = (flavor) => {
     if (!selectedSlot) return;
     
+    setUndoStack(prev => [...prev.slice(-9), { action: 'edit', slot: { ...selectedSlot } }]);
     setSavingSlot({ row: selectedSlot.row, position: selectedSlot.position, saving: true });
     
     const slotData = {
-      ...selectedSlot,
-      store_id: selectedStore,
-      flavor_name: flavor.name,
-      flavor_type: flavor.type || flavor.line,
-      color: flavor.color,
-      is_empty: flavor.is_empty || false
+      ...selectedSlot, store_id: selectedStore,
+      flavor_name: flavor.name, flavor_type: flavor.type || flavor.line,
+      color: flavor.color, is_empty: flavor.is_empty || false
     };
-
-    const existingSlot = slots.find(s => s.row === selectedSlot.row && s.position === selectedSlot.position);
     
+    const existing = slots.find(s => s.row === selectedSlot.row && s.position === selectedSlot.position);
     updateSlotMutation.mutate({
-      slotData: existingSlot ? { ...slotData, id: existingSlot.id } : slotData,
-      isNew: !existingSlot
+      slotData: existing ? { ...slotData, id: existing.id } : slotData,
+      isNew: !existing
     });
-
+    
     setShowFlavorSelector(false);
     setSelectedSlot(null);
   };
 
-  const handleDragStart = (e, slot) => {
-    setDraggedSlot(slot);
+  // Vaciar toda la nevera
+  const clearAllSlots = async () => {
+    if (!confirm('¿Seguro que deseas vaciar toda la nevera?')) return;
+    
+    setUndoStack(prev => [...prev.slice(-9), { action: 'clearAll', slots: [...slots] }]);
+    
+    toast.info('Vaciando nevera...');
+    const filledSlots = slots.filter(s => !s.is_empty && s.flavor_name);
+    
+    await Promise.all(filledSlots.map(s => 
+      base44.entities.FreezerSlot.update(s.id, {
+        flavor_name: '', flavor_type: 'vacio', color: '', is_empty: true
+      })
+    ));
+    
+    queryClient.invalidateQueries(['freezerSlots']);
+    toast.success('Nevera vaciada');
   };
 
-  const handleDragEnd = () => {
-    setDraggedSlot(null);
+  // Deshacer última acción
+  const handleUndo = async () => {
+    if (undoStack.length === 0) return;
+    
+    const lastAction = undoStack[undoStack.length - 1];
+    setUndoStack(prev => prev.slice(0, -1));
+    
+    if (lastAction.action === 'clear' || lastAction.action === 'edit') {
+      const slot = lastAction.slot;
+      const existing = slots.find(s => s.row === slot.row && s.position === slot.position);
+      if (existing?.id) {
+        await base44.entities.FreezerSlot.update(existing.id, {
+          flavor_name: slot.flavor_name, flavor_type: slot.flavor_type,
+          color: slot.color, is_empty: slot.is_empty
+        });
+      }
+    } else if (lastAction.action === 'clearAll') {
+      for (const slot of lastAction.slots) {
+        if (slot.id && !slot.is_empty) {
+          await base44.entities.FreezerSlot.update(slot.id, {
+            flavor_name: slot.flavor_name, flavor_type: slot.flavor_type,
+            color: slot.color, is_empty: slot.is_empty
+          });
+        }
+      }
+    }
+    
+    queryClient.invalidateQueries(['freezerSlots']);
+    toast.success('Acción deshecha');
   };
 
-  const handleDrop = async (e, targetSlot) => {
-    e.preventDefault();
-    if (!draggedSlot || (draggedSlot.row === targetSlot.row && draggedSlot.position === targetSlot.position)) {
+  // Duplicar fila
+  const duplicateRow = async (rowIndex) => {
+    const sourceRow = freezerGrid[rowIndex];
+    const targetRowIndex = rowIndex + 1;
+    if (targetRowIndex >= 7) {
+      toast.error('No hay fila disponible para duplicar');
       return;
     }
+    
+    for (const slot of sourceRow) {
+      if (slot.is_empty) continue;
+      const targetSlot = slots.find(s => s.row === targetRowIndex + 1 && s.position === slot.position);
+      const slotData = {
+        store_id: selectedStore, row: targetRowIndex + 1, position: slot.position,
+        flavor_name: slot.flavor_name, flavor_type: slot.flavor_type,
+        color: slot.color, is_empty: false, stock_level: slot.stock_level
+      };
+      if (targetSlot?.id) {
+        await base44.entities.FreezerSlot.update(targetSlot.id, slotData);
+      } else {
+        await base44.entities.FreezerSlot.create(slotData);
+      }
+    }
+    
+    queryClient.invalidateQueries(['freezerSlots']);
+    toast.success(`Fila ${rowIndex + 1} duplicada a fila ${targetRowIndex + 1}`);
+  };
 
-    // Intercambiar slots
+  // Drag & Drop
+  const handleDragStart = (e, slot) => setDraggedSlot(slot);
+  const handleDragEnd = () => setDraggedSlot(null);
+  
+  const handleDrop = async (e, targetSlot) => {
+    e.preventDefault();
+    if (!draggedSlot || (draggedSlot.row === targetSlot.row && draggedSlot.position === targetSlot.position)) return;
+    
     const draggedExisting = slots.find(s => s.row === draggedSlot.row && s.position === draggedSlot.position);
     const targetExisting = slots.find(s => s.row === targetSlot.row && s.position === targetSlot.position);
-
-    // Actualizar dragged a posición target
+    
     if (draggedExisting) {
-      await base44.entities.FreezerSlot.update(draggedExisting.id, {
-        row: targetSlot.row,
-        position: targetSlot.position
-      });
+      await base44.entities.FreezerSlot.update(draggedExisting.id, { row: targetSlot.row, position: targetSlot.position });
     }
-
-    // Actualizar target a posición dragged
     if (targetExisting) {
-      await base44.entities.FreezerSlot.update(targetExisting.id, {
-        row: draggedSlot.row,
-        position: draggedSlot.position
-      });
+      await base44.entities.FreezerSlot.update(targetExisting.id, { row: draggedSlot.row, position: draggedSlot.position });
     }
-
+    
     queryClient.invalidateQueries(['freezerSlots']);
-    toast.success('¡Sabores intercambiados!');
+    toast.success('Sabores intercambiados');
     setDraggedSlot(null);
   };
 
-  const handleAIReorder = async () => {
-    toast.info('🤖 Analizando ventas para optimizar la nevera...');
-    // Simulación de reordenamiento IA
-    setTimeout(() => {
-      toast.success('✨ Nevera optimizada según patrones de venta');
-    }, 2000);
+  // Auditoría
+  const runAudit = useCallback(() => {
+    const filledSlots = slots.filter(s => !s.is_empty && s.flavor_name);
+    const emptySlots = 42 - filledSlots.length;
+    
+    // Detectar repetidos
+    const flavorCounts = {};
+    filledSlots.forEach(s => {
+      flavorCounts[s.flavor_name] = (flavorCounts[s.flavor_name] || 0) + 1;
+    });
+    const repeatedFlavors = Object.entries(flavorCounts)
+      .filter(([_, count]) => count > 2)
+      .map(([name, count]) => ({ name, count }));
+    
+    // Detectar mal ubicados
+    const misplacedSlots = filledSlots.filter(s => {
+      const idealTypes = IDEAL_RULES[s.row] || ['gourmet', 'exclusivo'];
+      return !idealTypes.includes(s.flavor_type);
+    }).map(s => ({
+      ...s,
+      reason: `Debería estar en fila ${s.flavor_type === 'gourmet' ? 1 : 2}`
+    }));
+    
+    // Sugerencias
+    const suggestions = [];
+    if (emptySlots > 10) suggestions.push(`Hay ${emptySlots} espacios vacíos. Considera llenar la nevera.`);
+    if (repeatedFlavors.length > 0) suggestions.push(`Reduce sabores repetidos: ${repeatedFlavors.map(f => f.name).join(', ')}`);
+    if (misplacedSlots.length > 0) suggestions.push(`Reorganiza ${misplacedSlots.length} sabores mal ubicados según las reglas de exhibición.`);
+    
+    const efficiency = Math.round((filledSlots.length / 42) * 100 - (misplacedSlots.length * 2) - (repeatedFlavors.length * 3));
+    
+    setAuditData({
+      totalSlots: 42, filledSlots: filledSlots.length, emptySlots,
+      misplacedSlots, repeatedFlavors, suggestions,
+      efficiency: Math.max(0, Math.min(100, efficiency))
+    });
+    setShowAudit(true);
+  }, [slots]);
+
+  // Optimizar con IA
+  const optimizeWithAI = async () => {
+    setIsOptimizing(true);
+    toast.info('🤖 IA optimizando la nevera...');
+    
+    try {
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt: `Eres un experto en merchandising de heladerías. Organiza estos 42 espacios de nevera (7 filas x 6 posiciones) con estos sabores disponibles:
+        
+Gourmet: Chocolate, Vainilla, Fresa, Arequipe, Maracuyá, Limón, Mora, Coco, Café, Dulce de Leche
+Exclusivos: OREO, M&M's, SNICKERS, MILKY WAY, TWIX, KIT KAT, Nutella, Brownie, Cheesecake, Red Velvet, Tiramisú, Cookies & Cream
+
+Reglas:
+- Fila 1-2: Sabores más atractivos y vendidos (OREO, Chocolate, M&M's)
+- Fila 3-4: Sabores populares secundarios
+- Fila 5-7: Resto de sabores
+- No repetir más de 2 veces un sabor
+- Centro de cada fila debe tener los más llamativos
+
+Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_name, flavor_type (gourmet/exclusivo)`,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            layout: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  row: { type: "number" },
+                  position: { type: "number" },
+                  flavor_name: { type: "string" },
+                  flavor_type: { type: "string" }
+                }
+              }
+            }
+          }
+        }
+      });
+      
+      if (result?.layout && confirm('¿Aplicar la nueva distribución sugerida por la IA?')) {
+        await saveToHistory();
+        
+        for (const item of result.layout) {
+          const flavor = POPSY_FLAVORS.find(f => f.name === item.flavor_name);
+          const existing = slots.find(s => s.row === item.row && s.position === item.position);
+          const slotData = {
+            store_id: selectedStore, row: item.row, position: item.position,
+            flavor_name: item.flavor_name, flavor_type: item.flavor_type,
+            color: flavor?.color || '#FFB5C5', is_empty: false, stock_level: 'full'
+          };
+          
+          if (existing?.id) {
+            await base44.entities.FreezerSlot.update(existing.id, slotData);
+          } else {
+            await base44.entities.FreezerSlot.create(slotData);
+          }
+        }
+        
+        queryClient.invalidateQueries(['freezerSlots']);
+        toast.success('✨ Nevera optimizada por IA');
+      }
+    } catch (e) {
+      console.error(e);
+      toast.error('Error al optimizar');
+    }
+    
+    setIsOptimizing(false);
+  };
+
+  // Restaurar historial
+  const restoreFromHistory = async (entry) => {
+    if (!confirm('¿Restaurar este mapa? Se perderán los cambios actuales.')) return;
+    
+    try {
+      const snapshot = JSON.parse(entry.snapshot);
+      
+      // Limpiar actual
+      for (const s of slots) {
+        if (s.id) await base44.entities.FreezerSlot.delete(s.id);
+      }
+      
+      // Restaurar
+      for (const s of snapshot) {
+        await base44.entities.FreezerSlot.create({
+          store_id: selectedStore, row: s.row, position: s.position,
+          flavor_name: s.flavor_name, flavor_type: s.flavor_type,
+          color: s.color, is_empty: s.is_empty, stock_level: s.stock_level
+        });
+      }
+      
+      queryClient.invalidateQueries(['freezerSlots']);
+      toast.success('Mapa restaurado');
+      setShowHistory(false);
+    } catch (e) {
+      toast.error('Error al restaurar');
+    }
   };
 
   const selectedStoreName = STORES.find(s => s.code === selectedStore)?.name || '';
 
   return (
-    <div className={`min-h-screen transition-colors duration-500 ${isDarkMode ? 'bg-gray-950' : 'bg-gradient-to-br from-pink-50 via-white to-purple-50'}`}>
-      <div className="max-w-6xl mx-auto px-4 py-6">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50">
+      <div className="max-w-5xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          <div className="flex items-center gap-3">
             <Link to={createPageUrl('Home')}>
               <Button variant="ghost" size="icon" className="rounded-full hover:bg-pink-50">
-                <ArrowLeft className={`w-5 h-5 ${isDarkMode ? 'text-pink-400' : 'text-pink-600'}`} />
+                <ArrowLeft className="w-5 h-5 text-pink-600" />
               </Button>
             </Link>
             <div>
-              <h1 className={`text-2xl md:text-3xl font-semibold ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>
-                Mapa de Nevera
-              </h1>
-              {selectedStore && (
-                <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                  {selectedStore} - {selectedStoreName}
-                </p>
-              )}
+              <h1 className="text-xl sm:text-2xl font-semibold text-gray-700">Mapa de Nevera</h1>
+              {selectedStore && <p className="text-xs sm:text-sm text-gray-500">{selectedStore} - {selectedStoreName}</p>}
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <StoreSelector selectedStore={selectedStore} onStoreChange={handleStoreChange} />
-          </div>
+          <StoreSelector selectedStore={selectedStore} onStoreChange={handleStoreChange} />
         </div>
 
         {selectedStore ? (
           <>
-            {/* Filtros arriba */}
-            <div className="flex flex-wrap items-center gap-3 mb-4">
-              <span className={`text-xs font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Filtrar:</span>
-              <div className="flex gap-2">
-                {[
-                  { key: 'all', label: 'Todos', color: 'bg-gray-100 text-gray-600' },
-                  { key: 'gourmet', label: '🍦 Gourmet', color: 'bg-pink-100 text-pink-600' },
-                  { key: 'exclusivo', label: '✨ Exclusivos', color: 'bg-purple-100 text-purple-600' },
-                ].map((f) => (
-                  <motion.button
-                    key={f.key}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setFilterLine(f.key)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                      filterLine === f.key 
-                        ? f.key === 'gourmet' ? 'bg-pink-500 text-white' : f.key === 'exclusivo' ? 'bg-purple-500 text-white' : 'bg-gray-700 text-white'
-                        : f.color
-                    }`}
-                  >
-                    {f.label}
-                  </motion.button>
-                ))}
-              </div>
+            {/* Toolbar */}
+            <div className="flex flex-wrap items-center gap-2 mb-4 p-2 bg-white/80 rounded-xl shadow-sm">
+              <Button size="sm" variant="outline" onClick={() => setZoom(Math.max(0.6, zoom - 0.1))}>
+                <ZoomOut className="w-4 h-4" />
+              </Button>
+              <span className="text-xs text-gray-500 w-10 text-center">{Math.round(zoom * 100)}%</span>
+              <Button size="sm" variant="outline" onClick={() => setZoom(Math.min(1.3, zoom + 0.1))}>
+                <ZoomIn className="w-4 h-4" />
+              </Button>
+              
+              <div className="h-6 w-px bg-gray-200 mx-1" />
+              
+              <Button size="sm" variant="outline" onClick={handleUndo} disabled={undoStack.length === 0} title="Deshacer">
+                <Undo2 className="w-4 h-4" />
+              </Button>
+              <Button size="sm" variant="outline" onClick={clearAllSlots} className="text-red-600 hover:bg-red-50" title="Vaciar Nevera">
+                <Trash2 className="w-4 h-4" />
+              </Button>
+              
+              <div className="h-6 w-px bg-gray-200 mx-1" />
+              
+              <Button size="sm" variant="outline" onClick={runAudit} title="Auditoría">
+                <BarChart3 className="w-4 h-4 mr-1" />
+                <span className="hidden sm:inline">Auditoría</span>
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => setShowHistory(true)} title="Historial">
+                <History className="w-4 h-4 mr-1" />
+                <span className="hidden sm:inline">Historial</span>
+              </Button>
+              <Button size="sm" onClick={optimizeWithAI} disabled={isOptimizing} className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+                <Wand2 className="w-4 h-4 mr-1" />
+                <span className="hidden sm:inline">{isOptimizing ? 'Optimizando...' : 'IA Optimizar'}</span>
+              </Button>
             </div>
 
-            {/* Controls */}
-            <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setZoom(Math.max(0.5, zoom - 0.1))}
-                  className={isDarkMode ? 'border-gray-700 text-gray-300' : ''}
-                >
-                  <ZoomOut className="w-4 h-4" />
-                </Button>
-                <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                  {Math.round(zoom * 100)}%
-                </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setZoom(Math.min(1.5, zoom + 0.1))}
-                  className={isDarkMode ? 'border-gray-700 text-gray-300' : ''}
-                >
-                  <ZoomIn className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setRotation(r => (r + 5) % 360)}
-                  className={isDarkMode ? 'border-gray-700 text-gray-300' : ''}
-                >
-                  <RotateCcw className="w-4 h-4" />
-                </Button>
-              </div>
+            {/* Freezer Grid */}
+            <div className="overflow-x-auto pb-4">
+              <motion.div style={{ transform: `scale(${zoom})`, transformOrigin: 'top center' }} className="min-w-[320px]">
+                <div className="relative rounded-2xl p-3 sm:p-5 mx-auto max-w-xl bg-gradient-to-b from-white via-gray-50 to-white border-2 border-pink-200 shadow-xl">
+                  {/* Logo */}
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+                    <div className="px-4 py-1.5 rounded-full bg-white shadow-md">
+                      <img src={LOGO_URL} alt="Popsy" className="h-6 sm:h-8 object-contain" />
+                    </div>
+                  </div>
 
-              <div className="flex items-center gap-2">
-                <Button
-                  size="sm"
-                  onClick={handleAIReorder}
-                  className="bg-gradient-to-r from-purple-500 to-pink-500 text-white"
-                >
-                  <Wand2 className="w-4 h-4 mr-1" />
-                  IA Optimizar
-                </Button>
-              </div>
+                  {/* Grid */}
+                  <div className="space-y-2 mt-4">
+                    {freezerGrid.map((row, rowIndex) => (
+                      <div key={rowIndex} className="relative">
+                        {/* Row number */}
+                        <div className="absolute -left-4 sm:-left-6 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center text-[10px] sm:text-xs font-bold">
+                          {rowIndex + 1}
+                        </div>
+                        
+                        {/* Row actions */}
+                        <button
+                          onClick={() => duplicateRow(rowIndex)}
+                          className="absolute -right-4 sm:-right-6 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-gray-100 hover:bg-pink-100 text-gray-400 hover:text-pink-600 flex items-center justify-center transition-colors"
+                          title="Duplicar fila"
+                        >
+                          <Copy className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                        </button>
+
+                        {/* Slots */}
+                        <div className="grid grid-cols-6 gap-1 sm:gap-1.5 p-1.5 sm:p-2 rounded-lg bg-gray-100/50">
+                          {row.map((slot, slotIndex) => (
+                            <FreezerSlotCell
+                              key={`${rowIndex}-${slotIndex}`}
+                              slot={slot}
+                              onClick={handleSlotClick}
+                              onDoubleClick={handleDoubleClick}
+                              isSelected={selectedSlot?.row === slot.row && selectedSlot?.position === slot.position}
+                              isDarkMode={false}
+                              onDragStart={handleDragStart}
+                              onDragEnd={handleDragEnd}
+                              onDrop={handleDrop}
+                              savingState={savingSlot?.row === slot.row && savingSlot?.position === slot.position ? savingSlot : null}
+                              auditStatus={showAudit ? (auditData?.misplacedSlots?.find(m => m.row === slot.row && m.position === slot.position) ? 'misplaced' : slot.is_empty ? null : 'correct') : null}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
             </div>
 
-            {/* Freezer 3D View */}
-            <motion.div
-              ref={freezerRef}
-              style={{ 
-                transform: `scale(${zoom}) rotateY(${rotation}deg)`,
-                transformStyle: 'preserve-3d',
-                perspective: '1000px'
-              }}
-              className="relative mx-auto"
-            >
-              {/* Freezer Frame */}
-              <div className={`
-                relative rounded-2xl sm:rounded-3xl p-3 sm:p-6 mx-auto max-w-2xl
-                ${isDarkMode 
-                  ? 'bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 border border-pink-500/30' 
-                  : 'bg-gradient-to-b from-white via-gray-50 to-white border-2 sm:border-4 border-pink-200'}
-                shadow-xl sm:shadow-2xl
-              `}
-              style={{
-                boxShadow: isDarkMode 
-                  ? '0 0 60px rgba(236,72,153,0.2), 0 20px 60px rgba(0,0,0,0.5)' 
-                  : '0 20px 60px rgba(236,72,153,0.15), 0 10px 30px rgba(0,0,0,0.1)'
-              }}
-              >
-                {/* Logo Popsy en la nevera */}
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
-                  <motion.div
-                    animate={{ y: [0, -3, 0] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                    className={`px-6 py-2 rounded-full ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow-lg`}
-                  >
-                    <img src={LOGO_URL} alt="Popsy" className="h-8 object-contain" />
-                  </motion.div>
-                </div>
-
-                {/* Bajadas */}
-                <div className="space-y-3 mt-4">
-                  {freezerGrid.map((row, rowIndex) => (
-                    <motion.div
-                      key={rowIndex}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: rowIndex * 0.1 }}
-                      className="relative"
-                    >
-                      {/* Número de bajada */}
-                      <div className={`absolute -left-5 sm:-left-8 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-6 sm:h-6 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-bold
-                        ${isDarkMode ? 'bg-pink-500/20 text-pink-400' : 'bg-pink-100 text-pink-600'}`}
-                      >
-                        {rowIndex + 1}
-                      </div>
-
-                      {/* Slots de la bajada */}
-                      <div className={`grid grid-cols-3 sm:grid-cols-6 gap-1.5 sm:gap-2 p-1.5 sm:p-2 rounded-xl ${isDarkMode ? 'bg-black/30' : 'bg-gray-100/50'}`}>
-                        {row.map((slot, slotIndex) => (
-                          <FreezerSlot3D
-                            key={`${rowIndex}-${slotIndex}`}
-                            slot={slot}
-                            onClick={handleSlotClick}
-                            isSelected={selectedSlot?.row === slot.row && selectedSlot?.position === slot.position}
-                            isDarkMode={isDarkMode}
-                            onDragStart={handleDragStart}
-                            onDragEnd={handleDragEnd}
-                            onDrop={handleDrop}
-                            savingState={savingSlot?.row === slot.row && savingSlot?.position === slot.position ? savingSlot : null}
-                          />
-                        ))}
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-
-                {/* Reflejo inferior */}
-                <div className={`absolute -bottom-6 left-4 right-4 h-6 rounded-b-3xl opacity-20 blur-sm
-                  ${isDarkMode ? 'bg-pink-500' : 'bg-pink-300'}`} 
-                />
-              </div>
-            </motion.div>
-
-            {/* Panel inferior con agregar sabor y leyenda */}
-            <div className={`mt-4 sm:mt-8 p-3 sm:p-4 rounded-xl ${isDarkMode ? 'bg-gray-900/50' : 'bg-white/80'} shadow-lg max-w-2xl mx-auto space-y-3 sm:space-y-4`}>
-              {/* Agregar nuevo sabor */}
-              <div className={`p-3 rounded-lg border ${isDarkMode ? 'border-gray-700 bg-gray-800/50' : 'border-pink-200 bg-pink-50/50'}`}>
-                <div className="flex items-center justify-between mb-2">
-                  <span className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-pink-700'}`}>
-                    ➕ Crear Nuevo Sabor
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowAddFlavor(!showAddFlavor)}
-                    className="text-xs text-pink-600"
-                  >
-                    {showAddFlavor ? 'Cerrar' : 'Abrir'}
-                  </Button>
-                </div>
-                
+            {/* Info Panel */}
+            <div className="mt-4 p-3 bg-white/80 rounded-xl shadow-sm space-y-3">
+              {/* Add flavor */}
+              <div className="p-2 rounded-lg border border-pink-200 bg-pink-50/50">
+                <button onClick={() => setShowAddFlavor(!showAddFlavor)} className="flex items-center gap-2 text-sm font-medium text-pink-700 w-full">
+                  <Plus className="w-4 h-4" />
+                  Crear Nuevo Sabor
+                </button>
                 <AnimatePresence>
                   {showAddFlavor && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="space-y-2 mt-2"
-                    >
-                      <Input
-                        placeholder="Nombre del sabor (ej: M&M's, OREO)"
-                        value={newFlavor.name}
-                        onChange={(e) => setNewFlavor({ ...newFlavor, name: e.target.value })}
-                        className="text-sm"
-                      />
+                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="mt-2 space-y-2">
+                      <Input placeholder="Nombre del sabor" value={newFlavor.name} onChange={(e) => setNewFlavor({ ...newFlavor, name: e.target.value })} className="text-sm" />
                       <div className="flex gap-2">
-                        <Input
-                          type="color"
-                          value={newFlavor.color}
-                          onChange={(e) => setNewFlavor({ ...newFlavor, color: e.target.value })}
-                          className="w-12 h-9 p-1"
-                        />
-                        <select
-                          value={newFlavor.line}
-                          onChange={(e) => setNewFlavor({ ...newFlavor, line: e.target.value })}
-                          className="flex-1 text-sm border rounded-md px-2"
-                        >
+                        <Input type="color" value={newFlavor.color} onChange={(e) => setNewFlavor({ ...newFlavor, color: e.target.value })} className="w-12 h-9 p-1" />
+                        <select value={newFlavor.line} onChange={(e) => setNewFlavor({ ...newFlavor, line: e.target.value })} className="flex-1 text-sm border rounded-md px-2">
                           <option value="gourmet">🍦 Gourmet</option>
                           <option value="exclusivo">✨ Exclusivo</option>
                         </select>
-                        <Button 
-                          size="sm" 
-                          className="bg-pink-500 hover:bg-pink-600 text-white"
-                          onClick={() => {
-                            if (newFlavor.name.trim()) {
-                              toast.success(`✅ Sabor "${newFlavor.name}" creado. Selecciónalo en un slot para guardarlo.`);
-                              setNewFlavor({ name: '', color: '#FFB5C5', line: 'gourmet' });
-                              setShowAddFlavor(false);
-                            } else {
-                              toast.error('Ingresa un nombre para el sabor');
-                            }
-                          }}
-                        >
+                        <Button size="sm" className="bg-pink-500 text-white" onClick={() => {
+                          if (newFlavor.name.trim()) {
+                            POPSY_FLAVORS.push({ name: newFlavor.name, color: newFlavor.color, type: newFlavor.line, line: newFlavor.line });
+                            toast.success(`Sabor "${newFlavor.name}" agregado`);
+                            setNewFlavor({ name: '', color: '#FFB5C5', line: 'gourmet' });
+                            setShowAddFlavor(false);
+                          }
+                        }}>
                           <Check className="w-4 h-4" />
                         </Button>
                       </div>
-                      <p className="text-xs text-gray-400">El sabor se guardará al asignarlo a un slot de la nevera</p>
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
 
-              {/* Leyenda */}
-              <div className="flex flex-wrap gap-2 sm:gap-4 pt-2 border-t border-gray-200">
-                {[
-                  { type: 'gourmet', label: 'Gourmet' },
-                  { type: 'exclusivo', label: 'Exclusivo', icon: <Sparkles className="w-3 h-3 text-purple-500" /> },
-                ].map((item) => (
-                  <div key={item.type} className="flex items-center gap-2">
-                    <div className={`w-4 h-4 rounded bg-gradient-to-br ${TYPE_COLORS[item.type]} border ${TYPE_BORDERS[item.type]}`} />
-                    <span className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{item.label}</span>
-                    {item.icon}
-                  </div>
-                ))}
-                <div className="border-l border-gray-300 pl-4 flex flex-wrap gap-3">
-                  {[
-                    { level: 'full', label: 'Completo', color: 'bg-green-400' },
-                    { level: 'medium', label: 'Medio', color: 'bg-yellow-400' },
-                    { level: 'low', label: 'Bajo', color: 'bg-orange-400' },
-                    { level: 'empty', label: 'Agotado', color: 'bg-red-400' },
-                  ].map((item) => (
-                    <div key={item.level} className="flex items-center gap-1">
-                      <div className={`w-2 h-2 rounded-full ${item.color}`} />
-                      <span className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{item.label}</span>
-                    </div>
-                  ))}
-                </div>
+              {/* Legend */}
+              <div className="flex flex-wrap gap-3 text-xs text-gray-600">
+                <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-green-400" /> Lleno</span>
+                <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-yellow-400" /> Medio</span>
+                <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-red-400" /> Agotado</span>
+                <span className="text-gray-400">|</span>
+                <span>Doble click = Borrar</span>
               </div>
             </div>
           </>
         ) : (
-          <div className="text-center py-20">
-            <motion.div
-              animate={{ y: [0, -15, 0], rotate: [0, 5, -5, 0] }}
-              transition={{ duration: 3, repeat: Infinity }}
-              className="text-7xl mb-4"
-            >
-              🧊
-            </motion.div>
+          <div className="text-center py-16">
+            <div className="text-6xl mb-4">🧊</div>
             <h2 className="text-xl font-bold text-gray-700 mb-2">Selecciona una tienda</h2>
             <p className="text-gray-400">Para ver y editar el mapa de la nevera</p>
           </div>
@@ -730,17 +599,44 @@ export default function FreezerMap() {
       {/* Flavor Selector Modal */}
       <AnimatePresence>
         {showFlavorSelector && (
-          <FlavorSelector
-            isOpen={showFlavorSelector}
-            onClose={() => {
-              setShowFlavorSelector(false);
-              setSelectedSlot(null);
-            }}
-            onSelect={handleFlavorSelect}
-            currentSlot={selectedSlot}
-            isDarkMode={isDarkMode}
-          />
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => { setShowFlavorSelector(false); setSelectedSlot(null); }}>
+            <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} exit={{ scale: 0.9 }} onClick={(e) => e.stopPropagation()} className="w-full max-w-sm bg-white rounded-2xl shadow-2xl p-4 max-h-[80vh] overflow-y-auto">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-bold">Seleccionar Sabor</h3>
+                <Button variant="ghost" size="icon" onClick={() => { setShowFlavorSelector(false); setSelectedSlot(null); }}>
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+              <p className="text-xs text-gray-500 mb-3">Fila {selectedSlot?.row}, Posición {selectedSlot?.position}</p>
+              
+              <div className="grid grid-cols-3 gap-2">
+                {/* Vacío */}
+                <button onClick={() => handleFlavorSelect({ name: '', color: '', type: 'vacio', is_empty: true })} className="flex flex-col items-center p-2 rounded-lg border-2 border-dashed border-gray-300 hover:border-pink-400">
+                  <div className="w-7 h-7 rounded-full bg-gray-200 mb-1" />
+                  <span className="text-[10px] text-gray-500">Vacío</span>
+                </button>
+                
+                {POPSY_FLAVORS.map((flavor) => (
+                  <button key={flavor.name} onClick={() => handleFlavorSelect(flavor)} className="flex flex-col items-center p-2 rounded-lg border border-gray-200 hover:border-pink-400 hover:bg-pink-50 transition-colors">
+                    <div className="w-7 h-7 rounded-full shadow-sm mb-1" style={{ background: `radial-gradient(circle at 30% 30%, ${flavor.color}ee, ${flavor.color}88)` }} />
+                    <span className="text-[9px] font-medium text-center leading-tight">{flavor.name}</span>
+                    {flavor.brand && <Sparkles className="w-2.5 h-2.5 text-purple-500 mt-0.5" />}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
         )}
+      </AnimatePresence>
+
+      {/* Audit Panel */}
+      <AnimatePresence>
+        {showAudit && <FreezerAuditPanel auditData={auditData} onClose={() => setShowAudit(false)} onApplySuggestions={() => toast.info('Sugerencias aplicadas')} onAutoCorrect={optimizeWithAI} isLoading={isOptimizing} />}
+      </AnimatePresence>
+
+      {/* History Panel */}
+      <AnimatePresence>
+        {showHistory && <FreezerHistoryPanel history={history.map(h => ({ ...h, filledSlots: h.filled_slots, changes: h.changes_count }))} onClose={() => setShowHistory(false)} onRestore={restoreFromHistory} isLoading={false} />}
       </AnimatePresence>
     </div>
   );
