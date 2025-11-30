@@ -52,24 +52,29 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
       <PopoverTrigger asChild>
         <Button 
           variant="outline" 
-          className="w-full md:w-[300px] bg-white border-gray-200 hover:border-pink-300 transition-all shadow-sm rounded-xl justify-start"
+          className="w-full md:w-[300px] bg-white border-gray-200 hover:border-pink-300 transition-all shadow-md hover:shadow-lg rounded-xl justify-between group"
         >
-          <MapPin className="w-4 h-4 text-pink-500 mr-2" />
-          {selectedStore ? (
-            <span className="truncate">{selectedStore} - {selectedStoreName}</span>
-          ) : (
-            <span className="text-gray-400">Selecciona una tienda</span>
-          )}
+          <div className="flex items-center gap-2">
+            <MapPin className="w-4 h-4 text-pink-500" />
+            {selectedStore ? (
+              <span className="truncate">{selectedStore} - {selectedStoreName}</span>
+            ) : (
+              <span className="text-gray-500">Selecciona una tienda</span>
+            )}
+          </div>
+          <svg className="w-4 h-4 text-gray-400 group-hover:text-pink-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[300px] p-2" align="start">
         <div className="relative mb-2">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
           <Input 
             placeholder="Buscar tienda..." 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-8 h-9 text-sm bg-gray-50"
+            className="pl-8 h-9 text-sm bg-gray-50 placeholder:text-gray-600"
           />
         </div>
         <div className="max-h-[300px] overflow-y-auto space-y-1">

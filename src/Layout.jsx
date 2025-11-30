@@ -88,8 +88,10 @@ export default function Layout({ children, currentPageName }) {
         </nav>
 
         {/* Right Actions */}
-        <div className="flex items-center gap-2">
-          <SmartSearch storeId={selectedStore} />
+        <div className="flex items-center gap-2 h-full">
+          <div className="flex items-center h-full">
+            <SmartSearch storeId={selectedStore} />
+          </div>
 
           {/* Mobile Menu */}
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>

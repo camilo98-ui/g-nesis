@@ -122,7 +122,7 @@ export default function SmartSearch({ storeId }) {
                       setSearchTerm(e.target.value);
                       setSelectedCashier(null);
                     }}
-                    className="border-0 focus-visible:ring-0 text-lg"
+                    className="border-0 focus-visible:ring-0 text-lg placeholder:text-gray-600"
                     autoFocus
                   />
                   <Button variant="ghost" size="icon" onClick={handleClose} className="rounded-full">
