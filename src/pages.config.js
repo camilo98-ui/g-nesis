@@ -9,6 +9,7 @@ import Reports from './pages/Reports';
 import Settings from './pages/Settings';
 import CashierProfile from './pages/CashierProfile';
 import CashiersDashboard from './pages/CashiersDashboard';
+import FreezerMap from './pages/FreezerMap';
 import __Layout from './Layout.jsx';
 
 
@@ -24,6 +25,7 @@ export const PAGES = {
     "Settings": Settings,
     "CashierProfile": CashierProfile,
     "CashiersDashboard": CashiersDashboard,
+    "FreezerMap": FreezerMap,
 }
 
 export const pagesConfig = {
