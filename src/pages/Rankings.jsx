@@ -26,6 +26,7 @@ export default function Rankings() {
   const [activeTab, setActiveTab] = useState('sales');
   const [showGlobal, setShowGlobal] = useState(false);
   const [globalSearch, setGlobalSearch] = useState('');
+  const [globalStoreFilter, setGlobalStoreFilter] = useState('');
 
   useEffect(() => {
     const saved = localStorage.getItem('selectedStore');
@@ -566,17 +567,27 @@ export default function Rankings() {
                   </div>
                 </div>
 
-                {/* Search */}
-                <div className="px-5 pt-4">
-                  <div className="relative">
+                {/* Filters */}
+                <div className="px-5 pt-4 flex flex-col sm:flex-row gap-2">
+                  <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <Input
-                      placeholder="Buscar cajero por nombre..."
+                      placeholder="Buscar cajero..."
                       value={globalSearch}
                       onChange={(e) => setGlobalSearch(e.target.value)}
                       className="pl-10 bg-gray-50 border-gray-200 focus:border-purple-400"
                     />
                   </div>
+                  <select
+                    value={globalStoreFilter}
+                    onChange={(e) => setGlobalStoreFilter(e.target.value)}
+                    className="h-10 px-3 rounded-md border border-gray-200 bg-gray-50 text-sm focus:border-purple-400 focus:outline-none"
+                  >
+                    <option value="">Todas las tiendas</option>
+                    {STORES.map(store => (
+                      <option key={store.code} value={store.code}>{store.code} - {store.name}</option>
+                    ))}
+                  </select>
                 </div>
 
                 {/* Content */}
@@ -613,7 +624,7 @@ export default function Rankings() {
                         </p>
                       </div>
                       {globalRankings.bestOverallRanking
-                        ?.filter(item => !globalSearch || item.cashier?.name?.toLowerCase().includes(globalSearch.toLowerCase()))
+                        ?.filter(item => (!globalSearch || item.cashier?.name?.toLowerCase().includes(globalSearch.toLowerCase())) && (!globalStoreFilter || item.store_id === globalStoreFilter))
                         .map((item) => (
                         <motion.div
                           key={item.cashier_id}
@@ -655,7 +666,7 @@ export default function Rankings() {
                     {/* Ventas */}
                     <TabsContent value="sales" className="space-y-3">
                       {globalRankings.salesRanking
-                        ?.filter(item => !globalSearch || item.cashier?.name?.toLowerCase().includes(globalSearch.toLowerCase()))
+                        ?.filter(item => (!globalSearch || item.cashier?.name?.toLowerCase().includes(globalSearch.toLowerCase())) && (!globalStoreFilter || item.store_id === globalStoreFilter))
                         .map((item) => (
                         <motion.div
                           key={item.cashier_id}
@@ -691,7 +702,7 @@ export default function Rankings() {
                     {/* Transacciones */}
                     <TabsContent value="transactions" className="space-y-3">
                       {globalRankings.transactionsRanking
-                        .filter(item => !globalSearch || item.cashier?.name?.toLowerCase().includes(globalSearch.toLowerCase()))
+                        ?.filter(item => (!globalSearch || item.cashier?.name?.toLowerCase().includes(globalSearch.toLowerCase())) && (!globalStoreFilter || item.store_id === globalStoreFilter))
                         .map((item) => (
                         <motion.div
                           key={item.cashier_id}
@@ -727,7 +738,7 @@ export default function Rankings() {
                     {/* Ticket Promedio */}
                     <TabsContent value="ticket" className="space-y-3">
                       {globalRankings.ticketRanking
-                        ?.filter(item => !globalSearch || item.cashier?.name?.toLowerCase().includes(globalSearch.toLowerCase()))
+                        ?.filter(item => (!globalSearch || item.cashier?.name?.toLowerCase().includes(globalSearch.toLowerCase())) && (!globalStoreFilter || item.store_id === globalStoreFilter))
                         .map((item) => (
                         <motion.div
                           key={item.cashier_id}
@@ -763,7 +774,7 @@ export default function Rankings() {
                     {/* Sugeridos */}
                     <TabsContent value="suggested" className="space-y-3">
                       {globalRankings.suggestedRanking
-                        ?.filter(item => !globalSearch || item.cashier?.name?.toLowerCase().includes(globalSearch.toLowerCase()))
+                        ?.filter(item => (!globalSearch || item.cashier?.name?.toLowerCase().includes(globalSearch.toLowerCase())) && (!globalStoreFilter || item.store_id === globalStoreFilter))
                         .map((item) => (
                         <motion.div
                           key={item.cashier_id}
