@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
@@ -11,7 +11,7 @@ import CashierRankingCard from '@/components/ranking/CashierRankingCard';
 import CashierRecommendation from '@/components/CashierRecommendation';
 import TrendChart from '@/components/ranking/TrendChart';
 import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
-import { ArrowLeft, Award, Gift, Trophy, Star, Receipt, TrendingUp } from 'lucide-react';
+import { ArrowLeft, Award, Gift, Trophy, Star, Receipt, TrendingUp, Globe, X, Medal } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { startOfMonth } from 'date-fns';
@@ -23,6 +23,7 @@ export default function Rankings() {
     to: new Date()
   });
   const [activeTab, setActiveTab] = useState('sales');
+  const [showGlobal, setShowGlobal] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem('selectedStore');
@@ -44,6 +45,19 @@ export default function Rankings() {
     queryKey: ['shiftRecords', selectedStore],
     queryFn: () => base44.entities.ShiftRecord.filter({ store_id: selectedStore }),
     enabled: !!selectedStore
+  });
+
+  // Datos globales - todos los cajeros y registros
+  const { data: allCashiers = [] } = useQuery({
+    queryKey: ['allCashiers'],
+    queryFn: () => base44.entities.Cashier.list(),
+    enabled: showGlobal
+  });
+
+  const { data: allShiftRecords = [] } = useQuery({
+    queryKey: ['allShiftRecords'],
+    queryFn: () => base44.entities.ShiftRecord.list(),
+    enabled: showGlobal
   });
 
   // Filter records by date range
@@ -112,7 +126,75 @@ export default function Rankings() {
     return { salesRanking, suggestedRanking, ticketRanking };
   }, [filteredRecords, cashiers]);
 
+  // Rankings globales
+  const globalRankings = useMemo(() => {
+    if (!showGlobal) return { salesRanking: [], ticketRanking: [], transactionsRanking: [] };
+    
+    const globalFiltered = allShiftRecords.filter(r => {
+      const date = new Date(r.date);
+      return date >= dateRange.from && date <= dateRange.to;
+    });
+
+    const cashierStats = {};
+    globalFiltered.forEach(record => {
+      if (!cashierStats[record.cashier_id]) {
+        cashierStats[record.cashier_id] = {
+          cashier_id: record.cashier_id,
+          store_id: record.store_id,
+          totalSales: 0,
+          totalTickets: 0,
+          totalTransactions: 0,
+          totalSuggested: 0,
+          shifts: 0
+        };
+      }
+      cashierStats[record.cashier_id].totalSales += record.sales || 0;
+      cashierStats[record.cashier_id].totalTickets += record.tickets || 0;
+      cashierStats[record.cashier_id].totalTransactions += record.transactions || 0;
+      cashierStats[record.cashier_id].totalSuggested += record.suggested_sales || 0;
+      cashierStats[record.cashier_id].shifts += 1;
+    });
+
+    Object.values(cashierStats).forEach(stats => {
+      stats.avgTicket = stats.totalTickets > 0 ? stats.totalSales / stats.totalTickets : 0;
+    });
+
+    const salesRanking = Object.values(cashierStats)
+      .sort((a, b) => b.totalSales - a.totalSales)
+      .map((stats, index) => ({
+        ...stats,
+        rank: index + 1,
+        cashier: allCashiers.find(c => c.id === stats.cashier_id) || { name: 'Desconocido' },
+        storeName: STORES.find(s => s.code === stats.store_id)?.name || stats.store_id
+      }));
+
+    const ticketRanking = Object.values(cashierStats)
+      .filter(s => s.totalTickets > 0)
+      .sort((a, b) => b.avgTicket - a.avgTicket)
+      .map((stats, index) => ({
+        ...stats,
+        rank: index + 1,
+        cashier: allCashiers.find(c => c.id === stats.cashier_id) || { name: 'Desconocido' },
+        storeName: STORES.find(s => s.code === stats.store_id)?.name || stats.store_id
+      }));
+
+    const transactionsRanking = Object.values(cashierStats)
+      .sort((a, b) => b.totalTransactions - a.totalTransactions)
+      .map((stats, index) => ({
+        ...stats,
+        rank: index + 1,
+        cashier: allCashiers.find(c => c.id === stats.cashier_id) || { name: 'Desconocido' },
+        storeName: STORES.find(s => s.code === stats.store_id)?.name || stats.store_id
+      }));
+
+    return { salesRanking, ticketRanking, transactionsRanking };
+  }, [showGlobal, allShiftRecords, allCashiers, dateRange]);
+
   const selectedStoreName = STORES.find(s => s.code === selectedStore)?.name || '';
+  
+  const formatCurrency = (v) => new Intl.NumberFormat('es-CO', { 
+    style: 'currency', currency: 'COP', minimumFractionDigits: 0 
+  }).format(v);
 
   return (
     <div className="min-h-screen bg-white relative">
@@ -136,10 +218,19 @@ export default function Rankings() {
           <StoreSelector selectedStore={selectedStore} onStoreChange={handleStoreChange} />
         </div>
 
-        {/* Date Filter */}
+        {/* Date Filter & Global Button */}
         {selectedStore && (
-          <div className="mb-6 flex flex-wrap items-center gap-3">
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
             <DateFilter dateRange={dateRange} onDateChange={setDateRange} />
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                onClick={() => setShowGlobal(true)}
+                className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg shadow-purple-500/30 gap-2"
+              >
+                <Globe className="w-4 h-4" />
+                Ranking Global
+              </Button>
+            </motion.div>
           </div>
         )}
 
@@ -276,7 +367,180 @@ export default function Rankings() {
               selectedDate={new Date()}
             />
           </motion.div>
-        ) : (
+        )}
+
+        {/* Global Rankings Modal */}
+        <AnimatePresence>
+          {showGlobal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+              onClick={() => setShowGlobal(false)}
+            >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 50 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 50 }}
+                onClick={e => e.stopPropagation()}
+                className="w-full max-w-4xl bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+              >
+                {/* Header */}
+                <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 p-5 text-white">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <motion.div
+                        animate={{ rotate: [0, 360] }}
+                        transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                      >
+                        <Globe className="w-8 h-8" />
+                      </motion.div>
+                      <div>
+                        <h2 className="text-2xl font-bold">Ranking Global</h2>
+                        <p className="text-white/80 text-sm">Todos los cajeros de todas las tiendas</p>
+                      </div>
+                    </div>
+                    <Button variant="ghost" size="icon" onClick={() => setShowGlobal(false)} className="text-white hover:bg-white/20 rounded-full">
+                      <X className="w-6 h-6" />
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 overflow-y-auto p-5">
+                  <Tabs defaultValue="sales" className="w-full">
+                    <TabsList className="w-full grid grid-cols-3 mb-6 bg-gray-100 p-1 rounded-xl">
+                      <TabsTrigger value="sales" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-green-500 data-[state=active]:text-white rounded-lg gap-1">
+                        <Trophy className="w-4 h-4" />
+                        Ventas
+                      </TabsTrigger>
+                      <TabsTrigger value="transactions" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white rounded-lg gap-1">
+                        <Receipt className="w-4 h-4" />
+                        Transacciones
+                      </TabsTrigger>
+                      <TabsTrigger value="ticket" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500 data-[state=active]:to-orange-500 data-[state=active]:text-white rounded-lg gap-1">
+                        <TrendingUp className="w-4 h-4" />
+                        Ticket Prom.
+                      </TabsTrigger>
+                    </TabsList>
+
+                    {/* Ventas */}
+                    <TabsContent value="sales" className="space-y-3">
+                      {globalRankings.salesRanking.slice(0, 20).map((item, index) => (
+                        <motion.div
+                          key={item.cashier_id}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.03 }}
+                          className={`flex items-center gap-4 p-4 rounded-xl border ${
+                            index < 3 
+                              ? 'bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-200' 
+                              : 'bg-white border-gray-100'
+                          }`}
+                        >
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${
+                            index === 0 ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-white' :
+                            index === 1 ? 'bg-gradient-to-r from-gray-300 to-gray-400 text-white' :
+                            index === 2 ? 'bg-gradient-to-r from-orange-400 to-amber-600 text-white' :
+                            'bg-gray-100 text-gray-600'
+                          }`}>
+                            {index < 3 ? <Medal className="w-5 h-5" /> : item.rank}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-bold text-gray-800 truncate">{item.cashier?.name}</p>
+                            <p className="text-xs text-gray-500 truncate">📍 {item.storeName}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-bold text-emerald-600">{formatCurrency(item.totalSales)}</p>
+                            <p className="text-xs text-gray-400">{item.shifts} turnos</p>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </TabsContent>
+
+                    {/* Transacciones */}
+                    <TabsContent value="transactions" className="space-y-3">
+                      {globalRankings.transactionsRanking.slice(0, 20).map((item, index) => (
+                        <motion.div
+                          key={item.cashier_id}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.03 }}
+                          className={`flex items-center gap-4 p-4 rounded-xl border ${
+                            index < 3 
+                              ? 'bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200' 
+                              : 'bg-white border-gray-100'
+                          }`}
+                        >
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${
+                            index === 0 ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-white' :
+                            index === 1 ? 'bg-gradient-to-r from-gray-300 to-gray-400 text-white' :
+                            index === 2 ? 'bg-gradient-to-r from-orange-400 to-amber-600 text-white' :
+                            'bg-gray-100 text-gray-600'
+                          }`}>
+                            {index < 3 ? <Medal className="w-5 h-5" /> : item.rank}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-bold text-gray-800 truncate">{item.cashier?.name}</p>
+                            <p className="text-xs text-gray-500 truncate">📍 {item.storeName}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-bold text-blue-600">{item.totalTransactions.toLocaleString()}</p>
+                            <p className="text-xs text-gray-400">transacciones</p>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </TabsContent>
+
+                    {/* Ticket Promedio */}
+                    <TabsContent value="ticket" className="space-y-3">
+                      {globalRankings.ticketRanking.slice(0, 20).map((item, index) => (
+                        <motion.div
+                          key={item.cashier_id}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.03 }}
+                          className={`flex items-center gap-4 p-4 rounded-xl border ${
+                            index < 3 
+                              ? 'bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200' 
+                              : 'bg-white border-gray-100'
+                          }`}
+                        >
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${
+                            index === 0 ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-white' :
+                            index === 1 ? 'bg-gradient-to-r from-gray-300 to-gray-400 text-white' :
+                            index === 2 ? 'bg-gradient-to-r from-orange-400 to-amber-600 text-white' :
+                            'bg-gray-100 text-gray-600'
+                          }`}>
+                            {index < 3 ? <Medal className="w-5 h-5" /> : item.rank}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-bold text-gray-800 truncate">{item.cashier?.name}</p>
+                            <p className="text-xs text-gray-500 truncate">📍 {item.storeName}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-bold text-amber-600">{formatCurrency(item.avgTicket)}</p>
+                            <p className="text-xs text-gray-400">{item.totalTickets} tickets</p>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </TabsContent>
+                  </Tabs>
+                </div>
+
+                {/* Footer */}
+                <div className="p-4 bg-gray-50 border-t text-center">
+                  <p className="text-sm text-gray-500">
+                    🏆 Mostrando top 20 de {globalRankings.salesRanking.length} cajeros en todas las tiendas
+                  </p>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {!selectedStore && (
           <div className="text-center py-20">
             <motion.div
               animate={{ y: [0, -15, 0], rotate: [0, 5, -5, 0] }}
@@ -286,7 +550,16 @@ export default function Rankings() {
               🏆
             </motion.div>
             <h2 className="text-xl font-bold text-gray-700 mb-2">Selecciona una tienda</h2>
-            <p className="text-gray-400">Para ver los rankings de cajeros</p>
+            <p className="text-gray-400 mb-6">Para ver los rankings de cajeros</p>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                onClick={() => setShowGlobal(true)}
+                className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg shadow-purple-500/30 gap-2"
+              >
+                <Globe className="w-4 h-4" />
+                Ver Ranking Global
+              </Button>
+            </motion.div>
           </div>
         )}
       </div>
