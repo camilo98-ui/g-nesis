@@ -73,6 +73,15 @@ const MENU_ITEMS = [
     iconBg: 'bg-teal-100/80',
     iconColor: 'text-teal-400'
   },
+  { 
+    name: 'Mapa Nevera', 
+    page: 'FreezerMap',
+    icon: LayoutDashboard, 
+    description: 'Gestión de sabores 3D',
+    bgColor: 'bg-gradient-to-br from-cyan-50/80 to-sky-100/60',
+    iconBg: 'bg-cyan-100/80',
+    iconColor: 'text-cyan-400'
+  },
 ];
 
 export default function Home() {
@@ -133,7 +142,15 @@ export default function Home() {
         >
           {/* Logo removido del inicio */}
 
-          <p className="text-gray-500 text-sm mb-6">Sistema de Gestión de Ventas</p>
+          <motion.img 
+                  src={LOGO_URL} 
+                  alt="Popsy" 
+                  className="h-16 md:h-20 object-contain mx-auto mb-4"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.5 }}
+                />
+                <p className="text-gray-500 text-sm mb-6">Sistema de Gestión de Ventas</p>
           
           {/* Store Selector prominente */}
           <motion.div 

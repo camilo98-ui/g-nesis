@@ -8,8 +8,9 @@ import StoreSelector, { STORES } from '@/components/StoreSelector';
 import DateFilter from '@/components/DateFilter';
 import CashierRankingCard from '@/components/ranking/CashierRankingCard';
 import CashierRecommendation from '@/components/CashierRecommendation';
+import TrendChart from '@/components/ranking/TrendChart';
 import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
-import { ArrowLeft, Award, Gift, Trophy, Star, Receipt } from 'lucide-react';
+import { ArrowLeft, Award, Gift, Trophy, Star, Receipt, TrendingUp } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { startOfMonth } from 'date-fns';
@@ -172,7 +173,15 @@ export default function Rankings() {
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="sales" className="space-y-3">
+              <TabsContent value="sales" className="space-y-4">
+                {/* Trend Chart */}
+                <TrendChart 
+                  shiftRecords={filteredRecords}
+                  cashiers={cashiers}
+                  dateRange={dateRange}
+                  metricType="sales"
+                />
+                
                 {rankings.salesRanking.length > 0 ? (
                   rankings.salesRanking.map((item, index) => (
                     <CashierRankingCard
@@ -195,7 +204,15 @@ export default function Rankings() {
                 )}
               </TabsContent>
 
-              <TabsContent value="ticket" className="space-y-3">
+              <TabsContent value="ticket" className="space-y-4">
+                {/* Trend Chart */}
+                <TrendChart 
+                  shiftRecords={filteredRecords}
+                  cashiers={cashiers}
+                  dateRange={dateRange}
+                  metricType="ticket"
+                />
+                
                 {rankings.ticketRanking.length > 0 ? (
                   rankings.ticketRanking.map((item, index) => (
                     <CashierRankingCard
@@ -219,7 +236,15 @@ export default function Rankings() {
                 )}
               </TabsContent>
 
-              <TabsContent value="suggested" className="space-y-3">
+              <TabsContent value="suggested" className="space-y-4">
+                {/* Trend Chart for Transactions (as proxy for activity) */}
+                <TrendChart 
+                  shiftRecords={filteredRecords}
+                  cashiers={cashiers}
+                  dateRange={dateRange}
+                  metricType="transactions"
+                />
+                
                 {rankings.suggestedRanking.length > 0 ? (
                   rankings.suggestedRanking.map((item, index) => (
                     <CashierRankingCard
