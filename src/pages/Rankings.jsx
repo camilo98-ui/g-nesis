@@ -346,29 +346,83 @@ export default function Rankings() {
             )}
 
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="w-full bg-white border border-gray-100 p-1 rounded-xl mb-6 grid grid-cols-3 shadow-sm">
+              <TabsList className="w-full bg-white border border-gray-100 p-1 rounded-xl mb-6 grid grid-cols-4 shadow-sm">
+                <TabsTrigger 
+                  value="best" 
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-400 data-[state=active]:to-yellow-500 data-[state=active]:text-white rounded-lg"
+                >
+                  <Crown className="w-4 h-4 mr-1" />
+                  <span className="hidden sm:inline">Mejor</span>
+                </TabsTrigger>
                 <TabsTrigger 
                   value="sales" 
                   className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-400 data-[state=active]:to-rose-400 data-[state=active]:text-white rounded-lg"
                 >
-                  <Trophy className="w-4 h-4 mr-2" />
-                  <span className="hidden sm:inline">Top</span> Ventas
+                  <Trophy className="w-4 h-4 mr-1" />
+                  <span className="hidden sm:inline">Ventas</span>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="ticket" 
                   className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-sky-400 data-[state=active]:to-blue-400 data-[state=active]:text-white rounded-lg"
                 >
-                  <Receipt className="w-4 h-4 mr-2" />
-                  <span className="hidden sm:inline">Top</span> Ticket
+                  <Receipt className="w-4 h-4 mr-1" />
+                  <span className="hidden sm:inline">Ticket</span>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="suggested" 
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-400 data-[state=active]:to-orange-400 data-[state=active]:text-white rounded-lg"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-400 data-[state=active]:to-green-500 data-[state=active]:text-white rounded-lg"
                 >
-                  <Star className="w-4 h-4 mr-2" />
-                  <span className="hidden sm:inline">Top</span> Sugeridos
+                  <Star className="w-4 h-4 mr-1" />
+                  <span className="hidden sm:inline">Sugeridos</span>
                 </TabsTrigger>
               </TabsList>
+
+              {/* Best Cashier Tab */}
+              <TabsContent value="best" className="space-y-4">
+                {rankings.bestCashier?.length > 0 ? (
+                  rankings.bestCashier.map((item, index) => (
+                    <motion.div
+                      key={item.cashier_id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      className={`p-4 rounded-xl border ${
+                        index === 0 ? 'bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-200' :
+                        index <= 2 ? 'bg-gradient-to-r from-gray-50 to-slate-50 border-gray-200' :
+                        'bg-white border-gray-100'
+                      }`}
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg ${
+                          index === 0 ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-white shadow-lg' :
+                          index === 1 ? 'bg-gradient-to-r from-gray-300 to-gray-400 text-white' :
+                          index === 2 ? 'bg-gradient-to-r from-orange-400 to-amber-600 text-white' :
+                          'bg-gray-100 text-gray-600'
+                        }`}>
+                          {index <= 2 ? <Crown className="w-5 h-5" /> : index + 1}
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-bold text-gray-800">{item.cashier?.name}</p>
+                          <div className="flex flex-wrap gap-2 mt-1">
+                            <span className="text-[10px] bg-pink-100 text-pink-700 px-2 py-0.5 rounded-full">Ventas: {item.salesScore?.toFixed(0)}</span>
+                            <span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Ticket: {item.ticketScore?.toFixed(0)}</span>
+                            <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Sugeridos: {item.suggestedScore?.toFixed(0)}</span>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xl font-bold text-amber-600">{item.overallScore?.toFixed(0)}</p>
+                          <p className="text-xs text-gray-400">puntos</p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))
+                ) : (
+                  <div className="text-center py-12 bg-white rounded-2xl border border-gray-100">
+                    <Crown className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                    <p className="text-gray-400">No hay registros en el período seleccionado</p>
+                  </div>
+                )}
+              </TabsContent>
 
               <TabsContent value="sales" className="space-y-4">
                 {/* Trend Chart */}
