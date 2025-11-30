@@ -726,6 +726,114 @@ function ManagementDashboard() {
 
           {/* Team Tab */}
           <TabsContent value="team" className="space-y-6">
+            {/* Charts Row */}
+            <div className="grid md:grid-cols-2 gap-4">
+              {/* Sales Distribution by Store */}
+              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+                    <Users className="w-4 h-4 text-purple-500" />
+                    Distribución de Ventas por Tienda
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={180}>
+                    <RechartsPie>
+                      <Pie
+                        data={storePerformance.slice(0, 6).map((s, i) => ({ 
+                          name: s.code, 
+                          value: s.totalSales,
+                          fill: PASTEL_COLORS[i % PASTEL_COLORS.length]
+                        }))}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={40}
+                        outerRadius={70}
+                        dataKey="value"
+                        label={({ name }) => name}
+                        labelLine={false}
+                      />
+                      <Tooltip formatter={(v) => formatCurrency(v)} />
+                    </RechartsPie>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+
+              {/* Cashiers per Store */}
+              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+                    <BarChart3 className="w-4 h-4 text-blue-500" />
+                    Productividad Promedio por Tienda
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={180}>
+                    <BarChart data={storePerformance.slice(0, 8).map(s => ({
+                      store: s.code,
+                      avgTicket: s.avgTicket
+                    }))}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                      <XAxis dataKey="store" tick={{ fontSize: 9 }} />
+                      <YAxis tickFormatter={(v) => `${(v/1000).toFixed(0)}K`} tick={{ fontSize: 10 }} />
+                      <Tooltip formatter={(v) => formatCurrency(v)} />
+                      <Bar dataKey="avgTicket" fill="#a5b4fc" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Top Performers vs Low Performers */}
+            <div className="grid md:grid-cols-2 gap-4">
+              <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-green-700 flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4" />
+                    Top 5 Mejores Rendimientos
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {topCashiers.slice(0, 5).map((cashier, index) => (
+                    <div key={cashier.cashier_id} className="flex items-center gap-3 bg-white/60 rounded-lg p-2">
+                      <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
+                        index === 0 ? 'bg-yellow-400 text-white' : 'bg-gray-200 text-gray-600'
+                      }`}>{index + 1}</div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-800 truncate">{cashier.cashier?.name}</p>
+                        <p className="text-[10px] text-gray-500">{cashier.storeName}</p>
+                      </div>
+                      <p className="text-sm font-bold text-green-600">{formatCurrency(cashier.totalSales)}</p>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-red-50 to-orange-50 border-red-200">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-red-700 flex items-center gap-2">
+                    <TrendingDown className="w-4 h-4" />
+                    Necesitan Apoyo
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {topCashiers.slice(-5).reverse().map((cashier, index) => (
+                    <div key={cashier.cashier_id} className="flex items-center gap-3 bg-white/60 rounded-lg p-2">
+                      <div className="w-7 h-7 rounded-full bg-red-100 flex items-center justify-center">
+                        <AlertTriangle className="w-3 h-3 text-red-500" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-800 truncate">{cashier.cashier?.name}</p>
+                        <p className="text-[10px] text-gray-500">{cashier.storeName}</p>
+                      </div>
+                      <p className="text-sm font-bold text-red-600">{formatCurrency(cashier.totalSales)}</p>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Full Ranking */}
             <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">

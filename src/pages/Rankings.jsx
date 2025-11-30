@@ -125,7 +125,28 @@ export default function Rankings() {
         cashier: cashiers.find(c => c.id === stats.cashier_id) || { name: 'Desconocido' }
       }));
 
-    return { salesRanking, suggestedRanking, ticketRanking };
+    // Best cashier of the store
+    const maxSales = Math.max(...Object.values(cashierStats).map(s => s.totalSales), 1);
+    const maxTicket = Math.max(...Object.values(cashierStats).filter(s => s.totalTickets > 0).map(s => s.totalSales / s.totalTickets), 1);
+    const maxSuggested = Math.max(...Object.values(cashierStats).map(s => s.totalSuggested), 1);
+
+    const bestCashier = Object.values(cashierStats)
+      .filter(s => s.totalTickets > 0)
+      .map(stats => {
+        const salesScore = (stats.totalSales / maxSales) * 33;
+        const ticketScore = ((stats.totalSales / stats.totalTickets) / maxTicket) * 33;
+        const suggestedScore = (stats.totalSuggested / maxSuggested) * 34;
+        const overallScore = salesScore + ticketScore + suggestedScore;
+        return { ...stats, overallScore, salesScore, ticketScore, suggestedScore };
+      })
+      .sort((a, b) => b.overallScore - a.overallScore)
+      .map((stats, index) => ({
+        ...stats,
+        rank: index + 1,
+        cashier: cashiers.find(c => c.id === stats.cashier_id) || { name: 'Desconocido' }
+      }));
+
+    return { salesRanking, suggestedRanking, ticketRanking, bestCashier };
   }, [filteredRecords, cashiers]);
 
   // Rankings globales
@@ -292,25 +313,57 @@ export default function Rankings() {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-6"
           >
+            {/* Best Cashier of Store */}
+            {rankings.bestCashier?.[0] && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6 bg-gradient-to-r from-amber-50 via-yellow-50 to-orange-50 rounded-2xl p-4 border border-amber-200"
+              >
+                <div className="flex items-center gap-4">
+                  <motion.div
+                    animate={{ rotate: [0, 360] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                    className="w-14 h-14 rounded-full bg-gradient-to-r from-yellow-400 to-amber-500 flex items-center justify-center shadow-lg"
+                  >
+                    <Crown className="w-7 h-7 text-white" />
+                  </motion.div>
+                  <div className="flex-1">
+                    <p className="text-xs text-amber-600 font-medium">⭐ Mejor Cajero de la Tienda</p>
+                    <p className="text-xl font-bold text-gray-800">{rankings.bestCashier[0].cashier?.name}</p>
+                    <div className="flex gap-2 mt-1">
+                      <span className="text-[10px] bg-pink-100 text-pink-700 px-2 py-0.5 rounded-full">Ventas: {rankings.bestCashier[0].salesScore?.toFixed(0)}pts</span>
+                      <span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Ticket: {rankings.bestCashier[0].ticketScore?.toFixed(0)}pts</span>
+                      <span className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">Sugeridos: {rankings.bestCashier[0].suggestedScore?.toFixed(0)}pts</span>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-amber-600">{rankings.bestCashier[0].overallScore?.toFixed(0)}</p>
+                    <p className="text-xs text-gray-500">puntos totales</p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="w-full bg-white border border-gray-100 p-1 rounded-xl mb-6 grid grid-cols-3 shadow-sm">
                 <TabsTrigger 
                   value="sales" 
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500 data-[state=active]:to-rose-500 data-[state=active]:text-white rounded-lg"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-400 data-[state=active]:to-rose-400 data-[state=active]:text-white rounded-lg"
                 >
                   <Trophy className="w-4 h-4 mr-2" />
                   <span className="hidden sm:inline">Top</span> Ventas
                 </TabsTrigger>
                 <TabsTrigger 
                   value="ticket" 
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white rounded-lg"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-sky-400 data-[state=active]:to-blue-400 data-[state=active]:text-white rounded-lg"
                 >
                   <Receipt className="w-4 h-4 mr-2" />
                   <span className="hidden sm:inline">Top</span> Ticket
                 </TabsTrigger>
                 <TabsTrigger 
                   value="suggested" 
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500 data-[state=active]:to-orange-500 data-[state=active]:text-white rounded-lg"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-400 data-[state=active]:to-orange-400 data-[state=active]:text-white rounded-lg"
                 >
                   <Star className="w-4 h-4 mr-2" />
                   <span className="hidden sm:inline">Top</span> Sugeridos
@@ -475,24 +528,24 @@ export default function Rankings() {
                 {/* Content */}
                 <div className="flex-1 overflow-y-auto p-5">
                   <Tabs defaultValue="best" className="w-full">
-                    <TabsList className="w-full grid grid-cols-5 mb-6 bg-gray-100 p-1 rounded-xl">
-                      <TabsTrigger value="best" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white rounded-lg gap-1 text-xs">
+                    <TabsList className="w-full grid grid-cols-5 mb-6 bg-gray-50 p-1 rounded-xl">
+                      <TabsTrigger value="best" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-300 data-[state=active]:to-purple-400 data-[state=active]:text-white rounded-lg gap-1 text-xs">
                         <Crown className="w-3 h-3" />
                         <span className="hidden sm:inline">Mejor</span>
                       </TabsTrigger>
-                      <TabsTrigger value="sales" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-green-500 data-[state=active]:text-white rounded-lg gap-1 text-xs">
+                      <TabsTrigger value="sales" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-300 data-[state=active]:to-teal-400 data-[state=active]:text-white rounded-lg gap-1 text-xs">
                         <Trophy className="w-3 h-3" />
                         <span className="hidden sm:inline">Ventas</span>
                       </TabsTrigger>
-                      <TabsTrigger value="transactions" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white rounded-lg gap-1 text-xs">
+                      <TabsTrigger value="transactions" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-sky-300 data-[state=active]:to-blue-400 data-[state=active]:text-white rounded-lg gap-1 text-xs">
                         <Receipt className="w-3 h-3" />
                         <span className="hidden sm:inline">Trans.</span>
                       </TabsTrigger>
-                      <TabsTrigger value="ticket" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500 data-[state=active]:to-orange-500 data-[state=active]:text-white rounded-lg gap-1 text-xs">
+                      <TabsTrigger value="ticket" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-300 data-[state=active]:to-yellow-400 data-[state=active]:text-white rounded-lg gap-1 text-xs">
                         <TrendingUp className="w-3 h-3" />
                         <span className="hidden sm:inline">Ticket</span>
                       </TabsTrigger>
-                      <TabsTrigger value="suggested" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-rose-500 data-[state=active]:to-red-500 data-[state=active]:text-white rounded-lg gap-1 text-xs">
+                      <TabsTrigger value="suggested" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-300 data-[state=active]:to-rose-400 data-[state=active]:text-white rounded-lg gap-1 text-xs">
                         <Sparkles className="w-3 h-3" />
                         <span className="hidden sm:inline">Sugeridos</span>
                       </TabsTrigger>

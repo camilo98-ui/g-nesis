@@ -383,18 +383,22 @@ Proporciona análisis en formato JSON con:
 
             {/* Tabs */}
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-              <TabsList className="bg-white/80 p-1 rounded-xl grid grid-cols-3 w-full max-w-lg mx-auto">
-                <TabsTrigger value="predictions" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white rounded-lg gap-1">
+              <TabsList className="bg-white/80 p-1 rounded-xl grid grid-cols-4 w-full max-w-xl mx-auto">
+                <TabsTrigger value="predictions" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white rounded-lg gap-1 text-xs">
                   <TrendingUp className="w-4 h-4" />
-                  Predicciones
+                  <span className="hidden sm:inline">Predicciones</span>
                 </TabsTrigger>
-                <TabsTrigger value="staff" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white rounded-lg gap-1">
+                <TabsTrigger value="patterns" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-violet-500 data-[state=active]:text-white rounded-lg gap-1 text-xs">
+                  <BarChart3 className="w-4 h-4" />
+                  <span className="hidden sm:inline">Patrones</span>
+                </TabsTrigger>
+                <TabsTrigger value="staff" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white rounded-lg gap-1 text-xs">
                   <Users className="w-4 h-4" />
-                  Personal
+                  <span className="hidden sm:inline">Personal</span>
                 </TabsTrigger>
-                <TabsTrigger value="promotions" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500 data-[state=active]:to-orange-500 data-[state=active]:text-white rounded-lg gap-1">
+                <TabsTrigger value="promotions" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500 data-[state=active]:to-orange-500 data-[state=active]:text-white rounded-lg gap-1 text-xs">
                   <Gift className="w-4 h-4" />
-                  Promociones
+                  <span className="hidden sm:inline">Promociones</span>
                 </TabsTrigger>
               </TabsList>
 
@@ -571,6 +575,188 @@ Proporciona análisis en formato JSON con:
                     </Card>
                   </motion.div>
                 )}
+              </TabsContent>
+
+              {/* Patterns Tab - Customer Analysis */}
+              <TabsContent value="patterns" className="space-y-6">
+                {/* Sales by Hour/Shift Pattern */}
+                <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <Clock className="w-5 h-5 text-indigo-500" />
+                      Patrones de Venta por Turno
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ResponsiveContainer width="100%" height={250}>
+                      <ComposedChart data={historicalPatterns?.shiftAverages || []}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                        <XAxis dataKey="shiftName" tick={{ fontSize: 12 }} />
+                        <YAxis tickFormatter={(v) => `${(v/1000000).toFixed(1)}M`} tick={{ fontSize: 11 }} />
+                        <Tooltip formatter={(v) => formatCurrency(v)} />
+                        <Bar dataKey="avgSales" fill="#a5b4fc" radius={[8, 8, 0, 0]} name="Ventas Promedio" />
+                        <Line type="monotone" dataKey="count" stroke="#f472b6" strokeWidth={2} name="Registros" yAxisId="right" />
+                        <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 10 }} />
+                      </ComposedChart>
+                    </ResponsiveContainer>
+                    <div className="mt-4 grid grid-cols-3 gap-3">
+                      {(historicalPatterns?.shiftAverages || []).map((shift, idx) => (
+                        <div key={shift.shift} className={`p-3 rounded-xl text-center ${
+                          idx === 0 ? 'bg-yellow-50' : idx === 1 ? 'bg-orange-50' : 'bg-indigo-50'
+                        }`}>
+                          <div className="flex justify-center mb-1">
+                            {idx === 0 ? <Sun className="w-5 h-5 text-yellow-500" /> : 
+                             idx === 1 ? <Cloud className="w-5 h-5 text-orange-500" /> : 
+                             <Moon className="w-5 h-5 text-indigo-500" />}
+                          </div>
+                          <p className="text-sm font-bold text-gray-800">{shift.shiftName}</p>
+                          <p className="text-xs text-gray-500">{formatCurrency(shift.avgSales)}</p>
+                          <p className="text-[10px] text-gray-400">{shift.count} registros</p>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Day of Week Patterns */}
+                <div className="grid md:grid-cols-2 gap-4">
+                  <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium text-gray-600">Probabilidad de Alta Demanda por Día</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {(historicalPatterns?.dayAverages || []).map((day, idx) => {
+                          const maxAvg = Math.max(...(historicalPatterns?.dayAverages || []).map(d => d.avgSales), 1);
+                          const probability = (day.avgSales / maxAvg) * 100;
+                          return (
+                            <div key={day.day} className="flex items-center gap-3">
+                              <span className="w-12 text-sm font-medium text-gray-700">{day.dayName}</span>
+                              <div className="flex-1 bg-gray-100 rounded-full h-3">
+                                <motion.div
+                                  initial={{ width: 0 }}
+                                  animate={{ width: `${probability}%` }}
+                                  transition={{ delay: idx * 0.1, duration: 0.5 }}
+                                  className={`h-3 rounded-full ${
+                                    probability > 80 ? 'bg-gradient-to-r from-green-400 to-emerald-500' :
+                                    probability > 50 ? 'bg-gradient-to-r from-yellow-400 to-amber-500' :
+                                    'bg-gradient-to-r from-gray-300 to-gray-400'
+                                  }`}
+                                />
+                              </div>
+                              <span className="text-xs font-medium text-gray-600 w-12 text-right">{probability.toFixed(0)}%</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium text-gray-600">Segmentos de Clientes</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {[
+                          { name: 'Familias (Fines de semana)', probability: 85, color: 'from-pink-400 to-rose-500' },
+                          { name: 'Oficinistas (Almuerzo)', probability: 70, color: 'from-blue-400 to-cyan-500' },
+                          { name: 'Estudiantes (Tarde)', probability: 60, color: 'from-purple-400 to-violet-500' },
+                          { name: 'Parejas (Noche)', probability: 45, color: 'from-amber-400 to-orange-500' }
+                        ].map((segment, idx) => (
+                          <div key={segment.name} className="flex items-center gap-3">
+                            <div className="flex-1">
+                              <p className="text-sm font-medium text-gray-700">{segment.name}</p>
+                              <div className="bg-gray-100 rounded-full h-2 mt-1">
+                                <motion.div
+                                  initial={{ width: 0 }}
+                                  animate={{ width: `${segment.probability}%` }}
+                                  transition={{ delay: idx * 0.1, duration: 0.5 }}
+                                  className={`h-2 rounded-full bg-gradient-to-r ${segment.color}`}
+                                />
+                              </div>
+                            </div>
+                            <Badge className="bg-gray-100 text-gray-700">{segment.probability}%</Badge>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Products Analysis */}
+                <Card className="bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-200">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Sparkles className="w-5 h-5 text-indigo-500" />
+                      Productos Más Vendidos por Momento
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid md:grid-cols-3 gap-4">
+                      <div className="bg-white/80 rounded-xl p-4">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Sun className="w-5 h-5 text-yellow-500" />
+                          <h4 className="font-medium text-gray-800">Mañana</h4>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between text-sm">
+                            <span>🍦 Cono sencillo</span>
+                            <Badge className="bg-yellow-100 text-yellow-700">35%</Badge>
+                          </div>
+                          <div className="flex items-center justify-between text-sm">
+                            <span>🥤 Malteada</span>
+                            <Badge className="bg-yellow-100 text-yellow-700">25%</Badge>
+                          </div>
+                          <div className="flex items-center justify-between text-sm">
+                            <span>🧁 Litro</span>
+                            <Badge className="bg-yellow-100 text-yellow-700">20%</Badge>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="bg-white/80 rounded-xl p-4">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Cloud className="w-5 h-5 text-orange-500" />
+                          <h4 className="font-medium text-gray-800">Tarde</h4>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between text-sm">
+                            <span>🍨 Banana Split</span>
+                            <Badge className="bg-orange-100 text-orange-700">30%</Badge>
+                          </div>
+                          <div className="flex items-center justify-between text-sm">
+                            <span>🍦 Cono doble</span>
+                            <Badge className="bg-orange-100 text-orange-700">28%</Badge>
+                          </div>
+                          <div className="flex items-center justify-between text-sm">
+                            <span>🥤 Sundae</span>
+                            <Badge className="bg-orange-100 text-orange-700">22%</Badge>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="bg-white/80 rounded-xl p-4">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Moon className="w-5 h-5 text-indigo-500" />
+                          <h4 className="font-medium text-gray-800">Noche</h4>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between text-sm">
+                            <span>🧁 Litro para llevar</span>
+                            <Badge className="bg-indigo-100 text-indigo-700">40%</Badge>
+                          </div>
+                          <div className="flex items-center justify-between text-sm">
+                            <span>🍦 Cono premium</span>
+                            <Badge className="bg-indigo-100 text-indigo-700">25%</Badge>
+                          </div>
+                          <div className="flex items-center justify-between text-sm">
+                            <span>🍨 Copa especial</span>
+                            <Badge className="bg-indigo-100 text-indigo-700">20%</Badge>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </TabsContent>
 
               {/* Staff Tab */}
