@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import StoreSelector, { STORES } from '@/components/StoreSelector';
 import DateFilter from '@/components/DateFilter';
+import WeekFilter from '@/components/WeekFilter';
 import CashierRankingCard from '@/components/ranking/CashierRankingCard';
 import CashierRecommendation from '@/components/CashierRecommendation';
 import TrendChart from '@/components/ranking/TrendChart';
@@ -126,7 +127,7 @@ export default function Rankings() {
               </Button>
             </Link>
             <div>
-              <h1 className="text-2xl md:text-3xl font-black text-gray-800">Rankings</h1>
+              <h1 className="text-2xl md:text-3xl font-semibold text-gray-700">Rankings</h1>
               {selectedStore && (
                 <p className="text-sm text-gray-500">{selectedStore} - {selectedStoreName}</p>
               )}
@@ -137,7 +138,8 @@ export default function Rankings() {
 
         {/* Date Filter */}
         {selectedStore && (
-          <div className="mb-6">
+          <div className="mb-6 flex flex-wrap items-center gap-3">
+            <WeekFilter onWeekChange={(w) => setDateRange({ from: w.from, to: w.to })} />
             <DateFilter dateRange={dateRange} onDateChange={setDateRange} />
           </div>
         )}

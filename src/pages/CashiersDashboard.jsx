@@ -6,6 +6,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import StoreSelector, { STORES } from '@/components/StoreSelector';
 import DateFilter from '@/components/DateFilter';
+import WeekFilter from '@/components/WeekFilter';
 import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
 import CashierAnalysis from '@/components/cashier/CashierAnalysis';
 import BadgesDisplay from '@/components/gamification/BadgesDisplay';
@@ -133,8 +134,8 @@ export default function CashiersDashboard() {
               </Button>
             </Link>
             <div>
-              <h1 className="text-2xl md:text-3xl font-black text-gray-800 flex items-center gap-2">
-                <Users className="w-7 h-7 text-pink-500" />
+              <h1 className="text-2xl md:text-3xl font-semibold text-gray-700 flex items-center gap-2">
+                <Users className="w-6 h-6 text-pink-500" />
                 Dashboard Cajeros
               </h1>
               {selectedStore && (
@@ -142,8 +143,9 @@ export default function CashiersDashboard() {
               )}
             </div>
           </div>
-          <div className="flex flex-col md:flex-row gap-3">
+          <div className="flex flex-col md:flex-row gap-3 items-center">
             <StoreSelector selectedStore={selectedStore} onStoreChange={handleStoreChange} />
+            <WeekFilter onWeekChange={(w) => setDateRange({ from: w.from, to: w.to })} />
             <DateFilter dateRange={dateRange} onDateChange={setDateRange} />
           </div>
         </div>
@@ -160,7 +162,7 @@ export default function CashiersDashboard() {
                   <Users className="w-5 h-5 text-pink-500" />
                   <span className="text-sm text-gray-600">Equipo Activo</span>
                 </div>
-                <p className="text-3xl font-black text-gray-800">{teamTotals.totalCashiers}</p>
+                <p className="text-3xl font-semibold text-gray-700">{teamTotals.totalCashiers}</p>
                 <p className="text-xs text-gray-500">cajeros</p>
               </motion.div>
 
@@ -172,7 +174,7 @@ export default function CashiersDashboard() {
                   <TrendingUp className="w-5 h-5 text-emerald-500" />
                   <span className="text-sm text-gray-600">Ventas Equipo</span>
                 </div>
-                <p className="text-2xl font-black text-gray-800">${(teamTotals.totalSales/1000000).toFixed(1)}M</p>
+                <p className="text-2xl font-semibold text-gray-700">${(teamTotals.totalSales/1000000).toFixed(1)}M</p>
                 <p className="text-xs text-gray-500">este período</p>
               </motion.div>
 
@@ -184,7 +186,7 @@ export default function CashiersDashboard() {
                   <Target className="w-5 h-5 text-blue-500" />
                   <span className="text-sm text-gray-600">Tickets Totales</span>
                 </div>
-                <p className="text-3xl font-black text-gray-800">{teamTotals.totalTickets.toLocaleString()}</p>
+                <p className="text-3xl font-semibold text-gray-700">{teamTotals.totalTickets.toLocaleString()}</p>
                 <p className="text-xs text-gray-500">facturados</p>
               </motion.div>
 
@@ -196,7 +198,7 @@ export default function CashiersDashboard() {
                   <BarChart3 className="w-5 h-5 text-amber-500" />
                   <span className="text-sm text-gray-600">Ticket Prom.</span>
                 </div>
-                <p className="text-2xl font-black text-gray-800">${(teamTotals.avgTicket/1000).toFixed(0)}K</p>
+                <p className="text-2xl font-semibold text-gray-700">${Math.round(teamTotals.avgTicket/1000)}K</p>
                 <p className="text-xs text-gray-500">promedio equipo</p>
               </motion.div>
             </div>
