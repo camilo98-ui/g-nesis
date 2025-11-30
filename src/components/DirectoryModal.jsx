@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { X, Phone, Mail, MapPin, Search, User, Building, Wrench, Shield, Truck } from 'lucide-react';
+import { X, Phone, Mail, Search, User, Building, Wrench, Shield, Truck, Edit2, Save, Plus, Trash2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-const CONTACTS = [
+const DEFAULT_CONTACTS = [
   {
     category: 'Gerencia',
     icon: Building,
@@ -54,8 +54,41 @@ const CONTACTS = [
 
 export default function DirectoryModal({ onClose }) {
   const [search, setSearch] = useState('');
+  const [editMode, setEditMode] = useState(false);
+  const [contacts, setContacts] = useState(DEFAULT_CONTACTS);
+  const [editingContact, setEditingContact] = useState(null);
 
-  const filteredContacts = CONTACTS.map(cat => ({
+  useEffect(() => {
+    const saved = localStorage.getItem('directoryContacts');
+    if (saved) {
+      setContacts(JSON.parse(saved));
+    }
+  }, []);
+
+  const saveContacts = (newContacts) => {
+    setContacts(newContacts);
+    localStorage.setItem('directoryContacts', JSON.stringify(newContacts));
+  };
+
+  const handleEditContact = (catIndex, contactIndex, field, value) => {
+    const updated = [...contacts];
+    updated[catIndex].contacts[contactIndex][field] = value;
+    saveContacts(updated);
+  };
+
+  const handleDeleteContact = (catIndex, contactIndex) => {
+    const updated = [...contacts];
+    updated[catIndex].contacts.splice(contactIndex, 1);
+    saveContacts(updated);
+  };
+
+  const handleAddContact = (catIndex) => {
+    const updated = [...contacts];
+    updated[catIndex].contacts.push({ name: 'Nuevo Contacto', phone: '', email: '', role: 'Rol' });
+    saveContacts(updated);
+  };
+
+  const filteredContacts = contacts.map(cat => ({
     ...cat,
     contacts: cat.contacts.filter(c => 
       c.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -92,9 +125,19 @@ export default function DirectoryModal({ onClose }) {
                 <p className="text-white/80 text-sm">Contactos de emergencia y soporte</p>
               </div>
             </div>
-            <Button variant="ghost" size="icon" onClick={onClose} className="text-white hover:bg-white/20 rounded-full">
-              <X className="w-6 h-6" />
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => setEditMode(!editMode)} 
+                className={`text-white hover:bg-white/20 rounded-full ${editMode ? 'bg-white/20' : ''}`}
+              >
+                <Edit2 className="w-5 h-5" />
+              </Button>
+              <Button variant="ghost" size="icon" onClick={onClose} className="text-white hover:bg-white/20 rounded-full">
+                <X className="w-6 h-6" />
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -125,40 +168,96 @@ export default function DirectoryModal({ onClose }) {
                 </div>
                 
                 <div className="space-y-2 ml-2">
-                  {category.contacts.map((contact, idx) => (
-                    <motion.div
-                      key={idx}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: idx * 0.05 }}
-                      className="bg-gray-50 rounded-xl p-3 flex items-center justify-between"
+                  {category.contacts.map((contact, idx) => {
+                    const catIndex = contacts.findIndex(c => c.category === category.category);
+                    return (
+                      <motion.div
+                        key={idx}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: idx * 0.05 }}
+                        className="bg-gray-50 rounded-xl p-3"
+                      >
+                        {editMode ? (
+                          <div className="space-y-2">
+                            <div className="flex gap-2">
+                              <Input
+                                value={contact.name}
+                                onChange={(e) => handleEditContact(catIndex, idx, 'name', e.target.value)}
+                                placeholder="Nombre"
+                                className="h-8 text-sm"
+                              />
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                onClick={() => handleDeleteContact(catIndex, idx)}
+                                className="w-8 h-8 text-red-500 hover:bg-red-100"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                            <Input
+                              value={contact.role}
+                              onChange={(e) => handleEditContact(catIndex, idx, 'role', e.target.value)}
+                              placeholder="Rol"
+                              className="h-8 text-sm"
+                            />
+                            <div className="flex gap-2">
+                              <Input
+                                value={contact.phone}
+                                onChange={(e) => handleEditContact(catIndex, idx, 'phone', e.target.value)}
+                                placeholder="Teléfono"
+                                className="h-8 text-sm"
+                              />
+                              <Input
+                                value={contact.email}
+                                onChange={(e) => handleEditContact(catIndex, idx, 'email', e.target.value)}
+                                placeholder="Email"
+                                className="h-8 text-sm"
+                              />
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-gray-800 text-sm">{contact.name}</p>
+                              <p className="text-xs text-gray-500">{contact.role}</p>
+                              <p className="text-xs text-blue-600 mt-1">{contact.phone}</p>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                onClick={() => handleCall(contact.phone)}
+                                className="w-10 h-10 rounded-full bg-green-100 hover:bg-green-200 text-green-600"
+                              >
+                                <Phone className="w-4 h-4" />
+                              </Button>
+                              <a href={`mailto:${contact.email}`}>
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  className="w-10 h-10 rounded-full bg-blue-100 hover:bg-blue-200 text-blue-600"
+                                >
+                                  <Mail className="w-4 h-4" />
+                                </Button>
+                              </a>
+                            </div>
+                          </div>
+                        )}
+                      </motion.div>
+                    );
+                  })}
+                  {editMode && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleAddContact(contacts.findIndex(c => c.category === category.category))}
+                      className="w-full mt-2 text-xs border-dashed"
                     >
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-gray-800 text-sm">{contact.name}</p>
-                        <p className="text-xs text-gray-500">{contact.role}</p>
-                        <p className="text-xs text-blue-600 mt-1">{contact.phone}</p>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          onClick={() => handleCall(contact.phone)}
-                          className="w-10 h-10 rounded-full bg-green-100 hover:bg-green-200 text-green-600"
-                        >
-                          <Phone className="w-4 h-4" />
-                        </Button>
-                        <a href={`mailto:${contact.email}`}>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="w-10 h-10 rounded-full bg-blue-100 hover:bg-blue-200 text-blue-600"
-                          >
-                            <Mail className="w-4 h-4" />
-                          </Button>
-                        </a>
-                      </div>
-                    </motion.div>
-                  ))}
+                      <Plus className="w-3 h-3 mr-1" /> Agregar contacto
+                    </Button>
+                  )}
                 </div>
               </div>
             );

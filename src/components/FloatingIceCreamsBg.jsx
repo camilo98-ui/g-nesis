@@ -165,7 +165,7 @@ export default function FloatingIceCreamsBg() {
           }}
           initial={{ opacity: 0, y: -100 }}
           animate={{ 
-            opacity: [0, 0.6, 0.6, 0],
+            opacity: [0, 0.85, 0.85, 0],
             y: [-100, window.innerHeight + 100],
           }}
           transition={{ 
@@ -175,11 +175,11 @@ export default function FloatingIceCreamsBg() {
             ease: "linear"
           }}
         >
-          {el.type === 'cone' && <IceCreamCone opacity={0.55} />}
-          {el.type === 'shake' && <Milkshake opacity={0.5} />}
-          {el.type === 'banana' && <BananaSplit opacity={0.5} />}
-          {el.type === 'tub' && <IceCreamTub opacity={0.5} />}
-          {el.type === 'cup' && <IceCreamCup opacity={0.5} />}
+          {el.type === 'cone' && <IceCreamCone opacity={0.75} />}
+          {el.type === 'shake' && <Milkshake opacity={0.7} />}
+          {el.type === 'banana' && <BananaSplit opacity={0.7} />}
+          {el.type === 'tub' && <IceCreamTub opacity={0.7} />}
+          {el.type === 'cup' && <IceCreamCup opacity={0.7} />}
         </motion.div>
       ))}
     </div>
