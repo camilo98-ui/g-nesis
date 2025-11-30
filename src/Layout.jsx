@@ -37,8 +37,8 @@ export default function Layout({ children, currentPageName }) {
 
       {/* Top Header Bar */}
       <header className="fixed top-8 left-0 right-0 h-14 bg-white border-b border-gray-100 z-50 px-4 flex items-center justify-between shadow-sm">
-        {/* Logo izquierda - solo en páginas internas */}
-        <div className="flex items-center">
+        {/* Logo izquierda y ubicación */}
+        <div className="flex items-center gap-3">
           {currentPageName !== 'Home' && (
             <Link to={createPageUrl('Home')} className="flex items-center">
               <motion.img 
@@ -50,6 +50,10 @@ export default function Layout({ children, currentPageName }) {
               />
             </Link>
           )}
+          <div className="flex items-center gap-1 text-gray-400 text-xs">
+            <span>📍</span>
+            <span className="hidden sm:inline">Bogotá Noroccidente</span>
+          </div>
         </div>
 
         {/* Center Nav - Visible en todos los dispositivos */}

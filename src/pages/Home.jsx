@@ -106,12 +106,12 @@ export default function Home() {
           <motion.img 
             src={LOGO_URL} 
             alt="Popsy" 
-            className="h-20 md:h-24 object-contain mx-auto mb-1"
+            className="h-28 md:h-32 object-contain mx-auto mb-1"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             whileHover={{ scale: 1.05 }}
           />
-          <p className="text-gray-500 text-sm mb-3">Sistema de Gestión de Ventas</p>
+          <p className="text-gray-500 text-sm mb-3">Sistema de Gestión</p>
           
           {/* Store Selector */}
           <motion.div 
@@ -120,26 +120,12 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <div className="flex items-center gap-1.5 text-gray-500 text-xs">
-              <span>📍</span>
-              <span>Bogotá Noroccidente</span>
-            </div>
             <p className="text-gray-600 font-medium text-sm">¿A qué tienda deseas ingresar?</p>
             <StoreSelector 
               selectedStore={selectedStore} 
               onStoreChange={handleStoreChange} 
             />
           </motion.div>
-          
-          {selectedStore && (
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="mt-2 inline-flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-full shadow-xl shadow-pink-500/40"
-            >
-              <span className="text-sm font-medium">{selectedStore} - {selectedStoreName}</span>
-            </motion.div>
-          )}
         </motion.div>
 
         {/* Alertas button */}
