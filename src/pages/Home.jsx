@@ -241,10 +241,10 @@ export default function Home() {
         {/* Menu Grid estilo Popsy */}
         {selectedStore ? (
           <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4"
-          >
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4"
+                          >
             {MENU_ITEMS.map((item, index) => {
               const Icon = item.icon;
               return (
@@ -258,23 +258,23 @@ export default function Home() {
                 >
                   <Link to={createPageUrl(item.page)}>
                     <motion.div 
-                      className={`${item.bgColor} rounded-2xl p-5 h-full shadow-sm hover:shadow-2xl transition-all duration-300 border border-white/50`}
+                      className={`${item.bgColor} rounded-xl sm:rounded-2xl p-3 sm:p-5 h-full shadow-sm hover:shadow-2xl transition-all duration-300 border border-white/50`}
                       animate={{ 
                         boxShadow: ["0 4px 6px rgba(0,0,0,0.1)", "0 8px 15px rgba(0,0,0,0.15)", "0 4px 6px rgba(0,0,0,0.1)"]
                       }}
                       transition={{ duration: 3, repeat: Infinity, delay: index * 0.2 }}
                     >
                       <motion.div 
-                        className={`w-12 h-12 ${item.iconBg} rounded-xl flex items-center justify-center mb-3`}
+                        className={`w-10 h-10 sm:w-12 sm:h-12 ${item.iconBg} rounded-lg sm:rounded-xl flex items-center justify-center mb-2 sm:mb-3`}
                         whileHover={{ rotate: [0, -15, 15, -10, 10, 0], scale: 1.1 }}
                         transition={{ duration: 0.6 }}
                       >
-                        <Icon className={`w-6 h-6 ${item.iconColor}`} />
+                        <Icon className={`w-5 h-5 sm:w-6 sm:h-6 ${item.iconColor}`} />
                       </motion.div>
-                      <h3 className="font-bold text-gray-800 text-sm mb-1">
+                      <h3 className="font-bold text-gray-800 text-xs sm:text-sm mb-0.5 sm:mb-1">
                         {item.name}
                       </h3>
-                      <p className="text-xs text-gray-500">{item.description}</p>
+                      <p className="text-[10px] sm:text-xs text-gray-500 hidden sm:block">{item.description}</p>
                     </motion.div>
                   </Link>
                 </motion.div>

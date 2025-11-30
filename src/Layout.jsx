@@ -19,7 +19,7 @@ const NAV_ITEMS = [
   { name: 'Cajeros', page: 'CashiersDashboard', icon: Users },
   { name: 'Ventas', page: 'Sales', icon: TrendingUp },
   { name: 'Rankings', page: 'Rankings', icon: Award },
-  { name: 'Presupuestos', page: 'Budget', icon: Target },
+  { name: 'Metas', page: 'Budget', icon: Target },
   { name: 'Reportes', page: 'Reports', icon: FileText },
   { name: '', page: 'FreezerMap', icon: Snowflake, isIcon: true },
 ];
@@ -69,8 +69,8 @@ export default function Layout({ children, currentPageName }) {
                     </motion.div>
                   </div>
 
-        {/* Center Nav - Desktop */}
-        <nav className="hidden lg:flex items-center gap-1">
+        {/* Center Nav - Desktop/Tablet */}
+        <nav className="hidden md:flex items-center gap-0.5 lg:gap-1 flex-wrap justify-center">
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             const isActive = currentPageName === item.page;
@@ -115,7 +115,7 @@ export default function Layout({ children, currentPageName }) {
 
           {/* Mobile Menu */}
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-            <SheetTrigger asChild className="lg:hidden">
+            <SheetTrigger asChild className="md:hidden">
               <Button variant="ghost" size="icon" className="rounded-full">
                 <Menu className="w-6 h-6 text-gray-600" />
               </Button>

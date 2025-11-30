@@ -93,12 +93,12 @@ function FreezerSlot3D({ slot, onClick, isSelected, isDarkMode, onDragStart, onD
       transition={{ type: 'spring', stiffness: 300, damping: 20 }}
       onClick={() => onClick(slot)}
       className={`
-        relative w-full aspect-square rounded-xl cursor-pointer
+        relative w-full aspect-square rounded-lg sm:rounded-xl cursor-pointer
         transform-gpu perspective-1000
         ${isDarkMode ? 'bg-gradient-to-br from-gray-800 to-gray-900' : `bg-gradient-to-br ${TYPE_COLORS[slot.flavor_type || 'vacio']}`}
-        ${isSelected ? 'ring-4 ring-pink-400 ring-offset-2' : ''}
-        ${isDarkMode ? 'border border-pink-500/30' : `border-2 ${TYPE_BORDERS[slot.flavor_type || 'vacio']}`}
-        shadow-lg hover:shadow-2xl
+        ${isSelected ? 'ring-2 sm:ring-4 ring-pink-400 ring-offset-1 sm:ring-offset-2' : ''}
+        ${isDarkMode ? 'border border-pink-500/30' : `border sm:border-2 ${TYPE_BORDERS[slot.flavor_type || 'vacio']}`}
+        shadow-md sm:shadow-lg hover:shadow-xl sm:hover:shadow-2xl
         overflow-hidden
       `}
       style={{
@@ -131,18 +131,18 @@ function FreezerSlot3D({ slot, onClick, isSelected, isDarkMode, onDragStart, onD
               className="relative"
             >
               <div 
-                className="w-10 h-10 rounded-full shadow-lg"
+                className="w-7 h-7 sm:w-10 sm:h-10 rounded-full shadow-lg"
                 style={{ 
                   background: `radial-gradient(circle at 30% 30%, ${slot.color || '#FFB5C5'}ee, ${slot.color || '#FFB5C5'}88)`,
                   boxShadow: `0 4px 15px ${slot.color || '#FFB5C5'}66, inset 0 -5px 10px rgba(0,0,0,0.2), inset 0 5px 10px rgba(255,255,255,0.3)`
                 }}
               />
               {/* Brillo de la bola */}
-              <div className="absolute top-1 left-2 w-3 h-2 bg-white/50 rounded-full blur-sm" />
+              <div className="absolute top-0.5 sm:top-1 left-1 sm:left-2 w-2 sm:w-3 h-1.5 sm:h-2 bg-white/50 rounded-full blur-sm" />
             </motion.div>
             
             {/* Nombre del sabor */}
-            <p className={`text-[9px] font-bold text-center mt-1 leading-tight ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>
+            <p className={`text-[7px] sm:text-[9px] font-bold text-center mt-0.5 sm:mt-1 leading-tight line-clamp-2 ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>
               {slot.flavor_name}
             </p>
             
@@ -213,7 +213,7 @@ function FlavorSelector({ isOpen, onClose, onSelect, currentSlot, isDarkMode }) 
         animate={{ scale: 1, y: 0 }}
         exit={{ scale: 0.9, y: 20 }}
         onClick={(e) => e.stopPropagation()}
-        className={`w-full max-w-md rounded-2xl shadow-2xl p-6 ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-white'}`}
+        className={`w-full max-w-sm sm:max-w-md rounded-2xl shadow-2xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-white'}`}
       >
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-bold">Seleccionar Sabor</h3>
@@ -233,7 +233,7 @@ function FlavorSelector({ isOpen, onClose, onSelect, currentSlot, isDarkMode }) 
           className="mb-4"
         />
 
-        <div className="grid grid-cols-3 gap-3 max-h-80 overflow-y-auto">
+        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-3 max-h-60 sm:max-h-80 overflow-y-auto">
           {/* Opción vacío */}
           <motion.button
             whileHover={{ scale: 1.05 }}
@@ -548,11 +548,11 @@ export default function FreezerMap() {
             >
               {/* Freezer Frame */}
               <div className={`
-                relative rounded-3xl p-6 mx-auto max-w-2xl
+                relative rounded-2xl sm:rounded-3xl p-3 sm:p-6 mx-auto max-w-2xl
                 ${isDarkMode 
                   ? 'bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 border border-pink-500/30' 
-                  : 'bg-gradient-to-b from-white via-gray-50 to-white border-4 border-pink-200'}
-                shadow-2xl
+                  : 'bg-gradient-to-b from-white via-gray-50 to-white border-2 sm:border-4 border-pink-200'}
+                shadow-xl sm:shadow-2xl
               `}
               style={{
                 boxShadow: isDarkMode 
@@ -582,14 +582,14 @@ export default function FreezerMap() {
                       className="relative"
                     >
                       {/* Número de bajada */}
-                      <div className={`absolute -left-8 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold
+                      <div className={`absolute -left-5 sm:-left-8 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-6 sm:h-6 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-bold
                         ${isDarkMode ? 'bg-pink-500/20 text-pink-400' : 'bg-pink-100 text-pink-600'}`}
                       >
                         {rowIndex + 1}
                       </div>
 
                       {/* Slots de la bajada */}
-                      <div className={`grid grid-cols-6 gap-2 p-2 rounded-xl ${isDarkMode ? 'bg-black/30' : 'bg-gray-100/50'}`}>
+                      <div className={`grid grid-cols-3 sm:grid-cols-6 gap-1.5 sm:gap-2 p-1.5 sm:p-2 rounded-xl ${isDarkMode ? 'bg-black/30' : 'bg-gray-100/50'}`}>
                         {row.map((slot, slotIndex) => (
                           <FreezerSlot3D
                             key={`${rowIndex}-${slotIndex}`}
@@ -616,7 +616,7 @@ export default function FreezerMap() {
             </motion.div>
 
             {/* Panel inferior con agregar sabor y leyenda */}
-            <div className={`mt-8 p-4 rounded-xl ${isDarkMode ? 'bg-gray-900/50' : 'bg-white/80'} shadow-lg max-w-2xl mx-auto space-y-4`}>
+            <div className={`mt-4 sm:mt-8 p-3 sm:p-4 rounded-xl ${isDarkMode ? 'bg-gray-900/50' : 'bg-white/80'} shadow-lg max-w-2xl mx-auto space-y-3 sm:space-y-4`}>
               {/* Agregar nuevo sabor */}
               <div className={`p-3 rounded-lg border ${isDarkMode ? 'border-gray-700 bg-gray-800/50' : 'border-pink-200 bg-pink-50/50'}`}>
                 <div className="flex items-center justify-between mb-2">
@@ -685,7 +685,7 @@ export default function FreezerMap() {
               </div>
 
               {/* Leyenda */}
-              <div className="flex flex-wrap gap-4 pt-2 border-t border-gray-200">
+              <div className="flex flex-wrap gap-2 sm:gap-4 pt-2 border-t border-gray-200">
                 {[
                   { type: 'gourmet', label: 'Gourmet' },
                   { type: 'exclusivo', label: 'Exclusivo', icon: <Sparkles className="w-3 h-3 text-purple-500" /> },
