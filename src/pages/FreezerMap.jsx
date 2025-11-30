@@ -16,29 +16,35 @@ import { toast } from 'sonner';
 
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/c3a36de58_Capturadepantalla2025-11-251251441.png";
 
-// Sabores predefinidos Popsy
+// Sabores predefinidos Popsy - Línea Gourmet y Exclusivos
 const POPSY_FLAVORS = [
-  { name: 'Chocolate', color: '#5D3A1A', type: 'helado' },
-  { name: 'Vainilla', color: '#FFF8DC', type: 'helado' },
-  { name: 'Fresa', color: '#FFB5C5', type: 'helado' },
-  { name: 'Arequipe', color: '#D4A574', type: 'helado' },
-  { name: 'Cookies & Cream', color: '#2F2F2F', type: 'premium' },
-  { name: 'Mango Biche', color: '#FFD700', type: 'especial' },
-  { name: 'Ron Pasas', color: '#8B4513', type: 'premium' },
-  { name: 'Maracuyá', color: '#FFB347', type: 'helado' },
-  { name: 'Limón', color: '#FFFACD', type: 'helado' },
-  { name: 'Mora', color: '#4B0082', type: 'helado' },
-  { name: 'Brownie', color: '#3D2314', type: 'premium' },
-  { name: 'Chicle', color: '#FF69B4', type: 'especial' },
-  { name: 'Coco', color: '#FFFFFF', type: 'helado' },
-  { name: 'Café', color: '#6F4E37', type: 'helado' },
-  { name: 'Pistacho', color: '#93C572', type: 'premium' },
-  { name: 'Cheesecake', color: '#FFF5EE', type: 'premium' },
-  { name: 'Nutella', color: '#4A2C2A', type: 'premium' },
-  { name: 'Dulce de Leche', color: '#C19A6B', type: 'helado' },
+  // Línea Gourmet
+  { name: 'Chocolate', color: '#5D3A1A', type: 'gourmet', line: 'gourmet' },
+  { name: 'Vainilla', color: '#FFF8DC', type: 'gourmet', line: 'gourmet' },
+  { name: 'Fresa', color: '#FFB5C5', type: 'gourmet', line: 'gourmet' },
+  { name: 'Arequipe', color: '#D4A574', type: 'gourmet', line: 'gourmet' },
+  { name: 'Maracuyá', color: '#FFB347', type: 'gourmet', line: 'gourmet' },
+  { name: 'Limón', color: '#FFFACD', type: 'gourmet', line: 'gourmet' },
+  { name: 'Mora', color: '#4B0082', type: 'gourmet', line: 'gourmet' },
+  { name: 'Coco', color: '#FFFFFF', type: 'gourmet', line: 'gourmet' },
+  { name: 'Café', color: '#6F4E37', type: 'gourmet', line: 'gourmet' },
+  { name: 'Dulce de Leche', color: '#C19A6B', type: 'gourmet', line: 'gourmet' },
+  // Línea Exclusivos
+  { name: 'Cookies & Cream', color: '#2F2F2F', type: 'exclusivo', line: 'exclusivo' },
+  { name: 'Mango Biche', color: '#FFD700', type: 'exclusivo', line: 'exclusivo' },
+  { name: 'Ron Pasas', color: '#8B4513', type: 'exclusivo', line: 'exclusivo' },
+  { name: 'Brownie', color: '#3D2314', type: 'exclusivo', line: 'exclusivo' },
+  { name: 'Chicle', color: '#FF69B4', type: 'exclusivo', line: 'exclusivo' },
+  { name: 'Pistacho', color: '#93C572', type: 'exclusivo', line: 'exclusivo' },
+  { name: 'Cheesecake', color: '#FFF5EE', type: 'exclusivo', line: 'exclusivo' },
+  { name: 'Nutella', color: '#4A2C2A', type: 'exclusivo', line: 'exclusivo' },
+  { name: 'Tiramisú', color: '#D2B48C', type: 'exclusivo', line: 'exclusivo' },
+  { name: 'Red Velvet', color: '#C41E3A', type: 'exclusivo', line: 'exclusivo' },
 ];
 
 const TYPE_COLORS = {
+  gourmet: 'from-pink-100 to-pink-200',
+  exclusivo: 'from-purple-100 to-purple-200',
   helado: 'from-pink-100 to-pink-200',
   premium: 'from-purple-100 to-purple-200',
   light: 'from-green-100 to-green-200',
@@ -48,6 +54,8 @@ const TYPE_COLORS = {
 };
 
 const TYPE_BORDERS = {
+  gourmet: 'border-pink-300',
+  exclusivo: 'border-purple-300',
   helado: 'border-pink-300',
   premium: 'border-purple-300',
   light: 'border-green-300',

@@ -197,22 +197,22 @@ Usa emojis de helados 🍦🍨 y sé muy motivador pero con sustento en datos.`;
 
   return (
     <>
-      {/* Floating Mascot Button */}
+      {/* Floating Mascot Button - Positioned top right */}
       <motion.button
         onClick={onToggle}
-        className="fixed bottom-6 right-6 z-50"
-        whileHover={{ scale: 1.1, rotate: [0, -5, 5, 0] }}
+        className="fixed top-28 right-4 z-40"
+        whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         animate={{ 
-          y: [0, -8, 0],
+          y: [0, -4, 0],
         }}
         transition={{ 
-          y: { duration: 2, repeat: Infinity, ease: "easeInOut" }
+          y: { duration: 3, repeat: Infinity, ease: "easeInOut" }
         }}
       >
         <div className="relative">
-          {/* Cone Body */}
-          <svg viewBox="0 0 100 140" className="w-16 h-20 drop-shadow-xl">
+          {/* Cone Body - Smaller size */}
+          <svg viewBox="0 0 100 140" className="w-10 h-12 drop-shadow-lg">
             {/* Cone */}
             <polygon 
               points="25,60 75,60 55,130 45,130" 
@@ -292,10 +292,10 @@ Usa emojis de helados 🍦🍨 y sé muy motivador pero con sustento en datos.`;
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: 50, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 50, scale: 0.9 }}
-            className="fixed bottom-28 right-6 w-80 md:w-96 bg-white rounded-3xl shadow-2xl border border-pink-100 z-50 overflow-hidden"
+            initial={{ opacity: 0, x: 50, scale: 0.9 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: 50, scale: 0.9 }}
+            className="fixed top-40 right-4 w-72 md:w-80 bg-white rounded-2xl shadow-xl border border-pink-100 z-40 overflow-hidden"
           >
             {/* Header */}
             <div className="bg-gradient-to-r from-pink-400 via-rose-400 to-pink-500 p-4 text-white">
