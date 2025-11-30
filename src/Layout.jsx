@@ -5,7 +5,7 @@ import SmartSearch from '@/components/SmartSearch';
 import MotivationalHeader from '@/components/MotivationalHeader';
 import { 
   Home, LayoutDashboard, TrendingUp, Award,
-  Target, Users, Menu, X, FileText, Snowflake
+  Target, Users, Menu, X, FileText, Snowflake, GraduationCap, ClipboardCheck
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -22,6 +22,8 @@ const NAV_ITEMS = [
   { name: 'Metas', page: 'Budget', icon: Target },
   { name: 'Reportes', page: 'Reports', icon: FileText },
   { name: '', page: 'FreezerMap', icon: Snowflake, isIcon: true },
+  { name: '', page: 'Training', icon: GraduationCap, isIcon: true },
+  { name: '', page: 'Quality', icon: ClipboardCheck, isIcon: true },
 ];
 
 export default function Layout({ children, currentPageName }) {
