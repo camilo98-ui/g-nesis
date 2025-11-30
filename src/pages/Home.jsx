@@ -10,7 +10,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { 
   LayoutDashboard, Users, TrendingUp, 
-  Award, Target, FileText, Bell, Snowflake, Brain
+  Award, Target, FileText, Bell, Snowflake, Brain, ClipboardList
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { startOfMonth } from 'date-fns';
@@ -72,6 +72,15 @@ const MENU_ITEMS = [
     bgColor: 'bg-gradient-to-br from-purple-50/80 to-fuchsia-100/60',
     iconBg: 'bg-purple-100/80',
     iconColor: 'text-purple-400'
+  },
+  { 
+    name: 'Reportes', 
+    page: 'Reports',
+    icon: ClipboardList, 
+    description: 'Exportar reportes',
+    bgColor: 'bg-gradient-to-br from-slate-50/80 to-gray-100/60',
+    iconBg: 'bg-slate-100/80',
+    iconColor: 'text-slate-500'
   },
 ];
 

@@ -5,541 +5,742 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import StoreSelector, { STORES } from '@/components/StoreSelector';
-import DateFilter from '@/components/DateFilter';
 import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
-import { ArrowLeft, FileText, Download, Loader2, TrendingUp, TrendingDown, Award, AlertTriangle, Target, Receipt } from 'lucide-react';
+import { 
+  ArrowLeft, FileText, Download, FileSpreadsheet, Calendar,
+  TrendingUp, Users, Store, Target, BarChart3, Filter,
+  ChevronDown, CheckCircle, AlertCircle, Printer
+} from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { startOfMonth, format, differenceInDays, endOfMonth, eachDayOfInterval } from 'date-fns';
-import { es } from 'date-fns/locale';
-import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, 
-  ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, Legend,
-  ComposedChart, Line
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { 
+  BarChart, Bar, LineChart, Line, AreaChart, Area,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
+  Legend, ComposedChart, Cell
 } from 'recharts';
+import { format, startOfMonth, endOfMonth, subMonths, startOfQuarter, endOfQuarter, subQuarters, parseISO } from 'date-fns';
+import { es } from 'date-fns/locale';
 
-const COLORS = ['#ec4899', '#8b5cf6', '#10b981', '#f59e0b', '#3b82f6'];
+const PASTEL_COLORS = ['#FFB5C5', '#B5D8FF', '#C5FFB5', '#FFE4B5', '#E0B5FF', '#B5FFE4', '#FFB5E0', '#B5C5FF'];
 
 export default function Reports() {
-  const [selectedStore, setSelectedStore] = useState('');
-  const [dateRange, setDateRange] = useState({
-    from: startOfMonth(new Date()),
-    to: new Date()
-  });
-  const [generating, setGenerating] = useState(false);
+  const [selectedStore, setSelectedStore] = useState('all');
+  const [period, setPeriod] = useState('month');
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [activeTab, setActiveTab] = useState('store');
+  const [isExporting, setIsExporting] = useState(false);
 
-  useEffect(() => {
-    const saved = localStorage.getItem('selectedStore');
-    if (saved) setSelectedStore(saved);
-  }, []);
-
-  const handleStoreChange = (store) => {
-    setSelectedStore(store);
-    localStorage.setItem('selectedStore', store);
-  };
-
-  const { data: dailySales = [] } = useQuery({
-    queryKey: ['dailySales', selectedStore],
-    queryFn: () => base44.entities.DailySales.filter({ store_id: selectedStore }),
-    enabled: !!selectedStore
+  // Fetch all data
+  const { data: allDailySales = [] } = useQuery({
+    queryKey: ['allDailySalesReports'],
+    queryFn: () => base44.entities.DailySales.list()
   });
 
-  const { data: shiftRecords = [] } = useQuery({
-    queryKey: ['shiftRecords', selectedStore],
-    queryFn: () => base44.entities.ShiftRecord.filter({ store_id: selectedStore }),
-    enabled: !!selectedStore
+  const { data: allShiftRecords = [] } = useQuery({
+    queryKey: ['allShiftRecordsReports'],
+    queryFn: () => base44.entities.ShiftRecord.list()
   });
 
-  const { data: cashiers = [] } = useQuery({
-    queryKey: ['cashiers', selectedStore],
-    queryFn: () => base44.entities.Cashier.filter({ store_id: selectedStore }),
-    enabled: !!selectedStore
+  const { data: allCashiers = [] } = useQuery({
+    queryKey: ['allCashiersReports'],
+    queryFn: () => base44.entities.Cashier.list()
   });
 
-  const { data: budgets = [] } = useQuery({
-    queryKey: ['budgets', selectedStore],
-    queryFn: () => base44.entities.Budget.filter({ store_id: selectedStore }),
-    enabled: !!selectedStore
+  const { data: allBudgets = [] } = useQuery({
+    queryKey: ['allBudgetsReports'],
+    queryFn: () => base44.entities.Budget.list()
   });
 
-  // Datos para gráficas
-  const chartData = useMemo(() => {
-    const days = eachDayOfInterval({ start: dateRange.from, end: dateRange.to });
-    return days.map(day => {
-      const dayStr = format(day, 'yyyy-MM-dd');
-      const dayData = dailySales.find(s => s.date === dayStr) || {};
-      return {
-        date: format(day, 'dd', { locale: es }),
-        fullDate: format(day, 'EEE dd MMM', { locale: es }),
-        ventas: dayData.total_sales || 0,
-        tickets: dayData.total_tickets || 0,
-        sugeridos: dayData.total_suggested || 0,
-        ticketPromedio: (dayData.total_transactions || 0) > 0 ? (dayData.total_sales || 0) / dayData.total_transactions : 0
-      };
-    }).filter(d => d.ventas > 0);
-  }, [dailySales, dateRange]);
-
-  const reportData = useMemo(() => {
-    const filteredSales = dailySales.filter(s => {
-      const date = new Date(s.date);
-      return date >= dateRange.from && date <= dateRange.to;
-    });
-
-    const filteredRecords = shiftRecords.filter(r => {
-      const date = new Date(r.date);
-      return date >= dateRange.from && date <= dateRange.to;
-    });
-
-    const totals = filteredSales.reduce((acc, s) => ({
-      sales: acc.sales + (s.total_sales || 0),
-      tickets: acc.tickets + (s.total_tickets || 0),
-      transactions: acc.transactions + (s.total_transactions || 0),
-      suggested: acc.suggested + (s.total_suggested || 0)
-    }), { sales: 0, tickets: 0, transactions: 0, suggested: 0 });
-
-    const now = new Date();
-    const currentBudget = budgets.find(b => b.month === now.getMonth() + 1 && b.year === now.getFullYear()) || {};
-
-    // Rankings
-    const cashierStats = {};
-    filteredRecords.forEach(record => {
-      if (!cashierStats[record.cashier_id]) {
-        cashierStats[record.cashier_id] = { sales: 0, suggested: 0, tickets: 0, shifts: 0 };
-      }
-      cashierStats[record.cashier_id].sales += record.sales || 0;
-      cashierStats[record.cashier_id].suggested += record.suggested_sales || 0;
-      cashierStats[record.cashier_id].tickets += record.tickets || 0;
-      cashierStats[record.cashier_id].shifts += 1;
-    });
-
-    const topSellers = Object.entries(cashierStats)
-      .sort(([,a], [,b]) => b.sales - a.sales)
-      .slice(0, 5)
-      .map(([id, stats]) => ({ 
-        cashier: cashiers.find(c => c.id === id), 
-        ...stats 
-      }));
-
-    const topSuggested = Object.entries(cashierStats)
-      .sort(([,a], [,b]) => b.suggested - a.suggested)
-      .slice(0, 5)
-      .map(([id, stats]) => ({ 
-        cashier: cashiers.find(c => c.id === id), 
-        ...stats 
-      }));
-
-    const daysElapsed = differenceInDays(new Date(), startOfMonth(new Date())) + 1;
-    const totalDays = differenceInDays(endOfMonth(new Date()), startOfMonth(new Date())) + 1;
-    const dailyAvg = filteredSales.length > 0 ? totals.sales / filteredSales.length : 0;
-    const projection = dailyAvg * totalDays;
-
-    // Datos para pie chart de distribución por turno
-    const shiftDistribution = { morning: 0, afternoon: 0, night: 0 };
-    filteredRecords.forEach(r => {
-      shiftDistribution[r.shift] = (shiftDistribution[r.shift] || 0) + (r.sales || 0);
-    });
-    const pieData = [
-      { name: 'Mañana', value: shiftDistribution.morning, color: '#f59e0b' },
-      { name: 'Tarde', value: shiftDistribution.afternoon, color: '#ec4899' },
-      { name: 'Noche', value: shiftDistribution.night, color: '#6366f1' }
-    ].filter(d => d.value > 0);
-
-    return {
-      totals,
-      budget: currentBudget,
-      topSellers,
-      topSuggested,
-      daysWorked: filteredSales.length,
-      avgDaily: dailyAvg,
-      avgTicket: totals.tickets > 0 ? totals.sales / totals.tickets : 0,
-      compliance: currentBudget.sales_budget ? (totals.sales / currentBudget.sales_budget * 100) : 0,
-      projection,
-      daysElapsed,
-      totalDays,
-      pieData
-    };
-  }, [dailySales, shiftRecords, cashiers, budgets, dateRange]);
-
-  const generatePDF = async () => {
-    setGenerating(true);
-    
-    try {
-      const storeName = STORES.find(s => s.code === selectedStore)?.name || selectedStore;
-      const compliance = reportData.compliance.toFixed(1);
-      const formatCurrency = (val) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(val || 0);
-      
-      // Generar análisis con LLM
-      let analysis = null;
-      try {
-        const result = await base44.integrations.Core.InvokeLLM({
-          prompt: `Genera un análisis ejecutivo PROFESIONAL para un reporte gerencial de tienda Popsy:
-          
-          DATOS:
-          - Tienda: ${selectedStore} - ${storeName}
-          - Ventas: ${formatCurrency(reportData.totals.sales)}
-          - Presupuesto: ${formatCurrency(reportData.budget.sales_budget)}
-          - Cumplimiento: ${compliance}%
-          - Proyección: ${formatCurrency(reportData.projection)}
-          - Tickets: ${reportData.totals.tickets}
-          - Ticket promedio: ${formatCurrency(reportData.avgTicket)}
-          - Sugeridos: ${reportData.totals.suggested}
-          - Top vendedor: ${reportData.topSellers[0]?.cashier?.name || 'N/A'}
-          
-          Incluye: resumen, puntos destacados, áreas mejora, plan acción, recomendaciones`,
-          response_json_schema: {
-            type: "object",
-            properties: {
-              resumen: { type: "string" },
-              puntos_destacados: { type: "array", items: { type: "string" } },
-              areas_mejora: { type: "array", items: { type: "string" } },
-              plan_accion: { type: "array", items: { type: "string" } },
-              recomendaciones: { type: "array", items: { type: "string" } }
-            }
-          }
-        });
-        analysis = result;
-      } catch (e) {
-        analysis = null;
-      }
-      
-      const htmlContent = `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>Reporte Gerencial Popsy - ${selectedStore}</title>
-  <style>
-    @page { size: A4; margin: 15mm; }
-    body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.5; color: #333; max-width: 800px; margin: 0 auto; padding: 15px; font-size: 12px; }
-    .header { text-align: center; border-bottom: 3px solid #ec4899; padding-bottom: 15px; margin-bottom: 20px; }
-    .header h1 { color: #ec4899; margin: 0; font-size: 24px; }
-    .section { margin-bottom: 20px; page-break-inside: avoid; }
-    .section-title { background: linear-gradient(135deg, #ec4899, #f43f5e); color: white; padding: 8px 12px; border-radius: 6px; margin-bottom: 10px; font-size: 14px; font-weight: bold; }
-    .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 15px; }
-    .metric-card { background: #fdf2f8; border-radius: 8px; padding: 12px; text-align: center; }
-    .metric-value { font-size: 18px; font-weight: bold; color: #ec4899; }
-    .metric-label { font-size: 10px; color: #666; }
-    .ranking-item { display: flex; justify-content: space-between; padding: 6px 10px; background: #fdf2f8; margin: 4px 0; border-radius: 4px; }
-    .analysis-box { background: #f8fafc; border-left: 3px solid #ec4899; padding: 10px; margin: 8px 0; border-radius: 0 6px 6px 0; }
-    .footer { text-align: center; margin-top: 30px; padding-top: 15px; border-top: 2px solid #fce7f3; font-size: 11px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    th, td { padding: 8px; border: 1px solid #fce7f3; text-align: left; }
-    th { background: #fdf2f8; }
-    @media print { body { print-color-adjust: exact; -webkit-print-color-adjust: exact; } }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <h1>🍦 REPORTE GERENCIAL POPSY</h1>
-    <p><strong>${selectedStore} - ${storeName}</strong></p>
-    <p>Período: ${format(dateRange.from, 'dd/MM/yyyy')} - ${format(dateRange.to, 'dd/MM/yyyy')} | Generado: ${format(new Date(), "dd/MM/yyyy HH:mm")}</p>
-  </div>
-
-  <div class="section">
-    <div class="section-title">📊 RESUMEN EJECUTIVO</div>
-    <div class="grid">
-      <div class="metric-card">
-        <div class="metric-value">${formatCurrency(reportData.totals.sales)}</div>
-        <div class="metric-label">VENTAS TOTALES</div>
-      </div>
-      <div class="metric-card" style="background: ${parseFloat(compliance) >= 100 ? '#d1fae5' : parseFloat(compliance) >= 80 ? '#fef3c7' : '#fee2e2'}">
-        <div class="metric-value" style="color: ${parseFloat(compliance) >= 100 ? '#059669' : parseFloat(compliance) >= 80 ? '#d97706' : '#dc2626'}">${compliance}%</div>
-        <div class="metric-label">CUMPLIMIENTO</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-value">${formatCurrency(reportData.avgTicket)}</div>
-        <div class="metric-label">TICKET PROMEDIO</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-value">${formatCurrency(reportData.projection)}</div>
-        <div class="metric-label">PROYECCIÓN</div>
-      </div>
-    </div>
-    <div class="grid">
-      <div class="metric-card">
-        <div class="metric-value">${reportData.totals.tickets.toLocaleString()}</div>
-        <div class="metric-label">TICKETS</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-value">${reportData.totals.transactions.toLocaleString()}</div>
-        <div class="metric-label">TRANSACCIONES</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-value">${reportData.totals.suggested.toLocaleString()}</div>
-        <div class="metric-label">SUGERIDOS</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-value">${reportData.daysWorked}</div>
-        <div class="metric-label">DÍAS TRABAJADOS</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">🏆 TOP VENDEDORES</div>
-    ${reportData.topSellers.map((s, i) => `
-      <div class="ranking-item">
-        <span>${['🥇', '🥈', '🥉', '4️⃣', '5️⃣'][i]} ${s.cashier?.name || 'N/A'}</span>
-        <span><strong>${formatCurrency(s.sales)}</strong> (${s.shifts} turnos)</span>
-      </div>
-    `).join('')}
-  </div>
-
-  <div class="section">
-    <div class="section-title">⭐ TOP SUGERIDOS</div>
-    ${reportData.topSuggested.map((s, i) => `
-      <div class="ranking-item">
-        <span>${['🥇', '🥈', '🥉', '4️⃣', '5️⃣'][i]} ${s.cashier?.name || 'N/A'}</span>
-        <span><strong>${s.suggested}</strong> sugeridos</span>
-      </div>
-    `).join('')}
-  </div>
-
-  ${analysis ? `
-  <div class="section" style="page-break-before: always;">
-    <div class="section-title">📝 ANÁLISIS Y RECOMENDACIONES</div>
-    <div class="analysis-box">
-      <strong>Resumen:</strong><br>${analysis.resumen || ''}
-    </div>
-    ${(analysis.puntos_destacados || []).length > 0 ? `
-    <div class="analysis-box" style="border-color: #10b981; background: #ecfdf5;">
-      <strong style="color: #059669;">✨ Puntos Destacados:</strong>
-      <ul>${(analysis.puntos_destacados || []).map(p => `<li>${p}</li>`).join('')}</ul>
-    </div>` : ''}
-    ${(analysis.areas_mejora || []).length > 0 ? `
-    <div class="analysis-box" style="border-color: #f59e0b; background: #fef3c7;">
-      <strong style="color: #d97706;">⚠️ Áreas de Mejora:</strong>
-      <ul>${(analysis.areas_mejora || []).map(p => `<li>${p}</li>`).join('')}</ul>
-    </div>` : ''}
-    ${(analysis.plan_accion || []).length > 0 ? `
-    <div class="analysis-box" style="border-color: #3b82f6; background: #eff6ff;">
-      <strong style="color: #2563eb;">🎯 Plan de Acción:</strong>
-      <ol>${(analysis.plan_accion || []).map(p => `<li>${p}</li>`).join('')}</ol>
-    </div>` : ''}
-    ${(analysis.recomendaciones || []).length > 0 ? `
-    <div class="analysis-box" style="border-color: #a855f7; background: #faf5ff;">
-      <strong style="color: #9333ea;">💡 Recomendaciones:</strong>
-      <ul>${(analysis.recomendaciones || []).map(p => `<li>${p}</li>`).join('')}</ul>
-    </div>` : ''}
-  </div>
-  ` : ''}
-
-  <div class="footer">
-    <p>🍦 <strong>POPSY</strong> - Helado Gourmet | "Hacemos del mundo un lugar más dulce"</p>
-  </div>
-</body>
-</html>`;
-
-      const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
-      const url = window.URL.createObjectURL(blob);
-      const printWindow = window.open(url, '_blank');
-      if (printWindow) {
-        printWindow.onload = () => setTimeout(() => printWindow.print(), 500);
-      }
-      window.URL.revokeObjectURL(url);
-    } finally {
-      setGenerating(false);
+  // Calculate date range based on period
+  const dateRange = useMemo(() => {
+    const now = new Date(selectedYear, selectedMonth, 1);
+    if (period === 'month') {
+      return { from: startOfMonth(now), to: endOfMonth(now) };
+    } else if (period === 'quarter') {
+      return { from: startOfQuarter(now), to: endOfQuarter(now) };
+    } else {
+      return { from: new Date(selectedYear, 0, 1), to: new Date(selectedYear, 11, 31) };
     }
+  }, [period, selectedMonth, selectedYear]);
+
+  // Filter data by date range and store
+  const filteredSales = useMemo(() => {
+    return allDailySales.filter(s => {
+      const date = new Date(s.date);
+      const inRange = date >= dateRange.from && date <= dateRange.to;
+      const matchStore = selectedStore === 'all' || s.store_id === selectedStore;
+      return inRange && matchStore;
+    });
+  }, [allDailySales, dateRange, selectedStore]);
+
+  const filteredShiftRecords = useMemo(() => {
+    return allShiftRecords.filter(r => {
+      const date = new Date(r.date);
+      const inRange = date >= dateRange.from && date <= dateRange.to;
+      const matchStore = selectedStore === 'all' || r.store_id === selectedStore;
+      return inRange && matchStore;
+    });
+  }, [allShiftRecords, dateRange, selectedStore]);
+
+  // Store performance data
+  const storePerformance = useMemo(() => {
+    return STORES.map(store => {
+      const storeSales = filteredSales.filter(s => s.store_id === store.code);
+      const totalSales = storeSales.reduce((sum, s) => sum + (s.total_sales || 0), 0);
+      const totalTickets = storeSales.reduce((sum, s) => sum + (s.total_tickets || 0), 0);
+      const totalTransactions = storeSales.reduce((sum, s) => sum + (s.total_transactions || 0), 0);
+      
+      const budget = allBudgets.find(b => 
+        b.store_id === store.code && 
+        b.month === selectedMonth + 1 && 
+        b.year === selectedYear
+      );
+      const budgetAmount = budget?.sales_budget || 0;
+      const compliance = budgetAmount > 0 ? (totalSales / budgetAmount) * 100 : 0;
+
+      return {
+        ...store,
+        totalSales,
+        totalTickets,
+        totalTransactions,
+        avgTicket: totalTickets > 0 ? totalSales / totalTickets : 0,
+        budget: budgetAmount,
+        compliance,
+        daysWithData: storeSales.length
+      };
+    }).filter(s => s.daysWithData > 0).sort((a, b) => b.totalSales - a.totalSales);
+  }, [filteredSales, allBudgets, selectedMonth, selectedYear]);
+
+  // Zone totals
+  const zoneTotals = useMemo(() => {
+    const totalSales = storePerformance.reduce((sum, s) => sum + s.totalSales, 0);
+    const totalBudget = storePerformance.reduce((sum, s) => sum + s.budget, 0);
+    const totalTickets = storePerformance.reduce((sum, s) => sum + s.totalTickets, 0);
+    const totalTransactions = storePerformance.reduce((sum, s) => sum + s.totalTransactions, 0);
+    const compliance = totalBudget > 0 ? (totalSales / totalBudget) * 100 : 0;
+    const avgTicket = totalTickets > 0 ? totalSales / totalTickets : 0;
+
+    return { totalSales, totalBudget, totalTickets, totalTransactions, compliance, avgTicket };
+  }, [storePerformance]);
+
+  // Cashier performance
+  const cashierPerformance = useMemo(() => {
+    const stats = {};
+    filteredShiftRecords.forEach(record => {
+      if (!stats[record.cashier_id]) {
+        stats[record.cashier_id] = {
+          cashier_id: record.cashier_id,
+          store_id: record.store_id,
+          totalSales: 0,
+          totalTickets: 0,
+          totalTransactions: 0,
+          totalSuggested: 0,
+          shifts: 0
+        };
+      }
+      stats[record.cashier_id].totalSales += record.sales || 0;
+      stats[record.cashier_id].totalTickets += record.tickets || 0;
+      stats[record.cashier_id].totalTransactions += record.transactions || 0;
+      stats[record.cashier_id].totalSuggested += record.suggested_sales || 0;
+      stats[record.cashier_id].shifts += 1;
+    });
+
+    return Object.values(stats)
+      .map(s => ({
+        ...s,
+        avgTicket: s.totalTickets > 0 ? s.totalSales / s.totalTickets : 0,
+        avgSalesPerShift: s.shifts > 0 ? s.totalSales / s.shifts : 0,
+        cashier: allCashiers.find(c => c.id === s.cashier_id) || { name: 'Desconocido' },
+        storeName: STORES.find(st => st.code === s.store_id)?.name || s.store_id
+      }))
+      .sort((a, b) => b.totalSales - a.totalSales);
+  }, [filteredShiftRecords, allCashiers]);
+
+  // Budget history
+  const budgetHistory = useMemo(() => {
+    const months = [];
+    for (let i = 5; i >= 0; i--) {
+      const date = subMonths(new Date(selectedYear, selectedMonth, 1), i);
+      const month = date.getMonth() + 1;
+      const year = date.getFullYear();
+      
+      const monthBudgets = allBudgets.filter(b => b.month === month && b.year === year);
+      const monthSales = allDailySales.filter(s => {
+        const sDate = new Date(s.date);
+        return sDate.getMonth() + 1 === month && sDate.getFullYear() === year;
+      });
+
+      const totalBudget = monthBudgets.reduce((sum, b) => sum + (b.sales_budget || 0), 0);
+      const totalSales = monthSales.reduce((sum, s) => sum + (s.total_sales || 0), 0);
+      const compliance = totalBudget > 0 ? (totalSales / totalBudget) * 100 : 0;
+
+      months.push({
+        month: format(date, 'MMM yy', { locale: es }),
+        fullMonth: format(date, 'MMMM yyyy', { locale: es }),
+        budget: totalBudget,
+        sales: totalSales,
+        compliance
+      });
+    }
+    return months;
+  }, [allBudgets, allDailySales, selectedMonth, selectedYear]);
+
+  const formatCurrency = (v) => new Intl.NumberFormat('es-CO', { 
+    style: 'currency', currency: 'COP', minimumFractionDigits: 0 
+  }).format(v);
+
+  // Export to CSV
+  const exportToCSV = (type) => {
+    setIsExporting(true);
+    let csvContent = '';
+    let filename = '';
+
+    if (type === 'stores') {
+      csvContent = 'Tienda,Nombre,Ventas,Tickets,Transacciones,Ticket Promedio,Presupuesto,Cumplimiento %\n';
+      storePerformance.forEach(s => {
+        csvContent += `${s.code},"${s.name}",${s.totalSales},${s.totalTickets},${s.totalTransactions},${s.avgTicket.toFixed(0)},${s.budget},${s.compliance.toFixed(1)}\n`;
+      });
+      filename = `reporte_tiendas_${format(dateRange.from, 'yyyy-MM')}.csv`;
+    } else if (type === 'cashiers') {
+      csvContent = 'Cajero,Tienda,Ventas,Tickets,Transacciones,Sugeridos,Ticket Promedio,Turnos,Venta/Turno\n';
+      cashierPerformance.forEach(c => {
+        csvContent += `"${c.cashier?.name}","${c.storeName}",${c.totalSales},${c.totalTickets},${c.totalTransactions},${c.totalSuggested},${c.avgTicket.toFixed(0)},${c.shifts},${c.avgSalesPerShift.toFixed(0)}\n`;
+      });
+      filename = `reporte_cajeros_${format(dateRange.from, 'yyyy-MM')}.csv`;
+    } else if (type === 'budget') {
+      csvContent = 'Mes,Presupuesto,Ventas,Cumplimiento %\n';
+      budgetHistory.forEach(b => {
+        csvContent += `"${b.fullMonth}",${b.budget},${b.sales},${b.compliance.toFixed(1)}\n`;
+      });
+      filename = `historial_presupuesto_${selectedYear}.csv`;
+    }
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    link.click();
+    
+    setTimeout(() => setIsExporting(false), 1000);
   };
 
-  const selectedStoreName = STORES.find(s => s.code === selectedStore)?.name || '';
-  const formatCurrency = (val) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(val || 0);
+  // Export to PDF (print)
+  const exportToPDF = () => {
+    const printContent = document.getElementById('report-content');
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Reporte Popsy - ${format(dateRange.from, 'MMMM yyyy', { locale: es })}</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            h1 { color: #ec4899; }
+            table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background: #f5f5f5; }
+            .summary { display: flex; gap: 20px; margin: 20px 0; }
+            .summary-card { padding: 15px; background: #f9f9f9; border-radius: 8px; flex: 1; }
+          </style>
+        </head>
+        <body>
+          <h1>🍦 Reporte Popsy</h1>
+          <p>Período: ${format(dateRange.from, 'dd/MM/yyyy')} - ${format(dateRange.to, 'dd/MM/yyyy')}</p>
+          <p>Zona: Bogotá Noroccidente</p>
+          
+          <div class="summary">
+            <div class="summary-card">
+              <strong>Ventas Totales</strong><br/>
+              ${formatCurrency(zoneTotals.totalSales)}
+            </div>
+            <div class="summary-card">
+              <strong>Cumplimiento</strong><br/>
+              ${zoneTotals.compliance.toFixed(1)}%
+            </div>
+            <div class="summary-card">
+              <strong>Ticket Promedio</strong><br/>
+              ${formatCurrency(zoneTotals.avgTicket)}
+            </div>
+          </div>
+
+          <h2>Rendimiento por Tienda</h2>
+          <table>
+            <tr><th>Tienda</th><th>Ventas</th><th>Tickets</th><th>Cumplimiento</th></tr>
+            ${storePerformance.slice(0, 10).map(s => `
+              <tr>
+                <td>${s.code} - ${s.name}</td>
+                <td>${formatCurrency(s.totalSales)}</td>
+                <td>${s.totalTickets}</td>
+                <td>${s.compliance.toFixed(1)}%</td>
+              </tr>
+            `).join('')}
+          </table>
+
+          <h2>Top 10 Cajeros</h2>
+          <table>
+            <tr><th>Cajero</th><th>Tienda</th><th>Ventas</th><th>Ticket Prom.</th></tr>
+            ${cashierPerformance.slice(0, 10).map(c => `
+              <tr>
+                <td>${c.cashier?.name}</td>
+                <td>${c.storeName}</td>
+                <td>${formatCurrency(c.totalSales)}</td>
+                <td>${formatCurrency(c.avgTicket)}</td>
+              </tr>
+            `).join('')}
+          </table>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
+  };
+
+  const periodLabel = period === 'month' ? format(new Date(selectedYear, selectedMonth, 1), 'MMMM yyyy', { locale: es }) :
+                      period === 'quarter' ? `Q${Math.floor(selectedMonth / 3) + 1} ${selectedYear}` :
+                      `Año ${selectedYear}`;
 
   return (
-    <div className="min-h-screen bg-white relative">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-50 relative">
       <FloatingIceCreamsBg />
-      
-      <div className="max-w-5xl mx-auto px-4 py-6 relative z-10">
+      <div className="max-w-7xl mx-auto px-4 py-6 relative z-10">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-4">
             <Link to={createPageUrl('Home')}>
-              <Button variant="ghost" size="icon" className="rounded-full hover:bg-pink-50">
+              <Button variant="ghost" size="icon" className="rounded-full hover:bg-pink-100">
                 <ArrowLeft className="w-5 h-5 text-pink-600" />
               </Button>
             </Link>
             <div>
-              <h1 className="text-2xl font-bold text-gray-800">Reportes Gerenciales</h1>
-              {selectedStore && <p className="text-sm text-gray-500">{selectedStore} - {selectedStoreName}</p>}
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-2">
+                <FileText className="w-7 h-7 text-slate-600" />
+                Centro de Reportes
+              </h1>
+              <p className="text-sm text-gray-500">Genera y exporta reportes detallados</p>
             </div>
           </div>
-          <StoreSelector selectedStore={selectedStore} onStoreChange={handleStoreChange} />
+
+          {/* Export Buttons */}
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => exportToCSV(activeTab === 'store' ? 'stores' : activeTab === 'cashier' ? 'cashiers' : 'budget')}
+              disabled={isExporting}
+              className="gap-2"
+            >
+              <FileSpreadsheet className="w-4 h-4" />
+              CSV
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={exportToPDF}
+              className="gap-2"
+            >
+              <Printer className="w-4 h-4" />
+              PDF
+            </Button>
+          </div>
         </div>
 
-        {selectedStore ? (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-            <DateFilter dateRange={dateRange} onDateChange={setDateRange} />
+        {/* Filters */}
+        <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-md mb-6">
+          <CardContent className="p-4">
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="flex items-center gap-2">
+                <Filter className="w-4 h-4 text-gray-500" />
+                <span className="text-sm font-medium text-gray-600">Filtros:</span>
+              </div>
+              
+              <Select value={period} onValueChange={setPeriod}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="month">Mensual</SelectItem>
+                  <SelectItem value="quarter">Trimestral</SelectItem>
+                  <SelectItem value="year">Anual</SelectItem>
+                </SelectContent>
+              </Select>
 
-            {/* KPIs Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <Card className="bg-gradient-to-br from-emerald-50 to-emerald-100 border-none">
-                <CardContent className="pt-4">
-                  <TrendingUp className="w-5 h-5 text-emerald-500 mb-1" />
-                  <p className="text-xs text-gray-500">Ventas</p>
-                  <p className="text-lg font-bold text-gray-800">{formatCurrency(reportData.totals.sales)}</p>
-                </CardContent>
-              </Card>
-              <Card className={`border-none ${reportData.compliance >= 100 ? 'bg-gradient-to-br from-green-50 to-green-100' : reportData.compliance >= 80 ? 'bg-gradient-to-br from-amber-50 to-amber-100' : 'bg-gradient-to-br from-red-50 to-red-100'}`}>
-                <CardContent className="pt-4">
-                  <Target className="w-5 h-5 text-amber-500 mb-1" />
-                  <p className="text-xs text-gray-500">Cumplimiento</p>
-                  <p className="text-lg font-bold text-gray-800">{reportData.compliance.toFixed(1)}%</p>
-                </CardContent>
-              </Card>
-              <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-none">
-                <CardContent className="pt-4">
-                  <Receipt className="w-5 h-5 text-blue-500 mb-1" />
-                  <p className="text-xs text-gray-500">Ticket Prom.</p>
-                  <p className="text-lg font-bold text-gray-800">{formatCurrency(reportData.avgTicket)}</p>
-                </CardContent>
-              </Card>
-              <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-none">
-                <CardContent className="pt-4">
-                  <Award className="w-5 h-5 text-purple-500 mb-1" />
-                  <p className="text-xs text-gray-500">Sugeridos</p>
-                  <p className="text-lg font-bold text-gray-800">{reportData.totals.suggested}</p>
-                </CardContent>
-              </Card>
+              <Select value={selectedMonth.toString()} onValueChange={(v) => setSelectedMonth(parseInt(v))}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: 12 }, (_, i) => (
+                    <SelectItem key={i} value={i.toString()}>
+                      {format(new Date(2024, i, 1), 'MMMM', { locale: es })}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={selectedYear.toString()} onValueChange={(v) => setSelectedYear(parseInt(v))}>
+                <SelectTrigger className="w-[100px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="2024">2024</SelectItem>
+                  <SelectItem value="2025">2025</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={selectedStore} onValueChange={setSelectedStore}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Todas las tiendas" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas las tiendas</SelectItem>
+                  {STORES.map(store => (
+                    <SelectItem key={store.code} value={store.code}>{store.code}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Badge className="bg-slate-100 text-slate-700 ml-auto">
+                <Calendar className="w-3 h-3 mr-1" />
+                {periodLabel}
+              </Badge>
             </div>
+          </CardContent>
+        </Card>
 
-            {/* Gráficas */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {/* Tendencia de Ventas */}
-              <Card className="border-none shadow-md">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-gray-600">📈 Tendencia de Ventas</CardTitle>
+        {/* Summary Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-pink-100">
+            <div className="flex items-center gap-2 mb-2">
+              <TrendingUp className="w-5 h-5 text-pink-500" />
+              <span className="text-xs text-gray-500">Ventas Totales</span>
+            </div>
+            <p className="text-xl font-bold text-gray-800">{formatCurrency(zoneTotals.totalSales)}</p>
+          </motion.div>
+
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-blue-100">
+            <div className="flex items-center gap-2 mb-2">
+              <Target className="w-5 h-5 text-blue-500" />
+              <span className="text-xs text-gray-500">Cumplimiento</span>
+            </div>
+            <p className={`text-xl font-bold ${zoneTotals.compliance >= 90 ? 'text-green-600' : zoneTotals.compliance >= 70 ? 'text-amber-600' : 'text-red-600'}`}>
+              {zoneTotals.compliance.toFixed(1)}%
+            </p>
+          </motion.div>
+
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-green-100">
+            <div className="flex items-center gap-2 mb-2">
+              <BarChart3 className="w-5 h-5 text-green-500" />
+              <span className="text-xs text-gray-500">Ticket Promedio</span>
+            </div>
+            <p className="text-xl font-bold text-gray-800">{formatCurrency(zoneTotals.avgTicket)}</p>
+          </motion.div>
+
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-purple-100">
+            <div className="flex items-center gap-2 mb-2">
+              <Store className="w-5 h-5 text-purple-500" />
+              <span className="text-xs text-gray-500">Tiendas Activas</span>
+            </div>
+            <p className="text-xl font-bold text-gray-800">{storePerformance.length}</p>
+          </motion.div>
+        </div>
+
+        {/* Main Content */}
+        <div id="report-content">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+            <TabsList className="bg-white/80 p-1 rounded-xl grid grid-cols-4 w-full max-w-2xl mx-auto">
+              <TabsTrigger value="store" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500 data-[state=active]:to-rose-500 data-[state=active]:text-white rounded-lg gap-1 text-xs">
+                <Store className="w-4 h-4" />
+                <span className="hidden sm:inline">Tiendas</span>
+              </TabsTrigger>
+              <TabsTrigger value="compare" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white rounded-lg gap-1 text-xs">
+                <BarChart3 className="w-4 h-4" />
+                <span className="hidden sm:inline">Comparativa</span>
+              </TabsTrigger>
+              <TabsTrigger value="budget" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white rounded-lg gap-1 text-xs">
+                <Target className="w-4 h-4" />
+                <span className="hidden sm:inline">Presupuesto</span>
+              </TabsTrigger>
+              <TabsTrigger value="cashier" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-violet-500 data-[state=active]:text-white rounded-lg gap-1 text-xs">
+                <Users className="w-4 h-4" />
+                <span className="hidden sm:inline">Cajeros</span>
+              </TabsTrigger>
+            </TabsList>
+
+            {/* Store Performance Tab */}
+            <TabsContent value="store" className="space-y-6">
+              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Store className="w-5 h-5 text-pink-500" />
+                    Rendimiento por Tienda - {periodLabel}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="h-48">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={chartData}>
-                        <defs>
-                          <linearGradient id="salesGradRep" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#ec4899" stopOpacity={0.4}/>
-                            <stop offset="95%" stopColor="#ec4899" stopOpacity={0.05}/>
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                        <XAxis dataKey="date" tick={{ fontSize: 10 }} />
-                        <YAxis tick={{ fontSize: 10 }} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} />
-                        <Tooltip formatter={(v) => [formatCurrency(v), 'Venta']} />
-                        <Area type="monotone" dataKey="ventas" stroke="#ec4899" fill="url(#salesGradRep)" strokeWidth={2} />
-                      </AreaChart>
-                    </ResponsiveContainer>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <ComposedChart data={storePerformance.slice(0, 10)}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                      <XAxis dataKey="code" tick={{ fontSize: 10 }} />
+                      <YAxis yAxisId="left" tickFormatter={(v) => `${(v/1000000).toFixed(0)}M`} tick={{ fontSize: 10 }} />
+                      <YAxis yAxisId="right" orientation="right" domain={[0, 120]} tickFormatter={(v) => `${v}%`} tick={{ fontSize: 10 }} />
+                      <Tooltip formatter={(v, name) => name === 'compliance' ? `${v.toFixed(1)}%` : formatCurrency(v)} />
+                      <Legend />
+                      <Bar yAxisId="left" dataKey="totalSales" name="Ventas" fill="#FFB5C5" radius={[4, 4, 0, 0]} />
+                      <Line yAxisId="right" type="monotone" dataKey="compliance" name="Cumplimiento" stroke="#10b981" strokeWidth={2} dot={{ r: 4 }} />
+                    </ComposedChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+
+              {/* Store Table */}
+              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg overflow-hidden">
+                <CardContent className="p-0">
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="text-left p-3 text-xs font-medium text-gray-500">#</th>
+                          <th className="text-left p-3 text-xs font-medium text-gray-500">Tienda</th>
+                          <th className="text-right p-3 text-xs font-medium text-gray-500">Ventas</th>
+                          <th className="text-right p-3 text-xs font-medium text-gray-500">Tickets</th>
+                          <th className="text-right p-3 text-xs font-medium text-gray-500">Ticket Prom.</th>
+                          <th className="text-right p-3 text-xs font-medium text-gray-500">Presupuesto</th>
+                          <th className="text-right p-3 text-xs font-medium text-gray-500">Cumplimiento</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {storePerformance.map((store, idx) => (
+                          <tr key={store.code} className="border-t border-gray-100 hover:bg-gray-50">
+                            <td className="p-3 text-sm font-medium text-gray-600">{idx + 1}</td>
+                            <td className="p-3">
+                              <p className="text-sm font-medium text-gray-800">{store.code}</p>
+                              <p className="text-xs text-gray-500 truncate max-w-[150px]">{store.name}</p>
+                            </td>
+                            <td className="p-3 text-sm text-right font-medium text-gray-800">{formatCurrency(store.totalSales)}</td>
+                            <td className="p-3 text-sm text-right text-gray-600">{store.totalTickets.toLocaleString()}</td>
+                            <td className="p-3 text-sm text-right text-gray-600">{formatCurrency(store.avgTicket)}</td>
+                            <td className="p-3 text-sm text-right text-gray-600">{formatCurrency(store.budget)}</td>
+                            <td className="p-3 text-right">
+                              <Badge className={`${
+                                store.compliance >= 90 ? 'bg-green-100 text-green-700' :
+                                store.compliance >= 70 ? 'bg-amber-100 text-amber-700' :
+                                'bg-red-100 text-red-700'
+                              }`}>
+                                {store.compliance.toFixed(1)}%
+                              </Badge>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 </CardContent>
               </Card>
+            </TabsContent>
 
-              {/* Ticket Promedio */}
-              <Card className="border-none shadow-md">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-gray-600">💵 Ticket Promedio Diario</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-48">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <ComposedChart data={chartData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                        <XAxis dataKey="date" tick={{ fontSize: 10 }} />
-                        <YAxis tick={{ fontSize: 10 }} tickFormatter={(v) => `$${(v/1000).toFixed(0)}K`} />
-                        <Tooltip formatter={(v) => [formatCurrency(v), 'Ticket']} />
-                        <Bar dataKey="ticketPromedio" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
-                        <Line type="monotone" dataKey="ticketPromedio" stroke="#ec4899" strokeWidth={2} dot={false} />
-                      </ComposedChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-              {/* Distribución por turno */}
-              {reportData.pieData.length > 0 && (
-                <Card className="border-none shadow-md">
+            {/* Comparison Tab */}
+            <TabsContent value="compare" className="space-y-6">
+              <div className="grid md:grid-cols-2 gap-4">
+                <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-gray-600">🕐 Ventas por Turno</CardTitle>
+                    <CardTitle className="text-sm font-medium text-gray-600">Ventas por Tienda</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="h-40">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie data={reportData.pieData} cx="50%" cy="50%" innerRadius={30} outerRadius={55} paddingAngle={3} dataKey="value">
-                            {reportData.pieData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={entry.color} />
-                            ))}
-                          </Pie>
-                          <Tooltip formatter={(v) => formatCurrency(v)} />
-                          <Legend wrapperStyle={{ fontSize: 10 }} />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Top Vendedores */}
-              <Card className="border-none shadow-md">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-gray-600">🏆 Top Vendedores</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {reportData.topSellers.slice(0, 4).map((s, i) => (
-                      <div key={i} className="flex justify-between items-center text-sm">
-                        <span>{['🥇', '🥈', '🥉', '4️⃣'][i]} {s.cashier?.name || 'N/A'}</span>
-                        <span className="font-bold text-pink-600">${(s.sales/1000000).toFixed(1)}M</span>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Sugeridos */}
-              <Card className="border-none shadow-md">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-gray-600">⭐ Top Sugeridos</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-40">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={reportData.topSuggested.slice(0, 4).map(s => ({ name: s.cashier?.name?.split(' ')[0] || 'N/A', sugeridos: s.suggested }))}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                        <XAxis dataKey="name" tick={{ fontSize: 9 }} />
-                        <YAxis tick={{ fontSize: 10 }} />
-                        <Tooltip />
-                        <Bar dataKey="sugeridos" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+                    <ResponsiveContainer width="100%" height={250}>
+                      <BarChart data={storePerformance.slice(0, 8)} layout="vertical">
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                        <XAxis type="number" tickFormatter={(v) => `${(v/1000000).toFixed(0)}M`} tick={{ fontSize: 10 }} />
+                        <YAxis dataKey="code" type="category" width={60} tick={{ fontSize: 10 }} />
+                        <Tooltip formatter={(v) => formatCurrency(v)} />
+                        <Bar dataKey="totalSales" radius={[0, 4, 4, 0]}>
+                          {storePerformance.slice(0, 8).map((entry, index) => (
+                            <Cell key={index} fill={PASTEL_COLORS[index % PASTEL_COLORS.length]} />
+                          ))}
+                        </Bar>
                       </BarChart>
                     </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium text-gray-600">Ticket Promedio Comparativo</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ResponsiveContainer width="100%" height={250}>
+                      <BarChart data={storePerformance.slice(0, 8).sort((a, b) => b.avgTicket - a.avgTicket)}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                        <XAxis dataKey="code" tick={{ fontSize: 10 }} />
+                        <YAxis tickFormatter={(v) => `${(v/1000).toFixed(0)}K`} tick={{ fontSize: 10 }} />
+                        <Tooltip formatter={(v) => formatCurrency(v)} />
+                        <Bar dataKey="avgTicket" fill="#B5D8FF" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Top vs Bottom */}
+              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-sm font-medium text-gray-600">Top 5 vs Bottom 5</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                      <h4 className="text-sm font-medium text-green-600 mb-3 flex items-center gap-2">
+                        <CheckCircle className="w-4 h-4" /> Mejores
+                      </h4>
+                      <div className="space-y-2">
+                        {storePerformance.slice(0, 5).map((store, idx) => (
+                          <div key={store.code} className="flex items-center justify-between p-2 bg-green-50 rounded-lg">
+                            <div className="flex items-center gap-2">
+                              <span className="w-6 h-6 rounded-full bg-green-100 text-green-700 flex items-center justify-center text-xs font-bold">{idx + 1}</span>
+                              <span className="text-sm font-medium">{store.code}</span>
+                            </div>
+                            <span className="text-sm font-bold text-green-700">{formatCurrency(store.totalSales)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-medium text-red-600 mb-3 flex items-center gap-2">
+                        <AlertCircle className="w-4 h-4" /> Necesitan Mejora
+                      </h4>
+                      <div className="space-y-2">
+                        {storePerformance.slice(-5).reverse().map((store, idx) => (
+                          <div key={store.code} className="flex items-center justify-between p-2 bg-red-50 rounded-lg">
+                            <div className="flex items-center gap-2">
+                              <span className="w-6 h-6 rounded-full bg-red-100 text-red-700 flex items-center justify-center text-xs font-bold">{storePerformance.length - 4 + idx}</span>
+                              <span className="text-sm font-medium">{store.code}</span>
+                            </div>
+                            <span className="text-sm font-bold text-red-700">{formatCurrency(store.totalSales)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
-            </div>
+            </TabsContent>
 
-            {/* Generate Button */}
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Card className="bg-gradient-to-r from-pink-500 to-rose-500 text-white border-none shadow-xl cursor-pointer" onClick={!generating ? generatePDF : undefined}>
-                <CardContent className="py-6 text-center">
-                  <motion.div animate={{ rotate: generating ? 360 : 0 }} transition={{ duration: 1, repeat: generating ? Infinity : 0, ease: "linear" }} className="inline-block mb-3">
-                    {generating ? <Loader2 className="w-10 h-10" /> : <FileText className="w-10 h-10" />}
-                  </motion.div>
-                  <h3 className="text-lg font-bold mb-1">{generating ? 'Generando...' : 'Generar Reporte PDF'}</h3>
-                  <p className="text-white/80 text-sm mb-3">Incluye análisis IA, rankings y plan de acción</p>
-                  {!generating && (
-                    <Button size="sm" className="bg-white text-pink-600 hover:bg-white/90">
-                      <Download className="w-4 h-4 mr-1" /> Descargar
-                    </Button>
-                  )}
+            {/* Budget History Tab */}
+            <TabsContent value="budget" className="space-y-6">
+              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Target className="w-5 h-5 text-green-500" />
+                    Historial de Cumplimiento (Últimos 6 meses)
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <ComposedChart data={budgetHistory}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                      <XAxis dataKey="month" tick={{ fontSize: 11 }} />
+                      <YAxis yAxisId="left" tickFormatter={(v) => `${(v/1000000).toFixed(0)}M`} tick={{ fontSize: 10 }} />
+                      <YAxis yAxisId="right" orientation="right" domain={[0, 120]} tickFormatter={(v) => `${v}%`} tick={{ fontSize: 10 }} />
+                      <Tooltip formatter={(v, name) => name === 'compliance' ? `${v.toFixed(1)}%` : formatCurrency(v)} />
+                      <Legend />
+                      <Bar yAxisId="left" dataKey="budget" name="Presupuesto" fill="#E0B5FF" radius={[4, 4, 0, 0]} />
+                      <Bar yAxisId="left" dataKey="sales" name="Ventas" fill="#C5FFB5" radius={[4, 4, 0, 0]} />
+                      <Line yAxisId="right" type="monotone" dataKey="compliance" name="Cumplimiento" stroke="#f472b6" strokeWidth={3} dot={{ r: 5, fill: '#f472b6' }} />
+                    </ComposedChart>
+                  </ResponsiveContainer>
                 </CardContent>
               </Card>
-            </motion.div>
-          </motion.div>
-        ) : (
-          <div className="text-center py-20">
-            <motion.div animate={{ y: [0, -15, 0] }} transition={{ duration: 3, repeat: Infinity }} className="text-6xl mb-4">📊</motion.div>
-            <h2 className="text-xl font-bold text-gray-700 mb-2">Selecciona una tienda</h2>
-            <p className="text-gray-400">Para generar reportes gerenciales</p>
-          </div>
-        )}
+
+              {/* Budget Cards */}
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                {budgetHistory.map((month, idx) => (
+                  <motion.div
+                    key={month.month}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.05 }}
+                    className={`p-4 rounded-xl border ${
+                      month.compliance >= 90 ? 'bg-green-50 border-green-200' :
+                      month.compliance >= 70 ? 'bg-amber-50 border-amber-200' :
+                      'bg-red-50 border-red-200'
+                    }`}
+                  >
+                    <p className="text-xs text-gray-500 mb-1">{month.fullMonth}</p>
+                    <p className={`text-xl font-bold ${
+                      month.compliance >= 90 ? 'text-green-600' :
+                      month.compliance >= 70 ? 'text-amber-600' :
+                      'text-red-600'
+                    }`}>{month.compliance.toFixed(0)}%</p>
+                    <p className="text-[10px] text-gray-400 mt-1">{formatCurrency(month.sales)}</p>
+                  </motion.div>
+                ))}
+              </div>
+            </TabsContent>
+
+            {/* Cashier Performance Tab */}
+            <TabsContent value="cashier" className="space-y-6">
+              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="w-5 h-5 text-purple-500" />
+                    Desempeño de Cajeros - {periodLabel}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={cashierPerformance.slice(0, 10)}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                      <XAxis dataKey="cashier.name" tick={{ fontSize: 9 }} angle={-45} textAnchor="end" height={80} />
+                      <YAxis tickFormatter={(v) => `${(v/1000000).toFixed(1)}M`} tick={{ fontSize: 10 }} />
+                      <Tooltip formatter={(v) => formatCurrency(v)} />
+                      <Bar dataKey="totalSales" fill="#E0B5FF" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+
+              {/* Cashier Table */}
+              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg overflow-hidden">
+                <CardContent className="p-0">
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="text-left p-3 text-xs font-medium text-gray-500">#</th>
+                          <th className="text-left p-3 text-xs font-medium text-gray-500">Cajero</th>
+                          <th className="text-left p-3 text-xs font-medium text-gray-500">Tienda</th>
+                          <th className="text-right p-3 text-xs font-medium text-gray-500">Ventas</th>
+                          <th className="text-right p-3 text-xs font-medium text-gray-500">Tickets</th>
+                          <th className="text-right p-3 text-xs font-medium text-gray-500">Transacc.</th>
+                          <th className="text-right p-3 text-xs font-medium text-gray-500">Sugeridos</th>
+                          <th className="text-right p-3 text-xs font-medium text-gray-500">Ticket Prom.</th>
+                          <th className="text-right p-3 text-xs font-medium text-gray-500">Turnos</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {cashierPerformance.slice(0, 20).map((cashier, idx) => (
+                          <tr key={cashier.cashier_id} className="border-t border-gray-100 hover:bg-gray-50">
+                            <td className="p-3 text-sm font-medium text-gray-600">{idx + 1}</td>
+                            <td className="p-3 text-sm font-medium text-gray-800">{cashier.cashier?.name}</td>
+                            <td className="p-3 text-xs text-gray-500">{cashier.storeName}</td>
+                            <td className="p-3 text-sm text-right font-medium text-gray-800">{formatCurrency(cashier.totalSales)}</td>
+                            <td className="p-3 text-sm text-right text-gray-600">{cashier.totalTickets.toLocaleString()}</td>
+                            <td className="p-3 text-sm text-right text-gray-600">{cashier.totalTransactions.toLocaleString()}</td>
+                            <td className="p-3 text-sm text-right text-gray-600">{cashier.totalSuggested}</td>
+                            <td className="p-3 text-sm text-right text-gray-600">{formatCurrency(cashier.avgTicket)}</td>
+                            <td className="p-3 text-sm text-right text-gray-600">{cashier.shifts}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
     </div>
   );
