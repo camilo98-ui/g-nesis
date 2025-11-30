@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { motion } from 'framer-motion';
 
-const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/c3a36de58_Capturadepantalla2025-11-251251441.png";
+const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/7bcde60e7_Capturadepantalla2025-11-25140753.png";
 
 const NAV_ITEMS = [
   { name: 'Inicio', page: 'Home', icon: Home },
