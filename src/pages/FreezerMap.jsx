@@ -252,6 +252,9 @@ export default function FreezerMap() {
   const [selectedStore, setSelectedStore] = useState('');
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [showFlavorSelector, setShowFlavorSelector] = useState(false);
+  const [showAddFlavor, setShowAddFlavor] = useState(false);
+  const [newFlavor, setNewFlavor] = useState({ name: '', color: '#FFB5C5', line: 'gourmet' });
+  const [filterLine, setFilterLine] = useState('all');
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [zoom, setZoom] = useState(1);
   const [rotation, setRotation] = useState(0);
@@ -400,7 +403,7 @@ export default function FreezerMap() {
               </Button>
             </Link>
             <div>
-              <h1 className={`text-2xl md:text-3xl font-black ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
+              <h1 className={`text-2xl md:text-3xl font-semibold ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>
                 🧊 Mapa de Nevera 3D
               </h1>
               {selectedStore && (
@@ -548,38 +551,116 @@ export default function FreezerMap() {
               </div>
             </motion.div>
 
-            {/* Leyenda */}
-            <div className={`mt-8 p-4 rounded-xl ${isDarkMode ? 'bg-gray-900/50' : 'bg-white/80'} shadow-lg max-w-2xl mx-auto`}>
-              <h4 className={`text-sm font-bold mb-3 ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>
-                📋 Leyenda
-              </h4>
-              <div className="flex flex-wrap gap-4">
-                {[
-                  { type: 'helado', label: 'Helado Regular' },
-                  { type: 'premium', label: 'Premium', icon: <Sparkles className="w-3 h-3 text-purple-500" /> },
-                  { type: 'especial', label: 'Especial' },
-                  { type: 'nuevo', label: 'Nuevo' },
-                ].map((item) => (
-                  <div key={item.type} className="flex items-center gap-2">
-                    <div className={`w-4 h-4 rounded bg-gradient-to-br ${TYPE_COLORS[item.type]} border ${TYPE_BORDERS[item.type]}`} />
-                    <span className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{item.label}</span>
-                    {item.icon}
-                  </div>
-                ))}
+            {/* Panel inferior con filtros y agregar sabor */}
+            <div className={`mt-8 p-4 rounded-xl ${isDarkMode ? 'bg-gray-900/50' : 'bg-white/80'} shadow-lg max-w-2xl mx-auto space-y-4`}>
+              {/* Filtros por línea */}
+              <div className="flex flex-wrap items-center gap-3">
+                <span className={`text-xs font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Filtrar:</span>
+                <div className="flex gap-2">
+                  {[
+                    { key: 'all', label: 'Todos', color: 'bg-gray-100 text-gray-600' },
+                    { key: 'gourmet', label: '🍦 Gourmet', color: 'bg-pink-100 text-pink-600' },
+                    { key: 'exclusivo', label: '✨ Exclusivos', color: 'bg-purple-100 text-purple-600' },
+                  ].map((f) => (
+                    <motion.button
+                      key={f.key}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setFilterLine(f.key)}
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                        filterLine === f.key 
+                          ? f.key === 'gourmet' ? 'bg-pink-500 text-white' : f.key === 'exclusivo' ? 'bg-purple-500 text-white' : 'bg-gray-700 text-white'
+                          : f.color
+                      }`}
+                    >
+                      {f.label}
+                    </motion.button>
+                  ))}
+                </div>
               </div>
-              <div className="flex flex-wrap gap-4 mt-3 pt-3 border-t border-gray-200">
-                <span className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Stock:</span>
-                {[
-                  { level: 'full', label: 'Completo', color: 'bg-green-400' },
-                  { level: 'medium', label: 'Medio', color: 'bg-yellow-400' },
-                  { level: 'low', label: 'Bajo', color: 'bg-orange-400' },
-                  { level: 'empty', label: 'Agotado', color: 'bg-red-400' },
-                ].map((item) => (
-                  <div key={item.level} className="flex items-center gap-1">
-                    <div className={`w-2 h-2 rounded-full ${item.color}`} />
-                    <span className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{item.label}</span>
-                  </div>
-                ))}
+
+              {/* Agregar sabor manualmente */}
+              <div className={`p-3 rounded-lg border ${isDarkMode ? 'border-gray-700 bg-gray-800/50' : 'border-gray-200 bg-gray-50'}`}>
+                <div className="flex items-center justify-between mb-2">
+                  <span className={`text-xs font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    ➕ Agregar Sabor Personalizado
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowAddFlavor(!showAddFlavor)}
+                    className="text-xs"
+                  >
+                    {showAddFlavor ? 'Cerrar' : 'Abrir'}
+                  </Button>
+                </div>
+                
+                <AnimatePresence>
+                  {showAddFlavor && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="space-y-2 mt-2"
+                    >
+                      <Input
+                        placeholder="Nombre del sabor"
+                        value={newFlavor.name}
+                        onChange={(e) => setNewFlavor({ ...newFlavor, name: e.target.value })}
+                        className="text-sm"
+                      />
+                      <div className="flex gap-2">
+                        <Input
+                          type="color"
+                          value={newFlavor.color}
+                          onChange={(e) => setNewFlavor({ ...newFlavor, color: e.target.value })}
+                          className="w-12 h-9 p-1"
+                        />
+                        <select
+                          value={newFlavor.line}
+                          onChange={(e) => setNewFlavor({ ...newFlavor, line: e.target.value })}
+                          className="flex-1 text-sm border rounded-md px-2"
+                        >
+                          <option value="gourmet">Gourmet</option>
+                          <option value="exclusivo">Exclusivo</option>
+                        </select>
+                        <Button size="sm" className="bg-pink-500 hover:bg-pink-600 text-white">
+                          <Check className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Leyenda */}
+              <div className="pt-3 border-t border-gray-200">
+                <div className="flex flex-wrap gap-4">
+                  {[
+                    { type: 'gourmet', label: 'Gourmet' },
+                    { type: 'exclusivo', label: 'Exclusivo', icon: <Sparkles className="w-3 h-3 text-purple-500" /> },
+                  ].map((item) => (
+                    <div key={item.type} className="flex items-center gap-2">
+                      <div className={`w-4 h-4 rounded bg-gradient-to-br ${TYPE_COLORS[item.type]} border ${TYPE_BORDERS[item.type]}`} />
+                      <span className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{item.label}</span>
+                      {item.icon}
+                    </div>
+                  ))}
+                </div>
+                <div className="flex flex-wrap gap-4 mt-2">
+                  <span className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Stock:</span>
+                  {[
+                    { level: 'full', label: 'Completo', color: 'bg-green-400' },
+                    { level: 'medium', label: 'Medio', color: 'bg-yellow-400' },
+                    { level: 'low', label: 'Bajo', color: 'bg-orange-400' },
+                    { level: 'empty', label: 'Agotado', color: 'bg-red-400' },
+                  ].map((item) => (
+                    <div key={item.level} className="flex items-center gap-1">
+                      <div className={`w-2 h-2 rounded-full ${item.color}`} />
+                      <span className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{item.label}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </>
