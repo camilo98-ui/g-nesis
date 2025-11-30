@@ -76,6 +76,32 @@ const MENU_ITEMS = [
   
 ];
 
+// Icono flotante para Mapa de Nevera en Home
+function FreezerMapIcon() {
+  return (
+    <Link to={createPageUrl('FreezerMap')}>
+      <motion.div
+        className="fixed bottom-6 left-6 z-40"
+        whileHover={{ scale: 1.1, rotate: 5 }}
+        whileTap={{ scale: 0.95 }}
+        animate={{ y: [0, -5, 0] }}
+        transition={{ y: { duration: 2, repeat: Infinity } }}
+      >
+        <div className="w-14 h-14 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-2xl shadow-xl shadow-cyan-500/30 flex items-center justify-center">
+          <Snowflake className="w-7 h-7 text-white" />
+        </div>
+        <motion.div 
+          className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-white text-cyan-600 text-[8px] font-bold px-2 py-0.5 rounded-full shadow-md whitespace-nowrap"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          Nevera
+        </motion.div>
+      </motion.div>
+    </Link>
+  );
+}
+
 export default function Home() {
   const [selectedStore, setSelectedStore] = useState('');
   const [showMascot, setShowMascot] = useState(false);
@@ -276,6 +302,9 @@ export default function Home() {
           </motion.div>
         )}
       </div>
+
+      {/* Icono Mapa Nevera */}
+      <FreezerMapIcon />
 
       {/* Mascot */}
       <MascotCone 
