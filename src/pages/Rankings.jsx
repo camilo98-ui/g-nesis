@@ -11,7 +11,8 @@ import CashierRankingCard from '@/components/ranking/CashierRankingCard';
 import CashierRecommendation from '@/components/CashierRecommendation';
 import TrendChart from '@/components/ranking/TrendChart';
 import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
-import { ArrowLeft, Award, Gift, Trophy, Star, Receipt, TrendingUp, Globe, X, Medal } from 'lucide-react';
+import { ArrowLeft, Award, Gift, Trophy, Star, Receipt, TrendingUp, Globe, X, Medal, Search } from 'lucide-react';
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { startOfMonth } from 'date-fns';
@@ -24,6 +25,7 @@ export default function Rankings() {
   });
   const [activeTab, setActiveTab] = useState('sales');
   const [showGlobal, setShowGlobal] = useState(false);
+  const [globalSearch, setGlobalSearch] = useState('');
 
   useEffect(() => {
     const saved = localStorage.getItem('selectedStore');
@@ -407,6 +409,19 @@ export default function Rankings() {
                   </div>
                 </div>
 
+                {/* Search */}
+                <div className="px-5 pt-4">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Input
+                      placeholder="Buscar cajero por nombre..."
+                      value={globalSearch}
+                      onChange={(e) => setGlobalSearch(e.target.value)}
+                      className="pl-10 bg-gray-50 border-gray-200 focus:border-purple-400"
+                    />
+                  </div>
+                </div>
+
                 {/* Content */}
                 <div className="flex-1 overflow-y-auto p-5">
                   <Tabs defaultValue="sales" className="w-full">
@@ -427,25 +442,27 @@ export default function Rankings() {
 
                     {/* Ventas */}
                     <TabsContent value="sales" className="space-y-3">
-                      {globalRankings.salesRanking.slice(0, 20).map((item, index) => (
+                      {globalRankings.salesRanking
+                        .filter(item => !globalSearch || item.cashier?.name?.toLowerCase().includes(globalSearch.toLowerCase()))
+                        .map((item) => (
                         <motion.div
                           key={item.cashier_id}
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.03 }}
+                          transition={{ delay: 0.03 }}
                           className={`flex items-center gap-4 p-4 rounded-xl border ${
-                            index < 3 
+                            item.rank <= 3 
                               ? 'bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-200' 
                               : 'bg-white border-gray-100'
                           }`}
                         >
                           <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${
-                            index === 0 ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-white' :
-                            index === 1 ? 'bg-gradient-to-r from-gray-300 to-gray-400 text-white' :
-                            index === 2 ? 'bg-gradient-to-r from-orange-400 to-amber-600 text-white' :
+                            item.rank === 1 ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-white' :
+                            item.rank === 2 ? 'bg-gradient-to-r from-gray-300 to-gray-400 text-white' :
+                            item.rank === 3 ? 'bg-gradient-to-r from-orange-400 to-amber-600 text-white' :
                             'bg-gray-100 text-gray-600'
                           }`}>
-                            {index < 3 ? <Medal className="w-5 h-5" /> : item.rank}
+                            {item.rank <= 3 ? <Medal className="w-5 h-5" /> : item.rank}
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="font-bold text-gray-800 truncate">{item.cashier?.name}</p>
@@ -461,25 +478,27 @@ export default function Rankings() {
 
                     {/* Transacciones */}
                     <TabsContent value="transactions" className="space-y-3">
-                      {globalRankings.transactionsRanking.slice(0, 20).map((item, index) => (
+                      {globalRankings.transactionsRanking
+                        .filter(item => !globalSearch || item.cashier?.name?.toLowerCase().includes(globalSearch.toLowerCase()))
+                        .map((item) => (
                         <motion.div
                           key={item.cashier_id}
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.03 }}
+                          transition={{ delay: 0.03 }}
                           className={`flex items-center gap-4 p-4 rounded-xl border ${
-                            index < 3 
+                            item.rank <= 3 
                               ? 'bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200' 
                               : 'bg-white border-gray-100'
                           }`}
                         >
                           <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${
-                            index === 0 ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-white' :
-                            index === 1 ? 'bg-gradient-to-r from-gray-300 to-gray-400 text-white' :
-                            index === 2 ? 'bg-gradient-to-r from-orange-400 to-amber-600 text-white' :
+                            item.rank === 1 ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-white' :
+                            item.rank === 2 ? 'bg-gradient-to-r from-gray-300 to-gray-400 text-white' :
+                            item.rank === 3 ? 'bg-gradient-to-r from-orange-400 to-amber-600 text-white' :
                             'bg-gray-100 text-gray-600'
                           }`}>
-                            {index < 3 ? <Medal className="w-5 h-5" /> : item.rank}
+                            {item.rank <= 3 ? <Medal className="w-5 h-5" /> : item.rank}
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="font-bold text-gray-800 truncate">{item.cashier?.name}</p>
@@ -495,25 +514,27 @@ export default function Rankings() {
 
                     {/* Ticket Promedio */}
                     <TabsContent value="ticket" className="space-y-3">
-                      {globalRankings.ticketRanking.slice(0, 20).map((item, index) => (
+                      {globalRankings.ticketRanking
+                        .filter(item => !globalSearch || item.cashier?.name?.toLowerCase().includes(globalSearch.toLowerCase()))
+                        .map((item) => (
                         <motion.div
                           key={item.cashier_id}
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.03 }}
+                          transition={{ delay: 0.03 }}
                           className={`flex items-center gap-4 p-4 rounded-xl border ${
-                            index < 3 
+                            item.rank <= 3 
                               ? 'bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200' 
                               : 'bg-white border-gray-100'
                           }`}
                         >
                           <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${
-                            index === 0 ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-white' :
-                            index === 1 ? 'bg-gradient-to-r from-gray-300 to-gray-400 text-white' :
-                            index === 2 ? 'bg-gradient-to-r from-orange-400 to-amber-600 text-white' :
+                            item.rank === 1 ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-white' :
+                            item.rank === 2 ? 'bg-gradient-to-r from-gray-300 to-gray-400 text-white' :
+                            item.rank === 3 ? 'bg-gradient-to-r from-orange-400 to-amber-600 text-white' :
                             'bg-gray-100 text-gray-600'
                           }`}>
-                            {index < 3 ? <Medal className="w-5 h-5" /> : item.rank}
+                            {item.rank <= 3 ? <Medal className="w-5 h-5" /> : item.rank}
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="font-bold text-gray-800 truncate">{item.cashier?.name}</p>
