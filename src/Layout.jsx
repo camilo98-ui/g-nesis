@@ -21,6 +21,7 @@ const NAV_ITEMS = [
   { name: 'Rankings', page: 'Rankings', icon: Award },
   { name: 'Presupuestos', page: 'Budget', icon: Target },
   { name: 'Reportes', page: 'Reports', icon: FileText },
+  { name: '', page: 'FreezerMap', icon: Snowflake, isIcon: true },
 ];
 
 export default function Layout({ children, currentPageName }) {
