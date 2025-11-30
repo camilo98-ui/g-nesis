@@ -612,7 +612,7 @@ export default function Dashboard() {
               </Button>
             </Link>
             <div>
-              <h1 className="text-2xl md:text-3xl font-semibold text-gray-700">Dashboard</h1>
+              <h1 className="text-2xl md:text-3xl font-semibold text-gray-700">Tienda</h1>
               {selectedStore && (
                 <p className="text-sm text-gray-500">{selectedStore} - {selectedStoreName}</p>
               )}

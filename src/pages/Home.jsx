@@ -20,7 +20,7 @@ const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/pub
 
 const MENU_ITEMS = [
   { 
-    name: 'Dashboard Tienda', 
+    name: 'Tienda', 
     page: 'Dashboard',
     icon: LayoutDashboard, 
     description: 'Ventas y métricas',
@@ -29,7 +29,7 @@ const MENU_ITEMS = [
     iconColor: 'text-violet-400'
   },
   { 
-    name: 'Dashboard Cajeros', 
+    name: 'Cajeros', 
     page: 'CashiersDashboard',
     icon: Users, 
     description: 'Rendimiento del equipo',

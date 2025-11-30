@@ -41,7 +41,7 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
           <SelectValue placeholder="Selecciona una tienda" />
         </div>
       </SelectTrigger>
-      <SelectContent className="max-h-[400px] bg-white border-gray-200 rounded-xl">
+      <SelectContent className="max-h-[400px] bg-white border-gray-200 rounded-xl" position="popper" side="bottom" sideOffset={4}>
         {STORES.map((store) => (
           <SelectItem 
             key={store.code} 

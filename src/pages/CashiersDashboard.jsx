@@ -6,7 +6,6 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import StoreSelector, { STORES } from '@/components/StoreSelector';
 import DateFilter from '@/components/DateFilter';
-import WeekFilter from '@/components/WeekFilter';
 import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
 import CashierAnalysis from '@/components/cashier/CashierAnalysis';
 import BadgesDisplay from '@/components/gamification/BadgesDisplay';
@@ -136,7 +135,7 @@ export default function CashiersDashboard() {
             <div>
               <h1 className="text-2xl md:text-3xl font-semibold text-gray-700 flex items-center gap-2">
                 <Users className="w-6 h-6 text-pink-500" />
-                Dashboard Cajeros
+                Cajeros
               </h1>
               {selectedStore && (
                 <p className="text-sm text-gray-500">{selectedStore} - {selectedStoreName}</p>
@@ -145,7 +144,6 @@ export default function CashiersDashboard() {
           </div>
           <div className="flex flex-col md:flex-row gap-3 items-center">
             <StoreSelector selectedStore={selectedStore} onStoreChange={handleStoreChange} />
-            <WeekFilter onWeekChange={(w) => setDateRange({ from: w.from, to: w.to })} />
             <DateFilter dateRange={dateRange} onDateChange={setDateRange} />
           </div>
         </div>

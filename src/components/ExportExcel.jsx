@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FileSpreadsheet, Download, X, Store, Users, Loader2 } from 'lucide-react';
+import { FileSpreadsheet, Download, X, Store, Users, Loader2, TrendingUp, Award, Target } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -14,40 +14,107 @@ export default function ExportExcel({
 }) {
   const [exporting, setExporting] = useState(null);
 
+  // Calcular estadísticas para enriquecer el export
+  const storeStats = useMemo(() => {
+    const totalSales = storeData.reduce((acc, d) => acc + (d.total_sales || 0), 0);
+    const totalTickets = storeData.reduce((acc, d) => acc + (d.total_tickets || 0), 0);
+    const totalTrans = storeData.reduce((acc, d) => acc + (d.total_transactions || 0), 0);
+    const totalSuggested = storeData.reduce((acc, d) => acc + (d.total_suggested || 0), 0);
+    const avgTicket = totalTrans > 0 ? totalSales / totalTrans : 0;
+    const avgDailySales = storeData.length > 0 ? totalSales / storeData.length : 0;
+    const bestDay = storeData.reduce((max, d) => (d.total_sales || 0) > (max.total_sales || 0) ? d : max, {});
+    const worstDay = storeData.filter(d => d.total_sales > 0).reduce((min, d) => (d.total_sales || Infinity) < (min.total_sales || Infinity) ? d : min, {});
+    
+    return { totalSales, totalTickets, totalTrans, totalSuggested, avgTicket, avgDailySales, bestDay, worstDay };
+  }, [storeData]);
+
+  const cashierStats = useMemo(() => {
+    const byC = {};
+    cashierData.forEach(d => {
+      if (!byC[d.cashierName]) byC[d.cashierName] = { sales: 0, tickets: 0, suggested: 0, shifts: 0 };
+      byC[d.cashierName].sales += d.sales || 0;
+      byC[d.cashierName].tickets += d.tickets || 0;
+      byC[d.cashierName].suggested += d.suggested_sales || 0;
+      byC[d.cashierName].shifts += 1;
+    });
+    return Object.entries(byC)
+      .map(([name, stats]) => ({ name, ...stats, avgTicket: stats.tickets > 0 ? stats.sales / stats.tickets : 0 }))
+      .sort((a, b) => b.sales - a.sales);
+  }, [cashierData]);
+
   const convertToCSV = (data, type) => {
-    if (!data.length) return '';
+    if (!data.length && type !== 'store') return '';
     
     let headers, rows;
+    const formatCurr = (v) => `$${Math.round(v).toLocaleString()}`;
     
     if (type === 'store') {
-      headers = ['Fecha', 'Ventas Totales', 'Tickets', 'Transacciones', 'Sugeridos'];
-      rows = data.map(d => [
-        d.date,
-        d.total_sales || 0,
-        d.total_tickets || 0,
-        d.total_transactions || 0,
-        d.total_suggested || 0
-      ]);
+      // Reporte enriquecido de tienda
+      headers = ['REPORTE DE TIENDA - ' + storeName, '', '', '', ''];
+      const summaryRows = [
+        [''],
+        ['=== RESUMEN EJECUTIVO ===', '', '', '', ''],
+        ['Período', dateRange?.from ? `${format(dateRange.from, 'dd/MM/yyyy')} - ${format(dateRange.to, 'dd/MM/yyyy')}` : 'N/A', '', '', ''],
+        ['Ventas Totales', formatCurr(storeStats.totalSales), '', '', ''],
+        ['Total Transacciones', storeStats.totalTrans, '', '', ''],
+        ['Ticket Promedio', formatCurr(storeStats.avgTicket), '', '', ''],
+        ['Venta Diaria Promedio', formatCurr(storeStats.avgDailySales), '', '', ''],
+        ['Total Sugeridos', storeStats.totalSuggested, '', '', ''],
+        ['Días Trabajados', storeData.length, '', '', ''],
+        [''],
+        ['Mejor Día', storeStats.bestDay?.date || 'N/A', formatCurr(storeStats.bestDay?.total_sales || 0), '', ''],
+        ['Día Más Bajo', storeStats.worstDay?.date || 'N/A', formatCurr(storeStats.worstDay?.total_sales || 0), '', ''],
+        [''],
+        ['=== DETALLE DIARIO ===', '', '', '', ''],
+        ['Fecha', 'Ventas', 'Tickets', 'Transacciones', 'Sugeridos']
+      ];
+      rows = [
+        ...summaryRows,
+        ...storeData.map(d => [
+          d.date,
+          formatCurr(d.total_sales || 0),
+          d.total_tickets || 0,
+          d.total_transactions || 0,
+          d.total_suggested || 0
+        ])
+      ];
+      return rows.map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
     } else {
-      headers = ['Cajero', 'Fecha', 'Turno', 'Ventas', 'Tickets', 'Transacciones', 'Sugeridos', 'Ticket Promedio'];
-      rows = data.map(d => [
-        d.cashierName || 'N/A',
-        d.date,
-        d.shift === 'morning' ? 'Mañana' : d.shift === 'afternoon' ? 'Tarde' : 'Noche',
-        d.sales || 0,
-        d.tickets || 0,
-        d.transactions || 0,
-        d.suggested_sales || 0,
-        d.average_ticket || 0
-      ]);
+      // Reporte enriquecido de cajeros
+      const summaryRows = [
+        ['REPORTE DE CAJEROS - ' + storeName, '', '', '', '', '', ''],
+        [''],
+        ['=== RANKING DE CAJEROS ===', '', '', '', '', '', ''],
+        ['Posición', 'Cajero', 'Ventas Totales', 'Turnos', 'Ticket Prom.', 'Sugeridos', ''],
+        ...cashierStats.map((c, i) => [
+          i + 1,
+          c.name,
+          formatCurr(c.sales),
+          c.shifts,
+          formatCurr(c.avgTicket),
+          c.suggested,
+          ''
+        ]),
+        [''],
+        ['=== TOP 3 DESTACADOS ===', '', '', '', '', '', ''],
+        ['🥇 Mejor Vendedor', cashierStats[0]?.name || 'N/A', formatCurr(cashierStats[0]?.sales || 0), '', '', '', ''],
+        ['🥈 Segundo Lugar', cashierStats[1]?.name || 'N/A', formatCurr(cashierStats[1]?.sales || 0), '', '', '', ''],
+        ['🥉 Tercer Lugar', cashierStats[2]?.name || 'N/A', formatCurr(cashierStats[2]?.sales || 0), '', '', '', ''],
+        [''],
+        ['=== DETALLE DE TURNOS ===', '', '', '', '', '', ''],
+        ['Cajero', 'Fecha', 'Turno', 'Ventas', 'Tickets', 'Transacciones', 'Sugeridos'],
+        ...cashierData.map(d => [
+          d.cashierName || 'N/A',
+          d.date,
+          d.shift === 'morning' ? 'Mañana' : d.shift === 'afternoon' ? 'Tarde' : 'Noche',
+          formatCurr(d.sales || 0),
+          d.tickets || 0,
+          d.transactions || 0,
+          d.suggested_sales || 0
+        ])
+      ];
+      return summaryRows.map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
     }
-    
-    const csvContent = [
-      headers.join(','),
-      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
-    ].join('\n');
-    
-    return csvContent;
   };
 
   const downloadCSV = async (type) => {
