@@ -13,6 +13,7 @@ import FreezerMap from './pages/FreezerMap';
 import Training from './pages/Training';
 import Quality from './pages/Quality';
 import Management from './pages/Management';
+import PredictiveAnalytics from './pages/PredictiveAnalytics';
 import __Layout from './Layout.jsx';
 
 
@@ -32,6 +33,7 @@ export const PAGES = {
     "Training": Training,
     "Quality": Quality,
     "Management": Management,
+    "PredictiveAnalytics": PredictiveAnalytics,
 }
 
 export const pagesConfig = {

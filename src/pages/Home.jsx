@@ -10,7 +10,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { 
   LayoutDashboard, Users, TrendingUp, 
-  Award, Target, FileText, Bell, Snowflake
+  Award, Target, FileText, Bell, Snowflake, Brain
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { startOfMonth } from 'date-fns';
@@ -72,6 +72,15 @@ const MENU_ITEMS = [
     bgColor: 'bg-gradient-to-br from-indigo-50/80 to-purple-100/60',
     iconBg: 'bg-indigo-100/80',
     iconColor: 'text-indigo-400'
+  },
+  { 
+    name: 'IA Predictiva', 
+    page: 'PredictiveAnalytics',
+    icon: Brain, 
+    description: 'Predicciones con IA',
+    bgColor: 'bg-gradient-to-br from-purple-50/80 to-fuchsia-100/60',
+    iconBg: 'bg-purple-100/80',
+    iconColor: 'text-purple-400'
   },
 ];
 
