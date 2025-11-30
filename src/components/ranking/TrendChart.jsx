@@ -81,9 +81,9 @@ export default function TrendChart({ shiftRecords, cashiers, dateRange, metricTy
         currency: 'COP', 
         minimumFractionDigits: 0,
         maximumFractionDigits: 0
-      }).format(val);
+      }).format(Math.round(val));
     }
-    return val.toLocaleString();
+    return Math.round(val).toLocaleString();
   };
 
   const getYAxisLabel = () => {
@@ -109,9 +109,19 @@ export default function TrendChart({ shiftRecords, cashiers, dateRange, metricTy
       animate={{ opacity: 1, y: 0 }}
       className="bg-white rounded-2xl shadow-lg p-4 border border-gray-100"
     >
-      <h4 className="text-sm font-bold text-gray-700 mb-4 flex items-center gap-2">
-        📈 Tendencia de {getYAxisLabel()} por Cajero
-      </h4>
+      <motion.h4 
+        initial={{ opacity: 0, x: -10 }}
+        animate={{ opacity: 1, x: 0 }}
+        className="text-sm font-medium text-gray-600 mb-4 flex items-center gap-2"
+      >
+        <motion.span
+          animate={{ rotate: [0, 10, -10, 0] }}
+          transition={{ duration: 2, repeat: Infinity }}
+        >
+          📈
+        </motion.span>
+        Tendencia de {getYAxisLabel()} por Cajero
+      </motion.h4>
       <div className="h-72">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData}>
