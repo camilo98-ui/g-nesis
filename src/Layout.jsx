@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { motion } from 'framer-motion';
 
-const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/7bcde60e7_Capturadepantalla2025-11-25140753.png";
+const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/6a749247d_Capturadepantalla2025-11-251251441.png";
 
 const NAV_ITEMS = [
   { name: 'Inicio', page: 'Home', icon: Home },
@@ -22,7 +22,6 @@ const NAV_ITEMS = [
   { name: 'Metas', page: 'Budget', icon: Target },
   { name: 'Reportes', page: 'Reports', icon: FileText },
   { name: '', page: 'FreezerMap', icon: Snowflake, isIcon: true },
-  { name: '', page: 'Training', icon: GraduationCap, isIcon: true },
   { name: '', page: 'Quality', icon: ClipboardCheck, isIcon: true },
 ];
 
