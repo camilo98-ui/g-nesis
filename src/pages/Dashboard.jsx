@@ -620,18 +620,6 @@ export default function Dashboard() {
           </div>
           <div className="flex flex-col md:flex-row gap-3 items-center">
             <StoreSelector selectedStore={selectedStore} onStoreChange={handleStoreChange} />
-            <Select onValueChange={handleWeekChange} defaultValue="">
-              <SelectTrigger className="w-[140px] border-gray-200">
-                <SelectValue placeholder={`Sem ${currentWeek}`} />
-              </SelectTrigger>
-              <SelectContent className="max-h-60">
-                {weekOptions.map(w => (
-                  <SelectItem key={w.value} value={w.value.toString()}>
-                    {w.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
             <DateFilter dateRange={dateRange} onDateChange={setDateRange} />
           </div>
         </div>
@@ -780,8 +768,8 @@ export default function Dashboard() {
                   </Card>
                 </div>
 
-                {/* Second Row */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Second Row - Gráficas más grandes */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {/* Transacciones vs Venta */}
                   <Card className="border-none shadow-lg">
                     <CardHeader className="pb-2">
@@ -793,87 +781,76 @@ export default function Dashboard() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="h-44">
+                      <div className="h-64">
                         <ResponsiveContainer width="100%" height="100%">
                           <ComposedChart data={chartData}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                            <XAxis dataKey="date" tick={{ fill: '#6b7280', fontSize: 9 }} />
-                            <YAxis yAxisId="left" tick={{ fill: '#6b7280', fontSize: 9 }} />
-                            <YAxis yAxisId="right" orientation="right" tick={{ fill: '#6b7280', fontSize: 9 }} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} />
+                            <XAxis dataKey="date" tick={{ fill: '#6b7280', fontSize: 10 }} />
+                            <YAxis yAxisId="left" tick={{ fill: '#6b7280', fontSize: 10 }} />
+                            <YAxis yAxisId="right" orientation="right" tick={{ fill: '#6b7280', fontSize: 10 }} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} />
                             <Tooltip 
                               formatter={(v, name) => [name === 'ventas' ? formatCurrency(v) : v.toLocaleString(), name === 'ventas' ? 'Venta' : 'Transacciones']}
                               labelFormatter={(label, payload) => payload?.[0]?.payload?.fullDate || label}
                             />
-                            <Bar yAxisId="left" dataKey="transactions" fill="#8b5cf6" radius={[3, 3, 0, 0]} name="transactions" />
-                            <Line yAxisId="right" type="monotone" dataKey="ventas" stroke="#ec4899" strokeWidth={2} dot={false} name="ventas" />
+                            <Legend />
+                            <Bar yAxisId="left" dataKey="transactions" fill="#8b5cf6" radius={[3, 3, 0, 0]} name="Transacciones" />
+                            <Line yAxisId="right" type="monotone" dataKey="ventas" stroke="#ec4899" strokeWidth={2} dot={false} name="Ventas" />
                           </ComposedChart>
                         </ResponsiveContainer>
                       </div>
                     </CardContent>
                   </Card>
 
-                  {/* Suggested Trend */}
+                  {/* Sugeridos y Distribución */}
                   <Card className="border-none shadow-lg">
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm font-normal text-gray-500 flex items-center gap-2">
                         <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 2, repeat: Infinity }}>
                           <Gift className="w-4 h-4 text-pink-500" />
                         </motion.div>
-                        Sugeridos
+                        Sugeridos y Distribución
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="h-44">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <AreaChart data={chartData}>
-                            <defs>
-                              <linearGradient id="sugGrad" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#ec4899" stopOpacity={0.4}/>
-                                <stop offset="95%" stopColor="#ec4899" stopOpacity={0.05}/>
-                              </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                            <XAxis dataKey="date" tick={{ fill: '#6b7280', fontSize: 9 }} />
-                            <YAxis tick={{ fill: '#6b7280', fontSize: 9 }} />
-                            <Tooltip />
-                            <Area type="monotone" dataKey="suggested" stroke="#ec4899" strokeWidth={2} fill="url(#sugGrad)" />
-                          </AreaChart>
-                        </ResponsiveContainer>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Distribution Pie */}
-                  <Card className="border-none shadow-lg">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-normal text-gray-500">
-                        <motion.span animate={{ scale: [1, 1.05, 1] }} transition={{ duration: 2, repeat: Infinity }}>
-                          📊
-                        </motion.span> Distribución
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="h-44">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <PieChart>
-                            <Pie
-                              data={[
-                                { name: 'Ventas', value: totals.sales, fill: '#10b981' },
-                                { name: 'Tickets', value: totals.tickets * 10000, fill: '#3b82f6' },
-                                { name: 'Sugeridos', value: totals.suggested * 5000, fill: '#ec4899' }
-                              ]}
-                              cx="50%"
-                              cy="50%"
-                              innerRadius={35}
-                              outerRadius={60}
-                              paddingAngle={3}
-                              dataKey="value"
-                            >
-                            </Pie>
-                            <Tooltip />
-                            <Legend iconSize={8} wrapperStyle={{ fontSize: 10 }} />
-                          </PieChart>
-                        </ResponsiveContainer>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="h-56">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart data={chartData}>
+                              <defs>
+                                <linearGradient id="sugGrad" x1="0" y1="0" x2="0" y2="1">
+                                  <stop offset="5%" stopColor="#ec4899" stopOpacity={0.4}/>
+                                  <stop offset="95%" stopColor="#ec4899" stopOpacity={0.05}/>
+                                </linearGradient>
+                              </defs>
+                              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                              <XAxis dataKey="date" tick={{ fill: '#6b7280', fontSize: 9 }} />
+                              <YAxis tick={{ fill: '#6b7280', fontSize: 9 }} />
+                              <Tooltip />
+                              <Area type="monotone" dataKey="suggested" stroke="#ec4899" strokeWidth={2} fill="url(#sugGrad)" name="Sugeridos" />
+                            </AreaChart>
+                          </ResponsiveContainer>
+                        </div>
+                        <div className="h-56">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                              <Pie
+                                data={[
+                                  { name: 'Ventas', value: totals.sales, fill: '#10b981' },
+                                  { name: 'Tickets', value: totals.tickets * 10000, fill: '#3b82f6' },
+                                  { name: 'Sugeridos', value: totals.suggested * 5000, fill: '#ec4899' }
+                                ]}
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={40}
+                                outerRadius={70}
+                                paddingAngle={3}
+                                dataKey="value"
+                              />
+                              <Tooltip />
+                              <Legend iconSize={10} wrapperStyle={{ fontSize: 11 }} />
+                            </PieChart>
+                          </ResponsiveContainer>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>

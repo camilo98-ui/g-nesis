@@ -190,19 +190,32 @@ export default function FreezerMap() {
     enabled: !!selectedStore && showHistory
   });
 
-  // Grid de la nevera
+  // Grid de la nevera - Ahora con bajadas (cada bajada tiene 2 espacios: F y T)
+  // 7 bajadas x 6 posiciones = 42 posiciones visuales pero cada una es una bajada con F/T
   const freezerGrid = useMemo(() => {
     const grid = [];
     for (let row = 1; row <= 7; row++) {
-      const rowSlots = [];
+      const rowBajadas = [];
       for (let pos = 1; pos <= 6; pos++) {
-        const existingSlot = slots.find(s => s.row === row && s.position === pos);
-        rowSlots.push(existingSlot || {
-          row, position: pos, flavor_name: '', flavor_type: 'vacio',
-          color: '', is_empty: true, stock_level: 'full', store_id: selectedStore
+        // Cada posición es una "bajada" con slot frontal y trasero
+        const frontSlot = slots.find(s => s.row === row && s.position === pos && s.slot_type === 'F') ||
+          slots.find(s => s.row === row && s.position === pos && !s.slot_type);
+        const backSlot = slots.find(s => s.row === row && s.position === pos && s.slot_type === 'T');
+        
+        rowBajadas.push({
+          row,
+          position: pos,
+          front: frontSlot || {
+            row, position: pos, slot_type: 'F', flavor_name: '', flavor_type: 'vacio',
+            color: '', is_empty: true, stock_level: 'full', store_id: selectedStore
+          },
+          back: backSlot || {
+            row, position: pos, slot_type: 'T', flavor_name: '', flavor_type: 'vacio',
+            color: '', is_empty: true, stock_level: 'full', store_id: selectedStore
+          }
         });
       }
-      grid.push(rowSlots);
+      grid.push(rowBajadas);
     }
     return grid;
   }, [slots, selectedStore]);
@@ -273,16 +286,28 @@ export default function FreezerMap() {
   const handleFlavorSelect = (flavor) => {
     if (!selectedSlot) return;
     
+    const slotType = flavor.slotType || selectedSlot.slot_type || 'F';
+    
     setUndoStack(prev => [...prev.slice(-9), { action: 'edit', slot: { ...selectedSlot } }]);
     setSavingSlot({ row: selectedSlot.row, position: selectedSlot.position, saving: true });
     
     const slotData = {
-      ...selectedSlot, store_id: selectedStore,
-      flavor_name: flavor.name, flavor_type: flavor.type || flavor.line,
-      color: flavor.color, is_empty: flavor.is_empty || false
+      store_id: selectedStore,
+      row: selectedSlot.row,
+      position: selectedSlot.position,
+      slot_type: slotType,
+      flavor_name: flavor.name,
+      flavor_type: flavor.type || flavor.line,
+      color: flavor.color,
+      is_empty: flavor.is_empty || false
     };
     
-    const existing = slots.find(s => s.row === selectedSlot.row && s.position === selectedSlot.position);
+    const existing = slots.find(s => 
+      s.row === selectedSlot.row && 
+      s.position === selectedSlot.position && 
+      (s.slot_type === slotType || (!s.slot_type && slotType === 'F'))
+    );
+    
     updateSlotMutation.mutate({
       slotData: existing ? { ...slotData, id: existing.id } : slotData,
       isNew: !existing
@@ -599,40 +624,100 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                     </div>
                   </div>
 
-                  {/* Grid */}
-                  <div className="space-y-2 mt-4">
+                  {/* Grid - Bajadas con F (frontal) y T (trasero) */}
+                  <div className="space-y-3 mt-4">
                     {freezerGrid.map((row, rowIndex) => (
                       <div key={rowIndex} className="relative">
                         {/* Row number */}
-                        <div className="absolute -left-4 sm:-left-6 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center text-[10px] sm:text-xs font-bold">
+                        <div className="absolute -left-5 sm:-left-7 top-1/2 -translate-y-1/2 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center text-[10px] sm:text-xs font-bold">
                           {rowIndex + 1}
                         </div>
                         
                         {/* Row actions */}
                         <button
                           onClick={() => duplicateRow(rowIndex)}
-                          className="absolute -right-4 sm:-right-6 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-gray-100 hover:bg-pink-100 text-gray-400 hover:text-pink-600 flex items-center justify-center transition-colors"
+                          className="absolute -right-5 sm:-right-7 top-1/2 -translate-y-1/2 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gray-100 hover:bg-pink-100 text-gray-400 hover:text-pink-600 flex items-center justify-center transition-colors"
                           title="Duplicar fila"
                         >
-                          <Copy className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                          <Copy className="w-3 h-3" />
                         </button>
 
-                        {/* Slots */}
-                        <div className="grid grid-cols-6 gap-1 sm:gap-1.5 p-1.5 sm:p-2 rounded-lg bg-gray-100/50">
-                          {row.map((slot, slotIndex) => (
-                            <FreezerSlotCell
-                              key={`${rowIndex}-${slotIndex}`}
-                              slot={slot}
-                              onClick={handleSlotClick}
-                              onDoubleClick={handleDoubleClick}
-                              isSelected={selectedSlot?.row === slot.row && selectedSlot?.position === slot.position}
-                              isDarkMode={false}
-                              onDragStart={handleDragStart}
-                              onDragEnd={handleDragEnd}
-                              onDrop={handleDrop}
-                              savingState={savingSlot?.row === slot.row && savingSlot?.position === slot.position ? savingSlot : null}
-                              auditStatus={showAudit ? (auditData?.misplacedSlots?.find(m => m.row === slot.row && m.position === slot.position) ? 'misplaced' : slot.is_empty ? null : 'correct') : null}
-                            />
+                        {/* Bajadas - cada una con F y T */}
+                        <div className="grid grid-cols-6 gap-2 p-2 rounded-xl bg-gray-100/50">
+                          {row.map((bajada, bajadaIndex) => (
+                            <div 
+                              key={`${rowIndex}-${bajadaIndex}`} 
+                              className="relative"
+                              style={{ perspective: '200px' }}
+                            >
+                              {/* Contenedor 3D de la bajada */}
+                              <div className="relative">
+                                {/* Slot Trasero (T) - atrás con sombra */}
+                                <div 
+                                  className="absolute inset-x-0 -top-1 transform translate-z-0 opacity-80"
+                                  style={{ transform: 'translateY(-4px) scale(0.95)' }}
+                                >
+                                  <div
+                                    onClick={() => {
+                                      setSelectedSlot({ ...bajada.back, row: bajada.row, position: bajada.position, slot_type: 'T' });
+                                      setShowFlavorSelector(true);
+                                    }}
+                                    onDoubleClick={() => clearSlot(bajada.back)}
+                                    className={`h-10 sm:h-12 rounded-lg cursor-pointer transition-all border-2 ${
+                                      bajada.back.is_empty 
+                                        ? 'bg-gray-200/60 border-dashed border-gray-300' 
+                                        : 'border-purple-300 shadow-sm'
+                                    }`}
+                                    style={!bajada.back.is_empty ? { 
+                                      background: `linear-gradient(135deg, ${bajada.back.color}dd, ${bajada.back.color}99)` 
+                                    } : {}}
+                                  >
+                                    <div className="absolute top-0.5 left-0.5 bg-purple-500 text-white text-[7px] px-1 rounded font-bold">T</div>
+                                    {!bajada.back.is_empty && (
+                                      <div className="h-full flex items-center justify-center">
+                                        <span className="text-[8px] font-medium text-white drop-shadow-sm text-center leading-tight px-0.5 line-clamp-2">
+                                          {bajada.back.flavor_name}
+                                        </span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                                
+                                {/* Slot Frontal (F) - adelante */}
+                                <div 
+                                  className="relative z-10 mt-2"
+                                >
+                                  <div
+                                    onClick={() => {
+                                      setSelectedSlot({ ...bajada.front, row: bajada.row, position: bajada.position, slot_type: 'F' });
+                                      setShowFlavorSelector(true);
+                                    }}
+                                    onDoubleClick={() => clearSlot(bajada.front)}
+                                    className={`h-12 sm:h-14 rounded-lg cursor-pointer transition-all border-2 shadow-md ${
+                                      bajada.front.is_empty 
+                                        ? 'bg-white border-dashed border-gray-300 hover:border-pink-400' 
+                                        : 'border-pink-300 hover:scale-105'
+                                    }`}
+                                    style={!bajada.front.is_empty ? { 
+                                      background: `linear-gradient(135deg, ${bajada.front.color}ee, ${bajada.front.color}aa)` 
+                                    } : {}}
+                                  >
+                                    <div className="absolute top-0.5 left-0.5 bg-pink-500 text-white text-[7px] px-1 rounded font-bold">F</div>
+                                    {bajada.front.is_empty ? (
+                                      <div className="h-full flex items-center justify-center">
+                                        <Plus className="w-4 h-4 text-gray-400" />
+                                      </div>
+                                    ) : (
+                                      <div className="h-full flex items-center justify-center pt-2">
+                                        <span className="text-[9px] font-bold text-white drop-shadow-md text-center leading-tight px-0.5 line-clamp-2">
+                                          {bajada.front.flavor_name}
+                                        </span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
                           ))}
                         </div>
                       </div>

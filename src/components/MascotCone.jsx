@@ -107,7 +107,8 @@ export default function MascotCone({ storeId, isOpen, onToggle }) {
       opportunities,
       topPerformers,
       daysWorked: monthSales.length,
-      avgTicket: totals.tickets > 0 ? totals.sales / totals.tickets : 0
+      avgTicket: totals.tickets > 0 ? totals.sales / totals.tickets : 0,
+      ticketPromedioTienda: totals.sales / Math.max(totals.tickets, 1)
     };
   }, [dailySales, shiftRecords, cashiers, budgets]);
 
@@ -137,7 +138,7 @@ DATOS DE VENTA:
 - Venta diaria requerida para alcanzar meta: ${formatCurrency(requiredDaily)}
 
 INDICADORES CLAVE:
-- Ticket promedio actual: ${formatCurrency(analysis.avgTicket)}
+- Ticket promedio de la tienda (venta total / transacciones totales): ${formatCurrency(analysis.totals.sales / Math.max(analysis.totals.tickets, 1))}
 - Total transacciones: ${analysis.totals.tickets}
 - Sugeridos vendidos: ${analysis.totals.suggested}
 - Tasa de sugeridos: ${analysis.totals.tickets > 0 ? ((analysis.totals.suggested / analysis.totals.tickets) * 100).toFixed(1) : 0}%
@@ -441,8 +442,8 @@ Usa emojis de helados 🍦🍨 y sé muy motivador pero con sustento en datos.`;
                       </p>
                     </div>
                     <div className="bg-blue-50 rounded-xl p-3 text-center">
-                      <p className="text-xs text-gray-500">Ticket Prom.</p>
-                      <p className="text-lg font-bold text-blue-600">{formatCurrency(analysis.avgTicket)}</p>
+                      <p className="text-xs text-gray-500">Ticket Tienda</p>
+                      <p className="text-lg font-bold text-blue-600">{formatCurrency(analysis.totals.sales / Math.max(analysis.totals.tickets, 1))}</p>
                     </div>
                   </div>
 

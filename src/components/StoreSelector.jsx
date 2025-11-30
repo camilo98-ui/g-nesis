@@ -1,12 +1,12 @@
-import React from 'react';
-import { MapPin } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { MapPin, Search } from 'lucide-react';
+import { Input } from "@/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
 
 const STORES = [
   { code: "BTA 11", name: "CC PALATINO" },
@@ -33,29 +33,70 @@ const STORES = [
 export { STORES };
 
 export default function StoreSelector({ selectedStore, onStoreChange }) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState('');
+  
+  const filteredStores = useMemo(() => {
+    if (!search.trim()) return STORES;
+    const term = search.toLowerCase();
+    return STORES.filter(s => 
+      s.code.toLowerCase().includes(term) || 
+      s.name.toLowerCase().includes(term)
+    );
+  }, [search]);
+  
+  const selectedStoreName = STORES.find(s => s.code === selectedStore)?.name || '';
+  
   return (
-    <Select value={selectedStore} onValueChange={onStoreChange}>
-      <SelectTrigger className="w-full md:w-[300px] bg-white border-gray-200 hover:border-pink-300 transition-all shadow-sm rounded-xl">
-        <div className="flex items-center gap-2">
-          <MapPin className="w-4 h-4 text-pink-500" />
-          <SelectValue placeholder="Selecciona una tienda" />
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button 
+          variant="outline" 
+          className="w-full md:w-[300px] bg-white border-gray-200 hover:border-pink-300 transition-all shadow-sm rounded-xl justify-start"
+        >
+          <MapPin className="w-4 h-4 text-pink-500 mr-2" />
+          {selectedStore ? (
+            <span className="truncate">{selectedStore} - {selectedStoreName}</span>
+          ) : (
+            <span className="text-gray-400">Selecciona una tienda</span>
+          )}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[300px] p-2" align="start">
+        <div className="relative mb-2">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Input 
+            placeholder="Buscar tienda..." 
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-8 h-9 text-sm bg-gray-50"
+          />
         </div>
-      </SelectTrigger>
-      <SelectContent className="max-h-[400px] bg-white border-gray-200 rounded-xl" position="popper" side="bottom" sideOffset={4}>
-        {STORES.map((store) => (
-          <SelectItem 
-            key={store.code} 
-            value={store.code}
-            className="hover:bg-pink-50 cursor-pointer transition-colors rounded-lg"
-          >
-            <div className="flex items-center gap-2">
+        <div className="max-h-[300px] overflow-y-auto space-y-1">
+          {filteredStores.map((store) => (
+            <button
+              key={store.code}
+              onClick={() => {
+                onStoreChange(store.code);
+                setOpen(false);
+                setSearch('');
+              }}
+              className={`w-full flex items-center gap-2 p-2 rounded-lg text-left transition-colors ${
+                selectedStore === store.code 
+                  ? 'bg-pink-100 text-pink-700' 
+                  : 'hover:bg-pink-50'
+              }`}
+            >
               <span className="text-lg">🍦</span>
               <span className="font-medium text-gray-800">{store.code}</span>
-              <span className="text-gray-400 text-sm">- {store.name}</span>
-            </div>
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+              <span className="text-gray-400 text-xs truncate">- {store.name}</span>
+            </button>
+          ))}
+          {filteredStores.length === 0 && (
+            <p className="text-center text-gray-400 text-sm py-4">No se encontró "{search}"</p>
+          )}
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 }
