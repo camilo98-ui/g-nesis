@@ -365,7 +365,8 @@ function ManagementDashboard() {
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
-            <div className="grid md:grid-cols-2 gap-6">
+            {/* Row 1: Main Charts */}
+            <div className="grid md:grid-cols-2 gap-4">
               {/* Sales Trend */}
               <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
                 <CardHeader className="pb-2">
@@ -375,7 +376,7 @@ function ManagementDashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ResponsiveContainer width="100%" height={200}>
+                  <ResponsiveContainer width="100%" height={180}>
                     <AreaChart data={dailyTrend}>
                       <defs>
                         <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
@@ -384,16 +385,16 @@ function ManagementDashboard() {
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                      <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-                      <YAxis tickFormatter={(v) => `${(v/1000000).toFixed(1)}M`} tick={{ fontSize: 11 }} />
-                      <Tooltip formatter={(v) => formatCurrency(v)} labelFormatter={(l, p) => p[0]?.payload?.fullDate} />
+                      <XAxis dataKey="date" tick={{ fontSize: 10 }} />
+                      <YAxis tickFormatter={(v) => `${(v/1000000).toFixed(1)}M`} tick={{ fontSize: 10 }} />
+                      <Tooltip formatter={(v) => formatCurrency(v)} />
                       <Area type="monotone" dataKey="sales" stroke="#ec4899" fill="url(#salesGradient)" strokeWidth={2} />
                     </AreaChart>
                   </ResponsiveContainer>
                   <p className="text-xs text-gray-500 mt-2 bg-pink-50 p-2 rounded-lg">
-                    💡 <strong>Análisis:</strong> {dailyTrend[6]?.sales > dailyTrend[5]?.sales 
-                      ? 'Las ventas de hoy van por encima del día anterior. ¡Buen ritmo!' 
-                      : 'Las ventas de hoy están por debajo. Revisar operación en tiendas críticas.'}
+                    💡 {dailyTrend[6]?.sales > dailyTrend[5]?.sales 
+                      ? 'Ventas al alza. ¡Buen ritmo!' 
+                      : 'Revisar tiendas críticas.'}
                   </p>
                 </CardContent>
               </Card>
@@ -407,11 +408,11 @@ function ManagementDashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ResponsiveContainer width="100%" height={200}>
+                  <ResponsiveContainer width="100%" height={180}>
                     <BarChart data={salesByHour}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                      <XAxis dataKey="name" tick={{ fontSize: 10 }} />
-                      <YAxis tickFormatter={(v) => `${(v/1000000).toFixed(1)}M`} tick={{ fontSize: 11 }} />
+                      <XAxis dataKey="name" tick={{ fontSize: 9 }} />
+                      <YAxis tickFormatter={(v) => `${(v/1000000).toFixed(1)}M`} tick={{ fontSize: 10 }} />
                       <Tooltip formatter={(v) => formatCurrency(v)} />
                       <Bar dataKey="sales" radius={[8, 8, 0, 0]}>
                         {salesByHour.map((entry, index) => (
@@ -421,42 +422,213 @@ function ManagementDashboard() {
                     </BarChart>
                   </ResponsiveContainer>
                   <p className="text-xs text-gray-500 mt-2 bg-blue-50 p-2 rounded-lg">
-                    💡 <strong>Análisis:</strong> {salesByHour[1]?.sales > salesByHour[0]?.sales 
-                      ? 'El turno de la tarde lidera en ventas. Reforzar personal en horario pico.' 
-                      : 'Turno de la mañana con buen desempeño. Mantener estrategia.'}
+                    💡 {salesByHour[1]?.sales > salesByHour[0]?.sales 
+                      ? 'Tarde lidera. Reforzar personal.' 
+                      : 'Mañana con buen desempeño.'}
                   </p>
                 </CardContent>
               </Card>
             </div>
 
-            {/* Store Performance Chart */}
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+            {/* Row 2: Store Performance + Distribution */}
+            <div className="grid md:grid-cols-3 gap-4">
+              {/* Store Performance Chart */}
+              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg md:col-span-2">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+                    <Target className="w-4 h-4 text-purple-500" />
+                    Cumplimiento por Tienda
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={250}>
+                    <ComposedChart data={storePerformance.slice(0, 10)} layout="vertical">
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                      <XAxis type="number" domain={[0, 120]} tickFormatter={(v) => `${v}%`} />
+                      <YAxis dataKey="code" type="category" width={60} tick={{ fontSize: 10 }} />
+                      <Tooltip formatter={(v, name) => name === 'compliance' ? `${v.toFixed(1)}%` : formatCurrency(v)} />
+                      <Bar dataKey="compliance" radius={[0, 4, 4, 0]} barSize={18}>
+                        {storePerformance.slice(0, 10).map((entry, index) => (
+                          <Cell key={index} fill={entry.status === 'good' ? '#86efac' : entry.status === 'warning' ? '#fcd34d' : '#fca5a5'} />
+                        ))}
+                      </Bar>
+                      <Line type="monotone" dataKey={() => 100} stroke="#9ca3af" strokeDasharray="5 5" />
+                    </ComposedChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+
+              {/* Store Status Pie */}
+              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+                    <PieChart className="w-4 h-4 text-green-500" />
+                    Estado Tiendas
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={150}>
+                    <RechartsPie>
+                      <Pie
+                        data={[
+                          { name: 'En meta', value: storePerformance.filter(s => s.status === 'good').length, fill: '#86efac' },
+                          { name: 'Alerta', value: warningStores.length, fill: '#fcd34d' },
+                          { name: 'Críticas', value: criticalStores.length, fill: '#fca5a5' }
+                        ]}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={35}
+                        outerRadius={55}
+                        dataKey="value"
+                        label={({ name, value }) => `${value}`}
+                        labelLine={false}
+                      >
+                      </Pie>
+                      <Tooltip />
+                    </RechartsPie>
+                  </ResponsiveContainer>
+                  <div className="flex justify-center gap-3 mt-2 text-xs">
+                    <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-green-300" /> En meta</span>
+                    <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-yellow-300" /> Alerta</span>
+                    <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-red-300" /> Críticas</span>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Row 3: Comparative Charts */}
+            <div className="grid md:grid-cols-2 gap-4">
+              {/* Top 5 vs Bottom 5 */}
+              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+                    <BarChart3 className="w-4 h-4 text-emerald-500" />
+                    Top 5 vs Bottom 5 Tiendas
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={180}>
+                    <BarChart data={[
+                      ...storePerformance.slice(0, 5).map(s => ({ ...s, type: 'top' })),
+                      ...storePerformance.slice(-5).reverse().map(s => ({ ...s, type: 'bottom' }))
+                    ]}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                      <XAxis dataKey="code" tick={{ fontSize: 9 }} />
+                      <YAxis tickFormatter={(v) => `${(v/1000000).toFixed(0)}M`} tick={{ fontSize: 10 }} />
+                      <Tooltip formatter={(v) => formatCurrency(v)} />
+                      <Bar dataKey="totalSales" radius={[4, 4, 0, 0]}>
+                        {[...storePerformance.slice(0, 5), ...storePerformance.slice(-5).reverse()].map((entry, index) => (
+                          <Cell key={index} fill={index < 5 ? '#86efac' : '#fca5a5'} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                  <p className="text-xs text-gray-500 mt-2 bg-emerald-50 p-2 rounded-lg">
+                    💡 Diferencia entre mejor y peor: {formatCurrency(storePerformance[0]?.totalSales - storePerformance[storePerformance.length-1]?.totalSales)}
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Ticket Promedio por Tienda */}
+              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+                    <DollarSign className="w-4 h-4 text-amber-500" />
+                    Ticket Promedio por Tienda
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={180}>
+                    <BarChart data={storePerformance.slice(0, 10).sort((a, b) => b.avgTicket - a.avgTicket)}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                      <XAxis dataKey="code" tick={{ fontSize: 9 }} />
+                      <YAxis tickFormatter={(v) => `${(v/1000).toFixed(0)}K`} tick={{ fontSize: 10 }} />
+                      <Tooltip formatter={(v) => formatCurrency(v)} />
+                      <Bar dataKey="avgTicket" fill="#fcd34d" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                  <p className="text-xs text-gray-500 mt-2 bg-amber-50 p-2 rounded-lg">
+                    💡 Promedio zona: {formatCurrency(storePerformance.reduce((s, st) => s + st.avgTicket, 0) / storePerformance.length)}
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Row 4: Projections + Opportunities */}
+            <div className="grid md:grid-cols-2 gap-4">
+              {/* Projection Chart */}
+              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+                    <Activity className="w-4 h-4 text-indigo-500" />
+                    Proyección vs Presupuesto
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={180}>
+                    <ComposedChart data={storePerformance.slice(0, 8)}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                      <XAxis dataKey="code" tick={{ fontSize: 9 }} />
+                      <YAxis tickFormatter={(v) => `${(v/1000000).toFixed(0)}M`} tick={{ fontSize: 10 }} />
+                      <Tooltip formatter={(v) => formatCurrency(v)} />
+                      <Bar dataKey="projection" fill="#a5b4fc" name="Proyección" radius={[4, 4, 0, 0]} />
+                      <Line type="monotone" dataKey="budget" stroke="#f472b6" strokeWidth={2} name="Presupuesto" dot={{ r: 3 }} />
+                    </ComposedChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+
+              {/* Quick Insights */}
+              <Card className="bg-gradient-to-br from-purple-50 to-pink-50 border-0 shadow-lg">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+                    <Zap className="w-4 h-4 text-purple-500" />
+                    Insights Rápidos
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <div className="bg-white/60 rounded-lg p-2">
+                    <p className="text-xs text-gray-600">🏆 <strong>Mejor tienda:</strong> {storePerformance[0]?.code} con {formatCurrency(storePerformance[0]?.totalSales)}</p>
+                  </div>
+                  <div className="bg-white/60 rounded-lg p-2">
+                    <p className="text-xs text-gray-600">⚠️ <strong>Necesita atención:</strong> {storePerformance[storePerformance.length-1]?.code} ({storePerformance[storePerformance.length-1]?.compliance.toFixed(0)}%)</p>
+                  </div>
+                  <div className="bg-white/60 rounded-lg p-2">
+                    <p className="text-xs text-gray-600">📊 <strong>Tiendas en meta:</strong> {storePerformance.filter(s => s.status === 'good').length} de {storePerformance.length}</p>
+                  </div>
+                  <div className="bg-white/60 rounded-lg p-2">
+                    <p className="text-xs text-gray-600">💰 <strong>Faltante zona:</strong> {formatCurrency(zoneTotals.totalBudget - zoneTotals.totalSales)}</p>
+                  </div>
+                  <div className="bg-white/60 rounded-lg p-2">
+                    <p className="text-xs text-gray-600">📈 <strong>Días restantes:</strong> {new Date(currentYear, currentMonth, 0).getDate() - new Date().getDate()} días</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Oportunidades Alert */}
+            <Card className="bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200">
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
-                  <Target className="w-4 h-4 text-purple-500" />
-                  Cumplimiento por Tienda
+                <CardTitle className="text-sm font-medium text-amber-700 flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4" />
+                  Tiendas con Oportunidad de Mejora
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <ComposedChart data={storePerformance.slice(0, 10)} layout="vertical">
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                    <XAxis type="number" domain={[0, 120]} tickFormatter={(v) => `${v}%`} />
-                    <YAxis dataKey="code" type="category" width={80} tick={{ fontSize: 11 }} />
-                    <Tooltip formatter={(v, name) => name === 'compliance' ? `${v.toFixed(1)}%` : formatCurrency(v)} />
-                    <Bar dataKey="compliance" radius={[0, 4, 4, 0]} barSize={20}>
-                      {storePerformance.slice(0, 10).map((entry, index) => (
-                        <Cell key={index} fill={entry.status === 'good' ? '#86efac' : entry.status === 'warning' ? '#fcd34d' : '#fca5a5'} />
-                      ))}
-                    </Bar>
-                    <Line type="monotone" dataKey={() => 100} stroke="#9ca3af" strokeDasharray="5 5" />
-                  </ComposedChart>
-                </ResponsiveContainer>
-                <p className="text-xs text-gray-500 mt-2 bg-purple-50 p-2 rounded-lg">
-                  💡 <strong>Oportunidad:</strong> {criticalStores.length > 0 
-                    ? `Las tiendas ${criticalStores.slice(0, 3).map(s => s.code).join(', ')} requieren atención inmediata. Están por debajo del 70% de cumplimiento.`
-                    : 'Todas las tiendas van en buen camino hacia la meta mensual.'}
-                </p>
+                <div className="grid md:grid-cols-3 gap-3">
+                  {criticalStores.concat(warningStores).slice(0, 6).map(store => (
+                    <div key={store.code} className="bg-white/80 rounded-lg p-3">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-bold text-gray-800">{store.code}</span>
+                        <span className={`text-sm font-bold ${store.status === 'critical' ? 'text-red-500' : 'text-yellow-500'}`}>
+                          {store.compliance.toFixed(0)}%
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-500 truncate">{store.name}</p>
+                      <p className="text-xs text-gray-400 mt-1">Faltan: {formatCurrency(store.budget - store.totalSales)}</p>
+                    </div>
+                  ))}
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
