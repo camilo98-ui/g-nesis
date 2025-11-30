@@ -4,20 +4,17 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import StoreSelector, { STORES } from '@/components/StoreSelector';
 import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
-import MascotCone from '@/components/MascotCone';
-import ExportExcel from '@/components/ExportExcel';
 import NotificationSetup from '@/components/NotificationSetup';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { 
   LayoutDashboard, Users, TrendingUp, 
-  Award, Target, ChevronRight, FileText, FileSpreadsheet, Bell, MessageCircle, Snowflake,
-  GraduationCap, ClipboardCheck
+  Award, Target, FileText, Bell, Snowflake
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { startOfMonth } from 'date-fns';
 
-const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/7bcde60e7_Capturadepantalla2025-11-25140753.png";
+const ICE_CREAM_IMAGE = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/b447992e3_Capturadepantalla2025-11-30074009.png";
 
 const MENU_ITEMS = [
   { 
@@ -76,7 +73,7 @@ const MENU_ITEMS = [
   },
 ];
 
-// Icono flotante para Mapa de Nevera en Home
+// Icono flotante para Mapa de Nevera
 function FreezerMapIcon() {
   return (
     <Link to={createPageUrl('FreezerMap')}>
@@ -92,8 +89,6 @@ function FreezerMapIcon() {
         </div>
         <motion.div 
           className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-white text-cyan-600 text-[8px] font-bold px-2 py-0.5 rounded-full shadow-md whitespace-nowrap"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
         >
           Nevera
         </motion.div>
@@ -102,15 +97,8 @@ function FreezerMapIcon() {
   );
 }
 
-// Iconos flotantes adicionales - Solo Calidad (Academia está en nav)
-function FloatingButtons() {
-  return null; // Calidad ya está en el nav superior
-}
-
 export default function Home() {
   const [selectedStore, setSelectedStore] = useState('');
-  const [showMascot, setShowMascot] = useState(false);
-  const [showExport, setShowExport] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
 
   useEffect(() => {
@@ -123,33 +111,6 @@ export default function Home() {
     localStorage.setItem('selectedStore', store);
   };
 
-  const { data: dailySales = [] } = useQuery({
-    queryKey: ['dailySales', selectedStore],
-    queryFn: () => base44.entities.DailySales.filter({ store_id: selectedStore }),
-    enabled: !!selectedStore
-  });
-
-  const { data: shiftRecords = [] } = useQuery({
-    queryKey: ['shiftRecords', selectedStore],
-    queryFn: () => base44.entities.ShiftRecord.filter({ store_id: selectedStore }),
-    enabled: !!selectedStore
-  });
-
-  const { data: cashiers = [] } = useQuery({
-    queryKey: ['cashiers', selectedStore],
-    queryFn: () => base44.entities.Cashier.filter({ store_id: selectedStore }),
-    enabled: !!selectedStore
-  });
-
-  const monthStart = startOfMonth(new Date());
-  const filteredSales = dailySales.filter(s => new Date(s.date) >= monthStart);
-  const cashierExportData = shiftRecords
-    .filter(r => new Date(r.date) >= monthStart)
-    .map(r => ({
-      ...r,
-      cashierName: cashiers.find(c => c.id === r.cashier_id)?.name || 'N/A'
-    }));
-
   const selectedStoreName = STORES.find(s => s.code === selectedStore)?.name || '';
 
   return (
@@ -157,45 +118,25 @@ export default function Home() {
       <FloatingIceCreamsBg />
 
       <div className="max-w-6xl mx-auto px-4 py-6 relative z-10">
-        {/* Header con logo imagen */}
+        {/* Header simplificado */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-8"
         >
-          {/* Logo removido del inicio */}
-
-          <motion.img 
-                  src={LOGO_URL} 
-                  alt="Popsy" 
-                  className="h-24 md:h-32 object-contain mx-auto mb-4 cursor-pointer"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  whileHover={{ scale: 1.1, rotate: [0, -5, 5, 0] }}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ duration: 0.5 }}
-                  onClick={() => {
-                    const phrases = [
-                      "🍦 ¡Popsy, el sabor de la felicidad!",
-                      "🎉 ¡Hoy es un gran día para vender helados!",
-                      "💪 ¡Juntos somos más fuertes!",
-                      "🌟 ¡Cada cliente merece una sonrisa!",
-                      "🍨 ¡El mejor helado del mundo!",
-                      "❤️ ¡Gracias por ser parte de Popsy!"
-                    ];
-                    const randomPhrase = phrases[Math.floor(Math.random() * phrases.length)];
-                    alert(randomPhrase);
-                  }}
-                />
-                <p className="text-gray-500 text-sm mb-6">Sistema de Gestión de Ventas</p>
+          <p className="text-gray-500 text-sm mb-6">Sistema de Gestión de Ventas</p>
           
-          {/* Store Selector prominente */}
+          {/* Store Selector */}
           <motion.div 
             className="flex flex-col items-center gap-4"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
+            <div className="flex items-center gap-2 text-gray-500 text-sm">
+              <span>📍</span>
+              <span>Bogotá Noroccidente</span>
+            </div>
             <p className="text-gray-600 font-medium">¿A qué tienda deseas ingresar?</p>
             <StoreSelector 
               selectedStore={selectedStore} 
@@ -214,56 +155,32 @@ export default function Home() {
           )}
         </motion.div>
 
-        {/* Quick Actions sutiles */}
-                      {selectedStore && (
-                        <motion.div
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className="mb-6 flex justify-center gap-3"
-                        >
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setShowExport(!showExport)}
-                            className="text-gray-500 hover:text-green-600 hover:bg-green-50"
-                          >
-                            <FileSpreadsheet className="w-4 h-4 mr-1" />
-                            Exportar
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setShowNotifications(true)}
-                            className="text-gray-500 hover:text-pink-600 hover:bg-pink-50"
-                          >
-                            <Bell className="w-4 h-4 mr-1" />
-                            Alertas
-                          </Button>
-                        </motion.div>
-                      )}
+        {/* Alertas button */}
+        {selectedStore && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 flex justify-center"
+          >
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowNotifications(true)}
+              className="text-gray-500 hover:text-pink-600 hover:bg-pink-50"
+            >
+              <Bell className="w-4 h-4 mr-1" />
+              Alertas
+            </Button>
+          </motion.div>
+        )}
 
-                      {showExport && selectedStore && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: 'auto' }}
-                          className="mb-6"
-                        >
-                          <ExportExcel
-                            storeData={filteredSales}
-                            cashierData={cashierExportData}
-                            storeName={selectedStore}
-                            dateRange={{ from: monthStart, to: new Date() }}
-                          />
-                        </motion.div>
-                      )}
-
-        {/* Menu Grid estilo Popsy */}
+        {/* Menu Grid */}
         {selectedStore ? (
           <motion.div 
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4"
-                          >
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4"
+          >
             {MENU_ITEMS.map((item, index) => {
               const Icon = item.icon;
               return (
@@ -278,10 +195,6 @@ export default function Home() {
                   <Link to={createPageUrl(item.page)}>
                     <motion.div 
                       className={`${item.bgColor} rounded-xl sm:rounded-2xl p-3 sm:p-5 h-full shadow-sm hover:shadow-2xl transition-all duration-300 border border-white/50`}
-                      animate={{ 
-                        boxShadow: ["0 4px 6px rgba(0,0,0,0.1)", "0 8px 15px rgba(0,0,0,0.15)", "0 4px 6px rgba(0,0,0,0.1)"]
-                      }}
-                      transition={{ duration: 3, repeat: Infinity, delay: index * 0.2 }}
                     >
                       <motion.div 
                         className={`w-10 h-10 sm:w-12 sm:h-12 ${item.iconBg} rounded-lg sm:rounded-xl flex items-center justify-center mb-2 sm:mb-3`}
@@ -306,16 +219,17 @@ export default function Home() {
             animate={{ opacity: 1 }}
             className="text-center py-16"
           >
-            <motion.div 
-              className="text-8xl mb-6 inline-block"
+            {/* Imagen del helado sutil */}
+            <motion.img 
+              src={ICE_CREAM_IMAGE}
+              alt="Helado Popsy"
+              className="w-32 h-auto mx-auto mb-6 opacity-70"
+              style={{ filter: 'grayscale(20%)' }}
               animate={{ 
-                y: [0, -15, 0],
-                rotate: [0, 5, -5, 0]
+                y: [0, -8, 0],
               }}
-              transition={{ duration: 3, repeat: Infinity }}
-            >
-              🍦
-            </motion.div>
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+            />
             <h2 className="text-xl font-bold text-gray-700 mb-2">Selecciona una tienda para comenzar</h2>
             <p className="text-gray-400">Elige del menú superior la tienda con la que deseas trabajar</p>
           </motion.div>
@@ -324,16 +238,6 @@ export default function Home() {
 
       {/* Icono Mapa Nevera */}
       <FreezerMapIcon />
-
-      {/* Botones flotantes adicionales */}
-      <FloatingButtons />
-
-      {/* Mascot */}
-      <MascotCone 
-        storeId={selectedStore} 
-        isOpen={showMascot} 
-        onToggle={() => setShowMascot(!showMascot)} 
-      />
 
       {/* Notifications Setup Modal */}
       <AnimatePresence>

@@ -87,7 +87,13 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
                   : 'hover:bg-pink-50'
               }`}
             >
-              <span className="text-lg">🍦</span>
+              {/* Icono de cono con bolita */}
+              <svg viewBox="0 0 24 32" className="w-5 h-6">
+                <circle cx="12" cy="8" r="7" fill="#FFB5C5" stroke="#ec4899" strokeWidth="1"/>
+                <polygon points="5,12 12,30 19,12" fill="#D4A574" stroke="#c99a5e" strokeWidth="0.5"/>
+                <line x1="7" y1="15" x2="17" y2="15" stroke="#c99a5e" strokeWidth="0.5" opacity="0.6"/>
+                <line x1="8" y1="19" x2="16" y2="19" stroke="#c99a5e" strokeWidth="0.5" opacity="0.6"/>
+              </svg>
               <span className="font-medium text-gray-800">{store.code}</span>
               <span className="text-gray-400 text-xs truncate">- {store.name}</span>
             </button>

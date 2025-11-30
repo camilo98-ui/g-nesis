@@ -127,6 +127,13 @@ export default function NotificationSetup({ storeId, isOpen, onClose }) {
       icon: Trophy,
       color: 'text-amber-500'
     },
+    { 
+      key: 'alert_quality_checklist', 
+      label: 'Calidad & Aseo', 
+      description: 'Notifica cuando se completa un checklist de limpieza',
+      icon: CheckCircle2,
+      color: 'text-teal-500'
+    },
   ];
 
   return (
