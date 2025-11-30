@@ -14,7 +14,8 @@ import { motion } from 'framer-motion';
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/6a749247d_Capturadepantalla2025-11-251251441.png";
 
 const NAV_ITEMS = [
-  { name: 'Inicio', page: 'Home', icon: Home },
+  { name: '', page: 'FreezerMap', icon: Snowflake, isIcon: true },
+  { name: '', page: 'Home', icon: Home, isIcon: true },
   { name: '', page: 'Quality', icon: ClipboardCheck, isIcon: true },
 ];
 
@@ -35,21 +36,24 @@ export default function Layout({ children, currentPageName }) {
       </div>
 
       {/* Top Header Bar */}
-      <header className="fixed top-8 left-0 right-0 h-16 bg-white border-b border-gray-100 z-50 px-4 flex items-center justify-between shadow-sm">
-        {/* Logo centrado */}
-        <div className="flex-1" />
-        <Link to={createPageUrl('Home')} className="absolute left-1/2 -translate-x-1/2">
-          <motion.img 
-            src={LOGO_URL} 
-            alt="Popsy" 
-            className="h-10 md:h-12 object-contain"
-            whileHover={{ scale: 1.05 }}
-            transition={{ type: "spring", stiffness: 300 }}
-          />
-        </Link>
+      <header className="fixed top-8 left-0 right-0 h-14 bg-white border-b border-gray-100 z-50 px-4 flex items-center justify-between shadow-sm">
+        {/* Logo izquierda - solo en páginas internas */}
+        <div className="flex items-center">
+          {currentPageName !== 'Home' && (
+            <Link to={createPageUrl('Home')} className="flex items-center">
+              <motion.img 
+                src={LOGO_URL} 
+                alt="Popsy" 
+                className="h-8 md:h-10 object-contain"
+                whileHover={{ scale: 1.05 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              />
+            </Link>
+          )}
+        </div>
 
-        {/* Center Nav - Desktop/Tablet */}
-        <nav className="hidden md:flex items-center gap-0.5 lg:gap-1 flex-wrap justify-center">
+        {/* Center Nav - Visible en todos los dispositivos */}
+        <nav className="flex items-center gap-1 justify-center absolute left-1/2 -translate-x-1/2">
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             const isActive = currentPageName === item.page;
