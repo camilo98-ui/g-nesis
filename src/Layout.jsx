@@ -73,7 +73,11 @@ export default function Layout({ children, currentPageName }) {
                       : item.page === 'FreezerMap'
                         ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg'
                         : 'bg-gradient-to-r from-teal-500 to-emerald-500 text-white shadow-lg'
-                    : 'text-gray-500 hover:text-pink-600 hover:bg-pink-50'}`}
+                    : item.page === 'FreezerMap'
+                      ? 'text-cyan-500 hover:text-cyan-600 hover:bg-cyan-50'
+                      : item.page === 'Home'
+                        ? 'text-rose-500 hover:text-rose-600 hover:bg-rose-50'
+                        : 'text-teal-500 hover:text-teal-600 hover:bg-teal-50'}`}
                   >
                   <Icon className="w-5 h-5" />
                   </Button>

@@ -24,33 +24,34 @@ const Sparkle = ({ color, size = 6 }) => (
 );
 
 // Cono con bolita estilo sketch
-const IceCreamCone = ({ opacity = 0.3 }) => (
+const IceCreamCone = ({ opacity = 0.45 }) => (
   <svg viewBox="0 0 40 60" className="w-full h-full">
-    <circle cx="20" cy="14" r="12" fill="none" stroke="#aaa" strokeWidth="0.8" strokeDasharray="2,1" opacity={opacity} />
-    <circle cx="20" cy="14" r="12" fill="#FFB5C5" opacity={opacity * 0.4} />
-    <polygon points="10,22 20,55 30,22" fill="none" stroke="#aaa" strokeWidth="0.8" strokeDasharray="2,1" opacity={opacity} />
-    <polygon points="10,22 20,55 30,22" fill="#E8D5B0" opacity={opacity * 0.3} />
-    <line x1="13" y1="28" x2="27" y2="28" stroke="#bbb" strokeWidth="0.4" strokeDasharray="1,1" opacity={opacity * 0.6} />
-    <line x1="15" y1="36" x2="25" y2="36" stroke="#bbb" strokeWidth="0.4" strokeDasharray="1,1" opacity={opacity * 0.6} />
+    <circle cx="20" cy="14" r="12" fill="none" stroke="#999" strokeWidth="1" strokeDasharray="2,1" opacity={opacity} />
+    <circle cx="20" cy="14" r="12" fill="#FFB5C5" opacity={opacity * 0.5} />
+    <polygon points="10,22 20,55 30,22" fill="none" stroke="#999" strokeWidth="1" strokeDasharray="2,1" opacity={opacity} />
+    <polygon points="10,22 20,55 30,22" fill="#E8D5B0" opacity={opacity * 0.4} />
+    <line x1="13" y1="28" x2="27" y2="28" stroke="#aaa" strokeWidth="0.5" strokeDasharray="1,1" opacity={opacity * 0.7} />
+    <line x1="15" y1="36" x2="25" y2="36" stroke="#aaa" strokeWidth="0.5" strokeDasharray="1,1" opacity={opacity * 0.7} />
   </svg>
 );
 
 // Malteada estilo sketch
-const Milkshake = ({ opacity = 0.25 }) => (
+const Milkshake = ({ opacity = 0.4 }) => (
   <svg viewBox="0 0 35 55" className="w-full h-full">
-    <path d="M8 15 L10 48 L25 48 L27 15 Z" fill="none" stroke="#aaa" strokeWidth="0.8" strokeDasharray="2,1" opacity={opacity} />
-    <ellipse cx="17.5" cy="12" rx="10" ry="6" fill="none" stroke="#aaa" strokeWidth="0.5" strokeDasharray="1,1" opacity={opacity} />
-    <circle cx="17" cy="4" r="3" fill="none" stroke="#aaa" strokeWidth="0.5" opacity={opacity} />
-    <line x1="22" y1="5" x2="24" y2="35" stroke="#aaa" strokeWidth="0.8" opacity={opacity} />
+    <path d="M8 15 L10 48 L25 48 L27 15 Z" fill="none" stroke="#999" strokeWidth="1" strokeDasharray="2,1" opacity={opacity} />
+    <path d="M8 15 L10 48 L25 48 L27 15 Z" fill="#C5E8FF" opacity={opacity * 0.3} />
+    <ellipse cx="17.5" cy="12" rx="10" ry="6" fill="none" stroke="#999" strokeWidth="0.6" strokeDasharray="1,1" opacity={opacity} />
+    <circle cx="17" cy="4" r="3" fill="none" stroke="#999" strokeWidth="0.6" opacity={opacity} />
+    <line x1="22" y1="5" x2="24" y2="35" stroke="#999" strokeWidth="1" opacity={opacity} />
   </svg>
 );
 
 // Paleta estilo sketch
-const Popsicle = ({ opacity = 0.25 }) => (
+const Popsicle = ({ opacity = 0.4 }) => (
   <svg viewBox="0 0 25 50" className="w-full h-full">
-    <rect x="5" y="5" width="15" height="30" rx="7" fill="none" stroke="#aaa" strokeWidth="0.6" strokeDasharray="2,1" opacity={opacity} />
-    <rect x="5" y="5" width="15" height="30" rx="7" fill="#C5E8FF" opacity={opacity * 0.4} />
-    <rect x="10" y="32" width="5" height="15" fill="none" stroke="#aaa" strokeWidth="0.5" opacity={opacity} />
+    <rect x="5" y="5" width="15" height="30" rx="7" fill="none" stroke="#999" strokeWidth="0.8" strokeDasharray="2,1" opacity={opacity} />
+    <rect x="5" y="5" width="15" height="30" rx="7" fill="#C5E8FF" opacity={opacity * 0.5} />
+    <rect x="10" y="32" width="5" height="15" fill="none" stroke="#999" strokeWidth="0.6" opacity={opacity} />
   </svg>
 );
 
@@ -123,9 +124,9 @@ export default function FloatingIceCreamsBg() {
             y: { duration: 4 + i * 0.3, repeat: Infinity, ease: "easeInOut" }
           }}
         >
-          {el.type === 'cone' && <IceCreamCone opacity={0.35} />}
-          {el.type === 'shake' && <Milkshake opacity={0.3} />}
-          {el.type === 'popsicle' && <Popsicle opacity={0.3} />}
+          {el.type === 'cone' && <IceCreamCone opacity={0.5} />}
+          {el.type === 'shake' && <Milkshake opacity={0.45} />}
+          {el.type === 'popsicle' && <Popsicle opacity={0.45} />}
         </motion.div>
       ))}
     </div>
