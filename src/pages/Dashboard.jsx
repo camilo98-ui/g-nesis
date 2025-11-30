@@ -88,7 +88,7 @@ function MetricCard({ title, value, budget, icon: Icon, bgColor, iconBg, iconCol
       </div>
       
       <p className="text-sm text-gray-500 mb-1">{title}</p>
-      <p className="text-2xl font-black text-gray-800">{formatValue(value)}</p>
+      <p className="text-2xl font-semibold text-gray-700">{formatValue(value)}</p>
       
       {budget > 0 && (
         <div className="mt-3">
@@ -289,18 +289,23 @@ function DetailPanel({ metric, data, onClose, chartData, formatCurrency, shiftDa
         return (
           <div className="space-y-6">
             <div>
-              <h4 className="font-semibold text-gray-700 mb-3">⚡ Transacciones vs Tickets</h4>
+              <h4 className="font-medium text-gray-600 mb-3">⚡ Transacciones vs Venta</h4>
               <div className="h-72 bg-white rounded-xl p-4 shadow-inner">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartData} barCategoryGap="20%">
+                  <ComposedChart data={chartData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                     <XAxis dataKey="date" tick={{ fill: '#6b7280', fontSize: 11 }} />
-                    <YAxis tick={{ fill: '#6b7280', fontSize: 11 }} />
-                    <Tooltip contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }} />
+                    <YAxis yAxisId="left" tick={{ fill: '#6b7280', fontSize: 11 }} />
+                    <YAxis yAxisId="right" orientation="right" tick={{ fill: '#6b7280', fontSize: 11 }} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} />
+                    <Tooltip 
+                      contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
+                      labelFormatter={(label, payload) => payload?.[0]?.payload?.fullDate || label}
+                      formatter={(v, name) => [name === 'Venta' ? formatCurrency(v) : v.toLocaleString(), name]}
+                    />
                     <Legend />
-                    <Bar dataKey="transactions" fill="#8b5cf6" radius={[6, 6, 0, 0]} name="Transacciones" />
-                    <Bar dataKey="tickets" fill="#06b6d4" radius={[6, 6, 0, 0]} name="Tickets" />
-                  </BarChart>
+                    <Bar yAxisId="left" dataKey="transactions" fill="#8b5cf6" radius={[6, 6, 0, 0]} name="Transacciones" />
+                    <Line yAxisId="right" type="monotone" dataKey="ventas" stroke="#ec4899" strokeWidth={2} dot={{ fill: '#ec4899', r: 3 }} name="Venta" />
+                  </ComposedChart>
                 </ResponsiveContainer>
               </div>
             </div>
@@ -383,6 +388,13 @@ function DetailPanel({ metric, data, onClose, chartData, formatCurrency, shiftDa
     suggested: '🎁 Análisis de Sugeridos'
   };
 
+  const insights = {
+    sales: 'La tendencia de ventas muestra el comportamiento diario. Identifica los días de mayor venta para replicar estrategias exitosas.',
+    tickets: 'El ticket promedio es clave para aumentar ingresos sin necesidad de más clientes. Enfócate en venta sugerida.',
+    transactions: 'Las transacciones muestran el flujo de clientes. Compara con la venta para identificar oportunidades de ticket promedio.',
+    suggested: 'Los sugeridos impulsan el ticket promedio. Un incremento del 10% en sugeridos puede aumentar ventas en 15-20%.'
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -390,12 +402,20 @@ function DetailPanel({ metric, data, onClose, chartData, formatCurrency, shiftDa
       exit={{ opacity: 0, y: 20 }}
       className="bg-gradient-to-br from-gray-50 to-white rounded-2xl shadow-xl border border-gray-100 p-6"
     >
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-xl font-bold text-gray-800">{titles[metric]}</h3>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-medium text-gray-700">{titles[metric]}</h3>
         <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full">
           <X className="w-5 h-5" />
         </Button>
       </div>
+      {/* Insight sutil */}
+      <motion.p 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="text-xs text-gray-400 mb-4 italic border-l-2 border-pink-200 pl-3"
+      >
+        💡 {insights[metric]}
+      </motion.p>
       {getChartContent()}
     </motion.div>
   );
@@ -558,7 +578,7 @@ export default function Dashboard() {
     };
   }, [currentBudget, totals, filteredSales]);
 
-  const formatCurrency = (val) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(val);
+  const formatCurrency = (val) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(Math.round(val));
   const selectedStoreName = STORES.find(s => s.code === selectedStore)?.name || '';
 
   const getInsight = (type, value, budget) => {
@@ -592,7 +612,7 @@ export default function Dashboard() {
               </Button>
             </Link>
             <div>
-              <h1 className="text-2xl md:text-3xl font-black text-gray-800">Dashboard</h1>
+              <h1 className="text-2xl md:text-3xl font-semibold text-gray-700">Dashboard</h1>
               {selectedStore && (
                 <p className="text-sm text-gray-500">{selectedStore} - {selectedStoreName}</p>
               )}
