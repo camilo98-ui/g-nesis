@@ -6,11 +6,12 @@ import StoreSelector, { STORES } from '@/components/StoreSelector';
 import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
 import NotificationSetup from '@/components/NotificationSetup';
 import PopsyStoryModal from '@/components/PopsyStoryModal';
+import DirectoryModal from '@/components/DirectoryModal';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { 
   LayoutDashboard, Users, TrendingUp, 
-  Award, Target, FileText, Bell, Snowflake, Brain, ClipboardList
+  Award, Target, Bell, Snowflake, Brain, Phone
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { startOfMonth } from 'date-fns';
@@ -73,15 +74,6 @@ const MENU_ITEMS = [
     iconBg: 'bg-purple-100/80',
     iconColor: 'text-purple-400'
   },
-  { 
-    name: 'Reportes', 
-    page: 'Reports',
-    icon: ClipboardList, 
-    description: 'Exportar reportes',
-    bgColor: 'bg-gradient-to-br from-slate-50/80 to-gray-100/60',
-    iconBg: 'bg-slate-100/80',
-    iconColor: 'text-slate-500'
-  },
 ];
 
 
@@ -90,6 +82,7 @@ export default function Home() {
   const [selectedStore, setSelectedStore] = useState('');
   const [showNotifications, setShowNotifications] = useState(false);
   const [showStory, setShowStory] = useState(false);
+  const [showDirectory, setShowDirectory] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem('selectedStore');
@@ -150,12 +143,12 @@ export default function Home() {
           </motion.div>
         </motion.div>
 
-        {/* Alertas button */}
+        {/* Quick Actions */}
         {selectedStore && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-4 flex justify-center"
+            className="mb-4 flex justify-center gap-2"
           >
             <Button
               variant="ghost"
@@ -165,6 +158,15 @@ export default function Home() {
             >
               <Bell className="w-4 h-4 mr-1" />
               Alertas
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowDirectory(true)}
+              className="text-gray-500 hover:text-blue-600 hover:bg-blue-50"
+            >
+              <Phone className="w-4 h-4 mr-1" />
+              Directorio
             </Button>
           </motion.div>
         )}
@@ -203,10 +205,19 @@ export default function Home() {
                           <Icon className={`w-5 h-5 sm:w-6 sm:h-6 ${item.iconColor}`} />
                         </motion.div>
                       </motion.div>
-                      <h3 className="font-bold text-gray-800 text-xs sm:text-sm mb-0.5 sm:mb-1">
-                        {item.name}
+                      <h3 className="font-bold text-gray-600 text-xs sm:text-sm mb-0.5 sm:mb-1 flex items-center gap-0.5">
+                        {item.name.split('').map((letter, i) => (
+                          <motion.span
+                            key={i}
+                            initial={{ opacity: 0.8 }}
+                            whileHover={{ y: -2, opacity: 1 }}
+                            transition={{ delay: i * 0.02 }}
+                          >
+                            {letter}
+                          </motion.span>
+                        ))}
                       </h3>
-                      <p className="text-[10px] sm:text-xs text-gray-500 hidden sm:block">{item.description}</p>
+                      <p className="text-[10px] sm:text-xs text-gray-400 hidden sm:block">{item.description}</p>
                     </motion.div>
                   </Link>
                 </motion.div>
@@ -266,6 +277,13 @@ export default function Home() {
       <AnimatePresence>
         {showStory && (
           <PopsyStoryModal onClose={() => setShowStory(false)} />
+        )}
+      </AnimatePresence>
+
+      {/* Directory Modal */}
+      <AnimatePresence>
+        {showDirectory && (
+          <DirectoryModal onClose={() => setShowDirectory(false)} />
         )}
       </AnimatePresence>
     </div>
