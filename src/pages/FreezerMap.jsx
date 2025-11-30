@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
   ArrowLeft, Sparkles, RotateCcw, ZoomIn, ZoomOut, 
-  Wand2, Trash2, History, BarChart3, Undo2, Copy, Check, X, Plus
+  Wand2, Trash2, History, BarChart3, Undo2, Copy, Check, X, Plus, Search
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -51,6 +51,105 @@ const IDEAL_RULES = {
   2: ['exclusivo'], // Fila 2: Exclusivos
   3: ['gourmet', 'exclusivo'], // Fila 3: Mixto
 };
+
+// Modal de selección con búsqueda
+function FlavorSelectorModal({ selectedSlot, onClose, onSelect }) {
+  const [search, setSearch] = useState('');
+  const [slotType, setSlotType] = useState('F'); // F = Frontal, T = Trasero
+  
+  const filteredFlavors = POPSY_FLAVORS.filter(f => 
+    f.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0 }} 
+      animate={{ opacity: 1 }} 
+      exit={{ opacity: 0 }} 
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" 
+      onClick={onClose}
+    >
+      <motion.div 
+        initial={{ scale: 0.9, y: 20 }} 
+        animate={{ scale: 1, y: 0 }} 
+        exit={{ scale: 0.9, y: 20 }} 
+        onClick={(e) => e.stopPropagation()} 
+        className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-4 max-h-[85vh] overflow-hidden flex flex-col"
+      >
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-bold text-gray-800">Seleccionar Sabor</h3>
+          <Button variant="ghost" size="icon" onClick={onClose}>
+            <X className="w-4 h-4" />
+          </Button>
+        </div>
+        
+        <div className="flex items-center gap-2 mb-3">
+          <p className="text-xs text-gray-500">Bajada {selectedSlot?.row}, Pos {selectedSlot?.position}</p>
+          <div className="flex gap-1 ml-auto">
+            <Button 
+              size="sm" 
+              variant={slotType === 'F' ? 'default' : 'outline'}
+              onClick={() => setSlotType('F')}
+              className={`text-xs h-7 ${slotType === 'F' ? 'bg-pink-500' : ''}`}
+            >
+              F Frontal
+            </Button>
+            <Button 
+              size="sm" 
+              variant={slotType === 'T' ? 'default' : 'outline'}
+              onClick={() => setSlotType('T')}
+              className={`text-xs h-7 ${slotType === 'T' ? 'bg-purple-500' : ''}`}
+            >
+              T Trasero
+            </Button>
+          </div>
+        </div>
+        
+        {/* Search */}
+        <div className="relative mb-3">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Input 
+            placeholder="Buscar sabor..." 
+            value={search} 
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9 bg-gray-50"
+          />
+        </div>
+        
+        {/* Flavors Grid */}
+        <div className="grid grid-cols-3 gap-2 overflow-y-auto flex-1 pr-1">
+          {/* Vacío */}
+          <button 
+            onClick={() => onSelect({ name: '', color: '', type: 'vacio', is_empty: true, slotType })} 
+            className="flex flex-col items-center p-2 rounded-lg border-2 border-dashed border-gray-300 hover:border-pink-400 transition-colors"
+          >
+            <div className="w-8 h-8 rounded-full bg-gray-200 mb-1" />
+            <span className="text-[10px] text-gray-500">Vacío</span>
+          </button>
+          
+          {filteredFlavors.map((flavor) => (
+            <button 
+              key={flavor.name} 
+              onClick={() => onSelect({ ...flavor, slotType })} 
+              className="flex flex-col items-center p-2 rounded-lg border border-gray-200 hover:border-pink-400 hover:bg-pink-50 transition-colors"
+            >
+              <div 
+                className="w-8 h-8 rounded-full shadow-md mb-1" 
+                style={{ background: `radial-gradient(circle at 30% 30%, ${flavor.color}ee, ${flavor.color}88)` }} 
+              />
+              <span className="text-[9px] font-medium text-center leading-tight line-clamp-2">{flavor.name}</span>
+              {flavor.brand && <Sparkles className="w-2.5 h-2.5 text-purple-500 mt-0.5" />}
+            </button>
+          ))}
+        </div>
+        
+        {filteredFlavors.length === 0 && search && (
+          <p className="text-center text-gray-400 text-sm py-4">No se encontró "{search}"</p>
+        )}
+      </motion.div>
+    </motion.div>
+  );
+}
 
 export default function FreezerMap() {
   const queryClient = useQueryClient();
@@ -596,36 +695,14 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
         )}
       </div>
 
-      {/* Flavor Selector Modal */}
+      {/* Flavor Selector Modal with Search */}
       <AnimatePresence>
         {showFlavorSelector && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => { setShowFlavorSelector(false); setSelectedSlot(null); }}>
-            <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} exit={{ scale: 0.9 }} onClick={(e) => e.stopPropagation()} className="w-full max-w-sm bg-white rounded-2xl shadow-2xl p-4 max-h-[80vh] overflow-y-auto">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-bold">Seleccionar Sabor</h3>
-                <Button variant="ghost" size="icon" onClick={() => { setShowFlavorSelector(false); setSelectedSlot(null); }}>
-                  <X className="w-4 h-4" />
-                </Button>
-              </div>
-              <p className="text-xs text-gray-500 mb-3">Fila {selectedSlot?.row}, Posición {selectedSlot?.position}</p>
-              
-              <div className="grid grid-cols-3 gap-2">
-                {/* Vacío */}
-                <button onClick={() => handleFlavorSelect({ name: '', color: '', type: 'vacio', is_empty: true })} className="flex flex-col items-center p-2 rounded-lg border-2 border-dashed border-gray-300 hover:border-pink-400">
-                  <div className="w-7 h-7 rounded-full bg-gray-200 mb-1" />
-                  <span className="text-[10px] text-gray-500">Vacío</span>
-                </button>
-                
-                {POPSY_FLAVORS.map((flavor) => (
-                  <button key={flavor.name} onClick={() => handleFlavorSelect(flavor)} className="flex flex-col items-center p-2 rounded-lg border border-gray-200 hover:border-pink-400 hover:bg-pink-50 transition-colors">
-                    <div className="w-7 h-7 rounded-full shadow-sm mb-1" style={{ background: `radial-gradient(circle at 30% 30%, ${flavor.color}ee, ${flavor.color}88)` }} />
-                    <span className="text-[9px] font-medium text-center leading-tight">{flavor.name}</span>
-                    {flavor.brand && <Sparkles className="w-2.5 h-2.5 text-purple-500 mt-0.5" />}
-                  </button>
-                ))}
-              </div>
-            </motion.div>
-          </motion.div>
+          <FlavorSelectorModal
+            selectedSlot={selectedSlot}
+            onClose={() => { setShowFlavorSelector(false); setSelectedSlot(null); }}
+            onSelect={handleFlavorSelect}
+          />
         )}
       </AnimatePresence>
 

@@ -125,7 +125,7 @@ export default function MascotCone({ storeId, isOpen, onToggle }) {
       const daysRemaining = daysInMonth - analysis.daysWorked;
       const requiredDaily = daysRemaining > 0 ? salesGap / daysRemaining : 0;
       
-      const prompt = `Eres "Cami", un helado de chocolate animado y amigable que es la mascota de Popsy. Genera un análisis DETALLADO, profesional pero amigable (máximo 250 palabras) sobre el desempeño de la tienda con estos datos:
+      const prompt = `Eres "Conito", un cono de helado de fresa animado, dulce y muy amigable que es la mascota de Popsy. Genera un análisis DETALLADO, profesional pero amigable (máximo 250 palabras) sobre el desempeño de la tienda con estos datos:
 
 DATOS DE VENTA:
 - Ventas acumuladas del mes: ${formatCurrency(analysis.totals.sales)}
@@ -177,7 +177,7 @@ Usa emojis de helados 🍦🍨 y sé muy motivador pero con sustento en datos.`;
       setExpression(result.estado === 'excelente' ? 'celebrating' : result.estado === 'bueno' ? 'happy' : 'encouraging');
     } catch (e) {
       setAiMessage({ 
-        mensaje: "¡Hola! Soy Cami 🍫 Tu helado de chocolate favorito está aquí para ayudarte. Hoy es un gran día para vender helados y hacer feliz a cada cliente. ¡Vamos equipo!",
+        mensaje: "¡Hola! Soy Conito 🍓 Tu cono de fresa favorito está aquí para ayudarte. Hoy es un gran día para vender helados y hacer feliz a cada cliente. ¡Vamos equipo!",
         estado: "bueno",
         tip: "Recuerda siempre ofrecer un sugerido con cada venta 🍨"
       });
@@ -197,7 +197,7 @@ Usa emojis de helados 🍦🍨 y sé muy motivador pero con sustento en datos.`;
 
   return (
     <>
-      {/* Floating Mascot Button - Cami helado de chocolate */}
+      {/* Floating Mascot Button - Conito de Fresa */}
       <motion.button
         onClick={onToggle}
         className="fixed top-28 right-4 z-40"
@@ -211,12 +211,12 @@ Usa emojis de helados 🍦🍨 y sé muy motivador pero con sustento en datos.`;
         }}
       >
         <div className="relative">
-          {/* Cami - Helado de Chocolate */}
+          {/* Conito - Helado de Fresa */}
           <svg viewBox="0 0 100 140" className="w-12 h-14 drop-shadow-xl">
             {/* Cone */}
             <polygon 
               points="25,65 75,65 55,130 45,130" 
-              fill="url(#coneGradCami)"
+              fill="url(#coneGradConito)"
               stroke="#c99a5e"
               strokeWidth="2"
             />
@@ -225,17 +225,17 @@ Usa emojis de helados 🍦🍨 y sé muy motivador pero con sustento en datos.`;
             <line x1="50" y1="65" x2="50" y2="128" stroke="#b8894e" strokeWidth="1" opacity="0.6"/>
             <line x1="65" y1="70" x2="53" y2="125" stroke="#b8894e" strokeWidth="1" opacity="0.6"/>
             
-            {/* Chocolate ice cream scoops */}
-            <ellipse cx="50" cy="48" rx="32" ry="26" fill="url(#chocoGrad1)"/>
-            <ellipse cx="35" cy="36" rx="20" ry="16" fill="url(#chocoGrad2)"/>
-            <ellipse cx="65" cy="36" rx="20" ry="16" fill="url(#chocoGrad2)"/>
-            <ellipse cx="50" cy="22" rx="16" ry="13" fill="url(#chocoGrad3)"/>
+            {/* Strawberry ice cream scoops */}
+            <ellipse cx="50" cy="48" rx="32" ry="26" fill="url(#fresaGrad1)"/>
+            <ellipse cx="35" cy="36" rx="20" ry="16" fill="url(#fresaGrad2)"/>
+            <ellipse cx="65" cy="36" rx="20" ry="16" fill="url(#fresaGrad2)"/>
+            <ellipse cx="50" cy="22" rx="16" ry="13" fill="url(#fresaGrad3)"/>
             
-            {/* Chocolate drip effect */}
-            <path d="M 22 50 Q 20 58 22 65" stroke="#5D3A1A" strokeWidth="4" fill="none" strokeLinecap="round"/>
-            <path d="M 78 50 Q 80 60 78 65" stroke="#5D3A1A" strokeWidth="3" fill="none" strokeLinecap="round"/>
+            {/* Strawberry drip effect */}
+            <path d="M 22 50 Q 20 58 22 65" stroke="#FF6B8A" strokeWidth="4" fill="none" strokeLinecap="round"/>
+            <path d="M 78 50 Q 80 60 78 65" stroke="#FF6B8A" strokeWidth="3" fill="none" strokeLinecap="round"/>
             
-            {/* Face - Cami */}
+            {/* Face - Conito */}
             <ellipse cx="38" cy="44" rx="5" ry="6" fill="#1a1a1a"/>
             <ellipse cx="62" cy="44" rx="5" ry="6" fill="#1a1a1a"/>
             <ellipse cx="39" cy="42" rx="2" ry="2.5" fill="white"/>
@@ -245,33 +245,35 @@ Usa emojis de helados 🍦🍨 y sé muy motivador pero con sustento en datos.`;
             <path d="M 38 54 Q 50 64 62 54" stroke="#1a1a1a" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
             
             {/* Blush */}
-            <ellipse cx="30" cy="52" rx="6" ry="3.5" fill="#ffb6c1" opacity="0.5"/>
-            <ellipse cx="70" cy="52" rx="6" ry="3.5" fill="#ffb6c1" opacity="0.5"/>
+            <ellipse cx="30" cy="52" rx="6" ry="3.5" fill="#FF9EAA" opacity="0.6"/>
+            <ellipse cx="70" cy="52" rx="6" ry="3.5" fill="#FF9EAA" opacity="0.6"/>
             
-            {/* Chocolate chips */}
-            <ellipse cx="28" cy="28" rx="3" ry="2" fill="#3D2314" transform="rotate(-15 28 28)"/>
-            <ellipse cx="72" cy="30" rx="3" ry="2" fill="#3D2314" transform="rotate(20 72 30)"/>
-            <ellipse cx="50" cy="12" rx="2.5" ry="1.8" fill="#3D2314"/>
-            <ellipse cx="38" cy="18" rx="2" ry="1.5" fill="#3D2314" transform="rotate(-10 38 18)"/>
-            <ellipse cx="62" cy="16" rx="2" ry="1.5" fill="#3D2314" transform="rotate(15 62 16)"/>
+            {/* Strawberry seeds */}
+            <ellipse cx="28" cy="28" rx="2" ry="1.5" fill="#D4546A" transform="rotate(-15 28 28)"/>
+            <ellipse cx="72" cy="30" rx="2" ry="1.5" fill="#D4546A" transform="rotate(20 72 30)"/>
+            <ellipse cx="50" cy="12" rx="2" ry="1.5" fill="#D4546A"/>
+            <ellipse cx="38" cy="18" rx="1.5" ry="1" fill="#D4546A"/>
+            <ellipse cx="62" cy="16" rx="1.5" ry="1" fill="#D4546A"/>
+            <ellipse cx="30" cy="42" rx="1.5" ry="1" fill="#D4546A"/>
+            <ellipse cx="70" cy="40" rx="1.5" ry="1" fill="#D4546A"/>
             
             <defs>
-              <linearGradient id="coneGradCami" x1="0%" y1="0%" x2="100%" y2="100%">
+              <linearGradient id="coneGradConito" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stopColor="#e8c078"/>
                 <stop offset="100%" stopColor="#d4a254"/>
               </linearGradient>
-              <linearGradient id="chocoGrad1" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#8B5A2B"/>
-                <stop offset="50%" stopColor="#6B4423"/>
-                <stop offset="100%" stopColor="#5D3A1A"/>
+              <linearGradient id="fresaGrad1" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#FFB5C5"/>
+                <stop offset="50%" stopColor="#FF8FA3"/>
+                <stop offset="100%" stopColor="#FF6B8A"/>
               </linearGradient>
-              <linearGradient id="chocoGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#9B6A3B"/>
-                <stop offset="100%" stopColor="#6B4423"/>
+              <linearGradient id="fresaGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#FFC5D3"/>
+                <stop offset="100%" stopColor="#FF8FA3"/>
               </linearGradient>
-              <linearGradient id="chocoGrad3" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#A67B4B"/>
-                <stop offset="100%" stopColor="#7B5433"/>
+              <linearGradient id="fresaGrad3" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#FFD5E0"/>
+                <stop offset="100%" stopColor="#FFB5C5"/>
               </linearGradient>
             </defs>
           </svg>
@@ -282,13 +284,13 @@ Usa emojis de helados 🍦🍨 y sé muy motivador pero con sustento en datos.`;
             animate={{ scale: [1, 1.05, 1] }}
             transition={{ duration: 2, repeat: Infinity }}
           >
-            Cami
+            Conito
           </motion.div>
           
           {/* Notification dot */}
           {!isOpen && (
             <motion.div 
-              className="absolute -top-1 -right-1 w-5 h-5 bg-amber-400 rounded-full flex items-center justify-center shadow-lg"
+              className="absolute -top-1 -right-1 w-5 h-5 bg-pink-400 rounded-full flex items-center justify-center shadow-lg"
               animate={{ scale: [1, 1.2, 1] }}
               transition={{ duration: 1, repeat: Infinity }}
             >
@@ -316,11 +318,11 @@ Usa emojis de helados 🍦🍨 y sé muy motivador pero con sustento en datos.`;
                     animate={{ rotate: [0, 10, -10, 0] }}
                     transition={{ duration: 2, repeat: Infinity }}
                   >
-                    🍫
+                    🍓
                   </motion.span>
                   <div>
-                    <h3 className="font-bold">Cami - Tu Asistente</h3>
-                    <p className="text-xs text-white/80">Helado de Chocolate IA</p>
+                    <h3 className="font-bold">Conito - Tu Asistente</h3>
+                    <p className="text-xs text-white/80">Cono de Fresa IA</p>
                   </div>
                 </div>
                 <Button variant="ghost" size="icon" onClick={onToggle} className="text-white hover:bg-white/20 rounded-full">
@@ -339,7 +341,7 @@ Usa emojis de helados 🍦🍨 y sé muy motivador pero con sustento en datos.`;
                   >
                     <Loader2 className="w-8 h-8 text-pink-500" />
                   </motion.div>
-                  <p className="text-gray-500 mt-3 text-sm">Cami está analizando los datos...</p>
+                  <p className="text-gray-500 mt-3 text-sm">Conito está analizando los datos...</p>
                 </div>
               ) : aiMessage ? (
                 <div className="space-y-4">
