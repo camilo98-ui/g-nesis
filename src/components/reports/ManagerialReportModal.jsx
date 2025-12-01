@@ -1,18 +1,24 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FileText, Download, Loader2, X, BarChart3, Users, TrendingUp, Store, Calendar, Target, Award } from 'lucide-react';
+import { FileText, Download, Loader2, X, BarChart3, Users, TrendingUp, Store, Calendar as CalendarIcon, Target, Award } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { base44 } from '@/api/base44Client';
-import { format, startOfMonth, endOfMonth, subDays } from 'date-fns';
+import { format, startOfMonth, endOfMonth, subDays, startOfWeek, endOfWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useQuery } from '@tanstack/react-query';
 
 export default function ManagerialReportModal({ storeId, storeName, storeCode, onClose }) {
   const [loading, setLoading] = useState(false);
   const [aiInsights, setAiInsights] = useState(null);
+  const [calendarOpen, setCalendarOpen] = useState(false);
 
   const today = new Date();
-  const monthStart = startOfMonth(today);
+  const [dateRange, setDateRange] = useState({
+    from: startOfMonth(today),
+    to: today
+  });
 
   // Fetch data
   const { data: dailySales = [] } = useQuery({
@@ -43,7 +49,7 @@ export default function ManagerialReportModal({ storeId, storeName, storeCode, o
   const metrics = useMemo(() => {
     const currentMonthSales = dailySales.filter(s => {
       const saleDate = new Date(s.date);
-      return saleDate >= monthStart && saleDate <= today;
+      return dateRange.from && dateRange.to && saleDate >= dateRange.from && saleDate <= dateRange.to;
     });
 
     const totalSales = currentMonthSales.reduce((sum, s) => sum + (s.total_sales || 0), 0);
@@ -72,7 +78,7 @@ export default function ManagerialReportModal({ storeId, storeName, storeCode, o
       daysCount: currentMonthSales.length,
       dailyTrend: last14Days
     };
-  }, [dailySales, budgets, monthStart, today]);
+  }, [dailySales, budgets, dateRange]);
 
   // Cashier performance
   const cashierPerformance = useMemo(() => {
@@ -307,7 +313,7 @@ Genera:
         <div class="logo">🍦 POPSY</div>
         <div class="store-info">
           <div class="store-name">${storeCode} - ${storeName || 'Tienda'}</div>
-          <div class="store-date">Informe Gerencial • ${format(today, "MMMM yyyy", { locale: es })}</div>
+          <div class="store-date">Informe Gerencial • ${format(dateRange.from, "dd MMM", { locale: es })} - ${format(dateRange.to, "dd MMM yyyy", { locale: es })}</div>
         </div>
       </div>
     </div>
@@ -458,8 +464,63 @@ Genera:
           </Button>
         </div>
 
+        {/* Date Filter */}
+        <div className="px-6 pt-4 pb-2 border-b bg-gray-50">
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-gray-600 font-medium">Período:</span>
+            <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-2 bg-white">
+                  <CalendarIcon className="w-4 h-4 text-pink-500" />
+                  {format(dateRange.from, 'dd MMM', { locale: es })} - {format(dateRange.to, 'dd MMM yyyy', { locale: es })}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="range"
+                  selected={{ from: dateRange.from, to: dateRange.to }}
+                  onSelect={(range) => {
+                    if (range?.from) {
+                      setDateRange({ from: range.from, to: range.to || range.from });
+                      setAiInsights(null);
+                    }
+                  }}
+                  numberOfMonths={2}
+                  locale={es}
+                />
+              </PopoverContent>
+            </Popover>
+            <div className="flex gap-1">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-xs"
+                onClick={() => { setDateRange({ from: startOfWeek(today, { weekStartsOn: 1 }), to: today }); setAiInsights(null); }}
+              >
+                Esta semana
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-xs"
+                onClick={() => { setDateRange({ from: startOfMonth(today), to: today }); setAiInsights(null); }}
+              >
+                Este mes
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-xs"
+                onClick={() => { setDateRange({ from: subDays(today, 30), to: today }); setAiInsights(null); }}
+              >
+                Últimos 30 días
+              </Button>
+            </div>
+          </div>
+        </div>
+
         {/* Content */}
-        <div className="p-6 overflow-y-auto max-h-[60vh]">
+        <div className="p-6 overflow-y-auto max-h-[55vh]">
           {!storeId ? (
             <div className="text-center py-10">
               <Store className="w-16 h-16 text-gray-300 mx-auto mb-4" />
