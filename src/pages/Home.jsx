@@ -11,8 +11,9 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { 
   LayoutDashboard, Users, TrendingUp, 
-  Award, Target, Bell, Snowflake, Brain, Phone, Download, Smartphone, Monitor, Tablet
+  Award, Target, Bell, Snowflake, Brain, Phone, Download, Smartphone, Monitor, Fingerprint
 } from 'lucide-react';
+import FingerprintModal from '@/components/FingerprintModal';
 import { Button } from "@/components/ui/button";
 import { startOfMonth } from 'date-fns';
 
@@ -85,6 +86,7 @@ export default function Home() {
   const [showDirectory, setShowDirectory] = useState(false);
   const [showInstall, setShowInstall] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [showFingerprint, setShowFingerprint] = useState(false);
 
   useEffect(() => {
     const handler = (e) => {
@@ -95,10 +97,21 @@ export default function Home() {
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
 
-  // Siempre mostrar selector de tienda al abrir
+  // Cargar tienda guardada o mostrar selector
   useEffect(() => {
-    setSelectedStore('');
-    localStorage.removeItem('selectedStore');
+    const saved = localStorage.getItem('selectedStore');
+    const lastVisit = localStorage.getItem('lastVisitTime');
+    const now = Date.now();
+    
+    // Si pasaron más de 4 horas, limpiar tienda
+    if (lastVisit && (now - parseInt(lastVisit)) > 4 * 60 * 60 * 1000) {
+      localStorage.removeItem('selectedStore');
+      setSelectedStore('');
+    } else if (saved) {
+      setSelectedStore(saved);
+    }
+    
+    localStorage.setItem('lastVisitTime', now.toString());
   }, []);
 
   const handleStoreChange = (store) => {
@@ -186,6 +199,15 @@ export default function Home() {
             >
               <Download className="w-4 h-4 mr-1" />
               Instalar App
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowFingerprint(true)}
+              className="text-gray-500 hover:text-green-600 hover:bg-green-50"
+            >
+              <Fingerprint className="w-4 h-4 mr-1" />
+              Huella
             </Button>
             </motion.div>
             )}
@@ -294,6 +316,16 @@ export default function Home() {
       <AnimatePresence>
         {showDirectory && (
           <DirectoryModal onClose={() => setShowDirectory(false)} />
+        )}
+      </AnimatePresence>
+
+      {/* Fingerprint Modal */}
+      <AnimatePresence>
+        {showFingerprint && (
+          <FingerprintModal 
+            storeId={selectedStore} 
+            onClose={() => setShowFingerprint(false)} 
+          />
         )}
       </AnimatePresence>
 
