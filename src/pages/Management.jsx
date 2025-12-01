@@ -588,20 +588,20 @@ function ManagementDashboard() {
           </TabsContent>
         </Tabs>
 
-        {/* Bottom Panel Button */}
+        {/* Bottom Panel Button - Panel de Distrito */}
         <motion.div 
-          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-20"
+          className="mt-8 mb-6 flex justify-center"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
         >
           <Link to={createPageUrl('Reports')}>
             <motion.div
-              whileHover={{ scale: 1.05, y: -2 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.03, y: -2 }}
+              whileTap={{ scale: 0.97 }}
             >
-              <Button className="bg-gradient-to-r from-slate-700 to-slate-800 text-white shadow-2xl px-6 py-5 rounded-full gap-2 hover:from-slate-800 hover:to-slate-900">
-                <Store className="w-4 h-4" />
+              <Button className="bg-gradient-to-r from-slate-700 to-slate-800 text-white shadow-xl px-8 py-6 rounded-2xl gap-3 hover:from-slate-800 hover:to-slate-900 text-base">
+                <Store className="w-5 h-5" />
                 Panel de Distrito
               </Button>
             </motion.div>
