@@ -65,7 +65,15 @@ const MENU_ITEMS = [
     iconBg: 'bg-sky-100/80',
     iconColor: 'text-sky-400'
   },
-
+  { 
+    name: 'Calidad', 
+    page: 'Quality',
+    icon: ClipboardCheck, 
+    description: 'Checklists y visitas',
+    bgColor: 'bg-gradient-to-br from-teal-50/80 to-cyan-100/60',
+    iconBg: 'bg-teal-100/80',
+    iconColor: 'text-teal-400'
+  },
 ];
 
 // Confetti pastel suave
@@ -240,20 +248,6 @@ export default function Home() {
                 Instalar App
               </Button>
             </motion.div>
-            <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }}>
-              <Link to={createPageUrl('Quality')}>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-gray-500 hover:text-teal-600 hover:bg-teal-50 transition-all"
-                >
-                  <motion.div animate={{ rotate: [0, -5, 5, 0] }} transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 2 }}>
-                    <ClipboardCheck className="w-4 h-4 mr-1" />
-                  </motion.div>
-                  Calidad
-                </Button>
-              </Link>
-            </motion.div>
           </motion.div>
         )}
 
@@ -262,7 +256,7 @@ export default function Home() {
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4"
+            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4"
           >
             {MENU_ITEMS.map((item, index) => {
               const Icon = item.icon;
