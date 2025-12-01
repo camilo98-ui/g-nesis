@@ -50,7 +50,11 @@ export default function WeeklyCalendar({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['shifts'] });
       setShowAddShift(false);
-      toast.success('Turno creado');
+      setNewShift({ cashier_id: '', start_time: '08:00', end_time: '16:00', role: 'ventas' });
+      toast.success('Turno creado exitosamente');
+    },
+    onError: (error) => {
+      toast.error('Error al crear turno: ' + (error.message || 'Intenta de nuevo'));
     }
   });
 
@@ -80,10 +84,13 @@ export default function WeeklyCalendar({
   };
 
   const handleAddShift = () => {
-    if (!newShift.cashier_id || !selectedDay) return;
+    if (!newShift.cashier_id || !selectedDay) {
+      toast.error('Selecciona un colaborador');
+      return;
+    }
     
     const cashier = cashiers.find(c => c.id === newShift.cashier_id);
-    createMutation.mutate({
+    const shiftData = {
       store_id: storeId,
       cashier_id: newShift.cashier_id,
       cashier_name: cashier?.name || '',
@@ -92,7 +99,9 @@ export default function WeeklyCalendar({
       end_time: newShift.end_time,
       role: newShift.role,
       status: 'scheduled'
-    });
+    };
+    
+    createMutation.mutate(shiftData);
   };
 
   const copyWeek = async () => {
@@ -123,7 +132,11 @@ export default function WeeklyCalendar({
   };
 
   const getShiftsForDay = (day) => {
-    return shifts.filter(s => isSameDay(new Date(s.date), day));
+    const dayStr = format(day, 'yyyy-MM-dd');
+    return shifts.filter(s => {
+      const shiftDateStr = s.date?.split('T')[0] || s.date;
+      return shiftDateStr === dayStr;
+    });
   };
 
   return (
