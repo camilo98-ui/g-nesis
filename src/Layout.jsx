@@ -17,7 +17,6 @@ const NAV_ITEMS = [
   { name: '', page: 'FreezerMap', icon: Snowflake, isIcon: true },
   { name: '', page: 'Home', icon: Home, isIcon: true },
   { name: '', page: 'Management', icon: LayoutDashboard, isIcon: true },
-  { name: '', page: 'Quality', icon: ClipboardCheck, isIcon: true },
 ];
 
 export default function Layout({ children, currentPageName }) {
