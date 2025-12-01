@@ -31,10 +31,10 @@ export default function Layout({ children, currentPageName }) {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Motivational Banner */}
-      <div className="fixed top-0 left-0 right-0 h-8 bg-gradient-to-r from-pink-50 via-rose-50 to-amber-50 z-50 border-b border-pink-100">
-        <MotivationalHeader />
-      </div>
+      {/* Motivational Banner - Pastel muy suave */}
+              <div className="fixed top-0 left-0 right-0 h-8 bg-gradient-to-r from-pink-50/70 via-rose-50/60 to-amber-50/70 z-50 border-b border-pink-100/50">
+                <MotivationalHeader />
+              </div>
 
       {/* Top Header Bar */}
       <header className="fixed top-8 left-0 right-0 h-14 bg-white border-b border-gray-100 z-50 px-4 flex items-center justify-between shadow-sm">
