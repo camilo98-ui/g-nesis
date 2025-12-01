@@ -523,17 +523,35 @@ export default function WeatherImpactChart({ dailyTrend = [], formatCurrency, da
           )}
         </div>
 
-        {/* Leyenda de colores */}
-        <div className="mt-3 flex flex-wrap gap-2 justify-center">
-          {Object.entries(WEATHER_CONFIG).map(([key, config]) => {
-            const Icon = config.icon;
-            return (
-              <div key={key} className="flex items-center gap-1 text-[10px] text-gray-500 bg-gray-50 px-2 py-1 rounded-full">
-                <Icon className="w-3 h-3" style={{ color: config.color }} />
-                <span>{config.label}</span>
-              </div>
-            );
-          })}
+        {/* Leyenda de colores con significado */}
+        <div className="mt-3 p-2 bg-gray-50 rounded-xl">
+          <p className="text-[10px] text-gray-500 text-center mb-2 font-medium">¿Qué significa cada color?</p>
+          <div className="flex flex-wrap gap-2 justify-center">
+            {Object.entries(WEATHER_CONFIG).map(([key, config]) => {
+              const Icon = config.icon;
+              const stat = weatherStats.find(s => s.type === key);
+              const impactText = stat?.avgImpact >= 0 
+                ? `↑ Aumenta ventas ${stat?.avgImpact?.toFixed(0)}%` 
+                : `↓ Reduce ventas ${Math.abs(stat?.avgImpact || 0)?.toFixed(0)}%`;
+              return (
+                <div 
+                  key={key} 
+                  className="flex items-center gap-1.5 text-[10px] bg-white px-2 py-1.5 rounded-lg border border-gray-100 shadow-sm"
+                >
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: config.color }} />
+                    <Icon className="w-3.5 h-3.5" style={{ color: config.color }} />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="font-medium text-gray-700">{config.label}</span>
+                    <span className={`text-[8px] ${stat?.avgImpact >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+                      {impactText}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         {/* Insight dinámico */}
