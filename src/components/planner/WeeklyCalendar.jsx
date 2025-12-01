@@ -200,40 +200,63 @@ export default function WeeklyCalendar({
                       </div>
 
                       {/* Shifts */}
-                      <div className="p-2 space-y-2">
+                      <div className="p-1.5 space-y-1.5">
                         {dayShifts.map((shift, shiftIdx) => {
                           const colors = ROLE_COLORS[shift.role] || ROLE_COLORS.ventas;
+                          // Calcular duración
+                          const [startH, startM] = (shift.start_time || '08:00').split(':').map(Number);
+                          const [endH, endM] = (shift.end_time || '16:00').split(':').map(Number);
+                          const duration = (endH + endM/60) - (startH + startM/60);
+                          
                           return (
                             <Draggable key={shift.id} draggableId={shift.id} index={shiftIdx}>
                               {(provided, snapshot) => (
                                 <motion.div
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
-                                  initial={{ opacity: 0, scale: 0.9 }}
-                                  animate={{ opacity: 1, scale: 1 }}
-                                  className={`${colors.bg} ${colors.border} border rounded-xl p-2 group cursor-pointer hover:shadow-md transition-all ${snapshot.isDragging ? 'shadow-lg rotate-2' : ''}`}
+                                  initial={{ opacity: 0, y: 10 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  whileHover={{ scale: 1.02 }}
+                                  className={`${colors.bg} ${colors.border} border-l-4 rounded-lg p-2 group cursor-pointer hover:shadow-lg transition-all relative overflow-hidden ${snapshot.isDragging ? 'shadow-xl scale-105 z-50' : ''}`}
                                 >
-                                  <div className="flex items-start gap-1">
-                                    <div {...provided.dragHandleProps} className="mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                                      <GripVertical className="w-3 h-3 text-gray-400" />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                      <p className={`font-medium text-xs truncate ${colors.text}`}>
-                                        {shift.cashier_name || 'Sin nombre'}
-                                      </p>
-                                      <p className="text-[10px] text-gray-500 flex items-center gap-1 mt-0.5">
-                                        <Clock className="w-3 h-3" />
-                                        {shift.start_time} - {shift.end_time}
-                                      </p>
-                                      <span className={`text-[9px] ${colors.text} font-medium`}>
-                                        {ROLE_LABELS[shift.role] || shift.role}
+                                  {/* Drag handle */}
+                                  <div {...provided.dragHandleProps} className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <GripVertical className="w-3 h-3 text-gray-400" />
+                                  </div>
+                                  
+                                  {/* Nombre del colaborador */}
+                                  <div className="flex items-center gap-1.5 mb-1">
+                                    <div className={`w-5 h-5 rounded-full ${colors.bg} border ${colors.border} flex items-center justify-center`}>
+                                      <span className={`text-[9px] font-bold ${colors.text}`}>
+                                        {shift.cashier_name?.charAt(0) || '?'}
                                       </span>
                                     </div>
+                                    <p className={`font-semibold text-[11px] truncate ${colors.text}`}>
+                                      {shift.cashier_name || 'Sin asignar'}
+                                    </p>
+                                  </div>
+                                  
+                                  {/* Horario */}
+                                  <div className="flex items-center gap-1 mb-1">
+                                    <Clock className={`w-3 h-3 ${colors.text}`} />
+                                    <span className="text-[10px] font-medium text-gray-700">
+                                      {shift.start_time} - {shift.end_time}
+                                    </span>
+                                    <span className="text-[9px] text-gray-400 ml-auto">
+                                      {duration.toFixed(1)}h
+                                    </span>
+                                  </div>
+                                  
+                                  {/* Rol/Posición */}
+                                  <div className="flex items-center justify-between">
+                                    <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${colors.bg} ${colors.text} font-semibold border ${colors.border}`}>
+                                      {ROLE_LABELS[shift.role] || shift.role}
+                                    </span>
                                     <button
                                       onClick={(e) => { e.stopPropagation(); deleteMutation.mutate(shift.id); }}
-                                      className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-red-100 rounded"
+                                      className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:bg-red-100 rounded"
                                     >
-                                      <Trash2 className="w-3 h-3 text-red-500" />
+                                      <Trash2 className="w-3 h-3 text-red-400" />
                                     </button>
                                   </div>
                                 </motion.div>
@@ -245,12 +268,12 @@ export default function WeeklyCalendar({
                         
                         {/* Add Button */}
                         <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
+                          whileHover={{ scale: 1.03 }}
+                          whileTap={{ scale: 0.97 }}
                           onClick={() => { setSelectedDay(day); setShowAddShift(true); }}
-                          className="w-full p-2 border-2 border-dashed border-gray-200 rounded-xl text-gray-400 hover:border-pink-300 hover:text-pink-500 transition-all flex items-center justify-center gap-1 text-xs"
+                          className="w-full p-1.5 border border-dashed border-gray-200 rounded-lg text-gray-400 hover:border-pink-300 hover:text-pink-500 hover:bg-pink-50/50 transition-all flex items-center justify-center gap-1 text-[10px]"
                         >
-                          <Plus className="w-3 h-3" /> Agregar
+                          <Plus className="w-3 h-3" />
                         </motion.button>
                       </div>
                     </div>
