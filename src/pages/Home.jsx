@@ -95,9 +95,10 @@ export default function Home() {
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
 
+  // Siempre mostrar selector de tienda al abrir
   useEffect(() => {
-    const saved = localStorage.getItem('selectedStore');
-    if (saved) setSelectedStore(saved);
+    setSelectedStore('');
+    localStorage.removeItem('selectedStore');
   }, []);
 
   const handleStoreChange = (store) => {
@@ -121,19 +122,17 @@ export default function Home() {
           <motion.img 
             src={LOGO_URL} 
             alt="Popsy" 
-            className="h-28 md:h-32 object-contain mx-auto mb-1 cursor-pointer"
+            className="h-20 sm:h-24 md:h-28 object-contain mx-auto mb-2 cursor-pointer drop-shadow-md"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ 
               opacity: 1, 
               scale: [1, 1.02, 1],
-              rotate: [0, 0.5, -0.5, 0],
             }}
             transition={{
               opacity: { duration: 0.5 },
               scale: { duration: 4, repeat: Infinity, ease: "easeInOut" },
-              rotate: { duration: 6, repeat: Infinity, ease: "easeInOut" }
             }}
-            whileHover={{ scale: 1.08 }}
+            whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setShowStory(true)}
           />
@@ -297,6 +296,18 @@ export default function Home() {
           <DirectoryModal onClose={() => setShowDirectory(false)} />
         )}
       </AnimatePresence>
+
+      {/* Footer Message */}
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1 }}
+        className="fixed bottom-4 left-0 right-0 text-center px-4"
+      >
+        <p className="text-xs text-gray-300 tracking-wide">
+          Gracias por hacer del mundo un lugar más dulce, feliz y divertido 💗
+        </p>
+      </motion.div>
 
       {/* Install App Modal */}
       <AnimatePresence>
