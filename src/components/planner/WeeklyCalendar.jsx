@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { base44 } from '@/api/base44Client';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { format, addWeeks, subWeeks, isSameDay, isToday } from 'date-fns';
+import { format, addWeeks, subWeeks, isToday } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { 
-  ChevronLeft, ChevronRight, Copy, Plus, Clock, X, Trash2, 
-  GripVertical, User, Loader2 
+  ChevronLeft, ChevronRight, Copy, Plus, Clock, Trash2, 
+  GripVertical, User, Loader2, Download, Heart, ThumbsUp, Star,
+  IceCream, Coffee, Package, Headphones, Cookie, ClipboardList, Sparkles, ShoppingCart, Crown
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -15,35 +16,97 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 
-const ROLE_COLORS = {
-  ventas: { bg: 'bg-pink-100', text: 'text-pink-700', border: 'border-pink-300' },
-  limpieza: { bg: 'bg-sky-100', text: 'text-sky-700', border: 'border-sky-300' },
-  administrador: { bg: 'bg-violet-100', text: 'text-violet-700', border: 'border-violet-300' },
-  apoyo: { bg: 'bg-amber-100', text: 'text-amber-700', border: 'border-amber-300' },
-  entrenamiento: { bg: 'bg-emerald-100', text: 'text-emerald-700', border: 'border-emerald-300' },
-};
-
-const ROLE_LABELS = {
-  ventas: 'Ventas',
-  limpieza: 'Limpieza',
-  administrador: 'Admin',
-  apoyo: 'Apoyo',
-  entrenamiento: 'Entreno'
+// Nuevos roles con iconos y colores
+const ROLES_CONFIG = {
+  caja: { 
+    label: 'Caja', 
+    icon: ShoppingCart, 
+    bg: 'bg-emerald-100', 
+    text: 'text-emerald-700', 
+    border: 'border-emerald-400',
+    gradient: 'from-emerald-400 to-green-500'
+  },
+  coneo: { 
+    label: 'Coneo', 
+    icon: IceCream, 
+    bg: 'bg-pink-100', 
+    text: 'text-pink-700', 
+    border: 'border-pink-400',
+    gradient: 'from-pink-400 to-rose-500'
+  },
+  bebidas: { 
+    label: 'Bebidas', 
+    icon: Coffee, 
+    bg: 'bg-amber-100', 
+    text: 'text-amber-700', 
+    border: 'border-amber-400',
+    gradient: 'from-amber-400 to-orange-500'
+  },
+  especialidades: { 
+    label: 'Especialidades', 
+    icon: Sparkles, 
+    bg: 'bg-violet-100', 
+    text: 'text-violet-700', 
+    border: 'border-violet-400',
+    gradient: 'from-violet-400 to-purple-500'
+  },
+  coordinacion: { 
+    label: 'Coord. Entregas', 
+    icon: ClipboardList, 
+    bg: 'bg-blue-100', 
+    text: 'text-blue-700', 
+    border: 'border-blue-400',
+    gradient: 'from-blue-400 to-indigo-500'
+  },
+  cookie_jar: { 
+    label: 'Cookie Jar', 
+    icon: Cookie, 
+    bg: 'bg-orange-100', 
+    text: 'text-orange-700', 
+    border: 'border-orange-400',
+    gradient: 'from-orange-400 to-red-500'
+  },
+  stocker: { 
+    label: 'Stocker', 
+    icon: Package, 
+    bg: 'bg-slate-100', 
+    text: 'text-slate-700', 
+    border: 'border-slate-400',
+    gradient: 'from-slate-400 to-gray-500'
+  },
+  toma_pedidos: { 
+    label: 'Toma de Pedidos', 
+    icon: Headphones, 
+    bg: 'bg-cyan-100', 
+    text: 'text-cyan-700', 
+    border: 'border-cyan-400',
+    gradient: 'from-cyan-400 to-teal-500'
+  },
+  experiencia: { 
+    label: 'Experiencia', 
+    icon: Crown, 
+    bg: 'bg-yellow-100', 
+    text: 'text-yellow-700', 
+    border: 'border-yellow-500',
+    gradient: 'from-yellow-400 to-amber-500'
+  },
 };
 
 export default function WeeklyCalendar({ 
-  currentWeek, setCurrentWeek, weekDays, shifts, cashiers, storeId, loading 
+  currentWeek, setCurrentWeek, weekDays, shifts, cashiers, storeId, loading, onExportPDF 
 }) {
   const [showAddShift, setShowAddShift] = useState(false);
   const [selectedDay, setSelectedDay] = useState(null);
+  const [hoveredDay, setHoveredDay] = useState(null);
   const [newShift, setNewShift] = useState({
     cashier_id: '',
     start_time: '08:00',
     end_time: '16:00',
-    role: 'ventas'
+    role: 'caja'
   });
   const [copying, setCopying] = useState(false);
   const queryClient = useQueryClient();
+  const calendarRef = useRef(null);
 
   const createMutation = useMutation({
     mutationFn: async (data) => {
@@ -56,7 +119,7 @@ export default function WeeklyCalendar({
         queryClient.refetchQueries({ queryKey: ['shifts'] });
       }, 500);
       setShowAddShift(false);
-      setNewShift({ cashier_id: '', start_time: '08:00', end_time: '16:00', role: 'ventas' });
+      setNewShift({ cashier_id: '', start_time: '08:00', end_time: '16:00', role: 'caja' });
       toast.success('Turno creado exitosamente');
     },
     onError: (error) => {
@@ -138,6 +201,14 @@ export default function WeeklyCalendar({
     setCopying(false);
   };
 
+  const handleReaction = async (shiftId, reaction) => {
+    await updateMutation.mutateAsync({ 
+      id: shiftId, 
+      data: { reaction, reaction_date: new Date().toISOString() } 
+    });
+    toast.success('¡Reacción guardada!');
+  };
+
   const getShiftsForDay = (day) => {
     const dayStr = format(day, 'yyyy-MM-dd');
     return shifts.filter(s => {
@@ -147,30 +218,39 @@ export default function WeeklyCalendar({
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden" ref={calendarRef}>
       {/* Header */}
-      <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-pink-50 to-rose-50">
+      <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-pink-500 to-rose-500">
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={() => setCurrentWeek(subWeeks(currentWeek, 1))}>
+          <Button variant="ghost" size="icon" onClick={() => setCurrentWeek(subWeeks(currentWeek, 1))} className="text-white hover:bg-white/20">
             <ChevronLeft className="w-5 h-5" />
           </Button>
-          <h2 className="font-semibold text-gray-800">
+          <h2 className="font-bold text-white text-lg">
             {format(currentWeek, "d 'de' MMMM", { locale: es })} - {format(weekDays[6], "d 'de' MMMM yyyy", { locale: es })}
           </h2>
-          <Button variant="ghost" size="icon" onClick={() => setCurrentWeek(addWeeks(currentWeek, 1))}>
+          <Button variant="ghost" size="icon" onClick={() => setCurrentWeek(addWeeks(currentWeek, 1))} className="text-white hover:bg-white/20">
             <ChevronRight className="w-5 h-5" />
           </Button>
         </div>
         <div className="flex gap-2">
           <Button
-            variant="outline"
+            variant="secondary"
             size="sm"
             onClick={copyWeek}
             disabled={copying || shifts.length === 0}
-            className="gap-2"
+            className="gap-2 bg-white/20 text-white hover:bg-white/30 border-0"
           >
             {copying ? <Loader2 className="w-4 h-4 animate-spin" /> : <Copy className="w-4 h-4" />}
             Copiar semana
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={onExportPDF}
+            className="gap-2 bg-white text-pink-600 hover:bg-pink-50"
+          >
+            <Download className="w-4 h-4" />
+            Exportar PDF
           </Button>
         </div>
       </div>
@@ -187,116 +267,168 @@ export default function WeeklyCalendar({
               const dayShifts = getShiftsForDay(day);
               const isCurrentDay = isToday(day);
               const dateStr = format(day, 'yyyy-MM-dd');
+              const isHovered = hoveredDay === idx;
               
               return (
                 <Droppable key={dateStr} droppableId={dateStr}>
                   {(provided, snapshot) => (
-                    <div
+                    <motion.div
                       ref={provided.innerRef}
                       {...provided.droppableProps}
-                      className={`min-h-[400px] ${snapshot.isDraggingOver ? 'bg-pink-50' : ''} ${isCurrentDay ? 'bg-rose-50/50' : ''}`}
+                      onMouseEnter={() => setHoveredDay(idx)}
+                      onMouseLeave={() => setHoveredDay(null)}
+                      animate={{ 
+                        scale: isHovered ? 1.02 : 1,
+                        zIndex: isHovered ? 10 : 1
+                      }}
+                      className={`min-h-[450px] transition-all relative ${snapshot.isDraggingOver ? 'bg-pink-50' : ''} ${isCurrentDay ? 'bg-gradient-to-b from-rose-50 to-pink-50' : isHovered ? 'bg-gray-50' : 'bg-white'}`}
                     >
                       {/* Day Header */}
-                      <div className={`p-2 text-center border-b ${isCurrentDay ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white' : 'bg-gray-50'}`}>
-                        <p className="text-xs font-medium uppercase">
-                          {format(day, 'EEE', { locale: es })}
+                      <div className={`p-3 text-center border-b sticky top-0 z-10 ${isCurrentDay ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white' : isHovered ? 'bg-gradient-to-r from-violet-100 to-purple-100' : 'bg-gray-50'}`}>
+                        <p className={`text-xs font-bold uppercase tracking-wider ${isCurrentDay ? 'text-white/80' : 'text-gray-500'}`}>
+                          {format(day, 'EEEE', { locale: es })}
                         </p>
-                        <p className={`text-lg font-bold ${isCurrentDay ? '' : 'text-gray-800'}`}>
+                        <p className={`text-2xl font-black ${isCurrentDay ? 'text-white' : 'text-gray-800'}`}>
                           {format(day, 'd')}
+                        </p>
+                        <p className={`text-[10px] ${isCurrentDay ? 'text-white/70' : 'text-gray-400'}`}>
+                          {dayShifts.length} turno{dayShifts.length !== 1 ? 's' : ''}
                         </p>
                       </div>
 
                       {/* Shifts */}
-                      <div className="p-1 space-y-1">
-                        {dayShifts.map((shift, shiftIdx) => {
-                          const colors = ROLE_COLORS[shift.role] || ROLE_COLORS.ventas;
-                          const [startH, startM] = (shift.start_time || '08:00').split(':').map(Number);
-                          const [endH, endM] = (shift.end_time || '16:00').split(':').map(Number);
-                          const duration = (endH + endM/60) - (startH + startM/60);
-                          
-                          return (
-                            <Draggable key={shift.id} draggableId={shift.id} index={shiftIdx}>
-                              {(provided, snapshot) => (
-                                <motion.div
-                                  ref={provided.innerRef}
-                                  {...provided.draggableProps}
-                                  initial={{ opacity: 0, y: 5 }}
-                                  animate={{ opacity: 1, y: 0 }}
-                                  whileHover={{ scale: 1.02, y: -2 }}
-                                  className={`rounded-lg overflow-hidden group cursor-pointer hover:shadow-xl transition-all ${snapshot.isDragging ? 'shadow-2xl scale-105 z-50' : 'shadow-sm'}`}
-                                >
-                                  {/* Header con Posición/Rol */}
-                                  <div className={`${colors.bg} px-2 py-1 flex items-center justify-between`}>
-                                    <span className={`text-[10px] font-bold ${colors.text} uppercase tracking-wide`}>
-                                      📍 {ROLE_LABELS[shift.role] || shift.role}
-                                    </span>
-                                    <div {...provided.dragHandleProps} className="opacity-50 group-hover:opacity-100">
-                                      <GripVertical className="w-3 h-3 text-gray-500" />
-                                    </div>
-                                  </div>
-                                  
-                                  {/* Body */}
-                                  <div className={`bg-white border-x border-b ${colors.border} p-2`}>
-                                    {/* Colaborador */}
-                                    <div className="flex items-center gap-2 mb-2">
-                                      <div className={`w-7 h-7 rounded-full ${colors.bg} border-2 ${colors.border} flex items-center justify-center shadow-sm`}>
-                                        <span className={`text-xs font-bold ${colors.text}`}>
-                                          {shift.cashier_name?.charAt(0)?.toUpperCase() || '?'}
+                      <div className="p-2 space-y-2">
+                        <AnimatePresence>
+                          {dayShifts.map((shift, shiftIdx) => {
+                            const roleConfig = ROLES_CONFIG[shift.role] || ROLES_CONFIG.caja;
+                            const RoleIcon = roleConfig.icon;
+                            const [startH, startM] = (shift.start_time || '08:00').split(':').map(Number);
+                            const [endH, endM] = (shift.end_time || '16:00').split(':').map(Number);
+                            const duration = (endH + endM/60) - (startH + startM/60);
+                            
+                            return (
+                              <Draggable key={shift.id} draggableId={shift.id} index={shiftIdx}>
+                                {(provided, snapshot) => (
+                                  <motion.div
+                                    ref={provided.innerRef}
+                                    {...provided.draggableProps}
+                                    initial={{ opacity: 0, scale: 0.8 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.8 }}
+                                    whileHover={{ scale: 1.03, y: -2 }}
+                                    className={`rounded-xl overflow-hidden group cursor-pointer transition-all shadow-md hover:shadow-xl ${snapshot.isDragging ? 'shadow-2xl scale-105 z-50 rotate-2' : ''}`}
+                                  >
+                                    {/* Header con gradiente del rol */}
+                                    <div className={`bg-gradient-to-r ${roleConfig.gradient} p-2 flex items-center justify-between`}>
+                                      <div className="flex items-center gap-2">
+                                        <motion.div
+                                          animate={{ rotate: [0, 10, -10, 0] }}
+                                          transition={{ duration: 2, repeat: Infinity }}
+                                          className="w-6 h-6 bg-white/30 rounded-lg flex items-center justify-center"
+                                        >
+                                          <RoleIcon className="w-4 h-4 text-white" />
+                                        </motion.div>
+                                        <span className="text-xs font-bold text-white uppercase tracking-wide">
+                                          {roleConfig.label}
                                         </span>
                                       </div>
-                                      <div className="flex-1 min-w-0">
-                                        <p className="font-bold text-xs text-gray-800 truncate">
-                                          {shift.cashier_name || 'Sin asignar'}
-                                        </p>
-                                        <p className="text-[9px] text-gray-400">Colaborador</p>
+                                      <div {...provided.dragHandleProps}>
+                                        <GripVertical className="w-4 h-4 text-white/60" />
                                       </div>
                                     </div>
                                     
-                                    {/* Horario destacado */}
-                                    <div className={`${colors.bg} rounded-lg p-1.5 mb-1.5`}>
-                                      <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-1">
-                                          <Clock className={`w-3.5 h-3.5 ${colors.text}`} />
-                                          <span className={`text-sm font-bold ${colors.text}`}>
-                                            {shift.start_time}
-                                          </span>
-                                          <span className="text-gray-400 text-xs">→</span>
-                                          <span className={`text-sm font-bold ${colors.text}`}>
-                                            {shift.end_time}
+                                    {/* Body */}
+                                    <div className={`${roleConfig.bg} p-2`}>
+                                      {/* Colaborador */}
+                                      <div className="flex items-center gap-2 mb-2">
+                                        <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${roleConfig.gradient} flex items-center justify-center shadow-md`}>
+                                          <span className="text-sm font-bold text-white">
+                                            {shift.cashier_name?.charAt(0)?.toUpperCase() || '?'}
                                           </span>
                                         </div>
-                                        <span className={`text-[10px] font-semibold ${colors.text} bg-white/60 px-1.5 py-0.5 rounded`}>
-                                          {duration.toFixed(1)}h
-                                        </span>
+                                        <div className="flex-1 min-w-0">
+                                          <p className="font-bold text-sm text-gray-800 truncate">
+                                            {shift.cashier_name || 'Sin asignar'}
+                                          </p>
+                                        </div>
                                       </div>
+                                      
+                                      {/* Horario */}
+                                      <div className="bg-white/60 rounded-lg p-2 mb-2">
+                                        <div className="flex items-center justify-between">
+                                          <div className="flex items-center gap-1">
+                                            <Clock className={`w-4 h-4 ${roleConfig.text}`} />
+                                            <span className={`text-base font-black ${roleConfig.text}`}>
+                                              {shift.start_time}
+                                            </span>
+                                            <span className="text-gray-400 mx-1">→</span>
+                                            <span className={`text-base font-black ${roleConfig.text}`}>
+                                              {shift.end_time}
+                                            </span>
+                                          </div>
+                                          <span className={`text-xs font-bold ${roleConfig.text} bg-white px-2 py-0.5 rounded-full shadow-sm`}>
+                                            {duration.toFixed(1)}h
+                                          </span>
+                                        </div>
+                                      </div>
+
+                                      {/* Reacciones */}
+                                      <div className="flex items-center justify-between">
+                                        <div className="flex gap-1">
+                                          {[
+                                            { icon: ThumbsUp, emoji: '👍' },
+                                            { icon: Heart, emoji: '❤️' },
+                                            { icon: Star, emoji: '⭐' }
+                                          ].map((r, i) => (
+                                            <motion.button
+                                              key={i}
+                                              whileHover={{ scale: 1.2 }}
+                                              whileTap={{ scale: 0.9 }}
+                                              onClick={(e) => { e.stopPropagation(); handleReaction(shift.id, r.emoji); }}
+                                              className={`w-6 h-6 rounded-full flex items-center justify-center text-xs transition-all ${shift.reaction === r.emoji ? 'bg-yellow-200 shadow-md' : 'bg-white/80 hover:bg-white'}`}
+                                            >
+                                              {r.emoji}
+                                            </motion.button>
+                                          ))}
+                                        </div>
+                                        <button
+                                          onClick={(e) => { e.stopPropagation(); deleteMutation.mutate(shift.id); }}
+                                          className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-red-100 rounded-full"
+                                        >
+                                          <Trash2 className="w-3.5 h-3.5 text-red-400" />
+                                        </button>
+                                      </div>
+
+                                      {/* Indicador de visto */}
+                                      {shift.reaction && (
+                                        <motion.div 
+                                          initial={{ opacity: 0, y: 5 }}
+                                          animate={{ opacity: 1, y: 0 }}
+                                          className="mt-1 text-[10px] text-center text-gray-500 bg-white/50 rounded-full py-0.5"
+                                        >
+                                          ✅ Visto
+                                        </motion.div>
+                                      )}
                                     </div>
-                                    
-                                    {/* Delete */}
-                                    <button
-                                      onClick={(e) => { e.stopPropagation(); deleteMutation.mutate(shift.id); }}
-                                      className="w-full opacity-0 group-hover:opacity-100 transition-all text-[9px] text-red-400 hover:text-red-600 hover:bg-red-50 rounded py-0.5 flex items-center justify-center gap-1"
-                                    >
-                                      <Trash2 className="w-2.5 h-2.5" /> Eliminar
-                                    </button>
-                                  </div>
-                                </motion.div>
-                              )}
-                            </Draggable>
-                          );
-                        })}
+                                  </motion.div>
+                                )}
+                              </Draggable>
+                            );
+                          })}
+                        </AnimatePresence>
                         {provided.placeholder}
                         
                         {/* Add Button */}
                         <motion.button
-                          whileHover={{ scale: 1.05 }}
+                          whileHover={{ scale: 1.05, y: -2 }}
                           whileTap={{ scale: 0.95 }}
                           onClick={() => { setSelectedDay(day); setShowAddShift(true); }}
-                          className="w-full py-2 border-2 border-dashed border-gray-200 rounded-lg text-gray-400 hover:border-pink-400 hover:text-pink-500 hover:bg-pink-50 transition-all flex items-center justify-center gap-1 text-xs font-medium"
+                          className={`w-full py-3 border-2 border-dashed rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-2 ${isHovered ? 'border-pink-400 text-pink-500 bg-pink-50' : 'border-gray-200 text-gray-400 hover:border-pink-300 hover:text-pink-500'}`}
                         >
-                          <Plus className="w-4 h-4" /> Turno
+                          <Plus className="w-5 h-5" /> Agregar Turno
                         </motion.button>
                       </div>
-                    </div>
+                    </motion.div>
                   )}
                 </Droppable>
               );
@@ -310,7 +442,9 @@ export default function WeeklyCalendar({
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Plus className="w-5 h-5 text-pink-500" />
+              <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-rose-500 rounded-lg flex items-center justify-center">
+                <Plus className="w-5 h-5 text-white" />
+              </div>
               Agregar Turno - {selectedDay && format(selectedDay, "EEEE d 'de' MMMM", { locale: es })}
             </DialogTitle>
           </DialogHeader>
@@ -352,17 +486,27 @@ export default function WeeklyCalendar({
               </div>
             </div>
             <div>
-              <label className="text-sm font-medium text-gray-700 mb-1 block">Rol</label>
-              <Select value={newShift.role} onValueChange={(v) => setNewShift({ ...newShift, role: v })}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(ROLE_LABELS).map(([key, label]) => (
-                    <SelectItem key={key} value={key}>{label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">Rol / Posición</label>
+              <div className="grid grid-cols-3 gap-2">
+                {Object.entries(ROLES_CONFIG).map(([key, config]) => {
+                  const RoleIcon = config.icon;
+                  const isSelected = newShift.role === key;
+                  return (
+                    <motion.button
+                      key={key}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setNewShift({ ...newShift, role: key })}
+                      className={`p-2 rounded-xl border-2 transition-all flex flex-col items-center gap-1 ${isSelected ? `${config.bg} ${config.border} shadow-md` : 'border-gray-200 hover:border-gray-300'}`}
+                    >
+                      <RoleIcon className={`w-5 h-5 ${isSelected ? config.text : 'text-gray-400'}`} />
+                      <span className={`text-[10px] font-medium ${isSelected ? config.text : 'text-gray-500'}`}>
+                        {config.label}
+                      </span>
+                    </motion.button>
+                  );
+                })}
+              </div>
             </div>
           </div>
           <div className="flex justify-end gap-2">
@@ -381,3 +525,5 @@ export default function WeeklyCalendar({
     </div>
   );
 }
+
+export { ROLES_CONFIG };
