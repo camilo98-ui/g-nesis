@@ -299,7 +299,7 @@ export default function Rankings() {
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button
                 onClick={() => setShowGlobal(true)}
-                className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg shadow-purple-500/30 gap-2"
+                className="bg-gradient-to-r from-pink-200 to-rose-300 text-rose-700 hover:from-pink-300 hover:to-rose-400 shadow-lg shadow-pink-200/50 gap-2 border border-pink-100"
               >
                 <Globe className="w-4 h-4" />
                 Ranking Global
@@ -834,7 +834,7 @@ export default function Rankings() {
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button
                 onClick={() => setShowGlobal(true)}
-                className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg shadow-purple-500/30 gap-2"
+                className="bg-gradient-to-r from-pink-200 to-rose-300 text-rose-700 hover:from-pink-300 hover:to-rose-400 shadow-lg shadow-pink-200/50 gap-2 border border-pink-100"
               >
                 <Globe className="w-4 h-4" />
                 Ver Ranking Global

@@ -11,13 +11,11 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { 
   LayoutDashboard, Users, TrendingUp, 
-  Award, Target, Bell, Snowflake, Brain, Phone, Download, Smartphone, Monitor, Fingerprint
+  Award, Target, Bell, Brain, Phone, Download, Smartphone, Monitor
 } from 'lucide-react';
-import FingerprintModal from '@/components/FingerprintModal';
 import { Button } from "@/components/ui/button";
 import { startOfMonth } from 'date-fns';
 
-const ICE_CREAM_IMAGE = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/89e24fb79_Capturadepantalla2025-11-30074009.png";
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/6a749247d_Capturadepantalla2025-11-251251441.png";
 
 const MENU_ITEMS = [
@@ -77,7 +75,33 @@ const MENU_ITEMS = [
   },
 ];
 
-
+// Confetti pastel suave
+const PastelConfetti = () => (
+  <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+    {[...Array(20)].map((_, i) => (
+      <motion.div
+        key={i}
+        className="absolute w-2 h-2 rounded-full"
+        style={{
+          left: `${Math.random() * 100}%`,
+          background: ['#FFD1DC', '#E0BBE4', '#C5E8FF', '#FFEFD5', '#D4F0F0'][i % 5],
+        }}
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ 
+          y: window.innerHeight + 50,
+          opacity: [0, 0.6, 0.6, 0],
+          rotate: [0, 360]
+        }}
+        transition={{
+          duration: 8 + Math.random() * 4,
+          delay: i * 0.3,
+          repeat: Infinity,
+          ease: "linear"
+        }}
+      />
+    ))}
+  </div>
+);
 
 export default function Home() {
   const [selectedStore, setSelectedStore] = useState('');
@@ -86,7 +110,6 @@ export default function Home() {
   const [showDirectory, setShowDirectory] = useState(false);
   const [showInstall, setShowInstall] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
-  const [showFingerprint, setShowFingerprint] = useState(false);
 
   useEffect(() => {
     const handler = (e) => {
@@ -97,7 +120,7 @@ export default function Home() {
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
 
-  // Cargar tienda guardada o mostrar selector
+  // Cargar tienda guardada
   useEffect(() => {
     const saved = localStorage.getItem('selectedStore');
     const lastVisit = localStorage.getItem('lastVisitTime');
@@ -123,10 +146,11 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white relative overflow-hidden">
+      <PastelConfetti />
       <FloatingIceCreamsBg />
 
       <div className="max-w-6xl mx-auto px-4 py-6 relative z-10">
-        {/* Header con logo - compacto */}
+        {/* Header con logo animado premium */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -135,28 +159,37 @@ export default function Home() {
           <motion.img 
             src={LOGO_URL} 
             alt="Popsy" 
-            className="h-20 sm:h-24 md:h-28 object-contain mx-auto mb-2 cursor-pointer drop-shadow-md"
-            initial={{ opacity: 0, scale: 0.8 }}
+            className="h-24 sm:h-28 md:h-32 object-contain mx-auto mb-2 cursor-pointer drop-shadow-lg"
+            initial={{ opacity: 0, scale: 0.5 }}
             animate={{ 
               opacity: 1, 
-              scale: [1, 1.02, 1],
+              scale: [1, 1.03, 0.98, 1.02, 1],
+              y: [0, -8, 0, -4, 0],
             }}
             transition={{
-              opacity: { duration: 0.5 },
+              opacity: { duration: 0.8, ease: "easeOut" },
               scale: { duration: 4, repeat: Infinity, ease: "easeInOut" },
+              y: { duration: 3, repeat: Infinity, ease: "easeInOut" },
             }}
-            whileHover={{ scale: 1.05 }}
+            whileHover={{ scale: 1.08, rotate: [0, -2, 2, 0] }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setShowStory(true)}
           />
-          <p className="text-gray-500 text-sm mb-3">Sistema de Gestión</p>
+          <motion.p 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="text-gray-400 text-sm mb-3"
+          >
+            Sistema de Gestión
+          </motion.p>
           
           {/* Store Selector */}
           <motion.div 
             className="flex flex-col items-center gap-2"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
+            transition={{ delay: 0.3 }}
           >
             <p className="text-gray-600 font-medium text-sm">¿A qué tienda deseas ingresar?</p>
             <StoreSelector 
@@ -166,51 +199,54 @@ export default function Home() {
           </motion.div>
         </motion.div>
 
-        {/* Quick Actions */}
+        {/* Quick Actions - Más dinámicos */}
         {selectedStore && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             className="mb-4 flex justify-center gap-2"
           >
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowNotifications(true)}
-              className="text-gray-500 hover:text-pink-600 hover:bg-pink-50"
-            >
-              <Bell className="w-4 h-4 mr-1" />
-              Alertas
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowDirectory(true)}
-              className="text-gray-500 hover:text-blue-600 hover:bg-blue-50"
-            >
-              <Phone className="w-4 h-4 mr-1" />
-              Directorio
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowInstall(true)}
-              className="text-gray-500 hover:text-purple-600 hover:bg-purple-50"
-            >
-              <Download className="w-4 h-4 mr-1" />
-              Instalar App
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowFingerprint(true)}
-              className="text-gray-500 hover:text-green-600 hover:bg-green-50"
-            >
-              <Fingerprint className="w-4 h-4 mr-1" />
-              Huella
-            </Button>
+            <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowNotifications(true)}
+                className="text-gray-500 hover:text-pink-600 hover:bg-pink-50 transition-all"
+              >
+                <motion.div animate={{ rotate: [0, 15, -15, 0] }} transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}>
+                  <Bell className="w-4 h-4 mr-1" />
+                </motion.div>
+                Alertas
+              </Button>
             </motion.div>
-            )}
+            <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowDirectory(true)}
+                className="text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition-all"
+              >
+                <motion.div animate={{ y: [0, -2, 0] }} transition={{ duration: 1.5, repeat: Infinity }}>
+                  <Phone className="w-4 h-4 mr-1" />
+                </motion.div>
+                Directorio
+              </Button>
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowInstall(true)}
+                className="text-gray-500 hover:text-purple-600 hover:bg-purple-50 transition-all"
+              >
+                <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 2, repeat: Infinity }}>
+                  <Download className="w-4 h-4 mr-1" />
+                </motion.div>
+                Instalar App
+              </Button>
+            </motion.div>
+          </motion.div>
+        )}
 
         {/* Menu Grid */}
         {selectedStore ? (
@@ -269,17 +305,13 @@ export default function Home() {
               transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
             >
               <svg viewBox="0 0 80 120" className="w-full h-full">
-                {/* Bolita de helado - estilo sketch */}
                 <ellipse cx="40" cy="28" rx="28" ry="24" fill="none" stroke="#888" strokeWidth="1.5" strokeDasharray="2,1" />
                 <ellipse cx="40" cy="28" rx="28" ry="24" fill="#FFB5C5" opacity="0.3" />
                 <path d="M 20 22 Q 25 18 30 22 Q 35 18 40 22 Q 45 18 50 22 Q 55 18 60 22" fill="none" stroke="#888" strokeWidth="0.8" opacity="0.6" />
-                {/* Drip effect */}
                 <path d="M 25 45 Q 23 52 26 48" fill="none" stroke="#888" strokeWidth="0.8" />
                 <path d="M 55 45 Q 57 50 54 47" fill="none" stroke="#888" strokeWidth="0.8" />
-                {/* Cono */}
                 <polygon points="18,48 40,115 62,48" fill="none" stroke="#888" strokeWidth="1.5" strokeDasharray="3,1" />
                 <polygon points="18,48 40,115 62,48" fill="#E8D5B0" opacity="0.25" />
-                {/* Líneas del cono */}
                 <line x1="24" y1="58" x2="56" y2="58" stroke="#999" strokeWidth="0.6" strokeDasharray="2,2" />
                 <line x1="28" y1="72" x2="52" y2="72" stroke="#999" strokeWidth="0.6" strokeDasharray="2,2" />
                 <line x1="32" y1="86" x2="48" y2="86" stroke="#999" strokeWidth="0.6" strokeDasharray="2,2" />
@@ -292,7 +324,27 @@ export default function Home() {
         )}
       </div>
 
-
+      {/* Footer Message - Más visible */}
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1 }}
+        className="fixed bottom-6 left-0 right-0 text-center px-4"
+      >
+        <motion.p 
+          className="text-sm text-gray-400 tracking-wide flex items-center justify-center gap-2"
+          animate={{ y: [0, -2, 0] }}
+          transition={{ duration: 3, repeat: Infinity }}
+        >
+          <span>Gracias por hacer del mundo un lugar más</span>
+          <span className="text-pink-400 font-medium">dulce</span>
+          <span>,</span>
+          <span className="text-amber-400 font-medium">feliz</span>
+          <span>y</span>
+          <span className="text-purple-400 font-medium">divertido</span>
+          <span>💗</span>
+        </motion.p>
+      </motion.div>
 
       {/* Notifications Setup Modal */}
       <AnimatePresence>
@@ -318,28 +370,6 @@ export default function Home() {
           <DirectoryModal onClose={() => setShowDirectory(false)} />
         )}
       </AnimatePresence>
-
-      {/* Fingerprint Modal */}
-      <AnimatePresence>
-        {showFingerprint && (
-          <FingerprintModal 
-            storeId={selectedStore} 
-            onClose={() => setShowFingerprint(false)} 
-          />
-        )}
-      </AnimatePresence>
-
-      {/* Footer Message */}
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1 }}
-        className="fixed bottom-4 left-0 right-0 text-center px-4"
-      >
-        <p className="text-xs text-gray-300 tracking-wide">
-          Gracias por hacer del mundo un lugar más dulce, feliz y divertido 💗
-        </p>
-      </motion.div>
 
       {/* Install App Modal */}
       <AnimatePresence>
@@ -429,6 +459,6 @@ export default function Home() {
           </motion.div>
         )}
       </AnimatePresence>
-      </div>
-      );
-      }
+    </div>
+  );
+}
