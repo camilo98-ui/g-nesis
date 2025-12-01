@@ -11,7 +11,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { 
   LayoutDashboard, Users, TrendingUp, 
-  Award, Target, Bell, Snowflake, Brain, Phone
+  Award, Target, Bell, Snowflake, Brain, Phone, Download, Smartphone, Monitor, Tablet
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { startOfMonth } from 'date-fns';
@@ -83,6 +83,17 @@ export default function Home() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showStory, setShowStory] = useState(false);
   const [showDirectory, setShowDirectory] = useState(false);
+  const [showInstall, setShowInstall] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+
+  useEffect(() => {
+    const handler = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
 
   useEffect(() => {
     const saved = localStorage.getItem('selectedStore');
@@ -168,8 +179,17 @@ export default function Home() {
               <Phone className="w-4 h-4 mr-1" />
               Directorio
             </Button>
-          </motion.div>
-        )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowInstall(true)}
+              className="text-gray-500 hover:text-purple-600 hover:bg-purple-50"
+            >
+              <Download className="w-4 h-4 mr-1" />
+              Instalar App
+            </Button>
+            </motion.div>
+            )}
 
         {/* Menu Grid */}
         {selectedStore ? (
@@ -277,6 +297,95 @@ export default function Home() {
           <DirectoryModal onClose={() => setShowDirectory(false)} />
         )}
       </AnimatePresence>
-    </div>
-  );
-}
+
+      {/* Install App Modal */}
+      <AnimatePresence>
+        {showInstall && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setShowInstall(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              onClick={e => e.stopPropagation()}
+              className="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden"
+            >
+              <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-5 text-white text-center">
+                <Download className="w-10 h-10 mx-auto mb-2" />
+                <h2 className="text-xl font-bold">Instalar Popsy App</h2>
+                <p className="text-white/80 text-sm">Accede más rápido desde tu dispositivo</p>
+              </div>
+
+              <div className="p-5 space-y-4">
+                {deferredPrompt ? (
+                  <Button
+                    onClick={async () => {
+                      deferredPrompt.prompt();
+                      const { outcome } = await deferredPrompt.userChoice;
+                      if (outcome === 'accepted') {
+                        setDeferredPrompt(null);
+                        setShowInstall(false);
+                      }
+                    }}
+                    className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-6"
+                  >
+                    <Download className="w-5 h-5 mr-2" />
+                    Instalar ahora
+                  </Button>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="bg-gray-50 rounded-xl p-4">
+                      <div className="flex items-center gap-3 mb-2">
+                        <Smartphone className="w-6 h-6 text-blue-500" />
+                        <span className="font-medium">iPhone / iPad</span>
+                      </div>
+                      <ol className="text-sm text-gray-600 space-y-1 ml-9">
+                        <li>1. Toca el botón <strong>Compartir</strong> ⬆️</li>
+                        <li>2. Selecciona <strong>"Añadir a inicio"</strong></li>
+                        <li>3. Confirma tocando <strong>"Añadir"</strong></li>
+                      </ol>
+                    </div>
+
+                    <div className="bg-gray-50 rounded-xl p-4">
+                      <div className="flex items-center gap-3 mb-2">
+                        <Smartphone className="w-6 h-6 text-green-500" />
+                        <span className="font-medium">Android</span>
+                      </div>
+                      <ol className="text-sm text-gray-600 space-y-1 ml-9">
+                        <li>1. Toca el menú <strong>⋮</strong> del navegador</li>
+                        <li>2. Selecciona <strong>"Instalar app"</strong></li>
+                        <li>3. Confirma la instalación</li>
+                      </ol>
+                    </div>
+
+                    <div className="bg-gray-50 rounded-xl p-4">
+                      <div className="flex items-center gap-3 mb-2">
+                        <Monitor className="w-6 h-6 text-purple-500" />
+                        <span className="font-medium">PC / Mac</span>
+                      </div>
+                      <ol className="text-sm text-gray-600 space-y-1 ml-9">
+                        <li>1. En Chrome, busca el ícono ⊕ en la barra</li>
+                        <li>2. Click en <strong>"Instalar"</strong></li>
+                      </ol>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="p-4 bg-gray-50 border-t text-center">
+                <Button variant="ghost" onClick={() => setShowInstall(false)} className="text-gray-500">
+                  Cerrar
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      </div>
+      );
+      }
