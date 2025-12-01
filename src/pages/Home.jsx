@@ -366,6 +366,17 @@ export default function Home() {
         )}
       </AnimatePresence>
 
+      {/* Welcome Toast */}
+      <AnimatePresence>
+        {showWelcome && selectedStore && (
+          <WelcomeToast 
+            storeName={selectedStoreName}
+            storeCode={selectedStore}
+            onClose={() => setShowWelcome(false)}
+          />
+        )}
+      </AnimatePresence>
+
       {/* Install App Modal */}
       <AnimatePresence>
         {showInstall && (
