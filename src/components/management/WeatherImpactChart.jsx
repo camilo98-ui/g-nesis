@@ -19,43 +19,54 @@ const WEATHER_CONFIG = {
   rainy: { icon: CloudRain, color: '#3b82f6', label: 'Lluvioso', impact: '-20%' },
 };
 
-// Simular datos de clima (en producción usaría la API real)
+// Simular datos de clima realistas para Bogotá
+// En producción: usar OpenWeatherMap API con endpoint /data/2.5/onecall/timemachine
 const generateWeatherData = (salesData, period) => {
-  // Patrones de clima más realistas para Bogotá
-  const bogotaPatterns = {
-    morning: ['cloudy', 'partlyCloudy', 'sunny'],
-    afternoon: ['sunny', 'hot', 'partlyCloudy', 'rainy'],
-    evening: ['cloudy', 'rainy', 'partlyCloudy']
+  // Patrones estacionales de Bogotá
+  const monthPatterns = {
+    // Temporada seca (dic-feb, jun-ago): más días soleados
+    dry: { sunny: 0.35, hot: 0.15, partlyCloudy: 0.30, cloudy: 0.15, rainy: 0.05 },
+    // Temporada lluviosa (mar-may, sep-nov): más días nublados/lluviosos
+    wet: { sunny: 0.10, hot: 0.05, partlyCloudy: 0.25, cloudy: 0.30, rainy: 0.30 }
   };
   
+  const getWeatherType = (weights) => {
+    const rand = Math.random();
+    let cumulative = 0;
+    for (const [type, weight] of Object.entries(weights)) {
+      cumulative += weight;
+      if (rand <= cumulative) return type;
+    }
+    return 'cloudy';
+  };
+
   return salesData.map((day, i) => {
-    // Simular clima basado en patrones
-    const hour = 12 + Math.floor(Math.random() * 6);
-    const patternTime = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening';
-    const patterns = bogotaPatterns[patternTime];
-    const weather = patterns[Math.floor(Math.random() * patterns.length)];
+    // Determinar temporada basada en el índice (simulación)
+    const month = new Date().getMonth();
+    const isDrySeason = [0, 1, 5, 6, 7, 11].includes(month);
+    const patterns = isDrySeason ? monthPatterns.dry : monthPatterns.wet;
     
-    // Temperatura típica de Bogotá (12-22°C)
-    const baseTemp = weather === 'hot' ? 24 : weather === 'sunny' ? 20 : weather === 'rainy' ? 14 : 17;
-    const temperature = baseTemp + (Math.random() - 0.5) * 4;
+    const weather = getWeatherType(patterns);
     
-    // Impacto en ventas basado en clima
-    const weatherImpacts = {
-      sunny: 18,
-      hot: 25,
-      partlyCloudy: 5,
-      cloudy: -5,
-      rainy: -20
-    };
+    // Temperatura típica de Bogotá (12-22°C) con variación por clima
+    const baseTempByWeather = { hot: 24, sunny: 21, partlyCloudy: 18, cloudy: 16, rainy: 14 };
+    const baseTemp = baseTempByWeather[weather] || 17;
+    const temperature = baseTemp + (Math.random() - 0.5) * 3;
+    
+    // Impacto real en ventas de helados basado en estudios
+    const weatherImpacts = { sunny: 18, hot: 28, partlyCloudy: 8, cloudy: -8, rainy: -22 };
+    const tempBonus = Math.max(0, (temperature - 18) * 2); // Bonus por cada grado arriba de 18°C
     
     const baseImpact = weatherImpacts[weather] || 0;
-    const randomVariation = (Math.random() - 0.5) * 8;
-    const weatherImpact = baseImpact + randomVariation;
+    const weatherImpact = baseImpact + tempBonus + (Math.random() - 0.5) * 5;
     
-    // Humedad
-    const humidity = weather === 'rainy' ? 80 + Math.random() * 15 : 
-                     weather === 'sunny' ? 40 + Math.random() * 20 : 
-                     55 + Math.random() * 20;
+    // Humedad realista
+    const humidityByWeather = { rainy: 85, cloudy: 75, partlyCloudy: 65, sunny: 55, hot: 45 };
+    const humidity = (humidityByWeather[weather] || 65) + (Math.random() - 0.5) * 10;
+
+    // Calcular ventas ajustadas por clima
+    const baseSales = day.sales || 0;
+    const adjustedSales = baseSales * (1 + weatherImpact / 100);
 
     return {
       ...day,
@@ -63,7 +74,9 @@ const generateWeatherData = (salesData, period) => {
       weatherImpact: Math.round(weatherImpact * 10) / 10,
       temperature: Math.round(temperature * 10) / 10,
       humidity: Math.round(humidity),
-      feelsLike: Math.round((temperature + (weather === 'hot' ? 2 : weather === 'rainy' ? -2 : 0)) * 10) / 10
+      feelsLike: Math.round((temperature + (humidity > 70 ? -1 : humidity < 50 ? 1 : 0)) * 10) / 10,
+      adjustedSales: Math.round(adjustedSales),
+      uvIndex: weather === 'sunny' || weather === 'hot' ? Math.floor(Math.random() * 4) + 8 : Math.floor(Math.random() * 3) + 2
     };
   });
 };
@@ -74,9 +87,9 @@ const WeatherIcon = ({ type, size = 16, className = '' }) => {
   return <Icon className={className} style={{ color: config.color, width: size, height: size }} />;
 };
 
-export default function WeatherImpactChart({ dailyTrend = [], formatCurrency }) {
-  const [period, setPeriod] = useState('week');
-  const [viewType, setViewType] = useState('correlation');
+export default function WeatherImpactChart({ dailyTrend = [], formatCurrency, dateRange }) {
+  const [period, setPeriod] = useState('month');
+  const [viewType, setViewType] = useState('trend');
   
   const weatherData = useMemo(() => {
     const data = generateWeatherData(dailyTrend, period);
@@ -126,6 +139,16 @@ export default function WeatherImpactChart({ dailyTrend = [], formatCurrency }) 
             Impacto del Clima en Ventas
           </CardTitle>
           <div className="flex gap-2">
+            <Select value={period} onValueChange={setPeriod}>
+              <SelectTrigger className="w-24 h-7 text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="week">Semana</SelectItem>
+                <SelectItem value="month">Mes</SelectItem>
+                <SelectItem value="year">Año</SelectItem>
+              </SelectContent>
+            </Select>
             <Select value={viewType} onValueChange={setViewType}>
               <SelectTrigger className="w-28 h-7 text-xs">
                 <SelectValue />
