@@ -314,94 +314,36 @@ export default function WeatherImpactChart({ dailyTrend = [], formatCurrency, da
           })}
         </div>
 
-        {/* Panel de detalle del clima seleccionado */}
+
+
+        {/* Header del clima seleccionado */}
         <AnimatePresence>
           {selectedWeather && selectedWeatherStats && (
             <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="mb-4 overflow-hidden"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className={`mb-3 bg-gradient-to-r ${WEATHER_CONFIG[selectedWeather].bgColor} rounded-xl p-3 border border-gray-200`}
             >
-              <div className={`bg-gradient-to-r ${WEATHER_CONFIG[selectedWeather].bgColor} rounded-xl p-3 border-2 border-${selectedWeather === 'sunny' ? 'amber' : selectedWeather === 'hot' ? 'red' : selectedWeather === 'rainy' ? 'blue' : 'gray'}-200`}>
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <WeatherIcon type={selectedWeather} size={24} />
-                    <div>
-                      <h4 className="font-bold text-gray-800">{WEATHER_CONFIG[selectedWeather].label}</h4>
-                      <p className="text-xs text-gray-500">{selectedWeatherStats.count} días registrados</p>
-                    </div>
-                  </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <WeatherIcon type={selectedWeather} size={20} />
+                  <span className="font-bold text-gray-800 text-sm">{WEATHER_CONFIG[selectedWeather].label}</span>
+                  <span className="text-xs text-gray-500">• {selectedWeatherStats.count} días</span>
+                </div>
+                <div className="flex items-center gap-3 text-xs">
+                  <span className={`font-bold ${selectedWeatherStats.avgImpact >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+                    Impacto: {selectedWeatherStats.avgImpact >= 0 ? '+' : ''}{selectedWeatherStats.avgImpact?.toFixed(1)}%
+                  </span>
+                  <span className="text-gray-600">Temp: {selectedWeatherStats.avgTemp?.toFixed(1)}°C</span>
                   <Button 
                     variant="ghost" 
                     size="sm" 
                     onClick={() => setSelectedWeather(null)}
-                    className="h-6 w-6 p-0 rounded-full"
+                    className="h-5 w-5 p-0 rounded-full text-gray-400 hover:text-gray-600"
                   >
                     ✕
                   </Button>
-                </div>
-                
-                <div className="grid grid-cols-4 gap-2 text-center">
-                  <div className="bg-white/60 rounded-lg p-2">
-                    <p className="text-[10px] text-gray-500">Impacto Promedio</p>
-                    <p className={`text-sm font-bold ${selectedWeatherStats.avgImpact >= 0 ? 'text-green-600' : 'text-red-500'}`}>
-                      {selectedWeatherStats.avgImpact >= 0 ? '+' : ''}{selectedWeatherStats.avgImpact?.toFixed(1)}%
-                    </p>
-                  </div>
-                  <div className="bg-white/60 rounded-lg p-2">
-                    <p className="text-[10px] text-gray-500">Venta Total</p>
-                    <p className="text-sm font-bold text-gray-800">
-                      {formatCurrency ? formatCurrency(selectedWeatherStats.totalSales) : selectedWeatherStats.totalSales}
-                    </p>
-                  </div>
-                  <div className="bg-white/60 rounded-lg p-2">
-                    <p className="text-[10px] text-gray-500">Mejor Día</p>
-                    <p className="text-xs font-bold text-green-600 truncate">
-                      {selectedWeatherStats.bestDay?.fullDate || '-'}
-                    </p>
-                  </div>
-                  <div className="bg-white/60 rounded-lg p-2">
-                    <p className="text-[10px] text-gray-500">Temp. Promedio</p>
-                    <p className="text-sm font-bold text-gray-800">
-                      {selectedWeatherStats.avgTemp?.toFixed(1)}°C
-                    </p>
-                  </div>
-                </div>
-
-                {/* Mini gráfico de días con este clima */}
-                <div className="mt-3 h-20">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={filteredByWeather}>
-                      <defs>
-                        <linearGradient id={`gradient-${selectedWeather}`} x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor={WEATHER_CONFIG[selectedWeather].color} stopOpacity={0.4}/>
-                          <stop offset="95%" stopColor={WEATHER_CONFIG[selectedWeather].color} stopOpacity={0.05}/>
-                        </linearGradient>
-                      </defs>
-                      <XAxis dataKey="date" tick={{ fontSize: 9 }} />
-                      <YAxis hide />
-                      <Tooltip 
-                        content={({ active, payload }) => {
-                          if (!active || !payload?.length) return null;
-                          const data = payload[0].payload;
-                          return (
-                            <div className="bg-white p-2 rounded-lg shadow-lg border text-xs">
-                              <p className="font-bold capitalize">{data.fullDate}</p>
-                              <p>{formatCurrency?.(data.sales) || data.sales}</p>
-                            </div>
-                          );
-                        }}
-                      />
-                      <Area 
-                        type="monotone" 
-                        dataKey="sales" 
-                        stroke={WEATHER_CONFIG[selectedWeather].color} 
-                        fill={`url(#gradient-${selectedWeather})`} 
-                        strokeWidth={2} 
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
                 </div>
               </div>
             </motion.div>
@@ -458,7 +400,7 @@ export default function WeatherImpactChart({ dailyTrend = [], formatCurrency, da
                   }}
                 />
                 <Scatter 
-                  data={correlationData} 
+                  data={selectedWeather ? filteredByWeather : correlationData} 
                   fill="#ec4899"
                   shape={(props) => {
                     const { cx, cy, payload } = props;
@@ -482,7 +424,7 @@ export default function WeatherImpactChart({ dailyTrend = [], formatCurrency, da
 
           {viewType === 'trend' && (
             <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart data={weatherData}>
+              <ComposedChart data={selectedWeather ? filteredByWeather : weatherData}>
                 <defs>
                   <linearGradient id="salesWeatherGrad" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#a5b4fc" stopOpacity={0.4}/>
@@ -526,7 +468,7 @@ export default function WeatherImpactChart({ dailyTrend = [], formatCurrency, da
 
           {viewType === 'compare' && (
             <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart data={weatherStats} layout="vertical">
+              <ComposedChart data={selectedWeather ? weatherStats.filter(s => s.type === selectedWeather) : weatherStats} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis type="number" domain={[-30, 35]} tick={{ fontSize: 10 }} tickFormatter={(v) => `${v}%`} />
                 <YAxis 
