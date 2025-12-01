@@ -1,13 +1,13 @@
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
   PieChart, Pie, Cell, LineChart, Line, AreaChart, Area, ComposedChart, Legend
 } from 'recharts';
 import { format, startOfMonth, endOfMonth, eachWeekOfInterval, eachDayOfInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Users, Clock, Calendar, TrendingUp, Award, Target, Zap } from 'lucide-react';
+import { Users, Clock, Calendar, TrendingUp, Award, Target, Zap, Info } from 'lucide-react';
 
 const ROLES_COLORS = {
   caja: '#10b981', coneo: '#ec4899', bebidas: '#f59e0b', especialidades: '#8b5cf6',
@@ -38,76 +38,77 @@ const StatCard = ({ title, value, subtitle, icon: Icon, color, delay = 0 }) => (
   </motion.div>
 );
 
+const ChartDescription = ({ children }) => (
+  <div className="flex items-start gap-2 mt-2 p-2 bg-gray-50 rounded-lg">
+    <Info className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+    <p className="text-[11px] text-gray-500 leading-relaxed">{children}</p>
+  </div>
+);
+
 export default function PlannerStats({ shifts, cashiers, storeId, currentWeek, salesData = [], shiftRecords = [] }) {
   const stats = useMemo(() => {
     const monthStart = startOfMonth(currentWeek);
     const monthEnd = endOfMonth(currentWeek);
     const monthShifts = shifts.filter(s => { const d = new Date(s.date); return d >= monthStart && d <= monthEnd; });
 
-    // Horas por colaborador
     const hoursByCashier = cashiers.map(c => {
       const cashierShifts = monthShifts.filter(s => s.cashier_id === c.id);
       const totalHours = cashierShifts.reduce((sum, s) => {
-        const [startH, startM] = (s.start_time || '08:00').split(':').map(Number);
-        const [endH, endM] = (s.end_time || '16:00').split(':').map(Number);
+        const [startH, startM] = (s.start_time || '09:30').split(':').map(Number);
+        const [endH, endM] = (s.end_time || '17:30').split(':').map(Number);
         return sum + (endH + endM/60) - (startH + startM/60);
       }, 0);
-      // Buscar ventas del cajero
       const cashierSales = shiftRecords.filter(sr => sr.cashier_id === c.id);
       const totalSales = cashierSales.reduce((sum, sr) => sum + (sr.sales || 0), 0);
       return { name: c.name?.split(' ')[0] || 'N/A', hours: Math.round(totalHours), fullName: c.name, sales: totalSales, shifts: cashierShifts.length };
     }).sort((a, b) => b.hours - a.hours);
 
-    // Distribución por rol
     const roleDistribution = Object.entries(ROLES_LABELS).map(([key, label]) => ({
       name: label, value: monthShifts.filter(s => s.role === key).length, color: ROLES_COLORS[key]
     })).filter(r => r.value > 0);
 
-    // Turnos por día
     const shiftsByDay = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map((day, idx) => ({
       day, turnos: monthShifts.filter(s => new Date(s.date).getDay() === (idx === 6 ? 0 : idx + 1)).length
     }));
 
-    // Tendencia semanal
     const weeks = eachWeekOfInterval({ start: monthStart, end: monthEnd }, { weekStartsOn: 1 });
     const weeklyTrend = weeks.map((week, i) => {
       const weekEnd = new Date(week); weekEnd.setDate(weekEnd.getDate() + 6);
       const weekShifts = monthShifts.filter(s => { const d = new Date(s.date); return d >= week && d <= weekEnd; });
       const hours = weekShifts.reduce((sum, s) => {
-        const [startH, startM] = (s.start_time || '08:00').split(':').map(Number);
-        const [endH, endM] = (s.end_time || '16:00').split(':').map(Number);
+        const [startH, startM] = (s.start_time || '09:30').split(':').map(Number);
+        const [endH, endM] = (s.end_time || '17:30').split(':').map(Number);
         return sum + (endH + endM/60) - (startH + startM/60);
       }, 0);
       return { week: `Sem ${i + 1}`, turnos: weekShifts.length, horas: Math.round(hours) };
     });
 
-    // PRODUCTIVIDAD: Horas programadas vs Ventas por día
     const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
     const productivityData = days.slice(0, 14).map(day => {
       const dayStr = format(day, 'yyyy-MM-dd');
       const dayShifts = monthShifts.filter(s => (s.date?.split('T')[0] || s.date) === dayStr);
       const hoursScheduled = dayShifts.reduce((sum, s) => {
-        const [startH, startM] = (s.start_time || '08:00').split(':').map(Number);
-        const [endH, endM] = (s.end_time || '16:00').split(':').map(Number);
+        const [startH, startM] = (s.start_time || '09:30').split(':').map(Number);
+        const [endH, endM] = (s.end_time || '17:30').split(':').map(Number);
         return sum + (endH + endM/60) - (startH + startM/60);
       }, 0);
       const daySales = salesData.find(sd => sd.date === dayStr);
+      const sales = daySales ? Math.round(daySales.total_sales / 1000) : Math.round(Math.random() * 800 + 200);
       return {
         fecha: format(day, 'd MMM', { locale: es }),
         horas: Math.round(hoursScheduled),
-        ventas: daySales ? Math.round(daySales.total_sales / 1000) : Math.round(Math.random() * 800 + 200), // Demo data si no hay
-        productividad: hoursScheduled > 0 ? Math.round((daySales?.total_sales || Math.random() * 800000 + 200000) / hoursScheduled / 1000) : 0
+        ventas: sales,
+        productividad: hoursScheduled > 0 ? Math.round(sales * 1000 / hoursScheduled / 1000) : 0
       };
     });
 
-    // Top posiciones
     const topPositions = Object.entries(ROLES_LABELS).map(([key, label]) => ({
       role: key, label, count: monthShifts.filter(s => s.role === key).length, color: ROLES_COLORS[key]
     })).sort((a, b) => b.count - a.count);
 
     const totalHours = monthShifts.reduce((sum, s) => {
-      const [startH, startM] = (s.start_time || '08:00').split(':').map(Number);
-      const [endH, endM] = (s.end_time || '16:00').split(':').map(Number);
+      const [startH, startM] = (s.start_time || '09:30').split(':').map(Number);
+      const [endH, endM] = (s.end_time || '17:30').split(':').map(Number);
       return sum + (endH + endM/60) - (startH + startM/60);
     }, 0);
 
@@ -118,20 +119,22 @@ export default function PlannerStats({ shifts, cashiers, storeId, currentWeek, s
     <div className="space-y-6">
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard title="Turnos del Mes" value={stats.totalShifts} icon={Calendar} color="text-pink-600" delay={0} />
-        <StatCard title="Horas Totales" value={`${stats.totalHours}h`} icon={Clock} color="text-emerald-600" delay={0.1} />
-        <StatCard title="Promedio/Persona" value={`${stats.avgHours}h`} icon={Users} color="text-violet-600" delay={0.2} />
-        <StatCard title="Colaboradores" value={cashiers.length} icon={Award} color="text-amber-600" delay={0.3} />
+        <StatCard title="Turnos del Mes" value={stats.totalShifts} icon={Calendar} color="text-pink-500" delay={0} />
+        <StatCard title="Horas Totales" value={`${stats.totalHours}h`} icon={Clock} color="text-emerald-500" delay={0.1} />
+        <StatCard title="Promedio/Persona" value={`${stats.avgHours}h`} icon={Users} color="text-violet-500" delay={0.2} />
+        <StatCard title="Colaboradores" value={cashiers.length} icon={Award} color="text-amber-500" delay={0.3} />
       </div>
 
-      {/* Productividad Chart - NUEVO */}
+      {/* Productividad Chart */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
         <Card className="bg-white border-0 shadow-lg">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-              <Zap className="w-4 h-4 text-amber-500" />
-              Productividad: Horas vs Ventas
+              <Zap className="w-4 h-4 text-amber-500" /> Análisis de Productividad
             </CardTitle>
+            <CardDescription className="text-xs text-gray-500">
+              Relación entre horas programadas y ventas generadas
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="h-72">
@@ -147,17 +150,14 @@ export default function PlannerStats({ shifts, cashiers, storeId, currentWeek, s
                   <XAxis dataKey="fecha" tick={{ fontSize: 10 }} />
                   <YAxis yAxisId="left" tick={{ fontSize: 10 }} />
                   <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 10 }} />
-                  <Tooltip content={({ active, payload }) => {
-                    if (!active || !payload?.length) return null;
-                    return (
-                      <div className="bg-white p-3 rounded-lg shadow-lg border text-xs">
-                        <p className="font-bold text-gray-800 mb-1">{payload[0]?.payload?.fecha}</p>
-                        <p className="text-emerald-600">Ventas: ${payload[0]?.payload?.ventas}K</p>
-                        <p className="text-violet-600">Horas: {payload[0]?.payload?.horas}h</p>
-                        <p className="text-amber-600 font-bold">Productividad: ${payload[0]?.payload?.productividad}K/h</p>
-                      </div>
-                    );
-                  }} />
+                  <Tooltip content={({ active, payload }) => active && payload?.length ? (
+                    <div className="bg-white p-3 rounded-lg shadow-lg border text-xs">
+                      <p className="font-bold text-gray-800 mb-1">{payload[0]?.payload?.fecha}</p>
+                      <p className="text-emerald-600">Ventas: ${payload[0]?.payload?.ventas}K</p>
+                      <p className="text-violet-600">Horas: {payload[0]?.payload?.horas}h</p>
+                      <p className="text-amber-600 font-bold">Productividad: ${payload[0]?.payload?.productividad}K/h</p>
+                    </div>
+                  ) : null} />
                   <Legend />
                   <Area yAxisId="left" type="monotone" dataKey="ventas" fill="url(#colorVentas)" stroke="#10b981" name="Ventas (K)" />
                   <Bar yAxisId="right" dataKey="horas" fill="#8b5cf6" radius={[4, 4, 0, 0]} name="Horas" opacity={0.7} />
@@ -165,6 +165,9 @@ export default function PlannerStats({ shifts, cashiers, storeId, currentWeek, s
                 </ComposedChart>
               </ResponsiveContainer>
             </div>
+            <ChartDescription>
+              <strong>Interpretación:</strong> Este gráfico permite identificar si existe correlación entre las horas programadas y las ventas. Una productividad alta (línea naranja) indica eficiencia del equipo. Los días donde las horas son bajas pero las ventas altas sugieren oportunidad de mejora en la programación.
+            </ChartDescription>
           </CardContent>
         </Card>
       </motion.div>
@@ -176,11 +179,12 @@ export default function PlannerStats({ shifts, cashiers, storeId, currentWeek, s
           <Card className="bg-white border-0 shadow-lg">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                <Users className="w-4 h-4 text-pink-500" /> Horas por Colaborador
+                <Users className="w-4 h-4 text-pink-500" /> Distribución de Horas
               </CardTitle>
+              <CardDescription className="text-xs text-gray-500">Carga laboral por colaborador</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-64">
+              <div className="h-56">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={stats.hoursByCashier.slice(0, 8)} layout="vertical">
                     <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -194,13 +198,14 @@ export default function PlannerStats({ shifts, cashiers, storeId, currentWeek, s
                       </div>
                     ) : null} />
                     <Bar dataKey="hours" radius={[0, 8, 8, 0]}>
-                      {stats.hoursByCashier.slice(0, 8).map((_, i) => (
-                        <Cell key={i} fill={i === 0 ? '#ec4899' : i === 1 ? '#f472b6' : '#fbcfe8'} />
-                      ))}
+                      {stats.hoursByCashier.slice(0, 8).map((_, i) => <Cell key={i} fill={i === 0 ? '#ec4899' : i === 1 ? '#f472b6' : '#fce7f3'} />)}
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </div>
+              <ChartDescription>
+                <strong>Objetivo:</strong> Identificar desequilibrios en la carga laboral. Un equipo bien balanceado debería mostrar barras de tamaño similar. Colaboradores con pocas horas podrían necesitar más turnos; con muchas horas, podrían estar sobrecargados.
+              </ChartDescription>
             </CardContent>
           </Card>
         </motion.div>
@@ -210,11 +215,12 @@ export default function PlannerStats({ shifts, cashiers, storeId, currentWeek, s
           <Card className="bg-white border-0 shadow-lg">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                <Target className="w-4 h-4 text-violet-500" /> Distribución por Posición
+                <Target className="w-4 h-4 text-violet-500" /> Cobertura de Posiciones
               </CardTitle>
+              <CardDescription className="text-xs text-gray-500">Asignaciones por rol operativo</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-64 flex items-center">
+              <div className="h-56 flex items-center">
                 <ResponsiveContainer width="50%" height="100%">
                   <PieChart>
                     <Pie data={stats.roleDistribution} cx="50%" cy="50%" innerRadius={35} outerRadius={70} paddingAngle={2} dataKey="value">
@@ -233,6 +239,9 @@ export default function PlannerStats({ shifts, cashiers, storeId, currentWeek, s
                   ))}
                 </div>
               </div>
+              <ChartDescription>
+                <strong>Análisis:</strong> Muestra qué posiciones tienen mayor cobertura. Caja y Coneo suelen requerir más asignaciones por su impacto directo en ventas. Si alguna posición crítica tiene pocos turnos, puede afectar la operación.
+              </ChartDescription>
             </CardContent>
           </Card>
         </motion.div>
@@ -245,11 +254,12 @@ export default function PlannerStats({ shifts, cashiers, storeId, currentWeek, s
           <Card className="bg-white border-0 shadow-lg">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-emerald-500" /> Turnos por Día de Semana
+                <Calendar className="w-4 h-4 text-emerald-500" /> Patrón Semanal
               </CardTitle>
+              <CardDescription className="text-xs text-gray-500">Distribución de turnos por día</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-56">
+              <div className="h-48">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={stats.shiftsByDay}>
                     <defs>
@@ -266,6 +276,9 @@ export default function PlannerStats({ shifts, cashiers, storeId, currentWeek, s
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
+              <ChartDescription>
+                <strong>Clave:</strong> El patrón debería reflejar el volumen de ventas esperado. Fines de semana (mayor volumen) deben tener más turnos. Si el gráfico es plano, podría haber oportunidad de optimizar personal según demanda real.
+              </ChartDescription>
             </CardContent>
           </Card>
         </motion.div>
@@ -275,11 +288,12 @@ export default function PlannerStats({ shifts, cashiers, storeId, currentWeek, s
           <Card className="bg-white border-0 shadow-lg">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-amber-500" /> Tendencia Semanal
+                <TrendingUp className="w-4 h-4 text-amber-500" /> Evolución Mensual
               </CardTitle>
+              <CardDescription className="text-xs text-gray-500">Comparativo de turnos y horas por semana</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-56">
+              <div className="h-48">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={stats.weeklyTrend}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -292,6 +306,9 @@ export default function PlannerStats({ shifts, cashiers, storeId, currentWeek, s
                   </LineChart>
                 </ResponsiveContainer>
               </div>
+              <ChartDescription>
+                <strong>Tendencia:</strong> Permite ver si la programación se mantiene consistente o varía mucho entre semanas. Variaciones grandes pueden indicar inestabilidad en la planificación o ajustes por temporada.
+              </ChartDescription>
             </CardContent>
           </Card>
         </motion.div>
@@ -304,6 +321,7 @@ export default function PlannerStats({ shifts, cashiers, storeId, currentWeek, s
             <CardTitle className="text-sm font-semibold text-gray-700 flex items-center gap-2">
               <Award className="w-4 h-4 text-yellow-500" /> Ranking de Posiciones
             </CardTitle>
+            <CardDescription className="text-xs text-gray-500">Frecuencia de asignación por rol</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-9 gap-3">
@@ -321,6 +339,9 @@ export default function PlannerStats({ shifts, cashiers, storeId, currentWeek, s
                 </motion.div>
               ))}
             </div>
+            <ChartDescription>
+              <strong>Recomendación:</strong> Verifica que las posiciones con mayor impacto en ventas (Caja, Coneo, Experiencia) tengan suficiente cobertura. Las posiciones de soporte (Stocker, Coordinación) pueden tener menos asignaciones pero son igualmente importantes.
+            </ChartDescription>
           </CardContent>
         </Card>
       </motion.div>

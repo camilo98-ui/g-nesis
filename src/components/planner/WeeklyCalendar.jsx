@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { base44 } from '@/api/base44Client';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { format, addWeeks, subWeeks, isToday, getWeek, startOfWeek, eachWeekOfInterval, startOfYear, endOfYear } from 'date-fns';
+import { format, addWeeks, subWeeks, isToday, getWeek, eachWeekOfInterval, startOfYear, endOfYear } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { 
   ChevronLeft, ChevronRight, Copy, Plus, Clock, Trash2, 
@@ -16,7 +16,6 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 
-// Festivos Colombia 2024-2025
 const HOLIDAYS = [
   '2024-01-01', '2024-01-08', '2024-03-25', '2024-03-28', '2024-03-29',
   '2024-05-01', '2024-05-13', '2024-06-03', '2024-06-10', '2024-07-01',
@@ -29,16 +28,41 @@ const HOLIDAYS = [
 ];
 
 const ROLES_CONFIG = {
-  caja: { label: 'Caja', icon: ShoppingCart, bg: 'bg-emerald-50', text: 'text-emerald-600', border: 'border-emerald-200', header: 'bg-emerald-400' },
-  coneo: { label: 'Coneo', icon: IceCream, bg: 'bg-pink-50', text: 'text-pink-600', border: 'border-pink-200', header: 'bg-pink-400' },
-  bebidas: { label: 'Bebidas', icon: Coffee, bg: 'bg-amber-50', text: 'text-amber-600', border: 'border-amber-200', header: 'bg-amber-400' },
-  especialidades: { label: 'Especialidades', icon: Sparkles, bg: 'bg-violet-50', text: 'text-violet-600', border: 'border-violet-200', header: 'bg-violet-400' },
-  coordinacion: { label: 'Coord. Entregas', icon: ClipboardList, bg: 'bg-blue-50', text: 'text-blue-600', border: 'border-blue-200', header: 'bg-blue-400' },
-  cookie_jar: { label: 'Cookie Jar', icon: Cookie, bg: 'bg-orange-50', text: 'text-orange-600', border: 'border-orange-200', header: 'bg-orange-400' },
-  stocker: { label: 'Stocker', icon: Package, bg: 'bg-slate-50', text: 'text-slate-600', border: 'border-slate-200', header: 'bg-slate-400' },
-  toma_pedidos: { label: 'Toma Pedidos', icon: Headphones, bg: 'bg-cyan-50', text: 'text-cyan-600', border: 'border-cyan-200', header: 'bg-cyan-400' },
-  experiencia: { label: 'Experiencia', icon: Crown, bg: 'bg-yellow-50', text: 'text-yellow-600', border: 'border-yellow-200', header: 'bg-yellow-400' },
+  caja: { label: 'Caja', icon: ShoppingCart, bg: 'bg-emerald-50/70', text: 'text-emerald-500', border: 'border-emerald-100', header: 'bg-emerald-300' },
+  coneo: { label: 'Coneo', icon: IceCream, bg: 'bg-pink-50/70', text: 'text-pink-500', border: 'border-pink-100', header: 'bg-pink-300' },
+  bebidas: { label: 'Bebidas', icon: Coffee, bg: 'bg-amber-50/70', text: 'text-amber-500', border: 'border-amber-100', header: 'bg-amber-300' },
+  especialidades: { label: 'Especialidades', icon: Sparkles, bg: 'bg-violet-50/70', text: 'text-violet-500', border: 'border-violet-100', header: 'bg-violet-300' },
+  coordinacion: { label: 'Coord. Entregas', icon: ClipboardList, bg: 'bg-blue-50/70', text: 'text-blue-500', border: 'border-blue-100', header: 'bg-blue-300' },
+  cookie_jar: { label: 'Cookie Jar', icon: Cookie, bg: 'bg-orange-50/70', text: 'text-orange-500', border: 'border-orange-100', header: 'bg-orange-300' },
+  stocker: { label: 'Stocker', icon: Package, bg: 'bg-slate-50/70', text: 'text-slate-500', border: 'border-slate-100', header: 'bg-slate-300' },
+  toma_pedidos: { label: 'Toma Pedidos', icon: Headphones, bg: 'bg-cyan-50/70', text: 'text-cyan-500', border: 'border-cyan-100', header: 'bg-cyan-300' },
+  experiencia: { label: 'Experiencia', icon: Crown, bg: 'bg-yellow-50/70', text: 'text-yellow-500', border: 'border-yellow-100', header: 'bg-yellow-300' },
 };
+
+// Decoraciones de helados para las tarjetas
+const IceCreamDecorations = ({ roleColor }) => (
+  <div className="absolute top-0 left-0 right-0 h-3 overflow-hidden opacity-40">
+    <svg viewBox="0 0 120 12" className="w-full h-full" preserveAspectRatio="none">
+      {/* Cono pequeño */}
+      <circle cx="10" cy="4" r="3" fill={roleColor} opacity="0.6" />
+      <polygon points="8,6 10,12 12,6" fill="#d4a574" opacity="0.5" />
+      {/* Malteada */}
+      <rect x="28" y="3" width="6" height="8" rx="1" fill="#f0f0f0" opacity="0.5" />
+      <circle cx="31" cy="3" r="2.5" fill={roleColor} opacity="0.5" />
+      {/* Copa */}
+      <ellipse cx="50" cy="8" rx="5" ry="3" fill="#f0f0f0" opacity="0.4" />
+      <circle cx="50" cy="5" r="3" fill={roleColor} opacity="0.5" />
+      {/* Banana split */}
+      <ellipse cx="75" cy="9" rx="8" ry="2" fill="#ffe4b5" opacity="0.4" />
+      <circle cx="72" cy="6" r="2" fill="#ffc0cb" opacity="0.5" />
+      <circle cx="78" cy="6" r="2" fill={roleColor} opacity="0.5" />
+      {/* Cono doble */}
+      <circle cx="100" cy="3" r="2.5" fill={roleColor} opacity="0.5" />
+      <circle cx="100" cy="6" r="2" fill="#ffc0cb" opacity="0.4" />
+      <polygon points="97,7 100,12 103,7" fill="#d4a574" opacity="0.5" />
+    </svg>
+  </div>
+);
 
 export default function WeeklyCalendar({ 
   currentWeek, setCurrentWeek, weekDays, shifts, cashiers, storeId, loading, onExportPDF 
@@ -47,11 +71,10 @@ export default function WeeklyCalendar({
   const [editingShift, setEditingShift] = useState(null);
   const [selectedDay, setSelectedDay] = useState(null);
   const [hoveredDay, setHoveredDay] = useState(null);
-  const [newShift, setNewShift] = useState({ cashier_id: '', start_time: '08:00', end_time: '16:00', role: 'caja' });
+  const [newShift, setNewShift] = useState({ cashier_id: '', start_time: '09:30', end_time: '17:30', role: 'caja' });
   const [copying, setCopying] = useState(false);
   const queryClient = useQueryClient();
 
-  // Generar semanas del año para el filtro
   const yearWeeks = useMemo(() => {
     const start = startOfYear(currentWeek);
     const end = endOfYear(currentWeek);
@@ -94,7 +117,7 @@ export default function WeeklyCalendar({
     }
   });
 
-  const resetForm = () => setNewShift({ cashier_id: '', start_time: '08:00', end_time: '16:00', role: 'caja' });
+  const resetForm = () => setNewShift({ cashier_id: '', start_time: '09:30', end_time: '17:30', role: 'caja' });
 
   const handleDragEnd = async (result) => {
     if (!result.destination || result.source.droppableId === result.destination.droppableId) return;
@@ -125,12 +148,7 @@ export default function WeeklyCalendar({
 
   const handleEditShift = (shift) => {
     setEditingShift(shift);
-    setNewShift({
-      cashier_id: shift.cashier_id,
-      start_time: shift.start_time,
-      end_time: shift.end_time,
-      role: shift.role
-    });
+    setNewShift({ cashier_id: shift.cashier_id, start_time: shift.start_time, end_time: shift.end_time, role: shift.role });
     setShowAddShift(true);
   };
 
@@ -160,47 +178,42 @@ export default function WeeklyCalendar({
 
   const isHoliday = (day) => HOLIDAYS.includes(format(day, 'yyyy-MM-dd'));
 
+  const getRoleColor = (role) => {
+    const colors = {
+      caja: '#10b981', coneo: '#ec4899', bebidas: '#f59e0b', especialidades: '#8b5cf6',
+      coordinacion: '#3b82f6', cookie_jar: '#f97316', stocker: '#64748b', toma_pedidos: '#06b6d4', experiencia: '#eab308'
+    };
+    return colors[role] || '#ec4899';
+  };
+
   return (
     <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
       {/* Header */}
-      <div className="p-4 border-b border-gray-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-gradient-to-r from-rose-500 to-pink-500">
+      <div className="p-4 border-b border-gray-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-gradient-to-r from-rose-400 to-pink-400">
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon" onClick={() => setCurrentWeek(subWeeks(currentWeek, 1))} className="text-white hover:bg-white/20">
             <ChevronLeft className="w-5 h-5" />
           </Button>
           <div className="text-white">
             <p className="text-xs opacity-80">Semana {currentWeekNumber}</p>
-            <h2 className="font-bold text-lg">
-              {format(currentWeek, "d MMM", { locale: es })} - {format(weekDays[6], "d MMM yyyy", { locale: es })}
-            </h2>
+            <h2 className="font-bold text-lg">{format(currentWeek, "d MMM", { locale: es })} - {format(weekDays[6], "d MMM yyyy", { locale: es })}</h2>
           </div>
           <Button variant="ghost" size="icon" onClick={() => setCurrentWeek(addWeeks(currentWeek, 1))} className="text-white hover:bg-white/20">
             <ChevronRight className="w-5 h-5" />
           </Button>
         </div>
         <div className="flex flex-wrap gap-2">
-          {/* Week Filter */}
-          <Select 
-            value={currentWeekNumber.toString()} 
-            onValueChange={(v) => {
-              const selected = yearWeeks.find(w => w.number.toString() === v);
-              if (selected) setCurrentWeek(selected.week);
-            }}
-          >
-            <SelectTrigger className="w-40 bg-white/20 border-white/30 text-white text-sm">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {yearWeeks.map(w => (
-                <SelectItem key={w.number} value={w.number.toString()}>{w.label}</SelectItem>
-              ))}
-            </SelectContent>
+          <Select value={currentWeekNumber.toString()} onValueChange={(v) => {
+            const selected = yearWeeks.find(w => w.number.toString() === v);
+            if (selected) setCurrentWeek(selected.week);
+          }}>
+            <SelectTrigger className="w-40 bg-white/20 border-white/30 text-white text-sm"><SelectValue /></SelectTrigger>
+            <SelectContent>{yearWeeks.map(w => <SelectItem key={w.number} value={w.number.toString()}>{w.label}</SelectItem>)}</SelectContent>
           </Select>
           <Button variant="secondary" size="sm" onClick={copyWeek} disabled={copying || !shifts.length} className="gap-2 bg-white/20 text-white hover:bg-white/30 border-0">
-            {copying ? <Loader2 className="w-4 h-4 animate-spin" /> : <Copy className="w-4 h-4" />}
-            Copiar
+            {copying ? <Loader2 className="w-4 h-4 animate-spin" /> : <Copy className="w-4 h-4" />} Copiar
           </Button>
-          <Button variant="secondary" size="sm" onClick={onExportPDF} className="gap-2 bg-white text-pink-600 hover:bg-pink-50">
+          <Button variant="secondary" size="sm" onClick={onExportPDF} className="gap-2 bg-white text-pink-500 hover:bg-pink-50">
             <Download className="w-4 h-4" /> PDF
           </Button>
         </div>
@@ -208,7 +221,7 @@ export default function WeeklyCalendar({
 
       {/* Calendar Grid */}
       {loading ? (
-        <div className="p-10 text-center"><Loader2 className="w-8 h-8 animate-spin text-pink-500 mx-auto" /></div>
+        <div className="p-10 text-center"><Loader2 className="w-8 h-8 animate-spin text-pink-400 mx-auto" /></div>
       ) : (
         <DragDropContext onDragEnd={handleDragEnd}>
           <div className="grid grid-cols-7 divide-x divide-gray-100">
@@ -228,10 +241,10 @@ export default function WeeklyCalendar({
                       onMouseEnter={() => setHoveredDay(idx)}
                       onMouseLeave={() => setHoveredDay(null)}
                       animate={{ scale: isHovered ? 1.01 : 1 }}
-                      className={`min-h-[400px] transition-all relative ${snapshot.isDraggingOver ? 'bg-pink-50' : ''} ${isCurrentDay ? 'bg-rose-50/50' : isHovered ? 'bg-gray-50/50' : 'bg-white'} ${holiday ? 'bg-gradient-to-b from-amber-50 to-orange-50' : ''}`}
+                      className={`min-h-[380px] transition-all relative ${snapshot.isDraggingOver ? 'bg-pink-50/50' : ''} ${isCurrentDay ? 'bg-rose-50/30' : isHovered ? 'bg-gray-50/30' : 'bg-white'} ${holiday ? 'bg-gradient-to-b from-amber-50/50 to-orange-50/30' : ''}`}
                     >
                       {/* Day Header */}
-                      <div className={`p-2 text-center border-b sticky top-0 z-10 ${isCurrentDay ? 'bg-gradient-to-r from-rose-400 to-pink-400 text-white' : holiday ? 'bg-gradient-to-r from-amber-400 to-orange-400 text-white' : 'bg-gray-50'}`}>
+                      <div className={`p-2 text-center border-b sticky top-0 z-10 ${isCurrentDay ? 'bg-gradient-to-r from-rose-300 to-pink-300 text-white' : holiday ? 'bg-gradient-to-r from-amber-300 to-orange-300 text-white' : 'bg-gray-50'}`}>
                         <p className={`text-[10px] font-bold uppercase tracking-wider ${isCurrentDay || holiday ? 'text-white/80' : 'text-gray-400'}`}>
                           {format(day, 'EEE', { locale: es })}
                         </p>
@@ -250,8 +263,8 @@ export default function WeeklyCalendar({
                           {dayShifts.map((shift, shiftIdx) => {
                             const role = ROLES_CONFIG[shift.role] || ROLES_CONFIG.caja;
                             const RoleIcon = role.icon;
-                            const [startH, startM] = (shift.start_time || '08:00').split(':').map(Number);
-                            const [endH, endM] = (shift.end_time || '16:00').split(':').map(Number);
+                            const [startH, startM] = (shift.start_time || '09:30').split(':').map(Number);
+                            const [endH, endM] = (shift.end_time || '17:30').split(':').map(Number);
                             const duration = ((endH + endM/60) - (startH + startM/60)).toFixed(1);
                             
                             return (
@@ -264,10 +277,13 @@ export default function WeeklyCalendar({
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0 }}
                                     whileHover={{ scale: 1.02, y: -2 }}
-                                    className={`rounded-lg overflow-hidden border ${role.border} ${role.bg} shadow-sm hover:shadow-md transition-all cursor-pointer group ${snapshot.isDragging ? 'shadow-xl rotate-2' : ''}`}
+                                    className={`rounded-lg overflow-hidden border ${role.border} ${role.bg} shadow-sm hover:shadow-md transition-all cursor-pointer group relative ${snapshot.isDragging ? 'shadow-xl rotate-1' : ''}`}
                                   >
+                                    {/* Decoraciones de helados */}
+                                    <IceCreamDecorations roleColor={getRoleColor(shift.role)} />
+                                    
                                     {/* Role Header */}
-                                    <div className={`${role.header} px-2 py-1 flex items-center justify-between`}>
+                                    <div className={`${role.header} px-2 py-1 flex items-center justify-between relative`}>
                                       <div className="flex items-center gap-1">
                                         <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 2, repeat: Infinity }}>
                                           <RoleIcon className="w-3 h-3 text-white" />
@@ -280,24 +296,15 @@ export default function WeeklyCalendar({
                                     </div>
                                     
                                     {/* Content */}
-                                    <div className="p-2">
-                                      {/* Name */}
-                                      <p className="font-bold text-sm text-gray-800 truncate mb-1">
-                                        {shift.cashier_name || 'Sin asignar'}
-                                      </p>
-                                      
-                                      {/* Time */}
-                                      <div className="flex items-center justify-between bg-white/60 rounded px-1.5 py-1">
+                                    <div className="p-2 pt-3">
+                                      <p className="font-bold text-sm text-gray-700 truncate mb-1">{shift.cashier_name || 'Sin asignar'}</p>
+                                      <div className="flex items-center justify-between bg-white/70 rounded px-1.5 py-1">
                                         <div className="flex items-center gap-1">
                                           <Clock className={`w-3 h-3 ${role.text}`} />
-                                          <span className="text-xs font-bold text-gray-700">
-                                            {shift.start_time} - {shift.end_time}
-                                          </span>
+                                          <span className="text-xs font-bold text-gray-600">{shift.start_time} - {shift.end_time}</span>
                                         </div>
                                         <span className={`text-[10px] font-bold ${role.text}`}>{duration}h</span>
                                       </div>
-
-                                      {/* Actions */}
                                       <div className="flex justify-end gap-1 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                         <motion.button whileTap={{ scale: 0.9 }} onClick={() => handleEditShift(shift)} className="p-1 rounded bg-blue-100 hover:bg-blue-200">
                                           <Pencil className="w-3 h-3 text-blue-500" />
@@ -315,13 +322,9 @@ export default function WeeklyCalendar({
                         </AnimatePresence>
                         {provided.placeholder}
                         
-                        {/* Add Button */}
-                        <motion.button
-                          whileHover={{ scale: 1.03 }}
-                          whileTap={{ scale: 0.97 }}
+                        <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
                           onClick={() => { setSelectedDay(day); setEditingShift(null); resetForm(); setShowAddShift(true); }}
-                          className={`w-full py-2 border border-dashed rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1 ${isHovered ? 'border-pink-300 text-pink-500 bg-pink-50/50' : 'border-gray-200 text-gray-400 hover:border-pink-200'}`}
-                        >
+                          className={`w-full py-2 border border-dashed rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1 ${isHovered ? 'border-pink-300 text-pink-400 bg-pink-50/30' : 'border-gray-200 text-gray-400 hover:border-pink-200'}`}>
                           <Plus className="w-4 h-4" /> Agregar
                         </motion.button>
                       </div>
@@ -339,7 +342,7 @@ export default function WeeklyCalendar({
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-pink-400 to-rose-400 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-gradient-to-r from-pink-300 to-rose-300 rounded-lg flex items-center justify-center">
                 {editingShift ? <Pencil className="w-4 h-4 text-white" /> : <Plus className="w-4 h-4 text-white" />}
               </div>
               {editingShift ? 'Editar Turno' : `Agregar Turno - ${selectedDay && format(selectedDay, "EEE d MMM", { locale: es })}`}
@@ -350,24 +353,12 @@ export default function WeeklyCalendar({
               <label className="text-sm font-medium text-gray-700 mb-1 block">Colaborador</label>
               <Select value={newShift.cashier_id} onValueChange={(v) => setNewShift({ ...newShift, cashier_id: v })}>
                 <SelectTrigger><SelectValue placeholder="Seleccionar" /></SelectTrigger>
-                <SelectContent>
-                  {cashiers.map(c => (
-                    <SelectItem key={c.id} value={c.id}>
-                      <div className="flex items-center gap-2"><User className="w-4 h-4" />{c.name}</div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
+                <SelectContent>{cashiers.map(c => <SelectItem key={c.id} value={c.id}><div className="flex items-center gap-2"><User className="w-4 h-4" />{c.name}</div></SelectItem>)}</SelectContent>
               </Select>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-sm font-medium text-gray-700 mb-1 block">Inicio</label>
-                <Input type="time" value={newShift.start_time} onChange={(e) => setNewShift({ ...newShift, start_time: e.target.value })} />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700 mb-1 block">Fin</label>
-                <Input type="time" value={newShift.end_time} onChange={(e) => setNewShift({ ...newShift, end_time: e.target.value })} />
-              </div>
+              <div><label className="text-sm font-medium text-gray-700 mb-1 block">Inicio</label><Input type="time" value={newShift.start_time} onChange={(e) => setNewShift({ ...newShift, start_time: e.target.value })} /></div>
+              <div><label className="text-sm font-medium text-gray-700 mb-1 block">Fin</label><Input type="time" value={newShift.end_time} onChange={(e) => setNewShift({ ...newShift, end_time: e.target.value })} /></div>
             </div>
             <div>
               <label className="text-sm font-medium text-gray-700 mb-2 block">Posición</label>
@@ -389,7 +380,7 @@ export default function WeeklyCalendar({
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={() => setShowAddShift(false)}>Cancelar</Button>
             <Button onClick={handleSaveShift} disabled={!newShift.cashier_id || createMutation.isPending || updateMutation.isPending}
-              className="bg-gradient-to-r from-pink-400 to-rose-400 text-white">
+              className="bg-gradient-to-r from-pink-300 to-rose-300 text-white">
               {(createMutation.isPending || updateMutation.isPending) && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
               {editingShift ? 'Guardar' : 'Crear'}
             </Button>
