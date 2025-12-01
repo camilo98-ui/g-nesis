@@ -4,7 +4,7 @@ import { createPageUrl } from '@/utils';
 import SmartSearch from '@/components/SmartSearch';
 import MotivationalHeader from '@/components/MotivationalHeader';
 import { 
-  Home, TrendingUp, Award,
+  Home, LayoutDashboard, TrendingUp, Award,
   Target, Users, Menu, X, FileText, Snowflake, GraduationCap, ClipboardCheck
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/pub
 const NAV_ITEMS = [
   { name: '', page: 'FreezerMap', icon: Snowflake, isIcon: true },
   { name: '', page: 'Home', icon: Home, isIcon: true },
+  { name: '', page: 'Management', icon: LayoutDashboard, isIcon: true },
   { name: '', page: 'Quality', icon: ClipboardCheck, isIcon: true },
 ];
 
@@ -76,12 +77,16 @@ export default function Layout({ children, currentPageName }) {
                       ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg' 
                       : item.page === 'FreezerMap'
                         ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg'
-                        : 'bg-gradient-to-r from-teal-500 to-emerald-500 text-white shadow-lg'
+                        : item.page === 'Management'
+                          ? 'bg-gradient-to-r from-slate-600 to-gray-700 text-white shadow-lg'
+                          : 'bg-gradient-to-r from-teal-500 to-emerald-500 text-white shadow-lg'
                     : item.page === 'FreezerMap'
                       ? 'text-cyan-500 hover:text-cyan-600 hover:bg-cyan-50'
                       : item.page === 'Home'
                         ? 'text-rose-500 hover:text-rose-600 hover:bg-rose-50'
-                        : 'text-teal-500 hover:text-teal-600 hover:bg-teal-50'}`}
+                        : item.page === 'Management'
+                          ? 'text-slate-600 hover:text-slate-700 hover:bg-slate-50'
+                          : 'text-teal-500 hover:text-teal-600 hover:bg-teal-50'}`}
                   >
                   <Icon className="w-5 h-5" />
                   </Button>
@@ -113,7 +118,7 @@ export default function Layout({ children, currentPageName }) {
                 {NAV_ITEMS.map((item) => {
                   const Icon = item.icon;
                   const isActive = currentPageName === item.page;
-                  const itemName = item.page === 'FreezerMap' ? 'Mapa Nevera' : item.page === 'Home' ? 'Inicio' : 'Calidad';
+                  const itemName = item.page === 'FreezerMap' ? 'Mapa Nevera' : item.page === 'Home' ? 'Inicio' : item.page === 'Management' ? 'Gerencia' : 'Calidad';
                   return (
                     <Link
                       key={item.page}
@@ -129,7 +134,9 @@ export default function Layout({ children, currentPageName }) {
                               ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white' 
                               : item.page === 'Home'
                                 ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white'
-                                : 'bg-gradient-to-r from-teal-500 to-emerald-500 text-white'
+                                : item.page === 'Management'
+                                  ? 'bg-gradient-to-r from-slate-600 to-gray-700 text-white'
+                                  : 'bg-gradient-to-r from-teal-500 to-emerald-500 text-white'
                             : 'text-gray-600 hover:bg-pink-50'
                         }`}
                       >
