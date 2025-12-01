@@ -58,6 +58,12 @@ export default function PopsyPlanner() {
     enabled: !!selectedStore
   });
 
+  const { data: budgetData = [] } = useQuery({
+    queryKey: ['budget', selectedStore],
+    queryFn: () => base44.entities.Budget.filter({ store_id: selectedStore }),
+    enabled: !!selectedStore
+  });
+
   const weekShifts = useMemo(() => {
     const weekStartStr = format(currentWeek, 'yyyy-MM-dd');
     const weekEndStr = format(weekEnd, 'yyyy-MM-dd');
@@ -165,6 +171,7 @@ export default function PopsyPlanner() {
         weekDays={weekDays}
         existingShifts={weekShifts}
         salesData={salesData}
+        budgetData={budgetData}
       />
 
       <CashierManagerModal
