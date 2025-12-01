@@ -133,6 +133,7 @@ export default function WeatherImpactChart({ dailyTrend = [], formatCurrency, da
     to: externalDateRange?.to || new Date()
   });
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const [selectedWeather, setSelectedWeather] = useState(null);
   
   const weatherData = useMemo(() => {
     return generateWeatherData(dailyTrend, dateRange);
@@ -173,6 +174,30 @@ export default function WeatherImpactChart({ dailyTrend = [], formatCurrency, da
       dayOfWeek: d.dayOfWeek
     }));
   }, [weatherData]);
+
+  // Datos filtrados por clima seleccionado
+  const filteredByWeather = useMemo(() => {
+    if (!selectedWeather) return weatherData;
+    return weatherData.filter(d => d.weather === selectedWeather);
+  }, [weatherData, selectedWeather]);
+
+  // Stats del clima seleccionado
+  const selectedWeatherStats = useMemo(() => {
+    if (!selectedWeather) return null;
+    const stat = weatherStats.find(s => s.type === selectedWeather);
+    const days = filteredByWeather;
+    const totalSales = days.reduce((sum, d) => sum + (d.sales || 0), 0);
+    const bestDay = days.reduce((best, d) => (d.sales || 0) > (best?.sales || 0) ? d : best, days[0]);
+    const worstDay = days.reduce((worst, d) => (d.sales || 0) < (worst?.sales || 0) ? d : worst, days[0]);
+    
+    return {
+      ...stat,
+      totalSales,
+      bestDay,
+      worstDay,
+      days
+    };
+  }, [selectedWeather, weatherStats, filteredByWeather]);
 
   // Mejor y peor día
   const bestDay = weatherStats[0];
@@ -226,29 +251,32 @@ export default function WeatherImpactChart({ dailyTrend = [], formatCurrency, da
         </div>
       </CardHeader>
       <CardContent>
-        {/* Stats Cards - Más dinámicos */}
+        {/* Stats Cards - Clickeables */}
         <div className="grid grid-cols-5 gap-2 mb-4">
           {Object.entries(WEATHER_CONFIG).map(([key, config]) => {
             const stat = weatherStats.find(s => s.type === key);
             const Icon = config.icon;
             const isTop = stat?.type === bestDay?.type;
             const isWorst = stat?.type === worstDay?.type;
+            const isSelected = selectedWeather === key;
             
             return (
               <motion.div
                 key={key}
+                onClick={() => setSelectedWeather(isSelected ? null : key)}
                 whileHover={{ scale: 1.08, y: -4, rotate: 1 }}
                 whileTap={{ scale: 0.95 }}
-                animate={isTop ? { 
+                animate={isTop && !selectedWeather ? { 
                   boxShadow: ['0 0 0 0 rgba(34, 197, 94, 0)', '0 0 20px 4px rgba(34, 197, 94, 0.3)', '0 0 0 0 rgba(34, 197, 94, 0)'] 
                 } : {}}
                 transition={isTop ? { duration: 2, repeat: Infinity } : { type: "spring", stiffness: 400 }}
                 className={`bg-gradient-to-br ${config.bgColor} rounded-xl p-2 text-center border-2 cursor-pointer relative overflow-hidden ${
+                  isSelected ? 'border-indigo-500 ring-2 ring-indigo-200 shadow-lg' :
                   isTop ? 'border-green-400 ring-2 ring-green-200' : 
                   isWorst ? 'border-red-300' : 'border-transparent'
                 }`}
               >
-                {isTop && (
+                {isTop && !selectedWeather && (
                   <motion.div 
                     className="absolute -top-1 -right-1 bg-green-500 text-white text-[8px] px-1.5 py-0.5 rounded-bl-lg font-bold"
                     animate={{ scale: [1, 1.1, 1] }}
@@ -257,9 +285,18 @@ export default function WeatherImpactChart({ dailyTrend = [], formatCurrency, da
                     TOP
                   </motion.div>
                 )}
+                {isSelected && (
+                  <motion.div 
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="absolute -top-1 -right-1 bg-indigo-500 text-white text-[8px] px-1.5 py-0.5 rounded-bl-lg font-bold"
+                  >
+                    VER
+                  </motion.div>
+                )}
                 <motion.div
-                  animate={{ rotate: isTop ? [0, -10, 10, 0] : 0, scale: isTop ? [1, 1.1, 1] : 1 }}
-                  transition={{ duration: 2, repeat: Infinity }}
+                  animate={isSelected ? { rotate: [0, -15, 15, 0], scale: [1, 1.2, 1] } : isTop ? { rotate: [0, -10, 10, 0], scale: [1, 1.1, 1] } : {}}
+                  transition={{ duration: isSelected ? 0.5 : 2, repeat: isSelected ? 0 : Infinity }}
                 >
                   <Icon className="w-6 h-6 mx-auto mb-1" style={{ color: config.color }} />
                 </motion.div>
@@ -276,6 +313,100 @@ export default function WeatherImpactChart({ dailyTrend = [], formatCurrency, da
             );
           })}
         </div>
+
+        {/* Panel de detalle del clima seleccionado */}
+        <AnimatePresence>
+          {selectedWeather && selectedWeatherStats && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mb-4 overflow-hidden"
+            >
+              <div className={`bg-gradient-to-r ${WEATHER_CONFIG[selectedWeather].bgColor} rounded-xl p-3 border-2 border-${selectedWeather === 'sunny' ? 'amber' : selectedWeather === 'hot' ? 'red' : selectedWeather === 'rainy' ? 'blue' : 'gray'}-200`}>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <WeatherIcon type={selectedWeather} size={24} />
+                    <div>
+                      <h4 className="font-bold text-gray-800">{WEATHER_CONFIG[selectedWeather].label}</h4>
+                      <p className="text-xs text-gray-500">{selectedWeatherStats.count} días registrados</p>
+                    </div>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setSelectedWeather(null)}
+                    className="h-6 w-6 p-0 rounded-full"
+                  >
+                    ✕
+                  </Button>
+                </div>
+                
+                <div className="grid grid-cols-4 gap-2 text-center">
+                  <div className="bg-white/60 rounded-lg p-2">
+                    <p className="text-[10px] text-gray-500">Impacto Promedio</p>
+                    <p className={`text-sm font-bold ${selectedWeatherStats.avgImpact >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+                      {selectedWeatherStats.avgImpact >= 0 ? '+' : ''}{selectedWeatherStats.avgImpact?.toFixed(1)}%
+                    </p>
+                  </div>
+                  <div className="bg-white/60 rounded-lg p-2">
+                    <p className="text-[10px] text-gray-500">Venta Total</p>
+                    <p className="text-sm font-bold text-gray-800">
+                      {formatCurrency ? formatCurrency(selectedWeatherStats.totalSales) : selectedWeatherStats.totalSales}
+                    </p>
+                  </div>
+                  <div className="bg-white/60 rounded-lg p-2">
+                    <p className="text-[10px] text-gray-500">Mejor Día</p>
+                    <p className="text-xs font-bold text-green-600 truncate">
+                      {selectedWeatherStats.bestDay?.fullDate || '-'}
+                    </p>
+                  </div>
+                  <div className="bg-white/60 rounded-lg p-2">
+                    <p className="text-[10px] text-gray-500">Temp. Promedio</p>
+                    <p className="text-sm font-bold text-gray-800">
+                      {selectedWeatherStats.avgTemp?.toFixed(1)}°C
+                    </p>
+                  </div>
+                </div>
+
+                {/* Mini gráfico de días con este clima */}
+                <div className="mt-3 h-20">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={filteredByWeather}>
+                      <defs>
+                        <linearGradient id={`gradient-${selectedWeather}`} x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor={WEATHER_CONFIG[selectedWeather].color} stopOpacity={0.4}/>
+                          <stop offset="95%" stopColor={WEATHER_CONFIG[selectedWeather].color} stopOpacity={0.05}/>
+                        </linearGradient>
+                      </defs>
+                      <XAxis dataKey="date" tick={{ fontSize: 9 }} />
+                      <YAxis hide />
+                      <Tooltip 
+                        content={({ active, payload }) => {
+                          if (!active || !payload?.length) return null;
+                          const data = payload[0].payload;
+                          return (
+                            <div className="bg-white p-2 rounded-lg shadow-lg border text-xs">
+                              <p className="font-bold capitalize">{data.fullDate}</p>
+                              <p>{formatCurrency?.(data.sales) || data.sales}</p>
+                            </div>
+                          );
+                        }}
+                      />
+                      <Area 
+                        type="monotone" 
+                        dataKey="sales" 
+                        stroke={WEATHER_CONFIG[selectedWeather].color} 
+                        fill={`url(#gradient-${selectedWeather})`} 
+                        strokeWidth={2} 
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Main Chart */}
         <div className="h-52">
