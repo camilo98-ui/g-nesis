@@ -67,7 +67,7 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
           </svg>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[300px] p-2" align="start">
+      <PopoverContent className="w-[300px] p-2" align="start" side="bottom" sideOffset={5}>
         <div className="relative mb-2">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
           <Input 
