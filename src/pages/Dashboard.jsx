@@ -11,6 +11,7 @@ import ExportExcel from '@/components/ExportExcel';
 import DailyGoalsCard from '@/components/gamification/DailyGoalsCard';
 import WeatherImpactChart from '@/components/management/WeatherImpactChart';
 import GrowthVelocityChart from '@/components/management/GrowthVelocityChart';
+import StoreReportGenerator from '@/components/reports/StoreReportGenerator';
 import { 
   DollarSign, Receipt, Zap, Gift, TrendingUp, TrendingDown, ArrowLeft,
   BarChart3, AlertTriangle, CheckCircle2, X, FileSpreadsheet, Target
@@ -630,6 +631,11 @@ export default function Dashboard() {
           <div className="space-y-6">
             {/* Acciones rápidas - más sutil */}
             <div className="flex justify-end gap-2">
+              <StoreReportGenerator 
+                storeId={selectedStore}
+                storeName={selectedStoreName}
+                storeCode={selectedStore}
+              />
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button
                   variant="ghost"
