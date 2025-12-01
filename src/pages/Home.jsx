@@ -6,13 +6,14 @@ import StoreSelector, { STORES } from '@/components/StoreSelector';
 import WelcomeToast from '@/components/WelcomeToast';
 import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
 import NotificationSetup from '@/components/NotificationSetup';
+import ManagerialReportModal from '@/components/reports/ManagerialReportModal';
 import PopsyStoryModal from '@/components/PopsyStoryModal';
 import DirectoryModal from '@/components/DirectoryModal';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { 
   LayoutDashboard, Users, TrendingUp, 
-  Award, Target, Bell, Phone, Download, Smartphone, Monitor, ClipboardCheck
+  Award, Target, Bell, Phone, Download, Smartphone, Monitor, ClipboardCheck, FileText
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { startOfMonth } from 'date-fns';
@@ -112,6 +113,7 @@ export default function Home() {
   const [showInstall, setShowInstall] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showWelcome, setShowWelcome] = useState(false);
+  const [showReport, setShowReport] = useState(false);
 
   useEffect(() => {
     const handler = (e) => {
@@ -248,6 +250,19 @@ export default function Home() {
                 Instalar App
               </Button>
             </motion.div>
+            <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowReport(true)}
+                className="text-gray-500 hover:text-rose-600 hover:bg-rose-50 transition-all"
+              >
+                <motion.div animate={{ y: [0, -2, 0] }} transition={{ duration: 1.5, repeat: Infinity }}>
+                  <FileText className="w-4 h-4 mr-1" />
+                </motion.div>
+                Informe Gerencial
+              </Button>
+            </motion.div>
           </motion.div>
         )}
 
@@ -381,6 +396,18 @@ export default function Home() {
             storeName={selectedStoreName}
             storeCode={selectedStore}
             onClose={() => setShowWelcome(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Managerial Report Modal */}
+      <AnimatePresence>
+        {showReport && (
+          <ManagerialReportModal
+            storeId={selectedStore}
+            storeName={selectedStoreName}
+            storeCode={selectedStore}
+            onClose={() => setShowReport(false)}
           />
         )}
       </AnimatePresence>
