@@ -61,9 +61,12 @@ export default function PopsyPlanner() {
 
   // Filter shifts for current week
   const weekShifts = useMemo(() => {
+    const weekStartStr = format(currentWeek, 'yyyy-MM-dd');
+    const weekEndStr = format(weekEnd, 'yyyy-MM-dd');
+    
     return shifts.filter(s => {
-      const shiftDate = new Date(s.date);
-      return shiftDate >= currentWeek && shiftDate <= weekEnd;
+      const shiftDateStr = s.date?.split('T')[0] || s.date;
+      return shiftDateStr >= weekStartStr && shiftDateStr <= weekEndStr;
     });
   }, [shifts, currentWeek, weekEnd]);
 
