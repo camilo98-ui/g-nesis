@@ -15,6 +15,9 @@ import { toast } from "sonner";
 // Tiendas con horario especial (Viernes y Sábado extendido)
 const SPECIAL_STORES = ['BTA 13', 'BTA 14', 'BTA 90', 'BTA 18', 'BTA 78'];
 
+// Tiendas con DOS cajas (necesitan 2 personas en caja simultáneamente)
+const TWO_CASHIER_STORES = ['BTA 62', 'BTA 52', 'BTA 78', 'BTA 18', 'BTA 90', 'BTA 89', 'BTA 13', 'TUNJA 1', 'TUNJA 2'];
+
 const ROLES_CONFIG = {
   caja: { label: 'Caja', color: 'bg-emerald-400' },
   coneo: { label: 'Coneo', color: 'bg-pink-400' },
@@ -81,6 +84,7 @@ export default function AIScheduleSuggestion({
   const queryClient = useQueryClient();
 
   const isSpecialStore = SPECIAL_STORES.includes(storeId);
+  const hasTwoCashiers = TWO_CASHIER_STORES.includes(storeId);
 
   const resetToStart = () => {
     setSuggestion(null);
@@ -98,6 +102,10 @@ export default function AIScheduleSuggestion({
 - Resto de días: 09:30 a 21:30 (12 horas)`
       : `HORARIO NORMAL (${storeId}):
 - Todos los días (Domingo a Domingo): 09:30 a 21:30 (12 horas)`;
+
+    const cashierStationsInfo = hasTwoCashiers
+      ? `⚠️ IMPORTANTE - TIENDA CON 2 CAJAS: Esta tienda tiene DOS puntos de caja. SIEMPRE debe haber 2 personas asignadas al rol "caja" en cada turno/horario para cubrir ambas cajas simultáneamente.`
+      : `Esta tienda tiene 1 caja. Solo se necesita 1 persona en el rol "caja" por turno.`;
 
     // Información de colaboradores disponibles
     const totalCollaborators = cashiers.length;
@@ -157,6 +165,8 @@ ${collaboratorAdvice}
 
 ${storeScheduleInfo}
 
+${cashierStationsInfo}
+
 COLABORADORES:
 ${cashierPerformance.map(c => `- ${c.name} (ID: ${c.id}) | Turnos asignados: ${c.shiftsThisWeek}`).join('\n')}
 
@@ -175,6 +185,7 @@ REGLAS IMPORTANTES:
 4. Fines de semana necesitan MÁS personal y los MEJORES colaboradores
 5. SI HAY POCOS COLABORADORES: priorizar Caja y Coneo
 6. Distribuir EQUITATIVAMENTE los turnos
+7. ${hasTwoCashiers ? 'CRÍTICO: Esta tienda tiene 2 CAJAS - Asignar SIEMPRE 2 personas diferentes al rol "caja" en horarios que se crucen para cubrir ambas cajas' : 'Esta tienda tiene 1 caja'}
 
 ${customPrompt ? `INSTRUCCIONES DEL GERENTE:\n${customPrompt}` : ''}
 
@@ -284,6 +295,7 @@ Responde con JSON:
               <span className="text-lg font-bold">Generador Inteligente</span>
               <p className="text-xs text-gray-500 font-normal">
                 {isSpecialStore ? '🕐 Horario especial Vie-Sáb' : '🕐 Horario normal'}
+                {hasTwoCashiers && ' • 💳 2 Cajas'}
               </p>
             </div>
           </DialogTitle>
