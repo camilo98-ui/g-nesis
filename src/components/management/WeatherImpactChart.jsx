@@ -466,6 +466,20 @@ export default function WeatherImpactChart({ dailyTrend = [], formatCurrency, da
             </ResponsiveContainer>
           )}
 
+          {/* Leyenda de líneas del gráfico de tendencia */}
+          {viewType === 'trend' && (
+            <div className="mt-2 flex justify-center gap-4">
+              <div className="flex items-center gap-1.5 text-[10px]">
+                <div className="w-4 h-2 rounded-sm bg-indigo-400/50" />
+                <span className="text-gray-600">Área morada = <strong>Ventas del día</strong></span>
+              </div>
+              <div className="flex items-center gap-1.5 text-[10px]">
+                <div className="w-4 h-0.5 bg-pink-400 rounded" />
+                <span className="text-gray-600">Línea rosa = <strong>Impacto del clima (%)</strong></span>
+              </div>
+            </div>
+          )}
+
           {viewType === 'compare' && (
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={selectedWeather ? weatherStats.filter(s => s.type === selectedWeather) : weatherStats} layout="vertical">
