@@ -9,6 +9,8 @@ import DateFilter from '@/components/DateFilter';
 import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
 import ExportExcel from '@/components/ExportExcel';
 import DailyGoalsCard from '@/components/gamification/DailyGoalsCard';
+import WeatherImpactChart from '@/components/management/WeatherImpactChart';
+import GrowthVelocityChart from '@/components/management/GrowthVelocityChart';
 import { 
   DollarSign, Receipt, Zap, Gift, TrendingUp, TrendingDown, ArrowLeft,
   BarChart3, AlertTriangle, CheckCircle2, X, FileSpreadsheet, Target
@@ -854,6 +856,19 @@ export default function Dashboard() {
                       </div>
                     </CardContent>
                   </Card>
+                </div>
+
+                {/* Third Row - Velocidad de Crecimiento y Clima */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <GrowthVelocityChart 
+                    dailyTrend={chartData.map(d => ({ ...d, sales: d.ventas }))}
+                    budget={currentBudget?.sales_budget || 0}
+                    formatCurrency={formatCurrency}
+                  />
+                  <WeatherImpactChart 
+                    dailyTrend={chartData.map(d => ({ ...d, sales: d.ventas }))}
+                    formatCurrency={formatCurrency}
+                  />
                 </div>
               </motion.div>
             )}
