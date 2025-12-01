@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import StoreSelector, { STORES } from '@/components/StoreSelector';
+import WelcomeToast from '@/components/WelcomeToast';
 import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
 import NotificationSetup from '@/components/NotificationSetup';
 import PopsyStoryModal from '@/components/PopsyStoryModal';
@@ -11,7 +12,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { 
   LayoutDashboard, Users, TrendingUp, 
-  Award, Target, Bell, Brain, Phone, Download, Smartphone, Monitor
+  Award, Target, Bell, Phone, Download, Smartphone, Monitor
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { startOfMonth } from 'date-fns';
@@ -64,15 +65,7 @@ const MENU_ITEMS = [
     iconBg: 'bg-sky-100/80',
     iconColor: 'text-sky-400'
   },
-  { 
-    name: 'IA Predictiva', 
-    page: 'PredictiveAnalytics',
-    icon: Brain, 
-    description: 'Predicciones con IA',
-    bgColor: 'bg-gradient-to-br from-purple-50/80 to-fuchsia-100/60',
-    iconBg: 'bg-purple-100/80',
-    iconColor: 'text-purple-400'
-  },
+
 ];
 
 // Confetti pastel suave
@@ -110,6 +103,7 @@ export default function Home() {
   const [showDirectory, setShowDirectory] = useState(false);
   const [showInstall, setShowInstall] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [showWelcome, setShowWelcome] = useState(false);
 
   useEffect(() => {
     const handler = (e) => {
@@ -140,6 +134,7 @@ export default function Home() {
   const handleStoreChange = (store) => {
     setSelectedStore(store);
     localStorage.setItem('selectedStore', store);
+    setShowWelcome(true);
   };
 
   const selectedStoreName = STORES.find(s => s.code === selectedStore)?.name || '';
