@@ -1,32 +1,50 @@
-import React, { useMemo, useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Cloud, Sun, CloudRain, Thermometer, CloudSun, Loader2 } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Cloud, Sun, CloudRain, Thermometer, CloudSun, HelpCircle, Calendar as CalendarIcon } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { 
   ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, 
-  Tooltip, ResponsiveContainer, Legend, AreaChart, Area, ScatterChart, Scatter, ZAxis
+  Tooltip, ResponsiveContainer, AreaChart, Area, ScatterChart, Scatter, ZAxis, Cell
 } from 'recharts';
-import { format, subDays } from 'date-fns';
+import { format, eachDayOfInterval, subDays, subWeeks, subMonths, startOfWeek, endOfWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 // Configuración de clima por tipo
 const WEATHER_CONFIG = {
-  sunny: { icon: Sun, color: '#fbbf24', label: 'Soleado', impact: '+18%' },
-  hot: { icon: Thermometer, color: '#ef4444', label: 'Caluroso', impact: '+25%' },
-  cloudy: { icon: Cloud, color: '#9ca3af', label: 'Nublado', impact: '-5%' },
-  partlyCloudy: { icon: CloudSun, color: '#60a5fa', label: 'Parcial', impact: '+5%' },
-  rainy: { icon: CloudRain, color: '#3b82f6', label: 'Lluvioso', impact: '-20%' },
+  sunny: { icon: Sun, color: '#fbbf24', bgColor: 'from-amber-50 to-yellow-100', label: 'Soleado', impact: '+18%' },
+  hot: { icon: Thermometer, color: '#ef4444', bgColor: 'from-red-50 to-orange-100', label: 'Caluroso', impact: '+25%' },
+  cloudy: { icon: Cloud, color: '#9ca3af', bgColor: 'from-gray-50 to-slate-100', label: 'Nublado', impact: '-5%' },
+  partlyCloudy: { icon: CloudSun, color: '#60a5fa', bgColor: 'from-blue-50 to-sky-100', label: 'Parcial', impact: '+5%' },
+  rainy: { icon: CloudRain, color: '#3b82f6', bgColor: 'from-blue-100 to-indigo-100', label: 'Lluvioso', impact: '-20%' },
+};
+
+// Explicaciones de cada vista
+const VIEW_EXPLANATIONS = {
+  correlation: {
+    title: '📊 Correlación Temperatura vs Ventas',
+    description: 'Cada punto representa un día. El eje X muestra la temperatura y el eje Y las ventas. Los colores indican el tipo de clima. Puntos arriba a la derecha = días calurosos con altas ventas.',
+    tip: 'Busca patrones: ¿Los puntos amarillos (soleados) tienden a estar más arriba?'
+  },
+  trend: {
+    title: '📈 Tendencia de Ventas y Clima',
+    description: 'El área púrpura muestra las ventas diarias. La línea rosa muestra el impacto del clima (%). Valores positivos = el clima ayudó a vender más.',
+    tip: 'Identifica qué días el clima afectó más las ventas.'
+  },
+  compare: {
+    title: '📊 Comparativo por Tipo de Clima',
+    description: 'Muestra el impacto promedio en ventas para cada tipo de clima. Barras verdes = impacto positivo. Barras rojas = impacto negativo.',
+    tip: 'Usa esto para planificar promociones según pronóstico del clima.'
+  }
 };
 
 // Simular datos de clima realistas para Bogotá
-// En producción: usar OpenWeatherMap API con endpoint /data/2.5/onecall/timemachine
-const generateWeatherData = (salesData, period) => {
-  // Patrones estacionales de Bogotá
+const generateWeatherData = (salesData, dateRange) => {
   const monthPatterns = {
-    // Temporada seca (dic-feb, jun-ago): más días soleados
     dry: { sunny: 0.35, hot: 0.15, partlyCloudy: 0.30, cloudy: 0.15, rainy: 0.05 },
-    // Temporada lluviosa (mar-may, sep-nov): más días nublados/lluviosos
     wet: { sunny: 0.10, hot: 0.05, partlyCloudy: 0.25, cloudy: 0.30, rainy: 0.30 }
   };
   
@@ -40,43 +58,43 @@ const generateWeatherData = (salesData, period) => {
     return 'cloudy';
   };
 
-  return salesData.map((day, i) => {
-    // Determinar temporada basada en el índice (simulación)
-    const month = new Date().getMonth();
+  // Generar días del rango
+  const days = dateRange?.from && dateRange?.to 
+    ? eachDayOfInterval({ start: dateRange.from, end: dateRange.to })
+    : salesData.map((_, i) => subDays(new Date(), salesData.length - 1 - i));
+
+  return days.map((day, i) => {
+    const month = day.getMonth();
     const isDrySeason = [0, 1, 5, 6, 7, 11].includes(month);
     const patterns = isDrySeason ? monthPatterns.dry : monthPatterns.wet;
     
     const weather = getWeatherType(patterns);
     
-    // Temperatura típica de Bogotá (12-22°C) con variación por clima
     const baseTempByWeather = { hot: 24, sunny: 21, partlyCloudy: 18, cloudy: 16, rainy: 14 };
     const baseTemp = baseTempByWeather[weather] || 17;
     const temperature = baseTemp + (Math.random() - 0.5) * 3;
     
-    // Impacto real en ventas de helados basado en estudios
     const weatherImpacts = { sunny: 18, hot: 28, partlyCloudy: 8, cloudy: -8, rainy: -22 };
-    const tempBonus = Math.max(0, (temperature - 18) * 2); // Bonus por cada grado arriba de 18°C
+    const tempBonus = Math.max(0, (temperature - 18) * 2);
     
     const baseImpact = weatherImpacts[weather] || 0;
     const weatherImpact = baseImpact + tempBonus + (Math.random() - 0.5) * 5;
     
-    // Humedad realista
     const humidityByWeather = { rainy: 85, cloudy: 75, partlyCloudy: 65, sunny: 55, hot: 45 };
     const humidity = (humidityByWeather[weather] || 65) + (Math.random() - 0.5) * 10;
 
-    // Calcular ventas ajustadas por clima
-    const baseSales = day.sales || 0;
-    const adjustedSales = baseSales * (1 + weatherImpact / 100);
+    const baseSales = salesData[i]?.sales || Math.random() * 2000000 + 500000;
 
     return {
-      ...day,
+      date: format(day, 'dd', { locale: es }),
+      fullDate: format(day, 'EEEE dd MMM', { locale: es }),
+      dayOfWeek: format(day, 'EEEE', { locale: es }),
+      dateObj: day,
+      sales: baseSales,
       weather,
       weatherImpact: Math.round(weatherImpact * 10) / 10,
       temperature: Math.round(temperature * 10) / 10,
       humidity: Math.round(humidity),
-      feelsLike: Math.round((temperature + (humidity > 70 ? -1 : humidity < 50 ? 1 : 0)) * 10) / 10,
-      adjustedSales: Math.round(adjustedSales),
-      uvIndex: weather === 'sunny' || weather === 'hot' ? Math.floor(Math.random() * 4) + 8 : Math.floor(Math.random() * 3) + 2
     };
   });
 };
@@ -87,25 +105,50 @@ const WeatherIcon = ({ type, size = 16, className = '' }) => {
   return <Icon className={className} style={{ color: config.color, width: size, height: size }} />;
 };
 
-export default function WeatherImpactChart({ dailyTrend = [], formatCurrency, dateRange }) {
-  const [period, setPeriod] = useState('month');
+// Tooltip de ayuda
+const HelpTooltip = ({ viewType }) => {
+  const [open, setOpen] = useState(false);
+  const explanation = VIEW_EXPLANATIONS[viewType];
+  
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full hover:bg-sky-100">
+          <HelpCircle className="w-4 h-4 text-sky-500" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-72 p-3" align="end">
+        <h4 className="font-bold text-sm text-gray-800 mb-2">{explanation.title}</h4>
+        <p className="text-xs text-gray-600 mb-2">{explanation.description}</p>
+        <p className="text-xs text-sky-600 bg-sky-50 p-2 rounded-lg">💡 {explanation.tip}</p>
+      </PopoverContent>
+    </Popover>
+  );
+};
+
+export default function WeatherImpactChart({ dailyTrend = [], formatCurrency, dateRange: externalDateRange }) {
   const [viewType, setViewType] = useState('trend');
+  const [dateRange, setDateRange] = useState({
+    from: externalDateRange?.from || subWeeks(new Date(), 2),
+    to: externalDateRange?.to || new Date()
+  });
+  const [calendarOpen, setCalendarOpen] = useState(false);
   
   const weatherData = useMemo(() => {
-    const data = generateWeatherData(dailyTrend, period);
-    return data;
-  }, [dailyTrend, period]);
+    return generateWeatherData(dailyTrend, dateRange);
+  }, [dailyTrend, dateRange]);
 
   // Estadísticas por tipo de clima
   const weatherStats = useMemo(() => {
     const grouped = {};
     weatherData.forEach(d => {
       if (!grouped[d.weather]) {
-        grouped[d.weather] = { sales: [], impacts: [], temps: [] };
+        grouped[d.weather] = { sales: [], impacts: [], temps: [], days: [] };
       }
       grouped[d.weather].sales.push(d.sales || 0);
       grouped[d.weather].impacts.push(d.weatherImpact);
       grouped[d.weather].temps.push(d.temperature);
+      grouped[d.weather].days.push(d.dayOfWeek);
     });
     
     return Object.entries(grouped).map(([type, data]) => ({
@@ -114,7 +157,8 @@ export default function WeatherImpactChart({ dailyTrend = [], formatCurrency, da
       avgSales: data.sales.length ? data.sales.reduce((a, b) => a + b, 0) / data.sales.length : 0,
       avgImpact: data.impacts.length ? data.impacts.reduce((a, b) => a + b, 0) / data.impacts.length : 0,
       avgTemp: data.temps.length ? data.temps.reduce((a, b) => a + b, 0) / data.temps.length : 0,
-      count: data.sales.length
+      count: data.sales.length,
+      topDay: data.days.sort((a, b) => data.days.filter(v => v === a).length - data.days.filter(v => v === b).length).pop()
     })).sort((a, b) => b.avgImpact - a.avgImpact);
   }, [weatherData]);
 
@@ -124,31 +168,50 @@ export default function WeatherImpactChart({ dailyTrend = [], formatCurrency, da
       temperature: d.temperature,
       sales: d.sales,
       weather: d.weather,
-      date: d.date
+      date: d.date,
+      fullDate: d.fullDate,
+      dayOfWeek: d.dayOfWeek
     }));
   }, [weatherData]);
+
+  // Mejor y peor día
+  const bestDay = weatherStats[0];
+  const worstDay = weatherStats[weatherStats.length - 1];
 
   return (
     <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg">
       <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-2">
           <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
             <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 3, repeat: Infinity }}>
               <Cloud className="w-4 h-4 text-sky-500" />
             </motion.div>
             Impacto del Clima en Ventas
+            <HelpTooltip viewType={viewType} />
           </CardTitle>
-          <div className="flex gap-2">
-            <Select value={period} onValueChange={setPeriod}>
-              <SelectTrigger className="w-24 h-7 text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="week">Semana</SelectItem>
-                <SelectItem value="month">Mes</SelectItem>
-                <SelectItem value="year">Año</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="flex gap-2 items-center">
+            {/* Calendar Picker */}
+            <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="h-7 text-xs gap-1 bg-white/80">
+                  <CalendarIcon className="w-3 h-3" />
+                  {format(dateRange.from, 'dd/MM')} - {format(dateRange.to, 'dd/MM')}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="end">
+                <Calendar
+                  mode="range"
+                  selected={{ from: dateRange.from, to: dateRange.to }}
+                  onSelect={(range) => {
+                    if (range?.from) {
+                      setDateRange({ from: range.from, to: range.to || range.from });
+                    }
+                  }}
+                  numberOfMonths={1}
+                />
+              </PopoverContent>
+            </Popover>
+
             <Select value={viewType} onValueChange={setViewType}>
               <SelectTrigger className="w-28 h-7 text-xs">
                 <SelectValue />
@@ -163,22 +226,51 @@ export default function WeatherImpactChart({ dailyTrend = [], formatCurrency, da
         </div>
       </CardHeader>
       <CardContent>
-        {/* Stats Cards */}
+        {/* Stats Cards - Más dinámicos */}
         <div className="grid grid-cols-5 gap-2 mb-4">
           {Object.entries(WEATHER_CONFIG).map(([key, config]) => {
             const stat = weatherStats.find(s => s.type === key);
             const Icon = config.icon;
+            const isTop = stat?.type === bestDay?.type;
+            const isWorst = stat?.type === worstDay?.type;
+            
             return (
               <motion.div
                 key={key}
-                whileHover={{ scale: 1.03, y: -2 }}
-                className="bg-gradient-to-br from-gray-50 to-gray-100/80 rounded-xl p-2 text-center border border-gray-100"
+                whileHover={{ scale: 1.08, y: -4, rotate: 1 }}
+                whileTap={{ scale: 0.95 }}
+                animate={isTop ? { 
+                  boxShadow: ['0 0 0 0 rgba(34, 197, 94, 0)', '0 0 20px 4px rgba(34, 197, 94, 0.3)', '0 0 0 0 rgba(34, 197, 94, 0)'] 
+                } : {}}
+                transition={isTop ? { duration: 2, repeat: Infinity } : { type: "spring", stiffness: 400 }}
+                className={`bg-gradient-to-br ${config.bgColor} rounded-xl p-2 text-center border-2 cursor-pointer relative overflow-hidden ${
+                  isTop ? 'border-green-400 ring-2 ring-green-200' : 
+                  isWorst ? 'border-red-300' : 'border-transparent'
+                }`}
               >
-                <Icon className="w-5 h-5 mx-auto mb-1" style={{ color: config.color }} />
-                <p className="text-[10px] text-gray-500">{config.label}</p>
-                <p className={`text-xs font-bold ${stat?.avgImpact >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+                {isTop && (
+                  <motion.div 
+                    className="absolute -top-1 -right-1 bg-green-500 text-white text-[8px] px-1.5 py-0.5 rounded-bl-lg font-bold"
+                    animate={{ scale: [1, 1.1, 1] }}
+                    transition={{ duration: 1, repeat: Infinity }}
+                  >
+                    TOP
+                  </motion.div>
+                )}
+                <motion.div
+                  animate={{ rotate: isTop ? [0, -10, 10, 0] : 0, scale: isTop ? [1, 1.1, 1] : 1 }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  <Icon className="w-6 h-6 mx-auto mb-1" style={{ color: config.color }} />
+                </motion.div>
+                <p className="text-[10px] text-gray-600 font-medium">{config.label}</p>
+                <motion.p 
+                  className={`text-sm font-bold ${stat?.avgImpact >= 0 ? 'text-green-600' : 'text-red-500'}`}
+                  animate={isTop ? { scale: [1, 1.05, 1] } : {}}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                >
                   {stat?.avgImpact >= 0 ? '+' : ''}{stat?.avgImpact?.toFixed(0) || 0}%
-                </p>
+                </motion.p>
                 <p className="text-[9px] text-gray-400">{stat?.count || 0} días</p>
               </motion.div>
             );
@@ -198,6 +290,7 @@ export default function WeatherImpactChart({ dailyTrend = [], formatCurrency, da
                   unit="°C"
                   domain={[10, 28]}
                   tick={{ fontSize: 10 }}
+                  label={{ value: 'Temperatura °C', position: 'bottom', fontSize: 9, fill: '#888' }}
                 />
                 <YAxis 
                   dataKey="sales" 
@@ -205,6 +298,7 @@ export default function WeatherImpactChart({ dailyTrend = [], formatCurrency, da
                   name="Ventas" 
                   tickFormatter={(v) => `${(v/1000000).toFixed(1)}M`}
                   tick={{ fontSize: 10 }}
+                  label={{ value: 'Ventas', angle: -90, position: 'insideLeft', fontSize: 9, fill: '#888' }}
                 />
                 <ZAxis range={[50, 200]} />
                 <Tooltip 
@@ -212,13 +306,22 @@ export default function WeatherImpactChart({ dailyTrend = [], formatCurrency, da
                     if (!active || !payload?.length) return null;
                     const data = payload[0].payload;
                     return (
-                      <div className="bg-white p-2 rounded-lg shadow-lg border text-xs">
-                        <div className="flex items-center gap-1 mb-1">
-                          <WeatherIcon type={data.weather} size={14} />
-                          <span className="font-medium">{WEATHER_CONFIG[data.weather]?.label}</span>
+                      <div className="bg-white p-3 rounded-xl shadow-xl border text-xs">
+                        <div className="flex items-center gap-2 mb-2 pb-2 border-b">
+                          <WeatherIcon type={data.weather} size={18} />
+                          <div>
+                            <span className="font-bold text-gray-800">{WEATHER_CONFIG[data.weather]?.label}</span>
+                            <p className="text-gray-400 text-[10px] capitalize">{data.fullDate}</p>
+                          </div>
                         </div>
-                        <p>🌡️ {data.temperature}°C</p>
-                        <p className="font-bold">💰 {formatCurrency?.(data.sales) || data.sales}</p>
+                        <p className="flex justify-between gap-4">
+                          <span className="text-gray-500">🌡️ Temperatura:</span>
+                          <span className="font-bold">{data.temperature}°C</span>
+                        </p>
+                        <p className="flex justify-between gap-4 mt-1">
+                          <span className="text-gray-500">💰 Ventas:</span>
+                          <span className="font-bold text-green-600">{formatCurrency?.(data.sales) || data.sales}</span>
+                        </p>
                       </div>
                     );
                   }}
@@ -233,9 +336,11 @@ export default function WeatherImpactChart({ dailyTrend = [], formatCurrency, da
                       <circle 
                         cx={cx} 
                         cy={cy} 
-                        r={6} 
+                        r={7} 
                         fill={config?.color || '#ec4899'} 
-                        opacity={0.7}
+                        opacity={0.8}
+                        stroke="#fff"
+                        strokeWidth={1}
                       />
                     );
                   }}
@@ -262,15 +367,21 @@ export default function WeatherImpactChart({ dailyTrend = [], formatCurrency, da
                     if (!active || !payload?.length) return null;
                     const data = payload[0].payload;
                     return (
-                      <div className="bg-white p-2 rounded-lg shadow-lg border text-xs">
-                        <div className="flex items-center gap-1 mb-1">
-                          <WeatherIcon type={data.weather} size={12} />
-                          <span>{WEATHER_CONFIG[data.weather]?.label}</span>
-                          <span className="text-gray-400">| {data.temperature}°C</span>
+                      <div className="bg-white p-3 rounded-xl shadow-xl border text-xs">
+                        <div className="flex items-center gap-2 mb-2 pb-2 border-b">
+                          <WeatherIcon type={data.weather} size={18} />
+                          <div>
+                            <span className="font-bold text-gray-800 capitalize">{data.fullDate}</span>
+                            <p className="text-gray-400 text-[10px]">{WEATHER_CONFIG[data.weather]?.label} • {data.temperature}°C</p>
+                          </div>
                         </div>
-                        <p className="font-bold">Ventas: {formatCurrency?.(data.sales) || data.sales}</p>
-                        <p className={data.weatherImpact >= 0 ? 'text-green-600' : 'text-red-600'}>
-                          Impacto: {data.weatherImpact >= 0 ? '+' : ''}{data.weatherImpact.toFixed(1)}%
+                        <p className="flex justify-between gap-4">
+                          <span className="text-gray-500">💰 Ventas:</span>
+                          <span className="font-bold">{formatCurrency?.(data.sales) || data.sales}</span>
+                        </p>
+                        <p className={`flex justify-between gap-4 mt-1 ${data.weatherImpact >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+                          <span className="text-gray-500">📊 Impacto:</span>
+                          <span className="font-bold">{data.weatherImpact >= 0 ? '+' : ''}{data.weatherImpact.toFixed(1)}%</span>
                         </p>
                       </div>
                     );
@@ -286,7 +397,7 @@ export default function WeatherImpactChart({ dailyTrend = [], formatCurrency, da
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={weatherStats} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis type="number" domain={[-25, 30]} tick={{ fontSize: 10 }} tickFormatter={(v) => `${v}%`} />
+                <XAxis type="number" domain={[-30, 35]} tick={{ fontSize: 10 }} tickFormatter={(v) => `${v}%`} />
                 <YAxis 
                   dataKey="type" 
                   type="category" 
@@ -295,20 +406,42 @@ export default function WeatherImpactChart({ dailyTrend = [], formatCurrency, da
                   tickFormatter={(v) => WEATHER_CONFIG[v]?.label || v}
                 />
                 <Tooltip 
-                  formatter={(v, name) => [`${v.toFixed(1)}%`, 'Impacto promedio']}
-                  labelFormatter={(v) => WEATHER_CONFIG[v]?.label || v}
+                  content={({ active, payload }) => {
+                    if (!active || !payload?.length) return null;
+                    const data = payload[0].payload;
+                    return (
+                      <div className="bg-white p-3 rounded-xl shadow-xl border text-xs">
+                        <div className="flex items-center gap-2 mb-2">
+                          <WeatherIcon type={data.type} size={18} />
+                          <span className="font-bold text-gray-800">{data.config?.label}</span>
+                        </div>
+                        <p className="flex justify-between gap-4">
+                          <span className="text-gray-500">Impacto promedio:</span>
+                          <span className={`font-bold ${data.avgImpact >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+                            {data.avgImpact >= 0 ? '+' : ''}{data.avgImpact.toFixed(1)}%
+                          </span>
+                        </p>
+                        <p className="flex justify-between gap-4 mt-1">
+                          <span className="text-gray-500">Días registrados:</span>
+                          <span className="font-bold">{data.count}</span>
+                        </p>
+                        <p className="flex justify-between gap-4 mt-1">
+                          <span className="text-gray-500">Temp. promedio:</span>
+                          <span className="font-bold">{data.avgTemp?.toFixed(1)}°C</span>
+                        </p>
+                      </div>
+                    );
+                  }}
                 />
                 <Bar 
                   dataKey="avgImpact" 
                   radius={[0, 4, 4, 0]} 
-                  barSize={18}
-                  fill="#818cf8"
-                  label={{ position: 'right', fontSize: 10, formatter: (v) => `${v.toFixed(0)}%` }}
+                  barSize={20}
                 >
                   {weatherStats.map((entry, index) => (
-                    <motion.rect
-                      key={index}
-                      fill={entry.avgImpact >= 0 ? '#86efac' : '#fca5a5'}
+                    <Cell 
+                      key={index} 
+                      fill={entry.avgImpact >= 0 ? '#86efac' : '#fca5a5'} 
                     />
                   ))}
                 </Bar>
@@ -317,16 +450,31 @@ export default function WeatherImpactChart({ dailyTrend = [], formatCurrency, da
           )}
         </div>
 
-        {/* Insight */}
+        {/* Leyenda de colores */}
+        <div className="mt-3 flex flex-wrap gap-2 justify-center">
+          {Object.entries(WEATHER_CONFIG).map(([key, config]) => {
+            const Icon = config.icon;
+            return (
+              <div key={key} className="flex items-center gap-1 text-[10px] text-gray-500 bg-gray-50 px-2 py-1 rounded-full">
+                <Icon className="w-3 h-3" style={{ color: config.color }} />
+                <span>{config.label}</span>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Insight dinámico */}
         <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
           className="mt-3 bg-gradient-to-r from-sky-50 to-blue-50 rounded-xl p-3 border border-sky-100"
         >
           <p className="text-xs text-sky-800">
-            <span className="font-medium">💡 Insight:</span> Los días {weatherStats[0]?.config?.label?.toLowerCase() || 'calurosos'} 
-            {' '}aumentan las ventas en promedio un <span className="font-bold text-green-600">+{Math.abs(weatherStats[0]?.avgImpact || 20).toFixed(0)}%</span>. 
-            Considera promociones especiales cuando el pronóstico sea favorable.
+            <span className="font-bold">💡 Insight:</span> Los días <span className="font-bold">{bestDay?.config?.label?.toLowerCase() || 'calurosos'}</span> 
+            {' '}aumentan las ventas un <span className="font-bold text-green-600">+{Math.abs(bestDay?.avgImpact || 20).toFixed(0)}%</span> en promedio,
+            mientras que los días <span className="font-bold">{worstDay?.config?.label?.toLowerCase() || 'lluviosos'}</span> las reducen 
+            {' '}<span className="font-bold text-red-500">{worstDay?.avgImpact?.toFixed(0) || -15}%</span>.
+            {bestDay?.count > 0 && ` (${bestDay.count} días ${bestDay?.config?.label?.toLowerCase()} registrados)`}
           </p>
         </motion.div>
       </CardContent>
