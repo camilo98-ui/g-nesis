@@ -10,21 +10,19 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Progress } from "@/components/ui/progress";
 import { 
-  ArrowLeft, Sun, Moon, Sparkles, ClipboardCheck, 
-  CheckCircle, AlertTriangle, BarChart3, Bell, Calendar,
-  Save, X, Plus, Trash2, Edit3, TrendingUp, Star, Award
+  ArrowLeft, ClipboardCheck, 
+  CheckCircle, AlertTriangle, BarChart3, Calendar,
+  Save, Plus, Trash2, Edit3, Star
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { format, startOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, subMonths } from 'date-fns';
+import { format, startOfMonth, eachDayOfInterval, subMonths } from 'date-fns';
 import { es } from 'date-fns/locale';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, 
   ResponsiveContainer, Legend, AreaChart, Area
 } from 'recharts';
 
-// Plantillas de tareas editables (se pueden modificar)
 const DEFAULT_MORNING_TASKS = [
   { id: 'm1', label: 'Limpieza de vitrinas', category: 'limpieza' },
   { id: 'm2', label: 'Barra de servicio desinfectada', category: 'limpieza' },
@@ -34,8 +32,6 @@ const DEFAULT_MORNING_TASKS = [
   { id: 'm6', label: 'Uniforme completo y limpio', category: 'presentacion' },
   { id: 'm7', label: 'Nevera en buen estado', category: 'equipos' },
   { id: 'm8', label: 'Insumos de servicio limpios', category: 'insumos' },
-  { id: 'm9', label: 'Señalización visible', category: 'presentacion' },
-  { id: 'm10', label: 'Área externa barrida', category: 'limpieza' },
 ];
 
 const DEFAULT_CLOSING_TASKS = [
@@ -45,10 +41,8 @@ const DEFAULT_CLOSING_TASKS = [
   { id: 'c4', label: 'Bolsas de basura reemplazadas', category: 'limpieza' },
   { id: 'c5', label: 'Paredes y piso limpios', category: 'limpieza' },
   { id: 'c6', label: 'Inventario revisado', category: 'inventario' },
-  { id: 'c7', label: 'Punto de venta seguro', category: 'seguridad' },
-  { id: 'c8', label: 'Equipos apagados', category: 'equipos' },
-  { id: 'c9', label: 'Nevera cerrada correctamente', category: 'equipos' },
-  { id: 'c10', label: 'Caja cuadrada', category: 'caja' },
+  { id: 'c7', label: 'Equipos apagados', category: 'equipos' },
+  { id: 'c8', label: 'Caja cuadrada', category: 'caja' },
 ];
 
 const DEFAULT_DEEP_TASKS = [
@@ -57,26 +51,21 @@ const DEFAULT_DEEP_TASKS = [
   { id: 'd3', label: 'Revisión de equipos', category: 'equipos' },
   { id: 'd4', label: 'Nevera completa desinfectada', category: 'profundo' },
   { id: 'd5', label: 'Cristales sin manchas', category: 'limpieza' },
-  { id: 'd6', label: 'Señalización revisada', category: 'presentacion' },
-  { id: 'd7', label: 'Revisión de plagas', category: 'seguridad' },
-  { id: 'd8', label: 'Desagües limpios', category: 'profundo' },
+  { id: 'd6', label: 'Desagües limpios', category: 'profundo' },
 ];
 
 const QUALITY_MESSAGES = [
   "🧹 ¡Un espacio limpio = clientes felices!",
-  "✨ La limpieza es nuestra mejor carta de presentación",
-  "🍦 Helados perfectos en un ambiente impecable",
-  "💫 La calidad empieza por los detalles",
-  "🌟 Cada checklist completado nos hace mejores",
-  "🎯 Excelencia en cada rincón de Popsy"
+  "✨ La limpieza es nuestra mejor carta",
+  "🍦 Helados perfectos en ambiente impecable",
 ];
 
 const TABS = [
-  { id: 'checklist', label: 'Checklist', icon: ClipboardCheck, color: 'from-teal-400 to-cyan-500' },
-  { id: 'calendar', label: 'Calendario', icon: Calendar, color: 'from-blue-400 to-indigo-500' },
-  { id: 'stats', label: 'Estadísticas', icon: BarChart3, color: 'from-green-400 to-emerald-500' },
-  { id: 'visits', label: 'Visitas Calidad', icon: Star, color: 'from-amber-400 to-orange-500' },
-  { id: 'config', label: 'Configurar', icon: Edit3, color: 'from-purple-400 to-pink-500' },
+  { id: 'checklist', label: 'Checklist', icon: ClipboardCheck },
+  { id: 'calendar', label: 'Historial', icon: Calendar },
+  { id: 'stats', label: 'Stats', icon: BarChart3 },
+  { id: 'visits', label: 'Visitas', icon: Star },
+  { id: 'config', label: 'Config', icon: Edit3 },
 ];
 
 export default function Quality() {
@@ -92,14 +81,12 @@ export default function Quality() {
   const [dateRange, setDateRange] = useState({ from: startOfMonth(new Date()), to: new Date() });
   const [randomMessage, setRandomMessage] = useState('');
   
-  // Plantillas editables
   const [morningTasks, setMorningTasks] = useState(DEFAULT_MORNING_TASKS);
   const [closingTasks, setClosingTasks] = useState(DEFAULT_CLOSING_TASKS);
   const [deepTasks, setDeepTasks] = useState(DEFAULT_DEEP_TASKS);
   const [newTaskLabel, setNewTaskLabel] = useState('');
   const [editingType, setEditingType] = useState('morning');
 
-  // Visitas de calidad
   const [visitScore, setVisitScore] = useState(0);
   const [visitNotes, setVisitNotes] = useState('');
   const [visitDate, setVisitDate] = useState(format(new Date(), 'yyyy-MM-dd'));
@@ -113,7 +100,6 @@ export default function Quality() {
     }).catch(() => {});
     setRandomMessage(QUALITY_MESSAGES[Math.floor(Math.random() * QUALITY_MESSAGES.length)]);
     
-    // Cargar plantillas guardadas
     const savedMorning = localStorage.getItem('quality_morning_tasks');
     const savedClosing = localStorage.getItem('quality_closing_tasks');
     const savedDeep = localStorage.getItem('quality_deep_tasks');
@@ -138,7 +124,7 @@ export default function Quality() {
     mutationFn: (data) => base44.entities.CleaningChecklist.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries(['checklists']);
-      toast.success('✅ Checklist guardado correctamente');
+      toast.success('✅ Checklist guardado');
       setTasks({});
       setNotes('');
       setSignature('');
@@ -149,7 +135,7 @@ export default function Quality() {
     mutationFn: (data) => base44.entities.QualityIncident.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries(['incidents']);
-      toast.success('✅ Visita de calidad registrada');
+      toast.success('✅ Visita registrada');
       setVisitScore(0);
       setVisitNotes('');
     }
@@ -205,7 +191,6 @@ export default function Quality() {
     });
   };
 
-  // Agregar tarea a plantilla
   const addTask = (type) => {
     if (!newTaskLabel.trim()) return;
     const newId = `custom_${Date.now()}`;
@@ -245,7 +230,6 @@ export default function Quality() {
     toast.success('Tarea eliminada');
   };
 
-  // Filtrar checklists por fecha
   const filteredChecklists = useMemo(() => {
     return checklists.filter(c => {
       const d = new Date(c.date);
@@ -253,7 +237,6 @@ export default function Quality() {
     });
   }, [checklists, dateRange]);
 
-  // Datos para calendario
   const calendarData = useMemo(() => {
     const days = eachDayOfInterval({ start: dateRange.from, end: dateRange.to });
     return days.map(day => {
@@ -272,7 +255,6 @@ export default function Quality() {
     });
   }, [checklists, dateRange]);
 
-  // Tendencia de visitas de calidad
   const visitsTrend = useMemo(() => {
     const visits = incidents.filter(i => i.type === 'quality_visit');
     const months = [];
@@ -296,7 +278,6 @@ export default function Quality() {
     return months;
   }, [incidents]);
 
-  // Stats
   const stats = useMemo(() => {
     const todayStr = format(new Date(), 'yyyy-MM-dd');
     const today = checklists.filter(c => c.date === todayStr);
@@ -309,27 +290,19 @@ export default function Quality() {
     return { today: today.length, week: week.length, avgCompletion, openIncidents };
   }, [checklists, filteredChecklists, incidents]);
 
-  // Alertas
   const alerts = useMemo(() => {
     const list = [];
     const todayStr = format(new Date(), 'yyyy-MM-dd');
     const todayChecklists = checklists.filter(c => c.date === todayStr);
     
     if (!todayChecklists.some(c => c.type === 'morning')) {
-      list.push({ type: 'warning', message: '☀️ No se ha completado el aseo de mañana hoy' });
+      list.push({ type: 'warning', message: '☀️ Aseo de mañana pendiente' });
     }
     if (!todayChecklists.some(c => c.type === 'closing')) {
-      list.push({ type: 'info', message: '🌙 Pendiente el aseo de cierre de hoy' });
-    }
-    if (stats.openIncidents > 0) {
-      list.push({ type: 'error', message: `🚨 Hay ${stats.openIncidents} incidencias de calidad sin resolver` });
-    }
-    const unsigned = checklists.filter(c => !c.supervisor_signature && c.status === 'completed').length;
-    if (unsigned > 0) {
-      list.push({ type: 'warning', message: `📝 ${unsigned} checklists sin firma del supervisor` });
+      list.push({ type: 'info', message: '🌙 Aseo de cierre pendiente' });
     }
     return list;
-  }, [checklists, stats]);
+  }, [checklists]);
 
   const handleStoreChange = (store) => {
     setSelectedStore(store);
@@ -339,10 +312,10 @@ export default function Quality() {
   const selectedStoreName = STORES.find(s => s.code === selectedStore)?.name || '';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50 p-3 sm:p-4">
-      <div className="max-w-5xl mx-auto">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+    <div className="min-h-screen bg-gradient-to-br from-teal-50/50 via-white to-cyan-50/50 p-4">
+      <div className="max-w-4xl mx-auto">
+        {/* Header compacto */}
+        <div className="flex items-center justify-between gap-3 mb-4">
           <div className="flex items-center gap-3">
             <Link to={createPageUrl('Home')}>
               <Button variant="ghost" size="icon" className="rounded-full">
@@ -350,31 +323,29 @@ export default function Quality() {
               </Button>
             </Link>
             <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-800 flex items-center gap-2">
-                <ClipboardCheck className="w-6 h-6 text-teal-600" />
+              <h1 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                <ClipboardCheck className="w-5 h-5 text-teal-500" />
                 Calidad & Aseo
               </h1>
-              <p className="text-xs sm:text-sm text-gray-500">{selectedStore} - {selectedStoreName}</p>
+              <p className="text-xs text-gray-500">{selectedStore} - {selectedStoreName}</p>
             </div>
           </div>
-          <div className="flex gap-2">
-            <StoreSelector selectedStore={selectedStore} onStoreChange={handleStoreChange} />
-          </div>
+          <StoreSelector selectedStore={selectedStore} onStoreChange={handleStoreChange} />
         </div>
 
-        {/* Mensaje motivacional */}
+        {/* Mensaje motivacional sutil */}
         <motion.div 
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-xl p-3 mb-4 text-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="bg-gradient-to-r from-teal-100/60 to-cyan-100/60 text-teal-700 rounded-xl p-2.5 mb-4 text-center text-sm"
         >
-          <p className="text-sm font-medium">{randomMessage}</p>
+          {randomMessage}
         </motion.div>
 
         {selectedStore ? (
           <>
-            {/* Tabs */}
-            <div className="flex gap-1.5 mb-4 overflow-x-auto pb-2">
+            {/* Tabs más espaciados */}
+            <div className="grid grid-cols-5 gap-2 mb-4">
               {TABS.map((tab) => {
                 const Icon = tab.icon;
                 return (
@@ -383,18 +354,17 @@ export default function Quality() {
                     variant={activeTab === tab.id ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-1.5 whitespace-nowrap text-xs ${
-                      activeTab === tab.id ? `bg-gradient-to-r ${tab.color} text-white border-0` : ''
+                    className={`flex flex-col items-center gap-1 h-auto py-2 ${
+                      activeTab === tab.id ? 'bg-gradient-to-r from-teal-400 to-cyan-400 text-white border-0' : 'bg-white/80'
                     }`}
                   >
-                    <Icon className="w-3.5 h-3.5" />
-                    {tab.label}
+                    <Icon className="w-4 h-4" />
+                    <span className="text-[10px]">{tab.label}</span>
                   </Button>
                 );
               })}
             </div>
 
-            {/* Date Filter para calendario y stats */}
             {(activeTab === 'calendar' || activeTab === 'stats') && (
               <div className="mb-4">
                 <DateFilter dateRange={dateRange} onDateChange={setDateRange} />
@@ -404,143 +374,104 @@ export default function Quality() {
             <AnimatePresence mode="wait">
               {/* Checklist Tab */}
               {activeTab === 'checklist' && (
-                <motion.div key="checklist" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+                <motion.div key="checklist" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
                   {/* Tipo de checklist */}
-                  <div className="flex gap-2 mb-4">
+                  <div className="grid grid-cols-3 gap-2">
                     {[
-                      { id: 'morning', label: '☀️ Mañana', color: 'from-amber-400 to-orange-500' },
-                      { id: 'closing', label: '🌙 Cierre', color: 'from-indigo-400 to-purple-500' },
-                      { id: 'deep', label: '✨ Profunda', color: 'from-pink-400 to-rose-500' },
+                      { id: 'morning', label: '☀️ Mañana', color: 'from-amber-200 to-orange-200' },
+                      { id: 'closing', label: '🌙 Cierre', color: 'from-indigo-200 to-purple-200' },
+                      { id: 'deep', label: '✨ Profunda', color: 'from-pink-200 to-rose-200' },
                     ].map((type) => (
                       <Button
                         key={type.id}
-                        size="sm"
                         variant={checklistType === type.id ? 'default' : 'outline'}
                         onClick={() => { setChecklistType(type.id); setTasks({}); }}
-                        className={checklistType === type.id ? `bg-gradient-to-r ${type.color} text-white border-0` : ''}
+                        className={`h-12 ${checklistType === type.id ? `bg-gradient-to-r ${type.color} text-gray-700 border-0` : 'bg-white/80'}`}
                       >
                         {type.label}
                       </Button>
                     ))}
                   </div>
 
-                  <Card className="p-4 sm:p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h2 className="text-lg font-bold text-gray-800">
+                  <Card className="p-4 bg-white/90 backdrop-blur-sm border-0 shadow-lg">
+                    <div className="flex items-center justify-between mb-3">
+                      <h2 className="text-base font-bold text-gray-700">
                         {checklistType === 'morning' && '☀️ Checklist de Mañana'}
                         {checklistType === 'closing' && '🌙 Checklist de Cierre'}
                         {checklistType === 'deep' && '✨ Limpieza Profunda'}
                       </h2>
-                      <div className="text-right">
-                        <p className="text-sm text-gray-500">{format(new Date(), "d 'de' MMMM", { locale: es })}</p>
-                        <p className="text-xs text-teal-600 font-bold">{getCompletionPercentage()}%</p>
-                      </div>
+                      <span className="text-sm font-bold text-teal-600">{getCompletionPercentage()}%</span>
                     </div>
 
-                    {/* Barra de progreso con efectos */}
-                    <div className="relative mb-6">
-                      <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
-                        <motion.div 
-                          initial={{ width: 0 }}
-                          animate={{ width: `${getCompletionPercentage()}%` }}
-                          transition={{ duration: 0.5 }}
-                          className={`h-full rounded-full ${
-                            getCompletionPercentage() === 100 
-                              ? 'bg-gradient-to-r from-green-400 to-emerald-500' 
-                              : getCompletionPercentage() >= 70 
-                                ? 'bg-gradient-to-r from-amber-400 to-yellow-500'
-                                : 'bg-gradient-to-r from-teal-400 to-cyan-500'
-                          }`}
-                        />
-                      </div>
-                      {getCompletionPercentage() === 100 && (
-                        <motion.div 
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          className="absolute -right-1 -top-1"
-                        >
-                          <span className="text-xl">🎉</span>
-                        </motion.div>
-                      )}
+                    {/* Barra de progreso */}
+                    <div className="h-2 bg-gray-100 rounded-full overflow-hidden mb-4">
+                      <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: `${getCompletionPercentage()}%` }}
+                        className={`h-full rounded-full ${
+                          getCompletionPercentage() === 100 ? 'bg-gradient-to-r from-green-300 to-emerald-400' 
+                            : 'bg-gradient-to-r from-teal-300 to-cyan-400'
+                        }`}
+                      />
                     </div>
 
-                    {/* Nombre */}
-                    <div className="mb-4">
-                      <label className="text-sm font-medium text-gray-700 mb-1 block">👤 Nombre del Cajero</label>
-                      <Input value={cashierName} onChange={(e) => setCashierName(e.target.value)} placeholder="Tu nombre completo" className="bg-gray-50" />
+                    <div className="mb-3">
+                      <Input value={cashierName} onChange={(e) => setCashierName(e.target.value)} placeholder="Tu nombre" className="bg-gray-50/80 h-10" />
                     </div>
 
-                    {/* Tasks */}
-                    <div className="space-y-2 mb-4 max-h-64 overflow-y-auto">
-                      {getCurrentTasks().map((task, idx) => (
-                        <motion.div 
+                    {/* Tasks - más compacto */}
+                    <div className="space-y-1.5 mb-4 max-h-52 overflow-y-auto">
+                      {getCurrentTasks().map((task) => (
+                        <div 
                           key={task.id}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: idx * 0.03 }}
-                          className={`flex items-center justify-between p-2.5 rounded-lg transition-all ${
-                            tasks[task.id] === 'done' ? 'bg-green-50 border border-green-200' :
-                            tasks[task.id] === 'pending' ? 'bg-amber-50 border border-amber-200' :
-                            tasks[task.id] === 'na' ? 'bg-gray-100 border border-gray-200' :
-                            'bg-gray-50 border border-gray-100'
+                          className={`flex items-center justify-between p-2 rounded-lg transition-all ${
+                            tasks[task.id] === 'done' ? 'bg-green-50/80 border border-green-200' :
+                            tasks[task.id] === 'pending' ? 'bg-amber-50/80 border border-amber-200' :
+                            tasks[task.id] === 'na' ? 'bg-gray-50/80 border border-gray-200' :
+                            'bg-white border border-gray-100'
                           }`}
                         >
-                          <span className="text-sm text-gray-700 flex-1">{task.label}</span>
+                          <span className="text-sm text-gray-700">{task.label}</span>
                           <div className="flex gap-1">
                             {['done', 'pending', 'na'].map((status) => (
                               <button
                                 key={status}
                                 onClick={() => handleTaskChange(task.id, status)}
-                                className={`text-xs px-2 py-1 rounded-md transition-all ${
+                                className={`text-xs px-2 py-1 rounded transition-all ${
                                   tasks[task.id] === status
-                                    ? status === 'done' ? 'bg-green-500 text-white' 
-                                      : status === 'pending' ? 'bg-amber-500 text-white' 
-                                      : 'bg-gray-500 text-white'
-                                    : 'bg-white border border-gray-200 hover:bg-gray-100'
+                                    ? status === 'done' ? 'bg-green-400 text-white' 
+                                      : status === 'pending' ? 'bg-amber-400 text-white' 
+                                      : 'bg-gray-400 text-white'
+                                    : 'bg-white border border-gray-200 hover:bg-gray-50'
                                 }`}
                               >
                                 {status === 'done' ? '✓' : status === 'pending' ? '⏳' : 'N/A'}
                               </button>
                             ))}
                           </div>
-                        </motion.div>
+                        </div>
                       ))}
                     </div>
 
-                    {/* Notes y Firma */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-                      <div>
-                        <label className="text-sm font-medium text-gray-700 mb-1 block">📝 Notas</label>
-                        <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Observaciones..." className="bg-gray-50 h-20" />
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-700 mb-1 block">✍️ Firma Digital</label>
-                        <Input value={signature} onChange={(e) => setSignature(e.target.value)} placeholder="Tu firma..." className="bg-gray-50 italic" />
-                      </div>
+                    <div className="grid grid-cols-2 gap-2 mb-3">
+                      <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Notas..." className="bg-gray-50/80 h-16 text-sm" />
+                      <Input value={signature} onChange={(e) => setSignature(e.target.value)} placeholder="Tu firma..." className="bg-gray-50/80 italic h-16" />
                     </div>
 
-                    <Button onClick={saveChecklist} className="w-full bg-gradient-to-r from-teal-500 to-cyan-500 text-white">
+                    <Button onClick={saveChecklist} className="w-full bg-gradient-to-r from-teal-400 to-cyan-400 text-white h-11">
                       <Save className="w-4 h-4 mr-2" /> Guardar Checklist
                     </Button>
                   </Card>
 
-                  {/* Alertas inline */}
                   {alerts.length > 0 && (
-                    <div className="mt-4 space-y-2">
-                      {alerts.slice(0, 2).map((alert, i) => (
-                        <motion.div
-                          key={i}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          className={`p-3 rounded-lg flex items-center gap-2 text-sm ${
-                            alert.type === 'error' ? 'bg-red-50 text-red-700' : 
-                            alert.type === 'warning' ? 'bg-amber-50 text-amber-700' : 
-                            'bg-blue-50 text-blue-700'
-                          }`}
-                        >
+                    <div className="space-y-2">
+                      {alerts.map((alert, i) => (
+                        <div key={i} className={`p-2.5 rounded-lg flex items-center gap-2 text-sm ${
+                          alert.type === 'warning' ? 'bg-amber-50/80 text-amber-700' : 'bg-blue-50/80 text-blue-700'
+                        }`}>
                           <AlertTriangle className="w-4 h-4" />
                           {alert.message}
-                        </motion.div>
+                        </div>
                       ))}
                     </div>
                   )}
@@ -549,30 +480,29 @@ export default function Quality() {
 
               {/* Calendar Tab */}
               {activeTab === 'calendar' && (
-                <motion.div key="calendar" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-                  <Card className="p-4">
-                    <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
-                      <Calendar className="w-5 h-5 text-blue-500" />
-                      Historial de Aseo
+                <motion.div key="calendar" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                  <Card className="p-4 bg-white/90 backdrop-blur-sm border-0 shadow-lg">
+                    <h3 className="font-bold text-gray-700 mb-3 flex items-center gap-2">
+                      <Calendar className="w-5 h-5 text-blue-400" />
+                      Historial
                     </h3>
-                    <div className="grid grid-cols-7 gap-1 mb-2 text-center text-xs text-gray-500">
-                      {['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'].map(d => <div key={d}>{d}</div>)}
+                    <div className="grid grid-cols-7 gap-1 mb-2 text-center text-xs text-gray-400">
+                      {['D', 'L', 'M', 'X', 'J', 'V', 'S'].map(d => <div key={d}>{d}</div>)}
                     </div>
                     <div className="grid grid-cols-7 gap-1">
                       {calendarData.map((day, i) => (
                         <div
                           key={i}
-                          className={`p-1.5 rounded-lg text-center text-xs transition-all cursor-pointer hover:scale-105 ${
+                          className={`p-1.5 rounded-lg text-center text-xs ${
                             day.checklists.length > 0 
                               ? day.avgCompletion === 100 
-                                ? 'bg-green-100 border border-green-300' 
-                                : 'bg-amber-100 border border-amber-300'
-                              : 'bg-gray-50 border border-gray-200'
+                                ? 'bg-green-100/80 border border-green-200' 
+                                : 'bg-amber-100/80 border border-amber-200'
+                              : 'bg-gray-50/80 border border-gray-100'
                           }`}
-                          title={`${format(day.date, 'd MMM', { locale: es })}: ${day.checklists.length} checklists`}
                         >
                           <p className="font-medium">{format(day.date, 'd')}</p>
-                          <div className="flex justify-center gap-0.5 mt-0.5">
+                          <div className="flex justify-center gap-0.5">
                             {day.hasMorning && <span className="text-[8px]">☀️</span>}
                             {day.hasClosing && <span className="text-[8px]">🌙</span>}
                           </div>
@@ -580,19 +510,18 @@ export default function Quality() {
                       ))}
                     </div>
                     
-                    {/* Lista de checklists */}
-                    <div className="mt-4 space-y-2 max-h-60 overflow-y-auto">
-                      {filteredChecklists.slice(0, 15).map((c) => (
-                        <div key={c.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg text-sm">
+                    <div className="mt-4 space-y-1.5 max-h-48 overflow-y-auto">
+                      {filteredChecklists.slice(0, 10).map((c) => (
+                        <div key={c.id} className="flex items-center justify-between p-2 bg-gray-50/80 rounded-lg text-sm">
                           <div>
-                            <p className="font-medium">{c.cashier_name}</p>
-                            <p className="text-xs text-gray-500">
+                            <p className="font-medium text-gray-700">{c.cashier_name}</p>
+                            <p className="text-xs text-gray-400">
                               {c.type === 'morning' ? '☀️' : c.type === 'closing' ? '🌙' : '✨'} {c.date}
                             </p>
                           </div>
-                          <div className={`font-bold ${c.completion_percentage === 100 ? 'text-green-600' : 'text-amber-600'}`}>
+                          <span className={`font-bold ${c.completion_percentage === 100 ? 'text-green-500' : 'text-amber-500'}`}>
                             {c.completion_percentage}%
-                          </div>
+                          </span>
                         </div>
                       ))}
                     </div>
@@ -602,39 +531,39 @@ export default function Quality() {
 
               {/* Stats Tab */}
               {activeTab === 'stats' && (
-                <motion.div key="stats" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                <motion.div key="stats" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
+                  <div className="grid grid-cols-4 gap-2">
                     {[
-                      { label: 'Cumplimiento', value: `${stats.avgCompletion}%`, color: 'from-green-400 to-emerald-500', icon: '📊' },
-                      { label: 'Esta semana', value: stats.week, color: 'from-blue-400 to-cyan-500', icon: '📋' },
-                      { label: 'Hoy', value: stats.today, color: 'from-amber-400 to-orange-500', icon: '📅' },
-                      { label: 'Incidencias', value: stats.openIncidents, color: 'from-red-400 to-rose-500', icon: '⚠️' },
+                      { label: 'Cumplimiento', value: `${stats.avgCompletion}%`, color: 'from-green-200 to-emerald-300', icon: '📊' },
+                      { label: 'Semana', value: stats.week, color: 'from-blue-200 to-cyan-300', icon: '📋' },
+                      { label: 'Hoy', value: stats.today, color: 'from-amber-200 to-orange-300', icon: '📅' },
+                      { label: 'Pendientes', value: stats.openIncidents, color: 'from-red-200 to-rose-300', icon: '⚠️' },
                     ].map((stat, i) => (
                       <motion.div
                         key={i}
-                        whileHover={{ scale: 1.03, y: -2 }}
-                        className={`p-4 rounded-xl bg-gradient-to-br ${stat.color} text-white`}
+                        whileHover={{ scale: 1.02 }}
+                        className={`p-3 rounded-xl bg-gradient-to-br ${stat.color} text-center`}
                       >
-                        <p className="text-2xl mb-1">{stat.icon}</p>
-                        <p className="text-2xl font-bold">{stat.value}</p>
-                        <p className="text-xs opacity-80">{stat.label}</p>
+                        <p className="text-lg mb-1">{stat.icon}</p>
+                        <p className="text-xl font-bold text-gray-700">{stat.value}</p>
+                        <p className="text-[10px] text-gray-600">{stat.label}</p>
                       </motion.div>
                     ))}
                   </div>
 
-                  <Card className="p-4">
-                    <h3 className="font-bold text-gray-800 mb-4">📈 Tendencia de Cumplimiento</h3>
-                    <div className="h-64">
+                  <Card className="p-4 bg-white/90 backdrop-blur-sm border-0 shadow-lg">
+                    <h3 className="font-bold text-gray-700 mb-3">📈 Tendencia</h3>
+                    <div className="h-48">
                       <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={calendarData.filter(d => d.checklists.length > 0).slice(-14)}>
                           <defs>
                             <linearGradient id="completionGrad" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor="#14b8a6" stopOpacity={0.4}/>
+                              <stop offset="5%" stopColor="#14b8a6" stopOpacity={0.3}/>
                               <stop offset="95%" stopColor="#14b8a6" stopOpacity={0.05}/>
                             </linearGradient>
                           </defs>
                           <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                          <XAxis dataKey={d => format(d.date, 'dd/MM')} tick={{ fontSize: 10 }} />
+                          <XAxis dataKey={d => format(d.date, 'dd')} tick={{ fontSize: 10 }} />
                           <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} />
                           <Tooltip formatter={(v) => [`${v}%`, 'Cumplimiento']} />
                           <Area type="monotone" dataKey="avgCompletion" stroke="#14b8a6" fill="url(#completionGrad)" strokeWidth={2} />
@@ -647,27 +576,27 @@ export default function Quality() {
 
               {/* Visits Tab */}
               {activeTab === 'visits' && (
-                <motion.div key="visits" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
-                  <Card className="p-4">
-                    <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
-                      <Star className="w-5 h-5 text-amber-500" />
-                      Registrar Visita de Calidad
+                <motion.div key="visits" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
+                  <Card className="p-4 bg-white/90 backdrop-blur-sm border-0 shadow-lg">
+                    <h3 className="font-bold text-gray-700 mb-3 flex items-center gap-2">
+                      <Star className="w-5 h-5 text-amber-400" />
+                      Registrar Visita
                     </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 gap-3 mb-3">
                       <div>
-                        <label className="text-sm font-medium text-gray-700 mb-2 block">📅 Fecha</label>
-                        <Input type="date" value={visitDate} onChange={(e) => setVisitDate(e.target.value)} />
+                        <label className="text-xs text-gray-500 mb-1 block">Fecha</label>
+                        <Input type="date" value={visitDate} onChange={(e) => setVisitDate(e.target.value)} className="h-9" />
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-700 mb-2 block">⭐ Calificación (0-100)</label>
-                        <div className="flex gap-2 flex-wrap">
+                        <label className="text-xs text-gray-500 mb-1 block">Calificación</label>
+                        <div className="flex gap-1">
                           {[60, 70, 80, 90, 100].map((score) => (
                             <Button
                               key={score}
                               size="sm"
                               variant={visitScore === score ? 'default' : 'outline'}
                               onClick={() => setVisitScore(score)}
-                              className={visitScore === score ? 'bg-amber-500' : ''}
+                              className={`flex-1 text-xs h-9 ${visitScore === score ? 'bg-amber-400 text-white' : ''}`}
                             >
                               {score}
                             </Button>
@@ -675,28 +604,25 @@ export default function Quality() {
                         </div>
                       </div>
                     </div>
-                    <div className="mt-4">
-                      <label className="text-sm font-medium text-gray-700 mb-1 block">📝 Observaciones</label>
-                      <Textarea value={visitNotes} onChange={(e) => setVisitNotes(e.target.value)} placeholder="Comentarios de la visita..." />
-                    </div>
-                    <Button onClick={saveVisit} className="w-full mt-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white">
+                    <Textarea value={visitNotes} onChange={(e) => setVisitNotes(e.target.value)} placeholder="Observaciones..." className="h-16 mb-3" />
+                    <Button onClick={saveVisit} className="w-full bg-gradient-to-r from-amber-400 to-orange-400 text-white h-10">
                       <Save className="w-4 h-4 mr-2" /> Guardar Visita
                     </Button>
                   </Card>
 
-                  <Card className="p-4">
-                    <h3 className="font-bold text-gray-800 mb-4">📈 Tendencia de Visitas de Calidad</h3>
-                    <div className="h-64">
+                  <Card className="p-4 bg-white/90 backdrop-blur-sm border-0 shadow-lg">
+                    <h3 className="font-bold text-gray-700 mb-3">📈 Tendencia de Visitas</h3>
+                    <div className="h-48">
                       <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={visitsTrend}>
                           <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                          <XAxis dataKey="month" tick={{ fontSize: 11 }} />
-                          <YAxis yAxisId="left" domain={[0, 100]} tick={{ fontSize: 11 }} />
-                          <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11 }} />
-                          <Tooltip labelFormatter={(l, p) => p?.[0]?.payload?.fullMonth || l} />
-                          <Legend />
-                          <Line yAxisId="left" type="monotone" dataKey="calificacion" stroke="#f59e0b" strokeWidth={2} name="Calificación" dot={{ fill: '#f59e0b', r: 4 }} />
-                          <Line yAxisId="right" type="monotone" dataKey="visitas" stroke="#14b8a6" strokeWidth={2} name="# Visitas" dot={{ fill: '#14b8a6', r: 4 }} />
+                          <XAxis dataKey="month" tick={{ fontSize: 10 }} />
+                          <YAxis yAxisId="left" domain={[0, 100]} tick={{ fontSize: 10 }} />
+                          <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 10 }} />
+                          <Tooltip />
+                          <Legend wrapperStyle={{ fontSize: 10 }} />
+                          <Line yAxisId="left" type="monotone" dataKey="calificacion" stroke="#f59e0b" strokeWidth={2} name="Calif." />
+                          <Line yAxisId="right" type="monotone" dataKey="visitas" stroke="#14b8a6" strokeWidth={2} name="Visitas" />
                         </LineChart>
                       </ResponsiveContainer>
                     </div>
@@ -706,14 +632,14 @@ export default function Quality() {
 
               {/* Config Tab */}
               {activeTab === 'config' && (
-                <motion.div key="config" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-                  <Card className="p-4">
-                    <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
-                      <Edit3 className="w-5 h-5 text-purple-500" />
-                      Configurar Plantillas de Checklist
+                <motion.div key="config" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                  <Card className="p-4 bg-white/90 backdrop-blur-sm border-0 shadow-lg">
+                    <h3 className="font-bold text-gray-700 mb-3 flex items-center gap-2">
+                      <Edit3 className="w-5 h-5 text-purple-400" />
+                      Configurar Plantillas
                     </h3>
                     
-                    <div className="flex gap-2 mb-4">
+                    <div className="grid grid-cols-3 gap-2 mb-4">
                       {[
                         { id: 'morning', label: '☀️ Mañana' },
                         { id: 'closing', label: '🌙 Cierre' },
@@ -724,39 +650,27 @@ export default function Quality() {
                           size="sm"
                           variant={editingType === type.id ? 'default' : 'outline'}
                           onClick={() => setEditingType(type.id)}
-                          className={editingType === type.id ? 'bg-purple-500' : ''}
+                          className={editingType === type.id ? 'bg-purple-400 text-white' : ''}
                         >
                           {type.label}
                         </Button>
                       ))}
                     </div>
 
-                    {/* Lista de tareas editables */}
-                    <div className="space-y-2 max-h-64 overflow-y-auto mb-4">
+                    <div className="space-y-1.5 max-h-48 overflow-y-auto mb-3">
                       {(editingType === 'morning' ? morningTasks : editingType === 'closing' ? closingTasks : deepTasks).map((task) => (
-                        <div key={task.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                        <div key={task.id} className="flex items-center justify-between p-2 bg-gray-50/80 rounded-lg">
                           <span className="text-sm">{task.label}</span>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => removeTask(editingType, task.id)}
-                            className="text-red-500 hover:bg-red-50"
-                          >
+                          <Button size="sm" variant="ghost" onClick={() => removeTask(editingType, task.id)} className="text-red-400 hover:bg-red-50 h-8 w-8 p-0">
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>
                       ))}
                     </div>
 
-                    {/* Agregar nueva tarea */}
                     <div className="flex gap-2">
-                      <Input
-                        value={newTaskLabel}
-                        onChange={(e) => setNewTaskLabel(e.target.value)}
-                        placeholder="Nueva tarea..."
-                        className="flex-1"
-                      />
-                      <Button onClick={() => addTask(editingType)} className="bg-purple-500 text-white">
+                      <Input value={newTaskLabel} onChange={(e) => setNewTaskLabel(e.target.value)} placeholder="Nueva tarea..." className="flex-1" />
+                      <Button onClick={() => addTask(editingType)} className="bg-purple-400 text-white">
                         <Plus className="w-4 h-4 mr-1" /> Agregar
                       </Button>
                     </div>
@@ -768,10 +682,10 @@ export default function Quality() {
         ) : (
           <div className="text-center py-16">
             <motion.div animate={{ y: [0, -10, 0] }} transition={{ duration: 2, repeat: Infinity }}>
-              <ClipboardCheck className="w-16 h-16 text-teal-300 mx-auto mb-4" />
+              <ClipboardCheck className="w-16 h-16 text-teal-200 mx-auto mb-4" />
             </motion.div>
             <h2 className="text-xl font-bold text-gray-700 mb-2">Selecciona una tienda</h2>
-            <p className="text-gray-400">Para acceder al módulo de Calidad & Aseo</p>
+            <p className="text-gray-400">Para acceder al módulo de Calidad</p>
           </div>
         )}
       </div>
