@@ -14,6 +14,7 @@ import Training from './pages/Training';
 import Quality from './pages/Quality';
 import Management from './pages/Management';
 import PredictiveAnalytics from './pages/PredictiveAnalytics';
+import PopsyPlanner from './pages/PopsyPlanner';
 import __Layout from './Layout.jsx';
 
 
@@ -34,6 +35,7 @@ export const PAGES = {
     "Quality": Quality,
     "Management": Management,
     "PredictiveAnalytics": PredictiveAnalytics,
+    "PopsyPlanner": PopsyPlanner,
 }
 
 export const pagesConfig = {
