@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   Calendar as CalendarIcon, Users, Sparkles, Copy, ChevronLeft, ChevronRight,
-  Clock, BarChart3, FileText, Bell, Plus, Loader2, GripVertical
+  Clock, BarChart3, FileText, Bell, Plus, Loader2, GripVertical, UserPlus
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -16,6 +16,7 @@ import AIScheduleGenerator from '@/components/planner/AIScheduleGenerator';
 import ShiftRequestsPanel from '@/components/planner/ShiftRequestsPanel';
 import PlannerStats from '@/components/planner/PlannerStats';
 import CollaboratorProfile from '@/components/planner/CollaboratorProfile';
+import CashierManagerModal from '@/components/planner/CashierManagerModal';
 
 export default function PopsyPlanner() {
   const [selectedStore, setSelectedStore] = useState('');
@@ -23,6 +24,7 @@ export default function PopsyPlanner() {
   const [activeTab, setActiveTab] = useState('calendar');
   const [selectedCashier, setSelectedCashier] = useState(null);
   const [showAIGenerator, setShowAIGenerator] = useState(false);
+  const [showCashierManager, setShowCashierManager] = useState(false);
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -93,15 +95,27 @@ export default function PopsyPlanner() {
             <div className="flex items-center gap-3">
               <StoreSelector selectedStore={selectedStore} onStoreChange={handleStoreChange} />
               {selectedStore && (
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button
-                    onClick={() => setShowAIGenerator(true)}
-                    className="bg-gradient-to-r from-violet-500 to-purple-600 text-white gap-2 shadow-lg"
-                  >
-                    <Sparkles className="w-4 h-4" />
-                    <span className="hidden sm:inline">Generar con IA</span>
-                  </Button>
-                </motion.div>
+                <>
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Button
+                      onClick={() => setShowCashierManager(true)}
+                      variant="outline"
+                      className="gap-2 border-violet-200 text-violet-600 hover:bg-violet-50"
+                    >
+                      <UserPlus className="w-4 h-4" />
+                      <span className="hidden sm:inline">Colaboradores</span>
+                    </Button>
+                  </motion.div>
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Button
+                      onClick={() => setShowAIGenerator(true)}
+                      className="bg-gradient-to-r from-violet-500 to-purple-600 text-white gap-2 shadow-lg"
+                    >
+                      <Sparkles className="w-4 h-4" />
+                      <span className="hidden sm:inline">Generar con IA</span>
+                    </Button>
+                  </motion.div>
+                </>
               )}
             </div>
           </div>
@@ -236,6 +250,14 @@ export default function PopsyPlanner() {
           />
         )}
       </AnimatePresence>
+
+      {/* Cashier Manager Modal */}
+      <CashierManagerModal
+        isOpen={showCashierManager}
+        onClose={() => setShowCashierManager(false)}
+        cashiers={cashiers}
+        storeId={selectedStore}
+      />
     </div>
   );
 }
