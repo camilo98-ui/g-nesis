@@ -1,18 +1,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { 
-  Calendar as CalendarIcon, Sparkles, ChevronLeft, ChevronRight,
-  BarChart3, Plus, Loader2, UserPlus, Brain
-} from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { Calendar as CalendarIcon, Sparkles, BarChart3, UserPlus } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { format, startOfWeek, endOfWeek, addWeeks, subWeeks, eachDayOfInterval } from 'date-fns';
+import { format, startOfWeek, endOfWeek, eachDayOfInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
 import StoreSelector, { STORES } from '@/components/StoreSelector';
 import WeeklyCalendar from '@/components/planner/WeeklyCalendar';
-import AIScheduleGenerator from '@/components/planner/AIScheduleGenerator';
 import PlannerStats from '@/components/planner/PlannerStats';
 import CashierManagerModal from '@/components/planner/CashierManagerModal';
 import AIScheduleSuggestion from '@/components/planner/AIScheduleSuggestion';
@@ -22,10 +18,8 @@ export default function PopsyPlanner() {
   const [selectedStore, setSelectedStore] = useState('');
   const [currentWeek, setCurrentWeek] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
   const [activeTab, setActiveTab] = useState('calendar');
-  const [showAIGenerator, setShowAIGenerator] = useState(false);
   const [showCashierManager, setShowCashierManager] = useState(false);
   const [showAISuggestion, setShowAISuggestion] = useState(false);
-  const queryClient = useQueryClient();
 
   useEffect(() => {
     const saved = localStorage.getItem('selectedStore');
@@ -40,7 +34,6 @@ export default function PopsyPlanner() {
   const weekEnd = endOfWeek(currentWeek, { weekStartsOn: 1 });
   const weekDays = eachDayOfInterval({ start: currentWeek, end: weekEnd });
 
-  // Fetch data
   const { data: cashiers = [] } = useQuery({
     queryKey: ['cashiers', selectedStore],
     queryFn: () => base44.entities.Cashier.filter({ store_id: selectedStore }),
@@ -53,11 +46,21 @@ export default function PopsyPlanner() {
     enabled: !!selectedStore
   });
 
-  // Filter shifts for current week
+  const { data: salesData = [] } = useQuery({
+    queryKey: ['dailySales', selectedStore],
+    queryFn: () => base44.entities.DailySales.filter({ store_id: selectedStore }),
+    enabled: !!selectedStore
+  });
+
+  const { data: shiftRecords = [] } = useQuery({
+    queryKey: ['shiftRecords', selectedStore],
+    queryFn: () => base44.entities.ShiftRecord.filter({ store_id: selectedStore }),
+    enabled: !!selectedStore
+  });
+
   const weekShifts = useMemo(() => {
     const weekStartStr = format(currentWeek, 'yyyy-MM-dd');
     const weekEndStr = format(weekEnd, 'yyyy-MM-dd');
-    
     return shifts.filter(s => {
       const shiftDateStr = s.date?.split('T')[0] || s.date;
       return shiftDateStr >= weekStartStr && shiftDateStr <= weekEndStr;
@@ -66,33 +69,23 @@ export default function PopsyPlanner() {
 
   const storeName = STORES.find(s => s.code === selectedStore)?.name || '';
 
-  const handleExportPDF = () => {
-    generateSchedulePDF(weekDays, weekShifts, storeName, selectedStore);
-  };
+  const handleExportPDF = () => generateSchedulePDF(weekDays, weekShifts, storeName, selectedStore);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50/50 via-white to-violet-50/50 p-4 md:p-6">
+    <div className="min-h-screen bg-gradient-to-br from-rose-50/30 via-white to-violet-50/30 p-4 md:p-6">
       <div className="max-w-7xl mx-auto">
-        {/* Header - Sólido sin transparencia */}
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-6 bg-white rounded-2xl shadow-lg p-4 border border-gray-100"
-        >
+        {/* Header */}
+        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}
+          className="mb-6 bg-white rounded-2xl shadow-lg p-4 border border-gray-100">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <motion.div
-                animate={{ rotate: [0, 10, -10, 0] }}
-                transition={{ duration: 3, repeat: Infinity }}
-                className="w-12 h-12 bg-gradient-to-br from-pink-400 to-rose-500 rounded-xl flex items-center justify-center shadow-lg"
-              >
+              <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 3, repeat: Infinity }}
+                className="w-12 h-12 bg-gradient-to-br from-rose-400 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
                 <CalendarIcon className="w-6 h-6 text-white" />
               </motion.div>
               <div>
-                <h1 className="text-2xl md:text-3xl font-black text-gray-800">
-                  Popsy Planner
-                </h1>
-                <p className="text-gray-500 text-sm">Gestión inteligente de horarios y turnos</p>
+                <h1 className="text-2xl md:text-3xl font-black text-gray-800">Popsy Planner</h1>
+                <p className="text-gray-500 text-sm">Gestión inteligente de horarios</p>
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-2">
@@ -100,30 +93,13 @@ export default function PopsyPlanner() {
               {selectedStore && (
                 <>
                   <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                    <Button
-                      onClick={() => setShowCashierManager(true)}
-                      variant="outline"
-                      className="gap-2 border-violet-200 text-violet-600 hover:bg-violet-50"
-                    >
+                    <Button onClick={() => setShowCashierManager(true)} variant="outline" className="gap-2 border-violet-200 text-violet-600 hover:bg-violet-50">
                       <UserPlus className="w-4 h-4" />
                       <span className="hidden sm:inline">Colaboradores</span>
                     </Button>
                   </motion.div>
                   <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                    <Button
-                      onClick={() => setShowAISuggestion(true)}
-                      variant="outline"
-                      className="gap-2 border-amber-200 text-amber-600 hover:bg-amber-50"
-                    >
-                      <Brain className="w-4 h-4" />
-                      <span className="hidden sm:inline">IA Sugerencia</span>
-                    </Button>
-                  </motion.div>
-                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                    <Button
-                      onClick={() => setShowAIGenerator(true)}
-                      className="bg-gradient-to-r from-violet-500 to-purple-600 text-white gap-2 shadow-lg"
-                    >
+                    <Button onClick={() => setShowAISuggestion(true)} className="bg-gradient-to-r from-violet-500 to-purple-600 text-white gap-2 shadow-lg">
                       <Sparkles className="w-4 h-4" />
                       <span className="hidden sm:inline">Generar con IA</span>
                     </Button>
@@ -135,11 +111,7 @@ export default function PopsyPlanner() {
         </motion.div>
 
         {!selectedStore ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-20 bg-white rounded-2xl shadow-lg"
-          >
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-20 bg-white rounded-2xl shadow-lg">
             <div className="w-24 h-24 bg-gradient-to-br from-pink-100 to-rose-200 rounded-full mx-auto mb-6 flex items-center justify-center">
               <CalendarIcon className="w-12 h-12 text-pink-400" />
             </div>
@@ -147,60 +119,43 @@ export default function PopsyPlanner() {
             <p className="text-gray-400">Elige una tienda para gestionar los horarios</p>
           </motion.div>
         ) : (
-          <>
-            {/* Tabs - Sin transparencia */}
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-              <TabsList className="bg-white border border-gray-200 p-1 rounded-xl shadow-sm">
-                <TabsTrigger value="calendar" className="gap-2 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500 data-[state=active]:to-rose-500 data-[state=active]:text-white">
-                  <CalendarIcon className="w-4 h-4" /> Calendario
-                </TabsTrigger>
-                <TabsTrigger value="stats" className="gap-2 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-teal-500 data-[state=active]:text-white">
-                  <BarChart3 className="w-4 h-4" /> Reportes
-                </TabsTrigger>
-              </TabsList>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+            <TabsList className="bg-white border border-gray-200 p-1 rounded-xl shadow-sm">
+              <TabsTrigger value="calendar" className="gap-2 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-rose-400 data-[state=active]:to-pink-400 data-[state=active]:text-white">
+                <CalendarIcon className="w-4 h-4" /> Calendario
+              </TabsTrigger>
+              <TabsTrigger value="stats" className="gap-2 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-400 data-[state=active]:to-teal-400 data-[state=active]:text-white">
+                <BarChart3 className="w-4 h-4" /> Reportes
+              </TabsTrigger>
+            </TabsList>
 
-              {/* Calendar Tab */}
-              <TabsContent value="calendar" className="mt-0">
-                <WeeklyCalendar
-                  currentWeek={currentWeek}
-                  setCurrentWeek={setCurrentWeek}
-                  weekDays={weekDays}
-                  shifts={weekShifts}
-                  cashiers={cashiers}
-                  storeId={selectedStore}
-                  loading={loadingShifts}
-                  onExportPDF={handleExportPDF}
-                />
-              </TabsContent>
+            <TabsContent value="calendar" className="mt-0">
+              <WeeklyCalendar
+                currentWeek={currentWeek}
+                setCurrentWeek={setCurrentWeek}
+                weekDays={weekDays}
+                shifts={weekShifts}
+                cashiers={cashiers}
+                storeId={selectedStore}
+                loading={loadingShifts}
+                onExportPDF={handleExportPDF}
+              />
+            </TabsContent>
 
-              {/* Stats Tab */}
-              <TabsContent value="stats" className="mt-0">
-                <PlannerStats 
-                  shifts={shifts} 
-                  cashiers={cashiers} 
-                  storeId={selectedStore}
-                  currentWeek={currentWeek}
-                />
-              </TabsContent>
-            </Tabs>
-          </>
+            <TabsContent value="stats" className="mt-0">
+              <PlannerStats 
+                shifts={shifts} 
+                cashiers={cashiers} 
+                storeId={selectedStore}
+                currentWeek={currentWeek}
+                salesData={salesData}
+                shiftRecords={shiftRecords}
+              />
+            </TabsContent>
+          </Tabs>
         )}
       </div>
 
-      {/* AI Generator Modal */}
-      <AnimatePresence>
-        {showAIGenerator && (
-          <AIScheduleGenerator
-            storeId={selectedStore}
-            storeName={storeName}
-            cashiers={cashiers}
-            currentWeek={currentWeek}
-            onClose={() => setShowAIGenerator(false)}
-          />
-        )}
-      </AnimatePresence>
-
-      {/* AI Suggestion Modal */}
       <AIScheduleSuggestion
         isOpen={showAISuggestion}
         onClose={() => setShowAISuggestion(false)}
@@ -209,9 +164,9 @@ export default function PopsyPlanner() {
         cashiers={cashiers}
         weekDays={weekDays}
         existingShifts={weekShifts}
+        salesData={salesData}
       />
 
-      {/* Cashier Manager Modal */}
       <CashierManagerModal
         isOpen={showCashierManager}
         onClose={() => setShowCashierManager(false)}

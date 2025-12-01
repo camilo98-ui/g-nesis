@@ -1,13 +1,13 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { base44 } from '@/api/base44Client';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { format, addWeeks, subWeeks, isToday } from 'date-fns';
+import { format, addWeeks, subWeeks, isToday, getWeek, startOfWeek, eachWeekOfInterval, startOfYear, endOfYear } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { 
   ChevronLeft, ChevronRight, Copy, Plus, Clock, Trash2, 
-  GripVertical, User, Loader2, Download, Heart, ThumbsUp, Star,
+  GripVertical, User, Loader2, Download, Pencil, PartyPopper,
   IceCream, Coffee, Package, Headphones, Cookie, ClipboardList, Sparkles, ShoppingCart, Crown
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -16,121 +16,74 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 
-// Nuevos roles con iconos y colores
+// Festivos Colombia 2024-2025
+const HOLIDAYS = [
+  '2024-01-01', '2024-01-08', '2024-03-25', '2024-03-28', '2024-03-29',
+  '2024-05-01', '2024-05-13', '2024-06-03', '2024-06-10', '2024-07-01',
+  '2024-07-20', '2024-08-07', '2024-08-19', '2024-10-14', '2024-11-04',
+  '2024-11-11', '2024-12-08', '2024-12-25',
+  '2025-01-01', '2025-01-06', '2025-03-24', '2025-04-17', '2025-04-18',
+  '2025-05-01', '2025-06-02', '2025-06-23', '2025-06-30', '2025-07-20',
+  '2025-08-07', '2025-08-18', '2025-10-13', '2025-11-03', '2025-11-17',
+  '2025-12-08', '2025-12-25'
+];
+
 const ROLES_CONFIG = {
-  caja: { 
-    label: 'Caja', 
-    icon: ShoppingCart, 
-    bg: 'bg-emerald-100', 
-    text: 'text-emerald-700', 
-    border: 'border-emerald-400',
-    gradient: 'from-emerald-400 to-green-500'
-  },
-  coneo: { 
-    label: 'Coneo', 
-    icon: IceCream, 
-    bg: 'bg-pink-100', 
-    text: 'text-pink-700', 
-    border: 'border-pink-400',
-    gradient: 'from-pink-400 to-rose-500'
-  },
-  bebidas: { 
-    label: 'Bebidas', 
-    icon: Coffee, 
-    bg: 'bg-amber-100', 
-    text: 'text-amber-700', 
-    border: 'border-amber-400',
-    gradient: 'from-amber-400 to-orange-500'
-  },
-  especialidades: { 
-    label: 'Especialidades', 
-    icon: Sparkles, 
-    bg: 'bg-violet-100', 
-    text: 'text-violet-700', 
-    border: 'border-violet-400',
-    gradient: 'from-violet-400 to-purple-500'
-  },
-  coordinacion: { 
-    label: 'Coord. Entregas', 
-    icon: ClipboardList, 
-    bg: 'bg-blue-100', 
-    text: 'text-blue-700', 
-    border: 'border-blue-400',
-    gradient: 'from-blue-400 to-indigo-500'
-  },
-  cookie_jar: { 
-    label: 'Cookie Jar', 
-    icon: Cookie, 
-    bg: 'bg-orange-100', 
-    text: 'text-orange-700', 
-    border: 'border-orange-400',
-    gradient: 'from-orange-400 to-red-500'
-  },
-  stocker: { 
-    label: 'Stocker', 
-    icon: Package, 
-    bg: 'bg-slate-100', 
-    text: 'text-slate-700', 
-    border: 'border-slate-400',
-    gradient: 'from-slate-400 to-gray-500'
-  },
-  toma_pedidos: { 
-    label: 'Toma de Pedidos', 
-    icon: Headphones, 
-    bg: 'bg-cyan-100', 
-    text: 'text-cyan-700', 
-    border: 'border-cyan-400',
-    gradient: 'from-cyan-400 to-teal-500'
-  },
-  experiencia: { 
-    label: 'Experiencia', 
-    icon: Crown, 
-    bg: 'bg-yellow-100', 
-    text: 'text-yellow-700', 
-    border: 'border-yellow-500',
-    gradient: 'from-yellow-400 to-amber-500'
-  },
+  caja: { label: 'Caja', icon: ShoppingCart, bg: 'bg-emerald-50', text: 'text-emerald-600', border: 'border-emerald-200', header: 'bg-emerald-400' },
+  coneo: { label: 'Coneo', icon: IceCream, bg: 'bg-pink-50', text: 'text-pink-600', border: 'border-pink-200', header: 'bg-pink-400' },
+  bebidas: { label: 'Bebidas', icon: Coffee, bg: 'bg-amber-50', text: 'text-amber-600', border: 'border-amber-200', header: 'bg-amber-400' },
+  especialidades: { label: 'Especialidades', icon: Sparkles, bg: 'bg-violet-50', text: 'text-violet-600', border: 'border-violet-200', header: 'bg-violet-400' },
+  coordinacion: { label: 'Coord. Entregas', icon: ClipboardList, bg: 'bg-blue-50', text: 'text-blue-600', border: 'border-blue-200', header: 'bg-blue-400' },
+  cookie_jar: { label: 'Cookie Jar', icon: Cookie, bg: 'bg-orange-50', text: 'text-orange-600', border: 'border-orange-200', header: 'bg-orange-400' },
+  stocker: { label: 'Stocker', icon: Package, bg: 'bg-slate-50', text: 'text-slate-600', border: 'border-slate-200', header: 'bg-slate-400' },
+  toma_pedidos: { label: 'Toma Pedidos', icon: Headphones, bg: 'bg-cyan-50', text: 'text-cyan-600', border: 'border-cyan-200', header: 'bg-cyan-400' },
+  experiencia: { label: 'Experiencia', icon: Crown, bg: 'bg-yellow-50', text: 'text-yellow-600', border: 'border-yellow-200', header: 'bg-yellow-400' },
 };
 
 export default function WeeklyCalendar({ 
   currentWeek, setCurrentWeek, weekDays, shifts, cashiers, storeId, loading, onExportPDF 
 }) {
   const [showAddShift, setShowAddShift] = useState(false);
+  const [editingShift, setEditingShift] = useState(null);
   const [selectedDay, setSelectedDay] = useState(null);
   const [hoveredDay, setHoveredDay] = useState(null);
-  const [newShift, setNewShift] = useState({
-    cashier_id: '',
-    start_time: '08:00',
-    end_time: '16:00',
-    role: 'caja'
-  });
+  const [newShift, setNewShift] = useState({ cashier_id: '', start_time: '08:00', end_time: '16:00', role: 'caja' });
   const [copying, setCopying] = useState(false);
   const queryClient = useQueryClient();
-  const calendarRef = useRef(null);
+
+  // Generar semanas del año para el filtro
+  const yearWeeks = useMemo(() => {
+    const start = startOfYear(currentWeek);
+    const end = endOfYear(currentWeek);
+    return eachWeekOfInterval({ start, end }, { weekStartsOn: 1 }).map(week => ({
+      week,
+      number: getWeek(week, { weekStartsOn: 1 }),
+      label: `Sem ${getWeek(week, { weekStartsOn: 1 })} - ${format(week, "d MMM", { locale: es })}`
+    }));
+  }, [currentWeek]);
+
+  const currentWeekNumber = getWeek(currentWeek, { weekStartsOn: 1 });
 
   const createMutation = useMutation({
-    mutationFn: async (data) => {
-      const result = await base44.entities.Shift.create(data);
-      return result;
-    },
+    mutationFn: async (data) => await base44.entities.Shift.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['shifts'] });
-      setTimeout(() => {
-        queryClient.refetchQueries({ queryKey: ['shifts'] });
-      }, 500);
       setShowAddShift(false);
-      setNewShift({ cashier_id: '', start_time: '08:00', end_time: '16:00', role: 'caja' });
-      toast.success('Turno creado exitosamente');
-    },
-    onError: (error) => {
-      console.error('Error creating shift:', error);
-      toast.error('Error al crear turno: ' + (error.message || 'Intenta de nuevo'));
+      setEditingShift(null);
+      resetForm();
+      toast.success('Turno guardado');
     }
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Shift.update(id, data),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['shifts'] })
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['shifts'] });
+      setShowAddShift(false);
+      setEditingShift(null);
+      resetForm();
+      toast.success('Turno actualizado');
+    }
   });
 
   const deleteMutation = useMutation({
@@ -141,125 +94,121 @@ export default function WeeklyCalendar({
     }
   });
 
+  const resetForm = () => setNewShift({ cashier_id: '', start_time: '08:00', end_time: '16:00', role: 'caja' });
+
   const handleDragEnd = async (result) => {
-    if (!result.destination) return;
-    
-    const shiftId = result.draggableId;
-    const newDate = result.destination.droppableId;
-    
-    if (result.source.droppableId !== newDate) {
-      updateMutation.mutate({ id: shiftId, data: { date: newDate } });
-      toast.success('Turno movido');
-    }
+    if (!result.destination || result.source.droppableId === result.destination.droppableId) return;
+    updateMutation.mutate({ id: result.draggableId, data: { date: result.destination.droppableId } });
+    toast.success('Turno movido');
   };
 
-  const handleAddShift = () => {
-    if (!newShift.cashier_id || !selectedDay) {
-      toast.error('Selecciona un colaborador');
-      return;
-    }
-    
+  const handleSaveShift = () => {
+    if (!newShift.cashier_id) return toast.error('Selecciona un colaborador');
     const cashier = cashiers.find(c => c.id === newShift.cashier_id);
     const shiftData = {
       store_id: storeId,
       cashier_id: newShift.cashier_id,
       cashier_name: cashier?.name || '',
-      date: format(selectedDay, 'yyyy-MM-dd'),
+      date: editingShift ? editingShift.date : format(selectedDay, 'yyyy-MM-dd'),
       start_time: newShift.start_time,
       end_time: newShift.end_time,
       role: newShift.role,
       status: 'scheduled'
     };
     
-    createMutation.mutate(shiftData);
+    if (editingShift) {
+      updateMutation.mutate({ id: editingShift.id, data: shiftData });
+    } else {
+      createMutation.mutate(shiftData);
+    }
+  };
+
+  const handleEditShift = (shift) => {
+    setEditingShift(shift);
+    setNewShift({
+      cashier_id: shift.cashier_id,
+      start_time: shift.start_time,
+      end_time: shift.end_time,
+      role: shift.role
+    });
+    setShowAddShift(true);
   };
 
   const copyWeek = async () => {
     setCopying(true);
     const nextWeek = addWeeks(currentWeek, 1);
-    
     for (const shift of shifts) {
       const shiftDate = new Date(shift.date);
       const dayOfWeek = shiftDate.getDay();
       const newDate = new Date(nextWeek);
       newDate.setDate(nextWeek.getDate() + (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
-      
       await base44.entities.Shift.create({
-        store_id: storeId,
-        cashier_id: shift.cashier_id,
-        cashier_name: shift.cashier_name,
-        date: format(newDate, 'yyyy-MM-dd'),
-        start_time: shift.start_time,
-        end_time: shift.end_time,
-        role: shift.role,
-        status: 'scheduled'
+        store_id: storeId, cashier_id: shift.cashier_id, cashier_name: shift.cashier_name,
+        date: format(newDate, 'yyyy-MM-dd'), start_time: shift.start_time, end_time: shift.end_time,
+        role: shift.role, status: 'scheduled'
       });
     }
-    
     queryClient.invalidateQueries({ queryKey: ['shifts'] });
-    toast.success(`${shifts.length} turnos copiados a la próxima semana`);
+    toast.success(`${shifts.length} turnos copiados`);
     setCopying(false);
-  };
-
-  const handleReaction = async (shiftId, reaction) => {
-    await updateMutation.mutateAsync({ 
-      id: shiftId, 
-      data: { reaction, reaction_date: new Date().toISOString() } 
-    });
-    toast.success('¡Reacción guardada!');
   };
 
   const getShiftsForDay = (day) => {
     const dayStr = format(day, 'yyyy-MM-dd');
-    return shifts.filter(s => {
-      const shiftDateStr = s.date?.split('T')[0] || s.date;
-      return shiftDateStr === dayStr;
-    });
+    return shifts.filter(s => (s.date?.split('T')[0] || s.date) === dayStr);
   };
 
+  const isHoliday = (day) => HOLIDAYS.includes(format(day, 'yyyy-MM-dd'));
+
   return (
-    <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden" ref={calendarRef}>
+    <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
       {/* Header */}
-      <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-pink-500 to-rose-500">
+      <div className="p-4 border-b border-gray-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-gradient-to-r from-rose-500 to-pink-500">
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon" onClick={() => setCurrentWeek(subWeeks(currentWeek, 1))} className="text-white hover:bg-white/20">
             <ChevronLeft className="w-5 h-5" />
           </Button>
-          <h2 className="font-bold text-white text-lg">
-            {format(currentWeek, "d 'de' MMMM", { locale: es })} - {format(weekDays[6], "d 'de' MMMM yyyy", { locale: es })}
-          </h2>
+          <div className="text-white">
+            <p className="text-xs opacity-80">Semana {currentWeekNumber}</p>
+            <h2 className="font-bold text-lg">
+              {format(currentWeek, "d MMM", { locale: es })} - {format(weekDays[6], "d MMM yyyy", { locale: es })}
+            </h2>
+          </div>
           <Button variant="ghost" size="icon" onClick={() => setCurrentWeek(addWeeks(currentWeek, 1))} className="text-white hover:bg-white/20">
             <ChevronRight className="w-5 h-5" />
           </Button>
         </div>
-        <div className="flex gap-2">
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={copyWeek}
-            disabled={copying || shifts.length === 0}
-            className="gap-2 bg-white/20 text-white hover:bg-white/30 border-0"
+        <div className="flex flex-wrap gap-2">
+          {/* Week Filter */}
+          <Select 
+            value={currentWeekNumber.toString()} 
+            onValueChange={(v) => {
+              const selected = yearWeeks.find(w => w.number.toString() === v);
+              if (selected) setCurrentWeek(selected.week);
+            }}
           >
+            <SelectTrigger className="w-40 bg-white/20 border-white/30 text-white text-sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {yearWeeks.map(w => (
+                <SelectItem key={w.number} value={w.number.toString()}>{w.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button variant="secondary" size="sm" onClick={copyWeek} disabled={copying || !shifts.length} className="gap-2 bg-white/20 text-white hover:bg-white/30 border-0">
             {copying ? <Loader2 className="w-4 h-4 animate-spin" /> : <Copy className="w-4 h-4" />}
-            Copiar semana
+            Copiar
           </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={onExportPDF}
-            className="gap-2 bg-white text-pink-600 hover:bg-pink-50"
-          >
-            <Download className="w-4 h-4" />
-            Exportar PDF
+          <Button variant="secondary" size="sm" onClick={onExportPDF} className="gap-2 bg-white text-pink-600 hover:bg-pink-50">
+            <Download className="w-4 h-4" /> PDF
           </Button>
         </div>
       </div>
 
       {/* Calendar Grid */}
       {loading ? (
-        <div className="p-10 text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-pink-500 mx-auto" />
-        </div>
+        <div className="p-10 text-center"><Loader2 className="w-8 h-8 animate-spin text-pink-500 mx-auto" /></div>
       ) : (
         <DragDropContext onDragEnd={handleDragEnd}>
           <div className="grid grid-cols-7 divide-x divide-gray-100">
@@ -268,6 +217,7 @@ export default function WeeklyCalendar({
               const isCurrentDay = isToday(day);
               const dateStr = format(day, 'yyyy-MM-dd');
               const isHovered = hoveredDay === idx;
+              const holiday = isHoliday(day);
               
               return (
                 <Droppable key={dateStr} droppableId={dateStr}>
@@ -277,34 +227,32 @@ export default function WeeklyCalendar({
                       {...provided.droppableProps}
                       onMouseEnter={() => setHoveredDay(idx)}
                       onMouseLeave={() => setHoveredDay(null)}
-                      animate={{ 
-                        scale: isHovered ? 1.02 : 1,
-                        zIndex: isHovered ? 10 : 1
-                      }}
-                      className={`min-h-[450px] transition-all relative ${snapshot.isDraggingOver ? 'bg-pink-50' : ''} ${isCurrentDay ? 'bg-gradient-to-b from-rose-50 to-pink-50' : isHovered ? 'bg-gray-50' : 'bg-white'}`}
+                      animate={{ scale: isHovered ? 1.01 : 1 }}
+                      className={`min-h-[400px] transition-all relative ${snapshot.isDraggingOver ? 'bg-pink-50' : ''} ${isCurrentDay ? 'bg-rose-50/50' : isHovered ? 'bg-gray-50/50' : 'bg-white'} ${holiday ? 'bg-gradient-to-b from-amber-50 to-orange-50' : ''}`}
                     >
                       {/* Day Header */}
-                      <div className={`p-3 text-center border-b sticky top-0 z-10 ${isCurrentDay ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white' : isHovered ? 'bg-gradient-to-r from-violet-100 to-purple-100' : 'bg-gray-50'}`}>
-                        <p className={`text-xs font-bold uppercase tracking-wider ${isCurrentDay ? 'text-white/80' : 'text-gray-500'}`}>
-                          {format(day, 'EEEE', { locale: es })}
+                      <div className={`p-2 text-center border-b sticky top-0 z-10 ${isCurrentDay ? 'bg-gradient-to-r from-rose-400 to-pink-400 text-white' : holiday ? 'bg-gradient-to-r from-amber-400 to-orange-400 text-white' : 'bg-gray-50'}`}>
+                        <p className={`text-[10px] font-bold uppercase tracking-wider ${isCurrentDay || holiday ? 'text-white/80' : 'text-gray-400'}`}>
+                          {format(day, 'EEE', { locale: es })}
                         </p>
-                        <p className={`text-2xl font-black ${isCurrentDay ? 'text-white' : 'text-gray-800'}`}>
-                          {format(day, 'd')}
-                        </p>
-                        <p className={`text-[10px] ${isCurrentDay ? 'text-white/70' : 'text-gray-400'}`}>
-                          {dayShifts.length} turno{dayShifts.length !== 1 ? 's' : ''}
-                        </p>
+                        <p className={`text-xl font-black ${isCurrentDay || holiday ? 'text-white' : 'text-gray-700'}`}>{format(day, 'd')}</p>
+                        {holiday && (
+                          <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 1, repeat: Infinity }} className="flex items-center justify-center gap-1 text-[9px] text-white/90">
+                            <PartyPopper className="w-3 h-3" /> Festivo
+                          </motion.div>
+                        )}
+                        <p className={`text-[9px] ${isCurrentDay || holiday ? 'text-white/70' : 'text-gray-400'}`}>{dayShifts.length} turno{dayShifts.length !== 1 ? 's' : ''}</p>
                       </div>
 
                       {/* Shifts */}
-                      <div className="p-2 space-y-2">
+                      <div className="p-1.5 space-y-1.5">
                         <AnimatePresence>
                           {dayShifts.map((shift, shiftIdx) => {
-                            const roleConfig = ROLES_CONFIG[shift.role] || ROLES_CONFIG.caja;
-                            const RoleIcon = roleConfig.icon;
+                            const role = ROLES_CONFIG[shift.role] || ROLES_CONFIG.caja;
+                            const RoleIcon = role.icon;
                             const [startH, startM] = (shift.start_time || '08:00').split(':').map(Number);
                             const [endH, endM] = (shift.end_time || '16:00').split(':').map(Number);
-                            const duration = (endH + endM/60) - (startH + startM/60);
+                            const duration = ((endH + endM/60) - (startH + startM/60)).toFixed(1);
                             
                             return (
                               <Draggable key={shift.id} draggableId={shift.id} index={shiftIdx}>
@@ -312,103 +260,52 @@ export default function WeeklyCalendar({
                                   <motion.div
                                     ref={provided.innerRef}
                                     {...provided.draggableProps}
-                                    initial={{ opacity: 0, scale: 0.8 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    exit={{ opacity: 0, scale: 0.8 }}
-                                    whileHover={{ scale: 1.03, y: -2 }}
-                                    className={`rounded-xl overflow-hidden group cursor-pointer transition-all shadow-md hover:shadow-xl ${snapshot.isDragging ? 'shadow-2xl scale-105 z-50 rotate-2' : ''}`}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0 }}
+                                    whileHover={{ scale: 1.02, y: -2 }}
+                                    className={`rounded-lg overflow-hidden border ${role.border} ${role.bg} shadow-sm hover:shadow-md transition-all cursor-pointer group ${snapshot.isDragging ? 'shadow-xl rotate-2' : ''}`}
                                   >
-                                    {/* Header con gradiente del rol */}
-                                    <div className={`bg-gradient-to-r ${roleConfig.gradient} p-2 flex items-center justify-between`}>
-                                      <div className="flex items-center gap-2">
-                                        <motion.div
-                                          animate={{ rotate: [0, 10, -10, 0] }}
-                                          transition={{ duration: 2, repeat: Infinity }}
-                                          className="w-6 h-6 bg-white/30 rounded-lg flex items-center justify-center"
-                                        >
-                                          <RoleIcon className="w-4 h-4 text-white" />
+                                    {/* Role Header */}
+                                    <div className={`${role.header} px-2 py-1 flex items-center justify-between`}>
+                                      <div className="flex items-center gap-1">
+                                        <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 2, repeat: Infinity }}>
+                                          <RoleIcon className="w-3 h-3 text-white" />
                                         </motion.div>
-                                        <span className="text-xs font-bold text-white uppercase tracking-wide">
-                                          {roleConfig.label}
-                                        </span>
+                                        <span className="text-[10px] font-bold text-white">{role.label}</span>
                                       </div>
-                                      <div {...provided.dragHandleProps}>
-                                        <GripVertical className="w-4 h-4 text-white/60" />
+                                      <div {...provided.dragHandleProps} className="cursor-grab">
+                                        <GripVertical className="w-3 h-3 text-white/60" />
                                       </div>
                                     </div>
                                     
-                                    {/* Body */}
-                                    <div className={`${roleConfig.bg} p-2`}>
-                                      {/* Colaborador */}
-                                      <div className="flex items-center gap-2 mb-2">
-                                        <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${roleConfig.gradient} flex items-center justify-center shadow-md`}>
-                                          <span className="text-sm font-bold text-white">
-                                            {shift.cashier_name?.charAt(0)?.toUpperCase() || '?'}
-                                          </span>
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                          <p className="font-bold text-sm text-gray-800 truncate">
-                                            {shift.cashier_name || 'Sin asignar'}
-                                          </p>
-                                        </div>
-                                      </div>
+                                    {/* Content */}
+                                    <div className="p-2">
+                                      {/* Name */}
+                                      <p className="font-bold text-sm text-gray-800 truncate mb-1">
+                                        {shift.cashier_name || 'Sin asignar'}
+                                      </p>
                                       
-                                      {/* Horario */}
-                                      <div className="bg-white/60 rounded-lg p-2 mb-2">
-                                        <div className="flex items-center justify-between">
-                                          <div className="flex items-center gap-1">
-                                            <Clock className={`w-4 h-4 ${roleConfig.text}`} />
-                                            <span className={`text-base font-black ${roleConfig.text}`}>
-                                              {shift.start_time}
-                                            </span>
-                                            <span className="text-gray-400 mx-1">→</span>
-                                            <span className={`text-base font-black ${roleConfig.text}`}>
-                                              {shift.end_time}
-                                            </span>
-                                          </div>
-                                          <span className={`text-xs font-bold ${roleConfig.text} bg-white px-2 py-0.5 rounded-full shadow-sm`}>
-                                            {duration.toFixed(1)}h
+                                      {/* Time */}
+                                      <div className="flex items-center justify-between bg-white/60 rounded px-1.5 py-1">
+                                        <div className="flex items-center gap-1">
+                                          <Clock className={`w-3 h-3 ${role.text}`} />
+                                          <span className="text-xs font-bold text-gray-700">
+                                            {shift.start_time} - {shift.end_time}
                                           </span>
                                         </div>
+                                        <span className={`text-[10px] font-bold ${role.text}`}>{duration}h</span>
                                       </div>
 
-                                      {/* Reacciones */}
-                                      <div className="flex items-center justify-between">
-                                        <div className="flex gap-1">
-                                          {[
-                                            { icon: ThumbsUp, emoji: '👍' },
-                                            { icon: Heart, emoji: '❤️' },
-                                            { icon: Star, emoji: '⭐' }
-                                          ].map((r, i) => (
-                                            <motion.button
-                                              key={i}
-                                              whileHover={{ scale: 1.2 }}
-                                              whileTap={{ scale: 0.9 }}
-                                              onClick={(e) => { e.stopPropagation(); handleReaction(shift.id, r.emoji); }}
-                                              className={`w-6 h-6 rounded-full flex items-center justify-center text-xs transition-all ${shift.reaction === r.emoji ? 'bg-yellow-200 shadow-md' : 'bg-white/80 hover:bg-white'}`}
-                                            >
-                                              {r.emoji}
-                                            </motion.button>
-                                          ))}
-                                        </div>
-                                        <button
-                                          onClick={(e) => { e.stopPropagation(); deleteMutation.mutate(shift.id); }}
-                                          className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-red-100 rounded-full"
-                                        >
-                                          <Trash2 className="w-3.5 h-3.5 text-red-400" />
-                                        </button>
+                                      {/* Actions */}
+                                      <div className="flex justify-end gap-1 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <motion.button whileTap={{ scale: 0.9 }} onClick={() => handleEditShift(shift)} className="p-1 rounded bg-blue-100 hover:bg-blue-200">
+                                          <Pencil className="w-3 h-3 text-blue-500" />
+                                        </motion.button>
+                                        <motion.button whileTap={{ scale: 0.9 }} onClick={() => deleteMutation.mutate(shift.id)} className="p-1 rounded bg-red-100 hover:bg-red-200">
+                                          <Trash2 className="w-3 h-3 text-red-500" />
+                                        </motion.button>
                                       </div>
-
-                                      {/* Indicador de visto */}
-                                      {shift.reaction && (
-                                        <motion.div 
-                                          initial={{ opacity: 0, y: 5 }}
-                                          animate={{ opacity: 1, y: 0 }}
-                                          className="mt-1 text-[10px] text-center text-gray-500 bg-white/50 rounded-full py-0.5"
-                                        >
-                                          ✅ Visto
-                                        </motion.div>
-                                      )}
                                     </div>
                                   </motion.div>
                                 )}
@@ -420,12 +317,12 @@ export default function WeeklyCalendar({
                         
                         {/* Add Button */}
                         <motion.button
-                          whileHover={{ scale: 1.05, y: -2 }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={() => { setSelectedDay(day); setShowAddShift(true); }}
-                          className={`w-full py-3 border-2 border-dashed rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-2 ${isHovered ? 'border-pink-400 text-pink-500 bg-pink-50' : 'border-gray-200 text-gray-400 hover:border-pink-300 hover:text-pink-500'}`}
+                          whileHover={{ scale: 1.03 }}
+                          whileTap={{ scale: 0.97 }}
+                          onClick={() => { setSelectedDay(day); setEditingShift(null); resetForm(); setShowAddShift(true); }}
+                          className={`w-full py-2 border border-dashed rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1 ${isHovered ? 'border-pink-300 text-pink-500 bg-pink-50/50' : 'border-gray-200 text-gray-400 hover:border-pink-200'}`}
                         >
-                          <Plus className="w-5 h-5" /> Agregar Turno
+                          <Plus className="w-4 h-4" /> Agregar
                         </motion.button>
                       </div>
                     </motion.div>
@@ -437,31 +334,26 @@ export default function WeeklyCalendar({
         </DragDropContext>
       )}
 
-      {/* Add Shift Dialog */}
-      <Dialog open={showAddShift} onOpenChange={setShowAddShift}>
+      {/* Add/Edit Dialog */}
+      <Dialog open={showAddShift} onOpenChange={(v) => { setShowAddShift(v); if (!v) setEditingShift(null); }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-rose-500 rounded-lg flex items-center justify-center">
-                <Plus className="w-5 h-5 text-white" />
+              <div className="w-8 h-8 bg-gradient-to-r from-pink-400 to-rose-400 rounded-lg flex items-center justify-center">
+                {editingShift ? <Pencil className="w-4 h-4 text-white" /> : <Plus className="w-4 h-4 text-white" />}
               </div>
-              Agregar Turno - {selectedDay && format(selectedDay, "EEEE d 'de' MMMM", { locale: es })}
+              {editingShift ? 'Editar Turno' : `Agregar Turno - ${selectedDay && format(selectedDay, "EEE d MMM", { locale: es })}`}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div>
               <label className="text-sm font-medium text-gray-700 mb-1 block">Colaborador</label>
               <Select value={newShift.cashier_id} onValueChange={(v) => setNewShift({ ...newShift, cashier_id: v })}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar colaborador" />
-                </SelectTrigger>
+                <SelectTrigger><SelectValue placeholder="Seleccionar" /></SelectTrigger>
                 <SelectContent>
                   {cashiers.map(c => (
                     <SelectItem key={c.id} value={c.id}>
-                      <div className="flex items-center gap-2">
-                        <User className="w-4 h-4" />
-                        {c.name}
-                      </div>
+                      <div className="flex items-center gap-2"><User className="w-4 h-4" />{c.name}</div>
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -469,40 +361,25 @@ export default function WeeklyCalendar({
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-sm font-medium text-gray-700 mb-1 block">Hora inicio</label>
-                <Input 
-                  type="time" 
-                  value={newShift.start_time}
-                  onChange={(e) => setNewShift({ ...newShift, start_time: e.target.value })}
-                />
+                <label className="text-sm font-medium text-gray-700 mb-1 block">Inicio</label>
+                <Input type="time" value={newShift.start_time} onChange={(e) => setNewShift({ ...newShift, start_time: e.target.value })} />
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-700 mb-1 block">Hora fin</label>
-                <Input 
-                  type="time" 
-                  value={newShift.end_time}
-                  onChange={(e) => setNewShift({ ...newShift, end_time: e.target.value })}
-                />
+                <label className="text-sm font-medium text-gray-700 mb-1 block">Fin</label>
+                <Input type="time" value={newShift.end_time} onChange={(e) => setNewShift({ ...newShift, end_time: e.target.value })} />
               </div>
             </div>
             <div>
-              <label className="text-sm font-medium text-gray-700 mb-2 block">Rol / Posición</label>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">Posición</label>
               <div className="grid grid-cols-3 gap-2">
                 {Object.entries(ROLES_CONFIG).map(([key, config]) => {
                   const RoleIcon = config.icon;
                   const isSelected = newShift.role === key;
                   return (
-                    <motion.button
-                      key={key}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => setNewShift({ ...newShift, role: key })}
-                      className={`p-2 rounded-xl border-2 transition-all flex flex-col items-center gap-1 ${isSelected ? `${config.bg} ${config.border} shadow-md` : 'border-gray-200 hover:border-gray-300'}`}
-                    >
-                      <RoleIcon className={`w-5 h-5 ${isSelected ? config.text : 'text-gray-400'}`} />
-                      <span className={`text-[10px] font-medium ${isSelected ? config.text : 'text-gray-500'}`}>
-                        {config.label}
-                      </span>
+                    <motion.button key={key} whileTap={{ scale: 0.95 }} onClick={() => setNewShift({ ...newShift, role: key })}
+                      className={`p-2 rounded-lg border transition-all flex flex-col items-center gap-1 ${isSelected ? `${config.bg} ${config.border} shadow` : 'border-gray-200 hover:border-gray-300'}`}>
+                      <RoleIcon className={`w-4 h-4 ${isSelected ? config.text : 'text-gray-400'}`} />
+                      <span className={`text-[9px] font-medium ${isSelected ? config.text : 'text-gray-500'}`}>{config.label}</span>
                     </motion.button>
                   );
                 })}
@@ -511,13 +388,10 @@ export default function WeeklyCalendar({
           </div>
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={() => setShowAddShift(false)}>Cancelar</Button>
-            <Button 
-              onClick={handleAddShift}
-              disabled={!newShift.cashier_id || createMutation.isPending}
-              className="bg-gradient-to-r from-pink-500 to-rose-500 text-white"
-            >
-              {createMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-              Crear Turno
+            <Button onClick={handleSaveShift} disabled={!newShift.cashier_id || createMutation.isPending || updateMutation.isPending}
+              className="bg-gradient-to-r from-pink-400 to-rose-400 text-white">
+              {(createMutation.isPending || updateMutation.isPending) && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+              {editingShift ? 'Guardar' : 'Crear'}
             </Button>
           </div>
         </DialogContent>
