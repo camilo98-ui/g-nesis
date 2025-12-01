@@ -46,14 +46,21 @@ export default function WeeklyCalendar({
   const queryClient = useQueryClient();
 
   const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.Shift.create(data),
+    mutationFn: async (data) => {
+      const result = await base44.entities.Shift.create(data);
+      return result;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['shifts'] });
+      setTimeout(() => {
+        queryClient.refetchQueries({ queryKey: ['shifts'] });
+      }, 500);
       setShowAddShift(false);
       setNewShift({ cashier_id: '', start_time: '08:00', end_time: '16:00', role: 'ventas' });
       toast.success('Turno creado exitosamente');
     },
     onError: (error) => {
+      console.error('Error creating shift:', error);
       toast.error('Error al crear turno: ' + (error.message || 'Intenta de nuevo'));
     }
   });
