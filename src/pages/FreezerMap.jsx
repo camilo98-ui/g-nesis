@@ -166,6 +166,9 @@ export default function FreezerMap() {
   const [savingSlot, setSavingSlot] = useState(null);
   const [draggedSlot, setDraggedSlot] = useState(null);
   const [isOptimizing, setIsOptimizing] = useState(false);
+  const [currentFreezer, setCurrentFreezer] = useState(1); // Nueva nevera selector
+  const [longPressSlot, setLongPressSlot] = useState(null);
+  const longPressTimer = useRef(null);
 
   useEffect(() => {
     const saved = localStorage.getItem('selectedStore');
