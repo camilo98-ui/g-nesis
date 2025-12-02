@@ -27,6 +27,8 @@ const HOLIDAYS = [
   '2025-12-08', '2025-12-25'
 ];
 
+import { Moon } from 'lucide-react';
+
 const ROLES_CONFIG = {
   caja: { label: 'Caja', icon: ShoppingCart, bg: 'bg-emerald-50/70', text: 'text-emerald-500', border: 'border-emerald-100', header: 'bg-emerald-300' },
   coneo: { label: 'Coneo', icon: IceCream, bg: 'bg-pink-50/70', text: 'text-pink-500', border: 'border-pink-100', header: 'bg-pink-300' },
@@ -37,6 +39,7 @@ const ROLES_CONFIG = {
   stocker: { label: 'Stocker', icon: Package, bg: 'bg-slate-50/70', text: 'text-slate-500', border: 'border-slate-100', header: 'bg-slate-300' },
   toma_pedidos: { label: 'Toma Pedidos', icon: Headphones, bg: 'bg-cyan-50/70', text: 'text-cyan-500', border: 'border-cyan-100', header: 'bg-cyan-300' },
   experiencia: { label: 'Experiencia', icon: Crown, bg: 'bg-yellow-50/70', text: 'text-yellow-500', border: 'border-yellow-100', header: 'bg-yellow-300' },
+  descanso: { label: '😴 Descanso', icon: Moon, bg: 'bg-indigo-100/90', text: 'text-indigo-600', border: 'border-indigo-200', header: 'bg-gradient-to-r from-indigo-400 to-purple-400' },
 };
 
 // Decoraciones de helados para las tarjetas
