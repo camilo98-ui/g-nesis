@@ -589,7 +589,7 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
               </Button>
             </Link>
             <div>
-              <h1 className="text-xl sm:text-2xl font-semibold text-gray-700">Mapa de Nevera</h1>
+              <h1 className="text-xl sm:text-2xl font-semibold text-gray-700">Mapa de Nevera #{currentFreezer}</h1>
               {selectedStore && <p className="text-xs sm:text-sm text-gray-500">{selectedStore} - {selectedStoreName}</p>}
             </div>
           </div>
