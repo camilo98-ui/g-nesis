@@ -182,10 +182,27 @@ export default function FreezerMap() {
   };
 
   const { data: slots = [], isLoading } = useQuery({
-    queryKey: ['freezerSlots', selectedStore],
-    queryFn: () => base44.entities.FreezerSlot.filter({ store_id: selectedStore }),
+    queryKey: ['freezerSlots', selectedStore, currentFreezer],
+    queryFn: () => base44.entities.FreezerSlot.filter({ store_id: `${selectedStore}_F${currentFreezer}` }),
     enabled: !!selectedStore
   });
+
+  // Long press para borrar
+  const handleLongPressStart = (slot) => {
+    longPressTimer.current = setTimeout(() => {
+      clearSlot(slot);
+      setLongPressSlot(null);
+    }, 600);
+    setLongPressSlot(slot);
+  };
+
+  const handleLongPressEnd = () => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+    setLongPressSlot(null);
+  };
 
   const { data: history = [] } = useQuery({
     queryKey: ['freezerHistory', selectedStore],
