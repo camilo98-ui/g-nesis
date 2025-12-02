@@ -27,42 +27,105 @@ const HOLIDAYS = [
   '2025-12-08', '2025-12-25'
 ];
 
+// Generador de apodos divertidos basado en el nombre
+const generateNickname = (name) => {
+  if (!name) return '';
+  const firstName = name.split(' ')[0].toLowerCase();
+  const nicknames = {
+    // Nombres comunes y variaciones
+    'maria': ['Mari 🌸', 'Marí la Dulce', 'Mary Pop'],
+    'juan': ['Juancho 🎸', 'Juanito Helado', 'El Juanster'],
+    'carlos': ['Carlitos 🚀', 'El Crack', 'Charles'],
+    'ana': ['Anita ⭐', 'La Ana Banana', 'Anibella'],
+    'luis': ['Lucho 💪', 'Luisito Rey', 'El Luigi'],
+    'andrea': ['Andy 🎀', 'La Andreita', 'Drea'],
+    'david': ['Davi 🎯', 'El Davidón', 'Dave'],
+    'laura': ['Lau 🌟', 'Laurita Boom', 'La Lau'],
+    'daniel': ['Dani 🔥', 'El Danielito', 'Dan'],
+    'sofia': ['Sofi 💖', 'La Sofis', 'Sof'],
+    'camilo': ['Cami 🎭', 'El Camilín', 'Cam'],
+    'valentina': ['Vale 💫', 'La Valen', 'Tina'],
+    'santiago': ['Santi ⚡', 'El Santy', 'Tiago'],
+    'natalia': ['Naty 🌺', 'La Nati', 'Nat'],
+    'sebastian': ['Sebas 🎪', 'El Seba', 'Sebi'],
+    'paola': ['Pao 🦋', 'La Paolita', 'Paolis'],
+    'miguel': ['Migue 🎤', 'El Mickey', 'Miguelón'],
+    'carolina': ['Caro 🌈', 'La Carito', 'Carol'],
+    'andres': ['El Andy 🏆', 'Andresito', 'Dres'],
+    'juliana': ['Juli 🍀', 'La Julita', 'Ju'],
+    'diego': ['Dieguito 🎨', 'El D', 'Diegón'],
+    'paula': ['Pau 💝', 'Paulita', 'Paulis'],
+    'felipe': ['Pipe 🎵', 'El Felipe', 'Feli'],
+    'monica': ['Moni 🌙', 'La Moniquita', 'Mo'],
+    'alejandro': ['Alejo 🔮', 'El Ale', 'Alex'],
+    'marcela': ['Marce 🎁', 'La Marcelita', 'Mar'],
+    'jorge': ['Jorgito 🎬', 'El George', 'Jor'],
+    'diana': ['Di 💎', 'La Dianita', 'Didi'],
+    'ricardo': ['Ricky 🎸', 'El Ricar', 'Rico'],
+    'claudia': ['Clau 🦄', 'La Claudis', 'Claud'],
+  };
+  
+  // Buscar coincidencia exacta o parcial
+  for (const [key, values] of Object.entries(nicknames)) {
+    if (firstName.includes(key) || key.includes(firstName.slice(0, 3))) {
+      return values[Math.floor(Math.random() * values.length)];
+    }
+  }
+  
+  // Generar apodo genérico basado en la primera letra
+  const funSuffixes = ['⭐', '🚀', '💫', '🎯', '🔥', '💪', '🌟', '✨', '🎭', '🏆'];
+  const suffix = funSuffixes[firstName.charCodeAt(0) % funSuffixes.length];
+  const shortName = firstName.charAt(0).toUpperCase() + firstName.slice(1, 4);
+  return `${shortName} ${suffix}`;
+};
+
 import { Moon } from 'lucide-react';
 
 const ROLES_CONFIG = {
-  caja: { label: 'Caja', icon: ShoppingCart, bg: 'bg-emerald-50/70', text: 'text-emerald-500', border: 'border-emerald-100', header: 'bg-emerald-300' },
-  coneo: { label: 'Coneo', icon: IceCream, bg: 'bg-pink-50/70', text: 'text-pink-500', border: 'border-pink-100', header: 'bg-pink-300' },
-  bebidas: { label: 'Bebidas', icon: Coffee, bg: 'bg-amber-50/70', text: 'text-amber-500', border: 'border-amber-100', header: 'bg-amber-300' },
-  especialidades: { label: 'Especialidades', icon: Sparkles, bg: 'bg-violet-50/70', text: 'text-violet-500', border: 'border-violet-100', header: 'bg-violet-300' },
-  coordinacion: { label: 'Coord. Entregas', icon: ClipboardList, bg: 'bg-blue-50/70', text: 'text-blue-500', border: 'border-blue-100', header: 'bg-blue-300' },
-  cookie_jar: { label: 'Cookie Jar', icon: Cookie, bg: 'bg-orange-50/70', text: 'text-orange-500', border: 'border-orange-100', header: 'bg-orange-300' },
-  stocker: { label: 'Stocker', icon: Package, bg: 'bg-slate-50/70', text: 'text-slate-500', border: 'border-slate-100', header: 'bg-slate-300' },
-  toma_pedidos: { label: 'Toma Pedidos', icon: Headphones, bg: 'bg-cyan-50/70', text: 'text-cyan-500', border: 'border-cyan-100', header: 'bg-cyan-300' },
-  experiencia: { label: 'Experiencia', icon: Crown, bg: 'bg-yellow-50/70', text: 'text-yellow-500', border: 'border-yellow-100', header: 'bg-yellow-300' },
-  descanso: { label: '😴 Descanso', icon: Moon, bg: 'bg-indigo-100/90', text: 'text-indigo-600', border: 'border-indigo-200', header: 'bg-gradient-to-r from-indigo-400 to-purple-400' },
+  caja: { label: 'Caja', icon: ShoppingCart, bg: 'bg-gradient-to-br from-emerald-50 to-green-100', text: 'text-emerald-600', border: 'border-emerald-200', header: 'bg-gradient-to-r from-emerald-400 to-green-400' },
+  coneo: { label: 'Coneo', icon: IceCream, bg: 'bg-gradient-to-br from-pink-50 to-rose-100', text: 'text-pink-600', border: 'border-pink-200', header: 'bg-gradient-to-r from-pink-400 to-rose-400' },
+  bebidas: { label: 'Bebidas', icon: Coffee, bg: 'bg-gradient-to-br from-amber-50 to-orange-100', text: 'text-amber-600', border: 'border-amber-200', header: 'bg-gradient-to-r from-amber-400 to-orange-400' },
+  especialidades: { label: 'Especialidades', icon: Sparkles, bg: 'bg-gradient-to-br from-violet-50 to-purple-100', text: 'text-violet-600', border: 'border-violet-200', header: 'bg-gradient-to-r from-violet-400 to-purple-400' },
+  coordinacion: { label: 'Coord. Entregas', icon: ClipboardList, bg: 'bg-gradient-to-br from-blue-50 to-sky-100', text: 'text-blue-600', border: 'border-blue-200', header: 'bg-gradient-to-r from-blue-400 to-sky-400' },
+  cookie_jar: { label: 'Cookie Jar', icon: Cookie, bg: 'bg-gradient-to-br from-orange-50 to-amber-100', text: 'text-orange-600', border: 'border-orange-200', header: 'bg-gradient-to-r from-orange-400 to-amber-400' },
+  stocker: { label: 'Stocker', icon: Package, bg: 'bg-gradient-to-br from-slate-50 to-gray-100', text: 'text-slate-600', border: 'border-slate-200', header: 'bg-gradient-to-r from-slate-400 to-gray-400' },
+  toma_pedidos: { label: 'Toma Pedidos', icon: Headphones, bg: 'bg-gradient-to-br from-cyan-50 to-teal-100', text: 'text-cyan-600', border: 'border-cyan-200', header: 'bg-gradient-to-r from-cyan-400 to-teal-400' },
+  experiencia: { label: 'Experiencia', icon: Crown, bg: 'bg-gradient-to-br from-yellow-50 to-amber-100', text: 'text-yellow-600', border: 'border-yellow-200', header: 'bg-gradient-to-r from-yellow-400 to-amber-400' },
+  descanso: { label: '😴 Descanso', icon: Moon, bg: 'bg-gradient-to-br from-indigo-100 to-purple-100', text: 'text-indigo-600', border: 'border-indigo-200', header: 'bg-gradient-to-r from-indigo-500 to-purple-500' },
 };
 
-// Decoraciones de helados para las tarjetas
-const IceCreamDecorations = ({ roleColor }) => (
-  <div className="absolute top-0 left-0 right-0 h-3 overflow-hidden opacity-40">
-    <svg viewBox="0 0 120 12" className="w-full h-full" preserveAspectRatio="none">
+// Decoraciones de helados para las tarjetas - ahora en BLANCO para contraste
+const IceCreamDecorations = () => (
+  <div className="absolute top-0 left-0 right-0 h-full overflow-hidden pointer-events-none">
+    <svg viewBox="0 0 120 40" className="w-full h-full" preserveAspectRatio="none">
       {/* Cono pequeño */}
-      <circle cx="10" cy="4" r="3" fill={roleColor} opacity="0.6" />
-      <polygon points="8,6 10,12 12,6" fill="#d4a574" opacity="0.5" />
+      <circle cx="8" cy="8" r="4" fill="white" opacity="0.2" />
+      <polygon points="5,10 8,20 11,10" fill="white" opacity="0.15" />
+      {/* Estrellas/Sparkles */}
+      <path d="M25 6 L26 9 L29 9 L27 11 L28 14 L25 12 L22 14 L23 11 L21 9 L24 9 Z" fill="white" opacity="0.2" />
       {/* Malteada */}
-      <rect x="28" y="3" width="6" height="8" rx="1" fill="#f0f0f0" opacity="0.5" />
-      <circle cx="31" cy="3" r="2.5" fill={roleColor} opacity="0.5" />
-      {/* Copa */}
-      <ellipse cx="50" cy="8" rx="5" ry="3" fill="#f0f0f0" opacity="0.4" />
-      <circle cx="50" cy="5" r="3" fill={roleColor} opacity="0.5" />
-      {/* Banana split */}
-      <ellipse cx="75" cy="9" rx="8" ry="2" fill="#ffe4b5" opacity="0.4" />
-      <circle cx="72" cy="6" r="2" fill="#ffc0cb" opacity="0.5" />
-      <circle cx="78" cy="6" r="2" fill={roleColor} opacity="0.5" />
-      {/* Cono doble */}
-      <circle cx="100" cy="3" r="2.5" fill={roleColor} opacity="0.5" />
-      <circle cx="100" cy="6" r="2" fill="#ffc0cb" opacity="0.4" />
-      <polygon points="97,7 100,12 103,7" fill="#d4a574" opacity="0.5" />
+      <rect x="40" y="5" width="8" height="14" rx="2" fill="white" opacity="0.15" />
+      <ellipse cx="44" cy="5" rx="5" ry="3" fill="white" opacity="0.2" />
+      {/* Cherry */}
+      <circle cx="60" cy="10" r="3" fill="white" opacity="0.2" />
+      <path d="M60 7 Q63 4 65 6" stroke="white" strokeWidth="1" fill="none" opacity="0.2" />
+      {/* Helado copa */}
+      <ellipse cx="80" cy="16" rx="7" ry="4" fill="white" opacity="0.12" />
+      <circle cx="77" cy="10" r="4" fill="white" opacity="0.15" />
+      <circle cx="83" cy="10" r="4" fill="white" opacity="0.15" />
+      {/* Corazón */}
+      <path d="M100 12 C100 8 104 8 104 12 C104 8 108 8 108 12 C108 16 104 20 104 20 C104 20 100 16 100 12" fill="white" opacity="0.15" />
+      {/* Popsicle */}
+      <rect x="5" y="25" width="6" height="10" rx="2" fill="white" opacity="0.12" />
+      <rect x="7" y="33" width="2" height="4" fill="white" opacity="0.1" />
+      {/* Sprinkles */}
+      <rect x="35" y="28" width="3" height="1" rx="0.5" fill="white" opacity="0.2" transform="rotate(30 36 28)" />
+      <rect x="45" y="32" width="3" height="1" rx="0.5" fill="white" opacity="0.2" transform="rotate(-20 46 32)" />
+      <rect x="70" y="28" width="3" height="1" rx="0.5" fill="white" opacity="0.2" transform="rotate(45 71 28)" />
+      <rect x="90" y="30" width="3" height="1" rx="0.5" fill="white" opacity="0.2" transform="rotate(-30 91 30)" />
+      {/* Donut */}
+      <circle cx="115" cy="30" r="5" fill="white" opacity="0.12" />
+      <circle cx="115" cy="30" r="2" fill="none" stroke="white" strokeWidth="1" opacity="0.1" />
     </svg>
   </div>
 );
@@ -280,27 +343,27 @@ export default function WeeklyCalendar({
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0 }}
                                     whileHover={{ scale: 1.02, y: -2 }}
-                                    className={`rounded-lg overflow-hidden border ${role.border} ${role.bg} shadow-sm hover:shadow-md transition-all cursor-pointer group relative ${snapshot.isDragging ? 'shadow-xl rotate-1' : ''}`}
+                                    className={`rounded-xl overflow-hidden border-2 ${role.border} ${role.bg} shadow-sm hover:shadow-lg transition-all cursor-pointer group relative ${snapshot.isDragging ? 'shadow-xl rotate-2' : ''}`}
                                   >
-                                    {/* Decoraciones de helados */}
-                                    <IceCreamDecorations roleColor={getRoleColor(shift.role)} />
-                                    
-                                    {/* Role Header */}
-                                    <div className={`${role.header} px-2 py-1 flex items-center justify-between relative`}>
-                                      <div className="flex items-center gap-1">
-                                        <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 2, repeat: Infinity }}>
-                                          <RoleIcon className="w-3 h-3 text-white" />
+                                    {/* Role Header con decoraciones blancas */}
+                                    <div className={`${role.header} px-2 py-1.5 flex items-center justify-between relative overflow-hidden`}>
+                                      {/* Decoraciones de helados en blanco */}
+                                      <IceCreamDecorations />
+                                      <div className="flex items-center gap-1.5 relative z-10">
+                                        <motion.div animate={{ scale: [1, 1.15, 1] }} transition={{ duration: 2, repeat: Infinity }}>
+                                          <RoleIcon className="w-3.5 h-3.5 text-white drop-shadow-sm" />
                                         </motion.div>
-                                        <span className="text-[10px] font-bold text-white">{role.label}</span>
+                                        <span className="text-[10px] font-bold text-white drop-shadow-sm">{role.label}</span>
                                       </div>
-                                      <div {...provided.dragHandleProps} className="cursor-grab">
-                                        <GripVertical className="w-3 h-3 text-white/60" />
+                                      <div {...provided.dragHandleProps} className="cursor-grab relative z-10">
+                                        <GripVertical className="w-3 h-3 text-white/70" />
                                       </div>
                                     </div>
                                     
                                     {/* Content */}
-                                    <div className="p-2 pt-3">
-                                      <p className="font-bold text-sm text-gray-700 truncate mb-1">{shift.cashier_name || 'Sin asignar'}</p>
+                                    <div className="p-2 pt-2.5">
+                                      <p className="font-bold text-sm text-gray-700 truncate">{shift.cashier_name || 'Sin asignar'}</p>
+                                      <p className="text-[10px] text-gray-400 truncate mb-1">{generateNickname(shift.cashier_name)}</p>
                                       <div className="flex items-center justify-between bg-white/70 rounded px-1.5 py-1">
                                         <div className="flex items-center gap-1">
                                           <Clock className={`w-3 h-3 ${role.text}`} />
