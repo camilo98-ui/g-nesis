@@ -13,7 +13,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { 
   LayoutDashboard, Users, TrendingUp, 
-  Award, Target, Bell, Phone, Download, Smartphone, Monitor, ClipboardCheck, FileText, CloudSun
+  Award, Target, Bell, Phone, Download, Smartphone, Monitor, ClipboardCheck, FileText
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { startOfMonth } from 'date-fns';
@@ -75,15 +75,7 @@ const MENU_ITEMS = [
     iconBg: 'bg-teal-100/80',
     iconColor: 'text-teal-400'
   },
-  { 
-    name: 'Clima y Ventas', 
-    page: 'WeatherImpact',
-    icon: CloudSun, 
-    description: 'Impacto meteorológico',
-    bgColor: 'bg-gradient-to-br from-sky-50/80 to-blue-100/60',
-    iconBg: 'bg-sky-100/80',
-    iconColor: 'text-sky-400'
-  },
+
 ];
 
 // Confetti pastel suave
