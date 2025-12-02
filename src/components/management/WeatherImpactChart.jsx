@@ -1,6 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Cloud, Sun, CloudRain, Thermometer, CloudSun, HelpCircle, Calendar as CalendarIcon } from 'lucide-react';
+import { Cloud, Sun, CloudRain, Thermometer, CloudSun, HelpCircle, Calendar as CalendarIcon, Loader2, RefreshCw } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import {
 } from 'recharts';
 import { format, eachDayOfInterval, subDays, subWeeks, subMonths, startOfWeek, endOfWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { toast } from 'sonner';
 
 // Configuración de clima por tipo
 const WEATHER_CONFIG = {
