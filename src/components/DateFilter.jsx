@@ -1,11 +1,162 @@
 import React, { useState, useMemo } from 'react';
-import { CalendarRange, Calendar as CalendarIcon, X, Check } from 'lucide-react';
+import { CalendarRange, Calendar as CalendarIcon, X, Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
-import { format, startOfWeek, endOfWeek, getWeek, getYear, setWeek, startOfYear, min, max } from 'date-fns';
+import { format, startOfWeek, endOfWeek, getWeek, getYear, setWeek, startOfYear, min, max, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isWithinInterval, isSameMonth, addMonths, subMonths } from 'date-fns';
 import { es } from 'date-fns/locale';
+
+// Calendario personalizado más dinámico
+function CustomCalendar({ selected, onSelect, numberOfMonths = 2 }) {
+  const [currentMonth, setCurrentMonth] = useState(selected?.from || new Date());
+  const [hoverDate, setHoverDate] = useState(null);
+  const [selectingEnd, setSelectingEnd] = useState(false);
+
+  const months = useMemo(() => {
+    const result = [];
+    for (let i = 0; i < numberOfMonths; i++) {
+      result.push(addMonths(currentMonth, i));
+    }
+    return result;
+  }, [currentMonth, numberOfMonths]);
+
+  const handleDayClick = (day) => {
+    if (!selected?.from || (selected.from && selected.to) || !selectingEnd) {
+      // Iniciar nueva selección
+      onSelect({ from: day, to: day });
+      setSelectingEnd(true);
+    } else {
+      // Completar selección
+      if (day < selected.from) {
+        onSelect({ from: day, to: selected.from });
+      } else {
+        onSelect({ from: selected.from, to: day });
+      }
+      setSelectingEnd(false);
+    }
+  };
+
+  const handleDayHover = (day) => {
+    if (selectingEnd && selected?.from) {
+      setHoverDate(day);
+    }
+  };
+
+  const isInRange = (day) => {
+    if (!selected?.from) return false;
+    
+    const endDate = selectingEnd && hoverDate ? hoverDate : selected.to;
+    if (!endDate) return false;
+    
+    const start = selected.from < endDate ? selected.from : endDate;
+    const end = selected.from < endDate ? endDate : selected.from;
+    
+    return isWithinInterval(day, { start, end });
+  };
+
+  const isStart = (day) => selected?.from && isSameDay(day, selected.from);
+  const isEnd = (day) => {
+    if (selectingEnd && hoverDate) return isSameDay(day, hoverDate);
+    return selected?.to && isSameDay(day, selected.to);
+  };
+
+  const renderMonth = (month) => {
+    const monthStart = startOfMonth(month);
+    const monthEnd = endOfMonth(month);
+    const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
+    
+    // Obtener día de la semana del primer día (0=dom, 1=lun...)
+    const startDay = monthStart.getDay();
+    const offset = startDay === 0 ? 6 : startDay - 1; // Ajustar para que lunes sea el primer día
+    
+    return (
+      <div className="p-2">
+        <div className="text-center font-medium text-gray-700 mb-2 capitalize">
+          {format(month, 'MMMM yyyy', { locale: es })}
+        </div>
+        <div className="grid grid-cols-7 gap-0.5 mb-1">
+          {['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa', 'Do'].map(d => (
+            <div key={d} className="text-center text-[10px] text-gray-400 font-medium py-1">{d}</div>
+          ))}
+        </div>
+        <div className="grid grid-cols-7 gap-0.5">
+          {/* Espacios vacíos para alinear */}
+          {Array.from({ length: offset }).map((_, i) => (
+            <div key={`empty-${i}`} className="h-8" />
+          ))}
+          {days.map((day) => {
+            const inRange = isInRange(day);
+            const start = isStart(day);
+            const end = isEnd(day);
+            const isToday = isSameDay(day, new Date());
+            
+            return (
+              <button
+                key={day.toISOString()}
+                onClick={() => handleDayClick(day)}
+                onMouseEnter={() => handleDayHover(day)}
+                className={`h-8 w-full text-xs rounded-md transition-all relative
+                  ${inRange && !start && !end ? 'bg-pink-100' : ''}
+                  ${start || end ? 'bg-pink-500 text-white font-bold' : ''}
+                  ${!inRange && !start && !end ? 'hover:bg-pink-50' : ''}
+                  ${isToday && !start && !end ? 'ring-1 ring-pink-300' : ''}
+                `}
+              >
+                {format(day, 'd')}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="select-none">
+      {/* Navegación */}
+      <div className="flex items-center justify-between px-3 py-2 border-b">
+        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}>
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <div className="flex gap-4">
+          {months.map((m, i) => (
+            <span key={i} className="text-sm font-medium text-gray-600 capitalize">
+              {format(m, 'MMM yyyy', { locale: es })}
+            </span>
+          ))}
+        </div>
+        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      </div>
+      
+      {/* Meses */}
+      <div className="flex">
+        {months.map((month, i) => (
+          <div key={i} className={i > 0 ? 'border-l' : ''}>
+            {renderMonth(month)}
+          </div>
+        ))}
+      </div>
+      
+      {/* Footer con selección actual */}
+      <div className="px-3 py-2 border-t bg-gray-50 text-xs text-gray-500 flex items-center justify-between">
+        <span>
+          {selected?.from && (
+            <>
+              {format(selected.from, 'dd MMM', { locale: es })}
+              {selected.to && !isSameDay(selected.from, selected.to) && (
+                <> → {format(selected.to, 'dd MMM', { locale: es })}</>
+              )}
+            </>
+          )}
+          {!selected?.from && 'Clic para seleccionar'}
+        </span>
+        {selectingEnd && <span className="text-pink-500">Selecciona fecha fin</span>}
+      </div>
+    </div>
+  );
+}
 
 export default function DateFilter({ dateRange, onDateChange }) {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
@@ -60,21 +211,19 @@ export default function DateFilter({ dateRange, onDateChange }) {
     setSelectedWeeks([]);
   };
 
-  // Manejar selección desde calendario (permite 1 día o rango) - dinámico
-  const handleCalendarSelect = (range) => {
-    if (range?.from) {
-      onDateChange({ 
-        from: range.from, 
-        to: range.to || range.from 
-      });
-    }
-  };
-
   const getWeeksLabel = () => {
     if (selectedWeeks.length === 0) return 'Semanas';
     if (selectedWeeks.length === 1) return `Sem ${selectedWeeks[0]}`;
     if (selectedWeeks.length <= 3) return selectedWeeks.map(w => `S${w}`).join(', ');
     return `${selectedWeeks.length} semanas`;
+  };
+
+  const getDateLabel = () => {
+    if (!dateRange?.from) return 'Calendario';
+    if (dateRange.from && dateRange.to && isSameDay(dateRange.from, dateRange.to)) {
+      return format(dateRange.from, 'dd MMM', { locale: es });
+    }
+    return `${format(dateRange.from, 'dd/MM')} - ${format(dateRange.to, 'dd/MM')}`;
   };
 
   return (
@@ -152,7 +301,7 @@ export default function DateFilter({ dateRange, onDateChange }) {
         </PopoverContent>
       </Popover>
       
-      {/* Selector de rango/día personalizado - dinámico */}
+      {/* Selector de rango/día personalizado - más dinámico */}
       <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
         <PopoverTrigger asChild>
           <Button 
@@ -161,37 +310,24 @@ export default function DateFilter({ dateRange, onDateChange }) {
             className="gap-2 border-gray-200 hover:bg-pink-50 hover:border-pink-300"
           >
             <CalendarRange className="w-4 h-4 text-pink-500" />
-            <span className="hidden md:inline">
-              {dateRange.from && dateRange.to 
-                ? dateRange.from.getTime() === dateRange.to.getTime()
-                  ? format(dateRange.from, 'dd MMM', { locale: es })
-                  : `${format(dateRange.from, 'dd/MM', { locale: es })} - ${format(dateRange.to, 'dd/MM', { locale: es })}`
-                : 'Calendario'}
-            </span>
+            <span className="hidden md:inline">{getDateLabel()}</span>
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0 bg-white border-gray-200 rounded-xl" align="end">
-          <div className="p-2 border-b bg-gray-50 rounded-t-xl flex items-center justify-between">
-            <p className="text-xs text-gray-500">Selecciona fechas</p>
-            {dateRange.from && (
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="h-6 text-xs text-pink-600"
-                onClick={() => setIsCalendarOpen(false)}
-              >
-                <Check className="w-3 h-3 mr-1" /> Listo
-              </Button>
-            )}
-          </div>
-          <Calendar
-            mode="range"
-            defaultMonth={dateRange.from}
+          <CustomCalendar
             selected={dateRange}
-            onSelect={handleCalendarSelect}
+            onSelect={onDateChange}
             numberOfMonths={2}
-            locale={es}
           />
+          <div className="p-2 border-t flex justify-end">
+            <Button 
+              size="sm" 
+              className="bg-pink-500 hover:bg-pink-600 text-white"
+              onClick={() => setIsCalendarOpen(false)}
+            >
+              <Check className="w-3 h-3 mr-1" /> Aplicar
+            </Button>
+          </div>
         </PopoverContent>
       </Popover>
     </div>
