@@ -450,20 +450,26 @@ function ManagementDashboard() {
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={200}>
-                  <AreaChart data={dailyTrend}>
-                    <defs>
-                      <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#ec4899" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#ec4899" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                    <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#888' }} />
-                    <YAxis tickFormatter={(v) => `${(v/1000000).toFixed(1)}M`} tick={{ fontSize: 10, fill: '#888' }} />
-                    <Tooltip formatter={(v) => formatCurrency(v)} labelFormatter={(l, p) => p?.[0]?.payload?.fullDate || l} />
-                    <Area type="monotone" dataKey="sales" stroke="#ec4899" fill="url(#salesGradient)" strokeWidth={2} />
-                  </AreaChart>
-                </ResponsiveContainer>
+                          <ComposedChart data={dailyTrend}>
+                            <defs>
+                              <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                                <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                              </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                            <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#888' }} />
+                            <YAxis yAxisId="sales" tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} tick={{ fontSize: 10, fill: '#888' }} />
+                            <YAxis yAxisId="transactions" orientation="right" tickFormatter={(v) => v} tick={{ fontSize: 10, fill: '#888' }} />
+                            <Tooltip 
+                              formatter={(v, name) => name === 'sales' ? formatCurrency(v) : `${v} transacciones`} 
+                              labelFormatter={(l, p) => p?.[0]?.payload?.fullDate || l} 
+                            />
+                            <Legend formatter={(value) => value === 'sales' ? 'Ventas' : 'Transacciones'} />
+                            <Area yAxisId="sales" type="monotone" dataKey="sales" stroke="#10b981" fill="url(#salesGradient)" strokeWidth={2} name="sales" />
+                            <Line yAxisId="transactions" type="monotone" dataKey="transactions" stroke="#8b5cf6" strokeWidth={2} dot={false} name="transactions" />
+                          </ComposedChart>
+                        </ResponsiveContainer>
                 <ChartInsight data={dailyTrend} type="sales" formatCurrency={formatCurrency} />
               </CardContent>
             </Card>
