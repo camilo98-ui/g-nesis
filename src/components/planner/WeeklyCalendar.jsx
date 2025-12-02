@@ -185,6 +185,13 @@ export default function WeeklyCalendar({
 
   const resetForm = () => setNewShift({ cashier_id: '', start_time: '09:30', end_time: '17:30', role: 'caja' });
 
+  // Ordenar roles por prioridad para el selector
+  const sortedRoles = Object.entries(ROLES_CONFIG).sort((a, b) => {
+    if (a[0] === 'descanso') return 1;
+    if (b[0] === 'descanso') return -1;
+    return (a[1].priority || 9) - (b[1].priority || 9);
+  });
+
   const handleDragEnd = async (result) => {
     if (!result.destination || result.source.droppableId === result.destination.droppableId) return;
     updateMutation.mutate({ id: result.draggableId, data: { date: result.destination.droppableId } });
