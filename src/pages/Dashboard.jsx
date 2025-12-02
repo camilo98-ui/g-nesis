@@ -9,6 +9,7 @@ import DateFilter from '@/components/DateFilter';
 import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
 import ExportExcel from '@/components/ExportExcel';
 import DailyGoalsCard from '@/components/gamification/DailyGoalsCard';
+import WeatherSalesImpactChart from '@/components/weather/WeatherSalesImpactChart';
 
 import GrowthVelocityChart from '@/components/management/GrowthVelocityChart';
 import StoreReportGenerator from '@/components/reports/StoreReportGenerator';
