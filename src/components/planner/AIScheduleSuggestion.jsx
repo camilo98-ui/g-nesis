@@ -183,10 +183,16 @@ REGLAS IMPORTANTES:
 2. Turnos sugeridos: Apertura (09:30-17:30), Medio (12:00-20:00), Cierre (14:00-21:30 o 22:00)
 3. Máximo 5-6 turnos por colaborador a la semana
 4. Fines de semana necesitan MÁS personal y los MEJORES colaboradores - NADIE DESCANSA sábado ni domingo
-5. SI HAY POCOS COLABORADORES: priorizar Caja y Coneo
-6. Distribuir EQUITATIVAMENTE los turnos
-7. ${hasTwoCashiers ? 'CRÍTICO: Esta tienda tiene 2 CAJAS - Asignar SIEMPRE 2 personas diferentes al rol "caja" en horarios que se crucen para cubrir ambas cajas' : 'Esta tienda tiene 1 caja'}
-8. DESCANSOS: Cada colaborador debe tener 1-2 días de descanso SOLO entre lunes y viernes. Los descansos deben distribuirse equitativamente entre todos. Marcar los días de descanso con rol "descanso" y horario "00:00-00:00"
+5. ${hasTwoCashiers ? 'CRÍTICO: Esta tienda tiene 2 CAJAS - Asignar SIEMPRE 2 personas diferentes al rol "caja" en horarios que se crucen para cubrir ambas cajas' : 'Esta tienda tiene 1 caja'}
+6. DESCANSOS: Cada colaborador debe tener 1-2 días de descanso SOLO entre lunes y viernes. Los descansos deben distribuirse equitativamente entre todos. Marcar los días de descanso con rol "descanso" y horario "00:00-00:00"
+7. PRIORIZACIÓN DE POSICIONES CUANDO HAY POCOS COLABORADORES:
+   - CRÍTICO (siempre cubrir): Caja, Coneo
+   - IMPORTANTE (cubrir si es posible): Bebidas, Especialidades  
+   - SECUNDARIO (cubrir como tarea extra si sobra personal): Cookie Jar, Stocker, Toma Pedidos, Coordinacion, Experiencia
+   - Si hay 3 o menos colaboradores: SOLO asignar Caja y Coneo, las demás posiciones quedan como "tareas secundarias" en el campo reason
+   - Si hay 4-5 colaboradores: Cubrir Caja, Coneo, Bebidas. Las demás como secundarias
+   - Si hay 6+ colaboradores: Distribuir todas las posiciones normalmente
+8. Distribuir EQUITATIVAMENTE los turnos entre colaboradores
 
 ${customPrompt ? `INSTRUCCIONES DEL GERENTE:\n${customPrompt}` : ''}
 
