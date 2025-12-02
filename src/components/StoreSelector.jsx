@@ -1,12 +1,21 @@
 import React, { useState, useMemo } from 'react';
-import { MapPin, Search } from 'lucide-react';
+import { MapPin, Search, Lock, Eye, EyeOff, Settings, Save, X } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { base44 } from '@/api/base44Client';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { motion } from 'framer-motion';
 
 const STORES = [
   { code: "BTA 11", name: "CC PALATINO" },
