@@ -371,13 +371,19 @@ export default function WeeklyCalendar({
                                     <div className="p-2 pt-2.5">
                                       <p className="font-bold text-sm text-gray-700 truncate">{shift.cashier_name || 'Sin asignar'}</p>
                                       <p className="text-[10px] text-gray-400 truncate mb-1">{generateNickname(shift.cashier_name)}</p>
-                                      <div className="flex items-center justify-between bg-white/70 rounded px-1.5 py-1">
-                                        <div className="flex items-center gap-1">
-                                          <Clock className={`w-3 h-3 ${role.text}`} />
-                                          <span className="text-xs font-bold text-gray-600">{shift.start_time} - {shift.end_time}</span>
+                                      {shift.role === 'descanso' ? (
+                                        <div className="flex items-center justify-center bg-indigo-100/50 rounded px-1.5 py-1.5">
+                                          <span className="text-xs font-medium text-indigo-500">Día libre</span>
                                         </div>
-                                        <span className={`text-[10px] font-bold ${role.text}`}>{duration}h</span>
-                                      </div>
+                                      ) : (
+                                        <div className="flex items-center justify-between bg-white/70 rounded px-1.5 py-1">
+                                          <div className="flex items-center gap-1">
+                                            <Clock className={`w-3 h-3 ${role.text}`} />
+                                            <span className="text-xs font-bold text-gray-600">{shift.start_time} - {shift.end_time}</span>
+                                          </div>
+                                          <span className={`text-[10px] font-bold ${role.text}`}>{duration}h</span>
+                                        </div>
+                                      )}
                                       <div className="flex justify-end gap-1 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                         <motion.button whileTap={{ scale: 0.9 }} onClick={() => handleEditShift(shift)} className="p-1 rounded bg-blue-100 hover:bg-blue-200">
                                           <Pencil className="w-3 h-3 text-blue-500" />
