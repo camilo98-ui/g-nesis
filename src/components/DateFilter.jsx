@@ -179,20 +179,20 @@ function CustomCalendar({ selected, onSelect, onClose, onApply }) {
       {/* Footer */}
       <div className="px-4 py-3 border-t border-gray-100 bg-gray-50/50 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          {selected?.from ? (
+          {tempSelection?.from ? (
             <motion.div 
               initial={{ opacity: 0, y: 5 }}
               animate={{ opacity: 1, y: 0 }}
               className="flex items-center gap-2 text-sm"
             >
               <span className="px-2 py-1 bg-pink-100 text-pink-700 rounded-lg font-medium">
-                {format(selected.from, 'dd MMM', { locale: es })}
+                {format(tempSelection.from, 'dd MMM', { locale: es })}
               </span>
-              {selected.to && !isSameDay(selected.from, selected.to) && (
+              {tempSelection.to && !isSameDay(tempSelection.from, tempSelection.to) && (
                 <>
                   <span className="text-gray-400">→</span>
                   <span className="px-2 py-1 bg-rose-100 text-rose-700 rounded-lg font-medium">
-                    {format(selected.to, 'dd MMM', { locale: es })}
+                    {format(tempSelection.to, 'dd MMM', { locale: es })}
                   </span>
                 </>
               )}
@@ -201,16 +201,30 @@ function CustomCalendar({ selected, onSelect, onClose, onApply }) {
             <span className="text-xs text-gray-400">Selecciona una fecha</span>
           )}
         </div>
-        {selectingEnd && (
-          <motion.span 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-xs text-pink-500 font-medium flex items-center gap-1"
-          >
-            <Sparkles className="w-3 h-3" />
-            Selecciona fecha fin
-          </motion.span>
-        )}
+        <div className="flex items-center gap-2">
+          {selectingEnd && (
+            <motion.span 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-xs text-pink-500 font-medium flex items-center gap-1"
+            >
+              <Sparkles className="w-3 h-3" />
+              Selecciona fecha fin
+            </motion.span>
+          )}
+          {tempSelection?.from && !selectingEnd && (
+            <motion.button
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleApply}
+              className="px-4 py-1.5 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white text-xs font-medium shadow-md flex items-center gap-1"
+            >
+              <Check className="w-3 h-3" /> OK
+            </motion.button>
+          )}
+        </div>
       </div>
     </div>
   );
