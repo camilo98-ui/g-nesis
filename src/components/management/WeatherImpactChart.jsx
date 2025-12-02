@@ -704,13 +704,22 @@ export default function WeatherImpactChart({ dailyTrend = [], formatCurrency, da
           className="mt-3 bg-gradient-to-r from-sky-50 to-blue-50 rounded-xl p-3 border border-sky-100"
         >
           <p className="text-xs text-sky-800">
-            <span className="font-bold">💡 Insight:</span> Los días <span className="font-bold">{bestDay?.config?.label?.toLowerCase() || 'calurosos'}</span> 
+            <span className="font-bold">💡 Insight {dataSource === 'real' ? '(Datos Reales)' : '(Estimado)'}:</span> Los días <span className="font-bold">{bestDay?.config?.label?.toLowerCase() || 'calurosos'}</span> 
             {' '}aumentan las ventas un <span className="font-bold text-green-600">+{Math.abs(bestDay?.avgImpact || 20).toFixed(0)}%</span> en promedio,
             mientras que los días <span className="font-bold">{worstDay?.config?.label?.toLowerCase() || 'lluviosos'}</span> las reducen 
             {' '}<span className="font-bold text-red-500">{worstDay?.avgImpact?.toFixed(0) || -15}%</span>.
             {bestDay?.count > 0 && ` (${bestDay.count} días ${bestDay?.config?.label?.toLowerCase()} registrados)`}
           </p>
         </motion.div>
+        
+        {/* Nota sobre cálculo */}
+        <p className="text-[9px] text-gray-400 mt-2 text-center">
+          {dataSource === 'real' 
+            ? '📊 Impacto calculado comparando ventas reales de cada tipo de clima vs promedio general'
+            : '⚠️ Los porcentajes son estimaciones. Conecta con datos de ventas para cálculos precisos'}
+        </p>
+          </>
+        )}
       </CardContent>
     </Card>
   );
