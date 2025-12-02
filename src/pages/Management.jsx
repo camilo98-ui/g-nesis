@@ -291,13 +291,14 @@ function ManagementDashboard() {
     const days = eachDayOfInterval({ start: dateRange.from, end: dateRange.to });
     return days.map(day => {
       const dateStr = format(day, 'yyyy-MM-dd');
-      const daySales = filteredDailySales
-        .filter(s => s.date === dateStr)
-        .reduce((sum, s) => sum + (s.total_sales || 0), 0);
+      const daySalesData = filteredDailySales.filter(s => s.date === dateStr);
+      const daySales = daySalesData.reduce((sum, s) => sum + (s.total_sales || 0), 0);
+      const dayTransactions = daySalesData.reduce((sum, s) => sum + (s.total_transactions || 0), 0);
       return {
         date: format(day, 'dd', { locale: es }),
         fullDate: format(day, 'EEE dd MMM', { locale: es }),
-        sales: daySales
+        sales: daySales,
+        transactions: dayTransactions
       };
     });
   }, [filteredDailySales, dateRange]);
