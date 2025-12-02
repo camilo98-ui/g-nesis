@@ -142,37 +142,87 @@ export default function DailyGoalsCard({ storeId }) {
           className="w-full p-4 border-2 border-dashed border-gray-200 rounded-xl text-gray-400 hover:border-orange-300 hover:text-orange-500 transition-all flex items-center justify-center gap-2"
         >
           <Plus className="w-5 h-5" />
-          Definir objetivos de hoy
+          Definir objetivos
         </motion.button>
       ) : showForm ? (
         <div className="space-y-3">
-          <div className="grid grid-cols-3 gap-2">
-            <Input
-              type="number"
-              placeholder="Meta ventas"
-              value={goals.sales_goal}
-              onChange={(e) => setGoals({...goals, sales_goal: e.target.value})}
-              className="text-sm"
-            />
-            <Input
-              type="number"
-              placeholder="Meta tickets"
-              value={goals.tickets_goal}
-              onChange={(e) => setGoals({...goals, tickets_goal: e.target.value})}
-              className="text-sm"
-            />
-            <Input
-              type="number"
-              placeholder="Meta sugeridos"
-              value={goals.suggested_goal}
-              onChange={(e) => setGoals({...goals, suggested_goal: e.target.value})}
-              className="text-sm"
-            />
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => setShowForm(false)} className="flex-1">Cancelar</Button>
-            <Button size="sm" onClick={handleSave} className="flex-1 bg-gradient-to-r from-orange-500 to-amber-500 text-white">Guardar</Button>
-          </div>
+          {/* Tabs para elegir tipo de objetivo */}
+          <Tabs value={goalType} onValueChange={setGoalType} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 bg-gray-100">
+              <TabsTrigger value="daily" className="text-xs data-[state=active]:bg-orange-500 data-[state=active]:text-white">
+                📅 Objetivo del Día
+              </TabsTrigger>
+              <TabsTrigger value="weekly" className="text-xs data-[state=active]:bg-purple-500 data-[state=active]:text-white">
+                📆 Objetivo Semanal
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="daily" className="mt-3">
+              <div className="grid grid-cols-3 gap-2">
+                <Input
+                  type="number"
+                  placeholder="Meta ventas"
+                  value={goals.sales_goal}
+                  onChange={(e) => setGoals({...goals, sales_goal: e.target.value})}
+                  className="text-sm"
+                />
+                <Input
+                  type="number"
+                  placeholder="Meta tickets"
+                  value={goals.tickets_goal}
+                  onChange={(e) => setGoals({...goals, tickets_goal: e.target.value})}
+                  className="text-sm"
+                />
+                <Input
+                  type="number"
+                  placeholder="Meta sugeridos"
+                  value={goals.suggested_goal}
+                  onChange={(e) => setGoals({...goals, suggested_goal: e.target.value})}
+                  className="text-sm"
+                />
+              </div>
+              <div className="flex gap-2 mt-3">
+                <Button variant="outline" size="sm" onClick={() => setShowForm(false)} className="flex-1">Cancelar</Button>
+                <Button size="sm" onClick={handleSave} className="flex-1 bg-gradient-to-r from-orange-500 to-amber-500 text-white">Guardar</Button>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="weekly" className="mt-3">
+              <div className="bg-purple-50 rounded-xl p-3 mb-3">
+                <p className="text-xs text-purple-600 mb-2">💡 El objetivo semanal se dividirá automáticamente entre los 7 días</p>
+                <Input
+                  type="number"
+                  placeholder="Meta de ventas semanal total"
+                  value={weeklyGoal.sales_goal}
+                  onChange={(e) => setWeeklyGoal({ sales_goal: e.target.value })}
+                  className="text-sm bg-white"
+                />
+                {weeklyGoal.sales_goal && Number(weeklyGoal.sales_goal) > 0 && (
+                  <div className="mt-2 grid grid-cols-7 gap-1">
+                    {weekDays.map((day, i) => (
+                      <div key={i} className="text-center">
+                        <p className="text-[9px] text-purple-500 font-medium">{format(day, 'EEE', { locale: es })}</p>
+                        <p className="text-[10px] font-bold text-purple-700">
+                          ${(Number(weeklyGoal.sales_goal) / 7 / 1000).toFixed(0)}K
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={() => setShowForm(false)} className="flex-1">Cancelar</Button>
+                <Button 
+                  size="sm" 
+                  onClick={handleSaveWeekly} 
+                  disabled={saveWeeklyGoalMutation.isPending}
+                  className="flex-1 bg-gradient-to-r from-purple-500 to-violet-500 text-white"
+                >
+                  {saveWeeklyGoalMutation.isPending ? 'Guardando...' : 'Distribuir en 7 días'}
+                </Button>
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
       ) : (
         <div className="space-y-3">
