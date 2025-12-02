@@ -11,6 +11,8 @@ import GrowthVelocityChart from '@/components/management/GrowthVelocityChart';
 import StoreProductivityCard from '@/components/management/StoreProductivityCard';
 import ManagementReportButton from '@/components/management/ManagementReportButton';
 import ChartInsight from '@/components/management/ChartInsight';
+import MarketComparisonChart from '@/components/management/MarketComparisonChart';
+import BrandComparisonChart from '@/components/management/BrandComparisonChart';
 import { 
   ArrowLeft, Lock, TrendingUp, TrendingDown, Users, Store, 
   Target, AlertTriangle, Activity, Award, DollarSign, Calendar, MapPin
@@ -494,6 +496,12 @@ function ManagementDashboard() {
                 </ResponsiveContainer>
               </CardContent>
             </Card>
+
+            {/* Row 4: Market & Brand Comparison */}
+            <div className="grid md:grid-cols-2 gap-4">
+              <MarketComparisonChart />
+              <BrandComparisonChart />
+            </div>
           </TabsContent>
 
           {/* Stores Tab - Compact View */}
