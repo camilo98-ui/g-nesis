@@ -71,6 +71,36 @@ export default function DailyGoalsCard({ storeId }) {
     });
   };
 
+  // Guardar objetivo semanal (divide automáticamente en 7 días)
+  const saveWeeklyGoalMutation = useMutation({
+    mutationFn: async (weeklyTotal) => {
+      const dailyAmount = Math.round(weeklyTotal / 7);
+      const promises = weekDays.map(day => {
+        const dateStr = format(day, 'yyyy-MM-dd');
+        return base44.entities.DailyGoal.filter({ store_id: storeId, date: dateStr })
+          .then(existing => {
+            if (existing[0]?.id) {
+              return base44.entities.DailyGoal.update(existing[0].id, { sales_goal: dailyAmount });
+            }
+            return base44.entities.DailyGoal.create({ store_id: storeId, date: dateStr, sales_goal: dailyAmount });
+          });
+      });
+      return Promise.all(promises);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['dailyGoal']);
+      setShowForm(false);
+      toast.success('Objetivo semanal distribuido en 7 días');
+    }
+  });
+
+  const handleSaveWeekly = () => {
+    const total = Number(weeklyGoal.sales_goal);
+    if (total > 0) {
+      saveWeeklyGoalMutation.mutate(total);
+    }
+  };
+
   const goalItems = [
     { key: 'sales', label: 'Ventas', icon: TrendingUp, color: 'emerald', current: currentSales.total_sales, goal: dailyGoal?.sales_goal, format: (v) => `$${(v/1000).toFixed(0)}K` },
     { key: 'tickets', label: 'Tickets', icon: Ticket, color: 'blue', current: currentSales.total_tickets, goal: dailyGoal?.tickets_goal, format: (v) => v },
