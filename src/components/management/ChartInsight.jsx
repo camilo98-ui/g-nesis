@@ -74,7 +74,8 @@ export default function ChartInsight({ data, type = 'sales', formatCurrency }) {
             <span className={`font-bold ${insight.trendColor}`}>
               {insight.trendPercent >= 0 ? '+' : ''}{insight.trendPercent.toFixed(1)}%
             </span>.{' '}
-            Mejor día: <span className="font-bold text-green-600">{insight.bestDay?.fullDate || insight.bestDay?.date}</span> ({formatCurrency?.(insight.max) || insight.max}).{' '}
+            <span className="text-green-700">📈 Mejor día: <strong>{insight.bestDay?.fullDate || insight.bestDay?.date}</strong></span> ({formatCurrency?.(insight.max) || insight.max}).{' '}
+            <span className="text-red-600">📉 Menor venta: <strong>{insight.worstDay?.fullDate || insight.worstDay?.date}</strong></span> ({formatCurrency?.(insight.min) || insight.min}).{' '}
             {insight.isVolatile && 'Alta variabilidad entre días. '}
             {insight.isStable && 'Comportamiento consistente. '}
             Promedio diario: <span className="font-bold">{formatCurrency?.(insight.avg) || Math.round(insight.avg)}</span>.
@@ -85,9 +86,10 @@ export default function ChartInsight({ data, type = 'sales', formatCurrency }) {
         return (
           <>
             <span className="font-bold">Ticket promedio {insight.trendText}</span> ({insight.trendPercent >= 0 ? '+' : ''}{insight.trendPercent.toFixed(1)}%).{' '}
-            Rango: {formatCurrency?.(insight.min)} - {formatCurrency?.(insight.max)}.{' '}
-            {insight.isStable ? 'Los clientes mantienen un gasto similar cada día.' : 'Existe variación significativa en el ticket.'}
-            {' '}Media: <span className="font-bold">{formatCurrency?.(insight.avg)}</span>.
+            <span className="text-green-700">✅ Buenos días: <strong>{insight.bestDay?.fullDate || insight.bestDay?.date}</strong></span> (${formatCurrency?.(insight.max)}).{' '}
+            <span className="text-amber-600">⚠️ Oportunidad: <strong>{insight.worstDay?.fullDate || insight.worstDay?.date}</strong></span> (${formatCurrency?.(insight.min)}).{' '}
+            {insight.isStable ? 'Clientes con gasto similar.' : 'Variación significativa.'}{' '}
+            Media: <span className="font-bold">{formatCurrency?.(insight.avg)}</span>.
           </>
         );
       

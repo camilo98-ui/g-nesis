@@ -20,12 +20,21 @@ export default function GrowthVelocityChart({ dailyTrend = [], budget = 0, forma
       cumulative += day.sales || 0;
       expectedCumulative += dailyBudget;
       
-      const velocity = expectedCumulative > 0 ? (cumulative / expectedCumulative) * 100 : 0;
+      // Si no hay presupuesto, calcular velocidad basada en crecimiento vs día anterior
+      let velocity = 100;
+      if (expectedCumulative > 0) {
+        velocity = (cumulative / expectedCumulative) * 100;
+      } else if (i > 0 && cumulative > 0) {
+        // Sin presupuesto: calcular como porcentaje del acumulado esperado lineal
+        const linearExpected = (cumulative / (i + 1)) * dailyTrend.length;
+        velocity = (cumulative / (linearExpected || 1)) * 100 * (1 + i / dailyTrend.length);
+      }
+      
       const gap = cumulative - expectedCumulative;
       
       return {
         ...day,
-        velocity,
+        velocity: Math.max(50, Math.min(150, velocity)), // Limitar entre 50-150%
         gap,
         cumulative,
         expected: expectedCumulative,

@@ -105,10 +105,17 @@ export default function Management() {
 
 function ManagementDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
-  const [selectedWeek, setSelectedWeek] = useState(getWeek(new Date(), { weekStartsOn: 1 }));
-  const [dateRange, setDateRange] = useState({
-    from: startOfMonth(new Date()),
-    to: new Date()
+  const [selectedWeek, setSelectedWeek] = useState(() => {
+    const saved = localStorage.getItem('mgmt_selectedWeek');
+    return saved ? parseInt(saved) : getWeek(new Date(), { weekStartsOn: 1 });
+  });
+  const [dateRange, setDateRange] = useState(() => {
+    const savedFrom = localStorage.getItem('mgmt_dateFrom');
+    const savedTo = localStorage.getItem('mgmt_dateTo');
+    if (savedFrom && savedTo) {
+      return { from: new Date(savedFrom), to: new Date(savedTo) };
+    }
+    return { from: startOfMonth(new Date()), to: new Date() };
   });
 
   // Generate week options
@@ -133,6 +140,19 @@ function ManagementDashboard() {
     if (week) {
       setSelectedWeek(parseInt(weekNum));
       setDateRange({ from: week.from, to: week.to });
+      localStorage.setItem('mgmt_selectedWeek', weekNum);
+      localStorage.setItem('mgmt_dateFrom', week.from.toISOString());
+      localStorage.setItem('mgmt_dateTo', week.to.toISOString());
+    }
+  };
+  
+  // Guardar fechas cuando cambian por calendario
+  const handleDateRangeChange = (range) => {
+    if (range?.from) {
+      const newRange = { from: range.from, to: range.to || range.from };
+      setDateRange(newRange);
+      localStorage.setItem('mgmt_dateFrom', newRange.from.toISOString());
+      localStorage.setItem('mgmt_dateTo', newRange.to.toISOString());
     }
   };
 
@@ -334,7 +354,7 @@ function ManagementDashboard() {
                 <CalendarComponent
                   mode="range"
                   selected={{ from: dateRange.from, to: dateRange.to }}
-                  onSelect={(range) => range?.from && setDateRange({ from: range.from, to: range.to || range.from })}
+                  onSelect={handleDateRangeChange}
                   numberOfMonths={1}
                 />
               </PopoverContent>

@@ -109,11 +109,11 @@ export default function DailySalesForm({ storeId, onSuccess }) {
                 />
               </div>
 
-              {/* Tickets */}
+              {/* Ticket Promedio */}
               <div className="space-y-2">
                 <Label className="text-gray-600 flex items-center gap-2">
                   <Receipt className="w-4 h-4 text-blue-500" />
-                  Total Tickets
+                  Ticket Promedio
                 </Label>
                 <Input 
                   type="number"
