@@ -1,12 +1,13 @@
 import React, { useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Target, CheckCircle2, Circle, Flame, TrendingUp, Ticket, Gift, Plus } from 'lucide-react';
+import { Target, CheckCircle2, Circle, Flame, TrendingUp, Ticket, Gift, Plus, Calendar, ChevronDown } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { format } from 'date-fns';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { format, startOfWeek, endOfWeek, eachDayOfInterval, addDays } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { toast } from "sonner";
 
@@ -14,7 +15,13 @@ export default function DailyGoalsCard({ storeId }) {
   const queryClient = useQueryClient();
   const today = format(new Date(), 'yyyy-MM-dd');
   const [showForm, setShowForm] = useState(false);
+  const [goalType, setGoalType] = useState('daily'); // 'daily' | 'weekly'
   const [goals, setGoals] = useState({ sales_goal: '', tickets_goal: '', suggested_goal: '' });
+  const [weeklyGoal, setWeeklyGoal] = useState({ sales_goal: '' });
+  
+  // Días de la semana
+  const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
+  const weekDays = eachDayOfInterval({ start: weekStart, end: addDays(weekStart, 6) });
 
   const { data: dailyGoal } = useQuery({
     queryKey: ['dailyGoal', storeId, today],
