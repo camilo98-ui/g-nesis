@@ -600,6 +600,23 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
           <>
             {/* Toolbar */}
             <div className="flex flex-wrap items-center gap-2 mb-4 p-2 bg-white/80 rounded-xl shadow-sm">
+              {/* Selector de Nevera */}
+              <div className="flex items-center gap-1 bg-gradient-to-r from-cyan-100 to-blue-100 rounded-lg p-1">
+                {[1, 2, 3].map(num => (
+                  <Button
+                    key={num}
+                    size="sm"
+                    variant={currentFreezer === num ? "default" : "ghost"}
+                    onClick={() => setCurrentFreezer(num)}
+                    className={`text-xs h-7 px-3 ${currentFreezer === num ? 'bg-cyan-500 text-white' : 'text-cyan-700 hover:bg-cyan-200'}`}
+                  >
+                    🧊 {num}
+                  </Button>
+                ))}
+              </div>
+              
+              <div className="h-6 w-px bg-gray-200 mx-1" />
+              
               <Button size="sm" variant="outline" onClick={() => setZoom(Math.max(0.6, zoom - 0.1))}>
                 <ZoomOut className="w-4 h-4" />
               </Button>
