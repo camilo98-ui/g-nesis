@@ -13,6 +13,7 @@ import ManagementReportButton from '@/components/management/ManagementReportButt
 import ChartInsight from '@/components/management/ChartInsight';
 import MarketComparisonChart from '@/components/management/MarketComparisonChart';
 import BrandComparisonChart from '@/components/management/BrandComparisonChart';
+import TicketAnalysisCard from '@/components/management/TicketAnalysisCard';
 import { 
   ArrowLeft, Lock, TrendingUp, TrendingDown, Users, Store, 
   Target, AlertTriangle, Activity, Award, DollarSign, Calendar, MapPin
