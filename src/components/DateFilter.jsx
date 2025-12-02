@@ -60,10 +60,9 @@ export default function DateFilter({ dateRange, onDateChange }) {
     setSelectedWeeks([]);
   };
 
-  // Manejar selección desde calendario (permite 1 día o rango)
+  // Manejar selección desde calendario (permite 1 día o rango) - dinámico
   const handleCalendarSelect = (range) => {
     if (range?.from) {
-      // Si solo selecciona un día, from y to son iguales
       onDateChange({ 
         from: range.from, 
         to: range.to || range.from 
@@ -153,7 +152,7 @@ export default function DateFilter({ dateRange, onDateChange }) {
         </PopoverContent>
       </Popover>
       
-      {/* Selector de rango/día personalizado */}
+      {/* Selector de rango/día personalizado - dinámico */}
       <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
         <PopoverTrigger asChild>
           <Button 
@@ -172,11 +171,20 @@ export default function DateFilter({ dateRange, onDateChange }) {
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0 bg-white border-gray-200 rounded-xl" align="end">
-          <div className="p-2 border-b bg-gray-50 rounded-t-xl">
-            <p className="text-xs text-gray-500 text-center">Selecciona un día o un rango de fechas</p>
+          <div className="p-2 border-b bg-gray-50 rounded-t-xl flex items-center justify-between">
+            <p className="text-xs text-gray-500">Selecciona fechas</p>
+            {dateRange.from && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-6 text-xs text-pink-600"
+                onClick={() => setIsCalendarOpen(false)}
+              >
+                <Check className="w-3 h-3 mr-1" /> Listo
+              </Button>
+            )}
           </div>
           <Calendar
-            initialFocus
             mode="range"
             defaultMonth={dateRange.from}
             selected={dateRange}
