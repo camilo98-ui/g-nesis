@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { X, Plus, Pencil, Trash2, User, Mail, Phone, Loader2, Check } from 'lucide-react';
+import { X, Plus, Pencil, Trash2, User, Mail, Phone, Loader2, Check, Camera, Upload } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -11,7 +11,8 @@ import { toast } from "sonner";
 export default function CashierManagerModal({ isOpen, onClose, cashiers, storeId }) {
   const [editingCashier, setEditingCashier] = useState(null);
   const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({ name: '', email: '', phone: '' });
+  const [formData, setFormData] = useState({ name: '', email: '', phone: '', photo_url: '' });
+  const [uploading, setUploading] = useState(false);
   const queryClient = useQueryClient();
 
   const createMutation = useMutation({
@@ -19,7 +20,7 @@ export default function CashierManagerModal({ isOpen, onClose, cashiers, storeId
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cashiers'] });
       setShowForm(false);
-      setFormData({ name: '', email: '', phone: '' });
+      setFormData({ name: '', email: '', phone: '', photo_url: '' });
       toast.success('Colaborador creado');
     }
   });
@@ -30,10 +31,25 @@ export default function CashierManagerModal({ isOpen, onClose, cashiers, storeId
       queryClient.invalidateQueries({ queryKey: ['cashiers'] });
       setEditingCashier(null);
       setShowForm(false);
-      setFormData({ name: '', email: '', phone: '' });
+      setFormData({ name: '', email: '', phone: '', photo_url: '' });
       toast.success('Colaborador actualizado');
     }
   });
+
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    setUploading(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      setFormData({ ...formData, photo_url: file_url });
+      toast.success('Foto subida');
+    } catch (err) {
+      toast.error('Error al subir la foto');
+    }
+    setUploading(false);
+  };
 
   const deleteMutation = useMutation({
     mutationFn: (id) => base44.entities.Cashier.delete(id),
@@ -57,7 +73,7 @@ export default function CashierManagerModal({ isOpen, onClose, cashiers, storeId
 
   const handleEdit = (cashier) => {
     setEditingCashier(cashier);
-    setFormData({ name: cashier.name || '', email: cashier.email || '', phone: cashier.phone || '' });
+    setFormData({ name: cashier.name || '', email: cashier.email || '', phone: cashier.phone || '', photo_url: cashier.photo_url || '' });
     setShowForm(true);
   };
 
@@ -69,7 +85,7 @@ export default function CashierManagerModal({ isOpen, onClose, cashiers, storeId
 
   const handleAddNew = () => {
     setEditingCashier(null);
-    setFormData({ name: '', email: '', phone: '' });
+    setFormData({ name: '', email: '', phone: '', photo_url: '' });
     setShowForm(true);
   };
 
@@ -107,9 +123,13 @@ export default function CashierManagerModal({ isOpen, onClose, cashiers, storeId
                     transition={{ delay: idx * 0.05 }}
                     className="bg-gray-50 rounded-xl p-3 flex items-center gap-3 group hover:bg-gray-100 transition-colors"
                   >
-                    <div className="w-10 h-10 bg-gradient-to-br from-pink-400 to-rose-500 rounded-lg flex items-center justify-center text-white font-bold">
-                      {cashier.name?.charAt(0) || '?'}
-                    </div>
+                    {cashier.photo_url ? (
+                      <img src={cashier.photo_url} alt={cashier.name} className="w-10 h-10 rounded-lg object-cover" />
+                    ) : (
+                      <div className="w-10 h-10 bg-gradient-to-br from-pink-400 to-rose-500 rounded-lg flex items-center justify-center text-white font-bold">
+                        {cashier.name?.charAt(0) || '?'}
+                      </div>
+                    )}
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-gray-800 truncate">{cashier.name}</p>
                       <p className="text-xs text-gray-400 truncate">{cashier.email || cashier.phone || 'Sin contacto'}</p>
@@ -147,12 +167,25 @@ export default function CashierManagerModal({ isOpen, onClose, cashiers, storeId
               className="space-y-4"
             >
               <div className="text-center mb-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-violet-400 to-purple-500 rounded-2xl mx-auto flex items-center justify-center text-white text-2xl font-bold mb-2">
-                  {formData.name?.charAt(0) || '?'}
+                <div className="relative inline-block">
+                  {formData.photo_url ? (
+                    <img src={formData.photo_url} alt="Foto" className="w-20 h-20 rounded-2xl object-cover mx-auto" />
+                  ) : (
+                    <div className="w-20 h-20 bg-gradient-to-br from-violet-400 to-purple-500 rounded-2xl mx-auto flex items-center justify-center text-white text-3xl font-bold">
+                      {formData.name?.charAt(0) || '?'}
+                    </div>
+                  )}
+                  <label className="absolute -bottom-1 -right-1 w-8 h-8 bg-pink-500 rounded-full flex items-center justify-center cursor-pointer hover:bg-pink-600 transition-colors shadow-lg">
+                    <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
+                    {uploading ? <Loader2 className="w-4 h-4 text-white animate-spin" /> : <Camera className="w-4 h-4 text-white" />}
+                  </label>
                 </div>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 mt-2">
                   {editingCashier ? 'Editar colaborador' : 'Nuevo colaborador'}
                 </p>
+                {!formData.photo_url && (
+                  <p className="text-xs text-gray-400 mt-1">Toca el ícono de cámara para agregar foto</p>
+                )}
               </div>
 
               <div>
@@ -198,7 +231,7 @@ export default function CashierManagerModal({ isOpen, onClose, cashiers, storeId
               <div className="flex gap-2 pt-2">
                 <Button
                   variant="outline"
-                  onClick={() => { setShowForm(false); setEditingCashier(null); }}
+                  onClick={() => { setShowForm(false); setEditingCashier(null); setFormData({ name: '', email: '', phone: '', photo_url: '' }); }}
                   className="flex-1"
                 >
                   Cancelar

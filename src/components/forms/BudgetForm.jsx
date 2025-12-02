@@ -25,7 +25,7 @@ const MONTHS = [
   { value: 12, label: 'Diciembre' },
 ];
 
-export default function BudgetForm({ storeId, onSuccess }) {
+export default function BudgetForm({ storeId, onSuccess, editingBudget, onClearEdit }) {
   const queryClient = useQueryClient();
   const currentDate = new Date();
   
@@ -37,6 +37,20 @@ export default function BudgetForm({ storeId, onSuccess }) {
     transactions_budget: '',
     suggested_budget: ''
   });
+
+  // Cargar datos al editar
+  React.useEffect(() => {
+    if (editingBudget) {
+      setFormData({
+        month: editingBudget.month,
+        year: editingBudget.year,
+        sales_budget: editingBudget.sales_budget || '',
+        tickets_budget: editingBudget.tickets_budget || '',
+        transactions_budget: editingBudget.transactions_budget || '',
+        suggested_budget: editingBudget.suggested_budget || ''
+      });
+    }
+  }, [editingBudget]);
 
   const createMutation = useMutation({
     mutationFn: async (data) => {
@@ -66,6 +80,15 @@ export default function BudgetForm({ storeId, onSuccess }) {
       toast.success('¡Presupuesto guardado!');
       queryClient.invalidateQueries(['budgets']);
       onSuccess?.();
+      onClearEdit?.();
+      setFormData({
+        month: currentDate.getMonth() + 1,
+        year: currentDate.getFullYear(),
+        sales_budget: '',
+        tickets_budget: '',
+        transactions_budget: '',
+        suggested_budget: ''
+      });
     },
     onError: () => {
       toast.error('Error al guardar el presupuesto');
@@ -90,7 +113,7 @@ export default function BudgetForm({ storeId, onSuccess }) {
             <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl text-white">
               <Target className="w-5 h-5" />
             </div>
-            Configurar Presupuesto
+            {editingBudget ? 'Editar Presupuesto' : 'Configurar Presupuesto'}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -197,18 +220,40 @@ export default function BudgetForm({ storeId, onSuccess }) {
               </div>
             </div>
 
-            <Button 
-              type="submit" 
-              disabled={createMutation.isPending}
-              className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white shadow-lg shadow-indigo-500/30"
-            >
-              {createMutation.isPending ? (
-                <Loader2 className="w-5 h-5 animate-spin mr-2" />
-              ) : (
-                <Save className="w-5 h-5 mr-2" />
+            <div className="flex gap-2">
+              {editingBudget && (
+                <Button 
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    onClearEdit?.();
+                    setFormData({
+                      month: currentDate.getMonth() + 1,
+                      year: currentDate.getFullYear(),
+                      sales_budget: '',
+                      tickets_budget: '',
+                      transactions_budget: '',
+                      suggested_budget: ''
+                    });
+                  }}
+                  className="flex-1"
+                >
+                  Cancelar
+                </Button>
               )}
-              Guardar Presupuesto
-            </Button>
+              <Button 
+                type="submit" 
+                disabled={createMutation.isPending}
+                className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white shadow-lg shadow-indigo-500/30"
+              >
+                {createMutation.isPending ? (
+                  <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                ) : (
+                  <Save className="w-5 h-5 mr-2" />
+                )}
+                {editingBudget ? 'Actualizar' : 'Guardar'}
+              </Button>
+            </div>
           </form>
         </CardContent>
       </Card>
