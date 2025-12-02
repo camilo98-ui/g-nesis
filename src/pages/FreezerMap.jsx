@@ -803,7 +803,7 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                 <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-yellow-400" /> Medio</span>
                 <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-red-400" /> Agotado</span>
                 <span className="text-gray-400">|</span>
-                <span>Doble click = Borrar</span>
+                <span>Mantener tocado = Borrar</span>
               </div>
             </div>
           </>
