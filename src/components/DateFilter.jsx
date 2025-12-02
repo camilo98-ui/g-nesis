@@ -1,10 +1,11 @@
 import React, { useState, useMemo } from 'react';
-import { CalendarRange, Calendar as CalendarIcon, X, Check, ChevronLeft, ChevronRight } from 'lucide-react';
+import { CalendarRange, Calendar as CalendarIcon, X, Check, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
-import { format, startOfWeek, endOfWeek, getWeek, getYear, setWeek, startOfYear, min, max, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isWithinInterval, isSameMonth, addMonths, subMonths } from 'date-fns';
+import { format, startOfWeek, endOfWeek, getWeek, getYear, setWeek, startOfYear, min, max, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isWithinInterval, isSameMonth, addMonths, subMonths, subDays, isToday } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // Calendario personalizado más dinámico
 function CustomCalendar({ selected, onSelect, numberOfMonths = 2 }) {
