@@ -436,14 +436,18 @@ export default function WeeklyCalendar({
             <div>
               <label className="text-sm font-medium text-gray-700 mb-2 block">Posición</label>
               <div className="grid grid-cols-3 gap-2">
-                {Object.entries(ROLES_CONFIG).map(([key, config]) => {
+                {sortedRoles.map(([key, config]) => {
                   const RoleIcon = config.icon;
                   const isSelected = newShift.role === key;
+                  const isRest = key === 'descanso';
                   return (
                     <motion.button key={key} whileTap={{ scale: 0.95 }} onClick={() => setNewShift({ ...newShift, role: key })}
-                      className={`p-2 rounded-lg border transition-all flex flex-col items-center gap-1 ${isSelected ? `${config.bg} ${config.border} shadow` : 'border-gray-200 hover:border-gray-300'}`}>
+                      className={`p-2 rounded-lg border transition-all flex flex-col items-center gap-1 ${isSelected ? `${config.bg} ${config.border} shadow` : 'border-gray-200 hover:border-gray-300'} ${isRest ? 'col-span-3 bg-gradient-to-r from-indigo-50 to-purple-50' : ''}`}>
                       <RoleIcon className={`w-4 h-4 ${isSelected ? config.text : 'text-gray-400'}`} />
                       <span className={`text-[9px] font-medium ${isSelected ? config.text : 'text-gray-500'}`}>{config.label}</span>
+                      {config.priority === 1 && !isRest && <span className="text-[7px] text-emerald-500 font-bold">CRÍTICO</span>}
+                      {config.priority === 2 && <span className="text-[7px] text-amber-500 font-bold">IMPORTANTE</span>}
+                      {config.priority === 3 && <span className="text-[7px] text-gray-400">SECUNDARIO</span>}
                     </motion.button>
                   );
                 })}
