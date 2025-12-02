@@ -133,10 +133,7 @@ function CustomCalendar({ selected, onSelect, onClose, onApply }) {
               key={opt.label}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => {
-                onSelect(opt.getValue());
-                setSelectingEnd(false);
-              }}
+              onClick={() => handleQuickSelect(opt.getValue())}
               className="px-3 py-1.5 text-xs font-medium rounded-full bg-white border border-pink-200 text-pink-600 hover:bg-pink-500 hover:text-white hover:border-pink-500 transition-all shadow-sm"
             >
               {opt.label}
