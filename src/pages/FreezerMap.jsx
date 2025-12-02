@@ -692,7 +692,11 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                                   setSelectedSlot({ ...bajada.back, row: bajada.row, position: bajada.position, slot_type: 'T' });
                                   setShowFlavorSelector(true);
                                 }}
-                                onDoubleClick={() => clearSlot(bajada.back)}
+                                onTouchStart={() => handleLongPressStart(bajada.back)}
+                                onTouchEnd={handleLongPressEnd}
+                                onMouseDown={() => handleLongPressStart(bajada.back)}
+                                onMouseUp={handleLongPressEnd}
+                                onMouseLeave={handleLongPressEnd}
                                 className={`h-10 sm:h-11 rounded-lg cursor-pointer transition-all border-2 relative ${
                                   bajada.back.is_empty 
                                     ? 'bg-purple-50/50 border-dashed border-purple-200 hover:border-purple-400' 
