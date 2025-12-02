@@ -468,7 +468,7 @@ function ManagementDashboard() {
                 </CardContent>
               </Card>
 
-              <WeatherImpactChart dailyTrend={dailyTrend} formatCurrency={formatCurrency} dateRange={dateRange} />
+              <WeatherImpactChart dailyTrend={filteredDailySales} formatCurrency={formatCurrency} dateRange={dateRange} />
             </div>
 
             {/* Row 3: Store Compliance */}
