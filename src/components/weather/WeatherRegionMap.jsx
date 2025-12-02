@@ -1,74 +1,129 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { motion } from 'framer-motion';
-import { MapPin, CloudRain, Sun, Cloud, Loader2, TrendingUp, TrendingDown, RefreshCw } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { MapPin, CloudRain, Sun, Cloud, Loader2, TrendingUp, TrendingDown, RefreshCw, Droplets, Wind, Thermometer } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
-// Regiones principales de Colombia con coordenadas
+// Regiones principales de Colombia con coordenadas para el mapa
 const COLOMBIA_REGIONS = [
-  { id: 'bogota', name: 'Bogotá', lat: 4.6097, lon: -74.0817, x: 48, y: 52 },
-  { id: 'medellin', name: 'Medellín', lat: 6.2442, lon: -75.5812, x: 38, y: 38 },
-  { id: 'cali', name: 'Cali', lat: 3.4516, lon: -76.5320, x: 32, y: 62 },
-  { id: 'barranquilla', name: 'Barranquilla', lat: 10.9685, lon: -74.7813, x: 45, y: 12 },
-  { id: 'cartagena', name: 'Cartagena', lat: 10.3910, lon: -75.4794, x: 38, y: 15 },
-  { id: 'bucaramanga', name: 'Bucaramanga', lat: 7.1254, lon: -73.1198, x: 55, y: 32 },
-  { id: 'tunja', name: 'Tunja', lat: 5.5353, lon: -73.3678, x: 55, y: 45 },
-  { id: 'villavicencio', name: 'Villavicencio', lat: 4.1420, lon: -73.6266, x: 58, y: 55 },
+  { id: 'bogota', name: 'Bogotá D.C.', lat: 4.6097, lon: -74.0817, mapX: 265, mapY: 320 },
+  { id: 'medellin', name: 'Medellín', lat: 6.2442, lon: -75.5812, mapX: 220, mapY: 240 },
+  { id: 'cali', name: 'Cali', lat: 3.4516, lon: -76.5320, mapX: 195, mapY: 380 },
+  { id: 'barranquilla', name: 'Barranquilla', lat: 10.9685, lon: -74.7813, mapX: 250, mapY: 80 },
+  { id: 'cartagena', name: 'Cartagena', lat: 10.3910, lon: -75.4794, mapX: 210, mapY: 95 },
+  { id: 'bucaramanga', name: 'Bucaramanga', lat: 7.1254, lon: -73.1198, mapX: 300, mapY: 200 },
+  { id: 'tunja', name: 'Tunja', lat: 5.5353, lon: -73.3678, mapX: 295, mapY: 280 },
+  { id: 'villavicencio', name: 'Villavicencio', lat: 4.1420, lon: -73.6266, mapX: 310, mapY: 340 },
+  { id: 'pereira', name: 'Pereira', lat: 4.8087, lon: -75.6906, mapX: 215, mapY: 305 },
+  { id: 'cucuta', name: 'Cúcuta', lat: 7.8939, lon: -72.5078, mapX: 330, mapY: 175 },
 ];
 
-const getWeatherType = (code, precipitation) => {
-  if (precipitation > 5 || (code >= 51 && code <= 99)) return 'rainy';
-  if (code <= 2 && precipitation < 1) return 'sunny';
-  return 'cloudy';
-};
-
-const getWeatherEmoji = (type) => {
+const getWeatherIcon = (type, size = 24) => {
+  const iconProps = { size, strokeWidth: 2 };
   switch(type) {
-    case 'sunny': return '☀️';
-    case 'rainy': return '🌧️';
-    default: return '⛅';
+    case 'sunny': return <Sun {...iconProps} className="text-amber-500" />;
+    case 'rainy': return <CloudRain {...iconProps} className="text-blue-500" />;
+    case 'cloudy': return <Cloud {...iconProps} className="text-gray-400" />;
+    default: return <Cloud {...iconProps} className="text-gray-400" />;
   }
 };
 
-const getWeatherColor = (type) => {
+const getWeatherBg = (type) => {
   switch(type) {
-    case 'sunny': return { bg: 'bg-amber-100', text: 'text-amber-700', border: 'border-amber-300' };
-    case 'rainy': return { bg: 'bg-blue-100', text: 'text-blue-700', border: 'border-blue-300' };
-    default: return { bg: 'bg-gray-100', text: 'text-gray-700', border: 'border-gray-300' };
+    case 'sunny': return 'from-amber-400 to-yellow-300';
+    case 'rainy': return 'from-blue-500 to-cyan-400';
+    default: return 'from-gray-400 to-slate-300';
   }
+};
+
+// Animated Weather Icon Component
+const AnimatedWeatherIcon = ({ type, size = 32 }) => {
+  if (type === 'sunny') {
+    return (
+      <motion.div
+        animate={{ rotate: 360, scale: [1, 1.1, 1] }}
+        transition={{ rotate: { duration: 20, repeat: Infinity, ease: "linear" }, scale: { duration: 2, repeat: Infinity } }}
+        className="relative"
+      >
+        <Sun size={size} className="text-amber-500 drop-shadow-lg" />
+        <motion.div
+          className="absolute inset-0"
+          animate={{ opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+        >
+          <Sun size={size} className="text-yellow-300 blur-sm" />
+        </motion.div>
+      </motion.div>
+    );
+  }
+  
+  if (type === 'rainy') {
+    return (
+      <div className="relative">
+        <motion.div animate={{ y: [0, -2, 0] }} transition={{ duration: 2, repeat: Infinity }}>
+          <CloudRain size={size} className="text-blue-500 drop-shadow-lg" />
+        </motion.div>
+        {/* Rain drops */}
+        <motion.div
+          className="absolute -bottom-1 left-1/2 w-1 h-2 bg-blue-400 rounded-full"
+          animate={{ y: [0, 8, 0], opacity: [1, 0, 1] }}
+          transition={{ duration: 0.8, repeat: Infinity, delay: 0 }}
+        />
+        <motion.div
+          className="absolute -bottom-1 left-1/3 w-1 h-2 bg-blue-400 rounded-full"
+          animate={{ y: [0, 8, 0], opacity: [1, 0, 1] }}
+          transition={{ duration: 0.8, repeat: Infinity, delay: 0.3 }}
+        />
+      </div>
+    );
+  }
+  
+  return (
+    <motion.div animate={{ x: [-2, 2, -2] }} transition={{ duration: 3, repeat: Infinity }}>
+      <Cloud size={size} className="text-gray-400 drop-shadow-lg" />
+    </motion.div>
+  );
 };
 
 export default function WeatherRegionMap({ dateRange, dailySales, formatCurrency }) {
   const [regionWeather, setRegionWeather] = useState({});
   const [loading, setLoading] = useState(false);
-  const [selectedRegion, setSelectedRegion] = useState(null);
+  const [selectedRegion, setSelectedRegion] = useState('bogota');
+  const [hoveredRegion, setHoveredRegion] = useState(null);
 
   // Fetch weather for all regions
   const fetchRegionsWeather = async () => {
     setLoading(true);
-    const today = format(new Date(), 'yyyy-MM-dd');
     const results = {};
     
     try {
       await Promise.all(COLOMBIA_REGIONS.map(async (region) => {
         try {
           const res = await fetch(
-            `https://api.open-meteo.com/v1/forecast?latitude=${region.lat}&longitude=${region.lon}&current=temperature_2m,precipitation_probability,weather_code&timezone=America%2FBogota`
+            `https://api.open-meteo.com/v1/forecast?latitude=${region.lat}&longitude=${region.lon}&current=temperature_2m,relative_humidity_2m,precipitation_probability,weather_code,wind_speed_10m&timezone=America%2FBogota`
           );
           const data = await res.json();
           
           const weatherCode = data.current?.weather_code || 0;
-          const precipitation = data.current?.precipitation_probability || 0;
-          const weatherType = getWeatherType(weatherCode, precipitation > 50 ? 10 : 0);
+          const precipProb = data.current?.precipitation_probability || 0;
+          
+          // Lógica mejorada para determinar tipo de clima
+          let weatherType = 'cloudy';
+          if (weatherCode >= 51) weatherType = 'rainy'; // Drizzle, rain, snow, thunderstorm
+          else if (weatherCode <= 1 && precipProb < 30) weatherType = 'sunny'; // Clear or mainly clear
+          else if (weatherCode === 2 || weatherCode === 3) weatherType = 'cloudy'; // Partly cloudy to overcast
           
           results[region.id] = {
             temp: Math.round(data.current?.temperature_2m || 0),
+            humidity: data.current?.relative_humidity_2m || 0,
+            precipProb: precipProb,
+            windSpeed: Math.round(data.current?.wind_speed_10m || 0),
             weatherType,
-            precipitation: precipitation
+            weatherCode
           };
         } catch (e) {
-          results[region.id] = { temp: 18, weatherType: 'cloudy', precipitation: 0 };
+          results[region.id] = { temp: 18, weatherType: 'cloudy', humidity: 70, precipProb: 50, windSpeed: 10 };
         }
       }));
       
@@ -82,243 +137,303 @@ export default function WeatherRegionMap({ dateRange, dailySales, formatCurrency
 
   useEffect(() => {
     fetchRegionsWeather();
+    // Refresh every 10 minutes
+    const interval = setInterval(fetchRegionsWeather, 600000);
+    return () => clearInterval(interval);
   }, []);
 
-  // Calcular impacto en ventas para Bogotá vs otras ciudades
-  const salesImpactAnalysis = useMemo(() => {
+  // Calcular impacto en ventas
+  const salesImpact = useMemo(() => {
     const validSales = dailySales.filter(s => s.total_sales > 0);
     if (!validSales.length) return null;
     
     const totalSales = validSales.reduce((sum, s) => sum + (s.total_sales || 0), 0);
     const avgSales = totalSales / validSales.length;
     
-    // Determinar si hubo lluvia en el período
     const bogotaWeather = regionWeather['bogota'];
-    const wasRainy = bogotaWeather?.weatherType === 'rainy';
+    const isRainy = bogotaWeather?.weatherType === 'rainy';
+    const estimatedLoss = isRainy ? avgSales * 0.18 : 0;
+    const estimatedGain = bogotaWeather?.weatherType === 'sunny' ? avgSales * 0.12 : 0;
     
-    // Buscar ciudades con mejor clima
-    const betterWeatherCities = COLOMBIA_REGIONS.filter(r => 
-      r.id !== 'bogota' && regionWeather[r.id]?.weatherType === 'sunny'
-    );
-    
-    return {
-      totalSales,
-      avgSales,
-      wasRainy,
-      betterWeatherCities,
-      potentialLoss: wasRainy ? avgSales * 0.2 : 0
-    };
+    return { avgSales, isRainy, estimatedLoss, estimatedGain, totalSales };
   }, [dailySales, regionWeather]);
 
+  const selectedWeather = regionWeather[selectedRegion];
+  const selectedCity = COLOMBIA_REGIONS.find(r => r.id === selectedRegion);
+
   return (
-    <Card className="bg-white shadow-lg border-0 overflow-hidden">
-      <CardHeader className="pb-2 bg-gradient-to-r from-emerald-50 to-teal-50 border-b">
+    <Card className="bg-white shadow-xl border-0 overflow-hidden">
+      <CardHeader className="pb-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-base font-semibold text-gray-700 flex items-center gap-2">
-            <MapPin className="w-5 h-5 text-emerald-500" />
-            Mapa Climático de Colombia
+          <CardTitle className="text-base font-semibold flex items-center gap-2">
+            <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 2, repeat: Infinity }}>
+              <MapPin className="w-5 h-5" />
+            </motion.div>
+            Clima en Tiempo Real - Colombia
           </CardTitle>
-          <button 
+          <motion.button 
             onClick={fetchRegionsWeather}
             disabled={loading}
-            className="p-2 rounded-lg hover:bg-white/50 transition-colors"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            className="p-2 rounded-lg bg-white/20 hover:bg-white/30 transition-colors"
           >
-            <RefreshCw className={`w-4 h-4 text-gray-500 ${loading ? 'animate-spin' : ''}`} />
-          </button>
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+          </motion.button>
         </div>
-        <p className="text-xs text-gray-500 mt-1">
-          Clima actual por región - Haz clic en una ciudad para más detalles
-        </p>
       </CardHeader>
-      <CardContent className="p-4">
-        <div className="grid lg:grid-cols-2 gap-6">
-          {/* Map Container */}
-          <div className="relative bg-gradient-to-br from-emerald-50/50 to-sky-50/50 rounded-2xl p-4 min-h-[400px]">
+      
+      <CardContent className="p-0">
+        <div className="grid lg:grid-cols-5 gap-0">
+          {/* Map Container - 3 columns */}
+          <div className="lg:col-span-3 relative bg-gradient-to-br from-sky-100 via-emerald-50 to-teal-100 min-h-[450px] p-4">
             {loading && (
-              <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-10 rounded-2xl">
-                <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
+              <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-20">
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                >
+                  <Loader2 className="w-10 h-10 text-emerald-500" />
+                </motion.div>
               </div>
             )}
             
-            {/* Colombia Map SVG Simplified */}
-            <svg viewBox="0 0 100 100" className="w-full h-full">
-              {/* Colombia outline simplified */}
+            {/* Colombia Map SVG */}
+            <svg viewBox="0 0 450 520" className="w-full h-full drop-shadow-lg">
+              {/* Map background gradient */}
+              <defs>
+                <linearGradient id="mapGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#d1fae5" />
+                  <stop offset="100%" stopColor="#a7f3d0" />
+                </linearGradient>
+                <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feDropShadow dx="2" dy="4" stdDeviation="4" floodOpacity="0.2"/>
+                </filter>
+              </defs>
+              
+              {/* Colombia simplified outline */}
               <path 
-                d="M30 5 L55 8 L65 15 L70 25 L68 35 L62 45 L58 55 L55 65 L48 75 L40 80 L30 78 L22 70 L18 58 L20 45 L25 30 L28 18 Z"
-                fill="#e8f5e9"
-                stroke="#4caf50"
-                strokeWidth="0.5"
-                opacity="0.6"
+                d="M180 50 L250 40 L300 50 L340 70 L360 100 L370 150 L360 200 L340 250 L330 300 
+                   L320 350 L300 400 L270 440 L230 470 L190 480 L150 470 L120 440 L100 400 
+                   L90 350 L100 300 L120 250 L140 200 L150 150 L160 100 Z"
+                fill="url(#mapGradient)"
+                stroke="#10b981"
+                strokeWidth="2"
+                filter="url(#shadow)"
               />
               
-              {/* Region markers */}
+              {/* Department boundaries (simplified) */}
+              <path d="M200 100 L280 120 L260 180 L200 160 Z" fill="none" stroke="#059669" strokeWidth="0.5" opacity="0.3"/>
+              <path d="M160 200 L250 180 L280 280 L200 300 L140 260 Z" fill="none" stroke="#059669" strokeWidth="0.5" opacity="0.3"/>
+              <path d="M180 320 L280 300 L300 400 L220 420 L150 380 Z" fill="none" stroke="#059669" strokeWidth="0.5" opacity="0.3"/>
+              
+              {/* Ocean */}
+              <path 
+                d="M80 50 L180 50 L160 100 L150 150 L100 200 L70 180 L60 120 Z"
+                fill="#bfdbfe"
+                opacity="0.5"
+              />
+              
+              {/* City markers with weather */}
               {COLOMBIA_REGIONS.map((region) => {
                 const weather = regionWeather[region.id];
-                const colors = getWeatherColor(weather?.weatherType || 'cloudy');
                 const isSelected = selectedRegion === region.id;
+                const isHovered = hoveredRegion === region.id;
                 
                 return (
-                  <g key={region.id} className="cursor-pointer">
+                  <g key={region.id}>
+                    {/* Pulse effect for selected */}
+                    {isSelected && (
+                      <motion.circle
+                        cx={region.mapX}
+                        cy={region.mapY}
+                        r={25}
+                        fill="none"
+                        stroke="#10b981"
+                        strokeWidth="2"
+                        initial={{ r: 15, opacity: 1 }}
+                        animate={{ r: 35, opacity: 0 }}
+                        transition={{ duration: 1.5, repeat: Infinity }}
+                      />
+                    )}
+                    
+                    {/* Weather background circle */}
                     <motion.circle
-                      cx={region.x}
-                      cy={region.y}
-                      r={isSelected ? 6 : 4}
-                      className={`${colors.bg} ${colors.border}`}
-                      fill={weather?.weatherType === 'sunny' ? '#fbbf24' : weather?.weatherType === 'rainy' ? '#3b82f6' : '#9ca3af'}
-                      stroke="#fff"
-                      strokeWidth="1"
-                      onClick={() => setSelectedRegion(isSelected ? null : region.id)}
-                      whileHover={{ scale: 1.3 }}
-                      animate={isSelected ? { scale: [1, 1.2, 1] } : {}}
-                      transition={isSelected ? { duration: 1, repeat: Infinity } : {}}
+                      cx={region.mapX}
+                      cy={region.mapY}
+                      r={isSelected ? 22 : isHovered ? 20 : 16}
+                      className={`cursor-pointer transition-all duration-300`}
+                      fill={weather?.weatherType === 'sunny' ? '#fef3c7' : weather?.weatherType === 'rainy' ? '#dbeafe' : '#f3f4f6'}
+                      stroke={isSelected ? '#10b981' : '#fff'}
+                      strokeWidth={isSelected ? 3 : 2}
+                      onClick={() => setSelectedRegion(region.id)}
+                      onMouseEnter={() => setHoveredRegion(region.id)}
+                      onMouseLeave={() => setHoveredRegion(null)}
+                      whileHover={{ scale: 1.2 }}
+                      filter="url(#shadow)"
                     />
-                    <text 
-                      x={region.x} 
-                      y={region.y - 7} 
-                      textAnchor="middle" 
-                      className="text-[4px] fill-gray-600 font-medium"
+                    
+                    {/* Weather icon */}
+                    <foreignObject 
+                      x={region.mapX - 10} 
+                      y={region.mapY - 10} 
+                      width="20" 
+                      height="20"
+                      className="pointer-events-none"
                     >
-                      {region.name}
+                      <div className="flex items-center justify-center w-full h-full">
+                        {weather?.weatherType === 'sunny' && <Sun size={16} className="text-amber-500" />}
+                        {weather?.weatherType === 'rainy' && <CloudRain size={16} className="text-blue-500" />}
+                        {weather?.weatherType === 'cloudy' && <Cloud size={16} className="text-gray-400" />}
+                      </div>
+                    </foreignObject>
+                    
+                    {/* City label */}
+                    <text 
+                      x={region.mapX} 
+                      y={region.mapY + 32} 
+                      textAnchor="middle" 
+                      className="text-[10px] fill-gray-700 font-semibold pointer-events-none"
+                    >
+                      {region.name.split(' ')[0]}
                     </text>
+                    
+                    {/* Temperature */}
                     <text 
-                      x={region.x} 
-                      y={region.y + 10} 
+                      x={region.mapX} 
+                      y={region.mapY + 44} 
                       textAnchor="middle" 
-                      className="text-[5px] fill-gray-800 font-bold"
+                      className="text-[11px] fill-gray-900 font-bold pointer-events-none"
                     >
-                      {weather?.temp || '--'}°
+                      {weather?.temp || '--'}°C
                     </text>
                   </g>
                 );
               })}
             </svg>
-
-            {/* Legend */}
-            <div className="absolute bottom-2 left-2 bg-white/90 rounded-lg p-2 text-[10px] space-y-1">
-              <div className="flex items-center gap-1.5">
-                <div className="w-3 h-3 rounded-full bg-amber-400" />
-                <span>Soleado</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-3 h-3 rounded-full bg-blue-500" />
-                <span>Lluvioso</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-3 h-3 rounded-full bg-gray-400" />
-                <span>Nublado</span>
-              </div>
-            </div>
           </div>
 
-          {/* Analysis Panel */}
-          <div className="space-y-4">
-            {/* Selected Region Detail */}
-            {selectedRegion && (
+          {/* Info Panel - 2 columns */}
+          <div className="lg:col-span-2 bg-gradient-to-br from-slate-50 to-gray-100 p-4 space-y-4">
+            {/* Selected City Weather */}
+            <AnimatePresence mode="wait">
+              {selectedWeather && selectedCity && (
+                <motion.div
+                  key={selectedRegion}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className={`bg-gradient-to-br ${getWeatherBg(selectedWeather.weatherType)} rounded-2xl p-5 text-white shadow-xl`}
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3 className="text-xl font-bold">{selectedCity.name}</h3>
+                      <p className="text-white/80 text-sm">Clima actual</p>
+                    </div>
+                    <AnimatedWeatherIcon type={selectedWeather.weatherType} size={48} />
+                  </div>
+                  
+                  <div className="text-5xl font-bold mb-4">{selectedWeather.temp}°C</div>
+                  
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="bg-white/20 rounded-xl p-2 text-center">
+                      <Droplets className="w-4 h-4 mx-auto mb-1" />
+                      <p className="text-xs opacity-80">Humedad</p>
+                      <p className="font-bold">{selectedWeather.humidity}%</p>
+                    </div>
+                    <div className="bg-white/20 rounded-xl p-2 text-center">
+                      <CloudRain className="w-4 h-4 mx-auto mb-1" />
+                      <p className="text-xs opacity-80">Prob. Lluvia</p>
+                      <p className="font-bold">{selectedWeather.precipProb}%</p>
+                    </div>
+                    <div className="bg-white/20 rounded-xl p-2 text-center">
+                      <Wind className="w-4 h-4 mx-auto mb-1" />
+                      <p className="text-xs opacity-80">Viento</p>
+                      <p className="font-bold">{selectedWeather.windSpeed} km/h</p>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Sales Impact Analysis */}
+            {salesImpact && selectedRegion === 'bogota' && (
               <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="bg-gradient-to-br from-slate-50 to-gray-50 rounded-xl p-4 border"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="bg-white rounded-2xl p-4 shadow-lg border"
               >
-                <div className="flex items-center gap-3 mb-3">
-                  <span className="text-3xl">
-                    {getWeatherEmoji(regionWeather[selectedRegion]?.weatherType || 'cloudy')}
-                  </span>
-                  <div>
-                    <h4 className="font-bold text-gray-800">
-                      {COLOMBIA_REGIONS.find(r => r.id === selectedRegion)?.name}
-                    </h4>
-                    <p className="text-sm text-gray-500">
-                      {regionWeather[selectedRegion]?.temp || '--'}°C | 
-                      Prob. lluvia: {regionWeather[selectedRegion]?.precipitation || 0}%
+                <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-emerald-500" />
+                  Impacto en Ventas - Bogotá
+                </h4>
+                
+                {salesImpact.isRainy ? (
+                  <div className="space-y-3">
+                    <div className="bg-red-50 rounded-xl p-3 border border-red-100">
+                      <div className="flex items-center gap-2 text-red-700 mb-1">
+                        <TrendingDown className="w-4 h-4" />
+                        <span className="font-semibold">Alerta de lluvia</span>
+                      </div>
+                      <p className="text-sm text-red-600">
+                        Pérdida estimada: <strong>{formatCurrency(salesImpact.estimatedLoss)}</strong>
+                      </p>
+                      <p className="text-xs text-red-500 mt-1">~18% menos vs promedio</p>
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      💡 Tip: Activa promociones de "día lluvioso" para mitigar el impacto
                     </p>
                   </div>
-                </div>
-                
-                {selectedRegion === 'bogota' && salesImpactAnalysis && (
-                  <div className="bg-white rounded-lg p-3 mt-3">
-                    <p className="text-xs text-gray-500 mb-2">Impacto en ventas hoy:</p>
-                    {salesImpactAnalysis.wasRainy ? (
-                      <div className="flex items-center gap-2 text-red-600">
-                        <TrendingDown className="w-4 h-4" />
-                        <span className="font-bold">
-                          Posible pérdida: {formatCurrency(salesImpactAnalysis.potentialLoss)}
-                        </span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2 text-green-600">
+                ) : regionWeather['bogota']?.weatherType === 'sunny' ? (
+                  <div className="space-y-3">
+                    <div className="bg-green-50 rounded-xl p-3 border border-green-100">
+                      <div className="flex items-center gap-2 text-green-700 mb-1">
                         <TrendingUp className="w-4 h-4" />
-                        <span className="font-bold">Clima favorable para ventas</span>
+                        <span className="font-semibold">Clima favorable</span>
                       </div>
-                    )}
+                      <p className="text-sm text-green-600">
+                        Ganancia esperada: <strong>+{formatCurrency(salesImpact.estimatedGain)}</strong>
+                      </p>
+                      <p className="text-xs text-green-500 mt-1">~12% más vs promedio</p>
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      ☀️ Aprovecha el buen clima para promocionar productos premium
+                    </p>
+                  </div>
+                ) : (
+                  <div className="bg-gray-50 rounded-xl p-3 border">
+                    <p className="text-sm text-gray-600">
+                      Clima neutral - Ventas esperadas dentro del promedio
+                    </p>
                   </div>
                 )}
               </motion.div>
             )}
 
-            {/* Weather Summary Grid */}
-            <div className="grid grid-cols-2 gap-3">
-              {COLOMBIA_REGIONS.slice(0, 6).map((region) => {
-                const weather = regionWeather[region.id];
-                const colors = getWeatherColor(weather?.weatherType || 'cloudy');
-                
-                return (
-                  <motion.div
-                    key={region.id}
-                    whileHover={{ scale: 1.03, y: -2 }}
-                    onClick={() => setSelectedRegion(region.id)}
-                    className={`${colors.bg} rounded-xl p-3 cursor-pointer border ${colors.border} transition-all`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className={`text-xs font-medium ${colors.text}`}>{region.name}</p>
-                        <p className="text-lg font-bold text-gray-800">{weather?.temp || '--'}°C</p>
-                      </div>
-                      <span className="text-2xl">{getWeatherEmoji(weather?.weatherType)}</span>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div>
-
-            {/* Bogotá vs Other Cities Comparison */}
-            {salesImpactAnalysis && regionWeather['bogota'] && (
-              <div className="bg-gradient-to-r from-sky-50 to-blue-50 rounded-xl p-4 border border-sky-100">
-                <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                  <CloudRain className="w-4 h-4 text-sky-500" />
-                  Análisis Comparativo
-                </h4>
-                
-                {salesImpactAnalysis.wasRainy ? (
-                  <div className="space-y-3">
-                    <p className="text-sm text-gray-600">
-                      🌧️ <strong>Bogotá está lloviendo</strong> mientras otras ciudades tienen mejor clima:
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {salesImpactAnalysis.betterWeatherCities.length > 0 ? (
-                        salesImpactAnalysis.betterWeatherCities.map(city => (
-                          <span key={city.id} className="px-2 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-medium">
-                            ☀️ {city.name}
-                          </span>
-                        ))
-                      ) : (
-                        <span className="text-xs text-gray-500">Clima similar en todas las ciudades</span>
-                      )}
-                    </div>
-                    <div className="bg-red-50 rounded-lg p-3 mt-2">
-                      <p className="text-xs text-red-700">
-                        <strong>💰 Estimación:</strong> La lluvia podría reducir ventas entre 15-25% (~{formatCurrency(salesImpactAnalysis.potentialLoss)})
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="bg-green-50 rounded-lg p-3">
-                    <p className="text-sm text-green-700">
-                      ☀️ <strong>Buen clima en Bogotá</strong> - Condiciones favorables para las ventas
-                    </p>
-                  </div>
-                )}
+            {/* Quick Weather Summary */}
+            <div className="space-y-2">
+              <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Resumen rápido</h4>
+              <div className="grid grid-cols-3 gap-2">
+                {['sunny', 'cloudy', 'rainy'].map(type => {
+                  const count = Object.values(regionWeather).filter(w => w.weatherType === type).length;
+                  return (
+                    <motion.div
+                      key={type}
+                      whileHover={{ scale: 1.05 }}
+                      className={`rounded-xl p-3 text-center ${
+                        type === 'sunny' ? 'bg-amber-50 border-amber-200' :
+                        type === 'rainy' ? 'bg-blue-50 border-blue-200' :
+                        'bg-gray-50 border-gray-200'
+                      } border`}
+                    >
+                      <AnimatedWeatherIcon type={type} size={24} />
+                      <p className="text-lg font-bold text-gray-800 mt-1">{count}</p>
+                      <p className="text-[10px] text-gray-500">ciudades</p>
+                    </motion.div>
+                  );
+                })}
               </div>
-            )}
+            </div>
           </div>
         </div>
       </CardContent>

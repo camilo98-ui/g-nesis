@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { format, subDays, startOfMonth, endOfMonth, eachDayOfInterval, parseISO } from 'date-fns';
+import { format, subDays, startOfMonth, endOfMonth, eachDayOfInterval, parseISO, startOfWeek, endOfWeek, addWeeks, startOfYear, getWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { ArrowLeft, RefreshCw, Calendar, TrendingUp, TrendingDown, CloudRain, Sun, Cloud, Thermometer, MapPin, DollarSign, BarChart3 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarPicker } from "@/components/ui/calendar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import StoreSelector, { STORES } from '@/components/StoreSelector';
 
 import WeatherMainChart from '@/components/weather/WeatherMainChart';
@@ -28,6 +29,36 @@ export default function WeatherImpact() {
   });
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('analysis');
+  const [selectedWeek, setSelectedWeek] = useState('');
+
+  // Generar semanas del año
+  const weekOptions = useMemo(() => {
+    const weeks = [];
+    const year = new Date().getFullYear();
+    const yearStart = startOfYear(new Date(year, 0, 1));
+    const currentWeek = getWeek(new Date(), { weekStartsOn: 1 });
+    
+    for (let i = 1; i <= 52; i++) {
+      const weekStart = startOfWeek(addWeeks(yearStart, i - 1), { weekStartsOn: 1 });
+      const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
+      weeks.push({
+        value: String(i),
+        label: `Sem ${i} (${format(weekStart, 'dd MMM', { locale: es })} - ${format(weekEnd, 'dd MMM', { locale: es })})`,
+        from: weekStart,
+        to: weekEnd,
+        isCurrent: i === currentWeek
+      });
+    }
+    return weeks;
+  }, []);
+
+  const handleWeekChange = (weekNum) => {
+    setSelectedWeek(weekNum);
+    const week = weekOptions.find(w => w.value === weekNum);
+    if (week) {
+      setDateRange({ from: week.from, to: week.to });
+    }
+  };
 
   useEffect(() => {
     const saved = localStorage.getItem('selectedStore');
@@ -181,6 +212,23 @@ export default function WeatherImpact() {
           <div className="flex flex-wrap items-center gap-3">
             <StoreSelector selectedStore={selectedStore} onStoreChange={handleStoreChange} />
             
+            {/* Week Selector */}
+            <Select value={selectedWeek} onValueChange={handleWeekChange}>
+              <SelectTrigger className="w-[200px] h-10 bg-white shadow-sm">
+                <Calendar className="w-4 h-4 text-sky-500 mr-2" />
+                <SelectValue placeholder="Semana del año" />
+              </SelectTrigger>
+              <SelectContent className="max-h-[300px]">
+                {weekOptions.map((week) => (
+                  <SelectItem key={week.value} value={week.value}>
+                    <span className={week.isCurrent ? 'font-bold text-sky-600' : ''}>
+                      {week.label} {week.isCurrent && '(Actual)'}
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
             {/* Date Range Picker */}
             <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
               <PopoverTrigger asChild>
@@ -198,19 +246,23 @@ export default function WeatherImpact() {
                   onSelect={(range) => {
                     if (range?.from) {
                       setDateRange({ from: range.from, to: range.to || range.from });
+                      setSelectedWeek('');
                     }
                   }}
                   numberOfMonths={2}
                 />
-                <div className="p-3 border-t flex gap-2">
+                <div className="p-3 border-t flex gap-2 flex-wrap">
                   <Button size="sm" variant="outline" onClick={() => {
                     setDateRange({ from: subDays(new Date(), 7), to: new Date() });
+                    setSelectedWeek('');
                   }}>Últimos 7 días</Button>
                   <Button size="sm" variant="outline" onClick={() => {
                     setDateRange({ from: subDays(new Date(), 30), to: new Date() });
+                    setSelectedWeek('');
                   }}>Últimos 30 días</Button>
                   <Button size="sm" variant="outline" onClick={() => {
                     setDateRange({ from: startOfMonth(new Date()), to: new Date() });
+                    setSelectedWeek('');
                   }}>Este mes</Button>
                 </div>
               </PopoverContent>
