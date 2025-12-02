@@ -1,21 +1,12 @@
 import React, { useState, useMemo } from 'react';
-import { MapPin, Search, Lock, Eye, EyeOff, Settings, Save, X } from 'lucide-react';
+import { MapPin, Search } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { base44 } from '@/api/base44Client';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
 
 const STORES = [
   { code: "BTA 11", name: "CC PALATINO" },
@@ -44,6 +35,41 @@ export { STORES };
 export default function StoreSelector({ selectedStore, onStoreChange }) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
+  const [pendingStore, setPendingStore] = useState(null);
+  const [passwordInput, setPasswordInput] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [showConfigDialog, setShowConfigDialog] = useState(false);
+  const [configStore, setConfigStore] = useState(null);
+  const [newPassword, setNewPassword] = useState('');
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  
+  const queryClient = useQueryClient();
+  
+  // Fetch store passwords
+  const { data: storePasswords = [] } = useQuery({
+    queryKey: ['storePasswords'],
+    queryFn: () => base44.entities.StorePassword.list(),
+  });
+  
+  // Save password mutation
+  const savePasswordMutation = useMutation({
+    mutationFn: async ({ storeCode, password }) => {
+      const existing = storePasswords.find(sp => sp.store_code === storeCode);
+      if (existing) {
+        return base44.entities.StorePassword.update(existing.id, { password });
+      } else {
+        return base44.entities.StorePassword.create({ store_code: storeCode, password });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['storePasswords'] });
+      setShowConfigDialog(false);
+      setNewPassword('');
+      setConfigStore(null);
+    }
+  });
   
   const filteredStores = useMemo(() => {
     if (!search.trim()) return STORES;
@@ -56,67 +82,226 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
   
   const selectedStoreName = STORES.find(s => s.code === selectedStore)?.name || '';
   
+  const handleStoreClick = (store) => {
+    const storePassword = storePasswords.find(sp => sp.store_code === store.code);
+    
+    if (storePassword?.password) {
+      // Store has password, show dialog
+      setPendingStore(store);
+      setPasswordInput('');
+      setPasswordError('');
+      setShowPasswordDialog(true);
+    } else {
+      // No password, select directly
+      onStoreChange(store.code);
+      setOpen(false);
+      setSearch('');
+    }
+  };
+  
+  const handlePasswordSubmit = () => {
+    const storePassword = storePasswords.find(sp => sp.store_code === pendingStore?.code);
+    
+    if (passwordInput === storePassword?.password) {
+      onStoreChange(pendingStore.code);
+      setShowPasswordDialog(false);
+      setOpen(false);
+      setSearch('');
+      setPendingStore(null);
+      setPasswordInput('');
+    } else {
+      setPasswordError('Contraseña incorrecta');
+    }
+  };
+  
+  const handleConfigClick = (e, store) => {
+    e.stopPropagation();
+    setConfigStore(store);
+    const existing = storePasswords.find(sp => sp.store_code === store.code);
+    setNewPassword(existing?.password || '');
+    setShowConfigDialog(true);
+  };
+  
+  const handleSavePassword = () => {
+    if (configStore) {
+      savePasswordMutation.mutate({ storeCode: configStore.code, password: newPassword });
+    }
+  };
+  
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button 
-          variant="outline" 
-          className="w-full md:w-[300px] bg-white border-gray-200 hover:border-pink-300 transition-all shadow-md hover:shadow-lg rounded-xl justify-between group"
-        >
-          <div className="flex items-center gap-2">
-            <MapPin className="w-4 h-4 text-pink-500" />
-            {selectedStore ? (
-              <span className="truncate">{selectedStore} - {selectedStoreName}</span>
-            ) : (
-              <span className="text-gray-500">Selecciona una tienda</span>
+    <>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button 
+            variant="outline" 
+            className="w-full md:w-[300px] bg-white border-gray-200 hover:border-pink-300 transition-all shadow-md hover:shadow-lg rounded-xl justify-between group"
+          >
+            <div className="flex items-center gap-2">
+              <MapPin className="w-4 h-4 text-pink-500" />
+              {selectedStore ? (
+                <span className="truncate">{selectedStore} - {selectedStoreName}</span>
+              ) : (
+                <span className="text-gray-500">Selecciona una tienda</span>
+              )}
+            </div>
+            <svg className="w-4 h-4 text-gray-400 group-hover:text-pink-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-[320px] p-2" align="start" side="bottom" sideOffset={5}>
+          <div className="relative mb-2">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+            <Input 
+              placeholder="Buscar tienda..." 
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-8 h-9 text-sm bg-gray-50 placeholder:text-gray-600"
+            />
+          </div>
+          <div className="max-h-[300px] overflow-y-auto space-y-1">
+            {filteredStores.map((store) => {
+              const hasPassword = storePasswords.some(sp => sp.store_code === store.code && sp.password);
+              return (
+                <div
+                  key={store.code}
+                  className={`w-full flex items-center gap-2 p-2 rounded-lg transition-colors ${
+                    selectedStore === store.code 
+                      ? 'bg-pink-100 text-pink-700' 
+                      : 'hover:bg-pink-50'
+                  }`}
+                >
+                  <button
+                    onClick={() => handleStoreClick(store)}
+                    className="flex-1 flex items-center gap-2 text-left"
+                  >
+                    <svg viewBox="0 0 24 32" className="w-5 h-6">
+                      <circle cx="12" cy="8" r="7" fill="#FFB5C5" stroke="#ec4899" strokeWidth="1"/>
+                      <polygon points="5,12 12,30 19,12" fill="#D4A574" stroke="#c99a5e" strokeWidth="0.5"/>
+                      <line x1="7" y1="15" x2="17" y2="15" stroke="#c99a5e" strokeWidth="0.5" opacity="0.6"/>
+                      <line x1="8" y1="19" x2="16" y2="19" stroke="#c99a5e" strokeWidth="0.5" opacity="0.6"/>
+                    </svg>
+                    <span className="font-medium text-gray-800">{store.code}</span>
+                    <span className="text-gray-400 text-xs truncate flex-1">- {store.name}</span>
+                    {hasPassword && <Lock className="w-3 h-3 text-amber-500" />}
+                  </button>
+                  <button
+                    onClick={(e) => handleConfigClick(e, store)}
+                    className="p-1 hover:bg-gray-200 rounded transition-colors"
+                    title="Configurar contraseña"
+                  >
+                    <Settings className="w-4 h-4 text-gray-400 hover:text-gray-600" />
+                  </button>
+                </div>
+              );
+            })}
+            {filteredStores.length === 0 && (
+              <p className="text-center text-gray-400 text-sm py-4">No se encontró "{search}"</p>
             )}
           </div>
-          <svg className="w-4 h-4 text-gray-400 group-hover:text-pink-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-[300px] p-2" align="start" side="bottom" sideOffset={5}>
-        <div className="relative mb-2">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-          <Input 
-            placeholder="Buscar tienda..." 
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-8 h-9 text-sm bg-gray-50 placeholder:text-gray-600"
-          />
-        </div>
-        <div className="max-h-[300px] overflow-y-auto space-y-1">
-          {filteredStores.map((store) => (
-            <button
-              key={store.code}
-              onClick={() => {
-                onStoreChange(store.code);
-                setOpen(false);
-                setSearch('');
-              }}
-              className={`w-full flex items-center gap-2 p-2 rounded-lg text-left transition-colors ${
-                selectedStore === store.code 
-                  ? 'bg-pink-100 text-pink-700' 
-                  : 'hover:bg-pink-50'
-              }`}
-            >
-              {/* Icono de cono con bolita */}
-              <svg viewBox="0 0 24 32" className="w-5 h-6">
-                <circle cx="12" cy="8" r="7" fill="#FFB5C5" stroke="#ec4899" strokeWidth="1"/>
-                <polygon points="5,12 12,30 19,12" fill="#D4A574" stroke="#c99a5e" strokeWidth="0.5"/>
-                <line x1="7" y1="15" x2="17" y2="15" stroke="#c99a5e" strokeWidth="0.5" opacity="0.6"/>
-                <line x1="8" y1="19" x2="16" y2="19" stroke="#c99a5e" strokeWidth="0.5" opacity="0.6"/>
-              </svg>
-              <span className="font-medium text-gray-800">{store.code}</span>
-              <span className="text-gray-400 text-xs truncate">- {store.name}</span>
-            </button>
-          ))}
-          {filteredStores.length === 0 && (
-            <p className="text-center text-gray-400 text-sm py-4">No se encontró "{search}"</p>
-          )}
-        </div>
-      </PopoverContent>
-    </Popover>
+        </PopoverContent>
+      </Popover>
+      
+      {/* Password Entry Dialog */}
+      <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
+        <DialogContent className="sm:max-w-[350px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Lock className="w-5 h-5 text-amber-500" />
+              Acceso a {pendingStore?.code}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <p className="text-sm text-gray-600">Esta tienda requiere contraseña para acceder.</p>
+            <div className="relative">
+              <Input
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Ingresa la contraseña"
+                value={passwordInput}
+                onChange={(e) => {
+                  setPasswordInput(e.target.value);
+                  setPasswordError('');
+                }}
+                onKeyDown={(e) => e.key === 'Enter' && handlePasswordSubmit()}
+                className="pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+            {passwordError && (
+              <motion.p 
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-red-500 text-sm"
+              >
+                {passwordError}
+              </motion.p>
+            )}
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setShowPasswordDialog(false)} className="flex-1">
+                Cancelar
+              </Button>
+              <Button onClick={handlePasswordSubmit} className="flex-1 bg-pink-500 hover:bg-pink-600">
+                Ingresar
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Password Config Dialog */}
+      <Dialog open={showConfigDialog} onOpenChange={setShowConfigDialog}>
+        <DialogContent className="sm:max-w-[350px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5 text-gray-600" />
+              Configurar contraseña - {configStore?.code}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <p className="text-sm text-gray-600">
+              {storePasswords.find(sp => sp.store_code === configStore?.code)?.password 
+                ? 'Edita o elimina la contraseña de esta tienda.'
+                : 'Establece una contraseña para proteger el acceso a esta tienda.'}
+            </p>
+            <div className="relative">
+              <Input
+                type={showNewPassword ? 'text' : 'password'}
+                placeholder="Nueva contraseña (dejar vacío para quitar)"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowNewPassword(!showNewPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setShowConfigDialog(false)} className="flex-1">
+                <X className="w-4 h-4 mr-1" />
+                Cancelar
+              </Button>
+              <Button 
+                onClick={handleSavePassword} 
+                disabled={savePasswordMutation.isPending}
+                className="flex-1 bg-emerald-500 hover:bg-emerald-600"
+              >
+                <Save className="w-4 h-4 mr-1" />
+                {savePasswordMutation.isPending ? 'Guardando...' : 'Guardar'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
