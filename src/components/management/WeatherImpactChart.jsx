@@ -718,7 +718,7 @@ export default function WeatherImpactChart({ dailyTrend = [], formatCurrency, da
             ? '📊 Impacto calculado comparando ventas reales de cada tipo de clima vs promedio general'
             : '⚠️ Los porcentajes son estimaciones. Conecta con datos de ventas para cálculos precisos'}
         </p>
-          </>
+        </>
         )}
       </CardContent>
     </Card>
