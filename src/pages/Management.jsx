@@ -471,6 +471,9 @@ function ManagementDashboard() {
               <WeatherImpactChart dailyTrend={filteredDailySales} formatCurrency={formatCurrency} dateRange={dateRange} />
             </div>
 
+            {/* Row 2.5: Ticket Promedio Diario */}
+            <TicketAnalysisCard dailyTrend={dailyTrend} formatCurrency={formatCurrency} />
+
             {/* Row 3: Store Compliance */}
             <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg">
               <CardHeader className="pb-2">
