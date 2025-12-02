@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
   ArrowLeft, Sparkles, RotateCcw, ZoomIn, ZoomOut, 
-  Wand2, Trash2, History, BarChart3, Undo2, Copy, Check, X, Plus, Search
+  Trash2, History, BarChart3, Undo2, Copy, Check, X, Plus, Search
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -644,10 +644,7 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                 <History className="w-4 h-4 mr-1" />
                 <span className="hidden sm:inline">Historial</span>
               </Button>
-              <Button size="sm" onClick={optimizeWithAI} disabled={isOptimizing} className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
-                <Wand2 className="w-4 h-4 mr-1" />
-                <span className="hidden sm:inline">{isOptimizing ? 'Optimizando...' : 'IA Optimizar'}</span>
-              </Button>
+
             </div>
 
             {/* Freezer Grid */}

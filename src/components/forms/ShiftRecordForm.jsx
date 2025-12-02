@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Save, User, DollarSign, Receipt, Zap, Gift, Loader2, CheckCircle, Sun, Sunset, Moon, UserPlus } from 'lucide-react';
-import CashierForm from './CashierForm';
+
 import { toast } from 'sonner';
 
 const SHIFTS = [
@@ -137,22 +137,19 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
                   <User className="w-4 h-4 text-pink-500" />
                   Cajero
                 </Label>
-                <div className="flex gap-2">
-                  <Select 
-                    value={formData.cashier_id} 
-                    onValueChange={(val) => setFormData({...formData, cashier_id: val})}
-                  >
-                    <SelectTrigger className="border-pink-200 focus:ring-pink-500 flex-1">
-                      <SelectValue placeholder="Selecciona cajero" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {cashiers.map(c => (
-                        <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <CashierForm storeId={storeId} />
-                </div>
+                <Select 
+                  value={formData.cashier_id} 
+                  onValueChange={(val) => setFormData({...formData, cashier_id: val})}
+                >
+                  <SelectTrigger className="border-pink-200 focus:ring-pink-500">
+                    <SelectValue placeholder="Selecciona cajero" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {cashiers.map(c => (
+                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Fecha */}
