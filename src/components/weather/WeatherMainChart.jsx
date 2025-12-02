@@ -13,25 +13,37 @@ import { es } from 'date-fns/locale';
 const getWeatherType = (code, precipitation) => {
   // WMO Weather interpretation codes (https://open-meteo.com/en/docs)
   // 0: Clear sky
-  // 1, 2, 3: Mainly clear, partly cloudy, overcast
+  // 1: Mainly clear
+  // 2: Partly cloudy
+  // 3: Overcast
   // 45, 48: Fog
-  // 51-55: Drizzle
-  // 56-57: Freezing drizzle
-  // 61-65: Rain
-  // 66-67: Freezing rain
+  // 51-57: Drizzle (light to freezing)
+  // 61-67: Rain (slight to freezing)
   // 71-77: Snow
   // 80-82: Rain showers
   // 85-86: Snow showers
   // 95-99: Thunderstorm
   
-  if (code === 0 || code === 1) return 'sunny';
-  if (code === 2 || code === 3 || code === 45 || code === 48) return 'cloudy';
-  if (code >= 51) return 'rainy';
+  // Primero evaluar por código de clima (más preciso)
+  if (code === 0) return 'sunny'; // Cielo despejado
+  if (code === 1) return 'sunny'; // Mayormente despejado
+  if (code === 2) return 'cloudy'; // Parcialmente nublado
+  if (code === 3) return 'cloudy'; // Nublado/Cubierto
+  if (code === 45 || code === 48) return 'cloudy'; // Niebla
   
-  // Fallback basado en precipitación
-  if (precipitation > 2) return 'rainy';
-  if (precipitation < 0.5) return 'sunny';
-  return 'cloudy';
+  // Códigos de precipitación (51+)
+  if (code >= 51 && code <= 57) return 'rainy'; // Llovizna
+  if (code >= 61 && code <= 67) return 'rainy'; // Lluvia
+  if (code >= 71 && code <= 77) return 'rainy'; // Nieve (poco probable en Bogotá)
+  if (code >= 80 && code <= 82) return 'rainy'; // Chubascos
+  if (code >= 85 && code <= 86) return 'rainy'; // Chubascos de nieve
+  if (code >= 95 && code <= 99) return 'rainy'; // Tormenta
+  
+  // Fallback basado en precipitación real (mm)
+  if (precipitation > 5) return 'rainy'; // Más de 5mm = lluvia significativa
+  if (precipitation > 1) return 'cloudy'; // 1-5mm = probablemente nublado con algo de lluvia
+  
+  return 'sunny'; // Por defecto si no hay código ni precipitación
 };
 
 const getWeatherEmoji = (type) => {

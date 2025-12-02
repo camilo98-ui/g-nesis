@@ -108,11 +108,11 @@ export default function WeatherRegionMap({ dateRange, dailySales, formatCurrency
           const weatherCode = data.current?.weather_code || 0;
           const precipProb = data.current?.precipitation_probability || 0;
           
-          // Lógica mejorada para determinar tipo de clima
+          // Lógica corregida basada en códigos WMO
           let weatherType = 'cloudy';
-          if (weatherCode >= 51) weatherType = 'rainy'; // Drizzle, rain, snow, thunderstorm
-          else if (weatherCode <= 1 && precipProb < 30) weatherType = 'sunny'; // Clear or mainly clear
-          else if (weatherCode === 2 || weatherCode === 3) weatherType = 'cloudy'; // Partly cloudy to overcast
+          if (weatherCode === 0 || weatherCode === 1) weatherType = 'sunny'; // Despejado o mayormente despejado
+          else if (weatherCode === 2 || weatherCode === 3 || weatherCode === 45 || weatherCode === 48) weatherType = 'cloudy'; // Nublado o niebla
+          else if (weatherCode >= 51) weatherType = 'rainy'; // Cualquier tipo de precipitación
           
           results[region.id] = {
             temp: Math.round(data.current?.temperature_2m || 0),
