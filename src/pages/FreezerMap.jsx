@@ -312,7 +312,7 @@ export default function FreezerMap() {
     setSavingSlot({ row: selectedSlot.row, position: selectedSlot.position, saving: true });
     
     const slotData = {
-      store_id: selectedStore,
+      store_id: `${selectedStore}_F${currentFreezer}`,
       row: selectedSlot.row,
       position: selectedSlot.position,
       slot_type: slotType,
