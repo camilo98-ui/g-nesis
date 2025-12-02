@@ -7,27 +7,29 @@ import { format, startOfWeek, endOfWeek, getWeek, getYear, setWeek, startOfYear,
 import { es } from 'date-fns/locale';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// Calendario personalizado más dinámico
-function CustomCalendar({ selected, onSelect, numberOfMonths = 2 }) {
+// Opciones rápidas de fecha
+const QUICK_OPTIONS = [
+  { label: 'Hoy', getValue: () => ({ from: new Date(), to: new Date() }) },
+  { label: 'Ayer', getValue: () => ({ from: subDays(new Date(), 1), to: subDays(new Date(), 1) }) },
+  { label: 'Últimos 7 días', getValue: () => ({ from: subDays(new Date(), 6), to: new Date() }) },
+  { label: 'Últimos 14 días', getValue: () => ({ from: subDays(new Date(), 13), to: new Date() }) },
+  { label: 'Últimos 30 días', getValue: () => ({ from: subDays(new Date(), 29), to: new Date() }) },
+  { label: 'Este mes', getValue: () => ({ from: startOfMonth(new Date()), to: new Date() }) },
+];
+
+// Calendario personalizado más dinámico y bonito
+function CustomCalendar({ selected, onSelect, onClose }) {
   const [currentMonth, setCurrentMonth] = useState(selected?.from || new Date());
   const [hoverDate, setHoverDate] = useState(null);
   const [selectingEnd, setSelectingEnd] = useState(false);
 
-  const months = useMemo(() => {
-    const result = [];
-    for (let i = 0; i < numberOfMonths; i++) {
-      result.push(addMonths(currentMonth, i));
-    }
-    return result;
-  }, [currentMonth, numberOfMonths]);
+  const months = useMemo(() => [currentMonth, addMonths(currentMonth, 1)], [currentMonth]);
 
   const handleDayClick = (day) => {
     if (!selected?.from || (selected.from && selected.to) || !selectingEnd) {
-      // Iniciar nueva selección
       onSelect({ from: day, to: day });
       setSelectingEnd(true);
     } else {
-      // Completar selección
       if (day < selected.from) {
         onSelect({ from: day, to: selected.from });
       } else {
@@ -38,20 +40,15 @@ function CustomCalendar({ selected, onSelect, numberOfMonths = 2 }) {
   };
 
   const handleDayHover = (day) => {
-    if (selectingEnd && selected?.from) {
-      setHoverDate(day);
-    }
+    if (selectingEnd && selected?.from) setHoverDate(day);
   };
 
   const isInRange = (day) => {
     if (!selected?.from) return false;
-    
     const endDate = selectingEnd && hoverDate ? hoverDate : selected.to;
     if (!endDate) return false;
-    
     const start = selected.from < endDate ? selected.from : endDate;
     const end = selected.from < endDate ? endDate : selected.from;
-    
     return isWithinInterval(day, { start, end });
   };
 
@@ -65,46 +62,47 @@ function CustomCalendar({ selected, onSelect, numberOfMonths = 2 }) {
     const monthStart = startOfMonth(month);
     const monthEnd = endOfMonth(month);
     const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
-    
-    // Obtener día de la semana del primer día (0=dom, 1=lun...)
     const startDay = monthStart.getDay();
-    const offset = startDay === 0 ? 6 : startDay - 1; // Ajustar para que lunes sea el primer día
+    const offset = startDay === 0 ? 6 : startDay - 1;
     
     return (
-      <div className="p-2">
-        <div className="text-center font-medium text-gray-700 mb-2 capitalize">
+      <div className="p-3">
+        <div className="text-center font-semibold text-gray-800 mb-3 capitalize text-sm">
           {format(month, 'MMMM yyyy', { locale: es })}
         </div>
-        <div className="grid grid-cols-7 gap-0.5 mb-1">
-          {['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa', 'Do'].map(d => (
-            <div key={d} className="text-center text-[10px] text-gray-400 font-medium py-1">{d}</div>
+        <div className="grid grid-cols-7 gap-1 mb-2">
+          {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((d, i) => (
+            <div key={i} className="text-center text-[10px] text-gray-400 font-bold">{d}</div>
           ))}
         </div>
-        <div className="grid grid-cols-7 gap-0.5">
-          {/* Espacios vacíos para alinear */}
-          {Array.from({ length: offset }).map((_, i) => (
-            <div key={`empty-${i}`} className="h-8" />
-          ))}
+        <div className="grid grid-cols-7 gap-1">
+          {Array.from({ length: offset }).map((_, i) => <div key={`e-${i}`} className="h-8" />)}
           {days.map((day) => {
             const inRange = isInRange(day);
             const start = isStart(day);
             const end = isEnd(day);
-            const isToday = isSameDay(day, new Date());
+            const today = isToday(day);
             
             return (
-              <button
+              <motion.button
                 key={day.toISOString()}
                 onClick={() => handleDayClick(day)}
                 onMouseEnter={() => handleDayHover(day)}
-                className={`h-8 w-full text-xs rounded-md transition-all relative
-                  ${inRange && !start && !end ? 'bg-pink-100' : ''}
-                  ${start || end ? 'bg-pink-500 text-white font-bold' : ''}
-                  ${!inRange && !start && !end ? 'hover:bg-pink-50' : ''}
-                  ${isToday && !start && !end ? 'ring-1 ring-pink-300' : ''}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                className={`h-8 w-8 text-xs rounded-full transition-all relative flex items-center justify-center mx-auto
+                  ${inRange && !start && !end ? 'bg-gradient-to-r from-pink-100 to-rose-100' : ''}
+                  ${start ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white font-bold shadow-md' : ''}
+                  ${end && !start ? 'bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold shadow-md' : ''}
+                  ${!inRange && !start && !end ? 'hover:bg-pink-50 text-gray-700' : ''}
+                  ${today && !start && !end ? 'ring-2 ring-pink-400 ring-offset-1' : ''}
                 `}
               >
                 {format(day, 'd')}
-              </button>
+                {today && !start && !end && (
+                  <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-pink-500" />
+                )}
+              </motion.button>
             );
           })}
         </div>
@@ -113,47 +111,96 @@ function CustomCalendar({ selected, onSelect, numberOfMonths = 2 }) {
   };
 
   return (
-    <div className="select-none">
+    <div className="select-none bg-white rounded-2xl overflow-hidden shadow-xl border border-pink-100">
+      {/* Quick Options */}
+      <div className="p-3 bg-gradient-to-r from-pink-50 to-rose-50 border-b border-pink-100">
+        <div className="flex flex-wrap gap-1.5">
+          {QUICK_OPTIONS.map((opt) => (
+            <motion.button
+              key={opt.label}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => {
+                onSelect(opt.getValue());
+                setSelectingEnd(false);
+              }}
+              className="px-3 py-1.5 text-xs font-medium rounded-full bg-white border border-pink-200 text-pink-600 hover:bg-pink-500 hover:text-white hover:border-pink-500 transition-all shadow-sm"
+            >
+              {opt.label}
+            </motion.button>
+          ))}
+        </div>
+      </div>
+
       {/* Navegación */}
-      <div className="flex items-center justify-between px-3 py-2 border-b">
-        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}>
-          <ChevronLeft className="h-4 w-4" />
-        </Button>
-        <div className="flex gap-4">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+        <motion.button 
+          whileHover={{ scale: 1.1, x: -2 }} 
+          whileTap={{ scale: 0.9 }}
+          onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
+          className="p-1.5 rounded-full hover:bg-pink-50 text-pink-500"
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </motion.button>
+        <div className="flex gap-6">
           {months.map((m, i) => (
-            <span key={i} className="text-sm font-medium text-gray-600 capitalize">
-              {format(m, 'MMM yyyy', { locale: es })}
+            <span key={i} className="text-sm font-bold text-gray-700 capitalize">
+              {format(m, 'MMMM', { locale: es })}
             </span>
           ))}
         </div>
-        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>
-          <ChevronRight className="h-4 w-4" />
-        </Button>
+        <motion.button 
+          whileHover={{ scale: 1.1, x: 2 }} 
+          whileTap={{ scale: 0.9 }}
+          onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
+          className="p-1.5 rounded-full hover:bg-pink-50 text-pink-500"
+        >
+          <ChevronRight className="h-5 w-5" />
+        </motion.button>
       </div>
       
       {/* Meses */}
-      <div className="flex">
+      <div className="flex divide-x divide-gray-100">
         {months.map((month, i) => (
-          <div key={i} className={i > 0 ? 'border-l' : ''}>
-            {renderMonth(month)}
-          </div>
+          <div key={i}>{renderMonth(month)}</div>
         ))}
       </div>
       
-      {/* Footer con selección actual */}
-      <div className="px-3 py-2 border-t bg-gray-50 text-xs text-gray-500 flex items-center justify-between">
-        <span>
-          {selected?.from && (
-            <>
-              {format(selected.from, 'dd MMM', { locale: es })}
+      {/* Footer */}
+      <div className="px-4 py-3 border-t border-gray-100 bg-gray-50/50 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          {selected?.from ? (
+            <motion.div 
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex items-center gap-2 text-sm"
+            >
+              <span className="px-2 py-1 bg-pink-100 text-pink-700 rounded-lg font-medium">
+                {format(selected.from, 'dd MMM', { locale: es })}
+              </span>
               {selected.to && !isSameDay(selected.from, selected.to) && (
-                <> → {format(selected.to, 'dd MMM', { locale: es })}</>
+                <>
+                  <span className="text-gray-400">→</span>
+                  <span className="px-2 py-1 bg-rose-100 text-rose-700 rounded-lg font-medium">
+                    {format(selected.to, 'dd MMM', { locale: es })}
+                  </span>
+                </>
               )}
-            </>
+            </motion.div>
+          ) : (
+            <span className="text-xs text-gray-400">Selecciona una fecha</span>
           )}
-          {!selected?.from && 'Clic para seleccionar'}
-        </span>
-        {selectingEnd && <span className="text-pink-500">Selecciona fecha fin</span>}
+        </div>
+        {selectingEnd && (
+          <motion.span 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-xs text-pink-500 font-medium flex items-center gap-1"
+          >
+            <Sparkles className="w-3 h-3" />
+            Selecciona fecha fin
+          </motion.span>
+        )}
       </div>
     </div>
   );
