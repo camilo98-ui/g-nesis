@@ -1,12 +1,21 @@
 import React, { useState, useMemo } from 'react';
-import { MapPin, Search } from 'lucide-react';
+import { MapPin, Search, Lock, Eye, EyeOff, Settings, Save, X } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { base44 } from '@/api/base44Client';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { motion } from 'framer-motion';
 
 const STORES = [
   { code: "BTA 11", name: "CC PALATINO" },
@@ -35,13 +44,11 @@ export { STORES };
 export default function StoreSelector({ selectedStore, onStoreChange }) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
-  const [pendingStore, setPendingStore] = useState(null);
+  const [passwordDialog, setPasswordDialog] = useState({ open: false, store: null });
   const [passwordInput, setPasswordInput] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [passwordError, setPasswordError] = useState('');
-  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
-  const [showConfigDialog, setShowConfigDialog] = useState(false);
-  const [configStore, setConfigStore] = useState(null);
+  const [editPasswordDialog, setEditPasswordDialog] = useState({ open: false, store: null });
   const [newPassword, setNewPassword] = useState('');
   const [showNewPassword, setShowNewPassword] = useState(false);
   
@@ -53,10 +60,10 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
     queryFn: () => base44.entities.StorePassword.list(),
   });
   
-  // Save password mutation
+  // Mutation to save password
   const savePasswordMutation = useMutation({
     mutationFn: async ({ storeCode, password }) => {
-      const existing = storePasswords.find(sp => sp.store_code === storeCode);
+      const existing = storePasswords.find(p => p.store_code === storeCode);
       if (existing) {
         return base44.entities.StorePassword.update(existing.id, { password });
       } else {
@@ -65,9 +72,8 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['storePasswords'] });
-      setShowConfigDialog(false);
+      setEditPasswordDialog({ open: false, store: null });
       setNewPassword('');
-      setConfigStore(null);
     }
   });
   
@@ -83,16 +89,12 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
   const selectedStoreName = STORES.find(s => s.code === selectedStore)?.name || '';
   
   const handleStoreClick = (store) => {
-    const storePassword = storePasswords.find(sp => sp.store_code === store.code);
-    
+    const storePassword = storePasswords.find(p => p.store_code === store.code);
     if (storePassword?.password) {
-      // Store has password, show dialog
-      setPendingStore(store);
+      setPasswordDialog({ open: true, store });
       setPasswordInput('');
       setPasswordError('');
-      setShowPasswordDialog(true);
     } else {
-      // No password, select directly
       onStoreChange(store.code);
       setOpen(false);
       setSearch('');
@@ -100,32 +102,28 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
   };
   
   const handlePasswordSubmit = () => {
-    const storePassword = storePasswords.find(sp => sp.store_code === pendingStore?.code);
-    
+    const storePassword = storePasswords.find(p => p.store_code === passwordDialog.store.code);
     if (passwordInput === storePassword?.password) {
-      onStoreChange(pendingStore.code);
-      setShowPasswordDialog(false);
+      onStoreChange(passwordDialog.store.code);
+      setPasswordDialog({ open: false, store: null });
+      setPasswordInput('');
       setOpen(false);
       setSearch('');
-      setPendingStore(null);
-      setPasswordInput('');
     } else {
       setPasswordError('Contraseña incorrecta');
     }
   };
   
-  const handleConfigClick = (e, store) => {
-    e.stopPropagation();
-    setConfigStore(store);
-    const existing = storePasswords.find(sp => sp.store_code === store.code);
-    setNewPassword(existing?.password || '');
-    setShowConfigDialog(true);
+  const handleSavePassword = () => {
+    if (!newPassword.trim()) return;
+    savePasswordMutation.mutate({ 
+      storeCode: editPasswordDialog.store.code, 
+      password: newPassword 
+    });
   };
   
-  const handleSavePassword = () => {
-    if (configStore) {
-      savePasswordMutation.mutate({ storeCode: configStore.code, password: newPassword });
-    }
+  const hasPassword = (storeCode) => {
+    return storePasswords.some(p => p.store_code === storeCode && p.password);
   };
   
   return (
@@ -160,41 +158,44 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
             />
           </div>
           <div className="max-h-[300px] overflow-y-auto space-y-1">
-            {filteredStores.map((store) => {
-              const hasPassword = storePasswords.some(sp => sp.store_code === store.code && sp.password);
-              return (
-                <div
-                  key={store.code}
-                  className={`w-full flex items-center gap-2 p-2 rounded-lg transition-colors ${
-                    selectedStore === store.code 
-                      ? 'bg-pink-100 text-pink-700' 
-                      : 'hover:bg-pink-50'
-                  }`}
+            {filteredStores.map((store) => (
+              <div 
+                key={store.code}
+                className={`w-full flex items-center gap-2 p-2 rounded-lg transition-colors ${
+                  selectedStore === store.code 
+                    ? 'bg-pink-100 text-pink-700' 
+                    : 'hover:bg-pink-50'
+                }`}
+              >
+                <button
+                  onClick={() => handleStoreClick(store)}
+                  className="flex-1 flex items-center gap-2 text-left"
                 >
-                  <button
-                    onClick={() => handleStoreClick(store)}
-                    className="flex-1 flex items-center gap-2 text-left"
-                  >
-                    <svg viewBox="0 0 24 32" className="w-5 h-6">
-                      <circle cx="12" cy="8" r="7" fill="#FFB5C5" stroke="#ec4899" strokeWidth="1"/>
-                      <polygon points="5,12 12,30 19,12" fill="#D4A574" stroke="#c99a5e" strokeWidth="0.5"/>
-                      <line x1="7" y1="15" x2="17" y2="15" stroke="#c99a5e" strokeWidth="0.5" opacity="0.6"/>
-                      <line x1="8" y1="19" x2="16" y2="19" stroke="#c99a5e" strokeWidth="0.5" opacity="0.6"/>
-                    </svg>
-                    <span className="font-medium text-gray-800">{store.code}</span>
-                    <span className="text-gray-400 text-xs truncate flex-1">- {store.name}</span>
-                    {hasPassword && <Lock className="w-3 h-3 text-amber-500" />}
-                  </button>
-                  <button
-                    onClick={(e) => handleConfigClick(e, store)}
-                    className="p-1 hover:bg-gray-200 rounded transition-colors"
-                    title="Configurar contraseña"
-                  >
-                    <Settings className="w-4 h-4 text-gray-400 hover:text-gray-600" />
-                  </button>
-                </div>
-              );
-            })}
+                  <svg viewBox="0 0 24 32" className="w-5 h-6">
+                    <circle cx="12" cy="8" r="7" fill="#FFB5C5" stroke="#ec4899" strokeWidth="1"/>
+                    <polygon points="5,12 12,30 19,12" fill="#D4A574" stroke="#c99a5e" strokeWidth="0.5"/>
+                    <line x1="7" y1="15" x2="17" y2="15" stroke="#c99a5e" strokeWidth="0.5" opacity="0.6"/>
+                    <line x1="8" y1="19" x2="16" y2="19" stroke="#c99a5e" strokeWidth="0.5" opacity="0.6"/>
+                  </svg>
+                  <span className="font-medium text-gray-800">{store.code}</span>
+                  <span className="text-gray-400 text-xs truncate">- {store.name}</span>
+                  {hasPassword(store.code) && (
+                    <Lock className="w-3 h-3 text-amber-500 ml-auto" />
+                  )}
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setEditPasswordDialog({ open: true, store });
+                    setNewPassword(storePasswords.find(p => p.store_code === store.code)?.password || '');
+                  }}
+                  className="p-1 hover:bg-gray-200 rounded transition-colors"
+                  title="Configurar contraseña"
+                >
+                  <Settings className="w-3.5 h-3.5 text-gray-400" />
+                </button>
+              </div>
+            ))}
             {filteredStores.length === 0 && (
               <p className="text-center text-gray-400 text-sm py-4">No se encontró "{search}"</p>
             )}
@@ -203,25 +204,24 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
       </Popover>
       
       {/* Password Entry Dialog */}
-      <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
-        <DialogContent className="sm:max-w-[350px]">
+      <Dialog open={passwordDialog.open} onOpenChange={(open) => setPasswordDialog({ open, store: passwordDialog.store })}>
+        <DialogContent className="max-w-sm">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Lock className="w-5 h-5 text-amber-500" />
-              Acceso a {pendingStore?.code}
+              Ingresa la contraseña
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 pt-2">
-            <p className="text-sm text-gray-600">Esta tienda requiere contraseña para acceder.</p>
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600">
+              La tienda <strong>{passwordDialog.store?.code}</strong> está protegida con contraseña.
+            </p>
             <div className="relative">
               <Input
-                type={showPassword ? 'text' : 'password'}
-                placeholder="Ingresa la contraseña"
+                type={showPassword ? "text" : "password"}
+                placeholder="Contraseña"
                 value={passwordInput}
-                onChange={(e) => {
-                  setPasswordInput(e.target.value);
-                  setPasswordError('');
-                }}
+                onChange={(e) => { setPasswordInput(e.target.value); setPasswordError(''); }}
                 onKeyDown={(e) => e.key === 'Enter' && handlePasswordSubmit()}
                 className="pr-10"
               />
@@ -243,7 +243,7 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
               </motion.p>
             )}
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setShowPasswordDialog(false)} className="flex-1">
+              <Button variant="outline" onClick={() => setPasswordDialog({ open: false, store: null })} className="flex-1">
                 Cancelar
               </Button>
               <Button onClick={handlePasswordSubmit} className="flex-1 bg-pink-500 hover:bg-pink-600">
@@ -254,24 +254,22 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
         </DialogContent>
       </Dialog>
       
-      {/* Password Config Dialog */}
-      <Dialog open={showConfigDialog} onOpenChange={setShowConfigDialog}>
-        <DialogContent className="sm:max-w-[350px]">
+      {/* Edit Password Dialog */}
+      <Dialog open={editPasswordDialog.open} onOpenChange={(open) => setEditPasswordDialog({ open, store: editPasswordDialog.store })}>
+        <DialogContent className="max-w-sm">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Settings className="w-5 h-5 text-gray-600" />
-              Configurar contraseña - {configStore?.code}
+              Configurar contraseña
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 pt-2">
+          <div className="space-y-4">
             <p className="text-sm text-gray-600">
-              {storePasswords.find(sp => sp.store_code === configStore?.code)?.password 
-                ? 'Edita o elimina la contraseña de esta tienda.'
-                : 'Establece una contraseña para proteger el acceso a esta tienda.'}
+              Configura la contraseña para <strong>{editPasswordDialog.store?.code} - {editPasswordDialog.store?.name}</strong>
             </p>
             <div className="relative">
               <Input
-                type={showNewPassword ? 'text' : 'password'}
+                type={showNewPassword ? "text" : "password"}
                 placeholder="Nueva contraseña (dejar vacío para quitar)"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
@@ -285,15 +283,18 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
                 {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
+            <p className="text-xs text-gray-400">
+              💡 Deja el campo vacío y guarda para quitar la contraseña de esta tienda.
+            </p>
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setShowConfigDialog(false)} className="flex-1">
+              <Button variant="outline" onClick={() => setEditPasswordDialog({ open: false, store: null })} className="flex-1">
                 <X className="w-4 h-4 mr-1" />
                 Cancelar
               </Button>
               <Button 
                 onClick={handleSavePassword} 
-                disabled={savePasswordMutation.isPending}
                 className="flex-1 bg-emerald-500 hover:bg-emerald-600"
+                disabled={savePasswordMutation.isPending}
               >
                 <Save className="w-4 h-4 mr-1" />
                 {savePasswordMutation.isPending ? 'Guardando...' : 'Guardar'}
