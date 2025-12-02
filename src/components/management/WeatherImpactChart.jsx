@@ -315,6 +315,19 @@ export default function WeatherImpactChart({ dailyTrend = [], formatCurrency, da
             <HelpTooltip viewType={viewType} />
           </CardTitle>
           <div className="flex gap-2 items-center">
+            {/* Indicador de fuente de datos */}
+            {dataSource === 'real' && (
+              <span className="text-[9px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full font-medium flex items-center gap-1">
+                <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                Clima real
+              </span>
+            )}
+            {dataSource === 'simulated' && (
+              <span className="text-[9px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full font-medium">
+                Estimado
+              </span>
+            )}
+            
             {/* Calendar Picker */}
             <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
               <PopoverTrigger asChild>
