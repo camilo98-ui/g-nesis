@@ -7,7 +7,7 @@ import { createPageUrl } from '@/utils';
 import StoreSelector, { STORES } from '@/components/StoreSelector';
 import BudgetForm from '@/components/forms/BudgetForm';
 import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
-import { ArrowLeft, Target, DollarSign, Receipt, Zap, Gift, Calendar } from 'lucide-react';
+import { ArrowLeft, Target, DollarSign, Receipt, Zap, Gift, Calendar, Pencil } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +16,7 @@ const MONTHS = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 
 
 export default function Budget() {
   const [selectedStore, setSelectedStore] = useState('');
+  const [editingBudget, setEditingBudget] = useState(null);
 
   useEffect(() => {
     const saved = localStorage.getItem('selectedStore');
@@ -76,7 +77,7 @@ export default function Budget() {
         {selectedStore ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Form */}
-            <BudgetForm storeId={selectedStore} />
+            <BudgetForm storeId={selectedStore} editingBudget={editingBudget} onClearEdit={() => setEditingBudget(null)} />
 
             {/* Existing Budgets */}
             <motion.div
@@ -121,6 +122,14 @@ export default function Budget() {
                                   </Badge>
                                 )}
                               </div>
+                              <motion.button
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                                onClick={() => setEditingBudget(budget)}
+                                className="p-1.5 rounded-lg bg-white/50 hover:bg-blue-100 text-blue-500 transition-colors"
+                              >
+                                <Pencil className="w-4 h-4" />
+                              </motion.button>
                             </div>
                             <div className="grid grid-cols-2 gap-3">
                               <div className="flex items-center gap-2 text-sm">

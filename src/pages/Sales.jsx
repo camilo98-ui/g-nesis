@@ -5,7 +5,7 @@ import { createPageUrl } from '@/utils';
 import StoreSelector, { STORES } from '@/components/StoreSelector';
 import ShiftRecordForm from '@/components/forms/ShiftRecordForm';
 import DailySalesForm from '@/components/forms/DailySalesForm';
-import CashierForm from '@/components/forms/CashierForm';
+
 import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
 import { ArrowLeft, TrendingUp, Clock, Calendar } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -46,10 +46,7 @@ export default function Sales() {
               )}
             </div>
           </div>
-          <div className="flex gap-3 items-center">
-            <StoreSelector selectedStore={selectedStore} onStoreChange={handleStoreChange} />
-            {selectedStore && <CashierForm storeId={selectedStore} />}
-          </div>
+          <StoreSelector selectedStore={selectedStore} onStoreChange={handleStoreChange} />
         </div>
 
         {selectedStore ? (
