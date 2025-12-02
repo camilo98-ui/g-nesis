@@ -617,9 +617,12 @@ export default function Dashboard() {
     return null;
   };
 
+  // Calcular ticket promedio correctamente
+  const avgTicket = totals.transactions > 0 ? totals.sales / totals.transactions : 0;
+
   const metrics = [
     { id: 'sales', title: 'Ventas Totales', value: totals.sales, budget: currentBudget.sales_budget, icon: DollarSign, bgColor: 'bg-gradient-to-br from-emerald-100 to-green-200', iconBg: 'bg-emerald-200', iconColor: 'text-emerald-700', format: 'currency' },
-    { id: 'tickets', title: 'Ticket Promedio', value: totals.tickets > 0 ? totals.sales / totals.transactions : 0, budget: currentBudget.tickets_budget, icon: Receipt, bgColor: 'bg-gradient-to-br from-sky-100 to-blue-200', iconBg: 'bg-sky-200', iconColor: 'text-sky-700', format: 'currency' },
+    { id: 'tickets', title: 'Ticket Promedio', value: avgTicket, budget: currentBudget.tickets_budget, icon: Receipt, bgColor: 'bg-gradient-to-br from-sky-100 to-blue-200', iconBg: 'bg-sky-200', iconColor: 'text-sky-700', format: 'currency' },
     { id: 'transactions', title: 'Transacciones', value: totals.transactions, budget: currentBudget.transactions_budget, icon: Zap, bgColor: 'bg-gradient-to-br from-violet-100 to-purple-200', iconBg: 'bg-violet-200', iconColor: 'text-violet-700' },
     { id: 'suggested', title: 'Sugeridos', value: totals.suggested, budget: currentBudget.suggested_budget, icon: Gift, bgColor: 'bg-gradient-to-br from-pink-100 to-rose-200', iconBg: 'bg-pink-200', iconColor: 'text-pink-700' },
   ];
