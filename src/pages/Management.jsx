@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { STORES } from '@/components/StoreSelector';
 import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
-import WeatherImpactChart from '@/components/management/WeatherImpactChart';
+
 import GrowthVelocityChart from '@/components/management/GrowthVelocityChart';
 import StoreProductivityCard from '@/components/management/StoreProductivityCard';
 import ManagementReportButton from '@/components/management/ManagementReportButton';
@@ -438,39 +438,35 @@ function ManagementDashboard() {
               />
             </div>
 
-            {/* Row 2: Sales Trend + Weather */}
-            <div className="grid md:grid-cols-2 gap-4">
-              <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
-                    <motion.div animate={{ y: [0, -2, 0] }} transition={{ duration: 2, repeat: Infinity }}>
-                      <TrendingUp className="w-4 h-4 text-pink-500" />
-                    </motion.div>
-                    Tendencia de Ventas
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={160}>
-                    <AreaChart data={dailyTrend}>
-                      <defs>
-                        <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#ec4899" stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor="#ec4899" stopOpacity={0}/>
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                      <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#888' }} />
-                      <YAxis tickFormatter={(v) => `${(v/1000000).toFixed(1)}M`} tick={{ fontSize: 10, fill: '#888' }} />
-                      <Tooltip formatter={(v) => formatCurrency(v)} labelFormatter={(l, p) => p?.[0]?.payload?.fullDate || l} />
-                      <Area type="monotone" dataKey="sales" stroke="#ec4899" fill="url(#salesGradient)" strokeWidth={2} />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                  <ChartInsight data={dailyTrend} type="sales" formatCurrency={formatCurrency} />
-                </CardContent>
-              </Card>
-
-              <WeatherImpactChart dailyTrend={filteredDailySales} formatCurrency={formatCurrency} dateRange={dateRange} />
-            </div>
+            {/* Row 2: Sales Trend */}
+            <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+                  <motion.div animate={{ y: [0, -2, 0] }} transition={{ duration: 2, repeat: Infinity }}>
+                    <TrendingUp className="w-4 h-4 text-pink-500" />
+                  </motion.div>
+                  Tendencia de Ventas
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={200}>
+                  <AreaChart data={dailyTrend}>
+                    <defs>
+                      <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#ec4899" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#ec4899" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#888' }} />
+                    <YAxis tickFormatter={(v) => `${(v/1000000).toFixed(1)}M`} tick={{ fontSize: 10, fill: '#888' }} />
+                    <Tooltip formatter={(v) => formatCurrency(v)} labelFormatter={(l, p) => p?.[0]?.payload?.fullDate || l} />
+                    <Area type="monotone" dataKey="sales" stroke="#ec4899" fill="url(#salesGradient)" strokeWidth={2} />
+                  </AreaChart>
+                </ResponsiveContainer>
+                <ChartInsight data={dailyTrend} type="sales" formatCurrency={formatCurrency} />
+              </CardContent>
+            </Card>
 
             {/* Row 2.5: Ticket Promedio Diario */}
             <TicketAnalysisCard dailyTrend={dailyTrend} formatCurrency={formatCurrency} />
