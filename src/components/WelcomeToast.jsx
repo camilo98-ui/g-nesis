@@ -1,16 +1,45 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const GREETINGS = [
-  { text: "¡Bienvenido a", emoji: "🍦", suffix: "! Que sea un día dulce" },
-  { text: "¡Hola,", emoji: "✨", suffix: "! A romperla hoy" },
-  { text: "¡Llegaste a", emoji: "🚀", suffix: "! Vamos con todo" },
-  { text: "¡Qué bueno verte en", emoji: "💪", suffix: "!" },
-  { text: "¡Arrancamos en", emoji: "🎯", suffix: "! Metas por cumplir" },
-  { text: "¡Hey!", emoji: "👋", suffix: " te espera. ¡Éxitos!" },
+// Saludos según hora del día
+const getTimeBasedGreetings = () => {
+  const hour = new Date().getHours();
+  if (hour < 12) {
+    return [
+      { text: "¡Buenos días,", emoji: "☀️", suffix: "! A brillar hoy", bg: "from-amber-400 to-orange-400" },
+      { text: "¡Feliz mañana en", emoji: "🌅", suffix: "! Empieza fuerte", bg: "from-rose-400 to-pink-400" },
+      { text: "¡Arrancamos el día en", emoji: "🚀", suffix: "!", bg: "from-violet-400 to-purple-400" },
+      { text: "¡El sol salió para", emoji: "🌞", suffix: "! Vamos por todo", bg: "from-yellow-400 to-amber-400" },
+    ];
+  } else if (hour < 18) {
+    return [
+      { text: "¡Buenas tardes,", emoji: "🍦", suffix: "! La dulzura continúa", bg: "from-pink-400 to-rose-400" },
+      { text: "¡Sigue brillando en", emoji: "⭐", suffix: "!", bg: "from-cyan-400 to-blue-400" },
+      { text: "¡La tarde es tuya en", emoji: "💫", suffix: "! A dar lo mejor", bg: "from-emerald-400 to-teal-400" },
+      { text: "¡Qué flow en", emoji: "🔥", suffix: "! Sigue así", bg: "from-orange-400 to-red-400" },
+    ];
+  } else {
+    return [
+      { text: "¡Buenas noches,", emoji: "🌙", suffix: "! Último empujón", bg: "from-indigo-400 to-purple-400" },
+      { text: "¡Terminamos fuerte en", emoji: "💪", suffix: "!", bg: "from-violet-400 to-fuchsia-400" },
+      { text: "¡La noche es joven en", emoji: "✨", suffix: "! Vamos", bg: "from-blue-400 to-indigo-400" },
+      { text: "¡Cierre épico en", emoji: "🎯", suffix: "!", bg: "from-purple-400 to-pink-400" },
+    ];
+  }
+};
+
+const MOTIVATIONAL_PHRASES = [
+  "¡Hoy vendes más que ayer! 📈",
+  "¡Cada helado es una sonrisa! 😊",
+  "¡Eres parte del mejor equipo! 🏆",
+  "¡La meta está cerca! 🎯",
+  "¡Tú haces la diferencia! ⭐",
+  "¡Que fluya la dulzura! 🍨",
+  "¡Éxito asegurado! 🚀",
+  "¡A conquistar el día! 💪",
 ];
 
-const CONFETTI_COLORS = ['#FFB5C5', '#E0BBE4', '#C5E8FF', '#FFEFD5', '#D4F0F0'];
+const CONFETTI_COLORS = ['#FFB5C5', '#E0BBE4', '#C5E8FF', '#FFEFD5', '#D4F0F0', '#fbbf24', '#a78bfa'];
 
 const Confetti = () => (
   <div className="absolute inset-0 pointer-events-none overflow-hidden">
