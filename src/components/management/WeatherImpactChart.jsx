@@ -42,62 +42,116 @@ const VIEW_EXPLANATIONS = {
   }
 };
 
-// Simular datos de clima realistas para Bogotá
-const generateWeatherData = (salesData, dateRange) => {
-  const monthPatterns = {
-    dry: { sunny: 0.35, hot: 0.15, partlyCloudy: 0.30, cloudy: 0.15, rainy: 0.05 },
-    wet: { sunny: 0.10, hot: 0.05, partlyCloudy: 0.25, cloudy: 0.30, rainy: 0.30 }
-  };
+// Mapear código de clima de Open-Meteo a nuestros tipos
+const mapWeatherCode = (code) => {
+  // WMO Weather interpretation codes
+  // https://open-meteo.com/en/docs
+  if (code === 0) return 'sunny'; // Clear sky
+  if (code >= 1 && code <= 2) return 'partlyCloudy'; // Mainly clear, partly cloudy
+  if (code === 3) return 'cloudy'; // Overcast
+  if (code >= 45 && code <= 48) return 'cloudy'; // Fog
+  if (code >= 51 && code <= 67) return 'rainy'; // Drizzle and rain
+  if (code >= 71 && code <= 77) return 'cloudy'; // Snow (unlikely in Bogotá)
+  if (code >= 80 && code <= 82) return 'rainy'; // Rain showers
+  if (code >= 85 && code <= 86) return 'rainy'; // Snow showers
+  if (code >= 95 && code <= 99) return 'rainy'; // Thunderstorm
+  return 'partlyCloudy';
+};
+
+// Calcular impacto real basado en comparación de ventas
+const calculateRealImpact = (salesData, weatherType, avgSalesAll) => {
+  if (!avgSalesAll || avgSalesAll === 0) return 0;
+  const weatherDays = salesData.filter(d => d.weather === weatherType);
+  if (weatherDays.length === 0) return 0;
+  const avgWeatherSales = weatherDays.reduce((sum, d) => sum + (d.sales || 0), 0) / weatherDays.length;
+  return ((avgWeatherSales - avgSalesAll) / avgSalesAll) * 100;
+};
+
+// Función para obtener datos de clima real de Open-Meteo (gratuito, sin API key)
+const fetchRealWeatherData = async (dateRange) => {
+  const { from, to } = dateRange;
+  const startDate = format(from, 'yyyy-MM-dd');
+  const endDate = format(to, 'yyyy-MM-dd');
   
-  const getWeatherType = (weights) => {
-    const rand = Math.random();
-    let cumulative = 0;
-    for (const [type, weight] of Object.entries(weights)) {
-      cumulative += weight;
-      if (rand <= cumulative) return type;
+  // Coordenadas de Bogotá
+  const lat = 4.6097;
+  const lon = -74.0817;
+  
+  // Open-Meteo Historical Weather API (gratuita)
+  const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&start_date=${startDate}&end_date=${endDate}&daily=temperature_2m_max,temperature_2m_min,temperature_2m_mean,precipitation_sum,weathercode&timezone=America%2FBogota`;
+  
+  const response = await fetch(url);
+  if (!response.ok) throw new Error('Error fetching weather data');
+  
+  const data = await response.json();
+  return data;
+};
+
+// Generar datos combinando clima real con ventas
+const processWeatherWithSales = (weatherApiData, salesData, dateRange) => {
+  const days = eachDayOfInterval({ start: dateRange.from, end: dateRange.to });
+  
+  // Crear mapa de ventas por fecha
+  const salesByDate = {};
+  salesData.forEach(s => {
+    const dateKey = s.date?.split('T')[0] || s.date;
+    salesByDate[dateKey] = s.total_sales || s.sales || 0;
+  });
+  
+  // Mapear datos de API a nuestro formato
+  const processedData = days.map((day, i) => {
+    const dateStr = format(day, 'yyyy-MM-dd');
+    const apiIndex = weatherApiData?.daily?.time?.indexOf(dateStr);
+    
+    let weather = 'partlyCloudy';
+    let temperature = 17;
+    let precipitation = 0;
+    
+    if (apiIndex !== -1 && apiIndex !== undefined) {
+      const weatherCode = weatherApiData.daily.weathercode?.[apiIndex];
+      weather = mapWeatherCode(weatherCode);
+      temperature = weatherApiData.daily.temperature_2m_mean?.[apiIndex] || 17;
+      precipitation = weatherApiData.daily.precipitation_sum?.[apiIndex] || 0;
+      
+      // Si hay mucha lluvia, forzar rainy
+      if (precipitation > 10) weather = 'rainy';
+      // Si hace mucho calor para Bogotá (>22°C) y está soleado
+      if (temperature > 22 && weather === 'sunny') weather = 'hot';
     }
-    return 'cloudy';
-  };
-
-  // Generar días del rango
-  const days = dateRange?.from && dateRange?.to 
-    ? eachDayOfInterval({ start: dateRange.from, end: dateRange.to })
-    : salesData.map((_, i) => subDays(new Date(), salesData.length - 1 - i));
-
-  return days.map((day, i) => {
-    const month = day.getMonth();
-    const isDrySeason = [0, 1, 5, 6, 7, 11].includes(month);
-    const patterns = isDrySeason ? monthPatterns.dry : monthPatterns.wet;
     
-    const weather = getWeatherType(patterns);
+    const sales = salesByDate[dateStr] || 0;
     
-    const baseTempByWeather = { hot: 24, sunny: 21, partlyCloudy: 18, cloudy: 16, rainy: 14 };
-    const baseTemp = baseTempByWeather[weather] || 17;
-    const temperature = baseTemp + (Math.random() - 0.5) * 3;
-    
-    const weatherImpacts = { sunny: 18, hot: 28, partlyCloudy: 8, cloudy: -8, rainy: -22 };
-    const tempBonus = Math.max(0, (temperature - 18) * 2);
-    
-    const baseImpact = weatherImpacts[weather] || 0;
-    const weatherImpact = baseImpact + tempBonus + (Math.random() - 0.5) * 5;
-    
-    const humidityByWeather = { rainy: 85, cloudy: 75, partlyCloudy: 65, sunny: 55, hot: 45 };
-    const humidity = (humidityByWeather[weather] || 65) + (Math.random() - 0.5) * 10;
-
-    const baseSales = salesData[i]?.sales || Math.random() * 2000000 + 500000;
-
     return {
       date: format(day, 'dd', { locale: es }),
       fullDate: format(day, 'EEEE dd MMM', { locale: es }),
       dayOfWeek: format(day, 'EEEE', { locale: es }),
       dateObj: day,
-      sales: baseSales,
+      dateStr,
+      sales,
       weather,
-      weatherImpact: Math.round(weatherImpact * 10) / 10,
       temperature: Math.round(temperature * 10) / 10,
-      humidity: Math.round(humidity),
+      precipitation: Math.round(precipitation * 10) / 10,
+      weatherImpact: 0, // Se calculará después
     };
   });
+  
+  // Calcular impacto real basado en ventas promedio
+  const daysWithSales = processedData.filter(d => d.sales > 0);
+  const avgSalesAll = daysWithSales.length > 0 
+    ? daysWithSales.reduce((sum, d) => sum + d.sales, 0) / daysWithSales.length 
+    : 0;
+  
+  // Calcular impacto por tipo de clima
+  const impactByWeather = {};
+  Object.keys(WEATHER_CONFIG).forEach(type => {
+    impactByWeather[type] = calculateRealImpact(processedData, type, avgSalesAll);
+  });
+  
+  // Asignar impacto a cada día
+  return processedData.map(d => ({
+    ...d,
+    weatherImpact: Math.round(impactByWeather[d.weather] * 10) / 10
+  }));
 };
 
 const WeatherIcon = ({ type, size = 16, className = '' }) => {
