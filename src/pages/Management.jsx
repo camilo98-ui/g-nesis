@@ -443,11 +443,11 @@ function ManagementDashboard() {
             <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
-                  <motion.div animate={{ y: [0, -2, 0] }} transition={{ duration: 2, repeat: Infinity }}>
-                    <TrendingUp className="w-4 h-4 text-pink-500" />
-                  </motion.div>
-                  Tendencia de Ventas
-                </CardTitle>
+                                        <motion.div animate={{ y: [0, -2, 0] }} transition={{ duration: 2, repeat: Infinity }}>
+                                          <TrendingUp className="w-4 h-4 text-emerald-500" />
+                                        </motion.div>
+                                        Tendencia de Ventas vs Transacciones
+                                      </CardTitle>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={200}>
