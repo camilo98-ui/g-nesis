@@ -53,22 +53,22 @@ function CustomCalendar({ selected, onSelect, onClose, onApply }) {
   };
 
   const handleDayHover = (day) => {
-    if (selectingEnd && selected?.from) setHoverDate(day);
+    if (selectingEnd && tempSelection?.from) setHoverDate(day);
   };
 
   const isInRange = (day) => {
-    if (!selected?.from) return false;
-    const endDate = selectingEnd && hoverDate ? hoverDate : selected.to;
+    if (!tempSelection?.from) return false;
+    const endDate = selectingEnd && hoverDate ? hoverDate : tempSelection.to;
     if (!endDate) return false;
-    const start = selected.from < endDate ? selected.from : endDate;
-    const end = selected.from < endDate ? endDate : selected.from;
+    const start = tempSelection.from < endDate ? tempSelection.from : endDate;
+    const end = tempSelection.from < endDate ? endDate : tempSelection.from;
     return isWithinInterval(day, { start, end });
   };
 
-  const isStart = (day) => selected?.from && isSameDay(day, selected.from);
+  const isStart = (day) => tempSelection?.from && isSameDay(day, tempSelection.from);
   const isEnd = (day) => {
     if (selectingEnd && hoverDate) return isSameDay(day, hoverDate);
-    return selected?.to && isSameDay(day, selected.to);
+    return tempSelection?.to && isSameDay(day, tempSelection.to);
   };
 
   const renderMonth = (month) => {
