@@ -189,10 +189,55 @@ export default function WeatherImpactChart({ dailyTrend = [], formatCurrency, da
   });
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [selectedWeather, setSelectedWeather] = useState(null);
+  const [weatherData, setWeatherData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [dataSource, setDataSource] = useState('loading'); // 'real' | 'simulated' | 'loading'
   
-  const weatherData = useMemo(() => {
-    return generateWeatherData(dailyTrend, dateRange);
-  }, [dailyTrend, dateRange]);
+  // Cargar datos de clima real
+  useEffect(() => {
+    const loadWeatherData = async () => {
+      setLoading(true);
+      try {
+        const apiData = await fetchRealWeatherData(dateRange);
+        const processed = processWeatherWithSales(apiData, dailyTrend, dateRange);
+        setWeatherData(processed);
+        setDataSource('real');
+      } catch (error) {
+        console.error('Error fetching weather:', error);
+        // Fallback a datos simulados si falla la API
+        const days = eachDayOfInterval({ start: dateRange.from, end: dateRange.to });
+        const fallbackData = days.map((day, i) => {
+          const weatherTypes = ['sunny', 'partlyCloudy', 'cloudy', 'rainy', 'hot'];
+          const weather = weatherTypes[Math.floor(Math.random() * weatherTypes.length)];
+          const salesByDate = {};
+          dailyTrend.forEach(s => {
+            const dateKey = s.date?.split('T')[0] || s.date;
+            salesByDate[dateKey] = s.total_sales || s.sales || 0;
+          });
+          const dateStr = format(day, 'yyyy-MM-dd');
+          return {
+            date: format(day, 'dd', { locale: es }),
+            fullDate: format(day, 'EEEE dd MMM', { locale: es }),
+            dayOfWeek: format(day, 'EEEE', { locale: es }),
+            dateObj: day,
+            sales: salesByDate[dateStr] || Math.random() * 2000000 + 500000,
+            weather,
+            temperature: 14 + Math.random() * 10,
+            weatherImpact: weather === 'hot' ? 25 : weather === 'sunny' ? 15 : weather === 'rainy' ? -20 : 0,
+          };
+        });
+        setWeatherData(fallbackData);
+        setDataSource('simulated');
+        toast.error('No se pudo obtener clima real, usando datos estimados');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    if (dateRange.from && dateRange.to) {
+      loadWeatherData();
+    }
+  }, [dateRange, dailyTrend]);
 
   // Estadísticas por tipo de clima
   const weatherStats = useMemo(() => {
