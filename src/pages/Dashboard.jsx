@@ -898,6 +898,15 @@ export default function Dashboard() {
 
             {/* Daily Goals */}
             <DailyGoalsCard storeId={selectedStore} />
+            
+            {/* Weather Impact Chart */}
+            {weatherData && (
+              <WeatherSalesImpactChart 
+                weatherData={weatherData}
+                dailySales={dailySales}
+                formatCurrency={formatCurrency}
+              />
+            )}
 
             {/* Proyecciones */}
             {projections && (
