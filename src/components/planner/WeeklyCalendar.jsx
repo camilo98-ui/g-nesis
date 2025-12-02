@@ -82,16 +82,16 @@ const generateNickname = (name) => {
 import { Moon } from 'lucide-react';
 
 const ROLES_CONFIG = {
-  caja: { label: 'Caja', icon: ShoppingCart, bg: 'bg-gradient-to-br from-emerald-50 to-green-100', text: 'text-emerald-600', border: 'border-emerald-200', header: 'bg-gradient-to-r from-emerald-400 to-green-400' },
-  coneo: { label: 'Coneo', icon: IceCream, bg: 'bg-gradient-to-br from-pink-50 to-rose-100', text: 'text-pink-600', border: 'border-pink-200', header: 'bg-gradient-to-r from-pink-400 to-rose-400' },
-  bebidas: { label: 'Bebidas', icon: Coffee, bg: 'bg-gradient-to-br from-amber-50 to-orange-100', text: 'text-amber-600', border: 'border-amber-200', header: 'bg-gradient-to-r from-amber-400 to-orange-400' },
-  especialidades: { label: 'Especialidades', icon: Sparkles, bg: 'bg-gradient-to-br from-violet-50 to-purple-100', text: 'text-violet-600', border: 'border-violet-200', header: 'bg-gradient-to-r from-violet-400 to-purple-400' },
-  coordinacion: { label: 'Coord. Entregas', icon: ClipboardList, bg: 'bg-gradient-to-br from-blue-50 to-sky-100', text: 'text-blue-600', border: 'border-blue-200', header: 'bg-gradient-to-r from-blue-400 to-sky-400' },
-  cookie_jar: { label: 'Cookie Jar', icon: Cookie, bg: 'bg-gradient-to-br from-orange-50 to-amber-100', text: 'text-orange-600', border: 'border-orange-200', header: 'bg-gradient-to-r from-orange-400 to-amber-400' },
-  stocker: { label: 'Stocker', icon: Package, bg: 'bg-gradient-to-br from-slate-50 to-gray-100', text: 'text-slate-600', border: 'border-slate-200', header: 'bg-gradient-to-r from-slate-400 to-gray-400' },
-  toma_pedidos: { label: 'Toma Pedidos', icon: Headphones, bg: 'bg-gradient-to-br from-cyan-50 to-teal-100', text: 'text-cyan-600', border: 'border-cyan-200', header: 'bg-gradient-to-r from-cyan-400 to-teal-400' },
-  experiencia: { label: 'Experiencia', icon: Crown, bg: 'bg-gradient-to-br from-yellow-50 to-amber-100', text: 'text-yellow-600', border: 'border-yellow-200', header: 'bg-gradient-to-r from-yellow-400 to-amber-400' },
-  descanso: { label: '😴 Descanso', icon: Moon, bg: 'bg-gradient-to-br from-indigo-100 to-purple-100', text: 'text-indigo-600', border: 'border-indigo-200', header: 'bg-gradient-to-r from-indigo-500 to-purple-500' },
+  caja: { label: 'Caja', icon: ShoppingCart, bg: 'bg-gradient-to-br from-emerald-50 to-green-100', text: 'text-emerald-600', border: 'border-emerald-200', header: 'bg-gradient-to-r from-emerald-400 to-green-400', priority: 1 },
+  coneo: { label: 'Coneo', icon: IceCream, bg: 'bg-gradient-to-br from-pink-50 to-rose-100', text: 'text-pink-600', border: 'border-pink-200', header: 'bg-gradient-to-r from-pink-400 to-rose-400', priority: 1 },
+  bebidas: { label: 'Bebidas', icon: Coffee, bg: 'bg-gradient-to-br from-amber-50 to-orange-100', text: 'text-amber-600', border: 'border-amber-200', header: 'bg-gradient-to-r from-amber-400 to-orange-400', priority: 2 },
+  especialidades: { label: 'Especialidades', icon: Sparkles, bg: 'bg-gradient-to-br from-violet-50 to-purple-100', text: 'text-violet-600', border: 'border-violet-200', header: 'bg-gradient-to-r from-violet-400 to-purple-400', priority: 2 },
+  coordinacion: { label: 'Coord. Entregas', icon: ClipboardList, bg: 'bg-gradient-to-br from-blue-50 to-sky-100', text: 'text-blue-600', border: 'border-blue-200', header: 'bg-gradient-to-r from-blue-400 to-sky-400', priority: 3 },
+  cookie_jar: { label: 'Cookie Jar', icon: Cookie, bg: 'bg-gradient-to-br from-orange-50 to-amber-100', text: 'text-orange-600', border: 'border-orange-200', header: 'bg-gradient-to-r from-orange-400 to-amber-400', priority: 3 },
+  stocker: { label: 'Stocker', icon: Package, bg: 'bg-gradient-to-br from-slate-50 to-gray-100', text: 'text-slate-600', border: 'border-slate-200', header: 'bg-gradient-to-r from-slate-400 to-gray-400', priority: 3 },
+  toma_pedidos: { label: 'Toma Pedidos', icon: Headphones, bg: 'bg-gradient-to-br from-cyan-50 to-teal-100', text: 'text-cyan-600', border: 'border-cyan-200', header: 'bg-gradient-to-r from-cyan-400 to-teal-400', priority: 3 },
+  experiencia: { label: 'Experiencia', icon: Crown, bg: 'bg-gradient-to-br from-yellow-50 to-amber-100', text: 'text-yellow-600', border: 'border-yellow-200', header: 'bg-gradient-to-r from-yellow-400 to-amber-400', priority: 3 },
+  descanso: { label: '😴 Descanso', icon: Moon, bg: 'bg-gradient-to-br from-indigo-100 to-purple-200', text: 'text-indigo-600', border: 'border-indigo-300', header: 'bg-gradient-to-r from-indigo-500 to-purple-500', priority: 0 },
 };
 
 // Decoraciones de helados para las tarjetas - ahora en BLANCO para contraste
