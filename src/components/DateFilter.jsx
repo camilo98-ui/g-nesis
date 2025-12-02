@@ -417,21 +417,8 @@ export default function DateFilter({ dateRange, onDateChange }) {
             selected={dateRange}
             onSelect={onDateChange}
             onClose={() => setIsCalendarOpen(false)}
+            onApply={() => setIsCalendarOpen(false)}
           />
-          <motion.div 
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mt-2 flex justify-end"
-          >
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => setIsCalendarOpen(false)}
-              className="px-4 py-2 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-medium text-sm shadow-lg flex items-center gap-2"
-            >
-              <Check className="w-4 h-4" /> Aplicar
-            </motion.button>
-          </motion.div>
         </PopoverContent>
       </Popover>
     </div>
