@@ -364,6 +364,22 @@ export default function WeatherImpactChart({ dailyTrend = [], formatCurrency, da
         </div>
       </CardHeader>
       <CardContent>
+        {loading && (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="w-6 h-6 text-sky-500 animate-spin mr-2" />
+            <span className="text-sm text-gray-500">Cargando datos de clima...</span>
+          </div>
+        )}
+        
+        {!loading && weatherData.length === 0 && (
+          <div className="text-center py-8 text-gray-500">
+            <Cloud className="w-10 h-10 mx-auto mb-2 opacity-30" />
+            <p className="text-sm">No hay datos de clima disponibles</p>
+          </div>
+        )}
+        
+        {!loading && weatherData.length > 0 && (
+          <>
         {/* Stats Cards - Clickeables */}
         <div className="grid grid-cols-5 gap-2 mb-4">
           {Object.entries(WEATHER_CONFIG).map(([key, config]) => {
