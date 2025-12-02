@@ -18,25 +18,38 @@ const QUICK_OPTIONS = [
 ];
 
 // Calendario personalizado más dinámico y bonito
-function CustomCalendar({ selected, onSelect, onClose }) {
+function CustomCalendar({ selected, onSelect, onClose, onApply }) {
   const [currentMonth, setCurrentMonth] = useState(selected?.from || new Date());
   const [hoverDate, setHoverDate] = useState(null);
   const [selectingEnd, setSelectingEnd] = useState(false);
+  const [tempSelection, setTempSelection] = useState(selected);
 
   const months = useMemo(() => [currentMonth, addMonths(currentMonth, 1)], [currentMonth]);
 
   const handleDayClick = (day) => {
-    if (!selected?.from || (selected.from && selected.to) || !selectingEnd) {
-      onSelect({ from: day, to: day });
+    if (!tempSelection?.from || (tempSelection.from && tempSelection.to && !selectingEnd) || !selectingEnd) {
+      setTempSelection({ from: day, to: day });
       setSelectingEnd(true);
     } else {
-      if (day < selected.from) {
-        onSelect({ from: day, to: selected.from });
+      if (day < tempSelection.from) {
+        setTempSelection({ from: day, to: tempSelection.from });
       } else {
-        onSelect({ from: selected.from, to: day });
+        setTempSelection({ from: tempSelection.from, to: day });
       }
       setSelectingEnd(false);
     }
+  };
+  
+  const handleApply = () => {
+    if (tempSelection?.from) {
+      onSelect(tempSelection);
+      onApply?.();
+    }
+  };
+  
+  const handleQuickSelect = (range) => {
+    setTempSelection(range);
+    setSelectingEnd(false);
   };
 
   const handleDayHover = (day) => {
