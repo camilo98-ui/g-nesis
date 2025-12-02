@@ -433,6 +433,28 @@ export default function Dashboard() {
   });
   const [activeMetric, setActiveMetric] = useState(null);
   const [showExport, setShowExport] = useState(false);
+  const [weatherData, setWeatherData] = useState(null);
+  
+  // Fetch weather data
+  useEffect(() => {
+    const fetchWeather = async () => {
+      const end = new Date();
+      const start = new Date();
+      start.setDate(start.getDate() - 30);
+      
+      try {
+        const response = await fetch(
+          `https://archive-api.open-meteo.com/v1/archive?latitude=4.6097&longitude=-74.0817&start_date=${format(start, 'yyyy-MM-dd')}&end_date=${format(end, 'yyyy-MM-dd')}&daily=weathercode,temperature_2m_max,temperature_2m_min,temperature_2m_mean,precipitation_sum&timezone=America%2FBogota`
+        );
+        const data = await response.json();
+        setWeatherData({ history: data.daily });
+      } catch (e) {
+        console.error('Error fetching weather:', e);
+      }
+    };
+    
+    if (selectedStore) fetchWeather();
+  }, [selectedStore]);
 
   useEffect(() => {
     const saved = localStorage.getItem('selectedStore');
