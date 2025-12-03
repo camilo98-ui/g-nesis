@@ -83,10 +83,22 @@ export default function CashiersDashboard() {
     return stats;
   }, [activeCashiers, shiftRecords, dateRange]);
 
-  // Ranking por ventas
+  // Ranking por ventas - orden dinámico basado en múltiples factores
   const rankedCashiers = useMemo(() => {
     return Object.values(cashierStats)
-      .sort((a, b) => b.totalSales - a.totalSales)
+      .map(c => {
+        // Calcular score compuesto: ventas (50%), ticket promedio (30%), días trabajados (20%)
+        const maxSales = Math.max(...Object.values(cashierStats).map(x => x.totalSales), 1);
+        const maxTicket = Math.max(...Object.values(cashierStats).map(x => x.avgTicket), 1);
+        const maxDays = Math.max(...Object.values(cashierStats).map(x => x.daysWorked), 1);
+        
+        const salesScore = (c.totalSales / maxSales) * 50;
+        const ticketScore = (c.avgTicket / maxTicket) * 30;
+        const daysScore = (c.daysWorked / maxDays) * 20;
+        
+        return { ...c, compositeScore: salesScore + ticketScore + daysScore };
+      })
+      .sort((a, b) => b.compositeScore - a.compositeScore)
       .map((c, idx) => ({ ...c, rank: idx + 1 }));
   }, [cashierStats]);
 
@@ -222,37 +234,81 @@ export default function CashiersDashboard() {
                       key={cashier.id}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: idx * 0.05 }}
-                      whileHover={{ x: 5, scale: 1.01 }}
+                      transition={{ delay: idx * 0.03 }}
+                      whileHover={{ x: 8, scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
                       onClick={() => setSelectedCashier(cashier)}
                       className={`p-4 rounded-xl cursor-pointer transition-all ${
                         selectedCashier?.id === cashier.id 
-                          ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg' 
+                          ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg shadow-pink-500/30' 
                           : 'bg-white border border-gray-100 hover:border-pink-200 hover:shadow-md'
                       }`}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                            selectedCashier?.id === cashier.id 
-                              ? 'bg-white/20' 
-                              : cashier.rank <= 3 
-                                ? 'bg-gradient-to-br from-amber-100 to-orange-200' 
-                                : 'bg-gray-100'
-                          }`}>
+                          <motion.div 
+                            className={`w-10 h-10 rounded-full flex items-center justify-center relative ${
+                              selectedCashier?.id === cashier.id 
+                                ? 'bg-white/20' 
+                                : cashier.rank <= 3 
+                                  ? 'bg-gradient-to-br from-amber-100 to-orange-200' 
+                                  : 'bg-gray-100'
+                            }`}
+                            animate={cashier.rank === 1 ? { scale: [1, 1.1, 1] } : {}}
+                            transition={{ duration: 2, repeat: Infinity }}
+                          >
                             {getRankIcon(cashier.rank)}
-                          </div>
+                            {cashier.rank === 1 && (
+                              <motion.div 
+                                className="absolute -top-1 -right-1 text-xs"
+                                animate={{ rotate: [0, 15, -15, 0] }}
+                                transition={{ duration: 1, repeat: Infinity }}
+                              >
+                                ⭐
+                              </motion.div>
+                            )}
+                          </motion.div>
                           <div>
                             <p className={`font-bold ${selectedCashier?.id === cashier.id ? 'text-white' : 'text-gray-800'}`}>
                               {cashier.name}
                             </p>
-                            <p className={`text-xs ${selectedCashier?.id === cashier.id ? 'text-white/70' : 'text-gray-500'}`}>
-                              {cashier.daysWorked} turnos · ${(cashier.totalSales/1000000).toFixed(2)}M
-                            </p>
+                            <div className={`flex items-center gap-2 text-xs ${selectedCashier?.id === cashier.id ? 'text-white/70' : 'text-gray-500'}`}>
+                              <span>{cashier.daysWorked} turnos</span>
+                              <span>·</span>
+                              <span className="font-medium">${(cashier.totalSales/1000000).toFixed(2)}M</span>
+                              {cashier.avgTicket > teamTotals.avgTicket && (
+                                <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${selectedCashier?.id === cashier.id ? 'bg-white/20' : 'bg-emerald-100 text-emerald-700'}`}>
+                                  🎯 Alto ticket
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
-                        <ChevronRight className={`w-5 h-5 ${selectedCashier?.id === cashier.id ? 'text-white' : 'text-gray-400'}`} />
+                        <motion.div
+                          animate={selectedCashier?.id === cashier.id ? { x: [0, 3, 0] } : {}}
+                          transition={{ duration: 1, repeat: Infinity }}
+                        >
+                          <ChevronRight className={`w-5 h-5 ${selectedCashier?.id === cashier.id ? 'text-white' : 'text-gray-400'}`} />
+                        </motion.div>
                       </div>
+                      
+                      {/* Barra de progreso del score */}
+                      {!selectedCashier?.id === cashier.id && (
+                        <div className="mt-2">
+                          <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
+                            <motion.div 
+                              initial={{ width: 0 }}
+                              animate={{ width: `${cashier.compositeScore}%` }}
+                              transition={{ delay: idx * 0.05, duration: 0.5 }}
+                              className={`h-full rounded-full ${
+                                cashier.rank === 1 ? 'bg-gradient-to-r from-amber-400 to-yellow-500' :
+                                cashier.rank <= 3 ? 'bg-gradient-to-r from-pink-400 to-rose-500' :
+                                'bg-gradient-to-r from-gray-300 to-gray-400'
+                              }`}
+                            />
+                          </div>
+                        </div>
+                      )}
                       
                       {cashier.rank <= 3 && selectedCashier?.id !== cashier.id && (
                         <div className="mt-2">

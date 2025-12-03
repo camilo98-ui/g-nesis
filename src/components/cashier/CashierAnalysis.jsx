@@ -4,14 +4,16 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { 
   TrendingUp, TrendingDown, Target, BarChart3, 
-  Sparkles, AlertTriangle, CheckCircle, Loader2
+  Sparkles, AlertTriangle, CheckCircle, Loader2, Users, Zap
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import { startOfMonth, format, subDays, eachDayOfInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, 
-  ResponsiveContainer, Legend
+  ResponsiveContainer, Legend, AreaChart, Area, RadarChart,
+  PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, BarChart, Bar, Cell
 } from 'recharts';
 
 export default function CashierAnalysis({ cashierId, cashierName, storeId }) {
@@ -170,6 +172,57 @@ INSTRUCCIONES:
     );
   }
 
+  // Calcular eficiencia del cajero
+  const efficiencyData = useMemo(() => {
+    if (!trendData.length) return [];
+    
+    // Calcular eficiencia diaria (ventas / transacciones) como proxy de productividad
+    return trendData.map(d => ({
+      ...d,
+      eficiencia: d.transacciones > 0 ? Math.min(100, (d.ticketPromedio / 50000) * 100) : 0, // Normalizado a 100%
+    }));
+  }, [trendData]);
+
+  // Comparación con otros cajeros
+  const cashierComparison = useMemo(() => {
+    const monthStart = startOfMonth(new Date());
+    const allRecords = shiftRecords.filter(r => new Date(r.date) >= monthStart);
+    
+    // Agrupar por cajero
+    const cashierGroups = {};
+    allRecords.forEach(r => {
+      if (!cashierGroups[r.cashier_id]) {
+        cashierGroups[r.cashier_id] = { sales: 0, transactions: 0, days: 0 };
+      }
+      cashierGroups[r.cashier_id].sales += r.sales || 0;
+      cashierGroups[r.cashier_id].transactions += r.transactions || 0;
+      cashierGroups[r.cashier_id].days += 1;
+    });
+
+    // Calcular métricas para cada cajero
+    const comparison = Object.entries(cashierGroups).map(([id, data]) => {
+      const cashierInfo = allCashiers.find(c => c.id === id);
+      const avgTicket = data.transactions > 0 ? data.sales / data.transactions : 0;
+      const avgDaily = data.days > 0 ? data.sales / data.days : 0;
+      
+      return {
+        id,
+        name: cashierInfo?.name?.split(' ')[0] || 'N/A',
+        sales: data.sales,
+        avgTicket,
+        avgDaily,
+        days: data.days,
+        isCurrentCashier: id === cashierId
+      };
+    }).sort((a, b) => b.sales - a.sales);
+
+    return comparison;
+  }, [shiftRecords, allCashiers, cashierId]);
+
+  // Posición del cajero actual
+  const currentPosition = cashierComparison.findIndex(c => c.isCurrentCashier) + 1;
+  const totalCashiers = cashierComparison.length;
+
   return (
     <div className="space-y-4">
       {/* Gráfica de Tendencia */}
@@ -236,6 +289,102 @@ INSTRUCCIONES:
                 />
               </LineChart>
             </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Gráfica de Eficiencia */}
+      <Card className="border-none shadow-lg">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+            <Zap className="w-4 h-4 text-amber-500" />
+            Eficiencia del Cajero
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-48">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={efficiencyData}>
+                <defs>
+                  <linearGradient id="efficiencyGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.4}/>
+                    <stop offset="95%" stopColor="#f59e0b" stopOpacity={0.05}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <XAxis dataKey="date" tick={{ fill: '#6b7280', fontSize: 10 }} />
+                <YAxis 
+                  domain={[0, 100]}
+                  tick={{ fill: '#6b7280', fontSize: 10 }} 
+                  tickFormatter={(v) => `${v}%`}
+                />
+                <Tooltip 
+                  contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
+                  formatter={(v) => [`${v.toFixed(0)}%`, 'Eficiencia']}
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="eficiencia" 
+                  stroke="#f59e0b" 
+                  strokeWidth={2}
+                  fill="url(#efficiencyGradient)" 
+                  name="Eficiencia"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Comparación con otros cajeros */}
+      <Card className="border-none shadow-lg">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+            <Users className="w-4 h-4 text-violet-500" />
+            Posición vs Equipo
+            <span className="ml-auto text-xs px-2 py-1 rounded-full bg-violet-100 text-violet-700 font-bold">
+              #{currentPosition} de {totalCashiers}
+            </span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-52">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={cashierComparison.slice(0, 8)} layout="vertical">
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" horizontal={false} />
+                <XAxis type="number" tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} tick={{ fontSize: 9 }} />
+                <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: '#6b7280' }} width={60} />
+                <Tooltip 
+                  contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
+                  formatter={(v) => [formatCurrency(v), 'Ventas']}
+                />
+                <Bar dataKey="sales" radius={[0, 4, 4, 0]}>
+                  {cashierComparison.slice(0, 8).map((entry, index) => (
+                    <Cell 
+                      key={`cell-${index}`} 
+                      fill={entry.isCurrentCashier ? '#ec4899' : index === 0 ? '#fbbf24' : '#e5e7eb'}
+                      opacity={entry.isCurrentCashier ? 1 : 0.7}
+                    />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          
+          {/* Leyenda */}
+          <div className="flex justify-center gap-4 mt-2 text-xs">
+            <div className="flex items-center gap-1">
+              <div className="w-3 h-3 rounded bg-pink-500" />
+              <span className="text-gray-600">{cashierName}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-3 h-3 rounded bg-amber-400" />
+              <span className="text-gray-600">Top 1</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-3 h-3 rounded bg-gray-300" />
+              <span className="text-gray-600">Otros</span>
+            </div>
           </div>
         </CardContent>
       </Card>

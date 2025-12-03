@@ -90,30 +90,71 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
-            className="absolute inset-0 z-50 flex items-center justify-center bg-white/90 backdrop-blur-sm rounded-2xl"
+            className="absolute inset-0 z-50 flex items-center justify-center bg-white/95 backdrop-blur-sm rounded-2xl"
           >
             <motion.div
               initial={{ scale: 0 }}
-              animate={{ scale: [0, 1.2, 1] }}
-              transition={{ duration: 0.5 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 200 }}
               className="text-center"
             >
-              <motion.div
-                animate={{ rotate: [0, 10, -10, 0] }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-                className="text-6xl mb-3"
-              >
-                🍦
-              </motion.div>
+              {/* Helado animado */}
+              <motion.svg viewBox="0 0 80 120" className="w-24 h-32 mx-auto">
+                {/* Bola de helado */}
+                <motion.circle 
+                  cx="40" cy="28" r="22" 
+                  fill="url(#pinkIceCream)"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: [0, 1.2, 1], y: [20, -5, 0] }}
+                  transition={{ duration: 0.6, ease: "backOut" }}
+                />
+                <motion.circle cx="32" cy="20" r="5" fill="white" opacity="0.5" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.3 }} />
+                {/* Cono */}
+                <motion.polygon 
+                  points="20,45 40,110 60,45" 
+                  fill="url(#coneGrad)"
+                  initial={{ scaleY: 0 }}
+                  animate={{ scaleY: 1 }}
+                  transition={{ delay: 0.2, duration: 0.4 }}
+                  style={{ transformOrigin: 'center top' }}
+                />
+                <motion.g initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
+                  <line x1="26" y1="55" x2="54" y2="55" stroke="#b45309" strokeWidth="1" opacity="0.4" />
+                  <line x1="30" y1="70" x2="50" y2="70" stroke="#b45309" strokeWidth="1" opacity="0.4" />
+                  <line x1="34" y1="85" x2="46" y2="85" stroke="#b45309" strokeWidth="1" opacity="0.4" />
+                </motion.g>
+                {/* Chispas */}
+                <motion.circle cx="15" cy="15" r="3" fill="#fbbf24" animate={{ scale: [0, 1, 0], opacity: [0, 1, 0] }} transition={{ duration: 1, repeat: Infinity }} />
+                <motion.circle cx="65" cy="10" r="2" fill="#ec4899" animate={{ scale: [0, 1, 0], opacity: [0, 1, 0] }} transition={{ duration: 1, repeat: Infinity, delay: 0.3 }} />
+                <motion.circle cx="70" cy="35" r="2.5" fill="#8b5cf6" animate={{ scale: [0, 1, 0], opacity: [0, 1, 0] }} transition={{ duration: 1, repeat: Infinity, delay: 0.6 }} />
+                <defs>
+                  <linearGradient id="pinkIceCream" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#f472b6" />
+                    <stop offset="100%" stopColor="#ec4899" />
+                  </linearGradient>
+                  <linearGradient id="coneGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#fbbf24" />
+                    <stop offset="100%" stopColor="#d97706" />
+                  </linearGradient>
+                </defs>
+              </motion.svg>
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="flex items-center gap-2 justify-center"
+                transition={{ delay: 0.3 }}
+                className="flex items-center gap-2 justify-center mt-2"
               >
                 <CheckCircle className="w-6 h-6 text-green-500" />
                 <span className="text-lg font-bold text-gray-800">¡Guardado!</span>
               </motion.div>
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+                className="text-sm text-gray-500 mt-1"
+              >
+                Turno registrado exitosamente
+              </motion.p>
             </motion.div>
           </motion.div>
         )}
