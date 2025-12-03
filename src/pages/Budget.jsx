@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import StoreSelector, { STORES } from '@/components/StoreSelector';
 import BudgetForm from '@/components/forms/BudgetForm';
 import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
-import { ArrowLeft, Target, DollarSign, Receipt, Zap, Gift, Calendar, Pencil } from 'lucide-react';
+import { ArrowLeft, Target, DollarSign, Receipt, Zap, Gift, Calendar, Pencil, Trash2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +18,7 @@ const MONTHS = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 
 export default function Budget() {
   const [selectedStore, setSelectedStore] = useState('');
   const [editingBudget, setEditingBudget] = useState(null);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     const saved = localStorage.getItem('selectedStore');
@@ -122,14 +124,30 @@ export default function Budget() {
                                   </Badge>
                                 )}
                               </div>
-                              <motion.button
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                                onClick={() => setEditingBudget(budget)}
-                                className="p-1.5 rounded-lg bg-white/50 hover:bg-blue-100 text-blue-500 transition-colors"
-                              >
-                                <Pencil className="w-4 h-4" />
-                              </motion.button>
+                              <div className="flex gap-1">
+                                <motion.button
+                                  whileHover={{ scale: 1.1 }}
+                                  whileTap={{ scale: 0.9 }}
+                                  onClick={() => setEditingBudget(budget)}
+                                  className="p-1.5 rounded-lg bg-white/50 hover:bg-blue-100 text-blue-500 transition-colors"
+                                >
+                                  <Pencil className="w-4 h-4" />
+                                </motion.button>
+                                <motion.button
+                                  whileHover={{ scale: 1.1 }}
+                                  whileTap={{ scale: 0.9 }}
+                                  onClick={async () => {
+                                    if (confirm(`¿Eliminar presupuesto de ${MONTHS[budget.month - 1]} ${budget.year}?`)) {
+                                      await base44.entities.Budget.delete(budget.id);
+                                      queryClient.invalidateQueries(['budgets']);
+                                      toast.success('Presupuesto eliminado');
+                                    }
+                                  }}
+                                  className="p-1.5 rounded-lg bg-white/50 hover:bg-red-100 text-red-500 transition-colors"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </motion.button>
+                              </div>
                             </div>
                             <div className="grid grid-cols-2 gap-3">
                               <div className="flex items-center gap-2 text-sm">
