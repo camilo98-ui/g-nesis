@@ -26,48 +26,60 @@ const MENU_ITEMS = [
     page: 'Dashboard',
     icon: LayoutDashboard, 
     description: 'Ventas y métricas',
-    gradient: 'from-pink-500 to-rose-500',
-    bgGlow: 'shadow-pink-500/30'
+    bgColor: 'bg-gradient-to-br from-pink-100/90 to-rose-100/80',
+    iconBg: 'bg-pink-200/60',
+    iconColor: 'text-pink-500',
+    textColor: 'text-pink-700'
   },
   { 
     name: 'Cajeros', 
     page: 'CashiersDashboard',
     icon: Users, 
     description: 'Rendimiento',
-    gradient: 'from-rose-500 to-pink-500',
-    bgGlow: 'shadow-rose-500/30'
+    bgColor: 'bg-gradient-to-br from-violet-100/90 to-purple-100/80',
+    iconBg: 'bg-violet-200/60',
+    iconColor: 'text-violet-500',
+    textColor: 'text-violet-700'
   },
   { 
     name: 'Ventas', 
     page: 'Sales',
     icon: TrendingUp, 
     description: 'Registrar',
-    gradient: 'from-pink-400 to-rose-400',
-    bgGlow: 'shadow-pink-400/30'
+    bgColor: 'bg-gradient-to-br from-emerald-100/90 to-teal-100/80',
+    iconBg: 'bg-emerald-200/60',
+    iconColor: 'text-emerald-500',
+    textColor: 'text-emerald-700'
   },
   { 
     name: 'PopsyStars', 
     page: 'Rankings',
     icon: Award, 
     description: 'Top cajeros',
-    gradient: 'from-rose-400 to-pink-400',
-    bgGlow: 'shadow-rose-400/30'
+    bgColor: 'bg-gradient-to-br from-amber-100/90 to-yellow-100/80',
+    iconBg: 'bg-amber-200/60',
+    iconColor: 'text-amber-500',
+    textColor: 'text-amber-700'
   },
   { 
     name: 'Presupuestos', 
     page: 'Budget',
     icon: Target, 
     description: 'Metas',
-    gradient: 'from-pink-500 to-rose-400',
-    bgGlow: 'shadow-pink-500/30'
+    bgColor: 'bg-gradient-to-br from-sky-100/90 to-blue-100/80',
+    iconBg: 'bg-sky-200/60',
+    iconColor: 'text-sky-500',
+    textColor: 'text-sky-700'
   },
   { 
     name: 'Calidad', 
     page: 'Quality',
     icon: ClipboardCheck, 
     description: 'Checklists',
-    gradient: 'from-rose-500 to-pink-400',
-    bgGlow: 'shadow-rose-500/30'
+    bgColor: 'bg-gradient-to-br from-rose-100/90 to-pink-100/80',
+    iconBg: 'bg-rose-200/60',
+    iconColor: 'text-rose-500',
+    textColor: 'text-rose-700'
   },
 ];
 
@@ -280,28 +292,26 @@ export default function Home() {
                 >
                   <Link to={createPageUrl(item.page)}>
                     <motion.div 
-                      className={`bg-gradient-to-br ${item.gradient} rounded-2xl p-4 h-full shadow-lg ${item.bgGlow} hover:shadow-xl transition-all duration-300 group relative overflow-hidden`}
+                      className={`${item.bgColor} rounded-2xl p-4 h-full shadow-md hover:shadow-xl transition-all duration-300 group relative overflow-hidden border border-white/50 backdrop-blur-sm`}
                     >
-                      {/* Glow effect */}
+                      {/* Subtle glow effect */}
                       <motion.div
-                        className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"
-                        animate={{ scale: [1, 1.5, 1], opacity: [0, 0.2, 0] }}
-                        transition={{ duration: 2, repeat: Infinity }}
+                        className="absolute inset-0 bg-white/30 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl"
                       />
 
                       {/* Icon centered */}
                       <div className="flex flex-col items-center justify-center text-center relative z-10">
                         <motion.div 
-                          className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mb-2"
+                          className={`w-12 h-12 ${item.iconBg} backdrop-blur-sm rounded-xl flex items-center justify-center mb-2`}
                           whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1 }}
                           transition={{ duration: 0.4 }}
                         >
-                          <Icon className="w-6 h-6 text-white" />
+                          <Icon className={`w-6 h-6 ${item.iconColor}`} />
                         </motion.div>
-                        <h3 className="font-bold text-white text-sm">
+                        <h3 className={`font-bold ${item.textColor} text-sm`}>
                           {item.name}
                         </h3>
-                        <p className="text-[10px] text-white/70 mt-0.5">{item.description}</p>
+                        <p className="text-[10px] text-gray-500 mt-0.5">{item.description}</p>
                       </div>
                     </motion.div>
                   </Link>
