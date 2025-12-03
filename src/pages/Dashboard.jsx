@@ -746,9 +746,9 @@ export default function Dashboard() {
                   {/* Sales Trend */}
                   <Card className="border-none shadow-lg">
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-normal text-gray-500 flex items-center gap-2">
+                      <CardTitle className="text-sm font-medium text-pink-600 flex items-center gap-2">
                         <motion.div animate={{ y: [0, -2, 0] }} transition={{ duration: 2, repeat: Infinity }}>
-                          <DollarSign className="w-4 h-4 text-emerald-500" />
+                          <DollarSign className="w-4 h-4 text-pink-500" />
                         </motion.div>
                         Tendencia de Ventas
                       </CardTitle>
@@ -780,9 +780,9 @@ export default function Dashboard() {
                   {/* Ticket Promedio */}
                   <Card className="border-none shadow-lg">
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-normal text-gray-500 flex items-center gap-2">
+                      <CardTitle className="text-sm font-medium text-pink-600 flex items-center gap-2">
                         <motion.div animate={{ rotate: [0, 5, -5, 0] }} transition={{ duration: 3, repeat: Infinity }}>
-                          <Receipt className="w-4 h-4 text-blue-500" />
+                          <Receipt className="w-4 h-4 text-pink-500" />
                         </motion.div>
                         Ticket Promedio Diario
                       </CardTitle>
@@ -817,9 +817,9 @@ export default function Dashboard() {
                   {/* Transacciones vs Venta */}
                   <Card className="border-none shadow-lg">
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-normal text-gray-500 flex items-center gap-2">
+                      <CardTitle className="text-sm font-medium text-pink-600 flex items-center gap-2">
                         <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 1.5, repeat: Infinity }}>
-                          <Zap className="w-4 h-4 text-purple-500" />
+                          <Zap className="w-4 h-4 text-pink-500" />
                         </motion.div>
                         Transacciones vs Venta
                       </CardTitle>
@@ -848,7 +848,7 @@ export default function Dashboard() {
                   {/* Sugeridos y Distribución */}
                   <Card className="border-none shadow-lg">
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-normal text-gray-500 flex items-center gap-2">
+                      <CardTitle className="text-sm font-medium text-pink-600 flex items-center gap-2">
                         <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 2, repeat: Infinity }}>
                           <Gift className="w-4 h-4 text-pink-500" />
                         </motion.div>
