@@ -34,7 +34,7 @@ const POPSY_FLAVORS = [
   { name: 'Fresa', color: '#FFB5C5', type: 'gourmet', line: 'gourmet', dark: true },
   { name: 'Arequipe', color: '#D4A574', type: 'gourmet', line: 'gourmet', dark: true },
   { name: 'Ron', color: '#8B4513', type: 'gourmet', line: 'gourmet', dark: false },
-  // EXCLUSIVO (12 sabores)
+  // EXCLUSIVO (11 sabores)
   { name: 'Cherry', color: '#DC143C', type: 'exclusivo', line: 'exclusivo', dark: false },
   { name: 'Arroz', color: '#F5F5DC', type: 'exclusivo', line: 'exclusivo', dark: true },
   { name: 'Chicle', color: '#FFB6C1', type: 'exclusivo', line: 'exclusivo', dark: true },

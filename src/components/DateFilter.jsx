@@ -1,11 +1,10 @@
 import React, { useState, useMemo } from 'react';
-import { CalendarRange, Calendar as CalendarIcon, X, Check, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import { CalendarRange, Check, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Badge } from "@/components/ui/badge";
-import { format, startOfWeek, endOfWeek, getWeek, getYear, setWeek, startOfYear, min, max, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isWithinInterval, isSameMonth, addMonths, subMonths, subDays, isToday } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isWithinInterval, addMonths, subMonths, subDays, isToday } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 // Opciones rápidas de fecha
 const QUICK_OPTIONS = [
@@ -232,63 +231,6 @@ function CustomCalendar({ selected, onSelect, onClose, onApply }) {
 
 export default function DateFilter({ dateRange, onDateChange }) {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-  const [isWeekOpen, setIsWeekOpen] = useState(false);
-  const [selectedWeeks, setSelectedWeeks] = useState([]);
-
-  // Generar opciones de semanas del año actual
-  const weekOptions = useMemo(() => {
-    const currentYear = getYear(new Date());
-    const weeks = [];
-    for (let w = 1; w <= 52; w++) {
-      const weekStart = startOfWeek(setWeek(startOfYear(new Date(currentYear, 0, 1)), w, { weekStartsOn: 1 }), { weekStartsOn: 1 });
-      const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
-      weeks.push({
-        value: w,
-        label: `Sem ${w}`,
-        range: `${format(weekStart, 'dd/MM')} - ${format(weekEnd, 'dd/MM')}`,
-        from: weekStart,
-        to: weekEnd
-      });
-    }
-    return weeks;
-  }, []);
-
-  const currentWeek = getWeek(new Date(), { weekStartsOn: 1 });
-
-  const handleWeekToggle = (weekNum) => {
-    setSelectedWeeks(prev => {
-      if (prev.includes(weekNum)) {
-        return prev.filter(w => w !== weekNum);
-      } else {
-        return [...prev, weekNum].sort((a, b) => a - b);
-      }
-    });
-  };
-
-  const applySelectedWeeks = () => {
-    if (selectedWeeks.length === 0) return;
-    
-    const selectedWeeksData = selectedWeeks.map(w => weekOptions.find(opt => opt.value === w));
-    const allFromDates = selectedWeeksData.map(w => w.from);
-    const allToDates = selectedWeeksData.map(w => w.to);
-    
-    onDateChange({ 
-      from: min(allFromDates), 
-      to: max(allToDates) 
-    });
-    setIsWeekOpen(false);
-  };
-
-  const clearWeeks = () => {
-    setSelectedWeeks([]);
-  };
-
-  const getWeeksLabel = () => {
-    if (selectedWeeks.length === 0) return 'Semanas';
-    if (selectedWeeks.length === 1) return `Sem ${selectedWeeks[0]}`;
-    if (selectedWeeks.length <= 3) return selectedWeeks.map(w => `S${w}`).join(', ');
-    return `${selectedWeeks.length} semanas`;
-  };
 
   const getDateLabel = () => {
     if (!dateRange?.from) return 'Calendario';
@@ -300,105 +242,7 @@ export default function DateFilter({ dateRange, onDateChange }) {
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      {/* Selector de Semanas Multi-select - Diseño mejorado */}
-      <Popover open={isWeekOpen} onOpenChange={setIsWeekOpen}>
-        <PopoverTrigger asChild>
-          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-            <Button 
-              variant="outline" 
-              size="sm"
-              className="gap-2 border-pink-200 hover:border-pink-400 hover:bg-pink-50 min-w-[130px] rounded-full shadow-sm"
-            >
-              <CalendarIcon className="w-4 h-4 text-pink-500" />
-              <span className="font-medium">{getWeeksLabel()}</span>
-              {selectedWeeks.length > 0 && (
-                <Badge className="ml-1 h-5 px-1.5 bg-gradient-to-r from-pink-500 to-rose-500 text-white border-0">
-                  {selectedWeeks.length}
-                </Badge>
-              )}
-            </Button>
-          </motion.div>
-        </PopoverTrigger>
-        <PopoverContent className="w-[340px] p-0 bg-white rounded-2xl shadow-xl border border-pink-100" align="start">
-          <div className="p-3 bg-gradient-to-r from-pink-50 to-rose-50 border-b border-pink-100 rounded-t-2xl">
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-bold text-gray-700 flex items-center gap-2">
-                <CalendarIcon className="w-4 h-4 text-pink-500" />
-                Seleccionar semanas
-              </p>
-              {selectedWeeks.length > 0 && (
-                <motion.button 
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={clearWeeks} 
-                  className="text-xs text-gray-500 hover:text-pink-600 flex items-center gap-1"
-                >
-                  <X className="w-3 h-3" /> Limpiar
-                </motion.button>
-              )}
-            </div>
-          </div>
-          
-          <div className="p-3">
-            <div className="grid grid-cols-4 gap-2 max-h-[260px] overflow-y-auto pr-1">
-              {weekOptions.map((week) => {
-                const isSelected = selectedWeeks.includes(week.value);
-                const isCurrent = week.value === currentWeek;
-                return (
-                  <motion.button
-                    key={week.value}
-                    whileHover={{ scale: 1.05, y: -2 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => handleWeekToggle(week.value)}
-                    className={`p-2 text-xs rounded-xl border-2 transition-all shadow-sm ${
-                      isSelected 
-                        ? 'bg-gradient-to-br from-pink-500 to-rose-500 text-white border-pink-500 shadow-md' 
-                        : isCurrent
-                          ? 'bg-pink-50 border-pink-400 text-pink-600'
-                          : 'border-gray-200 hover:border-pink-300 hover:bg-pink-50 bg-white'
-                    }`}
-                  >
-                    <div className="font-bold">S{week.value}</div>
-                    <div className={`text-[9px] mt-0.5 ${isSelected ? 'text-white/80' : 'text-gray-400'}`}>
-                      {format(week.from, 'dd/MM')}
-                    </div>
-                    {isCurrent && !isSelected && (
-                      <div className="text-[8px] text-pink-500 font-medium">actual</div>
-                    )}
-                  </motion.button>
-                );
-              })}
-            </div>
-          </div>
-
-          <AnimatePresence>
-            {selectedWeeks.length > 0 && (
-              <motion.div 
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="p-3 border-t border-pink-100 bg-gray-50/50 rounded-b-2xl"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs text-gray-600 font-medium">
-                    {selectedWeeks.length} semana{selectedWeeks.length > 1 ? 's' : ''} seleccionada{selectedWeeks.length > 1 ? 's' : ''}
-                  </span>
-                </div>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={applySelectedWeeks} 
-                  className="w-full py-2 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-medium text-sm shadow-md flex items-center justify-center gap-2"
-                >
-                  <Check className="w-4 h-4" /> Aplicar selección
-                </motion.button>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </PopoverContent>
-      </Popover>
-      
-      {/* Selector de rango/día personalizado - Diseño premium */}
+      {/* Selector de rango/día personalizado */}
       <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
         <PopoverTrigger asChild>
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>

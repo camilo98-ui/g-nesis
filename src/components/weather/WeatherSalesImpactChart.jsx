@@ -79,28 +79,118 @@ const WeatherIcon = ({ type, size = 'md', animated = true }) => {
   );
 };
 
+// Componente de clima animado para botones
+const WeatherButtonIcon = ({ type, active }) => {
+  if (type === 'sunny') {
+    return (
+      <motion.div className="relative w-5 h-5">
+        <motion.div
+          animate={active ? { rotate: 360, scale: [1, 1.2, 1] } : {}}
+          transition={{ rotate: { duration: 8, repeat: Infinity, ease: "linear" }, scale: { duration: 1.5, repeat: Infinity } }}
+        >
+          <Sun className="w-5 h-5 text-amber-400" />
+        </motion.div>
+        {active && (
+          <>
+            <motion.div
+              className="absolute -top-1 -right-1 w-1.5 h-1.5 bg-yellow-300 rounded-full"
+              animate={{ scale: [0, 1, 0], opacity: [0, 1, 0] }}
+              transition={{ duration: 1, repeat: Infinity, delay: 0 }}
+            />
+            <motion.div
+              className="absolute -bottom-1 -left-1 w-1 h-1 bg-amber-300 rounded-full"
+              animate={{ scale: [0, 1, 0], opacity: [0, 1, 0] }}
+              transition={{ duration: 1, repeat: Infinity, delay: 0.3 }}
+            />
+          </>
+        )}
+      </motion.div>
+    );
+  }
+  if (type === 'rainy') {
+    return (
+      <motion.div className="relative w-5 h-5">
+        <motion.div
+          animate={active ? { y: [0, -2, 0] } : {}}
+          transition={{ duration: 1, repeat: Infinity }}
+        >
+          <CloudRain className="w-5 h-5 text-blue-400" />
+        </motion.div>
+        {active && (
+          <>
+            <motion.div
+              className="absolute bottom-0 left-1 w-0.5 h-1.5 bg-blue-400 rounded-full"
+              animate={{ y: [0, 4], opacity: [1, 0] }}
+              transition={{ duration: 0.5, repeat: Infinity, delay: 0 }}
+            />
+            <motion.div
+              className="absolute bottom-0 right-1.5 w-0.5 h-1.5 bg-blue-400 rounded-full"
+              animate={{ y: [0, 4], opacity: [1, 0] }}
+              transition={{ duration: 0.5, repeat: Infinity, delay: 0.2 }}
+            />
+          </>
+        )}
+      </motion.div>
+    );
+  }
+  if (type === 'cloudy') {
+    return (
+      <motion.div className="relative w-5 h-5">
+        <motion.div
+          animate={active ? { x: [-2, 2, -2] } : {}}
+          transition={{ duration: 2, repeat: Infinity }}
+        >
+          <Cloud className="w-5 h-5 text-gray-400" />
+        </motion.div>
+      </motion.div>
+    );
+  }
+  return null;
+};
+
 // Botón de vista con animación mejorada
-const ViewButton = ({ active, onClick, icon: Icon, label, color }) => (
+const ViewButton = ({ active, onClick, icon: Icon, label, color, weatherType }) => (
   <motion.button
     whileHover={{ scale: 1.08, y: -3 }}
     whileTap={{ scale: 0.92 }}
     onClick={onClick}
     className={`
       flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm
-      transition-all duration-300 shadow-sm
+      transition-all duration-300 shadow-sm relative overflow-hidden
       ${active 
         ? `bg-gradient-to-r ${color} text-white shadow-lg` 
         : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
       }
     `}
   >
+    {/* Background animation for weather buttons */}
+    {active && weatherType === 'sunny' && (
+      <motion.div
+        className="absolute inset-0 bg-gradient-to-r from-amber-400/20 to-orange-400/20"
+        animate={{ opacity: [0.3, 0.6, 0.3] }}
+        transition={{ duration: 2, repeat: Infinity }}
+      />
+    )}
+    {active && weatherType === 'rainy' && (
+      <motion.div
+        className="absolute inset-0 bg-gradient-to-b from-blue-400/10 to-blue-600/20"
+        animate={{ y: ['-100%', '100%'] }}
+        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+      />
+    )}
+    
     <motion.div
       animate={active ? { rotate: [0, 15, -15, 0], scale: [1, 1.3, 1] } : {}}
       transition={{ duration: 0.6, repeat: active ? Infinity : 0, repeatDelay: 2 }}
+      className="relative z-10"
     >
-      <Icon className="w-4 h-4" />
+      {weatherType ? (
+        <WeatherButtonIcon type={weatherType} active={active} />
+      ) : (
+        <Icon className="w-4 h-4" />
+      )}
     </motion.div>
-    {label}
+    <span className="relative z-10">{label}</span>
   </motion.button>
 );
 
@@ -398,72 +488,65 @@ function WeatherCalendar({ selected, onSelect, onApply }) {
   );
 }
 
+// Función para obtener tipo de clima basado en código WMO
+const getWeatherType = (code, precipitation, temp) => {
+  if (code === 0) return 'sunny';
+  if (code === 1) return 'sunny';
+  if (code === 2) return precipitation < 0.5 ? 'sunny' : 'cloudy';
+  if (code === 3) return 'cloudy';
+  if (code === 45 || code === 48) return 'cloudy';
+  if (code === 51) return precipitation > 1 ? 'rainy' : 'cloudy';
+  if (code === 53 || code === 55) return 'rainy';
+  if (code >= 56 && code <= 57) return 'rainy';
+  if (code === 61) return precipitation > 2 ? 'rainy' : 'cloudy';
+  if (code === 63 || code === 65) return 'rainy';
+  if (code >= 66 && code <= 67) return 'rainy';
+  if (code >= 71 && code <= 77) return 'rainy';
+  if (code === 80) return precipitation > 2 ? 'rainy' : 'cloudy';
+  if (code === 81 || code === 82) return 'rainy';
+  if (code >= 85 && code <= 86) return 'rainy';
+  if (code === 95 || code >= 96) return 'rainy';
+  if (precipitation >= 5) return 'rainy';
+  if (precipitation >= 1) return 'cloudy';
+  return 'sunny';
+};
+
 export default function WeatherSalesImpactChart({ weatherData, dailySales = [], formatCurrency }) {
   const [viewMode, setViewMode] = useState('bars');
   const [dateRange, setDateRange] = useState({ from: subDays(new Date(), 29), to: new Date() });
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [showForecast, setShowForecast] = useState(false);
+  const [forecastData, setForecastData] = useState(null);
+  const [loadingForecast, setLoadingForecast] = useState(false);
+
+  // Cargar pronóstico cuando se activa
+  React.useEffect(() => {
+    const fetchForecast = async () => {
+      if (!showForecast || forecastData) return;
+      setLoadingForecast(true);
+      try {
+        const response = await fetch(
+          `https://api.open-meteo.com/v1/forecast?latitude=4.6097&longitude=-74.0817&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=America%2FBogota&forecast_days=7`
+        );
+        const data = await response.json();
+        setForecastData(data.daily);
+      } catch (e) {
+        console.error('Error fetching forecast:', e);
+      }
+      setLoadingForecast(false);
+    };
+    fetchForecast();
+  }, [showForecast, forecastData]);
 
   // Procesar datos
   const chartData = useMemo(() => {
-    if (!weatherData?.history?.time || !dailySales.length) return [];
+    if (!weatherData?.history?.time) return [];
 
     const salesByDate = {};
     dailySales.forEach(s => {
       const dateKey = s.date?.split('T')[0] || s.date;
       salesByDate[dateKey] = s.total_sales || 0;
     });
-
-    // Códigos de clima WMO - MUY PRECISO
-    // https://open-meteo.com/en/docs - Weather interpretation codes (WMO)
-    const getWeatherType = (code, precipitation, temp) => {
-      // 0: Clear sky - SOLEADO
-      if (code === 0) return 'sunny';
-      // 1: Mainly clear - SOLEADO (pocas nubes)
-      if (code === 1) return 'sunny';
-      // 2: Partly cloudy - NUBLADO PARCIAL (puede ser soleado si poca nubosidad)
-      if (code === 2) return precipitation < 0.5 ? 'sunny' : 'cloudy';
-      // 3: Overcast - NUBLADO TOTAL
-      if (code === 3) return 'cloudy';
-      // 45, 48: Fog - NEBLINA (nublado)
-      if (code === 45 || code === 48) return 'cloudy';
-      // 51: Light drizzle - LLOVIZNA LIGERA
-      if (code === 51) return precipitation > 1 ? 'rainy' : 'cloudy';
-      // 53: Moderate drizzle - LLOVIZNA MODERADA
-      if (code === 53) return 'rainy';
-      // 55: Dense drizzle - LLOVIZNA INTENSA
-      if (code === 55) return 'rainy';
-      // 56-57: Freezing drizzle - LLOVIZNA HELADA
-      if (code >= 56 && code <= 57) return 'rainy';
-      // 61: Slight rain - LLUVIA LIGERA
-      if (code === 61) return precipitation > 2 ? 'rainy' : 'cloudy';
-      // 63: Moderate rain - LLUVIA MODERADA
-      if (code === 63) return 'rainy';
-      // 65: Heavy rain - LLUVIA FUERTE
-      if (code === 65) return 'rainy';
-      // 66-67: Freezing rain
-      if (code >= 66 && code <= 67) return 'rainy';
-      // 71-77: Snow (no común en Bogotá pero por si acaso)
-      if (code >= 71 && code <= 77) return 'rainy';
-      // 80: Slight rain showers - CHUBASCOS LIGEROS
-      if (code === 80) return precipitation > 2 ? 'rainy' : 'cloudy';
-      // 81: Moderate rain showers - CHUBASCOS MODERADOS
-      if (code === 81) return 'rainy';
-      // 82: Violent rain showers - CHUBASCOS FUERTES
-      if (code === 82) return 'rainy';
-      // 85-86: Snow showers
-      if (code >= 85 && code <= 86) return 'rainy';
-      // 95: Thunderstorm - TORMENTA
-      if (code === 95) return 'rainy';
-      // 96, 99: Thunderstorm with hail - TORMENTA CON GRANIZO
-      if (code >= 96) return 'rainy';
-      
-      // Fallback basado en precipitación real
-      if (precipitation >= 5) return 'rainy';
-      if (precipitation >= 1) return 'cloudy';
-      // Sin código pero sin lluvia = probablemente soleado/nublado
-      return 'sunny';
-    };
 
     const historyData = weatherData.history.time
       .filter(date => {
@@ -491,12 +574,12 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
         };
       });
 
-    // Agregar pronóstico si está activado
-    if (showForecast && weatherData.forecast?.time) {
-      const forecastData = weatherData.forecast.time.map((date, idx) => {
-        const temp = weatherData.forecast.temperature_2m_max?.[idx] || weatherData.forecast.temperature_2m?.[idx] || 0;
-        const precipitation = weatherData.forecast.precipitation_sum?.[idx] || weatherData.forecast.precipitation?.[idx] || 0;
-        const weatherCode = weatherData.forecast.weathercode?.[idx] || 0;
+    // Agregar pronóstico si está activado y hay datos
+    if (showForecast && forecastData?.time) {
+      const forecastItems = forecastData.time.map((date, idx) => {
+        const temp = forecastData.temperature_2m_max?.[idx] || 0;
+        const precipitation = forecastData.precipitation_sum?.[idx] || 0;
+        const weatherCode = forecastData.weathercode?.[idx] || 0;
         const weatherType = getWeatherType(weatherCode, precipitation, temp);
 
         return {
@@ -511,11 +594,11 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
           isForecast: true
         };
       });
-      return [...historyData, ...forecastData];
+      return [...historyData, ...forecastItems];
     }
 
     return historyData;
-  }, [weatherData, dailySales, dateRange, showForecast]);
+  }, [weatherData, dailySales, dateRange, showForecast, forecastData]);
 
   // Estadísticas
   const stats = useMemo(() => {
@@ -693,10 +776,14 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
             />
             <ViewButton
               active={showForecast}
-              onClick={() => setShowForecast(!showForecast)}
+              onClick={() => {
+                setShowForecast(!showForecast);
+                if (!showForecast) setForecastData(null);
+              }}
               icon={Cloud}
-              label={showForecast ? "Ocultar Pronóstico" : "Ver Pronóstico"}
+              label={loadingForecast ? "Cargando..." : showForecast ? "Ocultar Pronóstico" : "Ver Pronóstico"}
               color="from-cyan-500 to-blue-500"
+              weatherType={showForecast ? 'cloudy' : undefined}
             />
           </div>
         </CardContent>
@@ -883,46 +970,63 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
               </ResponsiveContainer>
             </div>
 
-            {/* Leyenda visual */}
+            {/* Leyenda visual - MÁS DINÁMICA */}
             <div className="flex flex-wrap justify-center gap-6 mt-4 pt-4 border-t">
               <div className="flex items-center gap-2 text-xs">
                 <motion.div 
-                  animate={{ scale: [1, 1.2, 1] }}
+                  animate={{ scale: [1, 1.2, 1], rotate: [0, 180, 360] }}
+                  transition={{ scale: { duration: 2, repeat: Infinity }, rotate: { duration: 8, repeat: Infinity, ease: "linear" } }}
+                  className="w-6 h-6 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 shadow-lg flex items-center justify-center"
+                >
+                  <Sun className="w-4 h-4 text-white" />
+                </motion.div>
+                <span className="text-gray-600 font-medium">Soleado</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                <motion.div
+                  animate={{ x: [-2, 2, -2] }}
                   transition={{ duration: 2, repeat: Infinity }}
-                  className="w-5 h-5 rounded bg-amber-500 shadow flex items-center justify-center"
+                  className="w-6 h-6 rounded-lg bg-gradient-to-br from-gray-400 to-slate-500 shadow-lg flex items-center justify-center"
                 >
-                  <Sun className="w-3 h-3 text-white" />
+                  <Cloud className="w-4 h-4 text-white" />
                 </motion.div>
-                <span className="text-gray-600">Soleado</span>
+                <span className="text-gray-600 font-medium">Nublado</span>
               </div>
-              <div className="flex items-center gap-2 text-xs">
+              <div className="flex items-center gap-2 text-xs relative">
                 <motion.div
-                  animate={{ y: [0, -2, 0] }}
+                  animate={{ y: [0, -3, 0] }}
                   transition={{ duration: 1.5, repeat: Infinity }}
-                  className="w-5 h-5 rounded bg-gray-400 shadow flex items-center justify-center"
+                  className="w-6 h-6 rounded-lg bg-gradient-to-br from-blue-400 to-cyan-500 shadow-lg flex items-center justify-center relative overflow-hidden"
                 >
-                  <Cloud className="w-3 h-3 text-white" />
+                  <CloudRain className="w-4 h-4 text-white relative z-10" />
+                  {/* Gotas animadas */}
+                  <motion.div
+                    className="absolute bottom-0 left-1 w-0.5 h-1 bg-white/60 rounded-full"
+                    animate={{ y: [-4, 4], opacity: [1, 0] }}
+                    transition={{ duration: 0.4, repeat: Infinity }}
+                  />
+                  <motion.div
+                    className="absolute bottom-0 right-1.5 w-0.5 h-1 bg-white/60 rounded-full"
+                    animate={{ y: [-4, 4], opacity: [1, 0] }}
+                    transition={{ duration: 0.4, repeat: Infinity, delay: 0.2 }}
+                  />
                 </motion.div>
-                <span className="text-gray-600">Nublado</span>
+                <span className="text-gray-600 font-medium">Lluvioso</span>
               </div>
               <div className="flex items-center gap-2 text-xs">
-                <motion.div
-                  animate={{ y: [0, -2, 0] }}
-                  transition={{ duration: 1, repeat: Infinity }}
-                  className="w-5 h-5 rounded bg-blue-500 shadow flex items-center justify-center"
-                >
-                  <CloudRain className="w-3 h-3 text-white" />
-                </motion.div>
-                <span className="text-gray-600">Lluvioso</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs">
-                <div className="w-8 h-1 bg-gradient-to-r from-orange-300 to-orange-500 rounded" />
-                <span className="text-gray-600">Temperatura</span>
+                <div className="w-8 h-1.5 bg-gradient-to-r from-orange-300 to-orange-500 rounded-full shadow" />
+                <span className="text-gray-600 font-medium">Temperatura</span>
               </div>
               {showForecast && (
                 <div className="flex items-center gap-2 text-xs">
-                  <div className="w-5 h-5 rounded border-2 border-dashed border-cyan-400 bg-cyan-100/50" />
-                  <span className="text-gray-600">Pronóstico</span>
+                  <motion.div 
+                    animate={{ opacity: [0.5, 1, 0.5] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className="w-6 h-6 rounded-lg border-2 border-dashed border-cyan-400 bg-cyan-100/50 flex items-center justify-center"
+                  >
+                    <Sparkles className="w-3 h-3 text-cyan-500" />
+                  </motion.div>
+                  <span className="text-gray-600 font-medium">Pronóstico</span>
                 </div>
               )}
             </div>
