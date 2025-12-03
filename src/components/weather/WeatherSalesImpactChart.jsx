@@ -751,7 +751,7 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
             </Popover>
           </div>
 
-          {/* Botones de vista */}
+          {/* Botones de vista - con iconos de clima que muestran gráficas */}
           <div className="flex flex-wrap gap-2 mt-4">
             <ViewButton
               active={viewMode === 'bars'}
@@ -774,6 +774,23 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
               label="Comparativo"
               color="from-amber-500 to-orange-500"
             />
+            {/* Botones de clima con gráficas */}
+            <ViewButton
+              active={viewMode === 'sunny'}
+              onClick={() => setViewMode('sunny')}
+              icon={Sun}
+              label="Soleados"
+              color="from-amber-400 to-yellow-500"
+              weatherType="sunny"
+            />
+            <ViewButton
+              active={viewMode === 'rainy'}
+              onClick={() => setViewMode('rainy')}
+              icon={CloudRain}
+              label="Lluviosos"
+              color="from-blue-400 to-cyan-500"
+              weatherType="rainy"
+            />
             <ViewButton
               active={showForecast}
               onClick={() => {
@@ -781,7 +798,7 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
                 if (!showForecast) setForecastData(null);
               }}
               icon={Cloud}
-              label={loadingForecast ? "Cargando..." : showForecast ? "Ocultar Pronóstico" : "Ver Pronóstico"}
+              label={loadingForecast ? "Cargando..." : showForecast ? "Ocultar Pronóstico" : "Pronóstico"}
               color="from-cyan-500 to-blue-500"
               weatherType={showForecast ? 'cloudy' : undefined}
             />
@@ -955,6 +972,30 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
                         dot={false}
                       />
                     </>
+                  )}
+
+                  {viewMode === 'sunny' && (
+                    <Bar yAxisId="sales" dataKey="sales" name="Ventas (Soleados)" radius={[6, 6, 0, 0]}>
+                      {chartData.map((entry, index) => (
+                        <Cell 
+                          key={`cell-sunny-${index}`} 
+                          fill={entry.weatherType === 'sunny' ? '#fbbf24' : '#e5e7eb'} 
+                          opacity={entry.weatherType === 'sunny' ? 1 : 0.3}
+                        />
+                      ))}
+                    </Bar>
+                  )}
+
+                  {viewMode === 'rainy' && (
+                    <Bar yAxisId="sales" dataKey="sales" name="Ventas (Lluviosos)" radius={[6, 6, 0, 0]}>
+                      {chartData.map((entry, index) => (
+                        <Cell 
+                          key={`cell-rainy-${index}`} 
+                          fill={entry.weatherType === 'rainy' ? '#3b82f6' : '#e5e7eb'} 
+                          opacity={entry.weatherType === 'rainy' ? 1 : 0.3}
+                        />
+                      ))}
+                    </Bar>
                   )}
 
                   <Line
