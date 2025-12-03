@@ -509,19 +509,16 @@ export default function Dashboard() {
   }, [budgets]);
 
   const filteredSales = useMemo(() => {
-    if (!dateRange.from || !dateRange.to) return [];
+    if (!dateRange.from || !dateRange.to || !dailySales.length) return [];
     
-    // Normalizar fechas para comparación (inicio del día)
-    const fromDate = new Date(dateRange.from);
-    fromDate.setHours(0, 0, 0, 0);
-    
-    const toDate = new Date(dateRange.to);
-    toDate.setHours(23, 59, 59, 999);
+    // Formatear fechas del rango a strings YYYY-MM-DD para comparación exacta
+    const fromStr = format(dateRange.from, 'yyyy-MM-dd');
+    const toStr = format(dateRange.to, 'yyyy-MM-dd');
     
     return dailySales.filter(s => {
-      const saleDate = new Date(s.date);
-      saleDate.setHours(12, 0, 0, 0); // Normalizar a mediodía para evitar problemas de zona horaria
-      return saleDate >= fromDate && saleDate <= toDate;
+      // Extraer solo la fecha (YYYY-MM-DD) del registro
+      const saleDateStr = s.date?.split('T')[0] || s.date;
+      return saleDateStr >= fromStr && saleDateStr <= toStr;
     });
   }, [dailySales, dateRange]);
 
