@@ -476,7 +476,7 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
         const precipitation = weatherData.history.precipitation_sum?.[idx] || 0;
         const weatherCode = weatherData.history.weathercode?.[idx] || 0;
         const sales = salesByDate[date] || 0;
-        const weatherType = getWeatherType(weatherCode, precipitation);
+        const weatherType = getWeatherType(weatherCode, precipitation, temp);
 
         return {
           date: format(parseISO(date), 'dd', { locale: es }),
