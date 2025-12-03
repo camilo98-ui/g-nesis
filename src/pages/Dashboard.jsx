@@ -509,9 +509,19 @@ export default function Dashboard() {
   }, [budgets]);
 
   const filteredSales = useMemo(() => {
+    if (!dateRange.from || !dateRange.to) return [];
+    
+    // Normalizar fechas para comparación (inicio del día)
+    const fromDate = new Date(dateRange.from);
+    fromDate.setHours(0, 0, 0, 0);
+    
+    const toDate = new Date(dateRange.to);
+    toDate.setHours(23, 59, 59, 999);
+    
     return dailySales.filter(s => {
-      const date = new Date(s.date);
-      return date >= dateRange.from && date <= dateRange.to;
+      const saleDate = new Date(s.date);
+      saleDate.setHours(12, 0, 0, 0); // Normalizar a mediodía para evitar problemas de zona horaria
+      return saleDate >= fromDate && saleDate <= toDate;
     });
   }, [dailySales, dateRange]);
 
@@ -530,7 +540,11 @@ export default function Dashboard() {
     
     return days.map(day => {
       const dayStr = format(day, 'yyyy-MM-dd');
-      const dayData = dailySales.find(s => s.date === dayStr) || {};
+      // Buscar en dailySales comparando correctamente las fechas
+      const dayData = dailySales.find(s => {
+        const saleDate = s.date?.split('T')[0] || s.date;
+        return saleDate === dayStr;
+      }) || {};
       const transactions = dayData.total_transactions || 0;
       const tickets = dayData.total_tickets || 0;
       const sales = dayData.total_sales || 0;
