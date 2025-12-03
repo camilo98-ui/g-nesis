@@ -502,10 +502,8 @@ export default function PlannerStats({ shifts, cashiers, storeId, currentWeek, s
                   <tr className="border-b border-gray-100">
                     <th className="text-left py-2 px-2 font-medium text-gray-500">Colaborador</th>
                     {Object.entries(ROLES_LABELS).slice(0, 9).map(([key, label]) => (
-                      <th key={key} className="text-center py-2 px-1 font-medium" style={{ color: ROLES_COLORS[key] }}>
-                        <motion.span animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 2, repeat: Infinity, delay: Math.random() }}>
-                          {ROLES_EMOJIS[key]}
-                        </motion.span>
+                      <th key={key} className="text-center py-2 px-1 font-medium text-[9px]" style={{ color: ROLES_COLORS[key] }}>
+                        {label}
                       </th>
                     ))}
                     <th className="text-center py-2 px-2 font-medium text-gray-500">Total</th>

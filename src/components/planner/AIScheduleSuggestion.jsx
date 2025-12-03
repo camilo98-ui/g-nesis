@@ -157,7 +157,7 @@ export default function AIScheduleSuggestion({
       };
     });
 
-    const prompt = `Eres un experto en gestión de horarios para heladería Popsy Colombia.
+    const prompt = `Eres un EXPERTO en gestión de POSICIONAMIENTO y horarios para heladería Popsy Colombia. Tu trabajo es POSICIONAR colaboradores en estaciones, NO solo crear turnos.
 
 TIENDA: ${storeName} (${storeId})
 TOTAL COLABORADORES DISPONIBLES: ${totalCollaborators}
@@ -176,32 +176,83 @@ ${budgetInfo}
 VOLUMEN ESPERADO Y HORARIOS POR DÍA:
 ${dayVolume.map(d => `- ${d.dayName} (${d.date}): Volumen ${d.expectedVolume}, Personal: ${d.staffNeeded}, Horario tienda: ${d.openTime}-${d.closeTime}`).join('\n')}
 
-POSICIONES: caja, coneo, bebidas, especialidades, coordinacion, cookie_jar, stocker, toma_pedidos, experiencia
+═══════════════════════════════════════════════════════════
+🎯 SISTEMA DE POSICIONAMIENTO POR ESTACIONES
+═══════════════════════════════════════════════════════════
 
-REGLAS IMPORTANTES:
-1. Los turnos deben estar DENTRO del horario de la tienda
-2. Turnos sugeridos: Apertura (09:30-17:30), Medio (12:00-20:00), Cierre (14:00-21:30 o 22:00)
-3. Máximo 5-6 turnos por colaborador a la semana
-4. Fines de semana necesitan MÁS personal y los MEJORES colaboradores - NADIE DESCANSA sábado ni domingo
-5. ${hasTwoCashiers ? 'CRÍTICO: Esta tienda tiene 2 CAJAS - Asignar SIEMPRE 2 personas diferentes al rol "caja" en horarios que se crucen para cubrir ambas cajas' : 'Esta tienda tiene 1 caja'}
-6. DESCANSOS: Cada colaborador debe tener 1-2 días de descanso SOLO entre lunes y viernes. Los descansos deben distribuirse equitativamente entre todos. Marcar los días de descanso con rol "descanso" y horario "00:00-00:00"
-7. PRIORIZACIÓN DE POSICIONES CUANDO HAY POCOS COLABORADORES:
-   - CRÍTICO (siempre cubrir): Caja, Coneo
-   - IMPORTANTE (cubrir si es posible): Bebidas, Especialidades  
-   - SECUNDARIO (cubrir como tarea extra si sobra personal): Cookie Jar, Stocker, Toma Pedidos, Coordinacion, Experiencia
-   - Si hay 3 o menos colaboradores: SOLO asignar Caja y Coneo, las demás posiciones quedan como "tareas secundarias" en el campo reason
-   - Si hay 4-5 colaboradores: Cubrir Caja, Coneo, Bebidas. Las demás como secundarias
-   - Si hay 6+ colaboradores: Distribuir todas las posiciones normalmente
-8. Distribuir EQUITATIVAMENTE los turnos entre colaboradores
+ESTACIONES DISPONIBLES (en orden de PRIORIDAD):
+1. CAJA (caja) - 🚨 CRÍTICO - Siempre debe estar cubierta. Es el punto de venta.
+2. CONEO (coneo) - 🚨 CRÍTICO - Preparación de helados. Sin coneo no hay producto.
+3. BEBIDAS (bebidas) - ⚠️ IMPORTANTE - Malteadas, batidos. Alto margen.
+4. ESPECIALIDADES (especialidades) - ⚠️ IMPORTANTE - Postres especiales.
+5. COORD. ENTREGAS (coordinacion) - 📦 SECUNDARIO - Solo si hay delivery.
+6. COOKIE JAR (cookie_jar) - 🍪 SECUNDARIO - Galletas y adicionales.
+7. STOCKER (stocker) - 📦 SECUNDARIO - Reposición de producto.
+8. TOMA PEDIDOS (toma_pedidos) - 🎧 SECUNDARIO - Solo en horas pico.
+9. EXPERIENCIA (experiencia) - 👑 SECUNDARIO - Atención premium.
 
-${customPrompt ? `INSTRUCCIONES DEL GERENTE:\n${customPrompt}` : ''}
+═══════════════════════════════════════════════════════════
+📋 REGLAS DE POSICIONAMIENTO INTELIGENTE
+═══════════════════════════════════════════════════════════
 
-Responde con JSON:
+🔴 CON 2-3 COLABORADORES (equipo mínimo):
+   - SOLO cubrir: Caja + Coneo
+   - Las demás estaciones quedan SIN CUBRIR
+   - En el campo "reason" indicar: "Estación principal - equipo mínimo"
+   - NO asignar bebidas, especialidades, etc.
+
+🟡 CON 4-5 COLABORADORES (equipo reducido):
+   - CUBRIR: Caja + Coneo + Bebidas
+   - Si sobra 1 persona: agregar Especialidades
+   - Las demás estaciones quedan como TAREAS EXTRAS
+   - En "reason" indicar: "Posición fija" o "Tarea secundaria: también apoya en X"
+
+🟢 CON 6+ COLABORADORES (equipo completo):
+   - Cubrir TODAS las estaciones según prioridad
+   - Rotar posiciones para que todos aprendan
+   - Fines de semana: reforzar Caja (2 personas si aplica) y Coneo
+
+═══════════════════════════════════════════════════════════
+⏰ REGLAS DE HORARIOS Y TURNOS
+═══════════════════════════════════════════════════════════
+
+1. TURNOS ESTÁNDAR:
+   - Apertura: 09:30 - 17:30 (8h)
+   - Medio: 12:00 - 20:00 (8h)
+   - Cierre: 14:00 - 21:30/22:00 (7.5-8h)
+
+2. CADA PERSONA = 1 POSICIÓN por turno. No cambiar de estación en el día.
+
+3. DESCANSOS:
+   - 1-2 días de descanso por semana, SOLO entre Lunes-Viernes
+   - NADIE descansa Sábado ni Domingo
+   - Marcar descanso con: rol="descanso", start_time="00:00", end_time="00:00"
+   - Distribuir descansos equitativamente
+
+4. ${hasTwoCashiers ? '⚠️ TIENDA CON 2 CAJAS: Siempre 2 personas en "caja" con horarios que se crucen' : 'Tienda con 1 caja'}
+
+5. MÁXIMO 5-6 turnos por colaborador a la semana
+
+${customPrompt ? `\n═══════════════════════════════════════════════════════════\n📝 INSTRUCCIONES ESPECIALES DEL GERENTE:\n${customPrompt}\n═══════════════════════════════════════════════════════════` : ''}
+
+GENERA UN HORARIO COMPLETO donde CADA TURNO = 1 PERSONA en 1 ESTACIÓN FIJA.
+
+Responde SOLO con este JSON:
 {
-  "schedule": [{"cashier_id": "id", "cashier_name": "nombre", "date": "YYYY-MM-DD", "start_time": "HH:MM", "end_time": "HH:MM", "role": "posicion", "reason": "razón"}],
-  "insights": "Estrategia usada",
-  "alerts": ["alertas importantes"],
-  "positioning_tips": ["consejos de posicionamiento según el volumen de colaboradores"]
+  "schedule": [
+    {
+      "cashier_id": "id del colaborador",
+      "cashier_name": "nombre completo",
+      "date": "YYYY-MM-DD",
+      "start_time": "HH:MM",
+      "end_time": "HH:MM",
+      "role": "caja|coneo|bebidas|especialidades|coordinacion|cookie_jar|stocker|toma_pedidos|experiencia|descanso",
+      "reason": "Ej: Posición fija en Caja / Descanso programado / También apoya Stocker en horas bajas"
+    }
+  ],
+  "insights": "Resumen de la estrategia de posicionamiento aplicada",
+  "alerts": ["Lista de alertas importantes: estaciones sin cubrir, riesgos, etc"],
+  "positioning_tips": ["Consejos específicos para el gerente sobre cómo optimizar posiciones"]
 }`;
 
     try {
