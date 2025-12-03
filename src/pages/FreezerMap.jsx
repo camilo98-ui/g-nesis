@@ -19,30 +19,33 @@ import { format } from 'date-fns';
 
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/c3a36de58_Capturadepantalla2025-11-251251441.png";
 
-// Sabores predefinidos
+// Sabores predefinidos - GOURMET Y EXCLUSIVO
 const POPSY_FLAVORS = [
-  { name: 'Chocolate', color: '#5D3A1A', type: 'gourmet', line: 'gourmet' },
+  // GOURMET
+  { name: 'Limón N.', color: '#FFFACD', type: 'gourmet', line: 'gourmet' },
+  { name: 'Maracuyá N.', color: '#FFB347', type: 'gourmet', line: 'gourmet' },
+  { name: 'Mandarina N.', color: '#FFA500', type: 'gourmet', line: 'gourmet' },
   { name: 'Vainilla', color: '#FFF8DC', type: 'gourmet', line: 'gourmet' },
+  { name: 'V. Francesa', color: '#FFFDD0', type: 'gourmet', line: 'gourmet' },
+  { name: 'V. Chips', color: '#F5DEB3', type: 'gourmet', line: 'gourmet' },
+  { name: 'Chocolate', color: '#5D3A1A', type: 'gourmet', line: 'gourmet' },
+  { name: 'Belga', color: '#3D2314', type: 'gourmet', line: 'gourmet' },
+  { name: 'Frutos', color: '#C71585', type: 'gourmet', line: 'gourmet' },
   { name: 'Fresa', color: '#FFB5C5', type: 'gourmet', line: 'gourmet' },
   { name: 'Arequipe', color: '#D4A574', type: 'gourmet', line: 'gourmet' },
-  { name: 'Maracuyá', color: '#FFB347', type: 'gourmet', line: 'gourmet' },
-  { name: 'Limón', color: '#FFFACD', type: 'gourmet', line: 'gourmet' },
-  { name: 'Mora', color: '#4B0082', type: 'gourmet', line: 'gourmet' },
-  { name: 'Coco', color: '#FFFFFF', type: 'gourmet', line: 'gourmet' },
-  { name: 'Café', color: '#6F4E37', type: 'gourmet', line: 'gourmet' },
-  { name: 'Dulce de Leche', color: '#C19A6B', type: 'gourmet', line: 'gourmet' },
-  { name: 'OREO', color: '#1A1A1A', type: 'exclusivo', line: 'exclusivo', brand: true },
-  { name: "M&M's", color: '#E31837', type: 'exclusivo', line: 'exclusivo', brand: true },
-  { name: 'SNICKERS', color: '#6B3E26', type: 'exclusivo', line: 'exclusivo', brand: true },
-  { name: 'MILKY WAY', color: '#4169E1', type: 'exclusivo', line: 'exclusivo', brand: true },
-  { name: 'TWIX', color: '#C4A35A', type: 'exclusivo', line: 'exclusivo', brand: true },
-  { name: 'KIT KAT', color: '#D42027', type: 'exclusivo', line: 'exclusivo', brand: true },
-  { name: 'Nutella', color: '#4A2C2A', type: 'exclusivo', line: 'exclusivo', brand: true },
+  { name: 'Ron', color: '#8B4513', type: 'gourmet', line: 'gourmet' },
+  // EXCLUSIVO
+  { name: 'Cherry', color: '#DC143C', type: 'exclusivo', line: 'exclusivo' },
+  { name: 'Arroz', color: '#F5F5DC', type: 'exclusivo', line: 'exclusivo' },
+  { name: 'Chicle', color: '#FFB6C1', type: 'exclusivo', line: 'exclusivo' },
   { name: 'Brownie', color: '#3D2314', type: 'exclusivo', line: 'exclusivo' },
-  { name: 'Cheesecake', color: '#FFF5EE', type: 'exclusivo', line: 'exclusivo' },
-  { name: 'Red Velvet', color: '#C41E3A', type: 'exclusivo', line: 'exclusivo' },
-  { name: 'Tiramisú', color: '#D2B48C', type: 'exclusivo', line: 'exclusivo' },
-  { name: 'Cookies & Cream', color: '#2F2F2F', type: 'exclusivo', line: 'exclusivo' },
+  { name: 'Crema Limón', color: '#FFFACD', type: 'exclusivo', line: 'exclusivo' },
+  { name: "M&M's", color: '#E31837', type: 'exclusivo', line: 'exclusivo', brand: true },
+  { name: 'Milky', color: '#4169E1', type: 'exclusivo', line: 'exclusivo', brand: true },
+  { name: 'Oreo', color: '#1A1A1A', type: 'exclusivo', line: 'exclusivo', brand: true },
+  { name: 'Macadamia', color: '#DEB887', type: 'exclusivo', line: 'exclusivo' },
+  { name: 'Café', color: '#6F4E37', type: 'exclusivo', line: 'exclusivo' },
+  { name: 'Yogurt C.', color: '#FFF5EE', type: 'exclusivo', line: 'exclusivo' },
 ];
 
 // Reglas de ubicación ideal
@@ -689,11 +692,7 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                                   setSelectedSlot({ ...bajada.back, row: bajada.row, position: bajada.position, slot_type: 'T' });
                                   setShowFlavorSelector(true);
                                 }}
-                                onTouchStart={() => handleLongPressStart(bajada.back)}
-                                onTouchEnd={handleLongPressEnd}
-                                onMouseDown={() => handleLongPressStart(bajada.back)}
-                                onMouseUp={handleLongPressEnd}
-                                onMouseLeave={handleLongPressEnd}
+                                onDoubleClick={() => clearSlot(bajada.back)}
                                 className={`h-10 sm:h-11 rounded-lg cursor-pointer transition-all border-2 relative ${
                                   bajada.back.is_empty 
                                     ? 'bg-purple-50/50 border-dashed border-purple-200 hover:border-purple-400' 
@@ -723,11 +722,7 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                                   setSelectedSlot({ ...bajada.front, row: bajada.row, position: bajada.position, slot_type: 'F' });
                                   setShowFlavorSelector(true);
                                 }}
-                                onTouchStart={() => handleLongPressStart(bajada.front)}
-                                onTouchEnd={handleLongPressEnd}
-                                onMouseDown={() => handleLongPressStart(bajada.front)}
-                                onMouseUp={handleLongPressEnd}
-                                onMouseLeave={handleLongPressEnd}
+                                onDoubleClick={() => clearSlot(bajada.front)}
                                 className={`h-11 sm:h-12 rounded-lg cursor-pointer transition-all border-2 shadow-md relative ${
                                   bajada.front.is_empty 
                                     ? 'bg-white border-dashed border-pink-200 hover:border-pink-400' 
@@ -800,7 +795,7 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                 <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-yellow-400" /> Medio</span>
                 <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-red-400" /> Agotado</span>
                 <span className="text-gray-400">|</span>
-                <span>Mantener tocado = Borrar</span>
+                <span>Doble click = Borrar</span>
               </div>
             </div>
           </>
