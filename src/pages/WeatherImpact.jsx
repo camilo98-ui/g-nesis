@@ -3,33 +3,44 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format, subDays, startOfMonth, endOfMonth, eachDayOfInterval, parseISO, startOfWeek, endOfWeek, addWeeks, startOfYear, getWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { ArrowLeft, RefreshCw, Calendar, TrendingUp, TrendingDown, CloudRain, Sun, Cloud, Thermometer, MapPin, DollarSign, BarChart3 } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Calendar, TrendingUp, TrendingDown, CloudRain, Sun, Cloud, Thermometer, MapPin, DollarSign, BarChart3, Save, History } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarPicker } from "@/components/ui/calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from "sonner";
 import StoreSelector, { STORES } from '@/components/StoreSelector';
 
 import WeatherMainChart from '@/components/weather/WeatherMainChart';
 import WeatherRegionMap from '@/components/weather/WeatherRegionMap';
 import WeatherImpactSummary from '@/components/weather/WeatherImpactSummary';
+import WeatherForecast7Days from '@/components/weather/WeatherForecast7Days';
+import LocationSelector, { DEFAULT_LOCATIONS } from '@/components/weather/LocationSelector';
 
 export default function WeatherImpact() {
   const [selectedStore, setSelectedStore] = useState('');
   const [weatherData, setWeatherData] = useState(null);
+  const [forecastData, setForecastData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [dateRange, setDateRange] = useState({
     from: startOfMonth(new Date()),
     to: new Date()
   });
   const [calendarOpen, setCalendarOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState('analysis');
+  const [activeTab, setActiveTab] = useState('forecast');
   const [selectedWeek, setSelectedWeek] = useState('');
+  const [selectedLocation, setSelectedLocation] = useState(DEFAULT_LOCATIONS[0]);
+  const [customLocations, setCustomLocations] = useState(() => {
+    const saved = localStorage.getItem('customWeatherLocations');
+    return saved ? JSON.parse(saved) : [];
+  });
+  
+  const queryClient = useQueryClient();
 
   // Generar semanas del año
   const weekOptions = useMemo(() => {
@@ -76,15 +87,53 @@ export default function WeatherImpact() {
     queryFn: () => base44.entities.DailySales.filter({ store_id: selectedStore }, '-date', 90),
     enabled: !!selectedStore
   });
+  
+  // Fetch weather history from database
+  const { data: weatherHistory = [] } = useQuery({
+    queryKey: ['weatherHistory', selectedStore],
+    queryFn: () => base44.entities.WeatherHistory.filter({ store_id: selectedStore }, '-date', 365),
+    enabled: !!selectedStore
+  });
+  
+  // Mutation to save weather history
+  const saveWeatherMutation = useMutation({
+    mutationFn: async (records) => {
+      for (const record of records) {
+        // Check if record exists
+        const existing = weatherHistory.find(w => w.date === record.date && w.store_id === record.store_id);
+        if (existing) {
+          await base44.entities.WeatherHistory.update(existing.id, record);
+        } else {
+          await base44.entities.WeatherHistory.create(record);
+        }
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['weatherHistory'] });
+      toast.success('Historial de clima guardado');
+    }
+  });
+  
+  // Save custom locations
+  useEffect(() => {
+    localStorage.setItem('customWeatherLocations', JSON.stringify(customLocations));
+  }, [customLocations]);
+  
+  const handleAddCustomLocation = (location) => {
+    setCustomLocations([...customLocations, location]);
+  };
+  
+  const handleRemoveCustomLocation = (id) => {
+    setCustomLocations(customLocations.filter(l => l.id !== id));
+  };
 
-  // Fetch weather data from Open-Meteo based on date range
+  // Fetch weather data from Open-Meteo based on date range and location
   const fetchWeatherData = async () => {
-    if (!dateRange.from || !dateRange.to) return;
+    if (!dateRange.from || !dateRange.to || !selectedLocation) return;
     
     setLoading(true);
     try {
-      const lat = 4.6097;
-      const lon = -74.0817;
+      const { lat, lon } = selectedLocation;
       
       const startDate = format(dateRange.from, 'yyyy-MM-dd');
       const endDate = format(dateRange.to, 'yyyy-MM-dd');
@@ -95,26 +144,54 @@ export default function WeatherImpact() {
       );
       const historyData = await historyRes.json();
       
-      // Current weather
-      const currentRes = await fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,precipitation_probability,weather_code&timezone=America%2FBogota`
+      // Current weather + 7 day forecast
+      const forecastRes = await fetch(
+        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,precipitation_probability,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,weathercode,windspeed_10m_max,uv_index_max&timezone=America%2FBogota`
       );
-      const currentData = await currentRes.json();
+      const forecastDataRes = await forecastRes.json();
       
       setWeatherData({
-        current: currentData.current,
-        history: historyData.daily
+        current: forecastDataRes.current,
+        history: historyData.daily,
+        forecast: forecastDataRes.daily
       });
+      
+      setForecastData({ daily: forecastDataRes.daily });
     } catch (error) {
       console.error('Error fetching weather:', error);
     } finally {
       setLoading(false);
     }
   };
+  
+  // Save weather data to history
+  const handleSaveWeatherHistory = async () => {
+    if (!selectedStore || !weatherData?.history?.time) {
+      toast.error('Selecciona una tienda primero');
+      return;
+    }
+    
+    const records = weatherData.history.time.map((date, idx) => ({
+      store_id: selectedStore,
+      date: date,
+      location_name: selectedLocation.name,
+      latitude: selectedLocation.lat,
+      longitude: selectedLocation.lon,
+      temperature_max: weatherData.history.temperature_2m_max?.[idx],
+      temperature_min: weatherData.history.temperature_2m_min?.[idx],
+      temperature_mean: weatherData.history.temperature_2m_mean?.[idx],
+      precipitation: weatherData.history.precipitation_sum?.[idx],
+      weather_code: weatherData.history.weathercode?.[idx],
+      total_sales: dailySales.find(s => (s.date?.split('T')[0] || s.date) === date)?.total_sales || 0,
+      total_tickets: dailySales.find(s => (s.date?.split('T')[0] || s.date) === date)?.total_tickets || 0
+    }));
+    
+    saveWeatherMutation.mutate(records);
+  };
 
   useEffect(() => {
     fetchWeatherData();
-  }, [dateRange]);
+  }, [dateRange, selectedLocation]);
 
   // Filtrar ventas por rango de fecha
   const filteredSales = useMemo(() => {
@@ -212,6 +289,15 @@ export default function WeatherImpact() {
           <div className="flex flex-wrap items-center gap-3">
             <StoreSelector selectedStore={selectedStore} onStoreChange={handleStoreChange} />
             
+            {/* Location Selector */}
+            <LocationSelector
+              selectedLocation={selectedLocation}
+              onLocationChange={setSelectedLocation}
+              customLocations={customLocations}
+              onAddCustomLocation={handleAddCustomLocation}
+              onRemoveCustomLocation={handleRemoveCustomLocation}
+            />
+            
             {/* Week Selector */}
             <Select value={selectedWeek} onValueChange={handleWeekChange}>
               <SelectTrigger className="w-[200px] h-10 bg-white shadow-sm">
@@ -277,6 +363,20 @@ export default function WeatherImpact() {
             >
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             </Button>
+            
+            {/* Save History Button */}
+            {selectedStore && weatherData?.history && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleSaveWeatherHistory}
+                disabled={saveWeatherMutation.isPending}
+                className="h-10 gap-2 bg-white shadow-sm"
+              >
+                <Save className={`w-4 h-4 ${saveWeatherMutation.isPending ? 'animate-spin' : ''}`} />
+                Guardar Historial
+              </Button>
+            )}
           </div>
         </div>
 
@@ -392,7 +492,10 @@ export default function WeatherImpact() {
 
             {/* Tabs */}
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="bg-white shadow-sm border p-1 rounded-xl">
+              <TabsList className="bg-white shadow-sm border p-1 rounded-xl flex-wrap">
+                <TabsTrigger value="forecast" className="rounded-lg data-[state=active]:bg-sky-500 data-[state=active]:text-white">
+                  🌤️ Pronóstico 7 Días
+                </TabsTrigger>
                 <TabsTrigger value="analysis" className="rounded-lg data-[state=active]:bg-sky-500 data-[state=active]:text-white">
                   📊 Análisis Detallado
                 </TabsTrigger>
@@ -402,7 +505,19 @@ export default function WeatherImpact() {
                 <TabsTrigger value="impact" className="rounded-lg data-[state=active]:bg-sky-500 data-[state=active]:text-white">
                   💰 Resumen Económico
                 </TabsTrigger>
+                <TabsTrigger value="history" className="rounded-lg data-[state=active]:bg-sky-500 data-[state=active]:text-white">
+                  📚 Historial
+                </TabsTrigger>
               </TabsList>
+
+              <TabsContent value="forecast" className="mt-4">
+                <WeatherForecast7Days
+                  forecastData={forecastData}
+                  salesHistory={weatherHistory}
+                  loading={loading}
+                  locationName={selectedLocation?.name}
+                />
+              </TabsContent>
 
               <TabsContent value="analysis" className="mt-4">
                 <WeatherMainChart 
@@ -430,6 +545,94 @@ export default function WeatherImpact() {
                   stats={stats}
                   formatCurrency={formatCurrency}
                 />
+              </TabsContent>
+
+              <TabsContent value="history" className="mt-4">
+                <Card className="bg-white shadow-lg border-0">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <History className="w-5 h-5 text-violet-500" />
+                      Historial Clima/Ventas - {selectedStore}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {weatherHistory.length === 0 ? (
+                      <div className="text-center py-10">
+                        <History className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                        <p className="text-gray-500">No hay historial guardado para esta tienda</p>
+                        <p className="text-sm text-gray-400 mt-1">
+                          Usa el botón "Guardar Historial" para almacenar datos de clima y ventas
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                          <div className="bg-violet-50 rounded-xl p-4 text-center">
+                            <p className="text-2xl font-bold text-violet-600">{weatherHistory.length}</p>
+                            <p className="text-xs text-gray-500">Días registrados</p>
+                          </div>
+                          <div className="bg-amber-50 rounded-xl p-4 text-center">
+                            <p className="text-2xl font-bold text-amber-600">
+                              {weatherHistory.filter(w => w.weather_code <= 2).length}
+                            </p>
+                            <p className="text-xs text-gray-500">Días soleados</p>
+                          </div>
+                          <div className="bg-blue-50 rounded-xl p-4 text-center">
+                            <p className="text-2xl font-bold text-blue-600">
+                              {weatherHistory.filter(w => w.weather_code >= 51 && w.weather_code <= 99).length}
+                            </p>
+                            <p className="text-xs text-gray-500">Días lluviosos</p>
+                          </div>
+                          <div className="bg-emerald-50 rounded-xl p-4 text-center">
+                            <p className="text-2xl font-bold text-emerald-600">
+                              {formatCurrency(weatherHistory.reduce((sum, w) => sum + (w.total_sales || 0), 0))}
+                            </p>
+                            <p className="text-xs text-gray-500">Ventas totales</p>
+                          </div>
+                        </div>
+                        
+                        <div className="max-h-[400px] overflow-y-auto">
+                          <table className="w-full text-sm">
+                            <thead className="bg-gray-50 sticky top-0">
+                              <tr>
+                                <th className="text-left p-2">Fecha</th>
+                                <th className="text-center p-2">Clima</th>
+                                <th className="text-center p-2">Temp</th>
+                                <th className="text-center p-2">Lluvia</th>
+                                <th className="text-right p-2">Ventas</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {weatherHistory.slice(0, 50).map((record, idx) => {
+                                const isSunny = record.weather_code <= 2;
+                                const isRainy = record.weather_code >= 51 && record.weather_code <= 99;
+                                return (
+                                  <tr key={record.id || idx} className="border-b hover:bg-gray-50">
+                                    <td className="p-2">
+                                      {record.date ? format(parseISO(record.date), 'dd MMM yyyy', { locale: es }) : '-'}
+                                    </td>
+                                    <td className="text-center p-2">
+                                      {isSunny ? '☀️' : isRainy ? '🌧️' : '⛅'}
+                                    </td>
+                                    <td className="text-center p-2">
+                                      {record.temperature_mean ? `${Math.round(record.temperature_mean)}°C` : '-'}
+                                    </td>
+                                    <td className="text-center p-2">
+                                      {record.precipitation ? `${record.precipitation.toFixed(1)}mm` : '0mm'}
+                                    </td>
+                                    <td className="text-right p-2 font-medium">
+                                      {record.total_sales ? formatCurrency(record.total_sales) : '-'}
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
               </TabsContent>
             </Tabs>
           </div>
