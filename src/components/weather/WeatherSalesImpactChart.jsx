@@ -916,16 +916,16 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
 
                   {viewMode === 'bars' && (
                     <Bar yAxisId="sales" dataKey="sales" name="Ventas" radius={[6, 6, 0, 0]}>
-                      {chartData.map((entry, index) => (
-                        <Cell 
-                          key={`cell-${index}`} 
-                          fill={entry.weatherColor} 
-                          opacity={entry.isForecast ? 0.4 : 0.8}
-                          strokeDasharray={entry.isForecast ? "4 2" : "0"}
-                          stroke={entry.isForecast ? entry.weatherColor : "none"}
-                        />
-                      ))}
-                    </Bar>
+                        {chartData.map((entry, index) => (
+                          <Cell 
+                            key={`cell-${index}`} 
+                            fill={entry.weatherType === 'sunny' ? '#fbbf24' : entry.weatherType === 'rainy' ? '#3b82f6' : '#9ca3af'} 
+                            opacity={entry.isForecast ? 0.4 : 0.85}
+                            strokeDasharray={entry.isForecast ? "4 2" : "0"}
+                            stroke={entry.isForecast ? entry.weatherColor : "none"}
+                          />
+                        ))}
+                      </Bar>
                   )}
 
                   {viewMode === 'trend' && (
@@ -970,49 +970,86 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
               </ResponsiveContainer>
             </div>
 
-            {/* Leyenda visual - MÁS DINÁMICA */}
+            {/* Leyenda visual con iconos animados tipo clima real */}
             <div className="flex flex-wrap justify-center gap-6 mt-4 pt-4 border-t">
+              {/* Sol animado con rayos */}
               <div className="flex items-center gap-2 text-xs">
-                <motion.div 
-                  animate={{ scale: [1, 1.2, 1], rotate: [0, 180, 360] }}
-                  transition={{ scale: { duration: 2, repeat: Infinity }, rotate: { duration: 8, repeat: Infinity, ease: "linear" } }}
-                  className="w-6 h-6 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 shadow-lg flex items-center justify-center"
-                >
-                  <Sun className="w-4 h-4 text-white" />
-                </motion.div>
+                <div className="relative w-8 h-8">
+                  <motion.div 
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                    className="absolute inset-0 flex items-center justify-center"
+                  >
+                    {[...Array(8)].map((_, i) => (
+                      <motion.div
+                        key={i}
+                        className="absolute w-1 h-2 bg-amber-400 rounded-full"
+                        style={{
+                          transform: `rotate(${i * 45}deg) translateY(-10px)`,
+                        }}
+                        animate={{ opacity: [0.5, 1, 0.5], scale: [0.8, 1.2, 0.8] }}
+                        transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.1 }}
+                      />
+                    ))}
+                  </motion.div>
+                  <motion.div 
+                    animate={{ scale: [1, 1.1, 1] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className="absolute inset-0 flex items-center justify-center"
+                  >
+                    <div className="w-5 h-5 rounded-full bg-gradient-to-br from-yellow-300 to-amber-500 shadow-lg shadow-amber-400/50" />
+                  </motion.div>
+                </div>
                 <span className="text-gray-600 font-medium">Soleado</span>
               </div>
+
+              {/* Nube animada */}
               <div className="flex items-center gap-2 text-xs">
                 <motion.div
-                  animate={{ x: [-2, 2, -2] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="w-6 h-6 rounded-lg bg-gradient-to-br from-gray-400 to-slate-500 shadow-lg flex items-center justify-center"
+                  animate={{ x: [-3, 3, -3], y: [-1, 1, -1] }}
+                  transition={{ duration: 4, repeat: Infinity }}
+                  className="relative"
                 >
-                  <Cloud className="w-4 h-4 text-white" />
+                  <div className="w-8 h-5 bg-gradient-to-b from-gray-300 to-gray-400 rounded-full shadow-md" />
+                  <div className="absolute -top-1 left-1 w-4 h-4 bg-gradient-to-b from-gray-200 to-gray-300 rounded-full" />
+                  <div className="absolute -top-0.5 right-1 w-3 h-3 bg-gradient-to-b from-gray-200 to-gray-300 rounded-full" />
                 </motion.div>
                 <span className="text-gray-600 font-medium">Nublado</span>
               </div>
+
+              {/* Lluvia animada con gotas */}
               <div className="flex items-center gap-2 text-xs relative">
-                <motion.div
-                  animate={{ y: [0, -3, 0] }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                  className="w-6 h-6 rounded-lg bg-gradient-to-br from-blue-400 to-cyan-500 shadow-lg flex items-center justify-center relative overflow-hidden"
-                >
-                  <CloudRain className="w-4 h-4 text-white relative z-10" />
-                  {/* Gotas animadas */}
+                <div className="relative w-8 h-10">
                   <motion.div
-                    className="absolute bottom-0 left-1 w-0.5 h-1 bg-white/60 rounded-full"
-                    animate={{ y: [-4, 4], opacity: [1, 0] }}
-                    transition={{ duration: 0.4, repeat: Infinity }}
-                  />
-                  <motion.div
-                    className="absolute bottom-0 right-1.5 w-0.5 h-1 bg-white/60 rounded-full"
-                    animate={{ y: [-4, 4], opacity: [1, 0] }}
-                    transition={{ duration: 0.4, repeat: Infinity, delay: 0.2 }}
-                  />
-                </motion.div>
+                    animate={{ y: [-2, 0, -2] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className="absolute top-0 left-0 right-0"
+                  >
+                    <div className="w-8 h-4 bg-gradient-to-b from-blue-400 to-blue-500 rounded-full shadow-md" />
+                    <div className="absolute -top-1 left-1 w-3 h-3 bg-gradient-to-b from-blue-300 to-blue-400 rounded-full" />
+                  </motion.div>
+                  {/* Gotas de lluvia */}
+                  {[0, 1, 2].map((i) => (
+                    <motion.div
+                      key={i}
+                      className="absolute w-0.5 bg-blue-400 rounded-full"
+                      style={{ left: `${10 + i * 10}px`, height: '6px' }}
+                      animate={{ 
+                        y: [4, 12], 
+                        opacity: [1, 0],
+                      }}
+                      transition={{ 
+                        duration: 0.5, 
+                        repeat: Infinity, 
+                        delay: i * 0.15,
+                        ease: "linear"
+                      }}
+                    />
+                  ))}
+                </div>
                 <span className="text-gray-600 font-medium">Lluvioso</span>
               </div>
+
               <div className="flex items-center gap-2 text-xs">
                 <div className="w-8 h-1.5 bg-gradient-to-r from-orange-300 to-orange-500 rounded-full shadow" />
                 <span className="text-gray-600 font-medium">Temperatura</span>

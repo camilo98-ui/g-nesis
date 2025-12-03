@@ -93,7 +93,15 @@ function MetricCard({ title, value, budget, icon: Icon, bgColor, iconBg, iconCol
       </div>
       
       <p className="text-sm text-gray-500 mb-1">{title}</p>
-      <p className="text-2xl font-semibold text-gray-700">{formatValue(value)}</p>
+      <motion.p 
+        key={value}
+        initial={{ scale: 1.2, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ type: "spring", stiffness: 200 }}
+        className="text-2xl font-semibold text-gray-700"
+      >
+        {formatValue(value)}
+      </motion.p>
       
       {budget > 0 && (
         <div className="mt-3">
@@ -634,7 +642,15 @@ export default function Dashboard() {
               </Button>
             </Link>
             <div>
-              <h1 className="text-2xl md:text-3xl font-semibold text-gray-700">Tienda</h1>
+              <motion.h1 
+                animate={{ 
+                  backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+                }}
+                transition={{ duration: 5, repeat: Infinity }}
+                className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-violet-600 via-pink-500 to-violet-600 bg-[length:200%_100%] bg-clip-text text-transparent"
+              >
+                Tienda
+              </motion.h1>
               {selectedStore && (
                 <p className="text-sm text-gray-500">{selectedStore} - {selectedStoreName}</p>
               )}
