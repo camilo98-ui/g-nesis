@@ -22,6 +22,7 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, 
   ResponsiveContainer, Legend, AreaChart, Area
 } from 'recharts';
+import InventoryAlertsPanel from '@/components/quality/InventoryAlertsPanel';
 
 const DEFAULT_MORNING_TASKS = [
   { id: 'm1', label: 'Limpieza de vitrinas', category: 'limpieza' },
@@ -60,6 +61,8 @@ const QUALITY_MESSAGES = [
   "🍦 Helados perfectos en ambiente impecable",
 ];
 
+import { Package } from 'lucide-react';
+
 const TABS = [
   { id: 'checklist', label: 'Checklist', icon: ClipboardCheck },
   { id: 'calendar', label: 'Historial', icon: Calendar },
@@ -90,6 +93,7 @@ export default function Quality() {
   const [visitScore, setVisitScore] = useState(0);
   const [visitNotes, setVisitNotes] = useState('');
   const [visitDate, setVisitDate] = useState(format(new Date(), 'yyyy-MM-dd'));
+  const [showInventoryAlerts, setShowInventoryAlerts] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem('selectedStore');
@@ -341,6 +345,28 @@ export default function Quality() {
         >
           {randomMessage}
         </motion.div>
+
+        {/* Botón de Alertas de Inventario */}
+        {selectedStore && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-4"
+          >
+            <Button
+              onClick={() => setShowInventoryAlerts(true)}
+              className="w-full bg-gradient-to-r from-orange-400 to-red-400 hover:from-orange-500 hover:to-red-500 text-white h-12 rounded-xl shadow-lg"
+            >
+              <motion.div
+                animate={{ rotate: [0, 10, -10, 0], scale: [1, 1.1, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                <Package className="w-5 h-5 mr-2" />
+              </motion.div>
+              🚨 Alertas de Inventario (Productos por Vencer)
+            </Button>
+          </motion.div>
+        )}
 
         {selectedStore ? (
           <>
@@ -689,6 +715,13 @@ export default function Quality() {
           </div>
         )}
       </div>
+
+      {/* Panel de Alertas de Inventario */}
+      <InventoryAlertsPanel 
+        storeId={selectedStore}
+        isOpen={showInventoryAlerts}
+        onClose={() => setShowInventoryAlerts(false)}
+      />
     </div>
   );
 }
