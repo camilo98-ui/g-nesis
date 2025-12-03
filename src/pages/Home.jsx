@@ -26,56 +26,49 @@ const MENU_ITEMS = [
     page: 'Dashboard',
     icon: LayoutDashboard, 
     description: 'Ventas y métricas',
-    bgColor: 'bg-gradient-to-br from-violet-50/80 to-purple-100/60',
-    iconBg: 'bg-violet-100/80',
-    iconColor: 'text-violet-400'
+    gradient: 'from-pink-500 to-rose-500',
+    bgGlow: 'shadow-pink-500/30'
   },
   { 
     name: 'Cajeros', 
     page: 'CashiersDashboard',
     icon: Users, 
-    description: 'Rendimiento del equipo',
-    bgColor: 'bg-gradient-to-br from-pink-50/80 to-rose-100/60',
-    iconBg: 'bg-pink-100/80',
-    iconColor: 'text-pink-400'
+    description: 'Rendimiento',
+    gradient: 'from-rose-500 to-pink-500',
+    bgGlow: 'shadow-rose-500/30'
   },
   { 
-    name: 'Registrar Ventas', 
+    name: 'Ventas', 
     page: 'Sales',
     icon: TrendingUp, 
-    description: 'Agregar ventas diarias',
-    bgColor: 'bg-gradient-to-br from-emerald-50/80 to-green-100/60',
-    iconBg: 'bg-emerald-100/80',
-    iconColor: 'text-emerald-400'
+    description: 'Registrar',
+    gradient: 'from-pink-400 to-rose-400',
+    bgGlow: 'shadow-pink-400/30'
   },
   { 
     name: 'PopsyStars', 
     page: 'Rankings',
     icon: Award, 
     description: 'Top cajeros',
-    bgColor: 'bg-gradient-to-br from-amber-50/80 to-yellow-100/60',
-    iconBg: 'bg-amber-100/80',
-    iconColor: 'text-amber-400'
+    gradient: 'from-rose-400 to-pink-400',
+    bgGlow: 'shadow-rose-400/30'
   },
   { 
     name: 'Presupuestos', 
     page: 'Budget',
     icon: Target, 
-    description: 'Metas mensuales',
-    bgColor: 'bg-gradient-to-br from-sky-50/80 to-blue-100/60',
-    iconBg: 'bg-sky-100/80',
-    iconColor: 'text-sky-400'
+    description: 'Metas',
+    gradient: 'from-pink-500 to-rose-400',
+    bgGlow: 'shadow-pink-500/30'
   },
   { 
     name: 'Calidad', 
     page: 'Quality',
     icon: ClipboardCheck, 
-    description: 'Checklists y visitas',
-    bgColor: 'bg-gradient-to-br from-teal-50/80 to-cyan-100/60',
-    iconBg: 'bg-teal-100/80',
-    iconColor: 'text-teal-400'
+    description: 'Checklists',
+    gradient: 'from-rose-500 to-pink-400',
+    bgGlow: 'shadow-rose-500/30'
   },
-
 ];
 
 // Confetti pastel suave
@@ -272,39 +265,44 @@ export default function Home() {
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4"
+            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4"
           >
             {MENU_ITEMS.map((item, index) => {
               const Icon = item.icon;
               return (
                 <motion.div
                   key={item.name}
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.08 }}
-                  whileHover={{ y: -10, scale: 1.05, rotate: 1 }}
+                  initial={{ opacity: 0, y: 30, scale: 0.9 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ delay: index * 0.08, type: "spring", stiffness: 200 }}
+                  whileHover={{ y: -8, scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
                   <Link to={createPageUrl(item.page)}>
                     <motion.div 
-                      className={`${item.bgColor} rounded-xl sm:rounded-2xl p-3 sm:p-5 h-full shadow-sm hover:shadow-2xl transition-all duration-300 border border-white/50 group`}
+                      className={`bg-gradient-to-br ${item.gradient} rounded-2xl p-4 h-full shadow-lg ${item.bgGlow} hover:shadow-xl transition-all duration-300 group relative overflow-hidden`}
                     >
-                      <motion.div 
-                        className={`w-10 h-10 sm:w-12 sm:h-12 ${item.iconBg} rounded-lg sm:rounded-xl flex items-center justify-center mb-2 sm:mb-3`}
-                        whileHover={{ rotate: [0, -15, 15, -10, 10, 0], scale: 1.2 }}
-                        animate={{ rotate: 0 }}
-                        transition={{ duration: 0.5 }}
-                      >
-                        <motion.div
-                          className="group-hover:animate-bounce"
+                      {/* Glow effect */}
+                      <motion.div
+                        className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"
+                        animate={{ scale: [1, 1.5, 1], opacity: [0, 0.2, 0] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                      />
+
+                      {/* Icon centered */}
+                      <div className="flex flex-col items-center justify-center text-center relative z-10">
+                        <motion.div 
+                          className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mb-2"
+                          whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1 }}
+                          transition={{ duration: 0.4 }}
                         >
-                          <Icon className={`w-5 h-5 sm:w-6 sm:h-6 ${item.iconColor}`} />
+                          <Icon className="w-6 h-6 text-white" />
                         </motion.div>
-                      </motion.div>
-                      <h3 className="font-bold text-gray-800 text-xs sm:text-sm mb-0.5 sm:mb-1">
-                        {item.name}
-                      </h3>
-                      <p className="text-[10px] sm:text-xs text-gray-400 hidden sm:block">{item.description}</p>
+                        <h3 className="font-bold text-white text-sm">
+                          {item.name}
+                        </h3>
+                        <p className="text-[10px] text-white/70 mt-0.5">{item.description}</p>
+                      </div>
                     </motion.div>
                   </Link>
                 </motion.div>

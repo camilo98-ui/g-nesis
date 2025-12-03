@@ -165,42 +165,53 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
           </div>
           <div className="max-h-[300px] overflow-y-auto space-y-1">
             {filteredStores.map((store) => (
-              <div 
-                key={store.code}
-                className={`w-full flex items-center gap-2 p-2 rounded-lg transition-colors ${
-                  selectedStore === store.code 
-                    ? 'bg-pink-100 text-pink-700' 
-                    : 'hover:bg-pink-50'
-                }`}
-              >
-                <button
-                  onClick={() => handleStoreClick(store)}
-                  className="flex-1 flex items-center gap-2 text-left"
-                >
-                  <svg viewBox="0 0 24 32" className="w-5 h-6">
-                    <circle cx="12" cy="8" r="7" fill="#FFB5C5" stroke="#ec4899" strokeWidth="1"/>
-                    <polygon points="5,12 12,30 19,12" fill="#D4A574" stroke="#c99a5e" strokeWidth="0.5"/>
-                    <line x1="7" y1="15" x2="17" y2="15" stroke="#c99a5e" strokeWidth="0.5" opacity="0.6"/>
-                    <line x1="8" y1="19" x2="16" y2="19" stroke="#c99a5e" strokeWidth="0.5" opacity="0.6"/>
-                  </svg>
-                  <span className="font-medium text-pink-600">{store.displayName}</span>
-                  {hasPassword(store.code) && (
-                    <Lock className="w-3 h-3 text-amber-500 ml-auto" />
-                  )}
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setEditPasswordDialog({ open: true, store });
-                    setNewPassword(storePasswords.find(p => p.store_code === store.code)?.password || '');
-                  }}
-                  className="p-1 hover:bg-gray-200 rounded transition-colors"
-                  title="Configurar contraseña"
-                >
-                  <Settings className="w-3.5 h-3.5 text-gray-400" />
-                </button>
-              </div>
-            ))}
+                  <motion.div 
+                    key={store.code}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    whileHover={{ x: 3, backgroundColor: 'rgba(236, 72, 153, 0.1)' }}
+                    className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all cursor-pointer ${
+                      selectedStore === store.code 
+                        ? 'bg-gradient-to-r from-pink-100 to-rose-100 border-2 border-pink-300' 
+                        : 'hover:bg-pink-50/50 border-2 border-transparent'
+                    }`}
+                  >
+                    <button
+                      onClick={() => handleStoreClick(store)}
+                      className="flex-1 flex items-center gap-3 text-left"
+                    >
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                        selectedStore === store.code 
+                          ? 'bg-gradient-to-br from-pink-500 to-rose-500' 
+                          : 'bg-gradient-to-br from-pink-100 to-rose-100'
+                      }`}>
+                        <svg viewBox="0 0 24 32" className="w-4 h-5">
+                          <circle cx="12" cy="8" r="7" fill={selectedStore === store.code ? '#fff' : '#FFB5C5'} stroke={selectedStore === store.code ? '#fff' : '#ec4899'} strokeWidth="1"/>
+                          <polygon points="5,12 12,30 19,12" fill={selectedStore === store.code ? '#fce7f3' : '#D4A574'} stroke={selectedStore === store.code ? '#fff' : '#c99a5e'} strokeWidth="0.5"/>
+                        </svg>
+                      </div>
+                      <span className={`font-semibold text-center flex-1 ${
+                        selectedStore === store.code ? 'text-pink-700' : 'text-pink-600'
+                      }`}>
+                        {store.displayName}
+                      </span>
+                      {hasPassword(store.code) && (
+                        <Lock className="w-3.5 h-3.5 text-amber-500" />
+                      )}
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEditPasswordDialog({ open: true, store });
+                        setNewPassword(storePasswords.find(p => p.store_code === store.code)?.password || '');
+                      }}
+                      className="p-1.5 hover:bg-pink-200/50 rounded-lg transition-colors"
+                      title="Configurar contraseña"
+                    >
+                      <Settings className="w-3.5 h-3.5 text-pink-400" />
+                    </button>
+                  </motion.div>
+                ))}
             {filteredStores.length === 0 && (
               <p className="text-center text-gray-400 text-sm py-4">No se encontró "{search}"</p>
             )}
