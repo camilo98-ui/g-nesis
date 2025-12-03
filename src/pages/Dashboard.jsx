@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import StoreSelector, { STORES } from '@/components/StoreSelector';
 import DateFilter from '@/components/DateFilter';
+import WeekFilter from '@/components/dashboard/WeekFilter';
 import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
 import ExportExcel from '@/components/ExportExcel';
 import DailyGoalsCard from '@/components/gamification/DailyGoalsCard';
@@ -434,6 +435,7 @@ export default function Dashboard() {
   const [activeMetric, setActiveMetric] = useState(null);
   const [showExport, setShowExport] = useState(false);
   const [weatherData, setWeatherData] = useState(null);
+  const [weekFilter, setWeekFilter] = useState(null); // Filtro de semana independiente
   
   // Fetch weather data
   useEffect(() => {
@@ -509,18 +511,22 @@ export default function Dashboard() {
   }, [budgets]);
 
   const filteredSales = useMemo(() => {
-    if (!dateRange.from || !dateRange.to || !dailySales.length) return [];
+    if (!dailySales.length) return [];
+    
+    // Si hay filtro de semana activo, usarlo; sino usar el calendario
+    const activeRange = weekFilter || dateRange;
+    if (!activeRange?.from || !activeRange?.to) return [];
     
     // Formatear fechas del rango a strings YYYY-MM-DD para comparación exacta
-    const fromStr = format(dateRange.from, 'yyyy-MM-dd');
-    const toStr = format(dateRange.to, 'yyyy-MM-dd');
+    const fromStr = format(activeRange.from, 'yyyy-MM-dd');
+    const toStr = format(activeRange.to, 'yyyy-MM-dd');
     
     return dailySales.filter(s => {
       // Extraer solo la fecha (YYYY-MM-DD) del registro
       const saleDateStr = s.date?.split('T')[0] || s.date;
       return saleDateStr >= fromStr && saleDateStr <= toStr;
     });
-  }, [dailySales, dateRange]);
+  }, [dailySales, dateRange, weekFilter]);
 
   const totals = useMemo(() => {
     return filteredSales.reduce((acc, s) => ({
@@ -532,8 +538,9 @@ export default function Dashboard() {
   }, [filteredSales]);
 
   const chartData = useMemo(() => {
-    if (!dateRange.from || !dateRange.to) return [];
-    const days = eachDayOfInterval({ start: dateRange.from, end: dateRange.to });
+    const activeRange = weekFilter || dateRange;
+    if (!activeRange?.from || !activeRange?.to) return [];
+    const days = eachDayOfInterval({ start: activeRange.from, end: activeRange.to });
     
     return days.map(day => {
       const dayStr = format(day, 'yyyy-MM-dd');
@@ -635,7 +642,8 @@ export default function Dashboard() {
           </div>
           <div className="flex flex-col md:flex-row gap-3 items-center">
             <StoreSelector selectedStore={selectedStore} onStoreChange={handleStoreChange} />
-            <DateFilter dateRange={dateRange} onDateChange={setDateRange} />
+            <WeekFilter onWeekChange={setWeekFilter} />
+            <DateFilter dateRange={dateRange} onDateChange={(range) => { setDateRange(range); setWeekFilter(null); }} />
           </div>
         </div>
 
