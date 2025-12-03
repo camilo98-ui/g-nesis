@@ -4,7 +4,9 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import StoreSelector, { STORES } from '@/components/StoreSelector';
+import StoreSelector, { STORES, getDisplayName } from '@/components/StoreSelector';
+import GamificationCoach from '@/components/ai/GamificationCoach';
+import PerformanceAnalyzer from '@/components/ai/PerformanceAnalyzer';
 import DateFilter from '@/components/DateFilter';
 import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
 import CashierAnalysis from '@/components/cashier/CashierAnalysis';
@@ -147,16 +149,23 @@ export default function CashiersDashboard() {
               </Button>
             </Link>
             <div>
-              <h1 className="text-2xl md:text-3xl font-semibold text-gray-700 flex items-center gap-2">
+              <motion.h1 
+                animate={{ 
+                  backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+                }}
+                transition={{ duration: 5, repeat: Infinity }}
+                className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-pink-500 via-rose-500 to-pink-500 bg-[length:200%_100%] bg-clip-text text-transparent flex items-center gap-2"
+              >
                 <Users className="w-6 h-6 text-pink-500" />
                 Cajeros
-              </h1>
+              </motion.h1>
               {selectedStore && (
-                <p className="text-sm text-gray-500">{selectedStore} - {selectedStoreName}</p>
+                <p className="text-sm text-pink-500 font-medium">{getDisplayName(selectedStore)}</p>
               )}
             </div>
           </div>
           <div className="flex flex-col md:flex-row gap-3 items-center">
+            <PerformanceAnalyzer storeId={selectedStore} storeName={getDisplayName(selectedStore)} />
             <StoreSelector selectedStore={selectedStore} onStoreChange={handleStoreChange} />
             <DateFilter dateRange={dateRange} onDateChange={setDateRange} />
           </div>
@@ -172,7 +181,7 @@ export default function CashiersDashboard() {
               >
                 <div className="flex items-center gap-2 mb-2">
                   <Users className="w-5 h-5 text-pink-500" />
-                  <span className="text-sm text-gray-600">Equipo Activo</span>
+                  <span className="text-sm text-pink-600">Equipo Activo</span>
                 </div>
                 <p className="text-3xl font-semibold text-gray-700">{teamTotals.totalCashiers}</p>
                 <p className="text-xs text-gray-500">cajeros</p>
@@ -184,7 +193,7 @@ export default function CashiersDashboard() {
               >
                 <div className="flex items-center gap-2 mb-2">
                   <TrendingUp className="w-5 h-5 text-emerald-500" />
-                  <span className="text-sm text-gray-600">Ventas Equipo</span>
+                  <span className="text-sm text-pink-600">Ventas Equipo</span>
                 </div>
                 <p className="text-2xl font-semibold text-gray-700">${(teamTotals.totalSales/1000000).toFixed(1)}M</p>
                 <p className="text-xs text-gray-500">este período</p>
@@ -196,7 +205,7 @@ export default function CashiersDashboard() {
               >
                 <div className="flex items-center gap-2 mb-2">
                   <Target className="w-5 h-5 text-blue-500" />
-                  <span className="text-sm text-gray-600">Tickets Totales</span>
+                  <span className="text-sm text-pink-600">Tickets Totales</span>
                 </div>
                 <p className="text-3xl font-semibold text-gray-700">{teamTotals.totalTickets.toLocaleString()}</p>
                 <p className="text-xs text-gray-500">facturados</p>
@@ -208,7 +217,7 @@ export default function CashiersDashboard() {
               >
                 <div className="flex items-center gap-2 mb-2">
                   <BarChart3 className="w-5 h-5 text-amber-500" />
-                  <span className="text-sm text-gray-600">Ticket Prom.</span>
+                  <span className="text-sm text-pink-600">Ticket Prom.</span>
                 </div>
                 <p className="text-2xl font-semibold text-gray-700">${Math.round(teamTotals.avgTicket/1000)}K</p>
                 <p className="text-xs text-gray-500">promedio equipo</p>
@@ -376,6 +385,15 @@ export default function CashiersDashboard() {
                             {selectedCashier.totalSuggested}
                           </p>
                         </div>
+                      </div>
+
+                      {/* Coach IA y Metas */}
+                      <div className="mt-4 flex gap-2 justify-end">
+                        <GamificationCoach 
+                          cashierId={selectedCashier.id}
+                          cashierName={selectedCashier.name}
+                          storeId={selectedStore}
+                        />
                       </div>
 
                       {/* Metas personalizadas */}
