@@ -27,8 +27,8 @@ import { es } from 'date-fns/locale';
 const ACCESS_CODE = '1998';
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/6a749247d_Capturadepantalla2025-11-251251441.png";
 
-// KPI Card Component
-const KPICard = ({ title, value, subvalue, icon: Icon, trend, color, delay = 0 }) => (
+// KPI Card Component with Compliance
+const KPICard = ({ title, value, subvalue, icon: Icon, trend, color, delay = 0, compliance }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
@@ -60,9 +60,121 @@ const KPICard = ({ title, value, subvalue, icon: Icon, trend, color, delay = 0 }
           </span>
         )}
       </div>
+      {compliance !== undefined && (
+        <div className="mt-2 pt-2 border-t border-white/20">
+          <div className="flex items-center justify-between">
+            <span className="text-white/70 text-[10px]">Cumplimiento</span>
+            <span className={`text-xs font-black ${compliance >= 90 ? 'text-green-200' : compliance >= 70 ? 'text-yellow-200' : 'text-red-200'}`}>
+              {compliance.toFixed(0)}%
+            </span>
+          </div>
+          <div className="w-full h-1 bg-white/20 rounded-full mt-1 overflow-hidden">
+            <motion.div 
+              className={`h-full rounded-full ${compliance >= 90 ? 'bg-green-300' : compliance >= 70 ? 'bg-yellow-300' : 'bg-red-300'}`}
+              initial={{ width: 0 }}
+              animate={{ width: `${Math.min(compliance, 100)}%` }}
+              transition={{ delay: delay + 0.3, duration: 0.8 }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   </motion.div>
 );
+
+// Store Card Component - More Dynamic and Professional
+const StoreCard = ({ store, index, formatCurrency }) => {
+  const getStatusColor = (value) => value >= 90 ? 'emerald' : value >= 70 ? 'amber' : 'rose';
+  const statusColor = getStatusColor(store.compliance);
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20, rotateX: -10 }}
+      animate={{ opacity: 1, y: 0, rotateX: 0 }}
+      transition={{ delay: index * 0.04, type: "spring", stiffness: 150 }}
+      whileHover={{ scale: 1.03, y: -5, boxShadow: '0 20px 40px rgba(236, 72, 153, 0.15)' }}
+      className="bg-white rounded-2xl p-4 border border-gray-100 shadow-lg hover:border-pink-200 transition-all relative overflow-hidden group"
+    >
+      {/* Decorative gradient */}
+      <motion.div 
+        className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r ${
+          statusColor === 'emerald' ? 'from-emerald-400 to-green-500' : 
+          statusColor === 'amber' ? 'from-amber-400 to-orange-500' : 'from-rose-400 to-red-500'
+        }`}
+        initial={{ scaleX: 0 }}
+        animate={{ scaleX: 1 }}
+        transition={{ delay: index * 0.04 + 0.2 }}
+      />
+      
+      {/* Header */}
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <motion.div 
+            className={`w-10 h-10 rounded-xl bg-gradient-to-br ${
+              statusColor === 'emerald' ? 'from-emerald-100 to-green-100' : 
+              statusColor === 'amber' ? 'from-amber-100 to-orange-100' : 'from-rose-100 to-red-100'
+            } flex items-center justify-center`}
+            whileHover={{ rotate: [0, -10, 10, 0] }}
+          >
+            <Store className={`w-5 h-5 ${
+              statusColor === 'emerald' ? 'text-emerald-600' : 
+              statusColor === 'amber' ? 'text-amber-600' : 'text-rose-600'
+            }`} />
+          </motion.div>
+          <div>
+            <h3 className="font-bold text-gray-800 text-sm leading-tight">{getDisplayName(store.code)}</h3>
+            <span className="text-[10px] text-gray-400">{store.code}</span>
+          </div>
+        </div>
+        <motion.div 
+          className={`px-2.5 py-1 rounded-full text-xs font-black ${
+            statusColor === 'emerald' ? 'bg-emerald-100 text-emerald-700' : 
+            statusColor === 'amber' ? 'bg-amber-100 text-amber-700' : 'bg-rose-100 text-rose-700'
+          }`}
+          animate={{ scale: [1, 1.05, 1] }}
+          transition={{ duration: 2, repeat: Infinity }}
+        >
+          {store.compliance.toFixed(0)}%
+        </motion.div>
+      </div>
+
+      {/* Progress Bar */}
+      <div className="relative h-2 bg-gray-100 rounded-full overflow-hidden mb-3">
+        <motion.div 
+          className={`absolute inset-y-0 left-0 rounded-full bg-gradient-to-r ${
+            statusColor === 'emerald' ? 'from-emerald-400 to-green-500' : 
+            statusColor === 'amber' ? 'from-amber-400 to-orange-500' : 'from-rose-400 to-red-500'
+          }`}
+          initial={{ width: 0 }}
+          animate={{ width: `${Math.min(store.compliance, 100)}%` }}
+          transition={{ delay: index * 0.04 + 0.3, duration: 0.8, ease: "easeOut" }}
+        />
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-2 gap-2">
+        <div className="bg-gray-50 rounded-lg p-2 text-center">
+          <p className="text-lg font-black text-gray-800">${(store.totalSales/1000000).toFixed(1)}M</p>
+          <p className="text-[9px] text-gray-500 uppercase tracking-wide">Ventas</p>
+        </div>
+        <div className="bg-gray-50 rounded-lg p-2 text-center">
+          <p className="text-lg font-black text-gray-800">${(store.avgTicket/1000).toFixed(0)}K</p>
+          <p className="text-[9px] text-gray-500 uppercase tracking-wide">Ticket</p>
+        </div>
+      </div>
+
+      {/* Mini indicators */}
+      <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-100">
+        <div className="flex items-center gap-1">
+          <ClipboardCheck className={`w-3 h-3 ${store.checklistCompliance >= 80 ? 'text-emerald-500' : 'text-gray-300'}`} />
+          <Snowflake className={`w-3 h-3 ${store.freezerEfficiency >= 80 ? 'text-cyan-500' : 'text-gray-300'}`} />
+          <Package className={`w-3 h-3 ${store.inventoryAlerts === 0 ? 'text-emerald-500' : 'text-rose-500'}`} />
+        </div>
+        <span className="text-[9px] text-gray-400">{store.totalTransactions.toLocaleString()} trans.</span>
+      </div>
+    </motion.div>
+  );
+};
 
 export default function Management() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -370,6 +482,25 @@ function ManagementDashboard() {
 
   const COLORS = ['#ec4899', '#f472b6', '#f9a8d4', '#fbcfe8', '#fce7f3'];
 
+  // Opportunities / Critical Indicators Data
+  const opportunitiesData = useMemo(() => {
+    const salesCompliance = zoneTotals.totalBudget > 0 ? (zoneTotals.totalSales / zoneTotals.totalBudget) * 100 : 0;
+    const avgChecklistCompliance = storePerformance.reduce((sum, s) => sum + s.checklistCompliance, 0) / Math.max(storePerformance.length, 1);
+    const avgFreezerEfficiency = storePerformance.reduce((sum, s) => sum + s.freezerEfficiency, 0) / Math.max(storePerformance.length, 1);
+    const totalAlerts = storePerformance.reduce((sum, s) => sum + s.inventoryAlerts, 0);
+    const inventoryScore = totalAlerts === 0 ? 100 : Math.max(0, 100 - (totalAlerts * 5));
+    
+    return [
+      { name: 'Ventas', value: salesCompliance, target: 100, fill: salesCompliance >= 90 ? '#10b981' : salesCompliance >= 70 ? '#f59e0b' : '#ef4444' },
+      { name: 'Checklists', value: avgChecklistCompliance, target: 100, fill: avgChecklistCompliance >= 80 ? '#10b981' : avgChecklistCompliance >= 60 ? '#f59e0b' : '#ef4444' },
+      { name: 'Neveras', value: avgFreezerEfficiency, target: 100, fill: avgFreezerEfficiency >= 85 ? '#10b981' : avgFreezerEfficiency >= 70 ? '#f59e0b' : '#ef4444' },
+      { name: 'Inventario', value: inventoryScore, target: 100, fill: inventoryScore >= 90 ? '#10b981' : inventoryScore >= 70 ? '#f59e0b' : '#ef4444' },
+    ];
+  }, [zoneTotals, storePerformance]);
+
+  // Projection compliance
+  const projectionCompliance = zoneTotals.totalBudget > 0 ? (zoneTotals.projection / zoneTotals.totalBudget) * 100 : 0;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-pink-50/30">
       <FloatingIceCreamsBg />
@@ -437,8 +568,8 @@ function ManagementDashboard() {
           <>
             {/* KPI Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-              <KPICard title="Venta Zona" value={`$${(zoneTotals.totalSales/1000000).toFixed(1)}M`} subvalue={`Meta: $${(zoneTotals.totalBudget/1000000).toFixed(1)}M`} icon={DollarSign} color="from-pink-500 to-rose-500" delay={0} />
-              <KPICard title="Proyección" value={`$${(zoneTotals.projection/1000000).toFixed(1)}M`} subvalue={`${((zoneTotals.projection / Math.max(zoneTotals.totalBudget, 1)) * 100).toFixed(0)}% de meta`} icon={Target} color="from-violet-500 to-purple-500" delay={0.1} />
+              <KPICard title="Venta Zona" value={`$${(zoneTotals.totalSales/1000000).toFixed(1)}M`} subvalue={`Meta: $${(zoneTotals.totalBudget/1000000).toFixed(1)}M`} icon={DollarSign} color="from-pink-500 to-rose-500" delay={0} compliance={zoneTotals.compliance} />
+              <KPICard title="Proyección" value={`$${(zoneTotals.projection/1000000).toFixed(1)}M`} subvalue={`Meta: $${(zoneTotals.totalBudget/1000000).toFixed(1)}M`} icon={Target} color="from-violet-500 to-purple-500" delay={0.1} compliance={projectionCompliance} />
               <KPICard title="Venta Hoy" value={`$${(zoneTotals.todayTotal/1000000).toFixed(1)}M`} subvalue="vs ayer" icon={Zap} trend={zoneTotals.yesterdayTotal > 0 ? ((zoneTotals.todayTotal / zoneTotals.yesterdayTotal) - 1) * 100 : 0} color="from-emerald-500 to-teal-500" delay={0.2} />
               <KPICard title="Ticket Prom." value={`$${(zoneTotals.avgTicket/1000).toFixed(0)}K`} subvalue="Promedio zona" icon={BarChart3} color="from-amber-500 to-orange-500" delay={0.3} />
             </div>
@@ -624,6 +755,49 @@ function ManagementDashboard() {
 
         {activeSection === 'tiendas' && (
           <>
+            {/* Opportunities Chart */}
+            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg mb-6">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-semibold text-pink-600 flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4" />
+                  Oportunidades Críticas
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-4 gap-4">
+                  {opportunitiesData.map((item, idx) => (
+                    <motion.div 
+                      key={item.name}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: idx * 0.1 }}
+                      className="text-center"
+                    >
+                      <div className="relative w-20 h-20 mx-auto mb-2">
+                        <svg className="w-20 h-20 transform -rotate-90">
+                          <circle cx="40" cy="40" r="35" stroke="#e5e7eb" strokeWidth="6" fill="none" />
+                          <motion.circle 
+                            cx="40" cy="40" r="35" 
+                            stroke={item.fill} 
+                            strokeWidth="6" 
+                            fill="none"
+                            strokeDasharray={`${(item.value / 100) * 220} 220`}
+                            initial={{ strokeDasharray: "0 220" }}
+                            animate={{ strokeDasharray: `${(item.value / 100) * 220} 220` }}
+                            transition={{ duration: 1, delay: idx * 0.1 }}
+                          />
+                        </svg>
+                        <span className="absolute inset-0 flex items-center justify-center text-lg font-black" style={{ color: item.fill }}>
+                          {item.value.toFixed(0)}%
+                        </span>
+                      </div>
+                      <p className="text-xs font-semibold text-gray-700">{item.name}</p>
+                    </motion.div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Store Ranking with Filter */}
             <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg mb-6">
               <CardHeader className="pb-2">
@@ -668,28 +842,10 @@ function ManagementDashboard() {
               </CardContent>
             </Card>
 
-            {/* Store Performance Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {storePerformance.slice(0, 12).map((store, idx) => (
-                <motion.div
-                  key={store.code}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: idx * 0.03 }}
-                  className="bg-white/80 backdrop-blur-sm rounded-xl p-3 border border-pink-100 shadow-sm"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-bold text-gray-800 text-sm">{getDisplayName(store.code)}</span>
-                    <span className={`text-xs font-bold ${store.compliance >= 90 ? 'text-emerald-600' : store.compliance >= 70 ? 'text-amber-600' : 'text-rose-600'}`}>
-                      {store.compliance.toFixed(0)}%
-                    </span>
-                  </div>
-                  <Progress value={Math.min(store.compliance, 100)} className="h-1.5 mb-2" />
-                  <div className="grid grid-cols-2 gap-1 text-[10px] text-gray-500">
-                    <span>Venta: ${(store.totalSales/1000000).toFixed(1)}M</span>
-                    <span>Ticket: ${(store.avgTicket/1000).toFixed(0)}K</span>
-                  </div>
-                </motion.div>
+            {/* Store Performance Grid - New Professional Design */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {storePerformance.map((store, idx) => (
+                <StoreCard key={store.code} store={store} index={idx} formatCurrency={formatCurrency} />
               ))}
             </div>
           </>
