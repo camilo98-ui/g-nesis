@@ -435,10 +435,17 @@ export default function WeeklyCalendar({
                 <SelectContent>{cashiers.map(c => <SelectItem key={c.id} value={c.id}><div className="flex items-center gap-2"><User className="w-4 h-4" />{c.name}</div></SelectItem>)}</SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div><label className="text-sm font-medium text-gray-700 mb-1 block">Inicio</label><Input type="time" value={newShift.start_time} onChange={(e) => setNewShift({ ...newShift, start_time: e.target.value })} /></div>
-              <div><label className="text-sm font-medium text-gray-700 mb-1 block">Fin</label><Input type="time" value={newShift.end_time} onChange={(e) => setNewShift({ ...newShift, end_time: e.target.value })} /></div>
-            </div>
+            {newShift.role !== 'descanso' && (
+              <div className="grid grid-cols-2 gap-3">
+                <div><label className="text-sm font-medium text-gray-700 mb-1 block">Inicio</label><Input type="time" value={newShift.start_time} onChange={(e) => setNewShift({ ...newShift, start_time: e.target.value })} /></div>
+                <div><label className="text-sm font-medium text-gray-700 mb-1 block">Fin</label><Input type="time" value={newShift.end_time} onChange={(e) => setNewShift({ ...newShift, end_time: e.target.value })} /></div>
+              </div>
+            )}
+            {newShift.role === 'descanso' && (
+              <div className="p-4 bg-indigo-50 rounded-xl text-center">
+                <p className="text-sm text-indigo-600 font-medium">😴 Día de descanso - Sin horario</p>
+              </div>
+            )}
             <div>
               <label className="text-sm font-medium text-gray-700 mb-2 block">Posición</label>
               <div className="grid grid-cols-3 gap-2">
