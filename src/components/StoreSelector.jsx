@@ -16,7 +16,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
 
 const STORES = [
   { code: "BTA 11", name: "CC PALATINO", displayName: "PALATINO" },
