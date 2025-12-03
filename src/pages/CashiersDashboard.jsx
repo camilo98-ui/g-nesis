@@ -9,6 +9,8 @@ import DateFilter from '@/components/DateFilter';
 import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
 import CashierAnalysis from '@/components/cashier/CashierAnalysis';
 import BadgesDisplay from '@/components/gamification/BadgesDisplay';
+import CashierRanking from '@/components/gamification/CashierRanking';
+import CashierGoalsManager from '@/components/gamification/CashierGoalsManager';
 import { 
   ArrowLeft, Users, Search, TrendingUp, TrendingDown, 
   Award, Target, BarChart3, User, ChevronRight, Star,
@@ -213,6 +215,11 @@ export default function CashiersDashboard() {
               </motion.div>
             </div>
 
+            {/* Ranking Semanal/Mensual */}
+            <div className="mb-6">
+              <CashierRanking storeId={selectedStore} onSelectCashier={setSelectedCashier} />
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Lista de Cajeros */}
               <div className="lg:col-span-1 space-y-4">
@@ -369,6 +376,25 @@ export default function CashiersDashboard() {
                             {selectedCashier.totalSuggested}
                           </p>
                         </div>
+                      </div>
+
+                      {/* Metas personalizadas */}
+                      <div className="mt-4">
+                        <CashierGoalsManager 
+                          cashierId={selectedCashier.id}
+                          cashierName={selectedCashier.name}
+                          storeId={selectedStore}
+                          shiftRecords={shiftRecords}
+                        />
+                      </div>
+
+                      {/* Insignias del cajero */}
+                      <div className="mt-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-4">
+                        <h4 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+                          <Award className="w-4 h-4 text-purple-500" />
+                          Insignias Obtenidas
+                        </h4>
+                        <BadgesDisplay cashierId={selectedCashier.id} showAll />
                       </div>
 
                       {/* Comparación con promedio */}
