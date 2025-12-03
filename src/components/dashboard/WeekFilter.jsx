@@ -1,114 +1,138 @@
 import React, { useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronLeft, ChevronRight, Calendar, Check } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { format, startOfWeek, endOfWeek, subWeeks, addWeeks, getWeek, getYear } from 'date-fns';
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format, startOfWeek, endOfWeek, subWeeks, getWeek, getYear, startOfYear, eachWeekOfInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 export default function WeekFilter({ selectedWeek, onWeekChange }) {
-  const [weekOffset, setWeekOffset] = useState(0);
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedWeekData, setSelectedWeekData] = useState(null);
 
-  const currentWeekData = useMemo(() => {
-    const baseDate = weekOffset === 0 ? new Date() : (weekOffset < 0 ? subWeeks(new Date(), Math.abs(weekOffset)) : addWeeks(new Date(), weekOffset));
-    const weekStart = startOfWeek(baseDate, { weekStartsOn: 1 });
-    const weekEnd = endOfWeek(baseDate, { weekStartsOn: 1 });
-    const weekNum = getWeek(weekStart, { weekStartsOn: 1 });
-    const year = getYear(weekStart);
+  // Generar lista de semanas del año
+  const weeksOfYear = useMemo(() => {
+    const year = new Date().getFullYear();
+    const start = startOfYear(new Date(year, 0, 1));
+    const end = new Date();
+    const weeks = eachWeekOfInterval({ start, end }, { weekStartsOn: 1 });
+    
+    return weeks.map(weekStart => {
+      const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
+      const weekNum = getWeek(weekStart, { weekStartsOn: 1 });
+      return {
+        weekNum,
+        year: getYear(weekStart),
+        start: weekStart,
+        end: weekEnd,
+        label: `Semana ${weekNum}`,
+        dateRange: `${format(weekStart, 'dd MMM', { locale: es })} - ${format(weekEnd, 'dd MMM', { locale: es })}`,
+        isCurrent: getWeek(new Date(), { weekStartsOn: 1 }) === weekNum
+      };
+    }).reverse();
+  }, []);
 
-    return {
-      weekNum,
-      year,
-      start: weekStart,
-      end: weekEnd,
-      label: `Semana ${weekNum}`,
-      dateRange: `${format(weekStart, 'dd MMM', { locale: es })} - ${format(weekEnd, 'dd MMM', { locale: es })}`
-    };
-  }, [weekOffset]);
-
-  const handlePrevWeek = () => {
-    const newOffset = weekOffset - 1;
-    setWeekOffset(newOffset);
-    const baseDate = subWeeks(new Date(), Math.abs(newOffset));
-    const weekStart = startOfWeek(baseDate, { weekStartsOn: 1 });
-    const weekEnd = endOfWeek(baseDate, { weekStartsOn: 1 });
-    onWeekChange?.({ from: weekStart, to: weekEnd, weekNum: getWeek(weekStart, { weekStartsOn: 1 }) });
+  const handleSelectWeek = (week) => {
+    setSelectedWeekData(week);
+    onWeekChange?.({ from: week.start, to: week.end, weekNum: week.weekNum });
+    setIsOpen(false);
   };
 
-  const handleNextWeek = () => {
-    if (weekOffset >= 0) return;
-    const newOffset = weekOffset + 1;
-    setWeekOffset(newOffset);
-    const baseDate = newOffset === 0 ? new Date() : subWeeks(new Date(), Math.abs(newOffset));
-    const weekStart = startOfWeek(baseDate, { weekStartsOn: 1 });
-    const weekEnd = endOfWeek(baseDate, { weekStartsOn: 1 });
-    onWeekChange?.({ from: weekStart, to: weekEnd, weekNum: getWeek(weekStart, { weekStartsOn: 1 }) });
-  };
+  const currentLabel = selectedWeekData 
+    ? `Sem ${selectedWeekData.weekNum}` 
+    : 'Semana';
 
-  const handleCurrentWeek = () => {
-    setWeekOffset(0);
-    const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
-    const weekEnd = endOfWeek(new Date(), { weekStartsOn: 1 });
-    onWeekChange?.({ from: weekStart, to: weekEnd, weekNum: getWeek(weekStart, { weekStartsOn: 1 }) });
-  };
+  const currentRange = selectedWeekData?.dateRange || 'Seleccionar';
 
   return (
-    <div className="flex items-center gap-2">
-      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={handlePrevWeek}
-          className="h-8 w-8 rounded-full border-violet-200 hover:border-violet-400 hover:bg-violet-50"
-        >
-          <ChevronLeft className="w-4 h-4 text-violet-500" />
-        </Button>
-      </motion.div>
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <PopoverTrigger asChild>
+        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+          <Button 
+            variant="outline" 
+            className="gap-2 border-pink-200 hover:border-pink-400 hover:bg-pink-50 rounded-full shadow-sm bg-white/80 min-w-[180px]"
+          >
+            <Calendar className="w-4 h-4 text-pink-500" />
+            <div className="text-left">
+              <span className="font-bold text-pink-600">{currentLabel}</span>
+              <span className="text-xs text-gray-500 ml-2">{currentRange}</span>
+            </div>
+          </Button>
+        </motion.div>
+      </PopoverTrigger>
+      <PopoverContent className="w-72 p-0 border-0 shadow-xl" align="start">
+        <div className="bg-white rounded-2xl overflow-hidden border border-pink-100">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-pink-500 to-rose-500 p-3 text-white">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-5 h-5" />
+              <span className="font-bold">Seleccionar Semana</span>
+            </div>
+            <p className="text-xs text-white/80 mt-1">Año {new Date().getFullYear()}</p>
+          </div>
 
-      <motion.div
-        whileHover={{ scale: 1.02 }}
-        className="px-4 py-1.5 rounded-full bg-gradient-to-r from-violet-100 to-purple-100 border border-violet-200 cursor-pointer"
-        onClick={handleCurrentWeek}
-      >
-        <div className="flex items-center gap-2">
-          <Calendar className="w-4 h-4 text-violet-500" />
-          <div className="text-center">
-            <motion.p 
-              key={currentWeekData.weekNum}
-              initial={{ y: -10, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              className="text-sm font-bold text-violet-700"
+          {/* Lista de semanas */}
+          <div className="max-h-64 overflow-y-auto p-2">
+            {weeksOfYear.map((week, idx) => (
+              <motion.button
+                key={week.weekNum}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: idx * 0.02 }}
+                onClick={() => handleSelectWeek(week)}
+                className={`w-full flex items-center justify-between p-2.5 rounded-xl mb-1 transition-all ${
+                  selectedWeekData?.weekNum === week.weekNum
+                    ? 'bg-gradient-to-r from-pink-100 to-rose-100 border-2 border-pink-300'
+                    : week.isCurrent
+                      ? 'bg-pink-50 border border-pink-200 hover:border-pink-300'
+                      : 'hover:bg-gray-50 border border-transparent'
+                }`}
+              >
+                <div className="text-left">
+                  <div className="flex items-center gap-2">
+                    <span className={`font-bold text-sm ${
+                      selectedWeekData?.weekNum === week.weekNum ? 'text-pink-600' : 'text-gray-700'
+                    }`}>
+                      {week.label}
+                    </span>
+                    {week.isCurrent && (
+                      <span className="px-1.5 py-0.5 bg-pink-500 text-white text-[9px] rounded-full font-bold">
+                        HOY
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-xs text-gray-500">{week.dateRange}</span>
+                </div>
+                {selectedWeekData?.weekNum === week.weekNum && (
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="w-5 h-5 rounded-full bg-pink-500 flex items-center justify-center"
+                  >
+                    <Check className="w-3 h-3 text-white" />
+                  </motion.div>
+                )}
+              </motion.button>
+            ))}
+          </div>
+
+          {/* Footer */}
+          <div className="p-2 border-t border-gray-100 bg-gray-50">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setSelectedWeekData(null);
+                onWeekChange?.(null);
+                setIsOpen(false);
+              }}
+              className="w-full text-gray-500 hover:text-pink-600"
             >
-              {currentWeekData.label}
-            </motion.p>
-            <p className="text-[10px] text-violet-500">{currentWeekData.dateRange}</p>
+              Limpiar filtro
+            </Button>
           </div>
         </div>
-      </motion.div>
-
-      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={handleNextWeek}
-          disabled={weekOffset >= 0}
-          className="h-8 w-8 rounded-full border-violet-200 hover:border-violet-400 hover:bg-violet-50 disabled:opacity-30"
-        >
-          <ChevronRight className="w-4 h-4 text-violet-500" />
-        </Button>
-      </motion.div>
-
-      {weekOffset !== 0 && (
-        <motion.button
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={handleCurrentWeek}
-          className="text-xs text-violet-500 hover:text-violet-700 font-medium"
-        >
-          Hoy
-        </motion.button>
-      )}
-    </div>
+      </PopoverContent>
+    </Popover>
   );
 }
