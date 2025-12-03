@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
   ArrowLeft, Sparkles, RotateCcw, ZoomIn, ZoomOut, 
-  Trash2, History, BarChart3, Undo2, Copy, Check, X, Plus, Search
+  Trash2, History, BarChart3, Undo2, Copy, Check, X, Plus, Search, FileDown
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -254,16 +254,18 @@ export default function FreezerMap() {
     return grid;
   }, [slots, selectedStore]);
 
-  // Guardar en historial
-  const saveToHistory = useCallback(async () => {
+  // Guardar en historial con usuario
+  const saveToHistory = useCallback(async (changesCount = 1) => {
     if (!selectedStore || slots.length === 0) return;
     try {
+      const user = await base44.auth.me().catch(() => null);
       await base44.entities.FreezerHistory.create({
         store_id: selectedStore,
         date: format(new Date(), 'yyyy-MM-dd'),
         snapshot: JSON.stringify(slots),
         filled_slots: slots.filter(s => !s.is_empty && s.flavor_name).length,
-        changes_count: 1
+        changes_count: changesCount,
+        created_by_user: user?.full_name || user?.email || 'Usuario'
       });
     } catch (e) { console.error(e); }
   }, [selectedStore, slots]);
@@ -657,6 +659,56 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
               <Button size="sm" variant="outline" onClick={() => setShowHistory(true)} title="Historial">
                 <History className="w-4 h-4 mr-1" />
                 <span className="hidden sm:inline">Historial</span>
+              </Button>
+              
+              <Button 
+                size="sm" 
+                variant="outline" 
+                onClick={() => {
+                  // Exportar a PDF usando window.print con estilos específicos
+                  const printContent = document.querySelector('.min-w-\\[320px\\]');
+                  if (printContent) {
+                    const printWindow = window.open('', '', 'width=800,height=600');
+                    printWindow.document.write(`
+                      <html>
+                        <head>
+                          <title>Mapa Nevera ${selectedStore} - Nevera #${currentFreezer}</title>
+                          <style>
+                            body { font-family: Arial, sans-serif; padding: 20px; }
+                            h1 { text-align: center; color: #ec4899; }
+                            .info { text-align: center; margin-bottom: 20px; color: #666; }
+                            .grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+                            .row { display: flex; gap: 8px; margin-bottom: 10px; }
+                            .slot { padding: 8px; border-radius: 8px; text-align: center; font-size: 10px; min-height: 40px; }
+                            .empty { background: #f3f4f6; border: 1px dashed #ccc; }
+                          </style>
+                        </head>
+                        <body>
+                          <h1>🍦 Mapa Nevera #${currentFreezer}</h1>
+                          <p class="info">Tienda: ${selectedStore} - ${selectedStoreName}<br/>Fecha: ${format(new Date(), 'dd/MM/yyyy HH:mm')}</p>
+                          ${freezerGrid.map((row, rowIdx) => `
+                            <div class="row">
+                              <strong style="width:30px;">${rowIdx + 1}</strong>
+                              ${row.map(slot => `
+                                <div class="slot" style="flex:1; background: ${slot.front.color || '#f3f4f6'}; color: ${slot.front.is_empty ? '#999' : '#000'}">
+                                  <small>F:</small> ${slot.front.flavor_name || 'Vacío'}<br/>
+                                  <small>T:</small> ${slot.back.flavor_name || 'Vacío'}
+                                </div>
+                              `).join('')}
+                            </div>
+                          `).join('')}
+                        </body>
+                      </html>
+                    `);
+                    printWindow.document.close();
+                    printWindow.print();
+                  }
+                }} 
+                title="Exportar PDF"
+                className="text-rose-600 hover:bg-rose-50"
+              >
+                <FileDown className="w-4 h-4 mr-1" />
+                <span className="hidden sm:inline">PDF</span>
               </Button>
 
             </div>
