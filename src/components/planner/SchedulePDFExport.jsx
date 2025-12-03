@@ -15,6 +15,7 @@ const ROLES_CONFIG = {
   stocker: { label: 'Stocker', color: '#64748b', emoji: '📦' },
   toma_pedidos: { label: 'Pedidos', color: '#06b6d4', emoji: '🎧' },
   experiencia: { label: 'Exp.', color: '#eab308', emoji: '👑' },
+  descanso: { label: 'Descanso', color: '#6366f1', emoji: '😴' },
 };
 
 export function generateSchedulePDF(weekDays, shifts, storeName, storeCode) {
@@ -196,8 +197,9 @@ export function generateSchedulePDF(weekDays, shifts, storeName, storeCode) {
                   ${dayShifts.length === 0 ? '<p style="text-align:center;color:#94a3b8;font-size:10px;padding:20px;">Sin turnos</p>' : ''}
                   ${dayShifts.map(shift => {
                     const role = ROLES_CONFIG[shift.role] || ROLES_CONFIG.caja;
-                    const [startH, startM] = (shift.start_time || '08:00').split(':').map(Number);
-                    const [endH, endM] = (shift.end_time || '16:00').split(':').map(Number);
+                    const isRest = shift.role === 'descanso';
+                    const [startH, startM] = (shift.start_time || '00:00').split(':').map(Number);
+                    const [endH, endM] = (shift.end_time || '00:00').split(':').map(Number);
                     const duration = ((endH + endM/60) - (startH + startM/60)).toFixed(1);
                     return `
                       <div class="shift">
@@ -207,10 +209,16 @@ export function generateSchedulePDF(weekDays, shifts, storeName, storeCode) {
                         </div>
                         <div class="shift-body">
                           <div class="shift-name">${shift.cashier_name || 'Sin asignar'}</div>
-                          <div class="shift-time">
-                            🕐 ${shift.start_time} → ${shift.end_time}
-                            <span class="shift-duration">${duration}h</span>
-                          </div>
+                          ${isRest ? `
+                            <div class="shift-time" style="color: #6366f1; font-size: 12px;">
+                              Día libre
+                            </div>
+                          ` : `
+                            <div class="shift-time">
+                              🕐 ${shift.start_time} → ${shift.end_time}
+                              <span class="shift-duration">${duration}h</span>
+                            </div>
+                          `}
                         </div>
                       </div>
                     `;

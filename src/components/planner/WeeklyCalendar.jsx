@@ -193,7 +193,8 @@ export default function WeeklyCalendar({
   });
 
   const handleDragEnd = async (result) => {
-    if (!result.destination || result.source.droppableId === result.destination.droppableId) return;
+    if (!result.destination) return;
+    if (result.source.droppableId === result.destination.droppableId) return;
     updateMutation.mutate({ id: result.draggableId, data: { date: result.destination.droppableId } });
     toast.success('Turno movido');
   };
@@ -370,7 +371,6 @@ export default function WeeklyCalendar({
                                     {/* Content */}
                                     <div className="p-2 pt-2.5">
                                       <p className="font-bold text-sm text-gray-700 truncate">{shift.cashier_name || 'Sin asignar'}</p>
-                                      <p className="text-[10px] text-gray-400 truncate mb-1">{generateNickname(shift.cashier_name)}</p>
                                       {shift.role === 'descanso' ? (
                                         <div className="flex items-center justify-center bg-indigo-100/50 rounded px-1.5 py-1.5">
                                           <span className="text-xs font-medium text-indigo-500">Día libre</span>
