@@ -13,7 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subWeeks, subMonths, eachDayOfInterval, isSameDay, isWithinInterval, addMonths, isToday } from 'date-fns';
 import { es } from 'date-fns/locale';
 
-const PODIUM_COLORS = ['from-amber-300 to-yellow-400', 'from-gray-200 to-slate-300', 'from-amber-500 to-orange-500'];
+const PODIUM_COLORS = ['from-pink-400 to-rose-500', 'from-gray-300 to-slate-400', 'from-amber-400 to-orange-500'];
 const PODIUM_ICONS = [Crown, Medal, Medal];
 
 // Calendario personalizado para ranking
@@ -309,47 +309,46 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
   };
 
   return (
-    <Card className="border-none shadow-xl bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 overflow-hidden">
+    <Card className="border-none shadow-xl bg-gradient-to-br from-pink-50/70 via-rose-50/50 to-amber-50/30 backdrop-blur-sm overflow-hidden">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-bold text-gray-800 flex items-center gap-2">
+          <CardTitle className="text-lg font-bold flex items-center gap-2">
             <motion.div
               animate={{ rotate: [0, 10, -10, 0], scale: [1, 1.1, 1] }}
               transition={{ duration: 2, repeat: Infinity }}
             >
-              <Trophy className="w-6 h-6 text-amber-500" />
+              <Trophy className="w-6 h-6 text-pink-500" />
             </motion.div>
             <motion.span
-              animate={{ color: ['#d97706', '#eab308', '#d97706'] }}
-              transition={{ duration: 3, repeat: Infinity }}
+              className="bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent"
             >
               Ranking
             </motion.span>
           </CardTitle>
           <Tabs value={period} onValueChange={handlePeriodChange}>
             <TabsList className="bg-white/60">
-              <TabsTrigger value="weekly" className="text-xs data-[state=active]:bg-amber-400 data-[state=active]:text-white">
+              <TabsTrigger value="weekly" className="text-xs data-[state=active]:bg-pink-500 data-[state=active]:text-white">
                 Semanal
               </TabsTrigger>
-              <TabsTrigger value="monthly" className="text-xs data-[state=active]:bg-amber-400 data-[state=active]:text-white">
+              <TabsTrigger value="monthly" className="text-xs data-[state=active]:bg-pink-500 data-[state=active]:text-white">
                 Mensual
               </TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
         
-        {/* Selector de fecha con calendario */}
-        <div className="flex items-center justify-center gap-2 mt-3">
+        {/* Selector de fecha con calendario - posicionado a la derecha */}
+        <div className="flex items-center justify-end gap-2 mt-3">
           <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
             <PopoverTrigger asChild>
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button 
                   variant="outline" 
                   size="sm"
-                  className="gap-2 border-amber-200 hover:border-amber-400 hover:bg-amber-50 rounded-full shadow-sm bg-white/80"
+                  className="gap-2 border-pink-200 hover:border-pink-400 hover:bg-pink-50 rounded-full shadow-sm bg-white/80"
                 >
-                  <CalendarRange className="w-4 h-4 text-amber-500" />
-                  <span className="font-medium text-gray-700">{getDateLabel()}</span>
+                  <CalendarRange className="w-4 h-4 text-pink-500" />
+                  <span className="font-medium text-pink-600">{getDateLabel()}</span>
                 </Button>
               </motion.div>
             </PopoverTrigger>
@@ -400,7 +399,7 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
                   
                   {/* Ventas animadas */}
                   <motion.p 
-                    className="text-[10px] text-amber-600 font-bold"
+                    className="text-[10px] text-pink-600 font-bold"
                     animate={{ scale: [1, 1.05, 1] }}
                     transition={{ duration: 2, repeat: Infinity }}
                   >
@@ -431,12 +430,12 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
               initial={{ x: -20, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               transition={{ delay: idx * 0.05 }}
-              whileHover={{ x: 5, backgroundColor: 'rgba(251, 191, 36, 0.1)' }}
+              whileHover={{ x: 5, backgroundColor: 'rgba(236, 72, 153, 0.1)' }}
               onClick={() => onSelectCashier?.(cashier)}
               className="flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors bg-white/50"
             >
-              <span className="w-6 text-center text-sm font-bold text-gray-400">
-                #{cashier.rank}
+              <span className="w-6 h-6 rounded-full bg-gradient-to-br from-pink-100 to-rose-100 text-center text-xs font-bold text-pink-600 flex items-center justify-center">
+                {cashier.rank}
               </span>
               <div className="flex-1">
                 <p className="text-sm font-medium text-gray-700">{cashier.name}</p>
@@ -444,13 +443,13 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
               </div>
               <div className="text-right">
                 <motion.p 
-                  className="text-sm font-bold text-amber-600"
+                  className="text-sm font-bold text-pink-600"
                   animate={{ scale: [1, 1.02, 1] }}
                   transition={{ duration: 2, repeat: Infinity }}
                 >
                   {formatCurrency(cashier.totalSales)}
                 </motion.p>
-                <p className="text-[10px] text-gray-400">
+                <p className="text-[10px] text-pink-400">
                   Ticket: {formatCurrency(cashier.avgTicket)}
                 </p>
               </div>

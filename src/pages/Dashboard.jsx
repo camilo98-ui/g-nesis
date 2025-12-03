@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import StoreSelector, { STORES } from '@/components/StoreSelector';
+import StoreSelector, { STORES, getDisplayName } from '@/components/StoreSelector';
 import DateFilter from '@/components/DateFilter';
 import WeekFilter from '@/components/dashboard/WeekFilter';
 import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
@@ -652,7 +652,7 @@ export default function Dashboard() {
                 Tienda
               </motion.h1>
               {selectedStore && (
-                <p className="text-sm text-gray-500">{selectedStore} - {selectedStoreName}</p>
+                <p className="text-sm text-pink-500 font-medium">{getDisplayName(selectedStore)}</p>
               )}
             </div>
           </div>
