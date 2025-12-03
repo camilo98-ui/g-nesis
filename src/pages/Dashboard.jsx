@@ -16,7 +16,8 @@ import GrowthVelocityChart from '@/components/management/GrowthVelocityChart';
 import StoreReportGenerator from '@/components/reports/StoreReportGenerator';
 import { 
   DollarSign, Receipt, Zap, Gift, TrendingUp, TrendingDown, ArrowLeft,
-  BarChart3, AlertTriangle, CheckCircle2, X, FileSpreadsheet, Target
+  BarChart3, AlertTriangle, CheckCircle2, X, FileSpreadsheet, Target,
+  ClipboardCheck, Snowflake, Package
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -500,6 +501,24 @@ export default function Dashboard() {
     enabled: !!selectedStore
   });
 
+  const { data: checklists = [] } = useQuery({
+    queryKey: ['checklists', selectedStore],
+    queryFn: () => base44.entities.CleaningChecklist.filter({ store_id: selectedStore }),
+    enabled: !!selectedStore
+  });
+
+  const { data: freezerSlots = [] } = useQuery({
+    queryKey: ['freezerSlots', selectedStore],
+    queryFn: () => base44.entities.FreezerSlot.filter({ store_id: selectedStore }),
+    enabled: !!selectedStore
+  });
+
+  const { data: inventoryAlerts = [] } = useQuery({
+    queryKey: ['inventoryAlerts', selectedStore],
+    queryFn: () => base44.entities.InventoryAlert.filter({ store_id: selectedStore }),
+    enabled: !!selectedStore
+  });
+
   // Preparar datos de cajeros para exportación
   const cashierExportData = useMemo(() => {
     return shiftRecords
@@ -627,6 +646,27 @@ export default function Dashboard() {
     { id: 'transactions', title: 'Transacciones', value: totals.transactions, budget: currentBudget.transactions_budget, icon: Zap, bgColor: 'bg-gradient-to-br from-violet-100 to-purple-200', iconBg: 'bg-violet-200', iconColor: 'text-violet-700' },
     { id: 'suggested', title: 'Sugeridos', value: totals.suggested, budget: currentBudget.suggested_budget, icon: Gift, bgColor: 'bg-gradient-to-br from-pink-100 to-rose-200', iconBg: 'bg-pink-200', iconColor: 'text-pink-700' },
   ];
+
+  // Opportunities / Critical Indicators Data
+  const opportunitiesData = useMemo(() => {
+    const salesCompliance = currentBudget?.sales_budget > 0 ? (totals.sales / currentBudget.sales_budget) * 100 : 0;
+    const ticketCompliance = currentBudget?.tickets_budget > 0 ? (avgTicket / currentBudget.tickets_budget) * 100 : 0;
+    const checklistCompliance = checklists.length > 0 
+      ? checklists.reduce((sum, c) => sum + (c.completion_percentage || 0), 0) / checklists.length 
+      : 0;
+    const filledSlots = freezerSlots.filter(s => !s.is_empty).length;
+    const freezerEfficiency = freezerSlots.length > 0 ? (filledSlots / freezerSlots.length) * 100 : 0;
+    const activeAlerts = inventoryAlerts.filter(a => a.status === 'low' || a.status === 'critical' || a.status === 'expired').length;
+    const inventoryScore = activeAlerts === 0 ? 100 : Math.max(0, 100 - (activeAlerts * 10));
+    
+    return [
+      { name: 'Ventas', value: salesCompliance, icon: DollarSign, fill: salesCompliance >= 90 ? '#10b981' : salesCompliance >= 70 ? '#f59e0b' : '#ef4444' },
+      { name: 'Ticket', value: ticketCompliance, icon: Receipt, fill: ticketCompliance >= 90 ? '#10b981' : ticketCompliance >= 70 ? '#f59e0b' : '#ef4444' },
+      { name: 'Checklists', value: checklistCompliance, icon: ClipboardCheck, fill: checklistCompliance >= 80 ? '#10b981' : checklistCompliance >= 60 ? '#f59e0b' : '#ef4444' },
+      { name: 'Neveras', value: freezerEfficiency, icon: Snowflake, fill: freezerEfficiency >= 85 ? '#10b981' : freezerEfficiency >= 70 ? '#f59e0b' : '#ef4444' },
+      { name: 'Inventario', value: inventoryScore, icon: Package, fill: inventoryScore >= 90 ? '#10b981' : inventoryScore >= 70 ? '#f59e0b' : '#ef4444' },
+    ];
+  }, [totals, currentBudget, avgTicket, checklists, freezerSlots, inventoryAlerts]);
 
   return (
     <div className="min-h-screen bg-white relative">
@@ -908,6 +948,57 @@ export default function Dashboard() {
                 />
               </motion.div>
             )}
+
+            {/* Opportunities Chart */}
+            <Card className="border-none shadow-lg bg-white/90 backdrop-blur-sm">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-pink-600 flex items-center gap-2">
+                  <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 2, repeat: Infinity }}>
+                    <AlertTriangle className="w-4 h-4 text-pink-500" />
+                  </motion.div>
+                  Oportunidades Críticas
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-5 gap-4">
+                  {opportunitiesData.map((item, idx) => {
+                    const Icon = item.icon;
+                    return (
+                      <motion.div 
+                        key={item.name}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: idx * 0.1 }}
+                        whileHover={{ scale: 1.05, y: -3 }}
+                        className="text-center"
+                      >
+                        <div className="relative w-16 h-16 mx-auto mb-2">
+                          <svg className="w-16 h-16 transform -rotate-90">
+                            <circle cx="32" cy="32" r="28" stroke="#e5e7eb" strokeWidth="5" fill="none" />
+                            <motion.circle 
+                              cx="32" cy="32" r="28" 
+                              stroke={item.fill} 
+                              strokeWidth="5" 
+                              fill="none"
+                              strokeLinecap="round"
+                              strokeDasharray={`${(item.value / 100) * 176} 176`}
+                              initial={{ strokeDasharray: "0 176" }}
+                              animate={{ strokeDasharray: `${(item.value / 100) * 176} 176` }}
+                              transition={{ duration: 1, delay: idx * 0.1 }}
+                            />
+                          </svg>
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <Icon className="w-5 h-5" style={{ color: item.fill }} />
+                          </div>
+                        </div>
+                        <p className="text-lg font-black" style={{ color: item.fill }}>{item.value.toFixed(0)}%</p>
+                        <p className="text-[10px] font-medium text-gray-600">{item.name}</p>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Daily Goals */}
             <DailyGoalsCard storeId={selectedStore} />
