@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   CloudRain, Sun, Cloud, Thermometer, TrendingUp, TrendingDown, 
@@ -520,7 +520,7 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
   const [loadingForecast, setLoadingForecast] = useState(false);
 
   // Cargar pronóstico cuando se activa
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchForecast = async () => {
       if (!showForecast || forecastData) return;
       setLoadingForecast(true);
