@@ -202,13 +202,14 @@ export default function WeeklyCalendar({
   const handleSaveShift = () => {
     if (!newShift.cashier_id) return toast.error('Selecciona un colaborador');
     const cashier = cashiers.find(c => c.id === newShift.cashier_id);
+    const isRest = newShift.role === 'descanso';
     const shiftData = {
       store_id: storeId,
       cashier_id: newShift.cashier_id,
       cashier_name: cashier?.name || '',
       date: editingShift ? editingShift.date : format(selectedDay, 'yyyy-MM-dd'),
-      start_time: newShift.start_time,
-      end_time: newShift.end_time,
+      start_time: isRest ? '00:00' : newShift.start_time,
+      end_time: isRest ? '00:00' : newShift.end_time,
       role: newShift.role,
       status: 'scheduled'
     };
