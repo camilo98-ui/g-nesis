@@ -19,9 +19,9 @@ import { format } from 'date-fns';
 
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/c3a36de58_Capturadepantalla2025-11-251251441.png";
 
-// Sabores predefinidos - GOURMET Y EXCLUSIVO
+// Sabores predefinidos - GOURMET Y EXCLUSIVO (SOLO LISTA OFICIAL)
 const POPSY_FLAVORS = [
-  // GOURMET
+  // GOURMET (12 sabores)
   { name: 'Limón N.', color: '#FFFACD', type: 'gourmet', line: 'gourmet' },
   { name: 'Maracuyá N.', color: '#FFB347', type: 'gourmet', line: 'gourmet' },
   { name: 'Mandarina N.', color: '#FFA500', type: 'gourmet', line: 'gourmet' },
@@ -34,15 +34,15 @@ const POPSY_FLAVORS = [
   { name: 'Fresa', color: '#FFB5C5', type: 'gourmet', line: 'gourmet' },
   { name: 'Arequipe', color: '#D4A574', type: 'gourmet', line: 'gourmet' },
   { name: 'Ron', color: '#8B4513', type: 'gourmet', line: 'gourmet' },
-  // EXCLUSIVO
+  // EXCLUSIVO (12 sabores)
   { name: 'Cherry', color: '#DC143C', type: 'exclusivo', line: 'exclusivo' },
   { name: 'Arroz', color: '#F5F5DC', type: 'exclusivo', line: 'exclusivo' },
   { name: 'Chicle', color: '#FFB6C1', type: 'exclusivo', line: 'exclusivo' },
   { name: 'Brownie', color: '#3D2314', type: 'exclusivo', line: 'exclusivo' },
   { name: 'Crema Limón', color: '#FFFACD', type: 'exclusivo', line: 'exclusivo' },
-  { name: "M&M's", color: '#E31837', type: 'exclusivo', line: 'exclusivo', brand: true },
-  { name: 'Milky', color: '#4169E1', type: 'exclusivo', line: 'exclusivo', brand: true },
-  { name: 'Oreo', color: '#1A1A1A', type: 'exclusivo', line: 'exclusivo', brand: true },
+  { name: "M&M", color: '#E31837', type: 'exclusivo', line: 'exclusivo' },
+  { name: 'Milky', color: '#4169E1', type: 'exclusivo', line: 'exclusivo' },
+  { name: 'Oreo', color: '#1A1A1A', type: 'exclusivo', line: 'exclusivo' },
   { name: 'Macadamia', color: '#DEB887', type: 'exclusivo', line: 'exclusivo' },
   { name: 'Café', color: '#6F4E37', type: 'exclusivo', line: 'exclusivo' },
   { name: 'Yogurt C.', color: '#FFF5EE', type: 'exclusivo', line: 'exclusivo' },
