@@ -22,31 +22,42 @@ const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/pub
 // Sabores predefinidos - GOURMET Y EXCLUSIVO (SOLO LISTA OFICIAL)
 const POPSY_FLAVORS = [
   // GOURMET (12 sabores)
-  { name: 'Limón N.', color: '#FFFACD', type: 'gourmet', line: 'gourmet' },
-  { name: 'Maracuyá N.', color: '#FFB347', type: 'gourmet', line: 'gourmet' },
-  { name: 'Mandarina N.', color: '#FFA500', type: 'gourmet', line: 'gourmet' },
-  { name: 'Vainilla', color: '#FFF8DC', type: 'gourmet', line: 'gourmet' },
-  { name: 'V. Francesa', color: '#FFFDD0', type: 'gourmet', line: 'gourmet' },
-  { name: 'V. Chips', color: '#F5DEB3', type: 'gourmet', line: 'gourmet' },
-  { name: 'Chocolate', color: '#5D3A1A', type: 'gourmet', line: 'gourmet' },
-  { name: 'Belga', color: '#3D2314', type: 'gourmet', line: 'gourmet' },
-  { name: 'Frutos', color: '#C71585', type: 'gourmet', line: 'gourmet' },
-  { name: 'Fresa', color: '#FFB5C5', type: 'gourmet', line: 'gourmet' },
-  { name: 'Arequipe', color: '#D4A574', type: 'gourmet', line: 'gourmet' },
-  { name: 'Ron', color: '#8B4513', type: 'gourmet', line: 'gourmet' },
+  { name: 'Limón N.', color: '#FFFACD', type: 'gourmet', line: 'gourmet', dark: true },
+  { name: 'Maracuyá N.', color: '#FFB347', type: 'gourmet', line: 'gourmet', dark: true },
+  { name: 'Mandarina N.', color: '#FFA500', type: 'gourmet', line: 'gourmet', dark: true },
+  { name: 'Vainilla', color: '#FFF8DC', type: 'gourmet', line: 'gourmet', dark: true },
+  { name: 'V. Francesa', color: '#FFFDD0', type: 'gourmet', line: 'gourmet', dark: true },
+  { name: 'V. Chips', color: '#F5DEB3', type: 'gourmet', line: 'gourmet', dark: true },
+  { name: 'Chocolate', color: '#5D3A1A', type: 'gourmet', line: 'gourmet', dark: false },
+  { name: 'Belga', color: '#3D2314', type: 'gourmet', line: 'gourmet', dark: false },
+  { name: 'Frutos', color: '#C71585', type: 'gourmet', line: 'gourmet', dark: false },
+  { name: 'Fresa', color: '#FFB5C5', type: 'gourmet', line: 'gourmet', dark: true },
+  { name: 'Arequipe', color: '#D4A574', type: 'gourmet', line: 'gourmet', dark: true },
+  { name: 'Ron', color: '#8B4513', type: 'gourmet', line: 'gourmet', dark: false },
   // EXCLUSIVO (12 sabores)
-  { name: 'Cherry', color: '#DC143C', type: 'exclusivo', line: 'exclusivo' },
-  { name: 'Arroz', color: '#F5F5DC', type: 'exclusivo', line: 'exclusivo' },
-  { name: 'Chicle', color: '#FFB6C1', type: 'exclusivo', line: 'exclusivo' },
-  { name: 'Brownie', color: '#3D2314', type: 'exclusivo', line: 'exclusivo' },
-  { name: 'Crema Limón', color: '#FFFACD', type: 'exclusivo', line: 'exclusivo' },
-  { name: "M&M", color: '#E31837', type: 'exclusivo', line: 'exclusivo' },
-  { name: 'Milky', color: '#4169E1', type: 'exclusivo', line: 'exclusivo' },
-  { name: 'Oreo', color: '#1A1A1A', type: 'exclusivo', line: 'exclusivo' },
-  { name: 'Macadamia', color: '#DEB887', type: 'exclusivo', line: 'exclusivo' },
-  { name: 'Café', color: '#6F4E37', type: 'exclusivo', line: 'exclusivo' },
-  { name: 'Yogurt C.', color: '#FFF5EE', type: 'exclusivo', line: 'exclusivo' },
+  { name: 'Cherry', color: '#DC143C', type: 'exclusivo', line: 'exclusivo', dark: false },
+  { name: 'Arroz', color: '#F5F5DC', type: 'exclusivo', line: 'exclusivo', dark: true },
+  { name: 'Chicle', color: '#FFB6C1', type: 'exclusivo', line: 'exclusivo', dark: true },
+  { name: 'Brownie', color: '#3D2314', type: 'exclusivo', line: 'exclusivo', dark: false },
+  { name: 'Crema Limón', color: '#FFFACD', type: 'exclusivo', line: 'exclusivo', dark: true },
+  { name: "M&M", color: '#E31837', type: 'exclusivo', line: 'exclusivo', dark: false },
+  { name: 'Milky', color: '#4169E1', type: 'exclusivo', line: 'exclusivo', dark: false },
+  { name: 'Oreo', color: '#1A1A1A', type: 'exclusivo', line: 'exclusivo', dark: false },
+  { name: 'Macadamia', color: '#DEB887', type: 'exclusivo', line: 'exclusivo', dark: true },
+  { name: 'Café', color: '#6F4E37', type: 'exclusivo', line: 'exclusivo', dark: false },
+  { name: 'Yogurt C.', color: '#FFF5EE', type: 'exclusivo', line: 'exclusivo', dark: true },
 ];
+
+// Función para determinar si el texto debe ser oscuro o claro basado en el color de fondo
+const getTextColor = (hexColor) => {
+  if (!hexColor) return '#1f2937';
+  const hex = hexColor.replace('#', '');
+  const r = parseInt(hex.substr(0, 2), 16);
+  const g = parseInt(hex.substr(2, 2), 16);
+  const b = parseInt(hex.substr(4, 2), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.5 ? '#1f2937' : '#ffffff';
+};
 
 // Reglas de ubicación ideal
 const IDEAL_RULES = {
@@ -709,7 +720,13 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                                   </div>
                                 ) : (
                                   <div className="h-full flex items-center justify-center pt-1.5">
-                                    <span className="text-[7px] sm:text-[8px] font-medium text-white drop-shadow-sm text-center leading-tight px-0.5 line-clamp-2">
+                                    <span 
+                                      className="text-[7px] sm:text-[8px] font-bold text-center leading-tight px-0.5 line-clamp-2"
+                                      style={{ 
+                                        color: getTextColor(bajada.back.color),
+                                        textShadow: getTextColor(bajada.back.color) === '#ffffff' ? '0 1px 2px rgba(0,0,0,0.5)' : '0 1px 1px rgba(255,255,255,0.3)'
+                                      }}
+                                    >
                                       {bajada.back.flavor_name}
                                     </span>
                                   </div>
@@ -739,7 +756,13 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                                   </div>
                                 ) : (
                                   <div className="h-full flex items-center justify-center pt-1.5">
-                                    <span className="text-[8px] sm:text-[9px] font-bold text-white drop-shadow-md text-center leading-tight px-0.5 line-clamp-2">
+                                    <span 
+                                      className="text-[8px] sm:text-[9px] font-bold text-center leading-tight px-0.5 line-clamp-2"
+                                      style={{ 
+                                        color: getTextColor(bajada.front.color),
+                                        textShadow: getTextColor(bajada.front.color) === '#ffffff' ? '0 1px 2px rgba(0,0,0,0.5)' : '0 1px 1px rgba(255,255,255,0.3)'
+                                      }}
+                                    >
                                       {bajada.front.flavor_name}
                                     </span>
                                   </div>
