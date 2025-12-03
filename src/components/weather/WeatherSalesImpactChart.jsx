@@ -414,29 +414,55 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
       salesByDate[dateKey] = s.total_sales || 0;
     });
 
-    // Códigos de clima más precisos según WMO
-    const getWeatherType = (code, precipitation) => {
-      // 0: Clear sky, 1: Mainly clear
-      if (code === 0 || code === 1) return 'sunny';
-      // 2: Partly cloudy, 3: Overcast
-      if (code === 2 || code === 3) return 'cloudy';
-      // 45, 48: Fog
+    // Códigos de clima WMO - MUY PRECISO
+    // https://open-meteo.com/en/docs - Weather interpretation codes (WMO)
+    const getWeatherType = (code, precipitation, temp) => {
+      // 0: Clear sky - SOLEADO
+      if (code === 0) return 'sunny';
+      // 1: Mainly clear - SOLEADO (pocas nubes)
+      if (code === 1) return 'sunny';
+      // 2: Partly cloudy - NUBLADO PARCIAL (puede ser soleado si poca nubosidad)
+      if (code === 2) return precipitation < 0.5 ? 'sunny' : 'cloudy';
+      // 3: Overcast - NUBLADO TOTAL
+      if (code === 3) return 'cloudy';
+      // 45, 48: Fog - NEBLINA (nublado)
       if (code === 45 || code === 48) return 'cloudy';
-      // 51-55: Drizzle, 56-57: Freezing drizzle
-      if (code >= 51 && code <= 57) return precipitation > 2 ? 'rainy' : 'cloudy';
-      // 61-65: Rain, 66-67: Freezing rain
-      if (code >= 61 && code <= 67) return 'rainy';
-      // 71-77: Snow
+      // 51: Light drizzle - LLOVIZNA LIGERA
+      if (code === 51) return precipitation > 1 ? 'rainy' : 'cloudy';
+      // 53: Moderate drizzle - LLOVIZNA MODERADA
+      if (code === 53) return 'rainy';
+      // 55: Dense drizzle - LLOVIZNA INTENSA
+      if (code === 55) return 'rainy';
+      // 56-57: Freezing drizzle - LLOVIZNA HELADA
+      if (code >= 56 && code <= 57) return 'rainy';
+      // 61: Slight rain - LLUVIA LIGERA
+      if (code === 61) return precipitation > 2 ? 'rainy' : 'cloudy';
+      // 63: Moderate rain - LLUVIA MODERADA
+      if (code === 63) return 'rainy';
+      // 65: Heavy rain - LLUVIA FUERTE
+      if (code === 65) return 'rainy';
+      // 66-67: Freezing rain
+      if (code >= 66 && code <= 67) return 'rainy';
+      // 71-77: Snow (no común en Bogotá pero por si acaso)
       if (code >= 71 && code <= 77) return 'rainy';
-      // 80-82: Rain showers
-      if (code >= 80 && code <= 82) return 'rainy';
+      // 80: Slight rain showers - CHUBASCOS LIGEROS
+      if (code === 80) return precipitation > 2 ? 'rainy' : 'cloudy';
+      // 81: Moderate rain showers - CHUBASCOS MODERADOS
+      if (code === 81) return 'rainy';
+      // 82: Violent rain showers - CHUBASCOS FUERTES
+      if (code === 82) return 'rainy';
       // 85-86: Snow showers
       if (code >= 85 && code <= 86) return 'rainy';
-      // 95, 96, 99: Thunderstorm
-      if (code >= 95) return 'rainy';
-      // Default based on precipitation
-      if (precipitation > 3) return 'rainy';
-      return 'cloudy';
+      // 95: Thunderstorm - TORMENTA
+      if (code === 95) return 'rainy';
+      // 96, 99: Thunderstorm with hail - TORMENTA CON GRANIZO
+      if (code >= 96) return 'rainy';
+      
+      // Fallback basado en precipitación real
+      if (precipitation >= 5) return 'rainy';
+      if (precipitation >= 1) return 'cloudy';
+      // Sin código pero sin lluvia = probablemente soleado/nublado
+      return 'sunny';
     };
 
     const historyData = weatherData.history.time
@@ -471,7 +497,7 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
         const temp = weatherData.forecast.temperature_2m_max?.[idx] || weatherData.forecast.temperature_2m?.[idx] || 0;
         const precipitation = weatherData.forecast.precipitation_sum?.[idx] || weatherData.forecast.precipitation?.[idx] || 0;
         const weatherCode = weatherData.forecast.weathercode?.[idx] || 0;
-        const weatherType = getWeatherType(weatherCode, precipitation);
+        const weatherType = getWeatherType(weatherCode, precipitation, temp);
 
         return {
           date: format(parseISO(date), 'dd', { locale: es }),
