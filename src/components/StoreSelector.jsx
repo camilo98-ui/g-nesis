@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { MapPin, Search, Lock, Eye, EyeOff, Settings, Save, X } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import {
