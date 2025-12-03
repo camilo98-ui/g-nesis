@@ -402,6 +402,7 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
   const [viewMode, setViewMode] = useState('bars');
   const [dateRange, setDateRange] = useState({ from: subDays(new Date(), 29), to: new Date() });
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [showForecast, setShowForecast] = useState(false);
 
   // Procesar datos
   const chartData = useMemo(() => {
@@ -413,13 +414,32 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
       salesByDate[dateKey] = s.total_sales || 0;
     });
 
+    // Códigos de clima más precisos según WMO
     const getWeatherType = (code, precipitation) => {
+      // 0: Clear sky, 1: Mainly clear
       if (code === 0 || code === 1) return 'sunny';
-      if (code >= 51 || precipitation > 5) return 'rainy';
+      // 2: Partly cloudy, 3: Overcast
+      if (code === 2 || code === 3) return 'cloudy';
+      // 45, 48: Fog
+      if (code === 45 || code === 48) return 'cloudy';
+      // 51-55: Drizzle, 56-57: Freezing drizzle
+      if (code >= 51 && code <= 57) return precipitation > 2 ? 'rainy' : 'cloudy';
+      // 61-65: Rain, 66-67: Freezing rain
+      if (code >= 61 && code <= 67) return 'rainy';
+      // 71-77: Snow
+      if (code >= 71 && code <= 77) return 'rainy';
+      // 80-82: Rain showers
+      if (code >= 80 && code <= 82) return 'rainy';
+      // 85-86: Snow showers
+      if (code >= 85 && code <= 86) return 'rainy';
+      // 95, 96, 99: Thunderstorm
+      if (code >= 95) return 'rainy';
+      // Default based on precipitation
+      if (precipitation > 3) return 'rainy';
       return 'cloudy';
     };
 
-    return weatherData.history.time
+    const historyData = weatherData.history.time
       .filter(date => {
         const d = parseISO(date);
         return d >= dateRange.from && d <= dateRange.to;
@@ -440,10 +460,36 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
           precipitation: Math.round(precipitation * 10) / 10,
           sales,
           weatherType,
-          weatherColor: weatherType === 'sunny' ? '#f59e0b' : weatherType === 'rainy' ? '#3b82f6' : '#9ca3af'
+          weatherColor: weatherType === 'sunny' ? '#f59e0b' : weatherType === 'rainy' ? '#3b82f6' : '#9ca3af',
+          isForecast: false
         };
       });
-  }, [weatherData, dailySales, dateRange]);
+
+    // Agregar pronóstico si está activado
+    if (showForecast && weatherData.forecast?.time) {
+      const forecastData = weatherData.forecast.time.map((date, idx) => {
+        const temp = weatherData.forecast.temperature_2m_max?.[idx] || weatherData.forecast.temperature_2m?.[idx] || 0;
+        const precipitation = weatherData.forecast.precipitation_sum?.[idx] || weatherData.forecast.precipitation?.[idx] || 0;
+        const weatherCode = weatherData.forecast.weathercode?.[idx] || 0;
+        const weatherType = getWeatherType(weatherCode, precipitation);
+
+        return {
+          date: format(parseISO(date), 'dd', { locale: es }),
+          fullDate: format(parseISO(date), "EEE dd MMM", { locale: es }) + ' (Pronóstico)',
+          dateStr: date,
+          temperature: Math.round(temp * 10) / 10,
+          precipitation: Math.round(precipitation * 10) / 10,
+          sales: 0,
+          weatherType,
+          weatherColor: weatherType === 'sunny' ? '#fbbf24' : weatherType === 'rainy' ? '#60a5fa' : '#d1d5db',
+          isForecast: true
+        };
+      });
+      return [...historyData, ...forecastData];
+    }
+
+    return historyData;
+  }, [weatherData, dailySales, dateRange, showForecast]);
 
   // Estadísticas
   const stats = useMemo(() => {
@@ -619,6 +665,13 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
               label="Comparativo"
               color="from-amber-500 to-orange-500"
             />
+            <ViewButton
+              active={showForecast}
+              onClick={() => setShowForecast(!showForecast)}
+              icon={Cloud}
+              label={showForecast ? "Ocultar Pronóstico" : "Ver Pronóstico"}
+              color="from-cyan-500 to-blue-500"
+            />
           </div>
         </CardContent>
       </Card>
@@ -738,6 +791,9 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
                             <span className="text-gray-500">🌧️ Lluvia:</span>
                             <span className="font-bold">{data?.precipitation}mm</span>
                           </p>
+                          {data?.isForecast && (
+                            <p className="text-xs text-cyan-500 mt-2 font-medium">📅 Pronóstico</p>
+                          )}
                         </motion.div>
                       );
                     }}
@@ -748,7 +804,13 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
                   {viewMode === 'bars' && (
                     <Bar yAxisId="sales" dataKey="sales" name="Ventas" radius={[6, 6, 0, 0]}>
                       {chartData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.weatherColor} opacity={0.8} />
+                        <Cell 
+                          key={`cell-${index}`} 
+                          fill={entry.weatherColor} 
+                          opacity={entry.isForecast ? 0.4 : 0.8}
+                          strokeDasharray={entry.isForecast ? "4 2" : "0"}
+                          stroke={entry.isForecast ? entry.weatherColor : "none"}
+                        />
                       ))}
                     </Bar>
                   )}
@@ -831,6 +893,12 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
                 <div className="w-8 h-1 bg-gradient-to-r from-orange-300 to-orange-500 rounded" />
                 <span className="text-gray-600">Temperatura</span>
               </div>
+              {showForecast && (
+                <div className="flex items-center gap-2 text-xs">
+                  <div className="w-5 h-5 rounded border-2 border-dashed border-cyan-400 bg-cyan-100/50" />
+                  <span className="text-gray-600">Pronóstico</span>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
