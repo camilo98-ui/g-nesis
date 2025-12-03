@@ -18,28 +18,34 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 
 const STORES = [
-  { code: "BTA 11", name: "CC PALATINO" },
-  { code: "BTA 37", name: "HOMECENTER CALLE 170" },
-  { code: "BTA 62", name: "CC FONTANAR" },
-  { code: "BTA 49", name: "HOMECENTER CEDRITOS" },
-  { code: "BTA 42", name: "CC BULEVAR NIZA" },
-  { code: "BTA 85", name: "MANSION CAJICA" },
-  { code: "BTA 52", name: "CC CENTRO SUBA" },
-  { code: "BTA 21", name: "CC CENTRO CHIA" },
-  { code: "BTA 78", name: "CC PLAZA IMPERIAL 2" },
-  { code: "BTA 18", name: "CC PLAZA IMPERIAL" },
-  { code: "TUNJA 1", name: "CC UNICENTRO" },
-  { code: "BTA 90", name: "CC PORTAL 80" },
-  { code: "BTA 59", name: "JUMBO 170" },
-  { code: "BTA 14", name: "CC PORTAL CL80 #2" },
-  { code: "BTA 28", name: "CC DIVERPLAZA" },
-  { code: "BTA 89", name: "CC DIVERPLAZA 2" },
-  { code: "BTA 16", name: "CC SAN RAFAEL" },
-  { code: "BTA 13", name: "CC PORTAL CL 80 #1" },
-  { code: "TUNJA 2", name: "CC VIVA TUNJA" },
+  { code: "BTA 11", name: "CC PALATINO", displayName: "PALATINO" },
+  { code: "BTA 37", name: "HOMECENTER CALLE 170", displayName: "HOMECENTER 170" },
+  { code: "BTA 62", name: "CC FONTANAR", displayName: "FONTANAR" },
+  { code: "BTA 49", name: "HOMECENTER CEDRITOS", displayName: "HOMECENTER CEDRITOS" },
+  { code: "BTA 42", name: "CC BULEVAR NIZA", displayName: "BULEVAR NIZA" },
+  { code: "BTA 85", name: "MANSION CAJICA", displayName: "MANSIÓN CAJICÁ" },
+  { code: "BTA 52", name: "CC CENTRO SUBA", displayName: "CENTRO SUBA" },
+  { code: "BTA 21", name: "CC CENTRO CHIA", displayName: "CENTRO CHÍA" },
+  { code: "BTA 78", name: "CC PLAZA IMPERIAL 2", displayName: "PLAZA IMPERIAL 2" },
+  { code: "BTA 18", name: "CC PLAZA IMPERIAL", displayName: "PLAZA IMPERIAL" },
+  { code: "TUNJA 1", name: "CC UNICENTRO", displayName: "UNICENTRO TUNJA" },
+  { code: "BTA 90", name: "CC PORTAL 80", displayName: "PORTAL 80" },
+  { code: "BTA 59", name: "JUMBO 170", displayName: "JUMBO 170" },
+  { code: "BTA 14", name: "CC PORTAL CL80 #2", displayName: "PORTAL 80 #2" },
+  { code: "BTA 28", name: "CC DIVERPLAZA", displayName: "DIVERPLAZA" },
+  { code: "BTA 89", name: "CC DIVERPLAZA 2", displayName: "DIVERPLAZA 2" },
+  { code: "BTA 16", name: "CC SAN RAFAEL", displayName: "SAN RAFAEL" },
+  { code: "BTA 13", name: "CC PORTAL CL 80 #1", displayName: "PORTAL 80 #1" },
+  { code: "TUNJA 2", name: "CC VIVA TUNJA", displayName: "VIVA TUNJA" },
 ];
 
-export { STORES };
+// Helper para obtener nombre corto sin BTA/código
+const getDisplayName = (code) => {
+  const store = STORES.find(s => s.code === code);
+  return store?.displayName || store?.name || code;
+};
+
+export { STORES, getDisplayName };
 
 export default function StoreSelector({ selectedStore, onStoreChange }) {
   const [open, setOpen] = useState(false);
@@ -137,10 +143,10 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
             <div className="flex items-center gap-2">
               <MapPin className="w-4 h-4 text-pink-500" />
               {selectedStore ? (
-                <span className="truncate">{selectedStore} - {selectedStoreName}</span>
-              ) : (
-                <span className="text-gray-500">Selecciona una tienda</span>
-              )}
+                    <span className="truncate text-pink-600 font-medium">{getDisplayName(selectedStore)}</span>
+                  ) : (
+                    <span className="text-gray-500">Selecciona una tienda</span>
+                  )}
             </div>
             <svg className="w-4 h-4 text-gray-400 group-hover:text-pink-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -177,8 +183,7 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
                     <line x1="7" y1="15" x2="17" y2="15" stroke="#c99a5e" strokeWidth="0.5" opacity="0.6"/>
                     <line x1="8" y1="19" x2="16" y2="19" stroke="#c99a5e" strokeWidth="0.5" opacity="0.6"/>
                   </svg>
-                  <span className="font-medium text-gray-800">{store.code}</span>
-                  <span className="text-gray-400 text-xs truncate">- {store.name}</span>
+                  <span className="font-medium text-pink-600">{store.displayName}</span>
                   {hasPassword(store.code) && (
                     <Lock className="w-3 h-3 text-amber-500 ml-auto" />
                   )}
