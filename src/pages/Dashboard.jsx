@@ -20,7 +20,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { startOfMonth, endOfMonth, differenceInDays, format, eachDayOfInterval, getWeek, startOfWeek, endOfWeek, addWeeks, startOfYear } from 'date-fns';
+import { startOfMonth, endOfMonth, differenceInDays, format, eachDayOfInterval, isSameDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
@@ -561,32 +561,7 @@ export default function Dashboard() {
     });
   }, [dateRange, dailySales]);
 
-  // Generar opciones de semanas del año
-  const weekOptions = useMemo(() => {
-    const weeks = [];
-    const year = new Date().getFullYear();
-    const yearStart = startOfYear(new Date(year, 0, 1));
-    for (let i = 1; i <= 52; i++) {
-      const weekStart = addWeeks(startOfWeek(yearStart, { weekStartsOn: 1 }), i - 1);
-      const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
-      weeks.push({
-        value: i,
-        label: `Semana ${i}`,
-        from: weekStart,
-        to: weekEnd
-      });
-    }
-    return weeks;
-  }, []);
 
-  const currentWeek = getWeek(new Date(), { weekStartsOn: 1 });
-
-  const handleWeekChange = (weekNum) => {
-    const week = weekOptions.find(w => w.value === parseInt(weekNum));
-    if (week) {
-      setDateRange({ from: week.from, to: week.to });
-    }
-  };
 
   // Proyecciones
   const projections = useMemo(() => {
