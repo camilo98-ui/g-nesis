@@ -2,28 +2,137 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { Trophy, Flame, Star, Zap, Users, TrendingUp, Target, Award } from 'lucide-react';
+import { 
+  Trophy, Flame, Star, Zap, Users, TrendingUp, Target, Award,
+  Receipt, Gift, Clock, Heart, Sun, Moon, Calendar, Crown
+} from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const BADGE_CONFIG = {
-  top_seller: { icon: Trophy, color: 'from-amber-400 to-yellow-500', label: 'Top Vendedor', desc: 'Líder en ventas del mes' },
-  streak_7: { icon: Flame, color: 'from-orange-400 to-red-500', label: 'Racha 7 días', desc: '7 días consecutivos cumpliendo metas' },
-  streak_30: { icon: Flame, color: 'from-red-500 to-pink-600', label: 'Racha 30 días', desc: '30 días consecutivos cumpliendo metas' },
-  perfect_day: { icon: Star, color: 'from-purple-400 to-violet-500', label: 'Día Perfecto', desc: 'Superó todas las metas del día' },
-  team_player: { icon: Users, color: 'from-teal-400 to-cyan-500', label: 'Jugador de Equipo', desc: 'Mejor colaborador del mes' },
-  rising_star: { icon: TrendingUp, color: 'from-emerald-400 to-green-500', label: 'Estrella Emergente', desc: 'Mayor crecimiento del mes' },
-  goal_crusher: { icon: Target, color: 'from-blue-400 to-indigo-500', label: 'Rompe Metas', desc: 'Superó el 120% de sus objetivos' },
-  consistent: { icon: Award, color: 'from-slate-400 to-gray-500', label: 'Consistente', desc: 'Rendimiento estable por 3 meses' }
+  top_seller: { 
+    icon: Trophy, 
+    color: 'from-amber-400 to-yellow-500', 
+    label: 'Top Vendedor', 
+    desc: 'Líder en ventas del mes',
+    glow: 'shadow-amber-400/50'
+  },
+  streak_7: { 
+    icon: Flame, 
+    color: 'from-orange-400 to-red-500', 
+    label: 'Racha 7 días', 
+    desc: '7 días consecutivos cumpliendo metas',
+    glow: 'shadow-orange-400/50'
+  },
+  streak_30: { 
+    icon: Flame, 
+    color: 'from-red-500 to-pink-600', 
+    label: 'Racha 30 días', 
+    desc: '30 días consecutivos cumpliendo metas',
+    glow: 'shadow-red-400/50'
+  },
+  perfect_day: { 
+    icon: Star, 
+    color: 'from-purple-400 to-violet-500', 
+    label: 'Día Perfecto', 
+    desc: 'Superó todas las metas del día',
+    glow: 'shadow-purple-400/50'
+  },
+  team_player: { 
+    icon: Users, 
+    color: 'from-teal-400 to-cyan-500', 
+    label: 'Jugador de Equipo', 
+    desc: 'Mejor colaborador del mes',
+    glow: 'shadow-teal-400/50'
+  },
+  rising_star: { 
+    icon: TrendingUp, 
+    color: 'from-emerald-400 to-green-500', 
+    label: 'Estrella Emergente', 
+    desc: 'Mayor crecimiento del mes',
+    glow: 'shadow-emerald-400/50'
+  },
+  goal_crusher: { 
+    icon: Target, 
+    color: 'from-blue-400 to-indigo-500', 
+    label: 'Rompe Metas', 
+    desc: 'Superó el 120% de sus objetivos',
+    glow: 'shadow-blue-400/50'
+  },
+  consistent: { 
+    icon: Award, 
+    color: 'from-slate-400 to-gray-500', 
+    label: 'Consistente', 
+    desc: 'Rendimiento estable por 3 meses',
+    glow: 'shadow-slate-400/50'
+  },
+  ticket_master: { 
+    icon: Receipt, 
+    color: 'from-sky-400 to-blue-600', 
+    label: 'Maestro del Ticket', 
+    desc: 'Mejor ticket promedio del equipo',
+    glow: 'shadow-sky-400/50'
+  },
+  suggested_king: { 
+    icon: Gift, 
+    color: 'from-pink-400 to-rose-500', 
+    label: 'Rey de Sugeridos', 
+    desc: 'Líder en ventas sugeridas',
+    glow: 'shadow-pink-400/50'
+  },
+  speed_demon: { 
+    icon: Zap, 
+    color: 'from-yellow-400 to-amber-500', 
+    label: 'Velocidad Máxima', 
+    desc: 'Mayor cantidad de transacciones',
+    glow: 'shadow-yellow-400/50'
+  },
+  customer_favorite: { 
+    icon: Heart, 
+    color: 'from-rose-400 to-red-500', 
+    label: 'Favorito del Cliente', 
+    desc: 'Mejor atención al cliente',
+    glow: 'shadow-rose-400/50'
+  },
+  early_bird: { 
+    icon: Sun, 
+    color: 'from-orange-300 to-yellow-400', 
+    label: 'Madrugador', 
+    desc: 'Mejor rendimiento en turnos mañana',
+    glow: 'shadow-orange-300/50'
+  },
+  night_owl: { 
+    icon: Moon, 
+    color: 'from-indigo-400 to-purple-600', 
+    label: 'Búho Nocturno', 
+    desc: 'Mejor rendimiento en turnos noche',
+    glow: 'shadow-indigo-400/50'
+  },
+  weekend_warrior: { 
+    icon: Calendar, 
+    color: 'from-fuchsia-400 to-pink-500', 
+    label: 'Guerrero del Fin de Semana', 
+    desc: 'Mejor rendimiento los fines de semana',
+    glow: 'shadow-fuchsia-400/50'
+  },
+  monthly_champion: { 
+    icon: Crown, 
+    color: 'from-amber-500 to-yellow-600', 
+    label: 'Campeón del Mes', 
+    desc: '1er lugar del ranking mensual',
+    glow: 'shadow-amber-500/50'
+  }
 };
 
-export default function BadgesDisplay({ cashierId, compact = false }) {
+export { BADGE_CONFIG };
+
+export default function BadgesDisplay({ cashierId, compact = false, showAll = false }) {
   const { data: badges = [] } = useQuery({
     queryKey: ['cashierBadges', cashierId],
     queryFn: () => base44.entities.CashierBadge.filter({ cashier_id: cashierId }),
     enabled: !!cashierId
   });
 
-  if (badges.length === 0) {
+  if (badges.length === 0 && !showAll) {
     return compact ? null : (
       <div className="text-center py-4 text-gray-400 text-sm">
         Sin insignias aún
@@ -31,42 +140,98 @@ export default function BadgesDisplay({ cashierId, compact = false }) {
     );
   }
 
+  // Si showAll, mostrar todas las insignias posibles (ganadas y no ganadas)
+  const badgesToShow = showAll 
+    ? Object.keys(BADGE_CONFIG).map(type => {
+        const earned = badges.find(b => b.badge_type === type);
+        return { badge_type: type, earned: !!earned, ...earned };
+      })
+    : badges;
+
   return (
     <TooltipProvider>
-      <div className={`flex ${compact ? 'gap-1' : 'flex-wrap gap-2'}`}>
-        {badges.slice(0, compact ? 3 : undefined).map((badge, idx) => {
+      <div className={`flex ${compact ? 'gap-1' : 'flex-wrap gap-3'}`}>
+        {badgesToShow.slice(0, compact ? 3 : undefined).map((badge, idx) => {
           const config = BADGE_CONFIG[badge.badge_type];
           if (!config) return null;
           const Icon = config.icon;
+          const isEarned = showAll ? badge.earned : true;
           
           return (
-            <Tooltip key={badge.id || idx}>
+            <Tooltip key={badge.id || badge.badge_type || idx}>
               <TooltipTrigger>
                 <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: idx * 0.1 }}
-                  whileHover={{ scale: 1.15, rotate: 5 }}
-                  className={`${compact ? 'w-7 h-7' : 'w-12 h-12'} rounded-full bg-gradient-to-br ${config.color} flex items-center justify-center shadow-lg`}
+                  initial={{ scale: 0, rotate: -180 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ delay: idx * 0.05, type: "spring", stiffness: 200 }}
+                  whileHover={{ scale: 1.2, rotate: 10, y: -5 }}
+                  className={`relative ${compact ? 'w-8 h-8' : 'w-14 h-14'} rounded-full 
+                    ${isEarned 
+                      ? `bg-gradient-to-br ${config.color} shadow-lg ${config.glow}` 
+                      : 'bg-gray-200'
+                    } flex items-center justify-center cursor-pointer transition-all`}
                 >
-                  <Icon className={`${compact ? 'w-3.5 h-3.5' : 'w-6 h-6'} text-white`} />
+                  <Icon className={`${compact ? 'w-4 h-4' : 'w-7 h-7'} ${isEarned ? 'text-white' : 'text-gray-400'}`} />
+                  
+                  {/* Animación de brillo para insignias ganadas */}
+                  {isEarned && !compact && (
+                    <motion.div
+                      className="absolute inset-0 rounded-full"
+                      animate={{ 
+                        boxShadow: [
+                          '0 0 0 0 rgba(255,255,255,0)',
+                          '0 0 0 4px rgba(255,255,255,0.3)',
+                          '0 0 0 0 rgba(255,255,255,0)'
+                        ]
+                      }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    />
+                  )}
+                  
+                  {/* Indicador de nuevo */}
+                  {isEarned && badge.earned_date && isRecent(badge.earned_date) && (
+                    <motion.div
+                      className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white"
+                      animate={{ scale: [1, 1.2, 1] }}
+                      transition={{ duration: 1, repeat: Infinity }}
+                    />
+                  )}
                 </motion.div>
               </TooltipTrigger>
-              <TooltipContent>
-                <div className="text-center">
-                  <p className="font-bold">{config.label}</p>
-                  <p className="text-xs text-gray-400">{config.desc}</p>
+              <TooltipContent className="max-w-xs">
+                <div className="text-center p-1">
+                  <p className="font-bold text-sm">{config.label}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">{config.desc}</p>
+                  {isEarned && badge.kpi_value && (
+                    <p className="text-xs text-emerald-500 mt-1 font-medium">
+                      KPI: {badge.kpi_value.toLocaleString()}
+                    </p>
+                  )}
+                  {!isEarned && showAll && (
+                    <p className="text-xs text-gray-400 mt-1 italic">No obtenida</p>
+                  )}
                 </div>
               </TooltipContent>
             </Tooltip>
           );
         })}
         {compact && badges.length > 3 && (
-          <div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-xs text-gray-500 font-medium">
+          <motion.div 
+            whileHover={{ scale: 1.1 }}
+            className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-xs text-gray-500 font-bold"
+          >
             +{badges.length - 3}
-          </div>
+          </motion.div>
         )}
       </div>
     </TooltipProvider>
   );
+}
+
+// Helper para verificar si una insignia es reciente (últimos 7 días)
+function isRecent(dateStr) {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diff = now - date;
+  return diff < 7 * 24 * 60 * 60 * 1000;
 }
