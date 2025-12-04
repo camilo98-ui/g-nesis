@@ -304,14 +304,54 @@ export default function WeatherImpactChart({ dailyTrend = [], formatCurrency, da
   const worstDay = weatherStats[weatherStats.length - 1];
 
   return (
-    <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg">
-      <CardHeader className="pb-2">
+    <Card className="bg-gradient-to-br from-sky-50/80 via-blue-50/60 to-indigo-50/40 backdrop-blur-sm border-0 shadow-lg overflow-hidden relative">
+      {/* Background animation */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <motion.div 
+          className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-gradient-to-br from-sky-200/30 to-blue-300/20"
+          animate={{ scale: [1, 1.2, 1], rotate: [0, 90, 0] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div 
+          className="absolute -bottom-10 -left-10 w-24 h-24 rounded-full bg-gradient-to-br from-cyan-200/30 to-sky-300/20"
+          animate={{ scale: [1, 1.3, 1], rotate: [0, -90, 0] }}
+          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+        />
+        {/* Floating clouds */}
+        <motion.div
+          className="absolute top-4 right-20 text-2xl opacity-20"
+          animate={{ x: [-10, 10, -10], y: [0, -5, 0] }}
+          transition={{ duration: 4, repeat: Infinity }}
+        >
+          ☁️
+        </motion.div>
+        <motion.div
+          className="absolute bottom-8 left-16 text-xl opacity-15"
+          animate={{ x: [0, 15, 0], y: [0, -3, 0] }}
+          transition={{ duration: 5, repeat: Infinity, delay: 1 }}
+        >
+          🌤️
+        </motion.div>
+      </div>
+      
+      <CardHeader className="pb-2 relative z-10">
         <div className="flex items-center justify-between flex-wrap gap-2">
-          <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
-            <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 3, repeat: Infinity }}>
-              <Cloud className="w-4 h-4 text-sky-500" />
+          <CardTitle className="text-sm font-medium text-gray-700 flex items-center gap-2">
+            <motion.div 
+              animate={{ 
+                rotate: [0, 10, -10, 5, -5, 0],
+                y: [0, -3, 0, -2, 0]
+              }} 
+              transition={{ duration: 4, repeat: Infinity }}
+            >
+              <Cloud className="w-5 h-5 text-sky-500" />
             </motion.div>
-            Impacto del Clima en Ventas
+            <motion.span
+              animate={{ opacity: [1, 0.8, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              Impacto del Clima en Ventas
+            </motion.span>
             <HelpTooltip viewType={viewType} />
           </CardTitle>
           <div className="flex gap-2 items-center">

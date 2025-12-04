@@ -115,10 +115,10 @@ export default function WelcomeToast({ storeName, storeCode, onClose }) {
         animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
         exit={{ opacity: 0, y: -30, scale: 0.8 }}
         transition={{ type: "spring", damping: 15, stiffness: 200 }}
-        className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50"
+        className="fixed top-28 right-4 z-50"
       >
         <motion.div 
-          className={`bg-gradient-to-r ${greeting.bg} rounded-3xl shadow-2xl px-6 py-5 relative overflow-hidden min-w-[320px]`}
+          className={`bg-gradient-to-r ${greeting.bg} rounded-2xl shadow-xl px-5 py-4 relative overflow-hidden max-w-[300px]`}
           whileHover={{ scale: 1.02, rotate: 1 }}
           animate={{ 
             boxShadow: [

@@ -13,8 +13,11 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { 
   LayoutDashboard, Users, TrendingUp, 
-  Award, Target, Bell, Phone, Download, Smartphone, Monitor, ClipboardCheck, FileText
+  Award, Target, Bell, Phone, Download, Smartphone, Monitor, ClipboardCheck, FileText,
+  LogOut, Lock, Eye, EyeOff
 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { startOfMonth } from 'date-fns';
 
@@ -120,6 +123,16 @@ export default function Home() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showWelcome, setShowWelcome] = useState(false);
   const [showReport, setShowReport] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loginPassword, setLoginPassword] = useState('');
+  const [loginError, setLoginError] = useState('');
+  const [pendingStore, setPendingStore] = useState('');
+
+  // Fetch store passwords
+  const { data: storePasswords = [] } = useQuery({
+    queryKey: ['storePasswords'],
+    queryFn: () => base44.entities.StorePassword.list(),
+  });
 
   useEffect(() => {
     const handler = (e) => {
@@ -130,30 +143,227 @@ export default function Home() {
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
 
-  // Cargar tienda guardada
+  // Cargar sesión guardada
   useEffect(() => {
-    const saved = localStorage.getItem('selectedStore');
+    const savedSession = localStorage.getItem('popsySession');
     const lastVisit = localStorage.getItem('lastVisitTime');
     const now = Date.now();
     
-    // Si pasaron más de 4 horas, limpiar tienda
+    // Si pasaron más de 4 horas, cerrar sesión
     if (lastVisit && (now - parseInt(lastVisit)) > 4 * 60 * 60 * 1000) {
       localStorage.removeItem('selectedStore');
+      localStorage.removeItem('popsySession');
       setSelectedStore('');
-    } else if (saved) {
-      setSelectedStore(saved);
+      setIsLoggedIn(false);
+    } else if (savedSession) {
+      const session = JSON.parse(savedSession);
+      setSelectedStore(session.store);
+      setIsLoggedIn(true);
     }
     
     localStorage.setItem('lastVisitTime', now.toString());
   }, []);
 
+  const handleStoreSelect = (store) => {
+    setPendingStore(store);
+    setLoginPassword('');
+    setLoginError('');
+  };
+
+  const handleLogin = () => {
+    const storePassword = storePasswords.find(p => p.store_code === pendingStore);
+    
+    // Si no tiene contraseña o la contraseña coincide
+    if (!storePassword?.password || loginPassword === storePassword.password) {
+      setSelectedStore(pendingStore);
+      setIsLoggedIn(true);
+      localStorage.setItem('selectedStore', pendingStore);
+      localStorage.setItem('popsySession', JSON.stringify({ store: pendingStore, time: Date.now() }));
+      setShowWelcome(true);
+      setPendingStore('');
+      setLoginPassword('');
+    } else {
+      setLoginError('Contraseña incorrecta');
+    }
+  };
+
+  const handleLogout = () => {
+    setSelectedStore('');
+    setIsLoggedIn(false);
+    setPendingStore('');
+    localStorage.removeItem('selectedStore');
+    localStorage.removeItem('popsySession');
+  };
+
   const handleStoreChange = (store) => {
     setSelectedStore(store);
     localStorage.setItem('selectedStore', store);
+    localStorage.setItem('popsySession', JSON.stringify({ store, time: Date.now() }));
     setShowWelcome(true);
   };
 
   const selectedStoreName = STORES.find(s => s.code === selectedStore)?.name || '';
+
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const needsPassword = pendingStore && storePasswords.find(p => p.store_code === pendingStore)?.password;
+
+  // Si no está logueado, mostrar pantalla de login
+  if (!isLoggedIn) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-amber-50 relative overflow-hidden flex items-center justify-center">
+        <PastelConfetti />
+        <FloatingIceCreamsBg />
+        
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          className="relative z-10 w-full max-w-md mx-4"
+        >
+          <motion.div
+            className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-pink-100"
+            whileHover={{ boxShadow: "0 25px 50px -12px rgba(236, 72, 153, 0.25)" }}
+          >
+            {/* Logo animado */}
+            <motion.img 
+              src={LOGO_URL} 
+              alt="Popsy" 
+              className="h-20 object-contain mx-auto mb-4 cursor-pointer"
+              animate={{ 
+                y: [0, -8, 0],
+                rotate: [0, 2, -2, 0]
+              }}
+              transition={{ duration: 3, repeat: Infinity }}
+              onClick={() => setShowStory(true)}
+            />
+            
+            <motion.div 
+              className="text-center mb-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+            >
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent">
+                ¡Bienvenido!
+              </h2>
+              <p className="text-gray-500 text-sm mt-1">Selecciona tu tienda para comenzar</p>
+            </motion.div>
+
+            {/* Selector de tienda */}
+            <motion.div 
+              className="mb-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <label className="text-sm font-medium text-gray-600 mb-2 block">🏪 Tienda</label>
+              <StoreSelector 
+                selectedStore={pendingStore} 
+                onStoreChange={handleStoreSelect}
+              />
+            </motion.div>
+
+            {/* Campo de contraseña (solo si la tienda tiene contraseña) */}
+            <AnimatePresence>
+              {needsPassword && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="mb-4"
+                >
+                  <label className="text-sm font-medium text-gray-600 mb-2 flex items-center gap-2">
+                    <Lock className="w-4 h-4 text-pink-500" />
+                    Contraseña de la tienda
+                  </label>
+                  <div className="relative">
+                    <Input
+                      type={showLoginPassword ? "text" : "password"}
+                      placeholder="Ingresa la contraseña"
+                      value={loginPassword}
+                      onChange={(e) => { setLoginPassword(e.target.value); setLoginError(''); }}
+                      onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+                      className="pr-10 border-pink-200 focus:border-pink-400"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowLoginPassword(!showLoginPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-pink-500"
+                    >
+                      {showLoginPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  {loginError && (
+                    <motion.p 
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-red-500 text-xs mt-1"
+                    >
+                      {loginError}
+                    </motion.p>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Botón de ingresar */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+            >
+              <Button
+                onClick={handleLogin}
+                disabled={!pendingStore}
+                className="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white py-6 rounded-xl shadow-lg shadow-pink-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <motion.span
+                  animate={{ scale: pendingStore ? [1, 1.05, 1] : 1 }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                  className="flex items-center gap-2"
+                >
+                  🍦 Ingresar a la tienda
+                </motion.span>
+              </Button>
+            </motion.div>
+
+            {/* Decoración */}
+            <motion.div 
+              className="mt-6 text-center"
+              animate={{ opacity: [0.5, 1, 0.5] }}
+              transition={{ duration: 3, repeat: Infinity }}
+            >
+              <p className="text-xs text-gray-400">
+                Haciendo del mundo un lugar más dulce 🍨
+              </p>
+            </motion.div>
+          </motion.div>
+
+          {/* Decoración flotante */}
+          <motion.div
+            className="absolute -top-6 -right-6 text-4xl"
+            animate={{ rotate: [0, 20, 0], y: [0, -10, 0] }}
+            transition={{ duration: 3, repeat: Infinity }}
+          >
+            🍦
+          </motion.div>
+          <motion.div
+            className="absolute -bottom-4 -left-4 text-3xl"
+            animate={{ rotate: [0, -15, 0], y: [0, 5, 0] }}
+            transition={{ duration: 2.5, repeat: Infinity, delay: 0.5 }}
+          >
+            🍨
+          </motion.div>
+        </motion.div>
+
+        {/* Popsy Story Modal */}
+        <AnimatePresence>
+          {showStory && (
+            <PopsyStoryModal onClose={() => setShowStory(false)} />
+          )}
+        </AnimatePresence>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white relative overflow-hidden">
@@ -161,6 +371,25 @@ export default function Home() {
       <FloatingIceCreamsBg />
 
       <div className="max-w-6xl mx-auto px-4 py-6 relative z-10">
+        {/* Botón de cerrar sesión */}
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="absolute top-4 right-4 z-20"
+        >
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button
+              onClick={handleLogout}
+              variant="outline"
+              size="sm"
+              className="bg-white/80 backdrop-blur-sm border-pink-200 text-pink-600 hover:bg-pink-50 hover:text-pink-700 rounded-full shadow-sm gap-2"
+            >
+              <LogOut className="w-4 h-4" />
+              <span className="hidden sm:inline">Cerrar Sesión</span>
+            </Button>
+          </motion.div>
+        </motion.div>
+
         {/* Header con logo animado premium */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}

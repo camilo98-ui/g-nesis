@@ -40,7 +40,9 @@ export default function Sales() {
               </Button>
             </Link>
             <div>
-              <h1 className="text-2xl md:text-3xl font-black text-gray-800">Registrar Ventas</h1>
+              <h1 className="text-2xl md:text-3xl font-black">
+                <span className="bg-gradient-to-r from-pink-500 via-rose-500 to-red-400 bg-clip-text text-transparent">Registrar Ventas</span>
+              </h1>
               {selectedStore && (
                 <p className="text-sm text-gray-500">{selectedStore} - {selectedStoreName}</p>
               )}

@@ -254,39 +254,59 @@ export default function Rankings() {
   }).format(v);
 
   return (
-    <div className="min-h-screen bg-white relative">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50/50 via-rose-50/30 to-amber-50/40 relative">
       <FloatingIceCreamsBg />
       <div className="max-w-4xl mx-auto px-4 py-6 relative z-10">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div className="flex items-center gap-4">
             <Link to={createPageUrl('Home')}>
-              <Button variant="ghost" size="icon" className="rounded-full hover:bg-pink-50">
-                <ArrowLeft className="w-5 h-5 text-pink-600" />
-              </Button>
+              <motion.div whileHover={{ scale: 1.1, x: -3 }} whileTap={{ scale: 0.95 }}>
+                <Button variant="ghost" size="icon" className="rounded-full hover:bg-pink-100/80 bg-white/50 shadow-sm">
+                  <ArrowLeft className="w-5 h-5 text-pink-600" />
+                </Button>
+              </motion.div>
             </Link>
             <div>
-              <h1 className="text-2xl md:text-3xl font-semibold text-gray-700 flex items-center gap-1">
+              <motion.h1 
+                className="text-2xl md:text-3xl font-bold flex items-center gap-1"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
                 {'PopsyStars'.split('').map((letter, i) => (
                   <motion.span
                     key={i}
-                    animate={{ y: [0, -4, 0] }}
-                    transition={{ duration: 0.5, delay: i * 0.05, repeat: Infinity, repeatDelay: 2 }}
-                    className={i >= 5 ? 'text-amber-500' : 'text-pink-500'}
+                    animate={{ 
+                      y: [0, -6, 0],
+                      rotate: [0, i % 2 === 0 ? 5 : -5, 0]
+                    }}
+                    transition={{ duration: 0.6, delay: i * 0.08, repeat: Infinity, repeatDelay: 3 }}
+                    className={`${i >= 5 ? 'text-amber-500' : 'text-pink-500'} drop-shadow-sm`}
+                    style={{ textShadow: '0 2px 4px rgba(236, 72, 153, 0.2)' }}
                   >
                     {letter}
                   </motion.span>
                 ))}
                 <motion.span
-                  animate={{ rotate: [0, 15, -15, 0], scale: [1, 1.2, 1] }}
-                  transition={{ duration: 1, repeat: Infinity, repeatDelay: 1 }}
-                  className="ml-1"
+                  animate={{ 
+                    rotate: [0, 20, -20, 10, -10, 0], 
+                    scale: [1, 1.3, 1.1, 1.2, 1],
+                    y: [0, -5, 0, -3, 0]
+                  }}
+                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 2 }}
+                  className="ml-2"
                 >
                   ⭐
                 </motion.span>
-              </h1>
+              </motion.h1>
               {selectedStore && (
-                <p className="text-sm text-gray-500">{selectedStore} - {selectedStoreName}</p>
+                <motion.p 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-sm text-pink-400 font-medium"
+                >
+                  {selectedStore} - {selectedStoreName}
+                </motion.p>
               )}
             </div>
           </div>
