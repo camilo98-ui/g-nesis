@@ -129,9 +129,10 @@ export default function Home() {
   const [selectedRole, setSelectedRole] = useState('');
 
   const ROLES = [
-    { id: 'lider', name: 'Líder de Experiencia', icon: '👑', description: 'Acceso completo' },
-    { id: 'embajador', name: 'Embajador de Experiencia', icon: '⭐', description: 'Acceso limitado' },
-    { id: 'calidad', name: 'Calidad', icon: '✅', description: 'Solo visualización' },
+    { id: 'lider', name: 'Líder de Experiencia', icon: '👑', color: 'from-amber-400 to-yellow-500', description: 'Acceso completo' },
+    { id: 'embajador', name: 'Embajador', icon: '⭐', color: 'from-pink-400 to-rose-500', description: 'Acceso limitado' },
+    { id: 'calidad', name: 'Calidad', icon: '✅', color: 'from-teal-400 to-cyan-500', description: 'Solo visualización' },
+    { id: 'c_interno', name: 'C. Interno', icon: '📋', color: 'from-violet-400 to-purple-500', description: 'Solo Planner' },
   ];
 
   // Fetch store passwords
@@ -184,8 +185,8 @@ export default function Home() {
       return;
     }
     
-    // Calidad no requiere contraseña
-    if (selectedRole === 'calidad') {
+    // Calidad y C. Interno no requieren contraseña
+    if (selectedRole === 'calidad' || selectedRole === 'c_interno') {
       setSelectedStore(pendingStore);
       setIsLoggedIn(true);
       localStorage.setItem('selectedStore', pendingStore);
@@ -234,7 +235,7 @@ export default function Home() {
   const selectedStoreName = STORES.find(s => s.code === selectedStore)?.name || '';
 
   const [showLoginPassword, setShowLoginPassword] = useState(false);
-  const needsPassword = pendingStore && selectedRole !== 'calidad' && storePasswords.find(p => p.store_code === pendingStore)?.password;
+  const needsPassword = pendingStore && selectedRole !== 'calidad' && selectedRole !== 'c_interno' && storePasswords.find(p => p.store_code === pendingStore)?.password;
 
   // Si no está logueado, mostrar pantalla de login
   if (!isLoggedIn) {
@@ -284,25 +285,79 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.35 }}
             >
-              <div className="w-full md:w-[300px] space-y-2">
-                <p className="text-xs text-gray-500 text-center mb-2">Selecciona tu rol</p>
-                <div className="grid grid-cols-3 gap-2">
-                  {ROLES.map((role) => (
+              <div className="w-full md:w-[340px] space-y-2">
+                <p className="text-xs text-gray-500 text-center mb-3">Selecciona tu rol</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {ROLES.map((role, idx) => (
                     <motion.button
                       key={role.id}
-                      whileHover={{ scale: 1.03 }}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.4 + idx * 0.05 }}
+                      whileHover={{ scale: 1.03, y: -2 }}
                       whileTap={{ scale: 0.97 }}
                       onClick={() => { setSelectedRole(role.id); setLoginError(''); }}
-                      className={`p-2 rounded-xl border-2 transition-all text-center ${
+                      className={`relative p-3 rounded-xl border-2 transition-all overflow-hidden ${
                         selectedRole === role.id
-                          ? 'border-pink-500 bg-pink-50 shadow-md'
-                          : 'border-gray-200 bg-white hover:border-pink-300'
+                          ? 'border-transparent shadow-lg'
+                          : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-md'
                       }`}
                     >
-                      <span className="text-xl">{role.icon}</span>
-                      <p className={`text-[10px] font-medium mt-1 leading-tight ${selectedRole === role.id ? 'text-pink-600' : 'text-gray-600'}`}>
-                        {role.name}
-                      </p>
+                      {/* Background gradient when selected */}
+                      {selectedRole === role.id && (
+                        <motion.div 
+                          layoutId="roleBackground"
+                          className={`absolute inset-0 bg-gradient-to-br ${role.color} opacity-20`}
+                          initial={false}
+                          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                        />
+                      )}
+                      
+                      <div className="relative z-10 flex items-center gap-2">
+                        {/* Icon container con animación */}
+                        <motion.div 
+                          className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                            selectedRole === role.id 
+                              ? `bg-gradient-to-br ${role.color} shadow-md` 
+                              : 'bg-gray-100'
+                          }`}
+                          animate={selectedRole === role.id ? { 
+                            scale: [1, 1.1, 1],
+                            rotate: [0, 5, -5, 0]
+                          } : {}}
+                          transition={{ duration: 0.5 }}
+                        >
+                          <span className={`text-lg ${selectedRole === role.id ? 'drop-shadow-sm' : ''}`}>
+                            {role.icon}
+                          </span>
+                        </motion.div>
+                        
+                        <div className="text-left flex-1">
+                          <p className={`text-xs font-bold leading-tight ${
+                            selectedRole === role.id ? 'text-gray-800' : 'text-gray-700'
+                          }`}>
+                            {role.name}
+                          </p>
+                          <p className={`text-[9px] ${
+                            selectedRole === role.id ? 'text-gray-600' : 'text-gray-400'
+                          }`}>
+                            {role.description}
+                          </p>
+                        </div>
+                        
+                        {/* Check indicator */}
+                        {selectedRole === role.id && (
+                          <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            className={`w-5 h-5 rounded-full bg-gradient-to-br ${role.color} flex items-center justify-center`}
+                          >
+                            <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                            </svg>
+                          </motion.div>
+                        )}
+                      </div>
                     </motion.button>
                   ))}
                 </div>
@@ -322,8 +377,8 @@ export default function Home() {
               />
             </motion.div>
 
-            {/* Campo de contraseña - Solo si no es Calidad */}
-            {selectedRole !== 'calidad' && (
+            {/* Campo de contraseña - Solo si no es Calidad ni C. Interno */}
+            {selectedRole !== 'calidad' && selectedRole !== 'c_interno' && (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -575,10 +630,16 @@ export default function Home() {
               
               // Restricciones por rol
               const isLocked = (selectedRole === 'embajador' && item.page === 'Budget') ||
-                              (selectedRole === 'calidad' && !['Quality'].includes(item.page));
+                              (selectedRole === 'calidad' && !['Quality'].includes(item.page)) ||
+                              (selectedRole === 'c_interno');
               
               // Para Calidad, solo mostrar Calidad
               if (selectedRole === 'calidad' && item.page !== 'Quality') {
+                return null;
+              }
+              
+              // Para C. Interno, no mostrar nada del menú (solo verá el planner embebido)
+              if (selectedRole === 'c_interno') {
                 return null;
               }
               
@@ -653,7 +714,7 @@ export default function Home() {
             className="mt-6"
           >
             <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-              <div className="bg-gradient-to-r from-violet-500 to-purple-500 p-4 text-white">
+              <div className="bg-gradient-to-r from-teal-500 to-cyan-500 p-4 text-white">
                 <h3 className="font-bold flex items-center gap-2">
                   📅 Planner de la Tienda
                   <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">Solo lectura</span>
@@ -664,6 +725,43 @@ export default function Home() {
                 <iframe 
                   src={createPageUrl('PopsyPlanner') + `?viewOnly=true`}
                   className="w-full h-[500px] border-0 rounded-xl"
+                  title="Planner"
+                />
+              </div>
+            </div>
+          </motion.div>
+        )}
+        
+        {/* Vista especial para C. Interno - Solo Planner */}
+        {selectedStore && selectedRole === 'c_interno' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-4"
+          >
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+              <div className="bg-gradient-to-r from-violet-500 to-purple-500 p-4 text-white">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-bold flex items-center gap-2">
+                      📋 Control Interno - Planner
+                      <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">Solo lectura</span>
+                    </h3>
+                    <p className="text-sm text-white/80">{selectedStoreName}</p>
+                  </div>
+                  <motion.div
+                    animate={{ rotate: [0, 10, -10, 0] }}
+                    transition={{ duration: 3, repeat: Infinity }}
+                    className="text-3xl"
+                  >
+                    🍦
+                  </motion.div>
+                </div>
+              </div>
+              <div className="p-4">
+                <iframe 
+                  src={createPageUrl('PopsyPlanner') + `?viewOnly=true`}
+                  className="w-full h-[600px] border-0 rounded-xl"
                   title="Planner"
                 />
               </div>
