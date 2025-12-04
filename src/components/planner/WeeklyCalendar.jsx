@@ -131,7 +131,7 @@ const IceCreamDecorations = () => (
 );
 
 export default function WeeklyCalendar({ 
-  currentWeek, setCurrentWeek, weekDays, shifts, cashiers, storeId, loading, onExportPDF 
+  currentWeek, setCurrentWeek, weekDays, shifts, cashiers, storeId, loading, onExportPDF, readOnly = false 
 }) {
   const [showAddShift, setShowAddShift] = useState(false);
   const [editingShift, setEditingShift] = useState(null);
@@ -285,9 +285,11 @@ export default function WeeklyCalendar({
             <SelectTrigger className="w-40 bg-white/20 border-white/30 text-white text-sm"><SelectValue /></SelectTrigger>
             <SelectContent>{yearWeeks.map(w => <SelectItem key={w.number} value={w.number.toString()}>{w.label}</SelectItem>)}</SelectContent>
           </Select>
-          <Button variant="secondary" size="sm" onClick={copyWeek} disabled={copying || !shifts.length} className="gap-2 bg-white/20 text-white hover:bg-white/30 border-0">
-            {copying ? <Loader2 className="w-4 h-4 animate-spin" /> : <Copy className="w-4 h-4" />} Copiar
-          </Button>
+          {!readOnly && (
+            <Button variant="secondary" size="sm" onClick={copyWeek} disabled={copying || !shifts.length} className="gap-2 bg-white/20 text-white hover:bg-white/30 border-0">
+              {copying ? <Loader2 className="w-4 h-4 animate-spin" /> : <Copy className="w-4 h-4" />} Copiar
+            </Button>
+          )}
           <Button variant="secondary" size="sm" onClick={onExportPDF} className="gap-2 bg-white text-pink-500 hover:bg-pink-50">
             <Download className="w-4 h-4" /> PDF
           </Button>
@@ -385,14 +387,16 @@ export default function WeeklyCalendar({
                                           <span className={`text-[10px] font-bold ${role.text}`}>{duration}h</span>
                                         </div>
                                       )}
-                                      <div className="flex justify-end gap-1 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <motion.button whileTap={{ scale: 0.9 }} onClick={() => handleEditShift(shift)} className="p-1 rounded bg-blue-100 hover:bg-blue-200">
-                                          <Pencil className="w-3 h-3 text-blue-500" />
-                                        </motion.button>
-                                        <motion.button whileTap={{ scale: 0.9 }} onClick={() => deleteMutation.mutate(shift.id)} className="p-1 rounded bg-red-100 hover:bg-red-200">
-                                          <Trash2 className="w-3 h-3 text-red-500" />
-                                        </motion.button>
-                                      </div>
+                                      {!readOnly && (
+                                        <div className="flex justify-end gap-1 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                          <motion.button whileTap={{ scale: 0.9 }} onClick={() => handleEditShift(shift)} className="p-1 rounded bg-blue-100 hover:bg-blue-200">
+                                            <Pencil className="w-3 h-3 text-blue-500" />
+                                          </motion.button>
+                                          <motion.button whileTap={{ scale: 0.9 }} onClick={() => deleteMutation.mutate(shift.id)} className="p-1 rounded bg-red-100 hover:bg-red-200">
+                                            <Trash2 className="w-3 h-3 text-red-500" />
+                                          </motion.button>
+                                        </div>
+                                      )}
                                     </div>
                                   </motion.div>
                                 )}
@@ -402,11 +406,13 @@ export default function WeeklyCalendar({
                         </AnimatePresence>
                         {provided.placeholder}
                         
-                        <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-                          onClick={() => { setSelectedDay(day); setEditingShift(null); resetForm(); setShowAddShift(true); }}
-                          className={`w-full py-2 border border-dashed rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1 ${isHovered ? 'border-pink-300 text-pink-400 bg-pink-50/30' : 'border-gray-200 text-gray-400 hover:border-pink-200'}`}>
-                          <Plus className="w-4 h-4" /> Agregar
-                        </motion.button>
+                        {!readOnly && (
+                          <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                            onClick={() => { setSelectedDay(day); setEditingShift(null); resetForm(); setShowAddShift(true); }}
+                            className={`w-full py-2 border border-dashed rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1 ${isHovered ? 'border-pink-300 text-pink-400 bg-pink-50/30' : 'border-gray-200 text-gray-400 hover:border-pink-200'}`}>
+                            <Plus className="w-4 h-4" /> Agregar
+                          </motion.button>
+                        )}
                       </div>
                     </motion.div>
                   )}
