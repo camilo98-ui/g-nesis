@@ -955,9 +955,9 @@ export default function Dashboard() {
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium text-pink-600 flex items-center gap-2">
                   <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 2, repeat: Infinity }}>
-                    <AlertTriangle className="w-4 h-4 text-pink-500" />
+                    <Target className="w-4 h-4 text-pink-500" />
                   </motion.div>
-                  Oportunidades Críticas
+                  ¿Cómo Vamos?
                 </CardTitle>
               </CardHeader>
               <CardContent>

@@ -367,24 +367,36 @@ export default function CashierFullProfile({
 export function ViewProfileButton({ cashier, stats, storeId, teamStats }) {
   const [isOpen, setIsOpen] = React.useState(false);
 
+  const handleOpen = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setIsOpen(true);
+  };
+
+  const handleClose = () => {
+    setIsOpen(false);
+  };
+
   return (
     <>
       <Button
         variant="ghost"
         size="icon"
-        onClick={() => setIsOpen(true)}
+        onClick={handleOpen}
         className="hover:bg-purple-50"
       >
         <Eye className="w-4 h-4 text-purple-500" />
       </Button>
-      <CashierFullProfile
-        cashier={cashier}
-        stats={stats}
-        storeId={storeId}
-        teamStats={teamStats}
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-      />
+      {isOpen && (
+        <CashierFullProfile
+          cashier={cashier}
+          stats={stats}
+          storeId={storeId}
+          teamStats={teamStats}
+          isOpen={isOpen}
+          onClose={handleClose}
+        />
+      )}
     </>
   );
 }

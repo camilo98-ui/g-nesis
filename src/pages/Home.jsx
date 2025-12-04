@@ -247,62 +247,59 @@ export default function Home() {
               <p className="text-gray-500 text-sm mt-1">Selecciona tu tienda para comenzar</p>
             </motion.div>
 
-            {/* Selector de tienda */}
+            {/* Selector de tienda - Centrado */}
             <motion.div 
-              className="mb-4"
+              className="mb-4 flex flex-col items-center"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
             >
-              <label className="text-sm font-medium text-gray-600 mb-2 block">🏪 Tienda</label>
+              <label className="text-sm font-medium text-gray-600 mb-2 block text-center">🏪 Tienda</label>
               <StoreSelector 
                 selectedStore={pendingStore} 
                 onStoreChange={handleStoreSelect}
               />
             </motion.div>
 
-            {/* Campo de contraseña (solo si la tienda tiene contraseña) */}
-            <AnimatePresence>
-              {needsPassword && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="mb-4"
+            {/* Campo de contraseña - Siempre visible abajo */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="mb-4"
+            >
+              <label className="text-sm font-medium text-gray-600 mb-2 flex items-center gap-2">
+                <Lock className="w-4 h-4 text-pink-500" />
+                Contraseña {needsPassword ? '' : '(opcional)'}
+              </label>
+              <div className="relative">
+                <Input
+                  type={showLoginPassword ? "text" : "password"}
+                  placeholder={needsPassword ? "Ingresa la contraseña" : "Sin contraseña requerida"}
+                  value={loginPassword}
+                  onChange={(e) => { setLoginPassword(e.target.value); setLoginError(''); }}
+                  onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+                  className="pr-10 border-pink-200 focus:border-pink-400"
+                  disabled={!needsPassword && pendingStore}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowLoginPassword(!showLoginPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-pink-500"
                 >
-                  <label className="text-sm font-medium text-gray-600 mb-2 flex items-center gap-2">
-                    <Lock className="w-4 h-4 text-pink-500" />
-                    Contraseña de la tienda
-                  </label>
-                  <div className="relative">
-                    <Input
-                      type={showLoginPassword ? "text" : "password"}
-                      placeholder="Ingresa la contraseña"
-                      value={loginPassword}
-                      onChange={(e) => { setLoginPassword(e.target.value); setLoginError(''); }}
-                      onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-                      className="pr-10 border-pink-200 focus:border-pink-400"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowLoginPassword(!showLoginPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-pink-500"
-                    >
-                      {showLoginPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                  {loginError && (
-                    <motion.p 
-                      initial={{ opacity: 0, y: -5 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="text-red-500 text-xs mt-1"
-                    >
-                      {loginError}
-                    </motion.p>
-                  )}
-                </motion.div>
+                  {showLoginPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+              {loginError && (
+                <motion.p 
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-red-500 text-xs mt-1"
+                >
+                  {loginError}
+                </motion.p>
               )}
-            </AnimatePresence>
+            </motion.div>
 
             {/* Botón de ingresar */}
             <motion.div
@@ -328,29 +325,45 @@ export default function Home() {
             {/* Decoración */}
             <motion.div 
               className="mt-6 text-center"
-              animate={{ opacity: [0.5, 1, 0.5] }}
+              animate={{ opacity: [0.7, 1, 0.7] }}
               transition={{ duration: 3, repeat: Infinity }}
             >
-              <p className="text-xs text-gray-400">
-                Haciendo del mundo un lugar más dulce 🍨
+              <p className="text-xs text-gray-500 flex items-center justify-center gap-1 flex-wrap">
+                Haciendo del mundo un lugar más
+                <span className="px-2 py-0.5 rounded-full bg-pink-100 text-pink-500 font-medium">dulce</span>
+                <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-500 font-medium">feliz</span>
+                y
+                <span className="px-2 py-0.5 rounded-full bg-purple-100 text-purple-500 font-medium">divertido</span>
+                🍨
               </p>
             </motion.div>
           </motion.div>
 
-          {/* Decoración flotante */}
+          {/* Decoración flotante - Conos */}
           <motion.div
-            className="absolute -top-6 -right-6 text-4xl"
-            animate={{ rotate: [0, 20, 0], y: [0, -10, 0] }}
+            className="absolute -top-6 -right-6"
+            animate={{ rotate: [0, 15, -15, 0], y: [0, -8, 0] }}
             transition={{ duration: 3, repeat: Infinity }}
           >
-            🍦
+            <svg viewBox="0 0 40 55" className="w-12 h-16">
+              <circle cx="20" cy="12" r="10" fill="#FFB5C5" />
+              <circle cx="16" cy="9" r="3" fill="#fff" opacity="0.5" />
+              <polygon points="10,20 20,50 30,20" fill="#D4A574" />
+              <line x1="13" y1="28" x2="27" y2="28" stroke="#c99a5e" strokeWidth="0.8" />
+              <line x1="15" y1="36" x2="25" y2="36" stroke="#c99a5e" strokeWidth="0.8" />
+            </svg>
           </motion.div>
           <motion.div
-            className="absolute -bottom-4 -left-4 text-3xl"
-            animate={{ rotate: [0, -15, 0], y: [0, 5, 0] }}
+            className="absolute -bottom-4 -left-4"
+            animate={{ rotate: [0, -10, 10, 0], y: [0, 5, 0] }}
             transition={{ duration: 2.5, repeat: Infinity, delay: 0.5 }}
           >
-            🍨
+            <svg viewBox="0 0 40 55" className="w-10 h-14">
+              <circle cx="20" cy="12" r="10" fill="#E0BBE4" />
+              <circle cx="24" cy="9" r="2.5" fill="#fff" opacity="0.4" />
+              <polygon points="10,20 20,50 30,20" fill="#D4A574" />
+              <line x1="13" y1="28" x2="27" y2="28" stroke="#c99a5e" strokeWidth="0.8" />
+            </svg>
           </motion.div>
         </motion.div>
 
