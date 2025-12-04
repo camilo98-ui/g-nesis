@@ -254,42 +254,44 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
             >
-              <label className="text-sm font-medium text-gray-600 mb-2 block text-center">🏪 Tienda</label>
               <StoreSelector 
                 selectedStore={pendingStore} 
                 onStoreChange={handleStoreSelect}
               />
             </motion.div>
 
-            {/* Campo de contraseña - Siempre visible abajo */}
+            {/* Campo de contraseña - Mismo estilo que selector de tienda */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="mb-4"
+              className="mb-4 flex flex-col items-center"
             >
-              <label className="text-sm font-medium text-gray-600 mb-2 flex items-center gap-2">
-                <Lock className="w-4 h-4 text-pink-500" />
-                Contraseña {needsPassword ? '' : '(opcional)'}
-              </label>
-              <div className="relative">
-                <Input
-                  type={showLoginPassword ? "text" : "password"}
-                  placeholder={needsPassword ? "Ingresa la contraseña" : "Sin contraseña requerida"}
-                  value={loginPassword}
-                  onChange={(e) => { setLoginPassword(e.target.value); setLoginError(''); }}
-                  onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-                  className="pr-10 border-pink-200 focus:border-pink-400"
-                  disabled={!needsPassword && pendingStore}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowLoginPassword(!showLoginPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-pink-500"
-                >
-                  {showLoginPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
+              <Button 
+                variant="outline" 
+                className="w-full md:w-[300px] bg-white border-gray-200 hover:border-pink-300 transition-all shadow-md hover:shadow-lg rounded-xl justify-between group h-auto py-2.5"
+                onClick={() => {}}
+              >
+                <div className="flex items-center gap-2 w-full">
+                  <Lock className="w-4 h-4 text-pink-500" />
+                  <input
+                    type={showLoginPassword ? "text" : "password"}
+                    placeholder={needsPassword ? "Ingresa la contraseña" : "Sin contraseña requerida"}
+                    value={loginPassword}
+                    onChange={(e) => { setLoginPassword(e.target.value); setLoginError(''); }}
+                    onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+                    className="flex-1 bg-transparent border-none outline-none text-pink-600 font-medium placeholder:text-gray-500 text-sm"
+                    disabled={!needsPassword && pendingStore}
+                  />
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); setShowLoginPassword(!showLoginPassword); }}
+                    className="text-gray-400 hover:text-pink-500"
+                  >
+                    {showLoginPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </Button>
               {loginError && (
                 <motion.p 
                   initial={{ opacity: 0, y: -5 }}
