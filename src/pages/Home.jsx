@@ -790,31 +790,7 @@ export default function Home() {
           </motion.div>
         ) : null}
         
-        {/* Vista especial para Calidad - Planner embebido */}
-        {selectedStore && selectedRole === 'calidad' && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mt-6"
-          >
-            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-              <div className="bg-gradient-to-r from-teal-500 to-cyan-500 p-4 text-white">
-                <h3 className="font-bold flex items-center gap-2">
-                  📅 Planner de la Tienda
-                  <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">Solo lectura</span>
-                </h3>
-                <p className="text-sm text-white/80">{selectedStoreName}</p>
-              </div>
-              <div className="p-4">
-                <iframe 
-                  src={createPageUrl('PopsyPlanner') + `?viewOnly=true`}
-                  className="w-full h-[500px] border-0 rounded-xl"
-                  title="Planner"
-                />
-              </div>
-            </div>
-          </motion.div>
-        )}
+        {/* Vista especial para Calidad - Solo módulo de calidad, sin planner embebido */}
         
         {/* Vista especial para C. Interno - Solo Planner */}
         {selectedStore && selectedRole === 'c_interno' && (
