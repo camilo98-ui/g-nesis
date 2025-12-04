@@ -161,14 +161,24 @@ export default function PopsyPlanner() {
             </TabsContent>
 
             <TabsContent value="stats" className="mt-0">
-              <PlannerStats 
-                shifts={shifts} 
-                cashiers={cashiers} 
-                storeId={selectedStore}
-                currentWeek={currentWeek}
-                salesData={salesData}
-                shiftRecords={shiftRecords}
-              />
+              {isReadOnly ? (
+                <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
+                  <div className="w-16 h-16 bg-amber-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                    <span className="text-3xl">🔒</span>
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-700 mb-2">Acceso Restringido</h3>
+                  <p className="text-gray-500 text-sm">Los reportes solo están disponibles para Líderes de Experiencia</p>
+                </div>
+              ) : (
+                <PlannerStats 
+                  shifts={shifts} 
+                  cashiers={cashiers} 
+                  storeId={selectedStore}
+                  currentWeek={currentWeek}
+                  salesData={salesData}
+                  shiftRecords={shiftRecords}
+                />
+              )}
             </TabsContent>
           </Tabs>
         )}
