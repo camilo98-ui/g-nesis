@@ -682,7 +682,7 @@ export default function Rankings() {
                             <p className="font-bold text-purple-600">{item.overallScore?.toFixed(1)} pts</p>
                             <p className="text-xs text-gray-400">{item.shifts} turnos</p>
                           </div>
-                          <Link to={createPageUrl(`CashierProfile?id=${item.cashier_id}`)}>
+                          <Link to={createPageUrl(`CashierProfile?id=${item.cashier_id}&from=rankings`)}>
                             <Button variant="ghost" size="icon" className="hover:bg-purple-50">
                               <Eye className="w-4 h-4 text-purple-500" />
                             </Button>
@@ -726,7 +726,7 @@ export default function Rankings() {
                             <p className="font-bold text-emerald-600">{formatCurrency(item.totalSales)}</p>
                             <p className="text-xs text-gray-400">{item.shifts} turnos</p>
                           </div>
-                          <Link to={createPageUrl(`CashierProfile?id=${item.cashier_id}`)}>
+                          <Link to={createPageUrl(`CashierProfile?id=${item.cashier_id}&from=rankings`)}>
                             <Button variant="ghost" size="icon" className="hover:bg-emerald-50">
                               <Eye className="w-4 h-4 text-emerald-500" />
                             </Button>
@@ -770,7 +770,7 @@ export default function Rankings() {
                             <p className="font-bold text-blue-600">{item.totalTransactions.toLocaleString()}</p>
                             <p className="text-xs text-gray-400">transacciones</p>
                           </div>
-                          <Link to={createPageUrl(`CashierProfile?id=${item.cashier_id}`)}>
+                          <Link to={createPageUrl(`CashierProfile?id=${item.cashier_id}&from=rankings`)}>
                             <Button variant="ghost" size="icon" className="hover:bg-blue-50">
                               <Eye className="w-4 h-4 text-blue-500" />
                             </Button>
@@ -814,7 +814,7 @@ export default function Rankings() {
                             <p className="font-bold text-amber-600">{formatCurrency(item.avgTicket)}</p>
                             <p className="text-xs text-gray-400">{item.totalTickets} tickets</p>
                           </div>
-                          <Link to={createPageUrl(`CashierProfile?id=${item.cashier_id}`)}>
+                          <Link to={createPageUrl(`CashierProfile?id=${item.cashier_id}&from=rankings`)}>
                             <Button variant="ghost" size="icon" className="hover:bg-amber-50">
                               <Eye className="w-4 h-4 text-amber-500" />
                             </Button>
@@ -858,7 +858,7 @@ export default function Rankings() {
                             <p className="font-bold text-rose-600">{item.totalSuggested?.toLocaleString()}</p>
                             <p className="text-xs text-gray-400">sugeridos</p>
                           </div>
-                          <Link to={createPageUrl(`CashierProfile?id=${item.cashier_id}`)}>
+                          <Link to={createPageUrl(`CashierProfile?id=${item.cashier_id}&from=rankings`)}>
                             <Button variant="ghost" size="icon" className="hover:bg-rose-50">
                               <Eye className="w-4 h-4 text-rose-500" />
                             </Button>

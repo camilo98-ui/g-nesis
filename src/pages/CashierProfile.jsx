@@ -14,6 +14,7 @@ import BadgesDisplay from '@/components/gamification/BadgesDisplay';
 export default function CashierProfile() {
   const urlParams = new URLSearchParams(window.location.search);
   const cashierId = urlParams.get('id');
+  const from = urlParams.get('from'); // 'rankings', 'cashiers', etc.
 
   const { data: cashier, isLoading } = useQuery({
     queryKey: ['cashier', cashierId],
@@ -32,13 +33,21 @@ export default function CashierProfile() {
     );
   }
 
+  const getBackLink = () => {
+    if (from === 'rankings') return { url: 'Rankings', label: 'Volver al Ranking Global' };
+    if (from === 'cashiers') return { url: 'CashiersDashboard', label: 'Volver a Cajeros' };
+    return { url: 'CashiersDashboard', label: 'Volver a Cajeros' };
+  };
+
+  const backInfo = getBackLink();
+
   if (!cashier) {
     return (
       <div className="min-h-screen bg-gray-50 p-6">
         <div className="max-w-2xl mx-auto text-center py-12">
           <p className="text-gray-500">Cajero no encontrado</p>
-          <Link to={createPageUrl('Team')}>
-            <Button variant="outline" className="mt-4">Volver al equipo</Button>
+          <Link to={createPageUrl(backInfo.url)}>
+            <Button variant="outline" className="mt-4">{backInfo.label}</Button>
           </Link>
         </div>
       </div>
@@ -49,10 +58,10 @@ export default function CashierProfile() {
     <div className="min-h-screen bg-gray-50 p-4 md:p-6">
       <div className="max-w-2xl mx-auto space-y-6">
         {/* Back Button */}
-        <Link to={createPageUrl('Team')}>
+        <Link to={createPageUrl(backInfo.url)}>
           <Button variant="ghost" size="sm" className="gap-2 text-gray-600 hover:text-pink-600">
             <ArrowLeft className="w-4 h-4" />
-            Volver al equipo
+            {backInfo.label}
           </Button>
         </Link>
 
