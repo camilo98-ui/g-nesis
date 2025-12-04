@@ -21,11 +21,11 @@ export default function PopsyPlanner() {
   const [showCashierManager, setShowCashierManager] = useState(false);
   const [showAISuggestion, setShowAISuggestion] = useState(false);
   
-  // Check if view only mode (for Calidad role)
+  // Check if view only mode (for Calidad, Embajador, C.Interno roles)
   const urlParams = new URLSearchParams(window.location.search);
   const viewOnly = urlParams.get('viewOnly') === 'true';
   const userRole = localStorage.getItem('userRole') || 'lider';
-  const isReadOnly = viewOnly || userRole === 'embajador' || userRole === 'calidad';
+  const isReadOnly = viewOnly || userRole === 'embajador' || userRole === 'calidad' || userRole === 'c_interno';
 
   useEffect(() => {
     const saved = localStorage.getItem('selectedStore');
