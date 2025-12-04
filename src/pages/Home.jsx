@@ -273,7 +273,7 @@ export default function Home() {
               transition={{ delay: 0.3 }}
             >
               <h2 className="text-2xl font-bold bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent">
-                ¡Bienvenido!
+                {selectedRole === 'calidad' ? '¡Hola María!' : selectedRole === 'c_interno' ? '¡Hola Julián!' : '¡Bienvenido!'}
               </h2>
               <p className="text-gray-500 text-sm mt-1">Ingresa para continuar</p>
             </motion.div>
@@ -461,94 +461,217 @@ export default function Home() {
             </motion.div>
           </motion.div>
 
-          {/* Decoración flotante - Helados profesionales */}
-          <motion.div
-            className="absolute -top-8 -right-8"
-            animate={{ 
-              y: [0, -12, 0],
-              rotate: [0, 8, -8, 0],
-              scale: [1, 1.05, 1]
-            }}
-            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-          >
-            <svg viewBox="0 0 50 70" className="w-16 h-20 drop-shadow-lg">
-              {/* Cono doble bola premium */}
-              <defs>
-                <linearGradient id="pinkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#fce7f3" />
-                  <stop offset="50%" stopColor="#f9a8d4" />
-                  <stop offset="100%" stopColor="#ec4899" />
-                </linearGradient>
-                <linearGradient id="coneGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#fbbf24" />
-                  <stop offset="100%" stopColor="#d97706" />
-                </linearGradient>
-                <filter id="shadow1" x="-20%" y="-20%" width="140%" height="140%">
-                  <feDropShadow dx="1" dy="2" stdDeviation="2" floodOpacity="0.2"/>
-                </filter>
-              </defs>
-              {/* Bola superior */}
-              <ellipse cx="25" cy="14" rx="12" ry="11" fill="url(#pinkGrad)" filter="url(#shadow1)" />
-              <ellipse cx="21" cy="10" rx="4" ry="3" fill="white" opacity="0.5" />
-              {/* Bola inferior */}
-              <ellipse cx="25" cy="28" rx="13" ry="12" fill="#fdf2f8" filter="url(#shadow1)" />
-              <ellipse cx="22" cy="24" rx="3" ry="2.5" fill="white" opacity="0.4" />
-              {/* Cono */}
-              <path d="M12 36 L25 65 L38 36 Z" fill="url(#coneGrad)" />
-              <path d="M14 40 L36 40" stroke="#92400e" strokeWidth="1" opacity="0.5" />
-              <path d="M16 46 L34 46" stroke="#92400e" strokeWidth="1" opacity="0.5" />
-              <path d="M19 52 L31 52" stroke="#92400e" strokeWidth="1" opacity="0.5" />
-              {/* Sprinkles */}
-              <rect x="18" y="10" width="3" height="1.5" rx="0.5" fill="#ec4899" transform="rotate(30 19 10)" />
-              <rect x="28" y="12" width="3" height="1.5" rx="0.5" fill="#f472b6" transform="rotate(-20 29 12)" />
-              <rect x="20" y="25" width="2.5" height="1.2" rx="0.5" fill="#fbbf24" transform="rotate(45 21 25)" />
-              {/* Cherry */}
-              <circle cx="25" cy="5" r="3.5" fill="#dc2626" />
-              <ellipse cx="23.5" cy="3.5" rx="1" ry="0.8" fill="white" opacity="0.6" />
-              <path d="M25 2 Q28 -2 30 0" stroke="#16a34a" strokeWidth="1.5" fill="none" />
-            </svg>
-          </motion.div>
-          
-          <motion.div
-            className="absolute -bottom-6 -left-6"
-            animate={{ 
-              y: [0, 8, 0],
-              rotate: [0, -12, 12, 0],
-              scale: [1, 1.03, 1]
-            }}
-            transition={{ duration: 3.5, repeat: Infinity, delay: 0.5, ease: "easeInOut" }}
-          >
-            <svg viewBox="0 0 45 60" className="w-14 h-18 drop-shadow-lg">
-              {/* Malteada premium */}
-              <defs>
-                <linearGradient id="cupGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#f0abfc" />
-                  <stop offset="100%" stopColor="#c084fc" />
-                </linearGradient>
-                <linearGradient id="creamGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="#fff" />
-                  <stop offset="100%" stopColor="#fdf4ff" />
-                </linearGradient>
-              </defs>
-              {/* Vaso */}
-              <path d="M8 22 L12 55 L33 55 L37 22 Z" fill="url(#cupGrad)" rx="3" />
-              <ellipse cx="22.5" cy="22" rx="14.5" ry="4" fill="#e879f9" />
-              {/* Crema batida */}
-              <ellipse cx="22.5" cy="18" rx="11" ry="6" fill="url(#creamGrad)" />
-              <ellipse cx="22.5" cy="12" rx="8" ry="5" fill="white" />
-              <ellipse cx="22.5" cy="7" rx="5" ry="3.5" fill="white" />
-              {/* Cherry */}
-              <circle cx="22.5" cy="3" r="3" fill="#ef4444" />
-              <ellipse cx="21" cy="1.5" rx="1" ry="0.7" fill="white" opacity="0.5" />
-              {/* Pajita */}
-              <rect x="28" y="5" width="3" height="40" rx="1" fill="#fbbf24" />
-              <rect x="27" y="3" width="5" height="4" rx="1" fill="#f59e0b" />
-              {/* Decoración vaso */}
-              <ellipse cx="22.5" cy="35" rx="8" ry="2" fill="white" opacity="0.3" />
-              <text x="22.5" y="42" textAnchor="middle" fontSize="8" fill="white" fontWeight="bold" opacity="0.8">♥</text>
-            </svg>
-          </motion.div>
-          
+          {/* Decoración flotante - Cambia según el rol */}
+          {selectedRole === 'lider' ? (
+            /* Líder - Persona con corona */
+            <>
+              <motion.div
+                className="absolute -top-6 -right-6"
+                animate={{ 
+                  y: [0, -8, 0],
+                  rotate: [0, 5, -5, 0],
+                  scale: [1, 1.05, 1]
+                }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <svg viewBox="0 0 60 80" className="w-20 h-24 drop-shadow-lg">
+                  {/* Corona */}
+                  <motion.g animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity }}>
+                    <path d="M15 25 L20 15 L25 22 L30 10 L35 22 L40 15 L45 25 L42 28 L18 28 Z" fill="#fbbf24" />
+                    <circle cx="20" cy="15" r="2" fill="#ef4444" />
+                    <circle cx="30" cy="10" r="2.5" fill="#3b82f6" />
+                    <circle cx="40" cy="15" r="2" fill="#22c55e" />
+                    <motion.path d="M15 25 L20 15 L25 22 L30 10 L35 22 L40 15 L45 25" stroke="#f59e0b" strokeWidth="1" fill="none" animate={{ strokeDashoffset: [0, 10] }} transition={{ duration: 2, repeat: Infinity }} />
+                  </motion.g>
+                  {/* Cabeza */}
+                  <circle cx="30" cy="40" r="12" fill="#fcd9b6" />
+                  <ellipse cx="26" cy="38" rx="2" ry="2.5" fill="#1e293b" />
+                  <ellipse cx="34" cy="38" rx="2" ry="2.5" fill="#1e293b" />
+                  <motion.path d="M26 46 Q30 50 34 46" stroke="#ec4899" strokeWidth="2" fill="none" strokeLinecap="round" animate={{ d: ["M26 46 Q30 50 34 46", "M26 46 Q30 52 34 46", "M26 46 Q30 50 34 46"] }} transition={{ duration: 2, repeat: Infinity }} />
+                  {/* Cuerpo */}
+                  <path d="M18 52 Q30 48 42 52 L44 72 L16 72 Z" fill="#ec4899" />
+                  <motion.ellipse cx="30" cy="60" rx="8" ry="3" fill="#f472b6" animate={{ ry: [3, 4, 3] }} transition={{ duration: 1.5, repeat: Infinity }} />
+                </svg>
+              </motion.div>
+              <motion.div className="absolute -bottom-4 -left-4" animate={{ scale: [1, 1.2, 1], rotate: [0, 10, -10, 0] }} transition={{ duration: 2, repeat: Infinity }}>
+                <span className="text-3xl">👑</span>
+              </motion.div>
+            </>
+          ) : selectedRole === 'embajador' ? (
+            /* Embajador - Grupo de personas */
+            <>
+              <motion.div
+                className="absolute -top-4 -right-4"
+                animate={{ y: [0, -6, 0] }}
+                transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <svg viewBox="0 0 80 70" className="w-24 h-20 drop-shadow-lg">
+                  {/* Persona 1 - izquierda */}
+                  <motion.g animate={{ y: [0, -3, 0] }} transition={{ duration: 2, repeat: Infinity, delay: 0 }}>
+                    <circle cx="18" cy="25" r="10" fill="#fcd9b6" />
+                    <ellipse cx="15" cy="24" rx="1.5" ry="2" fill="#1e293b" />
+                    <ellipse cx="21" cy="24" rx="1.5" ry="2" fill="#1e293b" />
+                    <path d="M15 29 Q18 32 21 29" stroke="#ec4899" strokeWidth="1.5" fill="none" />
+                    <path d="M8 35 Q18 32 28 35 L30 55 L6 55 Z" fill="#8b5cf6" />
+                  </motion.g>
+                  {/* Persona 2 - centro */}
+                  <motion.g animate={{ y: [0, -4, 0] }} transition={{ duration: 2.2, repeat: Infinity, delay: 0.3 }}>
+                    <circle cx="40" cy="20" r="11" fill="#e5c8a8" />
+                    <ellipse cx="36" cy="19" rx="1.8" ry="2.2" fill="#1e293b" />
+                    <ellipse cx="44" cy="19" rx="1.8" ry="2.2" fill="#1e293b" />
+                    <motion.path d="M36 25 Q40 29 44 25" stroke="#ec4899" strokeWidth="2" fill="none" animate={{ d: ["M36 25 Q40 29 44 25", "M36 25 Q40 31 44 25"] }} transition={{ duration: 1.5, repeat: Infinity }} />
+                    <path d="M26 32 Q40 28 54 32 L56 58 L24 58 Z" fill="#ec4899" />
+                  </motion.g>
+                  {/* Persona 3 - derecha */}
+                  <motion.g animate={{ y: [0, -3, 0] }} transition={{ duration: 2.1, repeat: Infinity, delay: 0.6 }}>
+                    <circle cx="62" cy="25" r="10" fill="#d4a88e" />
+                    <ellipse cx="59" cy="24" rx="1.5" ry="2" fill="#1e293b" />
+                    <ellipse cx="65" cy="24" rx="1.5" ry="2" fill="#1e293b" />
+                    <path d="M59 29 Q62 32 65 29" stroke="#ec4899" strokeWidth="1.5" fill="none" />
+                    <path d="M52 35 Q62 32 72 35 L74 55 L50 55 Z" fill="#06b6d4" />
+                  </motion.g>
+                </svg>
+              </motion.div>
+              <motion.div className="absolute -bottom-3 -left-3 flex" animate={{ x: [0, 3, 0] }} transition={{ duration: 2, repeat: Infinity }}>
+                <motion.span animate={{ y: [0, -5, 0] }} transition={{ duration: 1.5, repeat: Infinity }} className="text-2xl">🙋</motion.span>
+                <motion.span animate={{ y: [0, -5, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }} className="text-2xl -ml-1">🙋‍♀️</motion.span>
+                <motion.span animate={{ y: [0, -5, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0.4 }} className="text-2xl -ml-1">🙋‍♂️</motion.span>
+              </motion.div>
+            </>
+          ) : selectedRole === 'calidad' ? (
+            /* Calidad - Limpieza y desinfección */
+            <>
+              <motion.div
+                className="absolute -top-6 -right-6"
+                animate={{ 
+                  rotate: [0, 15, -15, 0],
+                  y: [0, -5, 0]
+                }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <svg viewBox="0 0 60 80" className="w-18 h-24 drop-shadow-lg">
+                  {/* Botella spray */}
+                  <rect x="20" y="30" width="20" height="35" rx="3" fill="#06b6d4" />
+                  <rect x="22" y="32" width="16" height="8" fill="#0891b2" opacity="0.5" />
+                  <rect x="26" y="20" width="8" height="12" fill="#334155" />
+                  <rect x="24" y="15" width="12" height="6" rx="2" fill="#475569" />
+                  <motion.path d="M18 18 L12 10" stroke="#06b6d4" strokeWidth="2" strokeLinecap="round" strokeDasharray="3,2" animate={{ opacity: [0, 1, 0] }} transition={{ duration: 0.8, repeat: Infinity }} />
+                  <motion.path d="M15 22 L8 18" stroke="#06b6d4" strokeWidth="2" strokeLinecap="round" strokeDasharray="3,2" animate={{ opacity: [0, 1, 0] }} transition={{ duration: 0.8, repeat: Infinity, delay: 0.2 }} />
+                  <motion.path d="M16 26 L6 26" stroke="#06b6d4" strokeWidth="2" strokeLinecap="round" strokeDasharray="3,2" animate={{ opacity: [0, 1, 0] }} transition={{ duration: 0.8, repeat: Infinity, delay: 0.4 }} />
+                  <text x="30" y="55" textAnchor="middle" fontSize="8" fill="white" fontWeight="bold">✓</text>
+                </svg>
+              </motion.div>
+              <motion.div
+                className="absolute -bottom-4 -left-4"
+                animate={{ rotate: [-20, 20, -20], x: [0, 5, 0] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+              >
+                <svg viewBox="0 0 50 60" className="w-14 h-16 drop-shadow-lg">
+                  {/* Escoba/Cepillo */}
+                  <rect x="23" y="5" width="4" height="35" fill="#92400e" rx="1" />
+                  <path d="M12 40 L38 40 L35 58 L15 58 Z" fill="#22c55e" />
+                  <line x1="15" y1="45" x2="15" y2="55" stroke="#16a34a" strokeWidth="2" />
+                  <line x1="20" y1="44" x2="20" y2="56" stroke="#16a34a" strokeWidth="2" />
+                  <line x1="25" y1="44" x2="25" y2="56" stroke="#16a34a" strokeWidth="2" />
+                  <line x1="30" y1="44" x2="30" y2="56" stroke="#16a34a" strokeWidth="2" />
+                  <line x1="35" y1="45" x2="35" y2="55" stroke="#16a34a" strokeWidth="2" />
+                </svg>
+              </motion.div>
+              <motion.div className="absolute top-1/2 -left-6" animate={{ scale: [0.8, 1.2, 0.8], opacity: [0.5, 1, 0.5] }} transition={{ duration: 1.5, repeat: Infinity }}>
+                <span className="text-xl">✨</span>
+              </motion.div>
+              <motion.div className="absolute top-1/4 -right-3" animate={{ scale: [1, 1.3, 1], opacity: [0.6, 1, 0.6] }} transition={{ duration: 1.2, repeat: Infinity, delay: 0.5 }}>
+                <span className="text-lg">🧴</span>
+              </motion.div>
+            </>
+          ) : selectedRole === 'c_interno' ? (
+            /* C. Interno - Chico con gafas */
+            <>
+              <motion.div
+                className="absolute -top-6 -right-6"
+                animate={{ 
+                  y: [0, -8, 0],
+                  rotate: [0, 3, -3, 0]
+                }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <svg viewBox="0 0 60 80" className="w-20 h-24 drop-shadow-lg">
+                  {/* Cabeza */}
+                  <circle cx="30" cy="30" r="14" fill="#fcd9b6" />
+                  {/* Pelo */}
+                  <path d="M16 25 Q20 12 30 14 Q40 12 44 25" fill="#1e293b" />
+                  <path d="M18 22 Q22 18 26 20" fill="#1e293b" />
+                  <path d="M34 20 Q38 18 42 22" fill="#1e293b" />
+                  {/* Gafas - más grandes y animadas */}
+                  <motion.g animate={{ y: [0, -1, 0] }} transition={{ duration: 2, repeat: Infinity }}>
+                    <rect x="18" y="26" width="11" height="9" rx="2" fill="none" stroke="#1e293b" strokeWidth="2" />
+                    <rect x="31" y="26" width="11" height="9" rx="2" fill="none" stroke="#1e293b" strokeWidth="2" />
+                    <line x1="29" y1="30" x2="31" y2="30" stroke="#1e293b" strokeWidth="2" />
+                    <line x1="18" y1="30" x2="14" y2="28" stroke="#1e293b" strokeWidth="1.5" />
+                    <line x1="42" y1="30" x2="46" y2="28" stroke="#1e293b" strokeWidth="1.5" />
+                    {/* Reflejo en gafas */}
+                    <motion.ellipse cx="22" cy="29" rx="2" ry="1.5" fill="white" opacity="0.4" animate={{ opacity: [0.2, 0.6, 0.2] }} transition={{ duration: 2, repeat: Infinity }} />
+                    <motion.ellipse cx="35" cy="29" rx="2" ry="1.5" fill="white" opacity="0.4" animate={{ opacity: [0.2, 0.6, 0.2] }} transition={{ duration: 2, repeat: Infinity, delay: 0.3 }} />
+                  </motion.g>
+                  {/* Ojos detrás de gafas */}
+                  <motion.ellipse cx="23" cy="30" rx="2" ry="2.5" fill="#1e293b" animate={{ scaleY: [1, 0.1, 1] }} transition={{ duration: 3, repeat: Infinity, repeatDelay: 2 }} />
+                  <motion.ellipse cx="37" cy="30" rx="2" ry="2.5" fill="#1e293b" animate={{ scaleY: [1, 0.1, 1] }} transition={{ duration: 3, repeat: Infinity, repeatDelay: 2 }} />
+                  {/* Sonrisa */}
+                  <motion.path d="M25 38 Q30 42 35 38" stroke="#ec4899" strokeWidth="2" fill="none" strokeLinecap="round" animate={{ d: ["M25 38 Q30 42 35 38", "M25 38 Q30 44 35 38", "M25 38 Q30 42 35 38"] }} transition={{ duration: 2.5, repeat: Infinity }} />
+                  {/* Cuerpo con corbata */}
+                  <path d="M16 44 Q30 40 44 44 L46 72 L14 72 Z" fill="#6366f1" />
+                  <path d="M28 44 L30 55 L32 44 Z" fill="#ef4444" />
+                  <rect x="28" y="44" width="4" height="3" fill="#dc2626" />
+                </svg>
+              </motion.div>
+              <motion.div className="absolute -bottom-3 -left-3" animate={{ rotate: [0, 10, -10, 0], y: [0, -3, 0] }} transition={{ duration: 2, repeat: Infinity }}>
+                <span className="text-2xl">📋</span>
+              </motion.div>
+              <motion.div className="absolute top-1/3 -left-5" animate={{ scale: [0.9, 1.1, 0.9] }} transition={{ duration: 1.5, repeat: Infinity }}>
+                <span className="text-lg">🔍</span>
+              </motion.div>
+            </>
+          ) : (
+            /* Default - Helados */
+            <>
+              <motion.div
+                className="absolute -top-8 -right-8"
+                animate={{ 
+                  y: [0, -12, 0],
+                  rotate: [0, 8, -8, 0],
+                  scale: [1, 1.05, 1]
+                }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <svg viewBox="0 0 50 70" className="w-16 h-20 drop-shadow-lg">
+                  <defs>
+                    <linearGradient id="pinkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#fce7f3" />
+                      <stop offset="50%" stopColor="#f9a8d4" />
+                      <stop offset="100%" stopColor="#ec4899" />
+                    </linearGradient>
+                    <linearGradient id="coneGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#fbbf24" />
+                      <stop offset="100%" stopColor="#d97706" />
+                    </linearGradient>
+                  </defs>
+                  <ellipse cx="25" cy="14" rx="12" ry="11" fill="url(#pinkGrad)" />
+                  <ellipse cx="21" cy="10" rx="4" ry="3" fill="white" opacity="0.5" />
+                  <ellipse cx="25" cy="28" rx="13" ry="12" fill="#fdf2f8" />
+                  <path d="M12 36 L25 65 L38 36 Z" fill="url(#coneGrad)" />
+                  <circle cx="25" cy="5" r="3.5" fill="#dc2626" />
+                </svg>
+              </motion.div>
+              <motion.div
+                className="absolute -bottom-6 -left-6"
+                animate={{ y: [0, 8, 0], rotate: [0, -12, 12, 0] }}
+                transition={{ duration: 3.5, repeat: Infinity, delay: 0.5 }}
+              >
+                <span className="text-4xl">🍦</span>
+              </motion.div>
+            </>
+          )}
+
           {/* Partículas flotantes */}
           <motion.div
             className="absolute top-1/4 -left-3"
@@ -564,14 +687,7 @@ export default function Home() {
           >
             <div className="w-3 h-3 rounded-full bg-gradient-to-r from-amber-200 to-yellow-300" />
           </motion.div>
-          <motion.div
-            className="absolute top-1/2 -right-4"
-            animate={{ y: [0, -8, 0], scale: [1, 1.2, 1] }}
-            transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
-          >
-            <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-purple-300 to-violet-400" />
           </motion.div>
-        </motion.div>
 
         {/* Popsy Story Modal */}
         <AnimatePresence>
@@ -715,7 +831,7 @@ export default function Home() {
               // Restricciones por rol
               const isLocked = (selectedRole === 'embajador' && item.page === 'Budget') ||
                               (selectedRole === 'calidad' && !['Quality'].includes(item.page)) ||
-                              (selectedRole === 'c_interno');
+                              (selectedRole === 'c_interno' && item.page !== 'Quality');
               
               // Para Calidad, solo mostrar Calidad
               if (selectedRole === 'calidad' && item.page !== 'Quality') {
@@ -790,7 +906,42 @@ export default function Home() {
           </motion.div>
         ) : null}
         
-        {/* Vista especial para Calidad - Solo módulo de calidad, sin planner embebido */}
+        {/* Vista especial para Calidad - Planner en solo lectura */}
+        {selectedStore && selectedRole === 'calidad' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-6"
+          >
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+              <div className="bg-gradient-to-r from-teal-500 to-cyan-500 p-4 text-white">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-bold flex items-center gap-2">
+                      📅 Planner de la Tienda
+                      <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">Solo lectura</span>
+                    </h3>
+                    <p className="text-sm text-white/80">{selectedStoreName}</p>
+                  </div>
+                  <motion.div
+                    animate={{ rotate: [0, 10, -10, 0] }}
+                    transition={{ duration: 3, repeat: Infinity }}
+                    className="text-3xl"
+                  >
+                    🧹
+                  </motion.div>
+                </div>
+              </div>
+              <div className="p-4">
+                <iframe 
+                  src={createPageUrl('PopsyPlanner') + `?viewOnly=true`}
+                  className="w-full h-[500px] border-0 rounded-xl"
+                  title="Planner"
+                />
+              </div>
+            </div>
+          </motion.div>
+        )}
         
         {/* Vista especial para C. Interno - Solo Planner */}
         {selectedStore && selectedRole === 'c_interno' && (
