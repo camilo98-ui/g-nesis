@@ -91,14 +91,21 @@ export default function DailySalesForm({ storeId, onSuccess }) {
         date: data.date 
       });
       
+      const salesValue = parseFloat(data.total_sales) || 0;
+      const ticketsValue = parseInt(data.total_tickets) || 0;
+      const transactionsValue = parseInt(data.total_transactions) || 0;
+      const suggestedValue = parseInt(data.total_suggested) || 0;
+      
       const recordData = {
         store_id: storeId,
         date: data.date,
-        total_sales: parseFloat(data.total_sales) || 0,
-        total_tickets: parseInt(data.total_tickets) || 0,
-        total_transactions: parseInt(data.total_transactions) || 0,
-        total_suggested: parseInt(data.total_suggested) || 0
+        total_sales: salesValue,
+        total_tickets: ticketsValue,
+        total_transactions: transactionsValue,
+        total_suggested: suggestedValue
       };
+      
+      console.log('Guardando datos:', recordData);
 
       if (existing.length > 0) {
         return base44.entities.DailySales.update(existing[0].id, recordData);
