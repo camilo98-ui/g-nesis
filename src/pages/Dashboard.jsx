@@ -14,6 +14,7 @@ import WeatherSalesImpactChart from '@/components/weather/WeatherSalesImpactChar
 
 import GrowthVelocityChart from '@/components/management/GrowthVelocityChart';
 import StoreReportGenerator from '@/components/reports/StoreReportGenerator';
+import DemandPredictionChart from '@/components/predictions/DemandPredictionChart';
 import { 
   DollarSign, Receipt, Zap, Gift, TrendingUp, TrendingDown, ArrowLeft,
   BarChart3, AlertTriangle, CheckCircle2, X, FileSpreadsheet, Target,
@@ -1003,6 +1004,12 @@ export default function Dashboard() {
             {/* Daily Goals */}
             <DailyGoalsCard storeId={selectedStore} />
             
+            {/* Demand Prediction Chart */}
+            <DemandPredictionChart 
+              storeId={selectedStore}
+              formatCurrency={formatCurrency}
+            />
+
             {/* Weather Impact Chart */}
             {weatherData && (
               <WeatherSalesImpactChart 
