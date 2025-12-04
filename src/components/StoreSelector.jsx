@@ -167,49 +167,66 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
             {filteredStores.map((store) => (
                   <motion.div 
                     key={store.code}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    whileHover={{ x: 3, backgroundColor: 'rgba(236, 72, 153, 0.1)' }}
+                    initial={{ opacity: 0, x: -10, scale: 0.95 }}
+                    animate={{ opacity: 1, x: 0, scale: 1 }}
+                    whileHover={{ x: 5, scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
                     className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all cursor-pointer ${
                       selectedStore === store.code 
-                        ? 'bg-gradient-to-r from-pink-100 to-rose-100 border-2 border-pink-300' 
-                        : 'hover:bg-pink-50/50 border-2 border-transparent'
+                        ? 'bg-gradient-to-r from-pink-400 via-rose-400 to-purple-400 border-2 border-pink-300 shadow-lg shadow-pink-500/30' 
+                        : 'bg-gradient-to-r from-white to-pink-50/50 hover:from-pink-50 hover:to-rose-50 border-2 border-transparent hover:border-pink-200'
                     }`}
                   >
                     <button
                       onClick={() => handleStoreClick(store)}
                       className="flex-1 flex items-center gap-3 text-left"
                     >
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                      <motion.div 
+                        className={`w-9 h-9 rounded-xl flex items-center justify-center shadow-sm ${
+                          selectedStore === store.code 
+                            ? 'bg-white/30 backdrop-blur-sm' 
+                            : 'bg-gradient-to-br from-pink-200 via-rose-200 to-purple-200'
+                        }`}
+                        animate={selectedStore === store.code ? { rotate: [0, 5, -5, 0] } : {}}
+                        transition={{ duration: 2, repeat: Infinity }}
+                      >
+                        <motion.div
+                          animate={{ y: [0, -2, 0] }}
+                          transition={{ duration: 1.5, repeat: Infinity }}
+                        >
+                          🍦
+                        </motion.div>
+                      </motion.div>
+                      <span className={`font-bold tracking-wide text-center flex-1 ${
                         selectedStore === store.code 
-                          ? 'bg-gradient-to-br from-pink-500 to-rose-500' 
-                          : 'bg-gradient-to-br from-pink-100 to-rose-100'
-                      }`}>
-                        <svg viewBox="0 0 24 32" className="w-4 h-5">
-                          <circle cx="12" cy="8" r="7" fill={selectedStore === store.code ? '#fff' : '#FFB5C5'} stroke={selectedStore === store.code ? '#fff' : '#ec4899'} strokeWidth="1"/>
-                          <polygon points="5,12 12,30 19,12" fill={selectedStore === store.code ? '#fce7f3' : '#D4A574'} stroke={selectedStore === store.code ? '#fff' : '#c99a5e'} strokeWidth="0.5"/>
-                        </svg>
-                      </div>
-                      <span className={`font-semibold text-center flex-1 ${
-                        selectedStore === store.code ? 'text-pink-700' : 'text-pink-600'
-                      }`}>
+                          ? 'text-white drop-shadow-sm' 
+                          : 'text-transparent bg-clip-text bg-gradient-to-r from-pink-600 via-rose-600 to-purple-600'
+                      }`} style={{ fontFamily: "'Poppins', 'Quicksand', sans-serif" }}>
                         {store.displayName}
                       </span>
                       {hasPassword(store.code) && (
-                        <Lock className="w-3.5 h-3.5 text-amber-500" />
+                        <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 2, repeat: Infinity }}>
+                          <Lock className={`w-3.5 h-3.5 ${selectedStore === store.code ? 'text-white/80' : 'text-amber-500'}`} />
+                        </motion.div>
                       )}
                     </button>
-                    <button
+                    <motion.button
+                      whileHover={{ rotate: 90 }}
                       onClick={(e) => {
                         e.stopPropagation();
                         setEditPasswordDialog({ open: true, store });
                         setNewPassword(storePasswords.find(p => p.store_code === store.code)?.password || '');
                       }}
-                      className="p-1.5 hover:bg-pink-200/50 rounded-lg transition-colors"
+                      className={`p-1.5 rounded-lg transition-colors ${
+                        selectedStore === store.code 
+                          ? 'hover:bg-white/20' 
+                          : 'hover:bg-pink-200/50'
+                      }`}
                       title="Configurar contraseña"
                     >
-                      <Settings className="w-3.5 h-3.5 text-pink-400" />
-                    </button>
+                      <Settings className={`w-3.5 h-3.5 ${selectedStore === store.code ? 'text-white/80' : 'text-pink-400'}`} />
+                    </motion.button>
                   </motion.div>
                 ))}
             {filteredStores.length === 0 && (
