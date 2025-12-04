@@ -66,7 +66,7 @@ export default function Layout({ children, currentPageName }) {
             const Icon = item.icon;
             const isActive = currentPageName === item.page;
             
-            // Restricciones por rol
+            // Restricciones por rol - Embajador tiene acceso al mapa
             const isLocked = (userRole === 'calidad' && (item.page === 'FreezerMap' || item.page === 'Management')) ||
                             (userRole === 'c_interno' && item.page !== 'Home' && item.page !== 'PopsyPlanner');
             
