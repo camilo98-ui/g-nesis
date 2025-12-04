@@ -20,6 +20,12 @@ export default function PopsyPlanner() {
   const [activeTab, setActiveTab] = useState('calendar');
   const [showCashierManager, setShowCashierManager] = useState(false);
   const [showAISuggestion, setShowAISuggestion] = useState(false);
+  
+  // Check if view only mode (for Calidad role)
+  const urlParams = new URLSearchParams(window.location.search);
+  const viewOnly = urlParams.get('viewOnly') === 'true';
+  const userRole = localStorage.getItem('userRole') || 'lider';
+  const isReadOnly = viewOnly || userRole === 'embajador' || userRole === 'calidad';
 
   useEffect(() => {
     const saved = localStorage.getItem('selectedStore');
@@ -95,8 +101,13 @@ export default function PopsyPlanner() {
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-2">
+              {isReadOnly && (
+                <span className="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-medium flex items-center gap-1">
+                  🔒 Solo lectura
+                </span>
+              )}
               <StoreSelector selectedStore={selectedStore} onStoreChange={handleStoreChange} />
-              {selectedStore && (
+              {selectedStore && !isReadOnly && (
                 <>
                   <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                     <Button onClick={() => setShowCashierManager(true)} variant="outline" className="gap-2 border-violet-200 text-violet-600 hover:bg-violet-50">
@@ -145,6 +156,7 @@ export default function PopsyPlanner() {
                 storeId={selectedStore}
                 loading={loadingShifts}
                 onExportPDF={handleExportPDF}
+                readOnly={isReadOnly}
               />
             </TabsContent>
 
