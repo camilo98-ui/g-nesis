@@ -129,11 +129,100 @@ export default function Home() {
   const [selectedRole, setSelectedRole] = useState('');
 
   const ROLES = [
-    { id: 'lider', name: 'Líder de Experiencia', icon: '👑', color: 'from-amber-400 to-yellow-500', description: 'Acceso completo' },
-    { id: 'embajador', name: 'Embajador', icon: '⭐', color: 'from-pink-400 to-rose-500', description: 'Acceso limitado' },
-    { id: 'calidad', name: 'Calidad', icon: '✅', color: 'from-teal-400 to-cyan-500', description: 'Solo visualización' },
-    { id: 'c_interno', name: 'C. Interno', icon: '📋', color: 'from-violet-400 to-purple-500', description: 'Solo Planner' },
+    { id: 'lider', name: 'Líder de Experiencia', icon: 'lider', color: 'from-amber-400 to-yellow-500', description: 'Acceso completo' },
+    { id: 'embajador', name: 'Embajador', icon: 'embajador', color: 'from-pink-400 to-rose-500', description: 'Acceso limitado' },
+    { id: 'calidad', name: 'Calidad', icon: 'calidad', color: 'from-teal-400 to-cyan-500', description: 'Solo visualización' },
+    { id: 'c_interno', name: 'C. Interno', icon: 'c_interno', color: 'from-violet-400 to-purple-500', description: 'Solo Planner' },
   ];
+
+  // Ilustraciones dinámicas por rol
+  const RoleIcon = ({ roleId, isSelected }) => {
+    if (roleId === 'lider') {
+      return (
+        <svg viewBox="0 0 40 50" className="w-full h-full">
+          <motion.g animate={isSelected ? { y: [0, -2, 0] } : {}} transition={{ duration: 1.5, repeat: Infinity }}>
+            <path d="M10 18 L14 10 L18 15 L20 6 L22 15 L26 10 L30 18 L28 20 L12 20 Z" fill="#fbbf24" />
+            <circle cx="14" cy="10" r="1.5" fill="#ef4444" />
+            <circle cx="20" cy="6" r="2" fill="#3b82f6" />
+            <circle cx="26" cy="10" r="1.5" fill="#22c55e" />
+          </motion.g>
+          <circle cx="20" cy="28" r="8" fill="#fcd9b6" />
+          <ellipse cx="17" cy="27" rx="1.2" ry="1.5" fill="#1e293b" />
+          <ellipse cx="23" cy="27" rx="1.2" ry="1.5" fill="#1e293b" />
+          <motion.path d="M17 32 Q20 35 23 32" stroke="#ec4899" strokeWidth="1.5" fill="none" strokeLinecap="round" animate={isSelected ? { d: ["M17 32 Q20 35 23 32", "M17 32 Q20 37 23 32"] } : {}} transition={{ duration: 1, repeat: Infinity }} />
+          <path d="M12 36 Q20 33 28 36 L29 48 L11 48 Z" fill="#ec4899" />
+        </svg>
+      );
+    }
+    if (roleId === 'embajador') {
+      return (
+        <svg viewBox="0 0 50 40" className="w-full h-full">
+          <motion.g animate={isSelected ? { y: [0, -2, 0] } : {}} transition={{ duration: 1.8, repeat: Infinity }}>
+            <circle cx="12" cy="15" r="6" fill="#fcd9b6" />
+            <ellipse cx="10" cy="14" rx="1" ry="1.2" fill="#1e293b" />
+            <ellipse cx="14" cy="14" rx="1" ry="1.2" fill="#1e293b" />
+            <path d="M6 21 Q12 19 18 21 L19 35 L5 35 Z" fill="#8b5cf6" />
+          </motion.g>
+          <motion.g animate={isSelected ? { y: [0, -3, 0] } : {}} transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }}>
+            <circle cx="25" cy="12" r="7" fill="#e5c8a8" />
+            <ellipse cx="22" cy="11" rx="1.2" ry="1.4" fill="#1e293b" />
+            <ellipse cx="28" cy="11" rx="1.2" ry="1.4" fill="#1e293b" />
+            <motion.path d="M22 16 Q25 19 28 16" stroke="#ec4899" strokeWidth="1.2" fill="none" animate={isSelected ? { d: ["M22 16 Q25 19 28 16", "M22 16 Q25 21 28 16"] } : {}} transition={{ duration: 1.2, repeat: Infinity }} />
+            <path d="M16 20 Q25 17 34 20 L35 38 L15 38 Z" fill="#ec4899" />
+          </motion.g>
+          <motion.g animate={isSelected ? { y: [0, -2, 0] } : {}} transition={{ duration: 1.6, repeat: Infinity, delay: 0.4 }}>
+            <circle cx="38" cy="15" r="6" fill="#d4a88e" />
+            <ellipse cx="36" cy="14" rx="1" ry="1.2" fill="#1e293b" />
+            <ellipse cx="40" cy="14" rx="1" ry="1.2" fill="#1e293b" />
+            <path d="M32 21 Q38 19 44 21 L45 35 L31 35 Z" fill="#06b6d4" />
+          </motion.g>
+        </svg>
+      );
+    }
+    if (roleId === 'calidad') {
+      return (
+        <svg viewBox="0 0 40 50" className="w-full h-full">
+          <motion.g animate={isSelected ? { rotate: [0, 10, -10, 0], y: [0, -2, 0] } : {}} transition={{ duration: 1.5, repeat: Infinity }}>
+            <rect x="14" y="20" width="12" height="22" rx="2" fill="#06b6d4" />
+            <rect x="15" y="21" width="10" height="5" fill="#0891b2" opacity="0.5" />
+            <rect x="17" y="12" width="6" height="9" fill="#334155" />
+            <rect x="16" y="8" width="8" height="5" rx="1.5" fill="#475569" />
+            <motion.path d="M12 12 L8 6" stroke="#06b6d4" strokeWidth="1.5" strokeLinecap="round" strokeDasharray="2,1" animate={isSelected ? { opacity: [0, 1, 0] } : { opacity: 0 }} transition={{ duration: 0.6, repeat: Infinity }} />
+            <motion.path d="M10 16 L5 13" stroke="#06b6d4" strokeWidth="1.5" strokeLinecap="round" strokeDasharray="2,1" animate={isSelected ? { opacity: [0, 1, 0] } : { opacity: 0 }} transition={{ duration: 0.6, repeat: Infinity, delay: 0.15 }} />
+            <motion.path d="M11 20 L4 20" stroke="#06b6d4" strokeWidth="1.5" strokeLinecap="round" strokeDasharray="2,1" animate={isSelected ? { opacity: [0, 1, 0] } : { opacity: 0 }} transition={{ duration: 0.6, repeat: Infinity, delay: 0.3 }} />
+            <text x="20" y="36" textAnchor="middle" fontSize="6" fill="white" fontWeight="bold">✓</text>
+          </motion.g>
+          <motion.g animate={isSelected ? { x: [0, 3, 0] } : {}} transition={{ duration: 1, repeat: Infinity }}>
+            <text x="32" y="14" fontSize="10">✨</text>
+          </motion.g>
+        </svg>
+      );
+    }
+    if (roleId === 'c_interno') {
+      return (
+        <svg viewBox="0 0 40 50" className="w-full h-full">
+          <circle cx="20" cy="18" r="10" fill="#fcd9b6" />
+          <path d="M10 15 Q14 8 20 10 Q26 8 30 15" fill="#1e293b" />
+          <motion.g animate={isSelected ? { y: [0, -1, 0] } : {}} transition={{ duration: 1.5, repeat: Infinity }}>
+            <rect x="11" y="15" width="8" height="6" rx="1.5" fill="none" stroke="#1e293b" strokeWidth="1.5" />
+            <rect x="21" y="15" width="8" height="6" rx="1.5" fill="none" stroke="#1e293b" strokeWidth="1.5" />
+            <line x1="19" y1="18" x2="21" y2="18" stroke="#1e293b" strokeWidth="1.5" />
+            <line x1="11" y1="18" x2="8" y2="16" stroke="#1e293b" strokeWidth="1" />
+            <line x1="29" y1="18" x2="32" y2="16" stroke="#1e293b" strokeWidth="1" />
+            <motion.ellipse cx="14" cy="17" rx="1.5" ry="1" fill="white" opacity="0.3" animate={isSelected ? { opacity: [0.2, 0.5, 0.2] } : {}} transition={{ duration: 1.5, repeat: Infinity }} />
+            <motion.ellipse cx="24" cy="17" rx="1.5" ry="1" fill="white" opacity="0.3" animate={isSelected ? { opacity: [0.2, 0.5, 0.2] } : {}} transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }} />
+          </motion.g>
+          <motion.ellipse cx="15" cy="18" rx="1.5" ry="2" fill="#1e293b" animate={isSelected ? { scaleY: [1, 0.1, 1] } : {}} transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 1.5 }} />
+          <motion.ellipse cx="25" cy="18" rx="1.5" ry="2" fill="#1e293b" animate={isSelected ? { scaleY: [1, 0.1, 1] } : {}} transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 1.5 }} />
+          <motion.path d="M16 24 Q20 27 24 24" stroke="#ec4899" strokeWidth="1.5" fill="none" strokeLinecap="round" animate={isSelected ? { d: ["M16 24 Q20 27 24 24", "M16 24 Q20 29 24 24"] } : {}} transition={{ duration: 1.5, repeat: Infinity }} />
+          <path d="M10 28 Q20 25 30 28 L31 48 L9 48 Z" fill="#6366f1" />
+          <path d="M18 28 L20 36 L22 28 Z" fill="#ef4444" />
+          <rect x="18" y="28" width="4" height="2" fill="#dc2626" />
+        </svg>
+      );
+    }
+    return null;
+  };
 
   // Fetch store passwords
   const { data: storePasswords = [] } = useQuery({
@@ -316,20 +405,19 @@ export default function Home() {
                       <div className="relative z-10 flex items-center gap-2">
                         {/* Icon container con animación */}
                         <motion.div 
-                          className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                          className={`w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden ${
                             selectedRole === role.id 
                               ? `bg-gradient-to-br ${role.color} shadow-md` 
                               : 'bg-gray-100'
                           }`}
                           animate={selectedRole === role.id ? { 
-                            scale: [1, 1.1, 1],
-                            rotate: [0, 5, -5, 0]
+                            scale: [1, 1.05, 1]
                           } : {}}
                           transition={{ duration: 0.5 }}
                         >
-                          <span className={`text-lg ${selectedRole === role.id ? 'drop-shadow-sm' : ''}`}>
-                            {role.icon}
-                          </span>
+                          <div className="w-10 h-10">
+                            <RoleIcon roleId={role.id} isSelected={selectedRole === role.id} />
+                          </div>
                         </motion.div>
                         
                         <div className="text-left flex-1">
