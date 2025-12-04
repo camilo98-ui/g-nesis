@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { Calendar as CalendarIcon, Sparkles, BarChart3, UserPlus } from 'lucide-react';
+import { Calendar as CalendarIcon, Sparkles, BarChart3, UserPlus, MessageCircle } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format, startOfWeek, endOfWeek, eachDayOfInterval } from 'date-fns';
@@ -12,6 +12,7 @@ import WeeklyCalendar from '@/components/planner/WeeklyCalendar';
 import PlannerStats from '@/components/planner/PlannerStats';
 import CashierManagerModal from '@/components/planner/CashierManagerModal';
 import AIScheduleSuggestion from '@/components/planner/AIScheduleSuggestion';
+import AIScheduleAssistant from '@/components/planner/AIScheduleAssistant';
 import { generateSchedulePDF } from '@/components/planner/SchedulePDFExport';
 
 export default function PopsyPlanner() {
@@ -20,6 +21,7 @@ export default function PopsyPlanner() {
   const [activeTab, setActiveTab] = useState('calendar');
   const [showCashierManager, setShowCashierManager] = useState(false);
   const [showAISuggestion, setShowAISuggestion] = useState(false);
+  const [showAIAssistant, setShowAIAssistant] = useState(false);
   
   // Check if view only mode (for Calidad, Embajador, C.Interno roles)
   const urlParams = new URLSearchParams(window.location.search);
@@ -116,6 +118,12 @@ export default function PopsyPlanner() {
                     </Button>
                   </motion.div>
                   <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Button onClick={() => setShowAIAssistant(true)} variant="outline" className="gap-2 border-purple-200 text-purple-600 hover:bg-purple-50">
+                      <MessageCircle className="w-4 h-4" />
+                      <span className="hidden sm:inline">Asistente</span>
+                    </Button>
+                  </motion.div>
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                     <Button onClick={() => setShowAISuggestion(true)} className="bg-gradient-to-r from-violet-500 to-purple-600 text-white gap-2 shadow-lg">
                       <Sparkles className="w-4 h-4" />
                       <span className="hidden sm:inline">Generar con IA</span>
@@ -201,6 +209,17 @@ export default function PopsyPlanner() {
         onClose={() => setShowCashierManager(false)}
         cashiers={cashiers}
         storeId={selectedStore}
+      />
+
+      <AIScheduleAssistant
+        isOpen={showAIAssistant}
+        onClose={() => setShowAIAssistant(false)}
+        storeId={selectedStore}
+        storeName={storeName}
+        cashiers={cashiers}
+        weekDays={weekDays}
+        existingShifts={weekShifts}
+        salesData={salesData}
       />
     </div>
   );
