@@ -13,7 +13,7 @@ import CashierAnalysis from '@/components/cashier/CashierAnalysis';
 import BadgesDisplay from '@/components/gamification/BadgesDisplay';
 import CashierRanking from '@/components/gamification/CashierRanking';
 import CashierGoalsManager from '@/components/gamification/CashierGoalsManager';
-import CashierFullProfile, { ViewProfileButton } from '@/components/cashier/CashierFullProfile';
+import { ViewProfileButton } from '@/components/cashier/CashierFullProfile';
 import { 
   ArrowLeft, Users, Search, TrendingUp, TrendingDown, 
   Award, Target, BarChart3, User, ChevronRight, Star,
@@ -300,9 +300,11 @@ export default function CashiersDashboard() {
                             )}
                           </motion.div>
                           <div>
-                            <p className={`font-bold ${selectedCashier?.id === cashier.id ? 'text-white' : 'text-gray-800'}`}>
-                              {cashier.name}
-                            </p>
+                            <Link to={createPageUrl(`CashierProfile?id=${cashier.id}&from=cashiers`)}>
+                              <p className={`font-bold hover:underline ${selectedCashier?.id === cashier.id ? 'text-white' : 'text-gray-800'}`}>
+                                {cashier.name}
+                              </p>
+                            </Link>
                             <div className={`flex items-center gap-2 text-xs ${selectedCashier?.id === cashier.id ? 'text-white/70' : 'text-gray-500'}`}>
                               <span>{cashier.daysWorked} turnos</span>
                               <span>·</span>
