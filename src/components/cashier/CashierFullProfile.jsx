@@ -39,19 +39,20 @@ export default function CashierFullProfile({
   onClose 
 }) {
   const analysisRef = useRef(null);
+  const cashierId = cashier?.id;
 
   // Fetch badges
   const { data: badges = [] } = useQuery({
-    queryKey: ['badges', cashier?.id],
-    queryFn: () => base44.entities.CashierBadge.filter({ cashier_id: cashier.id }),
-    enabled: !!cashier?.id
+    queryKey: ['badges', cashierId],
+    queryFn: () => base44.entities.CashierBadge.filter({ cashier_id: cashierId }),
+    enabled: !!cashierId
   });
 
   // Fetch all shift records for this cashier
   const { data: shiftRecords = [] } = useQuery({
-    queryKey: ['shiftRecords', storeId, cashier?.id],
-    queryFn: () => base44.entities.ShiftRecord.filter({ store_id: storeId, cashier_id: cashier?.id }),
-    enabled: !!storeId && !!cashier?.id
+    queryKey: ['shiftRecords', storeId, cashierId],
+    queryFn: () => base44.entities.ShiftRecord.filter({ store_id: storeId, cashier_id: cashierId }),
+    enabled: !!storeId && !!cashierId
   });
 
   // Auto scroll to analysis when profile opens
@@ -61,11 +62,11 @@ export default function CashierFullProfile({
         analysisRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 300);
     }
-  }, [isOpen, cashier?.id]);
+  }, [isOpen, cashierId]);
 
   // Calculate hashtags based on performance
   const hashtags = useMemo(() => {
-    if (!stats || !teamStats) return [];
+    if (!stats || !teamStats || !cashier) return [];
     const tags = [];
     
     // Top seller
@@ -99,7 +100,7 @@ export default function CashierFullProfile({
     }
     
     // Veteran or new talent based on hire date
-    if (cashier?.hire_date) {
+    if (cashier.hire_date) {
       const hireDate = new Date(cashier.hire_date);
       const monthsWorked = (new Date() - hireDate) / (1000 * 60 * 60 * 24 * 30);
       if (monthsWorked >= 12) {
@@ -125,6 +126,7 @@ export default function CashierFullProfile({
     }).format(val || 0);
   };
 
+  // Early return AFTER all hooks
   if (!cashier) return null;
 
   const ProfileContent = () => (
