@@ -6,15 +6,16 @@ import {
   Trophy, Crown, Medal, TrendingUp, TrendingDown, 
   ChevronRight, ChevronLeft, Check, Sparkles, CalendarRange, Eye
 } from 'lucide-react';
-import { ViewProfileButton } from '@/components/cashier/CashierFullProfile';
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
+import WeekFilter from '@/components/dashboard/WeekFilter';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subWeeks, subMonths, eachDayOfInterval, isSameDay, isWithinInterval, addMonths, isToday } from 'date-fns';
 import { es } from 'date-fns/locale';
 
-const PODIUM_COLORS = ['from-pink-400 to-rose-500', 'from-gray-300 to-slate-400', 'from-amber-400 to-orange-500'];
+const PODIUM_COLORS = ['from-pink-300 to-rose-400', 'from-gray-200 to-slate-300', 'from-amber-300 to-orange-400'];
 const PODIUM_ICONS = [Crown, Medal, Medal];
 
 // Calendario personalizado para ranking
@@ -231,12 +232,12 @@ function RankingCalendar({ selected, onSelect, onApply }) {
 }
 
 export default function CashierRanking({ storeId, onSelectCashier }) {
-  const [period, setPeriod] = useState('weekly');
   const [dateRange, setDateRange] = useState({
     from: startOfWeek(new Date(), { weekStartsOn: 1 }),
     to: new Date()
   });
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [weekFilter, setWeekFilter] = useState(null);
 
   const { data: cashiers = [] } = useQuery({
     queryKey: ['cashiers', storeId],
@@ -252,9 +253,10 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
 
   // Calcular ranking
   const ranking = useMemo(() => {
+    const activeRange = weekFilter || dateRange;
     const filteredRecords = shiftRecords.filter(r => {
       const d = new Date(r.date);
-      return d >= dateRange.from && d <= dateRange.to;
+      return d >= activeRange.from && d <= activeRange.to;
     });
 
     const cashierStats = {};
@@ -279,7 +281,7 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
     return Object.values(cashierStats)
       .sort((a, b) => b.totalSales - a.totalSales)
       .map((c, idx) => ({ ...c, rank: idx + 1 }));
-  }, [cashiers, shiftRecords, dateRange]);
+  }, [cashiers, shiftRecords, dateRange, weekFilter]);
 
   const formatCurrency = (val) => {
     if (val >= 1000000) return `$${(val/1000000).toFixed(1)}M`;
@@ -287,32 +289,18 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
     return `$${val.toFixed(0)}`;
   };
 
-  const handlePeriodChange = (newPeriod) => {
-    setPeriod(newPeriod);
-    if (newPeriod === 'weekly') {
-      setDateRange({
-        from: startOfWeek(new Date(), { weekStartsOn: 1 }),
-        to: new Date()
-      });
-    } else {
-      setDateRange({
-        from: startOfMonth(new Date()),
-        to: new Date()
-      });
-    }
-  };
-
   const getDateLabel = () => {
-    if (isSameDay(dateRange.from, dateRange.to)) {
-      return format(dateRange.from, 'dd MMM', { locale: es });
+    const activeRange = weekFilter || dateRange;
+    if (isSameDay(activeRange.from, activeRange.to)) {
+      return format(activeRange.from, 'dd MMM', { locale: es });
     }
-    return `${format(dateRange.from, 'dd MMM', { locale: es })} - ${format(dateRange.to, 'dd MMM', { locale: es })}`;
+    return `${format(activeRange.from, 'dd MMM', { locale: es })} - ${format(activeRange.to, 'dd MMM', { locale: es })}`;
   };
 
   return (
-    <Card className="border-none shadow-xl bg-gradient-to-br from-pink-50/70 via-rose-50/50 to-amber-50/30 backdrop-blur-sm overflow-hidden">
+    <Card className="border-none shadow-xl bg-gradient-to-br from-white via-pink-50/30 to-rose-50/20 backdrop-blur-sm overflow-hidden">
       <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-2">
           <CardTitle className="text-lg font-bold flex items-center gap-2">
             <motion.div
               animate={{ rotate: [0, 10, -10, 0], scale: [1, 1.1, 1] }}
@@ -326,41 +314,32 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
               Ranking
             </motion.span>
           </CardTitle>
-          <Tabs value={period} onValueChange={handlePeriodChange}>
-            <TabsList className="bg-white/60">
-              <TabsTrigger value="weekly" className="text-xs data-[state=active]:bg-pink-500 data-[state=active]:text-white">
-                Semanal
-              </TabsTrigger>
-              <TabsTrigger value="monthly" className="text-xs data-[state=active]:bg-pink-500 data-[state=active]:text-white">
-                Mensual
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </div>
-        
-        {/* Selector de fecha con calendario - posicionado a la derecha */}
-        <div className="flex items-center justify-end gap-2 mt-3">
-          <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
-            <PopoverTrigger asChild>
-              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  className="gap-2 border-pink-200 hover:border-pink-400 hover:bg-pink-50 rounded-full shadow-sm bg-white/80"
-                >
-                  <CalendarRange className="w-4 h-4 text-pink-500" />
-                  <span className="font-medium text-pink-600">{getDateLabel()}</span>
-                </Button>
-              </motion.div>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0 border-0 shadow-none bg-transparent" align="center">
-              <RankingCalendar
-                selected={dateRange}
-                onSelect={setDateRange}
-                onApply={() => setIsCalendarOpen(false)}
-              />
-            </PopoverContent>
-          </Popover>
+          
+          {/* Filtros de fecha */}
+          <div className="flex items-center gap-2">
+            <WeekFilter onWeekChange={(range) => { setWeekFilter(range); }} />
+            <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+              <PopoverTrigger asChild>
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="gap-2 border-pink-200 hover:border-pink-400 hover:bg-pink-50 rounded-full shadow-sm bg-white/80"
+                  >
+                    <CalendarRange className="w-4 h-4 text-pink-500" />
+                    <span className="font-medium text-pink-600">{getDateLabel()}</span>
+                  </Button>
+                </motion.div>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0 border-0 shadow-none bg-transparent" align="center">
+                <RankingCalendar
+                  selected={dateRange}
+                  onSelect={(range) => { setDateRange(range); setWeekFilter(null); }}
+                  onApply={() => setIsCalendarOpen(false)}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
       </CardHeader>
       
@@ -456,16 +435,11 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
                   Ticket: {formatCurrency(cashier.avgTicket)}
                 </p>
               </div>
-              <ViewProfileButton 
-                cashier={cashier}
-                stats={cashier}
-                storeId={storeId}
-                teamStats={{
-                  avgSales: ranking.reduce((s, c) => s + c.totalSales, 0) / ranking.length,
-                  avgTicket: ranking.reduce((s, c) => s + c.avgTicket, 0) / ranking.length,
-                  avgSuggested: ranking.reduce((s, c) => s + c.totalSuggested, 0) / ranking.length
-                }}
-              />
+              <Link to={createPageUrl(`CashierProfile?id=${cashier.id}&from=cashiers`)}>
+                <Button variant="ghost" size="icon" className="hover:bg-pink-50">
+                  <Eye className="w-4 h-4 text-pink-500" />
+                </Button>
+              </Link>
             </motion.div>
           ))}
         </div>
