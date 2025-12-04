@@ -14,6 +14,7 @@ import WeatherSalesImpactChart from '@/components/weather/WeatherSalesImpactChar
 
 import GrowthVelocityChart from '@/components/management/GrowthVelocityChart';
 import StoreReportGenerator from '@/components/reports/StoreReportGenerator';
+import CompraValeModal from '@/components/dashboard/CompraValeModal';
 
 import { 
   DollarSign, Receipt, Zap, Gift, TrendingUp, TrendingDown, ArrowLeft,
@@ -446,6 +447,7 @@ export default function Dashboard() {
   const [showExport, setShowExport] = useState(false);
   const [weatherData, setWeatherData] = useState(null);
   const [weekFilter, setWeekFilter] = useState(null); // Filtro de semana independiente
+  const [showCompraVale, setShowCompraVale] = useState(false);
   
   // Fetch weather data
   useEffect(() => {
@@ -708,6 +710,17 @@ export default function Dashboard() {
           <div className="space-y-6">
             {/* Acciones rápidas - más sutil */}
             <div className="flex justify-end gap-2">
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowCompraVale(true)}
+                  className="text-violet-600 border-violet-200 hover:bg-violet-50 hover:border-violet-300"
+                >
+                  <BarChart3 className="w-4 h-4 mr-1" />
+                  Compra Vale
+                </Button>
+              </motion.div>
               <StoreReportGenerator 
                 storeId={selectedStore}
                 storeName={selectedStoreName}
@@ -1026,6 +1039,19 @@ export default function Dashboard() {
                 formatCurrency={formatCurrency}
               />
             )}
+
+            {/* Compra Vale Modal */}
+            <AnimatePresence>
+              {showCompraVale && (
+                <CompraValeModal
+                  isOpen={showCompraVale}
+                  onClose={() => setShowCompraVale(false)}
+                  storeId={selectedStore}
+                  currentSales={totals}
+                  dateRange={weekFilter || dateRange}
+                />
+              )}
+            </AnimatePresence>
 
             {/* Proyecciones */}
             {projections && (
