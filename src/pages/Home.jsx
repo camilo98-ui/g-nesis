@@ -402,7 +402,7 @@ export default function Home() {
                       <div className="relative z-10 flex items-center gap-2">
                         {/* Icon container con animación */}
                         <motion.div 
-                          className={`w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden ${
+                          className={`w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden ${
                             selectedRole === role.id 
                               ? `bg-gradient-to-br ${role.color} shadow-md` 
                               : 'bg-gray-100'
@@ -412,7 +412,7 @@ export default function Home() {
                           } : {}}
                           transition={{ duration: 0.5 }}
                         >
-                          <div className="w-10 h-10">
+                          <div className="w-5 h-5">
                             <RoleIcon roleId={role.id} isSelected={selectedRole === role.id} />
                           </div>
                         </motion.div>
