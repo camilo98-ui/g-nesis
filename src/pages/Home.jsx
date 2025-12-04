@@ -244,7 +244,7 @@ export default function Home() {
               <h2 className="text-2xl font-bold bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent">
                 ¡Bienvenido!
               </h2>
-              <p className="text-gray-500 text-sm mt-1">Selecciona tu tienda para comenzar</p>
+              <p className="text-gray-500 text-sm mt-1">Ingresa para continuar</p>
             </motion.div>
 
             {/* Selector de tienda - Centrado */}
