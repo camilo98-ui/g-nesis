@@ -461,31 +461,115 @@ export default function Home() {
             </motion.div>
           </motion.div>
 
-          {/* Decoración flotante - Conos */}
+          {/* Decoración flotante - Helados profesionales */}
           <motion.div
-            className="absolute -top-6 -right-6"
-            animate={{ rotate: [0, 15, -15, 0], y: [0, -8, 0] }}
-            transition={{ duration: 3, repeat: Infinity }}
+            className="absolute -top-8 -right-8"
+            animate={{ 
+              y: [0, -12, 0],
+              rotate: [0, 8, -8, 0],
+              scale: [1, 1.05, 1]
+            }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
           >
-            <svg viewBox="0 0 40 55" className="w-12 h-16">
-              <circle cx="20" cy="12" r="10" fill="#FFB5C5" />
-              <circle cx="16" cy="9" r="3" fill="#fff" opacity="0.5" />
-              <polygon points="10,20 20,50 30,20" fill="#D4A574" />
-              <line x1="13" y1="28" x2="27" y2="28" stroke="#c99a5e" strokeWidth="0.8" />
-              <line x1="15" y1="36" x2="25" y2="36" stroke="#c99a5e" strokeWidth="0.8" />
+            <svg viewBox="0 0 50 70" className="w-16 h-20 drop-shadow-lg">
+              {/* Cono doble bola premium */}
+              <defs>
+                <linearGradient id="pinkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#fce7f3" />
+                  <stop offset="50%" stopColor="#f9a8d4" />
+                  <stop offset="100%" stopColor="#ec4899" />
+                </linearGradient>
+                <linearGradient id="coneGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#fbbf24" />
+                  <stop offset="100%" stopColor="#d97706" />
+                </linearGradient>
+                <filter id="shadow1" x="-20%" y="-20%" width="140%" height="140%">
+                  <feDropShadow dx="1" dy="2" stdDeviation="2" floodOpacity="0.2"/>
+                </filter>
+              </defs>
+              {/* Bola superior */}
+              <ellipse cx="25" cy="14" rx="12" ry="11" fill="url(#pinkGrad)" filter="url(#shadow1)" />
+              <ellipse cx="21" cy="10" rx="4" ry="3" fill="white" opacity="0.5" />
+              {/* Bola inferior */}
+              <ellipse cx="25" cy="28" rx="13" ry="12" fill="#fdf2f8" filter="url(#shadow1)" />
+              <ellipse cx="22" cy="24" rx="3" ry="2.5" fill="white" opacity="0.4" />
+              {/* Cono */}
+              <path d="M12 36 L25 65 L38 36 Z" fill="url(#coneGrad)" />
+              <path d="M14 40 L36 40" stroke="#92400e" strokeWidth="1" opacity="0.5" />
+              <path d="M16 46 L34 46" stroke="#92400e" strokeWidth="1" opacity="0.5" />
+              <path d="M19 52 L31 52" stroke="#92400e" strokeWidth="1" opacity="0.5" />
+              {/* Sprinkles */}
+              <rect x="18" y="10" width="3" height="1.5" rx="0.5" fill="#ec4899" transform="rotate(30 19 10)" />
+              <rect x="28" y="12" width="3" height="1.5" rx="0.5" fill="#f472b6" transform="rotate(-20 29 12)" />
+              <rect x="20" y="25" width="2.5" height="1.2" rx="0.5" fill="#fbbf24" transform="rotate(45 21 25)" />
+              {/* Cherry */}
+              <circle cx="25" cy="5" r="3.5" fill="#dc2626" />
+              <ellipse cx="23.5" cy="3.5" rx="1" ry="0.8" fill="white" opacity="0.6" />
+              <path d="M25 2 Q28 -2 30 0" stroke="#16a34a" strokeWidth="1.5" fill="none" />
             </svg>
           </motion.div>
+          
           <motion.div
-            className="absolute -bottom-4 -left-4"
-            animate={{ rotate: [0, -10, 10, 0], y: [0, 5, 0] }}
-            transition={{ duration: 2.5, repeat: Infinity, delay: 0.5 }}
+            className="absolute -bottom-6 -left-6"
+            animate={{ 
+              y: [0, 8, 0],
+              rotate: [0, -12, 12, 0],
+              scale: [1, 1.03, 1]
+            }}
+            transition={{ duration: 3.5, repeat: Infinity, delay: 0.5, ease: "easeInOut" }}
           >
-            <svg viewBox="0 0 40 55" className="w-10 h-14">
-              <circle cx="20" cy="12" r="10" fill="#E0BBE4" />
-              <circle cx="24" cy="9" r="2.5" fill="#fff" opacity="0.4" />
-              <polygon points="10,20 20,50 30,20" fill="#D4A574" />
-              <line x1="13" y1="28" x2="27" y2="28" stroke="#c99a5e" strokeWidth="0.8" />
+            <svg viewBox="0 0 45 60" className="w-14 h-18 drop-shadow-lg">
+              {/* Malteada premium */}
+              <defs>
+                <linearGradient id="cupGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#f0abfc" />
+                  <stop offset="100%" stopColor="#c084fc" />
+                </linearGradient>
+                <linearGradient id="creamGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#fff" />
+                  <stop offset="100%" stopColor="#fdf4ff" />
+                </linearGradient>
+              </defs>
+              {/* Vaso */}
+              <path d="M8 22 L12 55 L33 55 L37 22 Z" fill="url(#cupGrad)" rx="3" />
+              <ellipse cx="22.5" cy="22" rx="14.5" ry="4" fill="#e879f9" />
+              {/* Crema batida */}
+              <ellipse cx="22.5" cy="18" rx="11" ry="6" fill="url(#creamGrad)" />
+              <ellipse cx="22.5" cy="12" rx="8" ry="5" fill="white" />
+              <ellipse cx="22.5" cy="7" rx="5" ry="3.5" fill="white" />
+              {/* Cherry */}
+              <circle cx="22.5" cy="3" r="3" fill="#ef4444" />
+              <ellipse cx="21" cy="1.5" rx="1" ry="0.7" fill="white" opacity="0.5" />
+              {/* Pajita */}
+              <rect x="28" y="5" width="3" height="40" rx="1" fill="#fbbf24" />
+              <rect x="27" y="3" width="5" height="4" rx="1" fill="#f59e0b" />
+              {/* Decoración vaso */}
+              <ellipse cx="22.5" cy="35" rx="8" ry="2" fill="white" opacity="0.3" />
+              <text x="22.5" y="42" textAnchor="middle" fontSize="8" fill="white" fontWeight="bold" opacity="0.8">♥</text>
             </svg>
+          </motion.div>
+          
+          {/* Partículas flotantes */}
+          <motion.div
+            className="absolute top-1/4 -left-3"
+            animate={{ y: [0, -15, 0], opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 2.5, repeat: Infinity }}
+          >
+            <div className="w-2 h-2 rounded-full bg-gradient-to-r from-pink-300 to-rose-300" />
+          </motion.div>
+          <motion.div
+            className="absolute bottom-1/3 -right-2"
+            animate={{ y: [0, 10, 0], opacity: [0.4, 0.9, 0.4] }}
+            transition={{ duration: 3, repeat: Infinity, delay: 1 }}
+          >
+            <div className="w-3 h-3 rounded-full bg-gradient-to-r from-amber-200 to-yellow-300" />
+          </motion.div>
+          <motion.div
+            className="absolute top-1/2 -right-4"
+            animate={{ y: [0, -8, 0], scale: [1, 1.2, 1] }}
+            transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+          >
+            <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-purple-300 to-violet-400" />
           </motion.div>
         </motion.div>
 
