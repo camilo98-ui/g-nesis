@@ -751,7 +751,19 @@ export default function Dashboard() {
                   iconBg={metric.iconBg}
                   iconColor={metric.iconColor}
                   format={metric.format}
-                  onClick={() => setActiveMetric(activeMetric === metric.id ? null : metric.id)}
+                  onClick={() => {
+                    const newMetric = activeMetric === metric.id ? null : metric.id;
+                    setActiveMetric(newMetric);
+                    // Auto scroll to detail panel
+                    if (newMetric) {
+                      setTimeout(() => {
+                        const detailPanel = document.getElementById('detail-panel');
+                        if (detailPanel) {
+                          detailPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                      }, 100);
+                    }
+                  }}
                   isActive={activeMetric === metric.id}
                   insight={getInsight(metric.id, metric.value, metric.budget)}
                 />
@@ -761,17 +773,19 @@ export default function Dashboard() {
             {/* Detail Panel */}
             <AnimatePresence>
               {activeMetric && (
-                <DetailPanel 
-                  metric={activeMetric}
-                  data={totals}
-                  chartData={chartData.map(d => ({
-                    ...d,
-                    avgTicket: d.tickets > 0 ? d.ventas / d.tickets : 0
-                  }))}
-                  onClose={() => setActiveMetric(null)}
-                  formatCurrency={formatCurrency}
-                  shiftData={shiftRecords}
-                />
+                <div id="detail-panel">
+                  <DetailPanel 
+                    metric={activeMetric}
+                    data={totals}
+                    chartData={chartData.map(d => ({
+                      ...d,
+                      avgTicket: d.tickets > 0 ? d.ventas / d.tickets : 0
+                    }))}
+                    onClose={() => setActiveMetric(null)}
+                    formatCurrency={formatCurrency}
+                    shiftData={shiftRecords}
+                  />
+                </div>
               )}
             </AnimatePresence>
 

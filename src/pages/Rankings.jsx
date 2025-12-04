@@ -12,7 +12,6 @@ import CashierRecommendation from '@/components/CashierRecommendation';
 import TrendChart from '@/components/ranking/TrendChart';
 import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
 import { ArrowLeft, Award, Gift, Trophy, Star, Receipt, TrendingUp, Globe, X, Medal, Search, Crown, Sparkles, Eye } from 'lucide-react';
-import { ViewProfileButton } from '@/components/cashier/CashierFullProfile';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -683,23 +682,11 @@ export default function Rankings() {
                             <p className="font-bold text-purple-600">{item.overallScore?.toFixed(1)} pts</p>
                             <p className="text-xs text-gray-400">{item.shifts} turnos</p>
                           </div>
-                          <ViewProfileButton 
-                            cashier={item.cashier}
-                            stats={{
-                              ...item,
-                              totalSales: item.totalSales,
-                              totalTickets: item.totalTickets,
-                              totalSuggested: item.totalSuggested,
-                              avgTicket: item.avgTicket,
-                              rank: item.rank
-                            }}
-                            storeId={item.store_id}
-                            teamStats={{
-                              avgSales: globalRankings.bestOverallRanking.reduce((s, c) => s + c.totalSales, 0) / globalRankings.bestOverallRanking.length,
-                              avgTicket: globalRankings.bestOverallRanking.reduce((s, c) => s + c.avgTicket, 0) / globalRankings.bestOverallRanking.length,
-                              avgSuggested: globalRankings.bestOverallRanking.reduce((s, c) => s + c.totalSuggested, 0) / globalRankings.bestOverallRanking.length
-                            }}
-                          />
+                          <Link to={createPageUrl(`CashierProfile?id=${item.cashier_id}`)}>
+                            <Button variant="ghost" size="icon" className="hover:bg-purple-50">
+                              <Eye className="w-4 h-4 text-purple-500" />
+                            </Button>
+                          </Link>
                         </motion.div>
                       ))}
                     </TabsContent>
@@ -739,16 +726,11 @@ export default function Rankings() {
                             <p className="font-bold text-emerald-600">{formatCurrency(item.totalSales)}</p>
                             <p className="text-xs text-gray-400">{item.shifts} turnos</p>
                           </div>
-                          <ViewProfileButton 
-                            cashier={item.cashier}
-                            stats={{ ...item, rank: item.rank }}
-                            storeId={item.store_id}
-                            teamStats={{
-                              avgSales: globalRankings.salesRanking.reduce((s, c) => s + c.totalSales, 0) / globalRankings.salesRanking.length,
-                              avgTicket: globalRankings.salesRanking.reduce((s, c) => s + c.avgTicket, 0) / globalRankings.salesRanking.length,
-                              avgSuggested: globalRankings.salesRanking.reduce((s, c) => s + c.totalSuggested, 0) / globalRankings.salesRanking.length
-                            }}
-                          />
+                          <Link to={createPageUrl(`CashierProfile?id=${item.cashier_id}`)}>
+                            <Button variant="ghost" size="icon" className="hover:bg-emerald-50">
+                              <Eye className="w-4 h-4 text-emerald-500" />
+                            </Button>
+                          </Link>
                         </motion.div>
                       ))}
                     </TabsContent>
@@ -788,16 +770,11 @@ export default function Rankings() {
                             <p className="font-bold text-blue-600">{item.totalTransactions.toLocaleString()}</p>
                             <p className="text-xs text-gray-400">transacciones</p>
                           </div>
-                          <ViewProfileButton 
-                            cashier={item.cashier}
-                            stats={{ ...item, rank: item.rank }}
-                            storeId={item.store_id}
-                            teamStats={{
-                              avgSales: globalRankings.transactionsRanking.reduce((s, c) => s + c.totalSales, 0) / globalRankings.transactionsRanking.length,
-                              avgTicket: globalRankings.transactionsRanking.reduce((s, c) => s + c.avgTicket, 0) / globalRankings.transactionsRanking.length,
-                              avgSuggested: globalRankings.transactionsRanking.reduce((s, c) => s + c.totalSuggested, 0) / globalRankings.transactionsRanking.length
-                            }}
-                          />
+                          <Link to={createPageUrl(`CashierProfile?id=${item.cashier_id}`)}>
+                            <Button variant="ghost" size="icon" className="hover:bg-blue-50">
+                              <Eye className="w-4 h-4 text-blue-500" />
+                            </Button>
+                          </Link>
                         </motion.div>
                       ))}
                     </TabsContent>
@@ -837,16 +814,11 @@ export default function Rankings() {
                             <p className="font-bold text-amber-600">{formatCurrency(item.avgTicket)}</p>
                             <p className="text-xs text-gray-400">{item.totalTickets} tickets</p>
                           </div>
-                          <ViewProfileButton 
-                            cashier={item.cashier}
-                            stats={{ ...item, rank: item.rank }}
-                            storeId={item.store_id}
-                            teamStats={{
-                              avgSales: globalRankings.ticketRanking.reduce((s, c) => s + c.totalSales, 0) / globalRankings.ticketRanking.length,
-                              avgTicket: globalRankings.ticketRanking.reduce((s, c) => s + c.avgTicket, 0) / globalRankings.ticketRanking.length,
-                              avgSuggested: globalRankings.ticketRanking.reduce((s, c) => s + c.totalSuggested, 0) / globalRankings.ticketRanking.length
-                            }}
-                          />
+                          <Link to={createPageUrl(`CashierProfile?id=${item.cashier_id}`)}>
+                            <Button variant="ghost" size="icon" className="hover:bg-amber-50">
+                              <Eye className="w-4 h-4 text-amber-500" />
+                            </Button>
+                          </Link>
                         </motion.div>
                       ))}
                     </TabsContent>
@@ -886,16 +858,11 @@ export default function Rankings() {
                             <p className="font-bold text-rose-600">{item.totalSuggested?.toLocaleString()}</p>
                             <p className="text-xs text-gray-400">sugeridos</p>
                           </div>
-                          <ViewProfileButton 
-                            cashier={item.cashier}
-                            stats={{ ...item, rank: item.rank }}
-                            storeId={item.store_id}
-                            teamStats={{
-                              avgSales: globalRankings.suggestedRanking.reduce((s, c) => s + c.totalSales, 0) / globalRankings.suggestedRanking.length,
-                              avgTicket: globalRankings.suggestedRanking.reduce((s, c) => s + c.avgTicket, 0) / globalRankings.suggestedRanking.length,
-                              avgSuggested: globalRankings.suggestedRanking.reduce((s, c) => s + c.totalSuggested, 0) / globalRankings.suggestedRanking.length
-                            }}
-                          />
+                          <Link to={createPageUrl(`CashierProfile?id=${item.cashier_id}`)}>
+                            <Button variant="ghost" size="icon" className="hover:bg-rose-50">
+                              <Eye className="w-4 h-4 text-rose-500" />
+                            </Button>
+                          </Link>
                         </motion.div>
                       ))}
                     </TabsContent>

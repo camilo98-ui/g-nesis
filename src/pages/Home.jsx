@@ -385,24 +385,7 @@ export default function Home() {
       <FloatingIceCreamsBg />
 
       <div className="max-w-6xl mx-auto px-4 py-6 relative z-10">
-        {/* Botón de cerrar sesión */}
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="absolute top-4 right-4 z-20"
-        >
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button
-              onClick={handleLogout}
-              variant="outline"
-              size="sm"
-              className="bg-white/80 backdrop-blur-sm border-pink-200 text-pink-600 hover:bg-pink-50 hover:text-pink-700 rounded-full shadow-sm gap-2"
-            >
-              <LogOut className="w-4 h-4" />
-              <span className="hidden sm:inline">Cerrar Sesión</span>
-            </Button>
-          </motion.div>
-        </motion.div>
+
 
         {/* Header con logo animado premium */}
         <motion.div

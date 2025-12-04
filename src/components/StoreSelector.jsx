@@ -95,16 +95,9 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
   const selectedStoreName = STORES.find(s => s.code === selectedStore)?.name || '';
   
   const handleStoreClick = (store) => {
-    const storePassword = storePasswords.find(p => p.store_code === store.code);
-    if (storePassword?.password) {
-      setPasswordDialog({ open: true, store });
-      setPasswordInput('');
-      setPasswordError('');
-    } else {
-      onStoreChange(store.code);
-      setOpen(false);
-      setSearch('');
-    }
+    onStoreChange(store.code);
+    setOpen(false);
+    setSearch('');
   };
   
   const handlePasswordSubmit = () => {
@@ -183,56 +176,23 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
                       className="flex-1 flex items-center gap-3 text-left"
                     >
                       <motion.div 
-                        className={`w-9 h-9 rounded-xl flex items-center justify-center shadow-sm ${
+                        className={`w-8 h-8 rounded-lg flex items-center justify-center ${
                           selectedStore === store.code 
                             ? 'bg-white/30 backdrop-blur-sm' 
-                            : 'bg-gradient-to-br from-pink-200 via-rose-200 to-purple-200'
+                            : 'bg-gradient-to-br from-pink-100 to-rose-100'
                         }`}
-                        animate={selectedStore === store.code ? { rotate: [0, 10, -10, 0] } : {}}
-                        transition={{ duration: 2, repeat: Infinity }}
                       >
-                        {/* Cono redondo dinámico */}
-                        <motion.svg 
-                          viewBox="0 0 32 40" 
-                          className="w-6 h-7"
-                          animate={{ y: [0, -2, 0], rotate: [0, 3, -3, 0] }}
-                          transition={{ duration: 2, repeat: Infinity }}
-                        >
-                          {/* Bola de helado superior */}
-                          <motion.circle 
-                            cx="16" cy="10" r="9" 
-                            fill={selectedStore === store.code ? '#fff' : '#FFB5C5'}
-                            animate={{ scale: [1, 1.05, 1] }}
-                            transition={{ duration: 1.5, repeat: Infinity }}
-                          />
-                          {/* Bola de helado medio */}
-                          <motion.circle 
-                            cx="16" cy="18" r="7" 
-                            fill={selectedStore === store.code ? '#fce7f3' : '#F9A8D4'}
-                            animate={{ scale: [1, 1.03, 1] }}
-                            transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }}
-                          />
-                          {/* Cono */}
-                          <polygon 
-                            points="8,22 16,38 24,22" 
-                            fill={selectedStore === store.code ? '#fef3c7' : '#D4A574'}
-                          />
-                          {/* Líneas del cono */}
-                          <line x1="10" y1="24" x2="16" y2="36" stroke={selectedStore === store.code ? '#fcd34d' : '#c99a5e'} strokeWidth="0.5"/>
-                          <line x1="22" y1="24" x2="16" y2="36" stroke={selectedStore === store.code ? '#fcd34d' : '#c99a5e'} strokeWidth="0.5"/>
-                        </motion.svg>
+                        <MapPin className={`w-4 h-4 ${selectedStore === store.code ? 'text-white' : 'text-pink-500'}`} />
                       </motion.div>
-                      <span className={`font-bold tracking-wide text-center flex-1 ${
+                      <span className={`text-sm font-medium flex-1 ${
                         selectedStore === store.code 
-                          ? 'text-white drop-shadow-sm' 
-                          : 'text-transparent bg-clip-text bg-gradient-to-r from-pink-600 via-rose-600 to-purple-600'
-                      }`} style={{ fontFamily: "'Poppins', 'Quicksand', sans-serif" }}>
+                          ? 'text-white' 
+                          : 'text-gray-700'
+                      }`}>
                         {store.displayName}
                       </span>
                       {hasPassword(store.code) && (
-                        <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 2, repeat: Infinity }}>
-                          <Lock className={`w-3.5 h-3.5 ${selectedStore === store.code ? 'text-white/80' : 'text-amber-500'}`} />
-                        </motion.div>
+                        <Lock className={`w-3 h-3 ${selectedStore === store.code ? 'text-white/80' : 'text-amber-500'}`} />
                       )}
                     </button>
                     <motion.button
@@ -260,56 +220,7 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
         </PopoverContent>
       </Popover>
       
-      {/* Password Entry Dialog */}
-      <Dialog open={passwordDialog.open} onOpenChange={(open) => setPasswordDialog({ open, store: passwordDialog.store })}>
-        <DialogContent className="max-w-sm">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Lock className="w-5 h-5 text-amber-500" />
-              Ingresa la contraseña
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <p className="text-sm text-gray-600">
-              La tienda <strong>{passwordDialog.store?.code}</strong> está protegida con contraseña.
-            </p>
-            <div className="relative">
-              <Input
-                type={showPassword ? "text" : "password"}
-                placeholder="Contraseña"
-                value={passwordInput}
-                onChange={(e) => { setPasswordInput(e.target.value); setPasswordError(''); }}
-                onKeyDown={(e) => e.key === 'Enter' && handlePasswordSubmit()}
-                className="pr-10"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
-            {passwordError && (
-              <motion.p 
-                initial={{ opacity: 0, y: -5 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-red-500 text-sm"
-              >
-                {passwordError}
-              </motion.p>
-            )}
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setPasswordDialog({ open: false, store: null })} className="flex-1">
-                Cancelar
-              </Button>
-              <Button onClick={handlePasswordSubmit} className="flex-1 bg-pink-500 hover:bg-pink-600">
-                Ingresar
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+
       
       {/* Edit Password Dialog */}
       <Dialog open={editPasswordDialog.open} onOpenChange={(open) => setEditPasswordDialog({ open, store: editPasswordDialog.store })}>
