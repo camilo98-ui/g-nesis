@@ -11,7 +11,8 @@ import CashierRankingCard from '@/components/ranking/CashierRankingCard';
 import CashierRecommendation from '@/components/CashierRecommendation';
 import TrendChart from '@/components/ranking/TrendChart';
 import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
-import { ArrowLeft, Award, Gift, Trophy, Star, Receipt, TrendingUp, Globe, X, Medal, Search, Crown, Sparkles } from 'lucide-react';
+import { ArrowLeft, Award, Gift, Trophy, Star, Receipt, TrendingUp, Globe, X, Medal, Search, Crown, Sparkles, Eye } from 'lucide-react';
+import { ViewProfileButton } from '@/components/cashier/CashierFullProfile';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -625,26 +626,29 @@ export default function Rankings() {
                       </div>
                       {globalRankings.bestOverallRanking
                         ?.filter(item => (!globalSearch || item.cashier?.name?.toLowerCase().includes(globalSearch.toLowerCase())) && (!globalStoreFilter || item.store_id === globalStoreFilter))
-                        .map((item) => (
+                        .map((item, idx) => (
                         <motion.div
                           key={item.cashier_id}
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.03 }}
+                          transition={{ delay: idx * 0.03 }}
                           className={`flex items-center gap-4 p-4 rounded-xl border ${
                             item.rank <= 3 
                               ? 'bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200' 
                               : 'bg-white border-gray-100'
                           }`}
                         >
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${
-                            item.rank === 1 ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-white' :
-                            item.rank === 2 ? 'bg-gradient-to-r from-gray-300 to-gray-400 text-white' :
-                            item.rank === 3 ? 'bg-gradient-to-r from-orange-400 to-amber-600 text-white' :
-                            'bg-gray-100 text-gray-600'
-                          }`}>
-                            {item.rank <= 3 ? <Crown className="w-5 h-5" /> : item.rank}
-                          </div>
+                          <motion.div 
+                            className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-lg ${
+                              item.rank === 1 ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-white' :
+                              item.rank === 2 ? 'bg-gradient-to-r from-gray-300 to-gray-400 text-white' :
+                              item.rank === 3 ? 'bg-gradient-to-r from-orange-400 to-amber-600 text-white' :
+                              'bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700'
+                            }`}
+                            whileHover={{ scale: 1.1 }}
+                          >
+                            #{item.rank}
+                          </motion.div>
                           <div className="flex-1 min-w-0">
                             <p className="font-bold text-gray-800 truncate">{item.cashier?.name}</p>
                             <p className="text-xs text-gray-500 truncate">📍 {item.storeName}</p>
@@ -655,10 +659,27 @@ export default function Rankings() {
                               <span className="text-[10px] bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded">S:{item.suggestedScore?.toFixed(0)}</span>
                             </div>
                           </div>
-                          <div className="text-right">
+                          <div className="text-right mr-2">
                             <p className="font-bold text-purple-600">{item.overallScore?.toFixed(1)} pts</p>
                             <p className="text-xs text-gray-400">{item.shifts} turnos</p>
                           </div>
+                          <ViewProfileButton 
+                            cashier={item.cashier}
+                            stats={{
+                              ...item,
+                              totalSales: item.totalSales,
+                              totalTickets: item.totalTickets,
+                              totalSuggested: item.totalSuggested,
+                              avgTicket: item.avgTicket,
+                              rank: item.rank
+                            }}
+                            storeId={item.store_id}
+                            teamStats={{
+                              avgSales: globalRankings.bestOverallRanking.reduce((s, c) => s + c.totalSales, 0) / globalRankings.bestOverallRanking.length,
+                              avgTicket: globalRankings.bestOverallRanking.reduce((s, c) => s + c.avgTicket, 0) / globalRankings.bestOverallRanking.length,
+                              avgSuggested: globalRankings.bestOverallRanking.reduce((s, c) => s + c.totalSuggested, 0) / globalRankings.bestOverallRanking.length
+                            }}
+                          />
                         </motion.div>
                       ))}
                     </TabsContent>
@@ -667,34 +688,47 @@ export default function Rankings() {
                     <TabsContent value="sales" className="space-y-3">
                       {globalRankings.salesRanking
                         ?.filter(item => (!globalSearch || item.cashier?.name?.toLowerCase().includes(globalSearch.toLowerCase())) && (!globalStoreFilter || item.store_id === globalStoreFilter))
-                        .map((item) => (
+                        .map((item, idx) => (
                         <motion.div
                           key={item.cashier_id}
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.03 }}
+                          transition={{ delay: idx * 0.03 }}
                           className={`flex items-center gap-4 p-4 rounded-xl border ${
                             item.rank <= 3 
                               ? 'bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-200' 
                               : 'bg-white border-gray-100'
                           }`}
                         >
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${
-                            item.rank === 1 ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-white' :
-                            item.rank === 2 ? 'bg-gradient-to-r from-gray-300 to-gray-400 text-white' :
-                            item.rank === 3 ? 'bg-gradient-to-r from-orange-400 to-amber-600 text-white' :
-                            'bg-gray-100 text-gray-600'
-                          }`}>
-                            {item.rank <= 3 ? <Medal className="w-5 h-5" /> : item.rank}
-                          </div>
+                          <motion.div 
+                            className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-lg ${
+                              item.rank === 1 ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-white' :
+                              item.rank === 2 ? 'bg-gradient-to-r from-gray-300 to-gray-400 text-white' :
+                              item.rank === 3 ? 'bg-gradient-to-r from-orange-400 to-amber-600 text-white' :
+                              'bg-gradient-to-r from-emerald-100 to-green-100 text-emerald-700'
+                            }`}
+                            whileHover={{ scale: 1.1 }}
+                          >
+                            #{item.rank}
+                          </motion.div>
                           <div className="flex-1 min-w-0">
                             <p className="font-bold text-gray-800 truncate">{item.cashier?.name}</p>
                             <p className="text-xs text-gray-500 truncate">📍 {item.storeName}</p>
                           </div>
-                          <div className="text-right">
+                          <div className="text-right mr-2">
                             <p className="font-bold text-emerald-600">{formatCurrency(item.totalSales)}</p>
                             <p className="text-xs text-gray-400">{item.shifts} turnos</p>
                           </div>
+                          <ViewProfileButton 
+                            cashier={item.cashier}
+                            stats={{ ...item, rank: item.rank }}
+                            storeId={item.store_id}
+                            teamStats={{
+                              avgSales: globalRankings.salesRanking.reduce((s, c) => s + c.totalSales, 0) / globalRankings.salesRanking.length,
+                              avgTicket: globalRankings.salesRanking.reduce((s, c) => s + c.avgTicket, 0) / globalRankings.salesRanking.length,
+                              avgSuggested: globalRankings.salesRanking.reduce((s, c) => s + c.totalSuggested, 0) / globalRankings.salesRanking.length
+                            }}
+                          />
                         </motion.div>
                       ))}
                     </TabsContent>
@@ -703,34 +737,47 @@ export default function Rankings() {
                     <TabsContent value="transactions" className="space-y-3">
                       {globalRankings.transactionsRanking
                         ?.filter(item => (!globalSearch || item.cashier?.name?.toLowerCase().includes(globalSearch.toLowerCase())) && (!globalStoreFilter || item.store_id === globalStoreFilter))
-                        .map((item) => (
+                        .map((item, idx) => (
                         <motion.div
                           key={item.cashier_id}
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.03 }}
+                          transition={{ delay: idx * 0.03 }}
                           className={`flex items-center gap-4 p-4 rounded-xl border ${
                             item.rank <= 3 
                               ? 'bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200' 
                               : 'bg-white border-gray-100'
                           }`}
                         >
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${
-                            item.rank === 1 ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-white' :
-                            item.rank === 2 ? 'bg-gradient-to-r from-gray-300 to-gray-400 text-white' :
-                            item.rank === 3 ? 'bg-gradient-to-r from-orange-400 to-amber-600 text-white' :
-                            'bg-gray-100 text-gray-600'
-                          }`}>
-                            {item.rank <= 3 ? <Medal className="w-5 h-5" /> : item.rank}
-                          </div>
+                          <motion.div 
+                            className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-lg ${
+                              item.rank === 1 ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-white' :
+                              item.rank === 2 ? 'bg-gradient-to-r from-gray-300 to-gray-400 text-white' :
+                              item.rank === 3 ? 'bg-gradient-to-r from-orange-400 to-amber-600 text-white' :
+                              'bg-gradient-to-r from-blue-100 to-cyan-100 text-blue-700'
+                            }`}
+                            whileHover={{ scale: 1.1 }}
+                          >
+                            #{item.rank}
+                          </motion.div>
                           <div className="flex-1 min-w-0">
                             <p className="font-bold text-gray-800 truncate">{item.cashier?.name}</p>
                             <p className="text-xs text-gray-500 truncate">📍 {item.storeName}</p>
                           </div>
-                          <div className="text-right">
+                          <div className="text-right mr-2">
                             <p className="font-bold text-blue-600">{item.totalTransactions.toLocaleString()}</p>
                             <p className="text-xs text-gray-400">transacciones</p>
                           </div>
+                          <ViewProfileButton 
+                            cashier={item.cashier}
+                            stats={{ ...item, rank: item.rank }}
+                            storeId={item.store_id}
+                            teamStats={{
+                              avgSales: globalRankings.transactionsRanking.reduce((s, c) => s + c.totalSales, 0) / globalRankings.transactionsRanking.length,
+                              avgTicket: globalRankings.transactionsRanking.reduce((s, c) => s + c.avgTicket, 0) / globalRankings.transactionsRanking.length,
+                              avgSuggested: globalRankings.transactionsRanking.reduce((s, c) => s + c.totalSuggested, 0) / globalRankings.transactionsRanking.length
+                            }}
+                          />
                         </motion.div>
                       ))}
                     </TabsContent>
@@ -739,34 +786,47 @@ export default function Rankings() {
                     <TabsContent value="ticket" className="space-y-3">
                       {globalRankings.ticketRanking
                         ?.filter(item => (!globalSearch || item.cashier?.name?.toLowerCase().includes(globalSearch.toLowerCase())) && (!globalStoreFilter || item.store_id === globalStoreFilter))
-                        .map((item) => (
+                        .map((item, idx) => (
                         <motion.div
                           key={item.cashier_id}
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.03 }}
+                          transition={{ delay: idx * 0.03 }}
                           className={`flex items-center gap-4 p-4 rounded-xl border ${
                             item.rank <= 3 
                               ? 'bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200' 
                               : 'bg-white border-gray-100'
                           }`}
                         >
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${
-                            item.rank === 1 ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-white' :
-                            item.rank === 2 ? 'bg-gradient-to-r from-gray-300 to-gray-400 text-white' :
-                            item.rank === 3 ? 'bg-gradient-to-r from-orange-400 to-amber-600 text-white' :
-                            'bg-gray-100 text-gray-600'
-                          }`}>
-                            {item.rank <= 3 ? <Medal className="w-5 h-5" /> : item.rank}
-                          </div>
+                          <motion.div 
+                            className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-lg ${
+                              item.rank === 1 ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-white' :
+                              item.rank === 2 ? 'bg-gradient-to-r from-gray-300 to-gray-400 text-white' :
+                              item.rank === 3 ? 'bg-gradient-to-r from-orange-400 to-amber-600 text-white' :
+                              'bg-gradient-to-r from-amber-100 to-orange-100 text-amber-700'
+                            }`}
+                            whileHover={{ scale: 1.1 }}
+                          >
+                            #{item.rank}
+                          </motion.div>
                           <div className="flex-1 min-w-0">
                             <p className="font-bold text-gray-800 truncate">{item.cashier?.name}</p>
                             <p className="text-xs text-gray-500 truncate">📍 {item.storeName}</p>
                           </div>
-                          <div className="text-right">
+                          <div className="text-right mr-2">
                             <p className="font-bold text-amber-600">{formatCurrency(item.avgTicket)}</p>
                             <p className="text-xs text-gray-400">{item.totalTickets} tickets</p>
                           </div>
+                          <ViewProfileButton 
+                            cashier={item.cashier}
+                            stats={{ ...item, rank: item.rank }}
+                            storeId={item.store_id}
+                            teamStats={{
+                              avgSales: globalRankings.ticketRanking.reduce((s, c) => s + c.totalSales, 0) / globalRankings.ticketRanking.length,
+                              avgTicket: globalRankings.ticketRanking.reduce((s, c) => s + c.avgTicket, 0) / globalRankings.ticketRanking.length,
+                              avgSuggested: globalRankings.ticketRanking.reduce((s, c) => s + c.totalSuggested, 0) / globalRankings.ticketRanking.length
+                            }}
+                          />
                         </motion.div>
                       ))}
                     </TabsContent>
@@ -775,34 +835,47 @@ export default function Rankings() {
                     <TabsContent value="suggested" className="space-y-3">
                       {globalRankings.suggestedRanking
                         ?.filter(item => (!globalSearch || item.cashier?.name?.toLowerCase().includes(globalSearch.toLowerCase())) && (!globalStoreFilter || item.store_id === globalStoreFilter))
-                        .map((item) => (
+                        .map((item, idx) => (
                         <motion.div
                           key={item.cashier_id}
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.03 }}
+                          transition={{ delay: idx * 0.03 }}
                           className={`flex items-center gap-4 p-4 rounded-xl border ${
                             item.rank <= 3 
                               ? 'bg-gradient-to-r from-rose-50 to-red-50 border-rose-200' 
                               : 'bg-white border-gray-100'
                           }`}
                         >
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${
-                            item.rank === 1 ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-white' :
-                            item.rank === 2 ? 'bg-gradient-to-r from-gray-300 to-gray-400 text-white' :
-                            item.rank === 3 ? 'bg-gradient-to-r from-orange-400 to-amber-600 text-white' :
-                            'bg-gray-100 text-gray-600'
-                          }`}>
-                            {item.rank <= 3 ? <Sparkles className="w-5 h-5" /> : item.rank}
-                          </div>
+                          <motion.div 
+                            className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-lg ${
+                              item.rank === 1 ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-white' :
+                              item.rank === 2 ? 'bg-gradient-to-r from-gray-300 to-gray-400 text-white' :
+                              item.rank === 3 ? 'bg-gradient-to-r from-orange-400 to-amber-600 text-white' :
+                              'bg-gradient-to-r from-rose-100 to-pink-100 text-rose-700'
+                            }`}
+                            whileHover={{ scale: 1.1 }}
+                          >
+                            #{item.rank}
+                          </motion.div>
                           <div className="flex-1 min-w-0">
                             <p className="font-bold text-gray-800 truncate">{item.cashier?.name}</p>
                             <p className="text-xs text-gray-500 truncate">📍 {item.storeName}</p>
                           </div>
-                          <div className="text-right">
+                          <div className="text-right mr-2">
                             <p className="font-bold text-rose-600">{item.totalSuggested?.toLocaleString()}</p>
                             <p className="text-xs text-gray-400">sugeridos</p>
                           </div>
+                          <ViewProfileButton 
+                            cashier={item.cashier}
+                            stats={{ ...item, rank: item.rank }}
+                            storeId={item.store_id}
+                            teamStats={{
+                              avgSales: globalRankings.suggestedRanking.reduce((s, c) => s + c.totalSales, 0) / globalRankings.suggestedRanking.length,
+                              avgTicket: globalRankings.suggestedRanking.reduce((s, c) => s + c.avgTicket, 0) / globalRankings.suggestedRanking.length,
+                              avgSuggested: globalRankings.suggestedRanking.reduce((s, c) => s + c.totalSuggested, 0) / globalRankings.suggestedRanking.length
+                            }}
+                          />
                         </motion.div>
                       ))}
                     </TabsContent>
