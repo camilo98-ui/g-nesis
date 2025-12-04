@@ -23,10 +23,13 @@ const NAV_ITEMS = [
 export default function Layout({ children, currentPageName }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [selectedStore, setSelectedStore] = useState('');
+  const [userRole, setUserRole] = useState('lider');
 
   useEffect(() => {
     const saved = localStorage.getItem('selectedStore');
+    const savedRole = localStorage.getItem('userRole');
     if (saved) setSelectedStore(saved);
+    if (savedRole) setUserRole(savedRole);
   }, []);
 
   return (
