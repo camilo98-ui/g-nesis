@@ -572,30 +572,37 @@ export default function Home() {
           >
             {MENU_ITEMS.map((item, index) => {
               const Icon = item.icon;
+              
+              // Restricciones por rol
+              const isLocked = (selectedRole === 'embajador' && item.page === 'Budget') ||
+                              (selectedRole === 'calidad' && !['Quality'].includes(item.page));
+              
+              // Para Calidad, solo mostrar Calidad
+              if (selectedRole === 'calidad' && item.page !== 'Quality') {
+                return null;
+              }
+              
               return (
                 <motion.div
                   key={item.name}
                   initial={{ opacity: 0, y: 30, scale: 0.9 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   transition={{ delay: index * 0.08, type: "spring", stiffness: 200 }}
-                  whileHover={{ y: -8, scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  whileHover={!isLocked ? { y: -8, scale: 1.05 } : {}}
+                  whileTap={!isLocked ? { scale: 0.95 } : {}}
                 >
-                  <Link to={createPageUrl(item.page)}>
+                  {isLocked ? (
                     <motion.div 
-                      className={`${item.bgColor} rounded-2xl p-4 h-full shadow-md hover:shadow-xl transition-all duration-300 group relative overflow-hidden border border-white/50 backdrop-blur-sm`}
+                      className={`${item.bgColor} rounded-2xl p-4 h-full shadow-md transition-all duration-300 group relative overflow-hidden border border-white/50 backdrop-blur-sm opacity-60 cursor-not-allowed`}
                     >
-                      {/* Subtle glow effect */}
-                      <motion.div
-                        className="absolute inset-0 bg-white/30 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl"
-                      />
-
-                      {/* Icon centered */}
+                      {/* Lock overlay */}
+                      <div className="absolute inset-0 bg-gray-900/10 rounded-2xl flex items-center justify-center z-20">
+                        <Lock className="w-6 h-6 text-gray-600" />
+                      </div>
+                      
                       <div className="flex flex-col items-center justify-center text-center relative z-10">
                         <motion.div 
                           className={`w-12 h-12 ${item.iconBg} backdrop-blur-sm rounded-xl flex items-center justify-center mb-2`}
-                          whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1 }}
-                          transition={{ duration: 0.4 }}
                         >
                           <Icon className={`w-6 h-6 ${item.iconColor}`} />
                         </motion.div>
@@ -605,12 +612,64 @@ export default function Home() {
                         <p className="text-[10px] text-gray-500 mt-0.5">{item.description}</p>
                       </div>
                     </motion.div>
-                  </Link>
+                  ) : (
+                    <Link to={createPageUrl(item.page)}>
+                      <motion.div 
+                        className={`${item.bgColor} rounded-2xl p-4 h-full shadow-md hover:shadow-xl transition-all duration-300 group relative overflow-hidden border border-white/50 backdrop-blur-sm`}
+                      >
+                        {/* Subtle glow effect */}
+                        <motion.div
+                          className="absolute inset-0 bg-white/30 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl"
+                        />
+
+                        {/* Icon centered */}
+                        <div className="flex flex-col items-center justify-center text-center relative z-10">
+                          <motion.div 
+                            className={`w-12 h-12 ${item.iconBg} backdrop-blur-sm rounded-xl flex items-center justify-center mb-2`}
+                            whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1 }}
+                            transition={{ duration: 0.4 }}
+                          >
+                            <Icon className={`w-6 h-6 ${item.iconColor}`} />
+                          </motion.div>
+                          <h3 className={`font-bold ${item.textColor} text-sm`}>
+                            {item.name}
+                          </h3>
+                          <p className="text-[10px] text-gray-500 mt-0.5">{item.description}</p>
+                        </div>
+                      </motion.div>
+                    </Link>
+                  )}
                 </motion.div>
               );
             })}
           </motion.div>
         ) : null}
+        
+        {/* Vista especial para Calidad - Planner embebido */}
+        {selectedStore && selectedRole === 'calidad' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-6"
+          >
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+              <div className="bg-gradient-to-r from-violet-500 to-purple-500 p-4 text-white">
+                <h3 className="font-bold flex items-center gap-2">
+                  📅 Planner de la Tienda
+                  <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">Solo lectura</span>
+                </h3>
+                <p className="text-sm text-white/80">{selectedStoreName}</p>
+              </div>
+              <div className="p-4">
+                <iframe 
+                  src={createPageUrl('PopsyPlanner') + `?viewOnly=true`}
+                  className="w-full h-[500px] border-0 rounded-xl"
+                  title="Planner"
+                />
+              </div>
+            </div>
+          </motion.div>
+        )}
       </div>
 
 
