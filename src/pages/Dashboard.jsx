@@ -1040,6 +1040,62 @@ export default function Dashboard() {
                   </motion.div>
                   Proyección del Mes
                 </h3>
+
+                {/* Gráfica de Proyección */}
+                <div className="mb-6 bg-white/5 rounded-xl p-4">
+                  <p className="text-xs text-white/60 mb-3">Progreso vs Meta</p>
+                  <div className="h-40">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart 
+                        data={[
+                          { 
+                            name: 'Ventas', 
+                            actual: totals.sales, 
+                            meta: currentBudget?.sales_budget || 0,
+                            proyectado: projections.projectedSales
+                          },
+                          { 
+                            name: 'Ticket', 
+                            actual: projections.avgTicket, 
+                            meta: projections.budgetTicket,
+                            proyectado: projections.avgTicket
+                          },
+                          { 
+                            name: 'Trans.', 
+                            actual: totals.transactions, 
+                            meta: currentBudget?.transactions_budget || totals.transactions * 1.1,
+                            proyectado: totals.transactions * (30 / Math.max(filteredSales.length, 1))
+                          },
+                          { 
+                            name: 'Sugeridos', 
+                            actual: totals.suggested, 
+                            meta: currentBudget?.suggested_budget || totals.suggested * 1.2,
+                            proyectado: totals.suggested * (30 / Math.max(filteredSales.length, 1))
+                          }
+                        ]}
+                        layout="vertical"
+                        margin={{ top: 5, right: 30, left: 50, bottom: 5 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                        <XAxis type="number" tick={{ fill: 'rgba(255,255,255,0.6)', fontSize: 10 }} tickFormatter={(v) => v >= 1000000 ? `${(v/1000000).toFixed(1)}M` : v >= 1000 ? `${(v/1000).toFixed(0)}K` : v} />
+                        <YAxis type="category" dataKey="name" tick={{ fill: 'rgba(255,255,255,0.8)', fontSize: 11 }} width={55} />
+                        <Tooltip 
+                          contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: 8 }}
+                          labelStyle={{ color: '#fff' }}
+                          formatter={(value, name) => {
+                            const label = name === 'actual' ? 'Actual' : name === 'meta' ? 'Meta' : 'Proyectado';
+                            return [formatCurrency(value), label];
+                          }}
+                        />
+                        <Legend wrapperStyle={{ color: 'white', fontSize: 10 }} />
+                        <Bar dataKey="meta" fill="#475569" name="Meta" radius={[0, 4, 4, 0]} />
+                        <Bar dataKey="actual" fill="#10b981" name="Actual" radius={[0, 4, 4, 0]} />
+                        <Bar dataKey="proyectado" fill="#a78bfa" name="Proyectado" radius={[0, 4, 4, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div className="bg-white/5 rounded-xl p-4">
                     <div className="flex items-center justify-between mb-2">
