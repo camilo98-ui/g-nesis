@@ -16,7 +16,6 @@ import {
   Award, Target, Bell, Phone, Download, Smartphone, Monitor, ClipboardCheck, FileText,
   LogOut, Lock, Eye, EyeOff
 } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { startOfMonth } from 'date-fns';
@@ -548,36 +547,7 @@ export default function Home() {
               );
             })}
           </motion.div>
-        ) : (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-16"
-          >
-            {/* Cono estilo lápiz/sketch */}
-            <motion.div
-              className="w-28 h-40 mx-auto mb-6 opacity-60"
-              animate={{ y: [0, -8, 0] }}
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-            >
-              <svg viewBox="0 0 80 120" className="w-full h-full">
-                <ellipse cx="40" cy="28" rx="28" ry="24" fill="none" stroke="#888" strokeWidth="1.5" strokeDasharray="2,1" />
-                <ellipse cx="40" cy="28" rx="28" ry="24" fill="#FFB5C5" opacity="0.3" />
-                <path d="M 20 22 Q 25 18 30 22 Q 35 18 40 22 Q 45 18 50 22 Q 55 18 60 22" fill="none" stroke="#888" strokeWidth="0.8" opacity="0.6" />
-                <path d="M 25 45 Q 23 52 26 48" fill="none" stroke="#888" strokeWidth="0.8" />
-                <path d="M 55 45 Q 57 50 54 47" fill="none" stroke="#888" strokeWidth="0.8" />
-                <polygon points="18,48 40,115 62,48" fill="none" stroke="#888" strokeWidth="1.5" strokeDasharray="3,1" />
-                <polygon points="18,48 40,115 62,48" fill="#E8D5B0" opacity="0.25" />
-                <line x1="24" y1="58" x2="56" y2="58" stroke="#999" strokeWidth="0.6" strokeDasharray="2,2" />
-                <line x1="28" y1="72" x2="52" y2="72" stroke="#999" strokeWidth="0.6" strokeDasharray="2,2" />
-                <line x1="32" y1="86" x2="48" y2="86" stroke="#999" strokeWidth="0.6" strokeDasharray="2,2" />
-                <line x1="36" y1="100" x2="44" y2="100" stroke="#999" strokeWidth="0.6" strokeDasharray="2,2" />
-              </svg>
-            </motion.div>
-            <h2 className="text-xl font-bold text-gray-700 mb-2">Selecciona una tienda para comenzar</h2>
-            <p className="text-gray-400">Elige del menú superior la tienda con la que deseas trabajar</p>
-          </motion.div>
-        )}
+        ) : null}
       </div>
 
 
