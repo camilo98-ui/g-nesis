@@ -580,29 +580,7 @@ export default function Home() {
         )}
       </div>
 
-      {/* Footer Message - Solo visible en Home */}
-      {!selectedStore && (
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1 }}
-          className="fixed bottom-6 left-0 right-0 text-center px-4"
-        >
-          <motion.p 
-            className="text-sm text-gray-400 tracking-wide flex items-center justify-center gap-2"
-            animate={{ y: [0, -2, 0] }}
-            transition={{ duration: 3, repeat: Infinity }}
-          >
-            <span>Gracias por hacer del mundo un lugar más</span>
-            <span className="text-pink-400 font-medium">dulce</span>
-            <span>,</span>
-            <span className="text-amber-400 font-medium">feliz</span>
-            <span>y</span>
-            <span className="text-purple-400 font-medium">divertido</span>
-            <span>💗</span>
-          </motion.p>
-        </motion.div>
-      )}
+
 
       {/* Notifications Setup Modal */}
       <AnimatePresence>
