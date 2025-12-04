@@ -76,8 +76,12 @@ export default function CashierProfile() {
           <div className="h-24 bg-gradient-to-r from-pink-400 via-rose-400 to-pink-500" />
           <div className="px-6 pb-6">
             <div className="flex items-end gap-4 -mt-10">
-              <div className="w-20 h-20 rounded-2xl bg-white shadow-lg flex items-center justify-center border-4 border-white">
-                <span className="text-3xl font-bold text-pink-500">{cashier.name?.charAt(0)}</span>
+              <div className="w-20 h-20 rounded-2xl bg-white shadow-lg overflow-hidden flex items-center justify-center border-4 border-white">
+                {cashier.photo_url ? (
+                  <img src={cashier.photo_url} alt={cashier.name} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-3xl font-bold text-pink-500">{cashier.name?.charAt(0)}</span>
+                )}
               </div>
               <div className="pb-2">
                 <h1 className="text-2xl font-bold text-gray-800">{cashier.name}</h1>

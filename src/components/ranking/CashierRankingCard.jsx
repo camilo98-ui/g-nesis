@@ -64,24 +64,34 @@ export default function CashierRankingCard({
       } transition-all duration-300`}
     >
       <div className="p-4 flex items-center gap-4">
-        {/* Rank badge */}
-        <motion.div 
-          whileHover={{ rotate: [0, -15, 15, -10, 10, 0], scale: 1.1 }}
-          transition={{ duration: 0.5 }}
-          className={`flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center ${
+        {/* Photo + Rank badge */}
+        <div className="relative flex-shrink-0">
+          <motion.div 
+            whileHover={{ rotate: [0, -5, 5, 0], scale: 1.05 }}
+            transition={{ duration: 0.5 }}
+            className={`w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center ${
+              isTopThree 
+                ? 'bg-white/30 backdrop-blur-sm ring-2 ring-white/50' 
+                : 'bg-gradient-to-br from-pink-50 to-rose-100'
+            }`}
+          >
+            {cashier.photo_url ? (
+              <img src={cashier.photo_url} alt={cashier.name} className="w-full h-full object-cover" />
+            ) : (
+              <span className={`text-xl font-bold ${isTopThree ? 'text-white' : rank <= 5 ? 'text-fuchsia-600' : 'text-gray-500'}`}>
+                {cashier.name?.charAt(0) || '?'}
+              </span>
+            )}
+          </motion.div>
+          {/* Rank badge overlay */}
+          <div className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-md ${
             isTopThree 
-              ? 'bg-white/30 backdrop-blur-sm' 
-              : 'bg-gradient-to-br from-pink-50 to-rose-100'
-          }`}
-        >
-          {isTopThree ? (
-            <span className="text-2xl">{rankStyle.badge}</span>
-          ) : (
-            <span className={`text-xl font-bold ${rank <= 5 ? 'text-fuchsia-600' : 'text-gray-500'}`}>
-              #{rank}
-            </span>
-          )}
-        </motion.div>
+              ? 'bg-white text-gray-800' 
+              : 'bg-pink-500 text-white'
+          }`}>
+            {isTopThree ? rankStyle.badge : `#${rank}`}
+          </div>
+        </div>
 
         {/* Cashier info */}
         <div className="flex-grow min-w-0">

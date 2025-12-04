@@ -367,9 +367,13 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
                   <motion.div
                     animate={podiumIdx === 0 ? { scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] } : {}}
                     transition={{ duration: 2, repeat: Infinity }}
-                    className={`w-12 h-12 rounded-full bg-gradient-to-br ${PODIUM_COLORS[podiumIdx]} flex items-center justify-center mb-2 shadow-lg border-2 border-white`}
+                    className={`w-12 h-12 rounded-full bg-gradient-to-br ${PODIUM_COLORS[podiumIdx]} overflow-hidden flex items-center justify-center mb-2 shadow-lg border-2 border-white`}
                   >
-                    <Icon className="w-6 h-6 text-white drop-shadow" />
+                    {cashier.photo_url ? (
+                      <img src={cashier.photo_url} alt={cashier.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <Icon className="w-6 h-6 text-white drop-shadow" />
+                    )}
                   </motion.div>
                   
                   {/* Nombre */}
@@ -413,12 +417,21 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
               whileHover={{ x: 5, backgroundColor: 'rgba(236, 72, 153, 0.1)' }}
               className="flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors bg-white/50"
             >
-              <motion.span 
-                className="w-7 h-7 rounded-full bg-gradient-to-br from-pink-200 to-rose-200 text-center text-xs font-black text-pink-700 flex items-center justify-center shadow-sm"
-                whileHover={{ scale: 1.1 }}
-              >
-                #{cashier.rank}
-              </motion.span>
+              <div className="relative">
+                <motion.div 
+                  className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-200 to-rose-200 overflow-hidden flex items-center justify-center shadow-sm"
+                  whileHover={{ scale: 1.1 }}
+                >
+                  {cashier.photo_url ? (
+                    <img src={cashier.photo_url} alt={cashier.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-xs font-black text-pink-700">{cashier.name?.charAt(0)}</span>
+                  )}
+                </motion.div>
+                <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-pink-500 text-white text-[9px] font-bold flex items-center justify-center">
+                  {cashier.rank}
+                </div>
+              </div>
               <div className="flex-1" onClick={() => onSelectCashier?.(cashier)}>
                 <p className="text-sm font-medium text-gray-700">{cashier.name}</p>
                 <p className="text-xs text-gray-400">{cashier.daysWorked} turnos</p>

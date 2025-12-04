@@ -277,28 +277,35 @@ export default function CashiersDashboard() {
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <motion.div 
-                            className={`w-10 h-10 rounded-full flex items-center justify-center relative ${
+                          <div className="relative">
+                            <motion.div 
+                              className={`w-10 h-10 rounded-full overflow-hidden flex items-center justify-center ${
+                                selectedCashier?.id === cashier.id 
+                                  ? 'bg-white/20 ring-2 ring-white/50' 
+                                  : cashier.rank <= 3 
+                                    ? 'bg-gradient-to-br from-amber-100 to-orange-200' 
+                                    : 'bg-gray-100'
+                              }`}
+                              animate={cashier.rank === 1 ? { scale: [1, 1.05, 1] } : {}}
+                              transition={{ duration: 2, repeat: Infinity }}
+                            >
+                              {cashier.photo_url ? (
+                                <img src={cashier.photo_url} alt={cashier.name} className="w-full h-full object-cover" />
+                              ) : (
+                                getRankIcon(cashier.rank)
+                              )}
+                            </motion.div>
+                            {/* Rank badge */}
+                            <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shadow ${
                               selectedCashier?.id === cashier.id 
-                                ? 'bg-white/20' 
+                                ? 'bg-white text-pink-600' 
                                 : cashier.rank <= 3 
-                                  ? 'bg-gradient-to-br from-amber-100 to-orange-200' 
-                                  : 'bg-gray-100'
-                            }`}
-                            animate={cashier.rank === 1 ? { scale: [1, 1.1, 1] } : {}}
-                            transition={{ duration: 2, repeat: Infinity }}
-                          >
-                            {getRankIcon(cashier.rank)}
-                            {cashier.rank === 1 && (
-                              <motion.div 
-                                className="absolute -top-1 -right-1 text-xs"
-                                animate={{ rotate: [0, 15, -15, 0] }}
-                                transition={{ duration: 1, repeat: Infinity }}
-                              >
-                                ⭐
-                              </motion.div>
-                            )}
-                          </motion.div>
+                                  ? 'bg-amber-500 text-white' 
+                                  : 'bg-gray-400 text-white'
+                            }`}>
+                              {cashier.rank}
+                            </div>
+                          </div>
                           <div>
                             <Link to={createPageUrl(`CashierProfile?id=${cashier.id}&from=cashiers`)}>
                               <p className={`font-bold hover:underline ${selectedCashier?.id === cashier.id ? 'text-white' : 'text-gray-800'}`}>
@@ -517,8 +524,19 @@ export default function CashiersDashboard() {
                     className="bg-white/15 backdrop-blur-sm rounded-xl p-4"
                   >
                     <div className="flex items-center gap-3 mb-3">
-                      <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
-                        {idx === 0 ? '🥇' : idx === 1 ? '🥈' : '🥉'}
+                      <div className="relative">
+                        <div className="w-12 h-12 rounded-full bg-white/20 overflow-hidden flex items-center justify-center">
+                          {cashier.photo_url ? (
+                            <img src={cashier.photo_url} alt={cashier.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <span className="text-2xl">{idx === 0 ? '🥇' : idx === 1 ? '🥈' : '🥉'}</span>
+                          )}
+                        </div>
+                        {cashier.photo_url && (
+                          <div className="absolute -bottom-1 -right-1 text-sm">
+                            {idx === 0 ? '🥇' : idx === 1 ? '🥈' : '🥉'}
+                          </div>
+                        )}
                       </div>
                       <div>
                         <p className="font-bold">{cashier.name}</p>
