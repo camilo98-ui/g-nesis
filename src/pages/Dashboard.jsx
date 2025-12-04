@@ -14,7 +14,7 @@ import WeatherSalesImpactChart from '@/components/weather/WeatherSalesImpactChar
 
 import GrowthVelocityChart from '@/components/management/GrowthVelocityChart';
 import StoreReportGenerator from '@/components/reports/StoreReportGenerator';
-import DemandPredictionChart from '@/components/predictions/DemandPredictionChart';
+
 import { 
   DollarSign, Receipt, Zap, Gift, TrendingUp, TrendingDown, ArrowLeft,
   BarChart3, AlertTriangle, CheckCircle2, X, FileSpreadsheet, Target,
@@ -1004,12 +1004,6 @@ export default function Dashboard() {
             {/* Daily Goals */}
             <DailyGoalsCard storeId={selectedStore} />
             
-            {/* Demand Prediction Chart */}
-            <DemandPredictionChart 
-              storeId={selectedStore}
-              formatCurrency={formatCurrency}
-            />
-
             {/* Weather Impact Chart */}
             {weatherData && (
               <WeatherSalesImpactChart 
@@ -1032,7 +1026,7 @@ export default function Dashboard() {
                   </motion.div>
                   Proyección del Mes
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div className="bg-white/5 rounded-xl p-4">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-white/70 text-sm">Venta Proyectada</span>
@@ -1063,6 +1057,35 @@ export default function Dashboard() {
                     <p className="text-xs text-white/50 mt-1">
                       Meta: {formatCurrency(projections.budgetTicket)}
                     </p>
+                  </div>
+                  <div className="bg-white/5 rounded-xl p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-white/70 text-sm">% Participación</span>
+                      <motion.span 
+                        className="text-xs px-2 py-1 rounded-full bg-purple-500/20 text-purple-300"
+                        animate={{ scale: [1, 1.05, 1] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                      >
+                        📊 Cumplimiento
+                      </motion.span>
+                    </div>
+                    <motion.p 
+                      className="text-2xl font-semibold text-purple-300"
+                      animate={{ scale: [1, 1.02, 1] }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                    >
+                      {currentBudget?.sales_budget > 0 
+                        ? ((totals.sales / currentBudget.sales_budget) * 100).toFixed(1) 
+                        : 0}%
+                    </motion.p>
+                    <div className="mt-2 h-2 bg-white/10 rounded-full overflow-hidden">
+                      <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: `${Math.min(100, currentBudget?.sales_budget > 0 ? (totals.sales / currentBudget.sales_budget) * 100 : 0)}%` }}
+                        transition={{ duration: 1, delay: 0.3 }}
+                        className="h-full bg-gradient-to-r from-purple-400 to-pink-400 rounded-full"
+                      />
+                    </div>
                   </div>
                 </div>
               </motion.div>

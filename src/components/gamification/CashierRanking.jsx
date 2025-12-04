@@ -4,8 +4,9 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { 
   Trophy, Crown, Medal, TrendingUp, TrendingDown, 
-  ChevronRight, ChevronLeft, Check, Sparkles, CalendarRange
+  ChevronRight, ChevronLeft, Check, Sparkles, CalendarRange, Eye
 } from 'lucide-react';
+import { ViewProfileButton } from '@/components/cashier/CashierFullProfile';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -431,17 +432,19 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
               animate={{ x: 0, opacity: 1 }}
               transition={{ delay: idx * 0.05 }}
               whileHover={{ x: 5, backgroundColor: 'rgba(236, 72, 153, 0.1)' }}
-              onClick={() => onSelectCashier?.(cashier)}
               className="flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors bg-white/50"
             >
-              <span className="w-6 h-6 rounded-full bg-gradient-to-br from-pink-100 to-rose-100 text-center text-xs font-bold text-pink-600 flex items-center justify-center">
-                {cashier.rank}
-              </span>
-              <div className="flex-1">
+              <motion.span 
+                className="w-7 h-7 rounded-full bg-gradient-to-br from-pink-200 to-rose-200 text-center text-xs font-black text-pink-700 flex items-center justify-center shadow-sm"
+                whileHover={{ scale: 1.1 }}
+              >
+                #{cashier.rank}
+              </motion.span>
+              <div className="flex-1" onClick={() => onSelectCashier?.(cashier)}>
                 <p className="text-sm font-medium text-gray-700">{cashier.name}</p>
                 <p className="text-xs text-gray-400">{cashier.daysWorked} turnos</p>
               </div>
-              <div className="text-right">
+              <div className="text-right mr-2" onClick={() => onSelectCashier?.(cashier)}>
                 <motion.p 
                   className="text-sm font-bold text-pink-600"
                   animate={{ scale: [1, 1.02, 1] }}
@@ -453,6 +456,16 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
                   Ticket: {formatCurrency(cashier.avgTicket)}
                 </p>
               </div>
+              <ViewProfileButton 
+                cashier={cashier}
+                stats={cashier}
+                storeId={storeId}
+                teamStats={{
+                  avgSales: ranking.reduce((s, c) => s + c.totalSales, 0) / ranking.length,
+                  avgTicket: ranking.reduce((s, c) => s + c.avgTicket, 0) / ranking.length,
+                  avgSuggested: ranking.reduce((s, c) => s + c.totalSuggested, 0) / ranking.length
+                }}
+              />
             </motion.div>
           ))}
         </div>

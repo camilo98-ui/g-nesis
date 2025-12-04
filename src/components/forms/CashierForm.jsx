@@ -7,7 +7,32 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { UserPlus, Save, Loader2, User, Mail, Phone, Calendar, Camera, Upload } from 'lucide-react';
+import { UserPlus, Save, Loader2, User, Mail, Phone, Calendar, Camera, Upload, Smile } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+
+// Avatares animales y divertidos
+const AVATARS = [
+  { id: 'penguin', emoji: '🐧', label: 'Pingüino' },
+  { id: 'panda', emoji: '🐼', label: 'Panda' },
+  { id: 'koala', emoji: '🐨', label: 'Koala' },
+  { id: 'unicorn', emoji: '🦄', label: 'Unicornio' },
+  { id: 'fox', emoji: '🦊', label: 'Zorro' },
+  { id: 'owl', emoji: '🦉', label: 'Búho' },
+  { id: 'cat', emoji: '🐱', label: 'Gato' },
+  { id: 'dog', emoji: '🐶', label: 'Perro' },
+  { id: 'rabbit', emoji: '🐰', label: 'Conejo' },
+  { id: 'lion', emoji: '🦁', label: 'León' },
+  { id: 'bear', emoji: '🐻', label: 'Oso' },
+  { id: 'monkey', emoji: '🐵', label: 'Mono' },
+  { id: 'elephant', emoji: '🐘', label: 'Elefante' },
+  { id: 'tiger', emoji: '🐯', label: 'Tigre' },
+  { id: 'dolphin', emoji: '🐬', label: 'Delfín' },
+  { id: 'butterfly', emoji: '🦋', label: 'Mariposa' },
+  { id: 'icecream', emoji: '🍦', label: 'Helado' },
+  { id: 'star', emoji: '⭐', label: 'Estrella' },
+  { id: 'rocket', emoji: '🚀', label: 'Cohete' },
+  { id: 'rainbow', emoji: '🌈', label: 'Arcoíris' },
+];
 import { toast } from 'sonner';
 
 export default function CashierForm({ storeId, onSuccess }) {
@@ -19,8 +44,10 @@ export default function CashierForm({ storeId, onSuccess }) {
     email: '',
     phone: '',
     hire_date: new Date().toISOString().split('T')[0],
-    photo_url: ''
+    photo_url: '',
+    avatar: ''
   });
+  const [showAvatars, setShowAvatars] = useState(false);
 
   const handlePhotoUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -82,16 +109,27 @@ export default function CashierForm({ storeId, onSuccess }) {
           </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-          {/* Foto del cajero */}
-          <div className="flex justify-center">
+          {/* Foto del cajero o Avatar */}
+          <div className="flex flex-col items-center gap-3">
             <div className="relative">
-              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-pink-100 to-rose-100 flex items-center justify-center overflow-hidden border-4 border-white shadow-lg">
+              <motion.div 
+                whileHover={{ scale: 1.05 }}
+                className="w-24 h-24 rounded-full bg-gradient-to-br from-pink-100 to-rose-100 flex items-center justify-center overflow-hidden border-4 border-white shadow-lg"
+              >
                 {formData.photo_url ? (
                   <img src={formData.photo_url} alt="Foto" className="w-full h-full object-cover" />
+                ) : formData.avatar ? (
+                  <motion.span 
+                    className="text-5xl"
+                    animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    {AVATARS.find(a => a.id === formData.avatar)?.emoji || '🍦'}
+                  </motion.span>
                 ) : (
                   <User className="w-10 h-10 text-pink-300" />
                 )}
-              </div>
+              </motion.div>
               <label className="absolute bottom-0 right-0 p-2 bg-gradient-to-r from-pink-500 to-rose-500 rounded-full cursor-pointer shadow-lg hover:shadow-xl transition-shadow">
                 <input
                   type="file"
@@ -106,6 +144,46 @@ export default function CashierForm({ storeId, onSuccess }) {
                 )}
               </label>
             </div>
+            
+            {/* Avatar selector */}
+            <Popover open={showAvatars} onOpenChange={setShowAvatars}>
+              <PopoverTrigger asChild>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm"
+                  className="text-xs border-pink-200 hover:bg-pink-50"
+                >
+                  <Smile className="w-3 h-3 mr-1" />
+                  Elegir Avatar
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-72 p-3">
+                <p className="text-xs font-medium text-gray-500 mb-2">Selecciona un avatar divertido:</p>
+                <div className="grid grid-cols-5 gap-2">
+                  {AVATARS.map((avatar) => (
+                    <motion.button
+                      key={avatar.id}
+                      type="button"
+                      whileHover={{ scale: 1.2 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => {
+                        setFormData({ ...formData, avatar: avatar.id, photo_url: '' });
+                        setShowAvatars(false);
+                      }}
+                      className={`w-10 h-10 rounded-lg flex items-center justify-center text-2xl transition-all ${
+                        formData.avatar === avatar.id 
+                          ? 'bg-pink-100 ring-2 ring-pink-400' 
+                          : 'bg-gray-50 hover:bg-pink-50'
+                      }`}
+                      title={avatar.label}
+                    >
+                      {avatar.emoji}
+                    </motion.button>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
 
           <div className="space-y-2">

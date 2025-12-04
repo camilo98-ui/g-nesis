@@ -188,15 +188,39 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
                             ? 'bg-white/30 backdrop-blur-sm' 
                             : 'bg-gradient-to-br from-pink-200 via-rose-200 to-purple-200'
                         }`}
-                        animate={selectedStore === store.code ? { rotate: [0, 5, -5, 0] } : {}}
+                        animate={selectedStore === store.code ? { rotate: [0, 10, -10, 0] } : {}}
                         transition={{ duration: 2, repeat: Infinity }}
                       >
-                        <motion.div
-                          animate={{ y: [0, -2, 0] }}
-                          transition={{ duration: 1.5, repeat: Infinity }}
+                        {/* Cono redondo dinámico */}
+                        <motion.svg 
+                          viewBox="0 0 32 40" 
+                          className="w-6 h-7"
+                          animate={{ y: [0, -2, 0], rotate: [0, 3, -3, 0] }}
+                          transition={{ duration: 2, repeat: Infinity }}
                         >
-                          🍦
-                        </motion.div>
+                          {/* Bola de helado superior */}
+                          <motion.circle 
+                            cx="16" cy="10" r="9" 
+                            fill={selectedStore === store.code ? '#fff' : '#FFB5C5'}
+                            animate={{ scale: [1, 1.05, 1] }}
+                            transition={{ duration: 1.5, repeat: Infinity }}
+                          />
+                          {/* Bola de helado medio */}
+                          <motion.circle 
+                            cx="16" cy="18" r="7" 
+                            fill={selectedStore === store.code ? '#fce7f3' : '#F9A8D4'}
+                            animate={{ scale: [1, 1.03, 1] }}
+                            transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }}
+                          />
+                          {/* Cono */}
+                          <polygon 
+                            points="8,22 16,38 24,22" 
+                            fill={selectedStore === store.code ? '#fef3c7' : '#D4A574'}
+                          />
+                          {/* Líneas del cono */}
+                          <line x1="10" y1="24" x2="16" y2="36" stroke={selectedStore === store.code ? '#fcd34d' : '#c99a5e'} strokeWidth="0.5"/>
+                          <line x1="22" y1="24" x2="16" y2="36" stroke={selectedStore === store.code ? '#fcd34d' : '#c99a5e'} strokeWidth="0.5"/>
+                        </motion.svg>
                       </motion.div>
                       <span className={`font-bold tracking-wide text-center flex-1 ${
                         selectedStore === store.code 
