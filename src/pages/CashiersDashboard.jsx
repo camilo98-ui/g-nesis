@@ -396,25 +396,25 @@ export default function CashiersDashboard() {
                         <div className="bg-emerald-50 rounded-xl p-4 text-center">
                           <p className="text-xs text-gray-500 mb-1">Ventas Totales</p>
                           <p className="text-lg font-black text-emerald-600">
-                            ${(selectedCashier.totalSales/1000000).toFixed(2)}M
+                            ${((selectedCashier.totalSales || 0)/1000000).toFixed(2)}M
                           </p>
                         </div>
                         <div className="bg-blue-50 rounded-xl p-4 text-center">
                           <p className="text-xs text-gray-500 mb-1">Tickets</p>
                           <p className="text-lg font-black text-blue-600">
-                            {selectedCashier.totalTickets.toLocaleString()}
+                            {(selectedCashier.totalTickets || 0).toLocaleString()}
                           </p>
                         </div>
                         <div className="bg-purple-50 rounded-xl p-4 text-center">
                           <p className="text-xs text-gray-500 mb-1">Ticket Prom.</p>
                           <p className="text-lg font-black text-purple-600">
-                            ${(selectedCashier.avgTicket/1000).toFixed(0)}K
+                            ${((selectedCashier.avgTicket || 0)/1000).toFixed(0)}K
                           </p>
                         </div>
                         <div className="bg-pink-50 rounded-xl p-4 text-center">
                           <p className="text-xs text-gray-500 mb-1">Sugeridos</p>
                           <p className="text-lg font-black text-pink-600">
-                            {selectedCashier.totalSuggested}
+                            {selectedCashier.totalSuggested || 0}
                           </p>
                         </div>
                       </div>
