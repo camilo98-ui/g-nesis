@@ -126,6 +126,13 @@ export default function Home() {
   const [loginPassword, setLoginPassword] = useState('');
   const [loginError, setLoginError] = useState('');
   const [pendingStore, setPendingStore] = useState('');
+  const [selectedRole, setSelectedRole] = useState('');
+
+  const ROLES = [
+    { id: 'lider', name: 'Líder de Experiencia', icon: '👑', description: 'Acceso completo' },
+    { id: 'embajador', name: 'Embajador de Experiencia', icon: '⭐', description: 'Acceso limitado' },
+    { id: 'calidad', name: 'Calidad', icon: '✅', description: 'Solo visualización' },
+  ];
 
   // Fetch store passwords
   const { data: storePasswords = [] } = useQuery({
@@ -147,19 +154,21 @@ export default function Home() {
     const savedSession = localStorage.getItem('popsySession');
     const lastVisit = localStorage.getItem('lastVisitTime');
     const now = Date.now();
-    
+
     // Si pasaron más de 4 horas, cerrar sesión
     if (lastVisit && (now - parseInt(lastVisit)) > 4 * 60 * 60 * 1000) {
       localStorage.removeItem('selectedStore');
       localStorage.removeItem('popsySession');
+      localStorage.removeItem('userRole');
       setSelectedStore('');
       setIsLoggedIn(false);
     } else if (savedSession) {
       const session = JSON.parse(savedSession);
       setSelectedStore(session.store);
+      setSelectedRole(session.role || 'lider');
       setIsLoggedIn(true);
     }
-    
+
     localStorage.setItem('lastVisitTime', now.toString());
   }, []);
 
@@ -170,6 +179,24 @@ export default function Home() {
   };
 
   const handleLogin = () => {
+    if (!selectedRole) {
+      setLoginError('Selecciona un rol');
+      return;
+    }
+    
+    // Calidad no requiere contraseña
+    if (selectedRole === 'calidad') {
+      setSelectedStore(pendingStore);
+      setIsLoggedIn(true);
+      localStorage.setItem('selectedStore', pendingStore);
+      localStorage.setItem('userRole', selectedRole);
+      localStorage.setItem('popsySession', JSON.stringify({ store: pendingStore, role: selectedRole, time: Date.now() }));
+      setShowWelcome(true);
+      setPendingStore('');
+      setLoginPassword('');
+      return;
+    }
+    
     const storePassword = storePasswords.find(p => p.store_code === pendingStore);
     
     // Si no tiene contraseña o la contraseña coincide
@@ -177,7 +204,8 @@ export default function Home() {
       setSelectedStore(pendingStore);
       setIsLoggedIn(true);
       localStorage.setItem('selectedStore', pendingStore);
-      localStorage.setItem('popsySession', JSON.stringify({ store: pendingStore, time: Date.now() }));
+      localStorage.setItem('userRole', selectedRole);
+      localStorage.setItem('popsySession', JSON.stringify({ store: pendingStore, role: selectedRole, time: Date.now() }));
       setShowWelcome(true);
       setPendingStore('');
       setLoginPassword('');
@@ -190,21 +218,23 @@ export default function Home() {
     setSelectedStore('');
     setIsLoggedIn(false);
     setPendingStore('');
+    setSelectedRole('');
     localStorage.removeItem('selectedStore');
     localStorage.removeItem('popsySession');
+    localStorage.removeItem('userRole');
   };
 
   const handleStoreChange = (store) => {
     setSelectedStore(store);
     localStorage.setItem('selectedStore', store);
-    localStorage.setItem('popsySession', JSON.stringify({ store, time: Date.now() }));
+    localStorage.setItem('popsySession', JSON.stringify({ store, role: selectedRole, time: Date.now() }));
     setShowWelcome(true);
   };
 
   const selectedStoreName = STORES.find(s => s.code === selectedStore)?.name || '';
 
   const [showLoginPassword, setShowLoginPassword] = useState(false);
-  const needsPassword = pendingStore && storePasswords.find(p => p.store_code === pendingStore)?.password;
+  const needsPassword = pendingStore && selectedRole !== 'calidad' && storePasswords.find(p => p.store_code === pendingStore)?.password;
 
   // Si no está logueado, mostrar pantalla de login
   if (!isLoggedIn) {
@@ -247,6 +277,38 @@ export default function Home() {
               <p className="text-gray-500 text-sm mt-1">Ingresa para continuar</p>
             </motion.div>
 
+            {/* Selector de Rol */}
+            <motion.div 
+              className="mb-4 flex flex-col items-center"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.35 }}
+            >
+              <div className="w-full md:w-[300px] space-y-2">
+                <p className="text-xs text-gray-500 text-center mb-2">Selecciona tu rol</p>
+                <div className="grid grid-cols-3 gap-2">
+                  {ROLES.map((role) => (
+                    <motion.button
+                      key={role.id}
+                      whileHover={{ scale: 1.03 }}
+                      whileTap={{ scale: 0.97 }}
+                      onClick={() => { setSelectedRole(role.id); setLoginError(''); }}
+                      className={`p-2 rounded-xl border-2 transition-all text-center ${
+                        selectedRole === role.id
+                          ? 'border-pink-500 bg-pink-50 shadow-md'
+                          : 'border-gray-200 bg-white hover:border-pink-300'
+                      }`}
+                    >
+                      <span className="text-xl">{role.icon}</span>
+                      <p className={`text-[10px] font-medium mt-1 leading-tight ${selectedRole === role.id ? 'text-pink-600' : 'text-gray-600'}`}>
+                        {role.name}
+                      </p>
+                    </motion.button>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+
             {/* Selector de tienda - Centrado */}
             <motion.div 
               className="mb-4 flex flex-col items-center"
@@ -260,48 +322,51 @@ export default function Home() {
               />
             </motion.div>
 
-            {/* Campo de contraseña - Mismo estilo que selector de tienda */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              className="mb-4 flex flex-col items-center"
-            >
-              <Button 
-                variant="outline" 
-                className="w-full md:w-[300px] bg-white border-gray-200 hover:border-pink-300 transition-all shadow-md hover:shadow-lg rounded-xl justify-between group h-auto py-2.5"
-                onClick={() => {}}
+            {/* Campo de contraseña - Solo si no es Calidad */}
+            {selectedRole !== 'calidad' && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="mb-4 flex flex-col items-center"
               >
-                <div className="flex items-center gap-2 w-full">
-                  <Lock className="w-4 h-4 text-pink-500" />
-                  <input
-                    type={showLoginPassword ? "text" : "password"}
-                    placeholder={needsPassword ? "Ingresa la contraseña" : "Sin contraseña requerida"}
-                    value={loginPassword}
-                    onChange={(e) => { setLoginPassword(e.target.value); setLoginError(''); }}
-                    onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-                    className="flex-1 bg-transparent border-none outline-none text-pink-600 font-medium placeholder:text-gray-500 text-sm"
-                    disabled={!needsPassword && pendingStore}
-                  />
-                  <button
-                    type="button"
-                    onClick={(e) => { e.stopPropagation(); setShowLoginPassword(!showLoginPassword); }}
-                    className="text-gray-400 hover:text-pink-500"
-                  >
-                    {showLoginPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-              </Button>
-              {loginError && (
-                <motion.p 
-                  initial={{ opacity: 0, y: -5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="text-red-500 text-xs mt-1"
+                <Button 
+                  variant="outline" 
+                  className="w-full md:w-[300px] bg-white border-gray-200 hover:border-pink-300 transition-all shadow-md hover:shadow-lg rounded-xl justify-between group h-auto py-2.5"
+                  onClick={() => {}}
                 >
-                  {loginError}
-                </motion.p>
-              )}
-            </motion.div>
+                  <div className="flex items-center gap-2 w-full">
+                    <Lock className="w-4 h-4 text-pink-500" />
+                    <input
+                      type={showLoginPassword ? "text" : "password"}
+                      placeholder={needsPassword ? "Ingresa la contraseña" : "Sin contraseña requerida"}
+                      value={loginPassword}
+                      onChange={(e) => { setLoginPassword(e.target.value); setLoginError(''); }}
+                      onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+                      className="flex-1 bg-transparent border-none outline-none text-pink-600 font-medium placeholder:text-gray-500 text-sm"
+                      disabled={!needsPassword && pendingStore}
+                    />
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); setShowLoginPassword(!showLoginPassword); }}
+                      className="text-gray-400 hover:text-pink-500"
+                    >
+                      {showLoginPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </Button>
+              </motion.div>
+            )}
+
+            {loginError && (
+              <motion.p 
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-red-500 text-xs text-center mb-2"
+              >
+                {loginError}
+              </motion.p>
+            )}
 
             {/* Botón de ingresar */}
             <motion.div
@@ -311,11 +376,11 @@ export default function Home() {
             >
               <Button
                 onClick={handleLogin}
-                disabled={!pendingStore}
+                disabled={!pendingStore || !selectedRole}
                 className="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white py-6 rounded-xl shadow-lg shadow-pink-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <motion.span
-                  animate={{ scale: pendingStore ? [1, 1.05, 1] : 1 }}
+                  animate={{ scale: pendingStore && selectedRole ? [1, 1.05, 1] : 1 }}
                   transition={{ duration: 1.5, repeat: Infinity }}
                   className="flex items-center gap-2"
                 >
