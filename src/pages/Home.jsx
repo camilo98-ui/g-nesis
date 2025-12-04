@@ -135,89 +135,86 @@ export default function Home() {
     { id: 'c_interno', name: 'C. Interno', icon: 'c_interno', color: 'from-violet-400 to-purple-500', description: 'Solo Planner' },
   ];
 
-  // Ilustraciones dinámicas por rol
+  // Iconos profesionales por rol
   const RoleIcon = ({ roleId, isSelected }) => {
+    const iconColor = isSelected ? '#ffffff' : '#6b7280';
+    
     if (roleId === 'lider') {
+      // Corona profesional
       return (
-        <svg viewBox="0 0 40 50" className="w-full h-full">
-          <motion.g animate={isSelected ? { y: [0, -2, 0] } : {}} transition={{ duration: 1.5, repeat: Infinity }}>
-            <path d="M10 18 L14 10 L18 15 L20 6 L22 15 L26 10 L30 18 L28 20 L12 20 Z" fill="#fbbf24" />
-            <circle cx="14" cy="10" r="1.5" fill="#ef4444" />
-            <circle cx="20" cy="6" r="2" fill="#3b82f6" />
-            <circle cx="26" cy="10" r="1.5" fill="#22c55e" />
-          </motion.g>
-          <circle cx="20" cy="28" r="8" fill="#fcd9b6" />
-          <ellipse cx="17" cy="27" rx="1.2" ry="1.5" fill="#1e293b" />
-          <ellipse cx="23" cy="27" rx="1.2" ry="1.5" fill="#1e293b" />
-          <motion.path d="M17 32 Q20 35 23 32" stroke="#ec4899" strokeWidth="1.5" fill="none" strokeLinecap="round" animate={isSelected ? { d: ["M17 32 Q20 35 23 32", "M17 32 Q20 37 23 32"] } : {}} transition={{ duration: 1, repeat: Infinity }} />
-          <path d="M12 36 Q20 33 28 36 L29 48 L11 48 Z" fill="#ec4899" />
+        <svg viewBox="0 0 24 24" fill="none" className="w-full h-full">
+          <motion.path 
+            d="M3 18h18v2H3v-2zm1-8l4 4 4-6 4 6 4-4v8H4v-8z" 
+            fill={iconColor}
+            animate={isSelected ? { scale: [1, 1.05, 1] } : {}}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          />
+          <motion.circle cx="5" cy="8" r="1.5" fill={isSelected ? '#fbbf24' : iconColor} animate={isSelected ? { opacity: [0.7, 1, 0.7] } : {}} transition={{ duration: 1, repeat: Infinity }} />
+          <motion.circle cx="12" cy="5" r="2" fill={isSelected ? '#fbbf24' : iconColor} animate={isSelected ? { opacity: [0.7, 1, 0.7] } : {}} transition={{ duration: 1, repeat: Infinity, delay: 0.2 }} />
+          <motion.circle cx="19" cy="8" r="1.5" fill={isSelected ? '#fbbf24' : iconColor} animate={isSelected ? { opacity: [0.7, 1, 0.7] } : {}} transition={{ duration: 1, repeat: Infinity, delay: 0.4 }} />
         </svg>
       );
     }
     if (roleId === 'embajador') {
+      // Grupo de personas profesional
       return (
-        <svg viewBox="0 0 50 40" className="w-full h-full">
-          <motion.g animate={isSelected ? { y: [0, -2, 0] } : {}} transition={{ duration: 1.8, repeat: Infinity }}>
-            <circle cx="12" cy="15" r="6" fill="#fcd9b6" />
-            <ellipse cx="10" cy="14" rx="1" ry="1.2" fill="#1e293b" />
-            <ellipse cx="14" cy="14" rx="1" ry="1.2" fill="#1e293b" />
-            <path d="M6 21 Q12 19 18 21 L19 35 L5 35 Z" fill="#8b5cf6" />
+        <svg viewBox="0 0 24 24" fill="none" className="w-full h-full">
+          <motion.g animate={isSelected ? { y: [0, -1, 0] } : {}} transition={{ duration: 1.5, repeat: Infinity }}>
+            <circle cx="12" cy="6" r="3" fill={iconColor} />
+            <path d="M12 11c-4 0-6 2-6 4v2h12v-2c0-2-2-4-6-4z" fill={iconColor} />
           </motion.g>
-          <motion.g animate={isSelected ? { y: [0, -3, 0] } : {}} transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }}>
-            <circle cx="25" cy="12" r="7" fill="#e5c8a8" />
-            <ellipse cx="22" cy="11" rx="1.2" ry="1.4" fill="#1e293b" />
-            <ellipse cx="28" cy="11" rx="1.2" ry="1.4" fill="#1e293b" />
-            <motion.path d="M22 16 Q25 19 28 16" stroke="#ec4899" strokeWidth="1.2" fill="none" animate={isSelected ? { d: ["M22 16 Q25 19 28 16", "M22 16 Q25 21 28 16"] } : {}} transition={{ duration: 1.2, repeat: Infinity }} />
-            <path d="M16 20 Q25 17 34 20 L35 38 L15 38 Z" fill="#ec4899" />
+          <motion.g animate={isSelected ? { y: [0, -1, 0] } : {}} transition={{ duration: 1.5, repeat: Infinity, delay: 0.3 }}>
+            <circle cx="5" cy="9" r="2" fill={iconColor} opacity="0.7" />
+            <path d="M5 12c-2 0-4 1.5-4 3v1h5v-2c0-.7.2-1.4.5-2H5z" fill={iconColor} opacity="0.7" />
           </motion.g>
-          <motion.g animate={isSelected ? { y: [0, -2, 0] } : {}} transition={{ duration: 1.6, repeat: Infinity, delay: 0.4 }}>
-            <circle cx="38" cy="15" r="6" fill="#d4a88e" />
-            <ellipse cx="36" cy="14" rx="1" ry="1.2" fill="#1e293b" />
-            <ellipse cx="40" cy="14" rx="1" ry="1.2" fill="#1e293b" />
-            <path d="M32 21 Q38 19 44 21 L45 35 L31 35 Z" fill="#06b6d4" />
+          <motion.g animate={isSelected ? { y: [0, -1, 0] } : {}} transition={{ duration: 1.5, repeat: Infinity, delay: 0.5 }}>
+            <circle cx="19" cy="9" r="2" fill={iconColor} opacity="0.7" />
+            <path d="M19 12c2 0 4 1.5 4 3v1h-5v-2c0-.7-.2-1.4-.5-2h1.5z" fill={iconColor} opacity="0.7" />
           </motion.g>
         </svg>
       );
     }
     if (roleId === 'calidad') {
+      // Checklist profesional
       return (
-        <svg viewBox="0 0 40 50" className="w-full h-full">
-          <motion.g animate={isSelected ? { rotate: [0, 10, -10, 0], y: [0, -2, 0] } : {}} transition={{ duration: 1.5, repeat: Infinity }}>
-            <rect x="14" y="20" width="12" height="22" rx="2" fill="#06b6d4" />
-            <rect x="15" y="21" width="10" height="5" fill="#0891b2" opacity="0.5" />
-            <rect x="17" y="12" width="6" height="9" fill="#334155" />
-            <rect x="16" y="8" width="8" height="5" rx="1.5" fill="#475569" />
-            <motion.path d="M12 12 L8 6" stroke="#06b6d4" strokeWidth="1.5" strokeLinecap="round" strokeDasharray="2,1" animate={isSelected ? { opacity: [0, 1, 0] } : { opacity: 0 }} transition={{ duration: 0.6, repeat: Infinity }} />
-            <motion.path d="M10 16 L5 13" stroke="#06b6d4" strokeWidth="1.5" strokeLinecap="round" strokeDasharray="2,1" animate={isSelected ? { opacity: [0, 1, 0] } : { opacity: 0 }} transition={{ duration: 0.6, repeat: Infinity, delay: 0.15 }} />
-            <motion.path d="M11 20 L4 20" stroke="#06b6d4" strokeWidth="1.5" strokeLinecap="round" strokeDasharray="2,1" animate={isSelected ? { opacity: [0, 1, 0] } : { opacity: 0 }} transition={{ duration: 0.6, repeat: Infinity, delay: 0.3 }} />
-            <text x="20" y="36" textAnchor="middle" fontSize="6" fill="white" fontWeight="bold">✓</text>
-          </motion.g>
-          <motion.g animate={isSelected ? { x: [0, 3, 0] } : {}} transition={{ duration: 1, repeat: Infinity }}>
-            <text x="32" y="14" fontSize="10">✨</text>
-          </motion.g>
+        <svg viewBox="0 0 24 24" fill="none" className="w-full h-full">
+          <rect x="4" y="3" width="16" height="18" rx="2" stroke={iconColor} strokeWidth="2" fill="none" />
+          <motion.path 
+            d="M8 10l2 2 4-4" 
+            stroke={isSelected ? '#22c55e' : iconColor} 
+            strokeWidth="2" 
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+            fill="none"
+            animate={isSelected ? { pathLength: [0, 1] } : {}}
+            transition={{ duration: 0.8, repeat: Infinity, repeatDelay: 1 }}
+          />
+          <line x1="8" y1="16" x2="16" y2="16" stroke={iconColor} strokeWidth="2" strokeLinecap="round" />
         </svg>
       );
     }
     if (roleId === 'c_interno') {
+      // Documento con lupa profesional
       return (
-        <svg viewBox="0 0 40 50" className="w-full h-full">
-          <circle cx="20" cy="18" r="10" fill="#fcd9b6" />
-          <path d="M10 15 Q14 8 20 10 Q26 8 30 15" fill="#1e293b" />
-          <motion.g animate={isSelected ? { y: [0, -1, 0] } : {}} transition={{ duration: 1.5, repeat: Infinity }}>
-            <rect x="11" y="15" width="8" height="6" rx="1.5" fill="none" stroke="#1e293b" strokeWidth="1.5" />
-            <rect x="21" y="15" width="8" height="6" rx="1.5" fill="none" stroke="#1e293b" strokeWidth="1.5" />
-            <line x1="19" y1="18" x2="21" y2="18" stroke="#1e293b" strokeWidth="1.5" />
-            <line x1="11" y1="18" x2="8" y2="16" stroke="#1e293b" strokeWidth="1" />
-            <line x1="29" y1="18" x2="32" y2="16" stroke="#1e293b" strokeWidth="1" />
-            <motion.ellipse cx="14" cy="17" rx="1.5" ry="1" fill="white" opacity="0.3" animate={isSelected ? { opacity: [0.2, 0.5, 0.2] } : {}} transition={{ duration: 1.5, repeat: Infinity }} />
-            <motion.ellipse cx="24" cy="17" rx="1.5" ry="1" fill="white" opacity="0.3" animate={isSelected ? { opacity: [0.2, 0.5, 0.2] } : {}} transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }} />
-          </motion.g>
-          <motion.ellipse cx="15" cy="18" rx="1.5" ry="2" fill="#1e293b" animate={isSelected ? { scaleY: [1, 0.1, 1] } : {}} transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 1.5 }} />
-          <motion.ellipse cx="25" cy="18" rx="1.5" ry="2" fill="#1e293b" animate={isSelected ? { scaleY: [1, 0.1, 1] } : {}} transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 1.5 }} />
-          <motion.path d="M16 24 Q20 27 24 24" stroke="#ec4899" strokeWidth="1.5" fill="none" strokeLinecap="round" animate={isSelected ? { d: ["M16 24 Q20 27 24 24", "M16 24 Q20 29 24 24"] } : {}} transition={{ duration: 1.5, repeat: Infinity }} />
-          <path d="M10 28 Q20 25 30 28 L31 48 L9 48 Z" fill="#6366f1" />
-          <path d="M18 28 L20 36 L22 28 Z" fill="#ef4444" />
-          <rect x="18" y="28" width="4" height="2" fill="#dc2626" />
+        <svg viewBox="0 0 24 24" fill="none" className="w-full h-full">
+          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z" stroke={iconColor} strokeWidth="2" fill="none" />
+          <path d="M14 2v6h6" stroke={iconColor} strokeWidth="2" fill="none" />
+          <motion.circle 
+            cx="11" cy="14" r="3" 
+            stroke={iconColor} 
+            strokeWidth="2" 
+            fill="none"
+            animate={isSelected ? { scale: [1, 1.1, 1] } : {}}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          />
+          <motion.line 
+            x1="13.5" y1="16.5" x2="16" y2="19" 
+            stroke={iconColor} 
+            strokeWidth="2" 
+            strokeLinecap="round"
+            animate={isSelected ? { x2: [16, 17, 16], y2: [19, 20, 19] } : {}}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          />
         </svg>
       );
     }
@@ -329,7 +326,7 @@ export default function Home() {
   // Si no está logueado, mostrar pantalla de login
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-amber-50 relative overflow-hidden flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50/80 via-pink-50/30 to-purple-50/20 relative overflow-hidden flex items-center justify-center">
         <PastelConfetti />
         <FloatingIceCreamsBg />
         
