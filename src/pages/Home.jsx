@@ -85,26 +85,26 @@ const MENU_ITEMS = [
   },
 ];
 
-// Confetti pastel suave
+// Confetti pastel muy sutil
 const PastelConfetti = () => (
   <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-    {[...Array(20)].map((_, i) => (
+    {[...Array(10)].map((_, i) => (
       <motion.div
         key={i}
-        className="absolute w-2 h-2 rounded-full"
+        className="absolute w-1 h-1 rounded-full"
         style={{
           left: `${Math.random() * 100}%`,
-          background: ['#FFD1DC', '#E0BBE4', '#C5E8FF', '#FFEFD5', '#D4F0F0'][i % 5],
+          background: ['#fce7f3', '#f3e8ff', '#e0f2fe', '#fef3c7', '#ecfdf5'][i % 5],
         }}
         initial={{ y: -20, opacity: 0 }}
         animate={{ 
           y: window.innerHeight + 50,
-          opacity: [0, 0.6, 0.6, 0],
+          opacity: [0, 0.2, 0.2, 0],
           rotate: [0, 360]
         }}
         transition={{
-          duration: 8 + Math.random() * 4,
-          delay: i * 0.3,
+          duration: 14 + Math.random() * 4,
+          delay: i * 0.6,
           repeat: Infinity,
           ease: "linear"
         }}
