@@ -16,14 +16,24 @@ export default function CashierProfile() {
   const cashierId = urlParams.get('id');
   const from = urlParams.get('from'); // 'rankings', 'cashiers', etc.
 
-  const { data: cashier, isLoading } = useQuery({
+  const { data: cashier, isLoading, isError } = useQuery({
     queryKey: ['cashier', cashierId],
     queryFn: async () => {
+      if (!cashierId) return null;
       const results = await base44.entities.Cashier.filter({ id: cashierId });
-      return results[0] || null;
+      return results?.[0] || null;
     },
-    enabled: !!cashierId
+    enabled: !!cashierId,
+    retry: 2
   });
+
+  const getBackLink = () => {
+    if (from === 'rankings') return { url: 'Rankings', label: 'Volver a Rankings' };
+    if (from === 'cashiers') return { url: 'CashiersDashboard', label: 'Volver a Cajeros' };
+    return { url: 'Home', label: 'Volver al Inicio' };
+  };
+
+  const backInfo = getBackLink();
 
   if (isLoading) {
     return (
@@ -33,15 +43,7 @@ export default function CashierProfile() {
     );
   }
 
-  const getBackLink = () => {
-    if (from === 'rankings') return { url: 'Rankings', label: 'Volver al Ranking Global' };
-    if (from === 'cashiers') return { url: 'CashiersDashboard', label: 'Volver a Cajeros' };
-    return { url: 'CashiersDashboard', label: 'Volver a Cajeros' };
-  };
-
-  const backInfo = getBackLink();
-
-  if (!cashier) {
+  if (!cashierId || isError || !cashier) {
     return (
       <div className="min-h-screen bg-gray-50 p-6">
         <div className="max-w-2xl mx-auto text-center py-12">
