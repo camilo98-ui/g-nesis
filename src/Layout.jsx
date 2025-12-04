@@ -65,6 +65,30 @@ export default function Layout({ children, currentPageName }) {
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             const isActive = currentPageName === item.page;
+            
+            // Restricciones por rol
+            const isLocked = (userRole === 'calidad' && (item.page === 'FreezerMap' || item.page === 'Management')) ||
+                            (userRole === 'c_interno' && item.page !== 'Home' && item.page !== 'PopsyPlanner');
+            
+            if (isLocked) {
+              return (
+                <motion.div
+                  key={item.page}
+                  whileHover={{ scale: 1.02 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                >
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    disabled
+                    className="transition-all duration-200 w-10 h-10 text-gray-300 cursor-not-allowed opacity-50"
+                  >
+                    <Icon className="w-5 h-5" />
+                  </Button>
+                </motion.div>
+              );
+            }
+            
             return (
               <Link key={item.page} to={createPageUrl(item.page)}>
                 <motion.div
