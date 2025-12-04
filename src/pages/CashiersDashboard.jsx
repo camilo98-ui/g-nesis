@@ -13,10 +13,11 @@ import CashierAnalysis from '@/components/cashier/CashierAnalysis';
 import BadgesDisplay from '@/components/gamification/BadgesDisplay';
 import CashierRanking from '@/components/gamification/CashierRanking';
 import CashierGoalsManager from '@/components/gamification/CashierGoalsManager';
+import CashierFullProfile, { ViewProfileButton } from '@/components/cashier/CashierFullProfile';
 import { 
   ArrowLeft, Users, Search, TrendingUp, TrendingDown, 
   Award, Target, BarChart3, User, ChevronRight, Star,
-  Flame, Crown, Medal
+  Flame, Crown, Medal, Eye, Hash
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -114,13 +115,27 @@ export default function CashiersDashboard() {
   // Totales del equipo
   const teamTotals = useMemo(() => {
     const values = Object.values(cashierStats);
+    const totalSales = values.reduce((sum, c) => sum + c.totalSales, 0);
+    const totalSuggested = values.reduce((sum, c) => sum + c.totalSuggested, 0);
     return {
-      totalSales: values.reduce((sum, c) => sum + c.totalSales, 0),
+      totalSales,
       totalTickets: values.reduce((sum, c) => sum + c.totalTickets, 0),
       avgTicket: values.length > 0 ? values.reduce((sum, c) => sum + c.avgTicket, 0) / values.length : 0,
+      avgSales: values.length > 0 ? totalSales / values.length : 0,
+      avgSuggested: values.length > 0 ? totalSuggested / values.length : 0,
       totalCashiers: values.length
     };
   }, [cashierStats]);
+
+  // Auto scroll to analysis when cashier is selected
+  const analysisRef = React.useRef(null);
+  useEffect(() => {
+    if (selectedCashier && analysisRef.current) {
+      setTimeout(() => {
+        analysisRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 200);
+    }
+  }, [selectedCashier]);
 
   const formatCurrency = (val) => new Intl.NumberFormat('es-CO', { 
     style: 'currency', currency: 'COP', minimumFractionDigits: 0 
@@ -298,14 +313,29 @@ export default function CashiersDashboard() {
                                 </span>
                               )}
                             </div>
+                            {/* Hashtags mini */}
+                            {cashier.rank <= 3 && (
+                              <div className={`flex gap-1 mt-1 ${selectedCashier?.id === cashier.id ? 'text-white/60' : 'text-purple-500'}`}>
+                                <span className="text-[9px] font-bold">#TopVendedor</span>
+                              </div>
+                            )}
                           </div>
                         </div>
-                        <motion.div
-                          animate={selectedCashier?.id === cashier.id ? { x: [0, 3, 0] } : {}}
-                          transition={{ duration: 1, repeat: Infinity }}
-                        >
-                          <ChevronRight className={`w-5 h-5 ${selectedCashier?.id === cashier.id ? 'text-white' : 'text-gray-400'}`} />
-                        </motion.div>
+                        <div className="flex items-center gap-1">
+                          {/* View full profile button */}
+                          <ViewProfileButton 
+                            cashier={cashier}
+                            stats={cashier}
+                            storeId={selectedStore}
+                            teamStats={teamTotals}
+                          />
+                          <motion.div
+                            animate={selectedCashier?.id === cashier.id ? { x: [0, 3, 0] } : {}}
+                            transition={{ duration: 1, repeat: Infinity }}
+                          >
+                            <ChevronRight className={`w-5 h-5 ${selectedCashier?.id === cashier.id ? 'text-white' : 'text-gray-400'}`} />
+                          </motion.div>
+                        </div>
                       </div>
                       
                       {/* Barra de progreso del score */}
@@ -344,7 +374,7 @@ export default function CashiersDashboard() {
               </div>
 
               {/* Detalle del Cajero */}
-              <div className="lg:col-span-2">
+              <div className="lg:col-span-2" ref={analysisRef}>
                 <AnimatePresence mode="wait">
                   {selectedCashier ? (
                     <motion.div
