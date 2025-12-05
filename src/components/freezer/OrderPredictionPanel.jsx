@@ -8,9 +8,10 @@ import { Progress } from "@/components/ui/progress";
 const GOURMET_FLAVORS = ['Limón N.', 'Maracuyá N.', 'Mandarina N.', 'Vainilla', 'V. Francesa', 'V. Chips', 'Chocolate', 'Belga', 'Frutos', 'Fresa', 'Arequipe', 'Ron'];
 const EXCLUSIVO_FLAVORS = ['Cherry', 'Arroz', 'Chicle', 'Brownie', 'Crema Limón', 'M&M', 'Milky', 'Oreo', 'Macadamia', 'Café', 'Yogurt C.'];
 
-export default function OrderPredictionPanel({ slots }) {
+export default function OrderPredictionPanel({ slots = [] }) {
   // Calcular frecuencia de cada sabor y stock levels
   const flavorAnalysis = useMemo(() => {
+    if (!slots || slots.length === 0) return [];
     const analysis = {};
     
     slots.forEach(slot => {
@@ -53,6 +54,16 @@ export default function OrderPredictionPanel({ slots }) {
       totalCubetas: gourmetNeeded.length + exclusivoNeeded.length
     };
   }, [highMovement]);
+
+  if (!slots || slots.length === 0) {
+    return (
+      <Card className="border-purple-200">
+        <CardContent className="p-4 text-center text-gray-400 text-xs">
+          Sin datos de nevera
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="border-purple-200">

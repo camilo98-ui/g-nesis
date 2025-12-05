@@ -5,9 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Snowflake, TrendingUp, Package, CheckCircle } from 'lucide-react';
 
-export default function StockVisualization({ slots }) {
+export default function StockVisualization({ slots = [] }) {
   // Distribución de stock levels
   const stockDistribution = useMemo(() => {
+    if (!slots || slots.length === 0) return [];
     const distribution = { full: 0, medium: 0, low: 0, empty: 0 };
     slots.forEach(s => {
       if (s.stock_level) distribution[s.stock_level]++;
@@ -23,6 +24,7 @@ export default function StockVisualization({ slots }) {
 
   // Sabores por tipo
   const typeDistribution = useMemo(() => {
+    if (!slots || slots.length === 0) return [];
     const types = {};
     slots.forEach(s => {
       if (s.is_empty || !s.flavor_type) return;
@@ -38,6 +40,7 @@ export default function StockVisualization({ slots }) {
 
   // Top 5 sabores más frecuentes
   const topFlavors = useMemo(() => {
+    if (!slots || slots.length === 0) return [];
     const counts = {};
     slots.forEach(s => {
       if (s.is_empty || !s.flavor_name) return;
@@ -49,6 +52,14 @@ export default function StockVisualization({ slots }) {
       .sort((a, b) => b.count - a.count)
       .slice(0, 5);
   }, [slots]);
+
+  if (!slots || slots.length === 0) {
+    return (
+      <div className="p-4 text-center text-gray-400 text-xs">
+        Sin datos de nevera
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
