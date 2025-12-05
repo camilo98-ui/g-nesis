@@ -2,7 +2,8 @@ import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Snowflake, TrendingUp, Package } from 'lucide-react';
+import { Progress } from "@/components/ui/progress";
+import { Snowflake, TrendingUp, Package, CheckCircle } from 'lucide-react';
 
 export default function StockVisualization({ slots }) {
   // Distribución de stock levels
@@ -145,21 +146,6 @@ export default function StockVisualization({ slots }) {
         </CardContent>
       </Card>
 
-      {/* Recomendación */}
-      <div className="bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl p-3 border border-emerald-200">
-        <p className="text-xs font-bold text-emerald-700 mb-2 flex items-center gap-1">
-          <CheckCircle className="w-3 h-3" />
-          Recomendación de Pedido
-        </p>
-        <p className="text-xs text-emerald-600 leading-relaxed">
-          Pedir <strong>{orderSuggestion.gourmet.length} cubetas Gourmet</strong> y <strong>{orderSuggestion.exclusivo.length} cubetas Exclusivo</strong> para reponer los sabores de alto movimiento.
-        </p>
-        {lowMovement.length > 0 && (
-          <p className="text-xs text-amber-600 mt-2">
-            ⚠️ {lowMovement.length} sabores tienen bajo movimiento - considerar rotar por otros.
-          </p>
-        )}
-      </div>
     </div>
   );
 }
