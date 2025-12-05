@@ -22,7 +22,6 @@ import {
   AreaChart, Area, BarChart, Bar, LineChart, Line, PieChart as RechartsPie, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ComposedChart, ReferenceLine
 } from 'recharts';
-import { AnimatePresence } from 'framer-motion';
 import { format, startOfMonth, subDays, isToday, isYesterday, eachDayOfInterval, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 
