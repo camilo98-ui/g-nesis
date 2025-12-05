@@ -11,7 +11,7 @@ import CashierRankingCard from '@/components/ranking/CashierRankingCard';
 import CashierRecommendation from '@/components/CashierRecommendation';
 import TrendChart from '@/components/ranking/TrendChart';
 import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
-import { ArrowLeft, Award, Gift, Trophy, Star, Receipt, TrendingUp, Globe, X, Medal, Search, Crown, Sparkles, Eye } from 'lucide-react';
+import { ArrowLeft, Award, Gift, Trophy, Star, Receipt, TrendingUp, Globe, X, Medal, Search, Crown, Sparkles } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -682,10 +682,8 @@ export default function Rankings() {
                             <p className="font-bold text-purple-600">{item.overallScore?.toFixed(1)} pts</p>
                             <p className="text-xs text-gray-400">{item.shifts} turnos</p>
                           </div>
-                          <Link to={createPageUrl(`CashierProfile?id=${item.cashier_id}&from=rankings`)}>
-                            <Button variant="ghost" size="icon" className="hover:bg-purple-50">
-                              <Eye className="w-4 h-4 text-purple-500" />
-                            </Button>
+                          <Link to={createPageUrl(`CashierProfile?id=${item.cashier_id}&from=rankings`)} className="text-purple-600 hover:underline">
+                            <span className="font-bold">{item.cashier?.name}</span>
                           </Link>
                         </motion.div>
                       ))}
@@ -718,19 +716,26 @@ export default function Rankings() {
                           >
                             #{item.rank}
                           </motion.div>
+                          {/* Photo */}
+                          <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
+                            {item.cashier?.photo_url ? (
+                              <img src={item.cashier.photo_url} alt={item.cashier.name} className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-gray-400 font-bold">
+                                {item.cashier?.name?.charAt(0)}
+                              </div>
+                            )}
+                          </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-bold text-gray-800 truncate">{item.cashier?.name}</p>
+                            <Link to={createPageUrl(`CashierProfile?id=${item.cashier_id}&from=rankings`)} className="font-bold text-gray-800 truncate hover:text-emerald-600 hover:underline cursor-pointer">
+                              {item.cashier?.name}
+                            </Link>
                             <p className="text-xs text-gray-500 truncate">📍 {item.storeName}</p>
                           </div>
-                          <div className="text-right mr-2">
+                          <div className="text-right">
                             <p className="font-bold text-emerald-600">{formatCurrency(item.totalSales)}</p>
                             <p className="text-xs text-gray-400">{item.shifts} turnos</p>
                           </div>
-                          <Link to={createPageUrl(`CashierProfile?id=${item.cashier_id}&from=rankings`)}>
-                            <Button variant="ghost" size="icon" className="hover:bg-emerald-50">
-                              <Eye className="w-4 h-4 text-emerald-500" />
-                            </Button>
-                          </Link>
                         </motion.div>
                       ))}
                     </TabsContent>
@@ -762,19 +767,26 @@ export default function Rankings() {
                           >
                             #{item.rank}
                           </motion.div>
+                          {/* Photo */}
+                          <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
+                            {item.cashier?.photo_url ? (
+                              <img src={item.cashier.photo_url} alt={item.cashier.name} className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-gray-400 font-bold">
+                                {item.cashier?.name?.charAt(0)}
+                              </div>
+                            )}
+                          </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-bold text-gray-800 truncate">{item.cashier?.name}</p>
+                            <Link to={createPageUrl(`CashierProfile?id=${item.cashier_id}&from=rankings`)} className="font-bold text-gray-800 truncate hover:text-blue-600 hover:underline cursor-pointer">
+                              {item.cashier?.name}
+                            </Link>
                             <p className="text-xs text-gray-500 truncate">📍 {item.storeName}</p>
                           </div>
-                          <div className="text-right mr-2">
+                          <div className="text-right">
                             <p className="font-bold text-blue-600">{item.totalTransactions.toLocaleString()}</p>
                             <p className="text-xs text-gray-400">transacciones</p>
                           </div>
-                          <Link to={createPageUrl(`CashierProfile?id=${item.cashier_id}&from=rankings`)}>
-                            <Button variant="ghost" size="icon" className="hover:bg-blue-50">
-                              <Eye className="w-4 h-4 text-blue-500" />
-                            </Button>
-                          </Link>
                         </motion.div>
                       ))}
                     </TabsContent>
@@ -806,19 +818,26 @@ export default function Rankings() {
                           >
                             #{item.rank}
                           </motion.div>
+                          {/* Photo */}
+                          <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
+                            {item.cashier?.photo_url ? (
+                              <img src={item.cashier.photo_url} alt={item.cashier.name} className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-gray-400 font-bold">
+                                {item.cashier?.name?.charAt(0)}
+                              </div>
+                            )}
+                          </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-bold text-gray-800 truncate">{item.cashier?.name}</p>
+                            <Link to={createPageUrl(`CashierProfile?id=${item.cashier_id}&from=rankings`)} className="font-bold text-gray-800 truncate hover:text-amber-600 hover:underline cursor-pointer">
+                              {item.cashier?.name}
+                            </Link>
                             <p className="text-xs text-gray-500 truncate">📍 {item.storeName}</p>
                           </div>
-                          <div className="text-right mr-2">
+                          <div className="text-right">
                             <p className="font-bold text-amber-600">{formatCurrency(item.avgTicket)}</p>
-                            <p className="text-xs text-gray-400">{item.totalTickets} tickets</p>
+                            <p className="text-xs text-gray-400">Ticket Prom.</p>
                           </div>
-                          <Link to={createPageUrl(`CashierProfile?id=${item.cashier_id}&from=rankings`)}>
-                            <Button variant="ghost" size="icon" className="hover:bg-amber-50">
-                              <Eye className="w-4 h-4 text-amber-500" />
-                            </Button>
-                          </Link>
                         </motion.div>
                       ))}
                     </TabsContent>
@@ -850,19 +869,26 @@ export default function Rankings() {
                           >
                             #{item.rank}
                           </motion.div>
+                          {/* Photo */}
+                          <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
+                            {item.cashier?.photo_url ? (
+                              <img src={item.cashier.photo_url} alt={item.cashier.name} className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-gray-400 font-bold">
+                                {item.cashier?.name?.charAt(0)}
+                              </div>
+                            )}
+                          </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-bold text-gray-800 truncate">{item.cashier?.name}</p>
+                            <Link to={createPageUrl(`CashierProfile?id=${item.cashier_id}&from=rankings`)} className="font-bold text-gray-800 truncate hover:text-rose-600 hover:underline cursor-pointer">
+                              {item.cashier?.name}
+                            </Link>
                             <p className="text-xs text-gray-500 truncate">📍 {item.storeName}</p>
                           </div>
-                          <div className="text-right mr-2">
+                          <div className="text-right">
                             <p className="font-bold text-rose-600">{item.totalSuggested?.toLocaleString()}</p>
                             <p className="text-xs text-gray-400">sugeridos</p>
                           </div>
-                          <Link to={createPageUrl(`CashierProfile?id=${item.cashier_id}&from=rankings`)}>
-                            <Button variant="ghost" size="icon" className="hover:bg-rose-50">
-                              <Eye className="w-4 h-4 text-rose-500" />
-                            </Button>
-                          </Link>
                         </motion.div>
                       ))}
                     </TabsContent>

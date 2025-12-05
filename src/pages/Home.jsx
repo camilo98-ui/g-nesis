@@ -129,101 +129,102 @@ export default function Home() {
   const [selectedRole, setSelectedRole] = useState('');
 
   const ROLES = [
-    { id: 'gerente', name: 'Gerente', icon: 'gerente', color: 'from-slate-600 to-gray-700', description: 'Acceso total' },
-    { id: 'lider', name: 'Líder de Experiencia', icon: 'lider', color: 'from-amber-400 to-yellow-500', description: 'Acceso completo' },
-    { id: 'embajador', name: 'Embajador', icon: 'embajador', color: 'from-pink-400 to-rose-500', description: 'Acceso limitado' },
-    { id: 'calidad', name: 'Calidad', icon: 'calidad', color: 'from-teal-400 to-cyan-500', description: 'Solo visualización' },
-    { id: 'c_interno', name: 'C. Interno', icon: 'c_interno', color: 'from-violet-400 to-purple-500', description: 'Solo Planner' },
+    { id: 'gerente', name: 'Gerente', icon: 'gerente', color: 'from-slate-600 to-gray-700', description: 'Acceso total', iconBaseColor: '#475569' },
+    { id: 'lider', name: 'Líder de Experiencia', icon: 'lider', color: 'from-amber-400 to-yellow-500', description: 'Acceso completo', iconBaseColor: '#f59e0b' },
+    { id: 'embajador', name: 'Embajador', icon: 'embajador', color: 'from-pink-400 to-rose-500', description: 'Acceso limitado', iconBaseColor: '#ec4899' },
+    { id: 'calidad', name: 'Calidad', icon: 'calidad', color: 'from-teal-400 to-cyan-500', description: 'Solo visualización', iconBaseColor: '#14b8a6' },
+    { id: 'c_interno', name: 'C. Interno', icon: 'c_interno', color: 'from-violet-400 to-purple-500', description: 'Solo Planner', iconBaseColor: '#8b5cf6' },
   ];
 
-  // Iconos profesionales por rol
+  // Iconos profesionales por rol con colores dinámicos
   const RoleIcon = ({ roleId, isSelected }) => {
-    const iconColor = isSelected ? '#ffffff' : '#6b7280';
+    const role = ROLES.find(r => r.id === roleId);
+    const iconColor = isSelected ? '#ffffff' : role?.iconBaseColor || '#6b7280';
     
     if (roleId === 'gerente') {
-      // Maletín ejecutivo
+      // Maletín ejecutivo con color
       return (
         <svg viewBox="0 0 24 24" fill="none" className="w-full h-full">
-          <rect x="4" y="8" width="16" height="12" rx="2" stroke={iconColor} strokeWidth="2" fill="none" />
+          <motion.rect x="4" y="8" width="16" height="12" rx="2" stroke={iconColor} strokeWidth="2" fill={isSelected ? 'none' : 'rgba(71,85,105,0.1)'} animate={isSelected ? { scale: [1, 1.02, 1] } : {}} transition={{ duration: 1.5, repeat: Infinity }} />
           <path d="M8 8V6a2 2 0 012-2h4a2 2 0 012 2v2" stroke={iconColor} strokeWidth="2" fill="none" />
           <motion.line x1="4" y1="12" x2="20" y2="12" stroke={iconColor} strokeWidth="2" animate={isSelected ? { opacity: [0.5, 1, 0.5] } : {}} transition={{ duration: 1.5, repeat: Infinity }} />
         </svg>
       );
     }
     if (roleId === 'lider') {
-      // Corona profesional
+      // Corona profesional con brillo dorado
       return (
         <svg viewBox="0 0 24 24" fill="none" className="w-full h-full">
           <motion.path 
             d="M3 18h18v2H3v-2zm1-8l4 4 4-6 4 6 4-4v8H4v-8z" 
-            fill={iconColor}
+            fill={isSelected ? iconColor : '#fbbf24'}
             animate={isSelected ? { scale: [1, 1.05, 1] } : {}}
             transition={{ duration: 1.5, repeat: Infinity }}
           />
-          <motion.circle cx="5" cy="8" r="1.5" fill={isSelected ? '#fbbf24' : iconColor} animate={isSelected ? { opacity: [0.7, 1, 0.7] } : {}} transition={{ duration: 1, repeat: Infinity }} />
-          <motion.circle cx="12" cy="5" r="2" fill={isSelected ? '#fbbf24' : iconColor} animate={isSelected ? { opacity: [0.7, 1, 0.7] } : {}} transition={{ duration: 1, repeat: Infinity, delay: 0.2 }} />
-          <motion.circle cx="19" cy="8" r="1.5" fill={isSelected ? '#fbbf24' : iconColor} animate={isSelected ? { opacity: [0.7, 1, 0.7] } : {}} transition={{ duration: 1, repeat: Infinity, delay: 0.4 }} />
+          <motion.circle cx="5" cy="8" r="1.5" fill={isSelected ? '#fbbf24' : '#f59e0b'} animate={{ opacity: [0.7, 1, 0.7], scale: [1, 1.2, 1] }} transition={{ duration: 1, repeat: Infinity }} />
+          <motion.circle cx="12" cy="5" r="2" fill={isSelected ? '#fbbf24' : '#f59e0b'} animate={{ opacity: [0.7, 1, 0.7], scale: [1, 1.2, 1] }} transition={{ duration: 1, repeat: Infinity, delay: 0.2 }} />
+          <motion.circle cx="19" cy="8" r="1.5" fill={isSelected ? '#fbbf24' : '#f59e0b'} animate={{ opacity: [0.7, 1, 0.7], scale: [1, 1.2, 1] }} transition={{ duration: 1, repeat: Infinity, delay: 0.4 }} />
         </svg>
       );
     }
     if (roleId === 'embajador') {
-      // Grupo de personas profesional
+      // Grupo de personas con color rosa
       return (
         <svg viewBox="0 0 24 24" fill="none" className="w-full h-full">
-          <motion.g animate={isSelected ? { y: [0, -1, 0] } : {}} transition={{ duration: 1.5, repeat: Infinity }}>
-            <circle cx="12" cy="6" r="3" fill={iconColor} />
-            <path d="M12 11c-4 0-6 2-6 4v2h12v-2c0-2-2-4-6-4z" fill={iconColor} />
+          <motion.g animate={{ y: [0, -1, 0] }} transition={{ duration: 1.5, repeat: Infinity }}>
+            <circle cx="12" cy="6" r="3" fill={isSelected ? iconColor : '#ec4899'} />
+            <path d="M12 11c-4 0-6 2-6 4v2h12v-2c0-2-2-4-6-4z" fill={isSelected ? iconColor : '#ec4899'} />
           </motion.g>
-          <motion.g animate={isSelected ? { y: [0, -1, 0] } : {}} transition={{ duration: 1.5, repeat: Infinity, delay: 0.3 }}>
-            <circle cx="5" cy="9" r="2" fill={iconColor} opacity="0.7" />
-            <path d="M5 12c-2 0-4 1.5-4 3v1h5v-2c0-.7.2-1.4.5-2H5z" fill={iconColor} opacity="0.7" />
+          <motion.g animate={{ y: [0, -1, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0.3 }}>
+            <circle cx="5" cy="9" r="2" fill={isSelected ? iconColor : '#f472b6'} opacity="0.7" />
+            <path d="M5 12c-2 0-4 1.5-4 3v1h5v-2c0-.7.2-1.4.5-2H5z" fill={isSelected ? iconColor : '#f472b6'} opacity="0.7" />
           </motion.g>
-          <motion.g animate={isSelected ? { y: [0, -1, 0] } : {}} transition={{ duration: 1.5, repeat: Infinity, delay: 0.5 }}>
-            <circle cx="19" cy="9" r="2" fill={iconColor} opacity="0.7" />
-            <path d="M19 12c2 0 4 1.5 4 3v1h-5v-2c0-.7-.2-1.4-.5-2h1.5z" fill={iconColor} opacity="0.7" />
+          <motion.g animate={{ y: [0, -1, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0.5 }}>
+            <circle cx="19" cy="9" r="2" fill={isSelected ? iconColor : '#f472b6'} opacity="0.7" />
+            <path d="M19 12c2 0 4 1.5 4 3v1h-5v-2c0-.7-.2-1.4-.5-2h1.5z" fill={isSelected ? iconColor : '#f472b6'} opacity="0.7" />
           </motion.g>
         </svg>
       );
     }
     if (roleId === 'calidad') {
-      // Checklist profesional
+      // Checklist profesional con color teal
       return (
         <svg viewBox="0 0 24 24" fill="none" className="w-full h-full">
-          <rect x="4" y="3" width="16" height="18" rx="2" stroke={iconColor} strokeWidth="2" fill="none" />
+          <rect x="4" y="3" width="16" height="18" rx="2" stroke={isSelected ? iconColor : '#14b8a6'} strokeWidth="2" fill={isSelected ? 'none' : 'rgba(20,184,166,0.1)'} />
           <motion.path 
             d="M8 10l2 2 4-4" 
-            stroke={isSelected ? '#22c55e' : iconColor} 
-            strokeWidth="2" 
+            stroke={isSelected ? '#22c55e' : '#14b8a6'} 
+            strokeWidth="2.5" 
             strokeLinecap="round" 
             strokeLinejoin="round"
             fill="none"
-            animate={isSelected ? { pathLength: [0, 1] } : {}}
+            animate={{ pathLength: [0, 1], opacity: [0.5, 1] }}
             transition={{ duration: 0.8, repeat: Infinity, repeatDelay: 1 }}
           />
-          <line x1="8" y1="16" x2="16" y2="16" stroke={iconColor} strokeWidth="2" strokeLinecap="round" />
+          <line x1="8" y1="16" x2="16" y2="16" stroke={isSelected ? iconColor : '#14b8a6'} strokeWidth="2" strokeLinecap="round" />
         </svg>
       );
     }
     if (roleId === 'c_interno') {
-      // Documento con lupa profesional
+      // Documento con lupa en violeta
       return (
         <svg viewBox="0 0 24 24" fill="none" className="w-full h-full">
-          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z" stroke={iconColor} strokeWidth="2" fill="none" />
-          <path d="M14 2v6h6" stroke={iconColor} strokeWidth="2" fill="none" />
+          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z" stroke={isSelected ? iconColor : '#8b5cf6'} strokeWidth="2" fill={isSelected ? 'none' : 'rgba(139,92,246,0.1)'} />
+          <path d="M14 2v6h6" stroke={isSelected ? iconColor : '#8b5cf6'} strokeWidth="2" fill="none" />
           <motion.circle 
             cx="11" cy="14" r="3" 
-            stroke={iconColor} 
+            stroke={isSelected ? iconColor : '#8b5cf6'} 
             strokeWidth="2" 
             fill="none"
-            animate={isSelected ? { scale: [1, 1.1, 1] } : {}}
+            animate={{ scale: [1, 1.1, 1] }}
             transition={{ duration: 1.5, repeat: Infinity }}
           />
           <motion.line 
             x1="13.5" y1="16.5" x2="16" y2="19" 
-            stroke={iconColor} 
+            stroke={isSelected ? iconColor : '#8b5cf6'} 
             strokeWidth="2" 
             strokeLinecap="round"
-            animate={isSelected ? { x2: [16, 17, 16], y2: [19, 20, 19] } : {}}
+            animate={{ x2: [16, 17, 16], y2: [19, 20, 19] }}
             transition={{ duration: 1.5, repeat: Infinity }}
           />
         </svg>
@@ -958,59 +959,25 @@ export default function Home() {
               </div>
 
               <div className="p-5 space-y-4">
-                {deferredPrompt ? (
-                  <Button
+                <Button
                     onClick={async () => {
-                      deferredPrompt.prompt();
-                      const { outcome } = await deferredPrompt.userChoice;
-                      if (outcome === 'accepted') {
-                        setDeferredPrompt(null);
-                        setShowInstall(false);
+                      if (deferredPrompt) {
+                        deferredPrompt.prompt();
+                        const { outcome } = await deferredPrompt.userChoice;
+                        if (outcome === 'accepted') {
+                          setDeferredPrompt(null);
+                          setShowInstall(false);
+                        }
+                      } else {
+                        // Para iOS/Safari mostrar instrucciones rápidas
+                        alert('Para instalar:\n\niPhone/iPad: Toca Compartir ⬆️ → "Añadir a inicio"\n\nAndroid: Menú ⋮ → "Instalar app"\n\nPC: Busca el ícono ⊕ en la barra de Chrome');
                       }
                     }}
                     className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-6"
                   >
                     <Download className="w-5 h-5 mr-2" />
-                    Instalar ahora
+                    {deferredPrompt ? 'Instalar ahora' : 'Ver instrucciones'}
                   </Button>
-                ) : (
-                  <div className="space-y-4">
-                    <div className="bg-gray-50 rounded-xl p-4">
-                      <div className="flex items-center gap-3 mb-2">
-                        <Smartphone className="w-6 h-6 text-blue-500" />
-                        <span className="font-medium">iPhone / iPad</span>
-                      </div>
-                      <ol className="text-sm text-gray-600 space-y-1 ml-9">
-                        <li>1. Toca el botón <strong>Compartir</strong> ⬆️</li>
-                        <li>2. Selecciona <strong>"Añadir a inicio"</strong></li>
-                        <li>3. Confirma tocando <strong>"Añadir"</strong></li>
-                      </ol>
-                    </div>
-
-                    <div className="bg-gray-50 rounded-xl p-4">
-                      <div className="flex items-center gap-3 mb-2">
-                        <Smartphone className="w-6 h-6 text-green-500" />
-                        <span className="font-medium">Android</span>
-                      </div>
-                      <ol className="text-sm text-gray-600 space-y-1 ml-9">
-                        <li>1. Toca el menú <strong>⋮</strong> del navegador</li>
-                        <li>2. Selecciona <strong>"Instalar app"</strong></li>
-                        <li>3. Confirma la instalación</li>
-                      </ol>
-                    </div>
-
-                    <div className="bg-gray-50 rounded-xl p-4">
-                      <div className="flex items-center gap-3 mb-2">
-                        <Monitor className="w-6 h-6 text-purple-500" />
-                        <span className="font-medium">PC / Mac</span>
-                      </div>
-                      <ol className="text-sm text-gray-600 space-y-1 ml-9">
-                        <li>1. En Chrome, busca el ícono ⊕ en la barra</li>
-                        <li>2. Click en <strong>"Instalar"</strong></li>
-                      </ol>
-                    </div>
-                  </div>
-                )}
               </div>
 
               <div className="p-4 bg-gray-50 border-t text-center">
