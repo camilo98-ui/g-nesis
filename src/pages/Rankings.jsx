@@ -336,33 +336,84 @@ export default function Rankings() {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-6"
           >
-            {/* Best Cashier of Store */}
+            {/* Best Cashier of Store - DESTACADO con felicitación y análisis */}
             {rankings.bestCashier?.[0] && (
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mb-6 bg-gradient-to-r from-amber-50 via-yellow-50 to-orange-50 rounded-2xl p-4 border border-amber-200"
+                className="mb-6 bg-gradient-to-br from-amber-100 via-yellow-100 to-orange-100 rounded-3xl p-6 border-2 border-amber-300 shadow-xl relative overflow-hidden"
               >
-                <div className="flex items-center gap-4">
-                  <motion.div
-                    animate={{ rotate: [0, 360] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                    className="w-14 h-14 rounded-full bg-gradient-to-r from-yellow-400 to-amber-500 flex items-center justify-center shadow-lg"
-                  >
-                    <Crown className="w-7 h-7 text-white" />
-                  </motion.div>
-                  <div className="flex-1">
-                    <p className="text-xs text-amber-600 font-medium">⭐ Mejor Cajero de la Tienda</p>
-                    <p className="text-xl font-bold text-gray-800">{rankings.bestCashier[0].cashier?.name}</p>
-                    <div className="flex gap-2 mt-1">
-                      <span className="text-[10px] bg-pink-100 text-pink-700 px-2 py-0.5 rounded-full">Ventas: {rankings.bestCashier[0].salesScore?.toFixed(0)}pts</span>
-                      <span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Ticket: {rankings.bestCashier[0].ticketScore?.toFixed(0)}pts</span>
-                      <span className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">Sugeridos: {rankings.bestCashier[0].suggestedScore?.toFixed(0)}pts</span>
+                {/* Decoración de fondo */}
+                <motion.div
+                  className="absolute top-0 right-0 text-8xl opacity-10"
+                  animate={{ rotate: [0, 10, -10, 0], scale: [1, 1.1, 1] }}
+                  transition={{ duration: 4, repeat: Infinity }}
+                >
+                  👑
+                </motion.div>
+                
+                <div className="relative z-10">
+                  {/* Header con felicitación */}
+                  <div className="flex items-start gap-4 mb-4">
+                    <motion.div
+                      animate={{ rotate: [0, 360] }}
+                      transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                      className="w-16 h-16 rounded-full bg-gradient-to-r from-yellow-400 to-amber-500 flex items-center justify-center shadow-lg"
+                    >
+                      <Crown className="w-8 h-8 text-white" />
+                    </motion.div>
+                    <div className="flex-1">
+                      <p className="text-xs text-amber-700 font-medium mb-1">🎉 ¡FELICITACIONES! 🎉</p>
+                      <p className="text-2xl font-black text-gray-800 mb-1">{rankings.bestCashier[0].cashier?.name}</p>
+                      <p className="text-sm text-amber-700 font-medium">
+                        ¡Vas liderando la tienda! Sigue así y mantén la excelencia 🚀
+                      </p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-2xl font-bold text-amber-600">{rankings.bestCashier[0].overallScore?.toFixed(0)}</p>
-                    <p className="text-xs text-gray-500">puntos totales</p>
+
+                  {/* Métricas destacadas */}
+                  <div className="grid grid-cols-3 gap-3 mb-4">
+                    <div className="bg-white/50 rounded-xl p-3 text-center">
+                      <p className="text-xs text-gray-600 mb-1">Ventas</p>
+                      <p className="text-lg font-black text-pink-600">
+                        ${(rankings.bestCashier[0].totalSales / 1000000).toFixed(1)}M
+                      </p>
+                      <p className="text-[10px] text-pink-500">{rankings.bestCashier[0].salesScore?.toFixed(0)} pts</p>
+                    </div>
+                    <div className="bg-white/50 rounded-xl p-3 text-center">
+                      <p className="text-xs text-gray-600 mb-1">Ticket Prom.</p>
+                      <p className="text-lg font-black text-blue-600">
+                        ${(rankings.bestCashier[0].avgTicket / 1000).toFixed(0)}K
+                      </p>
+                      <p className="text-[10px] text-blue-500">{rankings.bestCashier[0].ticketScore?.toFixed(0)} pts</p>
+                    </div>
+                    <div className="bg-white/50 rounded-xl p-3 text-center">
+                      <p className="text-xs text-gray-600 mb-1">Sugeridos</p>
+                      <p className="text-lg font-black text-amber-600">{rankings.bestCashier[0].totalSuggested}</p>
+                      <p className="text-[10px] text-amber-500">{rankings.bestCashier[0].suggestedScore?.toFixed(0)} pts</p>
+                    </div>
+                  </div>
+
+                  {/* Puntuación total y motivación */}
+                  <div className="flex items-center justify-between bg-white/60 rounded-xl p-3">
+                    <div className="flex items-center gap-2">
+                      <Star className="w-5 h-5 text-amber-600" />
+                      <span className="text-sm font-bold text-gray-700">Puntuación Total</span>
+                    </div>
+                    <motion.div
+                      animate={{ scale: [1, 1.1, 1] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                      className="text-3xl font-black text-amber-600"
+                    >
+                      {rankings.bestCashier[0].overallScore?.toFixed(0)}
+                    </motion.div>
+                  </div>
+
+                  {/* Mensaje motivacional */}
+                  <div className="mt-4 p-3 bg-gradient-to-r from-amber-200 to-yellow-200 rounded-xl">
+                    <p className="text-xs text-center text-amber-900 font-medium italic">
+                      "Tu dedicación y esfuerzo están marcando la diferencia. ¡Eres un ejemplo para todo el equipo! 🍦✨"
+                    </p>
                   </div>
                 </div>
               </motion.div>
@@ -823,12 +874,12 @@ export default function Rankings() {
                               </div>
                             )}
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <Link to={createPageUrl(`CashierProfile?id=${item.cashier_id}&from=rankings`)} className="font-bold text-gray-800 truncate hover:text-emerald-600 hover:underline cursor-pointer">
+                          <Link to={createPageUrl(`CashierProfile?id=${item.cashier_id}&from=rankings`)} className="flex-1 min-w-0">
+                            <p className="font-bold text-gray-800 truncate hover:text-emerald-600 hover:underline cursor-pointer">
                               {item.cashier?.name}
-                            </Link>
+                            </p>
                             <p className="text-xs text-gray-500 truncate">📍 {item.storeName}</p>
-                          </div>
+                          </Link>
                           <div className="text-right">
                             <p className="font-bold text-emerald-600">{formatCurrency(item.totalSales)}</p>
                             <p className="text-xs text-gray-400">{item.shifts} turnos</p>
@@ -874,12 +925,12 @@ export default function Rankings() {
                               </div>
                             )}
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <Link to={createPageUrl(`CashierProfile?id=${item.cashier_id}&from=rankings`)} className="font-bold text-gray-800 truncate hover:text-blue-600 hover:underline cursor-pointer">
+                          <Link to={createPageUrl(`CashierProfile?id=${item.cashier_id}&from=rankings`)} className="flex-1 min-w-0">
+                            <p className="font-bold text-gray-800 truncate hover:text-blue-600 hover:underline cursor-pointer">
                               {item.cashier?.name}
-                            </Link>
+                            </p>
                             <p className="text-xs text-gray-500 truncate">📍 {item.storeName}</p>
-                          </div>
+                          </Link>
                           <div className="text-right">
                             <p className="font-bold text-blue-600">{item.totalTransactions.toLocaleString()}</p>
                             <p className="text-xs text-gray-400">transacciones</p>
@@ -925,12 +976,12 @@ export default function Rankings() {
                               </div>
                             )}
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <Link to={createPageUrl(`CashierProfile?id=${item.cashier_id}&from=rankings`)} className="font-bold text-gray-800 truncate hover:text-amber-600 hover:underline cursor-pointer">
+                          <Link to={createPageUrl(`CashierProfile?id=${item.cashier_id}&from=rankings`)} className="flex-1 min-w-0">
+                            <p className="font-bold text-gray-800 truncate hover:text-amber-600 hover:underline cursor-pointer">
                               {item.cashier?.name}
-                            </Link>
+                            </p>
                             <p className="text-xs text-gray-500 truncate">📍 {item.storeName}</p>
-                          </div>
+                          </Link>
                           <div className="text-right">
                             <p className="font-bold text-amber-600">{formatCurrency(item.avgTicket)}</p>
                             <p className="text-xs text-gray-400">Ticket Prom.</p>
@@ -976,12 +1027,12 @@ export default function Rankings() {
                               </div>
                             )}
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <Link to={createPageUrl(`CashierProfile?id=${item.cashier_id}&from=rankings`)} className="font-bold text-gray-800 truncate hover:text-rose-600 hover:underline cursor-pointer">
+                          <Link to={createPageUrl(`CashierProfile?id=${item.cashier_id}&from=rankings`)} className="flex-1 min-w-0">
+                            <p className="font-bold text-gray-800 truncate hover:text-rose-600 hover:underline cursor-pointer">
                               {item.cashier?.name}
-                            </Link>
+                            </p>
                             <p className="text-xs text-gray-500 truncate">📍 {item.storeName}</p>
-                          </div>
+                          </Link>
                           <div className="text-right">
                             <p className="font-bold text-rose-600">{item.totalSuggested?.toLocaleString()}</p>
                             <p className="text-xs text-gray-400">sugeridos</p>

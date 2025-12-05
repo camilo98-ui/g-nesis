@@ -223,19 +223,31 @@ ESTACIONES DISPONIBLES (en orden de PRIORIDAD):
 
 2. CADA PERSONA = 1 POSICIÓN por turno. No cambiar de estación en el día.
 
-3. DESCANSOS:
+3. LÍMITE DE HORAS SEMANALES - LEY LABORAL COLOMBIA:
+   - MÁXIMO 44 HORAS por semana por colaborador
+   - NO se permiten horas extras diarias
+   - Monitorear que cada colaborador no supere este límite
+
+4. DESCANSOS OBLIGATORIOS:
    - 1-2 días de descanso por semana, SOLO entre Lunes-Viernes
    - NADIE descansa Sábado ni Domingo
    - Marcar descanso con: rol="descanso", start_time="00:00", end_time="00:00"
    - Distribuir descansos equitativamente
 
-4. ${hasTwoCashiers ? '⚠️ TIENDA CON 2 CAJAS: Siempre 2 personas en "caja" con horarios que se crucen' : 'Tienda con 1 caja'}
+5. ${hasTwoCashiers ? '⚠️ TIENDA CON 2 CAJAS: Siempre 2 personas en "caja" con horarios que se crucen' : 'Tienda con 1 caja'}
 
-5. MÁXIMO 5-6 turnos por colaborador a la semana
+6. DÍAS LABORABLES:
+   - Máximo 5-6 turnos por colaborador a la semana
+   - Respetar días de descanso programados
 
 ${customPrompt ? `\n═══════════════════════════════════════════════════════════\n📝 INSTRUCCIONES ESPECIALES DEL GERENTE:\n${customPrompt}\n═══════════════════════════════════════════════════════════` : ''}
 
 GENERA UN HORARIO COMPLETO donde CADA TURNO = 1 PERSONA en 1 ESTACIÓN FIJA.
+
+⚠️ VALIDACIÓN CRÍTICA DE HORAS:
+- Calcular TOTAL de horas por colaborador en la semana
+- Si alguno supera 44 horas, ajustar turnos o dar descanso adicional
+- Incluir en "weekly_hours_check" el total de horas por persona
 
 Responde SOLO con este JSON:
 {
@@ -251,8 +263,15 @@ Responde SOLO con este JSON:
     }
   ],
   "insights": "Resumen de la estrategia de posicionamiento aplicada",
-  "alerts": ["Lista de alertas importantes: estaciones sin cubrir, riesgos, etc"],
-  "positioning_tips": ["Consejos específicos para el gerente sobre cómo optimizar posiciones"]
+  "alerts": ["Lista de alertas importantes: estaciones sin cubrir, riesgos, límite de horas, etc"],
+  "positioning_tips": ["Consejos específicos para el gerente sobre cómo optimizar posiciones"],
+  "weekly_hours_check": [
+    {
+      "cashier_name": "Nombre",
+      "total_hours": 40,
+      "status": "OK|EXCEDE"
+    }
+  ]
 }`;
 
     try {
@@ -278,7 +297,18 @@ Responde SOLO con este JSON:
             },
             insights: { type: "string" },
             alerts: { type: "array", items: { type: "string" } },
-            positioning_tips: { type: "array", items: { type: "string" } }
+            positioning_tips: { type: "array", items: { type: "string" } },
+            weekly_hours_check: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  cashier_name: { type: "string" },
+                  total_hours: { type: "number" },
+                  status: { type: "string" }
+                }
+              }
+            }
           }
         }
       });
@@ -422,6 +452,20 @@ Responde SOLO con este JSON:
                       <li key={i} className="text-xs text-blue-600">• {tip}</li>
                     ))}
                   </ul>
+                </div>
+              )}
+
+              {/* Validación de Horas Semanales */}
+              {suggestion.weekly_hours_check?.length > 0 && (
+                <div className="bg-blue-50 rounded-xl p-3 border border-blue-200">
+                  <p className="text-xs font-bold text-blue-700 mb-2">⏰ Control de Horas (Límite: 44h/semana)</p>
+                  <div className="space-y-1 max-h-32 overflow-y-auto">
+                    {suggestion.weekly_hours_check.map((check, i) => (
+                      <div key={i} className={`text-xs p-2 rounded ${check.status === 'EXCEDE' ? 'bg-red-100 text-red-700' : 'bg-green-50 text-green-700'}`}>
+                        <span className="font-medium">{check.cashier_name}</span>: {check.total_hours}h {check.status === 'EXCEDE' && '⚠️'}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
 

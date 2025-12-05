@@ -2,16 +2,19 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { 
   AlertTriangle, CheckCircle, AlertCircle, 
-  BarChart3, Zap, X 
+  BarChart3, Zap, X, Package, TrendingUp
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import OrderPredictionPanel from './OrderPredictionPanel';
+import StockVisualization from './StockVisualization';
 
 export default function FreezerAuditPanel({ 
   auditData, 
   onClose, 
   onApplySuggestions,
   onAutoCorrect,
-  isLoading 
+  isLoading,
+  allSlots = []
 }) {
   if (!auditData) return null;
 
@@ -57,7 +60,7 @@ export default function FreezerAuditPanel({
           </div>
         </div>
 
-        {/* Stats Grid */}
+        {/* Stats Grid - SIN mal ubicados */}
         <div className="grid grid-cols-2 gap-3">
           <div className="p-3 rounded-lg bg-green-50 border border-green-200">
             <CheckCircle className="w-5 h-5 text-green-600 mb-1" />
@@ -69,34 +72,25 @@ export default function FreezerAuditPanel({
             <p className="text-xl font-bold text-gray-700">{emptySlots}</p>
             <p className="text-xs text-gray-500">Vacíos</p>
           </div>
-          <div className="p-3 rounded-lg bg-red-50 border border-red-200">
-            <AlertTriangle className="w-5 h-5 text-red-600 mb-1" />
-            <p className="text-xl font-bold text-red-700">{misplacedSlots?.length || 0}</p>
-            <p className="text-xs text-red-600">Mal ubicados</p>
-          </div>
           <div className="p-3 rounded-lg bg-yellow-50 border border-yellow-200">
             <Zap className="w-5 h-5 text-yellow-600 mb-1" />
             <p className="text-xl font-bold text-yellow-700">{repeatedFlavors?.length || 0}</p>
             <p className="text-xs text-yellow-600">Repetidos</p>
           </div>
+          <div className="p-3 rounded-lg bg-purple-50 border border-purple-200">
+            <Package className="w-5 h-5 text-purple-600 mb-1" />
+            <p className="text-xl font-bold text-purple-700">{efficiency}%</p>
+            <p className="text-xs text-purple-600">Eficiencia</p>
+          </div>
         </div>
 
-        {/* Issues List */}
-        {misplacedSlots?.length > 0 && (
-          <div className="space-y-2">
-            <h4 className="font-semibold text-red-700 text-sm">⚠️ Mal Ubicados</h4>
-            <div className="space-y-1 max-h-32 overflow-y-auto">
-              {misplacedSlots.map((s, i) => (
-                <div key={i} className="text-xs p-2 bg-red-50 rounded-lg">
-                  <span className="font-medium">{s.flavor_name}</span>
-                  <span className="text-gray-500"> - Fila {s.row}, Pos {s.position}</span>
-                  {s.reason && <p className="text-red-600 mt-0.5">{s.reason}</p>}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Pronóstico de Pedido */}
+        <OrderPredictionPanel slots={allSlots} />
 
+        {/* Visualización Adicional */}
+        <StockVisualization slots={allSlots} />
+
+        {/* Issues List - Solo repetidos */}
         {repeatedFlavors?.length > 0 && (
           <div className="space-y-2">
             <h4 className="font-semibold text-yellow-700 text-sm">🔄 Sabores Repetidos</h4>
