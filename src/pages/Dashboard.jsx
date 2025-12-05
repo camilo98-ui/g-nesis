@@ -46,6 +46,12 @@ const PASTEL_COLORS = {
 
 // Metric Card con panel expandible
 function MetricCard({ title, value, budget, icon: Icon, bgColor, iconBg, iconColor, format: formatType = "number", onClick, isActive, insight }) {
+  // Calculate velocity trend (comparing to expected daily rate)
+  const daysInMonth = 30;
+  const daysElapsed = Math.max(1, Math.floor((new Date() - new Date(new Date().getFullYear(), new Date().getMonth(), 1)) / (1000 * 60 * 60 * 24)));
+  const expectedValue = budget ? (budget / daysInMonth) * daysElapsed : 0;
+  const velocityPct = expectedValue > 0 ? ((value / expectedValue) * 100 - 100) : 0;
+  
   const percentage = budget ? ((value / budget) * 100).toFixed(1) : 0;
   const isPositive = percentage >= 100;
   const isWarning = percentage >= 70 && percentage < 100;
@@ -83,14 +89,10 @@ function MetricCard({ title, value, budget, icon: Icon, bgColor, iconBg, iconCol
         </motion.div>
         {budget > 0 && (
           <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold ${
-            isPositive ? 'bg-green-100 text-green-700' : 
-            isWarning ? 'bg-amber-100 text-amber-700' : 
-            'bg-red-100 text-red-700'
+            velocityPct >= 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
           }`}>
-            {isPositive ? <CheckCircle2 className="w-3 h-3" /> : 
-             isWarning ? <AlertTriangle className="w-3 h-3" /> : 
-             <TrendingDown className="w-3 h-3" />}
-            {percentage}%
+            {velocityPct >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+            {velocityPct >= 0 ? '+' : ''}{velocityPct.toFixed(0)}%
           </div>
         )}
       </div>

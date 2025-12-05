@@ -751,7 +751,7 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
             </Popover>
           </div>
 
-          {/* Botones de vista - con iconos de clima que muestran gráficas */}
+          {/* Botones de vista simplificados */}
           <div className="flex flex-wrap gap-2 mt-4">
             <ViewButton
               active={viewMode === 'bars'}
@@ -768,37 +768,13 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
               color="from-emerald-500 to-teal-500"
             />
             <ViewButton
-              active={viewMode === 'comparison'}
-              onClick={() => setViewMode('comparison')}
-              icon={Zap}
-              label="Comparativo"
-              color="from-amber-500 to-orange-500"
-            />
-            {/* Botones de clima con gráficas */}
-            <ViewButton
-              active={viewMode === 'sunny'}
-              onClick={() => setViewMode('sunny')}
-              icon={Sun}
-              label="Soleados"
-              color="from-amber-400 to-yellow-500"
-              weatherType="sunny"
-            />
-            <ViewButton
-              active={viewMode === 'rainy'}
-              onClick={() => setViewMode('rainy')}
-              icon={CloudRain}
-              label="Lluviosos"
-              color="from-blue-400 to-cyan-500"
-              weatherType="rainy"
-            />
-            <ViewButton
               active={showForecast}
               onClick={() => {
                 setShowForecast(!showForecast);
                 if (!showForecast) setForecastData(null);
               }}
               icon={Cloud}
-              label={loadingForecast ? "Cargando..." : showForecast ? "Ocultar Pronóstico" : "Pronóstico"}
+              label={loadingForecast ? "..." : "Pronóstico"}
               color="from-cyan-500 to-blue-500"
               weatherType={showForecast ? 'cloudy' : undefined}
             />
