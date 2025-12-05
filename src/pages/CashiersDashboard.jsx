@@ -310,11 +310,11 @@ export default function CashiersDashboard() {
                         />
                       </div>
 
-                      {/* Insignias del cajero */}
+                      {/* Logros del cajero */}
                       <div className="mt-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-4">
                         <h4 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
                           <Award className="w-4 h-4 text-purple-500" />
-                          Insignias Obtenidas
+                          Logros
                         </h4>
                         <BadgesDisplay cashierId={selectedCashier.id} showAll />
                       </div>

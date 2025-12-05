@@ -14,6 +14,8 @@ const BADGE_CONFIG = {
     color: 'from-amber-400 to-yellow-500', 
     label: 'Top Vendedor', 
     desc: 'Líder en ventas del mes',
+    howToEarn: 'Logra ser el #1 en ventas totales del mes en tu tienda',
+    goalType: 'monthly',
     glow: 'shadow-amber-400/50'
   },
   streak_7: { 
@@ -21,6 +23,8 @@ const BADGE_CONFIG = {
     color: 'from-orange-400 to-red-500', 
     label: 'Racha 7 días', 
     desc: '7 días consecutivos cumpliendo metas',
+    howToEarn: 'Cumple o supera tu meta diaria de ventas durante 7 días seguidos',
+    goalType: 'daily',
     glow: 'shadow-orange-400/50'
   },
   streak_30: { 
@@ -28,6 +32,8 @@ const BADGE_CONFIG = {
     color: 'from-red-500 to-pink-600', 
     label: 'Racha 30 días', 
     desc: '30 días consecutivos cumpliendo metas',
+    howToEarn: 'Cumple tu meta diaria durante todo el mes sin fallar',
+    goalType: 'monthly',
     glow: 'shadow-red-400/50'
   },
   perfect_day: { 
@@ -35,6 +41,8 @@ const BADGE_CONFIG = {
     color: 'from-purple-400 to-violet-500', 
     label: 'Día Perfecto', 
     desc: 'Superó todas las metas del día',
+    howToEarn: 'Cumple 100% de todas tus metas en un solo día (ventas, ticket, sugeridos)',
+    goalType: 'daily',
     glow: 'shadow-purple-400/50'
   },
   team_player: { 
@@ -42,6 +50,8 @@ const BADGE_CONFIG = {
     color: 'from-teal-400 to-cyan-500', 
     label: 'Jugador de Equipo', 
     desc: 'Mejor colaborador del mes',
+    howToEarn: 'Destaca por tu actitud de equipo y apoyo a compañeros',
+    goalType: 'monthly',
     glow: 'shadow-teal-400/50'
   },
   rising_star: { 
@@ -49,6 +59,8 @@ const BADGE_CONFIG = {
     color: 'from-emerald-400 to-green-500', 
     label: 'Estrella Emergente', 
     desc: 'Mayor crecimiento del mes',
+    howToEarn: 'Mejora tu rendimiento en +20% vs el mes anterior',
+    goalType: 'monthly',
     glow: 'shadow-emerald-400/50'
   },
   goal_crusher: { 
@@ -56,6 +68,8 @@ const BADGE_CONFIG = {
     color: 'from-blue-400 to-indigo-500', 
     label: 'Rompe Metas', 
     desc: 'Superó el 120% de sus objetivos',
+    howToEarn: 'Supera el 120% de tu meta mensual de ventas',
+    goalType: 'monthly',
     glow: 'shadow-blue-400/50'
   },
   consistent: { 
@@ -63,6 +77,8 @@ const BADGE_CONFIG = {
     color: 'from-slate-400 to-gray-500', 
     label: 'Consistente', 
     desc: 'Rendimiento estable por 3 meses',
+    howToEarn: 'Mantén un rendimiento superior al 85% durante 3 meses consecutivos',
+    goalType: 'monthly',
     glow: 'shadow-slate-400/50'
   },
   ticket_master: { 
@@ -70,6 +86,8 @@ const BADGE_CONFIG = {
     color: 'from-sky-400 to-blue-600', 
     label: 'Maestro del Ticket', 
     desc: 'Mejor ticket promedio del equipo',
+    howToEarn: 'Logra el ticket promedio más alto del equipo en la semana',
+    goalType: 'weekly',
     glow: 'shadow-sky-400/50'
   },
   suggested_king: { 
@@ -77,6 +95,8 @@ const BADGE_CONFIG = {
     color: 'from-pink-400 to-rose-500', 
     label: 'Rey de Sugeridos', 
     desc: 'Líder en ventas sugeridas',
+    howToEarn: 'Sé el #1 en ventas sugeridas del mes',
+    goalType: 'monthly',
     glow: 'shadow-pink-400/50'
   },
   speed_demon: { 
@@ -84,6 +104,8 @@ const BADGE_CONFIG = {
     color: 'from-yellow-400 to-amber-500', 
     label: 'Velocidad Máxima', 
     desc: 'Mayor cantidad de transacciones',
+    howToEarn: 'Realiza más transacciones que cualquier otro cajero en el día',
+    goalType: 'daily',
     glow: 'shadow-yellow-400/50'
   },
   customer_favorite: { 
@@ -91,6 +113,8 @@ const BADGE_CONFIG = {
     color: 'from-rose-400 to-red-500', 
     label: 'Favorito del Cliente', 
     desc: 'Mejor atención al cliente',
+    howToEarn: 'Reconocido por clientes por tu excelente servicio',
+    goalType: 'monthly',
     glow: 'shadow-rose-400/50'
   },
   early_bird: { 
@@ -98,6 +122,8 @@ const BADGE_CONFIG = {
     color: 'from-orange-300 to-yellow-400', 
     label: 'Madrugador', 
     desc: 'Mejor rendimiento en turnos mañana',
+    howToEarn: 'Sé el mejor vendedor en turnos de mañana durante la semana',
+    goalType: 'weekly',
     glow: 'shadow-orange-300/50'
   },
   night_owl: { 
@@ -105,6 +131,8 @@ const BADGE_CONFIG = {
     color: 'from-indigo-400 to-purple-600', 
     label: 'Búho Nocturno', 
     desc: 'Mejor rendimiento en turnos noche',
+    howToEarn: 'Sé el mejor vendedor en turnos de noche durante la semana',
+    goalType: 'weekly',
     glow: 'shadow-indigo-400/50'
   },
   weekend_warrior: { 
@@ -112,6 +140,8 @@ const BADGE_CONFIG = {
     color: 'from-fuchsia-400 to-pink-500', 
     label: 'Guerrero del Fin de Semana', 
     desc: 'Mejor rendimiento los fines de semana',
+    howToEarn: 'Logra las mejores ventas los fines de semana del mes',
+    goalType: 'monthly',
     glow: 'shadow-fuchsia-400/50'
   },
   monthly_champion: { 
@@ -119,6 +149,8 @@ const BADGE_CONFIG = {
     color: 'from-amber-500 to-yellow-600', 
     label: 'Campeón del Mes', 
     desc: '1er lugar del ranking mensual',
+    howToEarn: 'Ocupa el 1er lugar en el ranking general del mes',
+    goalType: 'monthly',
     glow: 'shadow-amber-500/50'
   }
 };
@@ -199,16 +231,27 @@ export default function BadgesDisplay({ cashierId, compact = false, showAll = fa
                 </motion.div>
               </TooltipTrigger>
               <TooltipContent className="max-w-xs">
-                <div className="text-center p-1">
+                <div className="text-center p-2">
                   <p className="font-bold text-sm">{config.label}</p>
-                  <p className="text-xs text-gray-400 mt-0.5">{config.desc}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">{config.desc}</p>
+                  <div className="mt-2 pt-2 border-t border-gray-100">
+                    <p className="text-[10px] text-violet-600 font-medium">🎯 Cómo lograrlo:</p>
+                    <p className="text-[10px] text-gray-500 mt-0.5">{config.howToEarn}</p>
+                    <span className={`inline-block mt-1 text-[9px] px-1.5 py-0.5 rounded-full ${
+                      config.goalType === 'daily' ? 'bg-amber-100 text-amber-700' :
+                      config.goalType === 'weekly' ? 'bg-blue-100 text-blue-700' :
+                      'bg-purple-100 text-purple-700'
+                    }`}>
+                      Meta {config.goalType === 'daily' ? 'Diaria' : config.goalType === 'weekly' ? 'Semanal' : 'Mensual'}
+                    </span>
+                  </div>
                   {isEarned && badge.kpi_value && (
-                    <p className="text-xs text-emerald-500 mt-1 font-medium">
-                      KPI: {badge.kpi_value.toLocaleString()}
+                    <p className="text-xs text-emerald-500 mt-2 font-medium">
+                      ✓ Logrado con KPI: {badge.kpi_value.toLocaleString()}
                     </p>
                   )}
                   {!isEarned && showAll && (
-                    <p className="text-xs text-gray-400 mt-1 italic">No obtenida</p>
+                    <p className="text-xs text-gray-400 mt-2 italic">⏳ Aún no obtenido</p>
                   )}
                 </div>
               </TooltipContent>
