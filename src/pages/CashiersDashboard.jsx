@@ -14,6 +14,7 @@ import BadgesDisplay from '@/components/gamification/BadgesDisplay';
 import CashierRanking from '@/components/gamification/CashierRanking';
 import CashierGoalsManager from '@/components/gamification/CashierGoalsManager';
 import { ViewProfileButton } from '@/components/cashier/CashierFullProfile';
+import CashierAssignmentSuggestion from '@/components/ai/CashierAssignmentSuggestion';
 import { 
   ArrowLeft, Users, Search, TrendingUp, TrendingDown, 
   Award, Target, BarChart3, User, ChevronRight, Star,
@@ -369,6 +370,13 @@ export default function CashiersDashboard() {
                 </AnimatePresence>
               </div>
             </div>
+
+            {/* Sugerencia IA de Asignación */}
+            <CashierAssignmentSuggestion 
+              storeId={selectedStore}
+              cashiers={activeCashiers}
+              shiftRecords={shiftRecords}
+            />
 
             {/* Top 3 Highlight */}
             <motion.div

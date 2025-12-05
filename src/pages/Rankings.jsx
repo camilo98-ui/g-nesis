@@ -8,7 +8,7 @@ import StoreSelector, { STORES } from '@/components/StoreSelector';
 import DateFilter from '@/components/DateFilter';
 import WeekFilter from '@/components/WeekFilter';
 import CashierRankingCard from '@/components/ranking/CashierRankingCard';
-import CashierRecommendation from '@/components/CashierRecommendation';
+import CashierAssignmentSuggestion from '@/components/ai/CashierAssignmentSuggestion';
 import TrendChart from '@/components/ranking/TrendChart';
 import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
 import { ArrowLeft, Award, Gift, Trophy, Star, Receipt, TrendingUp, Globe, X, Medal, Search, Crown, Sparkles } from 'lucide-react';
@@ -540,12 +540,7 @@ export default function Rankings() {
               </TabsContent>
             </Tabs>
 
-            {/* Recommendations */}
-            <CashierRecommendation 
-              cashiers={cashiers} 
-              shiftRecords={shiftRecords}
-              selectedDate={new Date()}
-            />
+
           </motion.div>
         ) : null}
 
