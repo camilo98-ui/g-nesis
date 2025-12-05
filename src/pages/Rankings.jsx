@@ -446,13 +446,35 @@ export default function Rankings() {
               </TabsContent>
 
               <TabsContent value="sales" className="space-y-4">
-                {/* Trend Chart */}
-                <TrendChart 
-                  shiftRecords={filteredRecords}
-                  cashiers={cashiers}
-                  dateRange={dateRange}
-                  metricType="sales"
-                />
+                {/* Trend Chart + Performance Analysis */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <TrendChart 
+                    shiftRecords={filteredRecords}
+                    cashiers={cashiers}
+                    dateRange={dateRange}
+                    metricType="sales"
+                  />
+                  
+                  {/* Sales Distribution Chart */}
+                  <Card className="bg-white shadow-lg border-0">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-semibold text-pink-600">📊 Distribución de Ventas</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="h-48">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart data={rankings.salesRanking.slice(0, 5)}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
+                            <XAxis dataKey="cashier.name" tick={{ fontSize: 10 }} angle={-15} textAnchor="end" height={60} />
+                            <YAxis tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} tick={{ fontSize: 10 }} />
+                            <Tooltip formatter={(v) => [formatCurrency(v), 'Ventas']} />
+                            <Bar dataKey="totalSales" fill="#ec4899" radius={[6, 6, 0, 0]} />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
                 
                 {rankings.salesRanking.length > 0 ? (
                   rankings.salesRanking.map((item, index) => (
@@ -477,13 +499,35 @@ export default function Rankings() {
               </TabsContent>
 
               <TabsContent value="ticket" className="space-y-4">
-                {/* Trend Chart */}
-                <TrendChart 
-                  shiftRecords={filteredRecords}
-                  cashiers={cashiers}
-                  dateRange={dateRange}
-                  metricType="ticket"
-                />
+                {/* Trend Chart + Distribution */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <TrendChart 
+                    shiftRecords={filteredRecords}
+                    cashiers={cashiers}
+                    dateRange={dateRange}
+                    metricType="ticket"
+                  />
+                  
+                  {/* Ticket Avg Distribution */}
+                  <Card className="bg-white shadow-lg border-0">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-semibold text-sky-600">🎯 Top 5 - Ticket Promedio</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="h-48">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart data={rankings.ticketRanking.slice(0, 5)} layout="vertical">
+                            <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
+                            <XAxis type="number" tickFormatter={(v) => `$${(v/1000).toFixed(0)}K`} tick={{ fontSize: 10 }} />
+                            <YAxis type="category" dataKey="cashier.name" width={80} tick={{ fontSize: 10 }} />
+                            <Tooltip formatter={(v) => [formatCurrency(v), 'Ticket Prom.']} />
+                            <Bar dataKey="avgTicket" fill="#0ea5e9" radius={[0, 6, 6, 0]} />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
                 
                 {rankings.ticketRanking.length > 0 ? (
                   rankings.ticketRanking.map((item, index) => (
@@ -509,13 +553,35 @@ export default function Rankings() {
               </TabsContent>
 
               <TabsContent value="suggested" className="space-y-4">
-                {/* Trend Chart for Transactions (as proxy for activity) */}
-                <TrendChart 
-                  shiftRecords={filteredRecords}
-                  cashiers={cashiers}
-                  dateRange={dateRange}
-                  metricType="transactions"
-                />
+                {/* Trend Chart + Sugeridos Analysis */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <TrendChart 
+                    shiftRecords={filteredRecords}
+                    cashiers={cashiers}
+                    dateRange={dateRange}
+                    metricType="transactions"
+                  />
+                  
+                  {/* Suggested Sales Leaders */}
+                  <Card className="bg-white shadow-lg border-0">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-semibold text-emerald-600">🌟 Top 5 - Sugeridos</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="h-48">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart data={rankings.suggestedRanking.slice(0, 5)} layout="vertical">
+                            <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
+                            <XAxis type="number" tick={{ fontSize: 10 }} />
+                            <YAxis type="category" dataKey="cashier.name" width={80} tick={{ fontSize: 10 }} />
+                            <Tooltip formatter={(v) => [v.toLocaleString(), 'Sugeridos']} />
+                            <Bar dataKey="totalSuggested" fill="#10b981" radius={[0, 6, 6, 0]} />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
                 
                 {rankings.suggestedRanking.length > 0 ? (
                   rankings.suggestedRanking.map((item, index) => (

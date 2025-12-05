@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { STORES, getDisplayName } from '@/components/StoreSelector';
 import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
+import ZoneComparableModal from '@/components/management/ZoneComparableModal';
 import { 
   ArrowLeft, Lock, TrendingUp, TrendingDown, Users, Store, 
   Target, AlertTriangle, Activity, Award, DollarSign, Calendar, MapPin,
@@ -21,6 +22,7 @@ import {
   AreaChart, Area, BarChart, Bar, LineChart, Line, PieChart as RechartsPie, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ComposedChart, ReferenceLine
 } from 'recharts';
+import { AnimatePresence } from 'framer-motion';
 import { format, startOfMonth, subDays, isToday, isYesterday, eachDayOfInterval, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -254,6 +256,7 @@ function ManagementDashboard() {
   const [dateRange] = useState({ from: startOfMonth(new Date()), to: new Date() });
   const [rankingFilter, setRankingFilter] = useState('sales');
   const [activeSection, setActiveSection] = useState('zona');
+  const [showComparable, setShowComparable] = useState(false);
 
   // Fetch all data
   const { data: allCashiers = [] } = useQuery({
@@ -530,6 +533,15 @@ function ManagementDashboard() {
           </div>
           
           <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowComparable(true)}
+              className="text-violet-600 border-violet-200 hover:bg-violet-50"
+            >
+              <BarChart3 className="w-4 h-4 mr-1" />
+              Comparable
+            </Button>
             <motion.div 
               className={`px-4 py-2 rounded-full font-bold text-sm flex items-center gap-2 ${
                 zoneTotals.compliance >= 90 ? 'bg-emerald-100 text-emerald-700' :
@@ -850,6 +862,18 @@ function ManagementDashboard() {
             </div>
           </>
         )}
+
+        {/* Comparable Modal */}
+        <AnimatePresence>
+          {showComparable && (
+            <ZoneComparableModal
+              isOpen={showComparable}
+              onClose={() => setShowComparable(false)}
+              currentZoneData={zoneTotals}
+              currentStoresData={storePerformance}
+            />
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
