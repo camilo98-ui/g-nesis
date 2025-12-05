@@ -4,13 +4,14 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { 
   Brain, TrendingUp, Users, Award, Target, Loader2, 
-  ChevronRight, Star, AlertTriangle, Sparkles, BarChart3
+  ChevronRight, Star, AlertTriangle, Sparkles, BarChart3, Zap, TrendingDown, Calendar
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { format, subDays, startOfMonth } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, LineChart, Line, Area, AreaChart } from 'recharts';
 
 export default function PerformanceAnalyzer({ storeId, storeName }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -82,18 +83,22 @@ export default function PerformanceAnalyzer({ storeId, storeName }) {
 
     try {
       const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `Eres un analista de rendimiento de heladerías Popsy. Analiza estos datos de empleados de la tienda ${storeName} de los últimos 30 días:
+        prompt: `Eres un analista experto de rendimiento de heladerías Popsy. Analiza PROFUNDAMENTE estos datos de ${storeName}:
 
 ${JSON.stringify(cashierData, null, 2)}
 
-Genera un informe ejecutivo con:
-1. Resumen general del equipo (2-3 líneas)
-2. Top 3 mejores empleados con sus fortalezas
-3. 3 empleados que necesitan apoyo y en qué áreas específicas
-4. Recomendaciones de capacitación personalizadas (máximo 3)
-5. Tendencia general del equipo (mejorando/estable/decayendo)
+Genera un informe EJECUTIVO DETALLADO con:
 
-Responde en español, sé conciso y usa emojis para hacerlo visual.`,
+1. **Resumen Ejecutivo** (3-4 líneas): Diagnóstico preciso del equipo
+2. **Top 3 Mejores Empleados**: Nombre, fortalezas específicas (ventas, ticket, sugeridos), y puntaje cuantitativo
+3. **3 Áreas de Mejora**: Empleados específicos que necesitan apoyo, qué KPI mejorar, y plan de acción concreto
+4. **Recomendaciones de Capacitación**: 3 capacitaciones específicas con beneficio esperado (ej: "Curso Venta Sugerida → +15% conversión")
+5. **Tendencia del Equipo**: Análisis de si mejora/estable/decae con datos duros
+6. **Pronósticos**: Proyección de ventas para próximos 7-14 días basado en tendencia
+7. **Consejos Estratégicos**: 2-3 acciones inmediatas para el gerente
+8. **Datos de Soporte**: Gráficas sugeridas (ventas por cajero, ticket promedio, tendencia semanal)
+
+Sé muy específico, usa números, porcentajes y emojis.`,
         response_json_schema: {
           type: "object",
           properties: {
@@ -105,7 +110,8 @@ Responde en español, sé conciso y usa emojis para hacerlo visual.`,
                 properties: {
                   nombre: { type: "string" },
                   fortalezas: { type: "string" },
-                  puntaje: { type: "number" }
+                  puntaje: { type: "number" },
+                  kpi_destacado: { type: "string" }
                 }
               }
             },
@@ -116,16 +122,46 @@ Responde en español, sé conciso y usa emojis para hacerlo visual.`,
                 properties: {
                   nombre: { type: "string" },
                   areas_mejora: { type: "string" },
-                  sugerencia: { type: "string" }
+                  sugerencia: { type: "string" },
+                  plan_accion: { type: "string" }
                 }
               }
             },
             capacitaciones: {
               type: "array",
-              items: { type: "string" }
+              items: {
+                type: "object",
+                properties: {
+                  nombre: { type: "string" },
+                  beneficio: { type: "string" }
+                }
+              }
             },
             tendencia: { type: "string" },
-            tendencia_emoji: { type: "string" }
+            tendencia_emoji: { type: "string" },
+            pronosticos: {
+              type: "object",
+              properties: {
+                ventas_7_dias: { type: "number" },
+                ventas_14_dias: { type: "number" },
+                confianza: { type: "string" }
+              }
+            },
+            consejos_gerente: {
+              type: "array",
+              items: { type: "string" }
+            },
+            graficas_sugeridas: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  tipo: { type: "string" },
+                  titulo: { type: "string" },
+                  data_keys: { type: "array", items: { type: "string" } }
+                }
+              }
+            }
           }
         }
       });
@@ -173,14 +209,14 @@ Responde en español, sé conciso y usa emojis para hacerlo visual.`,
             </div>
           ) : report ? (
             <div className="space-y-4">
-              {/* Resumen */}
+              {/* Resumen Ejecutivo */}
               <Card className="bg-gradient-to-r from-violet-50 to-purple-50 border-violet-200">
                 <CardContent className="p-4">
                   <div className="flex items-start gap-3">
                     <Sparkles className="w-5 h-5 text-violet-500 mt-1" />
-                    <div>
-                      <p className="font-medium text-gray-700 mb-1">Resumen</p>
-                      <p className="text-sm text-gray-600">{report.resumen}</p>
+                    <div className="flex-1">
+                      <p className="font-medium text-gray-700 mb-1">Resumen Ejecutivo</p>
+                      <p className="text-sm text-gray-600 leading-relaxed">{report.resumen}</p>
                     </div>
                   </div>
                   <div className="mt-3 flex items-center gap-2">
@@ -190,7 +226,40 @@ Responde en español, sé conciso y usa emojis para hacerlo visual.`,
                 </CardContent>
               </Card>
 
-              {/* Top Performers */}
+              {/* Pronósticos con gráficas */}
+              {report.pronosticos && (
+                <Card className="border-blue-200">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm text-blue-700 flex items-center gap-2">
+                      <Calendar className="w-4 h-4" /> Pronósticos
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="bg-blue-50 rounded-lg p-3 text-center">
+                        <p className="text-xs text-gray-500 mb-1">Próximos 7 días</p>
+                        <p className="text-xl font-black text-blue-600">
+                          ${(report.pronosticos.ventas_7_dias / 1000000).toFixed(1)}M
+                        </p>
+                      </div>
+                      <div className="bg-violet-50 rounded-lg p-3 text-center">
+                        <p className="text-xs text-gray-500 mb-1">Próximos 14 días</p>
+                        <p className="text-xl font-black text-violet-600">
+                          ${(report.pronosticos.ventas_14_dias / 1000000).toFixed(1)}M
+                        </p>
+                      </div>
+                    </div>
+                    <div className="bg-gray-50 rounded-lg p-2">
+                      <p className="text-xs text-gray-500 flex items-center gap-1">
+                        <Zap className="w-3 h-3" />
+                        Nivel de confianza: <span className="font-bold text-blue-600">{report.pronosticos.confianza}</span>
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Top Performers con KPIs */}
               <Card className="border-emerald-200">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm text-emerald-700 flex items-center gap-2">
@@ -204,21 +273,32 @@ Responde en español, sé conciso y usa emojis para hacerlo visual.`,
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: i * 0.1 }}
-                      className="flex items-center gap-3 p-2 bg-emerald-50 rounded-lg"
+                      className="p-3 bg-emerald-50 rounded-lg border border-emerald-100"
                     >
-                      <span className="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-bold">
-                        {i + 1}
-                      </span>
-                      <div className="flex-1">
-                        <p className="font-medium text-gray-700">{p.nombre}</p>
-                        <p className="text-xs text-emerald-600">{p.fortalezas}</p>
+                      <div className="flex items-center gap-3">
+                        <span className="w-8 h-8 rounded-full bg-gradient-to-r from-emerald-400 to-green-500 text-white flex items-center justify-center text-sm font-bold">
+                          {i + 1}
+                        </span>
+                        <div className="flex-1">
+                          <p className="font-bold text-gray-800">{p.nombre}</p>
+                          <p className="text-xs text-emerald-600 mt-0.5">{p.fortalezas}</p>
+                          {p.kpi_destacado && (
+                            <p className="text-[10px] bg-emerald-200 text-emerald-700 px-2 py-0.5 rounded-full inline-block mt-1">
+                              ⭐ {p.kpi_destacado}
+                            </p>
+                          )}
+                        </div>
+                        <div className="text-right">
+                          <p className="text-lg font-black text-emerald-600">{p.puntaje}</p>
+                          <p className="text-[9px] text-gray-500">pts</p>
+                        </div>
                       </div>
                     </motion.div>
                   ))}
                 </CardContent>
               </Card>
 
-              {/* Need Support */}
+              {/* Need Support con plan de acción */}
               <Card className="border-amber-200">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm text-amber-700 flex items-center gap-2">
@@ -232,37 +312,89 @@ Responde en español, sé conciso y usa emojis para hacerlo visual.`,
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: i * 0.1 }}
-                      className="p-2 bg-amber-50 rounded-lg"
+                      className="p-3 bg-amber-50 rounded-lg border border-amber-100"
                     >
-                      <p className="font-medium text-gray-700">{p.nombre}</p>
-                      <p className="text-xs text-amber-600">{p.areas_mejora}</p>
-                      <p className="text-xs text-gray-500 mt-1 italic">💡 {p.sugerencia}</p>
+                      <p className="font-bold text-gray-800">{p.nombre}</p>
+                      <p className="text-xs text-amber-600 mt-1">📊 {p.areas_mejora}</p>
+                      <p className="text-xs text-gray-600 mt-1">💡 {p.sugerencia}</p>
+                      {p.plan_accion && (
+                        <p className="text-xs bg-amber-200 text-amber-800 px-2 py-1 rounded mt-2">
+                          ✓ Plan: {p.plan_accion}
+                        </p>
+                      )}
                     </motion.div>
                   ))}
                 </CardContent>
               </Card>
 
-              {/* Capacitaciones */}
+              {/* Capacitaciones con beneficio */}
               <Card className="border-blue-200">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm text-blue-700 flex items-center gap-2">
                     <BarChart3 className="w-4 h-4" /> Capacitaciones Sugeridas
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <ul className="space-y-1">
-                    {report.capacitaciones?.map((c, i) => (
-                      <li key={i} className="text-sm text-gray-600 flex items-start gap-2">
-                        <ChevronRight className="w-4 h-4 text-blue-500 mt-0.5" />
-                        {c}
-                      </li>
-                    ))}
-                  </ul>
+                <CardContent className="space-y-2">
+                  {report.capacitaciones?.map((c, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.1 }}
+                      className="p-3 bg-blue-50 rounded-lg border border-blue-100"
+                    >
+                      <p className="font-bold text-sm text-blue-800">{c.nombre || c}</p>
+                      {c.beneficio && (
+                        <p className="text-xs text-blue-600 mt-1">→ {c.beneficio}</p>
+                      )}
+                    </motion.div>
+                  ))}
                 </CardContent>
               </Card>
 
-              <Button onClick={analyzePerformance} variant="outline" className="w-full">
-                <Brain className="w-4 h-4 mr-2" /> Regenerar Análisis
+              {/* Consejos para Gerente */}
+              {report.consejos_gerente?.length > 0 && (
+                <Card className="border-pink-200">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm text-pink-700 flex items-center gap-2">
+                      <Sparkles className="w-4 h-4" /> Acciones Inmediatas
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {report.consejos_gerente.map((consejo, i) => (
+                      <div key={i} className="flex items-start gap-2 p-2 bg-pink-50 rounded-lg">
+                        <ChevronRight className="w-4 h-4 text-pink-500 mt-0.5" />
+                        <p className="text-xs text-gray-700">{consejo}</p>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Gráfica visual de cajeros */}
+              {cashierData.length > 0 && (
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm text-gray-700">📊 Performance Visual</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-48">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={cashierData.slice(0, 5)}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                          <XAxis dataKey="name" tick={{ fontSize: 10 }} angle={-15} textAnchor="end" height={60} />
+                          <YAxis tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} tick={{ fontSize: 10 }} />
+                          <RechartsTooltip formatter={(v) => [`$${v.toLocaleString()}`, 'Ventas']} />
+                          <Bar dataKey="totalSales" fill="#10b981" radius={[6, 6, 0, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              <Button onClick={analyzePerformance} variant="outline" className="w-full gap-2">
+                <Brain className="w-4 h-4" /> Regenerar Análisis
               </Button>
             </div>
           ) : null}
