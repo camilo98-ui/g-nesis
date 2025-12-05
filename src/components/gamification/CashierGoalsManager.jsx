@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   Target, DollarSign, Receipt, Gift, Zap, Save, 
-  Loader2, CheckCircle, Edit2, X, Plus, TrendingUp
+  Loader2, CheckCircle, Edit2, X, Plus, TrendingUp, Calendar
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from 'sonner';
 
 const GOAL_TYPES = [
@@ -24,6 +25,7 @@ const GOAL_TYPES = [
 export default function CashierGoalsManager({ cashierId, cashierName, storeId, shiftRecords = [] }) {
   const queryClient = useQueryClient();
   const [editMode, setEditMode] = useState(false);
+  const [goalPeriod, setGoalPeriod] = useState('monthly'); // daily, weekly, monthly
   const [formData, setFormData] = useState({
     sales_goal: '',
     tickets_goal: '',
@@ -31,7 +33,8 @@ export default function CashierGoalsManager({ cashierId, cashierName, storeId, s
     suggested_goal: '',
     custom_goal_name: '',
     custom_goal_value: '',
-    notes: ''
+    notes: '',
+    period: 'monthly'
   });
 
   const currentMonth = new Date().getMonth() + 1;
@@ -239,7 +242,7 @@ export default function CashierGoalsManager({ cashierId, cashierName, storeId, s
 
       {/* Modal de edición */}
       <Dialog open={editMode} onOpenChange={setEditMode}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Target className="w-5 h-5 text-violet-500" />
@@ -248,6 +251,24 @@ export default function CashierGoalsManager({ cashierId, cashierName, storeId, s
           </DialogHeader>
           
           <div className="space-y-4 py-4">
+            {/* Selector de período */}
+            <Tabs value={goalPeriod} onValueChange={setGoalPeriod} className="w-full">
+              <TabsList className="grid grid-cols-3 w-full">
+                <TabsTrigger value="daily" className="text-xs">
+                  <Calendar className="w-3 h-3 mr-1" />
+                  Diaria
+                </TabsTrigger>
+                <TabsTrigger value="weekly" className="text-xs">
+                  <Calendar className="w-3 h-3 mr-1" />
+                  Semanal
+                </TabsTrigger>
+                <TabsTrigger value="monthly" className="text-xs">
+                  <Calendar className="w-3 h-3 mr-1" />
+                  Mensual
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+
             <div className="grid grid-cols-2 gap-4">
               {GOAL_TYPES.map((type) => {
                 const Icon = type.icon;

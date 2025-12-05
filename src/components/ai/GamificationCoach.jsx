@@ -4,11 +4,12 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { 
   Sparkles, MessageCircle, Target, TrendingUp, Award,
-  Loader2, X, Lightbulb, Flame, Star, Zap
+  Loader2, X, Lightbulb, Flame, Star, Zap, BarChart3, Calendar
 } from 'lucide-react';
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { format, subDays } from 'date-fns';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 
 export default function GamificationCoach({ cashierId, cashierName, storeId }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -61,22 +62,30 @@ export default function GamificationCoach({ cashierId, cashierName, storeId }) {
 
     try {
       const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `Eres un coach motivacional de Popsy Helados 🍦. Tu rol es motivar y ayudar a los cajeros a mejorar su rendimiento.
+        prompt: `Eres un coach motivacional EXPERTO de Popsy Helados 🍦. Analiza profundamente el rendimiento de ${cashierName}.
 
-Datos del cajero ${cashierName}:
+Datos completos del cajero:
 ${JSON.stringify(performanceData, null, 2)}
 
-Genera un coaching personalizado que incluya:
-1. Un mensaje motivacional personalizado (máx 2 líneas, usa emojis de helado 🍦🍨)
-2. 3 tips específicos para mejorar sus KPIs débiles
-3. 2 metas sugeridas basadas en su rendimiento (alcanzables pero retadoras)
-4. Una frase de cierre motivacional estilo Popsy
+Genera un coaching COMPLETO Y MOTIVACIONAL que incluya:
 
-Sé positivo, específico y usa el nombre del cajero. Responde en español.`,
+1. **Mensaje Motivacional** (2-3 líneas): Personalizado, específico a sus logros, con emojis 🍦
+2. **Análisis de Fortalezas** (2-3 puntos): Qué hace bien, con números específicos
+3. **Tips Estratégicos** (3-4 tips): Acciones concretas para mejorar KPIs débiles con impacto esperado (ej: "+20% en sugeridos")
+4. **Metas Retadoras** (2-3 metas): Basadas en su rendimiento actual, alcanzables pero ambiciosas
+5. **Pronóstico de Crecimiento**: Si sigue estos consejos, qué puede lograr en 7-14 días
+6. **Gráficas Sugeridas**: Datos para visualizar progreso (tendencia ventas, comparativa con equipo)
+7. **Frase de Cierre**: Motivacional estilo Popsy con el nombre del cajero
+
+Sé MUY positivo, específico, usa datos duros y el nombre. Responde en español.`,
         response_json_schema: {
           type: "object",
           properties: {
             mensaje_motivacional: { type: "string" },
+            fortalezas: {
+              type: "array",
+              items: { type: "string" }
+            },
             tips: {
               type: "array",
               items: {
@@ -84,6 +93,7 @@ Sé positivo, específico y usa el nombre del cajero. Responde en español.`,
                 properties: {
                   titulo: { type: "string" },
                   descripcion: { type: "string" },
+                  impacto_esperado: { type: "string" },
                   icono: { type: "string" }
                 }
               }
@@ -95,7 +105,30 @@ Sé positivo, específico y usa el nombre del cajero. Responde en español.`,
                 properties: {
                   nombre: { type: "string" },
                   valor: { type: "number" },
-                  tipo: { type: "string" }
+                  tipo: { type: "string" },
+                  periodo: { type: "string" }
+                }
+              }
+            },
+            pronostico: {
+              type: "object",
+              properties: {
+                ventas_7_dias: { type: "number" },
+                crecimiento_esperado: { type: "string" }
+              }
+            },
+            graficas_data: {
+              type: "object",
+              properties: {
+                tendencia_semanal: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      dia: { type: "string" },
+                      valor: { type: "number" }
+                    }
+                  }
                 }
               }
             },
@@ -200,11 +233,30 @@ Sé positivo, específico y usa el nombre del cajero. Responde en español.`,
                       </div>
                     </motion.div>
 
-                    {/* Tips */}
+                    {/* Fortalezas */}
+                    {coaching.fortalezas?.length > 0 && (
+                      <Card className="border-emerald-200">
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm text-emerald-700 flex items-center gap-2">
+                            <Star className="w-4 h-4" /> Tus Fortalezas
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-1">
+                          {coaching.fortalezas.map((f, i) => (
+                            <div key={i} className="flex items-start gap-2 text-xs text-emerald-700">
+                              <span>✓</span>
+                              <p>{f}</p>
+                            </div>
+                          ))}
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {/* Tips Estratégicos con impacto */}
                     <div>
                       <h4 className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
                         <Lightbulb className="w-4 h-4 text-amber-500" />
-                        Tips para ti
+                        Tips Estratégicos
                       </h4>
                       <div className="space-y-2">
                         {coaching.tips?.map((tip, i) => (
@@ -215,20 +267,64 @@ Sé positivo, específico y usa el nombre del cajero. Responde en español.`,
                             transition={{ delay: i * 0.1 }}
                             className="p-3 bg-amber-50 rounded-lg border border-amber-200"
                           >
-                            <p className="font-medium text-sm text-amber-800">{tip.titulo}</p>
+                            <p className="font-bold text-sm text-amber-800">{tip.titulo}</p>
                             <p className="text-xs text-amber-600 mt-1">{tip.descripcion}</p>
+                            {tip.impacto_esperado && (
+                              <p className="text-xs bg-amber-200 text-amber-800 px-2 py-1 rounded-full inline-block mt-2">
+                                📈 {tip.impacto_esperado}
+                              </p>
+                            )}
                           </motion.div>
                         ))}
                       </div>
                     </div>
 
-                    {/* Metas sugeridas */}
+                    {/* Pronóstico con gráfica */}
+                    {coaching.pronostico && (
+                      <Card className="border-blue-200">
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm text-blue-700 flex items-center gap-2">
+                            <Calendar className="w-4 h-4" /> Tu Pronóstico
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="bg-blue-50 rounded-lg p-3 text-center mb-3">
+                            <p className="text-xs text-gray-500 mb-1">Próximos 7 días</p>
+                            <p className="text-2xl font-black text-blue-600">
+                              ${(coaching.pronostico.ventas_7_dias / 1000000).toFixed(1)}M
+                            </p>
+                            <p className="text-xs text-blue-500 mt-1">{coaching.pronostico.crecimiento_esperado}</p>
+                          </div>
+                          {coaching.graficas_data?.tendencia_semanal && (
+                            <div className="h-32">
+                              <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={coaching.graficas_data.tendencia_semanal}>
+                                  <defs>
+                                    <linearGradient id="coachGrad" x1="0" y1="0" x2="0" y2="1">
+                                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4}/>
+                                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                                    </linearGradient>
+                                  </defs>
+                                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                                  <XAxis dataKey="dia" tick={{ fontSize: 9 }} />
+                                  <YAxis tick={{ fontSize: 9 }} />
+                                  <RechartsTooltip />
+                                  <Area type="monotone" dataKey="valor" stroke="#3b82f6" fill="url(#coachGrad)" />
+                                </AreaChart>
+                              </ResponsiveContainer>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {/* Metas sugeridas con período */}
                     <div>
                       <h4 className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
                         <Target className="w-4 h-4 text-violet-500" />
-                        Metas sugeridas
+                        Metas Retadoras
                       </h4>
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-2">
                         {coaching.metas_sugeridas?.map((meta, i) => (
                           <motion.div
                             key={i}
@@ -236,12 +332,21 @@ Sé positivo, específico y usa el nombre del cajero. Responde en español.`,
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ delay: 0.3 + i * 0.1 }}
                             whileHover={{ scale: 1.02 }}
-                            className="p-3 bg-violet-50 rounded-lg border border-violet-200 text-center"
+                            className="p-3 bg-violet-50 rounded-lg border border-violet-200"
                           >
-                            <p className="text-lg font-bold text-violet-600">
-                              {meta.tipo === 'currency' ? `$${(meta.valor/1000000).toFixed(1)}M` : meta.valor}
-                            </p>
-                            <p className="text-xs text-violet-500">{meta.nombre}</p>
+                            <div className="flex items-center justify-between">
+                              <div className="flex-1">
+                                <p className="text-sm font-bold text-violet-700">{meta.nombre}</p>
+                                {meta.periodo && (
+                                  <p className="text-xs text-violet-500">
+                                    {meta.periodo === 'daily' ? '📅 Meta Diaria' : meta.periodo === 'weekly' ? '📆 Meta Semanal' : '📊 Meta Mensual'}
+                                  </p>
+                                )}
+                              </div>
+                              <p className="text-xl font-black text-violet-600">
+                                {meta.tipo === 'currency' ? `$${(meta.valor/1000000).toFixed(1)}M` : meta.valor}
+                              </p>
+                            </div>
                           </motion.div>
                         ))}
                       </div>
