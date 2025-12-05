@@ -8,6 +8,9 @@ import StoreSelector, { STORES, getDisplayName } from '@/components/StoreSelecto
 import GamificationCoach from '@/components/ai/GamificationCoach';
 import PerformanceAnalyzer from '@/components/ai/PerformanceAnalyzer';
 import DateFilter from '@/components/DateFilter';
+import BadgeConfigManager from '@/components/gamification/BadgeConfigManager';
+import GlobalPointsRanking from '@/components/gamification/GlobalPointsRanking';
+import CashierVisualProfile from '@/components/cashier/CashierVisualProfile';
 import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
 import CashierAnalysis from '@/components/cashier/CashierAnalysis';
 import BadgesDisplay from '@/components/gamification/BadgesDisplay';
@@ -18,7 +21,7 @@ import CashierAssignmentSuggestion from '@/components/ai/CashierAssignmentSugges
 import { 
   ArrowLeft, Users, Search, TrendingUp, TrendingDown, 
   Award, Target, BarChart3, User, ChevronRight, Star,
-  Flame, Crown, Medal, Eye, Hash
+  Flame, Crown, Medal, Eye, Hash, Settings
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,6 +35,7 @@ export default function CashiersDashboard() {
   const [dateRange, setDateRange] = useState({ from: startOfMonth(new Date()), to: new Date() });
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCashier, setSelectedCashier] = useState(null);
+  const [showBadgeConfig, setShowBadgeConfig] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem('selectedStore');
@@ -181,6 +185,15 @@ export default function CashiersDashboard() {
             </div>
           </div>
           <div className="flex flex-col md:flex-row gap-3 items-center">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowBadgeConfig(true)}
+              className="gap-2 border-violet-200 text-violet-600 hover:bg-violet-50"
+            >
+              <Settings className="w-4 h-4" />
+              Config Insignias
+            </Button>
             <PerformanceAnalyzer storeId={selectedStore} storeName={getDisplayName(selectedStore)} />
             <StoreSelector selectedStore={selectedStore} onStoreChange={handleStoreChange} />
             <DateFilter dateRange={dateRange} onDateChange={setDateRange} />
@@ -245,6 +258,8 @@ export default function CashiersDashboard() {
               {/* Ranking y Lista de Cajeros */}
               <div className="lg:col-span-1 space-y-4">
                 <CashierRanking storeId={selectedStore} onSelectCashier={setSelectedCashier} />
+                {/* Ranking Global de Puntos */}
+                <GlobalPointsRanking storeId={selectedStore} cashiers={activeCashiers} limit={5} />
               </div>
 
               {/* Detalle del Cajero */}
@@ -256,7 +271,20 @@ export default function CashiersDashboard() {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -20 }}
+                      className="space-y-4"
                     >
+                      {/* Perfil Visual estilo Facebook */}
+                      <CashierVisualProfile 
+                        cashier={selectedCashier}
+                        storeCode={selectedStore}
+                        shiftRecords={shiftRecords}
+                        teamAvg={{
+                          avgSales: teamTotals.avgSales,
+                          avgTicket: teamTotals.avgTicket
+                        }}
+                      />
+
+                      {/* Análisis detallado */}
                       <CashierAnalysis 
                         cashierId={selectedCashier.id}
                         cashierName={selectedCashier.name}
@@ -310,45 +338,7 @@ export default function CashiersDashboard() {
                         />
                       </div>
 
-                      {/* Logros del cajero */}
-                      <div className="mt-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-4">
-                        <h4 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
-                          <Award className="w-4 h-4 text-purple-500" />
-                          Logros
-                        </h4>
-                        <BadgesDisplay cashierId={selectedCashier.id} showAll />
-                      </div>
-
-                      {/* Comparación con promedio */}
-                      <div className="mt-4 bg-gradient-to-r from-gray-50 to-slate-100 rounded-xl p-4">
-                        <h4 className="text-sm font-medium text-gray-700 mb-3">Comparación con Equipo</h4>
-                        <div className="space-y-3">
-                          <div>
-                            <div className="flex justify-between text-xs text-gray-500 mb-1">
-                              <span>Ventas vs Promedio</span>
-                              <span className={selectedCashier.totalSales > teamTotals.totalSales / teamTotals.totalCashiers ? 'text-emerald-600' : 'text-red-500'}>
-                                {((selectedCashier.totalSales / (teamTotals.totalSales / teamTotals.totalCashiers)) * 100 - 100).toFixed(0)}%
-                              </span>
-                            </div>
-                            <Progress 
-                              value={Math.min(100, (selectedCashier.totalSales / (teamTotals.totalSales / teamTotals.totalCashiers)) * 50)} 
-                              className="h-2"
-                            />
-                          </div>
-                          <div>
-                            <div className="flex justify-between text-xs text-gray-500 mb-1">
-                              <span>Ticket Prom. vs Equipo</span>
-                              <span className={selectedCashier.avgTicket > teamTotals.avgTicket ? 'text-emerald-600' : 'text-red-500'}>
-                                {((selectedCashier.avgTicket / teamTotals.avgTicket) * 100 - 100).toFixed(0)}%
-                              </span>
-                            </div>
-                            <Progress 
-                              value={Math.min(100, (selectedCashier.avgTicket / teamTotals.avgTicket) * 50)} 
-                              className="h-2"
-                            />
-                          </div>
-                        </div>
-                      </div>
+                      {/* Los logros y comparación ya están en el perfil visual */}
                     </motion.div>
                   ) : (
                     <motion.div
@@ -444,6 +434,13 @@ export default function CashiersDashboard() {
           </div>
         )}
       </div>
+
+      {/* Modal de Configuración de Insignias */}
+      <BadgeConfigManager 
+        storeId={selectedStore} 
+        isOpen={showBadgeConfig} 
+        onClose={() => setShowBadgeConfig(false)} 
+      />
     </div>
   );
 }
