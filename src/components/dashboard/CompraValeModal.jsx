@@ -252,8 +252,8 @@ export default function CompraValeModal({ isOpen, onClose, storeId, currentSales
                 <BarChart3 className="w-6 h-6" />
               </motion.div>
               <div>
-                <h2 className="text-xl font-bold">Compra Vale</h2>
-                <p className="text-white/80 text-sm">Venta Comparable - Actual vs Períodos Anteriores</p>
+                <h2 className="text-xl font-bold">Comparable</h2>
+                <p className="text-white/80 text-sm">Venta Actual vs Períodos Anteriores</p>
               </div>
             </div>
             <Button variant="ghost" size="icon" onClick={onClose} className="text-white hover:bg-white/20 rounded-full">
@@ -368,76 +368,82 @@ export default function CompraValeModal({ isOpen, onClose, storeId, currentSales
                 </motion.div>
               </div>
 
-              {/* Comparison Bar Chart */}
+              {/* Comparison Bar Chart - Actual vs Anterior con diferencia */}
               <div className="bg-gray-50 rounded-2xl p-5">
                 <h4 className="font-semibold text-gray-700 mb-4 flex items-center gap-2">
                   <BarChart3 className="w-5 h-5 text-purple-500" />
-                  Comparativa: {comparison.lastPeriod.period_label} vs Actual
+                  {comparison.lastPeriod.period_label} vs Período Actual
                 </h4>
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={chartData} layout="vertical">
+                    <BarChart data={chartData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                      <XAxis type="number" tick={{ fill: '#6b7280', fontSize: 11 }} 
+                      <XAxis dataKey="name" tick={{ fill: '#6b7280', fontSize: 12 }} />
+                      <YAxis tick={{ fill: '#6b7280', fontSize: 11 }} 
                         tickFormatter={(v) => v >= 1000000 ? `$${(v/1000000).toFixed(1)}M` : v >= 1000 ? `$${(v/1000).toFixed(0)}K` : v} 
                       />
-                      <YAxis type="category" dataKey="name" tick={{ fill: '#6b7280', fontSize: 12 }} width={80} />
                       <Tooltip 
                         formatter={(v, name) => [
-                          name === 'Ventas' || name === 'anterior' || name === 'actual' 
-                            ? formatCurrency(v) 
-                            : v.toLocaleString(), 
+                          formatCurrency(v), 
                           name === 'anterior' ? 'Período Anterior' : 'Actual'
                         ]}
                       />
                       <Legend />
-                      <Bar dataKey="anterior" fill="#94a3b8" name="Anterior" radius={[0, 4, 4, 0]} />
-                      <Bar dataKey="actual" fill="#8b5cf6" name="Actual" radius={[0, 4, 4, 0]} />
+                      <Bar dataKey="anterior" fill="#94a3b8" name="Anterior" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="actual" name="Actual" radius={[4, 4, 0, 0]}>
+                        {chartData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.actual >= entry.anterior ? '#10b981' : '#ef4444'} />
+                        ))}
+                      </Bar>
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
+                <div className="mt-3 flex justify-center gap-4 text-xs">
+                  <span className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-emerald-500" /> Crecimiento</span>
+                  <span className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-red-500" /> Caída</span>
+                  <span className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-gray-400" /> Anterior</span>
+                </div>
               </div>
 
-              {/* Progress Chart - How much we've advanced */}
+              {/* Progress Chart - Diferencia ganada/perdida */}
               <div className="bg-gradient-to-r from-violet-50 to-purple-50 rounded-2xl p-5 border border-violet-100">
                 <h4 className="font-semibold text-gray-700 mb-4 flex items-center gap-2">
                   <TrendingUp className="w-5 h-5 text-violet-500" />
-                  ¿Cuánto Hemos Avanzado? (vs {comparison.lastPeriod.period_label})
+                  ¿Cuánto Hemos Avanzado? - Diferencia vs {comparison.lastPeriod.period_label}
                 </h4>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {progressData.map((item, idx) => (
+                  {[
+                    { name: 'Ventas', actual: currentSales?.sales || 0, anterior: comparison.lastPeriod.total_sales || 0, diff: comparison.sales.diff, pct: comparison.sales.pct },
+                    { name: 'Tickets', actual: currentSales?.tickets || 0, anterior: comparison.lastPeriod.total_tickets || 0, diff: comparison.tickets.diff, pct: comparison.tickets.pct },
+                    { name: 'Trans.', actual: currentSales?.transactions || 0, anterior: comparison.lastPeriod.total_transactions || 0, diff: comparison.transactions.diff, pct: comparison.transactions.pct },
+                    { name: 'Sugeridos', actual: currentSales?.suggested || 0, anterior: comparison.lastPeriod.total_suggested || 0, diff: comparison.suggested.diff, pct: comparison.suggested.pct },
+                  ].map((item, idx) => (
                     <motion.div 
                       key={item.name}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: idx * 0.1 }}
-                      className="text-center"
+                      whileHover={{ scale: 1.03 }}
+                      className={`p-4 rounded-xl border-2 ${item.pct >= 0 ? 'bg-emerald-50 border-emerald-200' : 'bg-red-50 border-red-200'}`}
                     >
-                      <div className="relative w-20 h-20 mx-auto mb-2">
-                        <svg className="w-20 h-20 transform -rotate-90">
-                          <circle cx="40" cy="40" r="34" stroke="#e5e7eb" strokeWidth="6" fill="none" />
-                          <motion.circle 
-                            cx="40" cy="40" r="34" 
-                            stroke={item.fill} 
-                            strokeWidth="6" 
-                            fill="none"
-                            strokeLinecap="round"
-                            strokeDasharray={`${Math.min(item.progress, 100) / 100 * 213.6} 213.6`}
-                            initial={{ strokeDasharray: "0 213.6" }}
-                            animate={{ strokeDasharray: `${Math.min(item.progress, 100) / 100 * 213.6} 213.6` }}
-                            transition={{ duration: 1, delay: idx * 0.1 }}
-                          />
-                        </svg>
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <span className="text-lg font-bold" style={{ color: item.fill }}>
-                            {item.progress.toFixed(0)}%
-                          </span>
+                      <p className="text-xs text-gray-500 mb-1">{item.name}</p>
+                      <p className={`text-2xl font-black ${item.pct >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                        {item.pct >= 0 ? '+' : ''}{item.pct.toFixed(1)}%
+                      </p>
+                      <div className="mt-2 space-y-1">
+                        <div className="flex justify-between text-[10px]">
+                          <span className="text-gray-500">Anterior:</span>
+                          <span className="font-medium">{item.name === 'Ventas' ? formatCurrency(item.anterior) : item.anterior.toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between text-[10px]">
+                          <span className="text-gray-500">Actual:</span>
+                          <span className="font-medium">{item.name === 'Ventas' ? formatCurrency(item.actual) : item.actual.toLocaleString()}</span>
+                        </div>
+                        <div className={`flex justify-between text-[10px] font-bold ${item.pct >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                          <span>Diferencia:</span>
+                          <span>{item.pct >= 0 ? '+' : ''}{item.name === 'Ventas' ? formatCurrency(item.diff) : item.diff.toLocaleString()}</span>
                         </div>
                       </div>
-                      <p className="text-sm font-medium text-gray-700">{item.name}</p>
-                      <p className="text-xs text-gray-500">
-                        {item.progress >= 100 ? '✅ Superado' : `Falta ${(100 - item.progress).toFixed(0)}%`}
-                      </p>
                     </motion.div>
                   ))}
                 </div>
@@ -684,7 +690,7 @@ export default function CompraValeModal({ isOpen, onClose, storeId, currentSales
         {/* Footer */}
         <div className="p-4 bg-gray-50 border-t text-center">
           <p className="text-xs text-gray-500">
-            💡 Compara tus ventas actuales con períodos anteriores para identificar tendencias y oportunidades
+            💡 Compara tus ventas actuales vs períodos anteriores para identificar crecimiento
           </p>
         </div>
       </motion.div>

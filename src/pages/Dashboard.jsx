@@ -8,7 +8,7 @@ import StoreSelector, { STORES, getDisplayName } from '@/components/StoreSelecto
 import DateFilter from '@/components/DateFilter';
 import WeekFilter from '@/components/dashboard/WeekFilter';
 import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
-import ExportExcel from '@/components/ExportExcel';
+
 import DailyGoalsCard from '@/components/gamification/DailyGoalsCard';
 import WeatherSalesImpactChart from '@/components/weather/WeatherSalesImpactChart';
 
@@ -444,7 +444,7 @@ export default function Dashboard() {
     to: new Date()
   });
   const [activeMetric, setActiveMetric] = useState(null);
-  const [showExport, setShowExport] = useState(false);
+
   const [weatherData, setWeatherData] = useState(null);
   const [weekFilter, setWeekFilter] = useState(null); // Filtro de semana independiente
   const [showCompraVale, setShowCompraVale] = useState(false);
@@ -718,7 +718,7 @@ export default function Dashboard() {
                   className="text-violet-600 border-violet-200 hover:bg-violet-50 hover:border-violet-300"
                 >
                   <BarChart3 className="w-4 h-4 mr-1" />
-                  Compra Vale
+                  Comparable
                 </Button>
               </motion.div>
               <StoreReportGenerator 
@@ -726,30 +726,9 @@ export default function Dashboard() {
                 storeName={selectedStoreName}
                 storeCode={selectedStore}
               />
-              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowExport(!showExport)}
-                  className="text-gray-500 hover:text-green-600 hover:bg-green-50"
-                >
-                  <FileSpreadsheet className="w-4 h-4 mr-1" />
-                  Excel
-                </Button>
-              </motion.div>
             </div>
 
-            <AnimatePresence>
-              {showExport && (
-                <ExportExcel
-                  storeData={filteredSales}
-                  cashierData={cashierExportData}
-                  storeName={selectedStore}
-                  dateRange={dateRange}
-                  onClose={() => setShowExport(false)}
-                />
-              )}
-            </AnimatePresence>
+
 
             {/* Metrics Grid - Clickeable */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -977,56 +956,7 @@ export default function Dashboard() {
               </motion.div>
             )}
 
-            {/* Opportunities Chart */}
-            <Card className="border-none shadow-lg bg-white/90 backdrop-blur-sm">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-pink-600 flex items-center gap-2">
-                  <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 2, repeat: Infinity }}>
-                    <Target className="w-4 h-4 text-pink-500" />
-                  </motion.div>
-                  ¿Cómo Vamos?
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-5 gap-4">
-                  {opportunitiesData.map((item, idx) => {
-                    const Icon = item.icon;
-                    return (
-                      <motion.div 
-                        key={item.name}
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: idx * 0.1 }}
-                        whileHover={{ scale: 1.05, y: -3 }}
-                        className="text-center"
-                      >
-                        <div className="relative w-16 h-16 mx-auto mb-2">
-                          <svg className="w-16 h-16 transform -rotate-90">
-                            <circle cx="32" cy="32" r="28" stroke="#e5e7eb" strokeWidth="5" fill="none" />
-                            <motion.circle 
-                              cx="32" cy="32" r="28" 
-                              stroke={item.fill} 
-                              strokeWidth="5" 
-                              fill="none"
-                              strokeLinecap="round"
-                              strokeDasharray={`${(item.value / 100) * 176} 176`}
-                              initial={{ strokeDasharray: "0 176" }}
-                              animate={{ strokeDasharray: `${(item.value / 100) * 176} 176` }}
-                              transition={{ duration: 1, delay: idx * 0.1 }}
-                            />
-                          </svg>
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <Icon className="w-5 h-5" style={{ color: item.fill }} />
-                          </div>
-                        </div>
-                        <p className="text-lg font-black" style={{ color: item.fill }}>{item.value.toFixed(0)}%</p>
-                        <p className="text-[10px] font-medium text-gray-600">{item.name}</p>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
+
 
             {/* Daily Goals */}
             <DailyGoalsCard storeId={selectedStore} />
@@ -1053,134 +983,164 @@ export default function Dashboard() {
               )}
             </AnimatePresence>
 
-            {/* Proyecciones */}
+            {/* Proyección del Mes - Diseño Mejorado */}
             {projections && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-gradient-to-r from-slate-800 to-slate-900 rounded-2xl shadow-xl p-6 text-white"
+                className="bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800 rounded-3xl shadow-2xl overflow-hidden"
               >
-                <h3 className="text-base font-medium mb-4 flex items-center gap-2">
-                  <motion.div animate={{ rotate: [0, 360] }} transition={{ duration: 8, repeat: Infinity, ease: "linear" }}>
-                    <Target className="w-5 h-5 text-pink-400" />
-                  </motion.div>
-                  Proyección del Mes
-                </h3>
-
-                {/* Gráfica de Proyección */}
-                <div className="mb-6 bg-white/5 rounded-xl p-4">
-                  <p className="text-xs text-white/60 mb-3">Progreso vs Meta</p>
-                  <div className="h-40">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart 
-                        data={[
-                          { 
-                            name: 'Ventas', 
-                            actual: totals.sales, 
-                            meta: currentBudget?.sales_budget || 0,
-                            proyectado: projections.projectedSales
-                          },
-                          { 
-                            name: 'Ticket', 
-                            actual: projections.avgTicket, 
-                            meta: projections.budgetTicket,
-                            proyectado: projections.avgTicket
-                          },
-                          { 
-                            name: 'Trans.', 
-                            actual: totals.transactions, 
-                            meta: currentBudget?.transactions_budget || totals.transactions * 1.1,
-                            proyectado: totals.transactions * (30 / Math.max(filteredSales.length, 1))
-                          },
-                          { 
-                            name: 'Sugeridos', 
-                            actual: totals.suggested, 
-                            meta: currentBudget?.suggested_budget || totals.suggested * 1.2,
-                            proyectado: totals.suggested * (30 / Math.max(filteredSales.length, 1))
-                          }
-                        ]}
-                        layout="vertical"
-                        margin={{ top: 5, right: 30, left: 50, bottom: 5 }}
-                      >
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                        <XAxis type="number" tick={{ fill: 'rgba(255,255,255,0.6)', fontSize: 10 }} tickFormatter={(v) => v >= 1000000 ? `${(v/1000000).toFixed(1)}M` : v >= 1000 ? `${(v/1000).toFixed(0)}K` : v} />
-                        <YAxis type="category" dataKey="name" tick={{ fill: 'rgba(255,255,255,0.8)', fontSize: 11 }} width={55} />
-                        <Tooltip 
-                          contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: 8 }}
-                          labelStyle={{ color: '#fff' }}
-                          formatter={(value, name) => {
-                            const label = name === 'actual' ? 'Actual' : name === 'meta' ? 'Meta' : 'Proyectado';
-                            return [formatCurrency(value), label];
-                          }}
+                {/* Header con cumplimiento principal */}
+                <div className="bg-gradient-to-r from-pink-500/20 to-violet-500/20 p-6 border-b border-white/10">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                        <Target className="w-6 h-6 text-pink-400" />
+                        Proyección del Mes
+                      </h3>
+                      <p className="text-white/60 text-sm mt-1">
+                        {projections.daysRemaining} días restantes para cerrar el mes
+                      </p>
+                    </div>
+                    {/* Cumplimiento circular grande */}
+                    <div className="relative">
+                      <svg className="w-24 h-24 transform -rotate-90">
+                        <circle cx="48" cy="48" r="42" stroke="rgba(255,255,255,0.1)" strokeWidth="8" fill="none" />
+                        <motion.circle 
+                          cx="48" cy="48" r="42" 
+                          stroke={projections.salesOnTrack ? '#10b981' : '#f59e0b'}
+                          strokeWidth="8" 
+                          fill="none"
+                          strokeLinecap="round"
+                          initial={{ strokeDasharray: "0 264" }}
+                          animate={{ strokeDasharray: `${Math.min((totals.sales / (currentBudget?.sales_budget || 1)) * 264, 264)} 264` }}
+                          transition={{ duration: 1.5 }}
                         />
-                        <Legend wrapperStyle={{ color: 'white', fontSize: 10 }} />
-                        <Bar dataKey="meta" fill="#475569" name="Meta" radius={[0, 4, 4, 0]} />
-                        <Bar dataKey="actual" fill="#10b981" name="Actual" radius={[0, 4, 4, 0]} />
-                        <Bar dataKey="proyectado" fill="#a78bfa" name="Proyectado" radius={[0, 4, 4, 0]} />
-                      </BarChart>
-                    </ResponsiveContainer>
+                      </svg>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <motion.span 
+                          className="text-2xl font-black text-white"
+                          animate={{ scale: [1, 1.05, 1] }}
+                          transition={{ duration: 2, repeat: Infinity }}
+                        >
+                          {currentBudget?.sales_budget > 0 ? ((totals.sales / currentBudget.sales_budget) * 100).toFixed(0) : 0}%
+                        </motion.span>
+                        <span className="text-[10px] text-white/60">Cumplimiento</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <div className="bg-white/5 rounded-xl p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-white/70 text-sm">Venta Proyectada</span>
-                      <span className={`text-xs px-2 py-1 rounded-full ${projections.salesOnTrack ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
-                        {projections.salesOnTrack ? '✓ En ruta' : '⚠ Atención'}
-                      </span>
+                {/* Grid de métricas principales */}
+                <div className="p-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {/* Venta Actual */}
+                  <motion.div 
+                    whileHover={{ scale: 1.03 }}
+                    className="bg-white/5 rounded-2xl p-4 border border-white/10"
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                        <DollarSign className="w-4 h-4 text-emerald-400" />
+                      </div>
+                      <span className="text-white/70 text-xs">Venta Actual</span>
                     </div>
-                    <p className="text-2xl font-semibold">{formatCurrency(projections.projectedSales)}</p>
-                    <p className="text-xs text-white/50 mt-1">
-                      Faltan {formatCurrency(projections.salesGap)} para la meta
-                    </p>
-                  </div>
-                  <div className="bg-white/5 rounded-xl p-4">
-                    <p className="text-white/70 text-sm mb-2">Venta Diaria Requerida</p>
-                    <p className="text-2xl font-semibold text-amber-400">{formatCurrency(projections.requiredDailySales)}</p>
-                    <p className="text-xs text-white/50 mt-1">
-                      Para alcanzar el 100% en {projections.daysRemaining} días
-                    </p>
-                  </div>
-                  <div className="bg-white/5 rounded-xl p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-white/70 text-sm">Ticket Promedio</span>
-                      <span className={`text-xs px-2 py-1 rounded-full ${projections.ticketOnTrack ? 'bg-green-500/20 text-green-400' : 'bg-amber-500/20 text-amber-400'}`}>
-                        {projections.ticketOnTrack ? '✓ OK' : 'Mejorar'}
-                      </span>
+                    <p className="text-xl font-bold text-white">{formatCurrency(totals.sales)}</p>
+                    <div className="mt-2 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                      <motion.div 
+                        className="h-full bg-emerald-500 rounded-full"
+                        initial={{ width: 0 }}
+                        animate={{ width: `${Math.min((totals.sales / (currentBudget?.sales_budget || 1)) * 100, 100)}%` }}
+                      />
                     </div>
-                    <p className="text-2xl font-semibold">{formatCurrency(projections.avgTicket)}</p>
-                    <p className="text-xs text-white/50 mt-1">
+                    <p className="text-[10px] text-white/50 mt-1">de {formatCurrency(currentBudget?.sales_budget || 0)}</p>
+                  </motion.div>
+
+                  {/* Proyección de Cierre */}
+                  <motion.div 
+                    whileHover={{ scale: 1.03 }}
+                    className="bg-white/5 rounded-2xl p-4 border border-white/10"
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-8 h-8 rounded-lg bg-violet-500/20 flex items-center justify-center">
+                        <TrendingUp className="w-4 h-4 text-violet-400" />
+                      </div>
+                      <span className="text-white/70 text-xs">Proyección Cierre</span>
+                    </div>
+                    <p className="text-xl font-bold text-violet-300">{formatCurrency(projections.projectedSales)}</p>
+                    <p className={`text-xs mt-2 px-2 py-0.5 rounded-full inline-block ${
+                      projections.salesOnTrack ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'
+                    }`}>
+                      {projections.salesOnTrack ? '✓ En ruta al 100%' : '⚠ Requiere impulso'}
+                    </p>
+                  </motion.div>
+
+                  {/* Venta Diaria Requerida */}
+                  <motion.div 
+                    whileHover={{ scale: 1.03 }}
+                    className="bg-white/5 rounded-2xl p-4 border border-white/10"
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center">
+                        <Zap className="w-4 h-4 text-amber-400" />
+                      </div>
+                      <span className="text-white/70 text-xs">Necesitas/Día</span>
+                    </div>
+                    <p className="text-xl font-bold text-amber-400">{formatCurrency(projections.requiredDailySales)}</p>
+                    <p className="text-[10px] text-white/50 mt-2">
+                      Para lograr {formatCurrency(projections.salesGap)} restantes
+                    </p>
+                  </motion.div>
+
+                  {/* Ticket Promedio */}
+                  <motion.div 
+                    whileHover={{ scale: 1.03 }}
+                    className="bg-white/5 rounded-2xl p-4 border border-white/10"
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-8 h-8 rounded-lg bg-sky-500/20 flex items-center justify-center">
+                        <Receipt className="w-4 h-4 text-sky-400" />
+                      </div>
+                      <span className="text-white/70 text-xs">Ticket Promedio</span>
+                    </div>
+                    <p className="text-xl font-bold text-white">{formatCurrency(projections.avgTicket)}</p>
+                    <p className={`text-xs mt-2 px-2 py-0.5 rounded-full inline-block ${
+                      projections.ticketOnTrack ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'
+                    }`}>
                       Meta: {formatCurrency(projections.budgetTicket)}
                     </p>
-                  </div>
+                  </motion.div>
+                </div>
+
+                {/* Barra de progreso visual */}
+                <div className="px-6 pb-6">
                   <div className="bg-white/5 rounded-xl p-4">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-white/70 text-sm">% Participación</span>
-                      <motion.span 
-                        className="text-xs px-2 py-1 rounded-full bg-purple-500/20 text-purple-300"
-                        animate={{ scale: [1, 1.05, 1] }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                      >
-                        📊 Cumplimiento
-                      </motion.span>
+                      <span className="text-white/70 text-sm">Progreso hacia la meta</span>
+                      <span className="text-white font-bold">
+                        {formatCurrency(currentBudget?.sales_budget - totals.sales)} por vender
+                      </span>
                     </div>
-                    <motion.p 
-                      className="text-2xl font-semibold text-purple-300"
-                      animate={{ scale: [1, 1.02, 1] }}
-                      transition={{ duration: 1.5, repeat: Infinity }}
-                    >
-                      {currentBudget?.sales_budget > 0 
-                        ? ((totals.sales / currentBudget.sales_budget) * 100).toFixed(1) 
-                        : 0}%
-                    </motion.p>
-                    <div className="mt-2 h-2 bg-white/10 rounded-full overflow-hidden">
+                    <div className="relative h-4 bg-white/10 rounded-full overflow-hidden">
                       <motion.div 
+                        className="absolute h-full bg-gradient-to-r from-pink-500 to-violet-500 rounded-full"
                         initial={{ width: 0 }}
-                        animate={{ width: `${Math.min(100, currentBudget?.sales_budget > 0 ? (totals.sales / currentBudget.sales_budget) * 100 : 0)}%` }}
-                        transition={{ duration: 1, delay: 0.3 }}
-                        className="h-full bg-gradient-to-r from-purple-400 to-pink-400 rounded-full"
+                        animate={{ width: `${Math.min((totals.sales / (currentBudget?.sales_budget || 1)) * 100, 100)}%` }}
+                        transition={{ duration: 1 }}
                       />
+                      <motion.div 
+                        className="absolute h-full bg-gradient-to-r from-violet-500/50 to-purple-500/50 rounded-full"
+                        style={{ left: `${Math.min((totals.sales / (currentBudget?.sales_budget || 1)) * 100, 100)}%` }}
+                        initial={{ width: 0 }}
+                        animate={{ width: `${Math.min(((projections.projectedSales - totals.sales) / (currentBudget?.sales_budget || 1)) * 100, 100 - (totals.sales / (currentBudget?.sales_budget || 1)) * 100)}%` }}
+                        transition={{ duration: 1, delay: 0.5 }}
+                      />
+                      {/* Marcador del 100% */}
+                      <div className="absolute right-0 top-0 h-full w-0.5 bg-white/50" />
+                    </div>
+                    <div className="flex justify-between mt-2 text-[10px] text-white/50">
+                      <span>Actual: {((totals.sales / (currentBudget?.sales_budget || 1)) * 100).toFixed(0)}%</span>
+                      <span>Proyección: {((projections.projectedSales / (currentBudget?.sales_budget || 1)) * 100).toFixed(0)}%</span>
+                      <span>Meta: 100%</span>
                     </div>
                   </div>
                 </div>
