@@ -400,6 +400,40 @@ export default function Rankings() {
 
               {/* Best Cashier Tab */}
               <TabsContent value="best" className="space-y-4">
+                {/* Performance Distribution Chart */}
+                {rankings.bestCashier?.length > 3 && (
+                  <Card className="bg-white shadow-lg border-0 mb-4">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-semibold text-amber-600">🏆 Distribución de Puntuación</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="h-56">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <PieChart>
+                            <Pie
+                              data={rankings.bestCashier.slice(0, 5).map(c => ({
+                                name: c.cashier?.name,
+                                value: c.overallScore
+                              }))}
+                              cx="50%"
+                              cy="50%"
+                              labelLine={false}
+                              label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                              outerRadius={80}
+                              dataKey="value"
+                            >
+                              {rankings.bestCashier.slice(0, 5).map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={['#fbbf24', '#f59e0b', '#fb923c', '#f97316', '#ea580c'][index]} />
+                              ))}
+                            </Pie>
+                            <Tooltip />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+                
                 {rankings.bestCashier?.length > 0 ? (
                   rankings.bestCashier.map((item, index) => (
                     <motion.div

@@ -765,6 +765,18 @@ function ManagementDashboard() {
           </>
         )}
 
+        {/* Comparable Modal */}
+        <AnimatePresence>
+          {showComparable && (
+            <ZoneComparableModal
+              isOpen={showComparable}
+              onClose={() => setShowComparable(false)}
+              currentZoneData={zoneTotals}
+              currentStoresData={storePerformance}
+            />
+          )}
+        </AnimatePresence>
+
         {activeSection === 'tiendas' && (
           <>
             {/* Opportunities Chart */}
@@ -862,18 +874,6 @@ function ManagementDashboard() {
             </div>
           </>
         )}
-
-        {/* Comparable Modal */}
-        <AnimatePresence>
-          {showComparable && (
-            <ZoneComparableModal
-              isOpen={showComparable}
-              onClose={() => setShowComparable(false)}
-              currentZoneData={zoneTotals}
-              currentStoresData={storePerformance}
-            />
-          )}
-        </AnimatePresence>
       </div>
     </div>
   );

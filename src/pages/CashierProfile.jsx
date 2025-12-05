@@ -20,8 +20,8 @@ export default function CashierProfile() {
     queryKey: ['cashier', cashierId],
     queryFn: async () => {
       if (!cashierId) return null;
-      const results = await base44.entities.Cashier.filter({ id: cashierId });
-      return results?.[0] || null;
+      const allCashiers = await base44.entities.Cashier.list();
+      return allCashiers.find(c => c.id === cashierId) || null;
     },
     enabled: !!cashierId,
     retry: 2
