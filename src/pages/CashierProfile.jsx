@@ -4,12 +4,11 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, User, Calendar, Mail, Phone, Award } from 'lucide-react';
+import { ArrowLeft, Award } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
 import CashierAnalysis from '@/components/cashier/CashierAnalysis';
 import BadgesDisplay from '@/components/gamification/BadgesDisplay';
+import CashierProfileHeader from '@/components/cashier/CashierProfileHeader';
 
 export default function CashierProfile() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -67,59 +66,21 @@ export default function CashierProfile() {
           </Button>
         </Link>
 
-        {/* Profile Header */}
+        {/* Profile Header con portada estilo Facebook */}
+        <CashierProfileHeader cashier={cashier} storeCode={cashier.store_id} />
+        
+        {/* Logros */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
+          transition={{ delay: 0.2 }}
+          className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6"
         >
-          <div className="h-24 bg-gradient-to-r from-pink-400 via-rose-400 to-pink-500" />
-          <div className="px-6 pb-6">
-            <div className="flex items-end gap-4 -mt-10">
-              <div className="w-20 h-20 rounded-2xl bg-white shadow-lg overflow-hidden flex items-center justify-center border-4 border-white">
-                {cashier.photo_url ? (
-                  <img src={cashier.photo_url} alt={cashier.name} className="w-full h-full object-cover" />
-                ) : (
-                  <span className="text-3xl font-bold text-pink-500">{cashier.name?.charAt(0)}</span>
-                )}
-              </div>
-              <div className="pb-2">
-                <h1 className="text-2xl font-bold text-gray-800">{cashier.name}</h1>
-                <p className="text-gray-500 text-sm">{cashier.store_id}</p>
-              </div>
-            </div>
-
-            {/* Contact Info */}
-            <div className="mt-6 grid grid-cols-2 gap-4">
-              {cashier.email && (
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Mail className="w-4 h-4 text-gray-400" />
-                  {cashier.email}
-                </div>
-              )}
-              {cashier.phone && (
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Phone className="w-4 h-4 text-gray-400" />
-                  {cashier.phone}
-                </div>
-              )}
-              {cashier.hire_date && (
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Calendar className="w-4 h-4 text-gray-400" />
-                  Desde {format(new Date(cashier.hire_date), "MMMM yyyy", { locale: es })}
-                </div>
-              )}
-            </div>
-
-            {/* Badges */}
-            <div className="mt-6">
-              <h3 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
-                <Award className="w-4 h-4 text-amber-500" />
-                Insignias ganadas
-              </h3>
-              <BadgesDisplay cashierId={cashierId} />
-            </div>
-          </div>
+          <h3 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+            <Award className="w-4 h-4 text-amber-500" />
+            Logros
+          </h3>
+          <BadgesDisplay cashierId={cashierId} showAll />
         </motion.div>
 
         {/* Analysis */}
