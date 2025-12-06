@@ -13,6 +13,7 @@ import PlannerStats from '@/components/planner/PlannerStats';
 import CashierManagerModal from '@/components/planner/CashierManagerModal';
 import AIScheduleSuggestion from '@/components/planner/AIScheduleSuggestion';
 import AIScheduleAssistant from '@/components/planner/AIScheduleAssistant';
+import ConeoRotationSuggestion from '@/components/planner/ConeoRotationSuggestion';
 import { generateSchedulePDF } from '@/components/planner/SchedulePDFExport';
 
 export default function PopsyPlanner() {
@@ -178,14 +179,20 @@ export default function PopsyPlanner() {
                   <p className="text-gray-500 text-sm">Los reportes solo están disponibles para Líderes de Experiencia</p>
                 </div>
               ) : (
-                <PlannerStats 
-                  shifts={shifts} 
-                  cashiers={cashiers} 
-                  storeId={selectedStore}
-                  currentWeek={currentWeek}
-                  salesData={salesData}
-                  shiftRecords={shiftRecords}
-                />
+                <div className="space-y-6">
+                  <PlannerStats 
+                    shifts={shifts} 
+                    cashiers={cashiers} 
+                    storeId={selectedStore}
+                    currentWeek={currentWeek}
+                    salesData={salesData}
+                    shiftRecords={shiftRecords}
+                  />
+                  <ConeoRotationSuggestion 
+                    shifts={shifts}
+                    cashiers={cashiers}
+                  />
+                </div>
               )}
             </TabsContent>
           </Tabs>
