@@ -8,7 +8,7 @@ import { Snowflake, TrendingUp, Package, CheckCircle } from 'lucide-react';
 export default function StockVisualization({ slots = [] }) {
   // Distribución de stock levels
   const stockDistribution = useMemo(() => {
-    if (!slots || slots.length === 0) return { data: [], hasData: false };
+    if (!slots || slots.length === 0) return [];
     const distribution = { full: 0, medium: 0, low: 0, empty: 0 };
     slots.forEach(s => {
       if (s.stock_level) distribution[s.stock_level]++;
@@ -24,7 +24,7 @@ export default function StockVisualization({ slots = [] }) {
 
   // Sabores por tipo
   const typeDistribution = useMemo(() => {
-    if (!slots || slots.length === 0) return { data: [], hasData: false };
+    if (!slots || slots.length === 0) return [];
     const types = {};
     slots.forEach(s => {
       if (s.is_empty || !s.flavor_type) return;
@@ -40,7 +40,7 @@ export default function StockVisualization({ slots = [] }) {
 
   // Top 5 sabores más frecuentes
   const topFlavors = useMemo(() => {
-    if (!slots || slots.length === 0) return { flavors: [], hasData: false };
+    if (!slots || slots.length === 0) return [];
     const counts = {};
     slots.forEach(s => {
       if (s.is_empty || !s.flavor_name) return;
@@ -133,7 +133,7 @@ export default function StockVisualization({ slots = [] }) {
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            {topFlavors.map((flavor, i) => (
+            {topFlavors.length > 0 ? topFlavors.map((flavor, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, x: -10 }}
@@ -152,11 +152,14 @@ export default function StockVisualization({ slots = [] }) {
                   <span className="text-xs font-bold text-pink-600">{flavor.count}x</span>
                 </div>
               </motion.div>
-            ))}
+            )) : (
+              <p className="text-xs text-gray-400 text-center py-2">Sin datos</p>
+            )}
           </div>
         </CardContent>
       </Card>
-
+      </>
+      )}
     </div>
   );
 }
