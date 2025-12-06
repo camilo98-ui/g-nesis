@@ -27,7 +27,7 @@ const FloatingHashtag = ({ text, delay, x, speed }) => (
     style={{ left: x }}
     initial={{ opacity: 0, y: -50 }}
     animate={{ 
-      opacity: [0, 0.15, 0.15, 0],
+      opacity: [0, 0.35, 0.35, 0],
       y: [-50, window.innerHeight + 50],
     }}
     transition={{ 
@@ -37,7 +37,7 @@ const FloatingHashtag = ({ text, delay, x, speed }) => (
       ease: "linear"
     }}
   >
-    <span className="text-pink-300/40 font-light text-sm tracking-wide">
+    <span className="text-pink-400/60 font-medium text-sm tracking-wide drop-shadow-sm">
       {text}
     </span>
   </motion.div>
@@ -151,22 +151,22 @@ const hashtagElements = HASHTAGS.map((tag, i) => ({
 
 // Destellos pastel
 const sparkles = [
-  { x: '10%', y: '20%', color: '#FFD1DC', size: 10 },
-  { x: '20%', y: '45%', color: '#E0BBE4', size: 8 },
-  { x: '35%', y: '15%', color: '#C5E8FF', size: 12 },
-  { x: '45%', y: '70%', color: '#FFEFD5', size: 9 },
-  { x: '55%', y: '30%', color: '#D4F0F0', size: 11 },
-  { x: '65%', y: '55%', color: '#FFE4E1', size: 8 },
-  { x: '75%', y: '18%', color: '#E6E6FA', size: 10 },
-  { x: '80%', y: '60%', color: '#F0FFF0', size: 12 },
-  { x: '90%', y: '35%', color: '#FFF0F5', size: 9 },
-  { x: '30%', y: '80%', color: '#F5F5DC', size: 11 },
+  { x: '10%', y: '20%', color: '#FFB5C5', size: 14 },
+  { x: '20%', y: '45%', color: '#D4A5D8', size: 12 },
+  { x: '35%', y: '15%', color: '#A5D8FF', size: 16 },
+  { x: '45%', y: '70%', color: '#FFD9A5', size: 13 },
+  { x: '55%', y: '30%', color: '#A5E8E8', size: 15 },
+  { x: '65%', y: '55%', color: '#FFCAC9', size: 12 },
+  { x: '75%', y: '18%', color: '#C9C9FF', size: 14 },
+  { x: '80%', y: '60%', color: '#D0FFD0', size: 16 },
+  { x: '90%', y: '35%', color: '#FFD0E5', size: 13 },
+  { x: '30%', y: '80%', color: '#ECECB0', size: 15 },
 ];
 
 export default function FloatingIceCreamsBg() {
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden">
-      {/* Hashtags flotantes estilo red social */}
+      {/* Hashtags flotantes estilo red social - más visibles */}
       {hashtagElements.map((hashtag, i) => (
         <FloatingHashtag 
           key={`hashtag-${i}`} 

@@ -71,29 +71,36 @@ export default function CashierVisualProfile({ cashier, storeCode, shiftRecords 
       <div className={`h-36 md:h-44 relative overflow-hidden bg-gradient-to-r ${coverPattern.gradient}`}>
         {/* Patrón decorativo */}
         <motion.div
-          className="absolute inset-0 opacity-20"
+          className="absolute inset-0 opacity-30"
           style={{
-            backgroundImage: 'radial-gradient(circle at 20% 50%, white 1px, transparent 1px), radial-gradient(circle at 80% 80%, white 1px, transparent 1px)',
-            backgroundSize: '50px 50px'
+            backgroundImage: 'radial-gradient(circle at 20% 50%, white 2px, transparent 2px), radial-gradient(circle at 80% 80%, white 2px, transparent 2px)',
+            backgroundSize: '40px 40px'
           }}
           animate={{ backgroundPosition: ['0% 0%', '100% 100%'] }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
         />
         
-        {/* Elementos decorativos flotantes */}
+        {/* Elementos decorativos flotantes más visibles */}
         <motion.div
-          className="absolute top-4 left-10 text-white/30 text-4xl"
+          className="absolute top-4 left-10 text-white/70 text-6xl drop-shadow-lg"
           animate={{ y: [0, -10, 0], rotate: [0, 10, -10, 0] }}
           transition={{ duration: 4, repeat: Infinity }}
         >
           {coverPattern.emoji}
         </motion.div>
         <motion.div
-          className="absolute bottom-8 right-16 text-white/20 text-3xl"
+          className="absolute top-8 right-10 text-white/60 text-5xl drop-shadow-lg"
           animate={{ y: [0, 15, 0], rotate: [0, -10, 10, 0] }}
           transition={{ duration: 5, repeat: Infinity, delay: 1 }}
         >
           ⭐
+        </motion.div>
+        <motion.div
+          className="absolute bottom-6 left-20 text-white/50 text-4xl drop-shadow-lg"
+          animate={{ y: [0, -12, 0], x: [0, 8, 0] }}
+          transition={{ duration: 4.5, repeat: Infinity, delay: 0.5 }}
+        >
+          🍦
         </motion.div>
         
         {/* Score Badge */}
@@ -124,7 +131,7 @@ export default function CashierVisualProfile({ cashier, storeCode, shiftRecords 
             whileHover={{ scale: 1.05, rotate: 2 }}
           >
             {cashier.photo_url ? (
-              <img src={cashier.photo_url} alt={cashier.name} className="w-full h-full object-cover" />
+              <img src={cashier.photo_url} alt={cashier.name} className="w-full h-full object-contain" />
             ) : (
               <span className="text-5xl md:text-6xl font-bold text-pink-500">
                 {cashier.name?.charAt(0)}

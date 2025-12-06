@@ -95,9 +95,9 @@ export default function Rankings() {
       cashierStats[record.cashier_id].shifts += 1;
     });
 
-    // Calculate average ticket
+    // Calculate average ticket - CORRECCIÓN: debe ser ventas / transacciones
     Object.values(cashierStats).forEach(stats => {
-      stats.avgTicket = stats.totalTickets > 0 ? stats.totalSales / stats.totalTickets : 0;
+      stats.avgTicket = stats.totalTransactions > 0 ? stats.totalSales / stats.totalTransactions : 0;
     });
 
     // Sort by sales
@@ -118,9 +118,9 @@ export default function Rankings() {
         cashier: cashiers.find(c => c.id === stats.cashier_id) || { name: 'Desconocido' }
       }));
 
-    // Sort by average ticket
+    // Sort by average ticket (ventas / transacciones)
     const ticketRanking = Object.values(cashierStats)
-      .filter(s => s.totalTickets > 0)
+      .filter(s => s.totalTransactions > 0)
       .sort((a, b) => b.avgTicket - a.avgTicket)
       .map((stats, index) => ({
         ...stats,
@@ -130,14 +130,14 @@ export default function Rankings() {
 
     // Best cashier of the store
     const maxSales = Math.max(...Object.values(cashierStats).map(s => s.totalSales), 1);
-    const maxTicket = Math.max(...Object.values(cashierStats).filter(s => s.totalTickets > 0).map(s => s.totalSales / s.totalTickets), 1);
+    const maxTicket = Math.max(...Object.values(cashierStats).filter(s => s.totalTransactions > 0).map(s => s.totalSales / s.totalTransactions), 1);
     const maxSuggested = Math.max(...Object.values(cashierStats).map(s => s.totalSuggested), 1);
 
     const bestCashier = Object.values(cashierStats)
-      .filter(s => s.totalTickets > 0)
+      .filter(s => s.totalTransactions > 0)
       .map(stats => {
         const salesScore = (stats.totalSales / maxSales) * 33;
-        const ticketScore = ((stats.totalSales / stats.totalTickets) / maxTicket) * 33;
+        const ticketScore = ((stats.totalSales / stats.totalTransactions) / maxTicket) * 33;
         const suggestedScore = (stats.totalSuggested / maxSuggested) * 34;
         const overallScore = salesScore + ticketScore + suggestedScore;
         return { ...stats, overallScore, salesScore, ticketScore, suggestedScore };
@@ -182,7 +182,7 @@ export default function Rankings() {
     });
 
     Object.values(cashierStats).forEach(stats => {
-      stats.avgTicket = stats.totalTickets > 0 ? stats.totalSales / stats.totalTickets : 0;
+      stats.avgTicket = stats.totalTransactions > 0 ? stats.totalSales / stats.totalTransactions : 0;
     });
 
     const salesRanking = Object.values(cashierStats)

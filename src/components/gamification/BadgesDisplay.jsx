@@ -231,25 +231,33 @@ export default function BadgesDisplay({ cashierId, compact = false, showAll = fa
                 </motion.div>
               </TooltipTrigger>
               <TooltipContent className="max-w-xs">
-                <div className="text-center p-2">
-                  <p className="font-bold text-sm">{config.label}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">{config.desc}</p>
-                  <div className="mt-2 pt-2 border-t border-gray-100">
-                    <p className="text-[10px] text-violet-600 font-medium">🎯 Cómo lograrlo:</p>
-                    <p className="text-[10px] text-gray-500 mt-0.5">{config.howToEarn}</p>
-                    <span className={`inline-block mt-1 text-[9px] px-1.5 py-0.5 rounded-full ${
+                <div className="text-center p-3 max-w-sm">
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <Icon className={`w-5 h-5 ${isEarned ? config.iconColor : 'text-gray-400'}`} />
+                    <p className="font-bold text-base">{config.label}</p>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-3">{config.desc}</p>
+
+                  <div className="bg-gradient-to-r from-violet-50 to-purple-50 rounded-lg p-3 mb-2">
+                    <p className="text-xs text-violet-700 font-bold mb-1">🎯 Cómo lograrlo:</p>
+                    <p className="text-xs text-gray-700 leading-relaxed">{config.howToEarn}</p>
+                  </div>
+
+                  <div className="flex items-center justify-center gap-2">
+                    <span className={`text-[10px] px-2 py-1 rounded-full font-medium ${
                       config.goalType === 'daily' ? 'bg-amber-100 text-amber-700' :
                       config.goalType === 'weekly' ? 'bg-blue-100 text-blue-700' :
                       'bg-purple-100 text-purple-700'
                     }`}>
                       Meta {config.goalType === 'daily' ? 'Diaria' : config.goalType === 'weekly' ? 'Semanal' : 'Mensual'}
                     </span>
+                    {isEarned && badge.kpi_value && (
+                      <span className="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full font-medium">
+                        ✓ KPI: {badge.kpi_value.toLocaleString()}
+                      </span>
+                    )}
                   </div>
-                  {isEarned && badge.kpi_value && (
-                    <p className="text-xs text-emerald-500 mt-2 font-medium">
-                      ✓ Logrado con KPI: {badge.kpi_value.toLocaleString()}
-                    </p>
-                  )}
+
                   {!isEarned && showAll && (
                     <p className="text-xs text-gray-400 mt-2 italic">⏳ Aún no obtenido</p>
                   )}
