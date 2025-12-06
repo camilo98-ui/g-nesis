@@ -14,6 +14,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 export default function DailyBudgetCard({ dailySales = [], storeId, formatCurrency }) {
   const [showDialog, setShowDialog] = useState(false);
   const [budgetAmount, setBudgetAmount] = useState('');
+  const [ticketGoal, setTicketGoal] = useState('');
+  const [transactionsGoal, setTransactionsGoal] = useState('');
   const queryClient = useQueryClient();
 
   const today = startOfDay(new Date()).toISOString().split('T')[0];
@@ -198,12 +200,32 @@ export default function DailyBudgetCard({ dailySales = [], storeId, formatCurren
               <p className="text-lg font-bold text-gray-800">{format(new Date(), 'EEEE dd MMMM yyyy', { locale: es })}</p>
             </div>
             <div>
-              <label className="text-sm text-gray-600 mb-1 block">Meta de Ventas</label>
+              <label className="text-sm text-gray-600 mb-1 block">💰 Meta de Ventas</label>
               <Input
                 type="number"
                 placeholder="Ej: 5000000"
                 value={budgetAmount}
                 onChange={(e) => setBudgetAmount(e.target.value)}
+                className="text-lg"
+              />
+            </div>
+            <div>
+              <label className="text-sm text-gray-600 mb-1 block">🎫 Meta de Ticket Promedio (opcional)</label>
+              <Input
+                type="number"
+                placeholder="Ej: 45000"
+                value={ticketGoal}
+                onChange={(e) => setTicketGoal(e.target.value)}
+                className="text-lg"
+              />
+            </div>
+            <div>
+              <label className="text-sm text-gray-600 mb-1 block">⚡ Meta de Transacciones (opcional)</label>
+              <Input
+                type="number"
+                placeholder="Ej: 120"
+                value={transactionsGoal}
+                onChange={(e) => setTransactionsGoal(e.target.value)}
                 className="text-lg"
               />
             </div>

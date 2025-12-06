@@ -1169,14 +1169,22 @@ export default function Dashboard() {
                         
                         {/* Visualización según tipo */}
                         {item.chartData && (
-                          <div className="flex items-end gap-0.5 h-8">
+                          <div className="flex items-end gap-0.5 h-10">
                             {item.chartData.map((val, i) => (
                               <motion.div
                                 key={i}
-                                className={`flex-1 ${item.barColor} rounded-t`}
-                                initial={{ height: 0 }}
-                                animate={{ height: `${Math.max(10, (val / Math.max(...item.chartData, 1)) * 100)}%` }}
-                                transition={{ delay: idx * 0.1 + i * 0.05 }}
+                                className={`flex-1 ${item.barColor} rounded-t-lg shadow-sm`}
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ 
+                                  height: `${Math.max(15, (val / Math.max(...item.chartData, 1)) * 100)}%`,
+                                  opacity: 1,
+                                  y: [0, -2, 0]
+                                }}
+                                transition={{ 
+                                  delay: idx * 0.1 + i * 0.05,
+                                  y: { duration: 1, repeat: Infinity, repeatDelay: 2, delay: i * 0.1 }
+                                }}
+                                whileHover={{ scaleY: 1.1, y: -3 }}
                               />
                             ))}
                           </div>
@@ -1201,18 +1209,32 @@ export default function Dashboard() {
                         )}
                         
                         {item.isTrend && (
-                          <div className="h-8 flex items-center">
+                          <div className="h-10 flex items-center relative">
                             <svg className="w-full h-full" viewBox="0 0 100 30">
                               <motion.path
                                 d="M 0 25 Q 25 20 50 15 T 100 5"
                                 fill="none"
                                 stroke="#f59e0b"
-                                strokeWidth="2"
+                                strokeWidth="3"
                                 initial={{ pathLength: 0 }}
                                 animate={{ pathLength: 1 }}
-                                transition={{ delay: idx * 0.1, duration: 1 }}
+                                transition={{ delay: idx * 0.1, duration: 1.5, ease: "easeInOut" }}
                               />
+                              <motion.circle
+                                r="3"
+                                fill="#f59e0b"
+                                initial={{ offsetDistance: '0%', opacity: 0 }}
+                                animate={{ offsetDistance: '100%', opacity: [0, 1, 1, 0] }}
+                                transition={{ duration: 2, delay: idx * 0.1 + 1, repeat: Infinity, repeatDelay: 1 }}
+                              >
+                                <animateMotion dur="2s" repeatCount="indefinite" begin={`${idx * 0.1 + 1}s`}>
+                                  <mpath href="#trendPath" />
+                                </animateMotion>
+                              </motion.circle>
                             </svg>
+                            <defs>
+                              <path id="trendPath" d="M 0 25 Q 25 20 50 15 T 100 5" />
+                            </defs>
                           </div>
                         )}
                         

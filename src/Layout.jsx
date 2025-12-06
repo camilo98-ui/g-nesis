@@ -205,8 +205,10 @@ export default function Layout({ children, currentPageName }) {
       </header>
 
       {/* Main Content */}
-      <main className="pt-[88px] min-h-screen">
-        {children}
+      <main className="pt-[88px] min-h-screen pb-4">
+        <div className="container mx-auto px-2 sm:px-4">
+          {children}
+        </div>
       </main>
     </div>
   );
