@@ -113,8 +113,6 @@ export default function DailySalesForm({ storeId, onSuccess }) {
       return base44.entities.DailySales.create(recordData);
     },
     onSuccess: () => {
-      setShowSuccess(true);
-      setTimeout(() => setShowSuccess(false), 2500);
       queryClient.invalidateQueries(['dailySales']);
       setFormData({
         ...formData,
@@ -123,9 +121,14 @@ export default function DailySalesForm({ storeId, onSuccess }) {
         total_transactions: '',
         total_suggested: ''
       });
-      onSuccess?.();
+      setShowSuccess(true);
+      setTimeout(() => {
+        setShowSuccess(false);
+        onSuccess?.();
+      }, 2500);
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Error guardando ventas:', error);
       toast.error('Error al guardar las ventas');
     }
   });

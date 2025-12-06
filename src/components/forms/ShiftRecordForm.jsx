@@ -47,8 +47,6 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
       average_ticket: data.tickets > 0 ? (parseFloat(data.sales) || 0) / parseInt(data.tickets) : 0
     }),
     onSuccess: () => {
-      setShowSuccess(true);
-      setTimeout(() => setShowSuccess(false), 2500);
       queryClient.invalidateQueries(['shiftRecords']);
       queryClient.invalidateQueries(['dailySales']);
       setFormData({
@@ -58,9 +56,14 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
         transactions: '',
         suggested_sales: ''
       });
-      onSuccess?.();
+      setShowSuccess(true);
+      setTimeout(() => {
+        setShowSuccess(false);
+        onSuccess?.();
+      }, 2500);
     },
     onError: (error) => {
+      console.error('Error guardando turno:', error);
       toast.error('Error al guardar el registro');
     }
   });

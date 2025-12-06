@@ -11,6 +11,7 @@ import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
 
 import DailyGoalsCard from '@/components/gamification/DailyGoalsCard';
 import WeatherSalesImpactChart from '@/components/weather/WeatherSalesImpactChart';
+import DailyBudgetCard from '@/components/dashboard/DailyBudgetCard';
 
 import GrowthVelocityChart from '@/components/management/GrowthVelocityChart';
 import StoreReportGenerator from '@/components/reports/StoreReportGenerator';
@@ -803,6 +804,11 @@ export default function Dashboard() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
+                      <div className="mb-3 p-2 bg-green-50 rounded-lg">
+                        <p className="text-xs text-gray-600 text-center">
+                          📊 Evolución de ventas diarias en el período seleccionado
+                        </p>
+                      </div>
                       <div className="h-52">
                         <ResponsiveContainer width="100%" height="100%">
                           <AreaChart data={chartData}>
@@ -814,10 +820,11 @@ export default function Dashboard() {
                             </defs>
                             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                             <XAxis dataKey="date" tick={{ fill: '#6b7280', fontSize: 10 }} />
-                            <YAxis tick={{ fill: '#6b7280', fontSize: 10 }} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} />
+                            <YAxis tick={{ fill: '#6b7280', fontSize: 10 }} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} label={{ value: 'Ventas (millones)', angle: -90, position: 'insideLeft', style: { fontSize: 10, fill: '#6b7280' } }} />
                             <Tooltip 
                               formatter={(v) => [formatCurrency(v), 'Venta']}
                               labelFormatter={(label, payload) => payload?.[0]?.payload?.fullDate || label}
+                              contentStyle={{ fontSize: 12, borderRadius: 8 }}
                             />
                             <Area type="monotone" dataKey="ventas" stroke="#10b981" strokeWidth={2} fill="url(#salesGrad)" name="Venta" />
                           </AreaChart>
@@ -837,6 +844,11 @@ export default function Dashboard() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
+                      <div className="mb-3 p-2 bg-blue-50 rounded-lg">
+                        <p className="text-xs text-gray-600 text-center">
+                          🎯 Venta ÷ Transacciones = Ticket promedio por día
+                        </p>
+                      </div>
                       <div className="h-52">
                         <ResponsiveContainer width="100%" height="100%">
                           <AreaChart data={chartData}>
@@ -848,10 +860,11 @@ export default function Dashboard() {
                             </defs>
                             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                             <XAxis dataKey="date" tick={{ fill: '#6b7280', fontSize: 10 }} />
-                            <YAxis tick={{ fill: '#6b7280', fontSize: 10 }} tickFormatter={(v) => `$${(v/1000).toFixed(0)}K`} />
+                            <YAxis tick={{ fill: '#6b7280', fontSize: 10 }} tickFormatter={(v) => `$${(v/1000).toFixed(0)}K`} label={{ value: 'Ticket (miles)', angle: -90, position: 'insideLeft', style: { fontSize: 10, fill: '#6b7280' } }} />
                             <Tooltip 
                               formatter={(v) => [formatCurrency(v), 'Ticket Promedio']}
                               labelFormatter={(label, payload) => payload?.[0]?.payload?.fullDate || label}
+                              contentStyle={{ fontSize: 12, borderRadius: 8 }}
                             />
                             <Area type="monotone" dataKey="ticketPromedio" stroke="#3b82f6" strokeWidth={2} fill="url(#ticketGrad)" name="Ticket Promedio" />
                           </AreaChart>
@@ -874,18 +887,24 @@ export default function Dashboard() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
+                      <div className="mb-3 p-2 bg-purple-50 rounded-lg">
+                        <p className="text-xs text-gray-600 text-center">
+                          ⚡ Más transacciones = más clientes atendidos. Barras moradas = transacciones, línea rosa = ventas
+                        </p>
+                      </div>
                       <div className="h-64">
                         <ResponsiveContainer width="100%" height="100%">
                           <ComposedChart data={chartData}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                             <XAxis dataKey="date" tick={{ fill: '#6b7280', fontSize: 10 }} />
-                            <YAxis yAxisId="left" tick={{ fill: '#6b7280', fontSize: 10 }} />
-                            <YAxis yAxisId="right" orientation="right" tick={{ fill: '#6b7280', fontSize: 10 }} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} />
+                            <YAxis yAxisId="left" tick={{ fill: '#6b7280', fontSize: 10 }} label={{ value: 'Trans.', angle: -90, position: 'insideLeft', style: { fontSize: 10, fill: '#6b7280' } }} />
+                            <YAxis yAxisId="right" orientation="right" tick={{ fill: '#6b7280', fontSize: 10 }} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} label={{ value: 'Ventas (M)', angle: 90, position: 'insideRight', style: { fontSize: 10, fill: '#6b7280' } }} />
                             <Tooltip 
                               formatter={(v, name) => [name === 'ventas' ? formatCurrency(v) : v.toLocaleString(), name === 'ventas' ? 'Venta' : 'Transacciones']}
                               labelFormatter={(label, payload) => payload?.[0]?.payload?.fullDate || label}
+                              contentStyle={{ fontSize: 12, borderRadius: 8 }}
                             />
-                            <Legend />
+                            <Legend wrapperStyle={{ fontSize: 11 }} />
                             <Bar yAxisId="left" dataKey="transactions" fill="#8b5cf6" radius={[3, 3, 0, 0]} name="Transacciones" />
                             <Line yAxisId="right" type="monotone" dataKey="ventas" stroke="#ec4899" strokeWidth={2} dot={false} name="Ventas" />
                           </ComposedChart>
@@ -905,6 +924,11 @@ export default function Dashboard() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
+                      <div className="mb-3 p-2 bg-pink-50 rounded-lg">
+                        <p className="text-xs text-gray-600 text-center">
+                          🎁 Más sugeridos = mejor ticket promedio. Verde = ventas, azul = tickets, rosa = sugeridos
+                        </p>
+                      </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="h-56">
                           <ResponsiveContainer width="100%" height="100%">
@@ -917,8 +941,8 @@ export default function Dashboard() {
                               </defs>
                               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                               <XAxis dataKey="date" tick={{ fill: '#6b7280', fontSize: 9 }} />
-                              <YAxis tick={{ fill: '#6b7280', fontSize: 9 }} />
-                              <Tooltip />
+                              <YAxis tick={{ fill: '#6b7280', fontSize: 9 }} label={{ value: 'Cantidad', angle: -90, position: 'insideLeft', style: { fontSize: 9, fill: '#6b7280' } }} />
+                              <Tooltip contentStyle={{ fontSize: 11, borderRadius: 8 }} />
                               <Area type="monotone" dataKey="suggested" stroke="#ec4899" strokeWidth={2} fill="url(#sugGrad)" name="Sugeridos" />
                             </AreaChart>
                           </ResponsiveContainer>
@@ -938,9 +962,10 @@ export default function Dashboard() {
                                 outerRadius={70}
                                 paddingAngle={3}
                                 dataKey="value"
+                                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                               />
-                              <Tooltip />
-                              <Legend iconSize={10} wrapperStyle={{ fontSize: 11 }} />
+                              <Tooltip contentStyle={{ fontSize: 11 }} />
+                              <Legend iconSize={10} wrapperStyle={{ fontSize: 10 }} />
                             </PieChart>
                           </ResponsiveContainer>
                         </div>
@@ -960,8 +985,13 @@ export default function Dashboard() {
 
 
 
-            {/* Daily Goals */}
-            <DailyGoalsCard storeId={selectedStore} />
+            {/* Daily Budget */}
+            <DailyBudgetCard 
+              dailySales={dailySales} 
+              budgets={budgets} 
+              storeId={selectedStore}
+              formatCurrency={formatCurrency}
+            />
             
             {/* Weather Impact Chart */}
             {weatherData && (
@@ -1033,129 +1063,145 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                {/* Grid de métricas CON GRÁFICAS */}
+                {/* Grid de métricas CON GRÁFICAS - Botones interactivos */}
                 <div className="p-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {/* Venta Actual con mini gráfica */}
-                  <motion.div 
-                    whileHover={{ scale: 1.03 }}
-                    className="bg-white/5 rounded-2xl p-4 border border-white/10"
-                  >
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-                        <DollarSign className="w-4 h-4 text-emerald-400" />
-                      </div>
-                      <span className="text-white/70 text-xs">Venta Actual</span>
-                    </div>
-                    <p className="text-xl font-bold text-white">{formatCurrency(totals.sales)}</p>
-                    {/* Mini gráfica de barras */}
-                    <div className="mt-2 flex items-end gap-0.5 h-8">
-                      {chartData.slice(-7).map((d, i) => (
-                        <motion.div
-                          key={i}
-                          className="flex-1 bg-emerald-400/60 rounded-t"
-                          initial={{ height: 0 }}
-                          animate={{ height: `${Math.max(10, (d.ventas / Math.max(...chartData.slice(-7).map(x => x.ventas || 1))) * 100)}%` }}
-                          transition={{ delay: i * 0.05 }}
-                        />
-                      ))}
-                    </div>
-                    <p className="text-[10px] text-white/50 mt-1">{((totals.sales / (currentBudget?.sales_budget || 1)) * 100).toFixed(0)}% de meta</p>
-                  </motion.div>
-
-                  {/* Proyección de Cierre con gauge */}
-                  <motion.div 
-                    whileHover={{ scale: 1.03 }}
-                    className="bg-white/5 rounded-2xl p-4 border border-white/10"
-                  >
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-8 h-8 rounded-lg bg-violet-500/20 flex items-center justify-center">
-                        <TrendingUp className="w-4 h-4 text-violet-400" />
-                      </div>
-                      <span className="text-white/70 text-xs">Proyección Cierre</span>
-                    </div>
-                    <p className="text-xl font-bold text-violet-300">{formatCurrency(projections.projectedSales)}</p>
-                    {/* Mini gauge circular */}
-                    <div className="mt-2 flex justify-center">
-                      <svg className="w-12 h-12 transform -rotate-90">
-                        <circle cx="24" cy="24" r="20" stroke="rgba(255,255,255,0.1)" strokeWidth="4" fill="none" />
-                        <motion.circle 
-                          cx="24" cy="24" r="20" 
-                          stroke="#8b5cf6"
-                          strokeWidth="4" 
-                          fill="none"
-                          strokeLinecap="round"
-                          initial={{ strokeDasharray: "0 126" }}
-                          animate={{ strokeDasharray: `${Math.min((projections.projectedSales / (currentBudget?.sales_budget || 1)) * 126, 126)} 126` }}
-                        />
-                      </svg>
-                    </div>
-                    <p className={`text-[10px] text-center mt-1 ${projections.salesOnTrack ? 'text-emerald-400' : 'text-amber-400'}`}>
-                      {((projections.projectedSales / (currentBudget?.sales_budget || 1)) * 100).toFixed(0)}% proyectado
-                    </p>
-                  </motion.div>
-
-                  {/* Venta Diaria Requerida con trend */}
-                  <motion.div 
-                    whileHover={{ scale: 1.03 }}
-                    className="bg-white/5 rounded-2xl p-4 border border-white/10"
-                  >
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center">
-                        <Zap className="w-4 h-4 text-amber-400" />
-                      </div>
-                      <span className="text-white/70 text-xs">Necesitas/Día</span>
-                    </div>
-                    <p className="text-xl font-bold text-amber-400">{formatCurrency(projections.requiredDailySales)}</p>
-                    {/* Línea de tendencia */}
-                    <div className="mt-2 h-8 flex items-center">
-                      <svg className="w-full h-full" viewBox="0 0 100 30">
-                        <motion.path
-                          d="M 0 25 Q 25 20 50 15 T 100 5"
-                          fill="none"
-                          stroke="#f59e0b"
-                          strokeWidth="2"
-                          initial={{ pathLength: 0 }}
-                          animate={{ pathLength: 1 }}
-                          transition={{ duration: 1 }}
-                        />
-                      </svg>
-                    </div>
-                    <p className="text-[10px] text-white/50">{formatCurrency(projections.salesGap)} restantes</p>
-                  </motion.div>
-
-                  {/* Ticket Promedio con comparativa */}
-                  <motion.div 
-                    whileHover={{ scale: 1.03 }}
-                    className="bg-white/5 rounded-2xl p-4 border border-white/10"
-                  >
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-8 h-8 rounded-lg bg-sky-500/20 flex items-center justify-center">
-                        <Receipt className="w-4 h-4 text-sky-400" />
-                      </div>
-                      <span className="text-white/70 text-xs">Ticket Promedio</span>
-                    </div>
-                    <p className="text-xl font-bold text-white">{formatCurrency(projections.avgTicket)}</p>
-                    {/* Comparativa visual */}
-                    <div className="mt-2 space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[8px] text-white/50 w-10">Actual</span>
-                        <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
-                          <motion.div 
-                            className="h-full bg-sky-400 rounded-full"
-                            initial={{ width: 0 }}
-                            animate={{ width: `${Math.min((projections.avgTicket / (projections.budgetTicket || 1)) * 100, 100)}%` }}
-                          />
+                  {[
+                    { 
+                      key: 'sales', 
+                      label: 'Venta Actual', 
+                      value: totals.sales, 
+                      icon: DollarSign, 
+                      iconBg: 'bg-emerald-500/20', 
+                      iconColor: 'text-emerald-400',
+                      barColor: 'bg-emerald-400/60',
+                      chartData: chartData.slice(-7).map(d => d.ventas),
+                      footer: `${((totals.sales / (currentBudget?.sales_budget || 1)) * 100).toFixed(0)}% de meta`
+                    },
+                    { 
+                      key: 'projection', 
+                      label: 'Proyección Cierre', 
+                      value: projections.projectedSales, 
+                      icon: TrendingUp, 
+                      iconBg: 'bg-violet-500/20', 
+                      iconColor: 'text-violet-400',
+                      isGauge: true,
+                      gaugePercent: (projections.projectedSales / (currentBudget?.sales_budget || 1)) * 100,
+                      footer: `${((projections.projectedSales / (currentBudget?.sales_budget || 1)) * 100).toFixed(0)}% proyectado`,
+                      footerColor: projections.salesOnTrack ? 'text-emerald-400' : 'text-amber-400'
+                    },
+                    { 
+                      key: 'required', 
+                      label: 'Necesitas/Día', 
+                      value: projections.requiredDailySales, 
+                      icon: Zap, 
+                      iconBg: 'bg-amber-500/20', 
+                      iconColor: 'text-amber-400',
+                      isTrend: true,
+                      footer: `${formatCurrency(projections.salesGap)} restantes`
+                    },
+                    { 
+                      key: 'ticket', 
+                      label: 'Ticket Promedio', 
+                      value: projections.avgTicket, 
+                      icon: Receipt, 
+                      iconBg: 'bg-sky-500/20', 
+                      iconColor: 'text-sky-400',
+                      isComparative: true,
+                      comparePercent: (projections.avgTicket / (projections.budgetTicket || 1)) * 100,
+                      footer: `Meta: ${formatCurrency(projections.budgetTicket)}`
+                    }
+                  ].map((item, idx) => {
+                    const Icon = item.icon;
+                    return (
+                      <motion.button
+                        key={item.key}
+                        whileHover={{ scale: 1.05, y: -5 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="bg-white/5 rounded-2xl p-4 border border-white/10 text-left transition-all hover:bg-white/10 hover:border-white/20 cursor-pointer"
+                      >
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className={`w-8 h-8 rounded-lg ${item.iconBg} flex items-center justify-center`}>
+                            <Icon className={`w-4 h-4 ${item.iconColor}`} />
+                          </div>
+                          <span className="text-white/70 text-xs">{item.label}</span>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[8px] text-white/50 w-10">Meta</span>
-                        <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
-                          <div className="h-full bg-white/30 rounded-full w-full" />
-                        </div>
-                      </div>
-                    </div>
-                    <p className="text-[10px] text-white/50 mt-1">Meta: {formatCurrency(projections.budgetTicket)}</p>
-                  </motion.div>
+                        <p className="text-xl font-bold text-white mb-2">{formatCurrency(item.value)}</p>
+                        
+                        {/* Visualización según tipo */}
+                        {item.chartData && (
+                          <div className="flex items-end gap-0.5 h-8">
+                            {item.chartData.map((val, i) => (
+                              <motion.div
+                                key={i}
+                                className={`flex-1 ${item.barColor} rounded-t`}
+                                initial={{ height: 0 }}
+                                animate={{ height: `${Math.max(10, (val / Math.max(...item.chartData, 1)) * 100)}%` }}
+                                transition={{ delay: idx * 0.1 + i * 0.05 }}
+                              />
+                            ))}
+                          </div>
+                        )}
+                        
+                        {item.isGauge && (
+                          <div className="flex justify-center">
+                            <svg className="w-12 h-12 transform -rotate-90">
+                              <circle cx="24" cy="24" r="20" stroke="rgba(255,255,255,0.1)" strokeWidth="4" fill="none" />
+                              <motion.circle 
+                                cx="24" cy="24" r="20" 
+                                stroke="#8b5cf6"
+                                strokeWidth="4" 
+                                fill="none"
+                                strokeLinecap="round"
+                                initial={{ strokeDasharray: "0 126" }}
+                                animate={{ strokeDasharray: `${Math.min(item.gaugePercent * 1.26, 126)} 126` }}
+                                transition={{ delay: idx * 0.1, duration: 1 }}
+                              />
+                            </svg>
+                          </div>
+                        )}
+                        
+                        {item.isTrend && (
+                          <div className="h-8 flex items-center">
+                            <svg className="w-full h-full" viewBox="0 0 100 30">
+                              <motion.path
+                                d="M 0 25 Q 25 20 50 15 T 100 5"
+                                fill="none"
+                                stroke="#f59e0b"
+                                strokeWidth="2"
+                                initial={{ pathLength: 0 }}
+                                animate={{ pathLength: 1 }}
+                                transition={{ delay: idx * 0.1, duration: 1 }}
+                              />
+                            </svg>
+                          </div>
+                        )}
+                        
+                        {item.isComparative && (
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <span className="text-[8px] text-white/50 w-10">Actual</span>
+                              <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
+                                <motion.div 
+                                  className="h-full bg-sky-400 rounded-full"
+                                  initial={{ width: 0 }}
+                                  animate={{ width: `${Math.min(item.comparePercent, 100)}%` }}
+                                  transition={{ delay: idx * 0.1 }}
+                                />
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-[8px] text-white/50 w-10">Meta</span>
+                              <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
+                                <div className="h-full bg-white/30 rounded-full w-full" />
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        
+                        <p className={`text-[10px] mt-1 ${item.footerColor || 'text-white/50'}`}>{item.footer}</p>
+                      </motion.button>
+                    );
+                  })}
                 </div>
 
                 {/* Barra de progreso visual - % VENTA ACTUAL */}

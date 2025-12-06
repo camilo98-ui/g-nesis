@@ -158,8 +158,8 @@ const ViewButton = ({ active, onClick, icon: Icon, label, color, weatherType }) 
       flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm
       transition-all duration-300 shadow-sm relative overflow-hidden
       ${active 
-        ? `bg-gradient-to-r ${color} text-white shadow-lg` 
-        : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
+        ? `bg-gradient-to-r ${color} text-gray-700 shadow-md` 
+        : 'bg-white/80 text-gray-500 hover:bg-gray-50 border border-gray-200'
       }
     `}
   >
@@ -201,7 +201,7 @@ const StatCard = ({ icon: Icon, label, value, subvalue, color, trend, delay = 0 
     animate={{ opacity: 1, y: 0, scale: 1 }}
     transition={{ delay, type: "spring", stiffness: 200 }}
     whileHover={{ scale: 1.05, y: -5, rotate: 1 }}
-    className={`bg-gradient-to-br ${color} rounded-2xl p-4 text-white shadow-lg cursor-pointer relative overflow-hidden`}
+    className={`bg-gradient-to-br ${color} rounded-2xl p-4 shadow-md cursor-pointer relative overflow-hidden`}
   >
     {/* Floating particles */}
     <motion.div
@@ -217,23 +217,23 @@ const StatCard = ({ icon: Icon, label, value, subvalue, color, trend, delay = 0 
     
     <div className="flex items-start justify-between relative z-10">
       <div>
-        <p className="text-white/80 text-xs font-medium">{label}</p>
+        <p className="text-gray-600 text-xs font-medium">{label}</p>
         <motion.p 
-          className="text-2xl font-black mt-1"
+          className="text-2xl font-black mt-1 text-gray-800"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           key={value}
         >
           {value}
         </motion.p>
-        {subvalue && <p className="text-white/70 text-xs mt-1">{subvalue}</p>}
+        {subvalue && <p className="text-gray-500 text-xs mt-1">{subvalue}</p>}
       </div>
       <motion.div
         animate={{ rotate: [0, 15, -15, 0], scale: [1, 1.1, 1] }}
         transition={{ duration: 3, repeat: Infinity }}
-        className="p-2 bg-white/20 rounded-xl backdrop-blur-sm"
+        className="p-2 bg-white/40 rounded-xl backdrop-blur-sm"
       >
-        <Icon className="w-5 h-5" />
+        <Icon className="w-5 h-5 text-gray-600" />
       </motion.div>
     </div>
     {trend !== undefined && (
@@ -241,12 +241,12 @@ const StatCard = ({ icon: Icon, label, value, subvalue, color, trend, delay = 0 
         initial={{ opacity: 0, x: -10 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: delay + 0.3 }}
-        className={`flex items-center gap-1 mt-2 text-xs ${trend >= 0 ? 'text-green-200' : 'text-red-200'}`}
+        className={`flex items-center gap-1 mt-2 text-xs ${trend >= 0 ? 'text-green-600' : 'text-red-600'}`}
       >
         <motion.div animate={{ y: trend >= 0 ? [-2, 2, -2] : [2, -2, 2] }} transition={{ duration: 1, repeat: Infinity }}>
           {trend >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
         </motion.div>
-        <span>{trend >= 0 ? '+' : ''}{trend.toFixed(1)}%</span>
+        <span className="font-medium">{trend >= 0 ? '+' : ''}{trend.toFixed(1)}%</span>
       </motion.div>
     )}
   </motion.div>
@@ -751,21 +751,21 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
             </Popover>
           </div>
 
-          {/* Botones de vista simplificados */}
+          {/* Botones de vista en tonos pastel más sutiles */}
           <div className="flex flex-wrap gap-2 mt-4">
             <ViewButton
               active={viewMode === 'bars'}
               onClick={() => setViewMode('bars')}
               icon={BarChart3}
               label="Barras"
-              color="from-violet-500 to-purple-500"
+              color="from-purple-200 to-violet-200"
             />
             <ViewButton
               active={viewMode === 'trend'}
               onClick={() => setViewMode('trend')}
               icon={Activity}
               label="Tendencia"
-              color="from-emerald-500 to-teal-500"
+              color="from-emerald-200 to-teal-200"
             />
             <ViewButton
               active={showForecast}
@@ -775,7 +775,7 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
               }}
               icon={Cloud}
               label={loadingForecast ? "..." : "Pronóstico"}
-              color="from-cyan-500 to-blue-500"
+              color="from-cyan-200 to-blue-200"
               weatherType={showForecast ? 'cloudy' : undefined}
             />
           </div>
@@ -790,7 +790,7 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
             label="Días Soleados"
             value={stats.sunnyCount}
             subvalue={stats.avgSunny > 0 ? formatCurrency(stats.avgSunny) : 'Sin datos'}
-            color="from-amber-400 to-orange-400"
+            color="from-amber-100 to-orange-100"
             trend={stats.sunnyImpact}
             delay={0}
           />
@@ -799,7 +799,7 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
             label="Días Lluviosos"
             value={stats.rainyCount}
             subvalue={stats.avgRainy > 0 ? formatCurrency(stats.avgRainy) : 'Sin datos'}
-            color="from-blue-400 to-cyan-400"
+            color="from-blue-100 to-cyan-100"
             trend={stats.rainyImpact}
             delay={0.1}
           />
@@ -808,7 +808,7 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
             label="Mejor Día"
             value={stats.bestDay ? formatCurrency(stats.bestDay.sales) : '-'}
             subvalue={stats.bestDay?.fullDate}
-            color="from-emerald-400 to-green-400"
+            color="from-emerald-100 to-green-100"
             delay={0.2}
           />
           <StatCard
@@ -816,7 +816,7 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
             label="Menor Día"
             value={stats.worstDay ? formatCurrency(stats.worstDay.sales) : '-'}
             subvalue={stats.worstDay?.fullDate}
-            color="from-rose-400 to-red-400"
+            color="from-rose-100 to-red-100"
             delay={0.3}
           />
         </div>
