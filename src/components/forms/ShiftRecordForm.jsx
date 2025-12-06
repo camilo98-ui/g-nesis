@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Save, User, DollarSign, Receipt, Zap, Gift, Loader2, CheckCircle, Sun, Sunset, Moon, UserPlus } from 'lucide-react';
-
+import FraudDetector from '@/components/sales/FraudDetector';
 import { toast } from 'sonner';
 
 const SHIFTS = [
@@ -20,6 +20,8 @@ const SHIFTS = [
 export default function ShiftRecordForm({ storeId, onSuccess }) {
   const queryClient = useQueryClient();
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showFraudWarning, setShowFraudWarning] = useState(false);
+  const [pendingData, setPendingData] = useState(null);
   const [formData, setFormData] = useState({
     cashier_id: '',
     date: new Date().toISOString().split('T')[0],
@@ -33,6 +35,12 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
   const { data: cashiers = [], isLoading: loadingCashiers } = useQuery({
     queryKey: ['cashiers', storeId],
     queryFn: () => base44.entities.Cashier.filter({ store_id: storeId, is_active: true }),
+    enabled: !!storeId
+  });
+
+  const { data: allShiftRecords = [] } = useQuery({
+    queryKey: ['shiftRecords', storeId],
+    queryFn: () => base44.entities.ShiftRecord.filter({ store_id: storeId }),
     enabled: !!storeId
   });
 
@@ -95,7 +103,32 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
       toast.error('Selecciona un cajero');
       return;
     }
-    createMutation.mutate(formData);
+
+    // Calcular promedios para detección de fraude
+    const cashierRecords = allShiftRecords.filter(r => r.cashier_id === formData.cashier_id);
+    const avgSales = cashierRecords.length > 0 
+      ? cashierRecords.reduce((sum, r) => sum + (r.sales || 0), 0) / cashierRecords.length 
+      : 1500000;
+    const avgTicket = cashierRecords.length > 0
+      ? cashierRecords.reduce((sum, r) => sum + ((r.sales || 0) / Math.max(r.transactions || 1, 1)), 0) / cashierRecords.length
+      : 45000;
+    const avgSuggested = cashierRecords.length > 0
+      ? cashierRecords.reduce((sum, r) => sum + (r.suggested_sales || 0), 0) / cashierRecords.length
+      : 8;
+
+    setPendingData({ 
+      dataToSubmit: formData, 
+      averageData: { avgSales, avgTicket, avgSuggested } 
+    });
+    setShowFraudWarning(true);
+  };
+
+  const confirmSubmit = () => {
+    if (pendingData) {
+      createMutation.mutate(pendingData.dataToSubmit);
+      setShowFraudWarning(false);
+      setPendingData(null);
+    }
   };
 
   const selectedShift = SHIFTS.find(s => s.value === formData.shift);
@@ -334,6 +367,23 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
           </form>
         </CardContent>
       </Card>
+
+      {/* Fraud Detection Warning */}
+      {showFraudWarning && pendingData && (
+        <FraudDetector
+          salesData={{
+            sales: parseFloat(pendingData.dataToSubmit.sales) || 0,
+            transactions: parseFloat(pendingData.dataToSubmit.transactions) || 0,
+            suggested: parseFloat(pendingData.dataToSubmit.suggested_sales) || 0
+          }}
+          averageData={pendingData.averageData}
+          onConfirm={confirmSubmit}
+          onCancel={() => {
+            setShowFraudWarning(false);
+            setPendingData(null);
+          }}
+        />
+      )}
     </motion.div>
   );
 }
