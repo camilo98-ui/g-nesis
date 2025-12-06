@@ -85,6 +85,8 @@ export default function DailySalesForm({ storeId, onSuccess }) {
 
   const createMutation = useMutation({
     mutationFn: async (data) => {
+      const user = await base44.auth.me();
+      
       // Check if record exists for this date
       const existing = await base44.entities.DailySales.filter({ 
         store_id: storeId, 
@@ -105,15 +107,34 @@ export default function DailySalesForm({ storeId, onSuccess }) {
         total_suggested: suggestedValue
       };
       
-      console.log('Guardando datos:', recordData);
-
+      let record;
+      let action;
+      
       if (existing.length > 0) {
-        return base44.entities.DailySales.update(existing[0].id, recordData);
+        record = await base44.entities.DailySales.update(existing[0].id, recordData);
+        action = 'update';
+      } else {
+        record = await base44.entities.DailySales.create(recordData);
+        action = 'create';
       }
-      return base44.entities.DailySales.create(recordData);
+      
+      // Log de la acción
+      await base44.entities.SalesLog.create({
+        store_id: storeId,
+        record_type: 'daily_sales',
+        record_id: record.id,
+        action,
+        user_email: user.email,
+        sales_amount: salesValue,
+        action_date: data.date,
+        details: JSON.stringify({ total_transactions: transactionsValue, total_suggested: suggestedValue })
+      });
+      
+      return record;
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['dailySales']);
+      queryClient.invalidateQueries(['salesLogs']);
       setFormData({
         ...formData,
         total_sales: '',

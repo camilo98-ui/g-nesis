@@ -5,6 +5,7 @@ import { createPageUrl } from '@/utils';
 import StoreSelector, { STORES } from '@/components/StoreSelector';
 import ShiftRecordForm from '@/components/forms/ShiftRecordForm';
 import DailySalesForm from '@/components/forms/DailySalesForm';
+import SalesActivityLog from '@/components/sales/SalesActivityLog';
 
 import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
 import { ArrowLeft, TrendingUp, Clock, Calendar } from 'lucide-react';
@@ -55,7 +56,13 @@ export default function Sales() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
+            className="space-y-4"
           >
+            {/* Log de actividad */}
+            <div className="flex justify-end">
+              <SalesActivityLog storeId={selectedStore} />
+            </div>
+
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
               <TabsList className="w-full bg-white border border-gray-100 p-1 rounded-xl shadow-sm">
                 <TabsTrigger 

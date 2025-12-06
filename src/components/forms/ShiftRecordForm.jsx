@@ -37,18 +37,39 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.ShiftRecord.create({
-      ...data,
-      store_id: storeId,
-      sales: parseFloat(data.sales) || 0,
-      tickets: parseInt(data.tickets) || 0,
-      transactions: parseInt(data.transactions) || 0,
-      suggested_sales: parseInt(data.suggested_sales) || 0,
-      average_ticket: data.tickets > 0 ? (parseFloat(data.sales) || 0) / parseInt(data.tickets) : 0
-    }),
+    mutationFn: async (data) => {
+      const user = await base44.auth.me();
+      const cashier = cashiers.find(c => c.id === data.cashier_id);
+      
+      const record = await base44.entities.ShiftRecord.create({
+        ...data,
+        store_id: storeId,
+        sales: parseFloat(data.sales) || 0,
+        tickets: parseInt(data.tickets) || 0,
+        transactions: parseInt(data.transactions) || 0,
+        suggested_sales: parseInt(data.suggested_sales) || 0,
+        average_ticket: data.tickets > 0 ? (parseFloat(data.sales) || 0) / parseInt(data.tickets) : 0
+      });
+      
+      // Log de la acción
+      await base44.entities.SalesLog.create({
+        store_id: storeId,
+        record_type: 'shift_record',
+        record_id: record.id,
+        action: 'create',
+        user_email: user.email,
+        cashier_name: cashier?.name,
+        sales_amount: parseFloat(data.sales) || 0,
+        action_date: data.date,
+        details: JSON.stringify({ shift: data.shift })
+      });
+      
+      return record;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries(['shiftRecords']);
       queryClient.invalidateQueries(['dailySales']);
+      queryClient.invalidateQueries(['salesLogs']);
       setFormData({
         ...formData,
         sales: '',
