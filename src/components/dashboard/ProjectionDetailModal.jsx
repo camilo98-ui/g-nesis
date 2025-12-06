@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { X, DollarSign, TrendingUp, Zap, Receipt } from 'lucide-react';
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Line, ComposedChart, Bar } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Line, ComposedChart, Bar, BarChart } from 'recharts';
 
 export default function ProjectionDetailModal({ isOpen, onClose, metric, data, formatCurrency }) {
   const configs = {
