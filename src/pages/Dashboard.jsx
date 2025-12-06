@@ -12,6 +12,7 @@ import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
 import DailyGoalsCard from '@/components/gamification/DailyGoalsCard';
 import WeatherSalesImpactChart from '@/components/weather/WeatherSalesImpactChart';
 import DailyBudgetCard from '@/components/dashboard/DailyBudgetCard';
+import ProjectionDetailModal from '@/components/dashboard/ProjectionDetailModal';
 
 import GrowthVelocityChart from '@/components/management/GrowthVelocityChart';
 import StoreReportGenerator from '@/components/reports/StoreReportGenerator';
@@ -447,6 +448,7 @@ export default function Dashboard() {
     to: new Date()
   });
   const [activeMetric, setActiveMetric] = useState(null);
+  const [projectionMetric, setProjectionMetric] = useState(null);
 
   const [weatherData, setWeatherData] = useState(null);
   const [weekFilter, setWeekFilter] = useState(null); // Filtro de semana independiente
@@ -618,17 +620,41 @@ export default function Dashboard() {
     const avgTicket = totals.transactions > 0 ? totals.sales / totals.transactions : 0;
     const budgetTicket = currentBudget.tickets_budget || avgTicket;
     
+    // Datos para proyección
+    const projectionData = [];
+    let accumulated = 0;
+    chartData.forEach((d, i) => {
+      accumulated += d.ventas;
+      projectionData.push({ day: `Día ${i+1}`, real: accumulated, proyectado: null });
+    });
+    for (let i = 0; i < daysRemaining; i++) {
+      accumulated += dailyAvgSales;
+      projectionData.push({ day: `Día ${chartData.length + i + 1}`, real: null, proyectado: accumulated });
+    }
+    
+    // Datos para requerimiento diario
+    const dailyRequired = Array.from({ length: daysRemaining }, (_, i) => ({
+      day: `Día ${i + 1}`,
+      required: requiredDailySales
+    }));
+    
     return {
       projectedSales,
       salesGap,
       requiredDailySales,
       daysRemaining,
+      daysElapsed,
       avgTicket,
       budgetTicket,
       salesOnTrack: projectedSales >= currentBudget.sales_budget * 0.95,
-      ticketOnTrack: avgTicket >= budgetTicket * 0.95
+      ticketOnTrack: avgTicket >= budgetTicket * 0.95,
+      projectionData,
+      dailyRequired,
+      totals,
+      budget: currentBudget.sales_budget,
+      chartData
     };
-  }, [currentBudget, totals, filteredSales]);
+  }, [currentBudget, totals, filteredSales, chartData]);
 
   const formatCurrency = (val) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(Math.round(val));
   const selectedStoreName = STORES.find(s => s.code === selectedStore)?.name || '';
@@ -1015,6 +1041,19 @@ export default function Dashboard() {
               )}
             </AnimatePresence>
 
+            {/* Projection Detail Modal */}
+            <AnimatePresence>
+              {projectionMetric && projections && (
+                <ProjectionDetailModal
+                  isOpen={!!projectionMetric}
+                  onClose={() => setProjectionMetric(null)}
+                  metric={projectionMetric}
+                  data={projections}
+                  formatCurrency={formatCurrency}
+                />
+              )}
+            </AnimatePresence>
+
             {/* Proyección del Mes - Diseño Mejorado con Gráficas */}
             {projections && (
               <motion.div
@@ -1111,14 +1150,15 @@ export default function Dashboard() {
                       footer: `Meta: ${formatCurrency(projections.budgetTicket)}`
                     }
                   ].map((item, idx) => {
-                    const Icon = item.icon;
-                    return (
-                      <motion.button
-                        key={item.key}
-                        whileHover={{ scale: 1.05, y: -5 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="bg-white/5 rounded-2xl p-4 border border-white/10 text-left transition-all hover:bg-white/10 hover:border-white/20 cursor-pointer"
-                      >
+                   const Icon = item.icon;
+                   return (
+                     <motion.button
+                       key={item.key}
+                       whileHover={{ scale: 1.05, y: -5 }}
+                       whileTap={{ scale: 0.98 }}
+                       onClick={() => setProjectionMetric(item.key)}
+                       className="bg-white/5 rounded-2xl p-4 border border-white/10 text-left transition-all hover:bg-white/10 hover:border-white/20 cursor-pointer"
+                     >
                         <div className="flex items-center gap-2 mb-2">
                           <div className={`w-8 h-8 rounded-lg ${item.iconBg} flex items-center justify-center`}>
                             <Icon className={`w-4 h-4 ${item.iconColor}`} />
