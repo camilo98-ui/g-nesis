@@ -253,85 +253,13 @@ export default function CashiersDashboard() {
               </motion.div>
             </div>
 
-            {/* Lista de Cajeros con Ranking */}
+            {/* Ranking y Lista de Cajeros */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Listado único con ranking visible */}
-              <div className="lg:col-span-1">
-                <Card className="border-pink-100 shadow-lg">
-                  <CardContent className="p-4">
-                    {/* Búsqueda */}
-                    <div className="relative mb-4">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                      <Input
-                        placeholder="Buscar cajero..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-9 border-pink-200"
-                      />
-                    </div>
-
-                    {/* Lista de cajeros */}
-                    <div className="space-y-2 max-h-[600px] overflow-y-auto">
-                      {filteredCashiers.map((cashier) => (
-                        <motion.div
-                          key={cashier.id}
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          whileHover={{ scale: 1.02, x: 5 }}
-                          className={`p-3 rounded-xl border-2 transition-all cursor-pointer ${
-                            selectedCashier?.id === cashier.id
-                              ? 'border-pink-400 bg-gradient-to-r from-pink-50 to-rose-50 shadow-md'
-                              : 'border-gray-100 bg-white hover:border-pink-200'
-                          }`}
-                          onClick={() => setSelectedCashier(cashier)}
-                        >
-                          <div className="flex items-center gap-3">
-                            {/* Ranking badge */}
-                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                              cashier.rank === 1 ? 'bg-gradient-to-br from-amber-400 to-yellow-500 shadow-md' :
-                              cashier.rank === 2 ? 'bg-gradient-to-br from-gray-300 to-gray-400 shadow-md' :
-                              cashier.rank === 3 ? 'bg-gradient-to-br from-amber-600 to-orange-600 shadow-md' :
-                              'bg-gray-100'
-                            }`}>
-                              {getRankIcon(cashier.rank)}
-                            </div>
-
-                            {/* Foto */}
-                            <div className="w-10 h-10 rounded-full bg-pink-100 overflow-hidden flex items-center justify-center">
-                              {cashier.photo_url ? (
-                                <img src={cashier.photo_url} alt={cashier.name} className="w-full h-full object-contain" />
-                              ) : (
-                                <span className="text-lg font-bold text-pink-500">{cashier.name.charAt(0)}</span>
-                              )}
-                            </div>
-
-                            {/* Info */}
-                            <div className="flex-1 min-w-0">
-                              <p className="font-bold text-gray-800 text-sm truncate">{cashier.name}</p>
-                              <p className="text-xs text-gray-500">
-                                ${(cashier.totalSales/1000000).toFixed(2)}M · {cashier.daysWorked} turnos
-                              </p>
-                            </div>
-
-                            {/* View eye */}
-                            <ViewProfileButton 
-                              cashierId={cashier.id} 
-                              from="CashiersDashboard"
-                            />
-                          </div>
-
-                          {/* Progress */}
-                          <div className="mt-2">
-                            <Progress 
-                              value={(cashier.compositeScore / 100) * 100} 
-                              className="h-1.5"
-                            />
-                          </div>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
+              {/* Ranking visual con barras */}
+              <div className="lg:col-span-1 space-y-4">
+                <CashierRanking storeId={selectedStore} onSelectCashier={setSelectedCashier} />
+                {/* Ranking Global de Puntos */}
+                <GlobalPointsRanking storeId={selectedStore} cashiers={activeCashiers} limit={5} />
               </div>
 
               {/* Detalle del Cajero */}
