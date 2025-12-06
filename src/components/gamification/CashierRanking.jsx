@@ -4,10 +4,8 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { 
   Trophy, Crown, Medal, TrendingUp, TrendingDown, 
-  ChevronRight, ChevronLeft, Check, Sparkles, CalendarRange, Eye
+  ChevronRight, ChevronLeft, Check, Sparkles, CalendarRange
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { createPageUrl } from '@/utils';
 import WeekFilter from '@/components/dashboard/WeekFilter';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,7 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subWeeks, subMonths, eachDayOfInterval, isSameDay, isWithinInterval, addMonths, isToday } from 'date-fns';
 import { es } from 'date-fns/locale';
 
-const PODIUM_COLORS = ['from-pink-300 to-rose-400', 'from-gray-200 to-slate-300', 'from-amber-300 to-orange-400'];
+const PODIUM_COLORS = ['from-pink-200 to-rose-300', 'from-violet-200 to-purple-300', 'from-amber-200 to-orange-300'];
 const PODIUM_ICONS = [Crown, Medal, Medal];
 
 // Calendario personalizado para ranking
@@ -436,7 +434,7 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
                 <p className="text-sm font-medium text-gray-700">{cashier.name}</p>
                 <p className="text-xs text-gray-400">{cashier.daysWorked} turnos</p>
               </div>
-              <div className="text-right mr-2" onClick={() => onSelectCashier?.(cashier)}>
+              <div className="text-right" onClick={() => onSelectCashier?.(cashier)}>
                 <motion.p 
                   className="text-sm font-bold text-pink-600"
                   animate={{ scale: [1, 1.02, 1] }}
@@ -448,11 +446,6 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
                   Ticket: {formatCurrency(cashier.avgTicket)}
                 </p>
               </div>
-              <Link to={createPageUrl(`CashierProfile?id=${cashier.id}&from=cashiers`)}>
-                <Button variant="ghost" size="icon" className="hover:bg-pink-50">
-                  <Eye className="w-4 h-4 text-pink-500" />
-                </Button>
-              </Link>
             </motion.div>
           ))}
         </div>

@@ -477,7 +477,9 @@ export default function PlannerStats({ shifts, cashiers, storeId, currentWeek, s
               </ResponsiveContainer>
             </div>
             <ChartDescription>
-              <strong>Interpretación:</strong> La línea naranja indica eficiencia. Días con barras bajas pero ventas altas = oportunidad de optimizar personal.
+              <strong>¿Qué muestra?</strong> Relaciona las horas programadas (barras moradas) con las ventas generadas (área verde). 
+              La línea naranja es la <strong>productividad</strong> (ventas ÷ horas). 
+              <strong>Usa esto para:</strong> Identificar días donde vendes mucho con poco personal (alta eficiencia) o viceversa (oportunidad de ajuste).
             </ChartDescription>
           </CardContent>
         </Card>
@@ -541,7 +543,8 @@ export default function PlannerStats({ shifts, cashiers, storeId, currentWeek, s
               </table>
             </div>
             <ChartDescription>
-              <strong>Uso:</strong> Identifica qué colaboradores tienen experiencia en múltiples estaciones vs quiénes están especializados en una sola posición.
+              <strong>¿Qué muestra?</strong> Tabla de versatilidad. Cada número indica cuántas veces el colaborador trabajó en esa estación. 
+              <strong>Usa esto para:</strong> Identificar quiénes son versátiles (múltiples estaciones) vs especializados. Planifica mejor en días de alta demanda asignando a los más experimentados en cada rol.
             </ChartDescription>
           </CardContent>
         </Card>
@@ -580,6 +583,10 @@ export default function PlannerStats({ shifts, cashiers, storeId, currentWeek, s
                   </BarChart>
                 </ResponsiveContainer>
               </div>
+              <ChartDescription>
+                <strong>¿Qué muestra?</strong> Ranking de horas trabajadas por colaborador. 
+                <strong>Usa esto para:</strong> Balancear la carga laboral - evita que unos pocos trabajen mucho y otros poco. Equidad = equipo feliz.
+              </ChartDescription>
             </CardContent>
           </Card>
         </motion.div>
@@ -615,6 +622,10 @@ export default function PlannerStats({ shifts, cashiers, storeId, currentWeek, s
                   ))}
                 </div>
               </div>
+              <ChartDescription>
+                <strong>¿Qué muestra?</strong> Distribución de turnos por estación (caja, coneo, bebidas, etc.). 
+                <strong>Usa esto para:</strong> Ver si hay estaciones sobrecargadas o desatendidas. Un balance adecuado mejora el servicio y reduce tiempos de espera.
+              </ChartDescription>
             </CardContent>
           </Card>
         </motion.div>
@@ -651,6 +662,10 @@ export default function PlannerStats({ shifts, cashiers, storeId, currentWeek, s
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
+              <ChartDescription>
+                <strong>¿Qué muestra?</strong> Patrón de turnos por día de la semana. 
+                <strong>Usa esto para:</strong> Identificar qué días requieren más personal (típicamente fines de semana) y ajustar la programación futura.
+              </ChartDescription>
             </CardContent>
           </Card>
         </motion.div>
@@ -680,6 +695,10 @@ export default function PlannerStats({ shifts, cashiers, storeId, currentWeek, s
                   </LineChart>
                 </ResponsiveContainer>
               </div>
+              <ChartDescription>
+                <strong>¿Qué muestra?</strong> Evolución de turnos y horas totales semana a semana. 
+                <strong>Usa esto para:</strong> Detectar tendencias (¿estás programando más o menos?) y planificar recursos a futuro.
+              </ChartDescription>
             </CardContent>
           </Card>
         </motion.div>
@@ -736,6 +755,10 @@ export default function PlannerStats({ shifts, cashiers, storeId, currentWeek, s
                 </motion.div>
               ))}
             </div>
+            <ChartDescription>
+              <strong>¿Qué muestra?</strong> Estaciones con más turnos asignados. 
+              <strong>Usa esto para:</strong> Ver dónde se concentra tu equipo y ajustar según las necesidades operativas de la tienda.
+            </ChartDescription>
           </CardContent>
         </Card>
       </motion.div>
