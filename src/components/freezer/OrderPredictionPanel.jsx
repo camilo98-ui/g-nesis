@@ -11,7 +11,7 @@ const EXCLUSIVO_FLAVORS = ['Cherry', 'Arroz', 'Chicle', 'Brownie', 'Crema Limón
 export default function OrderPredictionPanel({ slots = [] }) {
   // Calcular frecuencia de cada sabor y stock levels
   const flavorAnalysis = useMemo(() => {
-    if (!slots || slots.length === 0) return [];
+    if (!slots || slots.length === 0) return { flavors: [], totalSlots: 0 };
     const analysis = {};
     
     slots.forEach(slot => {
@@ -55,15 +55,7 @@ export default function OrderPredictionPanel({ slots = [] }) {
     };
   }, [highMovement]);
 
-  if (!slots || slots.length === 0) {
-    return (
-      <Card className="border-purple-200">
-        <CardContent className="p-4 text-center text-gray-400 text-xs">
-          Sin datos de nevera
-        </CardContent>
-      </Card>
-    );
-  }
+  const hasData = slots && slots.length > 0 && flavorAnalysis.flavors.length > 0;
 
   return (
     <Card className="border-purple-200">
