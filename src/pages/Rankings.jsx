@@ -826,7 +826,7 @@ export default function Rankings() {
                               </div>
                             )}
                           </div>
-                          <Link to={createPageUrl(`CashierProfile?id=${item.cashier_id}&from=rankings`)} className="flex-1 min-w-0 hover:opacity-80">
+                          <div className="flex-1 min-w-0">
                             <p className="font-bold text-gray-800 truncate">{item.cashier?.name}</p>
                             <p className="text-xs text-gray-500 truncate">📍 {item.storeName}</p>
                             <div className="flex gap-2 mt-1">
@@ -835,7 +835,7 @@ export default function Rankings() {
                               <span className="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded">TK:{item.ticketScore?.toFixed(0)}</span>
                               <span className="text-[10px] bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded">S:{item.suggestedScore?.toFixed(0)}</span>
                             </div>
-                          </Link>
+                          </div>
                           <div className="text-right">
                             <p className="font-bold text-purple-600">{item.overallScore?.toFixed(1)} pts</p>
                             <p className="text-xs text-gray-400">{item.shifts} turnos</p>
@@ -881,12 +881,12 @@ export default function Rankings() {
                               </div>
                             )}
                           </div>
-                          <Link to={createPageUrl(`CashierProfile?id=${item.cashier_id}&from=rankings`)} className="flex-1 min-w-0">
-                            <p className="font-bold text-gray-800 truncate hover:text-emerald-600 hover:underline cursor-pointer">
+                          <div className="flex-1 min-w-0">
+                            <p className="font-bold text-gray-800 truncate">
                               {item.cashier?.name}
                             </p>
                             <p className="text-xs text-gray-500 truncate">📍 {item.storeName}</p>
-                          </Link>
+                          </div>
                           <div className="text-right">
                             <p className="font-bold text-emerald-600">{formatCurrency(item.totalSales)}</p>
                             <p className="text-xs text-gray-400">{item.shifts} turnos</p>
@@ -932,12 +932,12 @@ export default function Rankings() {
                               </div>
                             )}
                           </div>
-                          <Link to={createPageUrl(`CashierProfile?id=${item.cashier_id}&from=rankings`)} className="flex-1 min-w-0">
-                            <p className="font-bold text-gray-800 truncate hover:text-blue-600 hover:underline cursor-pointer">
+                          <div className="flex-1 min-w-0">
+                            <p className="font-bold text-gray-800 truncate">
                               {item.cashier?.name}
                             </p>
                             <p className="text-xs text-gray-500 truncate">📍 {item.storeName}</p>
-                          </Link>
+                          </div>
                           <div className="text-right">
                             <p className="font-bold text-blue-600">{item.totalTransactions.toLocaleString()}</p>
                             <p className="text-xs text-gray-400">transacciones</p>
@@ -983,12 +983,12 @@ export default function Rankings() {
                               </div>
                             )}
                           </div>
-                          <Link to={createPageUrl(`CashierProfile?id=${item.cashier_id}&from=rankings`)} className="flex-1 min-w-0">
-                            <p className="font-bold text-gray-800 truncate hover:text-amber-600 hover:underline cursor-pointer">
+                          <div className="flex-1 min-w-0">
+                            <p className="font-bold text-gray-800 truncate">
                               {item.cashier?.name}
                             </p>
                             <p className="text-xs text-gray-500 truncate">📍 {item.storeName}</p>
-                          </Link>
+                          </div>
                           <div className="text-right">
                             <p className="font-bold text-amber-600">{formatCurrency(item.avgTicket)}</p>
                             <p className="text-xs text-gray-400">Ticket Prom.</p>
@@ -1034,12 +1034,12 @@ export default function Rankings() {
                               </div>
                             )}
                           </div>
-                          <Link to={createPageUrl(`CashierProfile?id=${item.cashier_id}&from=rankings`)} className="flex-1 min-w-0">
-                            <p className="font-bold text-gray-800 truncate hover:text-rose-600 hover:underline cursor-pointer">
+                          <div className="flex-1 min-w-0">
+                            <p className="font-bold text-gray-800 truncate">
                               {item.cashier?.name}
                             </p>
                             <p className="text-xs text-gray-500 truncate">📍 {item.storeName}</p>
-                          </Link>
+                          </div>
                           <div className="text-right">
                             <p className="font-bold text-rose-600">{item.totalSuggested?.toLocaleString()}</p>
                             <p className="text-xs text-gray-400">sugeridos</p>

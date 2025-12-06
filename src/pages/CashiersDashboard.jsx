@@ -9,7 +9,6 @@ import GamificationCoach from '@/components/ai/GamificationCoach';
 import PerformanceAnalyzer from '@/components/ai/PerformanceAnalyzer';
 import DateFilter from '@/components/DateFilter';
 import BadgeConfigManager from '@/components/gamification/BadgeConfigManager';
-import GlobalPointsRanking from '@/components/gamification/GlobalPointsRanking';
 import CashierVisualProfile from '@/components/cashier/CashierVisualProfile';
 import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
 import CashierAnalysis from '@/components/cashier/CashierAnalysis';
@@ -256,10 +255,8 @@ export default function CashiersDashboard() {
             {/* Ranking y Lista de Cajeros */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Ranking visual con barras */}
-              <div className="lg:col-span-1 space-y-4">
+              <div className="lg:col-span-1">
                 <CashierRanking storeId={selectedStore} onSelectCashier={setSelectedCashier} />
-                {/* Ranking Global de Puntos */}
-                <GlobalPointsRanking storeId={selectedStore} cashiers={activeCashiers} limit={5} />
               </div>
 
               {/* Detalle del Cajero */}

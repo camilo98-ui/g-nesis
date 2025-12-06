@@ -60,99 +60,75 @@ export default function CashierVisualProfile({ cashier, storeCode, shiftRecords 
     return Math.min(100, Math.max(0, salesRatio));
   }, [stats, teamAvg]);
 
-  const coverPattern = getCoverPattern(cashier?.id, performanceScore);
-  const totalPoints = badges.length * 10; // Puntos base por insignia
+  const totalPoints = badges.length * 10;
+  const themeColor = useMemo(() => {
+    const themes = [
+      { bg: 'from-pink-100 to-rose-200', accent: 'pink-500', emoji: '🍦' },
+      { bg: 'from-violet-100 to-purple-200', accent: 'violet-500', emoji: '⭐' },
+      { bg: 'from-cyan-100 to-blue-200', accent: 'cyan-500', emoji: '💎' },
+      { bg: 'from-amber-100 to-orange-200', accent: 'amber-500', emoji: '🔥' },
+      { bg: 'from-emerald-100 to-green-200', accent: 'emerald-500', emoji: '🏆' },
+    ];
+    const idx = (cashier?.id?.charCodeAt(0) || 0) % themes.length;
+    return themes[idx];
+  }, [cashier?.id]);
 
   if (!cashier) return null;
 
   return (
     <Card className="overflow-hidden border-none shadow-xl">
-      {/* Cover Photo con patrón dinámico */}
-      <div className={`h-36 md:h-44 relative overflow-hidden bg-gradient-to-r ${coverPattern.gradient}`}>
-        {/* Patrón decorativo */}
+      {/* Header con tema dinámico */}
+      <div className={`bg-gradient-to-r ${themeColor.bg} p-6 relative overflow-hidden`}>
+        {/* Elementos flotantes temáticos */}
         <motion.div
-          className="absolute inset-0 opacity-30"
-          style={{
-            backgroundImage: 'radial-gradient(circle at 20% 50%, white 2px, transparent 2px), radial-gradient(circle at 80% 80%, white 2px, transparent 2px)',
-            backgroundSize: '40px 40px'
-          }}
-          animate={{ backgroundPosition: ['0% 0%', '100% 100%'] }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-        />
-        
-        {/* Elementos decorativos flotantes más visibles */}
-        <motion.div
-          className="absolute top-4 left-10 text-white/70 text-6xl drop-shadow-lg"
+          className="absolute top-2 right-4 text-5xl opacity-40"
           animate={{ y: [0, -10, 0], rotate: [0, 10, -10, 0] }}
           transition={{ duration: 4, repeat: Infinity }}
         >
-          {coverPattern.emoji}
+          {themeColor.emoji}
         </motion.div>
         <motion.div
-          className="absolute top-8 right-10 text-white/60 text-5xl drop-shadow-lg"
-          animate={{ y: [0, 15, 0], rotate: [0, -10, 10, 0] }}
+          className="absolute bottom-2 left-6 text-4xl opacity-30"
+          animate={{ y: [0, 8, 0], x: [0, 5, 0] }}
           transition={{ duration: 5, repeat: Infinity, delay: 1 }}
         >
-          ⭐
-        </motion.div>
-        <motion.div
-          className="absolute bottom-6 left-20 text-white/50 text-4xl drop-shadow-lg"
-          animate={{ y: [0, -12, 0], x: [0, 8, 0] }}
-          transition={{ duration: 4.5, repeat: Infinity, delay: 0.5 }}
-        >
-          🍦
-        </motion.div>
-        
-        {/* Score Badge */}
-        <motion.div
-          className="absolute top-4 right-4 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1"
-          whileHover={{ scale: 1.1 }}
-        >
-          <span className="text-white text-sm font-bold">{totalPoints} pts</span>
+          ✨
         </motion.div>
 
-        {/* Performance Indicator */}
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
-          <motion.div
-            className="h-full bg-white/60"
-            initial={{ width: 0 }}
-            animate={{ width: `${performanceScore}%` }}
-            transition={{ duration: 1 }}
-          />
-        </div>
-      </div>
-      
-      {/* Profile Info */}
-      <CardContent className="pt-0 pb-6">
-        <div className="flex flex-col md:flex-row md:items-end gap-4 -mt-14 md:-mt-16 px-4">
-          {/* Profile Picture */}
+        <div className="flex items-center gap-4 relative z-10">
+          {/* Foto del cajero */}
           <motion.div 
-            className="w-28 h-28 md:w-36 md:h-36 rounded-2xl bg-white shadow-xl overflow-hidden flex items-center justify-center border-4 border-white"
-            whileHover={{ scale: 1.05, rotate: 2 }}
+            className="w-24 h-24 rounded-2xl bg-white shadow-lg overflow-hidden flex items-center justify-center border-4 border-white"
+            whileHover={{ scale: 1.08, rotate: 3 }}
+            transition={{ type: "spring", stiffness: 300 }}
           >
             {cashier.photo_url ? (
               <img src={cashier.photo_url} alt={cashier.name} className="w-full h-full object-contain" />
             ) : (
-              <span className="text-5xl md:text-6xl font-bold text-pink-500">
+              <span className="text-4xl font-bold text-pink-500">
                 {cashier.name?.charAt(0)}
               </span>
             )}
           </motion.div>
           
-          {/* Name and Store */}
-          <div className="pb-2 flex-1">
-            <h1 className="text-2xl md:text-3xl font-black text-gray-800">{cashier.name}</h1>
+          {/* Info */}
+          <div className="flex-1">
+            <h1 className="text-2xl font-black text-gray-800">{cashier.name}</h1>
             <div className="flex items-center gap-2 mt-1">
-              <p className="text-gray-500 text-sm flex items-center gap-1">
+              <p className="text-gray-600 text-sm flex items-center gap-1">
                 <MapPin className="w-3 h-3" />
                 {storeCode}
               </p>
-              <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs rounded-full font-bold">
-                {badges.length} 🏅
+              <span className={`px-2 py-0.5 bg-${themeColor.accent}/20 text-${themeColor.accent} text-xs rounded-full font-bold`}>
+                {totalPoints} pts
               </span>
             </div>
           </div>
         </div>
+      </div>
+      
+      {/* Profile Info */}
+      <CardContent className="pt-4 pb-6">
 
         {/* Contact Info */}
         <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3 px-4">
