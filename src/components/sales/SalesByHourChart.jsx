@@ -21,7 +21,8 @@ const SHIFT_TIMES = {
 };
 
 export default function SalesByHourChart({ shiftRecords = [], formatCurrency }) {
-  const [chartType, setChartType] = React.useState('composed'); // 'composed', 'area', 'line'
+  const [selectedShift, setSelectedShift] = React.useState('all');
+  const [chartType, setChartType] = React.useState('composed');
 
   const hourlyData = useMemo(() => {
     const hours = {};
@@ -31,8 +32,13 @@ export default function SalesByHourChart({ shiftRecords = [], formatCurrency }) 
       hours[h] = { hour: h, sales: 0, transactions: 0, count: 0 };
     }
     
+    // Filtrar registros según el turno seleccionado
+    const filteredRecords = selectedShift === 'all' 
+      ? shiftRecords 
+      : shiftRecords.filter(r => r.shift === selectedShift);
+    
     // Distribuir ventas de cada turno en sus horas
-    shiftRecords.forEach(record => {
+    filteredRecords.forEach(record => {
       const shiftInfo = SHIFT_TIMES[record.shift];
       if (!shiftInfo) return;
       
@@ -62,7 +68,7 @@ export default function SalesByHourChart({ shiftRecords = [], formatCurrency }) 
         ticketProm: h.transactions > 0 ? h.sales / h.transactions : 0
       }))
       .filter(h => h.sales > 0);
-  }, [shiftRecords]);
+  }, [shiftRecords, selectedShift]);
 
   const maxSales = Math.max(...hourlyData.map(h => h.sales), 1);
   const peakHour = hourlyData.reduce((max, h) => h.sales > max.sales ? h : max, hourlyData[0] || {});
@@ -126,7 +132,7 @@ export default function SalesByHourChart({ shiftRecords = [], formatCurrency }) 
         </div>
       </CardHeader>
       <CardContent className="p-4">
-        {/* Indicadores de turno - MÁS NUMÉRICOS Y DIVERTIDOS */}
+        {/* Indicadores de turno CLICKEABLES - MUESTRAN INFO */}
         <div className="grid grid-cols-3 gap-3 mb-4">
           {Object.entries(SHIFT_TIMES).map(([key, shift]) => {
             const Icon = shift.icon;
@@ -137,17 +143,23 @@ export default function SalesByHourChart({ shiftRecords = [], formatCurrency }) 
               .filter(r => r.shift === key)
               .reduce((sum, r) => sum + (r.transactions || 0), 0);
             const avgTicket = shiftTransactions > 0 ? shiftSales / shiftTransactions : 0;
+            const shiftCount = shiftRecords.filter(r => r.shift === key).length;
+            const isSelected = selectedShift === key;
             
             return (
-              <motion.div
+              <motion.button
                 key={key}
+                onClick={() => setSelectedShift(selectedShift === key ? 'all' : key)}
                 whileHover={{ scale: 1.08, y: -5, rotate: 2 }}
                 whileTap={{ scale: 0.95 }}
-                className={`bg-gradient-to-br ${shift.bgColor} rounded-2xl p-4 text-center shadow-lg cursor-pointer border-2 border-white`}
+                className={`bg-gradient-to-br ${shift.bgColor} rounded-2xl p-4 text-center shadow-lg cursor-pointer border-2 transition-all ${
+                  isSelected ? 'border-gray-800 ring-4 ring-offset-2' : 'border-white'
+                }`}
+                style={isSelected ? { ringColor: shift.color } : {}}
               >
                 <motion.div
-                  animate={{ rotate: [0, 10, -10, 0] }}
-                  transition={{ duration: 2, repeat: Infinity }}
+                  animate={isSelected ? { rotate: [0, 360] } : { rotate: [0, 10, -10, 0] }}
+                  transition={isSelected ? { duration: 2, repeat: Infinity, ease: "linear" } : { duration: 2, repeat: Infinity }}
                 >
                   <Icon className="w-7 h-7 mx-auto mb-2" style={{ color: shift.color }} />
                 </motion.div>
@@ -155,11 +167,14 @@ export default function SalesByHourChart({ shiftRecords = [], formatCurrency }) 
                 <p className="text-2xl font-black mb-1" style={{ color: shift.color }}>
                   ${Math.round(shiftSales/1000000)}M
                 </p>
-                <div className="flex items-center justify-center gap-2 text-[10px] text-gray-600 font-bold">
-                  <span className="bg-white/60 px-2 py-0.5 rounded-full">{shiftTransactions} trans</span>
-                  <span className="bg-white/60 px-2 py-0.5 rounded-full">${Math.round(avgTicket/1000)}K</span>
+                <div className="flex flex-col gap-1 text-[10px] text-gray-600 font-bold">
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="bg-white/60 px-2 py-0.5 rounded-full">{shiftTransactions} trans</span>
+                    <span className="bg-white/60 px-2 py-0.5 rounded-full">${Math.round(avgTicket/1000)}K</span>
+                  </div>
+                  <span className="bg-white/80 px-2 py-1 rounded-full font-black text-gray-700">{shiftCount} turnos</span>
                 </div>
-              </motion.div>
+              </motion.button>
             );
           })}
         </div>

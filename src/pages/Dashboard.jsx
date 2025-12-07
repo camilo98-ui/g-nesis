@@ -21,7 +21,7 @@ import CompraValeModal from '@/components/dashboard/CompraValeModal';
 
 import { 
   DollarSign, Receipt, Zap, Gift, TrendingUp, TrendingDown, ArrowLeft,
-  BarChart3, AlertTriangle, CheckCircle2, X, FileSpreadsheet, Target,
+  BarChart3, AlertTriangle, CheckCircle2, X, Target,
   ClipboardCheck, Snowflake, Package
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -31,21 +31,8 @@ import { startOfMonth, endOfMonth, differenceInDays, format, eachDayOfInterval, 
 import { es } from 'date-fns/locale';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
-  BarChart, Bar, PieChart, Pie, Cell, Legend, ComposedChart, Line, RadialBarChart, RadialBar,
-  Treemap, ScatterChart, Scatter, ZAxis
+  BarChart, Bar, PieChart, Pie, Cell, Legend, ComposedChart, Line
 } from 'recharts';
-
-const COLORS = ['#ec4899', '#f43f5e', '#fb7185', '#fda4af', '#fecdd3', '#fff1f2'];
-const POPSY_PINK = '#ec4899';
-const POPSY_ROSE = '#f43f5e';
-
-// Colores pastel más vibrantes estilo heladería
-const PASTEL_COLORS = {
-  sales: 'from-emerald-100 to-green-200',
-  tickets: 'from-sky-100 to-blue-200',
-  transactions: 'from-violet-100 to-purple-200',
-  suggested: 'from-pink-100 to-rose-200'
-};
 
 // Metric Card con panel expandible
 function MetricCard({ title, value, budget, icon: Icon, bgColor, iconBg, iconColor, format: formatType = "number", onClick, isActive, insight }) {
@@ -528,18 +515,7 @@ export default function Dashboard() {
     enabled: !!selectedStore
   });
 
-  // Preparar datos de cajeros para exportación
-  const cashierExportData = useMemo(() => {
-    return shiftRecords
-      .filter(r => {
-        const date = new Date(r.date);
-        return date >= dateRange.from && date <= dateRange.to;
-      })
-      .map(r => ({
-        ...r,
-        cashierName: cashiers.find(c => c.id === r.cashier_id)?.name || 'N/A'
-      }));
-  }, [shiftRecords, cashiers, dateRange]);
+
 
   const currentBudget = useMemo(() => {
     const now = new Date();
@@ -580,26 +556,24 @@ export default function Dashboard() {
     
     return days.map(day => {
       const dayStr = format(day, 'yyyy-MM-dd');
-      // Buscar en dailySales comparando correctamente las fechas
       const dayData = dailySales.find(s => {
         const saleDate = s.date?.split('T')[0] || s.date;
         return saleDate === dayStr;
       }) || {};
       const transactions = dayData.total_transactions || 0;
-      const tickets = dayData.total_tickets || 0;
       const sales = dayData.total_sales || 0;
       return {
         date: format(day, 'dd', { locale: es }),
         fullDate: format(day, 'EEEE dd MMM', { locale: es }),
         dayName: format(day, 'EEEE', { locale: es }),
         ventas: sales,
-        tickets: tickets,
+        tickets: dayData.total_tickets || 0,
         ticketPromedio: transactions > 0 ? sales / transactions : 0,
         transactions: transactions,
         suggested: dayData.total_suggested || 0
       };
     });
-  }, [dateRange, dailySales]);
+  }, [dateRange, dailySales, weekFilter]);
 
 
 
@@ -680,26 +654,7 @@ export default function Dashboard() {
     { id: 'suggested', title: 'Sugeridos', value: totals.suggested, budget: currentBudget.suggested_budget, icon: Gift, bgColor: 'bg-gradient-to-br from-pink-100 to-rose-200', iconBg: 'bg-pink-200', iconColor: 'text-pink-700' },
   ];
 
-  // Opportunities / Critical Indicators Data
-  const opportunitiesData = useMemo(() => {
-    const salesCompliance = currentBudget?.sales_budget > 0 ? (totals.sales / currentBudget.sales_budget) * 100 : 0;
-    const ticketCompliance = currentBudget?.tickets_budget > 0 ? (avgTicket / currentBudget.tickets_budget) * 100 : 0;
-    const checklistCompliance = checklists.length > 0 
-      ? checklists.reduce((sum, c) => sum + (c.completion_percentage || 0), 0) / checklists.length 
-      : 0;
-    const filledSlots = freezerSlots.filter(s => !s.is_empty).length;
-    const freezerEfficiency = freezerSlots.length > 0 ? (filledSlots / freezerSlots.length) * 100 : 0;
-    const activeAlerts = inventoryAlerts.filter(a => a.status === 'low' || a.status === 'critical' || a.status === 'expired').length;
-    const inventoryScore = activeAlerts === 0 ? 100 : Math.max(0, 100 - (activeAlerts * 10));
-    
-    return [
-      { name: 'Ventas', value: salesCompliance, icon: DollarSign, fill: salesCompliance >= 90 ? '#10b981' : salesCompliance >= 70 ? '#f59e0b' : '#ef4444' },
-      { name: 'Ticket', value: ticketCompliance, icon: Receipt, fill: ticketCompliance >= 90 ? '#10b981' : ticketCompliance >= 70 ? '#f59e0b' : '#ef4444' },
-      { name: 'Checklists', value: checklistCompliance, icon: ClipboardCheck, fill: checklistCompliance >= 80 ? '#10b981' : checklistCompliance >= 60 ? '#f59e0b' : '#ef4444' },
-      { name: 'Neveras', value: freezerEfficiency, icon: Snowflake, fill: freezerEfficiency >= 85 ? '#10b981' : freezerEfficiency >= 70 ? '#f59e0b' : '#ef4444' },
-      { name: 'Inventario', value: inventoryScore, icon: Package, fill: inventoryScore >= 90 ? '#10b981' : inventoryScore >= 70 ? '#f59e0b' : '#ef4444' },
-    ];
-  }, [totals, currentBudget, avgTicket, checklists, freezerSlots, inventoryAlerts]);
+
 
   return (
     <div className="min-h-screen bg-white relative">
