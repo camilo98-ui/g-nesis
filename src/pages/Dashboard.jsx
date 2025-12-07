@@ -91,10 +91,10 @@ function MetricCard({ title, value, budget, icon: Icon, bgColor, iconBg, iconCol
         </motion.div>
         {budget > 0 && (
           <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold ${
-            velocityPct >= 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+            percentage >= 100 ? 'bg-green-100 text-green-700' : percentage >= 70 ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'
           }`}>
-            {velocityPct >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-            {velocityPct >= 0 ? '+' : ''}{velocityPct.toFixed(0)}%
+            {percentage >= 100 ? <CheckCircle2 className="w-3 h-3" /> : percentage >= 70 ? <TrendingUp className="w-3 h-3" /> : <AlertTriangle className="w-3 h-3" />}
+            {percentage}%
           </div>
         )}
       </div>
@@ -926,9 +926,24 @@ export default function Dashboard() {
                             <YAxis yAxisId="left" tick={{ fill: '#6b7280', fontSize: 10 }} label={{ value: 'Trans.', angle: -90, position: 'insideLeft', style: { fontSize: 10, fill: '#6b7280' } }} />
                             <YAxis yAxisId="right" orientation="right" tick={{ fill: '#6b7280', fontSize: 10 }} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} label={{ value: 'Ventas (M)', angle: 90, position: 'insideRight', style: { fontSize: 10, fill: '#6b7280' } }} />
                             <Tooltip 
-                              formatter={(v, name) => [name === 'ventas' ? formatCurrency(v) : v.toLocaleString(), name === 'ventas' ? 'Venta' : 'Transacciones']}
-                              labelFormatter={(label, payload) => payload?.[0]?.payload?.fullDate || label}
-                              contentStyle={{ fontSize: 12, borderRadius: 8 }}
+                              content={({ active, payload }) => {
+                                if (!active || !payload?.length) return null;
+                                return (
+                                  <div className="bg-white p-3 rounded-xl shadow-xl border text-xs">
+                                    <p className="font-bold text-gray-800 mb-2">{payload[0]?.payload?.fullDate}</p>
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <div className="w-3 h-3 rounded-full bg-violet-500"></div>
+                                      <span className="text-gray-600">Transacciones:</span>
+                                      <span className="font-bold text-violet-600">{payload[0]?.value?.toLocaleString()}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <div className="w-3 h-3 rounded-full bg-pink-500"></div>
+                                      <span className="text-gray-600">Ventas:</span>
+                                      <span className="font-bold text-pink-600">{formatCurrency(payload[1]?.value)}</span>
+                                    </div>
+                                  </div>
+                                );
+                              }}
                             />
                             <Legend wrapperStyle={{ fontSize: 11 }} />
                             <Bar yAxisId="left" dataKey="transactions" fill="#8b5cf6" radius={[3, 3, 0, 0]} name="Transacciones" />

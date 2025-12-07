@@ -1,47 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-// Hashtags estilo red social
-const HASHTAGS = [
-  '#MiraHeladoPositivoDeLasCosas',
-  '#PorHeladoQueTúQuieras', 
-  '#MejoresVentas',
-  '#PopsyLovers',
-  '#HeladosFelices',
-  '#DulceMomento',
-  '#VentasDeHelado',
-  '#SaborQueEnamora',
-  '#TeamPopsy',
-  '#HeladosConAmor',
-  '#MetasCumplidas',
-  '#VendeMás',
-  '#ClientesFelices',
-  '#MomentoPopsy',
-  '#DulzuraTotal'
-];
-
-// Floating Hashtag
-const FloatingHashtag = ({ text, delay, x, speed }) => (
-  <motion.div
-    className="absolute whitespace-nowrap"
-    style={{ left: x }}
-    initial={{ opacity: 0, y: -50 }}
-    animate={{ 
-      opacity: [0, 0.35, 0.35, 0],
-      y: [-50, window.innerHeight + 50],
-    }}
-    transition={{ 
-      duration: speed,
-      delay,
-      repeat: Infinity,
-      ease: "linear"
-    }}
-  >
-    <span className="text-pink-400/60 font-medium text-sm tracking-wide drop-shadow-sm">
-      {text}
-    </span>
-  </motion.div>
-);
+// Ya no se usan hashtags
 
 // Destellos de colores pastel
 const Sparkle = ({ color, size = 6 }) => (
@@ -88,17 +48,24 @@ const Milkshake = ({ opacity = 0.5 }) => (
   </svg>
 );
 
-// Banana Split estilo sketch
-const BananaSplit = ({ opacity = 0.45 }) => (
+// Banana Split estilo sketch - MEJORADO
+const BananaSplit = ({ opacity = 0.55 }) => (
   <svg viewBox="0 0 60 35" className="w-full h-full">
+    {/* Plato */}
     <ellipse cx="30" cy="28" rx="28" ry="6" fill="none" stroke="#999" strokeWidth="0.8" strokeDasharray="2,1" opacity={opacity} />
     <ellipse cx="30" cy="28" rx="28" ry="6" fill="#F5F5DC" opacity={opacity * 0.3} />
+    {/* Banana */}
     <path d="M 8 22 Q 15 8 30 12 Q 45 8 52 22" fill="none" stroke="#DAA520" strokeWidth="1.2" opacity={opacity} />
     <path d="M 8 22 Q 15 8 30 12 Q 45 8 52 22" fill="#FFE135" opacity={opacity * 0.4} />
+    {/* Bolas de helado */}
     <circle cx="18" cy="18" r="7" fill="#FFB5C5" opacity={opacity * 0.5} stroke="#999" strokeWidth="0.6" />
     <circle cx="30" cy="15" r="7" fill="#8B4513" opacity={opacity * 0.5} stroke="#999" strokeWidth="0.6" />
     <circle cx="42" cy="18" r="7" fill="#FFF8DC" opacity={opacity * 0.5} stroke="#999" strokeWidth="0.6" />
+    {/* Cherry */}
     <circle cx="30" cy="8" r="3" fill="#DC143C" opacity={opacity * 0.6} />
+    {/* Detalles */}
+    <circle cx="25" cy="20" r="1" fill="#FF1493" opacity={opacity * 0.4} />
+    <circle cx="35" cy="19" r="1" fill="#FF1493" opacity={opacity * 0.4} />
   </svg>
 );
 
@@ -130,24 +97,19 @@ const IceCreamCup = ({ opacity = 0.55 }) => (
 
 const sketchElements = [
   { x: '5%', size: 30, type: 'cone', delay: 0 },
-  { x: '15%', size: 26, type: 'shake', delay: 2 },
-  { x: '25%', size: 28, type: 'tub', delay: 5 },
+  { x: '12%', size: 26, type: 'shake', delay: 2 },
+  { x: '20%', size: 38, type: 'banana', delay: 5 },
+  { x: '28%', size: 28, type: 'tub', delay: 5 },
   { x: '35%', size: 24, type: 'cup', delay: 1 },
-  { x: '45%', size: 38, type: 'banana', delay: 4 },
-  { x: '55%', size: 28, type: 'cone', delay: 3 },
-  { x: '65%', size: 26, type: 'shake', delay: 6 },
-  { x: '75%', size: 28, type: 'tub', delay: 2.5 },
-  { x: '85%', size: 30, type: 'cup', delay: 4.5 },
-  { x: '95%', size: 32, type: 'cone', delay: 1.5 },
+  { x: '42%', size: 36, type: 'banana', delay: 4 },
+  { x: '50%', size: 28, type: 'cone', delay: 3 },
+  { x: '58%', size: 26, type: 'shake', delay: 6 },
+  { x: '65%', size: 40, type: 'banana', delay: 2 },
+  { x: '72%', size: 28, type: 'tub', delay: 2.5 },
+  { x: '80%', size: 30, type: 'cup', delay: 4.5 },
+  { x: '88%', size: 32, type: 'cone', delay: 1.5 },
+  { x: '95%', size: 34, type: 'banana', delay: 3.5 },
 ];
-
-// Hashtags positions
-const hashtagElements = HASHTAGS.map((tag, i) => ({
-  text: tag,
-  x: `${(i * 7) % 100}%`,
-  delay: i * 1.5,
-  speed: 18 + (i % 5) * 2
-}));
 
 // Destellos pastel
 const sparkles = [
@@ -166,17 +128,6 @@ const sparkles = [
 export default function FloatingIceCreamsBg() {
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden">
-      {/* Hashtags flotantes estilo red social - más visibles */}
-      {hashtagElements.map((hashtag, i) => (
-        <FloatingHashtag 
-          key={`hashtag-${i}`} 
-          text={hashtag.text} 
-          x={hashtag.x} 
-          delay={hashtag.delay}
-          speed={hashtag.speed}
-        />
-      ))}
-
       {/* Destellos pastel */}
       {sparkles.map((sparkle, i) => (
         <motion.div

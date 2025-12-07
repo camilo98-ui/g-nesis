@@ -286,9 +286,28 @@ export default function WeeklyCalendar({
             <SelectContent>{yearWeeks.map(w => <SelectItem key={w.number} value={w.number.toString()}>{w.label}</SelectItem>)}</SelectContent>
           </Select>
           {!readOnly && (
-            <Button variant="secondary" size="sm" onClick={copyWeek} disabled={copying || !shifts.length} className="gap-2 bg-white/20 text-white hover:bg-white/30 border-0">
-              {copying ? <Loader2 className="w-4 h-4 animate-spin" /> : <Copy className="w-4 h-4" />} Copiar
-            </Button>
+            <>
+              <Button variant="secondary" size="sm" onClick={copyWeek} disabled={copying || !shifts.length} className="gap-2 bg-white/20 text-white hover:bg-white/30 border-0">
+                {copying ? <Loader2 className="w-4 h-4 animate-spin" /> : <Copy className="w-4 h-4" />} Copiar
+              </Button>
+              <Button 
+                variant="secondary" 
+                size="sm" 
+                onClick={async () => {
+                  if (confirm('¿Borrar todos los turnos de esta semana?')) {
+                    for (const shift of shifts) {
+                      await base44.entities.Shift.delete(shift.id);
+                    }
+                    queryClient.invalidateQueries({ queryKey: ['shifts'] });
+                    toast.success('Semana borrada');
+                  }
+                }}
+                disabled={!shifts.length}
+                className="gap-2 bg-red-500/20 text-white hover:bg-red-500/30 border-0"
+              >
+                <Trash2 className="w-4 h-4" /> Borrar Semana
+              </Button>
+            </>
           )}
           <Button variant="secondary" size="sm" onClick={onExportPDF} className="gap-2 bg-white text-pink-500 hover:bg-pink-50">
             <Download className="w-4 h-4" /> PDF
