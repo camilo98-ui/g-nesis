@@ -117,7 +117,6 @@ export default function GrowthVelocityChart({ dailyTrend = [], budget = 0, forma
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis dataKey="date" tick={{ fontSize: 10 }} />
               <YAxis domain={[50, 150]} tick={{ fontSize: 10 }} tickFormatter={(v) => `${v}%`} />
-              <ReferenceLine y={100} stroke="#10b981" strokeDasharray="5 5" label={{ value: 'Meta', fontSize: 10, fill: '#10b981' }} />
               <Tooltip 
                 content={({ active, payload }) => {
                   if (!active || !payload?.length) return null;
