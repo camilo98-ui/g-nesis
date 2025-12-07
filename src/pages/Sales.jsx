@@ -6,12 +6,12 @@ import StoreSelector, { STORES } from '@/components/StoreSelector';
 import ShiftRecordForm from '@/components/forms/ShiftRecordForm';
 import DailySalesForm from '@/components/forms/DailySalesForm';
 import SalesActivityLog from '@/components/sales/SalesActivityLog';
-import SalesByHourChart from '@/components/sales/SalesByHourChart';
+
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 
 import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
-import { ArrowLeft, TrendingUp, Clock, Calendar } from 'lucide-react';
+import { ArrowLeft, Clock, Calendar } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
@@ -30,16 +30,6 @@ export default function Sales() {
   };
 
   const selectedStoreName = STORES.find(s => s.code === selectedStore)?.name || '';
-
-  const { data: shiftRecords = [] } = useQuery({
-    queryKey: ['shiftRecords', selectedStore],
-    queryFn: () => base44.entities.ShiftRecord.filter({ store_id: selectedStore }),
-    enabled: !!selectedStore
-  });
-
-  const formatCurrency = (v) => new Intl.NumberFormat('es-CO', { 
-    style: 'currency', currency: 'COP', minimumFractionDigits: 0 
-  }).format(v);
 
   return (
     <div className="min-h-screen bg-white relative">
@@ -71,9 +61,6 @@ export default function Sales() {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-6"
           >
-            {/* Análisis por hora */}
-            <SalesByHourChart shiftRecords={shiftRecords} formatCurrency={formatCurrency} />
-
             {/* Log de actividad */}
             <div className="flex justify-end">
               <SalesActivityLog storeId={selectedStore} />
