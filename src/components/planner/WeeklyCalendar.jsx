@@ -263,33 +263,58 @@ export default function WeeklyCalendar({
 
   return (
     <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-      {/* Header */}
-      <div className="p-3 sm:p-4 border-b border-gray-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3 bg-gradient-to-r from-rose-400 to-pink-400">
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={() => setCurrentWeek(subWeeks(currentWeek, 1))} className="text-white hover:bg-white/20">
-            <ChevronLeft className="w-5 h-5" />
+      {/* Header - Optimizado para móvil */}
+      <div className="p-2 sm:p-4 border-b border-gray-100 bg-gradient-to-r from-rose-400 to-pink-400">
+        {/* Navegación de semanas - MEJORADA */}
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => setCurrentWeek(subWeeks(currentWeek, 1))} 
+            className="text-white hover:bg-white/20 h-10 px-3"
+          >
+            <ChevronLeft className="w-6 h-6" />
           </Button>
-          <div className="text-white">
-            <p className="text-[10px] sm:text-xs opacity-80">Semana {currentWeekNumber}</p>
-            <h2 className="font-bold text-sm sm:text-lg">{format(currentWeek, "d MMM", { locale: es })} - {format(weekDays[6], "d MMM yyyy", { locale: es })}</h2>
+          
+          <div className="flex-1 text-center text-white">
+            <p className="text-xs sm:text-sm opacity-90 font-medium">Semana {currentWeekNumber}</p>
+            <h2 className="font-bold text-base sm:text-lg leading-tight">
+              {format(currentWeek, "d MMM", { locale: es })} - {format(weekDays[6], "d MMM yyyy", { locale: es })}
+            </h2>
           </div>
-          <Button variant="ghost" size="icon" onClick={() => setCurrentWeek(addWeeks(currentWeek, 1))} className="text-white hover:bg-white/20">
-            <ChevronRight className="w-5 h-5" />
+          
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => setCurrentWeek(addWeeks(currentWeek, 1))} 
+            className="text-white hover:bg-white/20 h-10 px-3"
+          >
+            <ChevronRight className="w-6 h-6" />
           </Button>
         </div>
-        <div className="flex flex-wrap gap-1 sm:gap-2">
+
+        {/* Acciones - Grid responsive */}
+        <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-1.5 sm:gap-2">
           <Select value={currentWeekNumber.toString()} onValueChange={(v) => {
             const selected = yearWeeks.find(w => w.number.toString() === v);
             if (selected) setCurrentWeek(selected.week);
           }}>
-            <SelectTrigger className="w-32 sm:w-40 bg-white/20 border-white/30 text-white text-xs sm:text-sm"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="bg-white/20 border-white/30 text-white text-xs h-9 col-span-2 sm:col-span-1 sm:w-40">
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>{yearWeeks.map(w => <SelectItem key={w.number} value={w.number.toString()}>{w.label}</SelectItem>)}</SelectContent>
           </Select>
           {!readOnly && (
             <>
-              <Button variant="secondary" size="sm" onClick={copyWeek} disabled={copying || !shifts.length} className="gap-1 sm:gap-2 bg-white/20 text-white hover:bg-white/30 border-0 text-xs px-2 sm:px-3">
-                {copying ? <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 animate-spin" /> : <Copy className="w-3 h-3 sm:w-4 sm:h-4" />} 
-                <span className="hidden sm:inline">Copiar</span>
+              <Button 
+                variant="secondary" 
+                size="sm" 
+                onClick={copyWeek} 
+                disabled={copying || !shifts.length} 
+                className="bg-white/20 text-white hover:bg-white/30 border-0 h-9 text-xs"
+              >
+                {copying ? <Loader2 className="w-4 h-4 animate-spin" /> : <Copy className="w-4 h-4" />}
+                <span className="ml-1.5 sm:ml-2">Copiar</span>
               </Button>
               <Button 
                 variant="secondary" 
@@ -304,26 +329,31 @@ export default function WeeklyCalendar({
                   }
                 }}
                 disabled={!shifts.length}
-                className="gap-1 sm:gap-2 bg-red-500/20 text-white hover:bg-red-500/30 border-0 text-xs px-2 sm:px-3"
+                className="bg-red-500/20 text-white hover:bg-red-500/30 border-0 h-9 text-xs"
               >
-                <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" /> 
-                <span className="hidden sm:inline">Borrar</span>
+                <Trash2 className="w-4 h-4" />
+                <span className="ml-1.5 sm:ml-2">Borrar</span>
               </Button>
             </>
           )}
-          <Button variant="secondary" size="sm" onClick={onExportPDF} className="gap-1 sm:gap-2 bg-white text-pink-500 hover:bg-pink-50 text-xs px-2 sm:px-3">
-            <Download className="w-3 h-3 sm:w-4 sm:h-4" /> 
-            <span className="hidden sm:inline">PDF</span>
+          <Button 
+            variant="secondary" 
+            size="sm" 
+            onClick={onExportPDF} 
+            className="bg-white text-pink-500 hover:bg-pink-50 h-9 text-xs col-span-2 sm:col-span-1"
+          >
+            <Download className="w-4 h-4" />
+            <span className="ml-1.5 sm:ml-2">Exportar PDF</span>
           </Button>
         </div>
       </div>
 
-      {/* Calendar Grid */}
+      {/* Calendar Grid - OPTIMIZADO para móvil */}
       {loading ? (
         <div className="p-10 text-center"><Loader2 className="w-8 h-8 animate-spin text-pink-400 mx-auto" /></div>
       ) : (
         <DragDropContext onDragEnd={handleDragEnd}>
-          <div className="grid grid-cols-7 divide-x divide-gray-100 overflow-x-auto">
+          <div className="grid grid-cols-7 divide-x divide-gray-100 overflow-x-auto touch-pan-x">
             {weekDays.map((day, idx) => {
               const dayShifts = getShiftsForDay(day);
               const isCurrentDay = isToday(day);
@@ -339,25 +369,26 @@ export default function WeeklyCalendar({
                       {...provided.droppableProps}
                       onMouseEnter={() => setHoveredDay(idx)}
                       onMouseLeave={() => setHoveredDay(null)}
-                      animate={{ scale: isHovered ? 1.01 : 1 }}
-                      className={`min-h-[320px] sm:min-h-[380px] min-w-[100px] sm:min-w-[120px] transition-all relative ${snapshot.isDraggingOver ? 'bg-pink-50/50' : ''} ${isCurrentDay ? 'bg-rose-50/30' : isHovered ? 'bg-gray-50/30' : 'bg-white'} ${holiday ? 'bg-gradient-to-b from-amber-50/50 to-orange-50/30' : ''}`}
+                      className={`min-h-[400px] sm:min-h-[380px] min-w-[110px] sm:min-w-[140px] transition-all relative ${snapshot.isDraggingOver ? 'bg-pink-50/50' : ''} ${isCurrentDay ? 'bg-rose-50/30' : isHovered ? 'bg-gray-50/30' : 'bg-white'} ${holiday ? 'bg-gradient-to-b from-amber-50/50 to-orange-50/30' : ''}`}
                     >
-                      {/* Day Header */}
-                      <div className={`p-1.5 sm:p-2 text-center border-b sticky top-0 z-10 ${isCurrentDay ? 'bg-gradient-to-r from-rose-300 to-pink-300 text-white' : holiday ? 'bg-gradient-to-r from-amber-300 to-orange-300 text-white' : 'bg-gray-50'}`}>
-                        <p className={`text-[8px] sm:text-[10px] font-bold uppercase tracking-wider ${isCurrentDay || holiday ? 'text-white/80' : 'text-gray-400'}`}>
+                      {/* Day Header - Mejorado para móvil */}
+                      <div className={`p-2 sm:p-2 text-center border-b sticky top-0 z-10 ${isCurrentDay ? 'bg-gradient-to-r from-rose-300 to-pink-300 text-white shadow-md' : holiday ? 'bg-gradient-to-r from-amber-300 to-orange-300 text-white' : 'bg-gray-50'}`}>
+                        <p className={`text-[10px] sm:text-[10px] font-bold uppercase tracking-wider mb-0.5 ${isCurrentDay || holiday ? 'text-white/90' : 'text-gray-400'}`}>
                           {format(day, 'EEE', { locale: es })}
                         </p>
-                        <p className={`text-lg sm:text-xl font-black ${isCurrentDay || holiday ? 'text-white' : 'text-gray-700'}`}>{format(day, 'd')}</p>
+                        <p className={`text-2xl sm:text-xl font-black ${isCurrentDay || holiday ? 'text-white' : 'text-gray-700'}`}>{format(day, 'd')}</p>
                         {holiday && (
-                          <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 1, repeat: Infinity }} className="flex items-center justify-center gap-1 text-[9px] text-white/90">
+                          <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 1, repeat: Infinity }} className="flex items-center justify-center gap-1 text-[10px] text-white/90 mt-0.5">
                             <PartyPopper className="w-3 h-3" /> Festivo
                           </motion.div>
                         )}
-                        <p className={`text-[8px] sm:text-[9px] ${isCurrentDay || holiday ? 'text-white/70' : 'text-gray-400'}`}>{dayShifts.length} turno{dayShifts.length !== 1 ? 's' : ''}</p>
+                        <p className={`text-[10px] sm:text-[9px] font-medium mt-1 ${isCurrentDay || holiday ? 'text-white/80' : 'text-gray-500'}`}>
+                          {dayShifts.length} turno{dayShifts.length !== 1 ? 's' : ''}
+                        </p>
                       </div>
 
-                      {/* Shifts */}
-                      <div className="p-1 sm:p-1.5 space-y-1 sm:space-y-1.5">
+                      {/* Shifts - OPTIMIZADO para móvil */}
+                      <div className="p-1.5 sm:p-1.5 space-y-2 sm:space-y-1.5">
                         <AnimatePresence>
                           {dayShifts.map((shift, shiftIdx) => {
                             const role = ROLES_CONFIG[shift.role] || ROLES_CONFIG.caja;
@@ -374,48 +405,56 @@ export default function WeeklyCalendar({
                                     {...provided.draggableProps}
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0 }}
-                                    whileHover={{ scale: 1.02, y: -2 }}
-                                    className={`rounded-xl overflow-hidden border-2 ${role.border} ${role.bg} shadow-sm hover:shadow-lg transition-all cursor-pointer group relative ${snapshot.isDragging ? 'shadow-xl rotate-2' : ''}`}
+                                    exit={{ opacity: 0, scale: 0.8 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    onClick={() => !readOnly && handleEditShift(shift)}
+                                    className={`rounded-xl overflow-hidden border-2 ${role.border} ${role.bg} shadow-md active:shadow-lg transition-all cursor-pointer relative ${snapshot.isDragging ? 'shadow-2xl scale-105' : ''}`}
                                   >
-                                    {/* Role Header con decoraciones blancas */}
-                                    <div className={`${role.header} px-1.5 sm:px-2 py-1 sm:py-1.5 flex items-center justify-between relative overflow-hidden`}>
-                                     {/* Decoraciones de helados en blanco */}
+                                    {/* Role Header - Más grande en móvil */}
+                                    <div className={`${role.header} px-2 py-1.5 sm:py-1.5 flex items-center justify-between relative overflow-hidden`}>
                                      <IceCreamDecorations />
-                                     <div className="flex items-center gap-1 sm:gap-1.5 relative z-10">
+                                     <div className="flex items-center gap-1.5 sm:gap-1.5 relative z-10">
                                        <motion.div animate={{ scale: [1, 1.15, 1] }} transition={{ duration: 2, repeat: Infinity }}>
-                                         <RoleIcon className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white drop-shadow-sm" />
+                                         <RoleIcon className="w-4 h-4 sm:w-3.5 sm:h-3.5 text-white drop-shadow-sm" />
                                        </motion.div>
-                                       <span className="text-[8px] sm:text-[10px] font-bold text-white drop-shadow-sm">{role.label}</span>
+                                       <span className="text-[11px] sm:text-[10px] font-bold text-white drop-shadow-sm">{role.label}</span>
                                      </div>
-                                     <div {...provided.dragHandleProps} className="cursor-grab relative z-10">
-                                       <GripVertical className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white/70" />
+                                     <div {...provided.dragHandleProps} className="cursor-grab active:cursor-grabbing relative z-10 p-1 touch-manipulation">
+                                       <GripVertical className="w-4 h-4 sm:w-3 sm:h-3 text-white/70" />
                                      </div>
                                     </div>
 
-                                    {/* Content */}
-                                    <div className="p-1.5 sm:p-2 pt-2 sm:pt-2.5">
-                                     <p className="font-bold text-[10px] sm:text-sm text-gray-700 truncate">{shift.cashier_name || 'Sin asignar'}</p>
+                                    {/* Content - Más espacioso en móvil */}
+                                    <div className="p-2 sm:p-2 pt-2 sm:pt-2.5">
+                                     <p className="font-bold text-[11px] sm:text-sm text-gray-700 truncate leading-tight mb-1.5">{shift.cashier_name || 'Sin asignar'}</p>
                                       {shift.role === 'descanso' ? (
-                                        <div className="flex items-center justify-center bg-indigo-100/50 rounded px-1 sm:px-1.5 py-1 sm:py-1.5">
-                                          <span className="text-[9px] sm:text-xs font-medium text-indigo-500">Día libre</span>
+                                        <div className="flex items-center justify-center bg-indigo-100/50 rounded px-2 py-1.5">
+                                          <span className="text-[11px] sm:text-xs font-medium text-indigo-600">😴 Día libre</span>
                                         </div>
                                       ) : (
-                                        <div className="flex flex-col sm:flex-row items-center justify-between bg-white/70 rounded px-1 sm:px-1.5 py-1">
-                                          <div className="flex items-center gap-0.5 sm:gap-1">
-                                            <Clock className={`w-2.5 h-2.5 sm:w-3 sm:h-3 ${role.text}`} />
-                                            <span className="text-[9px] sm:text-xs font-bold text-gray-600">{shift.start_time} - {shift.end_time}</span>
+                                        <div className="flex items-center justify-between bg-white/80 rounded-lg px-2 py-1.5">
+                                          <div className="flex items-center gap-1">
+                                            <Clock className={`w-3.5 h-3.5 sm:w-3 sm:h-3 ${role.text}`} />
+                                            <span className="text-[11px] sm:text-xs font-bold text-gray-700">{shift.start_time} - {shift.end_time}</span>
                                           </div>
-                                          <span className={`text-[8px] sm:text-[10px] font-bold ${role.text}`}>{duration}h</span>
+                                          <span className={`text-[10px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded ${role.text} bg-white/60`}>{duration}h</span>
                                         </div>
                                       )}
                                       {!readOnly && (
-                                        <div className="flex justify-end gap-0.5 sm:gap-1 mt-0.5 sm:mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                          <motion.button whileTap={{ scale: 0.9 }} onClick={() => handleEditShift(shift)} className="p-0.5 sm:p-1 rounded bg-blue-100 hover:bg-blue-200">
-                                            <Pencil className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-blue-500" />
+                                        <div className="flex justify-end gap-1 mt-2 sm:mt-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                                          <motion.button 
+                                            whileTap={{ scale: 0.9 }} 
+                                            onClick={(e) => { e.stopPropagation(); handleEditShift(shift); }} 
+                                            className="p-1.5 sm:p-1 rounded-lg bg-blue-100 active:bg-blue-200 touch-manipulation"
+                                          >
+                                            <Pencil className="w-3.5 h-3.5 sm:w-3 sm:h-3 text-blue-600" />
                                           </motion.button>
-                                          <motion.button whileTap={{ scale: 0.9 }} onClick={() => deleteMutation.mutate(shift.id)} className="p-0.5 sm:p-1 rounded bg-red-100 hover:bg-red-200">
-                                            <Trash2 className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-red-500" />
+                                          <motion.button 
+                                            whileTap={{ scale: 0.9 }} 
+                                            onClick={(e) => { e.stopPropagation(); deleteMutation.mutate(shift.id); }} 
+                                            className="p-1.5 sm:p-1 rounded-lg bg-red-100 active:bg-red-200 touch-manipulation"
+                                          >
+                                            <Trash2 className="w-3.5 h-3.5 sm:w-3 sm:h-3 text-red-600" />
                                           </motion.button>
                                         </div>
                                       )}
@@ -429,10 +468,13 @@ export default function WeeklyCalendar({
                         {provided.placeholder}
                         
                         {!readOnly && (
-                          <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                          <motion.button 
+                            whileTap={{ scale: 0.97 }}
                             onClick={() => { setSelectedDay(day); setEditingShift(null); resetForm(); setShowAddShift(true); }}
-                            className={`w-full py-1.5 sm:py-2 border border-dashed rounded-lg text-[9px] sm:text-xs font-medium transition-all flex items-center justify-center gap-0.5 sm:gap-1 ${isHovered ? 'border-pink-300 text-pink-400 bg-pink-50/30' : 'border-gray-200 text-gray-400 hover:border-pink-200'}`}>
-                            <Plus className="w-3 h-3 sm:w-4 sm:h-4" /> <span className="hidden sm:inline">Agregar</span><span className="sm:hidden">+</span>
+                            className={`w-full py-3 sm:py-2 border-2 border-dashed rounded-xl text-xs sm:text-xs font-bold transition-all flex items-center justify-center gap-1.5 touch-manipulation ${isHovered ? 'border-pink-400 text-pink-500 bg-pink-50/50' : 'border-gray-300 text-gray-500 active:border-pink-300 active:bg-pink-50/30'}`}
+                          >
+                            <Plus className="w-5 h-5 sm:w-4 sm:h-4" /> 
+                            <span>Agregar turno</span>
                           </motion.button>
                         )}
                       </div>
@@ -445,63 +487,111 @@ export default function WeeklyCalendar({
         </DragDropContext>
       )}
 
-      {/* Add/Edit Dialog */}
+      {/* Add/Edit Dialog - OPTIMIZADO para móvil */}
       <Dialog open={showAddShift} onOpenChange={(v) => { setShowAddShift(v); if (!v) setEditingShift(null); }}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="max-w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-pink-300 to-rose-300 rounded-lg flex items-center justify-center">
-                {editingShift ? <Pencil className="w-4 h-4 text-white" /> : <Plus className="w-4 h-4 text-white" />}
+            <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <div className="w-9 h-9 sm:w-8 sm:h-8 bg-gradient-to-r from-pink-300 to-rose-300 rounded-xl flex items-center justify-center flex-shrink-0">
+                {editingShift ? <Pencil className="w-5 h-5 sm:w-4 sm:h-4 text-white" /> : <Plus className="w-5 h-5 sm:w-4 sm:h-4 text-white" />}
               </div>
-              {editingShift ? 'Editar Turno' : `Agregar Turno - ${selectedDay && format(selectedDay, "EEE d MMM", { locale: es })}`}
+              <span className="leading-tight">
+                {editingShift ? 'Editar Turno' : `Agregar Turno`}
+                {selectedDay && <span className="block text-xs text-gray-500 font-normal">{format(selectedDay, "EEEE d 'de' MMMM", { locale: es })}</span>}
+              </span>
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-4">
+          <div className="space-y-5 py-4">
+            {/* Colaborador */}
             <div>
-              <label className="text-sm font-medium text-gray-700 mb-1 block">Colaborador</label>
+              <label className="text-sm font-bold text-gray-700 mb-2 block">Colaborador</label>
               <Select value={newShift.cashier_id} onValueChange={(v) => setNewShift({ ...newShift, cashier_id: v })}>
-                <SelectTrigger><SelectValue placeholder="Seleccionar" /></SelectTrigger>
-                <SelectContent>{cashiers.map(c => <SelectItem key={c.id} value={c.id}><div className="flex items-center gap-2"><User className="w-4 h-4" />{c.name}</div></SelectItem>)}</SelectContent>
+                <SelectTrigger className="h-12 text-base"><SelectValue placeholder="Seleccionar colaborador" /></SelectTrigger>
+                <SelectContent>
+                  {cashiers.map(c => (
+                    <SelectItem key={c.id} value={c.id} className="h-12">
+                      <div className="flex items-center gap-2">
+                        <User className="w-5 h-5 text-gray-500" />
+                        <span className="text-base">{c.name}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
               </Select>
             </div>
+
+            {/* Horario */}
             {newShift.role !== 'descanso' && (
               <div className="grid grid-cols-2 gap-3">
-                <div><label className="text-sm font-medium text-gray-700 mb-1 block">Inicio</label><Input type="time" value={newShift.start_time} onChange={(e) => setNewShift({ ...newShift, start_time: e.target.value })} /></div>
-                <div><label className="text-sm font-medium text-gray-700 mb-1 block">Fin</label><Input type="time" value={newShift.end_time} onChange={(e) => setNewShift({ ...newShift, end_time: e.target.value })} /></div>
+                <div>
+                  <label className="text-sm font-bold text-gray-700 mb-2 block">Hora inicio</label>
+                  <Input 
+                    type="time" 
+                    value={newShift.start_time} 
+                    onChange={(e) => setNewShift({ ...newShift, start_time: e.target.value })} 
+                    className="h-12 text-base"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-bold text-gray-700 mb-2 block">Hora fin</label>
+                  <Input 
+                    type="time" 
+                    value={newShift.end_time} 
+                    onChange={(e) => setNewShift({ ...newShift, end_time: e.target.value })} 
+                    className="h-12 text-base"
+                  />
+                </div>
               </div>
             )}
             {newShift.role === 'descanso' && (
-              <div className="p-4 bg-indigo-50 rounded-xl text-center">
-                <p className="text-sm text-indigo-600 font-medium">😴 Día de descanso - Sin horario</p>
+              <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl text-center border-2 border-indigo-200">
+                <p className="text-base text-indigo-700 font-bold">😴 Día de descanso</p>
+                <p className="text-sm text-indigo-600">Sin horario de trabajo</p>
               </div>
             )}
+
+            {/* Posición */}
             <div>
-              <label className="text-sm font-medium text-gray-700 mb-2 block">Posición</label>
-              <div className="grid grid-cols-3 gap-2">
+              <label className="text-sm font-bold text-gray-700 mb-2 block">Posición de trabajo</label>
+              <div className="grid grid-cols-3 gap-2.5">
                 {sortedRoles.map(([key, config]) => {
                   const RoleIcon = config.icon;
                   const isSelected = newShift.role === key;
                   const isRest = key === 'descanso';
                   return (
-                    <motion.button key={key} whileTap={{ scale: 0.95 }} onClick={() => setNewShift({ ...newShift, role: key })}
-                      className={`p-2 rounded-lg border transition-all flex flex-col items-center gap-1 ${isSelected ? `${config.bg} ${config.border} shadow` : 'border-gray-200 hover:border-gray-300'} ${isRest ? 'col-span-3 bg-gradient-to-r from-indigo-50 to-purple-50' : ''}`}>
-                      <RoleIcon className={`w-4 h-4 ${isSelected ? config.text : 'text-gray-400'}`} />
-                      <span className={`text-[9px] font-medium ${isSelected ? config.text : 'text-gray-500'}`}>{config.label}</span>
-                      {config.priority === 1 && !isRest && <span className="text-[7px] text-emerald-500 font-bold">CRÍTICO</span>}
-                      {config.priority === 2 && <span className="text-[7px] text-amber-500 font-bold">IMPORTANTE</span>}
-                      {config.priority === 3 && <span className="text-[7px] text-gray-400">SECUNDARIO</span>}
+                    <motion.button 
+                      key={key} 
+                      whileTap={{ scale: 0.95 }} 
+                      onClick={() => setNewShift({ ...newShift, role: key })}
+                      className={`p-3 rounded-xl border-2 transition-all flex flex-col items-center gap-1.5 touch-manipulation ${isSelected ? `${config.bg} ${config.border} shadow-lg scale-105` : 'border-gray-200 hover:border-gray-300 bg-white'} ${isRest ? 'col-span-3 bg-gradient-to-r from-indigo-50 to-purple-50' : ''}`}
+                    >
+                      <RoleIcon className={`w-6 h-6 ${isSelected ? config.text : 'text-gray-400'}`} />
+                      <span className={`text-[11px] font-bold leading-tight text-center ${isSelected ? config.text : 'text-gray-600'}`}>{config.label}</span>
+                      {config.priority === 1 && !isRest && <span className="text-[8px] text-emerald-600 font-bold bg-emerald-100 px-1.5 py-0.5 rounded">CRÍTICO</span>}
+                      {config.priority === 2 && <span className="text-[8px] text-amber-600 font-bold bg-amber-100 px-1.5 py-0.5 rounded">IMPORTANTE</span>}
                     </motion.button>
                   );
                 })}
               </div>
             </div>
           </div>
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setShowAddShift(false)}>Cancelar</Button>
-            <Button onClick={handleSaveShift} disabled={!newShift.cashier_id || createMutation.isPending || updateMutation.isPending}
-              className="bg-gradient-to-r from-pink-300 to-rose-300 text-white">
-              {(createMutation.isPending || updateMutation.isPending) && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-              {editingShift ? 'Guardar' : 'Crear'}
+
+          {/* Botones */}
+          <div className="flex gap-2 pt-2 border-t">
+            <Button 
+              variant="outline" 
+              onClick={() => setShowAddShift(false)}
+              className="flex-1 h-12 text-base font-medium"
+            >
+              Cancelar
+            </Button>
+            <Button 
+              onClick={handleSaveShift} 
+              disabled={!newShift.cashier_id || createMutation.isPending || updateMutation.isPending}
+              className="flex-1 h-12 text-base font-bold bg-gradient-to-r from-pink-400 to-rose-400 hover:from-pink-500 hover:to-rose-500 text-white shadow-lg"
+            >
+              {(createMutation.isPending || updateMutation.isPending) && <Loader2 className="w-5 h-5 animate-spin mr-2" />}
+              {editingShift ? '✓ Guardar cambios' : '+ Crear turno'}
             </Button>
           </div>
         </DialogContent>
