@@ -41,16 +41,7 @@ const MENU_ITEMS = [
     iconColor: 'text-violet-500',
     textColor: 'text-violet-700'
   },
-  { 
-    name: 'Registro de Ventas', 
-    page: 'Sales',
-    icon: TrendingUp, 
-    description: 'Por cajero y tienda',
-    bgColor: 'bg-gradient-to-br from-emerald-100/90 to-teal-100/80',
-    iconBg: 'bg-emerald-200/60',
-    iconColor: 'text-emerald-500',
-    textColor: 'text-emerald-700'
-  },
+
   { 
     name: 'PopsyStars', 
     page: 'Rankings',
