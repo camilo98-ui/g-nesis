@@ -137,29 +137,24 @@ export default function DailySalesForm({ storeId, onSuccess }) {
         throw error;
       }
     },
-    onSuccess: async () => {
-      try {
-        await queryClient.invalidateQueries(['dailySales']);
-        await queryClient.invalidateQueries(['salesLogs']);
+    onSuccess: () => {
+      queryClient.invalidateQueries(['dailySales']);
+      queryClient.invalidateQueries(['salesLogs']);
 
-        setFormData({
-          ...formData,
-          total_sales: '',
-          total_tickets: '',
-          total_transactions: '',
-          total_suggested: ''
-        });
+      setFormData(prev => ({
+        ...prev,
+        total_sales: '',
+        total_tickets: '',
+        total_transactions: '',
+        total_suggested: ''
+      }));
 
-        toast.success('Ventas guardadas exitosamente');
-        setShowSuccess(true);
+      setShowSuccess(true);
 
-        setTimeout(() => {
-          setShowSuccess(false);
-          onSuccess?.();
-        }, 2000);
-      } catch (error) {
-        console.error('Error en onSuccess:', error);
-      }
+      setTimeout(() => {
+        setShowSuccess(false);
+        if (onSuccess) onSuccess();
+      }, 2500);
     },
     onError: (error) => {
       console.error('Error guardando ventas:', error);
@@ -167,7 +162,7 @@ export default function DailySalesForm({ storeId, onSuccess }) {
     }
   });
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     e.stopPropagation();
     
@@ -177,11 +172,7 @@ export default function DailySalesForm({ storeId, onSuccess }) {
       return;
     }
     
-    try {
-      await createMutation.mutateAsync(formData);
-    } catch (error) {
-      console.error('Error en submit:', error);
-    }
+    createMutation.mutate(formData);
   };
 
   return (
@@ -191,13 +182,14 @@ export default function DailySalesForm({ storeId, onSuccess }) {
       className="relative"
     >
       {/* Success Animation Overlay */}
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {showSuccess && (
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
-            className="absolute inset-0 z-50 flex items-center justify-center bg-white/95 backdrop-blur-sm rounded-2xl"
+            className="absolute inset-0 z-[100] flex items-center justify-center bg-white/98 backdrop-blur-sm rounded-2xl"
+            style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
           >
             <motion.div
               initial={{ scale: 0 }}

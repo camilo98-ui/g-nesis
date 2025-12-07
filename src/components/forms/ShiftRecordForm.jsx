@@ -109,31 +109,26 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
         throw error;
       }
     },
-    onSuccess: async () => {
-      try {
-        await queryClient.invalidateQueries(['shiftRecords']);
-        await queryClient.invalidateQueries(['dailySales']);
-        await queryClient.invalidateQueries(['salesLogs']);
-        await queryClient.invalidateQueries(['budget']);
+    onSuccess: () => {
+      queryClient.invalidateQueries(['shiftRecords']);
+      queryClient.invalidateQueries(['dailySales']);
+      queryClient.invalidateQueries(['salesLogs']);
+      queryClient.invalidateQueries(['budget']);
 
-        setFormData({
-          ...formData,
-          sales: '',
-          tickets: '',
-          transactions: '',
-          suggested_sales: ''
-        });
+      setFormData(prev => ({
+        ...prev,
+        sales: '',
+        tickets: '',
+        transactions: '',
+        suggested_sales: ''
+      }));
 
-        toast.success('Turno guardado exitosamente');
-        setShowSuccess(true);
+      setShowSuccess(true);
 
-        setTimeout(() => {
-          setShowSuccess(false);
-          onSuccess?.();
-        }, 2000);
-      } catch (error) {
-        console.error('Error en onSuccess:', error);
-      }
+      setTimeout(() => {
+        setShowSuccess(false);
+        if (onSuccess) onSuccess();
+      }, 2500);
     },
     onError: (error) => {
       console.error('Error guardando turno:', error);
@@ -141,7 +136,7 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
     }
   });
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     e.stopPropagation();
     
@@ -155,11 +150,7 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
       return;
     }
 
-    try {
-      await createMutation.mutateAsync(formData);
-    } catch (error) {
-      console.error('Error en submit:', error);
-    }
+    createMutation.mutate(formData);
   };
 
   const selectedShift = SHIFTS.find(s => s.value === formData.shift);
@@ -172,13 +163,14 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
       className="relative"
     >
       {/* Success Animation Overlay */}
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {showSuccess && (
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
-            className="absolute inset-0 z-50 flex items-center justify-center bg-white/95 backdrop-blur-sm rounded-2xl"
+            className="absolute inset-0 z-[100] flex items-center justify-center bg-white/98 backdrop-blur-sm rounded-2xl"
+            style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
           >
             <motion.div
               initial={{ scale: 0 }}
