@@ -85,11 +85,21 @@ export default function Sales() {
               </TabsList>
 
               <TabsContent value="shift">
-                <ShiftRecordForm storeId={selectedStore} />
+                <ShiftRecordForm 
+                  storeId={selectedStore} 
+                  onSuccess={() => {
+                    // Recargar log cuando se guarda
+                  }} 
+                />
               </TabsContent>
 
               <TabsContent value="daily">
-                <DailySalesForm storeId={selectedStore} />
+                <DailySalesForm 
+                  storeId={selectedStore}
+                  onSuccess={() => {
+                    // Recargar log cuando se guarda
+                  }}
+                />
               </TabsContent>
             </Tabs>
           </motion.div>

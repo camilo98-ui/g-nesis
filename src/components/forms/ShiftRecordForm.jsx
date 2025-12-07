@@ -161,6 +161,7 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className="relative"
+      style={{ position: 'relative', isolation: 'isolate' }}
     >
       {/* Success Animation Overlay */}
       <AnimatePresence mode="wait">
