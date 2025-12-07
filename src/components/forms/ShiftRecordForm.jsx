@@ -40,9 +40,7 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
       const user = await base44.auth.me();
       const cashier = cashiers.find(c => c.id === data.cashier_id);
       
-      console.log('🔄 Guardando turno:', { storeId, cashierId: data.cashier_id, date: data.date });
-      
-      // Crear ShiftRecord
+      // 1. Crear ShiftRecord
       const record = await base44.entities.ShiftRecord.create({
         store_id: storeId,
         cashier_id: data.cashier_id,
@@ -56,12 +54,10 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
         average_ticket: data.tickets > 0 ? (parseFloat(data.sales) || 0) / parseInt(data.tickets) : 0
       });
       
-      console.log('✅ ShiftRecord creado:', record.id);
-    
-      // Esperar un momento para consistencia
-      await new Promise(resolve => setTimeout(resolve, 300));
+      // 2. Esperar para asegurar consistencia
+      await new Promise(resolve => setTimeout(resolve, 500));
       
-      // Recalcular DailySales
+      // 3. Recalcular DailySales
       const allDayRecords = await base44.entities.ShiftRecord.filter({ 
         store_id: storeId, 
         date: data.date 
@@ -73,8 +69,6 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
         transactions: acc.transactions + (r.transactions || 0),
         suggested: acc.suggested + (r.suggested_sales || 0)
       }), { sales: 0, tickets: 0, transactions: 0, suggested: 0 });
-      
-      console.log('📊 Totales del día:', dailyTotals);
       
       const existingDailySales = await base44.entities.DailySales.filter({ 
         store_id: storeId, 
@@ -88,7 +82,6 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
           total_transactions: dailyTotals.transactions,
           total_suggested: dailyTotals.suggested
         });
-        console.log('✅ DailySales actualizado');
       } else {
         await base44.entities.DailySales.create({
           store_id: storeId,
@@ -98,10 +91,9 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
           total_transactions: dailyTotals.transactions,
           total_suggested: dailyTotals.suggested
         });
-        console.log('✅ DailySales creado');
       }
         
-      // Crear log
+      // 4. Crear log
       await base44.entities.SalesLog.create({
         store_id: storeId,
         record_type: 'shift_record',
@@ -114,14 +106,13 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
         details: JSON.stringify({ shift: data.shift })
       });
       
-      console.log('✅ GUARDADO COMPLETO');
       return record;
     },
     onSuccess: () => {
-      toast.success('Turno registrado');
+      toast.success('Turno guardado exitosamente');
       
-      queryClient.invalidateQueries({ queryKey: ['shiftRecords', storeId] });
-      queryClient.invalidateQueries({ queryKey: ['dailySales', storeId] });
+      // Invalidar TODAS las queries para forzar recarga
+      queryClient.invalidateQueries();
       
       setShowSuccess(true);
       setTimeout(() => {
@@ -134,10 +125,10 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
           suggested_sales: ''
         });
         if (onSuccess) onSuccess();
-      }, 2000);
+      }, 1500);
     },
     onError: (error) => {
-      console.error('❌ Error:', error);
+      console.error('ERROR:', error);
       toast.error(error.message || 'Error al guardar');
     }
   });
@@ -199,7 +190,7 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
               </motion.svg>
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="flex items-center gap-2 justify-center mt-2">
                 <CheckCircle className="w-6 h-6 text-green-500" />
-                <span className="text-lg font-bold text-gray-800">Guardado</span>
+                <span className="text-lg font-bold text-gray-800">¡Guardado!</span>
               </motion.div>
             </div>
           </motion.div>

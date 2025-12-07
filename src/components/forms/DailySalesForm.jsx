@@ -24,8 +24,7 @@ export default function DailySalesForm({ storeId, onSuccess }) {
     mutationFn: async (data) => {
       const user = await base44.auth.me();
       
-      console.log('🔄 Guardando ventas:', { storeId, date: data.date });
-      
+      // 1. Verificar si existe registro
       const existing = await base44.entities.DailySales.filter({ 
         store_id: storeId, 
         date: data.date 
@@ -42,16 +41,17 @@ export default function DailySalesForm({ storeId, onSuccess }) {
       
       let record;
       
+      // 2. Crear o actualizar
       if (existing.length > 0) {
-        console.log('📝 Actualizando existente:', existing[0].id);
         record = await base44.entities.DailySales.update(existing[0].id, recordData);
       } else {
-        console.log('✨ Creando nuevo');
         record = await base44.entities.DailySales.create(recordData);
       }
       
-      console.log('✅ DailySales guardado:', record.id);
+      // 3. Esperar para asegurar consistencia
+      await new Promise(resolve => setTimeout(resolve, 500));
       
+      // 4. Crear log
       await base44.entities.SalesLog.create({
         store_id: storeId,
         record_type: 'daily_sales',
@@ -63,14 +63,13 @@ export default function DailySalesForm({ storeId, onSuccess }) {
         details: JSON.stringify({ total_transactions: recordData.total_transactions })
       });
       
-      console.log('✅ COMPLETO');
       return record;
     },
     onSuccess: () => {
-      toast.success('Ventas registradas');
+      toast.success('Ventas guardadas exitosamente');
       
-      queryClient.invalidateQueries({ queryKey: ['dailySales', storeId] });
-      queryClient.invalidateQueries({ queryKey: ['salesLogs', storeId] });
+      // Invalidar TODAS las queries para forzar recarga
+      queryClient.invalidateQueries();
       
       setShowSuccess(true);
       setTimeout(() => {
@@ -83,10 +82,10 @@ export default function DailySalesForm({ storeId, onSuccess }) {
           total_suggested: ''
         });
         if (onSuccess) onSuccess();
-      }, 2000);
+      }, 1500);
     },
     onError: (error) => {
-      console.error('❌ Error:', error);
+      console.error('ERROR:', error);
       toast.error(error.message || 'Error al guardar');
     }
   });
@@ -142,7 +141,7 @@ export default function DailySalesForm({ storeId, onSuccess }) {
               </motion.svg>
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
                 <CheckCircle className="w-6 h-6 text-emerald-500 mx-auto mt-2" />
-                <span className="text-lg font-bold text-gray-800 block mt-1">Guardado</span>
+                <span className="text-lg font-bold text-gray-800 block mt-1">¡Guardado!</span>
               </motion.div>
             </div>
           </motion.div>
