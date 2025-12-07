@@ -109,33 +109,33 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
         throw error;
       }
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       console.log('✅ Turno guardado exitosamente:', data);
 
-      // Mostrar animación de éxito PRIMERO
+      // Mostrar animación inmediatamente
       setShowSuccess(true);
 
-      // Luego actualizar el formulario
-      setTimeout(() => {
-        setFormData(prev => ({
-          ...prev,
-          sales: '',
-          tickets: '',
-          transactions: '',
-          suggested_sales: ''
-        }));
+      // Esperar a que termine la animación antes de actualizar
+      await new Promise(resolve => setTimeout(resolve, 2500));
 
-        queryClient.invalidateQueries(['shiftRecords']);
-        queryClient.invalidateQueries(['dailySales']);
-        queryClient.invalidateQueries(['salesLogs']);
-        queryClient.invalidateQueries(['budget']);
-      }, 100);
+      // Limpiar formulario y actualizar queries
+      setFormData(prev => ({
+        ...prev,
+        sales: '',
+        tickets: '',
+        transactions: '',
+        suggested_sales: ''
+      }));
 
-      // Ocultar animación después
-      setTimeout(() => {
-        setShowSuccess(false);
-        if (onSuccess) onSuccess();
-      }, 3000);
+      queryClient.invalidateQueries(['shiftRecords']);
+      queryClient.invalidateQueries(['dailySales']);
+      queryClient.invalidateQueries(['salesLogs']);
+      queryClient.invalidateQueries(['budget']);
+
+      // Ocultar overlay
+      setShowSuccess(false);
+      
+      if (onSuccess) onSuccess();
     },
     onError: (error) => {
       console.error('Error guardando turno:', error);
@@ -166,18 +166,19 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
   return (
     <>
       {/* Success Animation Overlay - FIXED POSITION */}
-      <AnimatePresence>
-          {showSuccess && (
+      <AnimatePresence mode="wait">
+        {showSuccess && (
           <motion.div
             key="success-overlay"
-            initial={{ opacity: 0, scale: 0.8 }}
+            initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
-            className="fixed inset-0 flex items-center justify-center z-[99999]"
+            exit={{ opacity: 0, scale: 0.5 }}
+            transition={{ type: "spring", stiffness: 200, damping: 20 }}
+            className="fixed inset-0 flex items-center justify-center"
             style={{ 
               backgroundColor: 'rgba(255, 255, 255, 0.98)',
-              backdropFilter: 'blur(8px)'
+              backdropFilter: 'blur(8px)',
+              zIndex: 999999
             }}
           >
             <motion.div
