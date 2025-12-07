@@ -13,6 +13,7 @@ import DailyGoalsCard from '@/components/gamification/DailyGoalsCard';
 import WeatherSalesImpactChart from '@/components/weather/WeatherSalesImpactChart';
 import DailyBudgetCard from '@/components/dashboard/DailyBudgetCard';
 import ProjectionDetailModal from '@/components/dashboard/ProjectionDetailModal';
+import SalesByHourChart from '@/components/sales/SalesByHourChart';
 
 import GrowthVelocityChart from '@/components/management/GrowthVelocityChart';
 import StoreReportGenerator from '@/components/reports/StoreReportGenerator';
@@ -817,207 +818,167 @@ export default function Dashboard() {
                 animate={{ opacity: 1 }}
                 className="space-y-6"
               >
-                {/* Main Charts Row */}
+                {/* Main Charts Row - MEJORADO PROFESIONAL */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Sales Trend */}
-                  <Card className="border-none shadow-lg">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium text-pink-600 flex items-center gap-2">
-                        <motion.div animate={{ y: [0, -2, 0] }} transition={{ duration: 2, repeat: Infinity }}>
-                          <DollarSign className="w-4 h-4 text-pink-500" />
+                  {/* Sales Trend - NUEVO DISEÑO */}
+                  <Card className="border-none shadow-2xl bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 overflow-hidden">
+                    <CardHeader className="pb-3 bg-gradient-to-r from-emerald-500 to-teal-500">
+                      <CardTitle className="text-base font-black text-white flex items-center gap-2">
+                        <motion.div animate={{ y: [0, -4, 0], rotate: [0, 5, 0] }} transition={{ duration: 2, repeat: Infinity }}>
+                          <DollarSign className="w-6 h-6" />
                         </motion.div>
-                        Tendencia de Ventas
+                        Evolución de Ventas
                       </CardTitle>
+                      <p className="text-white/80 text-xs">Análisis de tendencia diaria</p>
                     </CardHeader>
-                    <CardContent>
-                      <div className="mb-3 p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-100">
-                        <p className="text-xs text-gray-700 font-medium mb-2">📊 ¿Qué nos dice esta gráfica?</p>
-                        <p className="text-[11px] text-gray-600 leading-relaxed">
-                          Muestra la evolución diaria de ventas. Los picos indican días de alto rendimiento, los valles son días flojos. 
-                          <span className="font-semibold text-green-700"> Identifica patrones para replicar estrategias exitosas.</span>
-                        </p>
-                      </div>
-                      <div className="h-52">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <AreaChart data={chartData}>
-                            <defs>
-                              <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#10b981" stopOpacity={0.4}/>
-                                <stop offset="95%" stopColor="#10b981" stopOpacity={0.05}/>
-                              </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                            <XAxis dataKey="date" tick={{ fill: '#6b7280', fontSize: 10 }} />
-                            <YAxis tick={{ fill: '#6b7280', fontSize: 10 }} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} label={{ value: 'Ventas (millones)', angle: -90, position: 'insideLeft', style: { fontSize: 10, fill: '#6b7280' } }} />
-                            <Tooltip 
-                              formatter={(v) => [formatCurrency(v), 'Venta']}
-                              labelFormatter={(label, payload) => payload?.[0]?.payload?.fullDate || label}
-                              contentStyle={{ fontSize: 12, borderRadius: 8 }}
-                            />
-                            <Area type="monotone" dataKey="ventas" stroke="#10b981" strokeWidth={2} fill="url(#salesGrad)" name="Venta" />
-                          </AreaChart>
-                        </ResponsiveContainer>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Ticket Promedio */}
-                  <Card className="border-none shadow-lg">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium text-pink-600 flex items-center gap-2">
-                        <motion.div animate={{ rotate: [0, 5, -5, 0] }} transition={{ duration: 3, repeat: Infinity }}>
-                          <Receipt className="w-4 h-4 text-pink-500" />
-                        </motion.div>
-                        Ticket Promedio Diario
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="mb-3 p-3 bg-gradient-to-r from-blue-50 to-sky-50 rounded-xl border border-blue-100">
-                        <p className="text-xs text-gray-700 font-medium mb-2">🎯 ¿Cómo interpretar esta métrica?</p>
-                        <p className="text-[11px] text-gray-600 leading-relaxed">
-                          Ticket promedio = Venta ÷ Transacciones. Un ticket alto significa que cada cliente gasta más. 
-                          <span className="font-semibold text-blue-700"> Si baja, enfoca en venta sugerida y upselling.</span>
-                        </p>
-                      </div>
-                      <div className="h-52">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <AreaChart data={chartData}>
-                            <defs>
-                              <linearGradient id="ticketGrad" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4}/>
-                                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.05}/>
-                              </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                            <XAxis dataKey="date" tick={{ fill: '#6b7280', fontSize: 10 }} />
-                            <YAxis tick={{ fill: '#6b7280', fontSize: 10 }} tickFormatter={(v) => `$${(v/1000).toFixed(0)}K`} label={{ value: 'Ticket (miles)', angle: -90, position: 'insideLeft', style: { fontSize: 10, fill: '#6b7280' } }} />
-                            <Tooltip 
-                              formatter={(v) => [formatCurrency(v), 'Ticket Promedio']}
-                              labelFormatter={(label, payload) => payload?.[0]?.payload?.fullDate || label}
-                              contentStyle={{ fontSize: 12, borderRadius: 8 }}
-                            />
-                            <Area type="monotone" dataKey="ticketPromedio" stroke="#3b82f6" strokeWidth={2} fill="url(#ticketGrad)" name="Ticket Promedio" />
-                          </AreaChart>
-                        </ResponsiveContainer>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* Second Row - Gráficas más grandes */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Transacciones vs Venta */}
-                  <Card className="border-none shadow-lg">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium text-pink-600 flex items-center gap-2">
-                        <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 1.5, repeat: Infinity }}>
-                          <Zap className="w-4 h-4 text-pink-500" />
-                        </motion.div>
-                        Transacciones vs Venta
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="mb-3 p-3 bg-gradient-to-r from-purple-50 to-violet-50 rounded-xl border border-purple-100">
-                        <p className="text-xs text-gray-700 font-medium mb-2">⚡ ¿Qué significa esta relación?</p>
-                        <p className="text-[11px] text-gray-600 leading-relaxed">
-                          Barras moradas = transacciones (clientes), línea rosa = ventas totales. Si transacciones suben pero ventas no, el ticket promedio está bajando. 
-                          <span className="font-semibold text-purple-700"> Actúa: capacita en técnicas de venta sugerida.</span>
-                        </p>
-                      </div>
+                    <CardContent className="p-4">
                       <div className="h-64">
                         <ResponsiveContainer width="100%" height="100%">
                           <ComposedChart data={chartData}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                            <XAxis dataKey="date" tick={{ fill: '#6b7280', fontSize: 10 }} />
-                            <YAxis yAxisId="left" tick={{ fill: '#6b7280', fontSize: 10 }} label={{ value: 'Trans.', angle: -90, position: 'insideLeft', style: { fontSize: 10, fill: '#6b7280' } }} />
-                            <YAxis yAxisId="right" orientation="right" tick={{ fill: '#6b7280', fontSize: 10 }} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} label={{ value: 'Ventas (M)', angle: 90, position: 'insideRight', style: { fontSize: 10, fill: '#6b7280' } }} />
+                            <defs>
+                              <linearGradient id="salesGradPro" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#10b981" stopOpacity={0.8}/>
+                                <stop offset="95%" stopColor="#10b981" stopOpacity={0.1}/>
+                              </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#d1fae5" vertical={false} />
+                            <XAxis dataKey="date" tick={{ fill: '#059669', fontSize: 11, fontWeight: 'bold' }} stroke="#10b981" />
+                            <YAxis tick={{ fill: '#059669', fontSize: 11, fontWeight: 'bold' }} tickFormatter={(v) => `$${Math.round(v/1000000)}M`} stroke="#10b981" />
                             <Tooltip 
                               content={({ active, payload }) => {
                                 if (!active || !payload?.length) return null;
+                                const data = payload[0]?.payload;
                                 return (
-                                  <div className="bg-white p-3 rounded-xl shadow-xl border text-xs">
-                                    <p className="font-bold text-gray-800 mb-2">{payload[0]?.payload?.fullDate}</p>
-                                    <div className="flex items-center gap-2 mb-1">
-                                      <div className="w-3 h-3 rounded-full bg-violet-500"></div>
-                                      <span className="text-gray-600">Transacciones:</span>
-                                      <span className="font-bold text-violet-600">{payload[0]?.value?.toLocaleString()}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                      <div className="w-3 h-3 rounded-full bg-pink-500"></div>
-                                      <span className="text-gray-600">Ventas:</span>
-                                      <span className="font-bold text-pink-600">{formatCurrency(payload[1]?.value)}</span>
-                                    </div>
-                                  </div>
+                                  <motion.div
+                                    initial={{ scale: 0.9, opacity: 0 }}
+                                    animate={{ scale: 1, opacity: 1 }}
+                                    className="bg-white p-4 rounded-2xl shadow-2xl border-2 border-emerald-300"
+                                  >
+                                    <p className="font-black text-gray-800 mb-2">{data?.fullDate}</p>
+                                    <p className="text-2xl font-black text-emerald-600 mb-1">${Math.round(data?.ventas/1000000)}M</p>
+                                    <p className="text-xs text-gray-500">Ticket: {formatCurrency(data?.ticketPromedio)}</p>
+                                  </motion.div>
                                 );
                               }}
                             />
-                            <Legend wrapperStyle={{ fontSize: 11 }} />
-                            <Bar yAxisId="left" dataKey="transactions" fill="#8b5cf6" radius={[3, 3, 0, 0]} name="Transacciones" />
-                            <Line yAxisId="right" type="monotone" dataKey="ventas" stroke="#ec4899" strokeWidth={2} dot={false} name="Ventas" />
+                            <Area type="monotone" dataKey="ventas" stroke="#10b981" strokeWidth={4} fill="url(#salesGradPro)" />
+                            <Line type="monotone" dataKey="ventas" stroke="#059669" strokeWidth={2} dot={{ fill: '#10b981', r: 5, strokeWidth: 2, stroke: '#fff' }} />
                           </ComposedChart>
                         </ResponsiveContainer>
                       </div>
                     </CardContent>
                   </Card>
 
-                  {/* Sugeridos y Distribución */}
-                  <Card className="border-none shadow-lg">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium text-pink-600 flex items-center gap-2">
-                        <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 2, repeat: Infinity }}>
-                          <Gift className="w-4 h-4 text-pink-500" />
+                  {/* Ventas por Hora */}
+                  <SalesByHourChart shiftRecords={shiftRecords} formatCurrency={formatCurrency} />
+                </div>
+
+                {/* Second Row - PROFESIONAL Y MODERNO */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Transacciones vs Venta - REDISEÑADO */}
+                  <Card className="border-none shadow-2xl bg-gradient-to-br from-purple-50 via-violet-50 to-fuchsia-50 overflow-hidden">
+                    <CardHeader className="pb-3 bg-gradient-to-r from-purple-500 to-fuchsia-500">
+                      <CardTitle className="text-base font-black text-white flex items-center gap-2">
+                        <motion.div animate={{ scale: [1, 1.2, 1], rotate: [0, 180, 360] }} transition={{ duration: 3, repeat: Infinity }}>
+                          <Zap className="w-6 h-6" />
                         </motion.div>
-                        Sugeridos y Distribución
+                        Transacciones × Ventas
                       </CardTitle>
+                      <p className="text-white/80 text-xs">Relación entre flujo de clientes e ingresos</p>
                     </CardHeader>
-                    <CardContent>
-                      <div className="mb-3 p-3 bg-gradient-to-r from-pink-50 to-rose-50 rounded-xl border border-pink-100">
-                        <p className="text-xs text-gray-700 font-medium mb-2">🎁 ¿Por qué son importantes los sugeridos?</p>
-                        <p className="text-[11px] text-gray-600 leading-relaxed">
-                          Cada sugerido vendido aumenta el ticket promedio un 15-25%. Los días con más sugeridos (área rosa) tienen mejores ventas totales. 
-                          <span className="font-semibold text-pink-700"> Plan: incentiva a cajeros con bono por sugeridos.</span>
-                        </p>
+                    <CardContent className="p-4">
+                      <div className="h-72">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <ComposedChart data={chartData}>
+                            <defs>
+                              <linearGradient id="transGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#a855f7" stopOpacity={0.8}/>
+                                <stop offset="95%" stopColor="#a855f7" stopOpacity={0.1}/>
+                              </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e9d5ff" vertical={false} />
+                            <XAxis dataKey="date" tick={{ fill: '#7c3aed', fontSize: 11, fontWeight: 'bold' }} stroke="#a855f7" />
+                            <YAxis yAxisId="left" tick={{ fill: '#7c3aed', fontSize: 11, fontWeight: 'bold' }} stroke="#a855f7" />
+                            <YAxis yAxisId="right" orientation="right" tick={{ fill: '#ec4899', fontSize: 11, fontWeight: 'bold' }} tickFormatter={(v) => `$${Math.round(v/1000000)}M`} stroke="#ec4899" />
+                            <Tooltip 
+                              content={({ active, payload }) => {
+                                if (!active || !payload?.length) return null;
+                                return (
+                                  <motion.div
+                                    initial={{ scale: 0.9 }}
+                                    animate={{ scale: 1 }}
+                                    className="bg-white p-4 rounded-2xl shadow-2xl border-2 border-purple-300"
+                                  >
+                                    <p className="font-black text-gray-800 mb-3">{payload[0]?.payload?.fullDate}</p>
+                                    <div className="space-y-2">
+                                      <div className="flex items-center gap-2">
+                                        <div className="w-4 h-4 rounded-full bg-purple-500"></div>
+                                        <span className="text-gray-600 text-sm">Trans:</span>
+                                        <span className="font-black text-purple-600 text-lg">{payload[0]?.value?.toLocaleString()}</span>
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                        <div className="w-4 h-4 rounded-full bg-pink-500"></div>
+                                        <span className="text-gray-600 text-sm">Ventas:</span>
+                                        <span className="font-black text-pink-600 text-lg">${Math.round(payload[1]?.value/1000000)}M</span>
+                                      </div>
+                                    </div>
+                                  </motion.div>
+                                );
+                              }}
+                            />
+                            <Bar yAxisId="left" dataKey="transactions" fill="url(#transGrad)" radius={[8, 8, 0, 0]} />
+                            <Line yAxisId="right" type="monotone" dataKey="ventas" stroke="#ec4899" strokeWidth={3} dot={{ fill: '#ec4899', r: 5, strokeWidth: 2, stroke: '#fff' }} />
+                          </ComposedChart>
+                        </ResponsiveContainer>
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="h-56">
-                          <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={chartData}>
-                              <defs>
-                                <linearGradient id="sugGrad" x1="0" y1="0" x2="0" y2="1">
-                                  <stop offset="5%" stopColor="#ec4899" stopOpacity={0.4}/>
-                                  <stop offset="95%" stopColor="#ec4899" stopOpacity={0.05}/>
-                                </linearGradient>
-                              </defs>
-                              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                              <XAxis dataKey="date" tick={{ fill: '#6b7280', fontSize: 9 }} />
-                              <YAxis tick={{ fill: '#6b7280', fontSize: 9 }} label={{ value: 'Cantidad', angle: -90, position: 'insideLeft', style: { fontSize: 9, fill: '#6b7280' } }} />
-                              <Tooltip contentStyle={{ fontSize: 11, borderRadius: 8 }} />
-                              <Area type="monotone" dataKey="suggested" stroke="#ec4899" strokeWidth={2} fill="url(#sugGrad)" name="Sugeridos" />
-                            </AreaChart>
-                          </ResponsiveContainer>
-                        </div>
-                        <div className="h-56">
-                          <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                              <Pie
-                                data={[
-                                  { name: 'Ventas', value: totals.sales, fill: '#10b981' },
-                                  { name: 'Tickets', value: totals.tickets * 10000, fill: '#3b82f6' },
-                                  { name: 'Sugeridos', value: totals.suggested * 5000, fill: '#ec4899' }
-                                ]}
-                                cx="50%"
-                                cy="50%"
-                                innerRadius={40}
-                                outerRadius={70}
-                                paddingAngle={3}
-                                dataKey="value"
-                                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                              />
-                              <Tooltip contentStyle={{ fontSize: 11 }} />
-                              <Legend iconSize={10} wrapperStyle={{ fontSize: 10 }} />
-                            </PieChart>
-                          </ResponsiveContainer>
-                        </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Ticket Promedio - REDISEÑADO */}
+                  <Card className="border-none shadow-2xl bg-gradient-to-br from-sky-50 via-blue-50 to-cyan-50 overflow-hidden">
+                    <CardHeader className="pb-3 bg-gradient-to-r from-sky-500 to-cyan-500">
+                      <CardTitle className="text-base font-black text-white flex items-center gap-2">
+                        <motion.div animate={{ rotate: [0, -10, 10, 0] }} transition={{ duration: 3, repeat: Infinity }}>
+                          <Receipt className="w-6 h-6" />
+                        </motion.div>
+                        Ticket Promedio
+                      </CardTitle>
+                      <p className="text-white/80 text-xs">Gasto promedio por transacción</p>
+                    </CardHeader>
+                    <CardContent className="p-4">
+                      <div className="h-72">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <ComposedChart data={chartData}>
+                            <defs>
+                              <linearGradient id="ticketGradPro" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.8}/>
+                                <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0.1}/>
+                              </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e0f2fe" vertical={false} />
+                            <XAxis dataKey="date" tick={{ fill: '#0284c7', fontSize: 11, fontWeight: 'bold' }} stroke="#0ea5e9" />
+                            <YAxis tick={{ fill: '#0284c7', fontSize: 11, fontWeight: 'bold' }} tickFormatter={(v) => `$${Math.round(v/1000)}K`} stroke="#0ea5e9" />
+                            <Tooltip 
+                              content={({ active, payload }) => {
+                                if (!active || !payload?.length) return null;
+                                const data = payload[0]?.payload;
+                                return (
+                                  <motion.div
+                                    initial={{ scale: 0.9 }}
+                                    animate={{ scale: 1 }}
+                                    className="bg-white p-4 rounded-2xl shadow-2xl border-2 border-sky-300"
+                                  >
+                                    <p className="font-black text-gray-800 mb-3">{data?.fullDate}</p>
+                                    <p className="text-2xl font-black text-sky-600 mb-1">${Math.round(data?.ticketPromedio/1000)}K</p>
+                                    <p className="text-xs text-gray-500">{data?.transactions} transacciones</p>
+                                  </motion.div>
+                                );
+                              }}
+                            />
+                            <Area type="monotone" dataKey="ticketPromedio" stroke="#0ea5e9" strokeWidth={4} fill="url(#ticketGradPro)" />
+                            <Line type="monotone" dataKey="ticketPromedio" stroke="#0284c7" strokeWidth={2} dot={{ fill: '#0ea5e9', r: 5, strokeWidth: 2, stroke: '#fff' }} />
+                          </ComposedChart>
+                        </ResponsiveContainer>
                       </div>
                     </CardContent>
                   </Card>
