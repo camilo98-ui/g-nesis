@@ -24,6 +24,11 @@ export default function DailySalesForm({ storeId, onSuccess }) {
     mutationFn: async (data) => {
       const user = await base44.auth.me();
       
+      const salesValue = parseFloat(data.total_sales) || 0;
+      const ticketsValue = parseInt(data.total_tickets) || 0;
+      const transactionsValue = parseInt(data.total_transactions) || 0;
+      const suggestedValue = parseInt(data.total_suggested) || 0;
+      
       // 1. Verificar si existe registro
       const existing = await base44.entities.DailySales.filter({ 
         store_id: storeId, 
@@ -33,10 +38,10 @@ export default function DailySalesForm({ storeId, onSuccess }) {
       const recordData = {
         store_id: storeId,
         date: data.date,
-        total_sales: parseFloat(data.total_sales) || 0,
-        total_tickets: parseInt(data.total_tickets) || 0,
-        total_transactions: parseInt(data.total_transactions) || 0,
-        total_suggested: parseInt(data.total_suggested) || 0
+        total_sales: salesValue,
+        total_tickets: ticketsValue,
+        total_transactions: transactionsValue,
+        total_suggested: suggestedValue
       };
       
       let record;
@@ -44,32 +49,38 @@ export default function DailySalesForm({ storeId, onSuccess }) {
       // 2. Crear o actualizar
       if (existing.length > 0) {
         record = await base44.entities.DailySales.update(existing[0].id, recordData);
+        console.log('✅ DailySales actualizado:', record.id);
       } else {
         record = await base44.entities.DailySales.create(recordData);
+        console.log('✅ DailySales creado:', record.id);
       }
       
-      // 3. Esperar para asegurar consistencia
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // 4. Crear log
+      // 3. Crear log
       await base44.entities.SalesLog.create({
         store_id: storeId,
         record_type: 'daily_sales',
         record_id: record.id,
         action: existing.length > 0 ? 'update' : 'create',
         user_email: user.email,
-        sales_amount: recordData.total_sales,
+        sales_amount: salesValue,
         action_date: data.date,
-        details: JSON.stringify({ total_transactions: recordData.total_transactions })
+        details: JSON.stringify({ total_transactions: transactionsValue })
       });
+      
+      console.log('✅ TODO GUARDADO CORRECTAMENTE');
       
       return record;
     },
-    onSuccess: () => {
-      toast.success('Ventas guardadas exitosamente');
+    onSuccess: async () => {
+      console.log('🎉 Guardado exitoso, invalidando queries...');
       
-      // Invalidar TODAS las queries para forzar recarga
-      queryClient.invalidateQueries();
+      toast.success('¡Ventas registradas correctamente!');
+      
+      // Invalidar queries específicas
+      await queryClient.invalidateQueries({ queryKey: ['dailySales'] });
+      await queryClient.invalidateQueries({ queryKey: ['salesLogs'] });
+      
+      console.log('✅ Queries invalidadas');
       
       setShowSuccess(true);
       setTimeout(() => {
@@ -82,11 +93,14 @@ export default function DailySalesForm({ storeId, onSuccess }) {
           total_suggested: ''
         });
         if (onSuccess) onSuccess();
+        
+        // Forzar recarga de la página después de guardar
+        window.location.reload();
       }, 1500);
     },
     onError: (error) => {
-      console.error('ERROR:', error);
-      toast.error(error.message || 'Error al guardar');
+      console.error('❌ ERROR COMPLETO:', error);
+      toast.error(`Error al guardar: ${error.message || 'Intenta de nuevo'}`);
     }
   });
 
