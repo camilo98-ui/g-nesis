@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Save, User, DollarSign, Receipt, Zap, Gift, Loader2, CheckCircle, Sun, Sunset, Moon, UserPlus } from 'lucide-react';
+import { Save, User, DollarSign, Receipt, Zap, Gift, Loader2, CheckCircle, Sun, Sunset, Moon } from 'lucide-react';
 import { toast } from 'sonner';
 
 const SHIFTS = [
@@ -29,7 +29,7 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
     suggested_sales: ''
   });
 
-  const { data: cashiers = [], isLoading: loadingCashiers } = useQuery({
+  const { data: cashiers = [] } = useQuery({
     queryKey: ['cashiers', storeId],
     queryFn: () => base44.entities.Cashier.filter({ store_id: storeId, is_active: true }),
     enabled: !!storeId
@@ -37,106 +37,93 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
 
   const createMutation = useMutation({
     mutationFn: async (data) => {
-      try {
-        const user = await base44.auth.me();
-        const cashier = cashiers.find(c => c.id === data.cashier_id);
-        
-        console.log('🔄 Creando turno:', data);
-        
-        const record = await base44.entities.ShiftRecord.create({
+      const user = await base44.auth.me();
+      const cashier = cashiers.find(c => c.id === data.cashier_id);
+      
+      console.log('🔄 Guardando turno:', { storeId, cashierId: data.cashier_id, date: data.date });
+      
+      // Crear ShiftRecord
+      const record = await base44.entities.ShiftRecord.create({
+        store_id: storeId,
+        cashier_id: data.cashier_id,
+        cashier_name: cashier?.name || '',
+        date: data.date,
+        shift: data.shift,
+        sales: parseFloat(data.sales) || 0,
+        tickets: parseInt(data.tickets) || 0,
+        transactions: parseInt(data.transactions) || 0,
+        suggested_sales: parseInt(data.suggested_sales) || 0,
+        average_ticket: data.tickets > 0 ? (parseFloat(data.sales) || 0) / parseInt(data.tickets) : 0
+      });
+      
+      console.log('✅ ShiftRecord creado:', record.id);
+    
+      // Esperar un momento para consistencia
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Recalcular DailySales
+      const allDayRecords = await base44.entities.ShiftRecord.filter({ 
+        store_id: storeId, 
+        date: data.date 
+      });
+      
+      const dailyTotals = allDayRecords.reduce((acc, r) => ({
+        sales: acc.sales + (r.sales || 0),
+        tickets: acc.tickets + (r.tickets || 0),
+        transactions: acc.transactions + (r.transactions || 0),
+        suggested: acc.suggested + (r.suggested_sales || 0)
+      }), { sales: 0, tickets: 0, transactions: 0, suggested: 0 });
+      
+      console.log('📊 Totales del día:', dailyTotals);
+      
+      const existingDailySales = await base44.entities.DailySales.filter({ 
+        store_id: storeId, 
+        date: data.date 
+      });
+      
+      if (existingDailySales.length > 0) {
+        await base44.entities.DailySales.update(existingDailySales[0].id, {
+          total_sales: dailyTotals.sales,
+          total_tickets: dailyTotals.tickets,
+          total_transactions: dailyTotals.transactions,
+          total_suggested: dailyTotals.suggested
+        });
+        console.log('✅ DailySales actualizado');
+      } else {
+        await base44.entities.DailySales.create({
           store_id: storeId,
-          cashier_id: data.cashier_id,
-          cashier_name: cashier?.name || '',
           date: data.date,
-          shift: data.shift,
-          sales: parseFloat(data.sales) || 0,
-          tickets: parseInt(data.tickets) || 0,
-          transactions: parseInt(data.transactions) || 0,
-          suggested_sales: parseInt(data.suggested_sales) || 0,
-          average_ticket: data.tickets > 0 ? (parseFloat(data.sales) || 0) / parseInt(data.tickets) : 0
+          total_sales: dailyTotals.sales,
+          total_tickets: dailyTotals.tickets,
+          total_transactions: dailyTotals.transactions,
+          total_suggested: dailyTotals.suggested
         });
-        
-        console.log('✅ Turno creado:', record);
-      
-        // Actualizar DailySales - esperamos a que se complete
-        const allDayRecords = await base44.entities.ShiftRecord.filter({ 
-          store_id: storeId, 
-          date: data.date 
-        });
-        
-        const dailyTotals = allDayRecords.reduce((acc, r) => ({
-          sales: acc.sales + (r.sales || 0),
-          tickets: acc.tickets + (r.tickets || 0),
-          transactions: acc.transactions + (r.transactions || 0),
-          suggested: acc.suggested + (r.suggested_sales || 0)
-        }), { sales: 0, tickets: 0, transactions: 0, suggested: 0 });
-        
-        const existingDailySales = await base44.entities.DailySales.filter({ 
-          store_id: storeId, 
-          date: data.date 
-        });
-        
-        let dailySalesRecord;
-        if (existingDailySales.length > 0) {
-          dailySalesRecord = await base44.entities.DailySales.update(existingDailySales[0].id, {
-            total_sales: dailyTotals.sales,
-            total_tickets: dailyTotals.tickets,
-            total_transactions: dailyTotals.transactions,
-            total_suggested: dailyTotals.suggested
-          });
-        } else {
-          dailySalesRecord = await base44.entities.DailySales.create({
-            store_id: storeId,
-            date: data.date,
-            total_sales: dailyTotals.sales,
-            total_tickets: dailyTotals.tickets,
-            total_transactions: dailyTotals.transactions,
-            total_suggested: dailyTotals.suggested
-          });
-        }
-        
-        console.log('✅ DailySales actualizado:', dailySalesRecord);
-          
-        // Log - esperamos a que se complete
-        await base44.entities.SalesLog.create({
-          store_id: storeId,
-          record_type: 'shift_record',
-          record_id: record.id,
-          action: 'create',
-          user_email: user.email,
-          cashier_name: cashier?.name,
-          sales_amount: parseFloat(data.sales) || 0,
-          action_date: data.date,
-          details: JSON.stringify({ shift: data.shift })
-        });
-        
-        console.log('✅ Todo guardado correctamente');
-        return record;
-      } catch (error) {
-        console.error('❌ Error en createMutation:', error);
-        throw error;
+        console.log('✅ DailySales creado');
       }
+        
+      // Crear log
+      await base44.entities.SalesLog.create({
+        store_id: storeId,
+        record_type: 'shift_record',
+        record_id: record.id,
+        action: 'create',
+        user_email: user.email,
+        cashier_name: cashier?.name,
+        sales_amount: parseFloat(data.sales) || 0,
+        action_date: data.date,
+        details: JSON.stringify({ shift: data.shift })
+      });
+      
+      console.log('✅ GUARDADO COMPLETO');
+      return record;
     },
-    onSuccess: async (data) => {
-      console.log('✅ Turno guardado exitosamente:', data);
+    onSuccess: () => {
+      toast.success('Turno registrado');
       
-      // Toast inmediato
-      toast.success('¡Turno registrado exitosamente! 🍦');
+      queryClient.invalidateQueries({ queryKey: ['shiftRecords', storeId] });
+      queryClient.invalidateQueries({ queryKey: ['dailySales', storeId] });
       
-      // Invalidar queries y esperar
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['shiftRecords'] }),
-        queryClient.invalidateQueries({ queryKey: ['dailySales'] }),
-        queryClient.invalidateQueries({ queryKey: ['salesLogs'] }),
-        queryClient.invalidateQueries({ queryKey: ['budget'] })
-      ]);
-      
-      console.log('✅ Queries invalidadas correctamente');
-      
-      // Mostrar animación
       setShowSuccess(true);
-
-      // Timer para ocultar y limpiar
       setTimeout(() => {
         setShowSuccess(false);
         setFormData(prev => ({
@@ -147,17 +134,16 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
           suggested_sales: ''
         }));
         if (onSuccess) onSuccess();
-      }, 2500);
+      }, 2000);
     },
     onError: (error) => {
-      console.error('Error guardando turno:', error);
-      toast.error('Error al guardar el registro');
+      console.error('❌ Error:', error);
+      toast.error(error.message || 'Error al guardar');
     }
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    e.stopPropagation();
     
     if (!formData.cashier_id) {
       toast.error('Selecciona un cajero');
@@ -165,52 +151,33 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
     }
 
     if (!formData.sales && !formData.transactions) {
-      toast.error('Ingresa al menos las ventas o transacciones');
+      toast.error('Ingresa al menos las ventas');
       return;
     }
 
     createMutation.mutate(formData);
   };
 
-  const selectedShift = SHIFTS.find(s => s.value === formData.shift);
-  const ShiftIcon = selectedShift?.icon || Sun;
-
   return (
     <>
-      {/* Success Animation Overlay - FIXED POSITION */}
       <AnimatePresence mode="wait">
         {showSuccess && (
           <motion.div
-            key="success-overlay"
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.5 }}
-            transition={{ type: "spring", stiffness: 200, damping: 20 }}
-            className="fixed inset-0 flex items-center justify-center"
-            style={{ 
-              backgroundColor: 'rgba(255, 255, 255, 0.98)',
-              backdropFilter: 'blur(8px)',
-              zIndex: 999999
-            }}
+            className="fixed inset-0 flex items-center justify-center bg-white/95 backdrop-blur-sm z-[9999]"
           >
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: "spring", stiffness: 200 }}
-              className="text-center"
-            >
-              {/* Helado animado */}
+            <div className="text-center">
               <motion.svg viewBox="0 0 80 120" className="w-24 h-32 mx-auto">
-                {/* Bola de helado */}
                 <motion.circle 
                   cx="40" cy="28" r="22" 
                   fill="url(#pinkIceCream)"
                   initial={{ scale: 0 }}
-                  animate={{ scale: [0, 1.2, 1], y: [20, -5, 0] }}
-                  transition={{ duration: 0.6, ease: "backOut" }}
+                  animate={{ scale: [0, 1.2, 1] }}
+                  transition={{ duration: 0.6 }}
                 />
-                <motion.circle cx="32" cy="20" r="5" fill="white" opacity="0.5" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.3 }} />
-                {/* Cono */}
+                <motion.circle cx="32" cy="20" r="5" fill="white" opacity="0.5" />
                 <motion.polygon 
                   points="20,45 40,110 60,45" 
                   fill="url(#coneGrad)"
@@ -219,53 +186,27 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
                   transition={{ delay: 0.2, duration: 0.4 }}
                   style={{ transformOrigin: 'center top' }}
                 />
-                <motion.g initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
-                  <line x1="26" y1="55" x2="54" y2="55" stroke="#b45309" strokeWidth="1" opacity="0.4" />
-                  <line x1="30" y1="70" x2="50" y2="70" stroke="#b45309" strokeWidth="1" opacity="0.4" />
-                  <line x1="34" y1="85" x2="46" y2="85" stroke="#b45309" strokeWidth="1" opacity="0.4" />
-                </motion.g>
-                {/* Chispas */}
-                <motion.circle cx="15" cy="15" r="3" fill="#fbbf24" animate={{ scale: [0, 1, 0], opacity: [0, 1, 0] }} transition={{ duration: 1, repeat: Infinity }} />
-                <motion.circle cx="65" cy="10" r="2" fill="#ec4899" animate={{ scale: [0, 1, 0], opacity: [0, 1, 0] }} transition={{ duration: 1, repeat: Infinity, delay: 0.3 }} />
-                <motion.circle cx="70" cy="35" r="2.5" fill="#8b5cf6" animate={{ scale: [0, 1, 0], opacity: [0, 1, 0] }} transition={{ duration: 1, repeat: Infinity, delay: 0.6 }} />
                 <defs>
-                  <linearGradient id="pinkIceCream" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <linearGradient id="pinkIceCream">
                     <stop offset="0%" stopColor="#f472b6" />
                     <stop offset="100%" stopColor="#ec4899" />
                   </linearGradient>
-                  <linearGradient id="coneGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <linearGradient id="coneGrad">
                     <stop offset="0%" stopColor="#fbbf24" />
                     <stop offset="100%" stopColor="#d97706" />
                   </linearGradient>
                 </defs>
               </motion.svg>
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="flex items-center gap-2 justify-center mt-2"
-              >
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="flex items-center gap-2 justify-center mt-2">
                 <CheckCircle className="w-6 h-6 text-green-500" />
-                <span className="text-lg font-bold text-gray-800">¡Guardado!</span>
+                <span className="text-lg font-bold text-gray-800">Guardado</span>
               </motion.div>
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
-                className="text-sm text-gray-500 mt-1"
-              >
-                Turno registrado exitosamente
-              </motion.p>
-            </motion.div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        <Card className="bg-white/80 backdrop-blur-lg border-pink-100 shadow-xl">
+      <Card className="bg-white/80 backdrop-blur-lg border-pink-100 shadow-xl">
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-3 text-gray-800">
             <div className="p-2 bg-gradient-to-br from-pink-500 to-rose-500 rounded-xl text-white">
@@ -277,7 +218,6 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Cajero */}
               <div className="space-y-2">
                 <Label className="text-gray-600 flex items-center gap-2">
                   <User className="w-4 h-4 text-pink-500" />
@@ -287,7 +227,7 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
                   value={formData.cashier_id} 
                   onValueChange={(val) => setFormData({...formData, cashier_id: val})}
                 >
-                  <SelectTrigger className="border-pink-200 focus:ring-pink-500">
+                  <SelectTrigger className="border-pink-200">
                     <SelectValue placeholder="Selecciona cajero" />
                   </SelectTrigger>
                   <SelectContent>
@@ -298,18 +238,16 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
                 </Select>
               </div>
 
-              {/* Fecha */}
               <div className="space-y-2">
                 <Label className="text-gray-600">Fecha</Label>
                 <Input 
                   type="date" 
                   value={formData.date}
                   onChange={(e) => setFormData({...formData, date: e.target.value})}
-                  className="border-pink-200 focus:ring-pink-500"
+                  className="border-pink-200"
                 />
               </div>
 
-              {/* Turno */}
               <div className="space-y-2 md:col-span-2">
                 <Label className="text-gray-600">Turno</Label>
                 <div className="grid grid-cols-3 gap-2">
@@ -322,9 +260,7 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
                         type="button"
                         onClick={() => setFormData({...formData, shift: shift.value})}
                         className={`p-3 rounded-xl border-2 transition-all flex items-center justify-center gap-2 ${
-                          isSelected 
-                            ? 'border-pink-500 bg-pink-50 text-pink-600' 
-                            : 'border-gray-200 hover:border-pink-300 text-gray-600'
+                          isSelected ? 'border-pink-500 bg-pink-50 text-pink-600' : 'border-gray-200 hover:border-pink-300'
                         }`}
                       >
                         <Icon className={`w-5 h-5 ${isSelected ? shift.color : ''}`} />
@@ -336,40 +272,37 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
               </div>
             </div>
 
-            <div className="h-px bg-gradient-to-r from-transparent via-pink-200 to-transparent my-6" />
+            <div className="h-px bg-gradient-to-r from-transparent via-pink-200 to-transparent" />
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {/* Ventas */}
               <div className="space-y-2">
                 <Label className="text-gray-600 flex items-center gap-2">
                   <DollarSign className="w-4 h-4 text-green-500" />
-                  Ventas ($)
+                  Ventas
                 </Label>
                 <Input 
                   type="number"
                   placeholder="0"
                   value={formData.sales}
                   onChange={(e) => setFormData({...formData, sales: e.target.value})}
-                  className="border-pink-200 focus:ring-pink-500"
+                  className="border-pink-200"
                 />
               </div>
 
-              {/* Ticket Promedio */}
               <div className="space-y-2">
                 <Label className="text-gray-600 flex items-center gap-2">
                   <Receipt className="w-4 h-4 text-blue-500" />
-                  Ticket Promedio
+                  Tickets
                 </Label>
                 <Input 
                   type="number"
                   placeholder="0"
                   value={formData.tickets}
                   onChange={(e) => setFormData({...formData, tickets: e.target.value})}
-                  className="border-pink-200 focus:ring-pink-500"
+                  className="border-pink-200"
                 />
               </div>
 
-              {/* Transacciones */}
               <div className="space-y-2">
                 <Label className="text-gray-600 flex items-center gap-2">
                   <Zap className="w-4 h-4 text-purple-500" />
@@ -380,11 +313,10 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
                   placeholder="0"
                   value={formData.transactions}
                   onChange={(e) => setFormData({...formData, transactions: e.target.value})}
-                  className="border-pink-200 focus:ring-pink-500"
+                  className="border-pink-200"
                 />
               </div>
 
-              {/* Sugeridos */}
               <div className="space-y-2">
                 <Label className="text-gray-600 flex items-center gap-2">
                   <Gift className="w-4 h-4 text-pink-500" />
@@ -395,7 +327,7 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
                   placeholder="0"
                   value={formData.suggested_sales}
                   onChange={(e) => setFormData({...formData, suggested_sales: e.target.value})}
-                  className="border-pink-200 focus:ring-pink-500"
+                  className="border-pink-200"
                 />
               </div>
             </div>
@@ -403,7 +335,7 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
             <Button 
               type="submit" 
               disabled={createMutation.isPending}
-              className="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white shadow-lg shadow-pink-500/30 touch-manipulation"
+              className="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white shadow-lg"
             >
               {createMutation.isPending ? (
                 <>
@@ -413,14 +345,13 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
               ) : (
                 <>
                   <Save className="w-5 h-5 mr-2" />
-                  Guardar Registro
+                  Guardar
                 </>
               )}
             </Button>
           </form>
         </CardContent>
       </Card>
-      </motion.div>
     </>
   );
 }

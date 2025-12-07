@@ -9,69 +9,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Save, DollarSign, Receipt, Zap, Gift, Loader2, Calendar, TrendingUp, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
-// Componente de helado animado para éxito
-const SuccessIceCream = () => (
-  <motion.div className="relative">
-    {/* Cono */}
-    <motion.svg viewBox="0 0 80 120" className="w-24 h-32">
-      {/* Bola de helado principal */}
-      <motion.circle 
-        cx="40" cy="28" r="22" 
-        fill="url(#iceCreamGradient)"
-        initial={{ scale: 0 }}
-        animate={{ scale: [0, 1.2, 1], y: [20, -5, 0] }}
-        transition={{ duration: 0.6, ease: "backOut" }}
-      />
-      {/* Brillo */}
-      <motion.circle 
-        cx="32" cy="20" r="5" 
-        fill="white" opacity="0.5"
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ delay: 0.3 }}
-      />
-      {/* Cono */}
-      <motion.polygon 
-        points="20,45 40,110 60,45" 
-        fill="url(#coneGradient)"
-        initial={{ scaleY: 0 }}
-        animate={{ scaleY: 1 }}
-        transition={{ delay: 0.2, duration: 0.4 }}
-        style={{ transformOrigin: 'center top' }}
-      />
-      {/* Líneas del cono */}
-      <motion.g initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
-        <line x1="26" y1="55" x2="54" y2="55" stroke="#b45309" strokeWidth="1" opacity="0.4" />
-        <line x1="30" y1="70" x2="50" y2="70" stroke="#b45309" strokeWidth="1" opacity="0.4" />
-        <line x1="34" y1="85" x2="46" y2="85" stroke="#b45309" strokeWidth="1" opacity="0.4" />
-      </motion.g>
-      {/* Chispas de celebración */}
-      <motion.circle cx="15" cy="15" r="3" fill="#fbbf24" animate={{ scale: [0, 1, 0], opacity: [0, 1, 0] }} transition={{ duration: 1, repeat: Infinity, delay: 0 }} />
-      <motion.circle cx="65" cy="10" r="2" fill="#f472b6" animate={{ scale: [0, 1, 0], opacity: [0, 1, 0] }} transition={{ duration: 1, repeat: Infinity, delay: 0.3 }} />
-      <motion.circle cx="70" cy="35" r="2.5" fill="#34d399" animate={{ scale: [0, 1, 0], opacity: [0, 1, 0] }} transition={{ duration: 1, repeat: Infinity, delay: 0.6 }} />
-      <motion.circle cx="10" cy="40" r="2" fill="#a78bfa" animate={{ scale: [0, 1, 0], opacity: [0, 1, 0] }} transition={{ duration: 1, repeat: Infinity, delay: 0.9 }} />
-      <defs>
-        <linearGradient id="iceCreamGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#34d399" />
-          <stop offset="100%" stopColor="#10b981" />
-        </linearGradient>
-        <linearGradient id="coneGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#fbbf24" />
-          <stop offset="100%" stopColor="#d97706" />
-        </linearGradient>
-      </defs>
-    </motion.svg>
-    {/* Estrellas */}
-    <motion.div
-      className="absolute -top-2 -right-2"
-      animate={{ rotate: 360, scale: [1, 1.2, 1] }}
-      transition={{ duration: 2, repeat: Infinity }}
-    >
-      ✨
-    </motion.div>
-  </motion.div>
-);
-
 export default function DailySalesForm({ storeId, onSuccess }) {
   const queryClient = useQueryClient();
   const [showSuccess, setShowSuccess] = useState(false);
@@ -85,109 +22,80 @@ export default function DailySalesForm({ storeId, onSuccess }) {
 
   const createMutation = useMutation({
     mutationFn: async (data) => {
-      try {
-        const user = await base44.auth.me();
-        
-        console.log('🔄 Guardando ventas diarias:', data);
-        
-        // Check if record exists
-        const existing = await base44.entities.DailySales.filter({ 
-          store_id: storeId, 
-          date: data.date 
-        });
-        
-        const salesValue = parseFloat(data.total_sales) || 0;
-        const ticketsValue = parseInt(data.total_tickets) || 0;
-        const transactionsValue = parseInt(data.total_transactions) || 0;
-        const suggestedValue = parseInt(data.total_suggested) || 0;
-        
-        const recordData = {
-          store_id: storeId,
-          date: data.date,
-          total_sales: salesValue,
-          total_tickets: ticketsValue,
-          total_transactions: transactionsValue,
-          total_suggested: suggestedValue
-        };
-        
-        let record;
-        let action;
-        
-        if (existing.length > 0) {
-          console.log('📝 Actualizando registro existente');
-          record = await base44.entities.DailySales.update(existing[0].id, recordData);
-          action = 'update';
-        } else {
-          console.log('✨ Creando nuevo registro');
-          record = await base44.entities.DailySales.create(recordData);
-          action = 'create';
-        }
-        
-        console.log('✅ Registro guardado:', record);
-        
-        // Log - esperamos a que se complete
-        await base44.entities.SalesLog.create({
-          store_id: storeId,
-          record_type: 'daily_sales',
-          record_id: record.id,
-          action,
-          user_email: user.email,
-          sales_amount: salesValue,
-          action_date: data.date,
-          details: JSON.stringify({ total_transactions: transactionsValue, total_suggested: suggestedValue })
-        });
-        
-        console.log('✅ Todo guardado correctamente');
-        return record;
-      } catch (error) {
-        console.error('❌ Error en createMutation:', error);
-        throw error;
+      const user = await base44.auth.me();
+      
+      console.log('🔄 Guardando ventas:', { storeId, date: data.date });
+      
+      const existing = await base44.entities.DailySales.filter({ 
+        store_id: storeId, 
+        date: data.date 
+      });
+      
+      const recordData = {
+        store_id: storeId,
+        date: data.date,
+        total_sales: parseFloat(data.total_sales) || 0,
+        total_tickets: parseInt(data.total_tickets) || 0,
+        total_transactions: parseInt(data.total_transactions) || 0,
+        total_suggested: parseInt(data.total_suggested) || 0
+      };
+      
+      let record;
+      
+      if (existing.length > 0) {
+        console.log('📝 Actualizando existente:', existing[0].id);
+        record = await base44.entities.DailySales.update(existing[0].id, recordData);
+      } else {
+        console.log('✨ Creando nuevo');
+        record = await base44.entities.DailySales.create(recordData);
       }
+      
+      console.log('✅ DailySales guardado:', record.id);
+      
+      await base44.entities.SalesLog.create({
+        store_id: storeId,
+        record_type: 'daily_sales',
+        record_id: record.id,
+        action: existing.length > 0 ? 'update' : 'create',
+        user_email: user.email,
+        sales_amount: recordData.total_sales,
+        action_date: data.date,
+        details: JSON.stringify({ total_transactions: recordData.total_transactions })
+      });
+      
+      console.log('✅ COMPLETO');
+      return record;
     },
-    onSuccess: async (data) => {
-      console.log('✅ Ventas guardadas exitosamente:', data);
+    onSuccess: () => {
+      toast.success('Ventas registradas');
       
-      // Toast inmediato
-      toast.success('¡Ventas registradas exitosamente! 🍦');
+      queryClient.invalidateQueries({ queryKey: ['dailySales', storeId] });
+      queryClient.invalidateQueries({ queryKey: ['salesLogs', storeId] });
       
-      // Invalidar queries y esperar
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['dailySales'] }),
-        queryClient.invalidateQueries({ queryKey: ['salesLogs'] }),
-        queryClient.invalidateQueries({ queryKey: ['budget'] })
-      ]);
-      
-      console.log('✅ Queries invalidadas correctamente');
-      
-      // Mostrar animación
       setShowSuccess(true);
-
-      // Timer para ocultar y limpiar
       setTimeout(() => {
         setShowSuccess(false);
-        setFormData(prev => ({
-          ...prev,
+        setFormData({
+          date: new Date().toISOString().split('T')[0],
           total_sales: '',
           total_tickets: '',
           total_transactions: '',
           total_suggested: ''
-        }));
+        });
         if (onSuccess) onSuccess();
-      }, 2500);
+      }, 2000);
     },
     onError: (error) => {
-      console.error('Error guardando ventas:', error);
-      toast.error('Error al guardar las ventas');
+      console.error('❌ Error:', error);
+      toast.error(error.message || 'Error al guardar');
     }
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    e.stopPropagation();
     
-    // Validar que tenga al menos las ventas
     if (!formData.total_sales) {
-      toast.error('Ingresa al menos las ventas totales');
+      toast.error('Ingresa las ventas');
       return;
     }
     
@@ -196,56 +104,52 @@ export default function DailySalesForm({ storeId, onSuccess }) {
 
   return (
     <>
-      {/* Success Animation Overlay - FIXED POSITION */}
       <AnimatePresence mode="wait">
         {showSuccess && (
           <motion.div
-            key="success-overlay"
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.5 }}
-            transition={{ type: "spring", stiffness: 200, damping: 20 }}
-            className="fixed inset-0 flex items-center justify-center"
-            style={{ 
-              backgroundColor: 'rgba(255, 255, 255, 0.98)',
-              backdropFilter: 'blur(8px)',
-              zIndex: 999999
-            }}
+            className="fixed inset-0 flex items-center justify-center bg-white/95 backdrop-blur-sm z-[9999]"
           >
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: "spring", stiffness: 200 }}
-              className="text-center"
-            >
-              <SuccessIceCream />
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="flex items-center gap-2 justify-center mt-2"
-              >
-                <CheckCircle className="w-6 h-6 text-emerald-500" />
-                <span className="text-lg font-bold text-gray-800">¡Guardado!</span>
+            <div className="text-center">
+              <motion.svg viewBox="0 0 80 120" className="w-24 h-32">
+                <motion.circle 
+                  cx="40" cy="28" r="22" 
+                  fill="url(#greenIce)"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: [0, 1.2, 1] }}
+                  transition={{ duration: 0.6 }}
+                />
+                <motion.polygon 
+                  points="20,45 40,110 60,45" 
+                  fill="url(#coneG)"
+                  initial={{ scaleY: 0 }}
+                  animate={{ scaleY: 1 }}
+                  transition={{ delay: 0.2, duration: 0.4 }}
+                  style={{ transformOrigin: 'center top' }}
+                />
+                <defs>
+                  <linearGradient id="greenIce">
+                    <stop offset="0%" stopColor="#34d399" />
+                    <stop offset="100%" stopColor="#10b981" />
+                  </linearGradient>
+                  <linearGradient id="coneG">
+                    <stop offset="0%" stopColor="#fbbf24" />
+                    <stop offset="100%" stopColor="#d97706" />
+                  </linearGradient>
+                </defs>
+              </motion.svg>
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
+                <CheckCircle className="w-6 h-6 text-emerald-500 mx-auto mt-2" />
+                <span className="text-lg font-bold text-gray-800 block mt-1">Guardado</span>
               </motion.div>
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
-                className="text-sm text-gray-500 mt-1"
-              >
-                Ventas del día registradas
-              </motion.p>
-            </motion.div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        <Card className="bg-white/80 backdrop-blur-lg border-orange-100 shadow-xl">
+      <Card className="bg-white/80 backdrop-blur-lg border-orange-100 shadow-xl">
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-3 text-gray-800">
             <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl text-white">
@@ -256,7 +160,6 @@ export default function DailySalesForm({ storeId, onSuccess }) {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Fecha */}
             <div className="space-y-2">
               <Label className="text-gray-600 flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-orange-500" />
@@ -266,68 +169,64 @@ export default function DailySalesForm({ storeId, onSuccess }) {
                 type="date" 
                 value={formData.date}
                 onChange={(e) => setFormData({...formData, date: e.target.value})}
-                className="border-orange-200 focus:ring-orange-500"
+                className="border-orange-200"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              {/* Ventas totales */}
               <div className="space-y-2">
                 <Label className="text-gray-600 flex items-center gap-2">
                   <DollarSign className="w-4 h-4 text-green-500" />
-                  Ventas totales ($)
+                  Ventas totales
                 </Label>
                 <Input 
                   type="number"
                   placeholder="0"
                   value={formData.total_sales}
                   onChange={(e) => setFormData({...formData, total_sales: e.target.value})}
-                  className="border-orange-200 focus:ring-orange-500"
+                  className="border-orange-200"
                 />
               </div>
 
-              {/* Ticket Promedio */}
               <div className="space-y-2">
                 <Label className="text-gray-600 flex items-center gap-2">
                   <Receipt className="w-4 h-4 text-blue-500" />
-                  Ticket Promedio
+                  Tickets
                 </Label>
                 <Input 
                   type="number"
                   placeholder="0"
                   value={formData.total_tickets}
                   onChange={(e) => setFormData({...formData, total_tickets: e.target.value})}
-                  className="border-orange-200 focus:ring-orange-500"
+                  className="border-orange-200"
                 />
               </div>
 
-              {/* Transacciones */}
               <div className="space-y-2">
                 <Label className="text-gray-600 flex items-center gap-2">
                   <Zap className="w-4 h-4 text-purple-500" />
-                  Total Transacciones
+                  Transacciones
                 </Label>
                 <Input 
                   type="number"
                   placeholder="0"
                   value={formData.total_transactions}
                   onChange={(e) => setFormData({...formData, total_transactions: e.target.value})}
-                  className="border-orange-200 focus:ring-orange-500"
+                  className="border-orange-200"
                 />
               </div>
 
-              {/* Sugeridos */}
               <div className="space-y-2">
                 <Label className="text-gray-600 flex items-center gap-2">
                   <Gift className="w-4 h-4 text-pink-500" />
-                  Total Sugeridos
+                  Sugeridos
                 </Label>
                 <Input 
                   type="number"
                   placeholder="0"
                   value={formData.total_suggested}
                   onChange={(e) => setFormData({...formData, total_suggested: e.target.value})}
-                  className="border-orange-200 focus:ring-orange-500"
+                  className="border-orange-200"
                 />
               </div>
             </div>
@@ -335,7 +234,7 @@ export default function DailySalesForm({ storeId, onSuccess }) {
             <Button 
               type="submit" 
               disabled={createMutation.isPending}
-              className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg shadow-green-500/30 touch-manipulation"
+              className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg"
             >
               {createMutation.isPending ? (
                 <>
@@ -345,14 +244,13 @@ export default function DailySalesForm({ storeId, onSuccess }) {
               ) : (
                 <>
                   <Save className="w-5 h-5 mr-2" />
-                  Guardar Ventas
+                  Guardar
                 </>
               )}
             </Button>
           </form>
         </CardContent>
       </Card>
-      </motion.div>
     </>
   );
 }
