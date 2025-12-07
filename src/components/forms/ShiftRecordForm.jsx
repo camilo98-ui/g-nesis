@@ -126,13 +126,13 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
       setShowSuccess(true);
       setTimeout(() => {
         setShowSuccess(false);
-        setFormData(prev => ({
-          ...prev,
+        setFormData({
+          ...formData,
           sales: '',
           tickets: '',
           transactions: '',
           suggested_sales: ''
-        }));
+        });
         if (onSuccess) onSuccess();
       }, 2000);
     },
