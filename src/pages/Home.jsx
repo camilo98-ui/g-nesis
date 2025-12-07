@@ -128,7 +128,7 @@ export default function Home() {
 
   const ROLES = [
     { id: 'gerente', name: 'Gerente', icon: 'gerente', color: 'from-slate-600 to-gray-700', description: '🎯 Poder total', iconBaseColor: '#475569' },
-    { id: 'lider', name: 'Líder de Experiencia', icon: 'lider', color: 'from-amber-400 to-yellow-500', description: '⭐ Full acceso', iconBaseColor: '#f59e0b' },
+    { id: 'lider', name: 'Lider de Experiencia', icon: 'lider', color: 'from-amber-400 to-yellow-500', description: '⭐ Full acceso', iconBaseColor: '#f59e0b' },
     { id: 'embajador', name: 'Embajador', icon: 'embajador', color: 'from-pink-400 to-rose-500', description: '🍦 Team hero', iconBaseColor: '#ec4899' },
   ];
 
@@ -379,7 +379,7 @@ export default function Home() {
                 transition={{ duration: 3, repeat: Infinity }}
                 className="text-2xl font-bold bg-gradient-to-r from-pink-500 via-rose-500 to-pink-600 bg-clip-text text-transparent"
               >
-                {selectedRole === 'gerente' ? 'Hola Gerente! 🎯' : selectedRole === 'lider' ? 'Hola Líder! ⭐' : selectedRole === 'embajador' ? 'Hola Embajador! 🍦' : 'Bienvenido! 🎉'}
+                {selectedRole === 'gerente' ? 'Hola Gerente! 🎯' : selectedRole === 'lider' ? 'Hola Lider! ⭐' : selectedRole === 'embajador' ? 'Hola Embajador! 🍦' : 'Bienvenido! 🎉'}
               </motion.h2>
               <p className="text-gray-500 text-sm mt-1">
                 {selectedRole === 'gerente' ? 'El poder en tus manos' : selectedRole === 'lider' ? 'Listo para brillar' : selectedRole === 'embajador' ? 'El corazón del equipo' : 'Selecciona tu rol'}
