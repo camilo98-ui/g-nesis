@@ -74,14 +74,18 @@ export default function DailySalesForm({ storeId, onSuccess }) {
     onSuccess: async () => {
       console.log('🎉 Guardado exitoso, invalidando queries...');
       
+      // Invalidar y refetch inmediato
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['dailySales'], refetchType: 'active' }),
+        queryClient.invalidateQueries({ queryKey: ['salesLogs'], refetchType: 'active' }),
+        queryClient.invalidateQueries({ queryKey: ['budgets'], refetchType: 'active' }),
+        queryClient.refetchQueries({ queryKey: ['dailySales'], type: 'active' }),
+        queryClient.refetchQueries({ queryKey: ['salesLogs'], type: 'active' })
+      ]);
+      
+      console.log('✅ Queries invalidadas y refetch forzado');
+      
       toast.success('¡Ventas registradas correctamente!');
-      
-      // Invalidar TODAS las queries y remover del caché
-      await queryClient.invalidateQueries({ refetchType: 'all' });
-      await queryClient.removeQueries({ queryKey: ['dailySales'] });
-      await queryClient.removeQueries({ queryKey: ['salesLogs'] });
-      
-      console.log('✅ Queries invalidadas y caché limpiado');
       
       setShowSuccess(true);
       setTimeout(() => {
@@ -94,7 +98,7 @@ export default function DailySalesForm({ storeId, onSuccess }) {
           total_suggested: ''
         });
         if (onSuccess) onSuccess();
-      }, 1500);
+      }, 1000);
     },
     onError: (error) => {
       console.error('❌ ERROR COMPLETO:', error);

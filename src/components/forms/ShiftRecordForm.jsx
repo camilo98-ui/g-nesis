@@ -127,15 +127,19 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
     onSuccess: async () => {
       console.log('🎉 Guardado exitoso, invalidando queries...');
       
+      // Invalidar y refetch inmediato
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['shiftRecords'], refetchType: 'active' }),
+        queryClient.invalidateQueries({ queryKey: ['dailySales'], refetchType: 'active' }),
+        queryClient.invalidateQueries({ queryKey: ['salesLogs'], refetchType: 'active' }),
+        queryClient.invalidateQueries({ queryKey: ['budgets'], refetchType: 'active' }),
+        queryClient.refetchQueries({ queryKey: ['shiftRecords'], type: 'active' }),
+        queryClient.refetchQueries({ queryKey: ['dailySales'], type: 'active' })
+      ]);
+      
+      console.log('✅ Queries invalidadas y refetch forzado');
+      
       toast.success('¡Turno registrado correctamente!');
-      
-      // Invalidar TODAS las queries y remover del caché
-      await queryClient.invalidateQueries({ refetchType: 'all' });
-      await queryClient.removeQueries({ queryKey: ['shiftRecords'] });
-      await queryClient.removeQueries({ queryKey: ['dailySales'] });
-      await queryClient.removeQueries({ queryKey: ['salesLogs'] });
-      
-      console.log('✅ Queries invalidadas y caché limpiado');
       
       setShowSuccess(true);
       setTimeout(() => {
@@ -148,7 +152,7 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
           suggested_sales: ''
         });
         if (onSuccess) onSuccess();
-      }, 1500);
+      }, 1000);
     },
     onError: (error) => {
       console.error('❌ ERROR COMPLETO:', error);
