@@ -22,6 +22,16 @@ const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/pub
 
 const MENU_ITEMS = [
   { 
+    name: 'Registro de Ventas', 
+    page: 'Sales',
+    icon: TrendingUp, 
+    description: 'Alimentar datos',
+    bgColor: 'bg-gradient-to-br from-emerald-100/90 to-teal-100/80',
+    iconBg: 'bg-emerald-200/60',
+    iconColor: 'text-emerald-500',
+    textColor: 'text-emerald-700'
+  },
+  { 
     name: 'Tienda', 
     page: 'Dashboard',
     icon: LayoutDashboard, 
