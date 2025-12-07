@@ -89,7 +89,7 @@ export default function GrowthVelocityChart({ dailyTrend = [], budget = 0, forma
             <Zap className="w-4 h-4 text-blue-500 mx-auto mb-1" />
             <p className="text-xs text-gray-500">Brecha</p>
             <p className={`text-lg font-bold ${currentGap >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {currentGap >= 0 ? '+' : ''}{(currentGap / 1000000).toFixed(1)}M
+              {currentGap >= 0 ? '+' : ''}${(currentGap / 1000000).toFixed(1)}M COP
             </p>
           </motion.div>
 
@@ -100,7 +100,7 @@ export default function GrowthVelocityChart({ dailyTrend = [], budget = 0, forma
             <Activity className="w-4 h-4 text-purple-500 mx-auto mb-1" />
             <p className="text-xs text-gray-500">Acumulado</p>
             <p className="text-lg font-bold text-purple-600">
-              {((velocityData[velocityData.length - 1]?.cumulative || 0) / 1000000).toFixed(1)}M
+              ${((velocityData[velocityData.length - 1]?.cumulative || 0) / 1000000).toFixed(1)}M COP
             </p>
           </motion.div>
         </div>
@@ -117,6 +117,7 @@ export default function GrowthVelocityChart({ dailyTrend = [], budget = 0, forma
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis dataKey="date" tick={{ fontSize: 10 }} />
               <YAxis domain={[50, 150]} tick={{ fontSize: 10 }} tickFormatter={(v) => `${v}%`} />
+              <ReferenceLine y={100} stroke="#10b981" strokeDasharray="5 5" label={{ value: 'Meta', fontSize: 10, fill: '#10b981' }} />
               <Tooltip 
                 content={({ active, payload }) => {
                   if (!active || !payload?.length) return null;

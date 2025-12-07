@@ -165,12 +165,12 @@ export default function SalesByHourChart({ shiftRecords = [], formatCurrency }) 
                 </motion.div>
                 <p className="text-xs font-bold text-gray-700 mb-2">{shift.label}</p>
                 <p className="text-2xl font-black mb-1" style={{ color: shift.color }}>
-                  ${Math.round(shiftSales/1000000)}M
+                  ${Math.round(shiftSales/1000000)}M COP
                 </p>
                 <div className="flex flex-col gap-1 text-[10px] text-gray-600 font-bold">
                   <div className="flex items-center justify-center gap-2">
                     <span className="bg-white/60 px-2 py-0.5 rounded-full">{shiftTransactions} trans</span>
-                    <span className="bg-white/60 px-2 py-0.5 rounded-full">${Math.round(avgTicket/1000)}K</span>
+                    <span className="bg-white/60 px-2 py-0.5 rounded-full">${Math.round(avgTicket/1000)}K COP</span>
                   </div>
                   <span className="bg-white/80 px-2 py-1 rounded-full font-black text-gray-700">{shiftCount} turnos</span>
                 </div>
@@ -198,7 +198,7 @@ export default function SalesByHourChart({ shiftRecords = [], formatCurrency }) 
                 />
                 <YAxis 
                   tick={{ fill: '#0e7490', fontSize: 11, fontWeight: 'bold' }} 
-                  tickFormatter={(v) => `$${Math.round(v/1000000)}M`}
+                  tickFormatter={(v) => `$${Math.round(v/1000000)}M COP`}
                   stroke="#06b6d4"
                 />
                 <Tooltip 
@@ -208,7 +208,7 @@ export default function SalesByHourChart({ shiftRecords = [], formatCurrency }) 
                     boxShadow: '0 8px 30px rgba(6,182,212,0.3)',
                     background: 'linear-gradient(135deg, #ffffff 0%, #ecfeff 100%)'
                   }}
-                  formatter={(v) => [`$${Math.round(v/1000000)}M`, 'Ventas']}
+                  formatter={(v) => [`$${Math.round(v/1000000)}M COP`, 'Ventas']}
                   labelFormatter={(label) => `⏰ ${label}`}
                 />
                 <Area type="monotone" dataKey="sales" fill="url(#salesGradient)" stroke="#06b6d4" strokeWidth={3} />
@@ -231,7 +231,7 @@ export default function SalesByHourChart({ shiftRecords = [], formatCurrency }) 
                 />
                 <YAxis 
                   tick={{ fill: '#7c3aed', fontSize: 11, fontWeight: 'bold' }} 
-                  tickFormatter={(v) => `$${Math.round(v/1000000)}M`}
+                  tickFormatter={(v) => `$${Math.round(v/1000000)}M COP`}
                   stroke="#a855f7"
                 />
                 <Tooltip 
@@ -241,7 +241,7 @@ export default function SalesByHourChart({ shiftRecords = [], formatCurrency }) 
                     boxShadow: '0 8px 30px rgba(168,85,247,0.3)',
                     background: 'linear-gradient(135deg, #ffffff 0%, #faf5ff 100%)'
                   }}
-                  formatter={(v) => [`$${Math.round(v/1000000)}M`, 'Ventas']}
+                  formatter={(v) => [`$${Math.round(v/1000000)}M COP`, 'Ventas']}
                   labelFormatter={(label) => `⏰ ${label}`}
                 />
                 <Area type="monotone" dataKey="sales" stroke="#a855f7" strokeWidth={4} fill="url(#purpleGradient)" />
@@ -256,7 +256,7 @@ export default function SalesByHourChart({ shiftRecords = [], formatCurrency }) 
                 />
                 <YAxis 
                   tick={{ fill: '#ec4899', fontSize: 11, fontWeight: 'bold' }} 
-                  tickFormatter={(v) => `$${Math.round(v/1000000)}M`}
+                  tickFormatter={(v) => `$${Math.round(v/1000000)}M COP`}
                   stroke="#ec4899"
                 />
                 <Tooltip 
@@ -266,7 +266,7 @@ export default function SalesByHourChart({ shiftRecords = [], formatCurrency }) 
                     boxShadow: '0 8px 30px rgba(236,72,153,0.3)',
                     background: 'linear-gradient(135deg, #ffffff 0%, #fdf2f8 100%)'
                   }}
-                  formatter={(v) => [`$${Math.round(v/1000000)}M`, 'Ventas']}
+                  formatter={(v) => [`$${Math.round(v/1000000)}M COP`, 'Ventas']}
                   labelFormatter={(label) => `⏰ ${label}`}
                 />
                 <Line 
@@ -293,7 +293,7 @@ export default function SalesByHourChart({ shiftRecords = [], formatCurrency }) 
             </p>
             <p className="text-sm text-gray-700 font-bold leading-relaxed">
               {peakHour.hour 
-                ? <>Pico: <span className="text-cyan-600 text-xl">{peakHour.hourLabel}</span> con <span className="text-green-600 font-black">${Math.round(peakHour.sales/1000000)}M</span></> 
+                ? <>Pico: <span className="text-cyan-600 text-xl">{peakHour.hourLabel}</span> con <span className="text-green-600 font-black">${Math.round(peakHour.sales/1000000)}M COP</span></> 
                 : 'Registra más datos'}
             </p>
           </motion.div>
