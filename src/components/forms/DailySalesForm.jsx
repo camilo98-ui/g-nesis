@@ -85,57 +85,59 @@ export default function DailySalesForm({ storeId, onSuccess }) {
 
   const createMutation = useMutation({
     mutationFn: async (data) => {
-      try {
-        const user = await base44.auth.me();
-        
-        // Check if record exists for this date
-        const existing = await base44.entities.DailySales.filter({ 
-          store_id: storeId, 
-          date: data.date 
-        });
-        
-        const salesValue = parseFloat(data.total_sales) || 0;
-        const ticketsValue = parseInt(data.total_tickets) || 0;
-        const transactionsValue = parseInt(data.total_transactions) || 0;
-        const suggestedValue = parseInt(data.total_suggested) || 0;
-        
-        const recordData = {
-          store_id: storeId,
-          date: data.date,
-          total_sales: salesValue,
-          total_tickets: ticketsValue,
-          total_transactions: transactionsValue,
-          total_suggested: suggestedValue
-        };
-        
-        let record;
-        let action;
-        
-        if (existing.length > 0) {
-          record = await base44.entities.DailySales.update(existing[0].id, recordData);
-          action = 'update';
-        } else {
-          record = await base44.entities.DailySales.create(recordData);
-          action = 'create';
-        }
-        
-        // Log de la acción
-        await base44.entities.SalesLog.create({
-          store_id: storeId,
-          record_type: 'daily_sales',
-          record_id: record.id,
-          action,
-          user_email: user.email,
-          sales_amount: salesValue,
-          action_date: data.date,
-          details: JSON.stringify({ total_transactions: transactionsValue, total_suggested: suggestedValue })
-        });
-        
-        return record;
-      } catch (error) {
-        console.error('Error completo:', error);
-        throw error;
+      const user = await base44.auth.me();
+      
+      console.log('🔄 Guardando ventas diarias:', data);
+      
+      // Check if record exists
+      const existing = await base44.entities.DailySales.filter({ 
+        store_id: storeId, 
+        date: data.date 
+      });
+      
+      const salesValue = parseFloat(data.total_sales) || 0;
+      const ticketsValue = parseInt(data.total_tickets) || 0;
+      const transactionsValue = parseInt(data.total_transactions) || 0;
+      const suggestedValue = parseInt(data.total_suggested) || 0;
+      
+      const recordData = {
+        store_id: storeId,
+        date: data.date,
+        total_sales: salesValue,
+        total_tickets: ticketsValue,
+        total_transactions: transactionsValue,
+        total_suggested: suggestedValue
+      };
+      
+      let record;
+      let action;
+      
+      if (existing.length > 0) {
+        console.log('📝 Actualizando registro existente');
+        record = await base44.entities.DailySales.update(existing[0].id, recordData);
+        action = 'update';
+      } else {
+        console.log('✨ Creando nuevo registro');
+        record = await base44.entities.DailySales.create(recordData);
+        action = 'create';
       }
+      
+      console.log('✅ Registro guardado:', record);
+      
+      // Log
+      await base44.entities.SalesLog.create({
+        store_id: storeId,
+        record_type: 'daily_sales',
+        record_id: record.id,
+        action,
+        user_email: user.email,
+        sales_amount: salesValue,
+        action_date: data.date,
+        details: JSON.stringify({ total_transactions: transactionsValue, total_suggested: suggestedValue })
+      });
+      
+      console.log('✅ Todo guardado correctamente');
+      return record;
     },
     onSuccess: (data) => {
       console.log('✅ Ventas guardadas exitosamente:', data);
