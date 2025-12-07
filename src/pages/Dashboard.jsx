@@ -795,7 +795,7 @@ export default function Dashboard() {
                             </defs>
                             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                             <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-                            <YAxis tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} tick={{ fontSize: 11 }} />
+                            <YAxis tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M COP`} tick={{ fontSize: 11 }} />
                             <Tooltip 
                               contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
                               labelFormatter={(label, payload) => payload?.[0]?.payload?.fullDate || label}
@@ -829,7 +829,7 @@ export default function Dashboard() {
                             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                             <XAxis dataKey="date" tick={{ fontSize: 11 }} />
                             <YAxis yAxisId="left" tick={{ fontSize: 11 }} />
-                            <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11 }} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} />
+                            <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11 }} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M COP`} />
                             <Tooltip 
                               contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
                               formatter={(v, name) => [name === 'Ventas' ? formatCurrency(v) : v, name]}
