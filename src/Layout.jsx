@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import SmartSearch from '@/components/SmartSearch';
 import MotivationalHeader from '@/components/MotivationalHeader';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import { 
-  Home, LayoutDashboard, TrendingUp, Award,
-  Target, Users, Menu, X, FileText, Snowflake, GraduationCap, ClipboardCheck, CalendarDays
+  Home, LayoutDashboard, Menu, Snowflake, CalendarDays
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -33,11 +33,12 @@ export default function Layout({ children, currentPageName }) {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Motivational Banner - Pastel muy suave */}
-              <div className="fixed top-0 left-0 right-0 h-8 bg-gradient-to-r from-pink-50/70 via-rose-50/60 to-amber-50/70 z-50 border-b border-pink-100/50">
-                <MotivationalHeader />
-              </div>
+    <ErrorBoundary>
+      <div className="min-h-screen bg-white">
+        {/* Motivational Banner - Pastel muy suave */}
+        <div className="fixed top-0 left-0 right-0 h-8 bg-gradient-to-r from-pink-50/70 via-rose-50/60 to-amber-50/70 z-50 border-b border-pink-100/50">
+          <MotivationalHeader />
+        </div>
 
       {/* Top Header Bar */}
       <header className="fixed top-8 left-0 right-0 h-14 bg-white border-b border-gray-100 z-50 px-4 flex items-center justify-between shadow-sm">
@@ -204,12 +205,13 @@ export default function Layout({ children, currentPageName }) {
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="pt-[88px] min-h-screen pb-4">
-        <div className="container mx-auto px-2 sm:px-4">
-          {children}
-        </div>
-      </main>
-    </div>
+        {/* Main Content */}
+        <main className="pt-[88px] min-h-screen pb-4">
+          <div className="container mx-auto px-2 sm:px-4">
+            {children}
+          </div>
+        </main>
+      </div>
+    </ErrorBoundary>
   );
 }
