@@ -387,77 +387,86 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.35 }}
             >
-              <div className="w-full md:w-[340px] space-y-2">
-                <p className="text-xs text-gray-500 text-center mb-3">¿Quién eres hoy?</p>
-                <div className="grid grid-cols-3 gap-2">
+              <div className="w-full md:w-[380px] space-y-3">
+                <p className="text-sm text-gray-600 text-center mb-4 font-medium">¿Quién eres hoy?</p>
+                <div className="grid grid-cols-1 gap-3">
                   {ROLES.map((role, idx) => (
                     <motion.button
                       key={role.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.4 + idx * 0.05 }}
-                      whileHover={{ scale: 1.03, y: -2 }}
-                      whileTap={{ scale: 0.97 }}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.4 + idx * 0.1, type: "spring" }}
+                      whileHover={{ scale: 1.02, x: 5 }}
+                      whileTap={{ scale: 0.98 }}
                       onClick={() => { setSelectedRole(role.id); setLoginError(''); }}
-                      className={`relative p-3 rounded-xl border-2 transition-all overflow-hidden ${
+                      className={`relative p-4 rounded-2xl border-2 transition-all overflow-hidden ${
                         selectedRole === role.id
-                          ? 'border-transparent shadow-lg'
-                          : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-md'
+                          ? 'border-transparent shadow-2xl'
+                          : 'border-gray-200 bg-white hover:border-pink-200 hover:shadow-lg'
                       }`}
                     >
                       {/* Background gradient when selected */}
-                      {selectedRole === role.id && (
-                        <motion.div 
-                          layoutId="roleBackground"
-                          className={`absolute inset-0 bg-gradient-to-br ${role.color} opacity-20`}
-                          initial={false}
-                          transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                        />
-                      )}
-                      
-                      <div className="relative z-10 flex items-center gap-2">
+                      <AnimatePresence>
+                        {selectedRole === role.id && (
+                          <motion.div 
+                            layoutId="roleBackground"
+                            className={`absolute inset-0 bg-gradient-to-br ${role.color}`}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 0.15 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                          />
+                        )}
+                      </AnimatePresence>
+
+                      <div className="relative z-10 flex items-center gap-4">
                         {/* Icon container con animación */}
                         <motion.div 
-                          className={`w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden ${
+                          className={`w-14 h-14 rounded-2xl flex items-center justify-center overflow-hidden shadow-lg ${
                             selectedRole === role.id 
-                              ? `bg-gradient-to-br ${role.color} shadow-md` 
-                              : 'bg-gray-100'
+                              ? `bg-gradient-to-br ${role.color}` 
+                              : 'bg-gradient-to-br from-gray-100 to-gray-200'
                           }`}
                           animate={selectedRole === role.id ? { 
-                            scale: [1, 1.05, 1]
+                            scale: [1, 1.08, 1],
+                            rotate: [0, -3, 3, 0]
                           } : {}}
-                          transition={{ duration: 0.5 }}
+                          transition={{ duration: 2, repeat: Infinity }}
                         >
-                          <div className="w-5 h-5">
+                          <div className="w-7 h-7">
                             <RoleIcon roleId={role.id} isSelected={selectedRole === role.id} />
                           </div>
                         </motion.div>
-                        
+
                         <div className="text-left flex-1">
-                          <p className={`text-xs font-bold leading-tight ${
-                            selectedRole === role.id ? 'text-gray-800' : 'text-gray-700'
+                          <p className={`text-base font-black leading-tight mb-1 ${
+                            selectedRole === role.id ? 'text-gray-900' : 'text-gray-700'
                           }`}>
                             {role.name}
                           </p>
-                          <p className={`text-[9px] ${
-                            selectedRole === role.id ? 'text-gray-600' : 'text-gray-400'
+                          <p className={`text-xs font-medium ${
+                            selectedRole === role.id ? 'text-gray-700' : 'text-gray-500'
                           }`}>
                             {role.description}
                           </p>
                         </div>
-                        
+
                         {/* Check indicator */}
-                        {selectedRole === role.id && (
-                          <motion.div
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            className={`w-5 h-5 rounded-full bg-gradient-to-br ${role.color} flex items-center justify-center`}
-                          >
-                            <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                            </svg>
-                          </motion.div>
-                        )}
+                        <AnimatePresence>
+                          {selectedRole === role.id && (
+                            <motion.div
+                              initial={{ scale: 0, rotate: -180 }}
+                              animate={{ scale: 1, rotate: 0 }}
+                              exit={{ scale: 0, rotate: 180 }}
+                              transition={{ type: "spring", stiffness: 500, damping: 25 }}
+                              className={`w-8 h-8 rounded-full bg-gradient-to-br ${role.color} flex items-center justify-center shadow-lg`}
+                            >
+                              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                              </svg>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
                       </div>
                     </motion.button>
                   ))}
@@ -532,14 +541,40 @@ export default function Home() {
               <Button
                 onClick={handleLogin}
                 disabled={!pendingStore || !selectedRole}
-                className="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white py-6 rounded-xl shadow-lg shadow-pink-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white py-6 rounded-xl shadow-lg shadow-pink-500/30 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden"
               >
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                  animate={{ x: ['-100%', '200%'] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                />
                 <motion.span
                   animate={{ scale: pendingStore && selectedRole ? [1, 1.05, 1] : 1 }}
                   transition={{ duration: 1.5, repeat: Infinity }}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 relative z-10 text-lg font-bold"
                 >
-                  🍦 Ingresar a la tienda
+                  <svg viewBox="0 0 40 60" className="w-6 h-8">
+                    {/* Vaso */}
+                    <path d="M10 12 L12 48 L28 48 L30 12 Z" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.9" />
+                    <path d="M10 12 L12 48 L28 48 L30 12 Z" fill="url(#milkshakeGrad)" opacity="0.6" />
+                    <ellipse cx="20" cy="10" rx="11" ry="4" fill="none" stroke="currentColor" strokeWidth="1" opacity="0.9" />
+                    {/* Helado */}
+                    <motion.circle 
+                      cx="20" cy="6" r="4" 
+                      fill="#FFE5F1"
+                      animate={{ y: [0, -1, 0] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    />
+                    {/* Pajilla */}
+                    <line x1="25" y1="8" x2="27" y2="40" stroke="currentColor" strokeWidth="1.5" opacity="0.8" />
+                    <defs>
+                      <linearGradient id="milkshakeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.8"/>
+                        <stop offset="100%" stopColor="#FFB5C5" stopOpacity="0.6"/>
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                  Ingresar a la tienda
                 </motion.span>
               </Button>
             </motion.div>
