@@ -948,9 +948,11 @@ export default function Rankings() {
                             )}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-bold text-gray-800 truncate">
-                              {item.cashier?.name}
-                            </p>
+                            <Link to={createPageUrl('CashierProfile') + `?id=${item.cashier_id}&from=globalRanking`}>
+                              <p className="font-bold text-gray-800 truncate hover:text-pink-600 transition-colors cursor-pointer">
+                                {item.cashier?.name}
+                              </p>
+                            </Link>
                             <p className="text-xs text-gray-500 truncate">📍 {item.storeName}</p>
                           </div>
                           <div className="text-right">

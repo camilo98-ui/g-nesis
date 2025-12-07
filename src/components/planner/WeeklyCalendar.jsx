@@ -320,7 +320,7 @@ export default function WeeklyCalendar({
         <div className="p-10 text-center"><Loader2 className="w-8 h-8 animate-spin text-pink-400 mx-auto" /></div>
       ) : (
         <DragDropContext onDragEnd={handleDragEnd}>
-          <div className="grid grid-cols-7 divide-x divide-gray-100">
+          <div className="grid grid-cols-7 divide-x divide-gray-100 overflow-x-auto">
             {weekDays.map((day, idx) => {
               const dayShifts = getShiftsForDay(day);
               const isCurrentDay = isToday(day);
@@ -337,7 +337,7 @@ export default function WeeklyCalendar({
                       onMouseEnter={() => setHoveredDay(idx)}
                       onMouseLeave={() => setHoveredDay(null)}
                       animate={{ scale: isHovered ? 1.01 : 1 }}
-                      className={`min-h-[380px] transition-all relative ${snapshot.isDraggingOver ? 'bg-pink-50/50' : ''} ${isCurrentDay ? 'bg-rose-50/30' : isHovered ? 'bg-gray-50/30' : 'bg-white'} ${holiday ? 'bg-gradient-to-b from-amber-50/50 to-orange-50/30' : ''}`}
+                      className={`min-h-[380px] min-w-[120px] transition-all relative ${snapshot.isDraggingOver ? 'bg-pink-50/50' : ''} ${isCurrentDay ? 'bg-rose-50/30' : isHovered ? 'bg-gray-50/30' : 'bg-white'} ${holiday ? 'bg-gradient-to-b from-amber-50/50 to-orange-50/30' : ''}`}
                     >
                       {/* Day Header */}
                       <div className={`p-2 text-center border-b sticky top-0 z-10 ${isCurrentDay ? 'bg-gradient-to-r from-rose-300 to-pink-300 text-white' : holiday ? 'bg-gradient-to-r from-amber-300 to-orange-300 text-white' : 'bg-gray-50'}`}>
