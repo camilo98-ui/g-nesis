@@ -42,10 +42,10 @@ const MENU_ITEMS = [
     textColor: 'text-violet-700'
   },
   { 
-    name: 'Ventas', 
+    name: 'Registro de Ventas', 
     page: 'Sales',
     icon: TrendingUp, 
-    description: 'Registrar',
+    description: 'Por cajero y tienda',
     bgColor: 'bg-gradient-to-br from-emerald-100/90 to-teal-100/80',
     iconBg: 'bg-emerald-200/60',
     iconColor: 'text-emerald-500',
