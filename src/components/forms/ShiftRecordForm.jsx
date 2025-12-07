@@ -148,9 +148,6 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
           suggested_sales: ''
         });
         if (onSuccess) onSuccess();
-        
-        // Forzar recarga de la página después de guardar
-        window.location.reload();
       }, 1500);
     },
     onError: (error) => {

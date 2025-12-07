@@ -94,9 +94,6 @@ export default function DailySalesForm({ storeId, onSuccess }) {
           total_suggested: ''
         });
         if (onSuccess) onSuccess();
-        
-        // Forzar recarga de la página después de guardar
-        window.location.reload();
       }, 1500);
     },
     onError: (error) => {
