@@ -717,20 +717,8 @@ export default function Home() {
             {MENU_ITEMS.map((item, index) => {
               const Icon = item.icon;
               
-              // Restricciones por rol
-              const isLocked = (selectedRole === 'embajador' && item.page === 'Budget') ||
-                              (selectedRole === 'calidad' && !['Quality'].includes(item.page)) ||
-                              (selectedRole === 'c_interno' && item.page !== 'Quality');
-              
-              // Para Calidad, solo mostrar Calidad
-              if (selectedRole === 'calidad' && item.page !== 'Quality') {
-                return null;
-              }
-              
-              // Para C. Interno, no mostrar nada del menú (solo verá el planner embebido)
-              if (selectedRole === 'c_interno') {
-                return null;
-              }
+              // Restricciones por rol - solo embajador no ve Presupuestos
+              const isLocked = (selectedRole === 'embajador' && item.page === 'Budget');
               
               return (
                 <motion.div
