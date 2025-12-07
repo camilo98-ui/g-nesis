@@ -40,6 +40,11 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
       const user = await base44.auth.me();
       const cashier = cashiers.find(c => c.id === data.cashier_id);
       
+      const salesValue = parseFloat(data.sales) || 0;
+      const ticketsValue = parseInt(data.tickets) || 0;
+      const transactionsValue = parseInt(data.transactions) || 0;
+      const suggestedValue = parseInt(data.suggested_sales) || 0;
+      
       // 1. Crear ShiftRecord
       const record = await base44.entities.ShiftRecord.create({
         store_id: storeId,
@@ -47,21 +52,22 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
         cashier_name: cashier?.name || '',
         date: data.date,
         shift: data.shift,
-        sales: parseFloat(data.sales) || 0,
-        tickets: parseInt(data.tickets) || 0,
-        transactions: parseInt(data.transactions) || 0,
-        suggested_sales: parseInt(data.suggested_sales) || 0,
-        average_ticket: data.tickets > 0 ? (parseFloat(data.sales) || 0) / parseInt(data.tickets) : 0
+        sales: salesValue,
+        tickets: ticketsValue,
+        transactions: transactionsValue,
+        suggested_sales: suggestedValue,
+        average_ticket: ticketsValue > 0 ? salesValue / ticketsValue : 0
       });
       
-      // 2. Esperar para asegurar consistencia
-      await new Promise(resolve => setTimeout(resolve, 500));
+      console.log('✅ ShiftRecord creado:', record);
       
-      // 3. Recalcular DailySales
+      // 2. Recalcular DailySales
       const allDayRecords = await base44.entities.ShiftRecord.filter({ 
         store_id: storeId, 
         date: data.date 
       });
+      
+      console.log('📊 Registros del día:', allDayRecords.length);
       
       const dailyTotals = allDayRecords.reduce((acc, r) => ({
         sales: acc.sales + (r.sales || 0),
@@ -69,6 +75,8 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
         transactions: acc.transactions + (r.transactions || 0),
         suggested: acc.suggested + (r.suggested_sales || 0)
       }), { sales: 0, tickets: 0, transactions: 0, suggested: 0 });
+      
+      console.log('📈 Totales calculados:', dailyTotals);
       
       const existingDailySales = await base44.entities.DailySales.filter({ 
         store_id: storeId, 
@@ -82,6 +90,7 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
           total_transactions: dailyTotals.transactions,
           total_suggested: dailyTotals.suggested
         });
+        console.log('✅ DailySales actualizado');
       } else {
         await base44.entities.DailySales.create({
           store_id: storeId,
@@ -91,9 +100,10 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
           total_transactions: dailyTotals.transactions,
           total_suggested: dailyTotals.suggested
         });
+        console.log('✅ DailySales creado');
       }
         
-      // 4. Crear log
+      // 3. Crear log
       await base44.entities.SalesLog.create({
         store_id: storeId,
         record_type: 'shift_record',
@@ -101,18 +111,26 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
         action: 'create',
         user_email: user.email,
         cashier_name: cashier?.name,
-        sales_amount: parseFloat(data.sales) || 0,
+        sales_amount: salesValue,
         action_date: data.date,
         details: JSON.stringify({ shift: data.shift })
       });
       
+      console.log('✅ TODO GUARDADO CORRECTAMENTE');
+      
       return record;
     },
-    onSuccess: () => {
-      toast.success('Turno guardado exitosamente');
+    onSuccess: async () => {
+      console.log('🎉 Guardado exitoso, invalidando queries...');
       
-      // Invalidar TODAS las queries para forzar recarga
-      queryClient.invalidateQueries();
+      toast.success('¡Turno registrado correctamente!');
+      
+      // Invalidar queries específicas
+      await queryClient.invalidateQueries({ queryKey: ['shiftRecords'] });
+      await queryClient.invalidateQueries({ queryKey: ['dailySales'] });
+      await queryClient.invalidateQueries({ queryKey: ['salesLogs'] });
+      
+      console.log('✅ Queries invalidadas');
       
       setShowSuccess(true);
       setTimeout(() => {
@@ -125,11 +143,14 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
           suggested_sales: ''
         });
         if (onSuccess) onSuccess();
+        
+        // Forzar recarga de la página después de guardar
+        window.location.reload();
       }, 1500);
     },
     onError: (error) => {
-      console.error('ERROR:', error);
-      toast.error(error.message || 'Error al guardar');
+      console.error('❌ ERROR COMPLETO:', error);
+      toast.error(`Error al guardar: ${error.message || 'Intenta de nuevo'}`);
     }
   });
 
