@@ -137,21 +137,29 @@ export default function DailySalesForm({ storeId, onSuccess }) {
         throw error;
       }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries(['dailySales']);
-      queryClient.invalidateQueries(['salesLogs']);
-      setFormData({
-        ...formData,
-        total_sales: '',
-        total_tickets: '',
-        total_transactions: '',
-        total_suggested: ''
-      });
-      setShowSuccess(true);
-      setTimeout(() => {
-        setShowSuccess(false);
-        onSuccess?.();
-      }, 2500);
+    onSuccess: async () => {
+      try {
+        await queryClient.invalidateQueries(['dailySales']);
+        await queryClient.invalidateQueries(['salesLogs']);
+
+        setFormData({
+          ...formData,
+          total_sales: '',
+          total_tickets: '',
+          total_transactions: '',
+          total_suggested: ''
+        });
+
+        toast.success('Ventas guardadas exitosamente');
+        setShowSuccess(true);
+
+        setTimeout(() => {
+          setShowSuccess(false);
+          onSuccess?.();
+        }, 2000);
+      } catch (error) {
+        console.error('Error en onSuccess:', error);
+      }
     },
     onError: (error) => {
       console.error('Error guardando ventas:', error);
@@ -159,8 +167,9 @@ export default function DailySalesForm({ storeId, onSuccess }) {
     }
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    e.stopPropagation();
     
     // Validar que tenga al menos las ventas
     if (!formData.total_sales) {
@@ -168,7 +177,11 @@ export default function DailySalesForm({ storeId, onSuccess }) {
       return;
     }
     
-    createMutation.mutate(formData);
+    try {
+      await createMutation.mutateAsync(formData);
+    } catch (error) {
+      console.error('Error en submit:', error);
+    }
   };
 
   return (
@@ -305,14 +318,19 @@ export default function DailySalesForm({ storeId, onSuccess }) {
             <Button 
               type="submit" 
               disabled={createMutation.isPending}
-              className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg shadow-green-500/30"
+              className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg shadow-green-500/30 touch-manipulation"
             >
               {createMutation.isPending ? (
-                <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                  Guardando...
+                </>
               ) : (
-                <Save className="w-5 h-5 mr-2" />
+                <>
+                  <Save className="w-5 h-5 mr-2" />
+                  Guardar Ventas
+                </>
               )}
-              Guardar Ventas
             </Button>
           </form>
         </CardContent>

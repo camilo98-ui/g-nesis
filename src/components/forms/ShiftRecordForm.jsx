@@ -109,23 +109,31 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
         throw error;
       }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries(['shiftRecords']);
-      queryClient.invalidateQueries(['dailySales']);
-      queryClient.invalidateQueries(['salesLogs']);
-      queryClient.invalidateQueries(['budget']);
-      setFormData({
-        ...formData,
-        sales: '',
-        tickets: '',
-        transactions: '',
-        suggested_sales: ''
-      });
-      setShowSuccess(true);
-      setTimeout(() => {
-        setShowSuccess(false);
-        onSuccess?.();
-      }, 2500);
+    onSuccess: async () => {
+      try {
+        await queryClient.invalidateQueries(['shiftRecords']);
+        await queryClient.invalidateQueries(['dailySales']);
+        await queryClient.invalidateQueries(['salesLogs']);
+        await queryClient.invalidateQueries(['budget']);
+
+        setFormData({
+          ...formData,
+          sales: '',
+          tickets: '',
+          transactions: '',
+          suggested_sales: ''
+        });
+
+        toast.success('Turno guardado exitosamente');
+        setShowSuccess(true);
+
+        setTimeout(() => {
+          setShowSuccess(false);
+          onSuccess?.();
+        }, 2000);
+      } catch (error) {
+        console.error('Error en onSuccess:', error);
+      }
     },
     onError: (error) => {
       console.error('Error guardando turno:', error);
@@ -133,8 +141,10 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
     }
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    e.stopPropagation();
+    
     if (!formData.cashier_id) {
       toast.error('Selecciona un cajero');
       return;
@@ -145,7 +155,11 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
       return;
     }
 
-    createMutation.mutate(formData);
+    try {
+      await createMutation.mutateAsync(formData);
+    } catch (error) {
+      console.error('Error en submit:', error);
+    }
   };
 
   const selectedShift = SHIFTS.find(s => s.value === formData.shift);
@@ -372,14 +386,19 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
             <Button 
               type="submit" 
               disabled={createMutation.isPending}
-              className="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white shadow-lg shadow-pink-500/30"
+              className="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white shadow-lg shadow-pink-500/30 touch-manipulation"
             >
               {createMutation.isPending ? (
-                <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                  Guardando...
+                </>
               ) : (
-                <Save className="w-5 h-5 mr-2" />
+                <>
+                  <Save className="w-5 h-5 mr-2" />
+                  Guardar Registro
+                </>
               )}
-              Guardar Registro
             </Button>
           </form>
         </CardContent>
