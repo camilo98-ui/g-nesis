@@ -264,31 +264,32 @@ export default function WeeklyCalendar({
   return (
     <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
       {/* Header */}
-      <div className="p-4 border-b border-gray-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-gradient-to-r from-rose-400 to-pink-400">
+      <div className="p-3 sm:p-4 border-b border-gray-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3 bg-gradient-to-r from-rose-400 to-pink-400">
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon" onClick={() => setCurrentWeek(subWeeks(currentWeek, 1))} className="text-white hover:bg-white/20">
             <ChevronLeft className="w-5 h-5" />
           </Button>
           <div className="text-white">
-            <p className="text-xs opacity-80">Semana {currentWeekNumber}</p>
-            <h2 className="font-bold text-lg">{format(currentWeek, "d MMM", { locale: es })} - {format(weekDays[6], "d MMM yyyy", { locale: es })}</h2>
+            <p className="text-[10px] sm:text-xs opacity-80">Semana {currentWeekNumber}</p>
+            <h2 className="font-bold text-sm sm:text-lg">{format(currentWeek, "d MMM", { locale: es })} - {format(weekDays[6], "d MMM yyyy", { locale: es })}</h2>
           </div>
           <Button variant="ghost" size="icon" onClick={() => setCurrentWeek(addWeeks(currentWeek, 1))} className="text-white hover:bg-white/20">
             <ChevronRight className="w-5 h-5" />
           </Button>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-1 sm:gap-2">
           <Select value={currentWeekNumber.toString()} onValueChange={(v) => {
             const selected = yearWeeks.find(w => w.number.toString() === v);
             if (selected) setCurrentWeek(selected.week);
           }}>
-            <SelectTrigger className="w-40 bg-white/20 border-white/30 text-white text-sm"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-32 sm:w-40 bg-white/20 border-white/30 text-white text-xs sm:text-sm"><SelectValue /></SelectTrigger>
             <SelectContent>{yearWeeks.map(w => <SelectItem key={w.number} value={w.number.toString()}>{w.label}</SelectItem>)}</SelectContent>
           </Select>
           {!readOnly && (
             <>
-              <Button variant="secondary" size="sm" onClick={copyWeek} disabled={copying || !shifts.length} className="gap-2 bg-white/20 text-white hover:bg-white/30 border-0">
-                {copying ? <Loader2 className="w-4 h-4 animate-spin" /> : <Copy className="w-4 h-4" />} Copiar
+              <Button variant="secondary" size="sm" onClick={copyWeek} disabled={copying || !shifts.length} className="gap-1 sm:gap-2 bg-white/20 text-white hover:bg-white/30 border-0 text-xs px-2 sm:px-3">
+                {copying ? <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 animate-spin" /> : <Copy className="w-3 h-3 sm:w-4 sm:h-4" />} 
+                <span className="hidden sm:inline">Copiar</span>
               </Button>
               <Button 
                 variant="secondary" 
@@ -303,14 +304,16 @@ export default function WeeklyCalendar({
                   }
                 }}
                 disabled={!shifts.length}
-                className="gap-2 bg-red-500/20 text-white hover:bg-red-500/30 border-0"
+                className="gap-1 sm:gap-2 bg-red-500/20 text-white hover:bg-red-500/30 border-0 text-xs px-2 sm:px-3"
               >
-                <Trash2 className="w-4 h-4" /> Borrar Semana
+                <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" /> 
+                <span className="hidden sm:inline">Borrar</span>
               </Button>
             </>
           )}
-          <Button variant="secondary" size="sm" onClick={onExportPDF} className="gap-2 bg-white text-pink-500 hover:bg-pink-50">
-            <Download className="w-4 h-4" /> PDF
+          <Button variant="secondary" size="sm" onClick={onExportPDF} className="gap-1 sm:gap-2 bg-white text-pink-500 hover:bg-pink-50 text-xs px-2 sm:px-3">
+            <Download className="w-3 h-3 sm:w-4 sm:h-4" /> 
+            <span className="hidden sm:inline">PDF</span>
           </Button>
         </div>
       </div>
@@ -337,24 +340,24 @@ export default function WeeklyCalendar({
                       onMouseEnter={() => setHoveredDay(idx)}
                       onMouseLeave={() => setHoveredDay(null)}
                       animate={{ scale: isHovered ? 1.01 : 1 }}
-                      className={`min-h-[380px] min-w-[120px] transition-all relative ${snapshot.isDraggingOver ? 'bg-pink-50/50' : ''} ${isCurrentDay ? 'bg-rose-50/30' : isHovered ? 'bg-gray-50/30' : 'bg-white'} ${holiday ? 'bg-gradient-to-b from-amber-50/50 to-orange-50/30' : ''}`}
+                      className={`min-h-[320px] sm:min-h-[380px] min-w-[100px] sm:min-w-[120px] transition-all relative ${snapshot.isDraggingOver ? 'bg-pink-50/50' : ''} ${isCurrentDay ? 'bg-rose-50/30' : isHovered ? 'bg-gray-50/30' : 'bg-white'} ${holiday ? 'bg-gradient-to-b from-amber-50/50 to-orange-50/30' : ''}`}
                     >
                       {/* Day Header */}
-                      <div className={`p-2 text-center border-b sticky top-0 z-10 ${isCurrentDay ? 'bg-gradient-to-r from-rose-300 to-pink-300 text-white' : holiday ? 'bg-gradient-to-r from-amber-300 to-orange-300 text-white' : 'bg-gray-50'}`}>
-                        <p className={`text-[10px] font-bold uppercase tracking-wider ${isCurrentDay || holiday ? 'text-white/80' : 'text-gray-400'}`}>
+                      <div className={`p-1.5 sm:p-2 text-center border-b sticky top-0 z-10 ${isCurrentDay ? 'bg-gradient-to-r from-rose-300 to-pink-300 text-white' : holiday ? 'bg-gradient-to-r from-amber-300 to-orange-300 text-white' : 'bg-gray-50'}`}>
+                        <p className={`text-[8px] sm:text-[10px] font-bold uppercase tracking-wider ${isCurrentDay || holiday ? 'text-white/80' : 'text-gray-400'}`}>
                           {format(day, 'EEE', { locale: es })}
                         </p>
-                        <p className={`text-xl font-black ${isCurrentDay || holiday ? 'text-white' : 'text-gray-700'}`}>{format(day, 'd')}</p>
+                        <p className={`text-lg sm:text-xl font-black ${isCurrentDay || holiday ? 'text-white' : 'text-gray-700'}`}>{format(day, 'd')}</p>
                         {holiday && (
                           <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 1, repeat: Infinity }} className="flex items-center justify-center gap-1 text-[9px] text-white/90">
                             <PartyPopper className="w-3 h-3" /> Festivo
                           </motion.div>
                         )}
-                        <p className={`text-[9px] ${isCurrentDay || holiday ? 'text-white/70' : 'text-gray-400'}`}>{dayShifts.length} turno{dayShifts.length !== 1 ? 's' : ''}</p>
+                        <p className={`text-[8px] sm:text-[9px] ${isCurrentDay || holiday ? 'text-white/70' : 'text-gray-400'}`}>{dayShifts.length} turno{dayShifts.length !== 1 ? 's' : ''}</p>
                       </div>
 
                       {/* Shifts */}
-                      <div className="p-1.5 space-y-1.5">
+                      <div className="p-1 sm:p-1.5 space-y-1 sm:space-y-1.5">
                         <AnimatePresence>
                           {dayShifts.map((shift, shiftIdx) => {
                             const role = ROLES_CONFIG[shift.role] || ROLES_CONFIG.caja;
@@ -376,43 +379,43 @@ export default function WeeklyCalendar({
                                     className={`rounded-xl overflow-hidden border-2 ${role.border} ${role.bg} shadow-sm hover:shadow-lg transition-all cursor-pointer group relative ${snapshot.isDragging ? 'shadow-xl rotate-2' : ''}`}
                                   >
                                     {/* Role Header con decoraciones blancas */}
-                                    <div className={`${role.header} px-2 py-1.5 flex items-center justify-between relative overflow-hidden`}>
-                                      {/* Decoraciones de helados en blanco */}
-                                      <IceCreamDecorations />
-                                      <div className="flex items-center gap-1.5 relative z-10">
-                                        <motion.div animate={{ scale: [1, 1.15, 1] }} transition={{ duration: 2, repeat: Infinity }}>
-                                          <RoleIcon className="w-3.5 h-3.5 text-white drop-shadow-sm" />
-                                        </motion.div>
-                                        <span className="text-[10px] font-bold text-white drop-shadow-sm">{role.label}</span>
-                                      </div>
-                                      <div {...provided.dragHandleProps} className="cursor-grab relative z-10">
-                                        <GripVertical className="w-3 h-3 text-white/70" />
-                                      </div>
+                                    <div className={`${role.header} px-1.5 sm:px-2 py-1 sm:py-1.5 flex items-center justify-between relative overflow-hidden`}>
+                                     {/* Decoraciones de helados en blanco */}
+                                     <IceCreamDecorations />
+                                     <div className="flex items-center gap-1 sm:gap-1.5 relative z-10">
+                                       <motion.div animate={{ scale: [1, 1.15, 1] }} transition={{ duration: 2, repeat: Infinity }}>
+                                         <RoleIcon className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white drop-shadow-sm" />
+                                       </motion.div>
+                                       <span className="text-[8px] sm:text-[10px] font-bold text-white drop-shadow-sm">{role.label}</span>
+                                     </div>
+                                     <div {...provided.dragHandleProps} className="cursor-grab relative z-10">
+                                       <GripVertical className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white/70" />
+                                     </div>
                                     </div>
-                                    
+
                                     {/* Content */}
-                                    <div className="p-2 pt-2.5">
-                                      <p className="font-bold text-sm text-gray-700 truncate">{shift.cashier_name || 'Sin asignar'}</p>
+                                    <div className="p-1.5 sm:p-2 pt-2 sm:pt-2.5">
+                                     <p className="font-bold text-[10px] sm:text-sm text-gray-700 truncate">{shift.cashier_name || 'Sin asignar'}</p>
                                       {shift.role === 'descanso' ? (
-                                        <div className="flex items-center justify-center bg-indigo-100/50 rounded px-1.5 py-1.5">
-                                          <span className="text-xs font-medium text-indigo-500">Día libre</span>
+                                        <div className="flex items-center justify-center bg-indigo-100/50 rounded px-1 sm:px-1.5 py-1 sm:py-1.5">
+                                          <span className="text-[9px] sm:text-xs font-medium text-indigo-500">Día libre</span>
                                         </div>
                                       ) : (
-                                        <div className="flex items-center justify-between bg-white/70 rounded px-1.5 py-1">
-                                          <div className="flex items-center gap-1">
-                                            <Clock className={`w-3 h-3 ${role.text}`} />
-                                            <span className="text-xs font-bold text-gray-600">{shift.start_time} - {shift.end_time}</span>
+                                        <div className="flex flex-col sm:flex-row items-center justify-between bg-white/70 rounded px-1 sm:px-1.5 py-1">
+                                          <div className="flex items-center gap-0.5 sm:gap-1">
+                                            <Clock className={`w-2.5 h-2.5 sm:w-3 sm:h-3 ${role.text}`} />
+                                            <span className="text-[9px] sm:text-xs font-bold text-gray-600">{shift.start_time} - {shift.end_time}</span>
                                           </div>
-                                          <span className={`text-[10px] font-bold ${role.text}`}>{duration}h</span>
+                                          <span className={`text-[8px] sm:text-[10px] font-bold ${role.text}`}>{duration}h</span>
                                         </div>
                                       )}
                                       {!readOnly && (
-                                        <div className="flex justify-end gap-1 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                          <motion.button whileTap={{ scale: 0.9 }} onClick={() => handleEditShift(shift)} className="p-1 rounded bg-blue-100 hover:bg-blue-200">
-                                            <Pencil className="w-3 h-3 text-blue-500" />
+                                        <div className="flex justify-end gap-0.5 sm:gap-1 mt-0.5 sm:mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                          <motion.button whileTap={{ scale: 0.9 }} onClick={() => handleEditShift(shift)} className="p-0.5 sm:p-1 rounded bg-blue-100 hover:bg-blue-200">
+                                            <Pencil className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-blue-500" />
                                           </motion.button>
-                                          <motion.button whileTap={{ scale: 0.9 }} onClick={() => deleteMutation.mutate(shift.id)} className="p-1 rounded bg-red-100 hover:bg-red-200">
-                                            <Trash2 className="w-3 h-3 text-red-500" />
+                                          <motion.button whileTap={{ scale: 0.9 }} onClick={() => deleteMutation.mutate(shift.id)} className="p-0.5 sm:p-1 rounded bg-red-100 hover:bg-red-200">
+                                            <Trash2 className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-red-500" />
                                           </motion.button>
                                         </div>
                                       )}
@@ -428,8 +431,8 @@ export default function WeeklyCalendar({
                         {!readOnly && (
                           <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
                             onClick={() => { setSelectedDay(day); setEditingShift(null); resetForm(); setShowAddShift(true); }}
-                            className={`w-full py-2 border border-dashed rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1 ${isHovered ? 'border-pink-300 text-pink-400 bg-pink-50/30' : 'border-gray-200 text-gray-400 hover:border-pink-200'}`}>
-                            <Plus className="w-4 h-4" /> Agregar
+                            className={`w-full py-1.5 sm:py-2 border border-dashed rounded-lg text-[9px] sm:text-xs font-medium transition-all flex items-center justify-center gap-0.5 sm:gap-1 ${isHovered ? 'border-pink-300 text-pink-400 bg-pink-50/30' : 'border-gray-200 text-gray-400 hover:border-pink-200'}`}>
+                            <Plus className="w-3 h-3 sm:w-4 sm:h-4" /> <span className="hidden sm:inline">Agregar</span><span className="sm:hidden">+</span>
                           </motion.button>
                         )}
                       </div>

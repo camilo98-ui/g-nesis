@@ -138,13 +138,28 @@ export default function SalesByHourChart({ shiftRecords = [], formatCurrency }) 
           </ResponsiveContainer>
         </div>
 
-        {/* Insights */}
-        <div className="mt-4 p-3 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl">
-          <p className="text-xs text-blue-700 font-medium">
-            💡 {peakHour.hour 
-              ? `Tu mejor hora es ${peakHour.hourLabel} con ${formatCurrency(peakHour.sales)} en ventas` 
-              : 'Registra más datos para ver patrones horarios'}
-          </p>
+        {/* Insights con sugerencia urgente */}
+        <div className="mt-4 space-y-2">
+          <div className="p-3 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl border border-blue-100">
+            <p className="text-xs text-gray-700 font-medium mb-1">💡 Insight clave:</p>
+            <p className="text-[11px] text-gray-600 leading-relaxed">
+              {peakHour.hour 
+                ? `Tu mejor hora es ${peakHour.hourLabel} con ${formatCurrency(peakHour.sales)} en ventas` 
+                : 'Registra más datos para ver patrones horarios'}
+            </p>
+          </div>
+          
+          {peakHour.hour && hourlyData.length > 3 && (
+            <div className="p-3 bg-gradient-to-r from-rose-50 to-pink-50 rounded-xl border border-pink-100">
+              <p className="text-xs text-gray-700 font-medium mb-1 flex items-center gap-1">
+                🎯 Plan urgente de personal:
+              </p>
+              <p className="text-[11px] text-gray-600 leading-relaxed">
+                Refuerza equipo entre <span className="font-bold text-pink-700">{peakHour.hourLabel}</span> con +1 cajero para maximizar ventas. 
+                Considera reducir personal en horas bajas para optimizar costos.
+              </p>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
