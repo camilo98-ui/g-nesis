@@ -234,9 +234,8 @@ export default function DailySalesForm({ storeId, onSuccess }) {
                 Ventas del día registradas
               </motion.p>
             </motion.div>
-            </motion.div>
-            </motion.div>
-            )}
+          </motion.div>
+        )}
 
       <Card className="bg-white/80 backdrop-blur-lg border-orange-100 shadow-xl">
         <CardHeader className="pb-4">
