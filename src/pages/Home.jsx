@@ -127,11 +127,9 @@ export default function Home() {
   const [selectedRole, setSelectedRole] = useState('');
 
   const ROLES = [
-    { id: 'gerente', name: 'Gerente', icon: 'gerente', color: 'from-slate-600 to-gray-700', description: 'Acceso total', iconBaseColor: '#475569' },
-    { id: 'lider', name: 'Líder de Experiencia', icon: 'lider', color: 'from-amber-400 to-yellow-500', description: 'Acceso completo', iconBaseColor: '#f59e0b' },
-    { id: 'embajador', name: 'Embajador', icon: 'embajador', color: 'from-pink-400 to-rose-500', description: 'Acceso limitado', iconBaseColor: '#ec4899' },
-    { id: 'calidad', name: 'Calidad', icon: 'calidad', color: 'from-teal-400 to-cyan-500', description: 'Solo visualización', iconBaseColor: '#14b8a6' },
-    { id: 'c_interno', name: 'C. Interno', icon: 'c_interno', color: 'from-violet-400 to-purple-500', description: 'Solo Planner', iconBaseColor: '#8b5cf6' },
+    { id: 'gerente', name: 'Gerente', icon: 'gerente', color: 'from-slate-600 to-gray-700', description: '🎯 Poder total', iconBaseColor: '#475569' },
+    { id: 'lider', name: 'Líder de Experiencia', icon: 'lider', color: 'from-amber-400 to-yellow-500', description: '⭐ Full acceso', iconBaseColor: '#f59e0b' },
+    { id: 'embajador', name: 'Embajador', icon: 'embajador', color: 'from-pink-400 to-rose-500', description: '🍦 Team hero', iconBaseColor: '#ec4899' },
   ];
 
   // Iconos profesionales por rol con colores dinámicos
@@ -299,19 +297,6 @@ export default function Home() {
     }
     }
 
-    // Calidad y C. Interno no requieren contraseña
-    if (selectedRole === 'calidad' || selectedRole === 'c_interno') {
-    setSelectedStore(pendingStore);
-    setIsLoggedIn(true);
-    localStorage.setItem('selectedStore', pendingStore);
-    localStorage.setItem('userRole', selectedRole);
-    localStorage.setItem('popsySession', JSON.stringify({ store: pendingStore, role: selectedRole, time: Date.now() }));
-    setShowWelcome(true);
-    setPendingStore('');
-    setLoginPassword('');
-    return;
-    }
-
     const storePassword = storePasswords.find(p => p.store_code === pendingStore);
     
     // Si no tiene contraseña o la contraseña coincide
@@ -349,7 +334,7 @@ export default function Home() {
   const selectedStoreName = STORES.find(s => s.code === selectedStore)?.name || '';
 
   const [showLoginPassword, setShowLoginPassword] = useState(false);
-  const needsPassword = pendingStore && selectedRole !== 'calidad' && selectedRole !== 'c_interno';
+  const needsPassword = pendingStore;
   const isGerente = selectedRole === 'gerente';
 
   // Si no está logueado, mostrar pantalla de login
@@ -388,9 +373,11 @@ export default function Home() {
               transition={{ delay: 0.3 }}
             >
               <h2 className="text-2xl font-bold text-[#E91E63]">
-                {selectedRole === 'calidad' ? '¡Hola María!' : selectedRole === 'c_interno' ? '¡Hola Julián!' : selectedRole === 'gerente' ? '¡Hola Gerente!' : '¡Bienvenido!'}
+                {selectedRole === 'gerente' ? '¡Hola Gerente! 🎯' : selectedRole === 'lider' ? '¡Hola Líder! ⭐' : selectedRole === 'embajador' ? '¡Hola Embajador! 🍦' : '¡Bienvenido! 🎉'}
               </h2>
-              <p className="text-gray-500 text-sm mt-1">Ingresa para continuar</p>
+              <p className="text-gray-500 text-sm mt-1">
+                {selectedRole === 'gerente' ? 'El poder en tus manos' : selectedRole === 'lider' ? 'Listo para brillar' : selectedRole === 'embajador' ? 'El corazón del equipo' : 'Selecciona tu rol'}
+              </p>
             </motion.div>
 
             {/* Selector de Rol */}
@@ -401,8 +388,8 @@ export default function Home() {
               transition={{ delay: 0.35 }}
             >
               <div className="w-full md:w-[340px] space-y-2">
-                <p className="text-xs text-gray-500 text-center mb-3">Selecciona tu rol</p>
-                <div className="grid grid-cols-2 gap-2">
+                <p className="text-xs text-gray-500 text-center mb-3">¿Quién eres hoy?</p>
+                <div className="grid grid-cols-3 gap-2">
                   {ROLES.map((role, idx) => (
                     <motion.button
                       key={role.id}
@@ -491,8 +478,8 @@ export default function Home() {
               />
             </motion.div>
 
-            {/* Campo de contraseña - Solo si no es Calidad ni C. Interno */}
-            {selectedRole !== 'calidad' && selectedRole !== 'c_interno' && (
+            {/* Campo de contraseña */}
+            {selectedRole && (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -808,80 +795,7 @@ export default function Home() {
           </motion.div>
         ) : null}
         
-        {/* Vista especial para Calidad - Planner en solo lectura */}
-        {selectedStore && selectedRole === 'calidad' && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mt-6"
-          >
-            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-              <div className="bg-gradient-to-r from-teal-500 to-cyan-500 p-4 text-white">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-bold flex items-center gap-2">
-                      📅 Planner de la Tienda
-                      <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">Solo lectura</span>
-                    </h3>
-                    <p className="text-sm text-white/80">{selectedStoreName}</p>
-                  </div>
-                  <motion.div
-                    animate={{ rotate: [0, 10, -10, 0] }}
-                    transition={{ duration: 3, repeat: Infinity }}
-                    className="text-3xl"
-                  >
-                    🧹
-                  </motion.div>
-                </div>
-              </div>
-              <div className="p-4">
-                <iframe 
-                  src={createPageUrl('PopsyPlanner') + `?viewOnly=true`}
-                  className="w-full h-[500px] border-0 rounded-xl"
-                  title="Planner"
-                />
-              </div>
-            </div>
-          </motion.div>
-        )}
-        
-        {/* Vista especial para C. Interno - Solo Planner */}
-        {selectedStore && selectedRole === 'c_interno' && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mt-4"
-          >
-            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-              <div className="bg-gradient-to-r from-violet-500 to-purple-500 p-4 text-white">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-bold flex items-center gap-2">
-                      📋 Control Interno - Planner
-                      <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">Solo lectura</span>
-                    </h3>
-                    <p className="text-sm text-white/80">{selectedStoreName}</p>
-                  </div>
-                  <motion.div
-                    animate={{ rotate: [0, 10, -10, 0] }}
-                    transition={{ duration: 3, repeat: Infinity }}
-                    className="text-3xl"
-                  >
-                    🍦
-                  </motion.div>
-                </div>
-              </div>
-              <div className="p-4">
-                <iframe 
-                  src={createPageUrl('PopsyPlanner') + `?viewOnly=true`}
-                  className="w-full h-[600px] border-0 rounded-xl"
-                  title="Planner"
-                />
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </div>
+        </div>
 
 
 
