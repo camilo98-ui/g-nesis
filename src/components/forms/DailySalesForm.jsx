@@ -76,11 +76,12 @@ export default function DailySalesForm({ storeId, onSuccess }) {
       
       toast.success('¡Ventas registradas correctamente!');
       
-      // Invalidar queries específicas
-      await queryClient.invalidateQueries({ queryKey: ['dailySales'] });
-      await queryClient.invalidateQueries({ queryKey: ['salesLogs'] });
+      // Invalidar TODAS las queries y remover del caché
+      await queryClient.invalidateQueries({ refetchType: 'all' });
+      await queryClient.removeQueries({ queryKey: ['dailySales'] });
+      await queryClient.removeQueries({ queryKey: ['salesLogs'] });
       
-      console.log('✅ Queries invalidadas');
+      console.log('✅ Queries invalidadas y caché limpiado');
       
       setShowSuccess(true);
       setTimeout(() => {

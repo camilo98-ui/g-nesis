@@ -32,7 +32,11 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
   const { data: cashiers = [] } = useQuery({
     queryKey: ['cashiers', storeId],
     queryFn: () => base44.entities.Cashier.filter({ store_id: storeId, is_active: true }),
-    enabled: !!storeId
+    enabled: !!storeId,
+    staleTime: 0,
+    cacheTime: 0,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true
   });
 
   const createMutation = useMutation({
@@ -125,12 +129,13 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
       
       toast.success('¡Turno registrado correctamente!');
       
-      // Invalidar queries específicas
-      await queryClient.invalidateQueries({ queryKey: ['shiftRecords'] });
-      await queryClient.invalidateQueries({ queryKey: ['dailySales'] });
-      await queryClient.invalidateQueries({ queryKey: ['salesLogs'] });
+      // Invalidar TODAS las queries y remover del caché
+      await queryClient.invalidateQueries({ refetchType: 'all' });
+      await queryClient.removeQueries({ queryKey: ['shiftRecords'] });
+      await queryClient.removeQueries({ queryKey: ['dailySales'] });
+      await queryClient.removeQueries({ queryKey: ['salesLogs'] });
       
-      console.log('✅ Queries invalidadas');
+      console.log('✅ Queries invalidadas y caché limpiado');
       
       setShowSuccess(true);
       setTimeout(() => {
