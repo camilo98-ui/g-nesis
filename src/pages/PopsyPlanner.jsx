@@ -14,6 +14,7 @@ import CashierManagerModal from '@/components/planner/CashierManagerModal';
 import AIScheduleSuggestion from '@/components/planner/AIScheduleSuggestion';
 import AIScheduleAssistant from '@/components/planner/AIScheduleAssistant';
 import ConeoRotationSuggestion from '@/components/planner/ConeoRotationSuggestion';
+import AIScheduleOptimizer from '@/components/planner/AIScheduleOptimizer';
 import { generateSchedulePDF } from '@/components/planner/SchedulePDFExport';
 
 export default function PopsyPlanner() {
@@ -155,7 +156,19 @@ export default function PopsyPlanner() {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="calendar" className="mt-0">
+            <TabsContent value="calendar" className="mt-0 space-y-4">
+              {/* Optimizador IA */}
+              {!isReadOnly && (
+                <AIScheduleOptimizer
+                  storeId={selectedStore}
+                  currentWeek={currentWeek}
+                  shifts={weekShifts}
+                  cashiers={cashiers}
+                  sales={salesData}
+                  budgets={budgetData}
+                />
+              )}
+              
               <WeeklyCalendar
                 currentWeek={currentWeek}
                 setCurrentWeek={setCurrentWeek}
