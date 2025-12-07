@@ -476,19 +476,31 @@ export default function Dashboard() {
   const { data: dailySales = [] } = useQuery({
     queryKey: ['dailySales', selectedStore],
     queryFn: () => base44.entities.DailySales.filter({ store_id: selectedStore }),
-    enabled: !!selectedStore
+    enabled: !!selectedStore,
+    staleTime: 0,
+    cacheTime: 0,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true
   });
 
   const { data: budgets = [] } = useQuery({
     queryKey: ['budgets', selectedStore],
     queryFn: () => base44.entities.Budget.filter({ store_id: selectedStore }),
-    enabled: !!selectedStore
+    enabled: !!selectedStore,
+    staleTime: 0,
+    cacheTime: 0,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true
   });
 
   const { data: shiftRecords = [] } = useQuery({
     queryKey: ['shiftRecords', selectedStore],
     queryFn: () => base44.entities.ShiftRecord.filter({ store_id: selectedStore }),
-    enabled: !!selectedStore
+    enabled: !!selectedStore,
+    staleTime: 0,
+    cacheTime: 0,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true
   });
 
   const { data: cashiers = [] } = useQuery({
