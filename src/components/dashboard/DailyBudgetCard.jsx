@@ -149,7 +149,7 @@ export default function DailyBudgetCard({ dailySales = [], storeId, formatCurren
               </div>
               <p className="text-xs text-center mt-2 font-medium">
                 {compliance >= 100 
-                  ? `🎉 ¡Superaste el presupuesto en ${formatCurrency(todayBudget.actual_sales - todayBudget.budget_amount)}!` 
+                  ? `🎉 Superaste el presupuesto en ${formatCurrency(todayBudget.actual_sales - todayBudget.budget_amount)}!` 
                   : `💪 No se cumplió la meta por ${formatCurrency(todayBudget.budget_amount - todayBudget.actual_sales)}`}
               </p>
             </motion.div>
