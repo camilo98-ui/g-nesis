@@ -123,12 +123,16 @@ export default function DailySalesForm({ storeId, onSuccess }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    console.log('🎯 handleSubmit llamado', formData);
+    console.log('📍 storeId:', storeId);
+    console.log('🔄 isPending:', createMutation.isPending);
     
     if (!formData.total_sales) {
       toast.error('Ingresa las ventas');
       return;
     }
     
+    console.log('✅ Validación pasada, ejecutando mutation...');
     createMutation.mutate(formData);
   };
 
