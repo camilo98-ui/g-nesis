@@ -2,7 +2,8 @@ import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Clock, Sun, Sunset, Moon } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { Button } from "@/components/ui/button";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Area, AreaChart, Line, LineChart, ComposedChart } from 'recharts';
 
 /**
  * Turnos:
@@ -20,6 +21,8 @@ const SHIFT_TIMES = {
 };
 
 export default function SalesByHourChart({ shiftRecords = [], formatCurrency }) {
+  const [chartType, setChartType] = React.useState('composed'); // 'composed', 'area', 'line'
+
   const hourlyData = useMemo(() => {
     const hours = {};
     
@@ -65,100 +68,233 @@ export default function SalesByHourChart({ shiftRecords = [], formatCurrency }) 
   const peakHour = hourlyData.reduce((max, h) => h.sales > max.sales ? h : max, hourlyData[0] || {});
 
   return (
-    <Card className="bg-white shadow-xl border-0">
-      <CardHeader className="pb-2 bg-gradient-to-r from-cyan-50 to-blue-50 rounded-t-lg">
-        <CardTitle className="text-sm font-bold text-cyan-700 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Clock className="w-5 h-5 text-cyan-500" />
+    <Card className="bg-gradient-to-br from-cyan-50 via-blue-50 to-purple-50 shadow-xl border-0 overflow-hidden">
+      <CardHeader className="pb-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white">
+        <div className="flex items-center justify-between mb-2">
+          <CardTitle className="text-base font-black flex items-center gap-2">
+            <motion.div animate={{ rotate: [0, 360] }} transition={{ duration: 4, repeat: Infinity, ease: "linear" }}>
+              <Clock className="w-6 h-6" />
+            </motion.div>
             Ventas por Hora
-          </div>
+          </CardTitle>
           {peakHour.hour && (
-            <span className="text-xs bg-cyan-100 text-cyan-700 px-2 py-1 rounded-full">
+            <motion.div 
+              animate={{ scale: [1, 1.1, 1] }} 
+              transition={{ duration: 1.5, repeat: Infinity }}
+              className="text-xs bg-white/20 backdrop-blur-sm text-white px-3 py-1.5 rounded-full font-bold shadow-lg"
+            >
               🔥 Pico: {peakHour.hourLabel}
-            </span>
+            </motion.div>
           )}
-        </CardTitle>
-        <p className="text-xs text-gray-500">Distribución horaria basada en turnos</p>
+        </div>
+        
+        {/* Botones de vista - MÁS DIVERTIDOS Y NUMÉRICOS */}
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            onClick={() => setChartType('composed')}
+            className={`flex-1 h-9 transition-all ${
+              chartType === 'composed'
+                ? 'bg-white text-cyan-600 shadow-lg font-bold'
+                : 'bg-white/20 text-white hover:bg-white/30 border-0'
+            }`}
+          >
+            📊 Mixta
+          </Button>
+          <Button
+            size="sm"
+            onClick={() => setChartType('area')}
+            className={`flex-1 h-9 transition-all ${
+              chartType === 'area'
+                ? 'bg-white text-purple-600 shadow-lg font-bold'
+                : 'bg-white/20 text-white hover:bg-white/30 border-0'
+            }`}
+          >
+            📈 Área
+          </Button>
+          <Button
+            size="sm"
+            onClick={() => setChartType('line')}
+            className={`flex-1 h-9 transition-all ${
+              chartType === 'line'
+                ? 'bg-white text-pink-600 shadow-lg font-bold'
+                : 'bg-white/20 text-white hover:bg-white/30 border-0'
+            }`}
+          >
+            📉 Línea
+          </Button>
+        </div>
       </CardHeader>
       <CardContent className="p-4">
-        {/* Indicadores de turno */}
-        <div className="grid grid-cols-3 gap-2 mb-4">
+        {/* Indicadores de turno - MÁS NUMÉRICOS Y DIVERTIDOS */}
+        <div className="grid grid-cols-3 gap-3 mb-4">
           {Object.entries(SHIFT_TIMES).map(([key, shift]) => {
             const Icon = shift.icon;
             const shiftSales = shiftRecords
               .filter(r => r.shift === key)
               .reduce((sum, r) => sum + (r.sales || 0), 0);
+            const shiftTransactions = shiftRecords
+              .filter(r => r.shift === key)
+              .reduce((sum, r) => sum + (r.transactions || 0), 0);
+            const avgTicket = shiftTransactions > 0 ? shiftSales / shiftTransactions : 0;
             
             return (
               <motion.div
                 key={key}
-                whileHover={{ scale: 1.03, y: -2 }}
-                className={`bg-gradient-to-br ${shift.bgColor} rounded-xl p-3 text-center`}
+                whileHover={{ scale: 1.08, y: -5, rotate: 2 }}
+                whileTap={{ scale: 0.95 }}
+                className={`bg-gradient-to-br ${shift.bgColor} rounded-2xl p-4 text-center shadow-lg cursor-pointer border-2 border-white`}
               >
-                <Icon className="w-5 h-5 mx-auto mb-1" style={{ color: shift.color }} />
-                <p className="text-xs text-gray-600 mb-1">{shift.label}</p>
-                <p className="text-sm font-black" style={{ color: shift.color }}>
-                  ${(shiftSales/1000000).toFixed(1)}M
+                <motion.div
+                  animate={{ rotate: [0, 10, -10, 0] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  <Icon className="w-7 h-7 mx-auto mb-2" style={{ color: shift.color }} />
+                </motion.div>
+                <p className="text-xs font-bold text-gray-700 mb-2">{shift.label}</p>
+                <p className="text-2xl font-black mb-1" style={{ color: shift.color }}>
+                  ${Math.round(shiftSales/1000000)}M
                 </p>
+                <div className="flex items-center justify-center gap-2 text-[10px] text-gray-600 font-bold">
+                  <span className="bg-white/60 px-2 py-0.5 rounded-full">{shiftTransactions} trans</span>
+                  <span className="bg-white/60 px-2 py-0.5 rounded-full">${Math.round(avgTicket/1000)}K</span>
+                </div>
               </motion.div>
             );
           })}
         </div>
 
-        {/* Gráfica */}
-        <div className="h-64">
+        {/* Gráfica DINÁMICA */}
+        <div className="h-72">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={hourlyData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-              <XAxis 
-                dataKey="hourLabel" 
-                tick={{ fill: '#6b7280', fontSize: 10 }} 
-                angle={-45}
-                textAnchor="end"
-                height={60}
-              />
-              <YAxis 
-                tick={{ fill: '#6b7280', fontSize: 10 }} 
-                tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} 
-              />
-              <Tooltip 
-                contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
-                formatter={(v) => [formatCurrency(v), 'Ventas']}
-                labelFormatter={(label) => `${label}`}
-              />
-              <Bar dataKey="sales" radius={[6, 6, 0, 0]}>
-                {hourlyData.map((entry, index) => {
-                  // Color basado en la intensidad
-                  const intensity = entry.sales / maxSales;
-                  const color = intensity > 0.7 ? '#10b981' : intensity > 0.4 ? '#f59e0b' : '#6366f1';
-                  return <Cell key={`cell-${index}`} fill={color} />;
-                })}
-              </Bar>
-            </BarChart>
+            {chartType === 'composed' ? (
+              <ComposedChart data={hourlyData}>
+                <defs>
+                  <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="#06b6d4" stopOpacity={0.1}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e0f2fe" />
+                <XAxis 
+                  dataKey="hourLabel" 
+                  tick={{ fill: '#0e7490', fontSize: 11, fontWeight: 'bold' }}
+                  stroke="#06b6d4"
+                />
+                <YAxis 
+                  tick={{ fill: '#0e7490', fontSize: 11, fontWeight: 'bold' }} 
+                  tickFormatter={(v) => `$${Math.round(v/1000000)}M`}
+                  stroke="#06b6d4"
+                />
+                <Tooltip 
+                  contentStyle={{ 
+                    borderRadius: 16, 
+                    border: '2px solid #06b6d4', 
+                    boxShadow: '0 8px 30px rgba(6,182,212,0.3)',
+                    background: 'linear-gradient(135deg, #ffffff 0%, #ecfeff 100%)'
+                  }}
+                  formatter={(v) => [`$${Math.round(v/1000000)}M`, 'Ventas']}
+                  labelFormatter={(label) => `⏰ ${label}`}
+                />
+                <Area type="monotone" dataKey="sales" fill="url(#salesGradient)" stroke="#06b6d4" strokeWidth={3} />
+                <Bar dataKey="sales" radius={[8, 8, 0, 0]} fill="#06b6d4" opacity={0.6} />
+                <Line type="monotone" dataKey="sales" stroke="#ec4899" strokeWidth={2} dot={{ fill: '#ec4899', r: 5 }} />
+              </ComposedChart>
+            ) : chartType === 'area' ? (
+              <AreaChart data={hourlyData}>
+                <defs>
+                  <linearGradient id="purpleGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#a855f7" stopOpacity={0.9}/>
+                    <stop offset="95%" stopColor="#a855f7" stopOpacity={0.05}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="5 5" stroke="#f3e8ff" />
+                <XAxis 
+                  dataKey="hourLabel" 
+                  tick={{ fill: '#7c3aed', fontSize: 11, fontWeight: 'bold' }}
+                  stroke="#a855f7"
+                />
+                <YAxis 
+                  tick={{ fill: '#7c3aed', fontSize: 11, fontWeight: 'bold' }} 
+                  tickFormatter={(v) => `$${Math.round(v/1000000)}M`}
+                  stroke="#a855f7"
+                />
+                <Tooltip 
+                  contentStyle={{ 
+                    borderRadius: 16, 
+                    border: '2px solid #a855f7', 
+                    boxShadow: '0 8px 30px rgba(168,85,247,0.3)',
+                    background: 'linear-gradient(135deg, #ffffff 0%, #faf5ff 100%)'
+                  }}
+                  formatter={(v) => [`$${Math.round(v/1000000)}M`, 'Ventas']}
+                  labelFormatter={(label) => `⏰ ${label}`}
+                />
+                <Area type="monotone" dataKey="sales" stroke="#a855f7" strokeWidth={4} fill="url(#purpleGradient)" />
+              </AreaChart>
+            ) : (
+              <LineChart data={hourlyData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#fce7f3" />
+                <XAxis 
+                  dataKey="hourLabel" 
+                  tick={{ fill: '#ec4899', fontSize: 11, fontWeight: 'bold' }}
+                  stroke="#ec4899"
+                />
+                <YAxis 
+                  tick={{ fill: '#ec4899', fontSize: 11, fontWeight: 'bold' }} 
+                  tickFormatter={(v) => `$${Math.round(v/1000000)}M`}
+                  stroke="#ec4899"
+                />
+                <Tooltip 
+                  contentStyle={{ 
+                    borderRadius: 16, 
+                    border: '2px solid #ec4899', 
+                    boxShadow: '0 8px 30px rgba(236,72,153,0.3)',
+                    background: 'linear-gradient(135deg, #ffffff 0%, #fdf2f8 100%)'
+                  }}
+                  formatter={(v) => [`$${Math.round(v/1000000)}M`, 'Ventas']}
+                  labelFormatter={(label) => `⏰ ${label}`}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="sales" 
+                  stroke="#ec4899" 
+                  strokeWidth={4} 
+                  dot={{ fill: '#ec4899', r: 6, strokeWidth: 2, stroke: '#fff' }}
+                  activeDot={{ r: 8, fill: '#ec4899', stroke: '#fff', strokeWidth: 3 }}
+                />
+              </LineChart>
+            )}
           </ResponsiveContainer>
         </div>
 
-        {/* Insights con sugerencia urgente */}
-        <div className="mt-4 space-y-2">
-          <div className="p-3 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl border border-blue-100">
-            <p className="text-xs text-gray-700 font-medium mb-1">💡 Insight clave:</p>
-            <p className="text-[11px] text-gray-600 leading-relaxed">
-              {peakHour.hour 
-                ? `Tu mejor hora es ${peakHour.hourLabel} con ${formatCurrency(peakHour.sales)} en ventas` 
-                : 'Registra más datos para ver patrones horarios'}
+        {/* Insights MEJORADOS - Más numéricos y divertidos */}
+        <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+          <motion.div 
+            whileHover={{ scale: 1.03 }}
+            className="p-4 bg-gradient-to-r from-cyan-100 to-blue-100 rounded-2xl border-2 border-cyan-200 shadow-md"
+          >
+            <p className="text-xs font-black text-cyan-800 mb-2 flex items-center gap-1">
+              💡 Insight clave
             </p>
-          </div>
+            <p className="text-sm text-gray-700 font-bold leading-relaxed">
+              {peakHour.hour 
+                ? <>Pico: <span className="text-cyan-600 text-xl">{peakHour.hourLabel}</span> con <span className="text-green-600 font-black">${Math.round(peakHour.sales/1000000)}M</span></> 
+                : 'Registra más datos'}
+            </p>
+          </motion.div>
           
           {peakHour.hour && hourlyData.length > 3 && (
-            <div className="p-3 bg-gradient-to-r from-rose-50 to-pink-50 rounded-xl border border-pink-100">
-              <p className="text-xs text-gray-700 font-medium mb-1 flex items-center gap-1">
-                🎯 Plan urgente de personal:
+            <motion.div 
+              whileHover={{ scale: 1.03 }}
+              className="p-4 bg-gradient-to-r from-pink-100 to-rose-100 rounded-2xl border-2 border-pink-200 shadow-md"
+            >
+              <p className="text-xs font-black text-pink-800 mb-2 flex items-center gap-1">
+                🎯 Acción urgente
               </p>
-              <p className="text-[11px] text-gray-600 leading-relaxed">
-                Refuerza equipo entre <span className="font-bold text-pink-700">{peakHour.hourLabel}</span> con +1 cajero para maximizar ventas. 
-                Considera reducir personal en horas bajas para optimizar costos.
+              <p className="text-sm text-gray-700 leading-relaxed">
+                Refuerza <span className="font-black text-pink-700">{peakHour.hourLabel}</span> con <span className="text-green-600 font-black">+1 cajero</span> para 📈 maximizar ventas
               </p>
-            </div>
+            </motion.div>
           )}
         </div>
       </CardContent>
