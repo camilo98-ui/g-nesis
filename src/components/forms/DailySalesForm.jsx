@@ -156,6 +156,13 @@ export default function DailySalesForm({ storeId, onSuccess }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    // Validar que tenga al menos las ventas
+    if (!formData.total_sales) {
+      toast.error('Ingresa al menos las ventas totales');
+      return;
+    }
+    
     createMutation.mutate(formData);
   };
 

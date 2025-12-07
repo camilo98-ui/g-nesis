@@ -142,6 +142,12 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
       return;
     }
 
+    // Validar que tenga al menos ventas o transacciones
+    if (!formData.sales && !formData.transactions) {
+      toast.error('Ingresa al menos las ventas o transacciones');
+      return;
+    }
+
     // Calcular promedios para detección de fraude
     const cashierRecords = allShiftRecords.filter(r => r.cashier_id === formData.cashier_id);
     const avgSales = cashierRecords.length > 0 
@@ -154,11 +160,29 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
       ? cashierRecords.reduce((sum, r) => sum + (r.suggested_sales || 0), 0) / cashierRecords.length
       : 8;
 
-    setPendingData({ 
-      dataToSubmit: formData, 
-      averageData: { avgSales, avgTicket, avgSuggested } 
-    });
-    setShowFraudWarning(true);
+    const salesValue = parseFloat(formData.sales) || 0;
+    const transactionsValue = parseFloat(formData.transactions) || 0;
+    const suggestedValue = parseFloat(formData.suggested_sales) || 0;
+    const ticketPromedio = transactionsValue > 0 ? salesValue / transactionsValue : 0;
+
+    // Verificar si hay alertas de fraude
+    const hasAlerts = (
+      salesValue > avgSales * 3 ||
+      (ticketPromedio > avgTicket * 2.5 && avgTicket > 0) ||
+      (suggestedValue > avgSuggested * 3 && avgSuggested > 0) ||
+      (transactionsValue < 20 && ticketPromedio > 200000)
+    );
+
+    if (hasAlerts) {
+      setPendingData({ 
+        dataToSubmit: formData, 
+        averageData: { avgSales, avgTicket, avgSuggested } 
+      });
+      setShowFraudWarning(true);
+    } else {
+      // Si no hay alertas, guardar directamente
+      createMutation.mutate(formData);
+    }
   };
 
   const confirmSubmit = () => {
