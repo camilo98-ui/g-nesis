@@ -17,7 +17,7 @@ import CashierRanking from '@/components/gamification/CashierRanking';
 import CashierGoalsManager from '@/components/gamification/CashierGoalsManager';
 import { ViewProfileButton } from '@/components/cashier/CashierFullProfile';
 import CashierAssignmentSuggestion from '@/components/ai/CashierAssignmentSuggestion';
-import QuickSalesModal from '@/components/forms/QuickSalesModal';
+import CashierSalesModal from '@/components/forms/CashierSalesModal';
 import { 
   ArrowLeft, Users, Search, TrendingUp, TrendingDown, 
   Award, Target, BarChart3, User, ChevronRight, Star,
@@ -36,7 +36,7 @@ export default function CashiersDashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCashier, setSelectedCashier] = useState(null);
   const [showBadgeConfig, setShowBadgeConfig] = useState(false);
-  const [showQuickSales, setShowQuickSales] = useState(false);
+  const [showCashierSales, setShowCashierSales] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem('selectedStore');
@@ -185,9 +185,9 @@ export default function CashiersDashboard() {
                   <motion.button
                     whileHover={{ scale: 1.1, rotate: 90 }}
                     whileTap={{ scale: 0.9 }}
-                    onClick={() => setShowQuickSales(true)}
+                    onClick={() => setShowCashierSales(true)}
                     className="w-10 h-10 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow"
-                    title="Registrar ventas"
+                    title="Registrar turno de cajero"
                   >
                     <TrendingUp className="w-5 h-5" />
                   </motion.button>
@@ -454,12 +454,12 @@ export default function CashiersDashboard() {
         onClose={() => setShowBadgeConfig(false)} 
       />
 
-      {/* Quick Sales Modal */}
+      {/* Cashier Sales Modal */}
       <AnimatePresence>
-        {showQuickSales && (
-          <QuickSalesModal
-            isOpen={showQuickSales}
-            onClose={() => setShowQuickSales(false)}
+        {showCashierSales && (
+          <CashierSalesModal
+            isOpen={showCashierSales}
+            onClose={() => setShowCashierSales(false)}
             storeId={selectedStore}
           />
         )}
