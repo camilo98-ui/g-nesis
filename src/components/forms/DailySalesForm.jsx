@@ -137,31 +137,33 @@ export default function DailySalesForm({ storeId, onSuccess }) {
         throw error;
       }
     },
-    onSuccess: async (data) => {
+    onSuccess: (data) => {
       console.log('✅ Ventas guardadas exitosamente:', data);
-
-      // Mostrar animación inmediatamente
+      
+      // Toast inmediato como backup
+      toast.success('¡Ventas registradas exitosamente! 🍦');
+      
+      // Mostrar animación
       setShowSuccess(true);
-
-      // Esperar a que termine la animación antes de actualizar
-      await new Promise(resolve => setTimeout(resolve, 2500));
-
-      // Limpiar formulario y actualizar queries
-      setFormData(prev => ({
-        ...prev,
-        total_sales: '',
-        total_tickets: '',
-        total_transactions: '',
-        total_suggested: ''
-      }));
-
+      
+      // Invalidar queries sin esperar
       queryClient.invalidateQueries(['dailySales']);
       queryClient.invalidateQueries(['salesLogs']);
 
-      // Ocultar overlay
-      setShowSuccess(false);
-      
-      if (onSuccess) onSuccess();
+      // Timer para ocultar y limpiar
+      const timer = setTimeout(() => {
+        setShowSuccess(false);
+        setFormData(prev => ({
+          ...prev,
+          total_sales: '',
+          total_tickets: '',
+          total_transactions: '',
+          total_suggested: ''
+        }));
+        if (onSuccess) onSuccess();
+      }, 2500);
+
+      return () => clearTimeout(timer);
     },
     onError: (error) => {
       console.error('Error guardando ventas:', error);
