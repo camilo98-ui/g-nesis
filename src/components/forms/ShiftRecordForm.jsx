@@ -177,6 +177,7 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    console.log('🎯 handleSubmit llamado', formData);
     
     if (!formData.cashier_id) {
       toast.error('Selecciona un cajero');
@@ -188,6 +189,7 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
       return;
     }
 
+    console.log('✅ Validación pasada, ejecutando mutation...');
     createMutation.mutate(formData);
   };
 
