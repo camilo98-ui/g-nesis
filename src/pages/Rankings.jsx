@@ -190,6 +190,7 @@ export default function Rankings() {
       .map((stats, index) => ({
         ...stats,
         rank: index + 1,
+        avgSales: stats.shifts > 0 ? stats.totalSales / stats.shifts : 0,
         cashier: allCashiers.find(c => c.id === stats.cashier_id) || { name: 'Desconocido' },
         storeName: STORES.find(s => s.code === stats.store_id)?.name || stats.store_id
       }));
@@ -209,6 +210,7 @@ export default function Rankings() {
       .map((stats, index) => ({
         ...stats,
         rank: index + 1,
+        avgTransactions: stats.shifts > 0 ? stats.totalTransactions / stats.shifts : 0,
         cashier: allCashiers.find(c => c.id === stats.cashier_id) || { name: 'Desconocido' },
         storeName: STORES.find(s => s.code === stats.store_id)?.name || stats.store_id
       }));
@@ -542,22 +544,86 @@ export default function Rankings() {
                     metricType="sales"
                   />
                   
-                  {/* Sales Distribution Chart */}
-                  <Card className="bg-white shadow-lg border-0">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-semibold text-pink-600">📊 Distribución de Ventas</CardTitle>
+                  {/* Sales Distribution Chart - MEJORADO */}
+                  <Card className="bg-gradient-to-br from-pink-50 via-rose-50 to-purple-50 shadow-xl border-0 overflow-hidden">
+                    <CardHeader className="pb-2 bg-white/60 backdrop-blur-sm">
+                      <CardTitle className="text-sm font-bold text-pink-600 flex items-center gap-2">
+                        <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 2, repeat: Infinity }}>
+                          📊
+                        </motion.div>
+                        Top 5 - Distribución de Ventas
+                      </CardTitle>
                     </CardHeader>
-                    <CardContent>
-                      <div className="h-48">
+                    <CardContent className="pt-4">
+                      <div className="h-48 mb-3">
                         <ResponsiveContainer width="100%" height="100%">
                           <BarChart data={rankings.salesRanking.slice(0, 5)}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
+                            <defs>
+                              {rankings.salesRanking.slice(0, 5).map((_, idx) => (
+                                <linearGradient key={idx} id={`salesGrad${idx}`} x1="0" y1="0" x2="0" y2="1">
+                                  <stop offset="0%" stopColor={['#f472b6', '#a78bfa', '#60a5fa', '#34d399', '#fbbf24'][idx]} stopOpacity={0.9} />
+                                  <stop offset="100%" stopColor={['#ec4899', '#8b5cf6', '#3b82f6', '#10b981', '#f59e0b'][idx]} stopOpacity={0.7} />
+                                </linearGradient>
+                              ))}
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                             <XAxis dataKey="cashier.name" tick={{ fontSize: 10 }} angle={-15} textAnchor="end" height={60} />
                             <YAxis tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} tick={{ fontSize: 10 }} />
-                            <Tooltip formatter={(v) => [formatCurrency(v), 'Ventas']} />
-                            <Bar dataKey="totalSales" fill="#ec4899" radius={[6, 6, 0, 0]} />
+                            <Tooltip 
+                              content={({ active, payload }) => {
+                                if (!active || !payload?.length) return null;
+                                const data = payload[0].payload;
+                                return (
+                                  <motion.div
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    className="bg-white p-4 rounded-xl shadow-2xl border-2 border-pink-200"
+                                  >
+                                    {data.cashier?.photo_url && (
+                                      <div className="w-16 h-16 rounded-full overflow-hidden mx-auto mb-2 border-2 border-pink-300">
+                                        <img src={data.cashier.photo_url} alt={data.cashier.name} className="w-full h-full object-cover" />
+                                      </div>
+                                    )}
+                                    <p className="font-bold text-gray-800 mb-2 text-center">{data.cashier?.name}</p>
+                                    <div className="space-y-1 text-xs">
+                                      <div className="flex justify-between gap-4">
+                                        <span className="text-gray-600">💰 Ventas:</span>
+                                        <span className="font-bold text-pink-600">{formatCurrency(data.totalSales)}</span>
+                                      </div>
+                                      <div className="flex justify-between gap-4">
+                                        <span className="text-gray-600">📅 Turnos:</span>
+                                        <span className="font-bold text-gray-700">{data.shifts}</span>
+                                      </div>
+                                      <div className="flex justify-between gap-4">
+                                        <span className="text-gray-600">📊 Prom/turno:</span>
+                                        <span className="font-bold text-purple-600">{formatCurrency(data.totalSales / data.shifts)}</span>
+                                      </div>
+                                    </div>
+                                  </motion.div>
+                                );
+                              }}
+                            />
+                            <Bar dataKey="totalSales" radius={[8, 8, 0, 0]}>
+                              {rankings.salesRanking.slice(0, 5).map((_, idx) => (
+                                <Cell key={`cell-${idx}`} fill={`url(#salesGrad${idx})`} />
+                              ))}
+                            </Bar>
                           </BarChart>
                         </ResponsiveContainer>
+                      </div>
+                      <div className="grid grid-cols-5 gap-1">
+                        {rankings.salesRanking.slice(0, 5).map((c, idx) => (
+                          <div key={c.cashier_id} className="text-center">
+                            <div className={`w-8 h-8 rounded-full mx-auto mb-1 overflow-hidden ${c.cashier?.photo_url ? '' : 'bg-gradient-to-br from-pink-200 to-rose-200 flex items-center justify-center'}`}>
+                              {c.cashier?.photo_url ? (
+                                <img src={c.cashier.photo_url} alt={c.cashier.name} className="w-full h-full object-cover" />
+                              ) : (
+                                <span className="text-xs font-bold text-pink-700">{c.cashier?.name?.charAt(0)}</span>
+                              )}
+                            </div>
+                            <p className="text-[8px] text-gray-600 font-medium truncate">{c.cashier?.name?.split(' ')[0]}</p>
+                          </div>
+                        ))}
                       </div>
                     </CardContent>
                   </Card>
@@ -761,24 +827,24 @@ export default function Rankings() {
                 {/* Content */}
                 <div className="flex-1 overflow-y-auto p-5">
                   <Tabs defaultValue="best" className="w-full">
-                    <TabsList className="w-full grid grid-cols-5 mb-6 bg-gray-50 p-1 rounded-xl">
-                      <TabsTrigger value="best" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-300 data-[state=active]:to-purple-400 data-[state=active]:text-white rounded-lg gap-1 text-xs">
+                    <TabsList className="w-full grid grid-cols-5 mb-6 bg-gradient-to-r from-teal-50 to-cyan-50 p-1 rounded-xl border border-teal-200">
+                      <TabsTrigger value="best" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-400 data-[state=active]:to-yellow-400 data-[state=active]:text-white rounded-lg gap-1 text-xs">
                         <Crown className="w-3 h-3" />
                         <span className="hidden sm:inline">Mejor</span>
                       </TabsTrigger>
-                      <TabsTrigger value="sales" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-300 data-[state=active]:to-teal-400 data-[state=active]:text-white rounded-lg gap-1 text-xs">
+                      <TabsTrigger value="sales" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-400 data-[state=active]:to-rose-400 data-[state=active]:text-white rounded-lg gap-1 text-xs">
                         <Trophy className="w-3 h-3" />
                         <span className="hidden sm:inline">Ventas</span>
                       </TabsTrigger>
-                      <TabsTrigger value="transactions" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-sky-300 data-[state=active]:to-blue-400 data-[state=active]:text-white rounded-lg gap-1 text-xs">
+                      <TabsTrigger value="transactions" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-400 data-[state=active]:to-purple-400 data-[state=active]:text-white rounded-lg gap-1 text-xs">
                         <Receipt className="w-3 h-3" />
                         <span className="hidden sm:inline">Trans.</span>
                       </TabsTrigger>
-                      <TabsTrigger value="ticket" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-300 data-[state=active]:to-yellow-400 data-[state=active]:text-white rounded-lg gap-1 text-xs">
+                      <TabsTrigger value="ticket" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-sky-400 data-[state=active]:to-blue-400 data-[state=active]:text-white rounded-lg gap-1 text-xs">
                         <TrendingUp className="w-3 h-3" />
                         <span className="hidden sm:inline">Ticket</span>
                       </TabsTrigger>
-                      <TabsTrigger value="suggested" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-300 data-[state=active]:to-rose-400 data-[state=active]:text-white rounded-lg gap-1 text-xs">
+                      <TabsTrigger value="suggested" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-400 data-[state=active]:to-teal-400 data-[state=active]:text-white rounded-lg gap-1 text-xs">
                         <Sparkles className="w-3 h-3" />
                         <span className="hidden sm:inline">Sugeridos</span>
                       </TabsTrigger>
@@ -888,8 +954,8 @@ export default function Rankings() {
                             <p className="text-xs text-gray-500 truncate">📍 {item.storeName}</p>
                           </div>
                           <div className="text-right">
-                            <p className="font-bold text-emerald-600">{formatCurrency(item.totalSales)}</p>
-                            <p className="text-xs text-gray-400">{item.shifts} turnos</p>
+                            <p className="font-bold text-emerald-600">{formatCurrency(item.avgSales)}</p>
+                            <p className="text-xs text-gray-400">prom/turno</p>
                           </div>
                         </motion.div>
                       ))}
@@ -939,8 +1005,8 @@ export default function Rankings() {
                             <p className="text-xs text-gray-500 truncate">📍 {item.storeName}</p>
                           </div>
                           <div className="text-right">
-                            <p className="font-bold text-blue-600">{item.totalTransactions.toLocaleString()}</p>
-                            <p className="text-xs text-gray-400">transacciones</p>
+                            <p className="font-bold text-blue-600">{Math.round(item.avgTransactions)}</p>
+                            <p className="text-xs text-gray-400">prom/turno</p>
                           </div>
                         </motion.div>
                       ))}

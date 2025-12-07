@@ -52,12 +52,49 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
       const record = await base44.entities.ShiftRecord.create({
         ...data,
         store_id: storeId,
+        cashier_name: cashier?.name || '',
         sales: parseFloat(data.sales) || 0,
         tickets: parseInt(data.tickets) || 0,
         transactions: parseInt(data.transactions) || 0,
         suggested_sales: parseInt(data.suggested_sales) || 0,
         average_ticket: data.tickets > 0 ? (parseFloat(data.sales) || 0) / parseInt(data.tickets) : 0
       });
+      
+      // Actualizar DailySales con la suma de todos los turnos del día
+      const allDayRecords = await base44.entities.ShiftRecord.filter({ 
+        store_id: storeId, 
+        date: data.date 
+      });
+      
+      const dailyTotals = allDayRecords.reduce((acc, r) => ({
+        sales: acc.sales + (r.sales || 0),
+        tickets: acc.tickets + (r.tickets || 0),
+        transactions: acc.transactions + (r.transactions || 0),
+        suggested: acc.suggested + (r.suggested_sales || 0)
+      }), { sales: 0, tickets: 0, transactions: 0, suggested: 0 });
+      
+      const existingDailySales = await base44.entities.DailySales.filter({ 
+        store_id: storeId, 
+        date: data.date 
+      });
+      
+      if (existingDailySales.length > 0) {
+        await base44.entities.DailySales.update(existingDailySales[0].id, {
+          total_sales: dailyTotals.sales,
+          total_tickets: dailyTotals.tickets,
+          total_transactions: dailyTotals.transactions,
+          total_suggested: dailyTotals.suggested
+        });
+      } else {
+        await base44.entities.DailySales.create({
+          store_id: storeId,
+          date: data.date,
+          total_sales: dailyTotals.sales,
+          total_tickets: dailyTotals.tickets,
+          total_transactions: dailyTotals.transactions,
+          total_suggested: dailyTotals.suggested
+        });
+      }
       
       // Log de la acción
       await base44.entities.SalesLog.create({
@@ -78,6 +115,7 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
       queryClient.invalidateQueries(['shiftRecords']);
       queryClient.invalidateQueries(['dailySales']);
       queryClient.invalidateQueries(['salesLogs']);
+      queryClient.invalidateQueries(['budget']);
       setFormData({
         ...formData,
         sales: '',

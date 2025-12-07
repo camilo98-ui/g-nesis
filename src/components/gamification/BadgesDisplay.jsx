@@ -201,7 +201,7 @@ export default function BadgesDisplay({ cashierId, compact = false, showAll = fa
                     ${isEarned 
                       ? `bg-gradient-to-br ${config.color} shadow-lg ${config.glow}` 
                       : 'bg-gray-200'
-                    } flex items-center justify-center cursor-pointer transition-all`}
+                    } flex items-center justify-center cursor-pointer transition-all group`}
                 >
                   <Icon className={`${compact ? 'w-4 h-4' : 'w-7 h-7'} ${isEarned ? 'text-white' : 'text-gray-400'}`} />
                   
@@ -227,6 +227,13 @@ export default function BadgesDisplay({ cashierId, compact = false, showAll = fa
                       animate={{ scale: [1, 1.2, 1] }}
                       transition={{ duration: 1, repeat: Infinity }}
                     />
+                  )}
+                  
+                  {/* Signo de interrogación para ver detalles */}
+                  {!compact && (
+                    <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-white rounded-full border-2 border-gray-200 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span className="text-[10px] font-bold text-gray-500">?</span>
+                    </div>
                   )}
                 </motion.div>
               </TooltipTrigger>
