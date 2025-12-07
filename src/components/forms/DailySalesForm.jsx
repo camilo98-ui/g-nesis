@@ -137,24 +137,31 @@ export default function DailySalesForm({ storeId, onSuccess }) {
         throw error;
       }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries(['dailySales']);
-      queryClient.invalidateQueries(['salesLogs']);
+    onSuccess: (data) => {
+      console.log('✅ Ventas guardadas exitosamente:', data);
 
-      setFormData(prev => ({
-        ...prev,
-        total_sales: '',
-        total_tickets: '',
-        total_transactions: '',
-        total_suggested: ''
-      }));
-
+      // Mostrar animación de éxito PRIMERO
       setShowSuccess(true);
 
+      // Luego actualizar el formulario
+      setTimeout(() => {
+        setFormData(prev => ({
+          ...prev,
+          total_sales: '',
+          total_tickets: '',
+          total_transactions: '',
+          total_suggested: ''
+        }));
+
+        queryClient.invalidateQueries(['dailySales']);
+        queryClient.invalidateQueries(['salesLogs']);
+      }, 100);
+
+      // Ocultar animación después
       setTimeout(() => {
         setShowSuccess(false);
         if (onSuccess) onSuccess();
-      }, 2500);
+      }, 3000);
     },
     onError: (error) => {
       console.error('Error guardando ventas:', error);
@@ -183,15 +190,25 @@ export default function DailySalesForm({ storeId, onSuccess }) {
       style={{ position: 'relative', isolation: 'isolate' }}
     >
       {/* Success Animation Overlay */}
-      <AnimatePresence mode="wait">
-        {showSuccess && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            className="absolute inset-0 z-[100] flex items-center justify-center bg-white/98 backdrop-blur-sm rounded-2xl"
-            style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-          >
+      {showSuccess && (
+        <motion.div
+          key="success-overlay"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.8 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          className="absolute inset-0 flex items-center justify-center rounded-2xl"
+          style={{ 
+            position: 'absolute', 
+            top: 0, 
+            left: 0, 
+            right: 0, 
+            bottom: 0,
+            backgroundColor: 'rgba(255, 255, 255, 0.98)',
+            backdropFilter: 'blur(8px)',
+            zIndex: 9999
+          }}
+        >
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
@@ -217,9 +234,9 @@ export default function DailySalesForm({ storeId, onSuccess }) {
                 Ventas del día registradas
               </motion.p>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            </motion.div>
+            </motion.div>
+            )}
 
       <Card className="bg-white/80 backdrop-blur-lg border-orange-100 shadow-xl">
         <CardHeader className="pb-4">
