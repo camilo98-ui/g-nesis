@@ -144,18 +144,23 @@ export default function DailySalesForm({ storeId, onSuccess }) {
         throw error;
       }
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       console.log('✅ Ventas guardadas exitosamente:', data);
       
-      // Toast inmediato como backup
+      // Toast inmediato
       toast.success('¡Ventas registradas exitosamente! 🍦');
+      
+      // Invalidar queries y esperar
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['dailySales'] }),
+        queryClient.invalidateQueries({ queryKey: ['salesLogs'] }),
+        queryClient.invalidateQueries({ queryKey: ['budget'] })
+      ]);
+      
+      console.log('✅ Queries invalidadas correctamente');
       
       // Mostrar animación
       setShowSuccess(true);
-      
-      // Invalidar queries sin esperar
-      queryClient.invalidateQueries(['dailySales']);
-      queryClient.invalidateQueries(['salesLogs']);
 
       // Timer para ocultar y limpiar
       setTimeout(() => {
