@@ -17,6 +17,7 @@ import CashierRanking from '@/components/gamification/CashierRanking';
 import CashierGoalsManager from '@/components/gamification/CashierGoalsManager';
 import { ViewProfileButton } from '@/components/cashier/CashierFullProfile';
 import CashierAssignmentSuggestion from '@/components/ai/CashierAssignmentSuggestion';
+import QuickSalesModal from '@/components/forms/QuickSalesModal';
 import { 
   ArrowLeft, Users, Search, TrendingUp, TrendingDown, 
   Award, Target, BarChart3, User, ChevronRight, Star,
@@ -35,6 +36,7 @@ export default function CashiersDashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCashier, setSelectedCashier] = useState(null);
   const [showBadgeConfig, setShowBadgeConfig] = useState(false);
+  const [showQuickSales, setShowQuickSales] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem('selectedStore');
@@ -168,16 +170,29 @@ export default function CashiersDashboard() {
               </Button>
             </Link>
             <div>
-              <motion.h1 
-                animate={{ 
-                  backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
-                }}
-                transition={{ duration: 5, repeat: Infinity }}
-                className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-pink-500 via-rose-500 to-pink-500 bg-[length:200%_100%] bg-clip-text text-transparent flex items-center gap-2"
-              >
-                <Users className="w-6 h-6 text-pink-500" />
-                Cajeros
-              </motion.h1>
+              <div className="flex items-center gap-3">
+                <motion.h1 
+                  animate={{ 
+                    backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+                  }}
+                  transition={{ duration: 5, repeat: Infinity }}
+                  className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-pink-500 via-rose-500 to-pink-500 bg-[length:200%_100%] bg-clip-text text-transparent flex items-center gap-2"
+                >
+                  <Users className="w-6 h-6 text-pink-500" />
+                  Cajeros
+                </motion.h1>
+                {selectedStore && (
+                  <motion.button
+                    whileHover={{ scale: 1.1, rotate: 90 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => setShowQuickSales(true)}
+                    className="w-10 h-10 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow"
+                    title="Registrar ventas"
+                  >
+                    <TrendingUp className="w-5 h-5" />
+                  </motion.button>
+                )}
+              </div>
               {selectedStore && (
                 <p className="text-sm text-pink-500 font-medium">{getDisplayName(selectedStore)}</p>
               )}
@@ -438,6 +453,17 @@ export default function CashiersDashboard() {
         isOpen={showBadgeConfig} 
         onClose={() => setShowBadgeConfig(false)} 
       />
+
+      {/* Quick Sales Modal */}
+      <AnimatePresence>
+        {showQuickSales && (
+          <QuickSalesModal
+            isOpen={showQuickSales}
+            onClose={() => setShowQuickSales(false)}
+            storeId={selectedStore}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

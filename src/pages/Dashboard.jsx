@@ -18,6 +18,7 @@ import SalesByHourChart from '@/components/sales/SalesByHourChart';
 import GrowthVelocityChart from '@/components/management/GrowthVelocityChart';
 import StoreReportGenerator from '@/components/reports/StoreReportGenerator';
 import CompraValeModal from '@/components/dashboard/CompraValeModal';
+import QuickSalesModal from '@/components/forms/QuickSalesModal';
 
 import { 
   DollarSign, Receipt, Zap, Gift, TrendingUp, TrendingDown, ArrowLeft,
@@ -441,6 +442,7 @@ export default function Dashboard() {
   const [weatherData, setWeatherData] = useState(null);
   const [weekFilter, setWeekFilter] = useState(null); // Filtro de semana independiente
   const [showCompraVale, setShowCompraVale] = useState(false);
+  const [showQuickSales, setShowQuickSales] = useState(false);
   
   // Fetch weather data
   useEffect(() => {
@@ -682,15 +684,28 @@ export default function Dashboard() {
               </Button>
             </Link>
             <div>
-              <motion.h1 
-                animate={{ 
-                  backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
-                }}
-                transition={{ duration: 5, repeat: Infinity }}
-                className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-violet-600 via-pink-500 to-violet-600 bg-[length:200%_100%] bg-clip-text text-transparent"
-              >
-                Tienda
-              </motion.h1>
+              <div className="flex items-center gap-3">
+                <motion.h1 
+                  animate={{ 
+                    backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+                  }}
+                  transition={{ duration: 5, repeat: Infinity }}
+                  className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-violet-600 via-pink-500 to-violet-600 bg-[length:200%_100%] bg-clip-text text-transparent"
+                >
+                  Tienda
+                </motion.h1>
+                {selectedStore && (
+                  <motion.button
+                    whileHover={{ scale: 1.1, rotate: 90 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => setShowQuickSales(true)}
+                    className="w-10 h-10 rounded-full bg-gradient-to-r from-emerald-500 to-green-500 text-white flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow"
+                    title="Registrar ventas"
+                  >
+                    <TrendingUp className="w-5 h-5" />
+                  </motion.button>
+                )}
+              </div>
               {selectedStore && (
                 <p className="text-sm text-pink-500 font-medium">{getDisplayName(selectedStore)}</p>
               )}
@@ -925,6 +940,17 @@ export default function Dashboard() {
                   storeId={selectedStore}
                   currentSales={totals}
                   dateRange={weekFilter || dateRange}
+                />
+              )}
+            </AnimatePresence>
+
+            {/* Quick Sales Modal */}
+            <AnimatePresence>
+              {showQuickSales && (
+                <QuickSalesModal
+                  isOpen={showQuickSales}
+                  onClose={() => setShowQuickSales(false)}
+                  storeId={selectedStore}
                 />
               )}
             </AnimatePresence>
