@@ -125,7 +125,7 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
       queryClient.invalidateQueries(['budget']);
 
       // Timer para ocultar y limpiar
-      const timer = setTimeout(() => {
+      setTimeout(() => {
         setShowSuccess(false);
         setFormData(prev => ({
           ...prev,
@@ -136,8 +136,6 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
         }));
         if (onSuccess) onSuccess();
       }, 2500);
-
-      return () => clearTimeout(timer);
     },
     onError: (error) => {
       console.error('Error guardando turno:', error);

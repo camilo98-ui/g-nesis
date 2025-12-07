@@ -151,7 +151,7 @@ export default function DailySalesForm({ storeId, onSuccess }) {
       queryClient.invalidateQueries(['salesLogs']);
 
       // Timer para ocultar y limpiar
-      const timer = setTimeout(() => {
+      setTimeout(() => {
         setShowSuccess(false);
         setFormData(prev => ({
           ...prev,
@@ -162,8 +162,6 @@ export default function DailySalesForm({ storeId, onSuccess }) {
         }));
         if (onSuccess) onSuccess();
       }, 2500);
-
-      return () => clearTimeout(timer);
     },
     onError: (error) => {
       console.error('Error guardando ventas:', error);
