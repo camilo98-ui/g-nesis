@@ -372,9 +372,15 @@ export default function Home() {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
             >
-              <h2 className="text-2xl font-bold text-[#E91E63]">
+              <motion.h2 
+                animate={{ 
+                  scale: [1, 1.02, 1],
+                }}
+                transition={{ duration: 3, repeat: Infinity }}
+                className="text-2xl font-bold bg-gradient-to-r from-pink-500 via-rose-500 to-pink-600 bg-clip-text text-transparent"
+              >
                 {selectedRole === 'gerente' ? '¡Hola Gerente! 🎯' : selectedRole === 'lider' ? '¡Hola Líder! ⭐' : selectedRole === 'embajador' ? '¡Hola Embajador! 🍦' : '¡Bienvenido! 🎉'}
-              </h2>
+              </motion.h2>
               <p className="text-gray-500 text-sm mt-1">
                 {selectedRole === 'gerente' ? 'El poder en tus manos' : selectedRole === 'lider' ? 'Listo para brillar' : selectedRole === 'embajador' ? 'El corazón del equipo' : 'Selecciona tu rol'}
               </p>
