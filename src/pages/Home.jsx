@@ -13,12 +13,10 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { 
   LayoutDashboard, Users, TrendingUp, 
-  Award, Target, Bell, Phone, Download, Smartphone, Monitor, ClipboardCheck, FileText,
-  LogOut, Lock, Eye, EyeOff
+  Award, Target, Bell, Phone, Download, ClipboardCheck, FileText,
+  Lock, Eye, EyeOff
 } from 'lucide-react';
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { startOfMonth } from 'date-fns';
 
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/6a749247d_Capturadepantalla2025-11-251251441.png";
 
