@@ -120,12 +120,6 @@ export default function PopsyPlanner() {
                     </Button>
                   </motion.div>
                   <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                    <Button onClick={() => setShowAIAssistant(true)} variant="outline" className="gap-2 border-purple-200 text-purple-600 hover:bg-purple-50">
-                      <MessageCircle className="w-4 h-4" />
-                      <span className="hidden sm:inline">Asistente</span>
-                    </Button>
-                  </motion.div>
-                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                     <Button onClick={() => setShowAISuggestion(true)} className="bg-gradient-to-r from-violet-500 to-purple-600 text-white gap-2 shadow-lg">
                       <Sparkles className="w-4 h-4" />
                       <span className="hidden sm:inline">Generar con IA</span>
