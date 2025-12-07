@@ -164,32 +164,22 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
   const ShiftIcon = selectedShift?.icon || Sun;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="relative"
-      style={{ position: 'relative', isolation: 'isolate' }}
-    >
-      {/* Success Animation Overlay */}
-      {showSuccess && (
-        <motion.div
-          key="success-overlay"
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.8 }}
-          transition={{ duration: 0.3, ease: "easeOut" }}
-          className="absolute inset-0 flex items-center justify-center rounded-2xl"
-          style={{ 
-            position: 'absolute', 
-            top: 0, 
-            left: 0, 
-            right: 0, 
-            bottom: 0,
-            backgroundColor: 'rgba(255, 255, 255, 0.98)',
-            backdropFilter: 'blur(8px)',
-            zIndex: 9999
-          }}
-        >
+    <>
+      {/* Success Animation Overlay - FIXED POSITION */}
+      <AnimatePresence>
+          {showSuccess && (
+          <motion.div
+            key="success-overlay"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="fixed inset-0 flex items-center justify-center z-[99999]"
+            style={{ 
+              backgroundColor: 'rgba(255, 255, 255, 0.98)',
+              backdropFilter: 'blur(8px)'
+            }}
+          >
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
@@ -256,8 +246,13 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
             </motion.div>
           </motion.div>
         )}
+      </AnimatePresence>
 
-      <Card className="bg-white/80 backdrop-blur-lg border-pink-100 shadow-xl">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
+        <Card className="bg-white/80 backdrop-blur-lg border-pink-100 shadow-xl">
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-3 text-gray-800">
             <div className="p-2 bg-gradient-to-br from-pink-500 to-rose-500 rounded-xl text-white">
@@ -412,6 +407,7 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
           </form>
         </CardContent>
       </Card>
-    </motion.div>
+      </motion.div>
+    </>
   );
 }
