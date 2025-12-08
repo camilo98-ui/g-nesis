@@ -20,87 +20,53 @@ export default function DailySalesForm({ storeId, onSuccess }) {
     total_suggested: ''
   });
 
-  // Debug: verificar props
-  console.log('🔍 DailySalesForm montado con storeId:', storeId);
-
   const createMutation = useMutation({
     mutationFn: async (data) => {
-      try {
-        console.log('🚀 Iniciando guardado...', data);
-        
-        const user = await base44.auth.me();
-        
-        const salesValue = parseFloat(data.total_sales) || 0;
-        const ticketsValue = parseInt(data.total_tickets) || 0;
-        const transactionsValue = parseInt(data.total_transactions) || 0;
-        const suggestedValue = parseInt(data.total_suggested) || 0;
-        
-        console.log('📊 Valores procesados:', { salesValue, ticketsValue, transactionsValue, suggestedValue });
-        
-        // 1. Verificar si existe registro
-        const existing = await base44.entities.DailySales.filter({ 
-          store_id: storeId, 
-          date: data.date 
-        });
-        
-        console.log('🔍 Registros existentes:', existing.length);
-        
-        const recordData = {
-          store_id: storeId,
-          date: data.date,
-          total_sales: salesValue,
-          total_tickets: ticketsValue,
-          total_transactions: transactionsValue,
-          total_suggested: suggestedValue
-        };
-        
-        let record;
-        
-        // 2. Crear o actualizar
-        if (existing.length > 0) {
-          console.log('📝 Actualizando registro existente...');
-          record = await base44.entities.DailySales.update(existing[0].id, recordData);
-          console.log('✅ DailySales actualizado:', record);
-        } else {
-          console.log('📝 Creando nuevo registro...');
-          record = await base44.entities.DailySales.create(recordData);
-          console.log('✅ DailySales creado:', record);
-        }
-        
-        // 3. Crear log
-        console.log('📝 Creando log...');
-        await base44.entities.SalesLog.create({
-          store_id: storeId,
-          record_type: 'daily_sales',
-          record_id: record.id,
-          action: existing.length > 0 ? 'update' : 'create',
-          user_email: user.email,
-          sales_amount: salesValue,
-          action_date: data.date,
-          details: JSON.stringify({ total_transactions: transactionsValue })
-        });
-        
-        console.log('✅ TODO GUARDADO CORRECTAMENTE');
-        
-        return record;
-      } catch (error) {
-        console.error('❌ ERROR DETALLADO:', error);
-        throw error;
+      const user = await base44.auth.me();
+      
+      const salesValue = parseFloat(data.total_sales) || 0;
+      const ticketsValue = parseInt(data.total_tickets) || 0;
+      const transactionsValue = parseInt(data.total_transactions) || 0;
+      const suggestedValue = parseInt(data.total_suggested) || 0;
+      
+      const existing = await base44.entities.DailySales.filter({ 
+        store_id: storeId, 
+        date: data.date 
+      });
+      
+      const recordData = {
+        store_id: storeId,
+        date: data.date,
+        total_sales: salesValue,
+        total_tickets: ticketsValue,
+        total_transactions: transactionsValue,
+        total_suggested: suggestedValue
+      };
+      
+      let record;
+      if (existing.length > 0) {
+        record = await base44.entities.DailySales.update(existing[0].id, recordData);
+      } else {
+        record = await base44.entities.DailySales.create(recordData);
       }
+      
+      await base44.entities.SalesLog.create({
+        store_id: storeId,
+        record_type: 'daily_sales',
+        record_id: record.id,
+        action: existing.length > 0 ? 'update' : 'create',
+        user_email: user.email,
+        sales_amount: salesValue,
+        action_date: data.date,
+        details: JSON.stringify({ total_transactions: transactionsValue })
+      });
+      
+      return record;
     },
-    onSuccess: async () => {
-      console.log('🎉 Guardado exitoso, invalidando queries...');
-      
-      // Invalidar y refetch inmediato
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['dailySales'], refetchType: 'active' }),
-        queryClient.invalidateQueries({ queryKey: ['salesLogs'], refetchType: 'active' }),
-        queryClient.invalidateQueries({ queryKey: ['budgets'], refetchType: 'active' }),
-        queryClient.refetchQueries({ queryKey: ['dailySales'], type: 'active' }),
-        queryClient.refetchQueries({ queryKey: ['salesLogs'], type: 'active' })
-      ]);
-      
-      console.log('✅ Queries invalidadas y refetch forzado');
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dailySales'] });
+      queryClient.invalidateQueries({ queryKey: ['salesLogs'] });
+      queryClient.invalidateQueries({ queryKey: ['budgets'] });
       
       toast.success('¡Ventas registradas correctamente!');
       
@@ -115,27 +81,21 @@ export default function DailySalesForm({ storeId, onSuccess }) {
           total_suggested: ''
         });
         if (onSuccess) onSuccess();
-      }, 1000);
+      }, 1500);
     },
     onError: (error) => {
-      console.error('❌ ERROR COMPLETO:', error);
-      console.error('❌ Stack:', error.stack);
-      toast.error(`Error: ${error.message || 'No se pudo guardar. Revisa la consola.'}`);
+      toast.error('Error al guardar: ' + error.message);
     }
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('🎯 handleSubmit llamado', formData);
-    console.log('📍 storeId:', storeId);
-    console.log('🔄 isPending:', createMutation.isPending);
     
     if (!formData.total_sales) {
       toast.error('Ingresa las ventas');
       return;
     }
     
-    console.log('✅ Validación pasada, ejecutando mutation...');
     createMutation.mutate(formData);
   };
 
@@ -271,10 +231,6 @@ export default function DailySalesForm({ storeId, onSuccess }) {
             <Button 
               type="submit" 
               disabled={createMutation.isPending}
-              onClick={(e) => {
-                console.log('🖱️ Click en botón Guardar');
-                console.log('📋 Datos del formulario:', formData);
-              }}
               className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg"
             >
               {createMutation.isPending ? (
