@@ -41,7 +41,17 @@ const MENU_ITEMS = [
     iconColor: 'text-violet-500',
     textColor: 'text-violet-700'
   },
-
+  { 
+    name: 'Ventas', 
+    page: 'Dashboard',
+    icon: Receipt, 
+    description: 'Registrar ventas',
+    bgColor: 'bg-gradient-to-br from-emerald-100/90 to-green-100/80',
+    iconBg: 'bg-emerald-200/60',
+    iconColor: 'text-emerald-500',
+    textColor: 'text-emerald-700',
+    isSpecialAction: true
+  },
   { 
     name: 'PopsyStars', 
     page: 'Rankings',
@@ -686,20 +696,6 @@ export default function Home() {
             className="mb-4 flex justify-center gap-2 flex-wrap"
           >
             <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }}>
-              <Link to={createPageUrl('Dashboard')}>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-gray-500 hover:text-green-600 hover:bg-green-50 transition-all"
-                >
-                  <motion.div animate={{ y: [0, -2, 0] }} transition={{ duration: 1.5, repeat: Infinity }}>
-                    <Receipt className="w-4 h-4 mr-1" />
-                  </motion.div>
-                  Ventas
-                </Button>
-              </Link>
-            </motion.div>
-            <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }}>
               <Button
                 variant="ghost"
                 size="sm"
@@ -797,6 +793,31 @@ export default function Home() {
                         <p className="text-[10px] text-gray-500 mt-0.5">{item.description}</p>
                       </div>
                     </motion.div>
+                  ) : item.isSpecialAction ? (
+                    <motion.div 
+                      onClick={() => setShowStoreSales(true)}
+                      className={`${item.bgColor} rounded-2xl p-4 h-full shadow-md hover:shadow-xl transition-all duration-300 group relative overflow-hidden border border-white/50 backdrop-blur-sm cursor-pointer`}
+                    >
+                      {/* Subtle glow effect */}
+                      <motion.div
+                        className="absolute inset-0 bg-white/30 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl"
+                      />
+
+                      {/* Icon centered */}
+                      <div className="flex flex-col items-center justify-center text-center relative z-10">
+                        <motion.div 
+                          className={`w-12 h-12 ${item.iconBg} backdrop-blur-sm rounded-xl flex items-center justify-center mb-2`}
+                          whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1 }}
+                          transition={{ duration: 0.4 }}
+                        >
+                          <Icon className={`w-6 h-6 ${item.iconColor}`} />
+                        </motion.div>
+                        <h3 className={`font-bold ${item.textColor} text-sm`}>
+                          {item.name}
+                        </h3>
+                        <p className="text-[10px] text-gray-500 mt-0.5">{item.description}</p>
+                      </div>
+                    </motion.div>
                   ) : (
                     <Link to={createPageUrl(item.page)}>
                       <motion.div 
@@ -879,6 +900,52 @@ export default function Home() {
             storeCode={selectedStore}
             onClose={() => setShowReport(false)}
           />
+        )}
+      </AnimatePresence>
+
+      {/* Store Sales Modal */}
+      <AnimatePresence>
+        {showStoreSales && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setShowStoreSales(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              onClick={e => e.stopPropagation()}
+              className="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden"
+            >
+              <div className="bg-gradient-to-r from-emerald-500 to-green-500 p-5 text-white text-center relative">
+                <button
+                  onClick={() => setShowStoreSales(false)}
+                  className="absolute top-4 right-4 text-white/80 hover:text-white"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+                <TrendingUp className="w-10 h-10 mx-auto mb-2" />
+                <h2 className="text-xl font-bold">Registrar Ventas del Día</h2>
+              </div>
+
+              <div className="p-5">
+                <Link to={createPageUrl('Dashboard')}>
+                  <Button
+                    onClick={() => setShowStoreSales(false)}
+                    className="w-full bg-gradient-to-r from-emerald-500 to-green-500 text-white py-6"
+                  >
+                    <Receipt className="w-5 h-5 mr-2" />
+                    Ir a Registrar Ventas
+                  </Button>
+                </Link>
+              </div>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
 
