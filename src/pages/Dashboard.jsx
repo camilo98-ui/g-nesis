@@ -708,34 +708,23 @@ export default function Dashboard() {
         {selectedStore ? (
           <div className="space-y-6">
             {/* Acciones rápidas - al inicio */}
-            <div className="flex justify-between items-center gap-2">
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <div className="flex justify-end gap-2">
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button
-                  onClick={() => setShowStoreSales(true)}
-                  className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white shadow-lg"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowCompraVale(true)}
+                  className="text-violet-600 border-violet-200 hover:bg-violet-50 hover:border-violet-300"
                 >
-                  <TrendingUp className="w-4 h-4 mr-2" />
-                  Ventas
+                  <BarChart3 className="w-4 h-4 mr-1" />
+                  Comparable
                 </Button>
               </motion.div>
-              <div className="flex gap-2">
-                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowCompraVale(true)}
-                    className="text-violet-600 border-violet-200 hover:bg-violet-50 hover:border-violet-300"
-                  >
-                    <BarChart3 className="w-4 h-4 mr-1" />
-                    Comparable
-                  </Button>
-                </motion.div>
-                <StoreReportGenerator 
-                  storeId={selectedStore}
-                  storeName={selectedStoreName}
-                  storeCode={selectedStore}
-                />
-              </div>
+              <StoreReportGenerator 
+                storeId={selectedStore}
+                storeName={selectedStoreName}
+                storeCode={selectedStore}
+              />
             </div>
 
 

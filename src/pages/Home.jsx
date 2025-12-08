@@ -14,7 +14,7 @@ import { useQuery } from '@tanstack/react-query';
 import { 
   LayoutDashboard, Users, TrendingUp, 
   Award, Target, Bell, Phone, Download, ClipboardCheck, FileText,
-  Lock, Eye, EyeOff
+  Lock, Eye, EyeOff, Receipt
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 
@@ -116,6 +116,7 @@ export default function Home() {
   const [loginError, setLoginError] = useState('');
   const [pendingStore, setPendingStore] = useState('');
   const [selectedRole, setSelectedRole] = useState('');
+  const [showStoreSales, setShowStoreSales] = useState(false);
 
   const ROLES = [
     { id: 'gerente', name: 'Gerente', icon: 'gerente', color: 'from-slate-600 to-gray-700', description: '🎯 Poder total', iconBaseColor: '#475569' },
@@ -682,8 +683,22 @@ export default function Home() {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-4 flex justify-center gap-2"
+            className="mb-4 flex justify-center gap-2 flex-wrap"
           >
+            <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }}>
+              <Link to={createPageUrl('Dashboard')}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-gray-500 hover:text-green-600 hover:bg-green-50 transition-all"
+                >
+                  <motion.div animate={{ y: [0, -2, 0] }} transition={{ duration: 1.5, repeat: Infinity }}>
+                    <Receipt className="w-4 h-4 mr-1" />
+                  </motion.div>
+                  Ventas
+                </Button>
+              </Link>
+            </motion.div>
             <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }}>
               <Button
                 variant="ghost"
