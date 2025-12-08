@@ -709,25 +709,15 @@ export default function Dashboard() {
           <div className="space-y-6">
             {/* Acciones rápidas - al inicio */}
             <div className="flex justify-between items-center gap-2">
-              <div className="flex gap-2">
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Link to={createPageUrl('Sales')}>
-                    <Button className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white shadow-lg">
-                      <Receipt className="w-4 h-4 mr-2" />
-                      Registrar venta por cajero
-                    </Button>
-                  </Link>
-                </motion.div>
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button
-                    onClick={() => setShowStoreSales(true)}
-                    className="bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white shadow-lg"
-                  >
-                    <TrendingUp className="w-4 h-4 mr-2" />
-                    Registrar ventas del día
-                  </Button>
-                </motion.div>
-              </div>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button
+                  onClick={() => setShowStoreSales(true)}
+                  className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white shadow-lg"
+                >
+                  <TrendingUp className="w-4 h-4 mr-2" />
+                  Ventas
+                </Button>
+              </motion.div>
               <div className="flex gap-2">
                 <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                   <Button
