@@ -104,7 +104,7 @@ export default function SalesByHourChart({ shiftRecords = [], formatCurrency }) 
           </ResponsiveContainer>
         </div>
         
-        {/* Indicadores de turno simplificados */}
+        {/* Indicadores de turno con mini gráficas */}
         <div className="grid grid-cols-3 gap-3 mt-4">
           {Object.entries(SHIFT_TIMES).map(([key, shift]) => {
             const Icon = shift.icon;
@@ -116,19 +116,72 @@ export default function SalesByHourChart({ shiftRecords = [], formatCurrency }) 
               .reduce((sum, r) => sum + (r.transactions || 0), 0);
             const avgTicket = shiftTransactions > 0 ? shiftSales / shiftTransactions : 0;
             const shiftCount = shiftRecords.filter(r => r.shift === key).length;
-            const isSelected = selectedShift === key;
+            
+            // Datos del turno por hora
+            const shiftHourlyData = hourlyData.filter(h => {
+              const hour = h.hour;
+              return hour >= Math.floor(shift.start) && hour <= Math.floor(shift.end);
+            });
             
             return (
-              <div
+              <motion.button
                 key={key}
-                className={`bg-gradient-to-br ${shift.bgColor} rounded-xl p-3 text-center shadow-md`}
+                onClick={() => setSelectedShift(selectedShift === key ? 'all' : key)}
+                whileHover={{ scale: 1.05, y: -3 }}
+                whileTap={{ scale: 0.98 }}
+                className={`bg-gradient-to-br ${shift.bgColor} rounded-xl p-3 text-center shadow-md transition-all ${
+                  selectedShift === key ? 'ring-2 ring-offset-2' : ''
+                }`}
+                style={{ ringColor: shift.color }}
               >
-                <Icon className="w-5 h-5 mx-auto mb-1" style={{ color: shift.color }} />
+                <div className="flex items-center justify-between mb-2">
+                  <Icon className="w-5 h-5" style={{ color: shift.color }} />
+                  <span className="text-[10px] font-medium text-gray-600">{shiftCount} reg</span>
+                </div>
+                
+                {/* Mini gráfica sparkline */}
+                {shiftHourlyData.length > 0 && (
+                  <div className="h-8 mb-2 -mx-2">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={shiftHourlyData}>
+                        <defs>
+                          <linearGradient id={`shiftGrad-${key}`} x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor={shift.color} stopOpacity={0.5}/>
+                            <stop offset="95%" stopColor={shift.color} stopOpacity={0.05}/>
+                          </linearGradient>
+                        </defs>
+                        <Area 
+                          type="monotone" 
+                          dataKey="sales" 
+                          stroke={shift.color} 
+                          strokeWidth={1.5} 
+                          fill={`url(#shiftGrad-${key})`}
+                          isAnimationActive={false}
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+                
                 <p className="text-xs font-medium text-gray-700">{shift.label}</p>
-                <p className="text-lg font-bold" style={{ color: shift.color }}>
+                <p className="text-base font-bold mb-1" style={{ color: shift.color }}>
                   {formatCurrency ? formatCurrency(shiftSales) : `$${Math.round(shiftSales/1000000)}M COP`}
                 </p>
-              </div>
+                
+                {/* Indicadores adicionales */}
+                <div className="flex justify-around text-[9px] text-gray-500 pt-2 border-t border-gray-200/50">
+                  <div>
+                    <p className="font-medium">Trans</p>
+                    <p className="font-bold text-gray-700">{shiftTransactions}</p>
+                  </div>
+                  <div>
+                    <p className="font-medium">Ticket</p>
+                    <p className="font-bold text-gray-700">
+                      {avgTicket > 0 ? `$${Math.round(avgTicket/1000)}K` : '-'}
+                    </p>
+                  </div>
+                </div>
+              </motion.button>
             );
           })}
         </div>
