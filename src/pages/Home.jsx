@@ -9,6 +9,8 @@ import NotificationSetup from '@/components/NotificationSetup';
 import ManagerialReportModal from '@/components/reports/ManagerialReportModal';
 import PopsyStoryModal from '@/components/PopsyStoryModal';
 import DirectoryModal from '@/components/DirectoryModal';
+import DailySalesForm from '@/components/forms/DailySalesForm';
+import ShiftRecordForm from '@/components/forms/ShiftRecordForm';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { 
@@ -910,7 +912,7 @@ export default function Home() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
             onClick={() => setShowStoreSales(false)}
           >
             <motion.div
@@ -918,7 +920,7 @@ export default function Home() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               onClick={e => e.stopPropagation()}
-              className="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden"
+              className="bg-white rounded-2xl shadow-xl max-w-4xl w-full overflow-hidden my-8"
             >
               <div className="bg-gradient-to-r from-emerald-500 to-green-500 p-5 text-white text-center relative">
                 <button
@@ -931,18 +933,23 @@ export default function Home() {
                 </button>
                 <TrendingUp className="w-10 h-10 mx-auto mb-2" />
                 <h2 className="text-xl font-bold">Registrar Ventas del Día</h2>
+                <p className="text-white/80 text-sm mt-1">Ingresa las ventas de la tienda y por cajero</p>
               </div>
 
-              <div className="p-5">
-                <Link to={createPageUrl('Dashboard')}>
-                  <Button
-                    onClick={() => setShowStoreSales(false)}
-                    className="w-full bg-gradient-to-r from-emerald-500 to-green-500 text-white py-6"
-                  >
-                    <Receipt className="w-5 h-5 mr-2" />
-                    Ir a Registrar Ventas
-                  </Button>
-                </Link>
+              <div className="p-6 space-y-6 max-h-[80vh] overflow-y-auto">
+                <DailySalesForm 
+                  storeId={selectedStore} 
+                  onSuccess={() => {
+                    setShowStoreSales(false);
+                  }} 
+                />
+                
+                <div className="border-t border-gray-200 pt-6">
+                  <ShiftRecordForm 
+                    storeId={selectedStore} 
+                    onSuccess={() => {}} 
+                  />
+                </div>
               </div>
             </motion.div>
           </motion.div>
