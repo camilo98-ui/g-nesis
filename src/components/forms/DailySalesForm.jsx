@@ -249,32 +249,9 @@ export default function DailySalesForm({ storeId, onSuccess }) {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-gradient-to-br from-pink-50 via-purple-50 to-amber-50 rounded-3xl shadow-2xl border-2 border-pink-200/50 overflow-hidden"
+        className="bg-white/60 backdrop-blur-sm rounded-2xl shadow-lg overflow-hidden"
       >
-        <div className="bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 p-4 text-center relative overflow-hidden">
-          <motion.div
-            className="absolute inset-0 bg-white/20"
-            animate={{ x: ['-100%', '200%'] }}
-            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-          />
-          <div className="relative z-10 flex items-center justify-center gap-3">
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-            >
-              <Sparkles className="w-6 h-6 text-white" />
-            </motion.div>
-            <h3 className="text-xl font-black text-white">Ventas del Día</h3>
-            <motion.div
-              animate={{ rotate: -360 }}
-              transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-            >
-              <Sparkles className="w-6 h-6 text-white" />
-            </motion.div>
-          </div>
-        </div>
-
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="p-4 space-y-4">
           <motion.div
             whileHover={{ scale: 1.02 }}
             className="bg-white rounded-2xl p-4 shadow-lg border-2 border-amber-200"
@@ -361,32 +338,23 @@ export default function DailySalesForm({ storeId, onSuccess }) {
             </motion.div>
           </div>
 
-          <motion.div
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.98 }}
-          >
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
             <Button 
               type="submit" 
               disabled={createMutation.isPending}
-              className="w-full bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 hover:from-pink-600 hover:via-purple-600 hover:to-pink-600 text-white shadow-2xl py-7 text-lg font-black rounded-2xl relative overflow-hidden"
+              className="w-full bg-gradient-to-r from-pink-400 to-rose-400 hover:from-pink-500 hover:to-rose-500 text-white shadow-lg py-5 text-base font-bold rounded-xl"
             >
-              <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-                animate={{ x: ['-100%', '200%'] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-              />
               {createMutation.isPending ? (
-                <span className="relative z-10 flex items-center justify-center gap-2">
+                <span className="flex items-center justify-center gap-2">
                   <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}>
-                    <Loader2 className="w-6 h-6" />
+                    <Loader2 className="w-5 h-5" />
                   </motion.div>
                   Guardando...
                 </span>
               ) : (
-                <span className="relative z-10 flex items-center justify-center gap-2">
-                  <Save className="w-6 h-6" />
-                  ¡Guardar Ventas!
-                  <Sparkles className="w-5 h-5" />
+                <span className="flex items-center justify-center gap-2">
+                  <Save className="w-5 h-5" />
+                  Guardar
                 </span>
               )}
             </Button>

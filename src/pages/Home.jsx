@@ -129,6 +129,7 @@ export default function Home() {
   const [pendingStore, setPendingStore] = useState('');
   const [selectedRole, setSelectedRole] = useState('');
   const [showStoreSales, setShowStoreSales] = useState(false);
+  const [salesTab, setSalesTab] = useState('tienda');
 
   const ROLES = [
     { id: 'gerente', name: 'Gerente', icon: 'gerente', color: 'from-slate-600 to-gray-700', description: '🎯 Poder total', iconBaseColor: '#475569' },
@@ -920,36 +921,93 @@ export default function Home() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               onClick={e => e.stopPropagation()}
-              className="bg-white rounded-2xl shadow-xl max-w-4xl w-full overflow-hidden my-8"
+              className="bg-gradient-to-br from-pink-50/80 via-purple-50/60 to-amber-50/80 backdrop-blur-xl rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden my-8 border border-pink-200/50"
             >
-              <div className="bg-gradient-to-r from-emerald-500 to-green-500 p-5 text-white text-center relative">
+              <div className="bg-gradient-to-r from-pink-400/90 via-rose-400/90 to-pink-400/90 p-5 text-white text-center relative">
                 <button
                   onClick={() => setShowStoreSales(false)}
-                  className="absolute top-4 right-4 text-white/80 hover:text-white"
+                  className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
                 <TrendingUp className="w-10 h-10 mx-auto mb-2" />
-                <h2 className="text-xl font-bold">Registrar Ventas del Día</h2>
-                <p className="text-white/80 text-sm mt-1">Ingresa las ventas de la tienda y por cajero</p>
+                <h2 className="text-xl font-bold">Registrar Ventas</h2>
               </div>
 
-              <div className="p-6 space-y-6 max-h-[80vh] overflow-y-auto">
-                <DailySalesForm 
-                  storeId={selectedStore} 
-                  onSuccess={() => {
-                    setShowStoreSales(false);
-                  }} 
-                />
-                
-                <div className="border-t border-gray-200 pt-6">
-                  <ShiftRecordForm 
-                    storeId={selectedStore} 
-                    onSuccess={() => {}} 
-                  />
-                </div>
+              {/* Tabs */}
+              <div className="flex border-b border-pink-200/50 bg-white/50">
+                <button
+                  onClick={() => setSalesTab('tienda')}
+                  className={`flex-1 py-4 px-6 font-bold text-sm transition-all relative ${
+                    salesTab === 'tienda'
+                      ? 'text-pink-600'
+                      : 'text-gray-500 hover:text-pink-500'
+                  }`}
+                >
+                  <span className="flex items-center justify-center gap-2">
+                    🏪 Venta de Tienda
+                  </span>
+                  {salesTab === 'tienda' && (
+                    <motion.div
+                      layoutId="salesTab"
+                      className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-pink-500 to-rose-500 rounded-t-full"
+                    />
+                  )}
+                </button>
+                <button
+                  onClick={() => setSalesTab('cajero')}
+                  className={`flex-1 py-4 px-6 font-bold text-sm transition-all relative ${
+                    salesTab === 'cajero'
+                      ? 'text-violet-600'
+                      : 'text-gray-500 hover:text-violet-500'
+                  }`}
+                >
+                  <span className="flex items-center justify-center gap-2">
+                    👤 Venta de Cajero
+                  </span>
+                  {salesTab === 'cajero' && (
+                    <motion.div
+                      layoutId="salesTab"
+                      className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-violet-500 to-purple-500 rounded-t-full"
+                    />
+                  )}
+                </button>
+              </div>
+
+              <div className="p-6 max-h-[70vh] overflow-y-auto">
+                <AnimatePresence mode="wait">
+                  {salesTab === 'tienda' ? (
+                    <motion.div
+                      key="tienda"
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 20 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <DailySalesForm 
+                        storeId={selectedStore} 
+                        onSuccess={() => {
+                          setShowStoreSales(false);
+                        }} 
+                      />
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="cajero"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <ShiftRecordForm 
+                        storeId={selectedStore} 
+                        onSuccess={() => {}} 
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </motion.div>
           </motion.div>
