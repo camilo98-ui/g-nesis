@@ -41,7 +41,6 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
 
   const createMutation = useMutation({
     mutationFn: async (data) => {
-      const user = await base44.auth.me();
       const cashier = cashiers.find(c => c.id === data.cashier_id);
 
       const salesValue = parseFloat(data.sales) || 0;
@@ -97,17 +96,23 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
         });
       }
 
-      await base44.entities.SalesLog.create({
-        store_id: storeId,
-        record_type: 'shift_record',
-        record_id: record.id,
-        action: 'create',
-        user_email: user.email,
-        cashier_name: cashier?.name,
-        sales_amount: salesValue,
-        action_date: data.date,
-        details: JSON.stringify({ shift: data.shift })
-      });
+      // Crear log sin bloquear el guardado
+      try {
+        const user = await base44.auth.me();
+        await base44.entities.SalesLog.create({
+          store_id: storeId,
+          record_type: 'shift_record',
+          record_id: record.id,
+          action: 'create',
+          user_email: user.email,
+          cashier_name: cashier?.name,
+          sales_amount: salesValue,
+          action_date: data.date,
+          details: JSON.stringify({ shift: data.shift })
+        });
+      } catch (logError) {
+        console.warn('No se pudo crear el log:', logError);
+      }
 
       return record;
     },

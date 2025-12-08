@@ -22,46 +22,35 @@ export default function DailySalesForm({ storeId, onSuccess }) {
 
   const createMutation = useMutation({
     mutationFn: async (data) => {
-      alert('🚀 Iniciando guardado...');
+      const salesValue = parseFloat(data.total_sales) || 0;
+      const ticketsValue = parseInt(data.total_tickets) || 0;
+      const transactionsValue = parseInt(data.total_transactions) || 0;
+      const suggestedValue = parseInt(data.total_suggested) || 0;
       
+      const existing = await base44.entities.DailySales.filter({ 
+        store_id: storeId, 
+        date: data.date 
+      });
+      
+      const recordData = {
+        store_id: storeId,
+        date: data.date,
+        total_sales: salesValue,
+        total_tickets: ticketsValue,
+        total_transactions: transactionsValue,
+        total_suggested: suggestedValue
+      };
+      
+      let record;
+      if (existing.length > 0) {
+        record = await base44.entities.DailySales.update(existing[0].id, recordData);
+      } else {
+        record = await base44.entities.DailySales.create(recordData);
+      }
+      
+      // Crear log sin requerir autenticación
       try {
         const user = await base44.auth.me();
-        alert('✅ Usuario obtenido: ' + user.email);
-        
-        const salesValue = parseFloat(data.total_sales) || 0;
-        const ticketsValue = parseInt(data.total_tickets) || 0;
-        const transactionsValue = parseInt(data.total_transactions) || 0;
-        const suggestedValue = parseInt(data.total_suggested) || 0;
-        
-        alert('📊 Valores: Ventas=' + salesValue + ', Tickets=' + ticketsValue);
-        
-        const existing = await base44.entities.DailySales.filter({ 
-          store_id: storeId, 
-          date: data.date 
-        });
-        
-        alert('🔍 Registros existentes: ' + existing.length);
-        
-        const recordData = {
-          store_id: storeId,
-          date: data.date,
-          total_sales: salesValue,
-          total_tickets: ticketsValue,
-          total_transactions: transactionsValue,
-          total_suggested: suggestedValue
-        };
-        
-        let record;
-        if (existing.length > 0) {
-          alert('📝 Actualizando registro...');
-          record = await base44.entities.DailySales.update(existing[0].id, recordData);
-        } else {
-          alert('📝 Creando nuevo registro...');
-          record = await base44.entities.DailySales.create(recordData);
-        }
-        
-        alert('✅ Registro guardado con ID: ' + record.id);
-        
         await base44.entities.SalesLog.create({
           store_id: storeId,
           record_type: 'daily_sales',
@@ -72,18 +61,14 @@ export default function DailySalesForm({ storeId, onSuccess }) {
           action_date: data.date,
           details: JSON.stringify({ total_transactions: transactionsValue })
         });
-        
-        alert('✅ Log creado correctamente');
-        
-        return record;
-      } catch (error) {
-        alert('❌ ERROR: ' + error.message);
-        throw error;
+      } catch (logError) {
+        // Si falla el log, continuar de todas formas
+        console.warn('No se pudo crear el log:', logError);
       }
+      
+      return record;
     },
     onSuccess: () => {
-      alert('🎉 onSuccess ejecutado');
-      
       queryClient.invalidateQueries({ queryKey: ['dailySales'] });
       queryClient.invalidateQueries({ queryKey: ['salesLogs'] });
       queryClient.invalidateQueries({ queryKey: ['budgets'] });
@@ -104,7 +89,6 @@ export default function DailySalesForm({ storeId, onSuccess }) {
       }, 1500);
     },
     onError: (error) => {
-      alert('❌ onError ejecutado: ' + error.message);
       toast.error('Error al guardar: ' + error.message);
     }
   });
@@ -112,21 +96,16 @@ export default function DailySalesForm({ storeId, onSuccess }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    alert('🎯 handleSubmit ejecutado - Ventas: ' + formData.total_sales + ', Store: ' + storeId);
-    
     if (!formData.total_sales) {
-      alert('❌ Error: No hay ventas');
       toast.error('Ingresa las ventas');
       return;
     }
     
     if (!storeId) {
-      alert('❌ Error: No hay storeId');
       toast.error('No se ha seleccionado tienda');
       return;
     }
     
-    alert('✅ Ejecutando mutation...');
     createMutation.mutate(formData);
   };
 
