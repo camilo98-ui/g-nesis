@@ -206,28 +206,40 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
         )}
       </AnimatePresence>
 
-      <Card className="bg-white/80 backdrop-blur-lg border-pink-100 shadow-xl">
-        <CardHeader className="pb-4">
-          <CardTitle className="flex items-center gap-3 text-gray-800">
-            <div className="p-2 bg-gradient-to-br from-pink-500 to-rose-500 rounded-xl text-white">
-              <Receipt className="w-5 h-5" />
-            </div>
-            Registrar Turno
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-gradient-to-br from-violet-50 via-fuchsia-50 to-pink-50 rounded-3xl shadow-2xl border-2 border-violet-200/50 overflow-hidden"
+      >
+        <div className="bg-gradient-to-r from-violet-500 via-fuchsia-500 to-pink-500 p-4 text-center relative overflow-hidden">
+          <motion.div
+            className="absolute inset-0 bg-white/20"
+            animate={{ x: ['100%', '-200%'] }}
+            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+          />
+          <div className="relative z-10 flex items-center justify-center gap-3">
+            <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 1, repeat: Infinity }}>
+              👤
+            </motion.div>
+            <h3 className="text-xl font-black text-white">Turno de Cajero</h3>
+            <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 1, repeat: Infinity, delay: 0.5 }}>
+              ⏰
+            </motion.div>
+          </div>
+        </div>
+        <div className="p-6">
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-gray-600 flex items-center gap-2">
-                  <User className="w-4 h-4 text-pink-500" />
-                  Cajero
+              <motion.div whileHover={{ scale: 1.02 }} className="bg-white rounded-2xl p-4 shadow-lg border-2 border-violet-200">
+                <Label className="text-violet-700 flex items-center gap-2 mb-2 font-bold">
+                  <User className="w-5 h-5" />
+                  👤 Cajero
                 </Label>
                 <Select 
                   value={formData.cashier_id} 
                   onValueChange={(val) => setFormData({...formData, cashier_id: val})}
                 >
-                  <SelectTrigger className="border-pink-200">
+                  <SelectTrigger className="border-2 border-violet-300 text-lg font-semibold">
                     <SelectValue placeholder="Selecciona cajero" />
                   </SelectTrigger>
                   <SelectContent>
@@ -236,122 +248,139 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
+              </motion.div>
 
-              <div className="space-y-2">
-                <Label className="text-gray-600">Fecha</Label>
+              <motion.div whileHover={{ scale: 1.02 }} className="bg-white rounded-2xl p-4 shadow-lg border-2 border-fuchsia-200">
+                <Label className="text-fuchsia-700 flex items-center gap-2 mb-2 font-bold">
+                  📅 Fecha
+                </Label>
                 <Input 
                   type="date" 
                   value={formData.date}
                   onChange={(e) => setFormData({...formData, date: e.target.value})}
-                  className="border-pink-200"
+                  className="border-2 border-fuchsia-300 text-lg font-semibold"
                 />
-              </div>
+              </motion.div>
 
-              <div className="space-y-2 md:col-span-2">
-                <Label className="text-gray-600">Turno</Label>
-                <div className="grid grid-cols-3 gap-2">
+              <div className="md:col-span-2 bg-white rounded-2xl p-4 shadow-lg border-2 border-pink-200">
+                <Label className="text-pink-700 font-bold mb-3 block">⏰ Turno</Label>
+                <div className="grid grid-cols-3 gap-3">
                   {SHIFTS.map(shift => {
                     const Icon = shift.icon;
                     const isSelected = formData.shift === shift.value;
                     return (
-                      <button
+                      <motion.button
                         key={shift.value}
                         type="button"
                         onClick={() => setFormData({...formData, shift: shift.value})}
-                        className={`p-3 rounded-xl border-2 transition-all flex items-center justify-center gap-2 ${
-                          isSelected ? 'border-pink-500 bg-pink-50 text-pink-600' : 'border-gray-200 hover:border-pink-300'
+                        whileHover={{ scale: 1.05, rotate: 2 }}
+                        whileTap={{ scale: 0.95 }}
+                        className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${
+                          isSelected 
+                            ? 'border-pink-500 bg-gradient-to-br from-pink-100 to-rose-100 shadow-lg' 
+                            : 'border-gray-200 hover:border-pink-300 bg-white'
                         }`}
                       >
-                        <Icon className={`w-5 h-5 ${isSelected ? shift.color : ''}`} />
-                        <span className="font-medium">{shift.label}</span>
-                      </button>
+                        <Icon className={`w-6 h-6 ${isSelected ? shift.color : 'text-gray-400'}`} />
+                        <span className={`font-bold ${isSelected ? 'text-pink-600' : 'text-gray-600'}`}>
+                          {shift.label}
+                        </span>
+                      </motion.button>
                     );
                   })}
                 </div>
               </div>
             </div>
 
-            <div className="h-px bg-gradient-to-r from-transparent via-pink-200 to-transparent" />
+            <div className="h-1 bg-gradient-to-r from-violet-200 via-fuchsia-200 to-pink-200 rounded-full" />
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="space-y-2">
-                <Label className="text-gray-600 flex items-center gap-2">
-                  <DollarSign className="w-4 h-4 text-green-500" />
-                  Ventas
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <motion.div whileHover={{ scale: 1.05 }} className="bg-gradient-to-br from-emerald-100 to-green-200 rounded-2xl p-3 shadow-lg border-2 border-emerald-300">
+                <Label className="flex items-center gap-1 mb-2 font-black text-emerald-700 text-xs">
+                  <DollarSign className="w-4 h-4" />
+                  💰
                 </Label>
                 <Input 
                   type="number"
                   placeholder="0"
                   value={formData.sales}
                   onChange={(e) => setFormData({...formData, sales: e.target.value})}
-                  className="border-pink-200"
+                  className="border-2 border-emerald-400 font-bold bg-white"
                 />
-              </div>
+              </motion.div>
 
-              <div className="space-y-2">
-                <Label className="text-gray-600 flex items-center gap-2">
-                  <Receipt className="w-4 h-4 text-blue-500" />
-                  Tickets
+              <motion.div whileHover={{ scale: 1.05 }} className="bg-gradient-to-br from-sky-100 to-blue-200 rounded-2xl p-3 shadow-lg border-2 border-sky-300">
+                <Label className="flex items-center gap-1 mb-2 font-black text-sky-700 text-xs">
+                  <Receipt className="w-4 h-4" />
+                  🎫
                 </Label>
                 <Input 
                   type="number"
                   placeholder="0"
                   value={formData.tickets}
                   onChange={(e) => setFormData({...formData, tickets: e.target.value})}
-                  className="border-pink-200"
+                  className="border-2 border-sky-400 font-bold bg-white"
                 />
-              </div>
+              </motion.div>
 
-              <div className="space-y-2">
-                <Label className="text-gray-600 flex items-center gap-2">
-                  <Zap className="w-4 h-4 text-purple-500" />
-                  Transacciones
+              <motion.div whileHover={{ scale: 1.05 }} className="bg-gradient-to-br from-violet-100 to-purple-200 rounded-2xl p-3 shadow-lg border-2 border-violet-300">
+                <Label className="flex items-center gap-1 mb-2 font-black text-violet-700 text-xs">
+                  <Zap className="w-4 h-4" />
+                  ⚡
                 </Label>
                 <Input 
                   type="number"
                   placeholder="0"
                   value={formData.transactions}
                   onChange={(e) => setFormData({...formData, transactions: e.target.value})}
-                  className="border-pink-200"
+                  className="border-2 border-violet-400 font-bold bg-white"
                 />
-              </div>
+              </motion.div>
 
-              <div className="space-y-2">
-                <Label className="text-gray-600 flex items-center gap-2">
-                  <Gift className="w-4 h-4 text-pink-500" />
-                  Sugeridos
+              <motion.div whileHover={{ scale: 1.05 }} className="bg-gradient-to-br from-pink-100 to-rose-200 rounded-2xl p-3 shadow-lg border-2 border-pink-300">
+                <Label className="flex items-center gap-1 mb-2 font-black text-pink-700 text-xs">
+                  <Gift className="w-4 h-4" />
+                  🎁
                 </Label>
                 <Input 
                   type="number"
                   placeholder="0"
                   value={formData.suggested_sales}
                   onChange={(e) => setFormData({...formData, suggested_sales: e.target.value})}
-                  className="border-pink-200"
+                  className="border-2 border-pink-400 font-bold bg-white"
                 />
-              </div>
+              </motion.div>
             </div>
 
-            <Button 
-              type="submit" 
-              disabled={createMutation.isPending}
-              className="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white shadow-lg"
-            >
-              {createMutation.isPending ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                  Guardando...
-                </>
-              ) : (
-                <>
-                  <Save className="w-5 h-5 mr-2" />
-                  Guardar
-                </>
-              )}
-            </Button>
+            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+              <Button 
+                type="submit" 
+                disabled={createMutation.isPending}
+                className="w-full bg-gradient-to-r from-violet-500 via-fuchsia-500 to-pink-500 hover:from-violet-600 hover:via-fuchsia-600 hover:to-pink-600 text-white shadow-2xl py-6 text-lg font-black rounded-2xl relative overflow-hidden"
+              >
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                  animate={{ x: ['100%', '-200%'] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                />
+                {createMutation.isPending ? (
+                  <span className="relative z-10 flex items-center justify-center gap-2">
+                    <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}>
+                      <Loader2 className="w-5 h-5" />
+                    </motion.div>
+                    Guardando...
+                  </span>
+                ) : (
+                  <span className="relative z-10 flex items-center justify-center gap-2">
+                    <Save className="w-5 h-5" />
+                    ¡Guardar Turno!
+                  </span>
+                )}
+              </Button>
+            </motion.div>
           </form>
-        </CardContent>
-      </Card>
+          </div>
+          </motion.div>
     </>
   );
 }

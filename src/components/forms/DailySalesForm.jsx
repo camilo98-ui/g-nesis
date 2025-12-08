@@ -6,8 +6,39 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Save, DollarSign, Receipt, Zap, Gift, Loader2, Calendar, TrendingUp, CheckCircle } from 'lucide-react';
+import { Save, DollarSign, Receipt, Zap, Gift, Loader2, Calendar, TrendingUp, CheckCircle, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
+
+// Explosión de confetti de colores Popsy
+const PopsyConfetti = () => (
+  <div className="fixed inset-0 pointer-events-none z-[9999]">
+    {[...Array(30)].map((_, i) => (
+      <motion.div
+        key={i}
+        className="absolute w-3 h-3 rounded-full"
+        style={{
+          left: `${50 + (Math.random() - 0.5) * 20}%`,
+          top: '50%',
+          background: ['#ec4899', '#f472b6', '#fbbf24', '#a855f7', '#f59e0b', '#fb923c'][i % 6],
+          boxShadow: '0 0 10px currentColor'
+        }}
+        initial={{ scale: 0, opacity: 1, x: 0, y: 0 }}
+        animate={{
+          scale: [0, 1.5, 0],
+          opacity: [1, 1, 0],
+          x: (Math.random() - 0.5) * 600,
+          y: (Math.random() - 0.5) * 600,
+          rotate: Math.random() * 720
+        }}
+        transition={{
+          duration: 1.5,
+          ease: "easeOut",
+          delay: i * 0.02
+        }}
+      />
+    ))}
+  </div>
+);
 
 export default function DailySalesForm({ storeId, onSuccess }) {
   const queryClient = useQueryClient();
@@ -113,173 +144,255 @@ export default function DailySalesForm({ storeId, onSuccess }) {
     <>
       <AnimatePresence mode="wait">
         {showSuccess && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.5 }}
-            className="fixed inset-0 flex items-center justify-center bg-white/95 backdrop-blur-sm z-[9999]"
-          >
-            <div className="text-center">
-              <motion.svg viewBox="0 0 80 120" className="w-24 h-32">
-                {/* Bola de helado de chocolate */}
-                <motion.circle 
-                  cx="40" cy="28" r="22" 
-                  fill="url(#chocolateIce)"
-                  initial={{ scale: 0 }}
-                  animate={{ scale: [0, 1.2, 1] }}
-                  transition={{ duration: 0.6 }}
-                />
-                {/* Textura chocolate - puntos más oscuros */}
-                <motion.circle cx="33" cy="22" r="3" fill="#3d2817" opacity="0.4"
-                  initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.4 }} />
-                <motion.circle cx="45" cy="26" r="2.5" fill="#3d2817" opacity="0.4"
-                  initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.45 }} />
-                <motion.circle cx="38" cy="32" r="2" fill="#3d2817" opacity="0.4"
-                  initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.5 }} />
-                <motion.circle cx="47" cy="35" r="2.5" fill="#3d2817" opacity="0.4"
-                  initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.55 }} />
-                {/* Brillo sutil */}
-                <motion.ellipse cx="35" cy="20" rx="8" ry="5" fill="white" opacity="0.15"
-                  initial={{ opacity: 0 }} animate={{ opacity: 0.15 }} transition={{ delay: 0.6 }} />
-                {/* Cono */}
-                <motion.polygon 
-                  points="20,45 40,110 60,45" 
-                  fill="url(#coneChoco)"
-                  initial={{ scaleY: 0 }}
-                  animate={{ scaleY: 1 }}
-                  transition={{ delay: 0.2, duration: 0.4 }}
-                  style={{ transformOrigin: 'center top' }}
-                />
-                {/* Patrón del cono */}
-                <motion.line x1="25" y1="55" x2="55" y2="55" stroke="#d97706" strokeWidth="1.5" opacity="0.3"
-                  initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 0.7 }} />
-                <motion.line x1="27" y1="70" x2="53" y2="70" stroke="#d97706" strokeWidth="1.5" opacity="0.3"
-                  initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 0.75 }} />
-                <motion.line x1="30" y1="85" x2="50" y2="85" stroke="#d97706" strokeWidth="1.5" opacity="0.3"
-                  initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 0.8 }} />
-                <defs>
-                  <linearGradient id="chocolateIce">
-                    <stop offset="0%" stopColor="#6b4423" />
-                    <stop offset="50%" stopColor="#8b5a3c" />
-                    <stop offset="100%" stopColor="#5d3a1a" />
-                  </linearGradient>
-                  <linearGradient id="coneChoco">
-                    <stop offset="0%" stopColor="#fbbf24" />
-                    <stop offset="100%" stopColor="#d97706" />
-                  </linearGradient>
-                </defs>
-              </motion.svg>
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
-                <CheckCircle className="w-6 h-6 text-amber-600 mx-auto mt-2" />
-                <span className="text-lg font-bold text-gray-800 block mt-1">¡Guardado!</span>
-              </motion.div>
-            </div>
-          </motion.div>
+          <>
+            <PopsyConfetti />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.5 }}
+              className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-pink-500/20 via-purple-500/20 to-amber-500/20 backdrop-blur-sm z-[9998]"
+            >
+              <div className="text-center">
+                <motion.div
+                  animate={{ 
+                    rotate: [0, -15, 15, -10, 10, -5, 5, 0],
+                    y: [0, -30, -20, -25, -15, -10, -5, 0],
+                    scale: [1, 1.2, 1.1, 1.15, 1.05, 1.1, 1, 1]
+                  }}
+                  transition={{ duration: 1.2, ease: "easeInOut" }}
+                >
+                  <motion.svg viewBox="0 0 80 120" className="w-32 h-40 drop-shadow-2xl">
+                    {/* Cono animado */}
+                    <motion.polygon 
+                      points="20,45 40,110 60,45" 
+                      fill="url(#popsyCone)"
+                      initial={{ scaleY: 0 }}
+                      animate={{ scaleY: 1 }}
+                      transition={{ duration: 0.3 }}
+                      style={{ transformOrigin: 'center top' }}
+                    />
+                    {/* Patrón del cono */}
+                    <motion.path d="M 25 55 L 55 55 M 27 65 L 53 65 M 29 75 L 51 75 M 31 85 L 49 85 M 33 95 L 47 95" 
+                      stroke="#d97706" strokeWidth="1.5" opacity="0.3"
+                      initial={{ pathLength: 0 }} 
+                      animate={{ pathLength: 1 }} 
+                      transition={{ delay: 0.3, duration: 0.5 }}
+                    />
+
+                    {/* Helado rosa vibrante */}
+                    <motion.circle 
+                      cx="40" cy="28" r="24" 
+                      fill="url(#popsyIce)"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: [0, 1.3, 1] }}
+                      transition={{ delay: 0.2, duration: 0.6, type: "spring" }}
+                    />
+
+                    {/* Chispitas de colores */}
+                    {[...Array(12)].map((_, i) => (
+                      <motion.circle
+                        key={i}
+                        cx={30 + Math.cos(i * 30 * Math.PI / 180) * 15}
+                        cy={25 + Math.sin(i * 30 * Math.PI / 180) * 15}
+                        r="2"
+                        fill={['#fbbf24', '#ec4899', '#a855f7', '#f472b6'][i % 4]}
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: [0, 1.5, 1], opacity: [0, 1, 1] }}
+                        transition={{ delay: 0.5 + i * 0.03, duration: 0.3 }}
+                      />
+                    ))}
+
+                    {/* Brillo mágico */}
+                    <motion.ellipse 
+                      cx="32" cy="20" rx="10" ry="6" 
+                      fill="white" opacity="0.6"
+                      animate={{ opacity: [0.3, 0.7, 0.3] }}
+                      transition={{ duration: 1, repeat: Infinity }}
+                    />
+
+                    <defs>
+                      <linearGradient id="popsyIce" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#ec4899" />
+                        <stop offset="50%" stopColor="#f472b6" />
+                        <stop offset="100%" stopColor="#fb7185" />
+                      </linearGradient>
+                      <linearGradient id="popsyCone" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#fbbf24" />
+                        <stop offset="100%" stopColor="#f59e0b" />
+                      </linearGradient>
+                    </defs>
+                  </motion.svg>
+                </motion.div>
+
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }} 
+                  animate={{ opacity: 1, y: 0 }} 
+                  transition={{ delay: 0.5 }}
+                  className="mt-4"
+                >
+                  <motion.div
+                    animate={{ scale: [1, 1.1, 1] }}
+                    transition={{ duration: 0.5, delay: 0.7 }}
+                    className="inline-flex items-center gap-2 bg-gradient-to-r from-pink-500 to-purple-500 text-white px-6 py-3 rounded-full shadow-2xl"
+                  >
+                    <Sparkles className="w-5 h-5" />
+                    <span className="text-xl font-black">¡Súper guardado!</span>
+                    <Sparkles className="w-5 h-5" />
+                  </motion.div>
+                </motion.div>
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
 
-      <Card className="bg-white/80 backdrop-blur-lg border-orange-100 shadow-xl">
-        <CardHeader className="pb-4">
-          <CardTitle className="flex items-center gap-3 text-gray-800">
-            <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl text-white">
-              <TrendingUp className="w-5 h-5" />
-            </div>
-            Registrar Ventas del Día
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="space-y-2">
-              <Label className="text-gray-600 flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-orange-500" />
-                Fecha
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-gradient-to-br from-pink-50 via-purple-50 to-amber-50 rounded-3xl shadow-2xl border-2 border-pink-200/50 overflow-hidden"
+      >
+        <div className="bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 p-4 text-center relative overflow-hidden">
+          <motion.div
+            className="absolute inset-0 bg-white/20"
+            animate={{ x: ['-100%', '200%'] }}
+            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+          />
+          <div className="relative z-10 flex items-center justify-center gap-3">
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+            >
+              <Sparkles className="w-6 h-6 text-white" />
+            </motion.div>
+            <h3 className="text-xl font-black text-white">Ventas del Día</h3>
+            <motion.div
+              animate={{ rotate: -360 }}
+              transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+            >
+              <Sparkles className="w-6 h-6 text-white" />
+            </motion.div>
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            className="bg-white rounded-2xl p-4 shadow-lg border-2 border-amber-200"
+          >
+            <Label className="text-gray-600 flex items-center gap-2 mb-2 font-bold">
+              <Calendar className="w-5 h-5 text-amber-500" />
+              📅 Fecha
+            </Label>
+            <Input 
+              type="date" 
+              value={formData.date}
+              onChange={(e) => setFormData({...formData, date: e.target.value})}
+              className="border-2 border-amber-300 focus:border-amber-500 text-lg font-semibold"
+            />
+          </motion.div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <motion.div
+              whileHover={{ scale: 1.05, rotate: 2 }}
+              className="bg-gradient-to-br from-emerald-100 to-green-200 rounded-2xl p-4 shadow-lg border-2 border-emerald-300"
+            >
+              <Label className="flex items-center gap-2 mb-2 font-black text-emerald-700">
+                <DollarSign className="w-5 h-5" />
+                💰 Ventas
               </Label>
               <Input 
-                type="date" 
-                value={formData.date}
-                onChange={(e) => setFormData({...formData, date: e.target.value})}
-                className="border-orange-200"
+                type="number"
+                placeholder="0"
+                value={formData.total_sales}
+                onChange={(e) => setFormData({...formData, total_sales: e.target.value})}
+                className="border-2 border-emerald-400 focus:border-emerald-600 text-lg font-bold bg-white"
               />
-            </div>
+            </motion.div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-gray-600 flex items-center gap-2">
-                  <DollarSign className="w-4 h-4 text-green-500" />
-                  Ventas totales
-                </Label>
-                <Input 
-                  type="number"
-                  placeholder="0"
-                  value={formData.total_sales}
-                  onChange={(e) => setFormData({...formData, total_sales: e.target.value})}
-                  className="border-orange-200"
-                />
-              </div>
+            <motion.div
+              whileHover={{ scale: 1.05, rotate: -2 }}
+              className="bg-gradient-to-br from-sky-100 to-blue-200 rounded-2xl p-4 shadow-lg border-2 border-sky-300"
+            >
+              <Label className="flex items-center gap-2 mb-2 font-black text-sky-700">
+                <Receipt className="w-5 h-5" />
+                🎫 Tickets
+              </Label>
+              <Input 
+                type="number"
+                placeholder="0"
+                value={formData.total_tickets}
+                onChange={(e) => setFormData({...formData, total_tickets: e.target.value})}
+                className="border-2 border-sky-400 focus:border-sky-600 text-lg font-bold bg-white"
+              />
+            </motion.div>
 
-              <div className="space-y-2">
-                <Label className="text-gray-600 flex items-center gap-2">
-                  <Receipt className="w-4 h-4 text-blue-500" />
-                  Tickets
-                </Label>
-                <Input 
-                  type="number"
-                  placeholder="0"
-                  value={formData.total_tickets}
-                  onChange={(e) => setFormData({...formData, total_tickets: e.target.value})}
-                  className="border-orange-200"
-                />
-              </div>
+            <motion.div
+              whileHover={{ scale: 1.05, rotate: 2 }}
+              className="bg-gradient-to-br from-violet-100 to-purple-200 rounded-2xl p-4 shadow-lg border-2 border-violet-300"
+            >
+              <Label className="flex items-center gap-2 mb-2 font-black text-violet-700">
+                <Zap className="w-5 h-5" />
+                ⚡ Transacciones
+              </Label>
+              <Input 
+                type="number"
+                placeholder="0"
+                value={formData.total_transactions}
+                onChange={(e) => setFormData({...formData, total_transactions: e.target.value})}
+                className="border-2 border-violet-400 focus:border-violet-600 text-lg font-bold bg-white"
+              />
+            </motion.div>
 
-              <div className="space-y-2">
-                <Label className="text-gray-600 flex items-center gap-2">
-                  <Zap className="w-4 h-4 text-purple-500" />
-                  Transacciones
-                </Label>
-                <Input 
-                  type="number"
-                  placeholder="0"
-                  value={formData.total_transactions}
-                  onChange={(e) => setFormData({...formData, total_transactions: e.target.value})}
-                  className="border-orange-200"
-                />
-              </div>
+            <motion.div
+              whileHover={{ scale: 1.05, rotate: -2 }}
+              className="bg-gradient-to-br from-pink-100 to-rose-200 rounded-2xl p-4 shadow-lg border-2 border-pink-300"
+            >
+              <Label className="flex items-center gap-2 mb-2 font-black text-pink-700">
+                <Gift className="w-5 h-5" />
+                🎁 Sugeridos
+              </Label>
+              <Input 
+                type="number"
+                placeholder="0"
+                value={formData.total_suggested}
+                onChange={(e) => setFormData({...formData, total_suggested: e.target.value})}
+                className="border-2 border-pink-400 focus:border-pink-600 text-lg font-bold bg-white"
+              />
+            </motion.div>
+          </div>
 
-              <div className="space-y-2">
-                <Label className="text-gray-600 flex items-center gap-2">
-                  <Gift className="w-4 h-4 text-pink-500" />
-                  Sugeridos
-                </Label>
-                <Input 
-                  type="number"
-                  placeholder="0"
-                  value={formData.total_suggested}
-                  onChange={(e) => setFormData({...formData, total_suggested: e.target.value})}
-                  className="border-orange-200"
-                />
-              </div>
-            </div>
-
+          <motion.div
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.98 }}
+          >
             <Button 
               type="submit" 
               disabled={createMutation.isPending}
-              className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg"
+              className="w-full bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 hover:from-pink-600 hover:via-purple-600 hover:to-pink-600 text-white shadow-2xl py-7 text-lg font-black rounded-2xl relative overflow-hidden"
             >
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                animate={{ x: ['-100%', '200%'] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+              />
               {createMutation.isPending ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                  <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}>
+                    <Loader2 className="w-6 h-6" />
+                  </motion.div>
                   Guardando...
-                </>
+                </span>
               ) : (
-                <>
-                  <Save className="w-5 h-5 mr-2" />
-                  Guardar
-                </>
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                  <Save className="w-6 h-6" />
+                  ¡Guardar Ventas!
+                  <Sparkles className="w-5 h-5" />
+                </span>
               )}
             </Button>
-          </form>
-        </CardContent>
-      </Card>
+          </motion.div>
+        </form>
+      </motion.div>
     </>
   );
 }
