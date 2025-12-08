@@ -17,17 +17,20 @@ const SHIFTS = [
 ];
 
 export default function ShiftRecordForm({ storeId, onSuccess }) {
-  const queryClient = useQueryClient();
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [formData, setFormData] = useState({
-    cashier_id: '',
-    date: new Date().toISOString().split('T')[0],
-    shift: 'morning',
-    sales: '',
-    tickets: '',
-    transactions: '',
-    suggested_sales: ''
-  });
+    const queryClient = useQueryClient();
+    const [showSuccess, setShowSuccess] = useState(false);
+    const [formData, setFormData] = useState({
+      cashier_id: '',
+      date: new Date().toISOString().split('T')[0],
+      shift: 'morning',
+      sales: '',
+      tickets: '',
+      transactions: '',
+      suggested_sales: ''
+    });
+
+    // Debug: verificar props
+    console.log('🔍 ShiftRecordForm montado con storeId:', storeId);
 
   const { data: cashiers = [] } = useQuery({
     queryKey: ['cashiers', storeId],
@@ -370,6 +373,10 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
             <Button 
               type="submit" 
               disabled={createMutation.isPending}
+              onClick={(e) => {
+                console.log('🖱️ Click en botón Guardar Turno');
+                console.log('📋 Datos del formulario:', formData);
+              }}
               className="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white shadow-lg"
             >
               {createMutation.isPending ? (

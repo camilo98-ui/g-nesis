@@ -20,6 +20,9 @@ export default function DailySalesForm({ storeId, onSuccess }) {
     total_suggested: ''
   });
 
+  // Debug: verificar props
+  console.log('🔍 DailySalesForm montado con storeId:', storeId);
+
   const createMutation = useMutation({
     mutationFn: async (data) => {
       try {
@@ -268,6 +271,10 @@ export default function DailySalesForm({ storeId, onSuccess }) {
             <Button 
               type="submit" 
               disabled={createMutation.isPending}
+              onClick={(e) => {
+                console.log('🖱️ Click en botón Guardar');
+                console.log('📋 Datos del formulario:', formData);
+              }}
               className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg"
             >
               {createMutation.isPending ? (
