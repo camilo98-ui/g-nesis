@@ -121,34 +121,56 @@ export default function DailySalesForm({ storeId, onSuccess }) {
           >
             <div className="text-center">
               <motion.svg viewBox="0 0 80 120" className="w-24 h-32">
+                {/* Bola de helado de chocolate */}
                 <motion.circle 
                   cx="40" cy="28" r="22" 
-                  fill="url(#greenIce)"
+                  fill="url(#chocolateIce)"
                   initial={{ scale: 0 }}
                   animate={{ scale: [0, 1.2, 1] }}
                   transition={{ duration: 0.6 }}
                 />
+                {/* Textura chocolate - puntos más oscuros */}
+                <motion.circle cx="33" cy="22" r="3" fill="#3d2817" opacity="0.4"
+                  initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.4 }} />
+                <motion.circle cx="45" cy="26" r="2.5" fill="#3d2817" opacity="0.4"
+                  initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.45 }} />
+                <motion.circle cx="38" cy="32" r="2" fill="#3d2817" opacity="0.4"
+                  initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.5 }} />
+                <motion.circle cx="47" cy="35" r="2.5" fill="#3d2817" opacity="0.4"
+                  initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.55 }} />
+                {/* Brillo sutil */}
+                <motion.ellipse cx="35" cy="20" rx="8" ry="5" fill="white" opacity="0.15"
+                  initial={{ opacity: 0 }} animate={{ opacity: 0.15 }} transition={{ delay: 0.6 }} />
+                {/* Cono */}
                 <motion.polygon 
                   points="20,45 40,110 60,45" 
-                  fill="url(#coneG)"
+                  fill="url(#coneChoco)"
                   initial={{ scaleY: 0 }}
                   animate={{ scaleY: 1 }}
                   transition={{ delay: 0.2, duration: 0.4 }}
                   style={{ transformOrigin: 'center top' }}
                 />
+                {/* Patrón del cono */}
+                <motion.line x1="25" y1="55" x2="55" y2="55" stroke="#d97706" strokeWidth="1.5" opacity="0.3"
+                  initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 0.7 }} />
+                <motion.line x1="27" y1="70" x2="53" y2="70" stroke="#d97706" strokeWidth="1.5" opacity="0.3"
+                  initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 0.75 }} />
+                <motion.line x1="30" y1="85" x2="50" y2="85" stroke="#d97706" strokeWidth="1.5" opacity="0.3"
+                  initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 0.8 }} />
                 <defs>
-                  <linearGradient id="greenIce">
-                    <stop offset="0%" stopColor="#34d399" />
-                    <stop offset="100%" stopColor="#10b981" />
+                  <linearGradient id="chocolateIce">
+                    <stop offset="0%" stopColor="#6b4423" />
+                    <stop offset="50%" stopColor="#8b5a3c" />
+                    <stop offset="100%" stopColor="#5d3a1a" />
                   </linearGradient>
-                  <linearGradient id="coneG">
+                  <linearGradient id="coneChoco">
                     <stop offset="0%" stopColor="#fbbf24" />
                     <stop offset="100%" stopColor="#d97706" />
                   </linearGradient>
                 </defs>
               </motion.svg>
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
-                <CheckCircle className="w-6 h-6 text-emerald-500 mx-auto mt-2" />
+                <CheckCircle className="w-6 h-6 text-amber-600 mx-auto mt-2" />
                 <span className="text-lg font-bold text-gray-800 block mt-1">¡Guardado!</span>
               </motion.div>
             </div>

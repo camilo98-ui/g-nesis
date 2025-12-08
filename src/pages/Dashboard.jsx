@@ -684,28 +684,15 @@ export default function Dashboard() {
               </Button>
             </Link>
             <div>
-              <div className="flex items-center gap-3">
-                <motion.h1 
-                  animate={{ 
-                    backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
-                  }}
-                  transition={{ duration: 5, repeat: Infinity }}
-                  className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-violet-600 via-pink-500 to-violet-600 bg-[length:200%_100%] bg-clip-text text-transparent"
-                >
-                  Tienda
-                </motion.h1>
-                {selectedStore && (
-                  <motion.button
-                    whileHover={{ scale: 1.1, rotate: 90 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={() => setShowStoreSales(true)}
-                    className="w-10 h-10 rounded-full bg-gradient-to-r from-emerald-500 to-green-500 text-white flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow"
-                    title="Registrar ventas del día"
-                  >
-                    <TrendingUp className="w-5 h-5" />
-                  </motion.button>
-                )}
-              </div>
+              <motion.h1 
+                animate={{ 
+                  backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+                }}
+                transition={{ duration: 5, repeat: Infinity }}
+                className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-violet-600 via-pink-500 to-violet-600 bg-[length:200%_100%] bg-clip-text text-transparent"
+              >
+                Tienda
+              </motion.h1>
               {selectedStore && (
                 <p className="text-sm text-pink-500 font-medium">{getDisplayName(selectedStore)}</p>
               )}
@@ -720,24 +707,45 @@ export default function Dashboard() {
 
         {selectedStore ? (
           <div className="space-y-6">
-            {/* Acciones rápidas - más sutil */}
-            <div className="flex justify-end gap-2">
-              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowCompraVale(true)}
-                  className="text-violet-600 border-violet-200 hover:bg-violet-50 hover:border-violet-300"
-                >
-                  <BarChart3 className="w-4 h-4 mr-1" />
-                  Comparable
-                </Button>
-              </motion.div>
-              <StoreReportGenerator 
-                storeId={selectedStore}
-                storeName={selectedStoreName}
-                storeCode={selectedStore}
-              />
+            {/* Acciones rápidas - al inicio */}
+            <div className="flex justify-between items-center gap-2">
+              <div className="flex gap-2">
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Link to={createPageUrl('Sales')}>
+                    <Button className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white shadow-lg">
+                      <Receipt className="w-4 h-4 mr-2" />
+                      Registrar venta por cajero
+                    </Button>
+                  </Link>
+                </motion.div>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button
+                    onClick={() => setShowStoreSales(true)}
+                    className="bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white shadow-lg"
+                  >
+                    <TrendingUp className="w-4 h-4 mr-2" />
+                    Registrar ventas del día
+                  </Button>
+                </motion.div>
+              </div>
+              <div className="flex gap-2">
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowCompraVale(true)}
+                    className="text-violet-600 border-violet-200 hover:bg-violet-50 hover:border-violet-300"
+                  >
+                    <BarChart3 className="w-4 h-4 mr-1" />
+                    Comparable
+                  </Button>
+                </motion.div>
+                <StoreReportGenerator 
+                  storeId={selectedStore}
+                  storeName={selectedStoreName}
+                  storeCode={selectedStore}
+                />
+              </div>
             </div>
 
 
