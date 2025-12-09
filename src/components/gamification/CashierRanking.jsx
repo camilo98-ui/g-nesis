@@ -282,9 +282,9 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
   }, [cashiers, shiftRecords, dateRange, weekFilter]);
 
   const formatCurrency = (val) => {
-    if (val >= 1000000) return `$${(val/1000000).toFixed(1)}M`;
-    if (val >= 1000) return `$${(val/1000).toFixed(0)}K`;
-    return `$${val.toFixed(0)}`;
+    if (val >= 1000000) return `$${Math.round(val/1000000)}M`;
+    if (val >= 1000) return `$${Math.round(val/1000)}K`;
+    return `$${Math.round(val)}`;
   };
 
   const getDateLabel = () => {
@@ -443,7 +443,7 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
                   {formatCurrency(cashier.totalSales)}
                 </motion.p>
                 <p className="text-[10px] text-pink-400">
-                  Ticket: {formatCurrency(cashier.avgTicket)}
+                 Ticket Prom: {formatCurrency(cashier.avgTicket)}
                 </p>
               </div>
             </motion.div>
