@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 
 export default function EmployeeOfMonthPanel({ storeId }) {
   const [selectedCashier, setSelectedCashier] = useState('');
+  const [awardType, setAwardType] = useState('tienda');
   const queryClient = useQueryClient();
   const currentMonth = new Date().getMonth() + 1;
   const currentYear = new Date().getFullYear();
@@ -45,6 +46,7 @@ export default function EmployeeOfMonthPanel({ storeId }) {
         cashier_id: cashierId,
         cashier_name: cashier.name,
         store_id: storeId,
+        award_type: awardType,
         month: currentMonth,
         year: currentYear,
         is_active: true,
@@ -84,6 +86,9 @@ export default function EmployeeOfMonthPanel({ storeId }) {
               🏆
             </motion.div>
             <p className="text-2xl font-black text-amber-600 mb-2">{currentEmployee.cashier_name}</p>
+            <p className="text-xs text-gray-500 mb-1 font-bold">
+              {currentEmployee.award_type === 'distrito' ? '🏆 Popsy Star Distrito' : '⭐ Popsy Star Tienda'}
+            </p>
             <p className="text-sm text-gray-600 mb-3">
               {currentEmployee.has_spun ? '✅ Ya giró la ruleta' : '🎰 Ruleta disponible'}
             </p>
@@ -99,6 +104,24 @@ export default function EmployeeOfMonthPanel({ storeId }) {
         ) : (
           <div className="space-y-3">
             <p className="text-sm text-gray-600">Selecciona al Popsy Star del mes:</p>
+            
+            <div className="grid grid-cols-2 gap-2 mb-3">
+              <Button
+                onClick={() => setAwardType('tienda')}
+                variant={awardType === 'tienda' ? 'default' : 'outline'}
+                className={awardType === 'tienda' ? 'bg-gradient-to-r from-pink-400 to-rose-400' : ''}
+              >
+                ⭐ Tienda
+              </Button>
+              <Button
+                onClick={() => setAwardType('distrito')}
+                variant={awardType === 'distrito' ? 'default' : 'outline'}
+                className={awardType === 'distrito' ? 'bg-gradient-to-r from-purple-400 to-indigo-400' : ''}
+              >
+                🏆 Distrito
+              </Button>
+            </div>
+
             <Select value={selectedCashier} onValueChange={setSelectedCashier}>
               <SelectTrigger className="bg-white">
                 <SelectValue placeholder="Selecciona un cajero" />

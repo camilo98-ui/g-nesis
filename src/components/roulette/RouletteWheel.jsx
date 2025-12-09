@@ -3,48 +3,66 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Gift } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 
-const PRIZES = [
-  { id: 1, name: 'Bono $50.000', value: 50000, color: '#FFB5C5', emoji: '💰' },
-  { id: 2, name: 'Bono $30.000', value: 30000, color: '#D4A5D8', emoji: '💵' },
-  { id: 3, name: 'Un día libre', value: 0, color: '#A5D8FF', emoji: '🏖️' },
-  { id: 4, name: 'Medio turno libre', value: 0, color: '#FFD9A5', emoji: '⏰' },
-  { id: 5, name: 'Combo Doble Popsy', value: 15000, color: '#C9FFD4', emoji: '🍦' },
-  { id: 6, name: 'Popsy Pack', value: 20000, color: '#FFE5CC', emoji: '🎁' },
-  { id: 7, name: 'Outfit libre', value: 0, color: '#E5CCFF', emoji: '👕' },
-  { id: 8, name: 'Tarjeta Regalo', value: 40000, color: '#FFD0E5', emoji: '💳' },
+const PRIZES_TIENDA = [
+  { id: 1, name: 'Descanso remunerado', value: 0, color: '#FFB5C5', emoji: '🏖️' },
+  { id: 2, name: 'Bono $30.000 Olímpica', value: 30000, color: '#D4A5D8', emoji: '💳' },
+  { id: 3, name: 'Malteada chocolate', value: 0, color: '#A5D8FF', emoji: '🍫' },
+  { id: 4, name: 'Entradas Cinecolombia', value: 0, color: '#FFD9A5', emoji: '🎬' },
+  { id: 5, name: 'Domingo remunerado', value: 0, color: '#C9FFD4', emoji: '☀️' },
 ];
 
-export default function RouletteWheel({ onResult, disabled }) {
+const PRIZES_DISTRITO = [
+  { id: 1, name: 'Pase Piscilago 4 personas', value: 0, color: '#FFB5C5', emoji: '🏊' },
+  { id: 2, name: 'Domingo remunerado', value: 0, color: '#D4A5D8', emoji: '☀️' },
+  { id: 3, name: 'Descanso remunerado', value: 0, color: '#A5D8FF', emoji: '🏖️' },
+  { id: 4, name: 'Entradas Cine PREMIUM', value: 0, color: '#FFD9A5', emoji: '🎥' },
+  { id: 5, name: 'Litro de helado', value: 0, color: '#C9FFD4', emoji: '🍦' },
+  { id: 6, name: 'Descanso + Malteada', value: 0, color: '#FFE5CC', emoji: '🍹' },
+  { id: 7, name: 'Bono $80.000 Olímpica', value: 80000, color: '#FFD0E5', emoji: '💰' },
+];
+
+export default function RouletteWheel({ onResult, disabled, awardType = 'tienda' }) {
   const [spinning, setSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [winner, setWinner] = useState(null);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [suspensePhase, setSuspensePhase] = useState(0);
+
+  const PRIZES = awardType === 'distrito' ? PRIZES_DISTRITO : PRIZES_TIENDA;
 
   const handleSpin = () => {
     if (spinning || disabled) return;
     
     setSpinning(true);
     setWinner(null);
+    setSuspensePhase(0);
     
     // Seleccionar premio aleatorio
     const randomPrize = PRIZES[Math.floor(Math.random() * PRIZES.length)];
     const prizeIndex = PRIZES.findIndex(p => p.id === randomPrize.id);
     
-    // Calcular rotación final
+    // Calcular rotación final con suspenso extra
     const degreesPerSegment = 360 / PRIZES.length;
-    const targetRotation = 360 * 5 + (prizeIndex * degreesPerSegment) + (degreesPerSegment / 2);
+    const targetRotation = 360 * 8 + (prizeIndex * degreesPerSegment) + (degreesPerSegment / 2);
     
     setRotation(targetRotation);
     
-    // Después de 4 segundos, mostrar resultado
+    // Fase de suspenso 1
+    setTimeout(() => setSuspensePhase(1), 3000);
+    
+    // Fase de suspenso 2 (casi detiene)
+    setTimeout(() => setSuspensePhase(2), 5500);
+    
+    // Resultado final con rebote
     setTimeout(() => {
+      setSuspensePhase(3);
       setSpinning(false);
       setWinner(randomPrize);
       setShowConfetti(true);
       onResult(randomPrize);
       
-      setTimeout(() => setShowConfetti(false), 3000);
-    }, 4000);
+      setTimeout(() => setShowConfetti(false), 4000);
+    }, 6500);
   };
 
   return (
@@ -97,7 +115,15 @@ export default function RouletteWheel({ onResult, disabled }) {
           className="w-full h-full rounded-full relative shadow-2xl overflow-hidden border-8 border-white"
           style={{ 
             transform: `rotate(${rotation}deg)`,
-            transition: spinning ? 'transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99)' : 'none'
+            transition: spinning 
+              ? suspensePhase === 0 
+                ? 'transform 3s cubic-bezier(0.25, 0.46, 0.45, 0.94)' // Rápido inicial
+                : suspensePhase === 1 
+                  ? 'transform 2.5s cubic-bezier(0.4, 0.0, 0.6, 1)' // Desaceleración
+                  : suspensePhase === 2
+                    ? 'transform 1s cubic-bezier(0.5, 0.0, 0.75, 0.0)' // Casi detiene
+                    : 'transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55)' // Rebote final
+              : 'none'
           }}
         >
           {/* Segmentos */}

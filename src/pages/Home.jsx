@@ -16,7 +16,7 @@ import { useQuery } from '@tanstack/react-query';
 import { 
   LayoutDashboard, Users, TrendingUp, 
   Award, Target, Bell, Phone, Download, ClipboardCheck, FileText,
-  Lock, Eye, EyeOff, Receipt, Trophy
+  Lock, Eye, EyeOff, Receipt
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 
@@ -83,16 +83,6 @@ const MENU_ITEMS = [
     iconBg: 'bg-rose-200/60',
     iconColor: 'text-rose-500',
     textColor: 'text-rose-700'
-  },
-  { 
-    name: 'Ruleta Popsy', 
-    page: 'RoulettePopsy',
-    icon: Trophy, 
-    description: 'Premios',
-    bgColor: 'bg-gradient-to-br from-amber-100/90 to-yellow-100/80',
-    iconBg: 'bg-amber-200/60',
-    iconColor: 'text-amber-500',
-    textColor: 'text-amber-700'
   },
 ];
 

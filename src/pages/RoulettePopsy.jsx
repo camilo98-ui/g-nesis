@@ -187,6 +187,21 @@ export default function RoulettePopsy() {
           )}
         </motion.div>
 
+        {/* Tipo de premio */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-center mb-4"
+        >
+          <div className={`inline-block px-6 py-2 rounded-full font-bold text-white ${
+            activeEmployee.award_type === 'distrito' 
+              ? 'bg-gradient-to-r from-purple-500 to-indigo-500' 
+              : 'bg-gradient-to-r from-pink-500 to-rose-500'
+          }`}>
+            {activeEmployee.award_type === 'distrito' ? '🏆 Popsy Star Distrito' : '⭐ Popsy Star Tienda'}
+          </div>
+        </motion.div>
+
         {/* Ruleta */}
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
@@ -196,6 +211,7 @@ export default function RoulettePopsy() {
           <RouletteWheel 
             onResult={handleRouletteResult}
             disabled={activeEmployee.has_spun}
+            awardType={activeEmployee.award_type}
           />
         </motion.div>
 
