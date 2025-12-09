@@ -206,208 +206,228 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
       </AnimatePresence>
 
       <motion.div
-        initial={{ opacity: 0, y: 30 }}
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="bg-white/80 backdrop-blur-md rounded-3xl shadow-xl overflow-hidden border border-pink-100/50"
+        transition={{ duration: 0.4 }}
+        className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100"
       >
-        <div className="p-6 sm:p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Cajero y Fecha */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <motion.div 
-                whileHover={{ scale: 1.02, y: -2 }}
-                transition={{ type: "spring", stiffness: 300 }}
-                className="bg-gradient-to-br from-violet-100/60 via-purple-50/40 to-violet-50/30 rounded-3xl p-6 shadow-md border border-violet-200/40"
-              >
-                <Label className="text-violet-700 flex items-center gap-2.5 mb-3 font-bold text-base">
-                  <div className="w-10 h-10 bg-violet-200/60 rounded-2xl flex items-center justify-center">
-                    <User className="w-5 h-5 text-violet-600" />
-                  </div>
-                  Cajero
-                </Label>
-                <Select 
-                  value={formData.cashier_id} 
-                  onValueChange={(val) => setFormData({...formData, cashier_id: val})}
-                >
-                  <SelectTrigger className="border-violet-300/50 focus:border-violet-500 text-base font-semibold bg-white/80 h-12 rounded-2xl shadow-sm">
-                    <SelectValue placeholder="Selecciona cajero" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {cashiers.map(c => (
-                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </motion.div>
-
-              <motion.div 
-                whileHover={{ scale: 1.02, y: -2 }}
-                transition={{ type: "spring", stiffness: 300 }}
-                className="bg-gradient-to-br from-amber-100/60 via-yellow-50/40 to-amber-50/30 rounded-3xl p-6 shadow-md border border-amber-200/40"
-              >
-                <Label className="text-amber-700 flex items-center gap-2.5 mb-3 font-bold text-base">
-                  <div className="w-10 h-10 bg-amber-200/60 rounded-2xl flex items-center justify-center">
-                    <Calendar className="w-5 h-5 text-amber-600" />
-                  </div>
-                  Fecha
-                </Label>
-                <Input 
-                  type="date" 
-                  value={formData.date}
-                  onChange={(e) => setFormData({...formData, date: e.target.value})}
-                  className="border-amber-300/50 focus:border-amber-500 text-base font-semibold bg-white/80 h-12 rounded-2xl shadow-sm"
-                />
-              </motion.div>
-            </div>
-
-            {/* Selector de Turno */}
-            <div className="bg-gradient-to-br from-purple-100/50 via-pink-50/30 to-purple-50/40 rounded-3xl p-6 shadow-md border border-purple-200/40">
-              <Label className="text-purple-700 font-bold text-base mb-4 block flex items-center gap-2">
-                <div className="w-10 h-10 bg-purple-200/60 rounded-2xl flex items-center justify-center">
-                  <Sun className="w-5 h-5 text-purple-600" />
-                </div>
-                Turno
-              </Label>
-              <div className="grid grid-cols-3 gap-4">
-                {SHIFTS.map(shift => {
-                  const Icon = shift.icon;
-                  const isSelected = formData.shift === shift.value;
-                  return (
-                    <motion.button
-                      key={shift.value}
-                      type="button"
-                      onClick={() => setFormData({...formData, shift: shift.value})}
-                      whileHover={{ scale: 1.05, y: -3 }}
-                      whileTap={{ scale: 0.97 }}
-                      className={`p-5 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 shadow-md ${
-                        isSelected 
-                          ? 'border-purple-400 bg-white shadow-lg' 
-                          : 'border-gray-200/60 hover:border-purple-300 bg-white/60'
-                      }`}
-                    >
-                      <Icon className={`w-8 h-8 ${isSelected ? shift.color : 'text-gray-400'}`} />
-                      <span className={`text-sm font-bold ${isSelected ? 'text-purple-700' : 'text-gray-500'}`}>
-                        {shift.label}
-                      </span>
-                    </motion.button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Métricas de Venta */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <motion.div 
-                whileHover={{ scale: 1.03, y: -3 }} 
-                transition={{ type: "spring", stiffness: 300 }}
-                className="bg-gradient-to-br from-emerald-100/60 via-green-50/40 to-emerald-50/30 rounded-3xl p-6 shadow-md border border-emerald-200/40"
-              >
-                <Label className="flex items-center gap-2.5 mb-3 font-bold text-base text-emerald-700">
-                  <div className="w-10 h-10 bg-emerald-200/60 rounded-2xl flex items-center justify-center">
-                    <DollarSign className="w-5 h-5 text-emerald-600" />
-                  </div>
-                  Ventas
-                </Label>
-                <Input 
-                  type="number"
-                  placeholder="0"
-                  value={formData.sales}
-                  onChange={(e) => setFormData({...formData, sales: e.target.value})}
-                  className="border-emerald-300/50 focus:border-emerald-500 text-xl font-bold bg-white/80 h-14 rounded-2xl shadow-sm placeholder:text-gray-300"
-                />
-              </motion.div>
-
-              <motion.div 
-                whileHover={{ scale: 1.03, y: -3 }} 
-                transition={{ type: "spring", stiffness: 300 }}
-                className="bg-gradient-to-br from-sky-100/60 via-blue-50/40 to-sky-50/30 rounded-3xl p-6 shadow-md border border-sky-200/40"
-              >
-                <Label className="flex items-center gap-2.5 mb-3 font-bold text-base text-sky-700">
-                  <div className="w-10 h-10 bg-sky-200/60 rounded-2xl flex items-center justify-center">
-                    <Receipt className="w-5 h-5 text-sky-600" />
-                  </div>
-                  Tickets
-                </Label>
-                <Input 
-                  type="number"
-                  placeholder="0"
-                  value={formData.tickets}
-                  onChange={(e) => setFormData({...formData, tickets: e.target.value})}
-                  className="border-sky-300/50 focus:border-sky-500 text-xl font-bold bg-white/80 h-14 rounded-2xl shadow-sm placeholder:text-gray-300"
-                />
-              </motion.div>
-
-              <motion.div 
-                whileHover={{ scale: 1.03, y: -3 }} 
-                transition={{ type: "spring", stiffness: 300 }}
-                className="bg-gradient-to-br from-violet-100/60 via-purple-50/40 to-violet-50/30 rounded-3xl p-6 shadow-md border border-violet-200/40"
-              >
-                <Label className="flex items-center gap-2.5 mb-3 font-bold text-base text-violet-700">
-                  <div className="w-10 h-10 bg-violet-200/60 rounded-2xl flex items-center justify-center">
-                    <Zap className="w-5 h-5 text-violet-600" />
-                  </div>
-                  Transacciones
-                </Label>
-                <Input 
-                  type="number"
-                  placeholder="0"
-                  value={formData.transactions}
-                  onChange={(e) => setFormData({...formData, transactions: e.target.value})}
-                  className="border-violet-300/50 focus:border-violet-500 text-xl font-bold bg-white/80 h-14 rounded-2xl shadow-sm placeholder:text-gray-300"
-                />
-              </motion.div>
-
-              <motion.div 
-                whileHover={{ scale: 1.03, y: -3 }} 
-                transition={{ type: "spring", stiffness: 300 }}
-                className="bg-gradient-to-br from-pink-100/60 via-rose-50/40 to-pink-50/30 rounded-3xl p-6 shadow-md border border-pink-200/40"
-              >
-                <Label className="flex items-center gap-2.5 mb-3 font-bold text-base text-pink-700">
-                  <div className="w-10 h-10 bg-pink-200/60 rounded-2xl flex items-center justify-center">
-                    <Gift className="w-5 h-5 text-pink-600" />
-                  </div>
-                  Sugeridos
-                </Label>
-                <Input 
-                  type="number"
-                  placeholder="0"
-                  value={formData.suggested_sales}
-                  onChange={(e) => setFormData({...formData, suggested_sales: e.target.value})}
-                  className="border-pink-300/50 focus:border-pink-500 text-xl font-bold bg-white/80 h-14 rounded-2xl shadow-sm placeholder:text-gray-300"
-                />
-              </motion.div>
-            </div>
-
-            {/* Botón Guardar */}
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          {/* Cajero y Fecha */}
+          <div className="grid grid-cols-2 gap-5">
             <motion.div 
-              whileHover={{ scale: 1.02, y: -2 }} 
-              whileTap={{ scale: 0.98 }}
-              className="pt-2"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              whileHover={{ scale: 1.01 }}
+              className="bg-gradient-to-br from-violet-50 to-purple-50 rounded-[20px] p-5 shadow-md border border-violet-100 hover:shadow-lg transition-all"
             >
-              <Button 
-                type="submit" 
-                disabled={createMutation.isPending}
-                className="w-full bg-gradient-to-r from-pink-500 via-rose-500 to-pink-500 hover:from-pink-600 hover:via-rose-600 hover:to-pink-600 text-white shadow-xl py-7 text-lg font-bold rounded-2xl transition-all duration-300"
+              <Label className="text-violet-700 flex items-center gap-3 mb-3 text-base font-bold">
+                <div className="w-10 h-10 bg-violet-200/60 rounded-xl flex items-center justify-center">
+                  <User className="w-6 h-6 text-violet-600" />
+                </div>
+                Cajero
+              </Label>
+              <Select 
+                value={formData.cashier_id} 
+                onValueChange={(val) => setFormData({...formData, cashier_id: val})}
               >
-                {createMutation.isPending ? (
-                  <span className="flex items-center justify-center gap-3">
-                    <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}>
-                      <Loader2 className="w-6 h-6" />
-                    </motion.div>
-                    Guardando...
-                  </span>
-                ) : (
-                  <span className="flex items-center justify-center gap-3">
-                    <Save className="w-6 h-6" />
-                    Guardar Venta
-                  </span>
-                )}
-              </Button>
+                <SelectTrigger className="border-2 border-violet-200 focus:border-violet-400 bg-white rounded-xl h-12 text-base font-semibold focus:ring-2 focus:ring-violet-200 transition-all">
+                  <SelectValue placeholder="Selecciona" />
+                </SelectTrigger>
+                <SelectContent>
+                  {cashiers.map(c => (
+                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </motion.div>
-          </form>
+
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 }}
+              whileHover={{ scale: 1.01 }}
+              className="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-[20px] p-5 shadow-md border border-amber-100 hover:shadow-lg transition-all"
+            >
+              <Label className="text-amber-700 flex items-center gap-3 mb-3 text-base font-bold">
+                <div className="w-10 h-10 bg-amber-200/60 rounded-xl flex items-center justify-center">
+                  <Calendar className="w-6 h-6 text-amber-600" />
+                </div>
+                Fecha
+              </Label>
+              <Input 
+                type="date" 
+                value={formData.date}
+                onChange={(e) => setFormData({...formData, date: e.target.value})}
+                className="border-2 border-amber-200 focus:border-amber-400 bg-white rounded-xl text-base font-semibold h-12 focus:ring-2 focus:ring-amber-200 transition-all"
+              />
+            </motion.div>
           </div>
+
+          {/* Turno */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-[20px] p-5 shadow-md border border-purple-100"
+          >
+            <Label className="text-purple-700 font-bold mb-4 block text-base">Turno</Label>
+            <div className="grid grid-cols-3 gap-3">
+              {SHIFTS.map(shift => {
+                const Icon = shift.icon;
+                const isSelected = formData.shift === shift.value;
+                return (
+                  <motion.button
+                    key={shift.value}
+                    type="button"
+                    onClick={() => setFormData({...formData, shift: shift.value})}
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    whileTap={{ scale: 0.95 }}
+                    className={`p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2 shadow-sm ${
+                      isSelected 
+                        ? 'border-purple-400 bg-white shadow-md' 
+                        : 'border-gray-200 hover:border-purple-300 bg-white/50'
+                    }`}
+                  >
+                    <Icon className={`w-7 h-7 ${isSelected ? shift.color : 'text-gray-400'}`} />
+                    <span className={`text-sm font-bold ${isSelected ? 'text-purple-700' : 'text-gray-600'}`}>
+                      {shift.label}
+                    </span>
+                  </motion.button>
+                );
+              })}
+            </div>
           </motion.div>
+
+          {/* Grid de métricas */}
+          <div className="grid grid-cols-2 gap-5">
+            {/* Ventas */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25 }}
+              whileHover={{ scale: 1.02, y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-[20px] p-5 shadow-md border border-emerald-100 hover:shadow-lg transition-all"
+            >
+              <Label className="flex items-center gap-3 mb-3 text-base font-bold text-emerald-700">
+                <div className="w-10 h-10 bg-emerald-200/60 rounded-xl flex items-center justify-center">
+                  <DollarSign className="w-6 h-6 text-emerald-600" />
+                </div>
+                Ventas
+              </Label>
+              <Input 
+                type="number"
+                placeholder="0"
+                value={formData.sales}
+                onChange={(e) => setFormData({...formData, sales: e.target.value})}
+                className="border-2 border-emerald-200 focus:border-emerald-400 bg-white rounded-xl text-lg font-bold h-12 focus:ring-2 focus:ring-emerald-200 transition-all"
+              />
+            </motion.div>
+
+            {/* Tickets */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              whileHover={{ scale: 1.02, y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              className="bg-gradient-to-br from-sky-50 to-blue-50 rounded-[20px] p-5 shadow-md border border-sky-100 hover:shadow-lg transition-all"
+            >
+              <Label className="flex items-center gap-3 mb-3 text-base font-bold text-sky-700">
+                <div className="w-10 h-10 bg-sky-200/60 rounded-xl flex items-center justify-center">
+                  <Receipt className="w-6 h-6 text-sky-600" />
+                </div>
+                Tickets
+              </Label>
+              <Input 
+                type="number"
+                placeholder="0"
+                value={formData.tickets}
+                onChange={(e) => setFormData({...formData, tickets: e.target.value})}
+                className="border-2 border-sky-200 focus:border-sky-400 bg-white rounded-xl text-lg font-bold h-12 focus:ring-2 focus:ring-sky-200 transition-all"
+              />
+            </motion.div>
+
+            {/* Transacciones */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.35 }}
+              whileHover={{ scale: 1.02, y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              className="bg-gradient-to-br from-violet-50 to-purple-50 rounded-[20px] p-5 shadow-md border border-violet-100 hover:shadow-lg transition-all"
+            >
+              <Label className="flex items-center gap-3 mb-3 text-base font-bold text-violet-700">
+                <div className="w-10 h-10 bg-violet-200/60 rounded-xl flex items-center justify-center">
+                  <Zap className="w-6 h-6 text-violet-600" />
+                </div>
+                Transacciones
+              </Label>
+              <Input 
+                type="number"
+                placeholder="0"
+                value={formData.transactions}
+                onChange={(e) => setFormData({...formData, transactions: e.target.value})}
+                className="border-2 border-violet-200 focus:border-violet-400 bg-white rounded-xl text-lg font-bold h-12 focus:ring-2 focus:ring-violet-200 transition-all"
+              />
+            </motion.div>
+
+            {/* Sugeridos */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              whileHover={{ scale: 1.02, y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              className="bg-gradient-to-br from-pink-50 to-rose-50 rounded-[20px] p-5 shadow-md border border-pink-100 hover:shadow-lg transition-all"
+            >
+              <Label className="flex items-center gap-3 mb-3 text-base font-bold text-pink-700">
+                <div className="w-10 h-10 bg-pink-200/60 rounded-xl flex items-center justify-center">
+                  <Gift className="w-6 h-6 text-pink-600" />
+                </div>
+                Sugeridos
+              </Label>
+              <Input 
+                type="number"
+                placeholder="0"
+                value={formData.suggested_sales}
+                onChange={(e) => setFormData({...formData, suggested_sales: e.target.value})}
+                className="border-2 border-pink-200 focus:border-pink-400 bg-white rounded-xl text-lg font-bold h-12 focus:ring-2 focus:ring-pink-200 transition-all"
+              />
+            </motion.div>
+          </div>
+
+          {/* Botón Guardar */}
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.45 }}
+            whileHover={{ scale: 1.02 }} 
+            whileTap={{ scale: 0.98 }}
+          >
+            <Button 
+              type="submit" 
+              disabled={createMutation.isPending}
+              className="w-full bg-gradient-to-r from-violet-500 via-purple-500 to-violet-500 hover:from-violet-600 hover:via-purple-600 hover:to-violet-600 text-white shadow-lg hover:shadow-xl py-7 text-lg font-bold rounded-[20px] transition-all"
+            >
+              {createMutation.isPending ? (
+                <span className="flex items-center justify-center gap-3">
+                  <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}>
+                    <Loader2 className="w-6 h-6" />
+                  </motion.div>
+                  Guardando...
+                </span>
+              ) : (
+                <span className="flex items-center justify-center gap-3">
+                  <Save className="w-6 h-6" />
+                  Guardar Turno
+                </span>
+              )}
+            </Button>
+          </motion.div>
+        </form>
+      </motion.div>
     </>
   );
 }
