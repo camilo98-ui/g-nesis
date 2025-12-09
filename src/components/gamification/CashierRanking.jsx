@@ -342,65 +342,107 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
       </CardHeader>
       
       <CardContent className="pt-4">
-        {/* Podio Top 3 */}
+        {/* Podio Top 3 - Profesional */}
         {ranking.length >= 3 && (
-          <div className="flex items-end justify-center gap-2 mb-6 h-36">
-            {[1, 0, 2].map((podiumIdx) => {
-              const cashier = ranking[podiumIdx];
-              if (!cashier) return null;
-              const Icon = PODIUM_ICONS[podiumIdx];
-              const height = podiumIdx === 0 ? 'h-32' : podiumIdx === 1 ? 'h-24' : 'h-20';
-              
-              return (
-                <motion.div
-                  key={cashier.id}
-                  initial={{ y: 50, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: podiumIdx * 0.1, type: "spring" }}
-                  whileHover={{ y: -5 }}
-                  onClick={() => onSelectCashier?.(cashier)}
-                  className="flex flex-col items-center cursor-pointer"
-                >
-                  {/* Avatar */}
+          <div className="relative mb-8">
+            {/* Base del podio */}
+            <div className="absolute bottom-0 left-0 right-0 h-2 bg-gradient-to-r from-pink-100 via-purple-100 to-amber-100 rounded-full" />
+            
+            <div className="flex items-end justify-center gap-4 pt-4">
+              {[1, 0, 2].map((podiumIdx) => {
+                const cashier = ranking[podiumIdx];
+                if (!cashier) return null;
+                const Icon = PODIUM_ICONS[podiumIdx];
+                const heights = ['h-40', 'h-48', 'h-36'];
+                const height = heights[podiumIdx];
+                const isFirst = podiumIdx === 0;
+                
+                return (
                   <motion.div
-                    animate={podiumIdx === 0 ? { scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] } : {}}
-                    transition={{ duration: 2, repeat: Infinity }}
-                    className={`w-12 h-12 rounded-full bg-gradient-to-br ${PODIUM_COLORS[podiumIdx]} overflow-hidden flex items-center justify-center mb-2 shadow-lg border-2 border-white`}
+                    key={cashier.id}
+                    initial={{ y: 100, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: podiumIdx * 0.15, type: "spring", stiffness: 100 }}
+                    whileHover={{ y: -8, scale: 1.02 }}
+                    onClick={() => onSelectCashier?.(cashier)}
+                    className="flex flex-col items-center cursor-pointer relative"
+                    style={{ zIndex: isFirst ? 10 : 5 }}
                   >
-                    {cashier.photo_url ? (
-                      <img src={cashier.photo_url} alt={cashier.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <Icon className="w-6 h-6 text-white drop-shadow" />
+                    {/* Corona para el primero */}
+                    {isFirst && (
+                      <motion.div
+                        animate={{ y: [0, -5, 0], rotate: [-5, 5, -5] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                        className="absolute -top-8 text-4xl"
+                      >
+                        👑
+                      </motion.div>
                     )}
-                  </motion.div>
-                  
-                  {/* Nombre */}
-                  <p className="text-xs font-bold text-center mb-1 truncate w-20 text-gray-700">
-                    {cashier.name?.split(' ')[0]}
-                  </p>
-                  
-                  {/* Ventas animadas */}
-                  <motion.p 
-                    className="text-[10px] text-pink-600 font-bold"
-                    animate={{ scale: [1, 1.05, 1] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                  >
-                    {formatCurrency(cashier.totalSales)}
-                  </motion.p>
-                  
-                  {/* Podio */}
-                  <div className={`${height} w-16 bg-gradient-to-t ${PODIUM_COLORS[podiumIdx]} rounded-t-lg mt-2 flex items-center justify-center shadow-lg`}>
-                    <motion.span 
-                      className="text-2xl font-black text-white/90"
-                      animate={{ scale: [1, 1.1, 1] }}
-                      transition={{ duration: 1.5, repeat: Infinity, delay: podiumIdx * 0.2 }}
+                    
+                    {/* Avatar con borde especial */}
+                    <motion.div
+                      animate={isFirst ? { scale: [1, 1.05, 1], boxShadow: ['0 10px 30px rgba(236, 72, 153, 0.3)', '0 15px 40px rgba(236, 72, 153, 0.5)', '0 10px 30px rgba(236, 72, 153, 0.3)'] } : {}}
+                      transition={{ duration: 2, repeat: Infinity }}
+                      className={`${isFirst ? 'w-16 h-16' : 'w-14 h-14'} rounded-full bg-gradient-to-br ${PODIUM_COLORS[podiumIdx]} overflow-hidden flex items-center justify-center mb-2 shadow-xl border-4 border-white relative`}
                     >
-                      {podiumIdx + 1}
-                    </motion.span>
-                  </div>
-                </motion.div>
-              );
-            })}
+                      {cashier.photo_url ? (
+                        <img src={cashier.photo_url} alt={cashier.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <Icon className="w-7 h-7 text-white drop-shadow-lg" />
+                      )}
+                      {/* Posición badge */}
+                      <div className={`absolute -bottom-2 -right-2 ${isFirst ? 'w-8 h-8' : 'w-7 h-7'} rounded-full bg-white shadow-lg flex items-center justify-center border-2 ${isFirst ? 'border-pink-400' : podiumIdx === 1 ? 'border-purple-400' : 'border-amber-400'}`}>
+                        <span className={`${isFirst ? 'text-base' : 'text-sm'} font-black bg-gradient-to-r ${PODIUM_COLORS[podiumIdx]} bg-clip-text text-transparent`}>
+                          {podiumIdx + 1}
+                        </span>
+                      </div>
+                    </motion.div>
+                    
+                    {/* Nombre */}
+                    <p className={`${isFirst ? 'text-sm' : 'text-xs'} font-black text-center mb-1 truncate w-24 text-gray-800`}>
+                      {cashier.name?.split(' ')[0]}
+                    </p>
+                    
+                    {/* Ventas */}
+                    <motion.p 
+                      className={`${isFirst ? 'text-xs' : 'text-[10px]'} font-bold mb-1 ${isFirst ? 'text-pink-600' : podiumIdx === 1 ? 'text-purple-600' : 'text-amber-600'}`}
+                      animate={{ scale: [1, 1.05, 1] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    >
+                      {formatCurrency(cashier.totalSales)}
+                    </motion.p>
+                    
+                    {/* Barra con Ticket Promedio */}
+                    <motion.div 
+                      initial={{ scaleY: 0 }}
+                      animate={{ scaleY: 1 }}
+                      transition={{ delay: 0.5 + podiumIdx * 0.1, type: "spring" }}
+                      className={`${height} w-20 bg-gradient-to-t ${PODIUM_COLORS[podiumIdx]} rounded-t-2xl mt-2 flex flex-col items-center justify-center shadow-2xl relative overflow-hidden border-t-4 border-white`}
+                      style={{ transformOrigin: 'bottom' }}
+                    >
+                      {/* Efecto brillo */}
+                      <motion.div
+                        animate={{ x: ['-100%', '200%'] }}
+                        transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                      />
+                      
+                      {/* Ticket Promedio */}
+                      <div className="relative z-10 text-center">
+                        <p className="text-[9px] text-white/70 font-medium mb-0.5">Ticket Prom</p>
+                        <motion.p 
+                          className="text-sm font-black text-white drop-shadow-md"
+                          animate={{ scale: [1, 1.08, 1] }}
+                          transition={{ duration: 1.5, repeat: Infinity }}
+                        >
+                          {formatCurrency(cashier.avgTicket)}
+                        </motion.p>
+                      </div>
+                    </motion.div>
+                  </motion.div>
+                );
+              })}
+            </div>
           </div>
         )}
 
@@ -412,38 +454,43 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
               initial={{ x: -20, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               transition={{ delay: idx * 0.05 }}
-              whileHover={{ x: 5, backgroundColor: 'rgba(236, 72, 153, 0.1)' }}
-              className="flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors bg-white/50"
+              whileHover={{ x: 5, scale: 1.01 }}
+              onClick={() => onSelectCashier?.(cashier)}
+              className="flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all bg-gradient-to-r from-white to-pink-50/30 hover:shadow-md border border-pink-100/50"
             >
               <div className="relative">
                 <motion.div 
-                  className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-200 to-rose-200 overflow-hidden flex items-center justify-center shadow-sm"
-                  whileHover={{ scale: 1.1 }}
+                  className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-200 to-rose-200 overflow-hidden flex items-center justify-center shadow-md border-2 border-white"
+                  whileHover={{ scale: 1.1, rotate: 5 }}
                 >
                   {cashier.photo_url ? (
                     <img src={cashier.photo_url} alt={cashier.name} className="w-full h-full object-cover" />
                   ) : (
-                    <span className="text-xs font-black text-pink-700">{cashier.name?.charAt(0)}</span>
+                    <span className="text-sm font-black text-pink-700">{cashier.name?.charAt(0)}</span>
                   )}
                 </motion.div>
-                <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-pink-500 text-white text-[9px] font-bold flex items-center justify-center">
+                <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-gradient-to-br from-pink-500 to-rose-500 text-white text-[10px] font-bold flex items-center justify-center shadow-md">
                   {cashier.rank}
                 </div>
               </div>
-              <div className="flex-1" onClick={() => onSelectCashier?.(cashier)}>
-                <p className="text-sm font-medium text-gray-700">{cashier.name}</p>
-                <p className="text-xs text-gray-400">{cashier.daysWorked} turnos</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-gray-800 truncate">{cashier.name}</p>
+                <div className="flex items-center gap-2 text-xs text-gray-500 mt-0.5">
+                  <span>💼 {cashier.daysWorked} turnos</span>
+                  <span>•</span>
+                  <span className="text-emerald-600 font-medium">Promedio: {formatCurrency(cashier.avgDaily)}</span>
+                </div>
               </div>
-              <div className="text-right" onClick={() => onSelectCashier?.(cashier)}>
+              <div className="text-right">
                 <motion.p 
-                  className="text-sm font-bold text-pink-600"
-                  animate={{ scale: [1, 1.02, 1] }}
+                  className="text-base font-black bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent"
+                  animate={{ scale: [1, 1.05, 1] }}
                   transition={{ duration: 2, repeat: Infinity }}
                 >
                   {formatCurrency(cashier.totalSales)}
                 </motion.p>
-                <p className="text-[10px] text-pink-400">
-                 Ticket Prom: {formatCurrency(cashier.avgTicket)}
+                <p className="text-[10px] text-pink-500 font-medium mt-0.5">
+                  🎫 {formatCurrency(cashier.avgTicket)}
                 </p>
               </div>
             </motion.div>
