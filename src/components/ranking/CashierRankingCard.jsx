@@ -44,8 +44,8 @@ export default function CashierRankingCard({
     return new Intl.NumberFormat('es-CO', { 
       style: 'currency', 
       currency: 'COP',
-      minimumFractionDigits: 0
-    }).format(val);
+      maximumFractionDigits: 0
+    }).format(Math.round(val));
   };
 
   const calculatedAvgTicket = avgTicket || (tickets > 0 ? sales / tickets : 0);
@@ -152,7 +152,7 @@ export default function CashierRankingCard({
                 {formatCurrency(sales)}
               </p>
               <p className={`text-xs font-medium ${isTopThree ? 'text-gray-700' : 'text-gray-500'}`}>
-                Ticket: {formatCurrency(calculatedAvgTicket)}
+                Ticket Prom: {formatCurrency(calculatedAvgTicket)}
               </p>
             </motion.div>
           )}

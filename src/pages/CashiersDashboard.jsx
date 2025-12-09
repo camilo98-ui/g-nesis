@@ -144,8 +144,8 @@ export default function CashiersDashboard() {
   }, [selectedCashier]);
 
   const formatCurrency = (val) => new Intl.NumberFormat('es-CO', { 
-    style: 'currency', currency: 'COP', minimumFractionDigits: 0 
-  }).format(val);
+    style: 'currency', currency: 'COP', maximumFractionDigits: 0 
+  }).format(Math.round(val));
 
   const selectedStoreName = STORES.find(s => s.code === selectedStore)?.name || '';
 
@@ -225,7 +225,7 @@ export default function CashiersDashboard() {
                   <TrendingUp className="w-5 h-5 text-emerald-500" />
                   <span className="text-sm text-pink-600">Ventas Equipo</span>
                 </div>
-                <p className="text-2xl font-semibold text-gray-700">${(teamTotals.totalSales/1000000).toFixed(1)}M</p>
+                <p className="text-2xl font-semibold text-gray-700">${Math.round(teamTotals.totalSales/1000000)}M</p>
                 <p className="text-xs text-gray-500">este período</p>
               </motion.div>
 
@@ -293,18 +293,18 @@ export default function CashiersDashboard() {
                       {/* Stats adicionales - PROMEDIOS */}
                       <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3">
                         <div className="bg-emerald-50 rounded-xl p-4 text-center">
-                          <p className="text-xs text-gray-500 mb-1">💰 Venta Prom/Día</p>
-                          <p className="text-lg font-black text-emerald-600">
-                            ${((selectedCashier.avgSalesPerDay || 0)/1000).toFixed(0)}K
-                          </p>
-                          <p className="text-[9px] text-gray-400">{selectedCashier.daysWorked || 0} días trabajados</p>
+                         <p className="text-xs text-gray-500 mb-1">💰 Venta Prom/Día</p>
+                         <p className="text-lg font-black text-emerald-600">
+                           ${Math.round((selectedCashier.avgSalesPerDay || 0)/1000)}K
+                         </p>
+                         <p className="text-[9px] text-gray-400">{selectedCashier.daysWorked || 0} días trabajados</p>
                         </div>
                         <div className="bg-blue-50 rounded-xl p-4 text-center">
-                          <p className="text-xs text-gray-500 mb-1">🎫 Ticket Prom</p>
-                          <p className="text-lg font-black text-blue-600">
-                            ${((selectedCashier.avgTicket || 0)/1000).toFixed(0)}K
-                          </p>
-                          <p className="text-[9px] text-gray-400">por transacción</p>
+                         <p className="text-xs text-gray-500 mb-1">🎫 Ticket Promedio</p>
+                         <p className="text-lg font-black text-blue-600">
+                           ${Math.round((selectedCashier.avgTicket || 0)/1000)}K
+                         </p>
+                         <p className="text-[9px] text-gray-400">por transacción</p>
                         </div>
                         <div className="bg-purple-50 rounded-xl p-4 text-center">
                           <p className="text-xs text-gray-500 mb-1">⚡ Trans Prom/Día</p>
@@ -410,12 +410,12 @@ export default function CashiersDashboard() {
                     </div>
                     <div className="grid grid-cols-2 gap-2 text-center">
                       <div className="bg-white/10 rounded-lg p-2">
-                        <p className="text-lg font-bold">${(cashier.totalSales/1000000).toFixed(1)}M</p>
+                        <p className="text-lg font-bold">${Math.round(cashier.totalSales/1000000)}M</p>
                         <p className="text-xs text-white/70">Ventas</p>
                       </div>
                       <div className="bg-white/10 rounded-lg p-2">
-                        <p className="text-lg font-bold">${(cashier.avgTicket/1000).toFixed(0)}K</p>
-                        <p className="text-xs text-white/70">Ticket</p>
+                        <p className="text-lg font-bold">${Math.round(cashier.avgTicket/1000)}K</p>
+                        <p className="text-xs text-white/70">Ticket Prom</p>
                       </div>
                     </div>
                   </motion.div>

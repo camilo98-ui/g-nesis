@@ -260,7 +260,7 @@ export default function BadgesDisplay({ cashierId, compact = false, showAll = fa
                     </span>
                     {isEarned && badge.kpi_value && (
                       <span className="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full font-medium">
-                        ✓ KPI: {badge.kpi_value.toLocaleString()}
+                        ✓ KPI: {Math.round(badge.kpi_value).toLocaleString()}
                       </span>
                     )}
                   </div>

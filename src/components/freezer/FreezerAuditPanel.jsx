@@ -107,7 +107,7 @@ export default function FreezerAuditPanel({
               <span className="text-gray-600">Cubetas ocupadas:</span>
               <span className="font-bold text-cyan-700">{filledSlots} / {totalSlots}</span>
             </div>
-            <div className="text-[10px] text-cyan-600 mt-2 pt-2 border-t border-cyan-200">
+            <div className="text-[10px] text-cyan-600 mt-2 pt-2 border-t border-cyan-200 max-h-48 overflow-y-auto">
               {(() => {
                 const flavorCounts = {};
                 allSlots.forEach(s => {
@@ -121,12 +121,11 @@ export default function FreezerAuditPanel({
                     const originalSlot = allSlots.find(s => s.flavor_name?.toLowerCase().trim() === name);
                     return { name: originalSlot?.flavor_name || name, count };
                   })
-                  .sort((a, b) => b.count - a.count)
-                  .slice(0, 5);
+                  .sort((a, b) => b.count - a.count);
                 
                 return sortedFlavors.length > 0 ? (
                   <div>
-                    <p className="font-semibold mb-1">Top 5 más presentes:</p>
+                    <p className="font-semibold mb-1">Todos los sabores en nevera:</p>
                     <div className="space-y-0.5">
                       {sortedFlavors.map((f, i) => (
                         <div key={i} className="flex justify-between">

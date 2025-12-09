@@ -122,8 +122,8 @@ export default function CashierFullProfile({
     return new Intl.NumberFormat('es-CO', { 
       style: 'currency', 
       currency: 'COP',
-      minimumFractionDigits: 0
-    }).format(val || 0);
+      maximumFractionDigits: 0
+    }).format(Math.round(val || 0));
   };
 
   // Early return AFTER all hooks
@@ -234,7 +234,7 @@ export default function CashierFullProfile({
         {[
           { label: 'Ventas', value: formatCurrency(stats?.totalSales), icon: DollarSign, color: 'emerald' },
           { label: 'Tickets', value: stats?.totalTickets?.toLocaleString(), icon: Receipt, color: 'blue' },
-          { label: 'Ticket Prom.', value: formatCurrency(stats?.avgTicket), icon: Target, color: 'purple' },
+          { label: 'Ticket Promedio', value: formatCurrency(stats?.avgTicket), icon: Target, color: 'purple' },
           { label: 'Sugeridos', value: stats?.totalSuggested?.toLocaleString(), icon: Gift, color: 'pink' },
         ].map((stat, idx) => (
           <motion.div
