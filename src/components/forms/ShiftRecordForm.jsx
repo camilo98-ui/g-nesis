@@ -171,7 +171,7 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
               <motion.svg viewBox="0 0 80 120" className="w-24 h-32 mx-auto">
                 <motion.circle 
                   cx="40" cy="28" r="22" 
-                  fill="url(#pinkIceCream)"
+                  fill="url(#shiftRecordPinkIceCream)"
                   initial={{ scale: 0 }}
                   animate={{ scale: [0, 1.2, 1] }}
                   transition={{ duration: 0.6 }}
@@ -179,18 +179,18 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
                 <motion.circle cx="32" cy="20" r="5" fill="white" opacity="0.5" />
                 <motion.polygon 
                   points="20,45 40,110 60,45" 
-                  fill="url(#coneGrad)"
+                  fill="url(#shiftRecordConeGrad)"
                   initial={{ scaleY: 0 }}
                   animate={{ scaleY: 1 }}
                   transition={{ delay: 0.2, duration: 0.4 }}
                   style={{ transformOrigin: 'center top' }}
                 />
                 <defs>
-                  <linearGradient id="pinkIceCream">
+                  <linearGradient id="shiftRecordPinkIceCream">
                     <stop offset="0%" stopColor="#f472b6" />
                     <stop offset="100%" stopColor="#ec4899" />
                   </linearGradient>
-                  <linearGradient id="coneGrad">
+                  <linearGradient id="shiftRecordConeGrad">
                     <stop offset="0%" stopColor="#fbbf24" />
                     <stop offset="100%" stopColor="#d97706" />
                   </linearGradient>

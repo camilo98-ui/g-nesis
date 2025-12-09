@@ -164,7 +164,7 @@ export default function DailySalesForm({ storeId, onSuccess }) {
                     {/* Cono animado */}
                     <motion.polygon 
                       points="20,45 40,110 60,45" 
-                      fill="url(#popsyCone)"
+                      fill="url(#dailySalesPopsyCone)"
                       initial={{ scaleY: 0 }}
                       animate={{ scaleY: 1 }}
                       transition={{ duration: 0.3 }}
@@ -181,7 +181,7 @@ export default function DailySalesForm({ storeId, onSuccess }) {
                     {/* Helado rosa vibrante */}
                     <motion.circle 
                       cx="40" cy="28" r="24" 
-                      fill="url(#popsyIce)"
+                      fill="url(#dailySalesPopsyIce)"
                       initial={{ scale: 0 }}
                       animate={{ scale: [0, 1.3, 1] }}
                       transition={{ delay: 0.2, duration: 0.6, type: "spring" }}
@@ -210,12 +210,12 @@ export default function DailySalesForm({ storeId, onSuccess }) {
                     />
 
                     <defs>
-                      <linearGradient id="popsyIce" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <linearGradient id="dailySalesPopsyIce" x1="0%" y1="0%" x2="100%" y2="100%">
                         <stop offset="0%" stopColor="#ec4899" />
                         <stop offset="50%" stopColor="#f472b6" />
                         <stop offset="100%" stopColor="#fb7185" />
                       </linearGradient>
-                      <linearGradient id="popsyCone" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <linearGradient id="dailySalesPopsyCone" x1="0%" y1="0%" x2="0%" y2="100%">
                         <stop offset="0%" stopColor="#fbbf24" />
                         <stop offset="100%" stopColor="#f59e0b" />
                       </linearGradient>
