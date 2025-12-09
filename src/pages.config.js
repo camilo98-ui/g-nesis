@@ -16,6 +16,7 @@ import Management from './pages/Management';
 import PredictiveAnalytics from './pages/PredictiveAnalytics';
 import PopsyPlanner from './pages/PopsyPlanner';
 import WeatherImpact from './pages/WeatherImpact';
+import RoulettePopsy from './pages/RoulettePopsy';
 import __Layout from './Layout.jsx';
 
 
@@ -38,6 +39,7 @@ export const PAGES = {
     "PredictiveAnalytics": PredictiveAnalytics,
     "PopsyPlanner": PopsyPlanner,
     "WeatherImpact": WeatherImpact,
+    "RoulettePopsy": RoulettePopsy,
 }
 
 export const pagesConfig = {
