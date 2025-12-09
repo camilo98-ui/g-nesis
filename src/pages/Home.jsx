@@ -11,6 +11,7 @@ import PopsyStoryModal from '@/components/PopsyStoryModal';
 import DirectoryModal from '@/components/DirectoryModal';
 import DailySalesForm from '@/components/forms/DailySalesForm';
 import ShiftRecordForm from '@/components/forms/ShiftRecordForm';
+import BudgetTrendModal from '@/components/budget/BudgetTrendModal';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { 
@@ -72,7 +73,9 @@ const MENU_ITEMS = [
     bgColor: 'bg-gradient-to-br from-sky-100/90 to-blue-100/80',
     iconBg: 'bg-sky-200/60',
     iconColor: 'text-sky-500',
-    textColor: 'text-sky-700'
+    textColor: 'text-sky-700',
+    isSpecialAction: true,
+    specialAction: 'budgetTrend'
   },
   { 
     name: 'Calidad', 
@@ -130,6 +133,7 @@ export default function Home() {
   const [selectedRole, setSelectedRole] = useState('');
   const [showStoreSales, setShowStoreSales] = useState(false);
   const [salesTab, setSalesTab] = useState('tienda');
+  const [showBudgetTrend, setShowBudgetTrend] = useState(false);
 
   const ROLES = [
     { id: 'gerente', name: 'Gerente', icon: 'gerente', color: 'from-slate-600 to-gray-700', description: '🎯 Poder total', iconBaseColor: '#475569' },
@@ -799,7 +803,13 @@ export default function Home() {
                     </motion.div>
                   ) : item.isSpecialAction ? (
                     <motion.div 
-                      onClick={() => setShowStoreSales(true)}
+                      onClick={() => {
+                        if (item.specialAction === 'budgetTrend') {
+                          setShowBudgetTrend(true);
+                        } else {
+                          setShowStoreSales(true);
+                        }
+                      }}
                       className={`${item.bgColor} rounded-2xl p-4 h-full shadow-md hover:shadow-xl transition-all duration-300 group relative overflow-hidden border border-white/50 backdrop-blur-sm cursor-pointer`}
                     >
                       {/* Subtle glow effect */}
@@ -906,6 +916,14 @@ export default function Home() {
           />
         )}
       </AnimatePresence>
+
+      {/* Budget Trend Modal */}
+      <BudgetTrendModal
+        storeId={selectedStore}
+        storeName={selectedStoreName}
+        isOpen={showBudgetTrend}
+        onClose={() => setShowBudgetTrend(false)}
+      />
 
       {/* Store Sales Modal */}
       <AnimatePresence>

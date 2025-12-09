@@ -158,8 +158,8 @@ INSTRUCCIONES:
   }, [cashierId, trendData.length]);
 
   const formatCurrency = (val) => new Intl.NumberFormat('es-CO', { 
-    style: 'currency', currency: 'COP', minimumFractionDigits: 0 
-  }).format(val);
+    style: 'currency', currency: 'COP', maximumFractionDigits: 0 
+  }).format(Math.round(val));
 
   if (trendData.length === 0) {
     return (
@@ -225,69 +225,70 @@ INSTRUCCIONES:
 
   return (
     <div className="space-y-4">
-      {/* Gráfica de Tendencia */}
+      {/* Gráfica de Tendencia - Más clara con gráfico de área */}
       <Card className="border-none shadow-lg">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
             <BarChart3 className="w-4 h-4 text-pink-500" />
-            Tendencia de Gestión - {cashierName}
+            Tendencia de Ventas - {cashierName}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={trendData}>
+              <AreaChart data={trendData}>
+                <defs>
+                  <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.6}/>
+                    <stop offset="95%" stopColor="#10b981" stopOpacity={0.1}/>
+                  </linearGradient>
+                  <linearGradient id="ticketGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.6}/>
+                    <stop offset="95%" stopColor="#f59e0b" stopOpacity={0.1}/>
+                  </linearGradient>
+                </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                 <XAxis dataKey="date" tick={{ fill: '#6b7280', fontSize: 10 }} />
                 <YAxis 
                   yAxisId="left" 
                   tick={{ fill: '#6b7280', fontSize: 10 }} 
-                  tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`}
+                  tickFormatter={(v) => `$${Math.round(v/1000000)}M`}
                 />
                 <YAxis 
                   yAxisId="right" 
                   orientation="right" 
                   tick={{ fill: '#6b7280', fontSize: 10 }}
-                  tickFormatter={(v) => `$${(v/1000).toFixed(0)}K`}
+                  tickFormatter={(v) => `$${Math.round(v/1000)}K`}
                 />
                 <Tooltip 
                   contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
                   labelFormatter={(label, payload) => payload?.[0]?.payload?.fullDate || label}
                   formatter={(v, name) => {
-                    if (name === 'Ventas') return [formatCurrency(v), name];
-                    if (name === 'Ticket Prom.') return [formatCurrency(v), name];
-                    return [v.toLocaleString(), name];
+                    if (name === 'Ventas') return [formatCurrency(v), '💰 Ventas'];
+                    if (name === 'Ticket Promedio') return [formatCurrency(v), '🎫 Ticket'];
+                    return [Math.round(v).toLocaleString(), name];
                   }}
                 />
                 <Legend />
-                <Line 
+                <Area 
                   yAxisId="left"
                   type="monotone" 
                   dataKey="ventas" 
                   stroke="#10b981" 
-                  strokeWidth={2} 
-                  dot={{ r: 3, fill: '#10b981' }}
+                  strokeWidth={3} 
+                  fill="url(#salesGradient)"
                   name="Ventas"
                 />
-                <Line 
-                  yAxisId="left"
-                  type="monotone" 
-                  dataKey="transacciones" 
-                  stroke="#8b5cf6" 
-                  strokeWidth={2} 
-                  dot={{ r: 3, fill: '#8b5cf6' }}
-                  name="Transacciones"
-                />
-                <Line 
+                <Area 
                   yAxisId="right"
                   type="monotone" 
                   dataKey="ticketPromedio" 
                   stroke="#f59e0b" 
-                  strokeWidth={2} 
-                  dot={{ r: 3, fill: '#f59e0b' }}
-                  name="Ticket Prom."
+                  strokeWidth={3} 
+                  fill="url(#ticketGradient)"
+                  name="Ticket Promedio"
                 />
-              </LineChart>
+              </AreaChart>
             </ResponsiveContainer>
           </div>
         </CardContent>
@@ -352,7 +353,7 @@ INSTRUCCIONES:
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={cashierComparison.slice(0, 8)} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" horizontal={false} />
-                <XAxis type="number" tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} tick={{ fontSize: 9 }} />
+                <XAxis type="number" tickFormatter={(v) => `$${Math.round(v/1000000)}M`} tick={{ fontSize: 9 }} />
                 <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: '#6b7280' }} width={60} />
                 <Tooltip 
                   contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
@@ -445,11 +446,11 @@ INSTRUCCIONES:
       <div className="flex gap-2 text-xs">
         <div className={`flex items-center gap-1 px-2 py-1 rounded-full ${stats.trend >= 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
           {stats.trend >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-          Tendencia: {stats.trend >= 0 ? '+' : ''}{stats.trend.toFixed(1)}%
+          Tendencia: {stats.trend >= 0 ? '+' : ''}{Math.round(stats.trend)}%
         </div>
         <div className={`flex items-center gap-1 px-2 py-1 rounded-full ${stats.salesVsTeam >= 0 ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
           <Target className="w-3 h-3" />
-          vs Equipo: {stats.salesVsTeam >= 0 ? '+' : ''}{stats.salesVsTeam.toFixed(0)}%
+          vs Equipo: {stats.salesVsTeam >= 0 ? '+' : ''}{Math.round(stats.salesVsTeam)}%
         </div>
       </div>
     </div>

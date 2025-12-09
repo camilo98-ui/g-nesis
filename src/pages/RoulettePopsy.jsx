@@ -81,6 +81,7 @@ export default function RoulettePopsy() {
 
   const activeEmployee = employeeOfMonth.find(e => e.is_active);
   const isAdmin = userRole === 'gerente' || userRole === 'lider';
+  const canSpin = userRole === 'gerente'; // Solo el gerente puede girar
 
   // Si es admin, mostrar panel de administración
   if (isAdmin) {
@@ -207,10 +208,26 @@ export default function RoulettePopsy() {
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.3 }}
+          className="relative"
         >
+          {!canSpin && (
+            <div className="absolute inset-0 bg-white/60 backdrop-blur-sm rounded-3xl z-10 flex items-center justify-center">
+              <div className="text-center p-6">
+                <motion.div
+                  animate={{ rotate: [0, 10, -10, 0] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="text-6xl mb-4"
+                >
+                  🔒
+                </motion.div>
+                <p className="text-lg font-bold text-gray-700 mb-2">Solo el Gerente puede girar la ruleta</p>
+                <p className="text-sm text-gray-500">Habla con tu gerente para participar</p>
+              </div>
+            </div>
+          )}
           <RouletteWheel 
             onResult={handleRouletteResult}
-            disabled={activeEmployee.has_spun}
+            disabled={activeEmployee.has_spun || !canSpin}
             awardType={activeEmployee.award_type}
           />
         </motion.div>
