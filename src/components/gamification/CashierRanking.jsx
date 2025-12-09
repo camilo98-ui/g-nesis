@@ -490,9 +490,11 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-bold text-gray-800 truncate">{cashier.name}</p>
                 <div className="flex items-center gap-2 text-xs text-gray-500 mt-0.5">
-                  <span>💼 {cashier.daysWorked} turnos</span>
+                  <span>💼 {cashier.hasData ? cashier.daysWorked : cashier.historicalDays} turnos</span>
                   <span>•</span>
-                  <span className="text-emerald-600 font-medium">Promedio: {formatCurrency(cashier.avgDaily)}</span>
+                  <span className="text-emerald-600 font-medium">
+                    Promedio: {formatCurrency(cashier.hasData ? cashier.avgDaily : cashier.historicalAvgDaily)}
+                  </span>
                 </div>
               </div>
               <div className="text-right">
@@ -501,10 +503,10 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
                   animate={{ scale: [1, 1.05, 1] }}
                   transition={{ duration: 2, repeat: Infinity }}
                 >
-                  {formatCurrency(cashier.totalSales)}
+                  {formatCurrency(cashier.hasData ? cashier.totalSales : cashier.historicalSales)}
                 </motion.p>
                 <p className="text-[10px] text-pink-500 font-medium mt-0.5">
-                  🎫 {formatCurrency(cashier.avgTicket)}
+                  🎫 {formatCurrency(cashier.hasData ? cashier.avgTicket : cashier.historicalAvgTicket)}
                 </p>
               </div>
             </motion.div>
