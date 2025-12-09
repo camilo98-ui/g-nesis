@@ -66,7 +66,13 @@ export default function ConeoRotationSuggestion({ shifts = [], cashiers = [] }) 
                   animate={{ rotate: [0, -10, 10, -10, 0] }}
                   transition={{ duration: 2, repeat: Infinity }}
                 >
-                  <div className="text-2xl">🍦</div>
+                  <svg viewBox="0 0 40 65" className="w-8 h-12">
+                    <circle cx="20" cy="14" r="12" fill="#6B3410" />
+                    <ellipse cx="16" cy="10" rx="5" ry="3" fill="white" opacity="0.3" />
+                    <polygon points="10,22 20,58 30,22" fill="#E8D5B0" />
+                    <line x1="13" y1="28" x2="27" y2="28" stroke="#d97706" strokeWidth="0.5" opacity="0.7" />
+                    <line x1="15" y1="36" x2="25" y2="36" stroke="#d97706" strokeWidth="0.5" opacity="0.7" />
+                  </svg>
                 </motion.div>
                 Rotación de Coneadores
               </CardTitle>
@@ -99,13 +105,13 @@ export default function ConeoRotationSuggestion({ shifts = [], cashiers = [] }) 
             </p>
           </motion.div>
 
-          {/* Gráfica de turnos de coneo */}
-          <div className="h-64 mb-4">
+          {/* Gráfica de turnos de coneo - Mejorada */}
+          <div className="h-72 mb-4">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={coneoStats.slice(0, 10)} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis type="number" tick={{ fontSize: 10 }} />
-                <YAxis dataKey="name" type="category" width={80} tick={{ fontSize: 10 }} />
+              <BarChart data={coneoStats.slice(0, 10)} layout="vertical" margin={{ left: 10, right: 20, top: 10, bottom: 10 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f5f5f5" />
+                <XAxis type="number" tick={{ fontSize: 11, fill: '#64748b' }} label={{ value: 'Turnos de Coneo', position: 'insideBottom', offset: -5, fontSize: 11, fill: '#475569' }} />
+                <YAxis dataKey="name" type="category" width={90} tick={{ fontSize: 11, fill: '#334155', fontWeight: 600 }} />
                 <Tooltip 
                   content={({ active, payload }) => {
                     if (!active || !payload?.length) return null;
@@ -114,23 +120,56 @@ export default function ConeoRotationSuggestion({ shifts = [], cashiers = [] }) 
                       <motion.div
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="bg-white p-3 rounded-xl shadow-xl border text-xs"
+                        className="bg-white p-4 rounded-2xl shadow-2xl border-2 border-pink-100"
                       >
-                        <p className="font-bold text-gray-800 mb-1">{data.fullName}</p>
-                        <p className="text-pink-600">🍦 Turnos coneo: {data.coneoShifts}</p>
-                        <p className="text-gray-500">Total turnos: {data.totalShifts}</p>
-                        <p className="text-violet-600 font-bold">% Coneo: {data.coneoPercentage.toFixed(0)}%</p>
+                        <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-100">
+                          <div className="text-3xl">
+                            <svg viewBox="0 0 40 65" className="w-10 h-14">
+                              <circle cx="20" cy="14" r="12" fill="#6B3410" />
+                              <polygon points="10,22 20,58 30,22" fill="#E8D5B0" />
+                              <line x1="13" y1="28" x2="27" y2="28" stroke="#d97706" strokeWidth="0.5" opacity="0.7" />
+                            </svg>
+                          </div>
+                          <div>
+                            <p className="font-black text-gray-800 text-base">{data.fullName}</p>
+                            <p className="text-xs text-gray-500">Análisis de rotación</p>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-600">🍫 Turnos coneo:</span>
+                            <span className="text-base font-black text-pink-600">{data.coneoShifts}</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-600">📊 Total turnos:</span>
+                            <span className="text-sm font-bold text-gray-700">{data.totalShifts}</span>
+                          </div>
+                          <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                            <span className="text-sm text-gray-600">% Coneo:</span>
+                            <span className="text-base font-black text-violet-600">{data.coneoPercentage.toFixed(0)}%</span>
+                          </div>
+                        </div>
                         {data.isOverloaded && (
-                          <p className="text-red-600 font-bold mt-1">⚠️ Sobrecarga crítica</p>
+                          <div className="mt-3 pt-3 border-t border-red-200 bg-red-50 -mx-4 -mb-4 px-4 py-2 rounded-b-2xl">
+                            <p className="text-red-700 font-bold text-xs flex items-center gap-1">
+                              <AlertTriangle className="w-4 h-4" />
+                              ⚠️ Sobrecarga crítica - rotar urgente
+                            </p>
+                          </div>
                         )}
                         {data.needsBreak && !data.isOverloaded && (
-                          <p className="text-amber-600 font-bold mt-1">⚡ Necesita rotación</p>
+                          <div className="mt-3 pt-3 border-t border-amber-200 bg-amber-50 -mx-4 -mb-4 px-4 py-2 rounded-b-2xl">
+                            <p className="text-amber-700 font-bold text-xs flex items-center gap-1">
+                              <Clock className="w-4 h-4" />
+                              ⚡ Necesita rotación pronto
+                            </p>
+                          </div>
                         )}
                       </motion.div>
                     );
                   }}
                 />
-                <Bar dataKey="coneoShifts" radius={[0, 8, 8, 0]}>
+                <Bar dataKey="coneoShifts" radius={[0, 10, 10, 0]} barSize={24}>
                   {coneoStats.slice(0, 10).map((entry, index) => (
                     <Cell 
                       key={`cell-${index}`} 

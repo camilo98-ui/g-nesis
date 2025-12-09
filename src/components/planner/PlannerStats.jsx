@@ -462,11 +462,17 @@ export default function PlannerStats({ shifts, cashiers, storeId, currentWeek, s
                   <YAxis yAxisId="left" tick={{ fontSize: 10 }} />
                   <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 10 }} />
                   <Tooltip content={({ active, payload }) => active && payload?.length ? (
-                    <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="bg-white p-3 rounded-xl shadow-xl border text-xs">
-                      <p className="font-bold text-gray-800 mb-1">{payload[0]?.payload?.fecha}</p>
-                      <p className="text-emerald-600">💰 Ventas: ${payload[0]?.payload?.ventas}K</p>
-                      <p className="text-violet-600">⏱️ Horas: {payload[0]?.payload?.horas}h</p>
-                      <p className="text-amber-600 font-bold">⚡ Productividad: ${payload[0]?.payload?.productividad}K/h</p>
+                    <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="bg-white p-4 rounded-xl shadow-xl border text-xs">
+                      <p className="font-bold text-gray-800 mb-2 text-sm">{payload[0]?.payload?.fecha}</p>
+                      <div className="space-y-1.5">
+                        <p className="text-emerald-600 font-semibold">💰 Ventas: ${payload[0]?.payload?.ventas}K</p>
+                        <p className="text-violet-600 font-semibold">⏱️ Horas: {payload[0]?.payload?.horas}h</p>
+                        <div className="pt-1.5 border-t border-gray-200">
+                          <p className="text-amber-600 font-black text-base">
+                            ⚡ Productividad: ${payload[0]?.payload?.productividad.toLocaleString()}K/h
+                          </p>
+                        </div>
+                      </div>
                     </motion.div>
                   ) : null} />
                   <Legend />
@@ -657,7 +663,12 @@ export default function PlannerStats({ shifts, cashiers, storeId, currentWeek, s
                     <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                     <XAxis dataKey="day" tick={{ fontSize: 10 }} />
                     <YAxis tick={{ fontSize: 10 }} />
-                    <Tooltip />
+                    <Tooltip content={({ active, payload }) => active && payload?.length ? (
+                      <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="bg-white p-3 rounded-xl shadow-xl border text-xs">
+                        <p className="font-bold text-gray-800 mb-1">{payload[0]?.payload?.day}</p>
+                        <p className="text-emerald-600 font-semibold">📊 Turnos programados: {payload[0]?.value}</p>
+                      </motion.div>
+                    ) : null} />
                     <Area type="monotone" dataKey="turnos" stroke="#10b981" fill="url(#colorTurnosPlanner)" strokeWidth={3} dot={{ r: 5, fill: '#10b981' }} />
                   </AreaChart>
                 </ResponsiveContainer>

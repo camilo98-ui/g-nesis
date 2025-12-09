@@ -7,6 +7,12 @@ import { createPageUrl } from '@/utils';
 import { STORES, getDisplayName } from '@/components/StoreSelector';
 import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
 import ZoneComparableModal from '@/components/management/ZoneComparableModal';
+import ZoneSalesDistributionChart from '@/components/management/ZoneSalesDistributionChart';
+import StoreComplianceHeatmap from '@/components/management/StoreComplianceHeatmap';
+import TopCashiersZone from '@/components/management/TopCashiersZone';
+import TransactionsByStoreChart from '@/components/management/TransactionsByStoreChart';
+import ZoneTicketTrendChart from '@/components/management/ZoneTicketTrendChart';
+import ZoneDailyPerformanceTable from '@/components/management/ZoneDailyPerformanceTable';
 import { 
   ArrowLeft, Lock, TrendingUp, TrendingDown, Users, Store, 
   Target, AlertTriangle, Activity, Award, DollarSign, Calendar, MapPin,
@@ -583,6 +589,16 @@ function ManagementDashboard() {
               <KPICard title="Proyección" value={`$${(zoneTotals.projection/1000000).toFixed(1)}M`} subvalue={`Meta: $${(zoneTotals.totalBudget/1000000).toFixed(1)}M`} icon={Target} color="from-violet-500 to-purple-500" delay={0.1} compliance={projectionCompliance} />
               <KPICard title="Venta Hoy" value={`$${(zoneTotals.todayTotal/1000000).toFixed(1)}M`} subvalue="vs ayer" icon={Zap} trend={zoneTotals.yesterdayTotal > 0 ? ((zoneTotals.todayTotal / zoneTotals.yesterdayTotal) - 1) * 100 : 0} color="from-emerald-500 to-teal-500" delay={0.2} />
               <KPICard title="Ticket Prom." value={`$${(zoneTotals.avgTicket/1000).toFixed(0)}K`} subvalue="Promedio zona" icon={BarChart3} color="from-amber-500 to-orange-500" delay={0.3} />
+            </div>
+
+            {/* New Zone Charts */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+              <ZoneSalesDistributionChart storePerformance={storePerformance} formatCurrency={formatCurrency} />
+              <StoreComplianceHeatmap storePerformance={storePerformance} />
+              <TopCashiersZone allShiftRecords={allShiftRecords} allCashiers={allCashiers} formatCurrency={formatCurrency} />
+              <TransactionsByStoreChart storePerformance={storePerformance} />
+              <ZoneTicketTrendChart filteredDailySales={filteredDailySales} dateRange={dateRange} formatCurrency={formatCurrency} />
+              <ZoneDailyPerformanceTable filteredDailySales={filteredDailySales} dateRange={dateRange} formatCurrency={formatCurrency} />
             </div>
 
             {/* Charts Grid */}
