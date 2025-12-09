@@ -27,6 +27,7 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
       transactions: '',
       suggested_sales: ''
     });
+    const [editingRecord, setEditingRecord] = useState(null);
 
   const { data: cashiers = [] } = useQuery({
     queryKey: ['cashiers', storeId],
@@ -37,6 +38,46 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
     refetchOnMount: 'always',
     refetchOnWindowFocus: true
   });
+
+  // Buscar registro existente cuando cambian cajero, fecha o turno
+  const { data: existingRecords = [] } = useQuery({
+    queryKey: ['shiftRecord', storeId, formData.cashier_id, formData.date, formData.shift],
+    queryFn: () => base44.entities.ShiftRecord.filter({ 
+      store_id: storeId,
+      cashier_id: formData.cashier_id,
+      date: formData.date,
+      shift: formData.shift
+    }),
+    enabled: !!storeId && !!formData.cashier_id && !!formData.date,
+    staleTime: 0
+  });
+
+  // Cargar datos existentes en el formulario
+  React.useEffect(() => {
+    if (existingRecords.length > 0) {
+      const record = existingRecords[0];
+      setEditingRecord(record);
+      setFormData(prev => ({
+        ...prev,
+        sales: record.sales?.toString() || '',
+        tickets: record.tickets?.toString() || '',
+        transactions: record.transactions?.toString() || '',
+        suggested_sales: record.suggested_sales?.toString() || ''
+      }));
+    } else {
+      setEditingRecord(null);
+      // Solo limpiar si había un registro cargado antes
+      if (formData.sales || formData.tickets || formData.transactions || formData.suggested_sales) {
+        setFormData(prev => ({
+          ...prev,
+          sales: '',
+          tickets: '',
+          transactions: '',
+          suggested_sales: ''
+        }));
+      }
+    }
+  }, [existingRecords]);
 
   const createMutation = useMutation({
     mutationFn: async (data) => {
@@ -144,13 +185,16 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
       queryClient.invalidateQueries({ queryKey: ['salesLogs'] });
       queryClient.invalidateQueries({ queryKey: ['budgets'] });
 
-      toast.success('¡Turno registrado correctamente!');
+      toast.success(editingRecord ? '¡Turno actualizado correctamente!' : '¡Turno registrado correctamente!');
 
       setShowSuccess(true);
       setTimeout(() => {
         setShowSuccess(false);
+        setEditingRecord(null);
         setFormData({
-          ...formData,
+          cashier_id: '',
+          date: new Date().toISOString().split('T')[0],
+          shift: 'morning',
           sales: '',
           tickets: '',
           transactions: '',
@@ -234,6 +278,11 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
         transition={{ duration: 0.4 }}
         className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100"
       >
+        {editingRecord && (
+          <div className="bg-gradient-to-r from-amber-50 to-yellow-50 px-6 py-3 border-b border-amber-200 flex items-center gap-2">
+            <span className="text-amber-700 font-bold text-sm">✏️ Editando registro existente</span>
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Cajero y Fecha */}
           <div className="grid grid-cols-2 gap-5">
@@ -432,19 +481,19 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
             <Button 
               type="submit" 
               disabled={createMutation.isPending}
-              className="w-full bg-gradient-to-r from-violet-500 via-purple-500 to-violet-500 hover:from-violet-600 hover:via-purple-600 hover:to-violet-600 text-white shadow-lg hover:shadow-xl py-7 text-lg font-bold rounded-[20px] transition-all"
+              className={`w-full ${editingRecord ? 'bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-500 hover:from-amber-600 hover:via-yellow-600 hover:to-amber-600' : 'bg-gradient-to-r from-violet-500 via-purple-500 to-violet-500 hover:from-violet-600 hover:via-purple-600 hover:to-violet-600'} text-white shadow-lg hover:shadow-xl py-7 text-lg font-bold rounded-[20px] transition-all`}
             >
               {createMutation.isPending ? (
                 <span className="flex items-center justify-center gap-3">
                   <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}>
                     <Loader2 className="w-6 h-6" />
                   </motion.div>
-                  Guardando...
+                  {editingRecord ? 'Actualizando...' : 'Guardando...'}
                 </span>
               ) : (
                 <span className="flex items-center justify-center gap-3">
                   <Save className="w-6 h-6" />
-                  Guardar Turno
+                  {editingRecord ? 'Actualizar Turno' : 'Guardar Turno'}
                 </span>
               )}
             </Button>
