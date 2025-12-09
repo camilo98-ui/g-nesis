@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 
 export default function DailyBudgetCard({ dailySales = [], storeId, formatCurrency }) {
   const [showDialog, setShowDialog] = useState(false);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [budgetAmount, setBudgetAmount] = useState('');
   const [ticketGoal, setTicketGoal] = useState('');
   const [transactionsGoal, setTransactionsGoal] = useState('');
@@ -89,6 +90,18 @@ export default function DailyBudgetCard({ dailySales = [], storeId, formatCurren
   const hasTodayBudget = !!todayBudget;
   const compliance = todayBudget?.compliance_percentage || 0;
 
+  // Stats del historial
+  const historyStats = useMemo(() => {
+    const budgetsWithData = dailyBudgets.filter(b => b.completed);
+    const totalDays = budgetsWithData.length;
+    const daysCompliant = budgetsWithData.filter(b => b.compliance_percentage >= 100).length;
+    const avgCompliance = totalDays > 0 ? budgetsWithData.reduce((sum, b) => sum + (b.compliance_percentage || 0), 0) / totalDays : 0;
+    const totalBudget = budgetsWithData.reduce((sum, b) => sum + (b.budget_amount || 0), 0);
+    const totalSales = budgetsWithData.reduce((sum, b) => sum + (b.actual_sales || 0), 0);
+    
+    return { totalDays, daysCompliant, avgCompliance, totalBudget, totalSales };
+  }, [dailyBudgets]);
+
   return (
     <>
       <Card className="bg-white shadow-xl border-0">
@@ -101,14 +114,25 @@ export default function DailyBudgetCard({ dailySales = [], storeId, formatCurren
               </CardTitle>
               <p className="text-xs text-gray-500">Histórico de cumplimiento</p>
             </div>
-            <Button
-              size="sm"
-              onClick={() => setShowDialog(true)}
-              className="bg-gradient-to-r from-violet-500 to-purple-600 text-white"
-            >
-              <Plus className="w-4 h-4 mr-1" />
-              {hasTodayBudget ? 'Editar' : 'Agregar'}
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setShowHistoryModal(true)}
+                className="border-violet-200 text-violet-600 hover:bg-violet-50"
+              >
+                <TrendingUp className="w-4 h-4 mr-1" />
+                Historial
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => setShowDialog(true)}
+                className="bg-gradient-to-r from-violet-500 to-purple-600 text-white"
+              >
+                <Plus className="w-4 h-4 mr-1" />
+                {hasTodayBudget ? 'Editar' : 'Agregar'}
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent className="p-4">

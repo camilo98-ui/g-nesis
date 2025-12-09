@@ -435,7 +435,7 @@ export default function PlannerStats({ shifts, cashiers, storeId, currentWeek, s
         <StatCard title="Colaboradores" value={cashiers.length} icon={Award} color="text-amber-500" delay={0.3} />
       </div>
 
-      {/* Productividad Chart - MUY DINÁMICO */}
+      {/* Productividad Chart - MEJORADO CON DOBLE ESCALA */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
         <Card className="bg-white border-0 shadow-lg overflow-hidden">
           <CardHeader className="pb-2 bg-gradient-to-r from-amber-50 to-orange-50">
@@ -445,7 +445,7 @@ export default function PlannerStats({ shifts, cashiers, storeId, currentWeek, s
               </motion.div>
               Análisis de Productividad
             </CardTitle>
-            <CardDescription className="text-xs text-gray-500">Relación entre horas programadas y ventas</CardDescription>
+            <CardDescription className="text-xs text-gray-500">Relación entre horas programadas y ventas - Productividad en K$/hora</CardDescription>
           </CardHeader>
           <CardContent className="pt-4">
             <div className="h-72">
@@ -459,13 +459,13 @@ export default function PlannerStats({ shifts, cashiers, storeId, currentWeek, s
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                   <XAxis dataKey="fecha" tick={{ fontSize: 10 }} />
-                  <YAxis yAxisId="left" tick={{ fontSize: 10 }} />
-                  <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 10 }} />
+                  <YAxis yAxisId="left" tick={{ fontSize: 10 }} label={{ value: 'Ventas (K) / Horas', angle: -90, position: 'insideLeft', style: { fontSize: 10 } }} />
+                  <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 10 }} label={{ value: 'Productividad (K$/h)', angle: 90, position: 'insideRight', style: { fontSize: 10 } }} />
                   <Tooltip content={({ active, payload }) => active && payload?.length ? (
                     <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="bg-white p-4 rounded-xl shadow-xl border text-xs">
                       <p className="font-bold text-gray-800 mb-2 text-sm">{payload[0]?.payload?.fecha}</p>
                       <div className="space-y-1.5">
-                        <p className="text-emerald-600 font-semibold">💰 Ventas: ${payload[0]?.payload?.ventas}K</p>
+                        <p className="text-emerald-600 font-semibold">💰 Ventas: ${payload[0]?.payload?.ventas.toLocaleString()}K</p>
                         <p className="text-violet-600 font-semibold">⏱️ Horas: {payload[0]?.payload?.horas}h</p>
                         <div className="pt-1.5 border-t border-gray-200">
                           <p className="text-amber-600 font-black text-base">
@@ -477,14 +477,14 @@ export default function PlannerStats({ shifts, cashiers, storeId, currentWeek, s
                   ) : null} />
                   <Legend />
                   <Area yAxisId="left" type="monotone" dataKey="ventas" fill="url(#colorVentasPlanner)" stroke="#10b981" strokeWidth={2} name="Ventas (K)" />
-                  <Bar yAxisId="right" dataKey="horas" fill="#8b5cf6" radius={[4, 4, 0, 0]} name="Horas" opacity={0.7} />
-                  <Line yAxisId="left" type="monotone" dataKey="productividad" stroke="#f59e0b" strokeWidth={3} dot={{ r: 5, fill: '#f59e0b' }} name="$/Hora (K)" />
+                  <Bar yAxisId="left" dataKey="horas" fill="#8b5cf6" radius={[4, 4, 0, 0]} name="Horas" opacity={0.7} />
+                  <Line yAxisId="right" type="monotone" dataKey="productividad" stroke="#f59e0b" strokeWidth={4} dot={{ r: 6, fill: '#f59e0b', strokeWidth: 2, stroke: '#fff' }} name="Productividad (K$/h)" />
                 </ComposedChart>
               </ResponsiveContainer>
             </div>
             <ChartDescription>
               <strong>¿Qué muestra?</strong> Relaciona las horas programadas (barras moradas) con las ventas generadas (área verde). 
-              La línea naranja es la <strong>productividad</strong> (ventas ÷ horas). 
+              La línea naranja es la <strong>productividad</strong> (ventas ÷ horas en K$/h). 
               <strong>Usa esto para:</strong> Identificar días donde vendes mucho con poco personal (alta eficiencia) o viceversa (oportunidad de ajuste).
             </ChartDescription>
           </CardContent>
