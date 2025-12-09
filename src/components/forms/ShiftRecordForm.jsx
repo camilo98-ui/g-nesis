@@ -10,9 +10,9 @@ import { Save, User, DollarSign, Receipt, Zap, Gift, Loader2, CheckCircle, Sun, 
 import { toast } from 'sonner';
 
 const SHIFTS = [
-  { value: 'morning', label: 'Mañana', icon: Sun, color: 'text-yellow-500' },
-  { value: 'afternoon', label: 'Tarde', icon: Sunset, color: 'text-orange-500' },
-  { value: 'night', label: 'Noche', icon: Moon, color: 'text-indigo-500' },
+  { value: 'morning', label: 'Apertura', icon: Sun, color: 'text-yellow-500' },
+  { value: 'afternoon', label: 'Intermedio', icon: Sunset, color: 'text-orange-500' },
+  { value: 'night', label: 'Cierre', icon: Moon, color: 'text-indigo-500' },
 ];
 
 export default function ShiftRecordForm({ storeId, onSuccess }) {
