@@ -246,7 +246,10 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
   const { data: shiftRecords = [] } = useQuery({
     queryKey: ['shiftRecords', storeId],
     queryFn: () => base44.entities.ShiftRecord.filter({ store_id: storeId }),
-    enabled: !!storeId
+    enabled: !!storeId,
+    staleTime: 0,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true
   });
 
   // Calcular ranking
