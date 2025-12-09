@@ -254,7 +254,7 @@ export default function DailySalesForm({ storeId, onSuccess }) {
         <form onSubmit={handleSubmit} className="p-4 space-y-4">
           <motion.div
             whileHover={{ scale: 1.02 }}
-            className="bg-white rounded-2xl p-4 shadow-lg border-2 border-amber-200"
+            className="bg-gradient-to-br from-amber-50/60 to-yellow-50/40 rounded-xl p-4 shadow-sm border border-amber-200/40"
           >
             <Label className="text-gray-600 flex items-center gap-2 mb-2 font-bold">
               <Calendar className="w-5 h-5 text-amber-500" />
@@ -271,7 +271,7 @@ export default function DailySalesForm({ storeId, onSuccess }) {
           <div className="grid grid-cols-2 gap-4">
             <motion.div
               whileHover={{ scale: 1.05, rotate: 2 }}
-              className="bg-gradient-to-br from-emerald-100 to-green-200 rounded-2xl p-4 shadow-lg border-2 border-emerald-300"
+              className="bg-gradient-to-br from-emerald-50/80 to-green-50/60 rounded-xl p-4 shadow-sm border border-emerald-200/50"
             >
               <Label className="flex items-center gap-2 mb-2 font-black text-emerald-700">
                 <DollarSign className="w-5 h-5" />
@@ -288,7 +288,7 @@ export default function DailySalesForm({ storeId, onSuccess }) {
 
             <motion.div
               whileHover={{ scale: 1.05, rotate: -2 }}
-              className="bg-gradient-to-br from-sky-100 to-blue-200 rounded-2xl p-4 shadow-lg border-2 border-sky-300"
+              className="bg-gradient-to-br from-sky-50/80 to-blue-50/60 rounded-xl p-4 shadow-sm border border-sky-200/50"
             >
               <Label className="flex items-center gap-2 mb-2 font-black text-sky-700">
                 <Receipt className="w-5 h-5" />
@@ -305,7 +305,7 @@ export default function DailySalesForm({ storeId, onSuccess }) {
 
             <motion.div
               whileHover={{ scale: 1.05, rotate: 2 }}
-              className="bg-gradient-to-br from-violet-100 to-purple-200 rounded-2xl p-4 shadow-lg border-2 border-violet-300"
+              className="bg-gradient-to-br from-violet-50/80 to-purple-50/60 rounded-xl p-4 shadow-sm border border-violet-200/50"
             >
               <Label className="flex items-center gap-2 mb-2 font-black text-violet-700">
                 <Zap className="w-5 h-5" />
@@ -322,7 +322,7 @@ export default function DailySalesForm({ storeId, onSuccess }) {
 
             <motion.div
               whileHover={{ scale: 1.05, rotate: -2 }}
-              className="bg-gradient-to-br from-pink-100 to-rose-200 rounded-2xl p-4 shadow-lg border-2 border-pink-300"
+              className="bg-gradient-to-br from-pink-50/80 to-rose-50/60 rounded-xl p-4 shadow-sm border border-pink-200/50"
             >
               <Label className="flex items-center gap-2 mb-2 font-black text-pink-700">
                 <Gift className="w-5 h-5" />
