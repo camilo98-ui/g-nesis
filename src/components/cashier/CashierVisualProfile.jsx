@@ -41,7 +41,7 @@ export default function CashierVisualProfile({ cashier, storeCode, shiftRecords 
     const totalTransactions = records.reduce((sum, r) => sum + (r.transactions || 0), 0);
     const totalSuggested = records.reduce((sum, r) => sum + (r.suggested_sales || 0), 0);
     const daysWorked = records.length;
-    const avgTicket = totalTickets > 0 ? totalSales / totalTickets : 0;
+    const avgTicket = totalTransactions > 0 ? totalSales / totalTransactions : 0;
     const avgSales = daysWorked > 0 ? totalSales / daysWorked : 0;
 
     return {
