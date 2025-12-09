@@ -340,7 +340,7 @@ export default function PlannerStats({ shifts, cashiers, storeId, currentWeek, s
       }, 0);
       const daySales = salesData.find(sd => sd.date === dayStr);
       const sales = daySales ? Math.round(daySales.total_sales / 1000) : 0;
-      return { fecha: format(day, 'd MMM', { locale: es }), horas: Math.round(hoursScheduled), ventas: sales, productividad: hoursScheduled > 0 ? Math.round(sales * 1000 / hoursScheduled / 1000) : 0 };
+      return { fecha: format(day, 'd MMM', { locale: es }), horas: Math.round(hoursScheduled), ventas: sales, productividad: hoursScheduled > 0 ? Math.round(sales / hoursScheduled) : 0 };
     });
 
     const topPositions = Object.entries(ROLES_LABELS).map(([key, label]) => ({
