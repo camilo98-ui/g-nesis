@@ -272,6 +272,8 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
       const historicalTickets = allRecords.reduce((sum, r) => sum + (r.tickets || 0), 0);
       const historicalDays = allRecords.length;
 
+      const historicalTransactions = allRecords.reduce((sum, r) => sum + (r.transactions || 0), 0);
+      
       cashierStats[c.id] = {
         ...c,
         totalSales,
@@ -279,13 +281,14 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
         totalTransactions,
         totalSuggested,
         daysWorked,
-        avgTicket: totalTickets > 0 ? totalSales / totalTickets : 0,
+        avgTicket: totalTransactions > 0 ? totalSales / totalTransactions : 0,
         avgDaily: daysWorked > 0 ? totalSales / daysWorked : 0,
         hasData: daysWorked > 0,
         historicalSales,
         historicalTickets,
         historicalDays,
-        historicalAvgTicket: historicalTickets > 0 ? historicalSales / historicalTickets : 0,
+        historicalTransactions,
+        historicalAvgTicket: historicalTransactions > 0 ? historicalSales / historicalTransactions : 0,
         historicalAvgDaily: historicalDays > 0 ? historicalSales / historicalDays : 0
       };
     });
