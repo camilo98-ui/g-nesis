@@ -23,13 +23,17 @@ export default function CashierAnalysis({ cashierId, cashierName, storeId }) {
   const { data: shiftRecords = [] } = useQuery({
     queryKey: ['shiftRecords', storeId],
     queryFn: () => base44.entities.ShiftRecord.filter({ store_id: storeId }),
-    enabled: !!storeId
+    enabled: !!storeId,
+    staleTime: 0,
+    refetchOnMount: 'always'
   });
 
   const { data: allCashiers = [] } = useQuery({
     queryKey: ['cashiers', storeId],
     queryFn: () => base44.entities.Cashier.filter({ store_id: storeId }),
-    enabled: !!storeId
+    enabled: !!storeId,
+    staleTime: 0,
+    refetchOnMount: 'always'
   });
 
   // Datos del cajero en los últimos 30 días
