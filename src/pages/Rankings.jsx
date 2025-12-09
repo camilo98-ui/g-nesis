@@ -338,6 +338,47 @@ export default function Rankings() {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-6"
           >
+            {/* Ruleta Popsy Link */}
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              whileHover={{ scale: 1.02, y: -5 }}
+              whileTap={{ scale: 0.98 }}
+              className="mb-6"
+            >
+              <Link to={createPageUrl('RoulettePopsy')}>
+                <div className="bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 rounded-3xl p-6 shadow-2xl relative overflow-hidden border-4 border-amber-300 cursor-pointer">
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/30 to-white/0"
+                    animate={{ x: ['-100%', '200%'] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                  />
+                  <div className="relative z-10 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <motion.div
+                        animate={{ rotate: [0, 360] }}
+                        transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                        className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg"
+                      >
+                        <Trophy className="w-8 h-8 text-amber-500" />
+                      </motion.div>
+                      <div>
+                        <p className="text-2xl font-black text-white mb-1">🎡 Ruleta Popsy</p>
+                        <p className="text-sm text-amber-100 font-medium">Empleado del Mes - Gira y gana premios increíbles</p>
+                      </div>
+                    </div>
+                    <motion.div
+                      animate={{ scale: [1, 1.2, 1], rotate: [0, 10, -10, 0] }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                      className="text-5xl"
+                    >
+                      🎁
+                    </motion.div>
+                  </div>
+                </div>
+              </Link>
+            </motion.div>
+
             {/* Best Cashier of Store - DESTACADO con felicitación y análisis */}
             {rankings.bestCashier?.[0] && (
               <motion.div
