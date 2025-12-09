@@ -773,6 +773,174 @@ export default function PlannerStats({ shifts, cashiers, storeId, currentWeek, s
           </CardContent>
         </Card>
       </motion.div>
+
+      {/* NUEVA: Análisis de Turnos por Horario */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9 }}>
+        <Card className="bg-white border-0 shadow-lg overflow-hidden">
+          <CardHeader className="pb-2 bg-gradient-to-r from-blue-50 to-cyan-50">
+            <CardTitle className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+              <motion.div animate={{ rotate: [0, 180, 360] }} transition={{ duration: 4, repeat: Infinity, ease: "linear" }}>
+                <Clock className="w-5 h-5 text-blue-500" />
+              </motion.div>
+              Distribución de Horarios
+            </CardTitle>
+            <CardDescription className="text-xs text-gray-500">Turnos por franja horaria</CardDescription>
+          </CardHeader>
+          <CardContent className="pt-4">
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={(() => {
+                  const timeSlots = {
+                    'Apertura (6-10am)': 0,
+                    'Mañana (10am-2pm)': 0,
+                    'Tarde (2-6pm)': 0,
+                    'Noche (6-10pm)': 0,
+                    'Cierre (10pm+)': 0
+                  };
+                  shifts.filter(s => {
+                    const d = new Date(s.date);
+                    return d >= dateRange.from && d <= dateRange.to;
+                  }).forEach(s => {
+                    const [startH] = (s.start_time || '09:30').split(':').map(Number);
+                    if (startH < 10) timeSlots['Apertura (6-10am)']++;
+                    else if (startH < 14) timeSlots['Mañana (10am-2pm)']++;
+                    else if (startH < 18) timeSlots['Tarde (2-6pm)']++;
+                    else if (startH < 22) timeSlots['Noche (6-10pm)']++;
+                    else timeSlots['Cierre (10pm+)']++;
+                  });
+                  return Object.entries(timeSlots).map(([name, value]) => ({ name, value }));
+                })()}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis dataKey="name" tick={{ fontSize: 9 }} angle={-15} textAnchor="end" height={60} />
+                  <YAxis tick={{ fontSize: 10 }} />
+                  <Tooltip />
+                  <Bar dataKey="value" radius={[8, 8, 0, 0]}>
+                    {[0, 1, 2, 3, 4].map((_, i) => (
+                      <Cell key={i} fill={['#3b82f6', '#06b6d4', '#8b5cf6', '#ec4899', '#6366f1'][i]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <ChartDescription>
+              <strong>¿Qué muestra?</strong> Cantidad de turnos por franja horaria del día. 
+              <strong>Usa esto para:</strong> Detectar huecos de cobertura (pocas personas en ciertos horarios) y asegurar que haya suficiente personal en horas pico.
+            </ChartDescription>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* NUEVA: Versatilidad de Colaboradores */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1 }}>
+        <Card className="bg-white border-0 shadow-lg overflow-hidden">
+          <CardHeader className="pb-2 bg-gradient-to-r from-purple-50 to-pink-50">
+            <CardTitle className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+              <motion.div animate={{ scale: [1, 1.15, 1] }} transition={{ duration: 2, repeat: Infinity }}>
+                <Sparkles className="w-5 h-5 text-purple-500" />
+              </motion.div>
+              Versatilidad del Equipo
+            </CardTitle>
+            <CardDescription className="text-xs text-gray-500">Cantidad de roles diferentes que domina cada colaborador</CardDescription>
+          </CardHeader>
+          <CardContent className="pt-4">
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={stats.hoursByCashier.slice(0, 8).map(c => ({
+                  name: c.name,
+                  roles: Object.keys(c.roleCount).length,
+                  fullName: c.fullName
+                }))}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis dataKey="name" tick={{ fontSize: 10 }} />
+                  <YAxis tick={{ fontSize: 10 }} domain={[0, 10]} />
+                  <Tooltip content={({ active, payload }) => active && payload?.length ? (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white p-3 rounded-xl shadow-xl border">
+                      <p className="font-bold text-gray-800 mb-1 text-sm">{payload[0]?.payload?.fullName}</p>
+                      <p className="text-purple-600 font-semibold text-xs">
+                        🎯 Domina {payload[0]?.value} posiciones diferentes
+                      </p>
+                      <p className="text-gray-500 text-xs mt-1">
+                        {payload[0]?.value >= 5 ? '⭐ Súper versátil' : payload[0]?.value >= 3 ? '✨ Versátil' : '💡 Puede aprender más roles'}
+                      </p>
+                    </motion.div>
+                  ) : null} />
+                  <Bar dataKey="roles" radius={[8, 8, 0, 0]}>
+                    {stats.hoursByCashier.slice(0, 8).map((c, i) => {
+                      const roles = Object.keys(c.roleCount).length;
+                      return (
+                        <Cell 
+                          key={i} 
+                          fill={roles >= 5 ? '#8b5cf6' : roles >= 3 ? '#a78bfa' : '#c4b5fd'} 
+                        />
+                      );
+                    })}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <ChartDescription>
+              <strong>¿Qué muestra?</strong> Cantidad de roles diferentes que ha trabajado cada colaborador. 
+              <strong>Usa esto para:</strong> Identificar quiénes son más versátiles (pueden cubrir varias estaciones) y quiénes necesitan entrenamiento cross-funcional.
+            </ChartDescription>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* NUEVA: Promedio de Horas por Día de Semana */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.1 }}>
+        <Card className="bg-white border-0 shadow-lg overflow-hidden">
+          <CardHeader className="pb-2 bg-gradient-to-r from-rose-50 to-pink-50">
+            <CardTitle className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+              <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity }}>
+                <TrendingUp className="w-5 h-5 text-rose-500" />
+              </motion.div>
+              Intensidad por Día
+            </CardTitle>
+            <CardDescription className="text-xs text-gray-500">Promedio de horas programadas por día de la semana</CardDescription>
+          </CardHeader>
+          <CardContent className="pt-4">
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={stats.shiftsByDay.map(d => {
+                  const dayShifts = shifts.filter(s => {
+                    const sd = new Date(s.date);
+                    const dayName = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'][sd.getDay()];
+                    return dayName === d.day && sd >= dateRange.from && sd <= dateRange.to;
+                  });
+                  const totalHours = dayShifts.reduce((sum, s) => {
+                    const [startH, startM] = (s.start_time || '09:30').split(':').map(Number);
+                    const [endH, endM] = (s.end_time || '17:30').split(':').map(Number);
+                    return sum + (endH + endM/60) - (startH + startM/60);
+                  }, 0);
+                  return { ...d, horas: Math.round(totalHours) };
+                })}>
+                  <defs>
+                    <linearGradient id="hoursGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.5}/>
+                      <stop offset="95%" stopColor="#f43f5e" stopOpacity={0.1}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis dataKey="day" tick={{ fontSize: 10 }} />
+                  <YAxis tick={{ fontSize: 10 }} />
+                  <Tooltip content={({ active, payload }) => active && payload?.length ? (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white p-3 rounded-xl shadow-xl border">
+                      <p className="font-bold text-gray-800 mb-1">{payload[0]?.payload?.day}</p>
+                      <p className="text-rose-600 font-semibold text-sm">⏱️ {payload[0]?.payload?.horas} horas</p>
+                      <p className="text-gray-500 text-xs">📊 {payload[0]?.payload?.turnos} turnos</p>
+                    </motion.div>
+                  ) : null} />
+                  <Area type="monotone" dataKey="horas" stroke="#f43f5e" strokeWidth={3} fill="url(#hoursGradient)" dot={{ r: 5, fill: '#f43f5e', strokeWidth: 2, stroke: '#fff' }} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+            <ChartDescription>
+              <strong>¿Qué muestra?</strong> Total de horas programadas por día de la semana. 
+              <strong>Usa esto para:</strong> Ver la intensidad operativa de cada día y planificar mejor el staffing según la demanda histórica.
+            </ChartDescription>
+          </CardContent>
+        </Card>
+      </motion.div>
     </div>
   );
 }
