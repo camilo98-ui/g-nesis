@@ -87,18 +87,20 @@ export default function FreezerAuditPanel({
         {/* Pronóstico de Pedido */}
         <OrderPredictionPanel slots={allSlots} />
 
-        {/* Visualización Adicional */}
-        <StockVisualization slots={allSlots} />
-
         {/* Issues List - Solo repetidos */}
         {repeatedFlavors?.length > 0 && (
           <div className="space-y-2">
             <h4 className="font-semibold text-yellow-700 text-sm">🔄 Sabores Repetidos</h4>
             <div className="space-y-1 max-h-32 overflow-y-auto">
               {repeatedFlavors.map((f, i) => (
-                <div key={i} className="text-xs p-2 bg-yellow-50 rounded-lg">
-                  <span className="font-medium">{f.name}</span>
-                  <span className="text-gray-500"> - {f.count}x veces</span>
+                <div key={i} className="text-xs p-2 bg-yellow-50 rounded-lg border border-yellow-200">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-bold text-yellow-800">{f.name}</span>
+                    <span className="text-yellow-600 font-semibold">{f.count}x</span>
+                  </div>
+                  {f.positions && (
+                    <p className="text-[10px] text-gray-500">Ubicaciones: {f.positions}</p>
+                  )}
                 </div>
               ))}
             </div>

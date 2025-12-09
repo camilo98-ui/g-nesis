@@ -225,12 +225,12 @@ export default function FreezerMap() {
   });
 
   // Grid de la nevera - Ahora con bajadas (cada bajada tiene 2 espacios: F y T)
-  // 7 bajadas x 6 posiciones = 42 posiciones visuales pero cada una es una bajada con F/T
+  // 7 bajadas x 5 posiciones = 35 posiciones visuales (10 cubetas por fila)
   const freezerGrid = useMemo(() => {
     const grid = [];
     for (let row = 1; row <= 7; row++) {
       const rowBajadas = [];
-      for (let pos = 1; pos <= 6; pos++) {
+      for (let pos = 1; pos <= 5; pos++) {
         // Cada posición es una "bajada" con slot frontal y trasero
         const frontSlot = slots.find(s => s.row === row && s.position === pos && s.slot_type === 'F') ||
           slots.find(s => s.row === row && s.position === pos && !s.slot_type);
@@ -457,18 +457,28 @@ export default function FreezerMap() {
   // Auditoría
   const runAudit = useCallback(() => {
     const filledSlots = slots.filter(s => !s.is_empty && s.flavor_name);
-    // Contar vacíos reales: 7 filas x 6 posiciones x 2 slots (F y T) = 84 slots totales
-    const totalSlotsInFreezer = 7 * 6 * 2; // 84 slots
+    // Contar vacíos reales: 7 filas x 5 posiciones x 2 slots (F y T) = 70 slots totales
+    const totalSlotsInFreezer = 7 * 5 * 2; // 70 slots
     const emptySlots = totalSlotsInFreezer - filledSlots.length;
     
-    // Detectar repetidos
+    // Detectar repetidos con más precisión
     const flavorCounts = {};
+    const flavorDetails = {};
     filledSlots.forEach(s => {
-      flavorCounts[s.flavor_name] = (flavorCounts[s.flavor_name] || 0) + 1;
+      const key = s.flavor_name.toLowerCase().trim();
+      flavorCounts[key] = (flavorCounts[key] || 0) + 1;
+      if (!flavorDetails[key]) {
+        flavorDetails[key] = { name: s.flavor_name, positions: [] };
+      }
+      flavorDetails[key].positions.push(`${s.row}-${s.position}${s.slot_type || 'F'}`);
     });
     const repeatedFlavors = Object.entries(flavorCounts)
       .filter(([_, count]) => count > 2)
-      .map(([name, count]) => ({ name, count }));
+      .map(([key, count]) => ({ 
+        name: flavorDetails[key].name, 
+        count,
+        positions: flavorDetails[key].positions.join(', ')
+      }));
     
     // Detectar mal ubicados
     const misplacedSlots = filledSlots.filter(s => {
@@ -745,7 +755,7 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                         </button>
 
                         {/* Bajadas - cada una con F y T en columna vertical */}
-                        <div className="grid grid-cols-6 gap-3 p-2 rounded-xl bg-gray-100/50">
+                        <div className="grid grid-cols-5 gap-3 p-2 rounded-xl bg-gray-100/50">
                           {row.map((bajada, bajadaIndex) => (
                             <div 
                               key={`${rowIndex}-${bajadaIndex}`} 

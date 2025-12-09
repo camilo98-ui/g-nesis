@@ -214,7 +214,7 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
         <div className="p-4">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
-              <motion.div whileHover={{ scale: 1.02 }} className="bg-gradient-to-br from-violet-100 to-purple-200 rounded-2xl p-4 shadow-lg border-2 border-violet-300">
+              <motion.div whileHover={{ scale: 1.02 }} className="bg-gradient-to-br from-violet-50/80 to-purple-50/60 rounded-xl p-4 shadow-sm border border-violet-200/50">
                 <Label className="text-violet-700 flex items-center gap-2 mb-2 font-black">
                   <User className="w-5 h-5" />
                   👤 Cajero
@@ -234,7 +234,7 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
                 </Select>
               </motion.div>
 
-              <motion.div whileHover={{ scale: 1.02 }} className="bg-gradient-to-br from-amber-100 to-yellow-200 rounded-2xl p-4 shadow-lg border-2 border-amber-300">
+              <motion.div whileHover={{ scale: 1.02 }} className="bg-gradient-to-br from-amber-50/80 to-yellow-50/60 rounded-xl p-4 shadow-sm border border-amber-200/50">
                 <Label className="text-amber-700 flex items-center gap-2 mb-2 font-black">
                   <Calendar className="w-5 h-5" />
                   📅 Fecha
@@ -248,7 +248,7 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
               </motion.div>
             </div>
 
-            <div className="bg-gradient-to-br from-purple-100 to-pink-200 rounded-2xl p-4 shadow-lg border-2 border-purple-300">
+            <div className="bg-gradient-to-br from-purple-50/80 to-pink-50/60 rounded-xl p-4 shadow-sm border border-purple-200/50">
               <Label className="text-purple-700 font-black mb-2 block">🌅 Turno</Label>
               <div className="grid grid-cols-3 gap-2">
                 {SHIFTS.map(shift => {
@@ -278,7 +278,7 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <motion.div whileHover={{ scale: 1.05, rotate: 2 }} className="bg-gradient-to-br from-emerald-100 to-green-200 rounded-2xl p-4 shadow-lg border-2 border-emerald-300">
+              <motion.div whileHover={{ scale: 1.05, rotate: 2 }} className="bg-gradient-to-br from-emerald-50/80 to-green-50/60 rounded-xl p-4 shadow-sm border border-emerald-200/50">
                 <Label className="flex items-center gap-2 mb-2 font-black text-emerald-700">
                   <DollarSign className="w-5 h-5" />
                   💰 Ventas
@@ -292,7 +292,7 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
                 />
               </motion.div>
 
-              <motion.div whileHover={{ scale: 1.05, rotate: -2 }} className="bg-gradient-to-br from-sky-100 to-blue-200 rounded-2xl p-4 shadow-lg border-2 border-sky-300">
+              <motion.div whileHover={{ scale: 1.05, rotate: -2 }} className="bg-gradient-to-br from-sky-50/80 to-blue-50/60 rounded-xl p-4 shadow-sm border border-sky-200/50">
                 <Label className="flex items-center gap-2 mb-2 font-black text-sky-700">
                   <Receipt className="w-5 h-5" />
                   🎫 Tickets
@@ -306,7 +306,7 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
                 />
               </motion.div>
 
-              <motion.div whileHover={{ scale: 1.05, rotate: 2 }} className="bg-gradient-to-br from-violet-100 to-purple-200 rounded-2xl p-4 shadow-lg border-2 border-violet-300">
+              <motion.div whileHover={{ scale: 1.05, rotate: 2 }} className="bg-gradient-to-br from-violet-50/80 to-purple-50/60 rounded-xl p-4 shadow-sm border border-violet-200/50">
                 <Label className="flex items-center gap-2 mb-2 font-black text-violet-700">
                   <Zap className="w-5 h-5" />
                   ⚡ Transacciones
@@ -320,7 +320,7 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
                 />
               </motion.div>
 
-              <motion.div whileHover={{ scale: 1.05, rotate: -2 }} className="bg-gradient-to-br from-pink-100 to-rose-200 rounded-2xl p-4 shadow-lg border-2 border-pink-300">
+              <motion.div whileHover={{ scale: 1.05, rotate: -2 }} className="bg-gradient-to-br from-pink-50/80 to-rose-50/60 rounded-xl p-4 shadow-sm border border-pink-200/50">
                 <Label className="flex items-center gap-2 mb-2 font-black text-pink-700">
                   <Gift className="w-5 h-5" />
                   🎁 Sugeridos

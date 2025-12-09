@@ -451,12 +451,16 @@ export default function Home() {
 
                         <div className="text-left flex-1">
                           <p className={`text-base font-black leading-tight mb-1 ${
-                            selectedRole === role.id ? 'text-gray-900' : 'text-gray-700'
+                            selectedRole === role.id 
+                              ? role.id === 'gerente' ? 'text-slate-700' : role.id === 'lider' ? 'text-amber-700' : 'text-pink-700'
+                              : 'text-gray-700'
                           }`}>
                             {role.name}
                           </p>
                           <p className={`text-xs font-medium ${
-                            selectedRole === role.id ? 'text-gray-700' : 'text-gray-500'
+                            selectedRole === role.id 
+                              ? role.id === 'gerente' ? 'text-slate-600' : role.id === 'lider' ? 'text-amber-600' : 'text-pink-600'
+                              : 'text-gray-500'
                           }`}>
                             {role.description}
                           </p>
@@ -564,24 +568,26 @@ export default function Home() {
                   transition={{ duration: 1.5, repeat: Infinity }}
                   className="flex items-center gap-2 relative z-10 text-lg font-bold"
                 >
-                  <svg viewBox="0 0 40 60" className="w-6 h-8">
-                    {/* Vaso */}
-                    <path d="M10 12 L12 48 L28 48 L30 12 Z" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.9" />
-                    <path d="M10 12 L12 48 L28 48 L30 12 Z" fill="url(#milkshakeGrad)" opacity="0.6" />
-                    <ellipse cx="20" cy="10" rx="11" ry="4" fill="none" stroke="currentColor" strokeWidth="1" opacity="0.9" />
-                    {/* Helado */}
+                  {/* Helado de chocolate */}
+                  <svg viewBox="0 0 40 65" className="w-6 h-9">
+                    {/* Cono */}
+                    <polygon points="10,22 20,58 30,22" fill="url(#coneGradient)" />
+                    <line x1="13" y1="28" x2="27" y2="28" stroke="#d97706" strokeWidth="0.5" opacity="0.7" />
+                    <line x1="15" y1="36" x2="25" y2="36" stroke="#d97706" strokeWidth="0.5" opacity="0.7" />
+                    <line x1="17" y1="44" x2="23" y2="44" stroke="#d97706" strokeWidth="0.5" opacity="0.7" />
+                    {/* Helado chocolate */}
                     <motion.circle 
-                      cx="20" cy="6" r="4" 
-                      fill="#FFE5F1"
-                      animate={{ y: [0, -1, 0] }}
+                      cx="20" cy="14" r="12" 
+                      fill="#5D3A1A"
+                      animate={{ y: [0, -2, 0] }}
                       transition={{ duration: 2, repeat: Infinity }}
                     />
-                    {/* Pajilla */}
-                    <line x1="25" y1="8" x2="27" y2="40" stroke="currentColor" strokeWidth="1.5" opacity="0.8" />
+                    {/* Brillo */}
+                    <ellipse cx="16" cy="10" rx="5" ry="3" fill="white" opacity="0.3" />
                     <defs>
-                      <linearGradient id="milkshakeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.8"/>
-                        <stop offset="100%" stopColor="#FFB5C5" stopOpacity="0.6"/>
+                      <linearGradient id="coneGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#fbbf24"/>
+                        <stop offset="100%" stopColor="#f59e0b"/>
                       </linearGradient>
                     </defs>
                   </svg>
@@ -651,7 +657,7 @@ export default function Home() {
           <motion.img 
             src={LOGO_URL} 
             alt="Popsy" 
-            className="h-24 sm:h-28 md:h-32 object-contain mx-auto mb-2 cursor-pointer drop-shadow-lg"
+            className="h-32 sm:h-36 md:h-40 object-contain mx-auto mb-2 cursor-pointer drop-shadow-lg"
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ 
               opacity: 1, 
