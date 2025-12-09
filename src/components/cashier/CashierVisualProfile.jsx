@@ -30,7 +30,9 @@ export default function CashierVisualProfile({ cashier, storeCode, shiftRecords 
   const { data: badges = [] } = useQuery({
     queryKey: ['cashierBadges', cashier?.id],
     queryFn: () => base44.entities.CashierBadge.filter({ cashier_id: cashier?.id }),
-    enabled: !!cashier?.id
+    enabled: !!cashier?.id,
+    staleTime: 0,
+    refetchOnMount: 'always'
   });
 
   // Calcular stats del cajero

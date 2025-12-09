@@ -52,13 +52,19 @@ export default function CashiersDashboard() {
   const { data: cashiers = [] } = useQuery({
     queryKey: ['cashiers', selectedStore],
     queryFn: () => base44.entities.Cashier.filter({ store_id: selectedStore }),
-    enabled: !!selectedStore
+    enabled: !!selectedStore,
+    staleTime: 0,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true
   });
 
   const { data: shiftRecords = [] } = useQuery({
     queryKey: ['shiftRecords', selectedStore],
     queryFn: () => base44.entities.ShiftRecord.filter({ store_id: selectedStore }),
-    enabled: !!selectedStore
+    enabled: !!selectedStore,
+    staleTime: 0,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true
   });
 
   const activeCashiers = cashiers.filter(c => c.is_active !== false);
