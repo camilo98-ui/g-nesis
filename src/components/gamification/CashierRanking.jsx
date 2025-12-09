@@ -260,11 +260,17 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
     const cashierStats = {};
     cashiers.filter(c => c.is_active !== false).forEach(c => {
       const records = filteredRecords.filter(r => r.cashier_id === c.id);
+      const allRecords = shiftRecords.filter(r => r.cashier_id === c.id);
       const totalSales = records.reduce((sum, r) => sum + (r.sales || 0), 0);
       const totalTickets = records.reduce((sum, r) => sum + (r.tickets || 0), 0);
       const totalTransactions = records.reduce((sum, r) => sum + (r.transactions || 0), 0);
       const totalSuggested = records.reduce((sum, r) => sum + (r.suggested_sales || 0), 0);
       const daysWorked = records.length;
+      
+      // Stats históricos totales para mostrar cuando no hay datos en el período
+      const historicalSales = allRecords.reduce((sum, r) => sum + (r.sales || 0), 0);
+      const historicalTickets = allRecords.reduce((sum, r) => sum + (r.tickets || 0), 0);
+      const historicalDays = allRecords.length;
 
       cashierStats[c.id] = {
         ...c,
@@ -274,7 +280,13 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
         totalSuggested,
         daysWorked,
         avgTicket: totalTickets > 0 ? totalSales / totalTickets : 0,
-        avgDaily: daysWorked > 0 ? totalSales / daysWorked : 0
+        avgDaily: daysWorked > 0 ? totalSales / daysWorked : 0,
+        hasData: daysWorked > 0,
+        historicalSales,
+        historicalTickets,
+        historicalDays,
+        historicalAvgTicket: historicalTickets > 0 ? historicalSales / historicalTickets : 0,
+        historicalAvgDaily: historicalDays > 0 ? historicalSales / historicalDays : 0
       };
     });
 
