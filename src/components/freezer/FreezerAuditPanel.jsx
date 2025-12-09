@@ -84,6 +84,64 @@ export default function FreezerAuditPanel({
           </div>
         </div>
 
+        {/* Resumen de Sabores */}
+        <div className="p-4 rounded-xl bg-gradient-to-r from-cyan-50 to-blue-50 border border-cyan-200">
+          <h4 className="font-bold text-cyan-700 text-sm mb-3 flex items-center gap-2">
+            <Package className="w-4 h-4" />
+            Resumen de Sabores
+          </h4>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-gray-600">Total de sabores diferentes:</span>
+              <span className="font-bold text-cyan-700">{(() => {
+                const uniqueFlavors = new Set();
+                allSlots.forEach(s => {
+                  if (!s.is_empty && s.flavor_name) {
+                    uniqueFlavors.add(s.flavor_name.toLowerCase().trim());
+                  }
+                });
+                return uniqueFlavors.size;
+              })()}</span>
+            </div>
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-gray-600">Cubetas ocupadas:</span>
+              <span className="font-bold text-cyan-700">{filledSlots} / {totalSlots}</span>
+            </div>
+            <div className="text-[10px] text-cyan-600 mt-2 pt-2 border-t border-cyan-200">
+              {(() => {
+                const flavorCounts = {};
+                allSlots.forEach(s => {
+                  if (!s.is_empty && s.flavor_name) {
+                    const key = s.flavor_name.toLowerCase().trim();
+                    flavorCounts[key] = (flavorCounts[key] || 0) + 1;
+                  }
+                });
+                const sortedFlavors = Object.entries(flavorCounts)
+                  .map(([name, count]) => {
+                    const originalSlot = allSlots.find(s => s.flavor_name?.toLowerCase().trim() === name);
+                    return { name: originalSlot?.flavor_name || name, count };
+                  })
+                  .sort((a, b) => b.count - a.count)
+                  .slice(0, 5);
+                
+                return sortedFlavors.length > 0 ? (
+                  <div>
+                    <p className="font-semibold mb-1">Top 5 más presentes:</p>
+                    <div className="space-y-0.5">
+                      {sortedFlavors.map((f, i) => (
+                        <div key={i} className="flex justify-between">
+                          <span>{f.name}</span>
+                          <span className="font-bold">{f.count}x</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : 'No hay sabores en la nevera';
+              })()}
+            </div>
+          </div>
+        </div>
+
         {/* Pronóstico de Pedido */}
         <OrderPredictionPanel slots={allSlots} />
 
