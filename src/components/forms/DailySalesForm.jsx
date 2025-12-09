@@ -5,8 +5,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Save, DollarSign, Receipt, Zap, Gift, Loader2, Calendar, TrendingUp, CheckCircle, Sparkles } from 'lucide-react';
+import { Save, DollarSign, Receipt, Zap, Gift, Loader2, Calendar, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 
 // Explosión de confetti de colores Popsy
@@ -247,114 +246,137 @@ export default function DailySalesForm({ storeId, onSuccess }) {
       </AnimatePresence>
 
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white/60 backdrop-blur-sm rounded-2xl shadow-lg overflow-hidden"
+        transition={{ duration: 0.5 }}
+        className="bg-white/80 backdrop-blur-md rounded-3xl shadow-xl overflow-hidden border border-pink-100/50"
       >
-        <form onSubmit={handleSubmit} className="p-4 space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-6">
+          {/* Fecha */}
           <motion.div
-            whileHover={{ scale: 1.02 }}
-            className="bg-gradient-to-br from-amber-50/60 to-yellow-50/40 rounded-xl p-4 shadow-sm border border-amber-200/40"
+            whileHover={{ scale: 1.02, y: -2 }}
+            transition={{ type: "spring", stiffness: 300 }}
+            className="bg-gradient-to-br from-amber-100/60 via-yellow-50/40 to-amber-50/30 rounded-3xl p-6 shadow-md border border-amber-200/40"
           >
-            <Label className="text-gray-600 flex items-center gap-2 mb-2 font-bold">
-              <Calendar className="w-5 h-5 text-amber-500" />
-              📅 Fecha
+            <Label className="text-amber-700 flex items-center gap-2.5 mb-3 font-bold text-base">
+              <div className="w-10 h-10 bg-amber-200/60 rounded-2xl flex items-center justify-center">
+                <Calendar className="w-5 h-5 text-amber-600" />
+              </div>
+              Fecha
             </Label>
             <Input 
               type="date" 
               value={formData.date}
               onChange={(e) => setFormData({...formData, date: e.target.value})}
-              className="border-2 border-amber-300 focus:border-amber-500 text-lg font-semibold"
+              className="border-amber-300/50 focus:border-amber-500 text-base font-semibold bg-white/80 h-12 rounded-2xl shadow-sm"
             />
           </motion.div>
 
-          <div className="grid grid-cols-2 gap-4">
+          {/* Métricas */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <motion.div
-              whileHover={{ scale: 1.05, rotate: 2 }}
-              className="bg-gradient-to-br from-emerald-50/80 to-green-50/60 rounded-xl p-4 shadow-sm border border-emerald-200/50"
+              whileHover={{ scale: 1.03, y: -3 }}
+              transition={{ type: "spring", stiffness: 300 }}
+              className="bg-gradient-to-br from-emerald-100/60 via-green-50/40 to-emerald-50/30 rounded-3xl p-6 shadow-md border border-emerald-200/40"
             >
-              <Label className="flex items-center gap-2 mb-2 font-black text-emerald-700">
-                <DollarSign className="w-5 h-5" />
-                💰 Ventas
+              <Label className="flex items-center gap-2.5 mb-3 font-bold text-base text-emerald-700">
+                <div className="w-10 h-10 bg-emerald-200/60 rounded-2xl flex items-center justify-center">
+                  <DollarSign className="w-5 h-5 text-emerald-600" />
+                </div>
+                Ventas
               </Label>
               <Input 
                 type="number"
                 placeholder="0"
                 value={formData.total_sales}
                 onChange={(e) => setFormData({...formData, total_sales: e.target.value})}
-                className="border-2 border-emerald-400 focus:border-emerald-600 text-lg font-bold bg-white"
+                className="border-emerald-300/50 focus:border-emerald-500 text-xl font-bold bg-white/80 h-14 rounded-2xl shadow-sm placeholder:text-gray-300"
               />
             </motion.div>
 
             <motion.div
-              whileHover={{ scale: 1.05, rotate: -2 }}
-              className="bg-gradient-to-br from-sky-50/80 to-blue-50/60 rounded-xl p-4 shadow-sm border border-sky-200/50"
+              whileHover={{ scale: 1.03, y: -3 }}
+              transition={{ type: "spring", stiffness: 300 }}
+              className="bg-gradient-to-br from-sky-100/60 via-blue-50/40 to-sky-50/30 rounded-3xl p-6 shadow-md border border-sky-200/40"
             >
-              <Label className="flex items-center gap-2 mb-2 font-black text-sky-700">
-                <Receipt className="w-5 h-5" />
-                🎫 Tickets
+              <Label className="flex items-center gap-2.5 mb-3 font-bold text-base text-sky-700">
+                <div className="w-10 h-10 bg-sky-200/60 rounded-2xl flex items-center justify-center">
+                  <Receipt className="w-5 h-5 text-sky-600" />
+                </div>
+                Tickets
               </Label>
               <Input 
                 type="number"
                 placeholder="0"
                 value={formData.total_tickets}
                 onChange={(e) => setFormData({...formData, total_tickets: e.target.value})}
-                className="border-2 border-sky-400 focus:border-sky-600 text-lg font-bold bg-white"
+                className="border-sky-300/50 focus:border-sky-500 text-xl font-bold bg-white/80 h-14 rounded-2xl shadow-sm placeholder:text-gray-300"
               />
             </motion.div>
 
             <motion.div
-              whileHover={{ scale: 1.05, rotate: 2 }}
-              className="bg-gradient-to-br from-violet-50/80 to-purple-50/60 rounded-xl p-4 shadow-sm border border-violet-200/50"
+              whileHover={{ scale: 1.03, y: -3 }}
+              transition={{ type: "spring", stiffness: 300 }}
+              className="bg-gradient-to-br from-violet-100/60 via-purple-50/40 to-violet-50/30 rounded-3xl p-6 shadow-md border border-violet-200/40"
             >
-              <Label className="flex items-center gap-2 mb-2 font-black text-violet-700">
-                <Zap className="w-5 h-5" />
-                ⚡ Transacciones
+              <Label className="flex items-center gap-2.5 mb-3 font-bold text-base text-violet-700">
+                <div className="w-10 h-10 bg-violet-200/60 rounded-2xl flex items-center justify-center">
+                  <Zap className="w-5 h-5 text-violet-600" />
+                </div>
+                Transacciones
               </Label>
               <Input 
                 type="number"
                 placeholder="0"
                 value={formData.total_transactions}
                 onChange={(e) => setFormData({...formData, total_transactions: e.target.value})}
-                className="border-2 border-violet-400 focus:border-violet-600 text-lg font-bold bg-white"
+                className="border-violet-300/50 focus:border-violet-500 text-xl font-bold bg-white/80 h-14 rounded-2xl shadow-sm placeholder:text-gray-300"
               />
             </motion.div>
 
             <motion.div
-              whileHover={{ scale: 1.05, rotate: -2 }}
-              className="bg-gradient-to-br from-pink-50/80 to-rose-50/60 rounded-xl p-4 shadow-sm border border-pink-200/50"
+              whileHover={{ scale: 1.03, y: -3 }}
+              transition={{ type: "spring", stiffness: 300 }}
+              className="bg-gradient-to-br from-pink-100/60 via-rose-50/40 to-pink-50/30 rounded-3xl p-6 shadow-md border border-pink-200/40"
             >
-              <Label className="flex items-center gap-2 mb-2 font-black text-pink-700">
-                <Gift className="w-5 h-5" />
-                🎁 Sugeridos
+              <Label className="flex items-center gap-2.5 mb-3 font-bold text-base text-pink-700">
+                <div className="w-10 h-10 bg-pink-200/60 rounded-2xl flex items-center justify-center">
+                  <Gift className="w-5 h-5 text-pink-600" />
+                </div>
+                Sugeridos
               </Label>
               <Input 
                 type="number"
                 placeholder="0"
                 value={formData.total_suggested}
                 onChange={(e) => setFormData({...formData, total_suggested: e.target.value})}
-                className="border-2 border-pink-400 focus:border-pink-600 text-lg font-bold bg-white"
+                className="border-pink-300/50 focus:border-pink-500 text-xl font-bold bg-white/80 h-14 rounded-2xl shadow-sm placeholder:text-gray-300"
               />
             </motion.div>
           </div>
 
-          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+          {/* Botón Guardar */}
+          <motion.div 
+            whileHover={{ scale: 1.02, y: -2 }} 
+            whileTap={{ scale: 0.98 }}
+            className="pt-2"
+          >
             <Button 
               type="submit" 
               disabled={createMutation.isPending}
-              className="w-full bg-gradient-to-r from-pink-400 to-rose-400 hover:from-pink-500 hover:to-rose-500 text-white shadow-lg py-5 text-base font-bold rounded-xl"
+              className="w-full bg-gradient-to-r from-pink-500 via-rose-500 to-pink-500 hover:from-pink-600 hover:via-rose-600 hover:to-pink-600 text-white shadow-xl py-7 text-lg font-bold rounded-2xl transition-all duration-300"
             >
               {createMutation.isPending ? (
-                <span className="flex items-center justify-center gap-2">
+                <span className="flex items-center justify-center gap-3">
                   <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}>
-                    <Loader2 className="w-5 h-5" />
+                    <Loader2 className="w-6 h-6" />
                   </motion.div>
                   Guardando...
                 </span>
               ) : (
-                <span className="flex items-center justify-center gap-2">
-                  <Save className="w-5 h-5" />
-                  Guardar
+                <span className="flex items-center justify-center gap-3">
+                  <Save className="w-6 h-6" />
+                  Guardar Ventas
                 </span>
               )}
             </Button>
