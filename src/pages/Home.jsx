@@ -570,26 +570,21 @@ export default function Home() {
                 >
                   {/* Helado de chocolate */}
                   <svg viewBox="0 0 40 65" className="w-6 h-9">
-                    {/* Cono */}
-                    <polygon points="10,22 20,58 30,22" fill="url(#coneGradient)" />
-                    <line x1="13" y1="28" x2="27" y2="28" stroke="#d97706" strokeWidth="0.5" opacity="0.7" />
-                    <line x1="15" y1="36" x2="25" y2="36" stroke="#d97706" strokeWidth="0.5" opacity="0.7" />
-                    <line x1="17" y1="44" x2="23" y2="44" stroke="#d97706" strokeWidth="0.5" opacity="0.7" />
-                    {/* Helado chocolate */}
-                    <motion.circle 
-                      cx="20" cy="14" r="12" 
-                      fill="#5D3A1A"
-                      animate={{ y: [0, -2, 0] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                    />
-                    {/* Brillo */}
-                    <ellipse cx="16" cy="10" rx="5" ry="3" fill="white" opacity="0.3" />
                     <defs>
                       <linearGradient id="coneGradient" x1="0%" y1="0%" x2="0%" y2="100%">
                         <stop offset="0%" stopColor="#fbbf24"/>
                         <stop offset="100%" stopColor="#f59e0b"/>
                       </linearGradient>
                     </defs>
+                    {/* Cono */}
+                    <polygon points="10,22 20,58 30,22" fill="url(#coneGradient)" />
+                    <line x1="13" y1="28" x2="27" y2="28" stroke="#d97706" strokeWidth="0.5" opacity="0.7" />
+                    <line x1="15" y1="36" x2="25" y2="36" stroke="#d97706" strokeWidth="0.5" opacity="0.7" />
+                    <line x1="17" y1="44" x2="23" y2="44" stroke="#d97706" strokeWidth="0.5" opacity="0.7" />
+                    {/* Helado chocolate */}
+                    <circle cx="20" cy="14" r="12" fill="#5D3A1A" />
+                    {/* Brillo */}
+                    <ellipse cx="16" cy="10" rx="5" ry="3" fill="white" opacity="0.3" />
                   </svg>
                   Ingresar a la tienda
                 </motion.span>
