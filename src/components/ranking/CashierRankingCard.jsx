@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Trophy, Medal, Award, Crown, Receipt, Zap, Star, Flame, Sparkles } from 'lucide-react';
+import { Trophy, Medal, Award, Crown, Receipt, Zap, Star, Flame, Sparkles, Calendar } from 'lucide-react';
 
 const RANK_STYLES = {
   1: { 
@@ -131,12 +131,16 @@ export default function CashierRankingCard({
           </h4>
           <div className={`flex flex-wrap gap-2 mt-2 ${isTopThree ? 'text-gray-700' : 'text-gray-600'}`}>
             <span className="flex items-center gap-1 bg-white/50 px-2 py-1 rounded-lg text-xs font-bold">
+              <Calendar className="w-3.5 h-3.5 text-gray-500" />
+              {cashier.daysWorked || 0} turnos
+            </span>
+            <span className="flex items-center gap-1 bg-white/50 px-2 py-1 rounded-lg text-xs font-bold">
               <Receipt className="w-3.5 h-3.5 text-blue-500" />
-              {tickets}
+              Prom: {formatCurrency(cashier.avgDaily || 0)}
             </span>
             <span className="flex items-center gap-1 bg-white/50 px-2 py-1 rounded-lg text-xs font-bold">
               <Zap className="w-3.5 h-3.5 text-purple-500" />
-              {transactions}
+              🎫 {formatCurrency(calculatedAvgTicket)}
             </span>
           </div>
         </div>
