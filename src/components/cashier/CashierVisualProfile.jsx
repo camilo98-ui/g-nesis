@@ -42,9 +42,11 @@ export default function CashierVisualProfile({ cashier, storeCode, shiftRecords 
     const totalSuggested = records.reduce((sum, r) => sum + (r.suggested_sales || 0), 0);
     const daysWorked = records.length;
     const avgTicket = totalTickets > 0 ? totalSales / totalTickets : 0;
+    const avgSales = daysWorked > 0 ? totalSales / daysWorked : 0;
 
     return {
       totalSales,
+      avgSales,
       totalTickets,
       totalTransactions,
       totalSuggested,
@@ -156,12 +158,12 @@ export default function CashierVisualProfile({ cashier, storeCode, shiftRecords 
         <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3 px-4">
           <div className="bg-emerald-50 rounded-xl p-3 text-center">
             <DollarSign className="w-5 h-5 text-emerald-500 mx-auto mb-1" />
-            <p className="text-lg font-black text-emerald-600">${(stats.totalSales/1000000).toFixed(1)}M</p>
-            <p className="text-[10px] text-gray-500">Ventas</p>
+            <p className="text-lg font-black text-emerald-600">${Math.round(stats.avgSales / 1000)}K</p>
+            <p className="text-[10px] text-gray-500">Promedio Venta</p>
           </div>
           <div className="bg-blue-50 rounded-xl p-3 text-center">
             <Receipt className="w-5 h-5 text-blue-500 mx-auto mb-1" />
-            <p className="text-lg font-black text-blue-600">${(stats.avgTicket/1000).toFixed(0)}K</p>
+            <p className="text-lg font-black text-blue-600">${Math.round(stats.avgTicket / 1000)}K</p>
             <p className="text-[10px] text-gray-500">Ticket Prom.</p>
           </div>
           <div className="bg-purple-50 rounded-xl p-3 text-center">

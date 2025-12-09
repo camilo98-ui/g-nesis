@@ -47,18 +47,39 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
       const transactionsValue = parseInt(data.transactions) || 0;
       const suggestedValue = parseInt(data.suggested_sales) || 0;
 
-      const record = await base44.entities.ShiftRecord.create({
-        store_id: storeId,
+      // Verificar si ya existe un registro para este cajero, fecha y turno
+      const existingRecords = await base44.entities.ShiftRecord.filter({ 
+        store_id: storeId, 
         cashier_id: data.cashier_id,
-        cashier_name: cashier?.name || '',
         date: data.date,
-        shift: data.shift,
-        sales: salesValue,
-        tickets: ticketsValue,
-        transactions: transactionsValue,
-        suggested_sales: suggestedValue,
-        average_ticket: ticketsValue > 0 ? salesValue / ticketsValue : 0
+        shift: data.shift
       });
+
+      let record;
+      if (existingRecords.length > 0) {
+        // Actualizar el registro existente
+        record = await base44.entities.ShiftRecord.update(existingRecords[0].id, {
+          sales: salesValue,
+          tickets: ticketsValue,
+          transactions: transactionsValue,
+          suggested_sales: suggestedValue,
+          average_ticket: ticketsValue > 0 ? salesValue / ticketsValue : 0
+        });
+      } else {
+        // Crear nuevo registro
+        record = await base44.entities.ShiftRecord.create({
+          store_id: storeId,
+          cashier_id: data.cashier_id,
+          cashier_name: cashier?.name || '',
+          date: data.date,
+          shift: data.shift,
+          sales: salesValue,
+          tickets: ticketsValue,
+          transactions: transactionsValue,
+          suggested_sales: suggestedValue,
+          average_ticket: ticketsValue > 0 ? salesValue / ticketsValue : 0
+        });
+      }
 
       const allDayRecords = await base44.entities.ShiftRecord.filter({ 
         store_id: storeId, 
