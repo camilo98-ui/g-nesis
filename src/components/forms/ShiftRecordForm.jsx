@@ -137,14 +137,12 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
       return record;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['shiftRecords'] });
-      queryClient.invalidateQueries({ queryKey: ['shiftRecords', storeId] });
-      queryClient.invalidateQueries({ queryKey: ['dailySales'] });
-      queryClient.invalidateQueries({ queryKey: ['dailySales', storeId] });
+      // Forzar refresco inmediato de todos los datos
+      queryClient.refetchQueries({ queryKey: ['shiftRecords'], type: 'active' });
+      queryClient.refetchQueries({ queryKey: ['dailySales'], type: 'active' });
+      queryClient.refetchQueries({ queryKey: ['cashiers'], type: 'active' });
       queryClient.invalidateQueries({ queryKey: ['salesLogs'] });
       queryClient.invalidateQueries({ queryKey: ['budgets'] });
-      queryClient.invalidateQueries({ queryKey: ['cashiers'] });
-      queryClient.invalidateQueries({ queryKey: ['cashiers', storeId] });
 
       toast.success('¡Turno registrado correctamente!');
 
