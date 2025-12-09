@@ -295,30 +295,30 @@ export default function CashiersDashboard() {
                         <div className="bg-emerald-50 rounded-xl p-4 text-center">
                          <p className="text-xs text-gray-500 mb-1">💰 Venta Prom/Día</p>
                          <p className="text-lg font-black text-emerald-600">
-                           ${Math.round((selectedCashier.avgSalesPerDay || 0)/1000)}K
+                           ${Math.round((cashierStats[selectedCashier.id]?.avgSalesPerDay || 0)/1000)}K
                          </p>
-                         <p className="text-[9px] text-gray-400">{selectedCashier.daysWorked || 0} días trabajados</p>
+                         <p className="text-[9px] text-gray-400">{cashierStats[selectedCashier.id]?.daysWorked || 0} turnos</p>
                         </div>
                         <div className="bg-blue-50 rounded-xl p-4 text-center">
                          <p className="text-xs text-gray-500 mb-1">🎫 Ticket Promedio</p>
                          <p className="text-lg font-black text-blue-600">
-                           ${Math.round((selectedCashier.avgTicket || 0)/1000)}K
+                           ${Math.round((cashierStats[selectedCashier.id]?.avgTicket || 0)/1000)}K
                          </p>
-                         <p className="text-[9px] text-gray-400">por transacción</p>
+                         <p className="text-[9px] text-gray-400">por ticket</p>
                         </div>
                         <div className="bg-purple-50 rounded-xl p-4 text-center">
-                          <p className="text-xs text-gray-500 mb-1">⚡ Trans Prom/Día</p>
+                          <p className="text-xs text-gray-500 mb-1">⚡ Transacciones</p>
                           <p className="text-lg font-black text-purple-600">
-                            {selectedCashier.daysWorked > 0 ? Math.round(selectedCashier.totalTransactions / selectedCashier.daysWorked) : 0}
+                            {cashierStats[selectedCashier.id]?.totalTransactions || 0}
                           </p>
-                          <p className="text-[9px] text-gray-400">transacciones</p>
+                          <p className="text-[9px] text-gray-400">totales</p>
                         </div>
                         <div className="bg-pink-50 rounded-xl p-4 text-center">
-                          <p className="text-xs text-gray-500 mb-1">🎁 Sugeridos Prom</p>
+                          <p className="text-xs text-gray-500 mb-1">🎁 Sugeridos Totales</p>
                           <p className="text-lg font-black text-pink-600">
-                            {selectedCashier.daysWorked > 0 ? Math.round(selectedCashier.totalSuggested / selectedCashier.daysWorked) : 0}
+                            {cashierStats[selectedCashier.id]?.totalSuggested || 0}
                           </p>
-                          <p className="text-[9px] text-gray-400">por día</p>
+                          <p className="text-[9px] text-gray-400">en el período</p>
                         </div>
                       </div>
 
