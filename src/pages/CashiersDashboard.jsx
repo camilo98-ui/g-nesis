@@ -170,29 +170,16 @@ export default function CashiersDashboard() {
               </Button>
             </Link>
             <div>
-              <div className="flex items-center gap-3">
-                <motion.h1 
-                  animate={{ 
-                    backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
-                  }}
-                  transition={{ duration: 5, repeat: Infinity }}
-                  className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-pink-500 via-rose-500 to-pink-500 bg-[length:200%_100%] bg-clip-text text-transparent flex items-center gap-2"
-                >
-                  <Users className="w-6 h-6 text-pink-500" />
-                  Cajeros
-                </motion.h1>
-                {selectedStore && (
-                  <motion.button
-                    whileHover={{ scale: 1.1, rotate: 90 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={() => setShowCashierSales(true)}
-                    className="w-10 h-10 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow"
-                    title="Registrar turno de cajero"
-                  >
-                    <TrendingUp className="w-5 h-5" />
-                  </motion.button>
-                )}
-              </div>
+              <motion.h1 
+                animate={{ 
+                  backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+                }}
+                transition={{ duration: 5, repeat: Infinity }}
+                className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-pink-500 via-rose-500 to-pink-500 bg-[length:200%_100%] bg-clip-text text-transparent flex items-center gap-2"
+              >
+                <Users className="w-6 h-6 text-pink-500" />
+                Cajeros
+              </motion.h1>
               {selectedStore && (
                 <p className="text-sm text-pink-500 font-medium">{getDisplayName(selectedStore)}</p>
               )}
@@ -303,31 +290,35 @@ export default function CashiersDashboard() {
                         storeId={selectedStore}
                       />
 
-                      {/* Stats adicionales */}
+                      {/* Stats adicionales - PROMEDIOS */}
                       <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3">
                         <div className="bg-emerald-50 rounded-xl p-4 text-center">
-                          <p className="text-xs text-gray-500 mb-1">Ventas Totales</p>
+                          <p className="text-xs text-gray-500 mb-1">💰 Venta Prom/Día</p>
                           <p className="text-lg font-black text-emerald-600">
-                            ${((selectedCashier.totalSales || 0)/1000000).toFixed(2)}M
+                            ${((selectedCashier.avgSalesPerDay || 0)/1000).toFixed(0)}K
                           </p>
+                          <p className="text-[9px] text-gray-400">{selectedCashier.daysWorked || 0} días trabajados</p>
                         </div>
                         <div className="bg-blue-50 rounded-xl p-4 text-center">
-                          <p className="text-xs text-gray-500 mb-1">Tickets</p>
+                          <p className="text-xs text-gray-500 mb-1">🎫 Ticket Prom</p>
                           <p className="text-lg font-black text-blue-600">
-                            {(selectedCashier.totalTickets || 0).toLocaleString()}
-                          </p>
-                        </div>
-                        <div className="bg-purple-50 rounded-xl p-4 text-center">
-                          <p className="text-xs text-gray-500 mb-1">Ticket Prom.</p>
-                          <p className="text-lg font-black text-purple-600">
                             ${((selectedCashier.avgTicket || 0)/1000).toFixed(0)}K
                           </p>
+                          <p className="text-[9px] text-gray-400">por transacción</p>
+                        </div>
+                        <div className="bg-purple-50 rounded-xl p-4 text-center">
+                          <p className="text-xs text-gray-500 mb-1">⚡ Trans Prom/Día</p>
+                          <p className="text-lg font-black text-purple-600">
+                            {selectedCashier.daysWorked > 0 ? Math.round(selectedCashier.totalTransactions / selectedCashier.daysWorked) : 0}
+                          </p>
+                          <p className="text-[9px] text-gray-400">transacciones</p>
                         </div>
                         <div className="bg-pink-50 rounded-xl p-4 text-center">
-                          <p className="text-xs text-gray-500 mb-1">Sugeridos</p>
+                          <p className="text-xs text-gray-500 mb-1">🎁 Sugeridos Prom</p>
                           <p className="text-lg font-black text-pink-600">
-                            {selectedCashier.totalSuggested || 0}
+                            {selectedCashier.daysWorked > 0 ? Math.round(selectedCashier.totalSuggested / selectedCashier.daysWorked) : 0}
                           </p>
+                          <p className="text-[9px] text-gray-400">por día</p>
                         </div>
                       </div>
 

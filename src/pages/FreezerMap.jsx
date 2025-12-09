@@ -457,7 +457,9 @@ export default function FreezerMap() {
   // Auditoría
   const runAudit = useCallback(() => {
     const filledSlots = slots.filter(s => !s.is_empty && s.flavor_name);
-    const emptySlots = 42 - filledSlots.length;
+    // Contar vacíos reales: 7 filas x 6 posiciones x 2 slots (F y T) = 84 slots totales
+    const totalSlotsInFreezer = 7 * 6 * 2; // 84 slots
+    const emptySlots = totalSlotsInFreezer - filledSlots.length;
     
     // Detectar repetidos
     const flavorCounts = {};
@@ -483,10 +485,10 @@ export default function FreezerMap() {
     if (repeatedFlavors.length > 0) suggestions.push(`Reduce sabores repetidos: ${repeatedFlavors.map(f => f.name).join(', ')}`);
     if (misplacedSlots.length > 0) suggestions.push(`Reorganiza ${misplacedSlots.length} sabores mal ubicados según las reglas de exhibición.`);
     
-    const efficiency = Math.round((filledSlots.length / 42) * 100 - (misplacedSlots.length * 2) - (repeatedFlavors.length * 3));
+    const efficiency = Math.round((filledSlots.length / totalSlotsInFreezer) * 100 - (misplacedSlots.length * 2) - (repeatedFlavors.length * 3));
     
     setAuditData({
-      totalSlots: 42, filledSlots: filledSlots.length, emptySlots,
+      totalSlots: totalSlotsInFreezer, filledSlots: filledSlots.length, emptySlots,
       misplacedSlots, repeatedFlavors, suggestions,
       efficiency: Math.max(0, Math.min(100, efficiency))
     });

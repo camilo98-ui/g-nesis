@@ -568,7 +568,7 @@ export default function Dashboard() {
     if (!activeRange?.from || !activeRange?.to) return [];
     const days = eachDayOfInterval({ start: activeRange.from, end: activeRange.to });
     
-    return days.map(day => {
+    const dataWithSales = days.map((day, idx) => {
       const dayStr = format(day, 'yyyy-MM-dd');
       const dayData = dailySales.find(s => {
         const saleDate = s.date?.split('T')[0] || s.date;
@@ -584,9 +584,33 @@ export default function Dashboard() {
         tickets: dayData.total_tickets || 0,
         ticketPromedio: transactions > 0 ? sales / transactions : 0,
         transactions: transactions,
-        suggested: dayData.total_suggested || 0
+        suggested: dayData.total_suggested || 0,
+        index: idx
       };
     });
+    
+    // Calcular proyección (regresión lineal simple)
+    const validData = dataWithSales.filter(d => d.ventas > 0);
+    if (validData.length >= 2) {
+      const n = validData.length;
+      let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+      validData.forEach(d => {
+        sumX += d.index;
+        sumY += d.ventas;
+        sumXY += d.index * d.ventas;
+        sumX2 += d.index * d.index;
+      });
+      const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+      const intercept = (sumY - slope * sumX) / n;
+      
+      // Aplicar proyección a todos los datos
+      return dataWithSales.map(d => ({
+        ...d,
+        proyeccion: slope * d.index + intercept
+      }));
+    }
+    
+    return dataWithSales;
   }, [dateRange, dailySales, weekFilter]);
 
 
@@ -789,18 +813,18 @@ export default function Dashboard() {
               >
                 {/* Main Charts Row */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Sales Trend */}
+                  {/* Sales Trend con Proyección */}
                   <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
                         <TrendingUp className="w-4 h-4 text-green-500" />
-                        Ventas Diarias
+                        Ventas Diarias con Proyección
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="h-64">
                         <ResponsiveContainer width="100%" height="100%">
-                          <AreaChart data={chartData}>
+                          <ComposedChart data={chartData}>
                             <defs>
                               <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
@@ -809,14 +833,24 @@ export default function Dashboard() {
                             </defs>
                             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                             <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-                            <YAxis tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M COP`} tick={{ fontSize: 11 }} />
+                            <YAxis tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} tick={{ fontSize: 11 }} />
                             <Tooltip 
                               contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
                               labelFormatter={(label, payload) => payload?.[0]?.payload?.fullDate || label}
-                              formatter={(v) => [formatCurrency(v), 'Ventas']}
+                              formatter={(v, name) => [formatCurrency(v), name === 'Proyección' ? '📈 Proyección' : '💰 Ventas']}
                             />
-                            <Area type="monotone" dataKey="ventas" stroke="#10b981" strokeWidth={2} fill="url(#salesGrad)" />
-                          </AreaChart>
+                            <Legend />
+                            <Area type="monotone" dataKey="ventas" stroke="#10b981" strokeWidth={2} fill="url(#salesGrad)" name="Ventas" />
+                            <Line 
+                              type="linear" 
+                              dataKey="proyeccion" 
+                              stroke="#f59e0b" 
+                              strokeWidth={2} 
+                              strokeDasharray="5 5" 
+                              dot={false}
+                              name="Proyección"
+                            />
+                          </ComposedChart>
                         </ResponsiveContainer>
                       </div>
                     </CardContent>

@@ -32,12 +32,12 @@ export default function SalesByHourChart({ shiftRecords = [], formatCurrency }) 
       hours[h] = { hour: h, sales: 0, transactions: 0, count: 0 };
     }
     
-    // Filtrar registros según el turno seleccionado
+    // Filtrar registros según el turno seleccionado - AHORA SÍ FILTRA CORRECTAMENTE
     const filteredRecords = selectedShift === 'all' 
       ? shiftRecords 
       : shiftRecords.filter(r => r.shift === selectedShift);
     
-    // Distribuir ventas de cada turno en sus horas
+    // Distribuir ventas de cada turno en sus horas ESPECÍFICAS
     filteredRecords.forEach(record => {
       const shiftInfo = SHIFT_TIMES[record.shift];
       if (!shiftInfo) return;
@@ -59,15 +59,26 @@ export default function SalesByHourChart({ shiftRecords = [], formatCurrency }) 
       }
     });
     
-    // Convertir a array y formatear
-    return Object.values(hours)
-      .map(h => ({
-        ...h,
-        hourLabel: `${h.hour}:00`,
-        avgSales: h.count > 0 ? h.sales / h.count : h.sales,
-        ticketProm: h.transactions > 0 ? h.sales / h.transactions : 0
-      }))
-      .filter(h => h.sales > 0);
+    // Convertir a array y formatear - SOLO MOSTRAR HORAS DEL TURNO SELECCIONADO
+    const allHours = Object.values(hours).map(h => ({
+      ...h,
+      hourLabel: `${h.hour}:00`,
+      avgSales: h.count > 0 ? h.sales / h.count : h.sales,
+      ticketProm: h.transactions > 0 ? h.sales / h.transactions : 0
+    }));
+    
+    // Si hay un turno seleccionado, solo mostrar las horas de ese turno
+    if (selectedShift !== 'all') {
+      const shiftInfo = SHIFT_TIMES[selectedShift];
+      if (shiftInfo) {
+        const startHour = Math.floor(shiftInfo.start);
+        const endHour = Math.floor(shiftInfo.end);
+        return allHours.filter(h => h.hour >= startHour && h.hour <= endHour);
+      }
+    }
+    
+    // Si es "all", mostrar todas las horas que tengan ventas
+    return allHours.filter(h => h.sales > 0);
   }, [shiftRecords, selectedShift]);
 
   const maxSales = Math.max(...hourlyData.map(h => h.sales), 1);

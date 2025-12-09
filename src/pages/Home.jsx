@@ -382,7 +382,7 @@ export default function Home() {
                   scale: [1, 1.02, 1],
                 }}
                 transition={{ duration: 3, repeat: Infinity }}
-                className="text-2xl font-bold bg-gradient-to-r from-pink-500 via-rose-500 to-pink-600 bg-clip-text text-transparent"
+                className="text-2xl font-bold bg-gradient-to-r from-pink-400 via-pink-500 to-rose-500 bg-clip-text text-transparent"
               >
                 {selectedRole === 'gerente' ? 'Hola Gerente! 🎯' : selectedRole === 'lider' ? 'Hola Lider! ⭐' : selectedRole === 'embajador' ? 'Hola Embajador! 🍦' : 'Bienvenido! 🎉'}
               </motion.h2>
@@ -552,7 +552,7 @@ export default function Home() {
               <Button
                 onClick={handleLogin}
                 disabled={!pendingStore || !selectedRole}
-                className="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white py-6 rounded-xl shadow-lg shadow-pink-500/30 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden"
+                className="w-full bg-gradient-to-r from-pink-400 via-pink-500 to-rose-500 hover:from-pink-500 hover:via-pink-600 hover:to-rose-600 text-white py-6 rounded-xl shadow-lg shadow-pink-500/30 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden"
               >
                 <motion.div
                   className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"

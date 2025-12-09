@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Target, TrendingUp, TrendingDown, Calendar, Plus, Check, X } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, ComposedChart, Line, Legend } from 'recharts';
 import { format, parseISO, startOfDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { base44 } from '@/api/base44Client';
@@ -155,35 +155,62 @@ export default function DailyBudgetCard({ dailySales = [], storeId, formatCurren
             </motion.div>
           )}
 
-          {/* Gráfica histórica */}
+          {/* Gráfica histórica con líneas claras */}
           <div className="h-56">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData}>
-                <defs>
-                  <linearGradient id="realGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.4}/>
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0.05}/>
-                  </linearGradient>
-                  <linearGradient id="budgetGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.05}/>
-                  </linearGradient>
-                </defs>
+              <ComposedChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                 <XAxis dataKey="date" tick={{ fill: '#6b7280', fontSize: 10 }} />
-                <YAxis tick={{ fill: '#6b7280', fontSize: 10 }} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M COP`} />
+                <YAxis tick={{ fill: '#6b7280', fontSize: 10 }} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} />
                 <Tooltip 
-                  contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)', fontSize: 11 }}
+                  contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)', fontSize: 11, padding: 12 }}
                   labelFormatter={(label, payload) => payload?.[0]?.payload?.fullDate || label}
                   formatter={(v, name) => {
-                    if (name === 'Cumplimiento') return [`${v.toFixed(0)}%`, name];
-                    return [formatCurrency(v), name === 'real' ? 'Real' : 'Presupuesto'];
+                    const emoji = name === 'Venta Real' ? '💰' : name === 'Meta' ? '🎯' : '📊';
+                    const color = name === 'Venta Real' ? '#10b981' : name === 'Meta' ? '#8b5cf6' : '#f59e0b';
+                    return [
+                      <span style={{ color }}>{emoji} {formatCurrency(v)}</span>,
+                      name
+                    ];
                   }}
                 />
-                <Area type="monotone" dataKey="presupuesto" stroke="#8b5cf6" strokeWidth={2} fill="url(#budgetGrad)" name="Presupuesto" />
-                <Area type="monotone" dataKey="real" stroke="#10b981" strokeWidth={2} fill="url(#realGrad)" name="Real" />
-              </AreaChart>
+                <Legend 
+                  iconType="circle"
+                  formatter={(value) => {
+                    if (value === 'real') return '💰 Venta Real';
+                    if (value === 'presupuesto') return '🎯 Meta';
+                    return value;
+                  }}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="presupuesto" 
+                  stroke="#8b5cf6" 
+                  strokeWidth={3} 
+                  strokeDasharray="5 5"
+                  dot={{ fill: '#8b5cf6', r: 4 }}
+                  name="Meta"
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="real" 
+                  stroke="#10b981" 
+                  strokeWidth={3} 
+                  dot={{ fill: '#10b981', r: 4 }}
+                  name="Venta Real"
+                />
+              </ComposedChart>
             </ResponsiveContainer>
+          </div>
+          <div className="mt-3 flex justify-center gap-4 text-xs">
+            <span className="flex items-center gap-1">
+              <span className="w-3 h-3 rounded-full bg-emerald-500"></span>
+              <span className="text-gray-600">💰 Venta Real</span>
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="w-3 h-1 bg-violet-500 rounded"></span>
+              <span className="text-gray-600">🎯 Meta</span>
+            </span>
           </div>
         </CardContent>
       </Card>

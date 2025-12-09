@@ -214,8 +214,8 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
         <div className="p-4">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
-              <motion.div whileHover={{ scale: 1.01 }} className="bg-violet-50/50 rounded-xl p-3 border border-violet-200/50">
-                <Label className="text-violet-700 flex items-center gap-2 mb-2 font-semibold text-sm">
+              <motion.div whileHover={{ scale: 1.01 }} className="bg-purple-50/50 rounded-xl p-3 border border-purple-200/50">
+                <Label className="text-purple-700 flex items-center gap-2 mb-2 font-semibold text-sm">
                   <User className="w-4 h-4" />
                   Cajero
                 </Label>
@@ -223,7 +223,7 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
                   value={formData.cashier_id} 
                   onValueChange={(val) => setFormData({...formData, cashier_id: val})}
                 >
-                  <SelectTrigger className="border border-violet-200 bg-white">
+                  <SelectTrigger className="border border-purple-200 bg-white">
                     <SelectValue placeholder="Selecciona" />
                   </SelectTrigger>
                   <SelectContent>
