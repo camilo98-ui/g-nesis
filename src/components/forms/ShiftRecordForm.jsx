@@ -214,16 +214,16 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
         <div className="p-4">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
-              <motion.div whileHover={{ scale: 1.01 }} className="bg-purple-50/50 rounded-xl p-3 border border-purple-200/50">
-                <Label className="text-purple-700 flex items-center gap-2 mb-2 font-semibold text-sm">
-                  <User className="w-4 h-4" />
-                  Cajero
+              <motion.div whileHover={{ scale: 1.02 }} className="bg-gradient-to-br from-violet-100 to-purple-200 rounded-2xl p-4 shadow-lg border-2 border-violet-300">
+                <Label className="text-violet-700 flex items-center gap-2 mb-2 font-black">
+                  <User className="w-5 h-5" />
+                  👤 Cajero
                 </Label>
                 <Select 
                   value={formData.cashier_id} 
                   onValueChange={(val) => setFormData({...formData, cashier_id: val})}
                 >
-                  <SelectTrigger className="border border-purple-200 bg-white">
+                  <SelectTrigger className="border-2 border-violet-400 focus:border-violet-600 text-lg font-bold bg-white">
                     <SelectValue placeholder="Selecciona" />
                   </SelectTrigger>
                   <SelectContent>
@@ -234,22 +234,22 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
                 </Select>
               </motion.div>
 
-              <motion.div whileHover={{ scale: 1.01 }} className="bg-purple-50/50 rounded-xl p-3 border border-purple-200/50">
-                <Label className="text-purple-700 flex items-center gap-2 mb-2 font-semibold text-sm">
-                  <Calendar className="w-4 h-4" />
-                  Fecha
+              <motion.div whileHover={{ scale: 1.02 }} className="bg-gradient-to-br from-amber-100 to-yellow-200 rounded-2xl p-4 shadow-lg border-2 border-amber-300">
+                <Label className="text-amber-700 flex items-center gap-2 mb-2 font-black">
+                  <Calendar className="w-5 h-5" />
+                  📅 Fecha
                 </Label>
                 <Input 
                   type="date" 
                   value={formData.date}
                   onChange={(e) => setFormData({...formData, date: e.target.value})}
-                  className="border border-purple-200 bg-white"
+                  className="border-2 border-amber-400 focus:border-amber-600 text-lg font-bold bg-white"
                 />
               </motion.div>
             </div>
 
-            <div className="bg-pink-50/50 rounded-xl p-3 border border-pink-200/50">
-              <Label className="text-pink-700 font-semibold mb-2 block text-sm">Turno</Label>
+            <div className="bg-gradient-to-br from-purple-100 to-pink-200 rounded-2xl p-4 shadow-lg border-2 border-purple-300">
+              <Label className="text-purple-700 font-black mb-2 block">🌅 Turno</Label>
               <div className="grid grid-cols-3 gap-2">
                 {SHIFTS.map(shift => {
                   const Icon = shift.icon;
@@ -259,16 +259,16 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
                       key={shift.value}
                       type="button"
                       onClick={() => setFormData({...formData, shift: shift.value})}
-                      whileHover={{ scale: 1.02 }}
+                      whileHover={{ scale: 1.05, rotate: 2 }}
                       whileTap={{ scale: 0.98 }}
-                      className={`p-2 rounded-lg border transition-all flex flex-col items-center gap-1 ${
+                      className={`p-3 rounded-xl border-2 transition-all flex flex-col items-center gap-1 shadow-md ${
                         isSelected 
-                          ? 'border-pink-400 bg-pink-100' 
-                          : 'border-gray-200 hover:border-pink-300 bg-white'
+                          ? 'border-purple-400 bg-purple-100' 
+                          : 'border-gray-200 hover:border-purple-300 bg-white'
                       }`}
                     >
-                      <Icon className={`w-5 h-5 ${isSelected ? shift.color : 'text-gray-400'}`} />
-                      <span className={`text-xs font-semibold ${isSelected ? 'text-pink-600' : 'text-gray-600'}`}>
+                      <Icon className={`w-6 h-6 ${isSelected ? shift.color : 'text-gray-400'}`} />
+                      <span className={`text-xs font-bold ${isSelected ? 'text-purple-600' : 'text-gray-600'}`}>
                         {shift.label}
                       </span>
                     </motion.button>
@@ -277,60 +277,60 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <motion.div whileHover={{ scale: 1.02 }} className="bg-emerald-50/50 rounded-xl p-3 border border-emerald-200/50">
-                <Label className="flex items-center gap-2 mb-2 font-semibold text-emerald-700 text-sm">
-                  <DollarSign className="w-4 h-4" />
-                  Ventas
+            <div className="grid grid-cols-2 gap-4">
+              <motion.div whileHover={{ scale: 1.05, rotate: 2 }} className="bg-gradient-to-br from-emerald-100 to-green-200 rounded-2xl p-4 shadow-lg border-2 border-emerald-300">
+                <Label className="flex items-center gap-2 mb-2 font-black text-emerald-700">
+                  <DollarSign className="w-5 h-5" />
+                  💰 Ventas
                 </Label>
                 <Input 
                   type="number"
                   placeholder="0"
                   value={formData.sales}
                   onChange={(e) => setFormData({...formData, sales: e.target.value})}
-                  className="border border-emerald-200 bg-white"
+                  className="border-2 border-emerald-400 focus:border-emerald-600 text-lg font-bold bg-white"
                 />
               </motion.div>
 
-              <motion.div whileHover={{ scale: 1.02 }} className="bg-sky-50/50 rounded-xl p-3 border border-sky-200/50">
-                <Label className="flex items-center gap-2 mb-2 font-semibold text-sky-700 text-sm">
-                  <Receipt className="w-4 h-4" />
-                  Tickets
+              <motion.div whileHover={{ scale: 1.05, rotate: -2 }} className="bg-gradient-to-br from-sky-100 to-blue-200 rounded-2xl p-4 shadow-lg border-2 border-sky-300">
+                <Label className="flex items-center gap-2 mb-2 font-black text-sky-700">
+                  <Receipt className="w-5 h-5" />
+                  🎫 Tickets
                 </Label>
                 <Input 
                   type="number"
                   placeholder="0"
                   value={formData.tickets}
                   onChange={(e) => setFormData({...formData, tickets: e.target.value})}
-                  className="border border-sky-200 bg-white"
+                  className="border-2 border-sky-400 focus:border-sky-600 text-lg font-bold bg-white"
                 />
               </motion.div>
 
-              <motion.div whileHover={{ scale: 1.02 }} className="bg-violet-50/50 rounded-xl p-3 border border-violet-200/50">
-                <Label className="flex items-center gap-2 mb-2 font-semibold text-violet-700 text-sm">
-                  <Zap className="w-4 h-4" />
-                  Transacciones
+              <motion.div whileHover={{ scale: 1.05, rotate: 2 }} className="bg-gradient-to-br from-violet-100 to-purple-200 rounded-2xl p-4 shadow-lg border-2 border-violet-300">
+                <Label className="flex items-center gap-2 mb-2 font-black text-violet-700">
+                  <Zap className="w-5 h-5" />
+                  ⚡ Transacciones
                 </Label>
                 <Input 
                   type="number"
                   placeholder="0"
                   value={formData.transactions}
                   onChange={(e) => setFormData({...formData, transactions: e.target.value})}
-                  className="border border-violet-200 bg-white"
+                  className="border-2 border-violet-400 focus:border-violet-600 text-lg font-bold bg-white"
                 />
               </motion.div>
 
-              <motion.div whileHover={{ scale: 1.02 }} className="bg-rose-50/50 rounded-xl p-3 border border-rose-200/50">
-                <Label className="flex items-center gap-2 mb-2 font-semibold text-rose-700 text-sm">
-                  <Gift className="w-4 h-4" />
-                  Sugeridos
+              <motion.div whileHover={{ scale: 1.05, rotate: -2 }} className="bg-gradient-to-br from-pink-100 to-rose-200 rounded-2xl p-4 shadow-lg border-2 border-pink-300">
+                <Label className="flex items-center gap-2 mb-2 font-black text-pink-700">
+                  <Gift className="w-5 h-5" />
+                  🎁 Sugeridos
                 </Label>
                 <Input 
                   type="number"
                   placeholder="0"
                   value={formData.suggested_sales}
                   onChange={(e) => setFormData({...formData, suggested_sales: e.target.value})}
-                  className="border border-rose-200 bg-white"
+                  className="border-2 border-pink-400 focus:border-pink-600 text-lg font-bold bg-white"
                 />
               </motion.div>
             </div>
