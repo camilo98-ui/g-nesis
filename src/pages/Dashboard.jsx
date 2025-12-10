@@ -19,11 +19,12 @@ import GrowthVelocityChart from '@/components/management/GrowthVelocityChart';
 import StoreReportGenerator from '@/components/reports/StoreReportGenerator';
 import CompraValeModal from '@/components/dashboard/CompraValeModal';
 import StoreSalesModal from '@/components/forms/StoreSalesModal';
+import MonthlyBudgetManager from '@/components/budget/MonthlyBudgetManager';
 
 import { 
   DollarSign, Receipt, Zap, Gift, TrendingUp, TrendingDown, ArrowLeft,
   BarChart3, AlertTriangle, CheckCircle2, X, Target,
-  ClipboardCheck, Snowflake, Package
+  ClipboardCheck, Snowflake, Package, Calendar
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -443,6 +444,7 @@ export default function Dashboard() {
   const [weekFilter, setWeekFilter] = useState(null); // Filtro de semana independiente
   const [showCompraVale, setShowCompraVale] = useState(false);
   const [showStoreSales, setShowStoreSales] = useState(false);
+  const [showMonthlyBudget, setShowMonthlyBudget] = useState(false);
   
   // Fetch weather data
   useEffect(() => {
@@ -941,19 +943,24 @@ export default function Dashboard() {
               animate={{ opacity: 1, y: 0 }}
             >
               <Button
-                onClick={() => {
-                  const MonthlyBudgetManager = require('@/components/budget/MonthlyBudgetManager').default;
-                  // Usar modal dinámico
-                  import('@/components/budget/MonthlyBudgetManager').then(module => {
-                    const comp = module.default;
-                  });
-                }}
+                onClick={() => setShowMonthlyBudget(true)}
                 className="mb-4 bg-gradient-to-r from-violet-500 to-purple-600 text-white gap-2"
               >
                 <Calendar className="w-4 h-4" />
                 Configurar Presupuestos del Mes
               </Button>
             </motion.div>
+
+            {/* Monthly Budget Manager Modal */}
+            <MonthlyBudgetManager
+              storeId={selectedStore}
+              isOpen={showMonthlyBudget}
+              onClose={() => setShowMonthlyBudget(false)}
+              onSuccess={() => {
+                queryClient.invalidateQueries(['dailyBudgets']);
+                queryClient.invalidateQueries(['budgets']);
+              }}
+            />
 
             {/* Daily Budget */}
             <DailyBudgetCard 
