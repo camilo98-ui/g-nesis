@@ -664,6 +664,10 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
               
               <div className="h-6 w-px bg-gray-200 mx-1" />
               
+              <Button size="sm" variant="outline" onClick={() => alert('Próximamente: Editar dimensiones de la nevera')} title="Editar dimensiones" className="text-purple-600 hover:bg-purple-50">
+                ✏️
+              </Button>
+              
               <Button size="sm" variant="outline" onClick={runAudit} title="Auditoría">
                 <BarChart3 className="w-4 h-4 mr-1" />
                 <span className="hidden sm:inline">Auditoría</span>

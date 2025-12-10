@@ -341,8 +341,8 @@ export default function Rankings() {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-6"
           >
-            {/* Ruleta Popsy Link - SOLO GERENTE */}
-            {userRole === 'gerente' && (
+            {/* Ruleta Popsy Link - Visible para líderes y embajadores */}
+            {(userRole === 'gerente' || userRole === 'lider' || userRole === 'embajador') && (
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -1002,8 +1002,8 @@ export default function Rankings() {
                             <p className="text-xs text-gray-500 truncate">📍 {item.storeName}</p>
                           </div>
                           <div className="text-right">
-                            <p className="font-bold text-emerald-600">{formatCurrency(item.avgSales)}</p>
-                            <p className="text-xs text-gray-400">prom/turno</p>
+                            <p className="font-bold text-emerald-600">${Math.round(item.totalSales / 1000000)}M</p>
+                            <p className="text-xs text-gray-400">ventas totales</p>
                           </div>
                         </motion.div>
                       ))}

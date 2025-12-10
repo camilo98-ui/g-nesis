@@ -80,11 +80,11 @@ export default function RoulettePopsy() {
   };
 
   const activeEmployee = employeeOfMonth.find(e => e.is_active);
-  const isAdmin = userRole === 'gerente' || userRole === 'lider';
+  const isGerente = userRole === 'gerente';
   const canSpin = userRole === 'gerente'; // Solo el gerente puede girar
 
-  // Si es admin, mostrar panel de administración
-  if (isAdmin) {
+  // Si es gerente, mostrar panel de administración completo
+  if (isGerente) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-amber-50 relative">
         <FloatingIceCreamsBg />

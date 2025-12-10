@@ -128,11 +128,12 @@ export default function CashiersDashboard() {
   const teamTotals = useMemo(() => {
     const values = Object.values(cashierStats);
     const totalSales = values.reduce((sum, c) => sum + c.totalSales, 0);
+    const totalTransactions = values.reduce((sum, c) => sum + c.totalTransactions, 0);
     const totalSuggested = values.reduce((sum, c) => sum + c.totalSuggested, 0);
     return {
       totalSales,
-      totalTickets: values.reduce((sum, c) => sum + c.totalTickets, 0),
-      avgTicket: values.length > 0 ? values.reduce((sum, c) => sum + c.avgTicket, 0) / values.length : 0,
+      totalTickets: totalTransactions,
+      avgTicket: totalTransactions > 0 ? totalSales / totalTransactions : 0,
       avgSales: values.length > 0 ? totalSales / values.length : 0,
       avgSuggested: values.length > 0 ? totalSuggested / values.length : 0,
       totalCashiers: values.length
@@ -210,7 +211,7 @@ export default function CashiersDashboard() {
         {selectedStore ? (
           <div className="space-y-6">
             {/* Team Summary */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               <motion.div 
                 whileHover={{ y: -5, scale: 1.02 }}
                 className="bg-gradient-to-br from-pink-50 to-rose-100 rounded-2xl p-5 shadow-sm"
@@ -241,22 +242,10 @@ export default function CashiersDashboard() {
               >
                 <div className="flex items-center gap-2 mb-2">
                   <Target className="w-5 h-5 text-blue-500" />
-                  <span className="text-sm text-pink-600">Tickets Totales</span>
+                  <span className="text-sm text-pink-600">Transacciones Totales</span>
                 </div>
                 <p className="text-3xl font-semibold text-gray-700">{teamTotals.totalTickets.toLocaleString()}</p>
-                <p className="text-xs text-gray-500">facturados</p>
-              </motion.div>
-
-              <motion.div 
-                whileHover={{ y: -5, scale: 1.02 }}
-                className="bg-gradient-to-br from-amber-50 to-orange-100 rounded-2xl p-5 shadow-sm"
-              >
-                <div className="flex items-center gap-2 mb-2">
-                  <BarChart3 className="w-5 h-5 text-amber-500" />
-                  <span className="text-sm text-pink-600">Ticket Prom.</span>
-                </div>
-                <p className="text-2xl font-semibold text-gray-700">${Math.round(teamTotals.avgTicket/1000)}K</p>
-                <p className="text-xs text-gray-500">promedio equipo</p>
+                <p className="text-xs text-gray-500">de la tienda</p>
               </motion.div>
             </div>
 

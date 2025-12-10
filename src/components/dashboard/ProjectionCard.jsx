@@ -3,11 +3,25 @@ import { motion } from 'framer-motion';
 import { Target, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2 } from 'lucide-react';
 
 export default function ProjectionCard({ currentSales, budget, daysElapsed, totalDays }) {
+  // Calcular proyección considerando que los fines de semana venden más
+  const daysRemaining = totalDays - daysElapsed;
+  
+  // Estimar días de fin de semana restantes (aprox 2/7 de los días)
+  const weekendDaysRemaining = Math.round(daysRemaining * (2/7));
+  const weekdayDaysRemaining = daysRemaining - weekendDaysRemaining;
+  
+  // Calcular promedio ajustado (asumiendo que fines de semana venden 40% más)
   const dailyAverage = daysElapsed > 0 ? currentSales / daysElapsed : 0;
-  const projectedSales = dailyAverage * totalDays;
+  const weekdayAvg = dailyAverage * 0.9; // Entre semana un poco menos
+  const weekendAvg = dailyAverage * 1.4; // Fin de semana +40%
+  
+  const projectedSales = currentSales + (weekdayAvg * weekdayDaysRemaining) + (weekendAvg * weekendDaysRemaining);
   const projectedPercentage = budget > 0 ? ((projectedSales / budget) * 100).toFixed(1) : 0;
   const remainingToGoal = budget - currentSales;
-  const dailyNeeded = (totalDays - daysElapsed) > 0 ? remainingToGoal / (totalDays - daysElapsed) : 0;
+  
+  // Calcular venta diaria necesaria (ajustada por días de semana)
+  const totalMultiplier = weekdayDaysRemaining + (weekendDaysRemaining * 1.4);
+  const dailyNeeded = totalMultiplier > 0 ? remainingToGoal / totalMultiplier : 0;
 
   const formatCurrency = (val) => {
     return new Intl.NumberFormat('es-CO', { 

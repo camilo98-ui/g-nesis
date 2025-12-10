@@ -367,13 +367,13 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
           <div className="relative mb-8">
             {/* Base del podio */}
             <div className="absolute bottom-0 left-0 right-0 h-2 bg-gradient-to-r from-pink-100 via-purple-100 to-amber-100 rounded-full" />
-            
+
             <div className="flex items-end justify-center gap-4 pt-4">
               {[1, 0, 2].map((podiumIdx) => {
                 const cashier = ranking[podiumIdx];
                 if (!cashier) return null;
                 const Icon = PODIUM_ICONS[podiumIdx];
-                const heights = ['h-40', 'h-48', 'h-36'];
+                const heights = ['h-32', 'h-52', 'h-28'];
                 const height = heights[podiumIdx];
                 const isFirst = podiumIdx === 0;
                 
