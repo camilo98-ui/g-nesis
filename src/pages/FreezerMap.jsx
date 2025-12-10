@@ -8,6 +8,7 @@ import StoreSelector, { STORES } from '@/components/StoreSelector';
 import FreezerSlotCell from '@/components/freezer/FreezerSlotCell';
 import FreezerAuditPanel from '@/components/freezer/FreezerAuditPanel';
 import FreezerHistoryPanel from '@/components/freezer/FreezerHistoryPanel';
+import FreezerDimensionsEditor from '@/components/freezer/FreezerDimensionsEditor';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
@@ -183,6 +184,8 @@ export default function FreezerMap() {
   const [currentFreezer, setCurrentFreezer] = useState(1); // Nueva nevera selector
   const [longPressSlot, setLongPressSlot] = useState(null);
   const longPressTimer = useRef(null);
+  const [numRows, setNumRows] = useState(7);
+  const [numCols, setNumCols] = useState(5);
 
   useEffect(() => {
     const saved = localStorage.getItem('selectedStore');
@@ -225,12 +228,11 @@ export default function FreezerMap() {
   });
 
   // Grid de la nevera - Ahora con bajadas (cada bajada tiene 2 espacios: F y T)
-  // 7 bajadas x 5 posiciones = 35 posiciones visuales (10 cubetas por fila)
   const freezerGrid = useMemo(() => {
     const grid = [];
-    for (let row = 1; row <= 7; row++) {
+    for (let row = 1; row <= numRows; row++) {
       const rowBajadas = [];
-      for (let pos = 1; pos <= 5; pos++) {
+      for (let pos = 1; pos <= numCols; pos++) {
         // Cada posición es una "bajada" con slot frontal y trasero
         const frontSlot = slots.find(s => s.row === row && s.position === pos && s.slot_type === 'F') ||
           slots.find(s => s.row === row && s.position === pos && !s.slot_type);
@@ -252,7 +254,7 @@ export default function FreezerMap() {
       grid.push(rowBajadas);
     }
     return grid;
-  }, [slots, selectedStore]);
+  }, [slots, selectedStore, numRows, numCols]);
 
   // Guardar en historial con usuario
   const saveToHistory = useCallback(async (changesCount = 1) => {
@@ -457,8 +459,8 @@ export default function FreezerMap() {
   // Auditoría
   const runAudit = useCallback(() => {
     const filledSlots = slots.filter(s => !s.is_empty && s.flavor_name);
-    // Contar vacíos reales: 7 filas x 5 posiciones x 2 slots (F y T) = 70 slots totales
-    const totalSlotsInFreezer = 7 * 5 * 2; // 70 slots
+    // Contar vacíos reales: numRows filas x numCols posiciones x 2 slots (F y T)
+    const totalSlotsInFreezer = numRows * numCols * 2;
     const emptySlots = totalSlotsInFreezer - filledSlots.length;
     
     // Detectar repetidos con más precisión
@@ -503,7 +505,7 @@ export default function FreezerMap() {
       efficiency: Math.max(0, Math.min(100, efficiency))
     });
     setShowAudit(true);
-  }, [slots]);
+  }, [slots, numRows, numCols]);
 
   // Optimizar con IA
   const optimizeWithAI = async () => {
@@ -664,9 +666,40 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
               
               <div className="h-6 w-px bg-gray-200 mx-1" />
               
-              <Button size="sm" variant="outline" onClick={() => alert('Próximamente: Editar dimensiones de la nevera')} title="Editar dimensiones" className="text-purple-600 hover:bg-purple-50">
-                ✏️
-              </Button>
+              <FreezerDimensionsEditor
+                currentRows={numRows}
+                currentCols={numCols}
+                onAddRow={() => {
+                  if (numRows < 10) {
+                    setNumRows(numRows + 1);
+                    toast.success('Fila agregada');
+                  } else {
+                    toast.error('Máximo 10 filas');
+                  }
+                }}
+                onRemoveRow={() => {
+                  if (numRows > 1) {
+                    setNumRows(numRows - 1);
+                    toast.success('Fila eliminada');
+                  }
+                }}
+                onAddCol={() => {
+                  if (numCols < 8) {
+                    setNumCols(numCols + 1);
+                    toast.success('Columna agregada');
+                  } else {
+                    toast.error('Máximo 8 columnas');
+                  }
+                }}
+                onRemoveCol={() => {
+                  if (numCols > 1) {
+                    setNumCols(numCols - 1);
+                    toast.success('Columna eliminada');
+                  }
+                }}
+              />
+              
+              <div className="h-6 w-px bg-gray-200 mx-1" />
               
               <Button size="sm" variant="outline" onClick={runAudit} title="Auditoría">
                 <BarChart3 className="w-4 h-4 mr-1" />
@@ -759,7 +792,7 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                         </button>
 
                         {/* Bajadas - cada una con F y T en columna vertical */}
-                        <div className="grid grid-cols-5 gap-3 p-2 rounded-xl bg-gray-100/50">
+                        <div className={`grid gap-3 p-2 rounded-xl bg-gray-100/50`} style={{ gridTemplateColumns: `repeat(${numCols}, minmax(0, 1fr))` }}>
                           {row.map((bajada, bajadaIndex) => (
                             <div 
                               key={`${rowIndex}-${bajadaIndex}`} 

@@ -92,7 +92,7 @@ export default function CashiersDashboard() {
         totalTransactions,
         totalSuggested,
         daysWorked,
-        avgTicket: totalTickets > 0 ? totalSales / totalTickets : 0,
+        avgTicket: totalTransactions > 0 ? totalSales / totalTransactions : 0,
         avgSalesPerDay: daysWorked > 0 ? totalSales / daysWorked : 0
       };
     });
@@ -299,7 +299,7 @@ export default function CashiersDashboard() {
                          <p className="text-lg font-black text-blue-600">
                            ${Math.round((cashierStats[selectedCashier.id]?.avgTicket || 0)/1000)}K
                          </p>
-                         <p className="text-[9px] text-gray-400">por ticket</p>
+                         <p className="text-[9px] text-gray-400">ventas/transacciones</p>
                         </div>
                         <div className="bg-purple-50 rounded-xl p-4 text-center">
                           <p className="text-xs text-gray-500 mb-1">⚡ Transacciones</p>
