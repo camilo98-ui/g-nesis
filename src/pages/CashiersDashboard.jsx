@@ -211,7 +211,7 @@ export default function CashiersDashboard() {
         {selectedStore ? (
           <div className="space-y-6">
             {/* Team Summary */}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <motion.div 
                 whileHover={{ y: -5, scale: 1.02 }}
                 className="bg-gradient-to-br from-pink-50 to-rose-100 rounded-2xl p-5 shadow-sm"
@@ -221,7 +221,7 @@ export default function CashiersDashboard() {
                   <span className="text-sm text-pink-600">Equipo Activo</span>
                 </div>
                 <p className="text-3xl font-semibold text-gray-700">{teamTotals.totalCashiers}</p>
-                <p className="text-xs text-gray-500">cajeros</p>
+                <p className="text-xs text-gray-500">cajeros trabajando</p>
               </motion.div>
 
               <motion.div 
@@ -230,10 +230,12 @@ export default function CashiersDashboard() {
               >
                 <div className="flex items-center gap-2 mb-2">
                   <TrendingUp className="w-5 h-5 text-emerald-500" />
-                  <span className="text-sm text-pink-600">Ventas Equipo</span>
+                  <span className="text-sm text-emerald-600">Prom. por Cajero</span>
                 </div>
-                <p className="text-2xl font-semibold text-gray-700">${Math.round(teamTotals.totalSales/1000000)}M</p>
-                <p className="text-xs text-gray-500">este período</p>
+                <p className="text-2xl font-semibold text-gray-700">
+                  {formatCurrency(teamTotals.avgSales)}
+                </p>
+                <p className="text-xs text-gray-500">venta promedio</p>
               </motion.div>
 
               <motion.div 
@@ -242,10 +244,28 @@ export default function CashiersDashboard() {
               >
                 <div className="flex items-center gap-2 mb-2">
                   <Target className="w-5 h-5 text-blue-500" />
-                  <span className="text-sm text-pink-600">Transacciones Totales</span>
+                  <span className="text-sm text-blue-600">Ticket Promedio</span>
                 </div>
-                <p className="text-3xl font-semibold text-gray-700">{teamTotals.totalTickets.toLocaleString()}</p>
-                <p className="text-xs text-gray-500">de la tienda</p>
+                <p className="text-2xl font-semibold text-gray-700">
+                  {formatCurrency(teamTotals.avgTicket)}
+                </p>
+                <p className="text-xs text-gray-500">del equipo</p>
+              </motion.div>
+
+              <motion.div 
+                whileHover={{ y: -5, scale: 1.02 }}
+                className="bg-gradient-to-br from-amber-50 to-yellow-100 rounded-2xl p-5 shadow-sm"
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <Award className="w-5 h-5 text-amber-500" />
+                  <span className="text-sm text-amber-600">Top Performer</span>
+                </div>
+                <p className="text-lg font-semibold text-gray-700 truncate">
+                  {rankedCashiers[0]?.name?.split(' ')[0] || '-'}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {rankedCashiers[0] ? formatCurrency(rankedCashiers[0].totalSales) : 'Sin datos'}
+                </p>
               </motion.div>
             </div>
 
