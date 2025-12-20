@@ -11,7 +11,7 @@ import PopsyStoryModal from '@/components/PopsyStoryModal';
 import DirectoryModal from '@/components/DirectoryModal';
 import DailySalesForm from '@/components/forms/DailySalesForm';
 import ShiftRecordForm from '@/components/forms/ShiftRecordForm';
-import BudgetTrendModal from '@/components/budget/BudgetTrendModal';
+import MonthlyBudgetDashboard from '@/components/budget/MonthlyBudgetDashboard';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -133,7 +133,7 @@ export default function Home() {
   const [selectedRole, setSelectedRole] = useState('');
   const [showStoreSales, setShowStoreSales] = useState(false);
   const [salesTab, setSalesTab] = useState('tienda');
-  const [showBudgetTrend, setShowBudgetTrend] = useState(false);
+  const [showBudgetDashboard, setShowBudgetDashboard] = useState(false);
 
   const ROLES = [
   { id: 'gerente', name: 'Gerente', icon: 'gerente', color: 'from-slate-600 to-gray-700', description: '🎯 Poder total', iconBaseColor: '#475569' },
@@ -809,7 +809,7 @@ export default function Home() {
                 <motion.div
                   onClick={() => {
                     if (item.specialAction === 'budgetTrend') {
-                      setShowBudgetTrend(true);
+                      setShowBudgetDashboard(true);
                     } else {
                       setShowStoreSales(true);
                     }
@@ -921,12 +921,12 @@ export default function Home() {
         }
       </AnimatePresence>
 
-      {/* Budget Trend Modal */}
-      <BudgetTrendModal
+      {/* Budget Dashboard Modal */}
+      <MonthlyBudgetDashboard
         storeId={selectedStore}
         storeName={selectedStoreName}
-        isOpen={showBudgetTrend}
-        onClose={() => setShowBudgetTrend(false)} />
+        isOpen={showBudgetDashboard}
+        onClose={() => setShowBudgetDashboard(false)} />
 
 
       {/* Store Sales Modal */}
