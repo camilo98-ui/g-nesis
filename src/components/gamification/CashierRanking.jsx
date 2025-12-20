@@ -237,7 +237,6 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
   });
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [weekFilter, setWeekFilter] = useState(null);
-  const [editingAvatar, setEditingAvatar] = useState(null);
 
   const { data: cashiers = [] } = useQuery({
     queryKey: ['cashiers', storeId],
@@ -414,19 +413,7 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
                       <AnimatedAvatar 
                         cashier={cashier} 
                         size={isFirst ? 'large' : 'medium'}
-                        onClick={() => setEditingAvatar(cashier)}
                       />
-                      {/* Editar avatar */}
-                      <motion.button
-                        whileHover={{ scale: 1.1 }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setEditingAvatar(cashier);
-                        }}
-                        className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-white shadow-lg flex items-center justify-center border-2 border-pink-400"
-                      >
-                        <Edit2 className="w-3 h-3 text-pink-500" />
-                      </motion.button>
                       {/* Posición badge */}
                       <div className={`absolute -bottom-2 left-1/2 -translate-x-1/2 ${isFirst ? 'w-8 h-8' : 'w-7 h-7'} rounded-full bg-white shadow-lg flex items-center justify-center border-2 ${isFirst ? 'border-pink-400' : podiumIdx === 1 ? 'border-purple-400' : 'border-amber-400'}`}>
                         <span className={`${isFirst ? 'text-base' : 'text-sm'} font-black bg-gradient-to-r ${PODIUM_COLORS[podiumIdx]} bg-clip-text text-transparent`}>
@@ -498,10 +485,6 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
               <AnimatedAvatar 
                 cashier={cashier} 
                 size="small"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setEditingAvatar(cashier);
-                }}
                 showRank
                 rank={cashier.rank}
               />
@@ -535,13 +518,6 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
         )}
       </CardContent>
 
-      {/* Avatar Creator Modal */}
-      <AvatarCreator
-        cashierId={editingAvatar?.id}
-        currentAvatar={editingAvatar?.avatar ? JSON.parse(editingAvatar.avatar) : null}
-        isOpen={!!editingAvatar}
-        onClose={() => setEditingAvatar(null)}
-      />
     </Card>
   );
 }
