@@ -7,7 +7,6 @@ import {
   ChevronRight, ChevronLeft, Check, Sparkles, CalendarRange, Edit2
 } from 'lucide-react';
 import AnimatedAvatar from '@/components/cashier/AnimatedAvatar';
-import { AvatarCreator } from '@/components/cashier/AvatarCreator';
 import WeekFilter from '@/components/dashboard/WeekFilter';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
