@@ -201,7 +201,8 @@ export default function FreezerMap() {
   const { data: slots = [], isLoading } = useQuery({
     queryKey: ['freezerSlots', selectedStore, currentFreezer],
     queryFn: () => base44.entities.FreezerSlot.filter({ store_id: `${selectedStore}_F${currentFreezer}` }),
-    enabled: !!selectedStore
+    enabled: !!selectedStore,
+    staleTime: 0
   });
 
   // Long press para borrar
@@ -423,32 +424,61 @@ export default function FreezerMap() {
     toast.success('Acción deshecha');
   };
 
-  // Duplicar fila
+  // Duplicar fila - Solo en la nevera actual
   const duplicateRow = async (rowIndex) => {
     const sourceRow = freezerGrid[rowIndex];
     const targetRowIndex = rowIndex + 1;
-    if (targetRowIndex >= 7) {
+    if (targetRowIndex >= numRows) {
       toast.error('No hay fila disponible para duplicar');
       return;
     }
     
-    for (const slot of sourceRow) {
-      if (slot.is_empty) continue;
-      const targetSlot = slots.find(s => s.row === targetRowIndex + 1 && s.position === slot.position);
-      const slotData = {
-        store_id: selectedStore, row: targetRowIndex + 1, position: slot.position,
-        flavor_name: slot.flavor_name, flavor_type: slot.flavor_type,
-        color: slot.color, is_empty: false, stock_level: slot.stock_level
-      };
-      if (targetSlot?.id) {
-        await base44.entities.FreezerSlot.update(targetSlot.id, slotData);
-      } else {
-        await base44.entities.FreezerSlot.create(slotData);
+    for (const bajada of sourceRow) {
+      // Duplicar slot frontal
+      if (!bajada.front.is_empty) {
+        const targetSlot = slots.find(s => s.row === targetRowIndex + 1 && s.position === bajada.position && s.slot_type === 'F');
+        const slotData = {
+          store_id: `${selectedStore}_F${currentFreezer}`,
+          row: targetRowIndex + 1,
+          position: bajada.position,
+          slot_type: 'F',
+          flavor_name: bajada.front.flavor_name,
+          flavor_type: bajada.front.flavor_type,
+          color: bajada.front.color,
+          is_empty: false,
+          stock_level: bajada.front.stock_level
+        };
+        if (targetSlot?.id) {
+          await base44.entities.FreezerSlot.update(targetSlot.id, slotData);
+        } else {
+          await base44.entities.FreezerSlot.create(slotData);
+        }
+      }
+      
+      // Duplicar slot trasero
+      if (!bajada.back.is_empty) {
+        const targetSlot = slots.find(s => s.row === targetRowIndex + 1 && s.position === bajada.position && s.slot_type === 'T');
+        const slotData = {
+          store_id: `${selectedStore}_F${currentFreezer}`,
+          row: targetRowIndex + 1,
+          position: bajada.position,
+          slot_type: 'T',
+          flavor_name: bajada.back.flavor_name,
+          flavor_type: bajada.back.flavor_type,
+          color: bajada.back.color,
+          is_empty: false,
+          stock_level: bajada.back.stock_level
+        };
+        if (targetSlot?.id) {
+          await base44.entities.FreezerSlot.update(targetSlot.id, slotData);
+        } else {
+          await base44.entities.FreezerSlot.create(slotData);
+        }
       }
     }
     
     queryClient.invalidateQueries(['freezerSlots']);
-    toast.success(`Fila ${rowIndex + 1} duplicada a fila ${targetRowIndex + 1}`);
+    toast.success(`Fila ${rowIndex + 1} duplicada a fila ${targetRowIndex + 1} en Nevera #${currentFreezer}`);
   };
 
   // Drag & Drop

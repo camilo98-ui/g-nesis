@@ -146,7 +146,7 @@ export default function Home() {
   const [showBudgetDashboard, setShowBudgetDashboard] = useState(false);
 
   const ROLES = [
-  { id: 'gerente', name: 'Gerente', icon: 'gerente', color: 'from-slate-600 to-gray-700', description: '🎯 Poder total', iconBaseColor: '#475569' },
+  { id: 'gerente', name: 'Gerente', icon: 'gerente', color: 'from-slate-600 to-gray-700', description: '🎯 Poder total', iconBaseColor: '#475569', hasExecutivePanel: true },
   { id: 'lider', name: 'Lider de Experiencia', icon: 'lider', color: 'from-amber-400 to-yellow-500', description: '⭐ Full acceso', iconBaseColor: '#f59e0b' },
   { id: 'embajador', name: 'Embajador', icon: 'embajador', color: 'from-pink-400 to-rose-500', description: '🍦 Team hero', iconBaseColor: '#ec4899' }];
 
@@ -298,17 +298,14 @@ export default function Home() {
       return;
     }
 
-    // Gerente tiene su propia clave universal (1998)
+    // Gerente tiene acceso directo al panel ejecutivo
     if (selectedRole === 'gerente') {
       if (loginPassword === '1998') {
-        setSelectedStore(pendingStore);
         setIsLoggedIn(true);
-        localStorage.setItem('selectedStore', pendingStore);
         localStorage.setItem('userRole', selectedRole);
-        localStorage.setItem('popsySession', JSON.stringify({ store: pendingStore, role: selectedRole, time: Date.now() }));
-        setShowWelcome(true);
-        setPendingStore('');
-        setLoginPassword('');
+        localStorage.setItem('popsySession', JSON.stringify({ role: selectedRole, time: Date.now() }));
+        // Redirigir al dashboard ejecutivo
+        window.location.href = createPageUrl('ExecutiveDashboard');
         return;
       } else {
         setLoginError('Contraseña de gerente incorrecta');
