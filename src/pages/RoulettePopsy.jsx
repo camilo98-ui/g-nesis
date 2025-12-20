@@ -81,7 +81,10 @@ export default function RoulettePopsy() {
 
   const activeEmployee = employeeOfMonth.find(e => e.is_active);
   const isGerente = userRole === 'gerente';
-  const canSpin = userRole === 'gerente'; // Solo el gerente puede girar
+  
+  // TODOS pueden ver la ruleta si son empleado del mes
+  // Solo el gerente puede girarla
+  const canSpin = isGerente;
 
   // Si es gerente, mostrar panel de administración completo
   if (isGerente) {
@@ -113,8 +116,8 @@ export default function RoulettePopsy() {
     );
   }
 
-  // Si no es empleado del mes, mostrar mensaje
-  if (!activeEmployee) {
+  // Si no es empleado del mes Y no es gerente, mostrar mensaje
+  if (!activeEmployee && !isGerente) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-amber-50 relative flex items-center justify-center">
         <FloatingIceCreamsBg />

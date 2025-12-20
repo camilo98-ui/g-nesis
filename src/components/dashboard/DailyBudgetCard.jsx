@@ -62,14 +62,14 @@ export default function DailyBudgetCard({ dailySales = [], storeId, formatCurren
     }
   });
 
-  // Datos de últimos 10 días con presupuesto
+  // Datos de últimos 10 días con presupuesto - ORDENADOS DE IZQUIERDA A DERECHA
   const chartData = useMemo(() => {
     const budgetsMap = {};
     dailyBudgets.forEach(b => {
       budgetsMap[b.date] = b;
     });
 
-    const last10Days = dailySales.slice(-10);
+    const last10Days = dailySales.slice(-10).sort((a, b) => new Date(a.date) - new Date(b.date));
     return last10Days.map(day => {
       const budget = budgetsMap[day.date];
       const real = day.total_sales || 0;

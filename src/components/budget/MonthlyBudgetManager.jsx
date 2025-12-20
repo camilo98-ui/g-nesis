@@ -26,13 +26,32 @@ export default function MonthlyBudgetManager({ storeId, isOpen, onClose, onSucce
       const isWeekend = dayOfWeek === 0 || dayOfWeek === 6; // Sábado o Domingo
       const isFriday = dayOfWeek === 5;
       
+      // Distribución analítica por día de la semana basada en comportamiento real:
+      // Domingo (0): +50% - día de mayor venta
+      // Sábado (6): +45% - segundo día más fuerte
+      // Viernes (5): +25% - día fuerte
+      // Jueves (4): +15% - día medio-alto
+      // Miércoles (3): +5% - día medio
+      // Martes (2): +0% - día base
+      // Lunes (1): -10% - día más bajo
+      
+      let multiplier = 1;
+      if (dayOfWeek === 0) multiplier = 1.5;      // Domingo +50%
+      else if (dayOfWeek === 6) multiplier = 1.45; // Sábado +45%
+      else if (dayOfWeek === 5) multiplier = 1.25; // Viernes +25%
+      else if (dayOfWeek === 4) multiplier = 1.15; // Jueves +15%
+      else if (dayOfWeek === 3) multiplier = 1.05; // Miércoles +5%
+      else if (dayOfWeek === 2) multiplier = 1;    // Martes base
+      else multiplier = 0.9;                        // Lunes -10%
+      
       return {
         date: format(day, 'yyyy-MM-dd'),
         dayName: format(day, 'EEEE', { locale: es }),
         dayNum: format(day, 'dd'),
+        dayOfWeek,
         isWeekend,
         isFriday,
-        multiplier: isWeekend ? 1.4 : isFriday ? 1.2 : 1 // Fines de semana +40%, viernes +20%
+        multiplier
       };
     });
   }, []);
@@ -158,7 +177,7 @@ export default function MonthlyBudgetManager({ storeId, isOpen, onClose, onSucce
                   className="text-lg font-bold border-violet-300 focus:border-violet-500"
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  💡 Se distribuirá automáticamente: fines de semana +40%, viernes +20%
+                  💡 Distribución analítica: Dom +50%, Sáb +45%, Vie +25%, Jue +15%, Mié +5%, Mar base, Lun -10%
                 </p>
               </div>
 
@@ -203,14 +222,14 @@ export default function MonthlyBudgetManager({ storeId, isOpen, onClose, onSucce
                   </div>
 
                   {/* Leyenda */}
-                  <div className="flex justify-center gap-3 mt-3 text-xs">
+                  <div className="flex justify-center gap-2 mt-3 text-xs flex-wrap">
                     <div className="flex items-center gap-1">
                       <div className="w-3 h-3 rounded bg-gradient-to-br from-pink-200 to-rose-300" />
-                      <span className="text-gray-600">Fin de semana (+40%)</span>
+                      <span className="text-gray-600">Fin de semana</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <div className="w-3 h-3 rounded bg-gradient-to-br from-amber-100 to-yellow-200" />
-                      <span className="text-gray-600">Viernes (+20%)</span>
+                      <span className="text-gray-600">Viernes</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <div className="w-3 h-3 rounded bg-white border border-gray-200" />
