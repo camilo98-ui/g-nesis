@@ -101,12 +101,18 @@ export default function CashierFullProfile({
     
     // Veteran or new talent based on hire date
     if (cashier.hire_date) {
-      const hireDate = new Date(cashier.hire_date);
-      const monthsWorked = (new Date() - hireDate) / (1000 * 60 * 60 * 24 * 30);
-      if (monthsWorked >= 12) {
-        tags.push(PERFORMANCE_HASHTAGS.veteran);
-      } else if (monthsWorked <= 3 && stats.rank <= 5) {
-        tags.push(PERFORMANCE_HASHTAGS.newStar);
+      try {
+        const hireDate = new Date(cashier.hire_date);
+        if (!isNaN(hireDate.getTime())) {
+          const monthsWorked = (new Date() - hireDate) / (1000 * 60 * 60 * 24 * 30);
+          if (monthsWorked >= 12) {
+            tags.push(PERFORMANCE_HASHTAGS.veteran);
+          } else if (monthsWorked <= 3 && stats.rank <= 5) {
+            tags.push(PERFORMANCE_HASHTAGS.newStar);
+          }
+        }
+      } catch (e) {
+        // Invalid date, skip veteran/new star tags
       }
     }
     
@@ -210,7 +216,15 @@ export default function CashierFullProfile({
               {cashier.hire_date && (
                 <span className="flex items-center gap-1">
                   <Calendar className="w-4 h-4" />
-                  Desde {format(new Date(cashier.hire_date), 'MMM yyyy', { locale: es })}
+                  {(() => {
+                    try {
+                      const date = new Date(cashier.hire_date);
+                      if (isNaN(date.getTime())) return 'Miembro del equipo';
+                      return `Desde ${format(date, 'MMM yyyy', { locale: es })}`;
+                    } catch {
+                      return 'Miembro del equipo';
+                    }
+                  })()}
                 </span>
               )}
             </div>
@@ -337,7 +351,14 @@ export default function CashierFullProfile({
                   <div className="flex-1">
                     <p className="font-medium text-gray-700 text-sm">{badge.badge_type?.replace(/_/g, ' ')}</p>
                     <p className="text-xs text-gray-400">
-                      {badge.earned_date && format(new Date(badge.earned_date), 'dd MMM yyyy', { locale: es })}
+                      {badge.earned_date && (() => {
+                        try {
+                          const date = new Date(badge.earned_date);
+                          return !isNaN(date.getTime()) ? format(date, 'dd MMM yyyy', { locale: es }) : '';
+                        } catch {
+                          return '';
+                        }
+                      })()}
                     </p>
                   </div>
                 </motion.div>

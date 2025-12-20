@@ -49,7 +49,15 @@ export default function CashierProfile({ cashier, stats }) {
                   {cashier.hire_date && (
                     <span className="flex items-center gap-1">
                       <Calendar className="w-4 h-4" />
-                      Desde {format(new Date(cashier.hire_date), 'MMM yyyy', { locale: es })}
+                      {(() => {
+                        try {
+                          const date = new Date(cashier.hire_date);
+                          if (isNaN(date.getTime())) return 'Miembro del equipo';
+                          return `Desde ${format(date, 'MMM yyyy', { locale: es })}`;
+                        } catch {
+                          return 'Miembro del equipo';
+                        }
+                      })()}
                     </span>
                   )}
                 </div>
