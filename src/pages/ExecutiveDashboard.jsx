@@ -23,18 +23,16 @@ import { es } from 'date-fns/locale';
 const COLORS = ['#ec4899', '#f472b6', '#f9a8d4', '#fbcfe8', '#fce7f3', '#8b5cf6', '#a78bfa'];
 
 export default function ExecutiveDashboard() {
-  const [selectedMonth, setSelectedMonth] = useState(new Date());
-  const [filterStatus, setFilterStatus] = useState('all'); // all, negative, critical, positive
-  const [forecastDays, setForecastDays] = useState(30);
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [dateRange, setDateRange] = useState({ from: startOfMonth(new Date()), to: new Date() });
+  const [viewMode, setViewMode] = useState('month'); // month, week, custom
   const [aiInsights, setAiInsights] = useState(null);
   const [loadingInsights, setLoadingInsights] = useState(false);
+  const [selectedCard, setSelectedCard] = useState(null);
 
-  const monthStart = startOfMonth(selectedMonth);
-  const monthEnd = endOfMonth(selectedMonth);
-  const currentMonth = selectedMonth.getMonth() + 1;
-  const currentYear = selectedMonth.getFullYear();
+  const currentMonth = new Date().getMonth() + 1;
+  const currentYear = new Date().getFullYear();
 
-  // Fetch data
   const { data: allDailySales = [] } = useQuery({
     queryKey: ['allDailySales'],
     queryFn: () => base44.entities.DailySales.list()
@@ -43,11 +41,6 @@ export default function ExecutiveDashboard() {
   const { data: allBudgets = [] } = useQuery({
     queryKey: ['allBudgets'],
     queryFn: () => base44.entities.Budget.list()
-  });
-
-  const { data: allShifts = [] } = useQuery({
-    queryKey: ['allShifts'],
-    queryFn: () => base44.entities.Shift.list()
   });
 
   const { data: allCashiers = [] } = useQuery({
@@ -61,7 +54,7 @@ export default function ExecutiveDashboard() {
       const storeSales = allDailySales.filter(s => {
         try {
           const d = new Date(s.date);
-          return s.store_id === store.code && !isNaN(d.getTime()) && d >= monthStart && d <= monthEnd;
+          return s.store_id === store.code && !isNaN(d.getTime()) && d >= dateRange.from && d <= dateRange.to;
         } catch {
           return false;
         }
@@ -82,10 +75,10 @@ export default function ExecutiveDashboard() {
       const transactionsCompliance = transactionsBudget > 0 ? (totalTransactions / transactionsBudget) * 100 : 0;
 
       // Proyección
-      const daysElapsed = Math.max(1, Math.floor((new Date() - monthStart) / (1000 * 60 * 60 * 24)));
-      const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
+      const daysElapsed = Math.max(1, storeSales.length);
+      const daysInPeriod = Math.max(1, Math.ceil((dateRange.to - dateRange.from) / (1000 * 60 * 60 * 24)));
       const dailyAvg = totalSales / daysElapsed;
-      const projection = dailyAvg * daysInMonth;
+      const projection = dailyAvg * daysInPeriod;
       const projectionCompliance = salesBudget > 0 ? (projection / salesBudget) * 100 : 0;
 
       // Status
@@ -117,10 +110,11 @@ export default function ExecutiveDashboard() {
         status,
         weight,
         daysElapsed,
-        dailyAvg
+        dailyAvg,
+        daysInPeriod
       };
     });
-  }, [allDailySales, allBudgets, monthStart, monthEnd, currentMonth, currentYear]);
+  }, [allDailySales, allBudgets, dateRange, currentMonth, currentYear]);
 
   // Filtrar tiendas según status
   const filteredStores = useMemo(() => {
@@ -243,50 +237,7 @@ export default function ExecutiveDashboard() {
     });
   }, [storesAnalysis, allDailySales, allBudgets, currentMonth, currentYear]);
 
-  // Staffing Predictions
-  const staffingPredictions = useMemo(() => {
-    return STORES.map(store => {
-      const storeShifts = allShifts.filter(s => {
-        try {
-          const d = new Date(s.date);
-          return s.store_id === store.code && !isNaN(d.getTime()) && d >= subMonths(new Date(), 2);
-        } catch {
-          return false;
-        }
-      });
 
-      const storeCashiers = allCashiers.filter(c => c.store_id === store.code && c.is_active !== false);
-      const leaders = storeCashiers.filter(c => c.position === 'lider');
-      
-      // Calculate average shifts per week
-      const weeksOfData = 8;
-      const avgShiftsPerWeek = storeShifts.length / weeksOfData;
-      const avgCashiersNeeded = Math.ceil(avgShiftsPerWeek / 5); // Assuming 5 shifts per cashier per week
-
-      // Predict if understaffed
-      const isUnderstaffed = storeCashiers.length < avgCashiersNeeded;
-      const needsMoreStaff = isUnderstaffed ? avgCashiersNeeded - storeCashiers.length : 0;
-
-      // Leader coverage
-      const leaderShifts = storeShifts.filter(s => {
-        const cashier = allCashiers.find(c => c.id === s.cashier_id);
-        return cashier?.position === 'lider';
-      });
-      const leaderCoveragePercent = storeShifts.length > 0 ? (leaderShifts.length / storeShifts.length) * 100 : 0;
-
-      return {
-        storeCode: store.code,
-        storeName: getDisplayName(store.code),
-        currentStaff: storeCashiers.length,
-        leaders: leaders.length,
-        avgShiftsPerWeek,
-        recommendedStaff: avgCashiersNeeded,
-        needsMoreStaff,
-        isUnderstaffed,
-        leaderCoveragePercent
-      };
-    });
-  }, [allShifts, allCashiers]);
 
   // Generate AI Insights
   const generateAIInsights = async () => {
@@ -295,21 +246,25 @@ export default function ExecutiveDashboard() {
 
     try {
       const storesAtRisk = salesForecast.filter(s => s.willMissTarget).slice(0, 5);
-      const understaffedStores = staffingPredictions.filter(s => s.isUnderstaffed).slice(0, 5);
+      const topStores = storesAnalysis.sort((a, b) => b.salesCompliance - a.salesCompliance).slice(0, 3);
+      const bottomStores = storesAnalysis.sort((a, b) => a.salesCompliance - b.salesCompliance).slice(0, 3);
 
       const prompt = `Analiza esta situación de la zona de Popsy y genera insights accionables:
 
-TIENDAS EN RIESGO DE NO CUMPLIR META:
+TIENDAS EN RIESGO:
 ${storesAtRisk.map(s => `- ${s.name}: Proyección $${(s.forecast30/1000000).toFixed(1)}M vs Meta $${(s.nextMonthBudget/1000000).toFixed(1)}M (Crecimiento: ${s.growthRate.toFixed(1)}%)`).join('\n')}
 
-TIENDAS CON DÉFICIT DE PERSONAL:
-${understaffedStores.map(s => `- ${s.storeName}: ${s.currentStaff} actuales vs ${s.recommendedStaff} recomendados (${s.leaders} líderes)`).join('\n')}
+TOP 3 TIENDAS:
+${topStores.map(s => `- ${s.name}: ${s.salesCompliance.toFixed(0)}% cumplimiento`).join('\n')}
+
+BOTTOM 3 TIENDAS:
+${bottomStores.map(s => `- ${s.name}: ${s.salesCompliance.toFixed(0)}% cumplimiento`).join('\n')}
 
 INSTRUCCIONES:
-1. Identifica patrones críticos
-2. Sugiere 3 acciones prioritarias específicas
+1. Identifica el patrón crítico más importante
+2. Sugiere 3 acciones prioritarias específicas y accionables
 3. Identifica oportunidades de mejora
-4. Sé directo y accionable (máximo 120 palabras)`;
+4. Sé directo y motivador (máximo 150 palabras)`;
 
       const result = await base44.integrations.Core.InvokeLLM({
         prompt,
