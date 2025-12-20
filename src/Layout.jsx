@@ -59,22 +59,6 @@ export default function Layout({ children, currentPageName }) {
               <span>📍</span>
               <span className="hidden sm:inline">Bogotá Noroccidente</span>
             </div>
-            {/* Gerencia Button */}
-            <RouterLink to={createPageUrl('Management')}>
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-slate-600 hover:text-slate-700 hover:bg-slate-50 gap-2 rounded-xl font-semibold"
-                >
-                  <TrendingUp className="w-4 h-4" />
-                  <span className="hidden md:inline">Gerencia</span>
-                </Button>
-              </motion.div>
-            </RouterLink>
           </div>
         </div>
 
