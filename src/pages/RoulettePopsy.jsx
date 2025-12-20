@@ -213,7 +213,7 @@ export default function RoulettePopsy() {
           transition={{ delay: 0.3 }}
           className="relative"
         >
-          {!canSpin && (
+          {activeEmployee.has_spun && !canSpin && (
             <div className="absolute inset-0 bg-white/60 backdrop-blur-sm rounded-3xl z-10 flex items-center justify-center">
               <div className="text-center p-6">
                 <motion.div
@@ -221,10 +221,25 @@ export default function RoulettePopsy() {
                   transition={{ duration: 2, repeat: Infinity }}
                   className="text-6xl mb-4"
                 >
-                  🔒
+                  ✅
                 </motion.div>
-                <p className="text-lg font-bold text-gray-700 mb-2">Solo el Gerente puede girar la ruleta</p>
-                <p className="text-sm text-gray-500">Habla con tu gerente para participar</p>
+                <p className="text-lg font-bold text-gray-700 mb-2">Ya giraste la ruleta este mes</p>
+                <p className="text-sm text-gray-500">Espera al próximo mes para un nuevo giro</p>
+              </div>
+            </div>
+          )}
+          {!activeEmployee.has_spun && !canSpin && (
+            <div className="absolute inset-0 bg-gradient-to-br from-pink-500/10 to-purple-500/10 backdrop-blur-sm rounded-3xl z-10 flex items-center justify-center">
+              <div className="text-center p-6">
+                <motion.div
+                  animate={{ scale: [1, 1.1, 1], rotate: [0, 10, -10, 0] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="text-6xl mb-4"
+                >
+                  🎡
+                </motion.div>
+                <p className="text-lg font-bold text-gray-700 mb-2">¡Tu ruleta está lista!</p>
+                <p className="text-sm text-gray-500">Espera a que el gerente la gire por ti</p>
               </div>
             </div>
           )}

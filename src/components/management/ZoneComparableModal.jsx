@@ -161,22 +161,28 @@ export default function ZoneComparableModal({ isOpen, onClose, currentZoneData, 
   const getPeriodSuggestions = () => {
     const now = new Date();
     if (periodType === 'weekly') {
-      return [
-        `Semana ${format(subWeeks(now, 1), 'w')} - ${format(subWeeks(now, 1), 'yyyy')}`,
-        `Semana ${format(subWeeks(now, 2), 'w')} - ${format(subWeeks(now, 2), 'yyyy')}`,
-        `Semana ${format(subWeeks(now, 52), 'w')} - ${format(subWeeks(now, 52), 'yyyy')} (Año ant.)`
-      ];
+      // Generar últimas 12 semanas
+      const weeks = [];
+      for (let i = 1; i <= 12; i++) {
+        const weekDate = subWeeks(now, i);
+        weeks.push(`Semana ${format(weekDate, 'w', { locale: es })} - ${format(weekDate, 'yyyy')}`);
+      }
+      return weeks;
     } else if (periodType === 'monthly') {
-      return [
-        format(subMonths(now, 1), 'MMMM yyyy', { locale: es }),
-        format(subMonths(now, 2), 'MMMM yyyy', { locale: es }),
-        format(subMonths(now, 12), 'MMMM yyyy', { locale: es }) + ' (Año ant.)'
-      ];
+      // Generar últimos 12 meses
+      const months = [];
+      for (let i = 1; i <= 12; i++) {
+        const monthDate = subMonths(now, i);
+        months.push(format(monthDate, 'MMMM yyyy', { locale: es }));
+      }
+      return months;
     } else {
-      return [
-        format(subYears(now, 1), 'yyyy'),
-        format(subYears(now, 2), 'yyyy')
-      ];
+      // Generar últimos 5 años
+      const years = [];
+      for (let i = 1; i <= 5; i++) {
+        years.push(format(subYears(now, i), 'yyyy'));
+      }
+      return years;
     }
   };
 
@@ -413,12 +419,14 @@ export default function ZoneComparableModal({ isOpen, onClose, currentZoneData, 
                       </div>
                     )}
                     <div className={activeTab === 'zona' ? 'col-span-2' : ''}>
-                      <label className="text-xs text-gray-600 mb-1 block">Período</label>
+                      <label className="text-xs text-gray-600 mb-1 block">
+                        {periodType === 'weekly' ? 'Semana' : periodType === 'monthly' ? 'Mes' : 'Año'}
+                      </label>
                       <Select value={newData.period_label} onValueChange={(v) => setNewData({...newData, period_label: v})}>
                         <SelectTrigger className="bg-white h-9 text-xs">
-                          <SelectValue placeholder="Seleccionar..." />
+                          <SelectValue placeholder={periodType === 'weekly' ? 'Selecciona semana...' : periodType === 'monthly' ? 'Selecciona mes...' : 'Selecciona año...'} />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="max-h-48">
                           {getPeriodSuggestions().map(p => (
                             <SelectItem key={p} value={p} className="text-xs">{p}</SelectItem>
                           ))}
