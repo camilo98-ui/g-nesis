@@ -310,8 +310,13 @@ function ManagementDashboard() {
   // Filter data by date range
   const filteredDailySales = useMemo(() => {
     return allDailySales.filter(s => {
-      const d = new Date(s.date);
-      return d >= dateRange.from && d <= dateRange.to;
+      try {
+        const d = new Date(s.date);
+        if (isNaN(d.getTime())) return false;
+        return d >= dateRange.from && d <= dateRange.to;
+      } catch {
+        return false;
+      }
     });
   }, [allDailySales, dateRange]);
 
@@ -329,8 +334,22 @@ function ManagementDashboard() {
       const budget = allBudgets.find(b => b.store_id === store.code && b.month === currentMonth && b.year === currentYear);
       totalBudget += budget?.sales_budget || 0;
 
-      const todaySales = allDailySales.find(s => s.store_id === store.code && isToday(new Date(s.date)));
-      const yesterdaySales = allDailySales.find(s => s.store_id === store.code && isYesterday(new Date(s.date)));
+      const todaySales = allDailySales.find(s => {
+        try {
+          const d = new Date(s.date);
+          return s.store_id === store.code && !isNaN(d.getTime()) && isToday(d);
+        } catch {
+          return false;
+        }
+      });
+      const yesterdaySales = allDailySales.find(s => {
+        try {
+          const d = new Date(s.date);
+          return s.store_id === store.code && !isNaN(d.getTime()) && isYesterday(d);
+        } catch {
+          return false;
+        }
+      });
       todayTotal += todaySales?.total_sales || 0;
       yesterdayTotal += yesterdaySales?.total_sales || 0;
     });
