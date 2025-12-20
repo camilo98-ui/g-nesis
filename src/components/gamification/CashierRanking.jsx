@@ -257,8 +257,13 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
   const ranking = useMemo(() => {
     const activeRange = weekFilter || dateRange;
     const filteredRecords = shiftRecords.filter(r => {
-      const d = new Date(r.date);
-      return d >= activeRange.from && d <= activeRange.to;
+      try {
+        const d = new Date(r.date);
+        if (isNaN(d.getTime())) return false;
+        return d >= activeRange.from && d <= activeRange.to;
+      } catch {
+        return false;
+      }
     });
 
     const cashierStats = {};
