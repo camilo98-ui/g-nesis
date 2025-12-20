@@ -815,18 +815,18 @@ export default function Dashboard() {
               >
                 {/* Main Charts Row */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Sales Trend con Proyección */}
+                  {/* Sales Trend */}
                   <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
                         <TrendingUp className="w-4 h-4 text-green-500" />
-                        Ventas Diarias con Proyección
+                        Ventas Diarias
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="h-64">
                         <ResponsiveContainer width="100%" height="100%">
-                          <ComposedChart data={chartData}>
+                          <AreaChart data={chartData}>
                             <defs>
                               <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
@@ -839,20 +839,11 @@ export default function Dashboard() {
                             <Tooltip 
                               contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
                               labelFormatter={(label, payload) => payload?.[0]?.payload?.fullDate || label}
-                              formatter={(v, name) => [formatCurrency(v), name === 'Proyección' ? '📈 Proyección' : '💰 Ventas']}
+                              formatter={(v) => [formatCurrency(v), '💰 Ventas']}
                             />
                             <Legend />
                             <Area type="monotone" dataKey="ventas" stroke="#10b981" strokeWidth={2} fill="url(#salesGrad)" name="Ventas" />
-                            <Line 
-                              type="linear" 
-                              dataKey="proyeccion" 
-                              stroke="#f59e0b" 
-                              strokeWidth={2} 
-                              strokeDasharray="5 5" 
-                              dot={false}
-                              name="Proyección"
-                            />
-                          </ComposedChart>
+                          </AreaChart>
                         </ResponsiveContainer>
                       </div>
                     </CardContent>

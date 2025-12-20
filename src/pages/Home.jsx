@@ -579,7 +579,7 @@ export default function Home() {
 
               <Button
                 onClick={handleLogin}
-                disabled={!pendingStore || !selectedRole}
+                disabled={(selectedRole !== 'gerente' && !pendingStore) || !selectedRole}
                 className="w-full bg-gradient-to-r from-pink-400 via-pink-500 to-rose-500 hover:from-pink-500 hover:via-pink-600 hover:to-rose-600 text-white py-6 rounded-xl shadow-lg shadow-pink-500/30 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden">
 
                 <motion.div
@@ -610,7 +610,7 @@ export default function Home() {
                     {/* Brillo */}
                     <ellipse cx="16" cy="10" rx="5" ry="3" fill="white" opacity="0.3" />
                   </svg>
-                  Ingresar a la tienda
+                  {selectedRole === 'gerente' ? 'Acceder al Panel Ejecutivo' : 'Ingresar a la tienda'}
                 </motion.span>
               </Button>
             </motion.div>
