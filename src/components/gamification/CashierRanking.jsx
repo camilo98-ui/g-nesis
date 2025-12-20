@@ -232,7 +232,7 @@ function RankingCalendar({ selected, onSelect, onApply }) {
 
 export default function CashierRanking({ storeId, onSelectCashier }) {
   const [dateRange, setDateRange] = useState({
-    from: startOfWeek(new Date(), { weekStartsOn: 1 }),
+    from: startOfMonth(new Date()),
     to: new Date()
   });
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
@@ -382,7 +382,7 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
                 const cashier = ranking[podiumIdx];
                 if (!cashier) return null;
                 const Icon = PODIUM_ICONS[podiumIdx];
-                const heights = ['h-32', 'h-52', 'h-28'];
+                const heights = ['h-64', 'h-40', 'h-32'];
                 const height = heights[podiumIdx];
                 const isFirst = podiumIdx === 0;
                 
