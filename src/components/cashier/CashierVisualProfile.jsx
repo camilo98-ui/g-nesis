@@ -160,7 +160,9 @@ export default function CashierVisualProfile({ cashier, storeCode, shiftRecords 
         <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3 px-4">
           <div className="bg-emerald-50 rounded-xl p-3 text-center">
             <DollarSign className="w-5 h-5 text-emerald-500 mx-auto mb-1" />
-            <p className="text-lg font-black text-emerald-600">${Math.round(stats.avgSales / 1000)}K</p>
+            <p className="text-lg font-black text-emerald-600">
+              {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(stats.avgSales)}
+            </p>
             <p className="text-[10px] text-gray-500">Promedio Venta</p>
           </div>
           <div className="bg-blue-50 rounded-xl p-3 text-center">
