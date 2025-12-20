@@ -392,23 +392,7 @@ export default function Home() {
                 }}
                 className="text-3xl md:text-4xl font-black bg-gradient-to-r from-pink-500 via-rose-500 to-purple-500 bg-clip-text text-transparent bg-[length:200%_auto] drop-shadow-sm"
               >
-                {selectedRole === 'gerente' ? (
-                  <span className="inline-flex items-center gap-2">
-                    ¡Hola Gerente! <span className="text-4xl">🎯</span>
-                  </span>
-                ) : selectedRole === 'lider' ? (
-                  <span className="inline-flex items-center gap-2">
-                    ¡Hola Líder! <span className="text-4xl">⭐</span>
-                  </span>
-                ) : selectedRole === 'embajador' ? (
-                  <span className="inline-flex items-center gap-2">
-                    ¡Hola Embajador! <span className="text-4xl">🍦</span>
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-2">
-                    ¡Bienvenido! <span className="text-4xl">🎉</span>
-                  </span>
-                )}
+                {selectedRole === 'gerente' ? '¡Hola Gerente!' : selectedRole === 'lider' ? '¡Hola Líder!' : selectedRole === 'embajador' ? '¡Hola Embajador!' : '¡Bienvenido!'}
               </motion.h2>
               <p className="text-gray-500 text-sm mt-1">
                 {selectedRole === 'gerente' ? 'El poder en tus manos' : selectedRole === 'lider' ? 'Listo para brillar' : selectedRole === 'embajador' ? 'El corazón del equipo' : 'Selecciona tu rol'}
