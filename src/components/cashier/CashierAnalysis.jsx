@@ -64,10 +64,22 @@ export default function CashierAnalysis({ cashierId, cashierName, storeId }) {
   // Estadísticas del cajero vs equipo
   const stats = useMemo(() => {
     const monthStart = startOfMonth(new Date());
-    const cashierRecords = shiftRecords.filter(r => 
-      r.cashier_id === cashierId && new Date(r.date) >= monthStart
-    );
-    const allRecords = shiftRecords.filter(r => new Date(r.date) >= monthStart);
+    const cashierRecords = shiftRecords.filter(r => {
+      try {
+        const date = new Date(r.date);
+        return r.cashier_id === cashierId && !isNaN(date.getTime()) && date >= monthStart;
+      } catch {
+        return false;
+      }
+    });
+    const allRecords = shiftRecords.filter(r => {
+      try {
+        const date = new Date(r.date);
+        return !isNaN(date.getTime()) && date >= monthStart;
+      } catch {
+        return false;
+      }
+    });
     
     const cashierSales = cashierRecords.reduce((sum, r) => sum + (r.sales || 0), 0);
     const cashierTrans = cashierRecords.reduce((sum, r) => sum + (r.transactions || 0), 0);
@@ -190,7 +202,14 @@ INSTRUCCIONES:
   // Comparación con otros cajeros
   const cashierComparison = useMemo(() => {
     const monthStart = startOfMonth(new Date());
-    const allRecords = shiftRecords.filter(r => new Date(r.date) >= monthStart);
+    const allRecords = shiftRecords.filter(r => {
+      try {
+        const date = new Date(r.date);
+        return !isNaN(date.getTime()) && date >= monthStart;
+      } catch {
+        return false;
+      }
+    });
     
     // Agrupar por cajero
     const cashierGroups = {};

@@ -288,8 +288,13 @@ export default function BadgesDisplay({ cashierId, compact = false, showAll = fa
 
 // Helper para verificar si una insignia es reciente (últimos 7 días)
 function isRecent(dateStr) {
-  const date = new Date(dateStr);
-  const now = new Date();
-  const diff = now - date;
-  return diff < 7 * 24 * 60 * 60 * 1000;
+  try {
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return false;
+    const now = new Date();
+    const diff = now - date;
+    return diff < 7 * 24 * 60 * 60 * 1000;
+  } catch {
+    return false;
+  }
 }
