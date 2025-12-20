@@ -25,6 +25,17 @@ const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/pub
 
 const MENU_ITEMS = [
 {
+  name: 'Panel Ejecutivo',
+  page: 'ExecutiveDashboard',
+  icon: TrendingUp,
+  description: 'Análisis Gerencial',
+  bgColor: 'bg-gradient-to-br from-slate-100/90 to-gray-100/80',
+  iconBg: 'bg-slate-200/60',
+  iconColor: 'text-slate-600',
+  textColor: 'text-slate-700',
+  requiredRole: 'gerente'
+},
+{
   name: 'Tienda',
   page: 'Dashboard',
   icon: LayoutDashboard,
@@ -44,16 +55,7 @@ const MENU_ITEMS = [
   iconColor: 'text-violet-500',
   textColor: 'text-violet-700'
 },
-{
-  name: 'Ejecutivo',
-  page: 'ExecutiveDashboard',
-  icon: TrendingUp,
-  description: 'Análisis Gerencial',
-  bgColor: 'bg-gradient-to-br from-slate-100/90 to-gray-100/80',
-  iconBg: 'bg-slate-200/60',
-  iconColor: 'text-slate-600',
-  textColor: 'text-slate-700'
-},
+
 {
   name: 'Mapa Nevera',
   page: 'FreezerMap',
@@ -298,14 +300,16 @@ export default function Home() {
       return;
     }
 
-    // Gerente tiene acceso directo al panel ejecutivo
+    // Gerente con clave 1998
     if (selectedRole === 'gerente') {
       if (loginPassword === '1998') {
+        setSelectedStore('');
         setIsLoggedIn(true);
         localStorage.setItem('userRole', selectedRole);
         localStorage.setItem('popsySession', JSON.stringify({ role: selectedRole, time: Date.now() }));
-        // Redirigir al dashboard ejecutivo
-        window.location.href = createPageUrl('ExecutiveDashboard');
+        setShowWelcome(true);
+        setPendingStore('');
+        setLoginPassword('');
         return;
       } else {
         setLoginError('Contraseña de gerente incorrecta');
@@ -313,9 +317,14 @@ export default function Home() {
       }
     }
 
+    // Para otros roles: validar contraseña de tienda
+    if (!pendingStore) {
+      setLoginError('Selecciona una tienda');
+      return;
+    }
+
     const storePassword = storePasswords.find((p) => p.store_code === pendingStore);
 
-    // Si no tiene contraseña o la contraseña coincide
     if (!storePassword?.password || loginPassword === storePassword.password) {
       setSelectedStore(pendingStore);
       setIsLoggedIn(true);
@@ -770,7 +779,7 @@ export default function Home() {
         }
 
         {/* Menu Grid */}
-        {selectedStore ?
+        {selectedStore || selectedRole === 'gerente' ?
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -778,6 +787,11 @@ export default function Home() {
 
             {MENU_ITEMS.map((item, index) => {
             const Icon = item.icon;
+
+            // Restricciones: Panel Ejecutivo solo para gerente, otras opciones solo si hay tienda seleccionada
+            const needsStore = item.page !== 'ExecutiveDashboard';
+            if (needsStore && !selectedStore) return null;
+            if (item.requiredRole && selectedRole !== item.requiredRole) return null;
 
             // Restricciones por rol - solo embajador no ve Presupuestos
             const isLocked = selectedRole === 'embajador' && item.page === 'Budget';
