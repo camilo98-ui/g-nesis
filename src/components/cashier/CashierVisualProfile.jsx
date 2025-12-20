@@ -151,7 +151,15 @@ export default function CashierVisualProfile({ cashier, storeCode, shiftRecords 
           {cashier.hire_date && (
             <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 rounded-lg p-3">
               <Calendar className="w-4 h-4 text-gray-400" />
-              Desde {format(new Date(cashier.hire_date), "MMM yyyy", { locale: es })}
+              {(() => {
+                try {
+                  const date = new Date(cashier.hire_date);
+                  if (isNaN(date.getTime())) return 'Miembro del equipo';
+                  return `Desde ${format(date, "MMM yyyy", { locale: es })}`;
+                } catch {
+                  return 'Miembro del equipo';
+                }
+              })()}
             </div>
           )}
         </div>
