@@ -383,12 +383,32 @@ export default function Home() {
 
               <motion.h2
                 animate={{
-                  scale: [1, 1.02, 1]
+                  scale: [1, 1.03, 1],
+                  backgroundPosition: ['0% 50%', '100% 50%', '0% 50%']
                 }}
-                transition={{ duration: 3, repeat: Infinity }} className="bg-clip-text text-pink-800 text-2xl font-bold from-pink-400 via-pink-500 to-rose-500">
-
-
-                {selectedRole === 'gerente' ? 'Hola Gerente! 🎯' : selectedRole === 'lider' ? 'Hola Lider! ⭐' : selectedRole === 'embajador' ? 'Hola Embajador! 🍦' : 'Bienvenido! 🎉'}
+                transition={{ 
+                  scale: { duration: 3, repeat: Infinity, ease: "easeInOut" },
+                  backgroundPosition: { duration: 5, repeat: Infinity, ease: "linear" }
+                }}
+                className="text-3xl md:text-4xl font-black bg-gradient-to-r from-pink-500 via-rose-500 to-purple-500 bg-clip-text text-transparent bg-[length:200%_auto] drop-shadow-sm"
+              >
+                {selectedRole === 'gerente' ? (
+                  <span className="inline-flex items-center gap-2">
+                    ¡Hola Gerente! <span className="text-4xl">🎯</span>
+                  </span>
+                ) : selectedRole === 'lider' ? (
+                  <span className="inline-flex items-center gap-2">
+                    ¡Hola Líder! <span className="text-4xl">⭐</span>
+                  </span>
+                ) : selectedRole === 'embajador' ? (
+                  <span className="inline-flex items-center gap-2">
+                    ¡Hola Embajador! <span className="text-4xl">🍦</span>
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-2">
+                    ¡Bienvenido! <span className="text-4xl">🎉</span>
+                  </span>
+                )}
               </motion.h2>
               <p className="text-gray-500 text-sm mt-1">
                 {selectedRole === 'gerente' ? 'El poder en tus manos' : selectedRole === 'lider' ? 'Listo para brillar' : selectedRole === 'embajador' ? 'El corazón del equipo' : 'Selecciona tu rol'}
