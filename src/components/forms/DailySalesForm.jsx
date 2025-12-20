@@ -99,9 +99,11 @@ export default function DailySalesForm({ storeId, onSuccess }) {
       return record;
     },
     onSuccess: () => {
+      // Solo invalidar consultas de ventas de tienda, NO de cajeros
       queryClient.invalidateQueries({ queryKey: ['dailySales'] });
       queryClient.invalidateQueries({ queryKey: ['salesLogs'] });
       queryClient.invalidateQueries({ queryKey: ['budgets'] });
+      queryClient.invalidateQueries({ queryKey: ['dailyBudgets'] });
       
       toast.success('¡Ventas registradas correctamente!');
       

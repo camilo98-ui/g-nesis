@@ -5,8 +5,9 @@ import SmartSearch from '@/components/SmartSearch';
 import MotivationalHeader from '@/components/MotivationalHeader';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { 
-  Home, LayoutDashboard, Menu, Snowflake, CalendarDays
+  Home, LayoutDashboard, Menu, Snowflake, CalendarDays, TrendingUp
 } from 'lucide-react';
+import { Link as RouterLink } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { motion } from 'framer-motion';
@@ -14,10 +15,9 @@ import { motion } from 'framer-motion';
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/6a749247d_Capturadepantalla2025-11-251251441.png";
 
 const NAV_ITEMS = [
-  { name: '', page: 'FreezerMap', icon: Snowflake, isIcon: true },
-  { name: '', page: 'Home', icon: Home, isIcon: true },
-  { name: '', page: 'PopsyPlanner', icon: CalendarDays, isIcon: true },
-  { name: '', page: 'Management', icon: LayoutDashboard, isIcon: true },
+  { name: 'Mapa Nevera', page: 'FreezerMap', icon: Snowflake, isIcon: true },
+  { name: 'Inicio', page: 'Home', icon: Home, isIcon: true },
+  { name: 'Planner', page: 'PopsyPlanner', icon: CalendarDays, isIcon: true },
 ];
 
 export default function Layout({ children, currentPageName }) {
@@ -55,9 +55,27 @@ export default function Layout({ children, currentPageName }) {
               />
             </Link>
           )}
-          <div className="flex items-center gap-1 text-gray-400 text-xs">
-            <span>📍</span>
-            <span className="hidden sm:inline">Bogotá Noroccidente</span>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1 text-gray-400 text-xs">
+              <span>📍</span>
+              <span className="hidden sm:inline">Bogotá Noroccidente</span>
+            </div>
+            {/* Gerencia Button */}
+            <RouterLink to={createPageUrl('Management')}>
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-slate-600 hover:text-slate-700 hover:bg-slate-50 gap-2 rounded-xl font-semibold"
+                >
+                  <TrendingUp className="w-4 h-4" />
+                  <span className="hidden md:inline">Gerencia</span>
+                </Button>
+              </motion.div>
+            </RouterLink>
           </div>
         </div>
 
@@ -107,18 +125,14 @@ export default function Layout({ children, currentPageName }) {
                                                   ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg'
                                                   : item.page === 'Management'
                                                     ? 'bg-gradient-to-r from-slate-600 to-gray-700 text-white shadow-lg'
-                                                    : item.page === 'PopsyPlanner'
-                                                      ? 'bg-gradient-to-r from-violet-500 to-purple-500 text-white shadow-lg'
-                                                      : 'bg-gradient-to-r from-teal-500 to-emerald-500 text-white shadow-lg'
+                                                    : 'bg-gradient-to-r from-violet-500 to-purple-500 text-white shadow-lg'
                                               : item.page === 'FreezerMap'
                                                 ? 'text-cyan-500 hover:text-cyan-600 hover:bg-cyan-50'
                                                 : item.page === 'Home'
                                                   ? 'text-rose-500 hover:text-rose-600 hover:bg-rose-50'
                                                   : item.page === 'Management'
                                                     ? 'text-slate-600 hover:text-slate-700 hover:bg-slate-50'
-                                                    : item.page === 'PopsyPlanner'
-                                                      ? 'text-violet-500 hover:text-violet-600 hover:bg-violet-50'
-                                                      : 'text-teal-500 hover:text-teal-600 hover:bg-teal-50'}`}
+                                                    : 'text-violet-500 hover:text-violet-600 hover:bg-violet-50'}`}
                   >
                   <Icon className="w-5 h-5" />
                   </Button>
@@ -169,7 +183,7 @@ export default function Layout({ children, currentPageName }) {
                 {NAV_ITEMS.map((item) => {
                   const Icon = item.icon;
                   const isActive = currentPageName === item.page;
-                  const itemName = item.page === 'FreezerMap' ? 'Mapa Nevera' : item.page === 'Home' ? 'Inicio' : item.page === 'Management' ? 'Gerencia' : item.page === 'PopsyPlanner' ? 'Planner' : 'Calidad';
+                  const itemName = item.name;
                   return (
                     <Link
                       key={item.page}
@@ -187,9 +201,7 @@ export default function Layout({ children, currentPageName }) {
                                                                   ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white'
                                                                   : item.page === 'Management'
                                                                     ? 'bg-gradient-to-r from-slate-600 to-gray-700 text-white'
-                                                                    : item.page === 'PopsyPlanner'
-                                                                      ? 'bg-gradient-to-r from-violet-500 to-purple-500 text-white'
-                                                                      : 'bg-gradient-to-r from-teal-500 to-emerald-500 text-white'
+                                                                    : 'bg-gradient-to-r from-violet-500 to-purple-500 text-white'
                             : 'text-gray-600 hover:bg-pink-50'
                         }`}
                       >

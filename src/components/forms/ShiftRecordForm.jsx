@@ -122,40 +122,8 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
         });
       }
 
-      const allDayRecords = await base44.entities.ShiftRecord.filter({ 
-        store_id: storeId, 
-        date: data.date 
-      });
-
-      const dailyTotals = allDayRecords.reduce((acc, r) => ({
-        sales: acc.sales + (r.sales || 0),
-        tickets: acc.tickets + (r.tickets || 0),
-        transactions: acc.transactions + (r.transactions || 0),
-        suggested: acc.suggested + (r.suggested_sales || 0)
-      }), { sales: 0, tickets: 0, transactions: 0, suggested: 0 });
-
-      const existingDailySales = await base44.entities.DailySales.filter({ 
-        store_id: storeId, 
-        date: data.date 
-      });
-
-      if (existingDailySales.length > 0) {
-        await base44.entities.DailySales.update(existingDailySales[0].id, {
-          total_sales: dailyTotals.sales,
-          total_tickets: dailyTotals.tickets,
-          total_transactions: dailyTotals.transactions,
-          total_suggested: dailyTotals.suggested
-        });
-      } else {
-        await base44.entities.DailySales.create({
-          store_id: storeId,
-          date: data.date,
-          total_sales: dailyTotals.sales,
-          total_tickets: dailyTotals.tickets,
-          total_transactions: dailyTotals.transactions,
-          total_suggested: dailyTotals.suggested
-        });
-      }
+      // NO actualizar DailySales automáticamente desde ShiftRecord
+      // DailySales solo se actualiza manualmente desde DailySalesForm
 
       // Crear log sin bloquear el guardado
       try {

@@ -4,8 +4,10 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { 
   Trophy, Crown, Medal, TrendingUp, TrendingDown, 
-  ChevronRight, ChevronLeft, Check, Sparkles, CalendarRange
+  ChevronRight, ChevronLeft, Check, Sparkles, CalendarRange, Edit2
 } from 'lucide-react';
+import AnimatedAvatar from '@/components/cashier/AnimatedAvatar';
+import { AvatarCreator } from '@/components/cashier/AvatarCreator';
 import WeekFilter from '@/components/dashboard/WeekFilter';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -236,6 +238,7 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
   });
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [weekFilter, setWeekFilter] = useState(null);
+  const [editingAvatar, setEditingAvatar] = useState(null);
 
   const { data: cashiers = [] } = useQuery({
     queryKey: ['cashiers', storeId],
@@ -252,7 +255,7 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
     refetchOnWindowFocus: true
   });
 
-  // Calcular ranking
+  // Calcular ranking con score de gestión integral
   const ranking = useMemo(() => {
     const activeRange = weekFilter || dateRange;
     const filteredRecords = shiftRecords.filter(r => {
@@ -270,12 +273,18 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
       const totalSuggested = records.reduce((sum, r) => sum + (r.suggested_sales || 0), 0);
       const daysWorked = records.length;
       
-      // Stats históricos totales para mostrar cuando no hay datos en el período
       const historicalSales = allRecords.reduce((sum, r) => sum + (r.sales || 0), 0);
       const historicalTickets = allRecords.reduce((sum, r) => sum + (r.tickets || 0), 0);
       const historicalDays = allRecords.length;
-
       const historicalTransactions = allRecords.reduce((sum, r) => sum + (r.transactions || 0), 0);
+      
+      const avgTicket = totalTransactions > 0 ? totalSales / totalTransactions : 0;
+      const avgDaily = daysWorked > 0 ? totalSales / daysWorked : 0;
+      const historicalAvgTicket = historicalTransactions > 0 ? historicalSales / historicalTransactions : 0;
+      const historicalAvgDaily = historicalDays > 0 ? historicalSales / historicalDays : 0;
+
+      // Score de gestión integral: ticket promedio (40%) + ventas (40%) + transacciones (20%)
+      const managementScore = (avgTicket * 0.4) + (totalSales * 0.4) + (totalTransactions * 0.2);
       
       cashierStats[c.id] = {
         ...c,
@@ -284,20 +293,22 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
         totalTransactions,
         totalSuggested,
         daysWorked,
-        avgTicket: totalTransactions > 0 ? totalSales / totalTransactions : 0,
-        avgDaily: daysWorked > 0 ? totalSales / daysWorked : 0,
+        avgTicket,
+        avgDaily,
+        managementScore,
         hasData: daysWorked > 0,
         historicalSales,
         historicalTickets,
         historicalDays,
         historicalTransactions,
-        historicalAvgTicket: historicalTransactions > 0 ? historicalSales / historicalTransactions : 0,
-        historicalAvgDaily: historicalDays > 0 ? historicalSales / historicalDays : 0
+        historicalAvgTicket,
+        historicalAvgDaily
       };
     });
 
+    // Ordenar por score de gestión integral
     return Object.values(cashierStats)
-      .sort((a, b) => b.totalSales - a.totalSales)
+      .sort((a, b) => b.managementScore - a.managementScore)
       .map((c, idx) => ({ ...c, rank: idx + 1 }));
   }, [cashiers, shiftRecords, dateRange, weekFilter]);
 
@@ -399,24 +410,31 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
                       </motion.div>
                     )}
                     
-                    {/* Avatar con borde especial */}
-                    <motion.div
-                      animate={isFirst ? { scale: [1, 1.05, 1], boxShadow: ['0 10px 30px rgba(236, 72, 153, 0.3)', '0 15px 40px rgba(236, 72, 153, 0.5)', '0 10px 30px rgba(236, 72, 153, 0.3)'] } : {}}
-                      transition={{ duration: 2, repeat: Infinity }}
-                      className={`${isFirst ? 'w-16 h-16' : 'w-14 h-14'} rounded-full bg-gradient-to-br ${PODIUM_COLORS[podiumIdx]} overflow-hidden flex items-center justify-center mb-2 shadow-xl border-4 border-white relative`}
-                    >
-                      {cashier.photo_url ? (
-                        <img src={cashier.photo_url} alt={cashier.name} className="w-full h-full object-cover" />
-                      ) : (
-                        <Icon className="w-7 h-7 text-white drop-shadow-lg" />
-                      )}
+                    {/* Avatar animado */}
+                    <div className="relative mb-2">
+                      <AnimatedAvatar 
+                        cashier={cashier} 
+                        size={isFirst ? 'large' : 'medium'}
+                        onClick={() => setEditingAvatar(cashier)}
+                      />
+                      {/* Editar avatar */}
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditingAvatar(cashier);
+                        }}
+                        className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-white shadow-lg flex items-center justify-center border-2 border-pink-400"
+                      >
+                        <Edit2 className="w-3 h-3 text-pink-500" />
+                      </motion.button>
                       {/* Posición badge */}
-                      <div className={`absolute -bottom-2 -right-2 ${isFirst ? 'w-8 h-8' : 'w-7 h-7'} rounded-full bg-white shadow-lg flex items-center justify-center border-2 ${isFirst ? 'border-pink-400' : podiumIdx === 1 ? 'border-purple-400' : 'border-amber-400'}`}>
+                      <div className={`absolute -bottom-2 left-1/2 -translate-x-1/2 ${isFirst ? 'w-8 h-8' : 'w-7 h-7'} rounded-full bg-white shadow-lg flex items-center justify-center border-2 ${isFirst ? 'border-pink-400' : podiumIdx === 1 ? 'border-purple-400' : 'border-amber-400'}`}>
                         <span className={`${isFirst ? 'text-base' : 'text-sm'} font-black bg-gradient-to-r ${PODIUM_COLORS[podiumIdx]} bg-clip-text text-transparent`}>
                           {podiumIdx + 1}
                         </span>
                       </div>
-                    </motion.div>
+                    </div>
                     
                     {/* Nombre */}
                     <p className={`${isFirst ? 'text-sm' : 'text-xs'} font-black text-center mb-1 truncate w-24 text-gray-800`}>
@@ -478,29 +496,20 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
               onClick={() => onSelectCashier?.(cashier)}
               className="flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all bg-gradient-to-r from-white to-pink-50/30 hover:shadow-md border border-pink-100/50"
             >
-              <div className="relative">
-                <motion.div 
-                  className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-200 to-rose-200 overflow-hidden flex items-center justify-center shadow-md border-2 border-white"
-                  whileHover={{ scale: 1.1, rotate: 5 }}
-                >
-                  {cashier.photo_url ? (
-                    <img src={cashier.photo_url} alt={cashier.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <span className="text-sm font-black text-pink-700">{cashier.name?.charAt(0)}</span>
-                  )}
-                </motion.div>
-                <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-gradient-to-br from-pink-500 to-rose-500 text-white text-[10px] font-bold flex items-center justify-center shadow-md">
-                  {cashier.rank}
-                </div>
-              </div>
+              <AnimatedAvatar 
+                cashier={cashier} 
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setEditingAvatar(cashier);
+                }}
+                showRank
+                rank={cashier.rank}
+              />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-bold text-gray-800 truncate">{cashier.name}</p>
                 <div className="flex items-center gap-2 text-xs text-gray-500 mt-0.5">
                   <span>💼 {cashier.hasData ? cashier.daysWorked : cashier.historicalDays} turnos</span>
-                  <span>•</span>
-                  <span className="text-emerald-600 font-medium">
-                    Promedio: {formatCurrency(cashier.hasData ? cashier.avgDaily : cashier.historicalAvgDaily)}
-                  </span>
                 </div>
               </div>
               <div className="text-right">
@@ -509,10 +518,10 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
                   animate={{ scale: [1, 1.05, 1] }}
                   transition={{ duration: 2, repeat: Infinity }}
                 >
-                  {formatCurrency(cashier.hasData ? cashier.totalSales : cashier.historicalSales)}
+                  Ticket: {formatCurrency(cashier.hasData ? cashier.avgTicket : cashier.historicalAvgTicket)}
                 </motion.p>
-                <p className="text-[10px] text-pink-500 font-medium mt-0.5">
-                  🎫 {formatCurrency(cashier.hasData ? cashier.avgTicket : cashier.historicalAvgTicket)}
+                <p className="text-[10px] text-emerald-600 font-medium mt-0.5">
+                  💰 {formatCurrency(cashier.hasData ? cashier.totalSales : cashier.historicalSales)}
                 </p>
               </div>
             </motion.div>
@@ -526,6 +535,14 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
           </div>
         )}
       </CardContent>
+
+      {/* Avatar Creator Modal */}
+      <AvatarCreator
+        cashierId={editingAvatar?.id}
+        currentAvatar={editingAvatar?.avatar ? JSON.parse(editingAvatar.avatar) : null}
+        isOpen={!!editingAvatar}
+        onClose={() => setEditingAvatar(null)}
+      />
     </Card>
   );
 }

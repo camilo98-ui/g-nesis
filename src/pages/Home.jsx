@@ -16,7 +16,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import {
   LayoutDashboard, Users, TrendingUp,
-  Award, Target, Bell, Phone, Download, ClipboardCheck, FileText,
+  Award, Target, Bell, Phone, Download, FileText,
   Lock, Eye, EyeOff, Receipt } from
 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -76,16 +76,6 @@ const MENU_ITEMS = [
   textColor: 'text-sky-700',
   isSpecialAction: true,
   specialAction: 'budgetTrend'
-},
-{
-  name: 'Calidad',
-  page: 'Quality',
-  icon: ClipboardCheck,
-  description: 'Checklists',
-  bgColor: 'bg-gradient-to-br from-rose-100/90 to-pink-100/80',
-  iconBg: 'bg-rose-200/60',
-  iconColor: 'text-rose-500',
-  textColor: 'text-rose-700'
 }];
 
 
