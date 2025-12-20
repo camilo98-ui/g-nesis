@@ -349,7 +349,49 @@ export default function Home() {
   // Si no está logueado, mostrar pantalla de login
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50/80 via-pink-50/30 to-purple-50/20 relative overflow-hidden flex items-center justify-center">
+      <div className="min-h-screen relative overflow-hidden flex items-center justify-center">
+        {/* Animated gradient background */}
+        <motion.div 
+          className="absolute inset-0 bg-gradient-to-br from-pink-100 via-purple-100 to-blue-100"
+          animate={{
+            background: [
+              'linear-gradient(135deg, #fce7f3 0%, #f3e8ff 50%, #dbeafe 100%)',
+              'linear-gradient(135deg, #dbeafe 0%, #fce7f3 50%, #f3e8ff 100%)',
+              'linear-gradient(135deg, #f3e8ff 0%, #dbeafe 50%, #fce7f3 100%)',
+              'linear-gradient(135deg, #fce7f3 0%, #f3e8ff 50%, #dbeafe 100%)',
+            ]
+          }}
+          transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+        />
+        
+        {/* Glowing orbs */}
+        <motion.div 
+          className="absolute top-20 left-20 w-96 h-96 bg-pink-300/30 rounded-full blur-3xl"
+          animate={{ 
+            scale: [1, 1.2, 1],
+            x: [0, 50, 0],
+            y: [0, 30, 0]
+          }}
+          transition={{ duration: 8, repeat: Infinity }}
+        />
+        <motion.div 
+          className="absolute bottom-20 right-20 w-96 h-96 bg-purple-300/30 rounded-full blur-3xl"
+          animate={{ 
+            scale: [1.2, 1, 1.2],
+            x: [0, -50, 0],
+            y: [0, -30, 0]
+          }}
+          transition={{ duration: 8, repeat: Infinity, delay: 1 }}
+        />
+        <motion.div 
+          className="absolute top-1/2 left-1/2 w-96 h-96 bg-blue-300/20 rounded-full blur-3xl"
+          animate={{ 
+            scale: [1, 1.3, 1],
+            rotate: [0, 180, 360]
+          }}
+          transition={{ duration: 12, repeat: Infinity }}
+        />
+        
         <PastelConfetti />
         <FloatingIceCreamsBg />
         
@@ -359,20 +401,40 @@ export default function Home() {
           className="relative z-10 w-full max-w-md mx-4">
 
           <motion.div
-            className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-pink-100"
-            whileHover={{ boxShadow: "0 25px 50px -12px rgba(236, 72, 153, 0.25)" }}>
+            className="bg-white/80 backdrop-blur-2xl rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.15)] p-8 border border-white/50"
+            whileHover={{ 
+              boxShadow: "0 30px 70px rgba(236, 72, 153, 0.3)",
+              y: -5
+            }}
+            transition={{ duration: 0.3 }}>
 
-            {/* Logo animado */}
-            <motion.img
-              src={LOGO_URL}
-              alt="Popsy"
-              className="h-20 object-contain mx-auto mb-4 cursor-pointer"
-              animate={{
-                y: [0, -8, 0],
-                rotate: [0, 2, -2, 0]
-              }}
-              transition={{ duration: 3, repeat: Infinity }}
-              onClick={() => setShowStory(true)} />
+            {/* Logo animado con efecto glow */}
+            <motion.div className="relative">
+              <motion.div 
+                className="absolute inset-0 blur-2xl opacity-50"
+                animate={{
+                  background: [
+                    'radial-gradient(circle, rgba(236,72,153,0.3) 0%, transparent 70%)',
+                    'radial-gradient(circle, rgba(168,85,247,0.3) 0%, transparent 70%)',
+                    'radial-gradient(circle, rgba(236,72,153,0.3) 0%, transparent 70%)',
+                  ]
+                }}
+                transition={{ duration: 3, repeat: Infinity }}
+              />
+              <motion.img
+                src={LOGO_URL}
+                alt="Popsy"
+                className="h-24 object-contain mx-auto mb-4 cursor-pointer relative z-10 drop-shadow-2xl"
+                animate={{
+                  y: [0, -10, 0],
+                  rotate: [0, 3, -3, 0],
+                  scale: [1, 1.02, 1]
+                }}
+                transition={{ duration: 4, repeat: Infinity }}
+                whileHover={{ scale: 1.1, rotate: [0, -5, 5, 0] }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setShowStory(true)} />
+            </motion.div>
 
             
             <motion.div
@@ -383,9 +445,19 @@ export default function Home() {
 
               <motion.h2
                 animate={{
-                  scale: [1, 1.02, 1]
+                  scale: [1, 1.03, 1],
+                  textShadow: [
+                    '0 0 20px rgba(236,72,153,0.3)',
+                    '0 0 30px rgba(236,72,153,0.5)',
+                    '0 0 20px rgba(236,72,153,0.3)'
+                  ]
                 }}
-                transition={{ duration: 3, repeat: Infinity }} className="bg-clip-text text-pink-800 text-2xl font-bold from-pink-400 via-pink-500 to-rose-500">
+                transition={{ duration: 3, repeat: Infinity }}
+                className="text-2xl font-black bg-gradient-to-r from-pink-500 via-rose-500 to-purple-500 bg-clip-text text-transparent"
+                style={{ 
+                  backgroundSize: '200% 200%',
+                  animation: 'gradient 3s ease infinite'
+                }}>
 
 
                 {selectedRole === 'gerente' ? 'Hola Gerente! 🎯' : selectedRole === 'lider' ? 'Hola Lider! ⭐' : selectedRole === 'embajador' ? 'Hola Embajador! 🍦' : 'Bienvenido! 🎉'}
@@ -414,10 +486,10 @@ export default function Home() {
                     whileHover={{ scale: 1.02, x: 5 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => {setSelectedRole(role.id);setLoginError('');}}
-                    className={`relative p-4 rounded-2xl border-2 transition-all overflow-hidden ${
+                    className={`relative p-4 rounded-2xl border-2 transition-all duration-300 overflow-hidden ${
                     selectedRole === role.id ?
-                    'border-transparent shadow-2xl' :
-                    'border-gray-200 bg-white hover:border-pink-200 hover:shadow-lg'}`
+                    'border-transparent shadow-[0_10px_40px_rgba(236,72,153,0.3)] ring-2 ring-pink-200' :
+                    'border-gray-200 bg-white hover:border-pink-300 hover:shadow-xl hover:scale-[1.02]'}`
                     }>
 
                       {/* Background gradient when selected */}
@@ -560,7 +632,7 @@ export default function Home() {
               <Button
                 onClick={handleLogin}
                 disabled={!pendingStore || !selectedRole}
-                className="w-full bg-gradient-to-r from-pink-400 via-pink-500 to-rose-500 hover:from-pink-500 hover:via-pink-600 hover:to-rose-600 text-white py-6 rounded-xl shadow-lg shadow-pink-500/30 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden">
+                className="w-full bg-gradient-to-r from-pink-500 via-rose-500 to-purple-500 hover:from-pink-600 hover:via-rose-600 hover:to-purple-600 text-white py-7 rounded-2xl shadow-[0_10px_40px_rgba(236,72,153,0.4)] hover:shadow-[0_15px_50px_rgba(236,72,153,0.5)] disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden font-bold text-lg transform hover:scale-[1.02] transition-all duration-300">
 
                 <motion.div
                   className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
@@ -640,7 +712,41 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-white relative overflow-hidden">
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Animated modern background */}
+      <motion.div 
+        className="absolute inset-0"
+        animate={{
+          background: [
+            'linear-gradient(135deg, #fff 0%, #fce7f3 30%, #f3e8ff 60%, #fff 100%)',
+            'linear-gradient(135deg, #fff 0%, #f3e8ff 30%, #dbeafe 60%, #fff 100%)',
+            'linear-gradient(135deg, #fff 0%, #dbeafe 30%, #fce7f3 60%, #fff 100%)',
+            'linear-gradient(135deg, #fff 0%, #fce7f3 30%, #f3e8ff 60%, #fff 100%)',
+          ]
+        }}
+        transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+      />
+      
+      {/* Floating gradient orbs */}
+      <motion.div 
+        className="absolute top-40 left-10 w-72 h-72 bg-gradient-to-br from-pink-200/40 to-rose-200/40 rounded-full blur-3xl"
+        animate={{ 
+          x: [0, 100, 0],
+          y: [0, 50, 0],
+          scale: [1, 1.2, 1]
+        }}
+        transition={{ duration: 20, repeat: Infinity }}
+      />
+      <motion.div 
+        className="absolute bottom-40 right-10 w-80 h-80 bg-gradient-to-br from-purple-200/40 to-blue-200/40 rounded-full blur-3xl"
+        animate={{ 
+          x: [0, -100, 0],
+          y: [0, -50, 0],
+          scale: [1.2, 1, 1.2]
+        }}
+        transition={{ duration: 20, repeat: Infinity, delay: 2 }}
+      />
+      
       <PastelConfetti />
       <FloatingIceCreamsBg />
 
@@ -653,24 +759,45 @@ export default function Home() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-6">
 
-          <motion.img
-            src={LOGO_URL}
-            alt="Popsy"
-            className="h-32 sm:h-36 md:h-40 object-contain mx-auto mb-2 cursor-pointer drop-shadow-lg"
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{
-              opacity: 1,
-              scale: [1, 1.03, 0.98, 1.02, 1],
-              y: [0, -8, 0, -4, 0]
-            }}
-            transition={{
-              opacity: { duration: 0.8, ease: "easeOut" },
-              scale: { duration: 4, repeat: Infinity, ease: "easeInOut" },
-              y: { duration: 3, repeat: Infinity, ease: "easeInOut" }
-            }}
-            whileHover={{ scale: 1.08, rotate: [0, -2, 2, 0] }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setShowStory(true)} />
+          <motion.div className="relative">
+            <motion.div 
+              className="absolute inset-0 blur-3xl opacity-40"
+              animate={{
+                background: [
+                  'radial-gradient(circle, rgba(236,72,153,0.4) 0%, transparent 70%)',
+                  'radial-gradient(circle, rgba(168,85,247,0.4) 0%, transparent 70%)',
+                  'radial-gradient(circle, rgba(59,130,246,0.4) 0%, transparent 70%)',
+                  'radial-gradient(circle, rgba(236,72,153,0.4) 0%, transparent 70%)',
+                ]
+              }}
+              transition={{ duration: 5, repeat: Infinity }}
+            />
+            <motion.img
+              src={LOGO_URL}
+              alt="Popsy"
+              className="h-32 sm:h-36 md:h-48 object-contain mx-auto mb-2 cursor-pointer relative z-10"
+              initial={{ opacity: 0, scale: 0.5, y: -50 }}
+              animate={{
+                opacity: 1,
+                scale: [1, 1.05, 0.98, 1.03, 1],
+                y: [0, -12, 0, -6, 0]
+              }}
+              transition={{
+                opacity: { duration: 1, ease: "easeOut" },
+                scale: { duration: 5, repeat: Infinity, ease: "easeInOut" },
+                y: { duration: 4, repeat: Infinity, ease: "easeInOut" }
+              }}
+              whileHover={{ 
+                scale: 1.12, 
+                rotate: [0, -3, 3, 0],
+                filter: "drop-shadow(0 25px 25px rgba(236, 72, 153, 0.5))"
+              }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowStory(true)}
+              style={{
+                filter: "drop-shadow(0 20px 40px rgba(0, 0, 0, 0.15))"
+              }} />
+          </motion.div>
 
           <motion.p
             initial={{ opacity: 0 }}
@@ -810,11 +937,19 @@ export default function Home() {
                       setShowStoreSales(true);
                     }
                   }}
-                  className={`${item.bgColor} rounded-2xl p-4 h-full shadow-md hover:shadow-xl transition-all duration-300 group relative overflow-hidden border border-white/50 backdrop-blur-sm cursor-pointer`}>
+                  className={`${item.bgColor} rounded-2xl p-4 h-full shadow-lg hover:shadow-2xl transition-all duration-300 group relative overflow-hidden border border-white/60 backdrop-blur-sm cursor-pointer hover:scale-105 hover:-translate-y-2`}>
 
-                      {/* Subtle glow effect */}
+                      {/* Animated glow effect */}
                       <motion.div
-                    className="absolute inset-0 bg-white/30 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl" />
+                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl"
+                    animate={{
+                      background: [
+                        'radial-gradient(circle at 50% 50%, rgba(255,255,255,0.3) 0%, transparent 70%)',
+                        'radial-gradient(circle at 50% 50%, rgba(255,255,255,0.5) 0%, transparent 70%)',
+                        'radial-gradient(circle at 50% 50%, rgba(255,255,255,0.3) 0%, transparent 70%)',
+                      ]
+                    }}
+                    transition={{ duration: 2, repeat: Infinity }} />
 
 
                       {/* Icon centered */}
@@ -835,7 +970,7 @@ export default function Home() {
 
                 <Link to={createPageUrl(item.page)}>
                       <motion.div
-                    className={`${item.bgColor} rounded-2xl p-4 h-full shadow-md hover:shadow-xl transition-all duration-300 group relative overflow-hidden border border-white/50 backdrop-blur-sm`}>
+                    className={`${item.bgColor} rounded-2xl p-4 h-full shadow-lg hover:shadow-2xl transition-all duration-300 group relative overflow-hidden border border-white/60 backdrop-blur-sm hover:scale-105 hover:-translate-y-2`}>
 
                         {/* Subtle glow effect */}
                         <motion.div
