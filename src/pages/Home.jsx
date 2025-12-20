@@ -17,7 +17,7 @@ import { useQuery } from '@tanstack/react-query';
 import {
   LayoutDashboard, Users, TrendingUp,
   Award, Target, Bell, Phone, Download, FileText,
-  Lock, Eye, EyeOff, Receipt } from
+  Lock, Eye, EyeOff, Receipt, Snowflake } from
 'lucide-react';
 import { Button } from "@/components/ui/button";
 
@@ -43,6 +43,16 @@ const MENU_ITEMS = [
   iconBg: 'bg-violet-200/60',
   iconColor: 'text-violet-500',
   textColor: 'text-violet-700'
+},
+{
+  name: 'Mapa Nevera',
+  page: 'FreezerMap',
+  icon: Snowflake,
+  description: 'Inventario helados',
+  bgColor: 'bg-gradient-to-br from-cyan-100/90 to-blue-100/80',
+  iconBg: 'bg-cyan-200/60',
+  iconColor: 'text-cyan-500',
+  textColor: 'text-cyan-700'
 },
 {
   name: 'Ventas',

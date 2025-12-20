@@ -15,7 +15,6 @@ import { motion } from 'framer-motion';
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/6a749247d_Capturadepantalla2025-11-251251441.png";
 
 const NAV_ITEMS = [
-  { name: 'Mapa Nevera', page: 'FreezerMap', icon: Snowflake, isIcon: true },
   { name: 'Inicio', page: 'Home', icon: Home, isIcon: true },
   { name: 'Planner', page: 'PopsyPlanner', icon: CalendarDays, isIcon: true },
 ];
@@ -85,8 +84,8 @@ export default function Layout({ children, currentPageName }) {
             const Icon = item.icon;
             const isActive = currentPageName === item.page;
             
-            // Restricciones por rol - Embajador tiene acceso al mapa
-            const isLocked = (userRole === 'calidad' && (item.page === 'FreezerMap' || item.page === 'Management')) ||
+            // Restricciones por rol
+            const isLocked = (userRole === 'calidad' && item.page === 'Management') ||
                             (userRole === 'c_interno' && item.page !== 'Home' && item.page !== 'PopsyPlanner');
             
             if (isLocked) {
@@ -121,18 +120,10 @@ export default function Layout({ children, currentPageName }) {
                   className={`transition-all duration-200 w-10 h-10 ${isActive 
                     ? item.page === 'Home' 
                                                 ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg' 
-                                                : item.page === 'FreezerMap'
-                                                  ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg'
-                                                  : item.page === 'Management'
-                                                    ? 'bg-gradient-to-r from-slate-600 to-gray-700 text-white shadow-lg'
-                                                    : 'bg-gradient-to-r from-violet-500 to-purple-500 text-white shadow-lg'
-                                              : item.page === 'FreezerMap'
-                                                ? 'text-cyan-500 hover:text-cyan-600 hover:bg-cyan-50'
-                                                : item.page === 'Home'
+                                                : 'bg-gradient-to-r from-violet-500 to-purple-500 text-white shadow-lg'
+                                              : item.page === 'Home'
                                                   ? 'text-rose-500 hover:text-rose-600 hover:bg-rose-50'
-                                                  : item.page === 'Management'
-                                                    ? 'text-slate-600 hover:text-slate-700 hover:bg-slate-50'
-                                                    : 'text-violet-500 hover:text-violet-600 hover:bg-violet-50'}`}
+                                                  : 'text-violet-500 hover:text-violet-600 hover:bg-violet-50'}`}
                   >
                   <Icon className="w-5 h-5" />
                   </Button>
@@ -195,13 +186,9 @@ export default function Layout({ children, currentPageName }) {
                         whileTap={{ scale: 0.98 }}
                         className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
                           isActive 
-                            ? item.page === 'FreezerMap' 
-                                                                ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white' 
-                                                                : item.page === 'Home'
+                            ? item.page === 'Home'
                                                                   ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white'
-                                                                  : item.page === 'Management'
-                                                                    ? 'bg-gradient-to-r from-slate-600 to-gray-700 text-white'
-                                                                    : 'bg-gradient-to-r from-violet-500 to-purple-500 text-white'
+                                                                  : 'bg-gradient-to-r from-violet-500 to-purple-500 text-white'
                             : 'text-gray-600 hover:bg-pink-50'
                         }`}
                       >

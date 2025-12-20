@@ -315,7 +315,7 @@ export default function DailySalesForm({ storeId, onSuccess }) {
                 <div className="w-10 h-10 bg-sky-200/60 rounded-xl flex items-center justify-center">
                   <Receipt className="w-6 h-6 text-sky-600" />
                 </div>
-                Tickets
+                Ticket Promedio
               </Label>
               <Input 
                 type="number"
