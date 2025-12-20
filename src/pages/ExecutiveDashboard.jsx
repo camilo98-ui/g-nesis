@@ -7,7 +7,8 @@ import { createPageUrl } from '@/utils';
 import { STORES, getDisplayName } from '@/components/StoreSelector';
 import { 
   ArrowLeft, TrendingUp, TrendingDown, AlertTriangle, CheckCircle,
-  DollarSign, Receipt, Zap, Target, Users, Clock, Calendar, Filter
+  DollarSign, Receipt, Zap, Target, Users, Clock, Calendar, Filter,
+  Brain, Activity, Sparkles, UserCheck
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,6 +25,9 @@ const COLORS = ['#ec4899', '#f472b6', '#f9a8d4', '#fbcfe8', '#fce7f3', '#8b5cf6'
 export default function ExecutiveDashboard() {
   const [selectedMonth, setSelectedMonth] = useState(new Date());
   const [filterStatus, setFilterStatus] = useState('all'); // all, negative, critical, positive
+  const [forecastDays, setForecastDays] = useState(30);
+  const [aiInsights, setAiInsights] = useState(null);
+  const [loadingInsights, setLoadingInsights] = useState(false);
 
   const monthStart = startOfMonth(selectedMonth);
   const monthEnd = endOfMonth(selectedMonth);
@@ -190,6 +194,148 @@ export default function ExecutiveDashboard() {
     critical: storesAnalysis.filter(s => s.status === 'critical').length
   }), [storesAnalysis]);
 
+  // Predictive Analytics - Sales Forecast
+  const salesForecast = useMemo(() => {
+    return storesAnalysis.map(store => {
+      // Simple linear regression for forecast
+      const historicalSales = allDailySales.filter(s => {
+        try {
+          const d = new Date(s.date);
+          return s.store_id === store.code && !isNaN(d.getTime());
+        } catch {
+          return false;
+        }
+      }).slice(-90); // Last 90 days
+
+      if (historicalSales.length < 7) return { ...store, forecast30: 0, forecast60: 0, willMissTarget: false };
+
+      // Calculate daily average and trend
+      const totalSales = historicalSales.reduce((sum, s) => sum + (s.total_sales || 0), 0);
+      const dailyAvg = totalSales / historicalSales.length;
+      
+      // Calculate trend (compare first half vs second half)
+      const midPoint = Math.floor(historicalSales.length / 2);
+      const firstHalfAvg = historicalSales.slice(0, midPoint).reduce((sum, s) => sum + (s.total_sales || 0), 0) / midPoint;
+      const secondHalfAvg = historicalSales.slice(midPoint).reduce((sum, s) => sum + (s.total_sales || 0), 0) / (historicalSales.length - midPoint);
+      const growthRate = firstHalfAvg > 0 ? (secondHalfAvg - firstHalfAvg) / firstHalfAvg : 0;
+
+      // Forecast with trend adjustment
+      const trendAdjustedDaily = dailyAvg * (1 + growthRate * 0.5);
+      const forecast30 = trendAdjustedDaily * 30;
+      const forecast60 = trendAdjustedDaily * 60;
+
+      // Predict if will miss target (using next month's budget)
+      const nextMonthBudget = allBudgets.find(b => 
+        b.store_id === store.code && 
+        b.month === (currentMonth % 12) + 1 && 
+        b.year === currentYear
+      );
+      const willMissTarget = nextMonthBudget ? forecast30 < nextMonthBudget.sales_budget * 0.85 : false;
+
+      return { 
+        ...store, 
+        forecast30, 
+        forecast60, 
+        growthRate: growthRate * 100,
+        willMissTarget,
+        nextMonthBudget: nextMonthBudget?.sales_budget || 0
+      };
+    });
+  }, [storesAnalysis, allDailySales, allBudgets, currentMonth, currentYear]);
+
+  // Staffing Predictions
+  const staffingPredictions = useMemo(() => {
+    return STORES.map(store => {
+      const storeShifts = allShifts.filter(s => {
+        try {
+          const d = new Date(s.date);
+          return s.store_id === store.code && !isNaN(d.getTime()) && d >= subMonths(new Date(), 2);
+        } catch {
+          return false;
+        }
+      });
+
+      const storeCashiers = allCashiers.filter(c => c.store_id === store.code && c.is_active !== false);
+      const leaders = storeCashiers.filter(c => c.position === 'lider');
+      
+      // Calculate average shifts per week
+      const weeksOfData = 8;
+      const avgShiftsPerWeek = storeShifts.length / weeksOfData;
+      const avgCashiersNeeded = Math.ceil(avgShiftsPerWeek / 5); // Assuming 5 shifts per cashier per week
+
+      // Predict if understaffed
+      const isUnderstaffed = storeCashiers.length < avgCashiersNeeded;
+      const needsMoreStaff = isUnderstaffed ? avgCashiersNeeded - storeCashiers.length : 0;
+
+      // Leader coverage
+      const leaderShifts = storeShifts.filter(s => {
+        const cashier = allCashiers.find(c => c.id === s.cashier_id);
+        return cashier?.position === 'lider';
+      });
+      const leaderCoveragePercent = storeShifts.length > 0 ? (leaderShifts.length / storeShifts.length) * 100 : 0;
+
+      return {
+        storeCode: store.code,
+        storeName: getDisplayName(store.code),
+        currentStaff: storeCashiers.length,
+        leaders: leaders.length,
+        avgShiftsPerWeek,
+        recommendedStaff: avgCashiersNeeded,
+        needsMoreStaff,
+        isUnderstaffed,
+        leaderCoveragePercent
+      };
+    });
+  }, [allShifts, allCashiers]);
+
+  // Generate AI Insights
+  const generateAIInsights = async () => {
+    if (loadingInsights) return;
+    setLoadingInsights(true);
+
+    try {
+      const storesAtRisk = salesForecast.filter(s => s.willMissTarget).slice(0, 5);
+      const understaffedStores = staffingPredictions.filter(s => s.isUnderstaffed).slice(0, 5);
+
+      const prompt = `Analiza esta situación de la zona de Popsy y genera insights accionables:
+
+TIENDAS EN RIESGO DE NO CUMPLIR META:
+${storesAtRisk.map(s => `- ${s.name}: Proyección $${(s.forecast30/1000000).toFixed(1)}M vs Meta $${(s.nextMonthBudget/1000000).toFixed(1)}M (Crecimiento: ${s.growthRate.toFixed(1)}%)`).join('\n')}
+
+TIENDAS CON DÉFICIT DE PERSONAL:
+${understaffedStores.map(s => `- ${s.storeName}: ${s.currentStaff} actuales vs ${s.recommendedStaff} recomendados (${s.leaders} líderes)`).join('\n')}
+
+INSTRUCCIONES:
+1. Identifica patrones críticos
+2. Sugiere 3 acciones prioritarias específicas
+3. Identifica oportunidades de mejora
+4. Sé directo y accionable (máximo 120 palabras)`;
+
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            patron_critico: { type: "string", description: "Patrón crítico identificado" },
+            acciones_prioritarias: { type: "array", items: { type: "string" }, description: "3 acciones específicas" },
+            oportunidades: { type: "string", description: "Oportunidades de mejora" }
+          }
+        }
+      });
+
+      setAiInsights(result);
+    } catch (e) {
+      console.error(e);
+    }
+    setLoadingInsights(false);
+  };
+
+  React.useEffect(() => {
+    if (salesForecast.length > 0 && !aiInsights) {
+      generateAIInsights();
+    }
+  }, [salesForecast.length]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-pink-50/20 p-4">
       <div className="max-w-7xl mx-auto">
@@ -223,6 +369,15 @@ export default function ExecutiveDashboard() {
                     </SelectItem>
                   );
                 })}
+              </SelectContent>
+            </Select>
+            <Select value={forecastDays.toString()} onValueChange={(v) => setForecastDays(parseInt(v))}>
+              <SelectTrigger className="w-32">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="30">30 días</SelectItem>
+                <SelectItem value="60">60 días</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -295,6 +450,184 @@ export default function ExecutiveDashboard() {
             En Meta
           </Button>
         </div>
+
+        {/* AI Insights */}
+        <Card className="border-0 shadow-xl mb-6 bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50">
+          <CardHeader>
+            <CardTitle className="text-sm font-bold text-purple-600 flex items-center gap-2">
+              <Brain className="w-5 h-5" />
+              Análisis Predictivo con IA
+              {loadingInsights && <Sparkles className="w-4 h-4 animate-pulse" />}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {aiInsights ? (
+              <div className="space-y-4">
+                <div className="bg-white/80 rounded-xl p-4">
+                  <p className="text-xs font-bold text-purple-600 mb-2">🎯 Patrón Crítico Detectado</p>
+                  <p className="text-sm text-gray-700">{aiInsights.patron_critico}</p>
+                </div>
+                <div className="bg-white/80 rounded-xl p-4">
+                  <p className="text-xs font-bold text-pink-600 mb-2">⚡ Acciones Prioritarias</p>
+                  <ul className="space-y-1">
+                    {aiInsights.acciones_prioritarias?.map((accion, i) => (
+                      <li key={i} className="text-sm text-gray-700 flex items-start gap-2">
+                        <span className="text-pink-500 font-bold">{i + 1}.</span>
+                        {accion}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="bg-white/80 rounded-xl p-4">
+                  <p className="text-xs font-bold text-emerald-600 mb-2">💡 Oportunidades</p>
+                  <p className="text-sm text-gray-700">{aiInsights.oportunidades}</p>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-400">
+                <Sparkles className="w-8 h-8 mx-auto mb-2 animate-pulse" />
+                <p className="text-sm">Generando insights...</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Predictive Analytics Cards */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+          {/* Sales Forecast */}
+          <Card className="border-0 shadow-xl">
+            <CardHeader>
+              <CardTitle className="text-sm font-bold text-pink-600 flex items-center gap-2">
+                <Activity className="w-4 h-4" />
+                Pronóstico de Ventas ({forecastDays} días)
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <ComposedChart data={salesForecast.slice(0, 10)}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                  <XAxis dataKey="name" tick={{ fontSize: 10 }} angle={-45} textAnchor="end" height={80} />
+                  <YAxis tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} tick={{ fontSize: 10 }} />
+                  <Tooltip formatter={(v) => formatCurrency(v)} />
+                  <Legend />
+                  <Bar dataKey={forecastDays === 30 ? 'forecast30' : 'forecast60'} fill="#8b5cf6" name="Proyección" />
+                  <Line type="monotone" dataKey="nextMonthBudget" stroke="#ec4899" strokeWidth={2} name="Meta Próx. Mes" />
+                </ComposedChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          {/* Stores at Risk */}
+          <Card className="border-0 shadow-xl">
+            <CardHeader>
+              <CardTitle className="text-sm font-bold text-rose-600 flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4" />
+                Tiendas en Riesgo de Incumplimiento
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                {salesForecast.filter(s => s.willMissTarget).slice(0, 8).map((store, idx) => (
+                  <motion.div
+                    key={store.code}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: idx * 0.05 }}
+                    className="bg-gradient-to-r from-rose-50 to-red-50 rounded-lg p-3 border border-rose-200"
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="font-bold text-sm text-gray-800">{store.name}</p>
+                      <span className="text-xs px-2 py-0.5 bg-rose-200 text-rose-700 rounded-full font-bold">
+                        {store.growthRate.toFixed(1)}%
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-gray-600">Proyección:</span>
+                      <span className="font-bold text-rose-600">{formatCurrency(store.forecast30)}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-gray-600">Meta próx. mes:</span>
+                      <span className="font-bold text-gray-700">{formatCurrency(store.nextMonthBudget)}</span>
+                    </div>
+                    <div className="mt-2 h-1 bg-rose-200 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-rose-500"
+                        style={{ width: `${Math.min(100, (store.forecast30 / store.nextMonthBudget) * 100)}%` }}
+                      />
+                    </div>
+                  </motion.div>
+                ))}
+                {salesForecast.filter(s => s.willMissTarget).length === 0 && (
+                  <div className="text-center py-8 text-gray-400">
+                    <CheckCircle className="w-8 h-8 mx-auto mb-2 text-emerald-400" />
+                    <p className="text-sm">Todas las tiendas en buen camino</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Staffing Predictions */}
+        <Card className="border-0 shadow-xl mb-6">
+          <CardHeader>
+            <CardTitle className="text-sm font-bold text-violet-600 flex items-center gap-2">
+              <UserCheck className="w-4 h-4" />
+              Predicción de Necesidades de Personal
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {staffingPredictions.filter(s => s.isUnderstaffed || s.leaderCoveragePercent < 30).map((store, idx) => (
+                <motion.div
+                  key={store.storeCode}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: idx * 0.05 }}
+                  className={`rounded-xl p-4 border ${
+                    store.isUnderstaffed 
+                      ? 'bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200' 
+                      : 'bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="font-bold text-sm text-gray-800">{store.storeName}</p>
+                    {store.isUnderstaffed && (
+                      <AlertTriangle className="w-4 h-4 text-amber-600" />
+                    )}
+                  </div>
+                  <div className="space-y-1 text-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-600">Personal actual:</span>
+                      <span className="font-bold text-gray-800">{store.currentStaff}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-600">Recomendado:</span>
+                      <span className="font-bold text-violet-600">{store.recommendedStaff}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-600">Líderes:</span>
+                      <span className="font-bold text-purple-600">{store.leaders}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-600">Cobertura líder:</span>
+                      <span className={`font-bold ${store.leaderCoveragePercent >= 30 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                        {store.leaderCoveragePercent.toFixed(0)}%
+                      </span>
+                    </div>
+                  </div>
+                  {store.isUnderstaffed && (
+                    <div className="mt-3 pt-3 border-t border-amber-200">
+                      <p className="text-xs text-amber-700 font-medium">
+                        💡 Contratar {store.needsMoreStaff} persona{store.needsMoreStaff > 1 ? 's' : ''}
+                      </p>
+                    </div>
+                  )}
+                </motion.div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Main Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
