@@ -69,7 +69,7 @@ export default function CashierProfileHeader({ cashier, storeCode }) {
             whileHover={{ scale: 1.05, rotate: 2 }}
           >
             {cashier?.photo_url ? (
-              <img src={cashier.photo_url} alt={cashier.name} className="w-full h-full object-contain" />
+              <img src={cashier.photo_url} alt={cashier.name} className="w-full h-full object-cover" />
             ) : (
               <span className="text-4xl md:text-5xl font-bold text-pink-500">
                 {cashier?.name?.charAt(0)}
