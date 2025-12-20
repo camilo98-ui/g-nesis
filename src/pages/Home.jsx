@@ -45,6 +45,16 @@ const MENU_ITEMS = [
   textColor: 'text-violet-700'
 },
 {
+  name: 'Ejecutivo',
+  page: 'ExecutiveDashboard',
+  icon: TrendingUp,
+  description: 'Análisis Gerencial',
+  bgColor: 'bg-gradient-to-br from-slate-100/90 to-gray-100/80',
+  iconBg: 'bg-slate-200/60',
+  iconColor: 'text-slate-600',
+  textColor: 'text-slate-700'
+},
+{
   name: 'Mapa Nevera',
   page: 'FreezerMap',
   icon: Snowflake,

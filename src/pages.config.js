@@ -16,6 +16,7 @@ import Management from './pages/Management';
 import PredictiveAnalytics from './pages/PredictiveAnalytics';
 import PopsyPlanner from './pages/PopsyPlanner';
 import RoulettePopsy from './pages/RoulettePopsy';
+import ExecutiveDashboard from './pages/ExecutiveDashboard';
 import __Layout from './Layout.jsx';
 
 
@@ -38,6 +39,7 @@ export const PAGES = {
     "PredictiveAnalytics": PredictiveAnalytics,
     "PopsyPlanner": PopsyPlanner,
     "RoulettePopsy": RoulettePopsy,
+    "ExecutiveDashboard": ExecutiveDashboard,
 }
 
 export const pagesConfig = {
