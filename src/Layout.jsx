@@ -206,11 +206,37 @@ export default function Layout({ children, currentPageName }) {
       </header>
 
         {/* Main Content */}
-        <main className="pt-[88px] min-h-screen pb-4">
-          <div className="container mx-auto px-2 sm:px-4">
-            {children}
+        <motion.main 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
+          className="pt-[88px] min-h-screen pb-4 relative"
+        >
+          {/* Animated gradient background */}
+          <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+            <motion.div
+              animate={{
+                background: [
+                  'radial-gradient(circle at 20% 30%, rgba(252, 231, 243, 0.3) 0%, transparent 50%)',
+                  'radial-gradient(circle at 80% 70%, rgba(243, 232, 255, 0.3) 0%, transparent 50%)',
+                  'radial-gradient(circle at 40% 60%, rgba(254, 243, 199, 0.3) 0%, transparent 50%)',
+                  'radial-gradient(circle at 20% 30%, rgba(252, 231, 243, 0.3) 0%, transparent 50%)',
+                ]
+              }}
+              transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+              className="absolute inset-0"
+            />
           </div>
-        </main>
+
+          <motion.div 
+            className="container mx-auto px-2 sm:px-4"
+            initial={{ y: 20 }}
+            animate={{ y: 0 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+          >
+            {children}
+          </motion.div>
+        </motion.main>
       </div>
     </ErrorBoundary>
   );
