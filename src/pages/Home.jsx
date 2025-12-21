@@ -418,8 +418,20 @@ export default function Home() {
               <motion.img
                 src={LOGO_URL}
                 alt="Popsy"
-                className="h-32 object-contain mx-auto md:mx-0 cursor-pointer"
-                whileHover={{ scale: 1.05 }}
+                className="h-32 object-contain mx-auto md:mx-0 cursor-pointer drop-shadow-lg"
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{
+                  opacity: 1,
+                  scale: [1, 1.03, 0.98, 1.02, 1],
+                  y: [0, -8, 0, -4, 0]
+                }}
+                transition={{
+                  opacity: { duration: 0.8, ease: "easeOut" },
+                  scale: { duration: 4, repeat: Infinity, ease: "easeInOut" },
+                  y: { duration: 3, repeat: Infinity, ease: "easeInOut" }
+                }}
+                whileHover={{ scale: 1.08, rotate: [0, -2, 2, 0] }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => setShowStory(true)} />
 
               <div>
