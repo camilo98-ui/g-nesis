@@ -992,7 +992,7 @@ INSTRUCCIONES:
             </div>
           )}
 
-          {/* Gráfica Principal Dinámica */}
+          {/* Panel Dinámico Expandido */}
           {isLoading ? (
             <ChartSkeleton />
           ) : (
@@ -1003,8 +1003,142 @@ INSTRUCCIONES:
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3 }}
+                className="space-y-4"
               >
-                <Card className="border-gray-100 shadow-sm mb-6">
+                {/* KPIs Mini del Panel Activo */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {chartView === 'ventas' && (
+                    <>
+                      <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-white">
+                        <CardContent className="pt-4 pb-3">
+                          <p className="text-xs text-blue-600 font-semibold mb-1">Venta Total Zona</p>
+                          <p className="text-xl font-black text-blue-900">{formatCurrency(zoneTotals.totalSales)}</p>
+                          <p className="text-[10px] text-gray-500 mt-1">Meta: {formatCurrency(zoneTotals.totalBudget)}</p>
+                        </CardContent>
+                      </Card>
+                      <Card className="border-indigo-200 bg-gradient-to-br from-indigo-50 to-white">
+                        <CardContent className="pt-4 pb-3">
+                          <p className="text-xs text-indigo-600 font-semibold mb-1">Brecha vs Meta</p>
+                          <p className="text-xl font-black text-indigo-900">{formatCurrency(Math.abs(zoneTotals.totalBudget - zoneTotals.totalSales))}</p>
+                          <p className="text-[10px] text-gray-500 mt-1">{zoneTotals.totalSales >= zoneTotals.totalBudget ? 'Superado' : 'Por recuperar'}</p>
+                        </CardContent>
+                      </Card>
+                      <Card className="border-cyan-200 bg-gradient-to-br from-cyan-50 to-white">
+                        <CardContent className="pt-4 pb-3">
+                          <p className="text-xs text-cyan-600 font-semibold mb-1">Promedio por Tienda</p>
+                          <p className="text-xl font-black text-cyan-900">{formatCurrency(zoneTotals.totalSales / filteredStores.length)}</p>
+                          <p className="text-[10px] text-gray-500 mt-1">{filteredStores.length} tiendas activas</p>
+                        </CardContent>
+                      </Card>
+                      <Card className="border-teal-200 bg-gradient-to-br from-teal-50 to-white">
+                        <CardContent className="pt-4 pb-3">
+                          <p className="text-xs text-teal-600 font-semibold mb-1">Top Tienda</p>
+                          <p className="text-xl font-black text-teal-900">{formatCurrency(Math.max(...filteredStores.map(s => s.totalSales)))}</p>
+                          <p className="text-[10px] text-gray-500 mt-1">{filteredStores.sort((a,b) => b.totalSales - a.totalSales)[0]?.name}</p>
+                        </CardContent>
+                      </Card>
+                    </>
+                  )}
+                  {chartView === 'cumplimiento' && (
+                    <>
+                      <Card className="border-emerald-200 bg-gradient-to-br from-emerald-50 to-white">
+                        <CardContent className="pt-4 pb-3">
+                          <p className="text-xs text-emerald-600 font-semibold mb-1">En Meta (≥90%)</p>
+                          <p className="text-xl font-black text-emerald-900">{statusCounts.positive}</p>
+                          <p className="text-[10px] text-gray-500 mt-1">{((statusCounts.positive/STORES.length)*100).toFixed(0)}% del total</p>
+                        </CardContent>
+                      </Card>
+                      <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-white">
+                        <CardContent className="pt-4 pb-3">
+                          <p className="text-xs text-amber-600 font-semibold mb-1">En Alerta (70-90%)</p>
+                          <p className="text-xl font-black text-amber-900">{statusCounts.negative}</p>
+                          <p className="text-[10px] text-gray-500 mt-1">{((statusCounts.negative/STORES.length)*100).toFixed(0)}% del total</p>
+                        </CardContent>
+                      </Card>
+                      <Card className="border-red-200 bg-gradient-to-br from-red-50 to-white">
+                        <CardContent className="pt-4 pb-3">
+                          <p className="text-xs text-red-600 font-semibold mb-1">Críticas (<70%)</p>
+                          <p className="text-xl font-black text-red-900">{statusCounts.critical}</p>
+                          <p className="text-[10px] text-gray-500 mt-1">{((statusCounts.critical/STORES.length)*100).toFixed(0)}% del total</p>
+                        </CardContent>
+                      </Card>
+                      <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-white">
+                        <CardContent className="pt-4 pb-3">
+                          <p className="text-xs text-blue-600 font-semibold mb-1">Cumplimiento Zona</p>
+                          <p className="text-xl font-black text-blue-900">{((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%</p>
+                          <p className="text-[10px] text-gray-500 mt-1">Promedio general</p>
+                        </CardContent>
+                      </Card>
+                    </>
+                  )}
+                  {chartView === 'proyeccion' && (
+                    <>
+                      <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-white">
+                        <CardContent className="pt-4 pb-3">
+                          <p className="text-xs text-purple-600 font-semibold mb-1">Proyección Total</p>
+                          <p className="text-xl font-black text-purple-900">{formatCurrency(zoneTotals.totalProjection)}</p>
+                          <p className="text-[10px] text-gray-500 mt-1">Estimado al cierre</p>
+                        </CardContent>
+                      </Card>
+                      <Card className="border-pink-200 bg-gradient-to-br from-pink-50 to-white">
+                        <CardContent className="pt-4 pb-3">
+                          <p className="text-xs text-pink-600 font-semibold mb-1">% Proyección</p>
+                          <p className="text-xl font-black text-pink-900">{((zoneTotals.totalProjection/zoneTotals.totalBudget)*100).toFixed(0)}%</p>
+                          <p className="text-[10px] text-gray-500 mt-1">vs meta mensual</p>
+                        </CardContent>
+                      </Card>
+                      <Card className="border-indigo-200 bg-gradient-to-br from-indigo-50 to-white">
+                        <CardContent className="pt-4 pb-3">
+                          <p className="text-xs text-indigo-600 font-semibold mb-1">Tiendas en Riesgo</p>
+                          <p className="text-xl font-black text-indigo-900">{storesAnalysis.filter(s => s.projectionCompliance < 85).length}</p>
+                          <p className="text-[10px] text-gray-500 mt-1">Proyección <85%</p>
+                        </CardContent>
+                      </Card>
+                      <Card className="border-violet-200 bg-gradient-to-br from-violet-50 to-white">
+                        <CardContent className="pt-4 pb-3">
+                          <p className="text-xs text-violet-600 font-semibold mb-1">Gap a Cerrar</p>
+                          <p className="text-xl font-black text-violet-900">{formatCurrency(Math.max(0, zoneTotals.totalBudget - zoneTotals.totalProjection))}</p>
+                          <p className="text-[10px] text-gray-500 mt-1">Faltante estimado</p>
+                        </CardContent>
+                      </Card>
+                    </>
+                  )}
+                  {chartView === 'eficiencia' && (
+                    <>
+                      <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-white">
+                        <CardContent className="pt-4 pb-3">
+                          <p className="text-xs text-amber-600 font-semibold mb-1">Ticket Zona</p>
+                          <p className="text-xl font-black text-amber-900">{formatCurrency(zoneTotals.totalSales / filteredStores.reduce((sum, s) => sum + s.totalTransactions, 0))}</p>
+                          <p className="text-[10px] text-gray-500 mt-1">Promedio general</p>
+                        </CardContent>
+                      </Card>
+                      <Card className="border-orange-200 bg-gradient-to-br from-orange-50 to-white">
+                        <CardContent className="pt-4 pb-3">
+                          <p className="text-xs text-orange-600 font-semibold mb-1">Transacciones</p>
+                          <p className="text-xl font-black text-orange-900">{filteredStores.reduce((sum, s) => sum + s.totalTransactions, 0).toLocaleString()}</p>
+                          <p className="text-[10px] text-gray-500 mt-1">Total zona</p>
+                        </CardContent>
+                      </Card>
+                      <Card className="border-yellow-200 bg-gradient-to-br from-yellow-50 to-white">
+                        <CardContent className="pt-4 pb-3">
+                          <p className="text-xs text-yellow-600 font-semibold mb-1">Mejor Ticket</p>
+                          <p className="text-xl font-black text-yellow-900">{formatCurrency(Math.max(...filteredStores.map(s => s.avgTicket)))}</p>
+                          <p className="text-[10px] text-gray-500 mt-1">{filteredStores.sort((a,b) => b.avgTicket - a.avgTicket)[0]?.name}</p>
+                        </CardContent>
+                      </Card>
+                      <Card className="border-lime-200 bg-gradient-to-br from-lime-50 to-white">
+                        <CardContent className="pt-4 pb-3">
+                          <p className="text-xs text-lime-600 font-semibold mb-1">Promedio Trans/Tienda</p>
+                          <p className="text-xl font-black text-lime-900">{Math.round(filteredStores.reduce((sum, s) => sum + s.totalTransactions, 0) / filteredStores.length).toLocaleString()}</p>
+                          <p className="text-[10px] text-gray-500 mt-1">Por punto de venta</p>
+                        </CardContent>
+                      </Card>
+                    </>
+                  )}
+                </div>
+
+                {/* Gráfica Principal */}
+                <Card className="border-gray-100 shadow-sm">
                   <CardHeader className={`border-b border-gray-100 ${
                     chartView === 'ventas' ? 'bg-gradient-to-r from-blue-50 to-indigo-50' :
                     chartView === 'cumplimiento' ? 'bg-gradient-to-r from-emerald-50 to-green-50' :
@@ -1220,7 +1354,6 @@ INSTRUCCIONES:
                           />
                           <Legend wrapperStyle={{ fontSize: '12px', fontWeight: 600 }} />
                           
-                          {/* Zona de alerta de fondo */}
                           <Area 
                             type="monotone" 
                             dataKey="zona_critica" 
@@ -1240,7 +1373,6 @@ INSTRUCCIONES:
                             animationDuration={1000}
                           />
                           
-                          {/* Barra principal con gradiente dinámico */}
                           <Bar 
                             dataKey="cumplimiento" 
                             name="% Cumplimiento" 
@@ -1267,7 +1399,6 @@ INSTRUCCIONES:
                             ))}
                           </Bar>
                           
-                          {/* Línea de meta con puntos destacados */}
                           <Line 
                             type="monotone" 
                             dataKey="meta" 
@@ -1405,6 +1536,46 @@ INSTRUCCIONES:
                         </ComposedChart>
                       )}
                     </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+
+                {/* Insight contextual por vista */}
+                <Card className={`border-2 ${
+                  chartView === 'ventas' ? 'border-blue-200 bg-blue-50' :
+                  chartView === 'cumplimiento' ? 'border-emerald-200 bg-emerald-50' :
+                  chartView === 'proyeccion' ? 'border-purple-200 bg-purple-50' :
+                  'border-amber-200 bg-amber-50'
+                }`}>
+                  <CardContent className="pt-4 pb-4">
+                    <div className="flex items-start gap-3">
+                      <div className={`p-2 rounded-lg ${
+                        chartView === 'ventas' ? 'bg-blue-100' :
+                        chartView === 'cumplimiento' ? 'bg-emerald-100' :
+                        chartView === 'proyeccion' ? 'bg-purple-100' :
+                        'bg-amber-100'
+                      }`}>
+                        <Sparkles className={`w-5 h-5 ${
+                          chartView === 'ventas' ? 'text-blue-600' :
+                          chartView === 'cumplimiento' ? 'text-emerald-600' :
+                          chartView === 'proyeccion' ? 'text-purple-600' :
+                          'text-amber-600'
+                        }`} />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-xs font-bold text-gray-900 mb-1">
+                          {chartView === 'ventas' && '💰 Insight de Ventas'}
+                          {chartView === 'cumplimiento' && '✓ Insight de Cumplimiento'}
+                          {chartView === 'proyeccion' && '🎯 Insight Predictivo'}
+                          {chartView === 'eficiencia' && '⚡ Insight de Eficiencia'}
+                        </p>
+                        <p className="text-xs text-gray-700 leading-relaxed">
+                          {chartView === 'ventas' && `La zona lleva ${formatCurrency(zoneTotals.totalSales)} de ${formatCurrency(zoneTotals.totalBudget)} meta. ${filteredStores.filter(s => s.totalSales >= s.salesBudget).length} tiendas ya superaron su objetivo.`}
+                          {chartView === 'cumplimiento' && `${statusCounts.positive} tiendas en meta, ${statusCounts.negative} en alerta y ${statusCounts.critical} críticas. El ${((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}% de cumplimiento general indica ${zoneTotals.totalSales >= zoneTotals.totalBudget * 0.9 ? 'buen desempeño' : 'necesidad de impulso'}.`}
+                          {chartView === 'proyeccion' && `Se proyecta cerrar en ${formatCurrency(zoneTotals.totalProjection)} (${((zoneTotals.totalProjection/zoneTotals.totalBudget)*100).toFixed(0)}% vs meta). ${storesAnalysis.filter(s => s.projectionCompliance >= 100).length} tiendas proyectan superar objetivo, ${storesAnalysis.filter(s => s.projectionCompliance < 85).length} en riesgo de no alcanzar.`}
+                          {chartView === 'eficiencia' && `Ticket promedio zona: ${formatCurrency(zoneTotals.totalSales / filteredStores.reduce((sum, s) => sum + s.totalTransactions, 0))}. ${filteredStores.filter(s => s.avgTicket > zoneTotals.totalSales / filteredStores.reduce((sum, s) => sum + s.totalTransactions, 0)).length} tiendas superan el promedio, optimizar las demás podría generar ${formatCurrency((filteredStores.reduce((sum, s) => sum + s.totalTransactions, 0) * 2000))} adicionales.`}
+                        </p>
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
               </motion.div>
