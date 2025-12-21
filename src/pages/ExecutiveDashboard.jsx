@@ -373,7 +373,7 @@ INSTRUCCIONES:
       {/* Sidebar */}
       <motion.aside
         initial={{ x: -300 }}
-        animate={{ x: sidebarOpen ? 0 : -250 }}
+        animate={{ x: sidebarOpen ? 0 : -280 }}
         className="fixed left-0 top-0 h-full bg-white border-r border-slate-200 shadow-lg z-40"
         style={{ width: '280px' }}
       >
@@ -426,7 +426,7 @@ INSTRUCCIONES:
       </motion.aside>
 
       {/* Main Content */}
-      <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-[280px]' : 'ml-[30px]'}`}>
+      <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-[280px]' : 'ml-0'}`}>
         <div className="p-8">
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
