@@ -25,6 +25,7 @@ import ChartsDetailView from '../components/executive/ChartsDetailView';
 import StoresDetailView from '../components/executive/StoresDetailView';
 import ComparableView from '../components/executive/ComparableView';
 import SalesForecastPanel from '../components/predictions/SalesForecastPanel';
+import StoreDetailModal from '../components/executive/StoreDetailModal';
 
 const COLORS = ['#3b82f6', '#60a5fa', '#93c5fd', '#dbeafe', '#1d4ed8', '#2563eb', '#1e40af'];
 
@@ -93,6 +94,7 @@ export default function ExecutiveDashboard() {
   const [selectedCard, setSelectedCard] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeView, setActiveView] = useState(urlView || 'general');
+  const [selectedStoreDetail, setSelectedStoreDetail] = useState(null);
   
   useEffect(() => {
     if (urlView) {
@@ -1116,9 +1118,11 @@ INSTRUCCIONES:
                 </thead>
                 <tbody>
                   {storesAnalysis.map((store, idx) => (
-                    <tr
+                    <motion.tr
                       key={store.code}
-                      className="border-b border-gray-100 hover:bg-blue-50/30 transition-colors"
+                      whileHover={{ backgroundColor: 'rgba(59, 130, 246, 0.05)' }}
+                      onClick={() => setSelectedStoreDetail(store)}
+                      className="border-b border-gray-100 cursor-pointer transition-colors"
                     >
                       <td className="py-3 px-4 font-medium text-gray-900">{store.name}</td>
                       <td className="py-3 px-4 text-right font-medium text-gray-900">{formatCurrency(store.totalSales)}</td>
@@ -1151,7 +1155,7 @@ INSTRUCCIONES:
                           </span>
                         )}
                       </td>
-                    </tr>
+                    </motion.tr>
                   ))}
                 </tbody>
                 </table>
@@ -1159,6 +1163,18 @@ INSTRUCCIONES:
             </CardContent>
             </Card>
           )}
+
+          {/* Modal de Detalle de Tienda */}
+          <AnimatePresence>
+            {selectedStoreDetail && (
+              <StoreDetailModal
+                store={selectedStoreDetail}
+                onClose={() => setSelectedStoreDetail(null)}
+                allDailySales={allDailySales}
+                dateRange={activeRange}
+              />
+            )}
+          </AnimatePresence>
 
             {/* Chart Modal */}
           <AnimatePresence>

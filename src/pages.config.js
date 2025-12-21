@@ -1,45 +1,45 @@
-import Home from './pages/Home';
-import Dashboard from './pages/Dashboard';
-import Sales from './pages/Sales';
-import Rankings from './pages/Rankings';
-import SearchCashier from './pages/SearchCashier';
 import Budget from './pages/Budget';
-import Team from './pages/Team';
-import Reports from './pages/Reports';
-import Settings from './pages/Settings';
 import CashierProfile from './pages/CashierProfile';
 import CashiersDashboard from './pages/CashiersDashboard';
-import FreezerMap from './pages/FreezerMap';
-import Training from './pages/Training';
-import Quality from './pages/Quality';
-import Management from './pages/Management';
-import PredictiveAnalytics from './pages/PredictiveAnalytics';
-import PopsyPlanner from './pages/PopsyPlanner';
-import RoulettePopsy from './pages/RoulettePopsy';
+import Dashboard from './pages/Dashboard';
 import ExecutiveDashboard from './pages/ExecutiveDashboard';
+import FreezerMap from './pages/FreezerMap';
+import Home from './pages/Home';
+import Management from './pages/Management';
+import PopsyPlanner from './pages/PopsyPlanner';
+import PredictiveAnalytics from './pages/PredictiveAnalytics';
+import Quality from './pages/Quality';
+import Rankings from './pages/Rankings';
+import Reports from './pages/Reports';
+import RoulettePopsy from './pages/RoulettePopsy';
+import Sales from './pages/Sales';
+import SearchCashier from './pages/SearchCashier';
+import Settings from './pages/Settings';
+import Team from './pages/Team';
+import Training from './pages/Training';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
-    "Home": Home,
-    "Dashboard": Dashboard,
-    "Sales": Sales,
-    "Rankings": Rankings,
-    "SearchCashier": SearchCashier,
     "Budget": Budget,
-    "Team": Team,
-    "Reports": Reports,
-    "Settings": Settings,
     "CashierProfile": CashierProfile,
     "CashiersDashboard": CashiersDashboard,
-    "FreezerMap": FreezerMap,
-    "Training": Training,
-    "Quality": Quality,
-    "Management": Management,
-    "PredictiveAnalytics": PredictiveAnalytics,
-    "PopsyPlanner": PopsyPlanner,
-    "RoulettePopsy": RoulettePopsy,
+    "Dashboard": Dashboard,
     "ExecutiveDashboard": ExecutiveDashboard,
+    "FreezerMap": FreezerMap,
+    "Home": Home,
+    "Management": Management,
+    "PopsyPlanner": PopsyPlanner,
+    "PredictiveAnalytics": PredictiveAnalytics,
+    "Quality": Quality,
+    "Rankings": Rankings,
+    "Reports": Reports,
+    "RoulettePopsy": RoulettePopsy,
+    "Sales": Sales,
+    "SearchCashier": SearchCashier,
+    "Settings": Settings,
+    "Team": Team,
+    "Training": Training,
 }
 
 export const pagesConfig = {
