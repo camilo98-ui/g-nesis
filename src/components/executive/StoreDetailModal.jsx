@@ -114,59 +114,51 @@ export default function StoreDetailModal({ store, onClose, allDailySales, dateRa
           <div className="p-6 max-h-[80vh] overflow-y-auto">
             {/* KPIs */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              <Card className="border-blue-100">
-                <CardContent className="pt-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="p-2 rounded-lg bg-blue-100">
-                      <DollarSign className="w-4 h-4 text-blue-600" />
-                    </div>
-                    <p className="text-xs text-gray-500 font-semibold">Venta Total</p>
+              <div className="bg-blue-50 rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="p-2 rounded-lg bg-blue-100">
+                    <DollarSign className="w-4 h-4 text-blue-600" />
                   </div>
-                  <p className="text-xl font-bold text-gray-900">{formatCurrency(totals.totalSales)}</p>
-                  <p className="text-xs text-gray-400 mt-1">
-                    Promedio: {formatCurrency(totals.avgDailySales)}/día
-                  </p>
-                </CardContent>
-              </Card>
+                  <p className="text-xs text-gray-500 font-semibold">Venta Total</p>
+                </div>
+                <p className="text-xl font-bold text-gray-900">{formatCurrency(totals.totalSales)}</p>
+                <p className="text-xs text-gray-400 mt-1">
+                  Promedio: {formatCurrency(totals.avgDailySales)}/día
+                </p>
+              </div>
 
-              <Card className="border-purple-100">
-                <CardContent className="pt-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="p-2 rounded-lg bg-purple-100">
-                      <Receipt className="w-4 h-4 text-purple-600" />
-                    </div>
-                    <p className="text-xs text-gray-500 font-semibold">Tickets</p>
+              <div className="bg-purple-50 rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="p-2 rounded-lg bg-purple-100">
+                    <Receipt className="w-4 h-4 text-purple-600" />
                   </div>
-                  <p className="text-xl font-bold text-gray-900">{totals.totalTickets.toLocaleString()}</p>
-                  <p className="text-xs text-gray-400 mt-1">
-                    {totals.daysWithSales} días con venta
-                  </p>
-                </CardContent>
-              </Card>
+                  <p className="text-xs text-gray-500 font-semibold">Tickets</p>
+                </div>
+                <p className="text-xl font-bold text-gray-900">{totals.totalTickets.toLocaleString()}</p>
+                <p className="text-xs text-gray-400 mt-1">
+                  {totals.daysWithSales} días con venta
+                </p>
+              </div>
 
-              <Card className="border-amber-100">
-                <CardContent className="pt-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="p-2 rounded-lg bg-amber-100">
-                      <Zap className="w-4 h-4 text-amber-600" />
-                    </div>
-                    <p className="text-xs text-gray-500 font-semibold">Transacciones</p>
+              <div className="bg-amber-50 rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="p-2 rounded-lg bg-amber-100">
+                    <Zap className="w-4 h-4 text-amber-600" />
                   </div>
-                  <p className="text-xl font-bold text-gray-900">{totals.totalTransactions.toLocaleString()}</p>
-                </CardContent>
-              </Card>
+                  <p className="text-xs text-gray-500 font-semibold">Transacciones</p>
+                </div>
+                <p className="text-xl font-bold text-gray-900">{totals.totalTransactions.toLocaleString()}</p>
+              </div>
 
-              <Card className="border-emerald-100">
-                <CardContent className="pt-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="p-2 rounded-lg bg-emerald-100">
-                      <TrendingUp className="w-4 h-4 text-emerald-600" />
-                    </div>
-                    <p className="text-xs text-gray-500 font-semibold">Ticket Promedio</p>
+              <div className="bg-emerald-50 rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="p-2 rounded-lg bg-emerald-100">
+                    <TrendingUp className="w-4 h-4 text-emerald-600" />
                   </div>
-                  <p className="text-xl font-bold text-gray-900">{formatCurrency(totals.avgTicket)}</p>
-                </CardContent>
-              </Card>
+                  <p className="text-xs text-gray-500 font-semibold">Ticket Promedio</p>
+                </div>
+                <p className="text-xl font-bold text-gray-900">{formatCurrency(totals.avgTicket)}</p>
+              </div>
             </div>
 
             {/* Gráficas */}
