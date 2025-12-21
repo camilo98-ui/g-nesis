@@ -96,6 +96,7 @@ export default function ExecutiveDashboard() {
   const [activeView, setActiveView] = useState(urlView || 'general');
   const [selectedStoreDetail, setSelectedStoreDetail] = useState(null);
   const [chartView, setChartView] = useState('ventas'); // ventas, cumplimiento, proyeccion, eficiencia
+  const [selectedMetric, setSelectedMetric] = useState(null);
   
   useEffect(() => {
     if (urlView) {
@@ -1196,407 +1197,491 @@ INSTRUCCIONES:
                   )}
                 </div>
 
-                {/* Gráfica Principal */}
-                <Card className="border-gray-100 shadow-sm">
-                  <CardHeader className={`border-b border-gray-100 ${
-                    chartView === 'ventas' ? 'bg-gradient-to-r from-blue-50 to-indigo-50' :
-                    chartView === 'cumplimiento' ? 'bg-gradient-to-r from-emerald-50 to-green-50' :
-                    chartView === 'proyeccion' ? 'bg-gradient-to-r from-purple-50 to-pink-50' :
-                    'bg-gradient-to-r from-amber-50 to-orange-50'
-                  }`}>
-                    <CardTitle className="text-base font-semibold text-gray-900 flex items-center gap-2">
-                      {chartView === 'ventas' && (
-                        <>
-                          <DollarSign className="w-5 h-5 text-blue-600" />
-                          Ventas Reales vs Meta Presupuestada
-                        </>
-                      )}
-                      {chartView === 'cumplimiento' && (
-                        <>
-                          <CheckCircle className="w-5 h-5 text-emerald-600" />
-                          % de Cumplimiento por Tienda
-                        </>
-                      )}
-                      {chartView === 'proyeccion' && (
-                        <>
-                          <Target className="w-5 h-5 text-purple-600" />
-                          Proyección Mensual vs Meta
-                        </>
-                      )}
-                      {chartView === 'eficiencia' && (
-                        <>
-                          <Zap className="w-5 h-5 text-amber-600" />
-                          Ticket Promedio vs Volumen de Transacciones
-                        </>
-                      )}
-                    </CardTitle>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {chartView === 'ventas' && 'Comparación entre las ventas acumuladas y el presupuesto mensual'}
-                      {chartView === 'cumplimiento' && 'Porcentaje de avance respecto a la meta de cada punto'}
-                      {chartView === 'proyeccion' && 'Estimación del cierre mensual vs objetivo planificado'}
-                      {chartView === 'eficiencia' && 'Análisis de eficiencia: valor promedio por transacción'}
-                    </p>
-                  </CardHeader>
-                  <CardContent className="pt-6">
-                    <ResponsiveContainer width="100%" height={350}>
-                      {chartView === 'ventas' && (
-                        <ComposedChart data={comparisonData}>
-                          <defs>
-                            <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.8}/>
-                              <stop offset="100%" stopColor="#1d4ed8" stopOpacity={0.3}/>
-                            </linearGradient>
-                            <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
-                              <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
-                              <feOffset dx="0" dy="3" result="offsetblur"/>
-                              <feComponentTransfer>
-                                <feFuncA type="linear" slope="0.3"/>
-                              </feComponentTransfer>
-                              <feMerge>
-                                <feMergeNode/>
-                                <feMergeNode in="SourceGraphic"/>
-                              </feMerge>
-                            </filter>
-                          </defs>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" strokeOpacity={0.5} />
-                          <XAxis 
-                            dataKey="name" 
-                            tick={{ fontSize: 11, fill: '#6b7280', fontWeight: 600 }} 
-                            angle={-45} 
-                            textAnchor="end" 
-                            height={90}
-                            stroke="#9ca3af"
-                            strokeWidth={1.5}
-                          />
-                          <YAxis 
-                            tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} 
-                            tick={{ fontSize: 11, fill: '#6b7280', fontWeight: 600 }}
-                            stroke="#9ca3af"
-                            strokeWidth={1.5}
-                          />
-                          <Tooltip 
-                            formatter={(v) => formatCurrency(v)}
-                            contentStyle={{ 
-                              borderRadius: '12px', 
-                              border: '2px solid #3b82f6', 
-                              boxShadow: '0 8px 24px rgba(59, 130, 246, 0.25)',
-                              backgroundColor: 'rgba(255, 255, 255, 0.98)',
-                              backdropFilter: 'blur(10px)'
-                            }}
-                            labelStyle={{ fontWeight: 700, color: '#1f2937' }}
-                          />
-                          <Legend wrapperStyle={{ fontSize: '12px', fontWeight: 600 }} />
-                          <Bar 
-                            dataKey="ventas" 
-                            fill="url(#salesGradient)" 
-                            name="Ventas Reales" 
-                            radius={[8, 8, 0, 0]}
-                            animationDuration={1200}
-                            animationBegin={100}
-                          />
-                          <Line 
-                            type="monotone" 
-                            dataKey="presupuesto" 
-                            stroke="#ef4444" 
-                            strokeWidth={4} 
-                            strokeDasharray="8 4" 
-                            name="Meta Presupuesto" 
-                            dot={{ fill: '#ef4444', r: 6, strokeWidth: 3, stroke: '#fff' }}
-                            activeDot={{ r: 8, strokeWidth: 3 }}
-                            animationDuration={1500}
-                          />
-                        </ComposedChart>
-                      )}
-                      {chartView === 'cumplimiento' && (
-                        <ComposedChart data={comparisonData.map(d => ({
-                          ...d,
-                          meta: 100,
-                          zona_critica: 70,
-                          zona_alerta: 90
-                        }))}>
-                          <defs>
-                            <linearGradient id="greenGradient" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor="#10b981" stopOpacity={1}/>
-                              <stop offset="50%" stopColor="#059669" stopOpacity={0.9}/>
-                              <stop offset="100%" stopColor="#047857" stopOpacity={0.8}/>
-                            </linearGradient>
-                            <linearGradient id="yellowGradient" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor="#fbbf24" stopOpacity={1}/>
-                              <stop offset="50%" stopColor="#f59e0b" stopOpacity={0.9}/>
-                              <stop offset="100%" stopColor="#d97706" stopOpacity={0.8}/>
-                            </linearGradient>
-                            <linearGradient id="redGradient" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor="#f87171" stopOpacity={1}/>
-                              <stop offset="50%" stopColor="#ef4444" stopOpacity={0.9}/>
-                              <stop offset="100%" stopColor="#dc2626" stopOpacity={0.8}/>
-                            </linearGradient>
-                            <filter id="glow">
-                              <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-                              <feMerge>
-                                <feMergeNode in="coloredBlur"/>
-                                <feMergeNode in="SourceGraphic"/>
-                              </feMerge>
-                            </filter>
-                          </defs>
-                          <CartesianGrid 
-                            strokeDasharray="3 3" 
-                            stroke="#e5e7eb" 
-                            strokeOpacity={0.5}
-                            vertical={false}
-                          />
-                          <XAxis 
-                            dataKey="name" 
-                            tick={{ fontSize: 11, fill: '#374151', fontWeight: 700 }} 
-                            angle={-45} 
-                            textAnchor="end" 
-                            height={90}
-                            stroke="#9ca3af"
-                            strokeWidth={2}
-                          />
-                          <YAxis 
-                            tickFormatter={(v) => `${v}%`} 
-                            tick={{ fontSize: 11, fill: '#374151', fontWeight: 700 }}
-                            stroke="#9ca3af"
-                            strokeWidth={2}
-                            domain={[0, 120]}
-                          />
-                          <Tooltip 
-                            content={({ active, payload }) => {
-                              if (!active || !payload || !payload.length) return null;
-                              const data = payload[0].payload;
-                              const status = data.cumplimiento >= 90 ? '✓ En Meta' : data.cumplimiento >= 70 ? '⚠ En Alerta' : '✗ Crítico';
-                              const statusColor = data.cumplimiento >= 90 ? '#10b981' : data.cumplimiento >= 70 ? '#f59e0b' : '#ef4444';
-                              return (
-                                <div style={{
-                                  backgroundColor: 'rgba(255, 255, 255, 0.98)',
-                                  backdropFilter: 'blur(12px)',
-                                  padding: '12px 16px',
-                                  borderRadius: '12px',
-                                  border: `3px solid ${statusColor}`,
-                                  boxShadow: `0 12px 32px ${statusColor}40`,
-                                }}>
-                                  <p style={{ fontWeight: 800, fontSize: '13px', marginBottom: '6px', color: '#1f2937' }}>
-                                    {data.name}
-                                  </p>
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                                    <div style={{
-                                      width: '32px',
-                                      height: '32px',
-                                      borderRadius: '8px',
-                                      background: `linear-gradient(135deg, ${statusColor}, ${statusColor}cc)`,
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      justifyContent: 'center',
-                                      fontWeight: 900,
-                                      fontSize: '16px',
-                                      color: 'white'
-                                    }}>
-                                      {data.cumplimiento.toFixed(0)}
-                                    </div>
-                                    <span style={{ fontSize: '14px', fontWeight: 600, color: statusColor }}>
-                                      {status}
-                                    </span>
-                                  </div>
-                                  <div style={{ fontSize: '11px', color: '#6b7280', marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #e5e7eb' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                      <span>Ventas:</span>
-                                      <span style={{ fontWeight: 700 }}>{formatCurrency(data.ventas)}</span>
-                                    </div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '2px' }}>
-                                      <span>Meta:</span>
-                                      <span style={{ fontWeight: 700 }}>{formatCurrency(data.presupuesto)}</span>
+                {/* Gráficas Dinámicas Mejoradas */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Gráfica Principal Grande */}
+                  <Card className="lg:col-span-2 border-none shadow-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 overflow-hidden relative">
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 via-purple-600/10 to-pink-600/10 pointer-events-none" />
+                    <CardHeader className="relative z-10 border-b border-white/10">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          {chartView === 'ventas' && <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/30"><DollarSign className="w-6 h-6 text-white" /></div>}
+                          {chartView === 'cumplimiento' && <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-lg shadow-emerald-500/30"><CheckCircle className="w-6 h-6 text-white" /></div>}
+                          {chartView === 'proyeccion' && <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-lg shadow-purple-500/30"><Target className="w-6 h-6 text-white" /></div>}
+                          {chartView === 'eficiencia' && <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/30"><Zap className="w-6 h-6 text-white" /></div>}
+                          <div>
+                            <CardTitle className="text-lg font-black text-white">
+                              {chartView === 'ventas' && 'Análisis de Ventas'}
+                              {chartView === 'cumplimiento' && 'Cumplimiento de Metas'}
+                              {chartView === 'proyeccion' && 'Proyección de Cierre'}
+                              {chartView === 'eficiencia' && 'Eficiencia Operativa'}
+                            </CardTitle>
+                            <p className="text-xs text-slate-400 mt-1">
+                              {chartView === 'ventas' && 'Performance de ventas vs presupuesto asignado'}
+                              {chartView === 'cumplimiento' && 'Porcentaje de avance sobre objetivos'}
+                              {chartView === 'proyeccion' && 'Estimación de cierre basada en tendencia'}
+                              {chartView === 'eficiencia' && 'Productividad: ticket promedio por transacción'}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="relative z-10 pt-8 pb-6">
+                      <ResponsiveContainer width="100%" height={400}>
+                        {chartView === 'ventas' && (
+                          <ComposedChart data={comparisonData}>
+                            <defs>
+                              <linearGradient id="vibrantSalesGradient" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#6366f1" stopOpacity={1}/>
+                                <stop offset="50%" stopColor="#3b82f6" stopOpacity={0.8}/>
+                                <stop offset="100%" stopColor="#2563eb" stopOpacity={0.6}/>
+                              </linearGradient>
+                              <linearGradient id="targetGradient" x1="0" y1="0" x2="1" y2="0">
+                                <stop offset="0%" stopColor="#ef4444"/>
+                                <stop offset="50%" stopColor="#f97316"/>
+                                <stop offset="100%" stopColor="#ef4444"/>
+                              </linearGradient>
+                              <filter id="neonGlow">
+                                <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                                <feMerge>
+                                  <feMergeNode in="coloredBlur"/>
+                                  <feMergeNode in="SourceGraphic"/>
+                                </feMerge>
+                              </filter>
+                            </defs>
+                            <CartesianGrid strokeDasharray="2 4" stroke="#475569" strokeOpacity={0.2} vertical={false} />
+                            <XAxis 
+                              dataKey="name" 
+                              tick={{ fontSize: 12, fill: '#cbd5e1', fontWeight: 700 }} 
+                              angle={-35} 
+                              textAnchor="end" 
+                              height={100}
+                              stroke="#64748b"
+                              strokeWidth={2}
+                            />
+                            <YAxis 
+                              tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} 
+                              tick={{ fontSize: 12, fill: '#cbd5e1', fontWeight: 700 }}
+                              stroke="#64748b"
+                              strokeWidth={2}
+                            />
+                            <Tooltip 
+                              content={({ active, payload }) => {
+                                if (!active || !payload?.length) return null;
+                                const data = payload[0].payload;
+                                const gap = data.presupuesto - data.ventas;
+                                const pct = (data.ventas / data.presupuesto) * 100;
+                                return (
+                                  <div className="bg-slate-900/95 backdrop-blur-xl p-4 rounded-2xl border-2 border-blue-400 shadow-2xl shadow-blue-500/50">
+                                    <p className="font-black text-white text-sm mb-3">{data.name}</p>
+                                    <div className="space-y-2 text-xs">
+                                      <div className="flex justify-between gap-6">
+                                        <span className="text-slate-300">💰 Ventas:</span>
+                                        <span className="font-bold text-blue-300">{formatCurrency(data.ventas)}</span>
+                                      </div>
+                                      <div className="flex justify-between gap-6">
+                                        <span className="text-slate-300">🎯 Meta:</span>
+                                        <span className="font-bold text-red-300">{formatCurrency(data.presupuesto)}</span>
+                                      </div>
+                                      <div className="flex justify-between gap-6 pt-2 border-t border-slate-700">
+                                        <span className="text-slate-300">📊 Cumplimiento:</span>
+                                        <span className={`font-black text-sm ${pct >= 90 ? 'text-emerald-400' : pct >= 70 ? 'text-amber-400' : 'text-red-400'}`}>
+                                          {pct.toFixed(1)}%
+                                        </span>
+                                      </div>
+                                      <div className="flex justify-between gap-6">
+                                        <span className="text-slate-300">📉 Brecha:</span>
+                                        <span className={`font-bold ${gap > 0 ? 'text-red-400' : 'text-emerald-400'}`}>
+                                          {formatCurrency(Math.abs(gap))}
+                                        </span>
+                                      </div>
                                     </div>
                                   </div>
-                                </div>
-                              );
-                            }}
-                          />
-                          <Legend wrapperStyle={{ fontSize: '12px', fontWeight: 600 }} />
-                          
-                          <Area 
-                            type="monotone" 
-                            dataKey="zona_critica" 
-                            fill="#fee2e2" 
-                            fillOpacity={0.3}
-                            stroke="none"
-                            name="Zona Crítica"
-                            animationDuration={800}
-                          />
-                          <Area 
-                            type="monotone" 
-                            dataKey="zona_alerta" 
-                            fill="#fef3c7" 
-                            fillOpacity={0.3}
-                            stroke="none"
-                            name="Zona Alerta"
-                            animationDuration={1000}
-                          />
-                          
-                          <Bar 
-                            dataKey="cumplimiento" 
-                            name="% Cumplimiento" 
-                            radius={[10, 10, 0, 0]} 
-                            animationDuration={1400}
-                            animationBegin={200}
-                            label={{
-                              position: 'top',
-                              fill: '#1f2937',
-                              fontWeight: 900,
-                              fontSize: 11,
-                              formatter: (v) => `${v.toFixed(0)}%`
-                            }}
-                          >
-                            {comparisonData.map((entry, index) => (
-                              <Cell 
-                                key={`cell-${index}`} 
-                                fill={
-                                  entry.cumplimiento >= 90 ? 'url(#greenGradient)' : 
-                                  entry.cumplimiento >= 70 ? 'url(#yellowGradient)' : 'url(#redGradient)'
-                                }
-                                filter="url(#glow)"
-                              />
-                            ))}
-                          </Bar>
-                          
-                          <Line 
-                            type="monotone" 
-                            dataKey="meta" 
-                            stroke="#1f2937" 
-                            strokeWidth={4} 
-                            strokeDasharray="10 5" 
-                            name="Meta 100%" 
-                            dot={{ fill: '#1f2937', r: 7, strokeWidth: 3, stroke: '#fff' }}
-                            activeDot={{ r: 10, strokeWidth: 4, fill: '#10b981' }}
-                            animationDuration={1600}
-                          />
-                        </ComposedChart>
-                      )}
-                      {chartView === 'proyeccion' && (
-                        <ComposedChart data={comparisonData}>
-                          <defs>
-                            <linearGradient id="projectionGradient" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor="#a855f7" stopOpacity={0.7}/>
-                              <stop offset="100%" stopColor="#c084fc" stopOpacity={0.2}/>
-                            </linearGradient>
-                          </defs>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" strokeOpacity={0.5} />
-                          <XAxis 
-                            dataKey="name" 
-                            tick={{ fontSize: 11, fill: '#6b7280', fontWeight: 600 }} 
-                            angle={-45} 
-                            textAnchor="end" 
-                            height={90}
-                            stroke="#9ca3af"
-                            strokeWidth={1.5}
-                          />
-                          <YAxis 
-                            tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} 
-                            tick={{ fontSize: 11, fill: '#6b7280', fontWeight: 600 }}
-                            stroke="#9ca3af"
-                            strokeWidth={1.5}
-                          />
-                          <Tooltip 
-                            formatter={(v) => formatCurrency(v)}
-                            contentStyle={{ 
-                              borderRadius: '12px', 
-                              border: '2px solid #a855f7', 
-                              boxShadow: '0 8px 24px rgba(168, 85, 247, 0.25)',
-                              backgroundColor: 'rgba(255, 255, 255, 0.98)',
-                              backdropFilter: 'blur(10px)'
-                            }}
-                            labelStyle={{ fontWeight: 700, color: '#1f2937' }}
-                          />
-                          <Legend wrapperStyle={{ fontSize: '12px', fontWeight: 600 }} />
-                          <Area 
-                            type="monotone" 
-                            dataKey="proyeccion" 
-                            stroke="#a855f7" 
-                            strokeWidth={4} 
-                            fill="url(#projectionGradient)" 
-                            name="Proyección Estimada"
-                            animationDuration={1400}
-                          />
-                          <Line 
-                            type="monotone" 
-                            dataKey="presupuesto" 
-                            stroke="#3b82f6" 
-                            strokeWidth={4} 
-                            strokeDasharray="8 4" 
-                            name="Meta Objetivo" 
-                            dot={{ fill: '#3b82f6', r: 6, strokeWidth: 3, stroke: '#fff' }}
-                            activeDot={{ r: 8, strokeWidth: 3 }}
-                            animationDuration={1500}
-                          />
-                        </ComposedChart>
-                      )}
-                      {chartView === 'eficiencia' && (
-                        <ComposedChart data={comparisonData}>
-                          <defs>
-                            <linearGradient id="amberGradient" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor="#f59e0b" stopOpacity={0.9}/>
-                              <stop offset="100%" stopColor="#d97706" stopOpacity={0.5}/>
-                            </linearGradient>
-                          </defs>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" strokeOpacity={0.5} />
-                          <XAxis 
-                            dataKey="name" 
-                            tick={{ fontSize: 11, fill: '#6b7280', fontWeight: 600 }} 
-                            angle={-45} 
-                            textAnchor="end" 
-                            height={90}
-                            stroke="#9ca3af"
-                            strokeWidth={1.5}
-                          />
-                          <YAxis 
-                            yAxisId="left" 
-                            tickFormatter={(v) => `$${(v/1000).toFixed(0)}k`} 
-                            tick={{ fontSize: 11, fill: '#6b7280', fontWeight: 600 }}
-                            stroke="#9ca3af"
-                            strokeWidth={1.5}
-                          />
-                          <YAxis 
-                            yAxisId="right" 
-                            orientation="right" 
-                            tick={{ fontSize: 11, fill: '#6b7280', fontWeight: 600 }}
-                            stroke="#9ca3af"
-                            strokeWidth={1.5}
-                          />
-                          <Tooltip 
-                            formatter={(v, name) => name.includes('Ticket') ? formatCurrency(v) : v.toLocaleString()}
-                            contentStyle={{ 
-                              borderRadius: '12px', 
-                              border: '2px solid #f59e0b', 
-                              boxShadow: '0 8px 24px rgba(245, 158, 11, 0.25)',
-                              backgroundColor: 'rgba(255, 255, 255, 0.98)',
-                              backdropFilter: 'blur(10px)'
-                            }}
-                            labelStyle={{ fontWeight: 700, color: '#1f2937' }}
-                          />
-                          <Legend wrapperStyle={{ fontSize: '12px', fontWeight: 600 }} />
-                          <Bar 
-                            yAxisId="right" 
-                            dataKey="transacciones" 
-                            fill="url(#amberGradient)" 
-                            name="Transacciones" 
-                            radius={[8, 8, 0, 0]}
-                            animationDuration={1200}
-                          />
-                          <Line 
-                            yAxisId="left" 
-                            type="monotone" 
-                            dataKey="ticket" 
-                            stroke="#8b5cf6" 
-                            strokeWidth={4} 
-                            dot={{ fill: '#8b5cf6', r: 7, strokeWidth: 3, stroke: '#fff' }} 
-                            activeDot={{ r: 9, strokeWidth: 3 }}
-                            name="Ticket Promedio"
-                            animationDuration={1500}
-                          />
-                        </ComposedChart>
-                      )}
-                    </ResponsiveContainer>
-                  </CardContent>
-                </Card>
+                                );
+                              }}
+                            />
+                            <Bar 
+                              dataKey="ventas" 
+                              fill="url(#vibrantSalesGradient)" 
+                              radius={[12, 12, 0, 0]}
+                              animationDuration={1500}
+                              animationBegin={100}
+                              label={{
+                                position: 'top',
+                                fill: '#e2e8f0',
+                                fontWeight: 900,
+                                fontSize: 10,
+                                formatter: (v) => `$${(v/1000000).toFixed(1)}M`
+                              }}
+                            />
+                            <Line 
+                              type="monotone" 
+                              dataKey="presupuesto" 
+                              stroke="url(#targetGradient)" 
+                              strokeWidth={5} 
+                              strokeDasharray="10 6" 
+                              dot={{ fill: '#ef4444', r: 8, strokeWidth: 4, stroke: '#1e293b' }}
+                              activeDot={{ r: 12, strokeWidth: 4, fill: '#f97316', filter: 'url(#neonGlow)' }}
+                              animationDuration={1800}
+                            />
+                          </ComposedChart>
+                        )}
+                        {chartView === 'cumplimiento' && (
+                          <BarChart data={comparisonData.sort((a, b) => b.cumplimiento - a.cumplimiento)}>
+                            <defs>
+                              <linearGradient id="successGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#10b981"/>
+                                <stop offset="100%" stopColor="#047857"/>
+                              </linearGradient>
+                              <linearGradient id="warningGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#f59e0b"/>
+                                <stop offset="100%" stopColor="#d97706"/>
+                              </linearGradient>
+                              <linearGradient id="dangerGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#ef4444"/>
+                                <stop offset="100%" stopColor="#dc2626"/>
+                              </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="2 4" stroke="#475569" strokeOpacity={0.2} vertical={false} />
+                            <XAxis 
+                              dataKey="name" 
+                              tick={{ fontSize: 12, fill: '#cbd5e1', fontWeight: 700 }} 
+                              angle={-35} 
+                              textAnchor="end" 
+                              height={100}
+                              stroke="#64748b"
+                              strokeWidth={2}
+                            />
+                            <YAxis 
+                              tickFormatter={(v) => `${v}%`} 
+                              tick={{ fontSize: 12, fill: '#cbd5e1', fontWeight: 700 }}
+                              stroke="#64748b"
+                              strokeWidth={2}
+                              domain={[0, 130]}
+                            />
+                            <Tooltip 
+                              content={({ active, payload }) => {
+                                if (!active || !payload?.length) return null;
+                                const data = payload[0].payload;
+                                return (
+                                  <div className="bg-slate-900/95 backdrop-blur-xl p-4 rounded-2xl border-2 border-emerald-400 shadow-2xl shadow-emerald-500/50">
+                                    <p className="font-black text-white text-sm mb-3">{data.name}</p>
+                                    <div className="flex items-center gap-3 mb-3">
+                                      <div className={`w-16 h-16 rounded-xl flex items-center justify-center font-black text-2xl ${
+                                        data.cumplimiento >= 90 ? 'bg-gradient-to-br from-emerald-500 to-green-600 text-white' :
+                                        data.cumplimiento >= 70 ? 'bg-gradient-to-br from-amber-500 to-orange-600 text-white' :
+                                        'bg-gradient-to-br from-red-500 to-rose-600 text-white'
+                                      }`}>
+                                        {data.cumplimiento.toFixed(0)}%
+                                      </div>
+                                      <div>
+                                        <p className={`text-xs font-bold ${
+                                          data.cumplimiento >= 90 ? 'text-emerald-400' :
+                                          data.cumplimiento >= 70 ? 'text-amber-400' :
+                                          'text-red-400'
+                                        }`}>
+                                          {data.cumplimiento >= 90 ? '✓ SUPERANDO META' : data.cumplimiento >= 70 ? '⚠ EN ALERTA' : '✗ CRÍTICO'}
+                                        </p>
+                                        <p className="text-[10px] text-slate-400 mt-1">
+                                          {data.cumplimiento >= 100 ? `+${(data.cumplimiento - 100).toFixed(0)}% sobre objetivo` : `Falta ${(100 - data.cumplimiento).toFixed(0)}% para meta`}
+                                        </p>
+                                      </div>
+                                    </div>
+                                    <div className="space-y-1.5 text-xs pt-3 border-t border-slate-700">
+                                      <div className="flex justify-between">
+                                        <span className="text-slate-400">Ventas:</span>
+                                        <span className="font-bold text-blue-300">{formatCurrency(data.ventas)}</span>
+                                      </div>
+                                      <div className="flex justify-between">
+                                        <span className="text-slate-400">Meta:</span>
+                                        <span className="font-bold text-slate-200">{formatCurrency(data.presupuesto)}</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              }}
+                            />
+                            <Bar 
+                              dataKey="cumplimiento" 
+                              radius={[12, 12, 0, 0]} 
+                              animationDuration={1600}
+                              animationBegin={100}
+                              label={{
+                                position: 'top',
+                                fill: '#f1f5f9',
+                                fontWeight: 900,
+                                fontSize: 11,
+                                formatter: (v) => `${v.toFixed(0)}%`
+                              }}
+                            >
+                              {comparisonData.map((entry, index) => (
+                                <Cell 
+                                  key={`cell-${index}`} 
+                                  fill={
+                                    entry.cumplimiento >= 90 ? 'url(#successGrad)' : 
+                                    entry.cumplimiento >= 70 ? 'url(#warningGrad)' : 'url(#dangerGrad)'
+                                  }
+                                />
+                              ))}
+                            </Bar>
+                          </BarChart>
+                        )}
+                        {chartView === 'proyeccion' && (
+                          <AreaChart data={comparisonData}>
+                            <defs>
+                              <linearGradient id="projGrad1" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#a855f7" stopOpacity={0.9}/>
+                                <stop offset="100%" stopColor="#6366f1" stopOpacity={0.1}/>
+                              </linearGradient>
+                              <linearGradient id="budgetGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#06b6d4" stopOpacity={0.8}/>
+                                <stop offset="100%" stopColor="#0ea5e9" stopOpacity={0.2}/>
+                              </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="2 4" stroke="#475569" strokeOpacity={0.2} />
+                            <XAxis 
+                              dataKey="name" 
+                              tick={{ fontSize: 12, fill: '#cbd5e1', fontWeight: 700 }} 
+                              angle={-35} 
+                              textAnchor="end" 
+                              height={100}
+                              stroke="#64748b"
+                              strokeWidth={2}
+                            />
+                            <YAxis 
+                              tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} 
+                              tick={{ fontSize: 12, fill: '#cbd5e1', fontWeight: 700 }}
+                              stroke="#64748b"
+                              strokeWidth={2}
+                            />
+                            <Tooltip 
+                              content={({ active, payload }) => {
+                                if (!active || !payload?.length) return null;
+                                const data = payload[0].payload;
+                                const gap = data.presupuesto - data.proyeccion;
+                                return (
+                                  <div className="bg-slate-900/95 backdrop-blur-xl p-4 rounded-2xl border-2 border-purple-400 shadow-2xl shadow-purple-500/50">
+                                    <p className="font-black text-white text-sm mb-3">{data.name}</p>
+                                    <div className="space-y-2 text-xs">
+                                      <div className="flex justify-between gap-6">
+                                        <span className="text-slate-300">🔮 Proyección:</span>
+                                        <span className="font-bold text-purple-300">{formatCurrency(data.proyeccion)}</span>
+                                      </div>
+                                      <div className="flex justify-between gap-6">
+                                        <span className="text-slate-300">🎯 Meta:</span>
+                                        <span className="font-bold text-cyan-300">{formatCurrency(data.presupuesto)}</span>
+                                      </div>
+                                      <div className="flex justify-between gap-6 pt-2 border-t border-slate-700">
+                                        <span className="text-slate-300">{gap > 0 ? '📉 Faltante:' : '🎉 Excedente:'}</span>
+                                        <span className={`font-black ${gap > 0 ? 'text-red-400' : 'text-emerald-400'}`}>
+                                          {formatCurrency(Math.abs(gap))}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              }}
+                            />
+                            <Area 
+                              type="monotone" 
+                              dataKey="proyeccion" 
+                              stroke="#a855f7" 
+                              strokeWidth={5} 
+                              fill="url(#projGrad1)" 
+                              animationDuration={1600}
+                              dot={{ fill: '#a855f7', r: 8, strokeWidth: 4, stroke: '#1e293b' }}
+                              activeDot={{ r: 12, strokeWidth: 4, fill: '#c084fc' }}
+                            />
+                            <Area 
+                              type="monotone" 
+                              dataKey="presupuesto" 
+                              stroke="#06b6d4" 
+                              strokeWidth={4} 
+                              strokeDasharray="10 6"
+                              fill="url(#budgetGrad)" 
+                              animationDuration={1800}
+                              dot={{ fill: '#06b6d4', r: 7, strokeWidth: 3, stroke: '#1e293b' }}
+                            />
+                          </AreaChart>
+                        )}
+                        {chartView === 'eficiencia' && (
+                          <ComposedChart data={comparisonData.sort((a, b) => b.ticket - a.ticket)}>
+                            <defs>
+                              <linearGradient id="transGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#f59e0b" stopOpacity={0.95}/>
+                                <stop offset="100%" stopColor="#ea580c" stopOpacity={0.7}/>
+                              </linearGradient>
+                              <linearGradient id="ticketLine" x1="0" y1="0" x2="1" y2="0">
+                                <stop offset="0%" stopColor="#8b5cf6"/>
+                                <stop offset="50%" stopColor="#a855f7"/>
+                                <stop offset="100%" stopColor="#8b5cf6"/>
+                              </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="2 4" stroke="#475569" strokeOpacity={0.2} />
+                            <XAxis 
+                              dataKey="name" 
+                              tick={{ fontSize: 12, fill: '#cbd5e1', fontWeight: 700 }} 
+                              angle={-35} 
+                              textAnchor="end" 
+                              height={100}
+                              stroke="#64748b"
+                              strokeWidth={2}
+                            />
+                            <YAxis 
+                              yAxisId="left" 
+                              tickFormatter={(v) => `$${(v/1000).toFixed(0)}k`} 
+                              tick={{ fontSize: 12, fill: '#cbd5e1', fontWeight: 700 }}
+                              stroke="#64748b"
+                              strokeWidth={2}
+                            />
+                            <YAxis 
+                              yAxisId="right" 
+                              orientation="right" 
+                              tick={{ fontSize: 12, fill: '#cbd5e1', fontWeight: 700 }}
+                              stroke="#64748b"
+                              strokeWidth={2}
+                            />
+                            <Tooltip 
+                              content={({ active, payload }) => {
+                                if (!active || !payload?.length) return null;
+                                const data = payload[0].payload;
+                                const efficiency = (data.ticket / 1000) * data.transacciones;
+                                return (
+                                  <div className="bg-slate-900/95 backdrop-blur-xl p-4 rounded-2xl border-2 border-amber-400 shadow-2xl shadow-amber-500/50">
+                                    <p className="font-black text-white text-sm mb-3">{data.name}</p>
+                                    <div className="space-y-2 text-xs">
+                                      <div className="flex justify-between gap-6">
+                                        <span className="text-slate-300">🎫 Ticket:</span>
+                                        <span className="font-bold text-purple-300">{formatCurrency(data.ticket)}</span>
+                                      </div>
+                                      <div className="flex justify-between gap-6">
+                                        <span className="text-slate-300">⚡ Trans:</span>
+                                        <span className="font-bold text-amber-300">{data.transacciones.toLocaleString()}</span>
+                                      </div>
+                                      <div className="flex justify-between gap-6 pt-2 border-t border-slate-700">
+                                        <span className="text-slate-300">💰 Total:</span>
+                                        <span className="font-black text-emerald-400">{formatCurrency(data.ventas)}</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              }}
+                            />
+                            <Bar 
+                              yAxisId="right" 
+                              dataKey="transacciones" 
+                              fill="url(#transGrad)" 
+                              radius={[12, 12, 0, 0]}
+                              animationDuration={1400}
+                              label={{
+                                position: 'top',
+                                fill: '#fde68a',
+                                fontWeight: 900,
+                                fontSize: 10,
+                                formatter: (v) => v.toLocaleString()
+                              }}
+                            />
+                            <Line 
+                              yAxisId="left" 
+                              type="monotone" 
+                              dataKey="ticket" 
+                              stroke="url(#ticketLine)" 
+                              strokeWidth={6} 
+                              dot={{ fill: '#8b5cf6', r: 9, strokeWidth: 4, stroke: '#1e293b' }} 
+                              activeDot={{ r: 13, strokeWidth: 4, fill: '#a855f7' }}
+                              animationDuration={1700}
+                            />
+                          </ComposedChart>
+                        )}
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+
+                  {/* Tarjetas Interactivas de Métricas */}
+                  {['ticket_zona', 'transacciones_zona', 'mejor_tienda', 'top_ticket'].map((metric, idx) => {
+                    const metricData = {
+                      ticket_zona: {
+                        icon: Receipt,
+                        title: 'Ticket Promedio Zona',
+                        value: formatCurrency(zoneTotals.totalSales / filteredStores.reduce((sum, s) => sum + s.totalTransactions, 0)),
+                        subtitle: `${filteredStores.reduce((sum, s) => sum + s.totalTransactions, 0).toLocaleString()} transacciones`,
+                        gradient: 'from-cyan-500 to-blue-600',
+                        shadow: 'shadow-cyan-500/30',
+                        ring: 'ring-cyan-300'
+                      },
+                      transacciones_zona: {
+                        icon: Zap,
+                        title: 'Total Transacciones',
+                        value: filteredStores.reduce((sum, s) => sum + s.totalTransactions, 0).toLocaleString(),
+                        subtitle: `${Math.round(filteredStores.reduce((sum, s) => sum + s.totalTransactions, 0) / filteredStores.length).toLocaleString()} promedio/tienda`,
+                        gradient: 'from-violet-500 to-purple-600',
+                        shadow: 'shadow-violet-500/30',
+                        ring: 'ring-violet-300'
+                      },
+                      mejor_tienda: {
+                        icon: TrendingUp,
+                        title: 'Mejor Tienda del Período',
+                        value: filteredStores.sort((a,b) => b.totalSales - a.totalSales)[0]?.name || '-',
+                        subtitle: formatCurrency(Math.max(...filteredStores.map(s => s.totalSales))),
+                        gradient: 'from-emerald-500 to-green-600',
+                        shadow: 'shadow-emerald-500/30',
+                        ring: 'ring-emerald-300'
+                      },
+                      top_ticket: {
+                        icon: Target,
+                        title: 'Mayor Ticket Promedio',
+                        value: filteredStores.sort((a,b) => b.avgTicket - a.avgTicket)[0]?.name || '-',
+                        subtitle: formatCurrency(Math.max(...filteredStores.map(s => s.avgTicket))),
+                        gradient: 'from-pink-500 to-rose-600',
+                        shadow: 'shadow-pink-500/30',
+                        ring: 'ring-pink-300'
+                      }
+                    }[metric];
+
+                    const Icon = metricData.icon;
+
+                    return (
+                      <motion.div
+                        key={metric}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: idx * 0.1 }}
+                        whileHover={{ scale: 1.03, y: -4 }}
+                        onClick={() => setSelectedMetric(selectedMetric === metric ? null : metric)}
+                        className={`relative cursor-pointer group`}
+                      >
+                        <Card className={`border-none shadow-xl bg-gradient-to-br ${metricData.gradient} overflow-hidden ${
+                          selectedMetric === metric ? `ring-4 ${metricData.ring}` : ''
+                        }`}>
+                          {selectedMetric === metric && (
+                            <motion.div
+                              className="absolute inset-0 bg-gradient-to-r from-white/30 to-transparent"
+                              animate={{ x: ['-100%', '100%'] }}
+                              transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                            />
+                          )}
+                          <CardContent className="pt-6 pb-6 relative z-10">
+                            <div className="flex items-start justify-between mb-4">
+                              <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 transition-transform">
+                                <Icon className="w-7 h-7 text-white" />
+                              </div>
+                              <motion.div
+                                animate={selectedMetric === metric ? { rotate: 360 } : {}}
+                                transition={{ duration: 0.5 }}
+                                className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center"
+                              >
+                                <Sparkles className="w-4 h-4 text-white" />
+                              </motion.div>
+                            </div>
+                            <p className="text-xs font-bold text-white/80 mb-2 uppercase tracking-wide">{metricData.title}</p>
+                            <p className="text-2xl font-black text-white mb-2 truncate">{metricData.value}</p>
+                            <p className="text-xs text-white/70 font-medium">{metricData.subtitle}</p>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    );
+                  })}
+                </div>
 
                 {/* Insight contextual por vista */}
                 <Card className={`border-2 ${
