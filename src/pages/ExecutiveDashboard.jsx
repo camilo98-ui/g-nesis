@@ -134,26 +134,26 @@ export default function ExecutiveDashboard() {
         }
       });
 
-      const totalSales = storeSales.reduce((sum, s) => sum + (s.total_sales || 0), 0);
-      const totalTickets = storeSales.reduce((sum, s) => sum + (s.total_tickets || 0), 0);
-      const totalTransactions = storeSales.reduce((sum, s) => sum + (s.total_transactions || 0), 0);
-      const avgTicket = totalTransactions > 0 ? totalSales / totalTransactions : 0;
+      const totalSales = Math.max(0, storeSales.reduce((sum, s) => sum + (s.total_sales || 0), 0));
+      const totalTickets = Math.max(0, storeSales.reduce((sum, s) => sum + (s.total_tickets || 0), 0));
+      const totalTransactions = Math.max(0, storeSales.reduce((sum, s) => sum + (s.total_transactions || 0), 0));
+      const avgTicket = totalTransactions > 0 && !isNaN(totalSales) ? totalSales / totalTransactions : 0;
 
       const budget = allBudgets.find(b => b.store_id === store.code && b.month === currentMonth && b.year === currentYear);
-      const salesBudget = budget?.sales_budget || 0;
-      const ticketsBudget = budget?.tickets_budget || 0;
-      const transactionsBudget = budget?.transactions_budget || 0;
+      const salesBudget = Math.max(0, budget?.sales_budget || 0);
+      const ticketsBudget = Math.max(0, budget?.tickets_budget || 0);
+      const transactionsBudget = Math.max(0, budget?.transactions_budget || 0);
 
-      const salesCompliance = salesBudget > 0 && totalSales >= 0 ? (totalSales / salesBudget) * 100 : 0;
-      const ticketsCompliance = ticketsBudget > 0 && totalTickets >= 0 ? (totalTickets / ticketsBudget) * 100 : 0;
-      const transactionsCompliance = transactionsBudget > 0 && totalTransactions >= 0 ? (totalTransactions / transactionsBudget) * 100 : 0;
+      const salesCompliance = salesBudget > 0 && !isNaN(totalSales) ? (totalSales / salesBudget) * 100 : 0;
+      const ticketsCompliance = ticketsBudget > 0 && !isNaN(totalTickets) ? (totalTickets / ticketsBudget) * 100 : 0;
+      const transactionsCompliance = transactionsBudget > 0 && !isNaN(totalTransactions) ? (totalTransactions / transactionsBudget) * 100 : 0;
 
       // Proyección sobre días del período
       const daysElapsed = Math.max(1, storeSales.length);
       const daysInPeriod = Math.max(1, Math.ceil((activeRange.to - activeRange.from) / (1000 * 60 * 60 * 24)));
-      const dailyAvg = daysElapsed > 0 ? totalSales / daysElapsed : 0;
-      const projection = dailyAvg * daysInPeriod;
-      const projectionCompliance = salesBudget > 0 && projection >= 0 ? (projection / salesBudget) * 100 : 0;
+      const dailyAvg = daysElapsed > 0 && !isNaN(totalSales) ? totalSales / daysElapsed : 0;
+      const projection = !isNaN(dailyAvg) && !isNaN(daysInPeriod) ? dailyAvg * daysInPeriod : 0;
+      const projectionCompliance = salesBudget > 0 && !isNaN(projection) ? (projection / salesBudget) * 100 : 0;
 
       let status = 'positive';
       if (salesCompliance < 70 || projectionCompliance < 85) status = 'critical';
@@ -195,17 +195,19 @@ export default function ExecutiveDashboard() {
 
       if (historicalSales.length < 7) return { ...store, forecast30: 0, forecast60: 0, willMissTarget: false, growthRate: 0 };
 
-      const totalSales = historicalSales.reduce((sum, s) => sum + (s.total_sales || 0), 0);
-      const dailyAvg = historicalSales.length > 0 ? totalSales / historicalSales.length : 0;
-      
-      const midPoint = Math.floor(historicalSales.length / 2);
-      const firstHalfAvg = midPoint > 0 ? historicalSales.slice(0, midPoint).reduce((sum, s) => sum + (s.total_sales || 0), 0) / midPoint : 0;
-      const secondHalfAvg = (historicalSales.length - midPoint) > 0 ? historicalSales.slice(midPoint).reduce((sum, s) => sum + (s.total_sales || 0), 0) / (historicalSales.length - midPoint) : 0;
-      const growthRate = firstHalfAvg > 0 && !isNaN(secondHalfAvg) ? (secondHalfAvg - firstHalfAvg) / firstHalfAvg : 0;
+      const totalSales = Math.max(0, historicalSales.reduce((sum, s) => sum + (s.total_sales || 0), 0));
+      const dailyAvg = historicalSales.length > 0 && !isNaN(totalSales) ? totalSales / historicalSales.length : 0;
 
-      const trendAdjustedDaily = dailyAvg * (1 + growthRate * 0.5);
-      const forecast30 = trendAdjustedDaily * 30;
-      const forecast60 = trendAdjustedDaily * 60;
+      const midPoint = Math.floor(historicalSales.length / 2);
+      const firstHalfSum = midPoint > 0 ? historicalSales.slice(0, midPoint).reduce((sum, s) => sum + (s.total_sales || 0), 0) : 0;
+      const firstHalfAvg = midPoint > 0 && !isNaN(firstHalfSum) ? firstHalfSum / midPoint : 0;
+      const secondHalfSum = (historicalSales.length - midPoint) > 0 ? historicalSales.slice(midPoint).reduce((sum, s) => sum + (s.total_sales || 0), 0) : 0;
+      const secondHalfAvg = (historicalSales.length - midPoint) > 0 && !isNaN(secondHalfSum) ? secondHalfSum / (historicalSales.length - midPoint) : 0;
+      const growthRate = firstHalfAvg > 0 && !isNaN(secondHalfAvg) && !isNaN(firstHalfAvg) ? (secondHalfAvg - firstHalfAvg) / firstHalfAvg : 0;
+
+      const trendAdjustedDaily = !isNaN(dailyAvg) && !isNaN(growthRate) ? dailyAvg * (1 + growthRate * 0.5) : dailyAvg || 0;
+      const forecast30 = !isNaN(trendAdjustedDaily) ? trendAdjustedDaily * 30 : 0;
+      const forecast60 = !isNaN(trendAdjustedDaily) ? trendAdjustedDaily * 60 : 0;
 
       const nextMonthBudget = allBudgets.find(b => 
         b.store_id === store.code && 
