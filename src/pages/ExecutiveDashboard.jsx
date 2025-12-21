@@ -18,7 +18,7 @@ import {
   BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, ComposedChart,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from 'recharts';
-import { format, startOfMonth } from 'date-fns';
+import { format, startOfMonth, startOfWeek, endOfWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
 import KPIsDetailView from '../components/executive/KPIsDetailView';
 import ChartsDetailView from '../components/executive/ChartsDetailView';
@@ -108,6 +108,11 @@ export default function ExecutiveDashboard() {
   const { data: allCashiers = [], isLoading: loadingCashiers } = useQuery({
     queryKey: ['allCashiers'],
     queryFn: () => base44.entities.Cashier.list()
+  });
+
+  const { data: allShifts = [] } = useQuery({
+    queryKey: ['allShifts'],
+    queryFn: () => base44.entities.Shift.list()
   });
 
   const isLoading = loadingSales || loadingBudgets || loadingCashiers;
@@ -346,6 +351,27 @@ INSTRUCCIONES:
     };
   }, [storesAnalysis, zoneTotals, activeRange]);
 
+  // Detectar tiendas sin planner de la semana
+  const storesWithoutPlanner = useMemo(() => {
+    const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 }); // Lunes
+    const weekEnd = endOfWeek(new Date(), { weekStartsOn: 1 }); // Domingo
+    
+    const storesWithShifts = new Set(
+      allShifts
+        .filter(shift => {
+          try {
+            const shiftDate = new Date(shift.date);
+            return shiftDate >= weekStart && shiftDate <= weekEnd;
+          } catch {
+            return false;
+          }
+        })
+        .map(shift => shift.store_id)
+    );
+    
+    return STORES.filter(store => !storesWithShifts.has(store.code));
+  }, [allShifts]);
+
   const autoInsight = useMemo(() => {
     if (storesAnalysis.length === 0) return null;
     
@@ -528,6 +554,27 @@ INSTRUCCIONES:
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-4 mt-4 mb-2">Alertas</p>
             <motion.div
               whileHover={{ x: 3 }}
+              onClick={() => setActiveView('planner')}
+              className={`px-4 py-2.5 rounded-lg cursor-pointer transition-colors ${
+                activeView === 'planner' ? 'bg-orange-50 text-orange-700' : 'hover:bg-gray-50 text-gray-700'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Clock className="w-4 h-4" />
+                  <span className={`text-sm ${activeView === 'planner' ? 'font-semibold' : 'font-medium'}`}>
+                    Planner Pendiente
+                  </span>
+                </div>
+                {storesWithoutPlanner.length > 0 && (
+                  <span className="bg-orange-100 text-orange-700 text-xs font-semibold px-2 py-0.5 rounded-full">
+                    {storesWithoutPlanner.length}
+                  </span>
+                )}
+              </div>
+            </motion.div>
+            <motion.div
+              whileHover={{ x: 3 }}
               onClick={() => setActiveView('critical')}
               className={`px-4 py-2.5 rounded-lg cursor-pointer transition-colors ${
                 activeView === 'critical' ? 'bg-red-50 text-red-700' : 'hover:bg-gray-50 text-gray-700'
@@ -682,6 +729,83 @@ INSTRUCCIONES:
               storesAnalysis={storesAnalysis.filter(s => s.status === 'negative')}
               formatCurrency={formatCurrency}
             />
+            )}
+
+            {activeView === 'planner' && (
+            <div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6"
+              >
+                <h1 className="text-2xl font-bold text-gray-900 mb-1">Tiendas sin Planner Semanal</h1>
+                <p className="text-sm text-gray-500">
+                  Tiendas que aún no han registrado horarios para la semana actual (Lunes - Domingo)
+                </p>
+              </motion.div>
+
+              {storesWithoutPlanner.length === 0 ? (
+                <Card className="border-emerald-100 bg-emerald-50/50">
+                  <CardContent className="pt-6 text-center">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center">
+                        <CheckCircle className="w-8 h-8 text-emerald-600" />
+                      </div>
+                      <div>
+                        <p className="text-lg font-bold text-emerald-900">¡Excelente!</p>
+                        <p className="text-sm text-emerald-700">Todas las tiendas tienen su planner completo</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {storesWithoutPlanner.map((store) => (
+                    <motion.div
+                      key={store.code}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      whileHover={{ scale: 1.02 }}
+                    >
+                      <Card className="border-orange-200 bg-orange-50/50 hover:shadow-lg transition-all">
+                        <CardContent className="pt-6">
+                          <div className="flex items-start gap-3">
+                            <div className="p-2 rounded-lg bg-orange-100">
+                              <Clock className="w-5 h-5 text-orange-600" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="font-bold text-gray-900 mb-1">{getDisplayName(store.code)}</p>
+                              <p className="text-xs text-gray-600 mb-2">{store.code}</p>
+                              <div className="flex items-center gap-1 text-orange-600">
+                                <AlertTriangle className="w-3 h-3" />
+                                <span className="text-xs font-semibold">Planner pendiente</span>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+
+              <Card className="mt-6 border-blue-100 bg-blue-50/50">
+                <CardContent className="pt-6">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 rounded-lg bg-blue-100">
+                      <AlertTriangle className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900 mb-1">📋 Recordatorio Semanal</p>
+                      <p className="text-sm text-gray-600">
+                        Todos los líderes deben registrar los horarios de su equipo cada lunes al inicio de la semana.
+                        Esto permite una mejor planificación y gestión del personal.
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
             )}
 
             {activeView === 'forecast' && !isLoading && (
