@@ -1,6 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, TrendingUp, Receipt, Zap, DollarSign } from 'lucide-react';
+import { X, TrendingUp, Receipt, Zap, DollarSign, ChevronRight } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
@@ -11,6 +11,7 @@ import { format, eachDayOfInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 export default function StoreDetailModal({ store, onClose, allDailySales, dateRange }) {
+  const [activeMetric, setActiveMetric] = useState('ventas');
   // Filtrar ventas de la tienda en el rango
   const storeSales = useMemo(() => {
     return allDailySales
@@ -133,173 +134,314 @@ export default function StoreDetailModal({ store, onClose, allDailySales, dateRa
           </div>
 
           <div className="p-6 max-h-[80vh] overflow-y-auto">
-            {/* KPIs */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              <div className="p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="p-2 rounded-lg bg-blue-100">
-                    <DollarSign className="w-4 h-4 text-blue-600" />
+            {/* KPIs Interactivos */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+              <motion.button
+                whileHover={{ scale: 1.03, y: -4 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setActiveMetric('ventas')}
+                className={`relative overflow-hidden rounded-2xl p-5 transition-all duration-300 group ${
+                  activeMetric === 'ventas'
+                    ? 'bg-gradient-to-br from-blue-500 to-indigo-600 shadow-xl shadow-blue-500/30'
+                    : 'bg-gradient-to-br from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 border-2 border-blue-200'
+                }`}
+              >
+                <motion.div
+                  animate={{ scale: activeMetric === 'ventas' ? [1, 1.2, 1] : 1 }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className={`absolute -right-8 -top-8 w-32 h-32 rounded-full ${
+                    activeMetric === 'ventas' ? 'bg-white/10' : 'bg-blue-200/30'
+                  }`}
+                />
+                <div className="relative z-10">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className={`p-3 rounded-xl ${
+                      activeMetric === 'ventas' ? 'bg-white/20 backdrop-blur-sm' : 'bg-blue-200'
+                    }`}>
+                      <DollarSign className={`w-5 h-5 ${activeMetric === 'ventas' ? 'text-white' : 'text-blue-600'}`} />
+                    </div>
+                    <ChevronRight className={`w-5 h-5 transition-transform ${
+                      activeMetric === 'ventas' ? 'text-white translate-x-0' : 'text-blue-500 -translate-x-2 opacity-0 group-hover:translate-x-0 group-hover:opacity-100'
+                    }`} />
                   </div>
-                  <p className="text-xs text-gray-500 font-semibold">Venta Total</p>
+                  <p className={`text-xs font-bold mb-2 ${activeMetric === 'ventas' ? 'text-white/80' : 'text-blue-600'}`}>
+                    💰 VENTAS TOTALES
+                  </p>
+                  <p className={`text-2xl font-black mb-1 ${activeMetric === 'ventas' ? 'text-white' : 'text-gray-900'}`}>
+                    {formatCurrency(totals.totalSales)}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <div className={`flex-1 h-1.5 rounded-full overflow-hidden ${
+                      activeMetric === 'ventas' ? 'bg-white/20' : 'bg-blue-200'
+                    }`}>
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: '100%' }}
+                        transition={{ duration: 1, delay: 0.2 }}
+                        className={activeMetric === 'ventas' ? 'h-full bg-white' : 'h-full bg-blue-600'}
+                      />
+                    </div>
+                    <p className={`text-xs font-semibold ${activeMetric === 'ventas' ? 'text-white/90' : 'text-blue-700'}`}>
+                      {formatCurrency(totals.avgDailySales)}/día
+                    </p>
+                  </div>
                 </div>
-                <p className="text-xl font-bold text-gray-900">{formatCurrency(totals.totalSales)}</p>
-                <p className="text-xs text-gray-400 mt-1">
-                  Promedio: {formatCurrency(totals.avgDailySales)}/día
-                </p>
-              </div>
+              </motion.button>
 
-              <div className="p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="p-2 rounded-lg bg-amber-100">
-                    <Zap className="w-4 h-4 text-amber-600" />
+              <motion.button
+                whileHover={{ scale: 1.03, y: -4 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setActiveMetric('transacciones')}
+                className={`relative overflow-hidden rounded-2xl p-5 transition-all duration-300 group ${
+                  activeMetric === 'transacciones'
+                    ? 'bg-gradient-to-br from-amber-500 to-orange-600 shadow-xl shadow-amber-500/30'
+                    : 'bg-gradient-to-br from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100 border-2 border-amber-200'
+                }`}
+              >
+                <motion.div
+                  animate={{ scale: activeMetric === 'transacciones' ? [1, 1.2, 1] : 1 }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className={`absolute -right-8 -top-8 w-32 h-32 rounded-full ${
+                    activeMetric === 'transacciones' ? 'bg-white/10' : 'bg-amber-200/30'
+                  }`}
+                />
+                <div className="relative z-10">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className={`p-3 rounded-xl ${
+                      activeMetric === 'transacciones' ? 'bg-white/20 backdrop-blur-sm' : 'bg-amber-200'
+                    }`}>
+                      <Zap className={`w-5 h-5 ${activeMetric === 'transacciones' ? 'text-white' : 'text-amber-600'}`} />
+                    </div>
+                    <ChevronRight className={`w-5 h-5 transition-transform ${
+                      activeMetric === 'transacciones' ? 'text-white translate-x-0' : 'text-amber-500 -translate-x-2 opacity-0 group-hover:translate-x-0 group-hover:opacity-100'
+                    }`} />
                   </div>
-                  <p className="text-xs text-gray-500 font-semibold">Transacciones</p>
+                  <p className={`text-xs font-bold mb-2 ${activeMetric === 'transacciones' ? 'text-white/80' : 'text-amber-600'}`}>
+                    ⚡ TRANSACCIONES
+                  </p>
+                  <p className={`text-2xl font-black mb-1 ${activeMetric === 'transacciones' ? 'text-white' : 'text-gray-900'}`}>
+                    {totals.totalTransactions.toLocaleString()}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <div className={`flex-1 h-1.5 rounded-full overflow-hidden ${
+                      activeMetric === 'transacciones' ? 'bg-white/20' : 'bg-amber-200'
+                    }`}>
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: '100%' }}
+                        transition={{ duration: 1, delay: 0.2 }}
+                        className={activeMetric === 'transacciones' ? 'h-full bg-white' : 'h-full bg-amber-600'}
+                      />
+                    </div>
+                    <p className={`text-xs font-semibold ${activeMetric === 'transacciones' ? 'text-white/90' : 'text-amber-700'}`}>
+                      {totals.daysWithSales} días
+                    </p>
+                  </div>
                 </div>
-                <p className="text-xl font-bold text-gray-900">{totals.totalTransactions.toLocaleString()}</p>
-              </div>
+              </motion.button>
 
-              <div className="p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="p-2 rounded-lg bg-emerald-100">
-                    <TrendingUp className="w-4 h-4 text-emerald-600" />
+              <motion.button
+                whileHover={{ scale: 1.03, y: -4 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setActiveMetric('ticket')}
+                className={`relative overflow-hidden rounded-2xl p-5 transition-all duration-300 group ${
+                  activeMetric === 'ticket'
+                    ? 'bg-gradient-to-br from-emerald-500 to-green-600 shadow-xl shadow-emerald-500/30'
+                    : 'bg-gradient-to-br from-emerald-50 to-green-50 hover:from-emerald-100 hover:to-green-100 border-2 border-emerald-200'
+                }`}
+              >
+                <motion.div
+                  animate={{ scale: activeMetric === 'ticket' ? [1, 1.2, 1] : 1 }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className={`absolute -right-8 -top-8 w-32 h-32 rounded-full ${
+                    activeMetric === 'ticket' ? 'bg-white/10' : 'bg-emerald-200/30'
+                  }`}
+                />
+                <div className="relative z-10">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className={`p-3 rounded-xl ${
+                      activeMetric === 'ticket' ? 'bg-white/20 backdrop-blur-sm' : 'bg-emerald-200'
+                    }`}>
+                      <TrendingUp className={`w-5 h-5 ${activeMetric === 'ticket' ? 'text-white' : 'text-emerald-600'}`} />
+                    </div>
+                    <ChevronRight className={`w-5 h-5 transition-transform ${
+                      activeMetric === 'ticket' ? 'text-white translate-x-0' : 'text-emerald-500 -translate-x-2 opacity-0 group-hover:translate-x-0 group-hover:opacity-100'
+                    }`} />
                   </div>
-                  <p className="text-xs text-gray-500 font-semibold">Ticket Promedio</p>
+                  <p className={`text-xs font-bold mb-2 ${activeMetric === 'ticket' ? 'text-white/80' : 'text-emerald-600'}`}>
+                    🎯 TICKET PROMEDIO
+                  </p>
+                  <p className={`text-2xl font-black mb-1 ${activeMetric === 'ticket' ? 'text-white' : 'text-gray-900'}`}>
+                    {formatCurrency(totals.avgTicket)}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <div className={`flex-1 h-1.5 rounded-full overflow-hidden ${
+                      activeMetric === 'ticket' ? 'bg-white/20' : 'bg-emerald-200'
+                    }`}>
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: '100%' }}
+                        transition={{ duration: 1, delay: 0.2 }}
+                        className={activeMetric === 'ticket' ? 'h-full bg-white' : 'h-full bg-emerald-600'}
+                      />
+                    </div>
+                    <p className={`text-xs font-semibold ${activeMetric === 'ticket' ? 'text-white/90' : 'text-emerald-700'}`}>
+                      vs promedio
+                    </p>
+                  </div>
                 </div>
-                <p className="text-xl font-bold text-gray-900">{formatCurrency(totals.avgTicket)}</p>
-              </div>
+              </motion.button>
             </div>
 
-            {/* Gráficas */}
-            <div className="space-y-6">
-              {/* Ventas por día */}
-              <Card className="border-gray-100">
-                <CardHeader>
-                  <CardTitle className="text-base font-semibold text-gray-900">
-                    💰 Ventas por Día
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={250}>
-                    <AreaChart data={dailyData}>
-                      <defs>
-                        <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-                      <XAxis 
-                        dataKey="date" 
-                        tick={{ fontSize: 11, fill: '#6b7280' }}
-                        angle={-45}
-                        textAnchor="end"
-                        height={60}
-                      />
-                      <YAxis 
-                        tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} 
-                        tick={{ fontSize: 11, fill: '#6b7280' }}
-                      />
-                      <Tooltip content={<CustomTooltip />} />
-                      <Area 
-                        type="monotone" 
-                        dataKey="sales" 
-                        stroke="#3b82f6" 
-                        strokeWidth={2}
-                        fill="url(#salesGradient)" 
-                        name="Ventas"
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-
-              {/* Ticket Promedio por día */}
-              <Card className="border-gray-100">
-                <CardHeader>
-                  <CardTitle className="text-base font-semibold text-gray-900">
-                    🎯 Ticket Promedio por Día
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={250}>
-                    <LineChart data={dailyData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-                      <XAxis 
-                        dataKey="date" 
-                        tick={{ fontSize: 11, fill: '#6b7280' }}
-                        angle={-45}
-                        textAnchor="end"
-                        height={60}
-                      />
-                      <YAxis 
-                        tickFormatter={(v) => `$${(v/1000).toFixed(0)}k`} 
-                        tick={{ fontSize: 11, fill: '#6b7280' }}
-                      />
-                      <Tooltip content={<CustomTooltip />} />
-                      <Line 
-                        type="monotone" 
-                        dataKey="avgTicket" 
-                        stroke="#8b5cf6" 
-                        strokeWidth={2}
-                        dot={{ fill: '#8b5cf6', r: 4 }}
-                        name="Ticket Promedio"
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-
-              {/* Transacciones vs Ventas */}
-              <Card className="border-gray-100">
-                <CardHeader>
-                  <CardTitle className="text-base font-semibold text-gray-900">
-                    ⚡ Transacciones vs Ventas por Día
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={250}>
-                    <ComposedChart data={salesVsTransactions}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-                      <XAxis 
-                        dataKey="date" 
-                        tick={{ fontSize: 11, fill: '#6b7280' }}
-                        angle={-45}
-                        textAnchor="end"
-                        height={60}
-                      />
-                      <YAxis 
-                        yAxisId="left"
-                        tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} 
-                        tick={{ fontSize: 11, fill: '#6b7280' }}
-                      />
-                      <YAxis 
-                        yAxisId="right"
-                        orientation="right"
-                        tick={{ fontSize: 11, fill: '#6b7280' }}
-                      />
-                      <Tooltip content={<CustomTooltip />} />
-                      <Legend />
-                      <Bar 
-                        yAxisId="left"
-                        dataKey="ventas" 
-                        fill="#3b82f6" 
-                        name="Ventas"
-                        radius={[4, 4, 0, 0]}
-                      />
-                      <Line 
-                        yAxisId="right"
-                        type="monotone" 
-                        dataKey="transacciones" 
-                        stroke="#f59e0b" 
-                        strokeWidth={2}
-                        dot={{ fill: '#f59e0b', r: 4 }}
-                        name="Transacciones"
-                      />
-                    </ComposedChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-            </div>
+            {/* Gráfica Dinámica Detallada */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeMetric}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Card className="border-gray-100 shadow-lg">
+                  <CardHeader className={`bg-gradient-to-r ${
+                    activeMetric === 'ventas' ? 'from-blue-500 to-indigo-600' :
+                    activeMetric === 'transacciones' ? 'from-amber-500 to-orange-600' :
+                    'from-emerald-500 to-green-600'
+                  }`}>
+                    <CardTitle className="text-lg font-bold text-white flex items-center gap-2">
+                      {activeMetric === 'ventas' && '💰 Análisis Detallado: Ventas vs Promedio Diario'}
+                      {activeMetric === 'transacciones' && '⚡ Análisis Detallado: Transacciones vs Objetivos'}
+                      {activeMetric === 'ticket' && '🎯 Análisis Detallado: Ticket Promedio vs Tendencia'}
+                    </CardTitle>
+                    <p className="text-sm text-white/80 mt-1">
+                      {activeMetric === 'ventas' && `Comparación de ventas diarias contra el promedio de ${formatCurrency(totals.avgDailySales)}`}
+                      {activeMetric === 'transacciones' && `Evolución de transacciones y su impacto en los resultados totales`}
+                      {activeMetric === 'ticket' && `Comportamiento del ticket promedio y su relación con las ventas`}
+                    </p>
+                  </CardHeader>
+                  <CardContent className="pt-6">
+                    <ResponsiveContainer width="100%" height={350}>
+                      {activeMetric === 'ventas' && (
+                        <ComposedChart data={dailyData}>
+                          <defs>
+                            <linearGradient id="salesGradientDetailed" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4}/>
+                              <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                          <XAxis 
+                            dataKey="date" 
+                            tick={{ fontSize: 11, fill: '#6b7280' }}
+                            angle={-45}
+                            textAnchor="end"
+                            height={70}
+                          />
+                          <YAxis 
+                            tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} 
+                            tick={{ fontSize: 11, fill: '#6b7280' }}
+                          />
+                          <Tooltip content={<CustomTooltip />} />
+                          <Legend />
+                          <Area 
+                            type="monotone" 
+                            dataKey="sales" 
+                            stroke="#3b82f6" 
+                            strokeWidth={3}
+                            fill="url(#salesGradientDetailed)" 
+                            name="Ventas Diarias"
+                          />
+                          <Line 
+                            type="monotone" 
+                            dataKey={() => totals.avgDailySales}
+                            stroke="#ef4444" 
+                            strokeWidth={2}
+                            strokeDasharray="5 5"
+                            dot={false}
+                            name="Promedio Esperado"
+                          />
+                        </ComposedChart>
+                      )}
+                      {activeMetric === 'transacciones' && (
+                        <ComposedChart data={dailyData}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                          <XAxis 
+                            dataKey="date" 
+                            tick={{ fontSize: 11, fill: '#6b7280' }}
+                            angle={-45}
+                            textAnchor="end"
+                            height={70}
+                          />
+                          <YAxis 
+                            yAxisId="left"
+                            tick={{ fontSize: 11, fill: '#6b7280' }}
+                          />
+                          <YAxis 
+                            yAxisId="right"
+                            orientation="right"
+                            tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} 
+                            tick={{ fontSize: 11, fill: '#6b7280' }}
+                          />
+                          <Tooltip content={<CustomTooltip />} />
+                          <Legend />
+                          <Bar 
+                            yAxisId="left"
+                            dataKey="transactions" 
+                            fill="#f59e0b" 
+                            name="Transacciones"
+                            radius={[6, 6, 0, 0]}
+                          />
+                          <Line 
+                            yAxisId="right"
+                            type="monotone" 
+                            dataKey="sales" 
+                            stroke="#3b82f6" 
+                            strokeWidth={3}
+                            dot={{ fill: '#3b82f6', r: 5 }}
+                            name="Ventas Generadas"
+                          />
+                        </ComposedChart>
+                      )}
+                      {activeMetric === 'ticket' && (
+                        <ComposedChart data={dailyData}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                          <XAxis 
+                            dataKey="date" 
+                            tick={{ fontSize: 11, fill: '#6b7280' }}
+                            angle={-45}
+                            textAnchor="end"
+                            height={70}
+                          />
+                          <YAxis 
+                            tickFormatter={(v) => `$${(v/1000).toFixed(0)}k`} 
+                            tick={{ fontSize: 11, fill: '#6b7280' }}
+                          />
+                          <Tooltip content={<CustomTooltip />} />
+                          <Legend />
+                          <Area 
+                            type="monotone" 
+                            dataKey="avgTicket" 
+                            stroke="#10b981" 
+                            strokeWidth={3}
+                            fill="rgba(16, 185, 129, 0.1)"
+                            name="Ticket Promedio"
+                          />
+                          <Line 
+                            type="monotone" 
+                            dataKey={() => totals.avgTicket}
+                            stroke="#8b5cf6" 
+                            strokeWidth={2}
+                            strokeDasharray="5 5"
+                            dot={false}
+                            name="Ticket Promedio General"
+                          />
+                        </ComposedChart>
+                      )}
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </AnimatePresence>
           </div>
         </motion.div>
       </motion.div>
