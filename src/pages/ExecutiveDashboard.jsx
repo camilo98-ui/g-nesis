@@ -9,7 +9,8 @@ import DateFilter from '@/components/DateFilter';
 import WeekFilter from '@/components/dashboard/WeekFilter';
 import { 
   ArrowLeft, TrendingUp, TrendingDown, AlertTriangle, CheckCircle,
-  DollarSign, Receipt, Zap, Target, Filter, Brain, Sparkles, BarChart3, X
+  DollarSign, Receipt, Zap, Target, Filter, Brain, Sparkles, BarChart3, X,
+  Store, Activity, Clock, Menu
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,34 +23,74 @@ import { es } from 'date-fns/locale';
 
 const COLORS = ['#ec4899', '#f472b6', '#f9a8d4', '#8b5cf6', '#a78bfa', '#c4b5fd', '#fbbf24'];
 
-const SummaryCard = ({ title, value, subtitle, icon: Icon, color, onClick, trend }) => (
-  <motion.div
-    whileHover={{ scale: 1.03, y: -5 }}
-    whileTap={{ scale: 0.98 }}
-    onClick={onClick}
-    className={`cursor-pointer bg-gradient-to-br ${color} rounded-2xl p-6 shadow-xl relative overflow-hidden`}
-  >
+// Skeleton Loader
+const KPISkeleton = () => (
+  <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100">
+    <div className="animate-pulse space-y-4">
+      <div className="h-4 bg-slate-200 rounded w-24"></div>
+      <div className="h-10 bg-slate-200 rounded w-32"></div>
+      <div className="h-3 bg-slate-200 rounded w-20"></div>
+    </div>
+  </div>
+);
+
+const ChartSkeleton = () => (
+  <Card className="border-slate-100 shadow-sm">
+    <CardHeader>
+      <div className="h-5 bg-slate-200 rounded w-40 animate-pulse"></div>
+    </CardHeader>
+    <CardContent>
+      <div className="h-80 bg-slate-100 rounded animate-pulse"></div>
+    </CardContent>
+  </Card>
+);
+
+const ExecutiveKPI = ({ title, value, subtitle, icon: Icon, trend, status = 'neutral', onClick }) => {
+  const statusColors = {
+    success: 'from-emerald-500/10 to-green-500/5 border-emerald-200/50 text-emerald-700',
+    warning: 'from-amber-500/10 to-yellow-500/5 border-amber-200/50 text-amber-700',
+    danger: 'from-rose-500/10 to-red-500/5 border-rose-200/50 text-rose-700',
+    neutral: 'from-slate-500/10 to-gray-500/5 border-slate-200/50 text-slate-700'
+  };
+
+  const statusIconColors = {
+    success: 'text-emerald-600',
+    warning: 'text-amber-600',
+    danger: 'text-rose-600',
+    neutral: 'text-slate-600'
+  };
+
+  return (
     <motion.div
-      className="absolute -top-6 -right-6 w-24 h-24 bg-white/10 rounded-full blur-2xl"
-      animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
-      transition={{ duration: 3, repeat: Infinity }}
-    />
-    <div className="relative z-10">
-      <div className="flex items-center justify-between mb-3">
-        <Icon className="w-8 h-8 text-white/90" />
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -4 }}
+      onClick={onClick}
+      className={`cursor-pointer bg-gradient-to-br ${statusColors[status]} rounded-3xl p-8 border backdrop-blur-sm shadow-sm hover:shadow-xl transition-all duration-300`}
+    >
+      <div className="flex items-start justify-between mb-6">
+        <div className={`p-3 rounded-2xl bg-white/80 ${statusIconColors[status]}`}>
+          <Icon className="w-6 h-6" />
+        </div>
         {trend !== undefined && (
-          <span className={`flex items-center gap-1 text-sm font-bold ${trend >= 0 ? 'text-white/80' : 'text-white/70'}`}>
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-bold ${
+              trend >= 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'
+            }`}
+          >
             {trend >= 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
             {trend >= 0 ? '+' : ''}{trend.toFixed(1)}%
-          </span>
+          </motion.div>
         )}
       </div>
-      <p className="text-white/70 text-xs font-medium mb-1">{title}</p>
-      <p className="text-3xl font-black text-white mb-1">{value}</p>
-      <p className="text-white/60 text-xs">{subtitle}</p>
-    </div>
-  </motion.div>
-);
+      <p className="text-sm font-semibold text-slate-600 mb-2">{title}</p>
+      <p className="text-4xl font-black text-slate-900 mb-2">{value}</p>
+      <p className="text-sm text-slate-500 font-medium">{subtitle}</p>
+    </motion.div>
+  );
+};
 
 export default function ExecutiveDashboard() {
   const [filterStatus, setFilterStatus] = useState('all');
@@ -58,25 +99,28 @@ export default function ExecutiveDashboard() {
   const [aiInsights, setAiInsights] = useState(null);
   const [loadingInsights, setLoadingInsights] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const activeRange = weekFilter || dateRange;
   const currentMonth = new Date().getMonth() + 1;
   const currentYear = new Date().getFullYear();
 
-  const { data: allDailySales = [] } = useQuery({
+  const { data: allDailySales = [], isLoading: loadingSales } = useQuery({
     queryKey: ['allDailySales'],
     queryFn: () => base44.entities.DailySales.list()
   });
 
-  const { data: allBudgets = [] } = useQuery({
+  const { data: allBudgets = [], isLoading: loadingBudgets } = useQuery({
     queryKey: ['allBudgets'],
     queryFn: () => base44.entities.Budget.list()
   });
 
-  const { data: allCashiers = [] } = useQuery({
+  const { data: allCashiers = [], isLoading: loadingCashiers } = useQuery({
     queryKey: ['allCashiers'],
     queryFn: () => base44.entities.Cashier.list()
   });
+
+  const isLoading = loadingSales || loadingBudgets || loadingCashiers;
 
   // Store Analysis
   const storesAnalysis = useMemo(() => {
@@ -258,143 +302,227 @@ INSTRUCCIONES:
   }, [storesAnalysis]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-pink-50/20 p-4">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100/30 flex">
+      {/* Sidebar */}
+      <motion.aside
+        initial={{ x: -300 }}
+        animate={{ x: sidebarOpen ? 0 : -250 }}
+        className="fixed left-0 top-0 h-full bg-white border-r border-slate-200 shadow-lg z-40"
+        style={{ width: '280px' }}
+      >
+        <div className="p-6">
+          <Link to={createPageUrl('Home')}>
+            <motion.div whileHover={{ scale: 1.02 }} className="flex items-center gap-3 mb-8 cursor-pointer">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center">
+                <Store className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <p className="text-sm font-black text-slate-900">Popsy</p>
+                <p className="text-xs text-slate-500">Panel Ejecutivo</p>
+              </div>
+            </motion.div>
+          </Link>
+
+          <nav className="space-y-2">
+            <motion.div
+              whileHover={{ x: 4 }}
+              className="px-4 py-3 rounded-xl bg-slate-100 border border-slate-200 cursor-pointer"
+            >
+              <div className="flex items-center gap-3">
+                <Activity className="w-4 h-4 text-slate-700" />
+                <span className="text-sm font-bold text-slate-900">Resumen General</span>
+              </div>
+            </motion.div>
             <Link to={createPageUrl('Home')}>
-              <Button variant="ghost" size="icon" className="rounded-full hover:bg-pink-100">
-                <ArrowLeft className="w-5 h-5 text-pink-600" />
-              </Button>
+              <motion.div
+                whileHover={{ x: 4 }}
+                className="px-4 py-3 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <Store className="w-4 h-4 text-slate-600" />
+                  <span className="text-sm font-medium text-slate-700">Volver a Tiendas</span>
+                </div>
+              </motion.div>
             </Link>
-            <div>
-              <h1 className="text-3xl font-black bg-gradient-to-r from-pink-600 to-rose-500 bg-clip-text text-transparent">
-                Panel Ejecutivo
-              </h1>
-              <p className="text-sm text-gray-500">Análisis y proyecciones</p>
+          </nav>
+        </div>
+
+        <div className="absolute bottom-6 left-6 right-6">
+          <div className="p-4 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 border border-slate-300">
+            <div className="flex items-center gap-2 text-xs text-slate-600 mb-1">
+              <Clock className="w-3 h-3" />
+              <span>Última actualización</span>
+            </div>
+            <p className="text-xs font-bold text-slate-900">{format(new Date(), 'HH:mm - dd MMM yyyy', { locale: es })}</p>
+          </div>
+        </div>
+      </motion.aside>
+
+      {/* Main Content */}
+      <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-[280px]' : 'ml-[30px]'}`}>
+        <div className="p-8">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="rounded-xl hover:bg-slate-100"
+              >
+                <Menu className="w-5 h-5 text-slate-600" />
+              </Button>
+              <div>
+                <h1 className="text-3xl font-black text-slate-900">
+                  Dashboard Ejecutivo
+                </h1>
+                <p className="text-sm text-slate-500 font-medium">
+                  Vista consolidada · {format(new Date(), 'EEEE, dd MMMM yyyy', { locale: es })}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <WeekFilter onWeekChange={setWeekFilter} />
+              <DateFilter dateRange={dateRange} onDateChange={(range) => { setDateRange(range); setWeekFilter(null); }} />
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <WeekFilter onWeekChange={setWeekFilter} />
-            <DateFilter onDateChange={(range) => { setDateRange(range); setWeekFilter(null); }} />
+          {/* KPIs Ejecutivos */}
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+              {[1, 2, 3, 4].map((i) => <KPISkeleton key={i} />)}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+              <ExecutiveKPI
+                title="Venta Total"
+                value={`$${(zoneTotals.totalSales/1000000).toFixed(1)}M`}
+                subtitle={`Meta: $${(zoneTotals.totalBudget/1000000).toFixed(1)}M · ${((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%`}
+                icon={DollarSign}
+                status={zoneTotals.totalSales >= zoneTotals.totalBudget ? 'success' : zoneTotals.totalSales >= zoneTotals.totalBudget * 0.85 ? 'warning' : 'danger'}
+                onClick={() => setSelectedCard('sales')}
+              />
+              <ExecutiveKPI
+                title="Proyección al Cierre"
+                value={`$${(zoneTotals.totalProjection/1000000).toFixed(1)}M`}
+                subtitle={`${((zoneTotals.totalProjection/zoneTotals.totalBudget)*100).toFixed(0)}% de la meta`}
+                icon={Target}
+                status={zoneTotals.totalProjection >= zoneTotals.totalBudget ? 'success' : zoneTotals.totalProjection >= zoneTotals.totalBudget * 0.9 ? 'warning' : 'danger'}
+                onClick={() => setSelectedCard('projection')}
+              />
+              <ExecutiveKPI
+                title="Tiendas en Meta"
+                value={statusCounts.positive}
+                subtitle={`${((statusCounts.positive/STORES.length)*100).toFixed(0)}% del total (${STORES.length})`}
+                icon={CheckCircle}
+                status={statusCounts.positive >= STORES.length * 0.7 ? 'success' : statusCounts.positive >= STORES.length * 0.5 ? 'warning' : 'danger'}
+                onClick={() => setFilterStatus('positive')}
+              />
+              <ExecutiveKPI
+                title="Tiendas en Riesgo"
+                value={statusCounts.critical + statusCounts.negative}
+                subtitle={`${statusCounts.critical} críticas · ${statusCounts.negative} en alerta`}
+                icon={AlertTriangle}
+                status={statusCounts.critical === 0 ? 'success' : statusCounts.critical <= 2 ? 'warning' : 'danger'}
+                onClick={() => setFilterStatus('critical')}
+              />
+            </div>
+          )}
+
+          {/* AI Insights */}
+          {isLoading ? (
+            <ChartSkeleton />
+          ) : (
+            <Card className="border-slate-100 shadow-sm mb-8 bg-gradient-to-br from-purple-50/50 to-blue-50/30">
+              <CardHeader className="border-b border-slate-100">
+                <CardTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
+                  <Brain className="w-5 h-5 text-purple-600" />
+                  Análisis Inteligente
+                  {loadingInsights && <Sparkles className="w-4 h-4 animate-pulse text-purple-500" />}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-6">
+                {aiInsights ? (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
+                      <p className="text-xs font-bold text-purple-600 mb-3 flex items-center gap-1">
+                        🎯 Patrón Crítico
+                      </p>
+                      <p className="text-sm text-slate-700 leading-relaxed">{aiInsights.patron_critico}</p>
+                    </div>
+                    <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
+                      <p className="text-xs font-bold text-blue-600 mb-3 flex items-center gap-1">
+                        ⚡ Acciones Prioritarias
+                      </p>
+                      <ul className="space-y-2">
+                        {aiInsights.acciones_prioritarias?.map((accion, i) => (
+                          <li key={i} className="text-xs text-slate-700 flex items-start gap-2">
+                            <span className="flex-shrink-0 w-5 h-5 rounded-full bg-blue-100 text-blue-700 font-bold flex items-center justify-center text-[10px]">{i + 1}</span>
+                            <span className="flex-1">{accion}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
+                      <p className="text-xs font-bold text-emerald-600 mb-3 flex items-center gap-1">
+                        💡 Oportunidades
+                      </p>
+                      <p className="text-sm text-slate-700 leading-relaxed">{aiInsights.oportunidades}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Sparkles className="w-10 h-10 mx-auto mb-3 animate-pulse text-purple-400" />
+                    <p className="text-sm text-slate-400 font-medium">Analizando datos...</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Filters */}
+          <div className="flex items-center gap-2 mb-6 flex-wrap">
+            <p className="text-sm font-semibold text-slate-600 mr-2">Filtrar:</p>
+            {['all', 'positive', 'negative', 'critical'].map(status => {
+              const configs = {
+                all: { label: 'Todas las tiendas', color: 'slate' },
+                positive: { label: 'En Meta', color: 'emerald' },
+                negative: { label: 'En Alerta', color: 'amber' },
+                critical: { label: 'Críticas', color: 'rose' }
+              };
+              const config = configs[status];
+              return (
+                <Button
+                  key={status}
+                  size="sm"
+                  variant={filterStatus === status ? 'default' : 'outline'}
+                  onClick={() => setFilterStatus(status)}
+                  className={filterStatus === status ? 
+                    `bg-${config.color}-600 hover:bg-${config.color}-700 text-white border-0 shadow-sm` :
+                    `border-slate-200 hover:bg-slate-50 text-slate-700`
+                  }
+                >
+                  {config.label}
+                </Button>
+              );
+            })}
           </div>
-        </div>
 
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <SummaryCard
-            title="Venta Total"
-            value={`$${(zoneTotals.totalSales/1000000).toFixed(1)}M`}
-            subtitle={`Meta: $${(zoneTotals.totalBudget/1000000).toFixed(1)}M`}
-            icon={DollarSign}
-            color="from-pink-500 to-rose-600"
-            onClick={() => setSelectedCard('sales')}
-          />
-          <SummaryCard
-            title="Proyección"
-            value={`$${(zoneTotals.totalProjection/1000000).toFixed(1)}M`}
-            subtitle="Final del período"
-            icon={Target}
-            color="from-violet-500 to-purple-600"
-            onClick={() => setSelectedCard('projection')}
-          />
-          <SummaryCard
-            title="En Meta"
-            value={statusCounts.positive}
-            subtitle={`${STORES.length} tiendas totales`}
-            icon={CheckCircle}
-            color="from-emerald-500 to-green-600"
-            onClick={() => setFilterStatus('positive')}
-          />
-          <SummaryCard
-            title="En Riesgo"
-            value={statusCounts.critical + statusCounts.negative}
-            subtitle="Requieren atención"
-            icon={AlertTriangle}
-            color="from-amber-500 to-orange-600"
-            onClick={() => setFilterStatus('critical')}
-          />
-        </div>
-
-        {/* AI Insights */}
-        <Card className="border-0 shadow-xl mb-6 bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50">
-          <CardHeader>
-            <CardTitle className="text-base font-bold text-purple-600 flex items-center gap-2">
-              <Brain className="w-5 h-5" />
-              Análisis Inteligente
-              {loadingInsights && <Sparkles className="w-4 h-4 animate-pulse" />}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {aiInsights ? (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-white/80 rounded-xl p-4">
-                  <p className="text-xs font-bold text-purple-600 mb-2 flex items-center gap-1">
-                    🎯 Patrón Crítico
-                  </p>
-                  <p className="text-sm text-gray-700">{aiInsights.patron_critico}</p>
-                </div>
-                <div className="bg-white/80 rounded-xl p-4">
-                  <p className="text-xs font-bold text-pink-600 mb-2 flex items-center gap-1">
-                    ⚡ Acciones Prioritarias
-                  </p>
-                  <ul className="space-y-1">
-                    {aiInsights.acciones_prioritarias?.map((accion, i) => (
-                      <li key={i} className="text-xs text-gray-700 flex items-start gap-1">
-                        <span className="text-pink-500 font-bold">{i + 1}.</span>
-                        <span>{accion}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="bg-white/80 rounded-xl p-4">
-                  <p className="text-xs font-bold text-emerald-600 mb-2 flex items-center gap-1">
-                    💡 Oportunidades
-                  </p>
-                  <p className="text-sm text-gray-700">{aiInsights.oportunidades}</p>
-                </div>
-              </div>
-            ) : (
-              <div className="text-center py-6">
-                <Sparkles className="w-8 h-8 mx-auto mb-2 animate-pulse text-purple-400" />
-                <p className="text-sm text-gray-400">Analizando datos...</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Filters */}
-        <div className="flex items-center gap-2 mb-4 flex-wrap">
-          <Filter className="w-4 h-4 text-gray-500" />
-          {['all', 'critical', 'negative', 'positive'].map(status => (
-            <Button
-              key={status}
-              size="sm"
-              variant={filterStatus === status ? 'default' : 'outline'}
-              onClick={() => setFilterStatus(status)}
-              className={filterStatus === status ? 
-                status === 'all' ? 'bg-pink-500 text-white' :
-                status === 'critical' ? 'bg-rose-500 text-white' :
-                status === 'negative' ? 'bg-amber-500 text-white' :
-                'bg-emerald-500 text-white' : ''
-              }
-            >
-              {status === 'all' ? 'Todas' : status === 'critical' ? 'Críticas' : status === 'negative' ? 'En Riesgo' : 'En Meta'}
-            </Button>
-          ))}
-        </div>
-
-        {/* Charts Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <Card className="border-0 shadow-xl">
-            <CardHeader>
-              <CardTitle className="text-sm font-bold text-pink-600 flex items-center gap-2">
-                <BarChart3 className="w-4 h-4" />
-                Comparativa: Ventas vs Presupuesto
-              </CardTitle>
-            </CardHeader>
+          {/* Charts Grid */}
+          {isLoading ? (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              {[1, 2, 3, 4].map((i) => <ChartSkeleton key={i} />)}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              <Card className="border-slate-100 shadow-sm">
+                <CardHeader className="border-b border-slate-100">
+                  <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                    <BarChart3 className="w-4 h-4 text-slate-600" />
+                    Comparativa: Ventas vs Presupuesto
+                  </CardTitle>
+                </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={350}>
                 <BarChart data={comparisonData}>
@@ -410,13 +538,13 @@ INSTRUCCIONES:
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-xl">
-            <CardHeader>
-              <CardTitle className="text-sm font-bold text-pink-600 flex items-center gap-2">
-                <Target className="w-4 h-4" />
-                Cumplimiento por Tienda
-              </CardTitle>
-            </CardHeader>
+              <Card className="border-slate-100 shadow-sm">
+                <CardHeader className="border-b border-slate-100">
+                  <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                    <Target className="w-4 h-4 text-slate-600" />
+                    Cumplimiento por Tienda
+                  </CardTitle>
+                </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={350}>
                 <BarChart data={comparisonData} layout="horizontal">
@@ -437,13 +565,13 @@ INSTRUCCIONES:
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-xl">
-            <CardHeader>
-              <CardTitle className="text-sm font-bold text-pink-600 flex items-center gap-2">
-                <TrendingUp className="w-4 h-4" />
-                Proyecciones vs Meta
-              </CardTitle>
-            </CardHeader>
+              <Card className="border-slate-100 shadow-sm">
+                <CardHeader className="border-b border-slate-100">
+                  <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4 text-slate-600" />
+                    Proyecciones vs Meta
+                  </CardTitle>
+                </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={350}>
                 <ComposedChart data={comparisonData}>
@@ -459,13 +587,13 @@ INSTRUCCIONES:
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-xl">
-            <CardHeader>
-              <CardTitle className="text-sm font-bold text-pink-600 flex items-center gap-2">
-                <Receipt className="w-4 h-4" />
-                Importancia de cada Punto
-              </CardTitle>
-            </CardHeader>
+              <Card className="border-slate-100 shadow-sm">
+                <CardHeader className="border-b border-slate-100">
+                  <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                    <Receipt className="w-4 h-4 text-slate-600" />
+                    Importancia de cada Punto
+                  </CardTitle>
+                </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={350}>
                 <PieChart>
@@ -490,15 +618,15 @@ INSTRUCCIONES:
           </Card>
         </div>
 
-        {/* Stores at Risk */}
-        {salesForecast.filter(s => s.willMissTarget).length > 0 && (
-          <Card className="border-0 shadow-xl mb-6 bg-gradient-to-br from-rose-50 to-red-50">
-            <CardHeader>
-              <CardTitle className="text-base font-bold text-rose-600 flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5" />
-                ⚠️ Tiendas en Riesgo de Incumplimiento
-              </CardTitle>
-            </CardHeader>
+          {/* Stores at Risk */}
+          {!isLoading && salesForecast.filter(s => s.willMissTarget).length > 0 && (
+            <Card className="border-rose-200 shadow-sm mb-8 bg-gradient-to-br from-rose-50/50 to-red-50/30">
+              <CardHeader className="border-b border-rose-100">
+                <CardTitle className="text-base font-bold text-rose-700 flex items-center gap-2">
+                  <AlertTriangle className="w-5 h-5" />
+                  Tiendas en Riesgo de Incumplimiento
+                </CardTitle>
+              </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {salesForecast.filter(s => s.willMissTarget).map((store, idx) => (
@@ -544,14 +672,15 @@ INSTRUCCIONES:
           </Card>
         )}
 
-        {/* Detail Table */}
-        <Card className="border-0 shadow-xl">
-          <CardHeader>
-            <CardTitle className="text-sm font-bold text-pink-600 flex items-center gap-2">
-              <Zap className="w-4 h-4" />
-              Detalle Completo
-            </CardTitle>
-          </CardHeader>
+          {/* Detail Table */}
+          {!isLoading && (
+            <Card className="border-slate-100 shadow-sm">
+              <CardHeader className="border-b border-slate-100">
+                <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-slate-600" />
+                  Detalle Completo por Tienda
+                </CardTitle>
+              </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
@@ -614,8 +743,9 @@ INSTRUCCIONES:
                 </tbody>
               </table>
             </div>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          )}
 
         {/* Chart Modal */}
         <AnimatePresence>
@@ -671,6 +801,7 @@ INSTRUCCIONES:
             </motion.div>
           )}
         </AnimatePresence>
+        </div>
       </div>
     </div>
   );
