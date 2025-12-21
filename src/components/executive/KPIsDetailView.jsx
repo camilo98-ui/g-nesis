@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign, TrendingUp, Target, Users, Award, Zap } from 'lucide-react';
+import { DollarSign, TrendingUp, TrendingDown, Target, Users, Award, Zap } from 'lucide-react';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Area, AreaChart } from 'recharts';
 
 export default function KPIsDetailView({ storesAnalysis, formatCurrency, zoneTotals }) {
