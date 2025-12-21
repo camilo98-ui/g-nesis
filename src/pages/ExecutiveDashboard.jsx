@@ -20,6 +20,9 @@ import {
 } from 'recharts';
 import { format, startOfMonth } from 'date-fns';
 import { es } from 'date-fns/locale';
+import KPIsDetailView from '../components/executive/KPIsDetailView';
+import ChartsDetailView from '../components/executive/ChartsDetailView';
+import StoresDetailView from '../components/executive/StoresDetailView';
 
 const COLORS = ['#ec4899', '#f472b6', '#f9a8d4', '#8b5cf6', '#a78bfa', '#c4b5fd', '#fbbf24'];
 
@@ -100,6 +103,7 @@ export default function ExecutiveDashboard() {
   const [loadingInsights, setLoadingInsights] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [activeView, setActiveView] = useState('general');
 
   const activeRange = weekFilter || dateRange;
   const currentMonth = new Date().getMonth() + 1;
@@ -445,71 +449,80 @@ INSTRUCCIONES:
           </Link>
 
           <nav className="space-y-1">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider px-4 mb-2">Vista General</p>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider px-4 mb-2">Vistas</p>
             <motion.div
               whileHover={{ x: 4 }}
-              className="px-4 py-3 rounded-xl bg-slate-100 border border-slate-200 cursor-pointer"
+              onClick={() => setActiveView('general')}
+              className={`px-4 py-3 rounded-xl cursor-pointer transition-colors ${
+                activeView === 'general' ? 'bg-slate-100 border border-slate-200' : 'hover:bg-slate-50'
+              }`}
             >
               <div className="flex items-center gap-3">
                 <Activity className="w-4 h-4 text-slate-700" />
-                <span className="text-sm font-bold text-slate-900">Resumen General</span>
+                <span className={`text-sm ${activeView === 'general' ? 'font-bold text-slate-900' : 'font-medium text-slate-700'}`}>
+                  Resumen General
+                </span>
               </div>
             </motion.div>
 
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider px-4 mt-4 mb-2">Análisis</p>
             <motion.div
               whileHover={{ x: 4 }}
-              onClick={() => {
-                const element = document.getElementById('kpis-section');
-                element?.scrollIntoView({ behavior: 'smooth' });
-              }}
-              className="px-4 py-2.5 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors"
+              onClick={() => setActiveView('kpis')}
+              className={`px-4 py-2.5 rounded-xl cursor-pointer transition-colors ${
+                activeView === 'kpis' ? 'bg-slate-100 border border-slate-200' : 'hover:bg-slate-50'
+              }`}
             >
               <div className="flex items-center gap-3">
                 <Target className="w-4 h-4 text-slate-600" />
-                <span className="text-sm font-medium text-slate-700">KPIs Ejecutivos</span>
+                <span className={`text-sm ${activeView === 'kpis' ? 'font-bold text-slate-900' : 'font-medium text-slate-700'}`}>
+                  KPIs Ejecutivos
+                </span>
               </div>
             </motion.div>
             <motion.div
               whileHover={{ x: 4 }}
-              onClick={() => {
-                const element = document.getElementById('charts-section');
-                element?.scrollIntoView({ behavior: 'smooth' });
-              }}
-              className="px-4 py-2.5 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors"
+              onClick={() => setActiveView('charts')}
+              className={`px-4 py-2.5 rounded-xl cursor-pointer transition-colors ${
+                activeView === 'charts' ? 'bg-slate-100 border border-slate-200' : 'hover:bg-slate-50'
+              }`}
             >
               <div className="flex items-center gap-3">
                 <BarChart3 className="w-4 h-4 text-slate-600" />
-                <span className="text-sm font-medium text-slate-700">Gráficos</span>
+                <span className={`text-sm ${activeView === 'charts' ? 'font-bold text-slate-900' : 'font-medium text-slate-700'}`}>
+                  Análisis Visual
+                </span>
               </div>
             </motion.div>
             <motion.div
               whileHover={{ x: 4 }}
-              onClick={() => {
-                const element = document.getElementById('stores-table');
-                element?.scrollIntoView({ behavior: 'smooth' });
-              }}
-              className="px-4 py-2.5 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors"
+              onClick={() => setActiveView('stores')}
+              className={`px-4 py-2.5 rounded-xl cursor-pointer transition-colors ${
+                activeView === 'stores' ? 'bg-slate-100 border border-slate-200' : 'hover:bg-slate-50'
+              }`}
             >
               <div className="flex items-center gap-3">
                 <Store className="w-4 h-4 text-slate-600" />
-                <span className="text-sm font-medium text-slate-700">Detalle por Tienda</span>
+                <span className={`text-sm ${activeView === 'stores' ? 'font-bold text-slate-900' : 'font-medium text-slate-700'}`}>
+                  Detalle por Tienda
+                </span>
               </div>
             </motion.div>
 
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider px-4 mt-4 mb-2">Alertas</p>
             <motion.div
               whileHover={{ x: 4 }}
-              onClick={() => {
-                setFilterStatus('critical');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className="px-4 py-2.5 rounded-xl hover:bg-rose-50 cursor-pointer transition-colors group"
+              onClick={() => setActiveView('critical')}
+              className={`px-4 py-2.5 rounded-xl cursor-pointer transition-colors group ${
+                activeView === 'critical' ? 'bg-rose-50 border border-rose-200' : 'hover:bg-rose-50'
+              }`}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <AlertTriangle className="w-4 h-4 text-rose-600" />
-                  <span className="text-sm font-medium text-slate-700 group-hover:text-rose-700">Tiendas Críticas</span>
+                  <span className={`text-sm ${activeView === 'critical' ? 'font-bold text-rose-700' : 'font-medium text-slate-700 group-hover:text-rose-700'}`}>
+                    Tiendas Críticas
+                  </span>
                 </div>
                 {statusCounts.critical > 0 && (
                   <span className="bg-rose-100 text-rose-700 text-xs font-bold px-2 py-0.5 rounded-full">
@@ -520,16 +533,17 @@ INSTRUCCIONES:
             </motion.div>
             <motion.div
               whileHover={{ x: 4 }}
-              onClick={() => {
-                setFilterStatus('negative');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className="px-4 py-2.5 rounded-xl hover:bg-amber-50 cursor-pointer transition-colors group"
+              onClick={() => setActiveView('alert')}
+              className={`px-4 py-2.5 rounded-xl cursor-pointer transition-colors group ${
+                activeView === 'alert' ? 'bg-amber-50 border border-amber-200' : 'hover:bg-amber-50'
+              }`}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <TrendingDown className="w-4 h-4 text-amber-600" />
-                  <span className="text-sm font-medium text-slate-700 group-hover:text-amber-700">En Alerta</span>
+                  <span className={`text-sm ${activeView === 'alert' ? 'font-bold text-amber-700' : 'font-medium text-slate-700 group-hover:text-amber-700'}`}>
+                    En Alerta
+                  </span>
                 </div>
                 {statusCounts.negative > 0 && (
                   <span className="bg-amber-100 text-amber-700 text-xs font-bold px-2 py-0.5 rounded-full">
@@ -540,16 +554,6 @@ INSTRUCCIONES:
             </motion.div>
 
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider px-4 mt-4 mb-2">Acciones</p>
-            <motion.div
-              whileHover={{ x: 4 }}
-              onClick={generateAIInsights}
-              className="px-4 py-2.5 rounded-xl hover:bg-purple-50 cursor-pointer transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <Brain className="w-4 h-4 text-purple-600" />
-                <span className="text-sm font-medium text-slate-700">Regenerar Insights</span>
-              </div>
-            </motion.div>
             <Link to={createPageUrl('Home')}>
               <motion.div
                 whileHover={{ x: 4 }}
@@ -580,6 +584,18 @@ INSTRUCCIONES:
         <div className="p-8">
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
+            {activeView !== 'general' && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setActiveView('general')}
+                className="absolute top-8 left-[320px] text-slate-600 hover:text-slate-900"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Volver al Resumen
+              </Button>
+            )}
+
             <div className="flex items-center gap-4">
               <Button
                 variant="ghost"
@@ -620,9 +636,50 @@ INSTRUCCIONES:
               <WeekFilter onWeekChange={setWeekFilter} />
               <DateFilter dateRange={dateRange} onDateChange={(range) => { setDateRange(range); setWeekFilter(null); }} />
             </div>
-          </div>
+            </div>
 
-          {/* Cuadro Maestro de Estado de la Zona */}
+            {/* Conditional View Rendering */}
+            {activeView === 'kpis' && !isLoading && (
+            <KPIsDetailView 
+              storesAnalysis={storesAnalysis}
+              formatCurrency={formatCurrency}
+              zoneTotals={zoneTotals}
+            />
+            )}
+
+            {activeView === 'charts' && !isLoading && (
+            <ChartsDetailView
+              storesAnalysis={storesAnalysis}
+              formatCurrency={formatCurrency}
+              comparisonData={comparisonData}
+            />
+            )}
+
+            {activeView === 'stores' && !isLoading && (
+            <StoresDetailView
+              storesAnalysis={storesAnalysis}
+              formatCurrency={formatCurrency}
+            />
+            )}
+
+            {activeView === 'critical' && !isLoading && (
+            <StoresDetailView
+              storesAnalysis={storesAnalysis.filter(s => s.status === 'critical')}
+              formatCurrency={formatCurrency}
+            />
+            )}
+
+            {activeView === 'alert' && !isLoading && (
+            <StoresDetailView
+              storesAnalysis={storesAnalysis.filter(s => s.status === 'negative')}
+              formatCurrency={formatCurrency}
+            />
+            )}
+
+            {/* General View */}
+            {activeView === 'general' && (
+            <>
+            {/* Cuadro Maestro de Estado de la Zona */}
           {isLoading ? (
             <KPISkeleton />
           ) : zoneStatus && (
