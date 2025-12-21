@@ -67,10 +67,10 @@ export default function CashiersDashboard() {
     },
     enabled: !!selectedStore,
     staleTime: 0,
-    cacheTime: 0,
+    gcTime: 0,
     refetchOnMount: 'always',
     refetchOnWindowFocus: true,
-    refetchInterval: 5000
+    refetchOnReconnect: true
   });
 
   const activeCashiers = cashiers.filter(c => c.is_active !== false);

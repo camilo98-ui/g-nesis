@@ -142,20 +142,14 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
     onSuccess: (savedRecord) => {
       console.log('✅ Registro guardado exitosamente:', savedRecord);
       
-      // Invalidar y refetch TODAS las queries de shiftRecords de manera agresiva
-      queryClient.invalidateQueries({ queryKey: ['shiftRecords'] });
-      queryClient.invalidateQueries({ queryKey: ['shiftRecord'] });
-      queryClient.invalidateQueries({ queryKey: ['cashiers'] });
-      queryClient.invalidateQueries({ queryKey: ['dailySales'] });
-      queryClient.invalidateQueries({ queryKey: ['badges'] });
-      queryClient.invalidateQueries({ queryKey: ['salesLog'] });
+      // SOLUCIÓN DEFINITIVA: Eliminar TODO el caché y forzar recarga
+      queryClient.removeQueries(); // Elimina TODAS las queries
+      queryClient.clear(); // Limpia completamente el caché
       
-      // Forzar refetch inmediato y eliminar caché
-      queryClient.removeQueries({ queryKey: ['shiftRecords'] });
-      queryClient.refetchQueries({ 
-        queryKey: ['shiftRecords'],
-        type: 'active'
-      });
+      // Refetch inmediato de las queries críticas
+      queryClient.refetchQueries({ queryKey: ['shiftRecords'] });
+      queryClient.refetchQueries({ queryKey: ['cashiers'] });
+      queryClient.refetchQueries({ queryKey: ['dailySales'] });
 
       toast.success(editingRecord ? '✅ Turno actualizado correctamente' : '✅ Turno registrado correctamente');
 

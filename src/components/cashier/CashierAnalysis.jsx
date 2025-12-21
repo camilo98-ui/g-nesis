@@ -29,10 +29,10 @@ export default function CashierAnalysis({ cashierId, cashierName, storeId }) {
     },
     enabled: !!storeId,
     staleTime: 0,
-    cacheTime: 0,
+    gcTime: 0, // Antes cacheTime, ahora gcTime en v5
     refetchOnMount: 'always',
     refetchOnWindowFocus: true,
-    refetchInterval: 5000
+    refetchOnReconnect: true
   });
 
   const { data: allCashiers = [] } = useQuery({
