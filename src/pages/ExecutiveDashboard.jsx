@@ -219,18 +219,18 @@ export default function ExecutiveDashboard() {
   }, [storesAnalysis, allDailySales, allBudgets, currentMonth, currentYear]);
 
   const comparisonData = useMemo(() => {
-    return storesAnalysis.map(s => ({
+    return filteredStores.map(s => ({
       name: s.name, ventas: s.totalSales, presupuesto: s.salesBudget,
       cumplimiento: s.salesCompliance, proyeccion: s.projection,
       ticket: s.avgTicket, transacciones: s.totalTransactions
     }));
-  }, [storesAnalysis]);
+  }, [filteredStores]);
 
   const weightData = useMemo(() => {
-    return storesAnalysis.sort((a, b) => b.weight - a.weight).map(s => ({
+    return filteredStores.slice().sort((a, b) => b.weight - a.weight).map(s => ({
       name: s.name, peso: s.weight, presupuesto: s.salesBudget
     }));
-  }, [storesAnalysis]);
+  }, [filteredStores]);
 
   const formatCurrency = (v) => new Intl.NumberFormat('es-CO', { 
     style: 'currency', currency: 'COP', minimumFractionDigits: 0
@@ -295,11 +295,78 @@ INSTRUCCIONES:
   }, [salesForecast.length]);
 
   const zoneTotals = useMemo(() => {
-    const totalSales = storesAnalysis.reduce((sum, s) => sum + s.totalSales, 0);
-    const totalBudget = storesAnalysis.reduce((sum, s) => sum + s.salesBudget, 0);
-    const totalProjection = storesAnalysis.reduce((sum, s) => sum + s.projection, 0);
+    const totalSales = filteredStores.reduce((sum, s) => sum + s.totalSales, 0);
+    const totalBudget = filteredStores.reduce((sum, s) => sum + s.salesBudget, 0);
+    const totalProjection = filteredStores.reduce((sum, s) => sum + s.projection, 0);
     return { totalSales, totalBudget, totalProjection };
-  }, [storesAnalysis]);
+  }, [filteredStores]);
+
+  // Auto Insight - Principal riesgo u oportunidad
+  const autoInsight = useMemo(() => {
+    if (storesAnalysis.length === 0) return null;
+    
+    const critical = storesAnalysis.filter(s => s.status === 'critical');
+    const positive = storesAnalysis.filter(s => s.status === 'positive' && s.salesCompliance >= 110);
+    const atRisk = salesForecast.filter(s => s.willMissTarget);
+    
+    const totalCompliance = (zoneTotals.totalSales / zoneTotals.totalBudget) * 100;
+    const projectionCompliance = (zoneTotals.totalProjection / zoneTotals.totalBudget) * 100;
+    
+    // Priorizar riesgos
+    if (critical.length >= STORES.length * 0.3) {
+      return {
+        type: 'danger',
+        icon: '🚨',
+        title: 'Alerta Crítica',
+        message: `${critical.length} tiendas en estado crítico (${((critical.length/STORES.length)*100).toFixed(0)}%). Requieren intervención inmediata.`
+      };
+    }
+    
+    if (atRisk.length > 0 && projectionCompliance < 90) {
+      return {
+        type: 'warning',
+        icon: '⚠️',
+        title: 'Riesgo de Incumplimiento',
+        message: `Proyección al ${projectionCompliance.toFixed(0)}% de meta. ${atRisk.length} tiendas en riesgo de no alcanzar objetivos.`
+      };
+    }
+    
+    if (totalCompliance < 85) {
+      const gap = zoneTotals.totalBudget - zoneTotals.totalSales;
+      return {
+        type: 'warning',
+        icon: '📉',
+        title: 'Por Debajo de Expectativas',
+        message: `Cumplimiento actual: ${totalCompliance.toFixed(0)}%. Falta ${formatCurrency(gap)} para alcanzar la meta.`
+      };
+    }
+    
+    // Oportunidades
+    if (positive.length >= 5) {
+      return {
+        type: 'success',
+        icon: '🎯',
+        title: 'Desempeño Destacado',
+        message: `${positive.length} tiendas superando metas en más del 10%. Momentum positivo en la zona.`
+      };
+    }
+    
+    if (totalCompliance >= 95 && projectionCompliance >= 100) {
+      return {
+        type: 'success',
+        icon: '✨',
+        title: 'En Cumplimiento',
+        message: `Zona al ${totalCompliance.toFixed(0)}% de meta. Proyección: ${projectionCompliance.toFixed(0)}%. Camino sólido hacia objetivos.`
+      };
+    }
+    
+    return {
+      type: 'neutral',
+      icon: '📊',
+      title: 'En Seguimiento',
+      message: `Cumplimiento: ${totalCompliance.toFixed(0)}%. Monitoreo continuo de ${statusCounts.negative + statusCounts.critical} puntos en alerta.`
+    };
+  }, [storesAnalysis, salesForecast, zoneTotals, statusCounts, formatCurrency]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100/30 flex">
@@ -379,6 +446,23 @@ INSTRUCCIONES:
                 <p className="text-sm text-slate-500 font-medium">
                   Vista consolidada · {format(new Date(), 'EEEE, dd MMMM yyyy', { locale: es })}
                 </p>
+                {!isLoading && autoInsight && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={`mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold ${
+                      autoInsight.type === 'danger' ? 'bg-rose-100 text-rose-700 border border-rose-200' :
+                      autoInsight.type === 'warning' ? 'bg-amber-100 text-amber-700 border border-amber-200' :
+                      autoInsight.type === 'success' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' :
+                      'bg-slate-100 text-slate-700 border border-slate-200'
+                    }`}
+                  >
+                    <span className="text-lg">{autoInsight.icon}</span>
+                    <div>
+                      <span className="font-black">{autoInsight.title}:</span> {autoInsight.message}
+                    </div>
+                  </motion.div>
+                )}
               </div>
             </div>
 
@@ -419,14 +503,22 @@ INSTRUCCIONES:
                 status={statusCounts.positive >= STORES.length * 0.7 ? 'success' : statusCounts.positive >= STORES.length * 0.5 ? 'warning' : 'danger'}
                 onClick={() => setFilterStatus('positive')}
               />
-              <ExecutiveKPI
-                title="Tiendas en Riesgo"
-                value={statusCounts.critical + statusCounts.negative}
-                subtitle={`${statusCounts.critical} críticas · ${statusCounts.negative} en alerta`}
-                icon={AlertTriangle}
-                status={statusCounts.critical === 0 ? 'success' : statusCounts.critical <= 2 ? 'warning' : 'danger'}
-                onClick={() => setFilterStatus('critical')}
-              />
+              <motion.div
+                animate={statusCounts.critical > 0 ? { 
+                  scale: [1, 1.02, 1],
+                  boxShadow: ['0 1px 3px rgba(0,0,0,0.1)', '0 4px 12px rgba(244,63,94,0.3)', '0 1px 3px rgba(0,0,0,0.1)']
+                } : {}}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                <ExecutiveKPI
+                  title="Tiendas en Riesgo"
+                  value={statusCounts.critical + statusCounts.negative}
+                  subtitle={`${statusCounts.critical} críticas · ${statusCounts.negative} en alerta`}
+                  icon={AlertTriangle}
+                  status={statusCounts.critical === 0 ? 'success' : statusCounts.critical <= 2 ? 'warning' : 'danger'}
+                  onClick={() => setFilterStatus('critical')}
+                />
+              </motion.div>
             </div>
           )}
 
@@ -619,15 +711,25 @@ INSTRUCCIONES:
             </div>
           )}
 
-          {/* Stores at Risk */}
+          {/* Stores at Risk - Prioridad Visual */}
           {!isLoading && salesForecast.filter(s => s.willMissTarget).length > 0 && (
-            <Card className="border-rose-200 shadow-sm mb-8 bg-gradient-to-br from-rose-50/50 to-red-50/30">
-              <CardHeader className="border-b border-rose-100">
-                <CardTitle className="text-base font-bold text-rose-700 flex items-center gap-2">
-                  <AlertTriangle className="w-5 h-5" />
-                  Tiendas en Riesgo de Incumplimiento
-                </CardTitle>
-              </CardHeader>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-8"
+            >
+              <Card className="border-2 border-rose-300 shadow-xl mb-8 bg-gradient-to-br from-rose-50 to-red-50">
+                <CardHeader className="border-b-2 border-rose-200 bg-rose-100/50">
+                  <CardTitle className="text-lg font-black text-rose-800 flex items-center gap-3">
+                    <motion.div
+                      animate={{ scale: [1, 1.2, 1] }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                    >
+                      <AlertTriangle className="w-6 h-6" />
+                    </motion.div>
+                    🚨 Tiendas en Riesgo de Incumplimiento - Acción Requerida
+                  </CardTitle>
+                </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {salesForecast.filter(s => s.willMissTarget).map((store, idx) => (
