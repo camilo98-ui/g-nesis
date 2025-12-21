@@ -46,8 +46,16 @@ function CustomCalendar({ selected, onSelect, onClose, onApply }) {
   const [tempSelection, setTempSelection] = useState(selected);
   const [showWeeks, setShowWeeks] = useState(false);
   const [selectedWeeks, setSelectedWeeks] = useState([]);
+  const [isMobile, setIsMobile] = useState(false);
 
-  const months = useMemo(() => [currentMonth, addMonths(currentMonth, 1)], [currentMonth]);
+  React.useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const months = useMemo(() => isMobile ? [currentMonth] : [currentMonth, addMonths(currentMonth, 1)], [currentMonth, isMobile]);
   const weeksOfYear = useMemo(() => generateWeeksOfYear(), []);
 
   const handleDayClick = (day) => {
@@ -269,10 +277,10 @@ function CustomCalendar({ selected, onSelect, onClose, onApply }) {
         >
           <ChevronLeft className="h-5 w-5" />
         </motion.button>
-        <div className="flex gap-6">
+        <div className={`flex ${isMobile ? 'gap-2' : 'gap-6'}`}>
           {months.map((m, i) => (
             <span key={i} className="text-sm font-bold text-gray-700 capitalize">
-              {format(m, 'MMMM', { locale: es })}
+              {format(m, isMobile ? 'MMMM yyyy' : 'MMMM', { locale: es })}
             </span>
           ))}
         </div>
@@ -287,28 +295,28 @@ function CustomCalendar({ selected, onSelect, onClose, onApply }) {
       </div>
       
       {/* Meses */}
-      <div className="flex divide-x divide-gray-100">
+      <div className={`flex ${isMobile ? '' : 'divide-x divide-gray-100'}`}>
         {months.map((month, i) => (
-          <div key={i}>{renderMonth(month)}</div>
+          <div key={i} className={isMobile ? 'w-full' : ''}>{renderMonth(month)}</div>
         ))}
       </div>
       
           {/* Footer */}
-          <div className="px-4 py-3 border-t border-gray-100 bg-gray-50/50 flex items-center justify-between">
-            <div className="flex items-center gap-2">
+          <div className={`px-4 py-3 border-t border-gray-100 bg-gray-50/50 ${isMobile ? 'flex-col space-y-3' : 'flex items-center justify-between'}`}>
+            <div className={`flex items-center gap-2 ${isMobile ? 'justify-center' : ''}`}>
               {tempSelection?.from ? (
                 <motion.div 
                   initial={{ opacity: 0, y: 5 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="flex items-center gap-2 text-sm"
                 >
-                  <span className="px-2 py-1 bg-pink-100 text-pink-700 rounded-lg font-medium">
+                  <span className="px-2 py-1 bg-pink-100 text-pink-700 rounded-lg font-medium text-xs">
                     {format(tempSelection.from, 'dd MMM', { locale: es })}
                   </span>
                   {tempSelection.to && !isSameDay(tempSelection.from, tempSelection.to) && (
                     <>
                       <span className="text-gray-400">→</span>
-                      <span className="px-2 py-1 bg-rose-100 text-rose-700 rounded-lg font-medium">
+                      <span className="px-2 py-1 bg-rose-100 text-rose-700 rounded-lg font-medium text-xs">
                         {format(tempSelection.to, 'dd MMM', { locale: es })}
                       </span>
                     </>
@@ -318,8 +326,8 @@ function CustomCalendar({ selected, onSelect, onClose, onApply }) {
                 <span className="text-xs text-gray-400">Selecciona una fecha</span>
               )}
             </div>
-            <div className="flex items-center gap-2">
-              {selectingEnd && (
+            <div className={`flex items-center gap-2 ${isMobile ? 'justify-center w-full' : ''}`}>
+              {selectingEnd && !isMobile && (
                 <motion.span 
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -336,9 +344,9 @@ function CustomCalendar({ selected, onSelect, onClose, onApply }) {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={handleApply}
-                  className="px-4 py-1.5 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white text-xs font-medium shadow-md flex items-center gap-1"
+                  className={`${isMobile ? 'w-full py-3' : 'px-4 py-1.5'} rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white text-sm font-bold shadow-md flex items-center justify-center gap-2`}
                 >
-                  <Check className="w-3 h-3" /> OK
+                  <Check className="w-4 h-4" /> Aplicar Fechas
                 </motion.button>
               )}
             </div>
