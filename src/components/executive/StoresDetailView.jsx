@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Store, Search, TrendingUp, TrendingDown, CheckCircle, AlertTriangle, Filter } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import StoreDetailModal from './StoreDetailModal';
 
 export default function StoresDetailView({ storesAnalysis, formatCurrency, allDailySales, dateRange }) {
   const [search, setSearch] = useState('');
@@ -91,8 +92,9 @@ export default function StoresDetailView({ storesAnalysis, formatCurrency, allDa
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: idx * 0.05 }}
+            onClick={() => setSelectedStore(store)}
           >
-            <Card className="border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer">
+            <Card className="border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer hover:border-blue-300">
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
@@ -198,6 +200,18 @@ export default function StoresDetailView({ storesAnalysis, formatCurrency, allDa
           <p className="text-gray-500 font-medium">No se encontraron tiendas con "{search}"</p>
         </div>
       )}
+
+      {/* Modal de Detalle */}
+      <AnimatePresence>
+        {selectedStore && allDailySales && dateRange && (
+          <StoreDetailModal
+            store={selectedStore}
+            onClose={() => setSelectedStore(null)}
+            allDailySales={allDailySales}
+            dateRange={dateRange}
+          />
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
