@@ -101,22 +101,40 @@ export default function PopsyPlanner() {
     <div className="min-h-screen bg-gradient-to-br from-rose-50/30 via-white to-violet-50/30 p-4 md:p-6">
       {/* Botón flotante de regreso */}
       <AnimatePresence>
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-          className="fixed top-24 left-4 z-50"
+        <motion.button
+          initial={{ opacity: 0, x: -50, scale: 0.8 }}
+          animate={{ 
+            opacity: 1, 
+            x: 0, 
+            scale: 1,
+          }}
+          whileHover={{ 
+            scale: 1.1, 
+            x: 5,
+            boxShadow: "0 10px 30px rgba(139, 92, 246, 0.3)"
+          }}
+          whileTap={{ scale: 0.95 }}
+          exit={{ opacity: 0, x: -50, scale: 0.8 }}
+          onClick={handleBack}
+          className="fixed top-24 left-4 z-50 w-12 h-12 rounded-full bg-gradient-to-r from-violet-500 to-purple-600 shadow-xl flex items-center justify-center group cursor-pointer border-2 border-white"
         >
-          <Button
-            onClick={handleBack}
-            variant="outline"
-            size="sm"
-            className="bg-white/95 backdrop-blur-sm border-gray-200 hover:border-violet-300 hover:bg-violet-50 shadow-lg gap-2"
+          <motion.div
+            animate={{ x: [0, -3, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
           >
-            <ArrowLeft className="w-4 h-4" />
-            <span className="hidden sm:inline">Volver</span>
-          </Button>
-        </motion.div>
+            <ArrowLeft className="w-6 h-6 text-white" />
+          </motion.div>
+          
+          {/* Tooltip */}
+          <motion.div
+            initial={{ opacity: 0, x: -10 }}
+            whileHover={{ opacity: 1, x: 0 }}
+            className="absolute left-14 bg-gray-900 text-white px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
+          >
+            Volver
+            <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1 w-2 h-2 bg-gray-900 rotate-45" />
+          </motion.div>
+        </motion.button>
       </AnimatePresence>
 
       <div className="max-w-7xl mx-auto">
