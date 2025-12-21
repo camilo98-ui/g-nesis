@@ -671,9 +671,9 @@ INSTRUCCIONES:
               </div>
             </CardContent>
             </Card>
-            )}
+          )}
 
-            {/* Detail Table */}
+          {/* Detail Table */}
           {!isLoading && (
             <Card className="border-slate-100 shadow-sm">
               <CardHeader className="border-b border-slate-100">
@@ -682,8 +682,8 @@ INSTRUCCIONES:
                   Detalle Completo por Tienda
                 </CardTitle>
               </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
+            <CardContent>
+              <div className="overflow-x-auto">
               <table className="w-full text-xs">
                 <thead>
                   <tr className="border-b-2 border-gray-200 bg-gray-50">
@@ -742,14 +742,14 @@ INSTRUCCIONES:
                     </motion.tr>
                   ))}
                 </tbody>
-              </table>
-            </div>
-              </CardContent>
+                </table>
+              </div>
+            </CardContent>
             </Card>
           )}
 
-        {/* Chart Modal */}
-        <AnimatePresence>
+            {/* Chart Modal */}
+          <AnimatePresence>
           {selectedCard && (
             <motion.div
               initial={{ opacity: 0 }}
@@ -801,7 +801,7 @@ INSTRUCCIONES:
               </motion.div>
             </motion.div>
           )}
-        </AnimatePresence>
+          </AnimatePresence>
         </div>
       </div>
     </div>
