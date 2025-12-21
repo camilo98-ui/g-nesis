@@ -1050,20 +1050,68 @@ INSTRUCCIONES:
                         <ComposedChart data={comparisonData}>
                           <defs>
                             <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                              <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                              <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.8}/>
+                              <stop offset="100%" stopColor="#1d4ed8" stopOpacity={0.3}/>
                             </linearGradient>
+                            <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+                              <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+                              <feOffset dx="0" dy="3" result="offsetblur"/>
+                              <feComponentTransfer>
+                                <feFuncA type="linear" slope="0.3"/>
+                              </feComponentTransfer>
+                              <feMerge>
+                                <feMergeNode/>
+                                <feMergeNode in="SourceGraphic"/>
+                              </feMerge>
+                            </filter>
                           </defs>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-                          <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#6b7280' }} angle={-45} textAnchor="end" height={90} />
-                          <YAxis tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} tick={{ fontSize: 11, fill: '#6b7280' }} />
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" strokeOpacity={0.5} />
+                          <XAxis 
+                            dataKey="name" 
+                            tick={{ fontSize: 11, fill: '#6b7280', fontWeight: 600 }} 
+                            angle={-45} 
+                            textAnchor="end" 
+                            height={90}
+                            stroke="#9ca3af"
+                            strokeWidth={1.5}
+                          />
+                          <YAxis 
+                            tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} 
+                            tick={{ fontSize: 11, fill: '#6b7280', fontWeight: 600 }}
+                            stroke="#9ca3af"
+                            strokeWidth={1.5}
+                          />
                           <Tooltip 
                             formatter={(v) => formatCurrency(v)}
-                            contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
+                            contentStyle={{ 
+                              borderRadius: '12px', 
+                              border: '2px solid #3b82f6', 
+                              boxShadow: '0 8px 24px rgba(59, 130, 246, 0.25)',
+                              backgroundColor: 'rgba(255, 255, 255, 0.98)',
+                              backdropFilter: 'blur(10px)'
+                            }}
+                            labelStyle={{ fontWeight: 700, color: '#1f2937' }}
                           />
-                          <Legend wrapperStyle={{ fontSize: '12px' }} />
-                          <Bar dataKey="ventas" fill="url(#salesGradient)" name="Ventas Reales" radius={[6, 6, 0, 0]} />
-                          <Line type="monotone" dataKey="presupuesto" stroke="#ef4444" strokeWidth={3} strokeDasharray="5 5" name="Meta Presupuesto" dot={false} />
+                          <Legend wrapperStyle={{ fontSize: '12px', fontWeight: 600 }} />
+                          <Bar 
+                            dataKey="ventas" 
+                            fill="url(#salesGradient)" 
+                            name="Ventas Reales" 
+                            radius={[8, 8, 0, 0]}
+                            animationDuration={1200}
+                            animationBegin={100}
+                          />
+                          <Line 
+                            type="monotone" 
+                            dataKey="presupuesto" 
+                            stroke="#ef4444" 
+                            strokeWidth={4} 
+                            strokeDasharray="8 4" 
+                            name="Meta Presupuesto" 
+                            dot={{ fill: '#ef4444', r: 6, strokeWidth: 3, stroke: '#fff' }}
+                            activeDot={{ r: 8, strokeWidth: 3 }}
+                            animationDuration={1500}
+                          />
                         </ComposedChart>
                       )}
                       {chartView === 'cumplimiento' && (
@@ -1071,58 +1119,192 @@ INSTRUCCIONES:
                           ...d,
                           cumplimientoColor: d.cumplimiento >= 90 ? '#10b981' : d.cumplimiento >= 70 ? '#f59e0b' : '#ef4444'
                         }))}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-                          <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#6b7280' }} angle={-45} textAnchor="end" height={90} />
-                          <YAxis tickFormatter={(v) => `${v}%`} tick={{ fontSize: 11, fill: '#6b7280' }} />
+                          <defs>
+                            <linearGradient id="greenGradient" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="#10b981" stopOpacity={1}/>
+                              <stop offset="100%" stopColor="#059669" stopOpacity={0.7}/>
+                            </linearGradient>
+                            <linearGradient id="yellowGradient" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="#f59e0b" stopOpacity={1}/>
+                              <stop offset="100%" stopColor="#d97706" stopOpacity={0.7}/>
+                            </linearGradient>
+                            <linearGradient id="redGradient" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="#ef4444" stopOpacity={1}/>
+                              <stop offset="100%" stopColor="#dc2626" stopOpacity={0.7}/>
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" strokeOpacity={0.5} />
+                          <XAxis 
+                            dataKey="name" 
+                            tick={{ fontSize: 11, fill: '#6b7280', fontWeight: 600 }} 
+                            angle={-45} 
+                            textAnchor="end" 
+                            height={90}
+                            stroke="#9ca3af"
+                            strokeWidth={1.5}
+                          />
+                          <YAxis 
+                            tickFormatter={(v) => `${v}%`} 
+                            tick={{ fontSize: 11, fill: '#6b7280', fontWeight: 600 }}
+                            stroke="#9ca3af"
+                            strokeWidth={1.5}
+                          />
                           <Tooltip 
                             formatter={(v) => `${v.toFixed(1)}%`}
-                            contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
+                            contentStyle={{ 
+                              borderRadius: '12px', 
+                              border: '2px solid #10b981', 
+                              boxShadow: '0 8px 24px rgba(16, 185, 129, 0.25)',
+                              backgroundColor: 'rgba(255, 255, 255, 0.98)',
+                              backdropFilter: 'blur(10px)'
+                            }}
+                            labelStyle={{ fontWeight: 700, color: '#1f2937' }}
                           />
-                          <Legend wrapperStyle={{ fontSize: '12px' }} />
-                          <Bar dataKey="cumplimiento" name="% Cumplimiento" radius={[6, 6, 0, 0]}>
+                          <Legend wrapperStyle={{ fontSize: '12px', fontWeight: 600 }} />
+                          <Bar dataKey="cumplimiento" name="% Cumplimiento" radius={[8, 8, 0, 0]} animationDuration={1200}>
                             {comparisonData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={
-                                entry.cumplimiento >= 90 ? '#10b981' : 
-                                entry.cumplimiento >= 70 ? '#f59e0b' : '#ef4444'
-                              } />
+                              <Cell 
+                                key={`cell-${index}`} 
+                                fill={
+                                  entry.cumplimiento >= 90 ? 'url(#greenGradient)' : 
+                                  entry.cumplimiento >= 70 ? 'url(#yellowGradient)' : 'url(#redGradient)'
+                                }
+                              />
                             ))}
                           </Bar>
-                          <Line type="monotone" dataKey={() => 100} stroke="#9ca3af" strokeWidth={2} strokeDasharray="5 5" name="Meta 100%" dot={false} />
+                          <Line 
+                            type="monotone" 
+                            dataKey={() => 100} 
+                            stroke="#6b7280" 
+                            strokeWidth={3} 
+                            strokeDasharray="8 4" 
+                            name="Meta 100%" 
+                            dot={false}
+                            animationDuration={1500}
+                          />
                         </BarChart>
                       )}
                       {chartView === 'proyeccion' && (
                         <ComposedChart data={comparisonData}>
                           <defs>
                             <linearGradient id="projectionGradient" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor="#a855f7" stopOpacity={0.3}/>
-                              <stop offset="95%" stopColor="#a855f7" stopOpacity={0}/>
+                              <stop offset="0%" stopColor="#a855f7" stopOpacity={0.7}/>
+                              <stop offset="100%" stopColor="#c084fc" stopOpacity={0.2}/>
                             </linearGradient>
                           </defs>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-                          <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#6b7280' }} angle={-45} textAnchor="end" height={90} />
-                          <YAxis tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} tick={{ fontSize: 11, fill: '#6b7280' }} />
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" strokeOpacity={0.5} />
+                          <XAxis 
+                            dataKey="name" 
+                            tick={{ fontSize: 11, fill: '#6b7280', fontWeight: 600 }} 
+                            angle={-45} 
+                            textAnchor="end" 
+                            height={90}
+                            stroke="#9ca3af"
+                            strokeWidth={1.5}
+                          />
+                          <YAxis 
+                            tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} 
+                            tick={{ fontSize: 11, fill: '#6b7280', fontWeight: 600 }}
+                            stroke="#9ca3af"
+                            strokeWidth={1.5}
+                          />
                           <Tooltip 
                             formatter={(v) => formatCurrency(v)}
-                            contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
+                            contentStyle={{ 
+                              borderRadius: '12px', 
+                              border: '2px solid #a855f7', 
+                              boxShadow: '0 8px 24px rgba(168, 85, 247, 0.25)',
+                              backgroundColor: 'rgba(255, 255, 255, 0.98)',
+                              backdropFilter: 'blur(10px)'
+                            }}
+                            labelStyle={{ fontWeight: 700, color: '#1f2937' }}
                           />
-                          <Legend wrapperStyle={{ fontSize: '12px' }} />
-                          <Area type="monotone" dataKey="proyeccion" stroke="#a855f7" strokeWidth={3} fill="url(#projectionGradient)" name="Proyección Estimada" />
-                          <Line type="monotone" dataKey="presupuesto" stroke="#3b82f6" strokeWidth={3} strokeDasharray="5 5" name="Meta Objetivo" dot={false} />
+                          <Legend wrapperStyle={{ fontSize: '12px', fontWeight: 600 }} />
+                          <Area 
+                            type="monotone" 
+                            dataKey="proyeccion" 
+                            stroke="#a855f7" 
+                            strokeWidth={4} 
+                            fill="url(#projectionGradient)" 
+                            name="Proyección Estimada"
+                            animationDuration={1400}
+                          />
+                          <Line 
+                            type="monotone" 
+                            dataKey="presupuesto" 
+                            stroke="#3b82f6" 
+                            strokeWidth={4} 
+                            strokeDasharray="8 4" 
+                            name="Meta Objetivo" 
+                            dot={{ fill: '#3b82f6', r: 6, strokeWidth: 3, stroke: '#fff' }}
+                            activeDot={{ r: 8, strokeWidth: 3 }}
+                            animationDuration={1500}
+                          />
                         </ComposedChart>
                       )}
                       {chartView === 'eficiencia' && (
                         <ComposedChart data={comparisonData}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-                          <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#6b7280' }} angle={-45} textAnchor="end" height={90} />
-                          <YAxis yAxisId="left" tickFormatter={(v) => `$${(v/1000).toFixed(0)}k`} tick={{ fontSize: 11, fill: '#6b7280' }} />
-                          <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11, fill: '#6b7280' }} />
+                          <defs>
+                            <linearGradient id="amberGradient" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="#f59e0b" stopOpacity={0.9}/>
+                              <stop offset="100%" stopColor="#d97706" stopOpacity={0.5}/>
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" strokeOpacity={0.5} />
+                          <XAxis 
+                            dataKey="name" 
+                            tick={{ fontSize: 11, fill: '#6b7280', fontWeight: 600 }} 
+                            angle={-45} 
+                            textAnchor="end" 
+                            height={90}
+                            stroke="#9ca3af"
+                            strokeWidth={1.5}
+                          />
+                          <YAxis 
+                            yAxisId="left" 
+                            tickFormatter={(v) => `$${(v/1000).toFixed(0)}k`} 
+                            tick={{ fontSize: 11, fill: '#6b7280', fontWeight: 600 }}
+                            stroke="#9ca3af"
+                            strokeWidth={1.5}
+                          />
+                          <YAxis 
+                            yAxisId="right" 
+                            orientation="right" 
+                            tick={{ fontSize: 11, fill: '#6b7280', fontWeight: 600 }}
+                            stroke="#9ca3af"
+                            strokeWidth={1.5}
+                          />
                           <Tooltip 
                             formatter={(v, name) => name.includes('Ticket') ? formatCurrency(v) : v.toLocaleString()}
-                            contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
+                            contentStyle={{ 
+                              borderRadius: '12px', 
+                              border: '2px solid #f59e0b', 
+                              boxShadow: '0 8px 24px rgba(245, 158, 11, 0.25)',
+                              backgroundColor: 'rgba(255, 255, 255, 0.98)',
+                              backdropFilter: 'blur(10px)'
+                            }}
+                            labelStyle={{ fontWeight: 700, color: '#1f2937' }}
                           />
-                          <Legend wrapperStyle={{ fontSize: '12px' }} />
-                          <Bar yAxisId="right" dataKey="transacciones" fill="#f59e0b" name="Transacciones" radius={[6, 6, 0, 0]} />
-                          <Line yAxisId="left" type="monotone" dataKey="ticket" stroke="#8b5cf6" strokeWidth={3} dot={{ fill: '#8b5cf6', r: 5 }} name="Ticket Promedio" />
+                          <Legend wrapperStyle={{ fontSize: '12px', fontWeight: 600 }} />
+                          <Bar 
+                            yAxisId="right" 
+                            dataKey="transacciones" 
+                            fill="url(#amberGradient)" 
+                            name="Transacciones" 
+                            radius={[8, 8, 0, 0]}
+                            animationDuration={1200}
+                          />
+                          <Line 
+                            yAxisId="left" 
+                            type="monotone" 
+                            dataKey="ticket" 
+                            stroke="#8b5cf6" 
+                            strokeWidth={4} 
+                            dot={{ fill: '#8b5cf6', r: 7, strokeWidth: 3, stroke: '#fff' }} 
+                            activeDot={{ r: 9, strokeWidth: 3 }}
+                            name="Ticket Promedio"
+                            animationDuration={1500}
+                          />
                         </ComposedChart>
                       )}
                     </ResponsiveContainer>
