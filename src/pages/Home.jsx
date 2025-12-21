@@ -362,7 +362,7 @@ export default function Home() {
   // Si no está logueado, mostrar pantalla de login
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50/80 via-pink-50/30 to-purple-50/20 relative overflow-hidden flex items-center justify-center">
+      <div className="min-h-screen bg-white relative overflow-hidden flex items-center justify-center">
         <PastelConfetti />
         <FloatingIceCreamsBg />
         
