@@ -510,18 +510,20 @@ export default function Home() {
               </div>
             </motion.div>
 
-            {/* Selector de tienda - Centrado */}
-            <motion.div
-              className="mb-4 flex flex-col items-center"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}>
+            {/* Selector de tienda - Centrado (oculto para gerente) */}
+            {selectedRole && selectedRole !== 'gerente' && (
+              <motion.div
+                className="mb-4 flex flex-col items-center"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}>
 
-              <StoreSelector
-                selectedStore={pendingStore}
-                onStoreChange={handleStoreSelect} />
+                <StoreSelector
+                  selectedStore={pendingStore}
+                  onStoreChange={handleStoreSelect} />
 
-            </motion.div>
+              </motion.div>
+            )}
 
             {/* Campo de contraseña */}
             {selectedRole &&
