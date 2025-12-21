@@ -15,7 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
-  BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, ComposedChart,
+  BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, ComposedChart, Area, AreaChart,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from 'recharts';
 import { format, startOfMonth, startOfWeek, endOfWeek } from 'date-fns';
