@@ -1257,6 +1257,8 @@ INSTRUCCIONES:
             </motion.div>
           )}
           </AnimatePresence>
+            </>
+            )}
         </div>
       </div>
     </div>
