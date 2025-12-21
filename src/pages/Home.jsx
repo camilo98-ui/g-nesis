@@ -418,7 +418,7 @@ export default function Home() {
               <motion.img
                 src={LOGO_URL}
                 alt="Popsy"
-                className="h-20 object-contain mx-auto md:mx-0 cursor-pointer"
+                className="h-32 object-contain mx-auto md:mx-0 cursor-pointer"
                 whileHover={{ scale: 1.05 }}
                 onClick={() => setShowStory(true)} />
 
