@@ -228,8 +228,8 @@ Genera un pronóstico realista y accionable.`;
   }, [forecast, dailyAggregated]);
 
   const formatCurrency = (v) => new Intl.NumberFormat('es-CO', { 
-    style: 'currency', currency: 'COP', minimumFractionDigits: 0 
-  }).format(v);
+    style: 'currency', currency: 'COP', maximumFractionDigits: 0, minimumFractionDigits: 0 
+  }).format(Math.round(v));
 
   if (dailyAggregated.length < 7) {
     return (

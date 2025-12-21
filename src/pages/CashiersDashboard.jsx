@@ -316,7 +316,7 @@ export default function CashiersDashboard() {
                         <div className="bg-emerald-50 rounded-xl p-4 text-center">
                          <p className="text-xs text-gray-500 mb-1">💰 Venta Prom/Día</p>
                          <p className="text-lg font-black text-emerald-600">
-                           {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(cashierStats[selectedCashier.id]?.avgSalesPerDay || 0)}
+                           {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(Math.round(cashierStats[selectedCashier.id]?.avgSalesPerDay || 0))}
                          </p>
                          <p className="text-[9px] text-gray-400">{cashierStats[selectedCashier.id]?.daysWorked || 0} turnos</p>
                         </div>

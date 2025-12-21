@@ -224,8 +224,8 @@ export default function ExecutiveDashboard() {
   }, [filteredStores]);
 
   const formatCurrency = (v) => new Intl.NumberFormat('es-CO', { 
-    style: 'currency', currency: 'COP', minimumFractionDigits: 0
-  }).format(v);
+    style: 'currency', currency: 'COP', maximumFractionDigits: 0, minimumFractionDigits: 0
+  }).format(Math.round(v));
 
   const statusCounts = useMemo(() => ({
     positive: storesAnalysis.filter(s => s.status === 'positive').length,

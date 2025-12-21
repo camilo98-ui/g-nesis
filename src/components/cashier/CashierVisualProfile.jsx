@@ -202,7 +202,7 @@ export default function CashierVisualProfile({ cashier, storeCode, shiftRecords 
                 <div className="flex justify-between text-xs mb-1">
                   <span className="text-gray-500">Ventas</span>
                   <span className={stats.totalSales > teamAvg.avgSales ? 'text-emerald-600 font-bold' : 'text-red-500'}>
-                    {((stats.totalSales / teamAvg.avgSales) * 100 - 100).toFixed(0)}%
+                   {Math.round((stats.totalSales / teamAvg.avgSales) * 100 - 100)}%
                   </span>
                 </div>
                 <Progress value={Math.min(100, (stats.totalSales / teamAvg.avgSales) * 50)} className="h-2" />
@@ -211,7 +211,7 @@ export default function CashierVisualProfile({ cashier, storeCode, shiftRecords 
                 <div className="flex justify-between text-xs mb-1">
                   <span className="text-gray-500">Ticket Promedio</span>
                   <span className={stats.avgTicket > teamAvg.avgTicket ? 'text-emerald-600 font-bold' : 'text-red-500'}>
-                    {((stats.avgTicket / (teamAvg.avgTicket || 1)) * 100 - 100).toFixed(0)}%
+                   {Math.round((stats.avgTicket / (teamAvg.avgTicket || 1)) * 100 - 100)}%
                   </span>
                 </div>
                 <Progress value={Math.min(100, (stats.avgTicket / (teamAvg.avgTicket || 1)) * 50)} className="h-2" />

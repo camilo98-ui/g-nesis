@@ -189,7 +189,7 @@ INSTRUCCIONES:
   }, [cashierId, trendData.length]);
 
   const formatCurrency = (val) => new Intl.NumberFormat('es-CO', { 
-    style: 'currency', currency: 'COP', maximumFractionDigits: 0 
+    style: 'currency', currency: 'COP', maximumFractionDigits: 0, minimumFractionDigits: 0 
   }).format(Math.round(val));
 
   if (trendData.length === 0) {
