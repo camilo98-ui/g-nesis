@@ -715,6 +715,8 @@ INSTRUCCIONES:
             <StoresDetailView
               storesAnalysis={storesAnalysis}
               formatCurrency={formatCurrency}
+              allDailySales={allDailySales}
+              dateRange={activeRange}
             />
             )}
 
@@ -722,6 +724,8 @@ INSTRUCCIONES:
             <StoresDetailView
               storesAnalysis={storesAnalysis.filter(s => s.status === 'critical')}
               formatCurrency={formatCurrency}
+              allDailySales={allDailySales}
+              dateRange={activeRange}
             />
             )}
 
@@ -729,6 +733,8 @@ INSTRUCCIONES:
             <StoresDetailView
               storesAnalysis={storesAnalysis.filter(s => s.status === 'negative')}
               formatCurrency={formatCurrency}
+              allDailySales={allDailySales}
+              dateRange={activeRange}
             />
             )}
 

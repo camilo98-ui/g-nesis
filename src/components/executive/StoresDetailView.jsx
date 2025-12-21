@@ -5,10 +5,11 @@ import { Store, Search, TrendingUp, TrendingDown, CheckCircle, AlertTriangle, Fi
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-export default function StoresDetailView({ storesAnalysis, formatCurrency }) {
+export default function StoresDetailView({ storesAnalysis, formatCurrency, allDailySales, dateRange }) {
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState('salesCompliance');
   const [sortOrder, setSortOrder] = useState('desc');
+  const [selectedStore, setSelectedStore] = useState(null);
 
   const filteredStores = storesAnalysis
     .filter(s => s.name.toLowerCase().includes(search.toLowerCase()))
