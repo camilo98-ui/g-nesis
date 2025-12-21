@@ -1091,7 +1091,7 @@ INSTRUCCIONES:
                         <CardContent className="pt-4 pb-3">
                           <p className="text-xs text-indigo-600 font-semibold mb-1">Tiendas en Riesgo</p>
                           <p className="text-xl font-black text-indigo-900">{storesAnalysis.filter(s => s.projectionCompliance < 85).length}</p>
-                          <p className="text-[10px] text-gray-500 mt-1">Proyección <85%</p>
+                          <p className="text-[10px] text-gray-500 mt-1">Proyección {'<'}85%</p>
                         </CardContent>
                       </Card>
                       <Card className="border-violet-200 bg-gradient-to-br from-violet-50 to-white">
