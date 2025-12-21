@@ -69,6 +69,29 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
     }
   }, [existingRecords, formData.cashier_id, formData.date, formData.shift]);
 
+  const deleteMutation = useMutation({
+    mutationFn: async (recordId) => {
+      await base44.entities.ShiftRecord.delete(recordId);
+      return recordId;
+    },
+    onSuccess: () => {
+      queryClient.removeQueries();
+      queryClient.clear();
+      queryClient.refetchQueries({ queryKey: ['shiftRecords'] });
+      toast.success('✅ Turno eliminado correctamente');
+      setEditingRecord(null);
+      setFormData({
+        cashier_id: '',
+        date: new Date().toISOString().split('T')[0],
+        shift: 'morning',
+        sales: '',
+        tickets: '',
+        transactions: '',
+        suggested_sales: ''
+      });
+    }
+  });
+
   const createMutation = useMutation({
     mutationFn: async (data) => {
       const cashier = cashiers.find(c => c.id === data.cashier_id);
@@ -436,33 +459,67 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
             </motion.div>
           </div>
 
-          {/* Botón Guardar */}
+          {/* Botones Guardar y Eliminar */}
           <motion.div 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.45 }}
-            whileHover={{ scale: 1.02 }} 
-            whileTap={{ scale: 0.98 }}
+            className="flex gap-3"
           >
-            <Button 
-              type="submit" 
-              disabled={createMutation.isPending}
-              className={`w-full ${editingRecord ? 'bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-500 hover:from-amber-600 hover:via-yellow-600 hover:to-amber-600' : 'bg-gradient-to-r from-violet-500 via-purple-500 to-violet-500 hover:from-violet-600 hover:via-purple-600 hover:to-violet-600'} text-white shadow-lg hover:shadow-xl py-7 text-lg font-bold rounded-[20px] transition-all`}
+            {editingRecord && (
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="flex-1"
+              >
+                <Button
+                  type="button"
+                  onClick={() => {
+                    if (confirm('¿Seguro que deseas eliminar este turno?')) {
+                      deleteMutation.mutate(editingRecord.id);
+                    }
+                  }}
+                  disabled={deleteMutation.isPending}
+                  className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-lg hover:shadow-xl py-7 text-lg font-bold rounded-[20px] transition-all"
+                >
+                  {deleteMutation.isPending ? (
+                    <span className="flex items-center justify-center gap-3">
+                      <Loader2 className="w-6 h-6 animate-spin" />
+                      Eliminando...
+                    </span>
+                  ) : (
+                    <span className="flex items-center justify-center gap-3">
+                      🗑️ Eliminar
+                    </span>
+                  )}
+                </Button>
+              </motion.div>
+            )}
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className={editingRecord ? 'flex-1' : 'w-full'}
             >
-              {createMutation.isPending ? (
-                <span className="flex items-center justify-center gap-3">
-                  <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}>
-                    <Loader2 className="w-6 h-6" />
-                  </motion.div>
-                  {editingRecord ? 'Actualizando...' : 'Guardando...'}
-                </span>
-              ) : (
-                <span className="flex items-center justify-center gap-3">
-                  <Save className="w-6 h-6" />
-                  {editingRecord ? 'Actualizar Turno' : 'Guardar Turno'}
-                </span>
-              )}
-            </Button>
+              <Button 
+                type="submit" 
+                disabled={createMutation.isPending}
+                className={`w-full ${editingRecord ? 'bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-500 hover:from-amber-600 hover:via-yellow-600 hover:to-amber-600' : 'bg-gradient-to-r from-violet-500 via-purple-500 to-violet-500 hover:from-violet-600 hover:via-purple-600 hover:to-violet-600'} text-white shadow-lg hover:shadow-xl py-7 text-lg font-bold rounded-[20px] transition-all`}
+              >
+                {createMutation.isPending ? (
+                  <span className="flex items-center justify-center gap-3">
+                    <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}>
+                      <Loader2 className="w-6 h-6" />
+                    </motion.div>
+                    {editingRecord ? 'Actualizando...' : 'Guardando...'}
+                  </span>
+                ) : (
+                  <span className="flex items-center justify-center gap-3">
+                    <Save className="w-6 h-6" />
+                    {editingRecord ? 'Actualizar' : 'Guardar'}
+                  </span>
+                )}
+              </Button>
+            </motion.div>
           </motion.div>
         </form>
       </motion.div>
