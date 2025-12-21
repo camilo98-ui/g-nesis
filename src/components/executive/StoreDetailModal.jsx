@@ -39,6 +39,7 @@ export default function StoreDetailModal({ store, onClose, allDailySales, dateRa
       return {
         date: format(day, 'dd/MM', { locale: es }),
         fullDate: dayStr,
+        dayOfWeek: format(day, 'EEEE', { locale: es }),
         sales,
         tickets,
         transactions,
@@ -51,10 +52,30 @@ export default function StoreDetailModal({ store, onClose, allDailySales, dateRa
   const salesVsTransactions = useMemo(() => {
     return dailyData.map(d => ({
       date: d.date,
+      dayOfWeek: d.dayOfWeek,
       ventas: d.sales,
       transacciones: d.transactions
     }));
   }, [dailyData]);
+
+  // Tooltip personalizado
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-200">
+          <p className="text-xs font-semibold text-gray-900 mb-1 capitalize">{data.dayOfWeek}</p>
+          <p className="text-xs text-gray-500 mb-2">{label}</p>
+          {payload.map((entry, index) => (
+            <p key={index} className="text-xs font-medium" style={{ color: entry.color }}>
+              {entry.name}: {entry.name.includes('Venta') || entry.name.includes('Ticket') ? formatCurrency(entry.value) : entry.value.toLocaleString()}
+            </p>
+          ))}
+        </div>
+      );
+    }
+    return null;
+  };
 
   // Totales
   const totals = useMemo(() => {
@@ -230,10 +251,7 @@ export default function StoreDetailModal({ store, onClose, allDailySales, dateRa
                         tickFormatter={(v) => `$${(v/1000).toFixed(0)}k`} 
                         tick={{ fontSize: 11, fill: '#6b7280' }}
                       />
-                      <Tooltip 
-                        formatter={(v) => formatCurrency(v)}
-                        contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb' }}
-                      />
+                      <Tooltip content={<CustomTooltip />} />
                       <Line 
                         type="monotone" 
                         dataKey="avgTicket" 
@@ -275,10 +293,7 @@ export default function StoreDetailModal({ store, onClose, allDailySales, dateRa
                         orientation="right"
                         tick={{ fontSize: 11, fill: '#6b7280' }}
                       />
-                      <Tooltip 
-                        formatter={(v, name) => name === 'ventas' ? formatCurrency(v) : v.toLocaleString()}
-                        contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb' }}
-                      />
+                      <Tooltip content={<CustomTooltip />} />
                       <Legend />
                       <Bar 
                         yAxisId="left"
