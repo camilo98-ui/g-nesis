@@ -616,7 +616,8 @@ INSTRUCCIONES:
               </ResponsiveContainer>
             </CardContent>
           </Card>
-        </div>
+            </div>
+          )}
 
           {/* Stores at Risk */}
           {!isLoading && salesForecast.filter(s => s.willMissTarget).length > 0 && (
@@ -669,10 +670,10 @@ INSTRUCCIONES:
                 ))}
               </div>
             </CardContent>
-          </Card>
-        )}
+            </Card>
+            )}
 
-          {/* Detail Table */}
+            {/* Detail Table */}
           {!isLoading && (
             <Card className="border-slate-100 shadow-sm">
               <CardHeader className="border-b border-slate-100">
