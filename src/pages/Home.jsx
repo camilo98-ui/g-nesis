@@ -487,9 +487,16 @@ export default function Home() {
                     <motion.button
                       key={role.id}
                       initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.4 + idx * 0.1 }}
-                      whileHover={{ scale: 1.01 }}
+                      animate={{ 
+                        opacity: 1, 
+                        y: 0,
+                        scale: isSelected ? 1.02 : 1
+                      }}
+                      transition={{ 
+                        delay: 0.4 + idx * 0.1,
+                        scale: { duration: 0.12, ease: "easeOut" }
+                      }}
+                      whileHover={{ scale: isSelected ? 1.02 : 1.01 }}
                       whileTap={{ scale: 0.99 }}
                       onClick={() => {setSelectedRole(role.id);setLoginError('');}}
                       className={`relative w-full p-4 rounded-xl transition-all duration-150 text-left ${
@@ -607,6 +614,27 @@ export default function Home() {
                   animate={{ opacity: 1, y: 0 }}
                   className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
                   <p className="text-red-600 text-sm font-medium">{loginError}</p>
+                </motion.div>
+              )}
+
+              {/* Contexto de confirmación */}
+              {selectedRole && (selectedRole === 'gerente' || pendingStore) && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mb-4 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
+                  <p className="text-sm text-gray-700">
+                    <span className="font-semibold text-blue-900">Entrarás como:</span>{' '}
+                    {ROLES.find(r => r.id === selectedRole)?.name}
+                    {pendingStore && (
+                      <>
+                        {' '}<span className="text-gray-400">–</span>{' '}
+                        <span className="font-medium text-blue-800">
+                          {STORES.find(s => s.code === pendingStore)?.displayName || pendingStore}
+                        </span>
+                      </>
+                    )}
+                  </p>
                 </motion.div>
               )}
 
