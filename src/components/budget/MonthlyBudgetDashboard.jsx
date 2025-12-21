@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { X, Plus, Edit2, Trash2, TrendingUp, Target, Calendar, DollarSign, Save } from 'lucide-react';
+import { X, Plus, Edit2, Trash2, TrendingUp, Target, Calendar, DollarSign, Save, Receipt, Zap, Gift } from 'lucide-react';
 import { toast } from 'sonner';
 import { format, startOfYear, endOfYear, eachMonthOfInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -17,7 +17,10 @@ export default function MonthlyBudgetDashboard({ storeId, storeName, isOpen, onC
   const [formData, setFormData] = useState({
     month: new Date().getMonth() + 1,
     year: new Date().getFullYear(),
-    sales_budget: ''
+    sales_budget: '',
+    tickets_budget: '',
+    transactions_budget: '',
+    suggested_budget: ''
   });
 
   // Fetch budgets
@@ -72,7 +75,10 @@ export default function MonthlyBudgetDashboard({ storeId, storeName, isOpen, onC
     setFormData({
       month: new Date().getMonth() + 1,
       year: new Date().getFullYear(),
-      sales_budget: ''
+      sales_budget: '',
+      tickets_budget: '',
+      transactions_budget: '',
+      suggested_budget: ''
     });
   };
 
@@ -81,7 +87,10 @@ export default function MonthlyBudgetDashboard({ storeId, storeName, isOpen, onC
     setFormData({
       month: budget.month,
       year: budget.year,
-      sales_budget: budget.sales_budget
+      sales_budget: budget.sales_budget,
+      tickets_budget: budget.tickets_budget || '',
+      transactions_budget: budget.transactions_budget || '',
+      suggested_budget: budget.suggested_budget || ''
     });
     setShowForm(true);
   };
@@ -171,7 +180,10 @@ export default function MonthlyBudgetDashboard({ storeId, storeName, isOpen, onC
                       setFormData({
                         month: new Date().getMonth() + 1,
                         year: new Date().getFullYear(),
-                        sales_budget: ''
+                        sales_budget: '',
+                        tickets_budget: '',
+                        transactions_budget: '',
+                        suggested_budget: ''
                       });
                       setShowForm(true);
                     }}
@@ -233,7 +245,7 @@ export default function MonthlyBudgetDashboard({ storeId, storeName, isOpen, onC
                     <h3 className="text-lg font-bold text-gray-800 mb-4">
                       {editingBudget ? 'Editar Presupuesto' : 'Nuevo Presupuesto'}
                     </h3>
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-2 gap-4 mb-4">
                       <div>
                         <label className="text-sm font-medium text-gray-700 mb-1 block">Mes</label>
                         <select
@@ -257,14 +269,56 @@ export default function MonthlyBudgetDashboard({ storeId, storeName, isOpen, onC
                           className="border-gray-300"
                         />
                       </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="text-sm font-medium text-gray-700 mb-1 block">Presupuesto</label>
+                        <label className="text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                          <DollarSign className="w-4 h-4 text-pink-500" />
+                          Presupuesto de Ventas
+                        </label>
                         <Input
                           type="number"
                           value={formData.sales_budget}
                           onChange={(e) => setFormData({ ...formData, sales_budget: parseFloat(e.target.value) })}
                           placeholder="250000000"
-                          className="border-gray-300"
+                          className="border-pink-300 focus:border-pink-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                          💳 Presupuesto de Ticket Promedio
+                        </label>
+                        <Input
+                          type="number"
+                          value={formData.tickets_budget}
+                          onChange={(e) => setFormData({ ...formData, tickets_budget: parseFloat(e.target.value) })}
+                          placeholder="35000"
+                          className="border-blue-300 focus:border-blue-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                          ⚡ Presupuesto de Transacciones
+                        </label>
+                        <Input
+                          type="number"
+                          value={formData.transactions_budget}
+                          onChange={(e) => setFormData({ ...formData, transactions_budget: parseFloat(e.target.value) })}
+                          placeholder="7500"
+                          className="border-purple-300 focus:border-purple-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                          🎁 Presupuesto de Sugeridos
+                        </label>
+                        <Input
+                          type="number"
+                          value={formData.suggested_budget}
+                          onChange={(e) => setFormData({ ...formData, suggested_budget: parseFloat(e.target.value) })}
+                          placeholder="1500"
+                          className="border-rose-300 focus:border-rose-500"
                         />
                       </div>
                     </div>
@@ -355,18 +409,36 @@ export default function MonthlyBudgetDashboard({ storeId, storeName, isOpen, onC
                                 <h4 className="font-bold text-gray-800">
                                   {format(new Date(budget.year, budget.month - 1), 'MMMM yyyy', { locale: es })}
                                 </h4>
-                                <div className="grid grid-cols-3 gap-4 mt-2">
-                                  <div>
-                                    <p className="text-xs text-gray-500">Presupuesto</p>
-                                    <p className="text-sm font-bold text-sky-600">{formatCurrency(budget.sales_budget)}</p>
+                                <div className="grid grid-cols-2 gap-3 mt-2 text-xs">
+                                  <div className="bg-pink-50 rounded-lg p-2">
+                                    <p className="text-gray-500 mb-0.5">💰 Ventas</p>
+                                    <p className="font-bold text-pink-600">{formatCurrency(budget.sales_budget)}</p>
                                   </div>
-                                  <div>
-                                    <p className="text-xs text-gray-500">Real</p>
-                                    <p className="text-sm font-bold text-emerald-600">{formatCurrency(monthSales)}</p>
+                                  {budget.tickets_budget > 0 && (
+                                    <div className="bg-blue-50 rounded-lg p-2">
+                                      <p className="text-gray-500 mb-0.5">💳 Ticket Prom.</p>
+                                      <p className="font-bold text-blue-600">{formatCurrency(budget.tickets_budget)}</p>
+                                    </div>
+                                  )}
+                                  {budget.transactions_budget > 0 && (
+                                    <div className="bg-purple-50 rounded-lg p-2">
+                                      <p className="text-gray-500 mb-0.5">⚡ Transacciones</p>
+                                      <p className="font-bold text-purple-600">{budget.transactions_budget.toLocaleString()}</p>
+                                    </div>
+                                  )}
+                                  {budget.suggested_budget > 0 && (
+                                    <div className="bg-rose-50 rounded-lg p-2">
+                                      <p className="text-gray-500 mb-0.5">🎁 Sugeridos</p>
+                                      <p className="font-bold text-rose-600">{budget.suggested_budget.toLocaleString()}</p>
+                                    </div>
+                                  )}
+                                  <div className="bg-emerald-50 rounded-lg p-2">
+                                    <p className="text-gray-500 mb-0.5">Venta Real</p>
+                                    <p className="font-bold text-emerald-600">{formatCurrency(monthSales)}</p>
                                   </div>
-                                  <div>
-                                    <p className="text-xs text-gray-500">Cumplimiento</p>
-                                    <p className={`text-sm font-bold ${compliance >= 100 ? 'text-green-600' : 'text-amber-600'}`}>
+                                  <div className="bg-gray-50 rounded-lg p-2">
+                                    <p className="text-gray-500 mb-0.5">Cumplimiento</p>
+                                    <p className={`font-bold ${compliance >= 100 ? 'text-green-600' : 'text-amber-600'}`}>
                                       {compliance}%
                                     </p>
                                   </div>
