@@ -134,7 +134,7 @@ export default function StoreDetailModal({ store, onClose, allDailySales, dateRa
 
           <div className="p-6 max-h-[80vh] overflow-y-auto">
             {/* KPIs */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               <div className="p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <div className="p-2 rounded-lg bg-blue-100">
@@ -145,19 +145,6 @@ export default function StoreDetailModal({ store, onClose, allDailySales, dateRa
                 <p className="text-xl font-bold text-gray-900">{formatCurrency(totals.totalSales)}</p>
                 <p className="text-xs text-gray-400 mt-1">
                   Promedio: {formatCurrency(totals.avgDailySales)}/día
-                </p>
-              </div>
-
-              <div className="p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="p-2 rounded-lg bg-purple-100">
-                    <Receipt className="w-4 h-4 text-purple-600" />
-                  </div>
-                  <p className="text-xs text-gray-500 font-semibold">Tickets</p>
-                </div>
-                <p className="text-xl font-bold text-gray-900">{totals.totalTickets.toLocaleString()}</p>
-                <p className="text-xs text-gray-400 mt-1">
-                  {totals.daysWithSales} días con venta
                 </p>
               </div>
 
