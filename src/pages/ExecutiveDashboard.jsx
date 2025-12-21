@@ -24,7 +24,7 @@ import KPIsDetailView from '../components/executive/KPIsDetailView';
 import ChartsDetailView from '../components/executive/ChartsDetailView';
 import StoresDetailView from '../components/executive/StoresDetailView';
 
-const COLORS = ['#ec4899', '#f472b6', '#f9a8d4', '#8b5cf6', '#a78bfa', '#c4b5fd', '#fbbf24'];
+const COLORS = ['#3b82f6', '#60a5fa', '#93c5fd', '#dbeafe', '#1d4ed8', '#2563eb', '#1e40af'];
 
 // Skeleton Loader
 const KPISkeleton = () => (
@@ -48,49 +48,33 @@ const ChartSkeleton = () => (
   </Card>
 );
 
-const ExecutiveKPI = ({ title, value, subtitle, icon: Icon, trend, status = 'neutral', onClick }) => {
-  const statusColors = {
-    success: 'from-emerald-500/10 to-green-500/5 border-emerald-200/50 text-emerald-700',
-    warning: 'from-amber-500/10 to-yellow-500/5 border-amber-200/50 text-amber-700',
-    danger: 'from-rose-500/10 to-red-500/5 border-rose-200/50 text-rose-700',
-    neutral: 'from-slate-500/10 to-gray-500/5 border-slate-200/50 text-slate-700'
-  };
-
-  const statusIconColors = {
-    success: 'text-emerald-600',
-    warning: 'text-amber-600',
-    danger: 'text-rose-600',
-    neutral: 'text-slate-600'
+const ExecutiveKPI = ({ title, value, subtitle, icon: Icon, badge, badgeColor = 'blue' }) => {
+  const badgeColors = {
+    blue: 'bg-blue-50 text-blue-700 border-blue-200',
+    green: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    amber: 'bg-amber-50 text-amber-700 border-amber-200',
+    red: 'bg-red-50 text-red-700 border-red-200'
   };
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -4 }}
-      onClick={onClick}
-      className={`cursor-pointer bg-gradient-to-br ${statusColors[status]} rounded-3xl p-8 border backdrop-blur-sm shadow-sm hover:shadow-xl transition-all duration-300`}
+      className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200"
     >
-      <div className="flex items-start justify-between mb-6">
-        <div className={`p-3 rounded-2xl bg-white/80 ${statusIconColors[status]}`}>
-          <Icon className="w-6 h-6" />
+      <div className="flex items-center justify-between mb-4">
+        <div className="p-2.5 rounded-lg bg-blue-50">
+          <Icon className="w-5 h-5 text-blue-600" />
         </div>
-        {trend !== undefined && (
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-bold ${
-              trend >= 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'
-            }`}
-          >
-            {trend >= 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
-            {trend >= 0 ? '+' : ''}{trend.toFixed(1)}%
-          </motion.div>
+        {badge && (
+          <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${badgeColors[badgeColor]}`}>
+            {badge}
+          </span>
         )}
       </div>
-      <p className="text-sm font-semibold text-slate-600 mb-2">{title}</p>
-      <p className="text-4xl font-black text-slate-900 mb-2">{value}</p>
-      <p className="text-sm text-slate-500 font-medium">{subtitle}</p>
+      <p className="text-sm font-medium text-gray-600 mb-2">{title}</p>
+      <p className="text-3xl font-bold text-gray-900 mb-1">{value}</p>
+      <p className="text-xs text-gray-500">{subtitle}</p>
     </motion.div>
   );
 };
@@ -427,141 +411,141 @@ INSTRUCCIONES:
   }, [storesAnalysis, salesForecast, zoneTotals, statusCounts, formatCurrency]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100/30 flex">
+    <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
       <motion.aside
         initial={{ x: -300 }}
         animate={{ x: sidebarOpen ? 0 : -280 }}
-        className="fixed left-0 top-0 h-full bg-white border-r border-slate-200 shadow-lg z-40"
+        className="fixed left-0 top-0 h-full bg-white border-r border-gray-200 z-40"
         style={{ width: '280px' }}
       >
         <div className="p-6">
           <Link to={createPageUrl('Home')}>
             <motion.div whileHover={{ scale: 1.02 }} className="flex items-center gap-3 mb-8 cursor-pointer">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center">
                 <Store className="w-5 h-5 text-white" />
               </div>
               <div>
-                <p className="text-sm font-black text-slate-900">Popsy</p>
-                <p className="text-xs text-slate-500">Panel Ejecutivo</p>
+                <p className="text-sm font-bold text-gray-900">Popsy</p>
+                <p className="text-xs text-gray-500">Panel Ejecutivo</p>
               </div>
             </motion.div>
           </Link>
 
           <nav className="space-y-1">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider px-4 mb-2">Vistas</p>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-4 mb-2">Vistas</p>
             <motion.div
-              whileHover={{ x: 4 }}
+              whileHover={{ x: 3 }}
               onClick={() => setActiveView('general')}
-              className={`px-4 py-3 rounded-xl cursor-pointer transition-colors ${
-                activeView === 'general' ? 'bg-slate-100 border border-slate-200' : 'hover:bg-slate-50'
+              className={`px-4 py-2.5 rounded-lg cursor-pointer transition-colors ${
+                activeView === 'general' ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-50 text-gray-700'
               }`}
             >
               <div className="flex items-center gap-3">
-                <Activity className="w-4 h-4 text-slate-700" />
-                <span className={`text-sm ${activeView === 'general' ? 'font-bold text-slate-900' : 'font-medium text-slate-700'}`}>
+                <Activity className="w-4 h-4" />
+                <span className={`text-sm ${activeView === 'general' ? 'font-semibold' : 'font-medium'}`}>
                   Resumen General
                 </span>
               </div>
             </motion.div>
 
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider px-4 mt-4 mb-2">Análisis</p>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-4 mt-4 mb-2">Análisis</p>
             <motion.div
-              whileHover={{ x: 4 }}
+              whileHover={{ x: 3 }}
               onClick={() => setActiveView('kpis')}
-              className={`px-4 py-2.5 rounded-xl cursor-pointer transition-colors ${
-                activeView === 'kpis' ? 'bg-slate-100 border border-slate-200' : 'hover:bg-slate-50'
+              className={`px-4 py-2.5 rounded-lg cursor-pointer transition-colors ${
+                activeView === 'kpis' ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-50 text-gray-700'
               }`}
             >
               <div className="flex items-center gap-3">
-                <Target className="w-4 h-4 text-slate-600" />
-                <span className={`text-sm ${activeView === 'kpis' ? 'font-bold text-slate-900' : 'font-medium text-slate-700'}`}>
+                <Target className="w-4 h-4" />
+                <span className={`text-sm ${activeView === 'kpis' ? 'font-semibold' : 'font-medium'}`}>
                   KPIs Ejecutivos
                 </span>
               </div>
             </motion.div>
             <motion.div
-              whileHover={{ x: 4 }}
+              whileHover={{ x: 3 }}
               onClick={() => setActiveView('charts')}
-              className={`px-4 py-2.5 rounded-xl cursor-pointer transition-colors ${
-                activeView === 'charts' ? 'bg-slate-100 border border-slate-200' : 'hover:bg-slate-50'
+              className={`px-4 py-2.5 rounded-lg cursor-pointer transition-colors ${
+                activeView === 'charts' ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-50 text-gray-700'
               }`}
             >
               <div className="flex items-center gap-3">
-                <BarChart3 className="w-4 h-4 text-slate-600" />
-                <span className={`text-sm ${activeView === 'charts' ? 'font-bold text-slate-900' : 'font-medium text-slate-700'}`}>
+                <BarChart3 className="w-4 h-4" />
+                <span className={`text-sm ${activeView === 'charts' ? 'font-semibold' : 'font-medium'}`}>
                   Análisis Visual
                 </span>
               </div>
             </motion.div>
             <motion.div
-              whileHover={{ x: 4 }}
+              whileHover={{ x: 3 }}
               onClick={() => setActiveView('stores')}
-              className={`px-4 py-2.5 rounded-xl cursor-pointer transition-colors ${
-                activeView === 'stores' ? 'bg-slate-100 border border-slate-200' : 'hover:bg-slate-50'
+              className={`px-4 py-2.5 rounded-lg cursor-pointer transition-colors ${
+                activeView === 'stores' ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-50 text-gray-700'
               }`}
             >
               <div className="flex items-center gap-3">
-                <Store className="w-4 h-4 text-slate-600" />
-                <span className={`text-sm ${activeView === 'stores' ? 'font-bold text-slate-900' : 'font-medium text-slate-700'}`}>
+                <Store className="w-4 h-4" />
+                <span className={`text-sm ${activeView === 'stores' ? 'font-semibold' : 'font-medium'}`}>
                   Detalle por Tienda
                 </span>
               </div>
             </motion.div>
 
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider px-4 mt-4 mb-2">Alertas</p>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-4 mt-4 mb-2">Alertas</p>
             <motion.div
-              whileHover={{ x: 4 }}
+              whileHover={{ x: 3 }}
               onClick={() => setActiveView('critical')}
-              className={`px-4 py-2.5 rounded-xl cursor-pointer transition-colors group ${
-                activeView === 'critical' ? 'bg-rose-50 border border-rose-200' : 'hover:bg-rose-50'
+              className={`px-4 py-2.5 rounded-lg cursor-pointer transition-colors ${
+                activeView === 'critical' ? 'bg-red-50 text-red-700' : 'hover:bg-gray-50 text-gray-700'
               }`}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <AlertTriangle className="w-4 h-4 text-rose-600" />
-                  <span className={`text-sm ${activeView === 'critical' ? 'font-bold text-rose-700' : 'font-medium text-slate-700 group-hover:text-rose-700'}`}>
+                  <AlertTriangle className="w-4 h-4" />
+                  <span className={`text-sm ${activeView === 'critical' ? 'font-semibold' : 'font-medium'}`}>
                     Tiendas Críticas
                   </span>
                 </div>
                 {statusCounts.critical > 0 && (
-                  <span className="bg-rose-100 text-rose-700 text-xs font-bold px-2 py-0.5 rounded-full">
+                  <span className="bg-red-100 text-red-700 text-xs font-semibold px-2 py-0.5 rounded-full">
                     {statusCounts.critical}
                   </span>
                 )}
               </div>
             </motion.div>
             <motion.div
-              whileHover={{ x: 4 }}
+              whileHover={{ x: 3 }}
               onClick={() => setActiveView('alert')}
-              className={`px-4 py-2.5 rounded-xl cursor-pointer transition-colors group ${
-                activeView === 'alert' ? 'bg-amber-50 border border-amber-200' : 'hover:bg-amber-50'
+              className={`px-4 py-2.5 rounded-lg cursor-pointer transition-colors ${
+                activeView === 'alert' ? 'bg-amber-50 text-amber-700' : 'hover:bg-gray-50 text-gray-700'
               }`}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <TrendingDown className="w-4 h-4 text-amber-600" />
-                  <span className={`text-sm ${activeView === 'alert' ? 'font-bold text-amber-700' : 'font-medium text-slate-700 group-hover:text-amber-700'}`}>
+                  <TrendingDown className="w-4 h-4" />
+                  <span className={`text-sm ${activeView === 'alert' ? 'font-semibold' : 'font-medium'}`}>
                     En Alerta
                   </span>
                 </div>
                 {statusCounts.negative > 0 && (
-                  <span className="bg-amber-100 text-amber-700 text-xs font-bold px-2 py-0.5 rounded-full">
+                  <span className="bg-amber-100 text-amber-700 text-xs font-semibold px-2 py-0.5 rounded-full">
                     {statusCounts.negative}
                   </span>
                 )}
               </div>
             </motion.div>
 
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider px-4 mt-4 mb-2">Acciones</p>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-4 mt-4 mb-2">Acciones</p>
             <Link to={createPageUrl('Home')}>
               <motion.div
-                whileHover={{ x: 4 }}
-                className="px-4 py-2.5 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors"
+                whileHover={{ x: 3 }}
+                className="px-4 py-2.5 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors text-gray-700"
               >
                 <div className="flex items-center gap-3">
-                  <ArrowLeft className="w-4 h-4 text-slate-600" />
-                  <span className="text-sm font-medium text-slate-700">Volver a Tiendas</span>
+                  <ArrowLeft className="w-4 h-4" />
+                  <span className="text-sm font-medium">Volver a Tiendas</span>
                 </div>
               </motion.div>
             </Link>
@@ -569,12 +553,12 @@ INSTRUCCIONES:
         </div>
 
         <div className="absolute bottom-6 left-6 right-6">
-          <div className="p-4 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 border border-slate-300">
-            <div className="flex items-center gap-2 text-xs text-slate-600 mb-1">
+          <div className="p-3 rounded-lg bg-gray-50 border border-gray-200">
+            <div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
               <Clock className="w-3 h-3" />
               <span>Última actualización</span>
             </div>
-            <p className="text-xs font-bold text-slate-900">{format(new Date(), 'HH:mm - dd MMM yyyy', { locale: es })}</p>
+            <p className="text-xs font-semibold text-gray-900">{format(new Date(), 'HH:mm - dd MMM yyyy', { locale: es })}</p>
           </div>
         </div>
       </motion.aside>
@@ -606,29 +590,12 @@ INSTRUCCIONES:
                 <Menu className="w-5 h-5 text-slate-600" />
               </Button>
               <div>
-                <h1 className="text-3xl font-black text-slate-900">
+                <h1 className="text-2xl font-bold text-gray-900">
                   Dashboard Ejecutivo
                 </h1>
-                <p className="text-sm text-slate-500 font-medium">
-                  Vista consolidada · {format(new Date(), 'EEEE, dd MMMM yyyy', { locale: es })}
+                <p className="text-sm text-gray-500 mt-1">
+                  {format(new Date(), 'EEEE, dd MMMM yyyy', { locale: es })}
                 </p>
-                {!isLoading && autoInsight && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className={`mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold ${
-                      autoInsight.type === 'danger' ? 'bg-rose-100 text-rose-700 border border-rose-200' :
-                      autoInsight.type === 'warning' ? 'bg-amber-100 text-amber-700 border border-amber-200' :
-                      autoInsight.type === 'success' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' :
-                      'bg-slate-100 text-slate-700 border border-slate-200'
-                    }`}
-                  >
-                    <span className="text-lg">{autoInsight.icon}</span>
-                    <div>
-                      <span className="font-black">{autoInsight.title}:</span> {autoInsight.message}
-                    </div>
-                  </motion.div>
-                )}
               </div>
             </div>
 
@@ -679,149 +646,73 @@ INSTRUCCIONES:
             {/* General View */}
             {activeView === 'general' && (
             <>
-            {/* Cuadro Maestro de Estado de la Zona */}
+            {/* Estado General Badge */}
+            {!isLoading && autoInsight && (
+              <motion.div
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6"
+              >
+                <div className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold border ${
+                  autoInsight.type === 'danger' ? 'bg-red-50 text-red-700 border-red-200' :
+                  autoInsight.type === 'warning' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                  autoInsight.type === 'success' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                  'bg-gray-50 text-gray-700 border-gray-200'
+                }`}>
+                  <span className="text-base">{autoInsight.icon}</span>
+                  <span>{autoInsight.title}:</span>
+                  <span className="font-normal">{autoInsight.message}</span>
+                </div>
+              </motion.div>
+            )}
+
+            {/* KPIs Principales */}
           {isLoading ? (
-            <KPISkeleton />
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+              {[1, 2, 3, 4, 5].map((i) => <KPISkeleton key={i} />)}
+            </div>
           ) : zoneStatus && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mb-8"
-            >
-              <Card className={`border-2 shadow-xl ${
-                zoneStatus.verdict === 'danger' ? 'border-rose-300 bg-gradient-to-br from-rose-50 to-red-50' :
-                zoneStatus.verdict === 'warning' ? 'border-amber-300 bg-gradient-to-br from-amber-50 to-yellow-50' :
-                'border-emerald-300 bg-gradient-to-br from-emerald-50 to-green-50'
-              }`}>
-                <CardContent className="p-6">
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* Veredicto Principal */}
-                    <div className="lg:col-span-1 flex flex-col justify-center items-center border-r border-slate-200">
-                      <motion.div
-                        animate={zoneStatus.alertActive ? {
-                          scale: [1, 1.05, 1],
-                          rotate: [0, -2, 2, 0]
-                        } : {}}
-                        transition={{ duration: 2, repeat: Infinity }}
-                        className={`w-24 h-24 rounded-full flex items-center justify-center text-4xl font-black mb-4 ${
-                          zoneStatus.verdict === 'danger' ? 'bg-rose-200 text-rose-700' :
-                          zoneStatus.verdict === 'warning' ? 'bg-amber-200 text-amber-700' :
-                          'bg-emerald-200 text-emerald-700'
-                        }`}
-                      >
-                        {zoneStatus.verdictIcon}
-                      </motion.div>
-                      <h2 className={`text-2xl font-black mb-2 ${
-                        zoneStatus.verdict === 'danger' ? 'text-rose-800' :
-                        zoneStatus.verdict === 'warning' ? 'text-amber-800' :
-                        'text-emerald-800'
-                      }`}>
-                        {zoneStatus.verdictLabel}
-                      </h2>
-                      <p className="text-sm text-slate-600 font-medium text-center">Estado de la Zona</p>
-                    </div>
-
-                    {/* Proyección y Brecha */}
-                    <div className="lg:col-span-1 space-y-4 border-r border-slate-200 pr-6">
-                      <div>
-                        <p className="text-xs text-slate-500 font-semibold mb-1">PROYECCIÓN MENSUAL</p>
-                        <div className="flex items-baseline gap-2">
-                          <p className="text-3xl font-black text-slate-900">{formatCurrency(zoneStatus.projection)}</p>
-                          <p className={`text-lg font-bold ${
-                            zoneStatus.projectionCompliance >= 100 ? 'text-emerald-600' :
-                            zoneStatus.projectionCompliance >= 95 ? 'text-amber-600' :
-                            'text-rose-600'
-                          }`}>
-                            {zoneStatus.projectionCompliance.toFixed(1)}%
-                          </p>
-                        </div>
-                        <p className="text-xs text-slate-500 mt-1">Meta: {formatCurrency(zoneStatus.totalBudget)}</p>
-                      </div>
-
-                      <div className="h-3 bg-slate-200 rounded-full overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${Math.min(100, zoneStatus.projectionCompliance)}%` }}
-                          className={`h-full ${
-                            zoneStatus.verdict === 'danger' ? 'bg-gradient-to-r from-rose-500 to-red-600' :
-                            zoneStatus.verdict === 'warning' ? 'bg-gradient-to-r from-amber-500 to-yellow-600' :
-                            'bg-gradient-to-r from-emerald-500 to-green-600'
-                          }`}
-                        />
-                      </div>
-
-                      {zoneStatus.gap !== 0 && (
-                        <div className={`p-3 rounded-xl ${
-                          zoneStatus.gap > 0 ? 'bg-rose-100/50' : 'bg-emerald-100/50'
-                        }`}>
-                          <p className="text-xs text-slate-600 font-semibold">
-                            {zoneStatus.gap > 0 ? 'BRECHA PROYECTADA' : 'EXCEDENTE PROYECTADO'}
-                          </p>
-                          <p className={`text-xl font-black ${
-                            zoneStatus.gap > 0 ? 'text-rose-700' : 'text-emerald-700'
-                          }`}>
-                            {formatCurrency(Math.abs(zoneStatus.gap))}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Ritmo y Consolidado */}
-                    <div className="lg:col-span-1 space-y-4">
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="bg-white/60 p-3 rounded-xl border border-slate-200">
-                          <p className="text-[10px] text-slate-500 font-bold mb-1">RITMO ACTUAL</p>
-                          <p className="text-lg font-black text-slate-800">{formatCurrency(zoneStatus.currentDailyAvg)}</p>
-                          <p className="text-[10px] text-slate-500">por día</p>
-                        </div>
-                        <div className="bg-white/60 p-3 rounded-xl border border-slate-200">
-                          <p className="text-[10px] text-slate-500 font-bold mb-1">RITMO REQUERIDO</p>
-                          <p className={`text-lg font-black ${
-                            zoneStatus.dailyRequired > zoneStatus.currentDailyAvg * 1.2 ? 'text-rose-700' :
-                            zoneStatus.dailyRequired > zoneStatus.currentDailyAvg ? 'text-amber-700' :
-                            'text-emerald-700'
-                          }`}>
-                            {formatCurrency(zoneStatus.dailyRequired)}
-                          </p>
-                          <p className="text-[10px] text-slate-500">por día</p>
-                        </div>
-                      </div>
-
-                      <div className="bg-white/60 p-4 rounded-xl border border-slate-200">
-                        <p className="text-xs text-slate-600 font-bold mb-3">TIENDAS POR ESTADO</p>
-                        <div className="grid grid-cols-3 gap-2">
-                          <div className="text-center">
-                            <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-1">
-                              <span className="text-lg font-black text-emerald-700">{zoneStatus.storesOnTrack}</span>
-                            </div>
-                            <p className="text-[9px] text-slate-500 font-medium">En Meta</p>
-                          </div>
-                          <div className="text-center">
-                            <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-1">
-                              <span className="text-lg font-black text-amber-700">{zoneStatus.storesAlert}</span>
-                            </div>
-                            <p className="text-[9px] text-slate-500 font-medium">Alerta</p>
-                          </div>
-                          <div className="text-center">
-                            <div className="w-10 h-10 rounded-full bg-rose-100 flex items-center justify-center mx-auto mb-1">
-                              <span className="text-lg font-black text-rose-700">{zoneStatus.storesCritical}</span>
-                            </div>
-                            <p className="text-[9px] text-slate-500 font-medium">Críticas</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {zoneStatus.daysRemaining > 0 && (
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-slate-500">Días transcurridos:</span>
-                          <span className="font-bold text-slate-700">{zoneStatus.daysElapsed}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+              <ExecutiveKPI
+                title="Ventas Acumuladas"
+                value={formatCurrency(zoneTotals.totalSales)}
+                subtitle={`Meta: ${formatCurrency(zoneTotals.totalBudget)}`}
+                icon={DollarSign}
+                badge={`${((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%`}
+                badgeColor={zoneTotals.totalSales >= zoneTotals.totalBudget * 0.9 ? 'green' : zoneTotals.totalSales >= zoneTotals.totalBudget * 0.7 ? 'amber' : 'red'}
+              />
+              <ExecutiveKPI
+                title="Proyección Mensual"
+                value={formatCurrency(zoneStatus.projection)}
+                subtitle={`Meta: ${formatCurrency(zoneStatus.totalBudget)}`}
+                icon={Target}
+                badge={`${zoneStatus.projectionCompliance.toFixed(0)}%`}
+                badgeColor={zoneStatus.projectionCompliance >= 95 ? 'green' : zoneStatus.projectionCompliance >= 85 ? 'amber' : 'red'}
+              />
+              <ExecutiveKPI
+                title="Brecha vs Meta"
+                value={formatCurrency(Math.abs(zoneStatus.gap))}
+                subtitle={zoneStatus.gap > 0 ? 'Por recuperar' : 'Excedente'}
+                icon={TrendingUp}
+                badge={zoneStatus.gap > 0 ? 'Déficit' : 'Superávit'}
+                badgeColor={zoneStatus.gap > 0 ? 'red' : 'green'}
+              />
+              <ExecutiveKPI
+                title="Ritmo Diario"
+                value={formatCurrency(zoneStatus.currentDailyAvg)}
+                subtitle={`Requerido: ${formatCurrency(zoneStatus.dailyRequired)}`}
+                icon={Zap}
+                badge={`${zoneStatus.daysElapsed}/${zoneStatus.daysElapsed + zoneStatus.daysRemaining} días`}
+                badgeColor="blue"
+              />
+              <ExecutiveKPI
+                title="Tiendas Críticas"
+                value={statusCounts.critical}
+                subtitle={`${((statusCounts.critical/STORES.length)*100).toFixed(0)}% del total`}
+                icon={AlertTriangle}
+                badge={statusCounts.critical === 0 ? 'Sin riesgo' : 'Requiere acción'}
+                badgeColor={statusCounts.critical === 0 ? 'green' : 'red'}
+              />
           )}
 
           {/* KPIs Ejecutivos */}
