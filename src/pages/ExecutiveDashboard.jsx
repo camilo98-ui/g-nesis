@@ -713,9 +713,8 @@ INSTRUCCIONES:
                 badge={statusCounts.critical === 0 ? 'Sin riesgo' : 'Requiere acción'}
                 badgeColor={statusCounts.critical === 0 ? 'green' : 'red'}
               />
-          )}
-
             </div>
+          )}
 
           {/* Gráfica Principal */}
           {isLoading ? (
@@ -886,15 +885,6 @@ INSTRUCCIONES:
               </CardContent>
             </Card>
           )}
-
-          {/* Tabla Compacta */}
-          {isLoading ? (
-            <ChartSkeleton />
-          ) : (
-            <div id="charts-section" className="mb-8">
-
-
-
 
           {/* Tabla Compacta */}
           {!isLoading && (
