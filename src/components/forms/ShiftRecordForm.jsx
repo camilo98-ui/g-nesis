@@ -66,18 +66,8 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
       }));
     } else {
       setEditingRecord(null);
-      // Solo limpiar si había un registro cargado antes
-      if (formData.sales || formData.tickets || formData.transactions || formData.suggested_sales) {
-        setFormData(prev => ({
-          ...prev,
-          sales: '',
-          tickets: '',
-          transactions: '',
-          suggested_sales: ''
-        }));
-      }
     }
-  }, [existingRecords]);
+  }, [existingRecords, formData.cashier_id, formData.date, formData.shift]);
 
   const createMutation = useMutation({
     mutationFn: async (data) => {
@@ -87,6 +77,18 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
       const ticketsValue = parseInt(data.tickets) || 0;
       const transactionsValue = parseInt(data.transactions) || 0;
       const suggestedValue = parseInt(data.suggested_sales) || 0;
+      
+      // Calcular ticket promedio correctamente: ventas / transacciones
+      const avgTicket = transactionsValue > 0 ? salesValue / transactionsValue : 0;
+
+      // Datos del registro
+      const recordData = {
+        sales: salesValue,
+        tickets: ticketsValue,
+        transactions: transactionsValue,
+        suggested_sales: suggestedValue,
+        average_ticket: avgTicket
+      };
 
       // Verificar si ya existe un registro para este cajero, fecha y turno
       const existingRecords = await base44.entities.ShiftRecord.filter({ 
@@ -99,13 +101,8 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
       let record;
       if (existingRecords.length > 0) {
         // Actualizar el registro existente
-        record = await base44.entities.ShiftRecord.update(existingRecords[0].id, {
-          sales: salesValue,
-          tickets: ticketsValue,
-          transactions: transactionsValue,
-          suggested_sales: suggestedValue,
-          average_ticket: ticketsValue > 0 ? salesValue / ticketsValue : 0
-        });
+        record = await base44.entities.ShiftRecord.update(existingRecords[0].id, recordData);
+        console.log('✅ ShiftRecord actualizado:', record.id, recordData);
       } else {
         // Crear nuevo registro
         record = await base44.entities.ShiftRecord.create({
@@ -114,12 +111,9 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
           cashier_name: cashier?.name || '',
           date: data.date,
           shift: data.shift,
-          sales: salesValue,
-          tickets: ticketsValue,
-          transactions: transactionsValue,
-          suggested_sales: suggestedValue,
-          average_ticket: ticketsValue > 0 ? salesValue / ticketsValue : 0
+          ...recordData
         });
+        console.log('✅ ShiftRecord creado:', record.id, recordData);
       }
 
       // NO actualizar DailySales automáticamente desde ShiftRecord
@@ -145,8 +139,10 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
 
       return record;
     },
-    onSuccess: () => {
-      // Invalidar específicamente las queries de cajeros
+    onSuccess: (savedRecord) => {
+      console.log('✅ Registro guardado exitosamente:', savedRecord);
+      
+      // Invalidar TODAS las queries relevantes para forzar actualización
       queryClient.invalidateQueries({ queryKey: ['shiftRecords'] });
       queryClient.invalidateQueries({ queryKey: ['shiftRecord'] });
       queryClient.invalidateQueries({ queryKey: ['cashiers'] });
@@ -154,13 +150,13 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
       queryClient.invalidateQueries({ queryKey: ['badges'] });
       queryClient.invalidateQueries({ queryKey: ['salesLog'] });
       
-      // Forzar refresco inmediato
+      // Forzar refetch inmediato de datos del cajero
       queryClient.refetchQueries({ 
-        queryKey: ['shiftRecords'], 
-        type: 'active' 
+        queryKey: ['shiftRecords', storeId],
+        exact: false
       });
 
-      toast.success(editingRecord ? '¡Turno actualizado correctamente!' : '¡Turno registrado correctamente!');
+      toast.success(editingRecord ? '✅ Turno actualizado correctamente' : '✅ Turno registrado correctamente');
 
       setShowSuccess(true);
       setTimeout(() => {
