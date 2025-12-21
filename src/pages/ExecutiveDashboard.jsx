@@ -144,16 +144,16 @@ export default function ExecutiveDashboard() {
       const ticketsBudget = budget?.tickets_budget || 0;
       const transactionsBudget = budget?.transactions_budget || 0;
 
-      const salesCompliance = salesBudget > 0 ? (totalSales / salesBudget) * 100 : 0;
-      const ticketsCompliance = ticketsBudget > 0 ? (totalTickets / ticketsBudget) * 100 : 0;
-      const transactionsCompliance = transactionsBudget > 0 ? (totalTransactions / transactionsBudget) * 100 : 0;
+      const salesCompliance = salesBudget > 0 && totalSales >= 0 ? (totalSales / salesBudget) * 100 : 0;
+      const ticketsCompliance = ticketsBudget > 0 && totalTickets >= 0 ? (totalTickets / ticketsBudget) * 100 : 0;
+      const transactionsCompliance = transactionsBudget > 0 && totalTransactions >= 0 ? (totalTransactions / transactionsBudget) * 100 : 0;
 
       // Proyección sobre días del período
       const daysElapsed = Math.max(1, storeSales.length);
       const daysInPeriod = Math.max(1, Math.ceil((activeRange.to - activeRange.from) / (1000 * 60 * 60 * 24)));
-      const dailyAvg = totalSales / daysElapsed;
+      const dailyAvg = daysElapsed > 0 ? totalSales / daysElapsed : 0;
       const projection = dailyAvg * daysInPeriod;
-      const projectionCompliance = salesBudget > 0 ? (projection / salesBudget) * 100 : 0;
+      const projectionCompliance = salesBudget > 0 && projection >= 0 ? (projection / salesBudget) * 100 : 0;
 
       let status = 'positive';
       if (salesCompliance < 70 || projectionCompliance < 85) status = 'critical';
@@ -162,7 +162,7 @@ export default function ExecutiveDashboard() {
       const totalZoneBudget = allBudgets
         .filter(b => b.month === currentMonth && b.year === currentYear)
         .reduce((sum, b) => sum + (b.sales_budget || 0), 0);
-      const weight = totalZoneBudget > 0 ? (salesBudget / totalZoneBudget) * 100 : 0;
+      const weight = totalZoneBudget > 0 && salesBudget >= 0 ? (salesBudget / totalZoneBudget) * 100 : 0;
 
       return {
         code: store.code,
@@ -196,12 +196,12 @@ export default function ExecutiveDashboard() {
       if (historicalSales.length < 7) return { ...store, forecast30: 0, forecast60: 0, willMissTarget: false, growthRate: 0 };
 
       const totalSales = historicalSales.reduce((sum, s) => sum + (s.total_sales || 0), 0);
-      const dailyAvg = totalSales / historicalSales.length;
+      const dailyAvg = historicalSales.length > 0 ? totalSales / historicalSales.length : 0;
       
       const midPoint = Math.floor(historicalSales.length / 2);
-      const firstHalfAvg = historicalSales.slice(0, midPoint).reduce((sum, s) => sum + (s.total_sales || 0), 0) / midPoint;
-      const secondHalfAvg = historicalSales.slice(midPoint).reduce((sum, s) => sum + (s.total_sales || 0), 0) / (historicalSales.length - midPoint);
-      const growthRate = firstHalfAvg > 0 ? (secondHalfAvg - firstHalfAvg) / firstHalfAvg : 0;
+      const firstHalfAvg = midPoint > 0 ? historicalSales.slice(0, midPoint).reduce((sum, s) => sum + (s.total_sales || 0), 0) / midPoint : 0;
+      const secondHalfAvg = (historicalSales.length - midPoint) > 0 ? historicalSales.slice(midPoint).reduce((sum, s) => sum + (s.total_sales || 0), 0) / (historicalSales.length - midPoint) : 0;
+      const growthRate = firstHalfAvg > 0 && !isNaN(secondHalfAvg) ? (secondHalfAvg - firstHalfAvg) / firstHalfAvg : 0;
 
       const trendAdjustedDaily = dailyAvg * (1 + growthRate * 0.5);
       const forecast30 = trendAdjustedDaily * 30;
@@ -309,8 +309,8 @@ INSTRUCCIONES:
     const positive = storesAnalysis.filter(s => s.status === 'positive' && s.salesCompliance >= 110);
     const atRisk = salesForecast.filter(s => s.willMissTarget);
     
-    const totalCompliance = (zoneTotals.totalSales / zoneTotals.totalBudget) * 100;
-    const projectionCompliance = (zoneTotals.totalProjection / zoneTotals.totalBudget) * 100;
+    const totalCompliance = zoneTotals.totalBudget > 0 ? (zoneTotals.totalSales / zoneTotals.totalBudget) * 100 : 0;
+    const projectionCompliance = zoneTotals.totalBudget > 0 ? (zoneTotals.totalProjection / zoneTotals.totalBudget) * 100 : 0;
     
     // Priorizar riesgos
     if (critical.length >= STORES.length * 0.3) {
