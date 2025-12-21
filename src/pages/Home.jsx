@@ -295,27 +295,24 @@ export default function Home() {
   };
 
   const handleLogin = () => {
-    if (!selectedRole) {
-      setLoginError('Selecciona un rol');
-      return;
-    }
-
-    // Gerente con clave 1998
-    if (selectedRole === 'gerente') {
-      if (loginPassword === '1998') {
-        setSelectedStore('');
-        setIsLoggedIn(true);
-        localStorage.setItem('userRole', selectedRole);
-        localStorage.setItem('popsySession', JSON.stringify({ role: selectedRole, time: Date.now() }));
-        setShowWelcome(true);
-        setPendingStore('');
-        setLoginPassword('');
-        return;
-      } else {
-        setLoginError('Contraseña de gerente incorrecta');
+      if (!selectedRole) {
+        setLoginError('Selecciona un rol');
         return;
       }
-    }
+
+      // Gerente con clave 1998 - redirigir directo al panel ejecutivo
+      if (selectedRole === 'gerente') {
+        if (loginPassword === '1998') {
+          localStorage.setItem('userRole', selectedRole);
+          localStorage.setItem('popsySession', JSON.stringify({ role: selectedRole, time: Date.now() }));
+          // Redirigir inmediatamente al panel ejecutivo
+          window.location.href = createPageUrl('ExecutiveDashboard');
+          return;
+        } else {
+          setLoginError('Contraseña de gerente incorrecta');
+          return;
+        }
+      }
 
     // Para otros roles: validar contraseña de tienda
     if (!pendingStore) {
