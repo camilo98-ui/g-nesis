@@ -5,8 +5,8 @@ import { DollarSign, TrendingUp, Target, Users, Award, Zap } from 'lucide-react'
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Area, AreaChart } from 'recharts';
 
 export default function KPIsDetailView({ storesAnalysis, formatCurrency, zoneTotals }) {
-  const topPerformers = storesAnalysis.sort((a, b) => b.salesCompliance - a.salesCompliance).slice(0, 5);
-  const bottomPerformers = storesAnalysis.sort((a, b) => a.salesCompliance - b.salesCompliance).slice(0, 5);
+  const topPerformers = [...storesAnalysis].sort((a, b) => b.salesCompliance - a.salesCompliance).slice(0, 5);
+  const bottomPerformers = [...storesAnalysis].sort((a, b) => a.salesCompliance - b.salesCompliance).slice(0, 5);
 
   const performanceDistribution = [
     { range: '0-50%', count: storesAnalysis.filter(s => s.salesCompliance < 50).length },
@@ -29,67 +29,79 @@ export default function KPIsDetailView({ storesAnalysis, formatCurrency, zoneTot
       className="space-y-6"
     >
       <div>
-        <h1 className="text-3xl font-black text-slate-900 mb-2">KPIs Ejecutivos</h1>
-        <p className="text-sm text-slate-500">Análisis profundo de métricas clave de rendimiento</p>
+        <h1 className="text-2xl font-bold text-gray-900 mb-1">KPIs Ejecutivos</h1>
+        <p className="text-sm text-gray-500">Análisis profundo de métricas clave de rendimiento</p>
       </div>
 
       {/* Top Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="border-slate-100 shadow-sm">
+        <Card className="border-gray-100 shadow-sm">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <DollarSign className="w-8 h-8 text-emerald-600" />
-              <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">
+              <div className="p-2.5 rounded-lg bg-blue-50">
+                <DollarSign className="w-6 h-6 text-blue-600" />
+              </div>
+              <span className="text-xs font-semibold text-blue-700 bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-full">
                 Total Zona
               </span>
             </div>
-            <p className="text-3xl font-black text-slate-900 mb-1">{formatCurrency(zoneTotals.totalSales)}</p>
-            <p className="text-sm text-slate-500">Ventas acumuladas</p>
+            <p className="text-3xl font-bold text-gray-900 mb-1">{formatCurrency(zoneTotals.totalSales)}</p>
+            <p className="text-sm text-gray-500">Ventas acumuladas</p>
           </CardContent>
         </Card>
 
-        <Card className="border-slate-100 shadow-sm">
+        <Card className="border-gray-100 shadow-sm">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <Target className="w-8 h-8 text-violet-600" />
-              <span className="text-xs font-bold text-violet-600 bg-violet-50 px-2 py-1 rounded-full">
+              <div className="p-2.5 rounded-lg bg-blue-50">
+                <Target className="w-6 h-6 text-blue-600" />
+              </div>
+              <span className="text-xs font-semibold text-blue-700 bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-full">
                 Proyección
               </span>
             </div>
-            <p className="text-3xl font-black text-slate-900 mb-1">{formatCurrency(zoneTotals.totalProjection)}</p>
-            <p className="text-sm text-slate-500">Estimado al cierre</p>
+            <p className="text-3xl font-bold text-gray-900 mb-1">{formatCurrency(zoneTotals.totalProjection)}</p>
+            <p className="text-sm text-gray-500">Estimado al cierre</p>
           </CardContent>
         </Card>
 
-        <Card className="border-slate-100 shadow-sm">
+        <Card className="border-gray-100 shadow-sm">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <Award className="w-8 h-8 text-amber-600" />
-              <span className="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded-full">
-                Promedio
+              <div className="p-2.5 rounded-lg bg-blue-50">
+                <Award className="w-6 h-6 text-blue-600" />
+              </div>
+              <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${
+                ((zoneTotals.totalSales / zoneTotals.totalBudget) * 100) >= 90 
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                  : ((zoneTotals.totalSales / zoneTotals.totalBudget) * 100) >= 70
+                    ? 'bg-amber-50 text-amber-700 border-amber-200'
+                    : 'bg-red-50 text-red-700 border-red-200'
+              }`}>
+                {((zoneTotals.totalSales / zoneTotals.totalBudget) * 100).toFixed(0)}%
               </span>
             </div>
-            <p className="text-3xl font-black text-slate-900 mb-1">
+            <p className="text-3xl font-bold text-gray-900 mb-1">
               {((zoneTotals.totalSales / zoneTotals.totalBudget) * 100).toFixed(1)}%
             </p>
-            <p className="text-sm text-slate-500">Cumplimiento zona</p>
+            <p className="text-sm text-gray-500">Cumplimiento zona</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Performance Distribution */}
-      <Card className="border-slate-100 shadow-sm">
-        <CardHeader>
-          <CardTitle className="text-base font-bold text-slate-900">Distribución de Rendimiento</CardTitle>
+      <Card className="border-gray-100 shadow-sm">
+        <CardHeader className="border-b border-gray-100">
+          <CardTitle className="text-sm font-semibold text-gray-900">Distribución de Rendimiento</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={performanceDistribution}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-              <XAxis dataKey="range" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="count" fill="#8b5cf6" radius={[8, 8, 0, 0]} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+              <XAxis dataKey="range" tick={{ fontSize: 11, fill: '#6b7280' }} />
+              <YAxis tick={{ fontSize: 11, fill: '#6b7280' }} />
+              <Tooltip contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb' }} />
+              <Bar dataKey="count" fill="#3b82f6" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>
@@ -97,35 +109,35 @@ export default function KPIsDetailView({ storesAnalysis, formatCurrency, zoneTot
 
       {/* Top & Bottom Performers */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="border-emerald-100 shadow-sm bg-gradient-to-br from-emerald-50/30 to-green-50/20">
-          <CardHeader>
-            <CardTitle className="text-base font-bold text-emerald-900 flex items-center gap-2">
-              <Award className="w-5 h-5" />
+        <Card className="border-gray-100 shadow-sm">
+          <CardHeader className="border-b border-gray-100">
+            <CardTitle className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+              <Award className="w-5 h-5 text-blue-600" />
               Top 5 Tiendas
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
+          <CardContent className="pt-4">
+            <div className="space-y-2">
               {topPerformers.map((store, idx) => (
                 <motion.div
                   key={store.code}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: idx * 0.1 }}
-                  className="bg-white rounded-xl p-4 border border-emerald-100"
+                  className="bg-gray-50 rounded-lg p-3 border border-gray-100 hover:border-blue-200 transition-colors"
                 >
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-3">
-                      <span className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 font-black flex items-center justify-center text-sm">
+                      <span className="w-7 h-7 rounded-full bg-blue-100 text-blue-700 font-semibold flex items-center justify-center text-sm">
                         {idx + 1}
                       </span>
-                      <span className="font-bold text-slate-900">{store.name}</span>
+                      <span className="font-semibold text-gray-900">{store.name}</span>
                     </div>
-                    <span className="text-lg font-black text-emerald-600">
-                      {store.salesCompliance.toFixed(1)}%
+                    <span className="text-base font-bold text-emerald-600">
+                      {store.salesCompliance.toFixed(0)}%
                     </span>
                   </div>
-                  <div className="flex justify-between text-xs text-slate-600">
+                  <div className="flex justify-between text-xs text-gray-600">
                     <span>Ventas: {formatCurrency(store.totalSales)}</span>
                     <span>Meta: {formatCurrency(store.salesBudget)}</span>
                   </div>
@@ -135,35 +147,35 @@ export default function KPIsDetailView({ storesAnalysis, formatCurrency, zoneTot
           </CardContent>
         </Card>
 
-        <Card className="border-rose-100 shadow-sm bg-gradient-to-br from-rose-50/30 to-red-50/20">
-          <CardHeader>
-            <CardTitle className="text-base font-bold text-rose-900 flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 rotate-180" />
+        <Card className="border-gray-100 shadow-sm">
+          <CardHeader className="border-b border-gray-100">
+            <CardTitle className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+              <TrendingDown className="w-5 h-5 text-red-600" />
               Requieren Atención
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
+          <CardContent className="pt-4">
+            <div className="space-y-2">
               {bottomPerformers.map((store, idx) => (
                 <motion.div
                   key={store.code}
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: idx * 0.1 }}
-                  className="bg-white rounded-xl p-4 border border-rose-100"
+                  className="bg-gray-50 rounded-lg p-3 border border-gray-100 hover:border-red-200 transition-colors"
                 >
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-3">
-                      <span className="w-8 h-8 rounded-full bg-rose-100 text-rose-700 font-black flex items-center justify-center text-sm">
+                      <span className="w-7 h-7 rounded-full bg-red-100 text-red-700 font-semibold flex items-center justify-center text-sm">
                         {storesAnalysis.length - idx}
                       </span>
-                      <span className="font-bold text-slate-900">{store.name}</span>
+                      <span className="font-semibold text-gray-900">{store.name}</span>
                     </div>
-                    <span className="text-lg font-black text-rose-600">
-                      {store.salesCompliance.toFixed(1)}%
+                    <span className="text-base font-bold text-red-600">
+                      {store.salesCompliance.toFixed(0)}%
                     </span>
                   </div>
-                  <div className="flex justify-between text-xs text-slate-600">
+                  <div className="flex justify-between text-xs text-gray-600">
                     <span>Ventas: {formatCurrency(store.totalSales)}</span>
                     <span>Gap: {formatCurrency(store.salesBudget - store.totalSales)}</span>
                   </div>
@@ -175,21 +187,21 @@ export default function KPIsDetailView({ storesAnalysis, formatCurrency, zoneTot
       </div>
 
       {/* Average Ticket Analysis */}
-      <Card className="border-slate-100 shadow-sm">
-        <CardHeader>
-          <CardTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
-            <Zap className="w-5 h-5 text-violet-600" />
+      <Card className="border-gray-100 shadow-sm">
+        <CardHeader className="border-b border-gray-100">
+          <CardTitle className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+            <Zap className="w-5 h-5 text-blue-600" />
             Top 10 - Ticket Promedio
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <ResponsiveContainer width="100%" height={350}>
             <BarChart data={avgTicketData} layout="horizontal">
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-              <XAxis type="number" tickFormatter={(v) => formatCurrency(v)} />
-              <YAxis dataKey="name" type="category" width={120} tick={{ fontSize: 11 }} />
-              <Tooltip formatter={(v) => formatCurrency(v)} />
-              <Bar dataKey="ticket" fill="#8b5cf6" radius={[0, 8, 8, 0]} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" horizontal={false} />
+              <XAxis type="number" tickFormatter={(v) => formatCurrency(v)} tick={{ fontSize: 11, fill: '#6b7280' }} />
+              <YAxis dataKey="name" type="category" width={120} tick={{ fontSize: 11, fill: '#374151' }} />
+              <Tooltip formatter={(v) => formatCurrency(v)} contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb' }} />
+              <Bar dataKey="ticket" fill="#3b82f6" radius={[0, 6, 6, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>
