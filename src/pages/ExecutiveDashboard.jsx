@@ -304,19 +304,19 @@ INSTRUCCIONES:
   // Auto Insight - Principal riesgo u oportunidad
   // Estado Maestro de la Zona
   const zoneStatus = useMemo(() => {
-    if (storesAnalysis.length === 0) return null;
+    if (storesAnalysis.length === 0 || !zoneTotals) return null;
 
     const daysInPeriod = Math.max(1, Math.ceil((activeRange.to - activeRange.from) / (1000 * 60 * 60 * 24)));
-    const daysElapsed = Math.max(1, storesAnalysis.reduce((sum, s) => Math.max(sum, s.daysElapsed), 1));
+    const daysElapsed = Math.max(1, storesAnalysis.reduce((sum, s) => Math.max(sum, s.daysElapsed || 0), 1));
     const daysRemaining = Math.max(0, daysInPeriod - daysElapsed);
 
-    const currentSales = zoneTotals.totalSales;
-    const totalBudget = zoneTotals.totalBudget;
-    const projection = zoneTotals.totalProjection;
-    const projectionCompliance = totalBudget > 0 ? (projection / totalBudget) * 100 : 0;
+    const currentSales = zoneTotals.totalSales || 0;
+    const totalBudget = zoneTotals.totalBudget || 0;
+    const projection = zoneTotals.totalProjection || 0;
+    const projectionCompliance = totalBudget > 0 && !isNaN(projection) ? (projection / totalBudget) * 100 : 0;
     const gap = totalBudget - projection;
-    const dailyRequired = daysRemaining > 0 ? (totalBudget - currentSales) / daysRemaining : 0;
-    const currentDailyAvg = daysElapsed > 0 ? currentSales / daysElapsed : 0;
+    const dailyRequired = daysRemaining > 0 && totalBudget >= currentSales ? (totalBudget - currentSales) / daysRemaining : 0;
+    const currentDailyAvg = daysElapsed > 0 && currentSales >= 0 ? currentSales / daysElapsed : 0;
 
     const storesOnTrack = storesAnalysis.filter(s => s.projectionCompliance >= 95).length;
     const storesAlert = storesAnalysis.filter(s => s.projectionCompliance >= 85 && s.projectionCompliance < 95).length;
