@@ -60,11 +60,17 @@ export default function CashiersDashboard() {
 
   const { data: shiftRecords = [] } = useQuery({
     queryKey: ['shiftRecords', selectedStore],
-    queryFn: () => base44.entities.ShiftRecord.filter({ store_id: selectedStore }),
+    queryFn: async () => {
+      const records = await base44.entities.ShiftRecord.filter({ store_id: selectedStore });
+      console.log('📊 ShiftRecords cargados en Dashboard:', records.length, 'para store:', selectedStore);
+      return records;
+    },
     enabled: !!selectedStore,
     staleTime: 0,
+    cacheTime: 0,
     refetchOnMount: 'always',
-    refetchOnWindowFocus: true
+    refetchOnWindowFocus: true,
+    refetchInterval: 5000
   });
 
   const activeCashiers = cashiers.filter(c => c.is_active !== false);

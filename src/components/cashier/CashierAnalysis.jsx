@@ -22,10 +22,17 @@ export default function CashierAnalysis({ cashierId, cashierName, storeId }) {
 
   const { data: shiftRecords = [] } = useQuery({
     queryKey: ['shiftRecords', storeId],
-    queryFn: () => base44.entities.ShiftRecord.filter({ store_id: storeId }),
+    queryFn: async () => {
+      const records = await base44.entities.ShiftRecord.filter({ store_id: storeId });
+      console.log('📊 ShiftRecords cargados en CashierAnalysis:', records.length, 'para store:', storeId);
+      return records;
+    },
     enabled: !!storeId,
     staleTime: 0,
-    refetchOnMount: 'always'
+    cacheTime: 0,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
+    refetchInterval: 5000
   });
 
   const { data: allCashiers = [] } = useQuery({
@@ -43,13 +50,18 @@ export default function CashierAnalysis({ cashierId, cashierName, storeId }) {
     const days = eachDayOfInterval({ start: startDate, end: endDate });
     
     const cashierRecords = shiftRecords.filter(r => r.cashier_id === cashierId);
+    console.log('📈 Calculando trendData para cashier:', cashierId, 'registros encontrados:', cashierRecords.length);
     
-    return days.map(day => {
+    const result = days.map(day => {
       const dayStr = format(day, 'yyyy-MM-dd');
       const dayRecords = cashierRecords.filter(r => r.date === dayStr);
       const sales = dayRecords.reduce((sum, r) => sum + (r.sales || 0), 0);
       const transactions = dayRecords.reduce((sum, r) => sum + (r.transactions || 0), 0);
       const tickets = dayRecords.reduce((sum, r) => sum + (r.tickets || 0), 0);
+      
+      if (dayRecords.length > 0) {
+        console.log(`  📅 ${dayStr}: ventas=${sales}, trans=${transactions}, tickets=${tickets}`);
+      }
       
       return {
         date: format(day, 'dd', { locale: es }),
@@ -59,6 +71,9 @@ export default function CashierAnalysis({ cashierId, cashierName, storeId }) {
         ticketPromedio: transactions > 0 ? Math.round(sales / transactions) : 0
       };
     }).filter(d => d.ventas > 0 || d.transacciones > 0);
+    
+    console.log('✅ trendData final tiene', result.length, 'días con datos');
+    return result;
   }, [shiftRecords, cashierId]);
 
   // Estadísticas del cajero vs equipo
