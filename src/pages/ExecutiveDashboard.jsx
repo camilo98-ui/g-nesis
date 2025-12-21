@@ -771,8 +771,9 @@ INSTRUCCIONES:
                   </motion.div>
                 ))}
               </div>
-            </CardContent>
-            </Card>
+              </CardContent>
+              </Card>
+            </motion.div>
           )}
 
           {/* Detail Table */}
