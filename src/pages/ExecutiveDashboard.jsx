@@ -934,60 +934,119 @@ INSTRUCCIONES:
             </div>
           )}
 
-          {/* Botones de Vista Dinámica */}
+          {/* Botones de Vista Dinámica Mejorados */}
           {!isLoading && (
-            <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
+            <div className="flex gap-3 mb-6 overflow-x-auto pb-2">
               <motion.button
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => setChartView('ventas')}
-                className={`px-4 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 whitespace-nowrap ${
+                className={`relative px-6 py-4 rounded-2xl font-bold text-sm transition-all flex items-center gap-3 whitespace-nowrap shadow-lg ${
                   chartView === 'ventas'
-                    ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/30'
-                    : 'bg-white border-2 border-gray-200 text-gray-600 hover:border-blue-300'
+                    ? 'bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700 text-white shadow-blue-500/50 ring-4 ring-blue-200'
+                    : 'bg-white border-2 border-gray-200 text-gray-700 hover:border-blue-400 hover:shadow-xl'
                 }`}
               >
-                <DollarSign className="w-4 h-4" />
-                Ventas vs Meta
+                {chartView === 'ventas' && (
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent rounded-2xl"
+                    animate={{ x: ['-100%', '100%'] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                  />
+                )}
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                  chartView === 'ventas' ? 'bg-white/20' : 'bg-blue-100'
+                }`}>
+                  <DollarSign className={`w-5 h-5 ${chartView === 'ventas' ? 'text-white' : 'text-blue-600'}`} />
+                </div>
+                <div className="text-left">
+                  <p className={chartView === 'ventas' ? 'text-white' : 'text-gray-900'}>Ventas</p>
+                  <p className={`text-xs ${chartView === 'ventas' ? 'text-blue-100' : 'text-gray-500'}`}>vs Meta</p>
+                </div>
               </motion.button>
+
               <motion.button
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => setChartView('cumplimiento')}
-                className={`px-4 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 whitespace-nowrap ${
+                className={`relative px-6 py-4 rounded-2xl font-bold text-sm transition-all flex items-center gap-3 whitespace-nowrap shadow-lg ${
                   chartView === 'cumplimiento'
-                    ? 'bg-gradient-to-r from-emerald-500 to-green-600 text-white shadow-lg shadow-emerald-500/30'
-                    : 'bg-white border-2 border-gray-200 text-gray-600 hover:border-emerald-300'
+                    ? 'bg-gradient-to-br from-emerald-500 via-green-600 to-teal-700 text-white shadow-emerald-500/50 ring-4 ring-emerald-200'
+                    : 'bg-white border-2 border-gray-200 text-gray-700 hover:border-emerald-400 hover:shadow-xl'
                 }`}
               >
-                <CheckCircle className="w-4 h-4" />
-                % Cumplimiento
+                {chartView === 'cumplimiento' && (
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent rounded-2xl"
+                    animate={{ x: ['-100%', '100%'] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                  />
+                )}
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                  chartView === 'cumplimiento' ? 'bg-white/20' : 'bg-emerald-100'
+                }`}>
+                  <CheckCircle className={`w-5 h-5 ${chartView === 'cumplimiento' ? 'text-white' : 'text-emerald-600'}`} />
+                </div>
+                <div className="text-left">
+                  <p className={chartView === 'cumplimiento' ? 'text-white' : 'text-gray-900'}>Cumplimiento</p>
+                  <p className={`text-xs ${chartView === 'cumplimiento' ? 'text-emerald-100' : 'text-gray-500'}`}>% por Tienda</p>
+                </div>
               </motion.button>
+
               <motion.button
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => setChartView('proyeccion')}
-                className={`px-4 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 whitespace-nowrap ${
+                className={`relative px-6 py-4 rounded-2xl font-bold text-sm transition-all flex items-center gap-3 whitespace-nowrap shadow-lg ${
                   chartView === 'proyeccion'
-                    ? 'bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-lg shadow-purple-500/30'
-                    : 'bg-white border-2 border-gray-200 text-gray-600 hover:border-purple-300'
+                    ? 'bg-gradient-to-br from-purple-500 via-pink-600 to-rose-700 text-white shadow-purple-500/50 ring-4 ring-purple-200'
+                    : 'bg-white border-2 border-gray-200 text-gray-700 hover:border-purple-400 hover:shadow-xl'
                 }`}
               >
-                <Target className="w-4 h-4" />
-                Proyección vs Meta
+                {chartView === 'proyeccion' && (
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent rounded-2xl"
+                    animate={{ x: ['-100%', '100%'] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                  />
+                )}
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                  chartView === 'proyeccion' ? 'bg-white/20' : 'bg-purple-100'
+                }`}>
+                  <Target className={`w-5 h-5 ${chartView === 'proyeccion' ? 'text-white' : 'text-purple-600'}`} />
+                </div>
+                <div className="text-left">
+                  <p className={chartView === 'proyeccion' ? 'text-white' : 'text-gray-900'}>Proyección</p>
+                  <p className={`text-xs ${chartView === 'proyeccion' ? 'text-purple-100' : 'text-gray-500'}`}>Estimación</p>
+                </div>
               </motion.button>
+
               <motion.button
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => setChartView('eficiencia')}
-                className={`px-4 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 whitespace-nowrap ${
+                className={`relative px-6 py-4 rounded-2xl font-bold text-sm transition-all flex items-center gap-3 whitespace-nowrap shadow-lg ${
                   chartView === 'eficiencia'
-                    ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-lg shadow-amber-500/30'
-                    : 'bg-white border-2 border-gray-200 text-gray-600 hover:border-amber-300'
+                    ? 'bg-gradient-to-br from-amber-500 via-orange-600 to-red-600 text-white shadow-amber-500/50 ring-4 ring-amber-200'
+                    : 'bg-white border-2 border-gray-200 text-gray-700 hover:border-amber-400 hover:shadow-xl'
                 }`}
               >
-                <Zap className="w-4 h-4" />
-                Ticket vs Transacciones
+                {chartView === 'eficiencia' && (
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent rounded-2xl"
+                    animate={{ x: ['-100%', '100%'] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                  />
+                )}
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                  chartView === 'eficiencia' ? 'bg-white/20' : 'bg-amber-100'
+                }`}>
+                  <Zap className={`w-5 h-5 ${chartView === 'eficiencia' ? 'text-white' : 'text-amber-600'}`} />
+                </div>
+                <div className="text-left">
+                  <p className={chartView === 'eficiencia' ? 'text-white' : 'text-gray-900'}>Eficiencia</p>
+                  <p className={`text-xs ${chartView === 'eficiencia' ? 'text-amber-100' : 'text-gray-500'}`}>Ticket & Trans</p>
+                </div>
               </motion.button>
             </div>
           )}
