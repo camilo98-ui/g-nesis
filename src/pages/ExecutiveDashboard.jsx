@@ -1057,7 +1057,7 @@ INSTRUCCIONES:
                       </Card>
                       <Card className="border-red-200 bg-gradient-to-br from-red-50 to-white">
                         <CardContent className="pt-4 pb-3">
-                          <p className="text-xs text-red-600 font-semibold mb-1">Críticas (<70%)</p>
+                          <p className="text-xs text-red-600 font-semibold mb-1">Críticas {'<'}70%)</p>
                           <p className="text-xl font-black text-red-900">{statusCounts.critical}</p>
                           <p className="text-[10px] text-gray-500 mt-1">{((statusCounts.critical/STORES.length)*100).toFixed(0)}% del total</p>
                         </CardContent>
