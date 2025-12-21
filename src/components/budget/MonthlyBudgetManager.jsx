@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { X, Calendar, DollarSign, Save, Sparkles } from 'lucide-react';
+import { X, Calendar, DollarSign, Save, Sparkles, Zap } from 'lucide-react';
 import { toast } from 'sonner';
 import { startOfMonth, endOfMonth, eachDayOfInterval, format, getDay } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -12,6 +12,9 @@ import { es } from 'date-fns/locale';
 export default function MonthlyBudgetManager({ storeId, isOpen, onClose, onSuccess }) {
   const queryClient = useQueryClient();
   const [monthlyBudget, setMonthlyBudget] = useState('');
+  const [ticketBudget, setTicketBudget] = useState('');
+  const [transactionsBudget, setTransactionsBudget] = useState('');
+  const [suggestedBudget, setSuggestedBudget] = useState('');
   const [customBudgets, setCustomBudgets] = useState({});
   const [useCustom, setUseCustom] = useState(false);
 
@@ -100,9 +103,37 @@ export default function MonthlyBudgetManager({ storeId, isOpen, onClose, onSucce
           await base44.entities.DailyBudget.create(entry);
         }
       }
+
+      // Guardar presupuesto mensual consolidado
+      const now = new Date();
+      const currentMonth = now.getMonth() + 1;
+      const currentYear = now.getFullYear();
+      
+      const existingMonthly = await base44.entities.Budget.filter({ 
+        store_id: storeId, 
+        month: currentMonth,
+        year: currentYear
+      });
+      
+      const monthlyData = {
+        store_id: storeId,
+        month: currentMonth,
+        year: currentYear,
+        sales_budget: parseFloat(monthlyBudget) || 0,
+        tickets_budget: parseFloat(ticketBudget) || 0,
+        transactions_budget: parseFloat(transactionsBudget) || 0,
+        suggested_budget: parseFloat(suggestedBudget) || 0
+      };
+      
+      if (existingMonthly.length > 0) {
+        await base44.entities.Budget.update(existingMonthly[0].id, monthlyData);
+      } else {
+        await base44.entities.Budget.create(monthlyData);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['dailyBudgets']);
+      queryClient.invalidateQueries(['budgets']);
       toast.success('Presupuestos guardados correctamente');
       onSuccess?.();
       onClose();
@@ -163,23 +194,68 @@ export default function MonthlyBudgetManager({ storeId, isOpen, onClose, onSucce
             </div>
 
             <div className="p-6 overflow-y-auto max-h-[calc(90vh-180px)]">
-              {/* Input presupuesto mensual */}
-              <div className="mb-6">
-                <label className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                  <DollarSign className="w-4 h-4 text-violet-500" />
-                  Presupuesto Total del Mes
-                </label>
-                <Input
-                  type="number"
-                  value={monthlyBudget}
-                  onChange={(e) => setMonthlyBudget(e.target.value)}
-                  placeholder="Ej: 250000000"
-                  className="text-lg font-bold border-violet-300 focus:border-violet-500"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  💡 Distribución analítica: Dom +50%, Sáb +45%, Vie +25%, Jue +15%, Mié +5%, Mar base, Lun -10%
-                </p>
+              {/* Inputs de presupuestos mensuales */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                    <DollarSign className="w-4 h-4 text-pink-500" />
+                    Presupuesto de Ventas
+                  </label>
+                  <Input
+                    type="number"
+                    value={monthlyBudget}
+                    onChange={(e) => setMonthlyBudget(e.target.value)}
+                    placeholder="Ej: 250000000"
+                    className="text-lg font-bold border-pink-300 focus:border-pink-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                    <DollarSign className="w-4 h-4 text-blue-500" />
+                    Presupuesto de Ticket Promedio
+                  </label>
+                  <Input
+                    type="number"
+                    value={ticketBudget}
+                    onChange={(e) => setTicketBudget(e.target.value)}
+                    placeholder="Ej: 35000"
+                    className="text-lg font-bold border-blue-300 focus:border-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                    <Zap className="w-4 h-4 text-purple-500" />
+                    Presupuesto de Transacciones
+                  </label>
+                  <Input
+                    type="number"
+                    value={transactionsBudget}
+                    onChange={(e) => setTransactionsBudget(e.target.value)}
+                    placeholder="Ej: 7500"
+                    className="text-lg font-bold border-purple-300 focus:border-purple-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-rose-500" />
+                    Presupuesto de Sugeridos
+                  </label>
+                  <Input
+                    type="number"
+                    value={suggestedBudget}
+                    onChange={(e) => setSuggestedBudget(e.target.value)}
+                    placeholder="Ej: 1500"
+                    className="text-lg font-bold border-rose-300 focus:border-rose-500"
+                  />
+                </div>
               </div>
+
+              <p className="text-xs text-gray-500 mb-4 bg-violet-50 p-3 rounded-lg border border-violet-200">
+                💡 Distribución diaria analítica de ventas: Dom +50%, Sáb +45%, Vie +25%, Jue +15%, Mié +5%, Mar base, Lun -10%
+              </p>
 
               {/* Preview de distribución */}
               {monthlyBudget && distributedBudgets && (
