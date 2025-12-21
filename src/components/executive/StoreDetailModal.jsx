@@ -212,10 +212,7 @@ export default function StoreDetailModal({ store, onClose, allDailySales, dateRa
                         tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} 
                         tick={{ fontSize: 11, fill: '#6b7280' }}
                       />
-                      <Tooltip 
-                        formatter={(v) => formatCurrency(v)}
-                        contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb' }}
-                      />
+                      <Tooltip content={<CustomTooltip />} />
                       <Area 
                         type="monotone" 
                         dataKey="sales" 
