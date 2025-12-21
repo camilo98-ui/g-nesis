@@ -62,21 +62,21 @@ const ExecutiveKPI = ({ title, value, subtitle, icon: Icon, badge, badgeColor = 
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200"
+      className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200"
     >
-      <div className="flex items-center justify-between mb-3">
-        <div className="p-2 rounded-lg bg-blue-50">
+      <div className="flex items-center justify-between mb-2">
+        <div className="p-1.5 rounded-lg bg-blue-50">
           <Icon className="w-4 h-4 text-blue-600" />
         </div>
         {badge && (
-          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${badgeColors[badgeColor]}`}>
+          <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border ${badgeColors[badgeColor]}`}>
             {badge}
           </span>
         )}
       </div>
-      <p className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">{title}</p>
-      <p className="text-2xl font-black text-gray-900 mb-1.5 leading-none break-words">{value}</p>
-      <p className="text-[10px] text-gray-400 leading-tight">{subtitle}</p>
+      <p className="text-[10px] font-bold text-gray-500 mb-1.5 uppercase tracking-wider">{title}</p>
+      <p className="text-lg font-black text-gray-900 mb-1 leading-none">{value}</p>
+      <p className="text-[9px] text-gray-400 leading-tight">{subtitle}</p>
     </motion.div>
   );
 };
