@@ -1115,53 +1115,146 @@ INSTRUCCIONES:
                         </ComposedChart>
                       )}
                       {chartView === 'cumplimiento' && (
-                        <BarChart data={comparisonData.map(d => ({
+                        <ComposedChart data={comparisonData.map(d => ({
                           ...d,
-                          cumplimientoColor: d.cumplimiento >= 90 ? '#10b981' : d.cumplimiento >= 70 ? '#f59e0b' : '#ef4444'
+                          meta: 100,
+                          zona_critica: 70,
+                          zona_alerta: 90
                         }))}>
                           <defs>
                             <linearGradient id="greenGradient" x1="0" y1="0" x2="0" y2="1">
                               <stop offset="0%" stopColor="#10b981" stopOpacity={1}/>
-                              <stop offset="100%" stopColor="#059669" stopOpacity={0.7}/>
+                              <stop offset="50%" stopColor="#059669" stopOpacity={0.9}/>
+                              <stop offset="100%" stopColor="#047857" stopOpacity={0.8}/>
                             </linearGradient>
                             <linearGradient id="yellowGradient" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor="#f59e0b" stopOpacity={1}/>
-                              <stop offset="100%" stopColor="#d97706" stopOpacity={0.7}/>
+                              <stop offset="0%" stopColor="#fbbf24" stopOpacity={1}/>
+                              <stop offset="50%" stopColor="#f59e0b" stopOpacity={0.9}/>
+                              <stop offset="100%" stopColor="#d97706" stopOpacity={0.8}/>
                             </linearGradient>
                             <linearGradient id="redGradient" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor="#ef4444" stopOpacity={1}/>
-                              <stop offset="100%" stopColor="#dc2626" stopOpacity={0.7}/>
+                              <stop offset="0%" stopColor="#f87171" stopOpacity={1}/>
+                              <stop offset="50%" stopColor="#ef4444" stopOpacity={0.9}/>
+                              <stop offset="100%" stopColor="#dc2626" stopOpacity={0.8}/>
                             </linearGradient>
+                            <filter id="glow">
+                              <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                              <feMerge>
+                                <feMergeNode in="coloredBlur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                              </feMerge>
+                            </filter>
                           </defs>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" strokeOpacity={0.5} />
+                          <CartesianGrid 
+                            strokeDasharray="3 3" 
+                            stroke="#e5e7eb" 
+                            strokeOpacity={0.5}
+                            vertical={false}
+                          />
                           <XAxis 
                             dataKey="name" 
-                            tick={{ fontSize: 11, fill: '#6b7280', fontWeight: 600 }} 
+                            tick={{ fontSize: 11, fill: '#374151', fontWeight: 700 }} 
                             angle={-45} 
                             textAnchor="end" 
                             height={90}
                             stroke="#9ca3af"
-                            strokeWidth={1.5}
+                            strokeWidth={2}
                           />
                           <YAxis 
                             tickFormatter={(v) => `${v}%`} 
-                            tick={{ fontSize: 11, fill: '#6b7280', fontWeight: 600 }}
+                            tick={{ fontSize: 11, fill: '#374151', fontWeight: 700 }}
                             stroke="#9ca3af"
-                            strokeWidth={1.5}
+                            strokeWidth={2}
+                            domain={[0, 120]}
                           />
                           <Tooltip 
-                            formatter={(v) => `${v.toFixed(1)}%`}
-                            contentStyle={{ 
-                              borderRadius: '12px', 
-                              border: '2px solid #10b981', 
-                              boxShadow: '0 8px 24px rgba(16, 185, 129, 0.25)',
-                              backgroundColor: 'rgba(255, 255, 255, 0.98)',
-                              backdropFilter: 'blur(10px)'
+                            content={({ active, payload }) => {
+                              if (!active || !payload || !payload.length) return null;
+                              const data = payload[0].payload;
+                              const status = data.cumplimiento >= 90 ? '✓ En Meta' : data.cumplimiento >= 70 ? '⚠ En Alerta' : '✗ Crítico';
+                              const statusColor = data.cumplimiento >= 90 ? '#10b981' : data.cumplimiento >= 70 ? '#f59e0b' : '#ef4444';
+                              return (
+                                <div style={{
+                                  backgroundColor: 'rgba(255, 255, 255, 0.98)',
+                                  backdropFilter: 'blur(12px)',
+                                  padding: '12px 16px',
+                                  borderRadius: '12px',
+                                  border: `3px solid ${statusColor}`,
+                                  boxShadow: `0 12px 32px ${statusColor}40`,
+                                }}>
+                                  <p style={{ fontWeight: 800, fontSize: '13px', marginBottom: '6px', color: '#1f2937' }}>
+                                    {data.name}
+                                  </p>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                                    <div style={{
+                                      width: '32px',
+                                      height: '32px',
+                                      borderRadius: '8px',
+                                      background: `linear-gradient(135deg, ${statusColor}, ${statusColor}cc)`,
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      fontWeight: 900,
+                                      fontSize: '16px',
+                                      color: 'white'
+                                    }}>
+                                      {data.cumplimiento.toFixed(0)}
+                                    </div>
+                                    <span style={{ fontSize: '14px', fontWeight: 600, color: statusColor }}>
+                                      {status}
+                                    </span>
+                                  </div>
+                                  <div style={{ fontSize: '11px', color: '#6b7280', marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #e5e7eb' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                      <span>Ventas:</span>
+                                      <span style={{ fontWeight: 700 }}>{formatCurrency(data.ventas)}</span>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '2px' }}>
+                                      <span>Meta:</span>
+                                      <span style={{ fontWeight: 700 }}>{formatCurrency(data.presupuesto)}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              );
                             }}
-                            labelStyle={{ fontWeight: 700, color: '#1f2937' }}
                           />
                           <Legend wrapperStyle={{ fontSize: '12px', fontWeight: 600 }} />
-                          <Bar dataKey="cumplimiento" name="% Cumplimiento" radius={[8, 8, 0, 0]} animationDuration={1200}>
+                          
+                          {/* Zona de alerta de fondo */}
+                          <Area 
+                            type="monotone" 
+                            dataKey="zona_critica" 
+                            fill="#fee2e2" 
+                            fillOpacity={0.3}
+                            stroke="none"
+                            name="Zona Crítica"
+                            animationDuration={800}
+                          />
+                          <Area 
+                            type="monotone" 
+                            dataKey="zona_alerta" 
+                            fill="#fef3c7" 
+                            fillOpacity={0.3}
+                            stroke="none"
+                            name="Zona Alerta"
+                            animationDuration={1000}
+                          />
+                          
+                          {/* Barra principal con gradiente dinámico */}
+                          <Bar 
+                            dataKey="cumplimiento" 
+                            name="% Cumplimiento" 
+                            radius={[10, 10, 0, 0]} 
+                            animationDuration={1400}
+                            animationBegin={200}
+                            label={{
+                              position: 'top',
+                              fill: '#1f2937',
+                              fontWeight: 900,
+                              fontSize: 11,
+                              formatter: (v) => `${v.toFixed(0)}%`
+                            }}
+                          >
                             {comparisonData.map((entry, index) => (
                               <Cell 
                                 key={`cell-${index}`} 
@@ -1169,20 +1262,24 @@ INSTRUCCIONES:
                                   entry.cumplimiento >= 90 ? 'url(#greenGradient)' : 
                                   entry.cumplimiento >= 70 ? 'url(#yellowGradient)' : 'url(#redGradient)'
                                 }
+                                filter="url(#glow)"
                               />
                             ))}
                           </Bar>
+                          
+                          {/* Línea de meta con puntos destacados */}
                           <Line 
                             type="monotone" 
-                            dataKey={() => 100} 
-                            stroke="#6b7280" 
-                            strokeWidth={3} 
-                            strokeDasharray="8 4" 
+                            dataKey="meta" 
+                            stroke="#1f2937" 
+                            strokeWidth={4} 
+                            strokeDasharray="10 5" 
                             name="Meta 100%" 
-                            dot={false}
-                            animationDuration={1500}
+                            dot={{ fill: '#1f2937', r: 7, strokeWidth: 3, stroke: '#fff' }}
+                            activeDot={{ r: 10, strokeWidth: 4, fill: '#10b981' }}
+                            animationDuration={1600}
                           />
-                        </BarChart>
+                        </ComposedChart>
                       )}
                       {chartView === 'proyeccion' && (
                         <ComposedChart data={comparisonData}>
