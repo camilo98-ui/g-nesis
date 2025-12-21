@@ -379,7 +379,7 @@ export default function Home() {
             <motion.img
               src={LOGO_URL}
               alt="Popsy"
-              className="h-20 object-contain mx-auto mb-4 cursor-pointer"
+              className="h-32 object-contain mx-auto mb-4 cursor-pointer"
               animate={{
                 y: [0, -8, 0],
                 rotate: [0, 2, -2, 0]
