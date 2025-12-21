@@ -146,9 +146,19 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
       return record;
     },
     onSuccess: () => {
-      // Forzar refresco inmediato de TODOS los queries
-      queryClient.refetchQueries({ type: 'active' });
-      queryClient.invalidateQueries();
+      // Invalidar específicamente las queries de cajeros
+      queryClient.invalidateQueries({ queryKey: ['shiftRecords'] });
+      queryClient.invalidateQueries({ queryKey: ['shiftRecord'] });
+      queryClient.invalidateQueries({ queryKey: ['cashiers'] });
+      queryClient.invalidateQueries({ queryKey: ['dailySales'] });
+      queryClient.invalidateQueries({ queryKey: ['badges'] });
+      queryClient.invalidateQueries({ queryKey: ['salesLog'] });
+      
+      // Forzar refresco inmediato
+      queryClient.refetchQueries({ 
+        queryKey: ['shiftRecords'], 
+        type: 'active' 
+      });
 
       toast.success(editingRecord ? '¡Turno actualizado correctamente!' : '¡Turno registrado correctamente!');
 
