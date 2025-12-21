@@ -100,19 +100,30 @@ export default function RouletteWheel({ onResult, disabled, awardType = 'tienda'
       </AnimatePresence>
 
       {/* Ruleta */}
-      <div className="relative w-80 h-80 mx-auto">
+      <div className="relative w-[500px] h-[500px] mx-auto max-w-full">
         {/* Indicador superior */}
         <motion.div 
           className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20"
-          animate={{ y: [0, -5, 0] }}
-          transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 2 }}
+          animate={{ 
+            y: [0, -8, 0],
+            scale: [1, 1.1, 1]
+          }}
+          transition={{ duration: 0.6, repeat: Infinity, repeatDelay: 1.5 }}
         >
-          <div className="w-0 h-0 border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-t-[25px] border-t-pink-500 filter drop-shadow-lg" />
+          <div className="w-0 h-0 border-l-[20px] border-l-transparent border-r-[20px] border-r-transparent border-t-[35px] border-t-pink-500 filter drop-shadow-2xl" />
         </motion.div>
 
         {/* Círculo de la ruleta */}
         <motion.div
-          className="w-full h-full rounded-full relative shadow-2xl overflow-hidden border-8 border-white"
+          className="w-full h-full rounded-full relative overflow-hidden border-[12px] border-white"
+          animate={{
+            boxShadow: spinning 
+              ? ['0 25px 50px -12px rgba(0, 0, 0, 0.25)', '0 25px 50px -12px rgba(236, 72, 153, 0.5)', '0 25px 50px -12px rgba(0, 0, 0, 0.25)']
+              : '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+          }}
+          transition={{
+            boxShadow: { duration: 0.5, repeat: spinning ? Infinity : 0 }
+          }}
           style={{ 
             transform: `rotate(${rotation}deg)`,
             transition: spinning 
@@ -139,15 +150,15 @@ export default function RouletteWheel({ onResult, disabled, awardType = 'tienda'
                 }}
               >
                 <div 
-                  className="w-full h-full flex items-start justify-center pt-8"
+                  className="w-full h-full flex items-start justify-center pt-12"
                   style={{ background: prize.color }}
                 >
                   <div 
-                    className="text-center"
+                    className="text-center max-w-[140px]"
                     style={{ transform: `rotate(${22.5}deg)` }}
                   >
-                    <div className="text-3xl mb-1">{prize.emoji}</div>
-                    <p className="text-[9px] font-bold text-gray-700 leading-tight px-1">
+                    <div className="text-5xl mb-2">{prize.emoji}</div>
+                    <p className="text-xs font-bold text-gray-800 leading-tight px-2 break-words">
                       {prize.name}
                     </p>
                   </div>
@@ -157,9 +168,19 @@ export default function RouletteWheel({ onResult, disabled, awardType = 'tienda'
           })}
 
           {/* Centro de la ruleta */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 rounded-full bg-gradient-to-br from-pink-400 to-rose-500 flex items-center justify-center shadow-xl border-4 border-white z-10">
-            <Sparkles className="w-8 h-8 text-white" />
-          </div>
+          <motion.div 
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-28 rounded-full bg-gradient-to-br from-pink-400 to-rose-500 flex items-center justify-center shadow-2xl border-6 border-white z-10"
+            animate={{
+              scale: spinning ? [1, 1.1, 1] : 1,
+              rotate: spinning ? 360 : 0
+            }}
+            transition={{
+              scale: { duration: 0.5, repeat: spinning ? Infinity : 0 },
+              rotate: { duration: 2, repeat: spinning ? Infinity : 0, ease: "linear" }
+            }}
+          >
+            <Sparkles className="w-12 h-12 text-white" />
+          </motion.div>
         </motion.div>
       </div>
 
