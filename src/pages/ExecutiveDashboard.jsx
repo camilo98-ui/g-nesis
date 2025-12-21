@@ -23,6 +23,7 @@ import { es } from 'date-fns/locale';
 import KPIsDetailView from '../components/executive/KPIsDetailView';
 import ChartsDetailView from '../components/executive/ChartsDetailView';
 import StoresDetailView from '../components/executive/StoresDetailView';
+import ComparableView from '../components/executive/ComparableView';
 import SalesForecastPanel from '../components/predictions/SalesForecastPanel';
 
 const COLORS = ['#3b82f6', '#60a5fa', '#93c5fd', '#dbeafe', '#1d4ed8', '#2563eb', '#1e40af'];
@@ -73,8 +74,8 @@ const ExecutiveKPI = ({ title, value, subtitle, icon: Icon, badge, badgeColor = 
           </span>
         )}
       </div>
-      <p className="text-sm font-medium text-gray-600 mb-2">{title}</p>
-      <p className="text-3xl font-bold text-gray-900 mb-1">{value}</p>
+      <p className="text-sm font-medium text-gray-600 mb-3">{title}</p>
+      <p className="text-3xl font-bold text-gray-900 mb-2 tracking-tight leading-tight">{value}</p>
       <p className="text-xs text-gray-500">{subtitle}</p>
     </motion.div>
   );
@@ -453,6 +454,20 @@ INSTRUCCIONES:
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-4 mt-4 mb-2">Análisis</p>
             <motion.div
               whileHover={{ x: 3 }}
+              onClick={() => setActiveView('comparable')}
+              className={`px-4 py-2.5 rounded-lg cursor-pointer transition-colors ${
+                activeView === 'comparable' ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-50 text-gray-700'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <TrendingUp className="w-4 h-4" />
+                <span className={`text-sm ${activeView === 'comparable' ? 'font-semibold' : 'font-medium'}`}>
+                  Análisis Comparable
+                </span>
+              </div>
+            </motion.div>
+            <motion.div
+              whileHover={{ x: 3 }}
               onClick={() => setActiveView('kpis')}
               className={`px-4 py-2.5 rounded-lg cursor-pointer transition-colors ${
                 activeView === 'kpis' ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-50 text-gray-700'
@@ -623,6 +638,15 @@ INSTRUCCIONES:
             </div>
 
             {/* Conditional View Rendering */}
+            {activeView === 'comparable' && !isLoading && (
+            <ComparableView 
+              storesAnalysis={storesAnalysis}
+              allDailySales={allDailySales}
+              activeRange={activeRange}
+              formatCurrency={formatCurrency}
+            />
+            )}
+
             {activeView === 'kpis' && !isLoading && (
             <KPIsDetailView 
               storesAnalysis={storesAnalysis}
