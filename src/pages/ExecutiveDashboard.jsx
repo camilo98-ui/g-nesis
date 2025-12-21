@@ -95,6 +95,7 @@ export default function ExecutiveDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeView, setActiveView] = useState(urlView || 'general');
   const [selectedStoreDetail, setSelectedStoreDetail] = useState(null);
+  const [chartView, setChartView] = useState('ventas'); // ventas, cumplimiento, proyeccion, eficiencia
   
   useEffect(() => {
     if (urlView) {
@@ -933,40 +934,202 @@ INSTRUCCIONES:
             </div>
           )}
 
-          {/* Gráfica Principal */}
+          {/* Botones de Vista Dinámica */}
+          {!isLoading && (
+            <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
+              <motion.button
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => setChartView('ventas')}
+                className={`px-4 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 whitespace-nowrap ${
+                  chartView === 'ventas'
+                    ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/30'
+                    : 'bg-white border-2 border-gray-200 text-gray-600 hover:border-blue-300'
+                }`}
+              >
+                <DollarSign className="w-4 h-4" />
+                Ventas vs Meta
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => setChartView('cumplimiento')}
+                className={`px-4 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 whitespace-nowrap ${
+                  chartView === 'cumplimiento'
+                    ? 'bg-gradient-to-r from-emerald-500 to-green-600 text-white shadow-lg shadow-emerald-500/30'
+                    : 'bg-white border-2 border-gray-200 text-gray-600 hover:border-emerald-300'
+                }`}
+              >
+                <CheckCircle className="w-4 h-4" />
+                % Cumplimiento
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => setChartView('proyeccion')}
+                className={`px-4 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 whitespace-nowrap ${
+                  chartView === 'proyeccion'
+                    ? 'bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-lg shadow-purple-500/30'
+                    : 'bg-white border-2 border-gray-200 text-gray-600 hover:border-purple-300'
+                }`}
+              >
+                <Target className="w-4 h-4" />
+                Proyección vs Meta
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => setChartView('eficiencia')}
+                className={`px-4 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 whitespace-nowrap ${
+                  chartView === 'eficiencia'
+                    ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-lg shadow-amber-500/30'
+                    : 'bg-white border-2 border-gray-200 text-gray-600 hover:border-amber-300'
+                }`}
+              >
+                <Zap className="w-4 h-4" />
+                Ticket vs Transacciones
+              </motion.button>
+            </div>
+          )}
+
+          {/* Gráfica Principal Dinámica */}
           {isLoading ? (
             <ChartSkeleton />
           ) : (
-            <Card className="border-gray-100 shadow-sm mb-6">
-              <CardHeader className="border-b border-gray-100 bg-gradient-to-r from-blue-50 to-white">
-                <CardTitle className="text-base font-semibold text-gray-900 flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5 text-blue-600" />
-                  Ventas Diarias vs Meta Mensual
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-6">
-                <ResponsiveContainer width="100%" height={300}>
-                  <ComposedChart data={comparisonData}>
-                    <defs>
-                      <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-                    <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#6b7280' }} angle={-45} textAnchor="end" height={90} />
-                    <YAxis tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} tick={{ fontSize: 11, fill: '#6b7280' }} />
-                    <Tooltip 
-                      formatter={(v) => formatCurrency(v)}
-                      contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
-                    />
-                    <Legend wrapperStyle={{ fontSize: '12px' }} />
-                    <Bar dataKey="ventas" fill="url(#salesGradient)" name="Ventas Reales" radius={[6, 6, 0, 0]} />
-                    <Line type="monotone" dataKey="presupuesto" stroke="#9ca3af" strokeWidth={2} strokeDasharray="5 5" name="Meta" dot={false} />
-                  </ComposedChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={chartView}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Card className="border-gray-100 shadow-sm mb-6">
+                  <CardHeader className={`border-b border-gray-100 ${
+                    chartView === 'ventas' ? 'bg-gradient-to-r from-blue-50 to-indigo-50' :
+                    chartView === 'cumplimiento' ? 'bg-gradient-to-r from-emerald-50 to-green-50' :
+                    chartView === 'proyeccion' ? 'bg-gradient-to-r from-purple-50 to-pink-50' :
+                    'bg-gradient-to-r from-amber-50 to-orange-50'
+                  }`}>
+                    <CardTitle className="text-base font-semibold text-gray-900 flex items-center gap-2">
+                      {chartView === 'ventas' && (
+                        <>
+                          <DollarSign className="w-5 h-5 text-blue-600" />
+                          Ventas Reales vs Meta Presupuestada
+                        </>
+                      )}
+                      {chartView === 'cumplimiento' && (
+                        <>
+                          <CheckCircle className="w-5 h-5 text-emerald-600" />
+                          % de Cumplimiento por Tienda
+                        </>
+                      )}
+                      {chartView === 'proyeccion' && (
+                        <>
+                          <Target className="w-5 h-5 text-purple-600" />
+                          Proyección Mensual vs Meta
+                        </>
+                      )}
+                      {chartView === 'eficiencia' && (
+                        <>
+                          <Zap className="w-5 h-5 text-amber-600" />
+                          Ticket Promedio vs Volumen de Transacciones
+                        </>
+                      )}
+                    </CardTitle>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {chartView === 'ventas' && 'Comparación entre las ventas acumuladas y el presupuesto mensual'}
+                      {chartView === 'cumplimiento' && 'Porcentaje de avance respecto a la meta de cada punto'}
+                      {chartView === 'proyeccion' && 'Estimación del cierre mensual vs objetivo planificado'}
+                      {chartView === 'eficiencia' && 'Análisis de eficiencia: valor promedio por transacción'}
+                    </p>
+                  </CardHeader>
+                  <CardContent className="pt-6">
+                    <ResponsiveContainer width="100%" height={350}>
+                      {chartView === 'ventas' && (
+                        <ComposedChart data={comparisonData}>
+                          <defs>
+                            <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                              <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                          <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#6b7280' }} angle={-45} textAnchor="end" height={90} />
+                          <YAxis tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} tick={{ fontSize: 11, fill: '#6b7280' }} />
+                          <Tooltip 
+                            formatter={(v) => formatCurrency(v)}
+                            contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
+                          />
+                          <Legend wrapperStyle={{ fontSize: '12px' }} />
+                          <Bar dataKey="ventas" fill="url(#salesGradient)" name="Ventas Reales" radius={[6, 6, 0, 0]} />
+                          <Line type="monotone" dataKey="presupuesto" stroke="#ef4444" strokeWidth={3} strokeDasharray="5 5" name="Meta Presupuesto" dot={false} />
+                        </ComposedChart>
+                      )}
+                      {chartView === 'cumplimiento' && (
+                        <BarChart data={comparisonData.map(d => ({
+                          ...d,
+                          cumplimientoColor: d.cumplimiento >= 90 ? '#10b981' : d.cumplimiento >= 70 ? '#f59e0b' : '#ef4444'
+                        }))}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                          <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#6b7280' }} angle={-45} textAnchor="end" height={90} />
+                          <YAxis tickFormatter={(v) => `${v}%`} tick={{ fontSize: 11, fill: '#6b7280' }} />
+                          <Tooltip 
+                            formatter={(v) => `${v.toFixed(1)}%`}
+                            contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
+                          />
+                          <Legend wrapperStyle={{ fontSize: '12px' }} />
+                          <Bar dataKey="cumplimiento" name="% Cumplimiento" radius={[6, 6, 0, 0]}>
+                            {comparisonData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={
+                                entry.cumplimiento >= 90 ? '#10b981' : 
+                                entry.cumplimiento >= 70 ? '#f59e0b' : '#ef4444'
+                              } />
+                            ))}
+                          </Bar>
+                          <Line type="monotone" dataKey={() => 100} stroke="#9ca3af" strokeWidth={2} strokeDasharray="5 5" name="Meta 100%" dot={false} />
+                        </BarChart>
+                      )}
+                      {chartView === 'proyeccion' && (
+                        <ComposedChart data={comparisonData}>
+                          <defs>
+                            <linearGradient id="projectionGradient" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#a855f7" stopOpacity={0.3}/>
+                              <stop offset="95%" stopColor="#a855f7" stopOpacity={0}/>
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                          <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#6b7280' }} angle={-45} textAnchor="end" height={90} />
+                          <YAxis tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} tick={{ fontSize: 11, fill: '#6b7280' }} />
+                          <Tooltip 
+                            formatter={(v) => formatCurrency(v)}
+                            contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
+                          />
+                          <Legend wrapperStyle={{ fontSize: '12px' }} />
+                          <Area type="monotone" dataKey="proyeccion" stroke="#a855f7" strokeWidth={3} fill="url(#projectionGradient)" name="Proyección Estimada" />
+                          <Line type="monotone" dataKey="presupuesto" stroke="#3b82f6" strokeWidth={3} strokeDasharray="5 5" name="Meta Objetivo" dot={false} />
+                        </ComposedChart>
+                      )}
+                      {chartView === 'eficiencia' && (
+                        <ComposedChart data={comparisonData}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                          <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#6b7280' }} angle={-45} textAnchor="end" height={90} />
+                          <YAxis yAxisId="left" tickFormatter={(v) => `$${(v/1000).toFixed(0)}k`} tick={{ fontSize: 11, fill: '#6b7280' }} />
+                          <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11, fill: '#6b7280' }} />
+                          <Tooltip 
+                            formatter={(v, name) => name.includes('Ticket') ? formatCurrency(v) : v.toLocaleString()}
+                            contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
+                          />
+                          <Legend wrapperStyle={{ fontSize: '12px' }} />
+                          <Bar yAxisId="right" dataKey="transacciones" fill="#f59e0b" name="Transacciones" radius={[6, 6, 0, 0]} />
+                          <Line yAxisId="left" type="monotone" dataKey="ticket" stroke="#8b5cf6" strokeWidth={3} dot={{ fill: '#8b5cf6', r: 5 }} name="Ticket Promedio" />
+                        </ComposedChart>
+                      )}
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </AnimatePresence>
           )}
 
           {/* Indicadores Secundarios */}
