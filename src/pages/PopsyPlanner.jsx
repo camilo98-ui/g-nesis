@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { Calendar as CalendarIcon, Sparkles, BarChart3, UserPlus, MessageCircle } from 'lucide-react';
+import { Calendar as CalendarIcon, Sparkles, BarChart3, UserPlus, MessageCircle, ArrowLeft } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format, startOfWeek, endOfWeek, eachDayOfInterval } from 'date-fns';
@@ -89,6 +89,26 @@ export default function PopsyPlanner() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50/30 via-white to-violet-50/30 p-4 md:p-6">
+      {/* Botón flotante de regreso */}
+      <AnimatePresence>
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -20 }}
+          className="fixed top-24 left-4 z-50"
+        >
+          <Button
+            onClick={() => window.history.back()}
+            variant="outline"
+            size="sm"
+            className="bg-white/95 backdrop-blur-sm border-gray-200 hover:border-violet-300 hover:bg-violet-50 shadow-lg gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span className="hidden sm:inline">Volver</span>
+          </Button>
+        </motion.div>
+      </AnimatePresence>
+
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}
