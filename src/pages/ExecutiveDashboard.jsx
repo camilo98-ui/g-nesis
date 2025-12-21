@@ -751,30 +751,35 @@ INSTRUCCIONES:
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {storesWithoutPlanner.map((store) => (
-                    <motion.div
+                    <Link 
                       key={store.code}
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      whileHover={{ scale: 1.02 }}
+                      to={`${createPageUrl('PopsyPlanner')}?store=${store.code}`}
+                      onClick={() => localStorage.setItem('selectedStore', store.code)}
                     >
-                      <Card className="border-orange-200 bg-orange-50/50 hover:shadow-lg transition-all">
-                        <CardContent className="pt-6">
-                          <div className="flex items-start gap-3">
-                            <div className="p-2 rounded-lg bg-orange-100">
-                              <Clock className="w-5 h-5 text-orange-600" />
-                            </div>
-                            <div className="flex-1">
-                              <p className="font-bold text-gray-900 mb-1">{getDisplayName(store.code)}</p>
-                              <p className="text-xs text-gray-600 mb-2">{store.code}</p>
-                              <div className="flex items-center gap-1 text-orange-600">
-                                <AlertTriangle className="w-3 h-3" />
-                                <span className="text-xs font-semibold">Planner pendiente</span>
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        whileHover={{ scale: 1.02 }}
+                      >
+                        <Card className="border-orange-200 bg-orange-50/50 hover:shadow-lg transition-all cursor-pointer">
+                          <CardContent className="pt-6">
+                            <div className="flex items-start gap-3">
+                              <div className="p-2 rounded-lg bg-orange-100">
+                                <Clock className="w-5 h-5 text-orange-600" />
+                              </div>
+                              <div className="flex-1">
+                                <p className="font-bold text-gray-900 mb-1">{getDisplayName(store.code)}</p>
+                                <p className="text-xs text-gray-600 mb-2">{store.code}</p>
+                                <div className="flex items-center gap-1 text-orange-600">
+                                  <AlertTriangle className="w-3 h-3" />
+                                  <span className="text-xs font-semibold">Crear planner →</span>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    </Link>
                   ))}
                 </div>
               )}
