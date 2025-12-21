@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
+import { createPageUrl } from '@/utils';
 import { Calendar as CalendarIcon, Sparkles, BarChart3, UserPlus, MessageCircle, ArrowLeft } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -28,8 +29,17 @@ export default function PopsyPlanner() {
   // Check if view only mode (for Calidad, Embajador, C.Interno roles)
   const urlParams = new URLSearchParams(window.location.search);
   const viewOnly = urlParams.get('viewOnly') === 'true';
+  const returnView = urlParams.get('returnView') || null;
   const userRole = localStorage.getItem('userRole') || 'lider';
   const isReadOnly = viewOnly || userRole === 'embajador' || userRole === 'calidad' || userRole === 'c_interno';
+
+  const handleBack = () => {
+    if (returnView) {
+      window.location.href = `${createPageUrl('ExecutiveDashboard')}?view=${returnView}`;
+    } else {
+      window.history.back();
+    }
+  };
 
   useEffect(() => {
     const saved = localStorage.getItem('selectedStore');
@@ -98,7 +108,7 @@ export default function PopsyPlanner() {
           className="fixed top-24 left-4 z-50"
         >
           <Button
-            onClick={() => window.history.back()}
+            onClick={handleBack}
             variant="outline"
             size="sm"
             className="bg-white/95 backdrop-blur-sm border-gray-200 hover:border-violet-300 hover:bg-violet-50 shadow-lg gap-2"

@@ -82,6 +82,9 @@ const ExecutiveKPI = ({ title, value, subtitle, icon: Icon, badge, badgeColor = 
 };
 
 export default function ExecutiveDashboard() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlView = urlParams.get('view');
+  
   const [filterStatus, setFilterStatus] = useState('all');
   const [dateRange, setDateRange] = useState({ from: startOfMonth(new Date()), to: new Date() });
   const [weekFilter, setWeekFilter] = useState(null);
@@ -89,7 +92,13 @@ export default function ExecutiveDashboard() {
   const [loadingInsights, setLoadingInsights] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [activeView, setActiveView] = useState('general');
+  const [activeView, setActiveView] = useState(urlView || 'general');
+  
+  useEffect(() => {
+    if (urlView) {
+      setActiveView(urlView);
+    }
+  }, [urlView]);
 
   const activeRange = weekFilter || dateRange;
   const currentMonth = new Date().getMonth() + 1;
@@ -753,7 +762,7 @@ INSTRUCCIONES:
                   {storesWithoutPlanner.map((store) => (
                     <Link 
                       key={store.code}
-                      to={`${createPageUrl('PopsyPlanner')}?store=${store.code}`}
+                      to={`${createPageUrl('PopsyPlanner')}?store=${store.code}&returnView=planner`}
                       onClick={() => localStorage.setItem('selectedStore', store.code)}
                     >
                       <motion.div
