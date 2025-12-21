@@ -23,6 +23,7 @@ import { es } from 'date-fns/locale';
 import KPIsDetailView from '../components/executive/KPIsDetailView';
 import ChartsDetailView from '../components/executive/ChartsDetailView';
 import StoresDetailView from '../components/executive/StoresDetailView';
+import SalesForecastPanel from '../components/predictions/SalesForecastPanel';
 
 const COLORS = ['#3b82f6', '#60a5fa', '#93c5fd', '#dbeafe', '#1d4ed8', '#2563eb', '#1e40af'];
 
@@ -493,6 +494,22 @@ INSTRUCCIONES:
               </div>
             </motion.div>
 
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-4 mt-4 mb-2">Predictivo</p>
+            <motion.div
+              whileHover={{ x: 3 }}
+              onClick={() => setActiveView('forecast')}
+              className={`px-4 py-2.5 rounded-lg cursor-pointer transition-colors ${
+                activeView === 'forecast' ? 'bg-purple-50 text-purple-700' : 'hover:bg-gray-50 text-gray-700'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <TrendingUp className="w-4 h-4" />
+                <span className={`text-sm ${activeView === 'forecast' ? 'font-semibold' : 'font-medium'}`}>
+                  Pronóstico IA
+                </span>
+              </div>
+            </motion.div>
+
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-4 mt-4 mb-2">Alertas</p>
             <motion.div
               whileHover={{ x: 3 }}
@@ -641,6 +658,46 @@ INSTRUCCIONES:
               storesAnalysis={storesAnalysis.filter(s => s.status === 'negative')}
               formatCurrency={formatCurrency}
             />
+            )}
+
+            {activeView === 'forecast' && !isLoading && (
+            <div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6"
+              >
+                <h1 className="text-2xl font-bold text-gray-900 mb-1">Pronósticos de Ventas</h1>
+                <p className="text-sm text-gray-500">Predicciones inteligentes basadas en IA para los próximos 7 días</p>
+              </motion.div>
+
+              <div className="space-y-6">
+                {/* Pronóstico de Zona */}
+                <SalesForecastPanel 
+                  storeId={null}
+                  storeName="Zona Bogotá Noroccidente"
+                  allStores={true}
+                />
+
+                {/* Pronósticos por Tienda Top 3 */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Pronósticos por Tienda</h3>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    {storesAnalysis
+                      .sort((a, b) => b.totalSales - a.totalSales)
+                      .slice(0, 4)
+                      .map(store => (
+                        <SalesForecastPanel 
+                          key={store.code}
+                          storeId={store.code}
+                          storeName={store.name}
+                          allStores={false}
+                        />
+                      ))}
+                  </div>
+                </div>
+              </div>
+            </div>
             )}
 
             {/* General View */}
