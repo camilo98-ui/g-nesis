@@ -6,7 +6,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { format, startOfWeek, endOfWeek, subWeeks, getWeek, getYear, startOfYear, eachWeekOfInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
 
-export default function WeekFilter({ selectedWeek, onWeekChange, multiSelect = false }) {
+export default function WeekFilter({ selectedWeek, onWeekChange, multiSelect = true }) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedWeekData, setSelectedWeekData] = useState(null);
   const [selectedWeeks, setSelectedWeeks] = useState([]);
