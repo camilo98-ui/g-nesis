@@ -628,19 +628,9 @@ INSTRUCCIONES:
                 </div>
               </motion.div>
             </Link>
-          </nav>
-        </div>
-
-        <div className="absolute bottom-6 left-6 right-6">
-          <div className="p-3 rounded-lg bg-gray-50 border border-gray-200">
-            <div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
-              <Clock className="w-3 h-3" />
-              <span>Última actualización</span>
+            </nav>
             </div>
-            <p className="text-xs font-semibold text-gray-900">{format(new Date(), 'HH:mm - dd MMM yyyy', { locale: es })}</p>
-          </div>
-        </div>
-      </motion.aside>
+            </motion.aside>
 
       {/* Main Content */}
       <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-[280px]' : 'ml-0'}`}>
