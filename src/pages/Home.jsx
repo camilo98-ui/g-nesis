@@ -362,14 +362,14 @@ export default function Home() {
   // Si no está logueado, mostrar pantalla de login
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-white relative overflow-hidden flex items-center justify-center">
+      <div className="min-h-screen bg-white relative overflow-hidden flex items-center justify-center p-4">
         <PastelConfetti />
         <FloatingIceCreamsBg />
         
         <motion.div
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          className="relative z-10 w-full max-w-md mx-4">
+          className="relative z-10 w-full max-w-md my-auto">
 
           <motion.div
             className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-pink-100"
