@@ -302,6 +302,58 @@ INSTRUCCIONES:
   }, [filteredStores]);
 
   // Auto Insight - Principal riesgo u oportunidad
+  // Estado Maestro de la Zona
+  const zoneStatus = useMemo(() => {
+    if (storesAnalysis.length === 0) return null;
+
+    const daysInPeriod = Math.max(1, Math.ceil((activeRange.to - activeRange.from) / (1000 * 60 * 60 * 24)));
+    const daysElapsed = Math.max(1, storesAnalysis.reduce((sum, s) => Math.max(sum, s.daysElapsed), 1));
+    const daysRemaining = Math.max(0, daysInPeriod - daysElapsed);
+
+    const currentSales = zoneTotals.totalSales;
+    const totalBudget = zoneTotals.totalBudget;
+    const projection = zoneTotals.totalProjection;
+    const projectionCompliance = totalBudget > 0 ? (projection / totalBudget) * 100 : 0;
+    const gap = totalBudget - projection;
+    const dailyRequired = daysRemaining > 0 ? (totalBudget - currentSales) / daysRemaining : 0;
+    const currentDailyAvg = daysElapsed > 0 ? currentSales / daysElapsed : 0;
+
+    const storesOnTrack = storesAnalysis.filter(s => s.projectionCompliance >= 95).length;
+    const storesAlert = storesAnalysis.filter(s => s.projectionCompliance >= 85 && s.projectionCompliance < 95).length;
+    const storesCritical = storesAnalysis.filter(s => s.projectionCompliance < 85).length;
+
+    let verdict = 'success';
+    let verdictLabel = 'EN META';
+    let verdictIcon = '✓';
+    if (projectionCompliance < 85) {
+      verdict = 'danger';
+      verdictLabel = 'RIESGO CRÍTICO';
+      verdictIcon = '!';
+    } else if (projectionCompliance < 95) {
+      verdict = 'warning';
+      verdictLabel = 'EN ALERTA';
+      verdictIcon = '⚠';
+    }
+
+    return {
+      verdict,
+      verdictLabel,
+      verdictIcon,
+      projectionCompliance,
+      projection,
+      totalBudget,
+      gap,
+      dailyRequired,
+      currentDailyAvg,
+      daysElapsed,
+      daysRemaining,
+      storesOnTrack,
+      storesAlert,
+      storesCritical,
+      alertActive: projectionCompliance < 95
+    };
+  }, [storesAnalysis, zoneTotals, activeRange]);
+
   const autoInsight = useMemo(() => {
     if (storesAnalysis.length === 0) return null;
     
@@ -471,6 +523,151 @@ INSTRUCCIONES:
               <DateFilter dateRange={dateRange} onDateChange={(range) => { setDateRange(range); setWeekFilter(null); }} />
             </div>
           </div>
+
+          {/* Cuadro Maestro de Estado de la Zona */}
+          {isLoading ? (
+            <KPISkeleton />
+          ) : zoneStatus && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-8"
+            >
+              <Card className={`border-2 shadow-xl ${
+                zoneStatus.verdict === 'danger' ? 'border-rose-300 bg-gradient-to-br from-rose-50 to-red-50' :
+                zoneStatus.verdict === 'warning' ? 'border-amber-300 bg-gradient-to-br from-amber-50 to-yellow-50' :
+                'border-emerald-300 bg-gradient-to-br from-emerald-50 to-green-50'
+              }`}>
+                <CardContent className="p-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Veredicto Principal */}
+                    <div className="lg:col-span-1 flex flex-col justify-center items-center border-r border-slate-200">
+                      <motion.div
+                        animate={zoneStatus.alertActive ? {
+                          scale: [1, 1.05, 1],
+                          rotate: [0, -2, 2, 0]
+                        } : {}}
+                        transition={{ duration: 2, repeat: Infinity }}
+                        className={`w-24 h-24 rounded-full flex items-center justify-center text-4xl font-black mb-4 ${
+                          zoneStatus.verdict === 'danger' ? 'bg-rose-200 text-rose-700' :
+                          zoneStatus.verdict === 'warning' ? 'bg-amber-200 text-amber-700' :
+                          'bg-emerald-200 text-emerald-700'
+                        }`}
+                      >
+                        {zoneStatus.verdictIcon}
+                      </motion.div>
+                      <h2 className={`text-2xl font-black mb-2 ${
+                        zoneStatus.verdict === 'danger' ? 'text-rose-800' :
+                        zoneStatus.verdict === 'warning' ? 'text-amber-800' :
+                        'text-emerald-800'
+                      }`}>
+                        {zoneStatus.verdictLabel}
+                      </h2>
+                      <p className="text-sm text-slate-600 font-medium text-center">Estado de la Zona</p>
+                    </div>
+
+                    {/* Proyección y Brecha */}
+                    <div className="lg:col-span-1 space-y-4 border-r border-slate-200 pr-6">
+                      <div>
+                        <p className="text-xs text-slate-500 font-semibold mb-1">PROYECCIÓN MENSUAL</p>
+                        <div className="flex items-baseline gap-2">
+                          <p className="text-3xl font-black text-slate-900">{formatCurrency(zoneStatus.projection)}</p>
+                          <p className={`text-lg font-bold ${
+                            zoneStatus.projectionCompliance >= 100 ? 'text-emerald-600' :
+                            zoneStatus.projectionCompliance >= 95 ? 'text-amber-600' :
+                            'text-rose-600'
+                          }`}>
+                            {zoneStatus.projectionCompliance.toFixed(1)}%
+                          </p>
+                        </div>
+                        <p className="text-xs text-slate-500 mt-1">Meta: {formatCurrency(zoneStatus.totalBudget)}</p>
+                      </div>
+
+                      <div className="h-3 bg-slate-200 rounded-full overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${Math.min(100, zoneStatus.projectionCompliance)}%` }}
+                          className={`h-full ${
+                            zoneStatus.verdict === 'danger' ? 'bg-gradient-to-r from-rose-500 to-red-600' :
+                            zoneStatus.verdict === 'warning' ? 'bg-gradient-to-r from-amber-500 to-yellow-600' :
+                            'bg-gradient-to-r from-emerald-500 to-green-600'
+                          }`}
+                        />
+                      </div>
+
+                      {zoneStatus.gap !== 0 && (
+                        <div className={`p-3 rounded-xl ${
+                          zoneStatus.gap > 0 ? 'bg-rose-100/50' : 'bg-emerald-100/50'
+                        }`}>
+                          <p className="text-xs text-slate-600 font-semibold">
+                            {zoneStatus.gap > 0 ? 'BRECHA PROYECTADA' : 'EXCEDENTE PROYECTADO'}
+                          </p>
+                          <p className={`text-xl font-black ${
+                            zoneStatus.gap > 0 ? 'text-rose-700' : 'text-emerald-700'
+                          }`}>
+                            {formatCurrency(Math.abs(zoneStatus.gap))}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Ritmo y Consolidado */}
+                    <div className="lg:col-span-1 space-y-4">
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="bg-white/60 p-3 rounded-xl border border-slate-200">
+                          <p className="text-[10px] text-slate-500 font-bold mb-1">RITMO ACTUAL</p>
+                          <p className="text-lg font-black text-slate-800">{formatCurrency(zoneStatus.currentDailyAvg)}</p>
+                          <p className="text-[10px] text-slate-500">por día</p>
+                        </div>
+                        <div className="bg-white/60 p-3 rounded-xl border border-slate-200">
+                          <p className="text-[10px] text-slate-500 font-bold mb-1">RITMO REQUERIDO</p>
+                          <p className={`text-lg font-black ${
+                            zoneStatus.dailyRequired > zoneStatus.currentDailyAvg * 1.2 ? 'text-rose-700' :
+                            zoneStatus.dailyRequired > zoneStatus.currentDailyAvg ? 'text-amber-700' :
+                            'text-emerald-700'
+                          }`}>
+                            {formatCurrency(zoneStatus.dailyRequired)}
+                          </p>
+                          <p className="text-[10px] text-slate-500">por día</p>
+                        </div>
+                      </div>
+
+                      <div className="bg-white/60 p-4 rounded-xl border border-slate-200">
+                        <p className="text-xs text-slate-600 font-bold mb-3">TIENDAS POR ESTADO</p>
+                        <div className="grid grid-cols-3 gap-2">
+                          <div className="text-center">
+                            <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-1">
+                              <span className="text-lg font-black text-emerald-700">{zoneStatus.storesOnTrack}</span>
+                            </div>
+                            <p className="text-[9px] text-slate-500 font-medium">En Meta</p>
+                          </div>
+                          <div className="text-center">
+                            <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-1">
+                              <span className="text-lg font-black text-amber-700">{zoneStatus.storesAlert}</span>
+                            </div>
+                            <p className="text-[9px] text-slate-500 font-medium">Alerta</p>
+                          </div>
+                          <div className="text-center">
+                            <div className="w-10 h-10 rounded-full bg-rose-100 flex items-center justify-center mx-auto mb-1">
+                              <span className="text-lg font-black text-rose-700">{zoneStatus.storesCritical}</span>
+                            </div>
+                            <p className="text-[9px] text-slate-500 font-medium">Críticas</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {zoneStatus.daysRemaining > 0 && (
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-slate-500">Días transcurridos:</span>
+                          <span className="font-bold text-slate-700">{zoneStatus.daysElapsed}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
 
           {/* KPIs Ejecutivos */}
           {isLoading ? (
