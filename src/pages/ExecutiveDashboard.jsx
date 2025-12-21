@@ -715,377 +715,244 @@ INSTRUCCIONES:
               />
           )}
 
-          {/* KPIs Ejecutivos */}
-          {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-              {[1, 2, 3, 4].map((i) => <KPISkeleton key={i} />)}
             </div>
-          ) : (
-            <div id="kpis-section" className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-              <ExecutiveKPI
-                title="Venta Total"
-                value={`$${(zoneTotals.totalSales/1000000).toFixed(1)}M`}
-                subtitle={`Meta: $${(zoneTotals.totalBudget/1000000).toFixed(1)}M · ${((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%`}
-                icon={DollarSign}
-                status={zoneTotals.totalSales >= zoneTotals.totalBudget ? 'success' : zoneTotals.totalSales >= zoneTotals.totalBudget * 0.85 ? 'warning' : 'danger'}
-                onClick={() => setSelectedCard('sales')}
-              />
-              <ExecutiveKPI
-                title="Proyección al Cierre"
-                value={`$${(zoneTotals.totalProjection/1000000).toFixed(1)}M`}
-                subtitle={`${((zoneTotals.totalProjection/zoneTotals.totalBudget)*100).toFixed(0)}% de la meta`}
-                icon={Target}
-                status={zoneTotals.totalProjection >= zoneTotals.totalBudget ? 'success' : zoneTotals.totalProjection >= zoneTotals.totalBudget * 0.9 ? 'warning' : 'danger'}
-                onClick={() => setSelectedCard('projection')}
-              />
-              <ExecutiveKPI
-                title="Tiendas en Meta"
-                value={statusCounts.positive}
-                subtitle={`${((statusCounts.positive/STORES.length)*100).toFixed(0)}% del total (${STORES.length})`}
-                icon={CheckCircle}
-                status={statusCounts.positive >= STORES.length * 0.7 ? 'success' : statusCounts.positive >= STORES.length * 0.5 ? 'warning' : 'danger'}
-                onClick={() => setFilterStatus('positive')}
-              />
-              <motion.div
-                animate={statusCounts.critical > 0 ? { 
-                  scale: [1, 1.02, 1],
-                  boxShadow: ['0 1px 3px rgba(0,0,0,0.1)', '0 4px 12px rgba(244,63,94,0.3)', '0 1px 3px rgba(0,0,0,0.1)']
-                } : {}}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
-                <ExecutiveKPI
-                  title="Tiendas en Riesgo"
-                  value={statusCounts.critical + statusCounts.negative}
-                  subtitle={`${statusCounts.critical} críticas · ${statusCounts.negative} en alerta`}
-                  icon={AlertTriangle}
-                  status={statusCounts.critical === 0 ? 'success' : statusCounts.critical <= 2 ? 'warning' : 'danger'}
-                  onClick={() => setFilterStatus('critical')}
-                />
-              </motion.div>
-            </div>
-          )}
 
-          {/* AI Insights */}
+          {/* Gráfica Principal */}
           {isLoading ? (
             <ChartSkeleton />
           ) : (
-            <Card className="border-slate-100 shadow-sm mb-8 bg-gradient-to-br from-purple-50/50 to-blue-50/30">
-              <CardHeader className="border-b border-slate-100">
-                <CardTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
-                  <Brain className="w-5 h-5 text-purple-600" />
-                  Análisis Inteligente
-                  {loadingInsights && <Sparkles className="w-4 h-4 animate-pulse text-purple-500" />}
+            <Card className="border-gray-100 shadow-sm mb-6">
+              <CardHeader className="border-b border-gray-100 bg-gradient-to-r from-blue-50 to-white">
+                <CardTitle className="text-base font-semibold text-gray-900 flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5 text-blue-600" />
+                  Ventas Diarias vs Meta Mensual
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-6">
-                {aiInsights ? (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
-                      <p className="text-xs font-bold text-purple-600 mb-3 flex items-center gap-1">
-                        🎯 Patrón Crítico
-                      </p>
-                      <p className="text-sm text-slate-700 leading-relaxed">{aiInsights.patron_critico}</p>
-                    </div>
-                    <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
-                      <p className="text-xs font-bold text-blue-600 mb-3 flex items-center gap-1">
-                        ⚡ Acciones Prioritarias
-                      </p>
-                      <ul className="space-y-2">
-                        {aiInsights.acciones_prioritarias?.map((accion, i) => (
-                          <li key={i} className="text-xs text-slate-700 flex items-start gap-2">
-                            <span className="flex-shrink-0 w-5 h-5 rounded-full bg-blue-100 text-blue-700 font-bold flex items-center justify-center text-[10px]">{i + 1}</span>
-                            <span className="flex-1">{accion}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
-                      <p className="text-xs font-bold text-emerald-600 mb-3 flex items-center gap-1">
-                        💡 Oportunidades
-                      </p>
-                      <p className="text-sm text-slate-700 leading-relaxed">{aiInsights.oportunidades}</p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <Sparkles className="w-10 h-10 mx-auto mb-3 animate-pulse text-purple-400" />
-                    <p className="text-sm text-slate-400 font-medium">Analizando datos...</p>
-                  </div>
-                )}
+                <ResponsiveContainer width="100%" height={300}>
+                  <ComposedChart data={comparisonData}>
+                    <defs>
+                      <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                    <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#6b7280' }} angle={-45} textAnchor="end" height={90} />
+                    <YAxis tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} tick={{ fontSize: 11, fill: '#6b7280' }} />
+                    <Tooltip 
+                      formatter={(v) => formatCurrency(v)}
+                      contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
+                    />
+                    <Legend wrapperStyle={{ fontSize: '12px' }} />
+                    <Bar dataKey="ventas" fill="url(#salesGradient)" name="Ventas Reales" radius={[6, 6, 0, 0]} />
+                    <Line type="monotone" dataKey="presupuesto" stroke="#9ca3af" strokeWidth={2} strokeDasharray="5 5" name="Meta" dot={false} />
+                  </ComposedChart>
+                </ResponsiveContainer>
               </CardContent>
             </Card>
           )}
 
-          {/* Filters */}
-          <div className="flex items-center gap-2 mb-6 flex-wrap">
-            <p className="text-sm font-semibold text-slate-600 mr-2">Filtrar:</p>
-            {['all', 'positive', 'negative', 'critical'].map(status => {
-              const configs = {
-                all: { label: 'Todas las tiendas', color: 'slate' },
-                positive: { label: 'En Meta', color: 'emerald' },
-                negative: { label: 'En Alerta', color: 'amber' },
-                critical: { label: 'Críticas', color: 'rose' }
-              };
-              const config = configs[status];
-              return (
-                <Button
-                  key={status}
-                  size="sm"
-                  variant={filterStatus === status ? 'default' : 'outline'}
-                  onClick={() => setFilterStatus(status)}
-                  className={filterStatus === status ? 
-                    `bg-${config.color}-600 hover:bg-${config.color}-700 text-white border-0 shadow-sm` :
-                    `border-slate-200 hover:bg-slate-50 text-slate-700`
-                  }
-                >
-                  {config.label}
-                </Button>
-              );
-            })}
-          </div>
-
-          {/* Charts Grid */}
-          {isLoading ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-              {[1, 2, 3, 4].map((i) => <ChartSkeleton key={i} />)}
-            </div>
-          ) : (
-            <div id="charts-section" className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-              <Card className="border-slate-100 shadow-sm">
-                <CardHeader className="border-b border-slate-100">
-                  <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                    <BarChart3 className="w-4 h-4 text-slate-600" />
-                    Comparativa: Ventas vs Presupuesto
-                  </CardTitle>
-                </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={350}>
-                <BarChart data={comparisonData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                  <XAxis dataKey="name" tick={{ fontSize: 10 }} angle={-45} textAnchor="end" height={90} />
-                  <YAxis tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} tick={{ fontSize: 10 }} />
-                  <Tooltip formatter={(v) => formatCurrency(v)} />
-                  <Legend />
-                  <Bar dataKey="ventas" fill="#ec4899" name="Ventas Reales" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="presupuesto" fill="#d1d5db" name="Presupuesto" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-
-              <Card className="border-slate-100 shadow-sm">
-                <CardHeader className="border-b border-slate-100">
-                  <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                    <Target className="w-4 h-4 text-slate-600" />
-                    Cumplimiento por Tienda
-                  </CardTitle>
-                </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={350}>
-                <BarChart data={comparisonData} layout="horizontal">
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                  <XAxis type="number" domain={[0, 150]} tickFormatter={(v) => `${v}%`} />
-                  <YAxis dataKey="name" type="category" width={110} tick={{ fontSize: 10 }} />
-                  <Tooltip formatter={(v) => `${v.toFixed(1)}%`} />
-                  <Bar dataKey="cumplimiento" radius={[0, 4, 4, 0]}>
-                    {comparisonData.map((entry, index) => (
-                      <Cell 
-                        key={`cell-${index}`} 
-                        fill={entry.cumplimiento >= 90 ? '#10b981' : entry.cumplimiento >= 70 ? '#f59e0b' : '#ef4444'}
-                      />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-
-              <Card className="border-slate-100 shadow-sm">
-                <CardHeader className="border-b border-slate-100">
-                  <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4 text-slate-600" />
-                    Proyecciones vs Meta
-                  </CardTitle>
-                </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={350}>
-                <ComposedChart data={comparisonData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                  <XAxis dataKey="name" tick={{ fontSize: 10 }} angle={-45} textAnchor="end" height={90} />
-                  <YAxis tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} tick={{ fontSize: 10 }} />
-                  <Tooltip formatter={(v) => formatCurrency(v)} />
-                  <Legend />
-                  <Bar dataKey="proyeccion" fill="#8b5cf6" name="Proyección" radius={[4, 4, 0, 0]} />
-                  <Line type="monotone" dataKey="presupuesto" stroke="#ec4899" strokeWidth={3} name="Meta" />
-                </ComposedChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-
-              <Card className="border-slate-100 shadow-sm">
-                <CardHeader className="border-b border-slate-100">
-                  <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                    <Receipt className="w-4 h-4 text-slate-600" />
-                    Importancia de cada Punto
-                  </CardTitle>
-                </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={350}>
-                <PieChart>
-                  <Pie
-                    data={weightData}
-                    dataKey="peso"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={120}
-                    label={(entry) => `${entry.name}: ${entry.peso.toFixed(1)}%`}
-                    labelLine={{ stroke: '#94a3b8', strokeWidth: 1 }}
-                  >
-                    {weightData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(v) => `${v.toFixed(1)}%`} />
-                </PieChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-            </div>
-          )}
-
-          {/* Stores at Risk - Prioridad Visual */}
-          {!isLoading && salesForecast.filter(s => s.willMissTarget).length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mb-8"
-            >
-              <Card className="border-2 border-rose-300 shadow-xl mb-8 bg-gradient-to-br from-rose-50 to-red-50">
-                <CardHeader className="border-b-2 border-rose-200 bg-rose-100/50">
-                  <CardTitle className="text-lg font-black text-rose-800 flex items-center gap-3">
-                    <motion.div
-                      animate={{ scale: [1, 1.2, 1] }}
-                      transition={{ duration: 1.5, repeat: Infinity }}
+          {/* Indicadores Secundarios */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+            {/* Donut de Cumplimiento */}
+            <Card className="border-gray-100 shadow-sm">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-semibold text-gray-900">Distribución de Cumplimiento</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={200}>
+                  <PieChart>
+                    <Pie
+                      data={[
+                        { name: 'En Meta', value: statusCounts.positive, fill: '#10b981' },
+                        { name: 'Alerta', value: statusCounts.negative, fill: '#f59e0b' },
+                        { name: 'Críticas', value: statusCounts.critical, fill: '#ef4444' }
+                      ]}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={50}
+                      outerRadius={80}
+                      dataKey="value"
+                      label={(entry) => `${entry.value}`}
                     >
-                      <AlertTriangle className="w-6 h-6" />
-                    </motion.div>
-                    🚨 Tiendas en Riesgo de Incumplimiento - Acción Requerida
-                  </CardTitle>
-                </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {salesForecast.filter(s => s.willMissTarget).map((store, idx) => (
-                  <motion.div
-                    key={store.code}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: idx * 0.05 }}
-                    className="bg-white rounded-xl p-4 border-2 border-rose-200 shadow-md"
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <p className="font-bold text-gray-800">{store.name}</p>
-                      <span className="text-xs px-2 py-0.5 bg-rose-200 text-rose-700 rounded-full font-bold">
-                        {store.growthRate.toFixed(1)}%
-                      </span>
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            {/* Barras de Estado */}
+            <Card className="border-gray-100 shadow-sm">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-semibold text-gray-900">Tiendas por Estado</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span className="text-gray-600 font-medium">En Meta</span>
+                      <span className="font-semibold text-emerald-600">{statusCounts.positive}</span>
                     </div>
-                    <div className="space-y-1 text-xs">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Proyección 30d:</span>
-                        <span className="font-bold text-rose-600">{formatCurrency(store.forecast30)}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Meta próx. mes:</span>
-                        <span className="font-bold text-gray-700">{formatCurrency(store.nextMonthBudget)}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Gap:</span>
-                        <span className="font-bold text-red-600">
-                          {formatCurrency(store.nextMonthBudget - store.forecast30)}
+                    <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                      <div className="h-full bg-emerald-500" style={{ width: `${(statusCounts.positive/STORES.length)*100}%` }} />
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span className="text-gray-600 font-medium">En Alerta</span>
+                      <span className="font-semibold text-amber-600">{statusCounts.negative}</span>
+                    </div>
+                    <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                      <div className="h-full bg-amber-500" style={{ width: `${(statusCounts.negative/STORES.length)*100}%` }} />
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span className="text-gray-600 font-medium">Críticas</span>
+                      <span className="font-semibold text-red-600">{statusCounts.critical}</span>
+                    </div>
+                    <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                      <div className="h-full bg-red-500" style={{ width: `${(statusCounts.critical/STORES.length)*100}%` }} />
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Tabla Top 5 Críticas */}
+            <Card className="border-gray-100 shadow-sm">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-semibold text-gray-900">Top 5 Tiendas Críticas</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {storesAnalysis
+                    .filter(s => s.status === 'critical' || s.status === 'negative')
+                    .sort((a, b) => a.salesCompliance - b.salesCompliance)
+                    .slice(0, 5)
+                    .map((store, idx) => (
+                      <div key={store.code} className="flex items-center justify-between text-xs py-1.5 border-b border-gray-100 last:border-0">
+                        <div className="flex items-center gap-2">
+                          <span className="w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center text-[10px] font-semibold text-gray-600">
+                            {idx + 1}
+                          </span>
+                          <span className="font-medium text-gray-800">{store.name}</span>
+                        </div>
+                        <span className={`font-semibold ${
+                          store.salesCompliance >= 70 ? 'text-amber-600' : 'text-red-600'
+                        }`}>
+                          {store.salesCompliance.toFixed(0)}%
                         </span>
                       </div>
-                    </div>
-                    <div className="mt-3 h-2 bg-rose-100 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-gradient-to-r from-rose-500 to-red-500"
-                        style={{ width: `${Math.min(100, (store.forecast30 / store.nextMonthBudget) * 100)}%` }}
-                      />
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
+                    ))}
+                </div>
               </CardContent>
-              </Card>
-            </motion.div>
-          )}
+            </Card>
+          </div>
 
-          {/* Detail Table */}
-          {!isLoading && (
-            <Card id="stores-table" className="border-slate-100 shadow-sm">
-              <CardHeader className="border-b border-slate-100">
-                <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                  <Zap className="w-4 h-4 text-slate-600" />
-                  Detalle Completo por Tienda
+          {/* AI Insights */}
+          {!isLoading && aiInsights && (
+            <Card className="border-gray-100 shadow-sm mb-6">
+              <CardHeader className="border-b border-gray-100">
+                <CardTitle className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                  <Brain className="w-4 h-4 text-blue-600" />
+                  Análisis Inteligente
                 </CardTitle>
               </CardHeader>
-            <CardContent>
+              <CardContent className="pt-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="bg-blue-50 rounded-lg p-4 border border-blue-100">
+                    <p className="text-xs font-semibold text-blue-700 mb-2">🎯 Patrón Crítico</p>
+                    <p className="text-xs text-gray-700 leading-relaxed">{aiInsights.patron_critico}</p>
+                  </div>
+                  <div className="bg-emerald-50 rounded-lg p-4 border border-emerald-100">
+                    <p className="text-xs font-semibold text-emerald-700 mb-2">⚡ Acciones Prioritarias</p>
+                    <ul className="space-y-1.5">
+                      {aiInsights.acciones_prioritarias?.map((accion, i) => (
+                        <li key={i} className="text-xs text-gray-700 flex items-start gap-2">
+                          <span className="flex-shrink-0 w-4 h-4 rounded-full bg-emerald-200 text-emerald-800 font-semibold flex items-center justify-center text-[10px]">{i + 1}</span>
+                          <span className="flex-1">{accion}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="bg-amber-50 rounded-lg p-4 border border-amber-100">
+                    <p className="text-xs font-semibold text-amber-700 mb-2">💡 Oportunidades</p>
+                    <p className="text-xs text-gray-700 leading-relaxed">{aiInsights.oportunidades}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Tabla Compacta */}
+          {isLoading ? (
+            <ChartSkeleton />
+          ) : (
+            <div id="charts-section" className="mb-8">
+
+
+
+
+          {/* Tabla Compacta */}
+          {!isLoading && (
+            <Card id="stores-table" className="border-gray-100 shadow-sm">
+              <CardHeader className="border-b border-gray-100">
+                <CardTitle className="text-sm font-semibold text-gray-900">Detalle por Tienda</CardTitle>
+              </CardHeader>
+            <CardContent className="p-0">
               <div className="overflow-x-auto">
               <table className="w-full text-xs">
                 <thead>
-                  <tr className="border-b-2 border-gray-200 bg-gray-50">
-                    <th className="text-left py-3 px-3 font-bold text-gray-700">Tienda</th>
-                    <th className="text-right py-3 px-3 font-bold text-gray-700">Ventas</th>
-                    <th className="text-right py-3 px-3 font-bold text-gray-700">Meta</th>
-                    <th className="text-right py-3 px-3 font-bold text-gray-700">% Cumpl.</th>
-                    <th className="text-right py-3 px-3 font-bold text-gray-700">Ticket</th>
-                    <th className="text-right py-3 px-3 font-bold text-gray-700">Trans.</th>
-                    <th className="text-right py-3 px-3 font-bold text-gray-700">Proyección</th>
-                    <th className="text-center py-3 px-3 font-bold text-gray-700">Estado</th>
+                  <tr className="border-b border-gray-200 bg-gray-50">
+                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Tienda</th>
+                    <th className="text-right py-3 px-4 font-semibold text-gray-700">Ventas</th>
+                    <th className="text-right py-3 px-4 font-semibold text-gray-700">Meta</th>
+                    <th className="text-right py-3 px-4 font-semibold text-gray-700">% Cumpl.</th>
+                    <th className="text-right py-3 px-4 font-semibold text-gray-700">Proyección</th>
+                    <th className="text-center py-3 px-4 font-semibold text-gray-700">Estado</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredStores.map((store, idx) => (
-                    <motion.tr
+                  {storesAnalysis.map((store, idx) => (
+                    <tr
                       key={store.code}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: idx * 0.02 }}
-                      className="border-b border-gray-100 hover:bg-pink-50/30 transition-colors"
+                      className="border-b border-gray-100 hover:bg-blue-50/30 transition-colors"
                     >
-                      <td className="py-3 px-3 font-bold text-gray-800">{store.name}</td>
-                      <td className="py-3 px-3 text-right font-medium">{formatCurrency(store.totalSales)}</td>
-                      <td className="py-3 px-3 text-right text-gray-500">{formatCurrency(store.salesBudget)}</td>
-                      <td className="py-3 px-3 text-right">
-                        <span className={`font-black ${
+                      <td className="py-3 px-4 font-medium text-gray-900">{store.name}</td>
+                      <td className="py-3 px-4 text-right font-medium text-gray-900">{formatCurrency(store.totalSales)}</td>
+                      <td className="py-3 px-4 text-right text-gray-500">{formatCurrency(store.salesBudget)}</td>
+                      <td className="py-3 px-4 text-right">
+                        <span className={`font-semibold ${
                           store.salesCompliance >= 90 ? 'text-emerald-600' : 
-                          store.salesCompliance >= 70 ? 'text-amber-600' : 'text-rose-600'
+                          store.salesCompliance >= 70 ? 'text-amber-600' : 'text-red-600'
                         }`}>
-                          {store.salesCompliance.toFixed(1)}%
+                          {store.salesCompliance.toFixed(0)}%
                         </span>
                       </td>
-                      <td className="py-3 px-3 text-right">{formatCurrency(store.avgTicket)}</td>
-                      <td className="py-3 px-3 text-right">{store.totalTransactions.toLocaleString()}</td>
-                      <td className="py-3 px-3 text-right text-violet-600 font-bold">
+                      <td className="py-3 px-4 text-right text-blue-600 font-medium">
                         {formatCurrency(store.projection)}
                       </td>
-                      <td className="py-3 px-3 text-center">
+                      <td className="py-3 px-4 text-center">
                         {store.status === 'positive' && (
-                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full text-[10px] font-bold">
-                            <CheckCircle className="w-3 h-3" /> Meta
+                          <span className="inline-flex px-2 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-[10px] font-semibold">
+                            En Meta
                           </span>
                         )}
                         {store.status === 'negative' && (
-                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-amber-100 text-amber-700 rounded-full text-[10px] font-bold">
-                            <AlertTriangle className="w-3 h-3" /> Riesgo
+                          <span className="inline-flex px-2 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-full text-[10px] font-semibold">
+                            Alerta
                           </span>
                         )}
                         {store.status === 'critical' && (
-                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-rose-100 text-rose-700 rounded-full text-[10px] font-bold">
-                            <TrendingDown className="w-3 h-3" /> Crítico
+                          <span className="inline-flex px-2 py-1 bg-red-50 text-red-700 border border-red-200 rounded-full text-[10px] font-semibold">
+                            Crítica
                           </span>
                         )}
                       </td>
-                    </motion.tr>
+                    </tr>
                   ))}
                 </tbody>
                 </table>
