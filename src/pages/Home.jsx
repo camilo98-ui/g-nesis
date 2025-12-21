@@ -148,9 +148,35 @@ export default function Home() {
   const [showBudgetDashboard, setShowBudgetDashboard] = useState(false);
 
   const ROLES = [
-  { id: 'gerente', name: 'Gerente', icon: 'gerente', color: 'from-slate-600 to-gray-700', description: '🎯 Poder total', iconBaseColor: '#475569', hasExecutivePanel: true },
-  { id: 'lider', name: 'Lider de Experiencia', icon: 'lider', color: 'from-amber-400 to-yellow-500', description: '⭐ Full acceso', iconBaseColor: '#f59e0b' },
-  { id: 'embajador', name: 'Embajador', icon: 'embajador', color: 'from-pink-400 to-rose-500', description: '🍦 Team hero', iconBaseColor: '#ec4899' }];
+  { 
+    id: 'gerente', 
+    name: 'Gerente', 
+    icon: 'gerente', 
+    color: 'from-slate-600 to-gray-700', 
+    description: 'Visión completa del negocio y toma de decisiones', 
+    iconBaseColor: '#475569', 
+    hasExecutivePanel: true,
+    buttonText: 'Ver métricas generales'
+  },
+  { 
+    id: 'lider', 
+    name: 'Líder de Experiencia', 
+    icon: 'lider', 
+    color: 'from-amber-400 to-yellow-500', 
+    description: 'Control diario del punto, equipo y resultados', 
+    iconBaseColor: '#f59e0b',
+    buttonText: 'Gestionar mi punto',
+    isRecommended: true
+  },
+  { 
+    id: 'embajador', 
+    name: 'Embajador', 
+    icon: 'embajador', 
+    color: 'from-pink-400 to-rose-500', 
+    description: 'Ejecución operativa y apoyo en ventas', 
+    iconBaseColor: '#ec4899',
+    buttonText: 'Comenzar mi turno'
+  }];
 
 
   // Iconos profesionales por rol con colores dinámicos
@@ -269,6 +295,7 @@ export default function Home() {
   useEffect(() => {
     const savedSession = localStorage.getItem('popsySession');
     const lastVisit = localStorage.getItem('lastVisitTime');
+    const lastRole = localStorage.getItem('lastSelectedRole');
     const now = Date.now();
 
     // Si pasaron más de 4 horas, cerrar sesión
@@ -285,6 +312,11 @@ export default function Home() {
       setIsLoggedIn(true);
     }
 
+    // Recordar último rol usado
+    if (!isLoggedIn && lastRole) {
+      setSelectedRole(lastRole);
+    }
+
     localStorage.setItem('lastVisitTime', now.toString());
   }, []);
 
@@ -299,6 +331,9 @@ export default function Home() {
         setLoginError('Selecciona un rol');
         return;
       }
+
+      // Guardar último rol usado
+      localStorage.setItem('lastSelectedRole', selectedRole);
 
       // Gerente con clave 1998 - redirigir directo al panel ejecutivo
       if (selectedRole === 'gerente') {
@@ -443,9 +478,11 @@ export default function Home() {
               </div>
 
               {/* Selector de Rol Profesional */}
-              <div className="space-y-3 mb-6">
+              <div className="space-y-3 mb-4">
                 {ROLES.map((role, idx) => {
-                  const isRecommended = role.id === 'lider';
+                  const isSelected = selectedRole === role.id;
+                  const isRecommended = role.isRecommended;
+                  
                   return (
                     <motion.button
                       key={role.id}
@@ -455,47 +492,56 @@ export default function Home() {
                       whileHover={{ scale: 1.01 }}
                       whileTap={{ scale: 0.99 }}
                       onClick={() => {setSelectedRole(role.id);setLoginError('');}}
-                      className={`relative w-full p-4 rounded-xl border-2 transition-all text-left ${
-                        selectedRole === role.id
-                          ? 'border-pink-500 bg-pink-50 shadow-md'
-                          : 'border-gray-200 bg-white hover:border-gray-300'
+                      className={`relative w-full p-4 rounded-xl transition-all duration-150 text-left ${
+                        isSelected
+                          ? 'border-2 border-pink-500 bg-pink-50 shadow-lg'
+                          : isRecommended
+                            ? 'border-2 border-amber-300 bg-gradient-to-br from-amber-50 to-yellow-50/50 shadow-md hover:border-amber-400'
+                            : 'border-2 border-gray-200 bg-white hover:border-gray-300 hover:shadow'
                       }`}>
 
-                      {isRecommended && selectedRole !== role.id && (
-                        <span className="absolute -top-2 right-3 px-2 py-0.5 bg-amber-400 text-white text-[10px] font-bold rounded-full">
-                          RECOMENDADO
-                        </span>
+                      {isRecommended && !isSelected && (
+                        <>
+                          <span className="absolute -top-2 right-3 px-2 py-0.5 bg-amber-400 text-white text-[10px] font-bold rounded-full shadow-sm">
+                            RECOMENDADO
+                          </span>
+                          <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-amber-100 text-amber-700 text-[9px] font-semibold rounded-full whitespace-nowrap">
+                            Rol principal para líderes de tienda
+                          </span>
+                        </>
                       )}
 
                       <div className="flex items-center gap-3">
                         <div className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                          selectedRole === role.id
-                            ? `bg-gradient-to-br ${role.color}`
-                            : 'bg-gray-100'
+                          isSelected
+                            ? `bg-gradient-to-br ${role.color} shadow-md`
+                            : isRecommended
+                              ? 'bg-amber-100'
+                              : 'bg-gray-100'
                         }`}>
                           <div className="w-6 h-6">
-                            <RoleIcon roleId={role.id} isSelected={selectedRole === role.id} />
+                            <RoleIcon roleId={role.id} isSelected={isSelected} />
                           </div>
                         </div>
 
                         <div className="flex-1">
                           <p className={`font-bold text-sm mb-0.5 ${
-                            selectedRole === role.id ? 'text-pink-900' : 'text-gray-900'
+                            isSelected ? 'text-pink-900' : 'text-gray-900'
                           }`}>
                             {role.name}
                           </p>
-                          <p className="text-xs text-gray-600">
-                            {role.id === 'gerente' ? 'Acceso ejecutivo completo' : 
-                             role.id === 'lider' ? 'Gestión de operaciones y equipo' : 
-                             'Soporte operativo y ventas'}
+                          <p className={`text-xs leading-snug ${
+                            isSelected ? 'text-pink-800' : isRecommended ? 'text-amber-700' : 'text-gray-600'
+                          }`}>
+                            {role.description}
                           </p>
                         </div>
 
-                        {selectedRole === role.id && (
+                        {isSelected && (
                           <motion.div
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
-                            className="w-6 h-6 rounded-full bg-pink-500 flex items-center justify-center flex-shrink-0">
+                            className="w-6 h-6 rounded-full bg-pink-500 flex items-center justify-center flex-shrink-0 shadow">
                             <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                             </svg>
@@ -506,6 +552,11 @@ export default function Home() {
                   );
                 })}
               </div>
+
+              {/* Microcopy de claridad */}
+              <p className="text-xs text-gray-500 mb-6 text-center">
+                Puedes cambiar tu rol más adelante si es necesario.
+              </p>
 
               {/* Selector de tienda */}
               {selectedRole && selectedRole !== 'gerente' && (
@@ -559,16 +610,21 @@ export default function Home() {
                 </motion.div>
               )}
 
-              {/* Botón de ingresar */}
+              {/* Botón de ingresar dinámico */}
               <Button
                 onClick={handleLogin}
                 disabled={(selectedRole !== 'gerente' && !pendingStore) || !selectedRole}
                 className="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white py-3.5 rounded-lg font-semibold text-base shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all">
-                {selectedRole === 'gerente' ? 'Acceder al Panel Ejecutivo' : 'Ingresar al Dashboard'}
+                {selectedRole ? ROLES.find(r => r.id === selectedRole)?.buttonText || 'Ingresar al Dashboard' : 'Selecciona un rol'}
               </Button>
 
-              <p className="text-center text-xs text-gray-500 mt-6">
-                Al ingresar, aceptas nuestros términos de uso y privacidad
+              {/* Microcopy de claridad bajo el botón */}
+              <p className="text-center text-xs text-gray-500 mt-3">
+                Tu acceso define lo que puedes ver y gestionar.
+              </p>
+
+              <p className="text-center text-xs text-gray-400 mt-4">
+                Al ingresar, aceptas nuestros términos de uso y privacidad.
               </p>
             </motion.div>
           </div>
