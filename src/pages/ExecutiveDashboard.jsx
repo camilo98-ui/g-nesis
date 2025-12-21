@@ -444,7 +444,8 @@ INSTRUCCIONES:
             </motion.div>
           </Link>
 
-          <nav className="space-y-2">
+          <nav className="space-y-1">
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider px-4 mb-2">Vista General</p>
             <motion.div
               whileHover={{ x: 4 }}
               className="px-4 py-3 rounded-xl bg-slate-100 border border-slate-200 cursor-pointer"
@@ -454,13 +455,108 @@ INSTRUCCIONES:
                 <span className="text-sm font-bold text-slate-900">Resumen General</span>
               </div>
             </motion.div>
+
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider px-4 mt-4 mb-2">Análisis</p>
+            <motion.div
+              whileHover={{ x: 4 }}
+              onClick={() => {
+                const element = document.getElementById('kpis-section');
+                element?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="px-4 py-2.5 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <Target className="w-4 h-4 text-slate-600" />
+                <span className="text-sm font-medium text-slate-700">KPIs Ejecutivos</span>
+              </div>
+            </motion.div>
+            <motion.div
+              whileHover={{ x: 4 }}
+              onClick={() => {
+                const element = document.getElementById('charts-section');
+                element?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="px-4 py-2.5 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <BarChart3 className="w-4 h-4 text-slate-600" />
+                <span className="text-sm font-medium text-slate-700">Gráficos</span>
+              </div>
+            </motion.div>
+            <motion.div
+              whileHover={{ x: 4 }}
+              onClick={() => {
+                const element = document.getElementById('stores-table');
+                element?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="px-4 py-2.5 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <Store className="w-4 h-4 text-slate-600" />
+                <span className="text-sm font-medium text-slate-700">Detalle por Tienda</span>
+              </div>
+            </motion.div>
+
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider px-4 mt-4 mb-2">Alertas</p>
+            <motion.div
+              whileHover={{ x: 4 }}
+              onClick={() => {
+                setFilterStatus('critical');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="px-4 py-2.5 rounded-xl hover:bg-rose-50 cursor-pointer transition-colors group"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <AlertTriangle className="w-4 h-4 text-rose-600" />
+                  <span className="text-sm font-medium text-slate-700 group-hover:text-rose-700">Tiendas Críticas</span>
+                </div>
+                {statusCounts.critical > 0 && (
+                  <span className="bg-rose-100 text-rose-700 text-xs font-bold px-2 py-0.5 rounded-full">
+                    {statusCounts.critical}
+                  </span>
+                )}
+              </div>
+            </motion.div>
+            <motion.div
+              whileHover={{ x: 4 }}
+              onClick={() => {
+                setFilterStatus('negative');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="px-4 py-2.5 rounded-xl hover:bg-amber-50 cursor-pointer transition-colors group"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <TrendingDown className="w-4 h-4 text-amber-600" />
+                  <span className="text-sm font-medium text-slate-700 group-hover:text-amber-700">En Alerta</span>
+                </div>
+                {statusCounts.negative > 0 && (
+                  <span className="bg-amber-100 text-amber-700 text-xs font-bold px-2 py-0.5 rounded-full">
+                    {statusCounts.negative}
+                  </span>
+                )}
+              </div>
+            </motion.div>
+
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider px-4 mt-4 mb-2">Acciones</p>
+            <motion.div
+              whileHover={{ x: 4 }}
+              onClick={generateAIInsights}
+              className="px-4 py-2.5 rounded-xl hover:bg-purple-50 cursor-pointer transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <Brain className="w-4 h-4 text-purple-600" />
+                <span className="text-sm font-medium text-slate-700">Regenerar Insights</span>
+              </div>
+            </motion.div>
             <Link to={createPageUrl('Home')}>
               <motion.div
                 whileHover={{ x: 4 }}
-                className="px-4 py-3 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors"
+                className="px-4 py-2.5 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors"
               >
                 <div className="flex items-center gap-3">
-                  <Store className="w-4 h-4 text-slate-600" />
+                  <ArrowLeft className="w-4 h-4 text-slate-600" />
                   <span className="text-sm font-medium text-slate-700">Volver a Tiendas</span>
                 </div>
               </motion.div>
@@ -677,7 +773,7 @@ INSTRUCCIONES:
               {[1, 2, 3, 4].map((i) => <KPISkeleton key={i} />)}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div id="kpis-section" className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
               <ExecutiveKPI
                 title="Venta Total"
                 value={`$${(zoneTotals.totalSales/1000000).toFixed(1)}M`}
@@ -806,7 +902,7 @@ INSTRUCCIONES:
               {[1, 2, 3, 4].map((i) => <ChartSkeleton key={i} />)}
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div id="charts-section" className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
               <Card className="border-slate-100 shadow-sm">
                 <CardHeader className="border-b border-slate-100">
                   <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
@@ -977,7 +1073,7 @@ INSTRUCCIONES:
 
           {/* Detail Table */}
           {!isLoading && (
-            <Card className="border-slate-100 shadow-sm">
+            <Card id="stores-table" className="border-slate-100 shadow-sm">
               <CardHeader className="border-b border-slate-100">
                 <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
                   <Zap className="w-4 h-4 text-slate-600" />
