@@ -1515,27 +1515,13 @@ export default function Dashboard() {
                         </CardTitle>
                       </div>
                       <motion.div
-                    className="mt-3 space-y-2"
-                    initial={{ opacity: 0, y: 5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}>
-
-                        <motion.div
-                      className="bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200/60 rounded-lg px-3 py-2 shadow-sm"
-                      whileHover={{ scale: 1.01, x: 2 }}>
-
-                          <p className="text-[10px] text-blue-900 leading-relaxed">
-                            <span className="font-extrabold text-blue-700">📊 Conclusión:</span> Muestra ingresos reales día por día. Los picos son oportunidades, las caídas son alertas.
-                          </p>
-                        </motion.div>
-                        <motion.div
-                      className="bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200/60 rounded-lg px-3 py-2 shadow-sm"
-                      whileHover={{ scale: 1.01, x: 2 }}>
-
-                          <p className="text-[10px] text-emerald-900 leading-relaxed">
-                            <span className="font-extrabold text-emerald-700">🎯 Acción:</span> Analizar qué causó días exitosos y replicarlo. Días bajos necesitan promociones urgentes.
-                          </p>
-                        </motion.div>
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        whileHover={{ scale: 1.01, y: -2 }}
+                        className="mt-3 bg-gradient-to-br from-emerald-50 via-green-50 to-cyan-50 border-2 border-emerald-200/60 rounded-xl px-4 py-3 shadow-md">
+                        <p className="text-xs text-gray-700 leading-relaxed">
+                          <span className="font-bold text-emerald-700">💡 Insight:</span> Los picos muestran días exitosos a replicar. Las caídas requieren promociones. Analiza qué funciona mejor.
+                        </p>
                       </motion.div>
                     </CardHeader>
                     <CardContent>
@@ -1593,27 +1579,13 @@ export default function Dashboard() {
                         Transacciones vs Ventas {showComparison && '- Comparativo'}
                       </CardTitle>
                       <motion.div
-                    className="mt-3 space-y-2"
-                    initial={{ opacity: 0, y: 5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}>
-
-                        <motion.div
-                      className="bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200/60 rounded-lg px-3 py-2 shadow-sm"
-                      whileHover={{ scale: 1.01, x: 2 }}>
-
-                          <p className="text-[10px] text-blue-900 leading-relaxed">
-                            <span className="font-extrabold text-blue-700">📊 Conclusión:</span> Relaciona cantidad de clientes con facturación. Muchos clientes pero pocas ventas = problema de conversión.
-                          </p>
-                        </motion.div>
-                        <motion.div
-                      className="bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200/60 rounded-lg px-3 py-2 shadow-sm"
-                      whileHover={{ scale: 1.01, x: 2 }}>
-
-                          <p className="text-[10px] text-emerald-900 leading-relaxed">
-                            <span className="font-extrabold text-emerald-700">🎯 Acción:</span> Si tráfico alto no genera ventas proporcionales, capacitar en técnicas de cierre inmediatamente.
-                          </p>
-                        </motion.div>
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        whileHover={{ scale: 1.01, y: -2 }}
+                        className="mt-3 bg-gradient-to-br from-purple-50 via-violet-50 to-blue-50 border-2 border-purple-200/60 rounded-xl px-4 py-3 shadow-md">
+                        <p className="text-xs text-gray-700 leading-relaxed">
+                          <span className="font-bold text-purple-700">💡 Insight:</span> Más clientes pero pocas ventas indica problema de conversión. Capacita en cierre de ventas.
+                        </p>
                       </motion.div>
                     </CardHeader>
                     <CardContent>
@@ -1651,27 +1623,13 @@ export default function Dashboard() {
                         Ticket Promedio {showComparison && '- Comparativo'}
                       </CardTitle>
                       <motion.div
-                    className="mt-3 space-y-2"
-                    initial={{ opacity: 0, y: 5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}>
-
-                        <motion.div
-                      className="bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200/60 rounded-lg px-3 py-2 shadow-sm"
-                      whileHover={{ scale: 1.01, x: 2 }}>
-
-                          <p className="text-[10px] text-blue-900 leading-relaxed">
-                            <span className="font-extrabold text-blue-700">📊 Conclusión:</span> Cuánto gasta cada cliente en promedio. Ticket bajo = estamos perdiendo dinero por venta.
-                          </p>
-                        </motion.div>
-                        <motion.div
-                      className="bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200/60 rounded-lg px-3 py-2 shadow-sm"
-                      whileHover={{ scale: 1.01, x: 2 }}>
-
-                          <p className="text-[10px] text-emerald-900 leading-relaxed">
-                            <span className="font-extrabold text-emerald-700">🎯 Acción:</span> Subir ticket con venta consultiva, combos y productos complementarios. Entrenar equipo en cross-selling.
-                          </p>
-                        </motion.div>
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        whileHover={{ scale: 1.01, y: -2 }}
+                        className="mt-3 bg-gradient-to-br from-blue-50 via-sky-50 to-cyan-50 border-2 border-blue-200/60 rounded-xl px-4 py-3 shadow-md">
+                        <p className="text-xs text-gray-700 leading-relaxed">
+                          <span className="font-bold text-blue-700">💡 Insight:</span> Aumenta ticket con combos y venta consultiva. Entrena al equipo en cross-selling.
+                        </p>
                       </motion.div>
                     </CardHeader>
                     <CardContent>
