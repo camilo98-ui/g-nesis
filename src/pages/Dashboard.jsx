@@ -931,20 +931,74 @@ export default function Dashboard() {
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-gradient-to-r from-purple-50 to-pink-50 border-l-4 border-purple-500 rounded-xl p-4 shadow-sm mb-6"
+                className="bg-gradient-to-r from-slate-50 to-gray-50 border-l-4 border-slate-700 rounded-xl shadow-sm mb-6 overflow-hidden"
               >
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <BarChart3 className="w-5 h-5 text-white" />
+                <div className="p-4">
+                  <div className="flex items-start gap-3 mb-4">
+                    <div className="w-10 h-10 bg-slate-700 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <BarChart3 className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-bold text-slate-900 text-base">Análisis Comparativo de Desempeño</h4>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <h4 className="font-bold text-purple-900 mb-1">Análisis Comparativo Entre Períodos</h4>
-                    <p className="text-sm text-purple-800 leading-relaxed">
-                      Este análisis compara el desempeño del período actual contra el período anterior seleccionado. 
-                      <span className="font-semibold"> Los indicadores de crecimiento porcentual, tendencias de mejora o deterioro, y cambios en patrones operativos 
-                      permiten evaluar la efectividad de estrategias implementadas y tomar decisiones basadas en datos para optimizar resultados futuros.</span>
-                      Las variaciones significativas (±10%) requieren análisis detallado de causas raíz.
-                    </p>
+
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {/* Conclusiones */}
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                      <h5 className="font-bold text-blue-900 text-sm mb-2 flex items-center gap-1">
+                        <span className="text-blue-600">📊</span> Conclusiones
+                      </h5>
+                      <p className="text-xs text-blue-900 leading-relaxed">
+                        {(() => {
+                          const salesGrowth = comparisonTotals.sales > 0 ? ((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100) : 0;
+                          const transGrowth = comparisonTotals.transactions > 0 ? ((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100) : 0;
+                          const ticketChange = comparisonTotals.transactions > 0 && totals.transactions > 0
+                            ? (((totals.sales / totals.transactions) - (comparisonTotals.sales / comparisonTotals.transactions)) / (comparisonTotals.sales / comparisonTotals.transactions) * 100)
+                            : 0;
+
+                          if (salesGrowth > 10 && transGrowth > 5 && ticketChange > 0) {
+                            return `El negocio muestra salud robusta: crecimiento de ${salesGrowth.toFixed(1)}% en facturación, impulsado por mayor tráfico (+${transGrowth.toFixed(1)}%) y mejor ticket promedio (+${ticketChange.toFixed(1)}%). Esto indica efectividad en captación de clientes y capacidad comercial del equipo.`;
+                          } else if (salesGrowth > 0 && transGrowth < 0) {
+                            return `Facturación creció ${salesGrowth.toFixed(1)}% pese a caída de ${Math.abs(transGrowth).toFixed(1)}% en tráfico. La mejora en ticket promedio compensó la reducción de clientes, pero la dependencia de menos clientes es riesgosa para sostenibilidad.`;
+                          } else if (salesGrowth < 0 && transGrowth > 0) {
+                            return `Situación crítica: más clientes (+${transGrowth.toFixed(1)}%) pero menos ventas (${salesGrowth.toFixed(1)}%). El ticket promedio cayó significativamente, revelando falta de efectividad comercial en conversión.`;
+                          } else if (salesGrowth < -5) {
+                            return `Deterioro preocupante de ${Math.abs(salesGrowth).toFixed(1)}% en ventas. La caída simultánea en tráfico y eficiencia comercial indica problemas operativos, de mercado o competitivos que requieren atención inmediata.`;
+                          } else {
+                            return `Desempeño estable con variación menor al 5%. Si bien muestra consistencia, la falta de crecimiento sugiere estancamiento y necesidad de estrategias para impulsar resultados.`;
+                          }
+                        })()}
+                      </p>
+                    </div>
+
+                    {/* Plan de Acción */}
+                    <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
+                      <h5 className="font-bold text-emerald-900 text-sm mb-2 flex items-center gap-1">
+                        <span className="text-emerald-600">🎯</span> Plan de Acción
+                      </h5>
+                      <p className="text-xs text-emerald-900 leading-relaxed">
+                        {(() => {
+                          const salesGrowth = comparisonTotals.sales > 0 ? ((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100) : 0;
+                          const transGrowth = comparisonTotals.transactions > 0 ? ((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100) : 0;
+                          const ticketChange = comparisonTotals.transactions > 0 && totals.transactions > 0
+                            ? (((totals.sales / totals.transactions) - (comparisonTotals.sales / comparisonTotals.transactions)) / (comparisonTotals.sales / comparisonTotals.transactions) * 100)
+                            : 0;
+
+                          if (salesGrowth > 10 && transGrowth > 5 && ticketChange > 0) {
+                            return `1) Documentar prácticas exitosas del equipo actual para replicarlas. 2) Incrementar inversión en estrategias de atracción que están funcionando. 3) Establecer nuevas metas 15-20% superiores para mantener momentum de crecimiento.`;
+                          } else if (salesGrowth > 0 && transGrowth < 0) {
+                            return `1) URGENTE: Auditar causas de pérdida de tráfico (competencia, ubicación, marketing). 2) Implementar estrategias de captación: promociones, redes sociales, alianzas. 3) Mientras tanto, reforzar venta cruzada para maximizar cada cliente que ingresa.`;
+                          } else if (salesGrowth < 0 && transGrowth > 0) {
+                            return `1) PRIORIDAD MÁXIMA: Capacitación intensiva en técnicas de venta consultiva y cierre. 2) Revisar pricing y mix de productos - puede estar desbalanceado. 3) Implementar script de venta sugerida y supervisión diaria de conversión por vendedor.`;
+                          } else if (salesGrowth < -5) {
+                            return `PLAN DE RECUPERACIÓN INMEDIATO: 1) Reunión con equipo en 24hrs para diagnóstico de campo. 2) Análisis competitivo urgente del entorno. 3) Promoción agresiva corto plazo para reactivar tráfico. 4) Revisión de servicio al cliente y experiencia de compra. Objetivo: detener caída en 7 días.`;
+                          } else {
+                            return `1) Definir objetivos de crecimiento ambiciosos (15-20%) para próximo período. 2) Probar estrategias nuevas: productos, promociones, horarios. 3) Benchmarking con tiendas de mejor desempeño. 4) Establecer incentivos al equipo por superación de metas.`;
+                          }
+                        })()}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </motion.div>
@@ -1424,36 +1478,67 @@ export default function Dashboard() {
                     </div>
                   </div>
 
-                  {/* Insight Ejecutivo */}
-                  <div className="bg-blue-500/10 border border-blue-400/30 rounded-xl p-4">
-                    <div className="flex items-start gap-3">
-                      <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <Target className="w-4 h-4 text-blue-300" />
-                      </div>
-                      <div className="flex-1">
-                        <h5 className="text-sm font-bold text-white mb-1">Análisis Ejecutivo</h5>
-                        <p className="text-xs text-blue-100 leading-relaxed">
-                          {activeMetric === 'sales_comp' && (
-                            totals.sales > comparisonTotals.sales 
-                              ? `La facturación muestra crecimiento sostenido del ${((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100).toFixed(1)}%. Este incremento indica efectividad en las estrategias comerciales implementadas. Recomendación: Replicar las tácticas exitosas del período actual en otros puntos de venta.`
-                              : `Se observa una contracción de ${Math.abs((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100).toFixed(1)}% en ventas. Requiere análisis inmediato de: 1) Flujo de clientes, 2) Competencia directa, 3) Cambios en comportamiento de compra. Prioridad: Implementar plan de recuperación en las próximas 72 horas.`
-                          )}
-                          {activeMetric === 'trans_comp' && (
-                            totals.transactions > comparisonTotals.transactions
-                              ? `El tráfico de clientes aumentó ${((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100).toFixed(1)}%, indicando mayor captación y retención. Si las ventas no crecieron proporcionalmente, existe oportunidad crítica de optimizar ticket promedio mediante capacitación en venta consultiva.`
-                              : `Reducción de ${Math.abs((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100).toFixed(1)}% en flujo de clientes. Causas potenciales: factores externos (clima, eventos), competencia, o deterioro en servicio. Acción: Auditoría urgente de experiencia de cliente y revisión de estrategias de atracción.`
-                          )}
-                          {activeMetric === 'ticket_comp' && (
-                            avgTicket > (comparisonTotals.sales / comparisonTotals.transactions)
-                              ? `Mejora de ${((avgTicket - (comparisonTotals.sales / comparisonTotals.transactions)) / (comparisonTotals.sales / comparisonTotals.transactions) * 100).toFixed(1)}% en ticket promedio refleja mayor efectividad comercial y éxito en estrategias de venta cruzada/upselling. Este KPI es clave para rentabilidad. Recomendación: Documentar e institucionalizar prácticas exitosas del equipo.`
-                              : `El ticket promedio decreció ${Math.abs((avgTicket - (comparisonTotals.sales / comparisonTotals.transactions)) / (comparisonTotals.sales / comparisonTotals.transactions) * 100).toFixed(1)}%, señalando menor conversión por transacción. Posibles causas: cambio en mix de productos, falta de venta sugerida, o migración a productos de menor valor. Requiere refuerzo inmediato en técnicas de venta consultiva.`
-                          )}
-                          {activeMetric === 'suggested_comp' && (
-                            totals.suggested > comparisonTotals.suggested
-                              ? `Los sugeridos crecieron ${((totals.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100).toFixed(1)}%, evidenciando mejora en capacidades de venta consultiva del equipo. Cada unidad adicional impacta directamente en márgenes. Mantener incentivos y reconocimiento a top performers.`
-                              : `Disminución de ${Math.abs((totals.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100).toFixed(1)}% en venta de sugeridos representa pérdida directa de margen. Requiere intervención inmediata: 1) Reforzar entrenamiento, 2) Verificar disponibilidad de productos complementarios, 3) Revisar script de venta sugerida con el equipo.`
-                          )}
-                        </p>
+                  {/* Análisis Gerencial */}
+                  <div className="bg-gradient-to-r from-slate-800 to-slate-900 rounded-xl overflow-hidden">
+                    <div className="p-4">
+                      <div className="grid md:grid-cols-2 gap-4">
+                        {/* Conclusiones */}
+                        <div className="bg-blue-500/10 border border-blue-400/30 rounded-lg p-3">
+                          <h5 className="text-sm font-bold text-blue-200 mb-2 flex items-center gap-1">
+                            <span>📊</span> Conclusiones
+                          </h5>
+                          <p className="text-xs text-blue-100 leading-relaxed">
+                            {activeMetric === 'sales_comp' && (
+                              totals.sales > comparisonTotals.sales 
+                                ? `La facturación creció ${((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100).toFixed(1)}%, superando el período anterior por ${formatCurrency(totals.sales - comparisonTotals.sales)}. Este resultado demuestra que las estrategias comerciales actuales están funcionando y el equipo está ejecutando efectivamente.`
+                                : `Las ventas cayeron ${Math.abs((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100).toFixed(1)}%, representando ${formatCurrency(Math.abs(totals.sales - comparisonTotals.sales))} menos que el período anterior. Esta contracción impacta directamente los objetivos mensuales y señala problemas operativos o de mercado que deben resolverse urgentemente.`
+                            )}
+                            {activeMetric === 'trans_comp' && (
+                              totals.transactions > comparisonTotals.transactions
+                                ? `El tráfico aumentó ${((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100).toFixed(1)}%, con ${Math.abs(totals.transactions - comparisonTotals.transactions)} clientes adicionales. Esto indica éxito en captación, pero debe verificarse si las ventas crecieron proporcionalmente para confirmar efectividad comercial.`
+                                : `Perdimos ${Math.abs(totals.transactions - comparisonTotals.transactions)} clientes (${Math.abs((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100).toFixed(1)}% menos tráfico). Esto es crítico porque reduce oportunidades de venta. Probablemente causado por factores externos, competencia o deterioro en servicio que aleja a los clientes.`
+                            )}
+                            {activeMetric === 'ticket_comp' && (
+                              avgTicket > (comparisonTotals.sales / comparisonTotals.transactions)
+                                ? `El ticket promedio mejoró ${((avgTicket - (comparisonTotals.sales / comparisonTotals.transactions)) / (comparisonTotals.sales / comparisonTotals.transactions) * 100).toFixed(1)}% (${formatCurrency(avgTicket - (comparisonTotals.sales / comparisonTotals.transactions))} más por cliente). Cada cliente está comprando más, lo que maximiza rentabilidad y evidencia mejor capacidad de venta consultiva del equipo.`
+                                : `El ticket promedio bajó ${Math.abs((avgTicket - (comparisonTotals.sales / comparisonTotals.transactions)) / (comparisonTotals.sales / comparisonTotals.transactions) * 100).toFixed(1)}%. Los clientes compran menos por visita, afectando márgenes. Esto sugiere falta de venta sugerida, problemas en mix de productos o migración a opciones de menor valor.`
+                            )}
+                            {activeMetric === 'suggested_comp' && (
+                              totals.suggested > comparisonTotals.suggested
+                                ? `Los sugeridos crecieron ${((totals.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100).toFixed(1)}%, vendiendo ${Math.abs(totals.suggested - comparisonTotals.suggested)} unidades más. Esto impacta directamente la rentabilidad porque cada sugerido tiene mayor margen y demuestra habilidad comercial del equipo.`
+                                : `Vendimos ${Math.abs(totals.suggested - comparisonTotals.suggested)} sugeridos menos (${Math.abs((totals.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100).toFixed(1)}% de caída). Esto representa pérdida directa de margen y señala que el equipo no está ejecutando técnicas de venta consultiva efectivamente.`
+                            )}
+                          </p>
+                        </div>
+
+                        {/* Plan de Acción */}
+                        <div className="bg-emerald-500/10 border border-emerald-400/30 rounded-lg p-3">
+                          <h5 className="text-sm font-bold text-emerald-200 mb-2 flex items-center gap-1">
+                            <span>🎯</span> Plan de Acción
+                          </h5>
+                          <p className="text-xs text-emerald-100 leading-relaxed">
+                            {activeMetric === 'sales_comp' && (
+                              totals.sales > comparisonTotals.sales 
+                                ? `1) Documentar qué hizo diferente el equipo este período (horarios, productos, técnicas). 2) Replicar estas prácticas exitosas en otros puntos. 3) Establecer nueva meta 10-15% superior para mantener momentum. Resultado esperado: consolidar crecimiento y llevarlo a otros puntos de venta.`
+                                : `PLAN URGENTE: 1) Reunión HOY con equipo para identificar problemas específicos. 2) Analizar competencia directa esta semana. 3) Lanzar promoción agresiva en 48hrs para reactivar. 4) Revisar experiencia de cliente completamente. Resultado esperado: detener caída en 7 días máximo.`
+                            )}
+                            {activeMetric === 'trans_comp' && (
+                              totals.transactions > comparisonTotals.transactions
+                                ? `1) Analizar si ventas crecieron al mismo ritmo que tráfico. 2) Si no, capacitar equipo en cierre de ventas esta semana. 3) Implementar seguimiento diario de conversión por vendedor. Resultado esperado: convertir el mayor tráfico en ventas proporcionalmente mayores.`
+                                : `PRIORIDAD ALTA: 1) Identificar por qué perdimos clientes (auditoría de servicio en 24hrs). 2) Revisar presencia digital y competencia. 3) Activar campaña de reactivación inmediata. 4) Mejorar experiencia física del punto. Resultado esperado: recuperar al menos 50% del tráfico perdido en 14 días.`
+                            )}
+                            {activeMetric === 'ticket_comp' && (
+                              avgTicket > (comparisonTotals.sales / comparisonTotals.transactions)
+                                ? `1) Identificar qué vendedores tienen mejor ticket y documentar su método. 2) Capacitar resto del equipo en estas técnicas. 3) Establecer metas individuales de ticket para todos. Resultado esperado: llevar a todos los vendedores al nivel del mejor performer.`
+                                : `ACCIÓN INMEDIATA: 1) Entrenamiento intensivo en venta sugerida mañana. 2) Implementar script obligatorio de cierre. 3) Verificar disponibilidad de productos complementarios. 4) Supervisión diaria de ticket por vendedor. Resultado esperado: recuperar ticket promedio anterior en 10 días.`
+                            )}
+                            {activeMetric === 'suggested_comp' && (
+                              totals.suggested > comparisonTotals.suggested
+                                ? `1) Reconocer públicamente a vendedores con más sugeridos. 2) Crear competencia interna con premio semanal. 3) Mantener inventario óptimo de productos complementarios. Resultado esperado: mantener y superar nivel actual, estableciendo nuevo estándar.`
+                                : `INTERVENCIÓN URGENTE: 1) Reforzar capacitación en venta consultiva esta semana. 2) Revisar inventario de productos complementarios. 3) Implementar script de sugerido obligatorio. 4) Seguimiento diario individual. Resultado esperado: duplicar sugeridos en 14 días.`
+                            )}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>

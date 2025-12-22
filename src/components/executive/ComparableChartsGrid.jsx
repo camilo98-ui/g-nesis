@@ -56,19 +56,38 @@ export default function ComparableChartsGrid({ chartData, totals, comparisonTota
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-gradient-to-r from-indigo-50 to-purple-50 border-l-4 border-indigo-500 rounded-xl p-4 shadow-sm"
+        className="bg-gradient-to-r from-slate-50 to-gray-50 border-l-4 border-slate-700 rounded-xl shadow-sm overflow-hidden"
       >
-        <div className="flex items-start gap-3">
-          <div className="w-10 h-10 bg-indigo-500 rounded-lg flex items-center justify-center flex-shrink-0">
-            <Activity className="w-5 h-5 text-white" />
+        <div className="p-4">
+          <div className="flex items-start gap-3 mb-4">
+            <div className="w-10 h-10 bg-slate-700 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Activity className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex-1">
+              <h4 className="font-bold text-slate-900 text-base">Análisis Detallado de Métricas Operativas</h4>
+            </div>
           </div>
-          <div className="flex-1">
-            <h4 className="font-bold text-indigo-900 mb-1">Análisis Multidimensional de Desempeño</h4>
-            <p className="text-sm text-indigo-800 leading-relaxed">
-              Las siguientes visualizaciones permiten comparar múltiples dimensiones operativas entre períodos. 
-              <span className="font-semibold"> Identifique correlaciones, patrones anómalos y oportunidades de mejora mediante análisis de tendencias, 
-              eficiencia operativa, y consistencia en el desempeño diario.</span> Variaciones superiores a ±15% requieren plan de acción inmediato.
-            </p>
+
+          <div className="grid md:grid-cols-2 gap-4">
+            {/* Conclusiones */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <h5 className="font-bold text-blue-900 text-sm mb-2 flex items-center gap-1">
+                <span className="text-blue-600">📊</span> Conclusiones
+              </h5>
+              <p className="text-xs text-blue-900 leading-relaxed">
+                Estas gráficas muestran el comportamiento detallado de cada indicador entre períodos. Las variaciones día a día revelan consistencia o volatilidad operativa. La eficiencia por transacción indica qué tan bien convertimos cada cliente en ventas. Patrones irregulares sugieren problemas de ejecución que reducen resultados.
+              </p>
+            </div>
+
+            {/* Plan de Acción */}
+            <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
+              <h5 className="font-bold text-emerald-900 text-sm mb-2 flex items-center gap-1">
+                <span className="text-emerald-600">🎯</span> Plan de Acción
+              </h5>
+              <p className="text-xs text-emerald-900 leading-relaxed">
+                1) Identificar días de mejor y peor desempeño - buscar causas específicas. 2) Si la variación diaria es alta, estandarizar procesos para reducir inconsistencia. 3) Usar métricas de eficiencia para establecer benchmarks por vendedor. 4) Variaciones mayores a 15% requieren revisión inmediata.
+              </p>
+            </div>
           </div>
         </div>
       </motion.div>
