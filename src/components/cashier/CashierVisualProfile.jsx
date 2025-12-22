@@ -180,8 +180,8 @@ export default function CashierVisualProfile({ cashier, storeCode, shiftRecords 
           </div>
           <div className="bg-purple-50 rounded-xl p-3 text-center">
             <Zap className="w-5 h-5 text-purple-500 mx-auto mb-1" />
-            <p className="text-lg font-black text-purple-600">{stats.totalTransactions}</p>
-            <p className="text-[10px] text-gray-500">Transacciones</p>
+            <p className="text-lg font-black text-purple-600">{Math.round(stats.daysWorked > 0 ? stats.totalTransactions / stats.daysWorked : 0)}</p>
+            <p className="text-[10px] text-gray-500">Trans. Promedio</p>
           </div>
           <div className="bg-pink-50 rounded-xl p-3 text-center">
             <Gift className="w-5 h-5 text-pink-500 mx-auto mb-1" />
