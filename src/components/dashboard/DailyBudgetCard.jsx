@@ -62,21 +62,31 @@ export default function DailyBudgetCard({ dailySales = [], storeId, formatCurren
     }
   });
 
-  // Datos de últimos 10 días con presupuesto - ORDENADOS DE IZQUIERDA A DERECHA
+  // Datos de últimos 30 días con presupuesto - ORDENADOS CRONOLÓGICAMENTE
   const chartData = useMemo(() => {
     const budgetsMap = {};
     dailyBudgets.forEach(b => {
       budgetsMap[b.date] = b;
     });
 
-    const last10Days = dailySales.slice(-10).sort((a, b) => new Date(a.date) - new Date(b.date));
-    return last10Days.map(day => {
-      const budget = budgetsMap[day.date];
+    // Tomar los últimos 30 días y ordenarlos cronológicamente
+    const last30Days = dailySales
+      .slice(-30)
+      .sort((a, b) => {
+        const dateA = a.date?.split('T')[0] || a.date;
+        const dateB = b.date?.split('T')[0] || b.date;
+        return dateA.localeCompare(dateB);
+      });
+
+    return last30Days.map(day => {
+      const dayDate = day.date?.split('T')[0] || day.date;
+      const budget = budgetsMap[dayDate];
       const real = day.total_sales || 0;
       const presupuesto = budget?.budget_amount || 0;
       return {
-        date: format(parseISO(day.date), 'dd MMM', { locale: es }),
-        fullDate: format(parseISO(day.date), 'EEEE dd MMM', { locale: es }),
+        date: format(parseISO(dayDate), 'dd MMM', { locale: es }),
+        fullDate: format(parseISO(dayDate), 'EEEE dd MMM', { locale: es }),
+        rawDate: dayDate,
         real,
         presupuesto,
         diferencia: real - presupuesto,
@@ -104,131 +114,225 @@ export default function DailyBudgetCard({ dailySales = [], storeId, formatCurren
 
   return (
     <>
-      <Card className="bg-white shadow-xl border-0">
-        <CardHeader className="pb-2 bg-gradient-to-r from-violet-50 to-purple-50 rounded-t-lg">
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="text-sm font-bold text-violet-700 flex items-center gap-2">
-                <Target className="w-5 h-5 text-violet-500" />
-                Presupuesto del Día
-              </CardTitle>
-              <p className="text-xs text-gray-500">Histórico de cumplimiento</p>
-            </div>
-            <div className="flex gap-2">
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setShowHistoryModal(true)}
-                className="border-violet-200 text-violet-600 hover:bg-violet-50"
-              >
-                <TrendingUp className="w-4 h-4 mr-1" />
-                Historial
-              </Button>
-              <Button
-                size="sm"
-                onClick={() => setShowDialog(true)}
-                className="bg-gradient-to-r from-violet-500 to-purple-600 text-white"
-              >
-                <Plus className="w-4 h-4 mr-1" />
-                {hasTodayBudget ? 'Editar' : 'Agregar'}
-              </Button>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="p-4">
-          {/* Resultado del día de hoy */}
-          {hasTodayBudget && todayBudget.completed && (
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className={`mb-4 p-4 rounded-xl ${
-                compliance >= 100 
-                  ? 'bg-gradient-to-r from-green-50 to-emerald-100 border-2 border-green-200' 
-                  : 'bg-gradient-to-r from-amber-50 to-orange-100 border-2 border-amber-200'
-              }`}
-            >
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-bold text-gray-700">Resultado de Hoy</span>
-                {compliance >= 100 ? (
-                  <Check className="w-6 h-6 text-green-600" />
-                ) : (
-                  <X className="w-6 h-6 text-amber-600" />
-                )}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="relative"
+      >
+        <Card className="bg-gradient-to-br from-white via-violet-50/30 to-purple-50/30 shadow-2xl border-2 border-violet-200/50 overflow-hidden">
+          {/* Efecto de brillo animado */}
+          <motion.div
+            animate={{ 
+              backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+            }}
+            transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent bg-[length:200%_100%] pointer-events-none"
+          />
+
+          <CardHeader className="pb-3 bg-gradient-to-r from-violet-500 to-purple-600 text-white relative overflow-hidden">
+            {/* Decoración de fondo */}
+            <motion.div 
+              className="absolute inset-0 opacity-20"
+              animate={{ 
+                backgroundPosition: ['0% 0%', '100% 100%'],
+              }}
+              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+              style={{
+                backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,.1) 10px, rgba(255,255,255,.1) 20px)'
+              }}
+            />
+            
+            <div className="flex items-center justify-between relative z-10">
+              <div>
+                <CardTitle className="text-base font-black flex items-center gap-2">
+                  <motion.div
+                    animate={{ rotate: [0, 10, -10, 0] }}
+                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                  >
+                    <Target className="w-5 h-5" />
+                  </motion.div>
+                  Presupuesto Diario
+                </CardTitle>
+                <p className="text-xs text-white/80 mt-0.5">Últimos 30 días de seguimiento</p>
               </div>
-              <div className="grid grid-cols-3 gap-2 text-center">
-                <div>
-                  <p className="text-xs text-gray-600">Meta</p>
-                  <p className="text-sm font-black text-violet-600">{formatCurrency(todayBudget.budget_amount)}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-600">Real</p>
-                  <p className="text-sm font-black text-emerald-600">{formatCurrency(todayBudget.actual_sales)}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-600">%</p>
-                  <p className={`text-sm font-black ${compliance >= 100 ? 'text-green-600' : 'text-amber-600'}`}>
-                    {compliance.toFixed(0)}%
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setShowHistoryModal(true)}
+                  className="text-white hover:bg-white/20 border border-white/30"
+                >
+                  <TrendingUp className="w-4 h-4 mr-1" />
+                  Análisis
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => setShowDialog(true)}
+                  className="bg-white text-violet-600 hover:bg-white/90"
+                >
+                  <Plus className="w-4 h-4 mr-1" />
+                  {hasTodayBudget ? 'Editar' : 'Crear'}
+                </Button>
+              </div>
+            </div>
+          </CardHeader>
+          
+          <CardContent className="p-5 relative">
+            {/* Resultado de hoy - Más visual */}
+            {hasTodayBudget && todayBudget.completed && (
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                whileHover={{ scale: 1.02, y: -2 }}
+                className={`mb-5 relative overflow-hidden rounded-2xl ${
+                  compliance >= 100 
+                    ? 'bg-gradient-to-br from-emerald-400 to-green-500' 
+                    : compliance >= 80
+                      ? 'bg-gradient-to-br from-amber-400 to-orange-500'
+                      : 'bg-gradient-to-br from-red-400 to-rose-500'
+                } shadow-lg`}
+              >
+                {/* Efecto de brillo */}
+                <motion.div
+                  animate={{ x: ['-100%', '200%'] }}
+                  transition={{ duration: 3, repeat: Infinity, repeatDelay: 2 }}
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                />
+                
+                <div className="relative z-10 p-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-sm font-bold text-white flex items-center gap-2">
+                      <Calendar className="w-4 h-4" />
+                      HOY - {format(new Date(), 'dd MMM', { locale: es })}
+                    </span>
+                    <motion.div
+                      animate={{ scale: [1, 1.1, 1] }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                    >
+                      {compliance >= 100 ? (
+                        <Check className="w-7 h-7 text-white drop-shadow-lg" />
+                      ) : (
+                        <TrendingUp className="w-7 h-7 text-white drop-shadow-lg" />
+                      )}
+                    </motion.div>
+                  </div>
+                  
+                  <div className="grid grid-cols-3 gap-3 mb-3">
+                    <div className="bg-white/20 backdrop-blur-sm rounded-lg p-3 text-center">
+                      <p className="text-[10px] text-white/90 font-medium mb-1">🎯 Meta</p>
+                      <p className="text-base font-black text-white">{formatCurrency(todayBudget.budget_amount).slice(0, -3)}</p>
+                    </div>
+                    <div className="bg-white/20 backdrop-blur-sm rounded-lg p-3 text-center">
+                      <p className="text-[10px] text-white/90 font-medium mb-1">💰 Real</p>
+                      <p className="text-base font-black text-white">{formatCurrency(todayBudget.actual_sales).slice(0, -3)}</p>
+                    </div>
+                    <div className="bg-white/30 backdrop-blur-sm rounded-lg p-3 text-center">
+                      <p className="text-[10px] text-white/90 font-medium mb-1">📊 %</p>
+                      <p className="text-base font-black text-white">{compliance.toFixed(0)}%</p>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-white/10 rounded-full h-2 overflow-hidden backdrop-blur-sm">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${Math.min(compliance, 100)}%` }}
+                      transition={{ duration: 1, ease: "easeOut" }}
+                      className="h-full bg-white rounded-full"
+                    />
+                  </div>
+                  
+                  <p className="text-xs text-center mt-2 font-bold text-white drop-shadow">
+                    {compliance >= 100 
+                      ? `🎉 ¡Superaste la meta en ${formatCurrency(todayBudget.actual_sales - todayBudget.budget_amount)}!` 
+                      : compliance >= 80
+                        ? `💪 Faltan ${formatCurrency(todayBudget.budget_amount - todayBudget.actual_sales)} para la meta`
+                        : `🚀 Impulsa ventas - ${formatCurrency(todayBudget.budget_amount - todayBudget.actual_sales)} pendientes`}
                   </p>
                 </div>
-              </div>
-              <p className="text-xs text-center mt-2 font-medium">
-                {compliance >= 100 
-                  ? `🎉 Superaste el presupuesto en ${formatCurrency(todayBudget.actual_sales - todayBudget.budget_amount)}!` 
-                  : `💪 No se cumplió la meta por ${formatCurrency(todayBudget.budget_amount - todayBudget.actual_sales)}`}
+              </motion.div>
+            )}
+
+            {/* Insight dinámico */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              whileHover={{ scale: 1.01, y: -2 }}
+              className="mb-4 bg-gradient-to-br from-violet-50 via-purple-50 to-pink-50 border-2 border-violet-200/60 rounded-xl px-4 py-3 shadow-md"
+            >
+              <p className="text-xs text-gray-700 leading-relaxed">
+                <span className="font-bold text-violet-700">💡 Insight:</span> Seguimiento diario de cumplimiento. Identifica patrones para optimizar metas.
               </p>
             </motion.div>
-          )}
 
-          {/* Gráfica histórica con líneas claras */}
-          <div className="h-56">
-            <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis dataKey="date" tick={{ fill: '#6b7280', fontSize: 10 }} />
-                <YAxis tick={{ fill: '#6b7280', fontSize: 10 }} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} />
-                <Tooltip 
-                  contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)', fontSize: 11, padding: 12 }}
-                  labelFormatter={(label, payload) => payload?.[0]?.payload?.fullDate || label}
-                  formatter={(v, name) => {
-                    const emoji = name === 'Venta Real' ? '💰' : name === 'Meta' ? '🎯' : '📊';
-                    const color = name === 'Venta Real' ? '#10b981' : name === 'Meta' ? '#8b5cf6' : '#f59e0b';
-                    return [
-                      <span style={{ color }}>{emoji} {formatCurrency(v)}</span>,
-                      name
-                    ];
-                  }}
-                />
-                <Legend 
-                  iconType="circle"
-                  formatter={(value) => {
-                    if (value === 'real') return '💰 Venta Real';
-                    if (value === 'presupuesto') return '🎯 Meta';
-                    return value;
-                  }}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="presupuesto" 
-                  stroke="#8b5cf6" 
-                  strokeWidth={3} 
-                  strokeDasharray="5 5"
-                  dot={{ fill: '#8b5cf6', r: 4 }}
-                  name="Meta"
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="real" 
-                  stroke="#10b981" 
-                  strokeWidth={3} 
-                  dot={{ fill: '#10b981', r: 4 }}
-                  name="Venta Real"
-                />
-              </ComposedChart>
-            </ResponsiveContainer>
-          </div>
+            {/* Gráfica histórica mejorada */}
+            <div className="h-64 bg-gradient-to-br from-gray-50 to-white rounded-xl p-3 border border-gray-100">
+              <ResponsiveContainer width="100%" height="100%">
+                <ComposedChart data={chartData.filter(d => d.presupuesto > 0)}>
+                  <defs>
+                    <linearGradient id="salesGradBudget" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
+                      <stop offset="95%" stopColor="#10b981" stopOpacity={0.05} />
+                    </linearGradient>
+                    <linearGradient id="budgetGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.05} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.6} />
+                  <XAxis 
+                    dataKey="date" 
+                    tick={{ fill: '#6b7280', fontSize: 9 }} 
+                    interval="preserveStartEnd"
+                    minTickGap={20}
+                  />
+                  <YAxis tick={{ fill: '#6b7280', fontSize: 10 }} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} />
+                  <Tooltip 
+                    contentStyle={{ 
+                      borderRadius: 12, 
+                      border: 'none', 
+                      boxShadow: '0 8px 30px rgba(0,0,0,0.12)', 
+                      fontSize: 11, 
+                      padding: 12,
+                      background: 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)'
+                    }}
+                    labelFormatter={(label, payload) => payload?.[0]?.payload?.fullDate || label}
+                    formatter={(v, name) => {
+                      const emoji = name === 'Venta Real' ? '💰' : '🎯';
+                      const color = name === 'Venta Real' ? '#10b981' : '#8b5cf6';
+                      return [
+                        <span style={{ color, fontWeight: 'bold' }}>{emoji} {formatCurrency(v)}</span>,
+                        name
+                      ];
+                    }}
+                  />
+                  <Legend 
+                    iconType="line"
+                    wrapperStyle={{ fontSize: 11, fontWeight: 600 }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="presupuesto"
+                    stroke="#8b5cf6"
+                    strokeWidth={2}
+                    fill="url(#budgetGrad)"
+                    strokeDasharray="5 5"
+                    name="🎯 Meta"
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="real"
+                    stroke="#10b981"
+                    strokeWidth={3}
+                    fill="url(#salesGradBudget)"
+                    name="💰 Venta Real"
+                  />
+                </ComposedChart>
+              </ResponsiveContainer>
+            </div>
 
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </motion.div>
 
       {/* Dialog para agregar presupuesto */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
