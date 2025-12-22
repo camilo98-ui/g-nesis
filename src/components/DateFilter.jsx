@@ -357,7 +357,7 @@ function CustomCalendar({ selected, onSelect, onClose, onApply }) {
   );
 }
 
-export default function DateFilter({ dateRange, onDateChange }) {
+export default function DateFilter({ dateRange, onDateChange, buttonClassName = '', buttonText = null }) {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   const getDateLabel = () => {

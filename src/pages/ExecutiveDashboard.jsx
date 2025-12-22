@@ -97,6 +97,8 @@ export default function ExecutiveDashboard() {
   const [selectedStoreDetail, setSelectedStoreDetail] = useState(null);
   const [chartView, setChartView] = useState('ventas'); // ventas, cumplimiento, proyeccion, eficiencia
   const [selectedMetric, setSelectedMetric] = useState(null);
+  const [comparisonRange, setComparisonRange] = useState(null);
+  const [showComparison, setShowComparison] = useState(false);
   
   useEffect(() => {
     if (urlView) {
@@ -188,6 +190,81 @@ export default function ExecutiveDashboard() {
     if (filterStatus === 'all') return storesAnalysis;
     return storesAnalysis.filter(s => s.status === filterStatus);
   }, [storesAnalysis, filterStatus]);
+
+  // Análisis del período de comparación
+  const comparisonAnalysis = useMemo(() => {
+    if (!comparisonRange) return null;
+
+    return STORES.map(store => {
+      const storeSales = allDailySales.filter(s => {
+        try {
+          const d = new Date(s.date);
+          return s.store_id === store.code && !isNaN(d.getTime()) && d >= comparisonRange.from && d <= comparisonRange.to;
+        } catch {
+          return false;
+        }
+      });
+
+      const totalSales = Math.max(0, storeSales.reduce((sum, s) => sum + (s.total_sales || 0), 0));
+      const totalTickets = Math.max(0, storeSales.reduce((sum, s) => sum + (s.total_tickets || 0), 0));
+      const totalTransactions = Math.max(0, storeSales.reduce((sum, s) => sum + (s.total_transactions || 0), 0));
+      const avgTicket = totalTransactions > 0 ? totalSales / totalTransactions : 0;
+
+      return {
+        code: store.code,
+        name: getDisplayName(store.code),
+        totalSales,
+        totalTickets,
+        totalTransactions,
+        avgTicket
+      };
+    });
+  }, [allDailySales, comparisonRange]);
+
+  // Datos comparativos para gráficas
+  const comparisonChartData = useMemo(() => {
+    if (!comparisonAnalysis) return comparisonData;
+
+    return storesAnalysis.map(current => {
+      const comparison = comparisonAnalysis.find(c => c.code === current.code);
+      return {
+        name: current.name,
+        ventas_actual: current.totalSales,
+        ventas_comparacion: comparison?.totalSales || 0,
+        ticket_actual: current.avgTicket,
+        ticket_comparacion: comparison?.avgTicket || 0,
+        transacciones_actual: current.totalTransactions,
+        transacciones_comparacion: comparison?.totalTransactions || 0,
+        cumplimiento: current.salesCompliance,
+        proyeccion: current.projection,
+        presupuesto: current.salesBudget,
+        growth: comparison?.totalSales > 0 ? ((current.totalSales - comparison.totalSales) / comparison.totalSales) * 100 : 0
+      };
+    });
+  }, [storesAnalysis, comparisonAnalysis, comparisonData]);
+
+  // Totales comparativos
+  const comparisonTotals = useMemo(() => {
+    if (!comparisonAnalysis) return null;
+
+    const currentTotal = zoneTotals.totalSales;
+    const comparisonTotal = comparisonAnalysis.reduce((sum, s) => sum + s.totalSales, 0);
+    const currentTransactions = filteredStores.reduce((sum, s) => sum + s.totalTransactions, 0);
+    const comparisonTransactions = comparisonAnalysis.reduce((sum, s) => sum + s.totalTransactions, 0);
+
+    return {
+      salesGrowth: comparisonTotal > 0 ? ((currentTotal - comparisonTotal) / comparisonTotal) * 100 : 0,
+      salesDiff: currentTotal - comparisonTotal,
+      transactionsGrowth: comparisonTransactions > 0 ? ((currentTransactions - comparisonTransactions) / comparisonTransactions) * 100 : 0,
+      transactionsDiff: currentTransactions - comparisonTransactions,
+      avgTicketCurrent: currentTransactions > 0 ? currentTotal / currentTransactions : 0,
+      avgTicketComparison: comparisonTransactions > 0 ? comparisonTotal / comparisonTransactions : 0,
+      currentTotal,
+      comparisonTotal
+    };
+  }, [zoneTotals, comparisonAnalysis, filteredStores]);
+
+  const dataToDisplay = showComparison && comparisonRange ? comparisonChartData : comparisonData;
 
   // Predictive Analytics
   const salesForecast = useMemo(() => {
@@ -684,6 +761,36 @@ INSTRUCCIONES:
             <div className="flex items-center gap-3">
               <WeekFilter onWeekChange={setWeekFilter} />
               <DateFilter dateRange={dateRange} onDateChange={(range) => { setDateRange(range); setWeekFilter(null); }} />
+              
+              {/* Botón de Comparación */}
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Button
+                  variant={showComparison ? "default" : "outline"}
+                  onClick={() => setShowComparison(!showComparison)}
+                  className={`gap-2 ${showComparison ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg' : 'border-purple-300 hover:border-purple-500'}`}
+                >
+                  <TrendingUp className="w-4 h-4" />
+                  {showComparison ? 'Comparación Activa' : 'Comparar Períodos'}
+                </Button>
+              </motion.div>
+
+              {/* Selector de Período de Comparación */}
+              <AnimatePresence>
+                {showComparison && (
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                  >
+                    <DateFilter 
+                      dateRange={comparisonRange || { from: startOfMonth(new Date()), to: new Date() }} 
+                      onDateChange={setComparisonRange}
+                      buttonClassName="border-pink-300 hover:border-pink-500"
+                      buttonText="📅 Período a Comparar"
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
             </div>
 
@@ -933,6 +1040,78 @@ INSTRUCCIONES:
                 badgeColor={statusCounts.critical === 0 ? 'green' : 'red'}
               />
             </div>
+          )}
+
+          {/* Panel de Comparación */}
+          {!isLoading && showComparison && comparisonRange && comparisonTotals && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4"
+            >
+              <Card className={`border-2 ${comparisonTotals.salesGrowth >= 0 ? 'border-emerald-300 bg-gradient-to-br from-emerald-50 to-green-50' : 'border-red-300 bg-gradient-to-br from-red-50 to-rose-50'}`}>
+                <CardContent className="pt-5 pb-5">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs font-bold text-gray-600 uppercase">Crecimiento Ventas</p>
+                    {comparisonTotals.salesGrowth >= 0 ? 
+                      <TrendingUp className="w-5 h-5 text-emerald-600" /> : 
+                      <TrendingDown className="w-5 h-5 text-red-600" />
+                    }
+                  </div>
+                  <p className={`text-3xl font-black mb-1 ${comparisonTotals.salesGrowth >= 0 ? 'text-emerald-700' : 'text-red-700'}`}>
+                    {comparisonTotals.salesGrowth >= 0 ? '+' : ''}{comparisonTotals.salesGrowth.toFixed(1)}%
+                  </p>
+                  <p className="text-xs text-gray-600">
+                    {comparisonTotals.salesDiff >= 0 ? '+' : ''}{formatCurrency(comparisonTotals.salesDiff)}
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="border-2 border-blue-300 bg-gradient-to-br from-blue-50 to-cyan-50">
+                <CardContent className="pt-5 pb-5">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs font-bold text-gray-600 uppercase">Actual vs Anterior</p>
+                    <Receipt className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <p className="text-xl font-black text-blue-700 mb-1">
+                    {formatCurrency(comparisonTotals.currentTotal)}
+                  </p>
+                  <p className="text-xs text-gray-600">
+                    vs {formatCurrency(comparisonTotals.comparisonTotal)}
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className={`border-2 ${comparisonTotals.transactionsGrowth >= 0 ? 'border-purple-300 bg-gradient-to-br from-purple-50 to-pink-50' : 'border-orange-300 bg-gradient-to-br from-orange-50 to-amber-50'}`}>
+                <CardContent className="pt-5 pb-5">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs font-bold text-gray-600 uppercase">Δ Transacciones</p>
+                    <Zap className="w-5 h-5 text-purple-600" />
+                  </div>
+                  <p className={`text-3xl font-black mb-1 ${comparisonTotals.transactionsGrowth >= 0 ? 'text-purple-700' : 'text-orange-700'}`}>
+                    {comparisonTotals.transactionsGrowth >= 0 ? '+' : ''}{comparisonTotals.transactionsGrowth.toFixed(1)}%
+                  </p>
+                  <p className="text-xs text-gray-600">
+                    {comparisonTotals.transactionsDiff >= 0 ? '+' : ''}{comparisonTotals.transactionsDiff.toLocaleString()} trans
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="border-2 border-amber-300 bg-gradient-to-br from-amber-50 to-yellow-50">
+                <CardContent className="pt-5 pb-5">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs font-bold text-gray-600 uppercase">Ticket Promedio</p>
+                    <Target className="w-5 h-5 text-amber-600" />
+                  </div>
+                  <p className="text-xl font-black text-amber-700 mb-1">
+                    {formatCurrency(comparisonTotals.avgTicketCurrent)}
+                  </p>
+                  <p className="text-xs text-gray-600">
+                    vs {formatCurrency(comparisonTotals.avgTicketComparison)}
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
           )}
 
           {/* Botones de Vista Dinámica Mejorados */}
@@ -1229,7 +1408,7 @@ INSTRUCCIONES:
                     <CardContent className="relative z-10 pt-8 pb-6">
                       <ResponsiveContainer width="100%" height={400}>
                         {chartView === 'ventas' && (
-                          <ComposedChart data={comparisonData}>
+                          <ComposedChart data={dataToDisplay}>
                             <defs>
                               <linearGradient id="vibrantSalesGradient" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="0%" stopColor="#6366f1" stopOpacity={1}/>
@@ -1300,20 +1479,47 @@ INSTRUCCIONES:
                                 );
                               }}
                             />
-                            <Bar 
-                              dataKey="ventas" 
-                              fill="url(#vibrantSalesGradient)" 
-                              radius={[12, 12, 0, 0]}
-                              animationDuration={1500}
-                              animationBegin={100}
-                              label={{
-                                position: 'top',
-                                fill: '#e2e8f0',
-                                fontWeight: 900,
-                                fontSize: 10,
-                                formatter: (v) => `$${(v/1000000).toFixed(1)}M`
-                              }}
-                            />
+                            {showComparison && comparisonRange ? (
+                              <>
+                                <Bar 
+                                  dataKey="ventas_comparacion" 
+                                  fill="rgba(148, 163, 184, 0.6)" 
+                                  radius={[12, 12, 0, 0]}
+                                  animationDuration={1500}
+                                  name="Período Anterior"
+                                />
+                                <Bar 
+                                  dataKey="ventas_actual" 
+                                  fill="url(#vibrantSalesGradient)" 
+                                  radius={[12, 12, 0, 0]}
+                                  animationDuration={1500}
+                                  animationBegin={200}
+                                  name="Período Actual"
+                                  label={{
+                                    position: 'top',
+                                    fill: '#e2e8f0',
+                                    fontWeight: 900,
+                                    fontSize: 10,
+                                    formatter: (v) => `$${(v/1000000).toFixed(1)}M`
+                                  }}
+                                />
+                              </>
+                            ) : (
+                              <Bar 
+                                dataKey="ventas" 
+                                fill="url(#vibrantSalesGradient)" 
+                                radius={[12, 12, 0, 0]}
+                                animationDuration={1500}
+                                animationBegin={100}
+                                label={{
+                                  position: 'top',
+                                  fill: '#e2e8f0',
+                                  fontWeight: 900,
+                                  fontSize: 10,
+                                  formatter: (v) => `$${(v/1000000).toFixed(1)}M`
+                                }}
+                              />
+                            )}
                             <Line 
                               type="monotone" 
                               dataKey="presupuesto" 
@@ -1323,11 +1529,12 @@ INSTRUCCIONES:
                               dot={{ fill: '#ef4444', r: 8, strokeWidth: 4, stroke: '#1e293b' }}
                               activeDot={{ r: 12, strokeWidth: 4, fill: '#f97316', filter: 'url(#neonGlow)' }}
                               animationDuration={1800}
+                              name="Meta Presupuesto"
                             />
                           </ComposedChart>
                         )}
                         {chartView === 'cumplimiento' && (
-                          <BarChart data={comparisonData.sort((a, b) => b.cumplimiento - a.cumplimiento)}>
+                          <BarChart data={dataToDisplay.sort((a, b) => b.cumplimiento - a.cumplimiento)}>
                             <defs>
                               <linearGradient id="successGrad" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="0%" stopColor="#10b981"/>
@@ -1427,7 +1634,7 @@ INSTRUCCIONES:
                           </BarChart>
                         )}
                         {chartView === 'proyeccion' && (
-                          <AreaChart data={comparisonData}>
+                          <AreaChart data={dataToDisplay}>
                             <defs>
                               <linearGradient id="projGrad1" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="0%" stopColor="#a855f7" stopOpacity={0.9}/>
@@ -1505,7 +1712,7 @@ INSTRUCCIONES:
                           </AreaChart>
                         )}
                         {chartView === 'eficiencia' && (
-                          <ComposedChart data={comparisonData.sort((a, b) => b.ticket - a.ticket)}>
+                          <ComposedChart data={dataToDisplay.sort((a, b) => (b.ticket_actual || b.ticket) - (a.ticket_actual || a.ticket))}>
                             <defs>
                               <linearGradient id="transGrad" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="0%" stopColor="#f59e0b" stopOpacity={0.95}/>
@@ -1567,30 +1774,85 @@ INSTRUCCIONES:
                                 );
                               }}
                             />
-                            <Bar 
-                              yAxisId="right" 
-                              dataKey="transacciones" 
-                              fill="url(#transGrad)" 
-                              radius={[12, 12, 0, 0]}
-                              animationDuration={1400}
-                              label={{
-                                position: 'top',
-                                fill: '#fde68a',
-                                fontWeight: 900,
-                                fontSize: 10,
-                                formatter: (v) => v.toLocaleString()
-                              }}
-                            />
-                            <Line 
-                              yAxisId="left" 
-                              type="monotone" 
-                              dataKey="ticket" 
-                              stroke="url(#ticketLine)" 
-                              strokeWidth={6} 
-                              dot={{ fill: '#8b5cf6', r: 9, strokeWidth: 4, stroke: '#1e293b' }} 
-                              activeDot={{ r: 13, strokeWidth: 4, fill: '#a855f7' }}
-                              animationDuration={1700}
-                            />
+                            {showComparison && comparisonRange ? (
+                              <>
+                                <Bar 
+                                  yAxisId="right" 
+                                  dataKey="transacciones_comparacion" 
+                                  fill="rgba(148, 163, 184, 0.5)" 
+                                  radius={[12, 12, 0, 0]}
+                                  animationDuration={1400}
+                                  name="Trans. Anterior"
+                                />
+                                <Bar 
+                                  yAxisId="right" 
+                                  dataKey="transacciones_actual" 
+                                  fill="url(#transGrad)" 
+                                  radius={[12, 12, 0, 0]}
+                                  animationDuration={1400}
+                                  animationBegin={200}
+                                  name="Trans. Actual"
+                                  label={{
+                                    position: 'top',
+                                    fill: '#fde68a',
+                                    fontWeight: 900,
+                                    fontSize: 10,
+                                    formatter: (v) => v.toLocaleString()
+                                  }}
+                                />
+                                <Line 
+                                  yAxisId="left" 
+                                  type="monotone" 
+                                  dataKey="ticket_comparacion" 
+                                  stroke="#94a3b8" 
+                                  strokeWidth={4} 
+                                  strokeDasharray="5 5"
+                                  dot={{ fill: '#94a3b8', r: 6 }} 
+                                  name="Ticket Anterior"
+                                  animationDuration={1700}
+                                />
+                                <Line 
+                                  yAxisId="left" 
+                                  type="monotone" 
+                                  dataKey="ticket_actual" 
+                                  stroke="url(#ticketLine)" 
+                                  strokeWidth={6} 
+                                  dot={{ fill: '#8b5cf6', r: 9, strokeWidth: 4, stroke: '#1e293b' }} 
+                                  activeDot={{ r: 13, strokeWidth: 4, fill: '#a855f7' }}
+                                  name="Ticket Actual"
+                                  animationDuration={1700}
+                                />
+                              </>
+                            ) : (
+                              <>
+                                <Bar 
+                                  yAxisId="right" 
+                                  dataKey="transacciones" 
+                                  fill="url(#transGrad)" 
+                                  radius={[12, 12, 0, 0]}
+                                  animationDuration={1400}
+                                  name="Transacciones"
+                                  label={{
+                                    position: 'top',
+                                    fill: '#fde68a',
+                                    fontWeight: 900,
+                                    fontSize: 10,
+                                    formatter: (v) => v.toLocaleString()
+                                  }}
+                                />
+                                <Line 
+                                  yAxisId="left" 
+                                  type="monotone" 
+                                  dataKey="ticket" 
+                                  stroke="url(#ticketLine)" 
+                                  strokeWidth={6} 
+                                  dot={{ fill: '#8b5cf6', r: 9, strokeWidth: 4, stroke: '#1e293b' }} 
+                                  activeDot={{ r: 13, strokeWidth: 4, fill: '#a855f7' }}
+                                  name="Ticket Promedio"
+                                  animationDuration={1700}
+                                />
+                              </>
+                            )}
                           </ComposedChart>
                         )}
                       </ResponsiveContainer>
