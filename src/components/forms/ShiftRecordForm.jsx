@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Save, User, DollarSign, Receipt, Zap, Gift, Loader2, CheckCircle, Sun, Sunset, Moon, Calendar } from 'lucide-react';
+import { Save, User, DollarSign, Receipt, Zap, Gift, Loader2, CheckCircle, Sun, Sunset, Moon, Calendar, Camera } from 'lucide-react';
 import { toast } from 'sonner';
+import FaceRecognitionCashierSelect from './FaceRecognitionCashierSelect';
 
 const SHIFTS = [
   { value: 'morning', label: 'Apertura', icon: Sun, color: 'text-yellow-500' },
@@ -18,6 +19,7 @@ const SHIFTS = [
 export default function ShiftRecordForm({ storeId, onSuccess }) {
     const queryClient = useQueryClient();
     const [showSuccess, setShowSuccess] = useState(false);
+    const [useFaceRecognition, setUseFaceRecognition] = useState(true);
     const [formData, setFormData] = useState({
       cashier_id: '',
       date: new Date().toISOString().split('T')[0],
@@ -273,21 +275,37 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
           </div>
         )}
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Cajero y Fecha */}
-          <div className="grid grid-cols-2 gap-5">
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              whileHover={{ scale: 1.01 }}
-              className="bg-gradient-to-br from-violet-50 to-purple-50 rounded-[20px] p-5 shadow-md border border-violet-100 hover:shadow-lg transition-all"
-            >
-              <Label className="text-violet-700 flex items-center gap-3 mb-3 text-base font-bold">
+          {/* Selector de Cajero con Reconocimiento Facial */}
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="bg-gradient-to-br from-violet-50 to-purple-50 rounded-[20px] p-5 shadow-md border border-violet-100"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <Label className="text-violet-700 flex items-center gap-3 text-base font-bold">
                 <div className="w-10 h-10 bg-violet-200/60 rounded-xl flex items-center justify-center">
                   <User className="w-6 h-6 text-violet-600" />
                 </div>
-                Cajero
+                Identificación de Cajero
               </Label>
+              <button
+                type="button"
+                onClick={() => setUseFaceRecognition(!useFaceRecognition)}
+                className="text-xs font-medium text-violet-600 hover:text-violet-700 flex items-center gap-1"
+              >
+                <Camera className="w-3 h-3" />
+                {useFaceRecognition ? 'Modo lista' : 'Reconocimiento'}
+              </button>
+            </div>
+
+            {useFaceRecognition ? (
+              <FaceRecognitionCashierSelect
+                cashiers={cashiers}
+                selectedId={formData.cashier_id}
+                onSelect={(id) => setFormData({...formData, cashier_id: id})}
+              />
+            ) : (
               <Select 
                 value={formData.cashier_id} 
                 onValueChange={(val) => setFormData({...formData, cashier_id: val})}
@@ -301,7 +319,18 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
                   ))}
                 </SelectContent>
               </Select>
-            </motion.div>
+            )}
+          </motion.div>
+
+          {/* Fecha */}
+          <div>
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 }}
+              whileHover={{ scale: 1.01 }}
+              className="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-[20px] p-5 shadow-md border border-amber-100 hover:shadow-lg transition-all"
+            >
 
             <motion.div 
               initial={{ opacity: 0, y: 10 }}
@@ -316,13 +345,13 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
                 </div>
                 Fecha
               </Label>
-              <Input 
-                type="date" 
-                value={formData.date}
-                onChange={(e) => setFormData({...formData, date: e.target.value})}
-                className="border-2 border-amber-200 focus:border-amber-400 bg-white rounded-xl text-base font-semibold h-12 focus:ring-2 focus:ring-amber-200 transition-all"
-              />
-            </motion.div>
+                <Input 
+                  type="date" 
+                  value={formData.date}
+                  onChange={(e) => setFormData({...formData, date: e.target.value})}
+                  className="border-2 border-amber-200 focus:border-amber-400 bg-white rounded-xl text-base font-semibold h-12 focus:ring-2 focus:ring-amber-200 transition-all"
+                />
+              </motion.div>
           </div>
 
           {/* Turno */}
