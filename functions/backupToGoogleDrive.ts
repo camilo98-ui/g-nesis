@@ -92,31 +92,36 @@ Deno.serve(async (req) => {
     const result = await uploadResponse.json();
     console.log('Archivo creado en Drive:', result.id);
 
+    // También subir a Base44 para link de descarga directo
+    const file = new File([jsonContent], fileName, { type: 'application/json' });
+    const uploadResult = await base44.asServiceRole.integrations.Core.UploadFile({ file });
+    const downloadUrl = uploadResult.file_url;
+    
+    console.log('Link de descarga creado:', downloadUrl);
+
     // Enviar email
     let emailSent = false;
     try {
-      const driveLink = `https://drive.google.com/file/d/${result.id}/view`;
-      
       await base44.asServiceRole.integrations.Core.SendEmail({
         from_name: 'Popsy Management',
         to: user.email,
-        subject: `🍦 Backup Popsy en Drive - ${fileName}`,
+        subject: `🍦 Backup Popsy - ${fileName}`,
         body: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #ec4899;">✅ Backup Guardado en Drive</h2>
-            <p>Tu backup está en Google Drive.</p>
+            <h2 style="color: #ec4899;">✅ Backup Completado</h2>
+            <p>Tu backup está guardado en Google Drive y listo para descargar.</p>
             
             <div style="background: #fce7f3; padding: 20px; border-radius: 10px; margin: 20px 0;">
               <h3 style="margin-top: 0;">📁 ${fileName}</h3>
               <p><strong>Registros:</strong> ${stores.length} tiendas, ${cashiers.length} cajeros, ${shiftRecords.length} turnos</p>
             </div>
             
-            <a href="${driveLink}" style="display: inline-block; background: linear-gradient(to right, #ec4899, #f43f5e); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold;">
-              📂 Abrir en Drive
+            <a href="${downloadUrl}" style="display: inline-block; background: linear-gradient(to right, #ec4899, #f43f5e); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold;">
+              📥 Descargar Backup
             </a>
             
             <p style="color: #666; font-size: 12px; margin-top: 30px;">
-              Busca "${fileName}" en tu Google Drive.
+              También puedes buscar "${fileName}" en tu Google Drive.
             </p>
           </div>
         `
@@ -131,10 +136,10 @@ Deno.serve(async (req) => {
       success: true,
       file_name: fileName,
       drive_id: result.id,
-      drive_link: `https://drive.google.com/file/d/${result.id}/view`,
+      download_url: downloadUrl,
       full_backup: backupData,
       email_sent: emailSent,
-      message: `Backup guardado en Drive. Busca "${fileName}"`
+      message: `Backup guardado en Drive y enviado por email`
     });
 
   } catch (error) {
