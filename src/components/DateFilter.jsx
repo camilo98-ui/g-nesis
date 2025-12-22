@@ -47,6 +47,7 @@ function CustomCalendar({ selected, onSelect, onClose, onApply }) {
   const [showWeeks, setShowWeeks] = useState(false);
   const [selectedWeeks, setSelectedWeeks] = useState([]);
   const [isMobile, setIsMobile] = useState(false);
+  const [showYearSelector, setShowYearSelector] = useState(false);
 
   React.useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -277,11 +278,20 @@ function CustomCalendar({ selected, onSelect, onClose, onApply }) {
         >
           <ChevronLeft className="h-5 w-5" />
         </motion.button>
-        <div className={`flex ${isMobile ? 'gap-2' : 'gap-6'}`}>
+        <div className={`flex ${isMobile ? 'gap-2' : 'gap-6'} items-center`}>
           {months.map((m, i) => (
-            <span key={i} className="text-sm font-bold text-gray-700 capitalize">
+            <button
+              key={i}
+              onClick={() => setShowYearSelector(!showYearSelector)}
+              className="text-sm font-bold text-gray-700 capitalize hover:text-pink-600 transition-colors"
+            >
               {format(m, isMobile ? 'MMMM yyyy' : 'MMMM', { locale: es })}
-            </span>
+              {!isMobile && i === 0 && (
+                <span className="ml-2 text-xs text-pink-600 cursor-pointer hover:underline">
+                  {format(m, 'yyyy')} ▾
+                </span>
+              )}
+            </button>
           ))}
         </div>
         <motion.button 
@@ -293,6 +303,39 @@ function CustomCalendar({ selected, onSelect, onClose, onApply }) {
           <ChevronRight className="h-5 w-5" />
         </motion.button>
       </div>
+
+      {/* Selector de año rápido */}
+      {showYearSelector && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          exit={{ opacity: 0, height: 0 }}
+          className="px-4 py-3 border-b border-gray-100 bg-pink-50"
+        >
+          <div className="flex gap-2 flex-wrap justify-center">
+            {[2024, 2025, 2026].map(year => (
+              <motion.button
+                key={year}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => {
+                  const newMonth = new Date(currentMonth);
+                  newMonth.setFullYear(year);
+                  setCurrentMonth(newMonth);
+                  setShowYearSelector(false);
+                }}
+                className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
+                  currentMonth.getFullYear() === year
+                    ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-md'
+                    : 'bg-white text-gray-700 hover:bg-pink-100 border border-pink-200'
+                }`}
+              >
+                {year}
+              </motion.button>
+            ))}
+          </div>
+        </motion.div>
+      )}
       
       {/* Meses */}
       <div className={`flex ${isMobile ? '' : 'divide-x divide-gray-100'}`}>

@@ -845,7 +845,7 @@ export default function Dashboard() {
 
 
 
-            {/* Panel de comparación de totales mejorado */}
+            {/* Panel de comparación de totales mejorado - INTERACTIVO */}
             {showComparison && comparisonTotals && (
               <motion.div
                 initial={{ opacity: 0, y: -20 }}
@@ -855,7 +855,10 @@ export default function Dashboard() {
                 <motion.button
                   whileHover={{ scale: 1.03, y: -4 }}
                   whileTap={{ scale: 0.98 }}
+                  onClick={() => setActiveMetric(activeMetric === 'sales_comp' ? null : 'sales_comp')}
                   className={`text-left border-2 rounded-2xl shadow-lg transition-all ${
+                    activeMetric === 'sales_comp' ? 'ring-4 ring-emerald-300' : ''
+                  } ${
                     comparisonTotals.sales > 0 && ((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100) >= 0 
                       ? 'border-emerald-400 bg-gradient-to-br from-emerald-50 to-green-50' 
                       : 'border-red-400 bg-gradient-to-br from-red-50 to-rose-50'
@@ -874,17 +877,20 @@ export default function Dashboard() {
                         ? 'text-emerald-700' 
                         : 'text-red-700'
                     }`}>
-                      {comparisonTotals.sales > 0 ? ((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100).toFixed(1) : 0}%
+                      {comparisonTotals.sales > 0 ? (((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100) >= 0 ? '+' : '') + ((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100).toFixed(1) : 0}%
                     </p>
                     <div className="space-y-1">
                       <p className="text-xs text-gray-600 font-semibold">
-                        {comparisonTotals.sales > 0 && totals.sales > comparisonTotals.sales ? '↑' : '↓'} {formatCurrency(Math.abs(totals.sales - comparisonTotals.sales))} 
+                        {formatCurrency(Math.abs(totals.sales - comparisonTotals.sales))} {totals.sales > comparisonTotals.sales ? 'más' : 'menos'}
                       </p>
-                      <div className="flex justify-between text-[10px] text-gray-500">
-                        <span>Actual: {formatCurrency(totals.sales)}</span>
+                      <div className="h-px bg-gray-200 my-2" />
+                      <div className="flex justify-between text-[10px] text-gray-600 font-medium">
+                        <span>Actual:</span>
+                        <span className="font-bold">{formatCurrency(totals.sales)}</span>
                       </div>
                       <div className="flex justify-between text-[10px] text-gray-500">
-                        <span>Anterior: {formatCurrency(comparisonTotals.sales)}</span>
+                        <span>Anterior:</span>
+                        <span>{formatCurrency(comparisonTotals.sales)}</span>
                       </div>
                     </div>
                   </CardContent>
@@ -893,7 +899,10 @@ export default function Dashboard() {
                 <motion.button
                   whileHover={{ scale: 1.03, y: -4 }}
                   whileTap={{ scale: 0.98 }}
+                  onClick={() => setActiveMetric(activeMetric === 'trans_comp' ? null : 'trans_comp')}
                   className={`text-left border-2 rounded-2xl shadow-lg transition-all ${
+                    activeMetric === 'trans_comp' ? 'ring-4 ring-purple-300' : ''
+                  } ${
                     comparisonTotals.transactions > 0 && ((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100) >= 0 
                       ? 'border-purple-400 bg-gradient-to-br from-purple-50 to-violet-50' 
                       : 'border-orange-400 bg-gradient-to-br from-orange-50 to-amber-50'
@@ -912,17 +921,20 @@ export default function Dashboard() {
                         ? 'text-purple-700' 
                         : 'text-orange-700'
                     }`}>
-                      {comparisonTotals.transactions > 0 ? ((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100).toFixed(1) : 0}%
+                      {comparisonTotals.transactions > 0 ? (((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100) >= 0 ? '+' : '') + ((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100).toFixed(1) : 0}%
                     </p>
                     <div className="space-y-1">
                       <p className="text-xs text-gray-600 font-semibold">
-                        {comparisonTotals.transactions > 0 && totals.transactions > comparisonTotals.transactions ? '↑' : '↓'} {Math.abs(totals.transactions - comparisonTotals.transactions).toLocaleString()} trans
+                        {Math.abs(totals.transactions - comparisonTotals.transactions).toLocaleString()} {totals.transactions > comparisonTotals.transactions ? 'más' : 'menos'}
                       </p>
-                      <div className="flex justify-between text-[10px] text-gray-500">
-                        <span>Actual: {totals.transactions.toLocaleString()}</span>
+                      <div className="h-px bg-gray-200 my-2" />
+                      <div className="flex justify-between text-[10px] text-gray-600 font-medium">
+                        <span>Actual:</span>
+                        <span className="font-bold">{totals.transactions.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between text-[10px] text-gray-500">
-                        <span>Anterior: {comparisonTotals.transactions.toLocaleString()}</span>
+                        <span>Anterior:</span>
+                        <span>{comparisonTotals.transactions.toLocaleString()}</span>
                       </div>
                     </div>
                   </CardContent>
@@ -931,29 +943,42 @@ export default function Dashboard() {
                 <motion.button
                   whileHover={{ scale: 1.03, y: -4 }}
                   whileTap={{ scale: 0.98 }}
-                  className="text-left border-2 border-amber-400 bg-gradient-to-br from-amber-50 to-yellow-50 rounded-2xl shadow-lg"
+                  onClick={() => setActiveMetric(activeMetric === 'ticket_comp' ? null : 'ticket_comp')}
+                  className={`text-left border-2 rounded-2xl shadow-lg transition-all ${
+                    activeMetric === 'ticket_comp' ? 'ring-4 ring-amber-300' : ''
+                  } border-amber-400 bg-gradient-to-br from-amber-50 to-yellow-50`}
                 >
                   <CardContent className="pt-5 pb-5">
                     <div className="flex items-center justify-between mb-3">
-                      <p className="text-xs font-black text-gray-700 uppercase tracking-wider">🎫 Ticket Promedio</p>
-                      <Receipt className="w-5 h-5 text-amber-600" />
+                      <p className="text-xs font-black text-gray-700 uppercase tracking-wider">🎫 Δ Ticket</p>
+                      {avgTicket > (comparisonTotals.sales / comparisonTotals.transactions) ? 
+                        <TrendingUp className="w-5 h-5 text-emerald-600" /> : 
+                        <TrendingDown className="w-5 h-5 text-red-600" />
+                      }
                     </div>
-                    <p className="text-2xl font-black text-amber-700 mb-2">
-                      {formatCurrency(avgTicket)}
+                    <p className={`text-3xl font-black mb-2 ${
+                      avgTicket > (comparisonTotals.sales / comparisonTotals.transactions) 
+                        ? 'text-emerald-700' 
+                        : 'text-red-700'
+                    }`}>
+                      {comparisonTotals.transactions > 0 ? 
+                        (((avgTicket - (comparisonTotals.sales / comparisonTotals.transactions)) / (comparisonTotals.sales / comparisonTotals.transactions) * 100) >= 0 ? '+' : '') +
+                        ((avgTicket - (comparisonTotals.sales / comparisonTotals.transactions)) / (comparisonTotals.sales / comparisonTotals.transactions) * 100).toFixed(1) 
+                        : 0}%
                     </p>
                     <div className="space-y-1">
                       <p className="text-xs text-gray-600 font-semibold">
-                        vs {formatCurrency(comparisonTotals.transactions > 0 ? comparisonTotals.sales / comparisonTotals.transactions : 0)}
+                        {formatCurrency(Math.abs(avgTicket - (comparisonTotals.sales / comparisonTotals.transactions)))} {avgTicket > (comparisonTotals.sales / comparisonTotals.transactions) ? 'más' : 'menos'}
                       </p>
-                      <p className={`text-xs font-bold ${
-                        avgTicket > (comparisonTotals.sales / comparisonTotals.transactions) 
-                          ? 'text-emerald-600' 
-                          : 'text-red-600'
-                      }`}>
-                        {comparisonTotals.transactions > 0 ? 
-                          ((avgTicket - (comparisonTotals.sales / comparisonTotals.transactions)) / (comparisonTotals.sales / comparisonTotals.transactions) * 100).toFixed(1) 
-                          : 0}% {avgTicket > (comparisonTotals.sales / comparisonTotals.transactions) ? '↑' : '↓'}
-                      </p>
+                      <div className="h-px bg-gray-200 my-2" />
+                      <div className="flex justify-between text-[10px] text-gray-600 font-medium">
+                        <span>Actual:</span>
+                        <span className="font-bold">{formatCurrency(avgTicket)}</span>
+                      </div>
+                      <div className="flex justify-between text-[10px] text-gray-500">
+                        <span>Anterior:</span>
+                        <span>{formatCurrency(comparisonTotals.transactions > 0 ? comparisonTotals.sales / comparisonTotals.transactions : 0)}</span>
+                      </div>
                     </div>
                   </CardContent>
                 </motion.button>
@@ -961,7 +986,10 @@ export default function Dashboard() {
                 <motion.button
                   whileHover={{ scale: 1.03, y: -4 }}
                   whileTap={{ scale: 0.98 }}
+                  onClick={() => setActiveMetric(activeMetric === 'suggested_comp' ? null : 'suggested_comp')}
                   className={`text-left border-2 rounded-2xl shadow-lg transition-all ${
+                    activeMetric === 'suggested_comp' ? 'ring-4 ring-pink-300' : ''
+                  } ${
                     comparisonTotals.suggested > 0 && ((totals.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100) >= 0 
                       ? 'border-pink-400 bg-gradient-to-br from-pink-50 to-rose-50' 
                       : 'border-red-400 bg-gradient-to-br from-red-50 to-rose-50'
@@ -980,15 +1008,20 @@ export default function Dashboard() {
                         ? 'text-pink-700' 
                         : 'text-red-700'
                     }`}>
-                      {comparisonTotals.suggested > 0 ? ((totals.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100).toFixed(1) : 0}%
+                      {comparisonTotals.suggested > 0 ? (((totals.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100) >= 0 ? '+' : '') + ((totals.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100).toFixed(1) : 0}%
                     </p>
                     <div className="space-y-1">
                       <p className="text-xs text-gray-600 font-semibold">
-                        {comparisonTotals.suggested > 0 && totals.suggested > comparisonTotals.suggested ? '↑' : '↓'} {Math.abs(totals.suggested - comparisonTotals.suggested).toLocaleString()}
+                        {Math.abs(totals.suggested - comparisonTotals.suggested).toLocaleString()} {totals.suggested > comparisonTotals.suggested ? 'más' : 'menos'}
                       </p>
+                      <div className="h-px bg-gray-200 my-2" />
+                      <div className="flex justify-between text-[10px] text-gray-600 font-medium">
+                        <span>Actual:</span>
+                        <span className="font-bold">{totals.suggested}</span>
+                      </div>
                       <div className="flex justify-between text-[10px] text-gray-500">
-                        <span>Actual: {totals.suggested}</span>
-                        <span>Anterior: {comparisonTotals.suggested}</span>
+                        <span>Anterior:</span>
+                        <span>{comparisonTotals.suggested}</span>
                       </div>
                     </div>
                   </CardContent>
@@ -1029,7 +1062,7 @@ export default function Dashboard() {
 
             {/* Detail Panel */}
             <AnimatePresence>
-              {activeMetric && (
+              {activeMetric && !activeMetric.includes('_comp') && (
                 <div id="detail-panel">
                   <DetailPanel 
                     metric={activeMetric}
@@ -1043,6 +1076,151 @@ export default function Dashboard() {
                     shiftData={shiftRecords}
                   />
                 </div>
+              )}
+              
+              {/* Detail Panel Comparativo */}
+              {activeMetric && activeMetric.includes('_comp') && showComparison && comparisonTotals && (
+                <motion.div
+                  id="detail-panel"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 20 }}
+                  className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl shadow-2xl p-6 border border-white/10"
+                >
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                      {activeMetric === 'sales_comp' && '💰 Análisis Comparativo de Ventas'}
+                      {activeMetric === 'trans_comp' && '⚡ Análisis Comparativo de Transacciones'}
+                      {activeMetric === 'ticket_comp' && '🎫 Análisis Comparativo de Ticket'}
+                      {activeMetric === 'suggested_comp' && '🎁 Análisis Comparativo de Sugeridos'}
+                    </h3>
+                    <Button variant="ghost" size="icon" onClick={() => setActiveMetric(null)} className="text-white hover:bg-white/10">
+                      <X className="w-5 h-5" />
+                    </Button>
+                  </div>
+
+                  {/* Gráfica comparativa detallada */}
+                  <div className="bg-white/5 rounded-2xl p-4 mb-6">
+                    <ResponsiveContainer width="100%" height={300}>
+                      <ComposedChart data={chartData}>
+                        <defs>
+                          <linearGradient id="currentGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.4}/>
+                            <stop offset="95%" stopColor="#10b981" stopOpacity={0.05}/>
+                          </linearGradient>
+                          <linearGradient id="previousGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#94a3b8" stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor="#94a3b8" stopOpacity={0.05}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#475569" opacity={0.3} />
+                        <XAxis dataKey="date" tick={{ fill: '#cbd5e1', fontSize: 11 }} />
+                        <YAxis tick={{ fill: '#cbd5e1', fontSize: 11 }} tickFormatter={(v) => 
+                          activeMetric === 'sales_comp' || activeMetric === 'ticket_comp' ? `$${(v/1000000).toFixed(1)}M` : v.toLocaleString()
+                        } />
+                        <Tooltip 
+                          contentStyle={{ background: '#1e293b', border: 'none', borderRadius: 12, color: '#fff' }}
+                          formatter={(v, name) => [
+                            activeMetric === 'sales_comp' || activeMetric === 'ticket_comp' ? formatCurrency(v) : v.toLocaleString(), 
+                            name
+                          ]}
+                        />
+                        <Legend wrapperStyle={{ color: '#fff' }} />
+                        <Area 
+                          type="monotone" 
+                          dataKey={
+                            activeMetric === 'sales_comp' ? 'ventasComparacion' :
+                            activeMetric === 'trans_comp' ? 'transactionsComparacion' :
+                            activeMetric === 'ticket_comp' ? 'ticketComparacion' :
+                            'suggestedComparacion'
+                          }
+                          stroke="#94a3b8" 
+                          strokeWidth={2} 
+                          fill="url(#previousGrad)" 
+                          name="Período Anterior"
+                          strokeDasharray="5 5"
+                        />
+                        <Area 
+                          type="monotone" 
+                          dataKey={
+                            activeMetric === 'sales_comp' ? 'ventas' :
+                            activeMetric === 'trans_comp' ? 'transactions' :
+                            activeMetric === 'ticket_comp' ? 'ticketPromedio' :
+                            'suggested'
+                          }
+                          stroke="#10b981" 
+                          strokeWidth={3} 
+                          fill="url(#currentGrad)" 
+                          name="Período Actual"
+                        />
+                      </ComposedChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  {/* Stats comparativos */}
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="bg-emerald-500/20 rounded-xl p-4 border border-emerald-400/30">
+                      <p className="text-xs text-emerald-200 mb-1">Período Actual</p>
+                      <p className="text-2xl font-black text-white">
+                        {activeMetric === 'sales_comp' && formatCurrency(totals.sales)}
+                        {activeMetric === 'trans_comp' && totals.transactions.toLocaleString()}
+                        {activeMetric === 'ticket_comp' && formatCurrency(avgTicket)}
+                        {activeMetric === 'suggested_comp' && totals.suggested.toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="bg-slate-500/20 rounded-xl p-4 border border-slate-400/30">
+                      <p className="text-xs text-slate-200 mb-1">Período Anterior</p>
+                      <p className="text-2xl font-black text-white">
+                        {activeMetric === 'sales_comp' && formatCurrency(comparisonTotals.sales)}
+                        {activeMetric === 'trans_comp' && comparisonTotals.transactions.toLocaleString()}
+                        {activeMetric === 'ticket_comp' && formatCurrency(comparisonTotals.transactions > 0 ? comparisonTotals.sales / comparisonTotals.transactions : 0)}
+                        {activeMetric === 'suggested_comp' && comparisonTotals.suggested.toLocaleString()}
+                      </p>
+                    </div>
+                    <div className={`rounded-xl p-4 border ${
+                      (activeMetric === 'sales_comp' && totals.sales > comparisonTotals.sales) ||
+                      (activeMetric === 'trans_comp' && totals.transactions > comparisonTotals.transactions) ||
+                      (activeMetric === 'ticket_comp' && avgTicket > (comparisonTotals.sales / comparisonTotals.transactions)) ||
+                      (activeMetric === 'suggested_comp' && totals.suggested > comparisonTotals.suggested)
+                        ? 'bg-emerald-500/20 border-emerald-400/30' 
+                        : 'bg-red-500/20 border-red-400/30'
+                    }`}>
+                      <p className={`text-xs mb-1 ${
+                        (activeMetric === 'sales_comp' && totals.sales > comparisonTotals.sales) ||
+                        (activeMetric === 'trans_comp' && totals.transactions > comparisonTotals.transactions) ||
+                        (activeMetric === 'ticket_comp' && avgTicket > (comparisonTotals.sales / comparisonTotals.transactions)) ||
+                        (activeMetric === 'suggested_comp' && totals.suggested > comparisonTotals.suggested)
+                          ? 'text-emerald-200' 
+                          : 'text-red-200'
+                      }`}>Diferencia</p>
+                      <p className={`text-2xl font-black ${
+                        (activeMetric === 'sales_comp' && totals.sales > comparisonTotals.sales) ||
+                        (activeMetric === 'trans_comp' && totals.transactions > comparisonTotals.transactions) ||
+                        (activeMetric === 'ticket_comp' && avgTicket > (comparisonTotals.sales / comparisonTotals.transactions)) ||
+                        (activeMetric === 'suggested_comp' && totals.suggested > comparisonTotals.suggested)
+                          ? 'text-emerald-400' 
+                          : 'text-red-400'
+                      }`}>
+                        {activeMetric === 'sales_comp' && 
+                          (totals.sales > comparisonTotals.sales ? '+' : '') + 
+                          ((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100).toFixed(1) + '%'
+                        }
+                        {activeMetric === 'trans_comp' && 
+                          (totals.transactions > comparisonTotals.transactions ? '+' : '') + 
+                          ((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100).toFixed(1) + '%'
+                        }
+                        {activeMetric === 'ticket_comp' && 
+                          (avgTicket > (comparisonTotals.sales / comparisonTotals.transactions) ? '+' : '') + 
+                          ((avgTicket - (comparisonTotals.sales / comparisonTotals.transactions)) / (comparisonTotals.sales / comparisonTotals.transactions) * 100).toFixed(1) + '%'
+                        }
+                        {activeMetric === 'suggested_comp' && 
+                          (totals.suggested > comparisonTotals.suggested ? '+' : '') + 
+                          ((totals.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100).toFixed(1) + '%'
+                        }
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
               )}
             </AnimatePresence>
 
