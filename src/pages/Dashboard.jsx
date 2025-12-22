@@ -37,7 +37,7 @@ import {
 } from 'recharts';
 
 // Metric Card con panel expandible
-function MetricCard({ title, value, budget, icon: Icon, bgColor, iconBg, iconColor, format: formatType = "number", onClick, isActive, insight }) {
+function MetricCard({ title, value, budget, icon: Icon, bgColor, iconBg, iconColor, format: formatType = "number", onClick, isActive, insight, comparisonValue, showComparison }) {
   // Calculate velocity trend (comparing to expected daily rate)
   const daysInMonth = 30;
   const daysElapsed = Math.max(1, Math.floor((new Date() - new Date(new Date().getFullYear(), new Date().getMonth(), 1)) / (1000 * 60 * 60 * 24)));
@@ -47,6 +47,12 @@ function MetricCard({ title, value, budget, icon: Icon, bgColor, iconBg, iconCol
   const percentage = budget ? ((value / budget) * 100).toFixed(1) : 0;
   const isPositive = percentage >= 100;
   const isWarning = percentage >= 70 && percentage < 100;
+  
+  // Comparación con período anterior
+  const comparisonPercentage = showComparison && comparisonValue > 0 
+    ? (((value - comparisonValue) / comparisonValue) * 100).toFixed(1) 
+    : null;
+  const isComparisonPositive = comparisonPercentage > 0;
   
   const formatValue = (val) => {
     if (formatType === "currency") {
@@ -116,7 +122,36 @@ function MetricCard({ title, value, budget, icon: Icon, bgColor, iconBg, iconCol
         </div>
       )}
 
-      {insight && (
+      {/* Comparación con período anterior */}
+      {showComparison && comparisonValue !== null && comparisonValue !== undefined && (
+        <motion.div
+          initial={{ opacity: 0, y: 5 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-3 p-2 rounded-lg bg-white/30 border border-white/50"
+        >
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-xs text-gray-600 font-medium">vs Anterior</span>
+            <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs font-bold ${
+              isComparisonPositive ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
+            }`}>
+              {isComparisonPositive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+              {isComparisonPositive ? '+' : ''}{comparisonPercentage}%
+            </div>
+          </div>
+          <div className="flex justify-between text-[10px]">
+            <span className="text-gray-500">Anterior:</span>
+            <span className="text-gray-700 font-semibold">{formatValue(comparisonValue)}</span>
+          </div>
+          <div className="flex justify-between text-[10px] mt-0.5">
+            <span className="text-gray-500">Diferencia:</span>
+            <span className={`font-bold ${isComparisonPositive ? 'text-emerald-600' : 'text-red-600'}`}>
+              {formatValue(Math.abs(value - comparisonValue))} {isComparisonPositive ? 'más' : 'menos'}
+            </span>
+          </div>
+        </motion.div>
+      )}
+
+      {insight && !showComparison && (
         <p className="text-xs text-gray-500 mt-2 italic">{insight}</p>
       )}
     </motion.div>
@@ -738,12 +773,57 @@ export default function Dashboard() {
 
   // Calcular ticket promedio correctamente
   const avgTicket = totals.transactions > 0 ? totals.sales / totals.transactions : 0;
+  const comparisonAvgTicket = comparisonTotals && comparisonTotals.transactions > 0 
+    ? comparisonTotals.sales / comparisonTotals.transactions 
+    : 0;
 
   const metrics = [
-    { id: 'sales', title: 'Ventas Totales', value: totals.sales, budget: currentBudget.sales_budget, icon: DollarSign, bgColor: 'bg-gradient-to-br from-emerald-100 to-green-200', iconBg: 'bg-emerald-200', iconColor: 'text-emerald-700', format: 'currency' },
-    { id: 'tickets', title: 'Ticket Promedio', value: avgTicket, budget: currentBudget.tickets_budget, icon: Receipt, bgColor: 'bg-gradient-to-br from-sky-100 to-blue-200', iconBg: 'bg-sky-200', iconColor: 'text-sky-700', format: 'currency' },
-    { id: 'transactions', title: 'Transacciones', value: totals.transactions, budget: currentBudget.transactions_budget, icon: Zap, bgColor: 'bg-gradient-to-br from-violet-100 to-purple-200', iconBg: 'bg-violet-200', iconColor: 'text-violet-700' },
-    { id: 'suggested', title: 'Sugeridos', value: totals.suggested, budget: currentBudget.suggested_budget, icon: Gift, bgColor: 'bg-gradient-to-br from-pink-100 to-rose-200', iconBg: 'bg-pink-200', iconColor: 'text-pink-700' },
+    { 
+      id: 'sales', 
+      title: 'Ventas Totales', 
+      value: totals.sales, 
+      comparisonValue: comparisonTotals?.sales,
+      budget: currentBudget.sales_budget, 
+      icon: DollarSign, 
+      bgColor: 'bg-gradient-to-br from-emerald-100 to-green-200', 
+      iconBg: 'bg-emerald-200', 
+      iconColor: 'text-emerald-700', 
+      format: 'currency' 
+    },
+    { 
+      id: 'tickets', 
+      title: 'Ticket Promedio', 
+      value: avgTicket, 
+      comparisonValue: comparisonAvgTicket,
+      budget: currentBudget.tickets_budget, 
+      icon: Receipt, 
+      bgColor: 'bg-gradient-to-br from-sky-100 to-blue-200', 
+      iconBg: 'bg-sky-200', 
+      iconColor: 'text-sky-700', 
+      format: 'currency' 
+    },
+    { 
+      id: 'transactions', 
+      title: 'Transacciones', 
+      value: totals.transactions, 
+      comparisonValue: comparisonTotals?.transactions,
+      budget: currentBudget.transactions_budget, 
+      icon: Zap, 
+      bgColor: 'bg-gradient-to-br from-violet-100 to-purple-200', 
+      iconBg: 'bg-violet-200', 
+      iconColor: 'text-violet-700' 
+    },
+    { 
+      id: 'suggested', 
+      title: 'Sugeridos', 
+      value: totals.suggested, 
+      comparisonValue: comparisonTotals?.suggested,
+      budget: currentBudget.suggested_budget, 
+      icon: Gift, 
+      bgColor: 'bg-gradient-to-br from-pink-100 to-rose-200', 
+      iconBg: 'bg-pink-200', 
+      iconColor: 'text-pink-700' 
+    },
   ];
 
 
@@ -1036,6 +1116,8 @@ export default function Dashboard() {
                   key={metric.id}
                   title={metric.title}
                   value={metric.value}
+                  comparisonValue={metric.comparisonValue}
+                  showComparison={showComparison}
                   budget={metric.budget}
                   icon={metric.icon}
                   bgColor={metric.bgColor}
