@@ -312,18 +312,19 @@ export default function FreezerMap() {
     }
   });
 
-  // Borrar slot - CORREGIDO para identificar correctamente el slot por tipo
+  // Borrar slot - CORREGIDO para identificar correctamente el slot por tipo y store
   const clearSlot = useCallback(async (slot) => {
     if (!slot || slot.is_empty) return;
 
     // Guardar para undo
     setUndoStack((prev) => [...prev.slice(-9), { action: 'clear', slot: { ...slot } }]);
 
-    // Buscar el slot exacto por row, position Y slot_type
+    // Buscar el slot exacto por store_id, row, position Y slot_type
     const existing = slots.find((s) =>
-    s.row === slot.row &&
-    s.position === slot.position &&
-    s.slot_type === slot.slot_type
+      s.store_id === `${selectedStore}_F${currentFreezer}` &&
+      s.row === slot.row &&
+      s.position === slot.position &&
+      s.slot_type === slot.slot_type
     );
 
     if (existing?.id) {
@@ -339,7 +340,7 @@ export default function FreezerMap() {
       setTimeout(() => setSavingSlot(null), 800);
       toast.success(`Slot ${slot.slot_type} vaciado`);
     }
-  }, [slots, queryClient]);
+  }, [slots, queryClient, selectedStore, currentFreezer]);
 
   // Doble click para borrar
   const handleDoubleClick = useCallback((slot) => {
@@ -373,9 +374,10 @@ export default function FreezerMap() {
     };
 
     const existing = slots.find((s) =>
-    s.row === selectedSlot.row &&
-    s.position === selectedSlot.position && (
-    s.slot_type === slotType || !s.slot_type && slotType === 'F')
+      s.store_id === `${selectedStore}_F${currentFreezer}` &&
+      s.row === selectedSlot.row &&
+      s.position === selectedSlot.position &&
+      s.slot_type === slotType
     );
 
     updateSlotMutation.mutate({
@@ -459,7 +461,12 @@ export default function FreezerMap() {
     for (const bajada of sourceRow) {
       // Duplicar slot frontal
       if (!bajada.front.is_empty) {
-        const targetSlot = slots.find((s) => s.row === targetRowIndex + 1 && s.position === bajada.position && s.slot_type === 'F');
+        const targetSlot = slots.find((s) => 
+          s.store_id === `${selectedStore}_F${currentFreezer}` &&
+          s.row === targetRowIndex + 1 && 
+          s.position === bajada.position && 
+          s.slot_type === 'F'
+        );
         const slotData = {
           store_id: `${selectedStore}_F${currentFreezer}`,
           row: targetRowIndex + 1,
@@ -480,7 +487,12 @@ export default function FreezerMap() {
 
       // Duplicar slot trasero
       if (!bajada.back.is_empty) {
-        const targetSlot = slots.find((s) => s.row === targetRowIndex + 1 && s.position === bajada.position && s.slot_type === 'T');
+        const targetSlot = slots.find((s) => 
+          s.store_id === `${selectedStore}_F${currentFreezer}` &&
+          s.row === targetRowIndex + 1 && 
+          s.position === bajada.position && 
+          s.slot_type === 'T'
+        );
         const slotData = {
           store_id: `${selectedStore}_F${currentFreezer}`,
           row: targetRowIndex + 1,
