@@ -1514,18 +1514,29 @@ export default function Dashboard() {
                           Ventas Diarias {showComparison && '- Comparativo'}
                         </CardTitle>
                       </div>
-                      <div className="mt-2 space-y-2">
-                        <div className="bg-blue-50 border border-blue-200 rounded px-2 py-1">
-                          <p className="text-[10px] text-blue-900 leading-tight">
-                            <span className="font-bold">Conclusión:</span> Muestra ingresos reales día por día. Los picos son oportunidades, las caídas son alertas.
+                      <motion.div 
+                        className="mt-3 space-y-2"
+                        initial={{ opacity: 0, y: 5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                      >
+                        <motion.div 
+                          className="bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200/60 rounded-lg px-3 py-2 shadow-sm"
+                          whileHover={{ scale: 1.01, x: 2 }}
+                        >
+                          <p className="text-[10px] text-blue-900 leading-relaxed">
+                            <span className="font-extrabold text-blue-700">📊 Conclusión:</span> Muestra ingresos reales día por día. Los picos son oportunidades, las caídas son alertas.
                           </p>
-                        </div>
-                        <div className="bg-emerald-50 border border-emerald-200 rounded px-2 py-1">
-                          <p className="text-[10px] text-emerald-900 leading-tight">
-                            <span className="font-bold">Acción:</span> Analizar qué causó días exitosos y replicarlo. Días bajos necesitan promociones urgentes.
+                        </motion.div>
+                        <motion.div 
+                          className="bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200/60 rounded-lg px-3 py-2 shadow-sm"
+                          whileHover={{ scale: 1.01, x: 2 }}
+                        >
+                          <p className="text-[10px] text-emerald-900 leading-relaxed">
+                            <span className="font-extrabold text-emerald-700">🎯 Acción:</span> Analizar qué causó días exitosos y replicarlo. Días bajos necesitan promociones urgentes.
                           </p>
-                        </div>
-                      </div>
+                        </motion.div>
+                      </motion.div>
                     </CardHeader>
                     <CardContent>
                       <div className="h-64">
@@ -1581,18 +1592,29 @@ export default function Dashboard() {
                         <Zap className="w-4 h-4 text-purple-500" />
                         Transacciones vs Ventas {showComparison && '- Comparativo'}
                       </CardTitle>
-                      <div className="mt-2 space-y-2">
-                        <div className="bg-blue-50 border border-blue-200 rounded px-2 py-1">
-                          <p className="text-[10px] text-blue-900 leading-tight">
-                            <span className="font-bold">Conclusión:</span> Relaciona cantidad de clientes con facturación. Muchos clientes pero pocas ventas = problema de conversión.
+                      <motion.div 
+                        className="mt-3 space-y-2"
+                        initial={{ opacity: 0, y: 5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                      >
+                        <motion.div 
+                          className="bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200/60 rounded-lg px-3 py-2 shadow-sm"
+                          whileHover={{ scale: 1.01, x: 2 }}
+                        >
+                          <p className="text-[10px] text-blue-900 leading-relaxed">
+                            <span className="font-extrabold text-blue-700">📊 Conclusión:</span> Relaciona cantidad de clientes con facturación. Muchos clientes pero pocas ventas = problema de conversión.
                           </p>
-                        </div>
-                        <div className="bg-emerald-50 border border-emerald-200 rounded px-2 py-1">
-                          <p className="text-[10px] text-emerald-900 leading-tight">
-                            <span className="font-bold">Acción:</span> Si tráfico alto no genera ventas proporcionales, capacitar en técnicas de cierre inmediatamente.
+                        </motion.div>
+                        <motion.div 
+                          className="bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200/60 rounded-lg px-3 py-2 shadow-sm"
+                          whileHover={{ scale: 1.01, x: 2 }}
+                        >
+                          <p className="text-[10px] text-emerald-900 leading-relaxed">
+                            <span className="font-extrabold text-emerald-700">🎯 Acción:</span> Si tráfico alto no genera ventas proporcionales, capacitar en técnicas de cierre inmediatamente.
                           </p>
-                        </div>
-                      </div>
+                        </motion.div>
+                      </motion.div>
                     </CardHeader>
                     <CardContent>
                       <div className="h-64">
@@ -1628,18 +1650,29 @@ export default function Dashboard() {
                         <Receipt className="w-4 h-4 text-blue-500" />
                         Ticket Promedio {showComparison && '- Comparativo'}
                       </CardTitle>
-                      <div className="mt-2 space-y-2">
-                        <div className="bg-blue-50 border border-blue-200 rounded px-2 py-1">
-                          <p className="text-[10px] text-blue-900 leading-tight">
-                            <span className="font-bold">Conclusión:</span> Cuánto gasta cada cliente en promedio. Ticket bajo = estamos perdiendo dinero por venta.
+                      <motion.div 
+                        className="mt-3 space-y-2"
+                        initial={{ opacity: 0, y: 5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                      >
+                        <motion.div 
+                          className="bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200/60 rounded-lg px-3 py-2 shadow-sm"
+                          whileHover={{ scale: 1.01, x: 2 }}
+                        >
+                          <p className="text-[10px] text-blue-900 leading-relaxed">
+                            <span className="font-extrabold text-blue-700">📊 Conclusión:</span> Cuánto gasta cada cliente en promedio. Ticket bajo = estamos perdiendo dinero por venta.
                           </p>
-                        </div>
-                        <div className="bg-emerald-50 border border-emerald-200 rounded px-2 py-1">
-                          <p className="text-[10px] text-emerald-900 leading-tight">
-                            <span className="font-bold">Acción:</span> Subir ticket con venta consultiva, combos y productos complementarios. Entrenar equipo en cross-selling.
+                        </motion.div>
+                        <motion.div 
+                          className="bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200/60 rounded-lg px-3 py-2 shadow-sm"
+                          whileHover={{ scale: 1.01, x: 2 }}
+                        >
+                          <p className="text-[10px] text-emerald-900 leading-relaxed">
+                            <span className="font-extrabold text-emerald-700">🎯 Acción:</span> Subir ticket con venta consultiva, combos y productos complementarios. Entrenar equipo en cross-selling.
                           </p>
-                        </div>
-                      </div>
+                        </motion.div>
+                      </motion.div>
                     </CardHeader>
                     <CardContent>
                       <div className="h-64">
