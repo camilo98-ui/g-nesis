@@ -182,7 +182,7 @@ export default function BadgesDisplay({ cashierId, compact = false, showAll = fa
 
   return (
     <TooltipProvider>
-      <div className={`flex ${compact ? 'gap-1' : 'flex-wrap gap-3'}`}>
+      <div className={`flex ${compact ? 'gap-2' : 'flex-wrap gap-4'} items-center`}>
         {badgesToShow.slice(0, compact ? 3 : undefined).map((badge, idx) => {
           const config = BADGE_CONFIG[badge.badge_type];
           if (!config) return null;
@@ -190,96 +190,197 @@ export default function BadgesDisplay({ cashierId, compact = false, showAll = fa
           const isEarned = showAll ? badge.earned : true;
           
           return (
-            <Tooltip key={badge.id || badge.badge_type || idx}>
-              <TooltipTrigger>
+            <Tooltip key={badge.id || badge.badge_type || idx} delayDuration={200}>
+              <TooltipTrigger asChild>
                 <motion.div
-                  initial={{ scale: 0, rotate: -180 }}
-                  animate={{ scale: 1, rotate: 0 }}
-                  transition={{ delay: idx * 0.05, type: "spring", stiffness: 200 }}
-                  whileHover={{ scale: 1.2, rotate: 10, y: -5 }}
-                  className={`relative ${compact ? 'w-8 h-8' : 'w-14 h-14'} rounded-full 
+                  initial={{ scale: 0, rotate: -180, opacity: 0 }}
+                  animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                  transition={{ 
+                    delay: idx * 0.08, 
+                    type: "spring", 
+                    stiffness: 260,
+                    damping: 20
+                  }}
+                  whileHover={{ 
+                    scale: compact ? 1.25 : 1.15, 
+                    rotate: [0, -5, 5, 0],
+                    y: -8,
+                    transition: { duration: 0.3 }
+                  }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`relative ${compact ? 'w-10 h-10' : 'w-16 h-16'} rounded-2xl 
                     ${isEarned 
-                      ? `bg-gradient-to-br ${config.color} shadow-lg ${config.glow}` 
-                      : 'bg-gray-200'
-                    } flex items-center justify-center cursor-pointer transition-all group`}
+                      ? `bg-gradient-to-br ${config.color} shadow-xl ${config.glow} border-2 border-white/30` 
+                      : 'bg-gradient-to-br from-gray-200 to-gray-300 border-2 border-gray-300'
+                    } flex items-center justify-center cursor-pointer transition-all group overflow-hidden`}
                 >
-                  <Icon className={`${compact ? 'w-4 h-4' : 'w-7 h-7'} ${isEarned ? 'text-white' : 'text-gray-400'}`} />
+                  {/* Efecto de brillo de fondo */}
+                  {isEarned && (
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/30 to-white/0"
+                      animate={{ 
+                        x: ['-100%', '100%'],
+                        opacity: [0, 1, 0]
+                      }}
+                      transition={{ 
+                        duration: 2.5, 
+                        repeat: Infinity,
+                        repeatDelay: 3,
+                        ease: "easeInOut"
+                      }}
+                    />
+                  )}
                   
-                  {/* Animación de brillo para insignias ganadas */}
+                  <Icon className={`${compact ? 'w-5 h-5' : 'w-8 h-8'} ${isEarned ? 'text-white drop-shadow-lg' : 'text-gray-500'} relative z-10 transition-transform group-hover:scale-110`} />
+                  
+                  {/* Animación de pulso para insignias ganadas */}
                   {isEarned && !compact && (
                     <motion.div
-                      className="absolute inset-0 rounded-full"
+                      className="absolute inset-0 rounded-2xl"
                       animate={{ 
                         boxShadow: [
                           '0 0 0 0 rgba(255,255,255,0)',
-                          '0 0 0 4px rgba(255,255,255,0.3)',
+                          '0 0 0 6px rgba(255,255,255,0.2)',
                           '0 0 0 0 rgba(255,255,255,0)'
                         ]
                       }}
-                      transition={{ duration: 2, repeat: Infinity }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
                     />
                   )}
                   
-                  {/* Indicador de nuevo */}
+                  {/* Badge "NUEVO" para insignias recientes */}
                   {isEarned && badge.earned_date && isRecent(badge.earned_date) && (
                     <motion.div
-                      className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white"
-                      animate={{ scale: [1, 1.2, 1] }}
-                      transition={{ duration: 1, repeat: Infinity }}
-                    />
+                      className="absolute -top-1.5 -right-1.5 bg-gradient-to-r from-red-500 to-pink-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full shadow-lg border-2 border-white"
+                      animate={{ 
+                        scale: [1, 1.15, 1],
+                        rotate: [0, -5, 5, 0]
+                      }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    >
+                      NUEVO
+                    </motion.div>
                   )}
                   
-                  {/* Signo de interrogación para ver detalles */}
+                  {/* Indicador interactivo */}
                   {!compact && (
-                    <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-white rounded-full border-2 border-gray-200 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <span className="text-[10px] font-bold text-gray-500">?</span>
+                    <motion.div 
+                      className="absolute -bottom-1.5 -right-1.5 w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full shadow-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all border-2 border-white"
+                      initial={{ scale: 0, rotate: -180 }}
+                      whileHover={{ 
+                        scale: [1, 1.2, 1],
+                        rotate: 360,
+                        transition: { duration: 0.6 }
+                      }}
+                    >
+                      <span className="text-[10px] font-black text-white">i</span>
+                    </motion.div>
+                  )}
+                  
+                  {/* Efecto de bloqueo para insignias no ganadas */}
+                  {!isEarned && showAll && (
+                    <div className="absolute inset-0 bg-black/20 rounded-2xl flex items-center justify-center backdrop-blur-[1px]">
+                      <motion.div
+                        animate={{ scale: [1, 1.1, 1] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                        className="text-2xl"
+                      >
+                        🔒
+                      </motion.div>
                     </div>
                   )}
                 </motion.div>
               </TooltipTrigger>
-              <TooltipContent className="max-w-xs">
-                <div className="text-center p-3 max-w-sm">
-                  <div className="flex items-center justify-center gap-2 mb-2">
-                    <Icon className={`w-5 h-5 ${isEarned ? config.iconColor : 'text-gray-400'}`} />
-                    <p className="font-bold text-base">{config.label}</p>
+              <TooltipContent 
+                className="max-w-xs bg-gradient-to-br from-slate-900 to-slate-800 border-2 border-white/20 shadow-2xl p-0 overflow-hidden"
+                sideOffset={10}
+              >
+                <div className="relative">
+                  {/* Header con gradiente */}
+                  <div className={`bg-gradient-to-r ${config.color} p-4 relative overflow-hidden`}>
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0"
+                      animate={{ x: ['-100%', '100%'] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                    />
+                    <div className="flex items-center justify-center gap-3 relative z-10">
+                      <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/30">
+                        <Icon className="w-7 h-7 text-white drop-shadow-lg" />
+                      </div>
+                      <div className="text-left">
+                        <p className="font-black text-white text-base drop-shadow-md">{config.label}</p>
+                        {isEarned && badge.earned_date && (
+                          <p className="text-[10px] text-white/80 font-medium">
+                            {new Date(badge.earned_date).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}
+                          </p>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <p className="text-sm text-gray-600 mb-3">{config.desc}</p>
 
-                  <div className="bg-gradient-to-r from-violet-50 to-purple-50 rounded-lg p-3 mb-2">
-                    <p className="text-xs text-violet-700 font-bold mb-1">🎯 Cómo lograrlo:</p>
-                    <p className="text-xs text-gray-700 leading-relaxed">{config.howToEarn}</p>
-                  </div>
+                  {/* Contenido */}
+                  <div className="p-4 space-y-3">
+                    <p className="text-sm text-gray-300 text-center leading-relaxed">{config.desc}</p>
 
-                  <div className="flex items-center justify-center gap-2">
-                    <span className={`text-[10px] px-2 py-1 rounded-full font-medium ${
-                      config.goalType === 'daily' ? 'bg-amber-100 text-amber-700' :
-                      config.goalType === 'weekly' ? 'bg-blue-100 text-blue-700' :
-                      'bg-purple-100 text-purple-700'
-                    }`}>
-                      Meta {config.goalType === 'daily' ? 'Diaria' : config.goalType === 'weekly' ? 'Semanal' : 'Mensual'}
-                    </span>
-                    {isEarned && badge.kpi_value && (
-                      <span className="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full font-medium">
-                        ✓ KPI: {Math.round(badge.kpi_value).toLocaleString()}
+                    <div className="bg-gradient-to-r from-violet-500/20 to-purple-500/20 rounded-xl p-3 border border-violet-400/30 backdrop-blur-sm">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xs">🎯</span>
+                        <p className="text-xs text-violet-300 font-bold">Cómo lograrlo:</p>
+                      </div>
+                      <p className="text-xs text-gray-200 leading-relaxed">{config.howToEarn}</p>
+                    </div>
+
+                    <div className="flex items-center justify-center gap-2 flex-wrap">
+                      <span className={`text-[10px] px-3 py-1.5 rounded-full font-bold shadow-md ${
+                        config.goalType === 'daily' ? 'bg-gradient-to-r from-amber-400 to-orange-500 text-white' :
+                        config.goalType === 'weekly' ? 'bg-gradient-to-r from-blue-400 to-cyan-500 text-white' :
+                        'bg-gradient-to-r from-purple-400 to-pink-500 text-white'
+                      }`}>
+                        {config.goalType === 'daily' ? '📅 Diaria' : config.goalType === 'weekly' ? '📊 Semanal' : '🏆 Mensual'}
                       </span>
+                      {isEarned && badge.kpi_value && (
+                        <span className="text-[10px] bg-gradient-to-r from-emerald-400 to-green-500 text-white px-3 py-1.5 rounded-full font-bold shadow-md">
+                          ✓ {Math.round(badge.kpi_value).toLocaleString()}
+                        </span>
+                      )}
+                    </div>
+
+                    {!isEarned && showAll && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-center py-2 bg-gray-800/50 rounded-lg border border-gray-700"
+                      >
+                        <p className="text-xs text-gray-400 italic flex items-center justify-center gap-2">
+                          <span>🔒</span>
+                          <span>Aún no desbloqueado</span>
+                        </p>
+                      </motion.div>
                     )}
                   </div>
-
-                  {!isEarned && showAll && (
-                    <p className="text-xs text-gray-400 mt-2 italic">⏳ Aún no obtenido</p>
-                  )}
                 </div>
               </TooltipContent>
             </Tooltip>
           );
         })}
         {compact && badges.length > 3 && (
-          <motion.div 
-            whileHover={{ scale: 1.1 }}
-            className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-xs text-gray-500 font-bold"
-          >
-            +{badges.length - 3}
-          </motion.div>
+          <Tooltip delayDuration={200}>
+            <TooltipTrigger asChild>
+              <motion.div 
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.3 }}
+                whileHover={{ scale: 1.15, rotate: 360 }}
+                whileTap={{ scale: 0.95 }}
+                className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 border-2 border-gray-300 flex items-center justify-center text-xs text-gray-600 font-black shadow-md cursor-pointer"
+              >
+                +{badges.length - 3}
+              </motion.div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="text-xs font-medium">{badges.length - 3} insignias más</p>
+            </TooltipContent>
+          </Tooltip>
         )}
       </div>
     </TooltipProvider>
