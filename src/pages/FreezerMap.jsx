@@ -181,11 +181,19 @@ export default function FreezerMap() {
   const [savingSlot, setSavingSlot] = useState(null);
   const [draggedSlot, setDraggedSlot] = useState(null);
   const [isOptimizing, setIsOptimizing] = useState(false);
-  const [currentFreezer, setCurrentFreezer] = useState(1); // Nueva nevera selector
+  const [currentFreezer, setCurrentFreezer] = useState(1);
   const [longPressSlot, setLongPressSlot] = useState(null);
   const longPressTimer = useRef(null);
-  const [numRows, setNumRows] = useState(7);
-  const [numCols, setNumCols] = useState(5);
+  
+  // Dimensiones independientes por nevera
+  const [freezerDimensions, setFreezerDimensions] = useState({
+    1: { rows: 7, cols: 5 },
+    2: { rows: 7, cols: 5 },
+    3: { rows: 7, cols: 5 }
+  });
+  
+  const numRows = freezerDimensions[currentFreezer]?.rows || 7;
+  const numCols = freezerDimensions[currentFreezer]?.cols || 5;
 
   useEffect(() => {
     const saved = localStorage.getItem('selectedStore');
@@ -719,30 +727,42 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                 currentCols={numCols}
                 onAddRow={() => {
                   if (numRows < 10) {
-                    setNumRows(numRows + 1);
-                    toast.success('Fila agregada');
+                    setFreezerDimensions(prev => ({
+                      ...prev,
+                      [currentFreezer]: { ...prev[currentFreezer], rows: numRows + 1 }
+                    }));
+                    toast.success(`Fila agregada a Nevera #${currentFreezer}`);
                   } else {
                     toast.error('Máximo 10 filas');
                   }
                 }}
                 onRemoveRow={() => {
                   if (numRows > 1) {
-                    setNumRows(numRows - 1);
-                    toast.success('Fila eliminada');
+                    setFreezerDimensions(prev => ({
+                      ...prev,
+                      [currentFreezer]: { ...prev[currentFreezer], rows: numRows - 1 }
+                    }));
+                    toast.success(`Fila eliminada de Nevera #${currentFreezer}`);
                   }
                 }}
                 onAddCol={() => {
                   if (numCols < 8) {
-                    setNumCols(numCols + 1);
-                    toast.success('Columna agregada');
+                    setFreezerDimensions(prev => ({
+                      ...prev,
+                      [currentFreezer]: { ...prev[currentFreezer], cols: numCols + 1 }
+                    }));
+                    toast.success(`Columna agregada a Nevera #${currentFreezer}`);
                   } else {
                     toast.error('Máximo 8 columnas');
                   }
                 }}
                 onRemoveCol={() => {
                   if (numCols > 1) {
-                    setNumCols(numCols - 1);
-                    toast.success('Columna eliminada');
+                    setFreezerDimensions(prev => ({
+                      ...prev,
+                      [currentFreezer]: { ...prev[currentFreezer], cols: numCols - 1 }
+                    }));
+                    toast.success(`Columna eliminada de Nevera #${currentFreezer}`);
                   }
                 }}
               />
