@@ -45,6 +45,7 @@ export default function ComparableAnalysisModal({ onClose }) {
   const [period1, setPeriod1] = useState('last7days');
   const [period2, setPeriod2] = useState('last14days');
   const [selectedStore, setSelectedStore] = useState('all');
+  const [chartView, setChartView] = useState('ventas');
 
   // Calcular fechas según los periodos
   const getDateRange = (periodValue) => {
@@ -139,34 +140,34 @@ export default function ComparableAnalysisModal({ onClose }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
-      onClick={onClose}
+      className="fixed inset-0 bg-gradient-to-br from-gray-50 to-slate-100 z-[100] overflow-y-auto"
     >
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        onClick={(e) => e.stopPropagation()}
-        className="bg-white rounded-3xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden"
-      >
+      <div className="min-h-screen p-4 md:p-8">
         {/* Header */}
-        <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 p-6 text-white">
-          <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={onClose}
+              className="p-2 rounded-xl hover:bg-white transition-colors border border-gray-200"
+            >
+              <X className="w-5 h-5 text-gray-600" />
+            </motion.button>
             <div className="flex items-center gap-3">
-              <BarChart3 className="w-8 h-8" />
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
+                <BarChart3 className="w-6 h-6 text-white" />
+              </div>
               <div>
-                <h2 className="text-2xl font-bold">Análisis Comparable</h2>
-                <p className="text-white/80 text-sm">Compara rendimiento entre periodos</p>
+                <h1 className="text-2xl font-bold text-gray-900">Análisis Comparable</h1>
+                <p className="text-sm text-gray-500">Comparación de rendimiento entre periodos</p>
               </div>
             </div>
-            <button onClick={onClose} className="text-white/80 hover:text-white transition-colors">
-              <X className="w-6 h-6" />
-            </button>
           </div>
         </div>
 
         {/* Filters */}
-        <div className="p-6 border-b bg-gray-50">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="text-sm font-semibold text-gray-700 mb-2 block flex items-center gap-2">
@@ -222,10 +223,8 @@ export default function ComparableAnalysisModal({ onClose }) {
           </div>
         </div>
 
-        {/* Content */}
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-280px)]">
-          {/* KPIs Comparativos */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        {/* KPIs Comparativos */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <div className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl p-4 border border-emerald-200">
               <p className="text-xs text-emerald-600 font-semibold mb-1">Ventas</p>
               <p className="text-2xl font-bold text-emerald-700">{formatCurrency(periodData.period1.total_sales)}</p>
@@ -263,66 +262,191 @@ export default function ComparableAnalysisModal({ onClose }) {
             </div>
           </div>
 
-          {/* Gráficas */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Ventas */}
-            <div className="bg-white rounded-xl border border-gray-200 p-4">
-              <h3 className="text-lg font-bold text-gray-800 mb-4">Comparación de Ventas</h3>
-              <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                  <YAxis tick={{ fontSize: 12 }} />
-                  <Tooltip formatter={(value) => formatCurrency(value)} />
-                  <Bar dataKey="ventas" fill="#10b981" radius={[8, 8, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-
-            {/* Ticket Promedio */}
-            <div className="bg-white rounded-xl border border-gray-200 p-4">
-              <h3 className="text-lg font-bold text-gray-800 mb-4">Ticket Promedio</h3>
-              <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                  <YAxis tick={{ fontSize: 12 }} />
-                  <Tooltip formatter={(value) => formatCurrency(value)} />
-                  <Bar dataKey="ticketPromedio" fill="#f59e0b" radius={[8, 8, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-
-            {/* Transacciones */}
-            <div className="bg-white rounded-xl border border-gray-200 p-4">
-              <h3 className="text-lg font-bold text-gray-800 mb-4">Transacciones</h3>
-              <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                  <YAxis tick={{ fontSize: 12 }} />
-                  <Tooltip />
-                  <Bar dataKey="transacciones" fill="#8b5cf6" radius={[8, 8, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-
-            {/* Tickets */}
-            <div className="bg-white rounded-xl border border-gray-200 p-4">
-              <h3 className="text-lg font-bold text-gray-800 mb-4">Tickets Vendidos</h3>
-              <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                  <YAxis tick={{ fontSize: 12 }} />
-                  <Tooltip />
-                  <Bar dataKey="tickets" fill="#3b82f6" radius={[8, 8, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
+        {/* Tabs de Vista */}
+        <div className="flex gap-3 mb-6 overflow-x-auto pb-2">
+          {[
+            { id: 'ventas', label: 'Ventas', icon: DollarSign, color: 'blue' },
+            { id: 'ticket', label: 'Ticket Promedio', icon: Receipt, color: 'amber' },
+            { id: 'transacciones', label: 'Transacciones', icon: Zap, color: 'purple' },
+            { id: 'comparacion', label: 'Comparación General', icon: TrendingUp, color: 'emerald' }
+          ].map((view) => {
+            const Icon = view.icon;
+            const isActive = chartView === view.id;
+            return (
+              <motion.button
+                key={view.id}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => setChartView(view.id)}
+                className={`px-6 py-3 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 whitespace-nowrap shadow-md ${
+                  isActive
+                    ? `bg-gradient-to-br from-${view.color}-500 to-${view.color}-600 text-white shadow-${view.color}-500/50`
+                    : 'bg-white border-2 border-gray-200 text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                {view.label}
+              </motion.button>
+            );
+          })}
         </div>
-      </motion.div>
+
+        {/* Gráficas Dinámicas */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={chartView}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+            className="space-y-6"
+          >
+            {/* Gráfica Principal */}
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
+              <ResponsiveContainer width="100%" height={450}>
+                {chartView === 'ventas' && (
+                  <BarChart data={chartData}>
+                    <defs>
+                      <linearGradient id="salesGrad1" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#3b82f6" stopOpacity={1}/>
+                        <stop offset="100%" stopColor="#1d4ed8" stopOpacity={0.8}/>
+                      </linearGradient>
+                      <linearGradient id="salesGrad2" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#10b981" stopOpacity={1}/>
+                        <stop offset="100%" stopColor="#059669" stopOpacity={0.8}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis dataKey="name" tick={{ fontSize: 13, fontWeight: 600 }} />
+                    <YAxis tick={{ fontSize: 13 }} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} />
+                    <Tooltip 
+                      formatter={(value) => formatCurrency(value)}
+                      contentStyle={{ borderRadius: 12, border: '2px solid #e5e7eb' }}
+                    />
+                    <Legend wrapperStyle={{ paddingTop: 20 }} />
+                    <Bar dataKey="ventas" fill="url(#salesGrad1)" radius={[8, 8, 0, 0]} name="Periodo Actual" />
+                  </BarChart>
+                )}
+
+                {chartView === 'ticket' && (
+                  <BarChart data={chartData}>
+                    <defs>
+                      <linearGradient id="ticketGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#f59e0b" stopOpacity={1}/>
+                        <stop offset="100%" stopColor="#d97706" stopOpacity={0.8}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis dataKey="name" tick={{ fontSize: 13, fontWeight: 600 }} />
+                    <YAxis tick={{ fontSize: 13 }} tickFormatter={(v) => formatCurrency(v)} />
+                    <Tooltip 
+                      formatter={(value) => formatCurrency(value)}
+                      contentStyle={{ borderRadius: 12, border: '2px solid #e5e7eb' }}
+                    />
+                    <Bar dataKey="ticketPromedio" fill="url(#ticketGrad)" radius={[8, 8, 0, 0]} name="Ticket Promedio" />
+                  </BarChart>
+                )}
+
+                {chartView === 'transacciones' && (
+                  <BarChart data={chartData}>
+                    <defs>
+                      <linearGradient id="transGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#8b5cf6" stopOpacity={1}/>
+                        <stop offset="100%" stopColor="#6366f1" stopOpacity={0.8}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis dataKey="name" tick={{ fontSize: 13, fontWeight: 600 }} />
+                    <YAxis tick={{ fontSize: 13 }} />
+                    <Tooltip contentStyle={{ borderRadius: 12, border: '2px solid #e5e7eb' }} />
+                    <Bar dataKey="transacciones" fill="url(#transGrad)" radius={[8, 8, 0, 0]} name="Transacciones" />
+                  </BarChart>
+                )}
+
+                {chartView === 'comparacion' && (
+                  <LineChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis dataKey="name" tick={{ fontSize: 13, fontWeight: 600 }} />
+                    <YAxis tick={{ fontSize: 13 }} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} />
+                    <Tooltip 
+                      formatter={(value) => formatCurrency(value)}
+                      contentStyle={{ borderRadius: 12, border: '2px solid #e5e7eb' }}
+                    />
+                    <Legend wrapperStyle={{ paddingTop: 20 }} />
+                    <Line type="monotone" dataKey="ventas" stroke="#3b82f6" strokeWidth={3} name="Ventas" dot={{ r: 5 }} />
+                    <Line type="monotone" dataKey="ticketPromedio" stroke="#f59e0b" strokeWidth={3} name="Ticket" dot={{ r: 5 }} />
+                  </LineChart>
+                )}
+              </ResponsiveContainer>
+            </div>
+
+            {/* Tabla de Tiendas */}
+            {selectedStore === 'all' && (
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+                <div className="p-4 bg-gray-50 border-b border-gray-200">
+                  <h3 className="text-lg font-bold text-gray-900">Detalle por Tienda</h3>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="bg-gray-50 border-b border-gray-200">
+                        <th className="text-left py-3 px-4 font-semibold text-gray-700">Tienda</th>
+                        <th className="text-right py-3 px-4 font-semibold text-gray-700">Ventas</th>
+                        <th className="text-right py-3 px-4 font-semibold text-gray-700">Ticket Prom.</th>
+                        <th className="text-right py-3 px-4 font-semibold text-gray-700">Transacciones</th>
+                        <th className="text-center py-3 px-4 font-semibold text-gray-700">Crecimiento</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {STORES.map((store) => {
+                        const p1Sales = allSales.filter(s => 
+                          s.store_id === store.code && 
+                          new Date(s.date) >= range1.start && 
+                          new Date(s.date) <= range1.end
+                        ).reduce((sum, s) => sum + (s.total_sales || 0), 0);
+                        
+                        const p1Trans = allSales.filter(s => 
+                          s.store_id === store.code && 
+                          new Date(s.date) >= range1.start && 
+                          new Date(s.date) <= range1.end
+                        ).reduce((sum, s) => sum + (s.total_transactions || 0), 0);
+                        
+                        const p2Sales = allSales.filter(s => 
+                          s.store_id === store.code && 
+                          new Date(s.date) >= range2.start && 
+                          new Date(s.date) <= range2.end
+                        ).reduce((sum, s) => sum + (s.total_sales || 0), 0);
+
+                        const avgTicket = p1Trans > 0 ? p1Sales / p1Trans : 0;
+                        const growth = p2Sales > 0 ? ((p1Sales - p2Sales) / p2Sales) * 100 : 0;
+
+                        return (
+                          <tr key={store.code} className="border-b border-gray-100 hover:bg-blue-50 transition-colors">
+                            <td className="py-3 px-4 font-medium text-gray-900">{store.name}</td>
+                            <td className="py-3 px-4 text-right font-semibold text-gray-900">{formatCurrency(p1Sales)}</td>
+                            <td className="py-3 px-4 text-right text-gray-700">{formatCurrency(avgTicket)}</td>
+                            <td className="py-3 px-4 text-right text-gray-700">{p1Trans.toLocaleString()}</td>
+                            <td className="py-3 px-4 text-center">
+                              <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold ${
+                                growth >= 0 
+                                  ? 'bg-emerald-100 text-emerald-700' 
+                                  : 'bg-red-100 text-red-700'
+                              }`}>
+                                {growth >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                                {growth >= 0 ? '+' : ''}{growth.toFixed(1)}%
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </div>
     </motion.div>
   );
 }
