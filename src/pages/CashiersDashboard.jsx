@@ -639,19 +639,19 @@ export default function CashiersDashboard() {
                         <CardContent>
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                             <TrafficLight
-                              value={cashier.totalSales}
+                              value={selectedCashier.totalSales}
                               target={teamTotals.avgSales}
                               label="Ventas vs Equipo"
                               type="sales"
                             />
                             <TrafficLight
-                              value={cashier.avgTicket}
+                              value={selectedCashier.avgTicket}
                               target={teamTotals.avgTicket}
                               label="Ticket Promedio"
                               type="ticket"
                             />
                             <TrafficLight
-                              value={cashier.totalSuggested}
+                              value={selectedCashier.totalSuggested}
                               target={teamTotals.avgSuggested}
                               label="Sugeridos"
                               type="suggested"
@@ -662,13 +662,13 @@ export default function CashiersDashboard() {
 
                       {/* INSIGHT AUTOMÁTICO DE LA SEMANA */}
                       <CashierInsight
-                        cashierStats={cashier}
+                        cashierStats={selectedCashier}
                         teamAvg={{
                           sales: teamTotals.avgSales,
                           avgTicket: teamTotals.avgTicket,
                           suggested: teamTotals.avgSuggested
                         }}
-                        allRecords={shiftRecords.filter(r => r.cashier_id === cashier.id)}
+                        allRecords={shiftRecords.filter(r => r.cashier_id === selectedCashier.id)}
                       />
 
                       {/* LOGROS Y BADGES */}
