@@ -585,20 +585,6 @@ INSTRUCCIONES:
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-4 mt-4 mb-2">Análisis</p>
             <motion.div
               whileHover={{ x: 3 }}
-              onClick={() => setActiveView('comparable')}
-              className={`px-4 py-2.5 rounded-lg cursor-pointer transition-colors ${
-                activeView === 'comparable' ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-50 text-gray-700'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <TrendingUp className="w-4 h-4" />
-                <span className={`text-sm ${activeView === 'comparable' ? 'font-semibold' : 'font-medium'}`}>
-                  Análisis Comparable
-                </span>
-              </div>
-            </motion.div>
-            <motion.div
-              whileHover={{ x: 3 }}
               onClick={() => setActiveView('kpis')}
               className={`px-4 py-2.5 rounded-lg cursor-pointer transition-colors ${
                 activeView === 'kpis' ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-50 text-gray-700'
