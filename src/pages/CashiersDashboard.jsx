@@ -73,41 +73,11 @@ export default function CashiersDashboard() {
     refetchOnReconnect: true
   });
 
-  // Cargar metas reales de la tienda
-  const { data: budgets = [] } = useQuery({
-    queryKey: ['budgets', selectedStore, dateRange],
-    queryFn: async () => {
-      const month = dateRange.from.getMonth() + 1;
-      const year = dateRange.from.getFullYear();
-      return await base44.entities.Budget.filter({ 
-        store_id: selectedStore,
-        month,
-        year
-      });
-    },
-    enabled: !!selectedStore && !!dateRange,
-  });
-
-  // Calcular metas proporcionales al período seleccionado
-  const storeMeta = useMemo(() => {
-    const budget = budgets[0];
-    if (!budget) {
-      return {
-        salesGoal: 15000000,
-        ticketGoal: 35000,
-      };
-    }
-
-    // Días del período seleccionado
-    const daysInPeriod = Math.ceil((dateRange.to - dateRange.from) / (1000 * 60 * 60 * 24)) + 1;
-    const daysInMonth = new Date(dateRange.from.getFullYear(), dateRange.from.getMonth() + 1, 0).getDate();
-    const proportion = daysInPeriod / daysInMonth;
-
-    return {
-      salesGoal: (budget.sales_budget || 15000000) * proportion,
-      ticketGoal: budget.tickets_budget || 35000,
-    };
-  }, [budgets, dateRange]);
+  // Metas de la tienda (hardcoded, luego se puede traer de BD)
+  const storeMeta = {
+    salesGoal: 15000000, // Meta de ventas mensual
+    ticketGoal: 35000, // Meta de ticket promedio
+  };
 
   const activeCashiers = cashiers.filter(c => c.is_active !== false);
 
@@ -166,45 +136,30 @@ export default function CashiersDashboard() {
     c.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Totales del equipo - calculados directamente desde shiftRecords de la tienda
+  // Totales del equipo
   const teamTotals = useMemo(() => {
-    const filteredRecords = shiftRecords.filter(r => {
-      const d = new Date(r.date);
-      return d >= dateRange.from && d <= dateRange.to;
-    });
-
-    const totalSales = filteredRecords.reduce((sum, r) => sum + (r.sales || 0), 0);
-    const totalTransactions = filteredRecords.reduce((sum, r) => sum + (r.transactions || 0), 0);
-    const totalSuggested = filteredRecords.reduce((sum, r) => sum + (r.suggested_sales || 0), 0);
-    
-    const activeCashiersCount = activeCashiers.length;
-    
+    const values = Object.values(cashierStats);
+    const totalSales = values.reduce((sum, c) => sum + c.totalSales, 0);
+    const totalTransactions = values.reduce((sum, c) => sum + c.totalTransactions, 0);
+    const totalSuggested = values.reduce((sum, c) => sum + c.totalSuggested, 0);
     return {
       totalSales,
       totalTickets: totalTransactions,
       avgTicket: totalTransactions > 0 ? totalSales / totalTransactions : 0,
-      avgSales: activeCashiersCount > 0 ? totalSales / activeCashiersCount : 0,
-      avgSuggested: activeCashiersCount > 0 ? totalSuggested / activeCashiersCount : 0,
-      totalCashiers: activeCashiersCount
+      avgSales: values.length > 0 ? totalSales / values.length : 0,
+      avgSuggested: values.length > 0 ? totalSuggested / values.length : 0,
+      totalCashiers: values.length
     };
-  }, [shiftRecords, dateRange, activeCashiers]);
+  }, [cashierStats]);
 
-  // Indicadores accionables y mejores cajeros por categoría
+  // Indicadores accionables
   const actionableMetrics = useMemo(() => {
     const salesCompliance = storeMeta.salesGoal > 0 ? (teamTotals.totalSales / storeMeta.salesGoal) * 100 : 0;
-    
-    // Ticket promedio REAL de la tienda (ventas totales / transacciones totales)
-    const storeAvgTicket = teamTotals.totalTickets > 0 ? teamTotals.totalSales / teamTotals.totalTickets : 0;
-    const ticketCompliance = storeMeta.ticketGoal > 0 ? (storeAvgTicket / storeMeta.ticketGoal) * 100 : 0;
+    const ticketCompliance = storeMeta.ticketGoal > 0 ? (teamTotals.avgTicket / storeMeta.ticketGoal) * 100 : 0;
     
     // Cuántos cajeros están sobre meta (simplificado: consideramos sobre meta si supera promedio del equipo)
     const avgTeamSales = teamTotals.avgSales;
     const cashiersOverGoal = rankedCashiers.filter(c => c.totalSales > avgTeamSales).length;
-
-    // Mejores cajeros por categoría
-    const bestInSales = rankedCashiers.reduce((best, c) => !best || c.totalSales > best.totalSales ? c : best, null);
-    const bestInTicket = rankedCashiers.reduce((best, c) => !best || c.avgTicket > best.avgTicket ? c : best, null);
-    const bestInTransactions = rankedCashiers.reduce((best, c) => !best || c.totalTransactions > best.totalTransactions ? c : best, null);
 
     return {
       salesCompliance,
@@ -212,11 +167,7 @@ export default function CashiersDashboard() {
       ticketCompliance,
       ticketStatus: ticketCompliance >= 100 ? 'success' : ticketCompliance >= 90 ? 'warning' : 'critical',
       cashiersOverGoal,
-      topPerformer: rankedCashiers[0],
-      storeAvgTicket,
-      bestInSales,
-      bestInTicket,
-      bestInTransactions
+      topPerformer: rankedCashiers[0]
     };
   }, [teamTotals, storeMeta, rankedCashiers]);
 
@@ -290,191 +241,223 @@ export default function CashiersDashboard() {
 
         {selectedStore ? (
           <div className="space-y-6">
-            {/* Header Gamificado - Hall of Fame */}
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="relative bg-gradient-to-br from-pink-100 via-rose-200 to-pink-200 rounded-[2.5rem] shadow-2xl overflow-hidden p-8 mb-6"
-            >
-              {/* Efecto de brillo animado */}
-              <motion.div
-                animate={{ 
-                  backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
-                }}
-                transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent bg-[length:200%_100%]"
-              />
-              
-              {/* Estrellas flotantes */}
-              <motion.div
-                animate={{ rotate: 360, scale: [1, 1.2, 1] }}
-                transition={{ duration: 20, repeat: Infinity }}
-                className="absolute top-4 right-4 text-4xl opacity-30"
+            {/* Indicadores Accionables */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {/* 1. Ventas vs Meta */}
+              <motion.div 
+                whileHover={{ y: -5, scale: 1.02 }}
+                className={`rounded-2xl p-5 shadow-lg border-2 relative overflow-hidden ${
+                  actionableMetrics.salesStatus === 'success' 
+                    ? 'bg-gradient-to-br from-emerald-50 to-green-100 border-emerald-300' 
+                    : actionableMetrics.salesStatus === 'warning'
+                      ? 'bg-gradient-to-br from-amber-50 to-yellow-100 border-amber-300'
+                      : 'bg-gradient-to-br from-red-50 to-rose-100 border-red-300'
+                }`}
               >
-                ✨
-              </motion.div>
-              <motion.div
-                animate={{ rotate: -360, scale: [1, 1.3, 1] }}
-                transition={{ duration: 15, repeat: Infinity }}
-                className="absolute bottom-4 left-4 text-4xl opacity-20"
-              >
-                🌟
+                {/* Semáforo */}
+                <motion.div 
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className={`absolute top-3 right-3 w-3 h-3 rounded-full ${
+                    actionableMetrics.salesStatus === 'success' ? 'bg-emerald-500' :
+                    actionableMetrics.salesStatus === 'warning' ? 'bg-amber-500' : 'bg-red-500'
+                  } shadow-lg`}
+                />
+                
+                <div className="flex items-center gap-2 mb-3">
+                  <TrendingUp className={`w-5 h-5 ${
+                    actionableMetrics.salesStatus === 'success' ? 'text-emerald-600' :
+                    actionableMetrics.salesStatus === 'warning' ? 'text-amber-600' : 'text-red-600'
+                  }`} />
+                  <span className={`text-xs font-bold uppercase ${
+                    actionableMetrics.salesStatus === 'success' ? 'text-emerald-700' :
+                    actionableMetrics.salesStatus === 'warning' ? 'text-amber-700' : 'text-red-700'
+                  }`}>Ventas vs Meta</span>
+                </div>
+                
+                <p className={`text-4xl font-black mb-1 ${
+                  actionableMetrics.salesStatus === 'success' ? 'text-emerald-700' :
+                  actionableMetrics.salesStatus === 'warning' ? 'text-amber-700' : 'text-red-700'
+                }`}>
+                  {Math.round(actionableMetrics.salesCompliance)}%
+                </p>
+                <p className="text-xs text-gray-600 font-medium mb-2">
+                  {formatCurrency(teamTotals.totalSales)} / {formatCurrency(storeMeta.salesGoal)}
+                </p>
+                <div className="h-2 bg-white/50 rounded-full overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${Math.min(actionableMetrics.salesCompliance, 100)}%` }}
+                    transition={{ duration: 1, delay: 0.3 }}
+                    className={`h-full ${
+                      actionableMetrics.salesStatus === 'success' ? 'bg-emerald-500' :
+                      actionableMetrics.salesStatus === 'warning' ? 'bg-amber-500' : 'bg-red-500'
+                    }`}
+                  />
+                </div>
+                <p className={`text-[10px] font-black mt-2 uppercase tracking-wide ${
+                  actionableMetrics.salesStatus === 'success' ? 'text-emerald-600' :
+                  actionableMetrics.salesStatus === 'warning' ? 'text-amber-600' : 'text-red-600'
+                }`}>
+                  {actionableMetrics.salesStatus === 'success' ? '✓ SOBRE META' :
+                   actionableMetrics.salesStatus === 'warning' ? '⚠ CERCA DE META' : '✕ BAJO META'}
+                </p>
               </motion.div>
 
-              <div className="relative z-10">
-                <div className="mb-6">
-                  <motion.h2 
-                    animate={{ scale: [1, 1.02, 1] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                    className="text-3xl md:text-4xl font-black text-pink-800 drop-shadow-sm flex items-center gap-3"
-                  >
-                    <span className="text-5xl">🏆</span>
-                    Hall of Fame
-                  </motion.h2>
-                  <p className="text-pink-700 text-sm mt-1 font-medium">
-                    {format(dateRange.from, 'dd MMM', { locale: es })} - {format(dateRange.to, 'dd MMM yyyy', { locale: es })}
+              {/* 2. Ticket Promedio vs Meta */}
+              <motion.div 
+                whileHover={{ y: -5, scale: 1.02 }}
+                className={`rounded-2xl p-5 shadow-lg border-2 relative overflow-hidden ${
+                  actionableMetrics.ticketStatus === 'success' 
+                    ? 'bg-gradient-to-br from-blue-50 to-sky-100 border-blue-300' 
+                    : actionableMetrics.ticketStatus === 'warning'
+                      ? 'bg-gradient-to-br from-amber-50 to-yellow-100 border-amber-300'
+                      : 'bg-gradient-to-br from-red-50 to-rose-100 border-red-300'
+                }`}
+              >
+                {/* Semáforo */}
+                <motion.div 
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ duration: 2, repeat: Infinity, delay: 0.2 }}
+                  className={`absolute top-3 right-3 w-3 h-3 rounded-full ${
+                    actionableMetrics.ticketStatus === 'success' ? 'bg-blue-500' :
+                    actionableMetrics.ticketStatus === 'warning' ? 'bg-amber-500' : 'bg-red-500'
+                  } shadow-lg`}
+                />
+                
+                <div className="flex items-center gap-2 mb-3">
+                  <Target className={`w-5 h-5 ${
+                    actionableMetrics.ticketStatus === 'success' ? 'text-blue-600' :
+                    actionableMetrics.ticketStatus === 'warning' ? 'text-amber-600' : 'text-red-600'
+                  }`} />
+                  <span className={`text-xs font-bold uppercase ${
+                    actionableMetrics.ticketStatus === 'success' ? 'text-blue-700' :
+                    actionableMetrics.ticketStatus === 'warning' ? 'text-amber-700' : 'text-red-700'
+                  }`}>Ticket vs Meta</span>
+                </div>
+                
+                <div className="flex items-baseline gap-2 mb-1">
+                  <p className={`text-4xl font-black ${
+                    actionableMetrics.ticketStatus === 'success' ? 'text-blue-700' :
+                    actionableMetrics.ticketStatus === 'warning' ? 'text-amber-700' : 'text-red-700'
+                  }`}>
+                    {Math.round(actionableMetrics.ticketCompliance)}%
                   </p>
+                  <span className={`text-sm font-bold ${
+                    actionableMetrics.ticketCompliance >= 100 ? 'text-blue-600' : 'text-red-600'
+                  }`}>
+                    {actionableMetrics.ticketCompliance >= 100 ? '↑' : '↓'}
+                    {Math.abs(100 - Math.round(actionableMetrics.ticketCompliance))}%
+                  </span>
+                </div>
+                <p className="text-xs text-gray-600 font-medium mb-2">
+                  {formatCurrency(teamTotals.avgTicket)} / {formatCurrency(storeMeta.ticketGoal)}
+                </p>
+                <div className="h-2 bg-white/50 rounded-full overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${Math.min(actionableMetrics.ticketCompliance, 100)}%` }}
+                    transition={{ duration: 1, delay: 0.4 }}
+                    className={`h-full ${
+                      actionableMetrics.ticketStatus === 'success' ? 'bg-blue-500' :
+                      actionableMetrics.ticketStatus === 'warning' ? 'bg-amber-500' : 'bg-red-500'
+                    }`}
+                  />
+                </div>
+                <p className={`text-[10px] font-black mt-2 uppercase tracking-wide ${
+                  actionableMetrics.ticketStatus === 'success' ? 'text-blue-600' :
+                  actionableMetrics.ticketStatus === 'warning' ? 'text-amber-600' : 'text-red-600'
+                }`}>
+                  {actionableMetrics.ticketStatus === 'success' ? '✓ SOBRE META' :
+                   actionableMetrics.ticketStatus === 'warning' ? '⚠ CERCA DE META' : '✕ BAJO META'}
+                </p>
+              </motion.div>
+
+              {/* 3. Productividad del Equipo */}
+              <motion.div 
+                whileHover={{ y: -5, scale: 1.02 }}
+                className="bg-gradient-to-br from-violet-50 to-purple-100 rounded-2xl p-5 shadow-lg border-2 border-violet-300 relative overflow-hidden"
+              >
+                <div className="flex items-center gap-2 mb-3">
+                  <Users className="w-5 h-5 text-violet-600" />
+                  <span className="text-xs font-bold uppercase text-violet-700">Productividad</span>
+                </div>
+                
+                <div className="flex items-center gap-2 mb-2">
+                  <p className="text-5xl font-black text-violet-700">{actionableMetrics.cashiersOverGoal}</p>
+                  <div className="text-left">
+                    <p className="text-xl font-bold text-violet-600">de {teamTotals.totalCashiers}</p>
+                    <p className="text-[10px] text-gray-600 font-medium uppercase">sobre meta</p>
+                  </div>
+                </div>
+                
+                <Progress 
+                  value={(actionableMetrics.cashiersOverGoal / teamTotals.totalCashiers) * 100} 
+                  className="h-2 mb-2 bg-white/50"
+                />
+                
+                <p className={`text-xs font-black uppercase tracking-wide ${
+                  actionableMetrics.cashiersOverGoal >= teamTotals.totalCashiers * 0.7 ? 'text-violet-700' :
+                  actionableMetrics.cashiersOverGoal >= teamTotals.totalCashiers * 0.5 ? 'text-amber-600' : 'text-red-600'
+                }`}>
+                  {actionableMetrics.cashiersOverGoal >= teamTotals.totalCashiers * 0.7 ? '✓ EQUIPO FUERTE' :
+                   actionableMetrics.cashiersOverGoal >= teamTotals.totalCashiers * 0.5 ? '⚠ MEJORABLE' : '✕ NECESITA APOYO'}
+                </p>
+              </motion.div>
+
+              {/* 4. Top Performer */}
+              <motion.div 
+                whileHover={{ y: -5, scale: 1.02 }}
+                onClick={() => actionableMetrics.topPerformer && setSelectedCashier(actionableMetrics.topPerformer)}
+                className="bg-gradient-to-br from-amber-100 via-yellow-100 to-amber-200 rounded-2xl p-5 shadow-lg border-2 border-amber-400 relative overflow-hidden cursor-pointer"
+              >
+                {/* Corona animada */}
+                <motion.div
+                  animate={{ rotate: [-5, 5, -5], y: [0, -3, 0] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="absolute top-2 right-2 text-2xl"
+                >
+                  👑
+                </motion.div>
+
+                <div className="flex items-center gap-2 mb-3">
+                  <Star className="w-5 h-5 text-amber-600" />
+                  <span className="text-xs font-bold uppercase text-amber-700">Top Performer</span>
                 </div>
 
-                {/* Mejores por categoría */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {/* Mejor en Ventas */}
-                  {actionableMetrics.bestInSales && (
-                    <motion.div
-                      whileHover={{ y: -5, scale: 1.03 }}
-                      onClick={() => setSelectedCashier(actionableMetrics.bestInSales)}
-                      className="cursor-pointer bg-white/20 backdrop-blur-md rounded-2xl p-5 border-2 border-pink-200/40 shadow-lg hover:border-pink-200/60 transition-all"
-                    >
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className="text-3xl">💰</span>
-                        <span className="text-xs font-bold text-pink-700 uppercase tracking-wider">Mejor en Ventas</span>
+                {actionableMetrics.topPerformer ? (
+                  <>
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center shadow-md overflow-hidden">
+                        {actionableMetrics.topPerformer.photo_url ? (
+                          <img src={actionableMetrics.topPerformer.photo_url} alt="" className="w-full h-full object-cover" />
+                        ) : (
+                          <User className="w-5 h-5 text-white" />
+                        )}
                       </div>
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="relative">
-                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-300 to-rose-400 shadow-lg overflow-hidden border-3 border-white/60">
-                            {actionableMetrics.bestInSales.photo_url ? (
-                              <img src={actionableMetrics.bestInSales.photo_url} alt="" className="w-full h-full object-cover" />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center text-xl">💎</div>
-                            )}
-                          </div>
-                          <motion.div
-                            animate={{ scale: [1, 1.2, 1] }}
-                            transition={{ duration: 2, repeat: Infinity }}
-                            className="absolute -bottom-1 -right-1 text-xl"
-                          >
-                            🥇
-                          </motion.div>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-black text-pink-900 truncate">
-                            {actionableMetrics.bestInSales.name?.split(' ').slice(0, 2).join(' ')}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="bg-white/70 backdrop-blur-sm rounded-xl p-3">
-                        <p className="text-3xl font-black text-pink-900 tracking-tight">
-                          {formatCurrency(actionableMetrics.bestInSales.totalSales)}
-                        </p>
-                        <p className="text-xs text-pink-700 font-medium mt-1">
-                          {actionableMetrics.bestInSales.daysWorked} turnos trabajados
+                      <div className="flex-1 min-w-0">
+                        <p className="text-base font-black text-amber-900 truncate leading-tight">
+                          {actionableMetrics.topPerformer.name?.split(' ').slice(0, 2).join(' ')}
                         </p>
                       </div>
-                    </motion.div>
-                  )}
+                    </div>
+                    
+                    <div className="bg-white/60 rounded-lg p-2 mb-1">
+                      <p className="text-xs text-gray-600 font-medium">Ventas Totales</p>
+                      <p className="text-2xl font-black text-amber-700">
+                        {formatCurrency(actionableMetrics.topPerformer.totalSales)}
+                      </p>
+                    </div>
 
-                  {/* Mejor en Ticket */}
-                  {actionableMetrics.bestInTicket && (
-                    <motion.div
-                      whileHover={{ y: -5, scale: 1.03 }}
-                      onClick={() => setSelectedCashier(actionableMetrics.bestInTicket)}
-                      className="cursor-pointer bg-white/20 backdrop-blur-md rounded-2xl p-5 border-2 border-rose-200/40 shadow-lg hover:border-rose-200/60 transition-all"
-                    >
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className="text-3xl">🎫</span>
-                        <span className="text-xs font-bold text-pink-700 uppercase tracking-wider">Mejor en Ticket</span>
-                      </div>
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="relative">
-                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-rose-300 to-pink-400 shadow-lg overflow-hidden border-3 border-white/60">
-                            {actionableMetrics.bestInTicket.photo_url ? (
-                              <img src={actionableMetrics.bestInTicket.photo_url} alt="" className="w-full h-full object-cover" />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center text-xl">⭐</div>
-                            )}
-                          </div>
-                          <motion.div
-                            animate={{ scale: [1, 1.2, 1] }}
-                            transition={{ duration: 2, repeat: Infinity, delay: 0.3 }}
-                            className="absolute -bottom-1 -right-1 text-xl"
-                          >
-                            🥈
-                          </motion.div>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-black text-pink-900 truncate">
-                            {actionableMetrics.bestInTicket.name?.split(' ').slice(0, 2).join(' ')}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="bg-white/70 backdrop-blur-sm rounded-xl p-3">
-                        <p className="text-3xl font-black text-pink-900 tracking-tight">
-                          {formatCurrency(actionableMetrics.bestInTicket.avgTicket)}
-                        </p>
-                        <p className="text-xs text-pink-700 font-medium mt-1">
-                          promedio por transacción
-                        </p>
-                      </div>
-                    </motion.div>
-                  )}
-
-                  {/* Mejor en Transacciones */}
-                  {actionableMetrics.bestInTransactions && (
-                    <motion.div
-                      whileHover={{ y: -5, scale: 1.03 }}
-                      onClick={() => setSelectedCashier(actionableMetrics.bestInTransactions)}
-                      className="cursor-pointer bg-white/20 backdrop-blur-md rounded-2xl p-5 border-2 border-fuchsia-200/40 shadow-lg hover:border-fuchsia-200/60 transition-all"
-                    >
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className="text-3xl">⚡</span>
-                        <span className="text-xs font-bold text-pink-700 uppercase tracking-wider">Más Transacciones</span>
-                      </div>
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="relative">
-                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-fuchsia-300 to-pink-400 shadow-lg overflow-hidden border-3 border-white/60">
-                            {actionableMetrics.bestInTransactions.photo_url ? (
-                              <img src={actionableMetrics.bestInTransactions.photo_url} alt="" className="w-full h-full object-cover" />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center text-xl">🚀</div>
-                            )}
-                          </div>
-                          <motion.div
-                            animate={{ scale: [1, 1.2, 1] }}
-                            transition={{ duration: 2, repeat: Infinity, delay: 0.6 }}
-                            className="absolute -bottom-1 -right-1 text-xl"
-                          >
-                            🥉
-                          </motion.div>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-black text-pink-900 truncate">
-                            {actionableMetrics.bestInTransactions.name?.split(' ').slice(0, 2).join(' ')}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="bg-white/70 backdrop-blur-sm rounded-xl p-3">
-                        <p className="text-3xl font-black text-pink-900 tracking-tight">
-                          {actionableMetrics.bestInTransactions.totalTransactions.toLocaleString('es-CO')}
-                        </p>
-                        <p className="text-xs text-pink-700 font-medium mt-1">
-                          transacciones totales
-                        </p>
-                      </div>
-                    </motion.div>
-                  )}
-                </div>
-              </div>
-            </motion.div>
+                    <p className="text-[10px] font-black text-amber-600 uppercase tracking-wide text-center">
+                      🏆 MEJOR DEL PERÍODO
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-sm text-gray-500 text-center">Sin datos</p>
+                )}
+              </motion.div>
+            </div>
 
             {/* Ranking y Lista de Cajeros */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
