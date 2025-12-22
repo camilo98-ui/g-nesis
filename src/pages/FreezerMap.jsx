@@ -938,7 +938,7 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                         </motion.button>
 
                         {/* Bajadas - cada una con F y T en columna vertical */}
-                        <div 
+                        <motion.div 
                           className="grid gap-3 p-3 rounded-2xl relative overflow-hidden"
                           style={{ 
                             gridTemplateColumns: `repeat(${numCols}, minmax(0, 1fr))`,
@@ -946,6 +946,9 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                             backdropFilter: 'blur(8px)',
                             boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.05)'
                           }}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ delay: rowIndex * 0.08 }}
                         >
                           {/* Efecto de brillo en la fila */}
                           <motion.div
@@ -959,9 +962,12 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                             transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: rowIndex * 0.3 }}
                           />
                           {row.map((bajada, bajadaIndex) => (
-                            <div 
+                            <motion.div 
                               key={`${rowIndex}-${bajadaIndex}`} 
                               className="flex flex-col gap-1"
+                              initial={{ opacity: 0, scale: 0.8 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              transition={{ delay: (rowIndex * numCols + bajadaIndex) * 0.02 }}
                             >
                               {/* Slot Trasero (T) - arriba */}
                               <motion.div
@@ -1123,10 +1129,10 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                                   </div>
                                 )}
                               </motion.div>
-                            </div>
+                            </motion.div>
                           ))}
-                        </div>
-                      </div>
+                        </motion.div>
+                      </motion.div>
                     ))}
                   </div>
                 </div>
