@@ -285,9 +285,6 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
       const avgDaily = daysWorked > 0 ? totalSales / daysWorked : 0;
       const historicalAvgTicket = historicalTransactions > 0 ? historicalSales / historicalTransactions : 0;
       const historicalAvgDaily = historicalDays > 0 ? historicalSales / historicalDays : 0;
-
-      // Score de gestión integral: ticket promedio (40%) + ventas (40%) + transacciones (20%)
-      const managementScore = (avgTicket * 0.4) + (totalSales * 0.4) + (totalTransactions * 0.2);
       
       cashierStats[c.id] = {
         ...c,
@@ -298,7 +295,6 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
         daysWorked,
         avgTicket,
         avgDaily,
-        managementScore,
         hasData: daysWorked > 0,
         historicalSales,
         historicalTickets,
@@ -309,9 +305,20 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
       };
     });
 
-    // Ordenar por score de gestión integral
+    // Calcular score normalizado 0-100: Ventas 50%, Ticket 30%, Sugeridos 20%
+    const maxSales = Math.max(...Object.values(cashierStats).map(s => s.totalSales), 1);
+    const maxTicket = Math.max(...Object.values(cashierStats).filter(s => s.totalTransactions > 0).map(s => s.avgTicket), 1);
+    const maxSuggested = Math.max(...Object.values(cashierStats).map(s => s.totalSuggested), 1);
+
     return Object.values(cashierStats)
-      .sort((a, b) => b.managementScore - a.managementScore)
+      .map(stats => {
+        const salesScore = (stats.totalSales / maxSales) * 50;
+        const ticketScore = (stats.avgTicket / maxTicket) * 30;
+        const suggestedScore = (stats.totalSuggested / maxSuggested) * 20;
+        const overallScore = salesScore + ticketScore + suggestedScore;
+        return { ...stats, overallScore, salesScore, ticketScore, suggestedScore };
+      })
+      .sort((a, b) => b.overallScore - a.overallScore)
       .map((c, idx) => ({ ...c, rank: idx + 1 }));
   }, [cashiers, shiftRecords, dateRange, weekFilter]);
 
@@ -517,7 +524,7 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
                     >
                       <p className={`${isFirst ? 'text-xs' : 'text-[10px]'} font-medium text-gray-500`}>SCORE</p>
                       <p className={`${isFirst ? 'text-2xl' : 'text-lg'} font-black bg-gradient-to-r ${PODIUM_COLORS[podiumIdx]} bg-clip-text text-transparent`}>
-                        {Math.round(cashier.managementScore || 0).toLocaleString('es-CO')}
+                        {Math.round(cashier.overallScore || 0)}
                       </p>
                     </motion.div>
                     
