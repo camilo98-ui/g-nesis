@@ -853,7 +853,7 @@ export default function Dashboard() {
 
               </motion.h1>
               {selectedStore &&
-              <p className="text-sm text-pink-500 font-medium">{getDisplayName(selectedStore)}</p>
+              <p className="text-pink-700 text-sm font-medium">{getDisplayName(selectedStore)}</p>
               }
             </div>
           </div>
