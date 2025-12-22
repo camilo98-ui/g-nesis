@@ -1614,9 +1614,18 @@ export default function Dashboard() {
                           Ventas Diarias {showComparison && '- Comparativo'}
                         </CardTitle>
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Evolución del ingreso bruto diario. Identifica tendencias, días atípicos y patrones estacionales para planificación estratégica.
-                      </p>
+                      <div className="mt-2 space-y-2">
+                        <div className="bg-blue-50 border border-blue-200 rounded px-2 py-1">
+                          <p className="text-[10px] text-blue-900 leading-tight">
+                            <span className="font-bold">Conclusión:</span> Muestra ingresos reales día por día. Los picos son oportunidades, las caídas son alertas.
+                          </p>
+                        </div>
+                        <div className="bg-emerald-50 border border-emerald-200 rounded px-2 py-1">
+                          <p className="text-[10px] text-emerald-900 leading-tight">
+                            <span className="font-bold">Acción:</span> Analizar qué causó días exitosos y replicarlo. Días bajos necesitan promociones urgentes.
+                          </p>
+                        </div>
+                      </div>
                     </CardHeader>
                     <CardContent>
                       <div className="h-64">
