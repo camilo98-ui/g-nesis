@@ -4,6 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import AnimatedIcon from '@/components/AnimatedIcon';
+import BackupToGoogleDrive from '@/components/BackupToGoogleDrive';
 import { ArrowLeft, Settings as SettingsIcon, MessageCircle, Bell, Save, Loader2, Check, Phone } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -152,6 +153,9 @@ export default function Settings() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Google Drive Backup */}
+          <BackupToGoogleDrive />
 
           {/* Save Button */}
           <Button 
