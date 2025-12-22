@@ -97,7 +97,9 @@ Deno.serve(async (req) => {
     const result = await uploadResponse.json();
     console.log('File uploaded to Drive:', result);
 
-    // Hacer el archivo accesible para cualquiera con el link
+    console.log('Compartiendo archivo en Drive...');
+    
+    // Hacer el archivo accesible
     const shareResponse = await fetch(`https://www.googleapis.com/drive/v3/files/${result.id}/permissions`, {
       method: 'POST',
       headers: {
@@ -110,50 +112,71 @@ Deno.serve(async (req) => {
       })
     });
 
+    let shareSuccess = false;
     if (!shareResponse.ok) {
       const shareError = await shareResponse.text();
       console.error('Share error:', shareError);
+    } else {
+      shareSuccess = true;
+      console.log('Archivo compartido exitosamente');
     }
 
     // Enviar email con el link
     const downloadLink = `https://drive.google.com/uc?export=download&id=${result.id}`;
-    await base44.asServiceRole.integrations.Core.SendEmail({
-      to: user.email,
-      subject: `🍦 Backup Popsy - ${fileName}`,
-      body: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #ec4899;">✅ Backup Completado</h2>
-          <p>Tu backup de Popsy Management se ha creado exitosamente.</p>
-          
-          <div style="background: #fce7f3; padding: 20px; border-radius: 10px; margin: 20px 0;">
-            <h3 style="margin-top: 0;">📁 ${fileName}</h3>
-            <p><strong>Fecha:</strong> ${new Date().toLocaleString('es-CO')}</p>
-            <p><strong>Registros:</strong></p>
-            <ul>
-              <li>Tiendas: ${stores.length}</li>
-              <li>Cajeros: ${cashiers.length}</li>
-              <li>Registros de turnos: ${shiftRecords.length}</li>
-              <li>Turnos programados: ${shifts.length}</li>
-            </ul>
+    let emailSent = false;
+    
+    try {
+      console.log('Enviando email a:', user.email);
+      
+      await base44.asServiceRole.integrations.Core.SendEmail({
+        from_name: 'Popsy Management',
+        to: user.email,
+        subject: `🍦 Backup Popsy - ${fileName}`,
+        body: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #ec4899;">✅ Backup Completado</h2>
+            <p>Tu backup de Popsy Management se ha creado exitosamente.</p>
+            
+            <div style="background: #fce7f3; padding: 20px; border-radius: 10px; margin: 20px 0;">
+              <h3 style="margin-top: 0;">📁 ${fileName}</h3>
+              <p><strong>Fecha:</strong> ${new Date().toLocaleString('es-CO')}</p>
+              <p><strong>Registros:</strong></p>
+              <ul>
+                <li>Tiendas: ${stores.length}</li>
+                <li>Cajeros: ${cashiers.length}</li>
+                <li>Registros de turnos: ${shiftRecords.length}</li>
+                <li>Turnos programados: ${shifts.length}</li>
+              </ul>
+            </div>
+            
+            <a href="${downloadLink}" style="display: inline-block; background: linear-gradient(to right, #ec4899, #f43f5e); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 10px 0;">
+              📥 Descargar Backup
+            </a>
+            
+            <p style="color: #666; font-size: 12px; margin-top: 30px;">
+              También puedes buscar el archivo "${fileName}" en tu Google Drive.
+            </p>
           </div>
-          
-          <a href="${downloadLink}" style="display: inline-block; background: linear-gradient(to right, #ec4899, #f43f5e); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 10px 0;">
-            📥 Descargar Backup
-          </a>
-          
-          <p style="color: #666; font-size: 12px; margin-top: 30px;">
-            También puedes buscar el archivo "${fileName}" en tu Google Drive.
-          </p>
-        </div>
-      `
-    });
+        `
+      });
+      
+      emailSent = true;
+      console.log('Email enviado correctamente');
+    } catch (emailError) {
+      console.error('Error enviando email:', emailError);
+    }
 
+    console.log('✅ Backup completado exitosamente');
+    
     return Response.json({ 
       success: true,
       file_id: result.id,
       file_name: fileName,
       drive_link: `https://drive.google.com/file/d/${result.id}/view`,
+      download_link: `https://drive.google.com/uc?export=download&id=${result.id}`,
       full_backup: backupData,
+      email_sent: emailSent,
+      share_success: shareSuccess,
       records_backed_up: {
         stores: stores.length,
         cashiers: cashiers.length,

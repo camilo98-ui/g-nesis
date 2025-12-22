@@ -869,9 +869,10 @@ export default function Home() {
                       setBackupLoading(true);
                       try {
                         const response = await base44.functions.invoke('backupToGoogleDrive', {});
-                        console.log('Backup response:', response.data);
+                        console.log('✅ Respuesta completa:', response);
+                        
                         if (response.data.success) {
-                          // Descargar backup localmente como respaldo
+                          // Descargar backup localmente
                           const backupBlob = new Blob([JSON.stringify(response.data.full_backup, null, 2)], { type: 'application/json' });
                           const url = window.URL.createObjectURL(backupBlob);
                           const a = document.createElement('a');
@@ -883,16 +884,19 @@ export default function Home() {
                           a.remove();
                           
                           toast.success(
-                            `✓ Backup creado: ${response.data.file_name}\n📥 Archivo descargado\n${response.data.drive_link ? '☁️ Busca "Popsy_Backup" en tu Drive' : ''}`,
-                            { duration: 10000 }
+                            `✅ ${response.data.message}\n📥 Descargado localmente\n📧 Revisa tu email: ${response.data.email_sent ? 'Enviado ✓' : 'Error al enviar'}`,
+                            { duration: 12000 }
                           );
                         } else {
-                          toast.error(`❌ Error detallado:\n${response.data.error}\n\n${response.data.details || 'Sin más detalles'}`, { duration: 10000 });
-                          console.error('Backup error details:', response.data);
+                          toast.error(
+                            `❌ ${response.data.error}\n\nDetalles: ${response.data.details || 'Ver consola (F12)'}`,
+                            { duration: 15000 }
+                          );
+                          console.error('❌ Error completo:', response.data);
                         }
                       } catch (error) {
-                        toast.error(`❌ Error de conexión:\n${error.message}`, { duration: 10000 });
-                        console.error('Backup exception:', error);
+                        toast.error(`❌ Error: ${error.message}\n\nVer consola (F12) para más detalles`, { duration: 12000 });
+                        console.error('❌ Exception:', error);
                       }
                       setBackupLoading(false);
                     } else {
