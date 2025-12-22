@@ -264,8 +264,6 @@ export default function ExecutiveDashboard() {
     };
   }, [zoneTotals, comparisonAnalysis, filteredStores]);
 
-  const dataToDisplay = showComparison && comparisonRange ? comparisonChartData : comparisonData;
-
   // Predictive Analytics
   const salesForecast = useMemo(() => {
     return storesAnalysis.map(store => {
@@ -312,6 +310,8 @@ export default function ExecutiveDashboard() {
       ticket: s.avgTicket, transacciones: s.totalTransactions
     }));
   }, [filteredStores]);
+
+  const dataToDisplay = showComparison && comparisonRange ? comparisonChartData : comparisonData;
 
   const weightData = useMemo(() => {
     return filteredStores.slice().sort((a, b) => b.weight - a.weight).map(s => ({
