@@ -873,14 +873,34 @@ export default function Home() {
                         <p className="text-[10px] text-gray-500 mt-0.5">{item.description}</p>
                       </div>
                     </motion.div> :
+                item.isSpecialAction && item.specialAction === 'comparable' ?
+                <Link to={createPageUrl('ExecutiveDashboard') + '?comparison=true'}>
+                  <motion.div
+                    className={`${item.bgColor} rounded-2xl p-4 h-full shadow-md hover:shadow-xl transition-all duration-300 group relative overflow-hidden border border-white/50 backdrop-blur-sm cursor-pointer`}>
+                    
+                    {/* Subtle glow effect */}
+                    <motion.div
+                      className="absolute inset-0 bg-white/30 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl" />
+
+                    {/* Icon centered */}
+                    <div className="flex flex-col items-center justify-center text-center relative z-10">
+                      <motion.div
+                        className={`w-12 h-12 ${item.iconBg} backdrop-blur-sm rounded-xl flex items-center justify-center mb-2`}
+                        whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1 }}
+                        transition={{ duration: 0.4 }}>
+                        <Icon className={`w-6 h-6 ${item.iconColor}`} />
+                      </motion.div>
+                      <h3 className={`font-bold ${item.textColor} text-sm`}>
+                        {item.name}
+                      </h3>
+                      <p className="text-[10px] text-gray-500 mt-0.5">{item.description}</p>
+                    </div>
+                  </motion.div>
+                </Link> :
                 item.isSpecialAction ?
-                <Link to={item.specialAction === 'comparable' ? createPageUrl('ExecutiveDashboard') + '?comparison=true' : '#'}>
                 <motion.div
                   onClick={async () => {
-                    if (item.specialAction === 'comparable') {
-                      // Redirigir al ejecutivo con comparación activa
-                      return;
-                    } else if (item.specialAction === 'budgetTrend') {
+                    if (item.specialAction === 'budgetTrend') {
                       setShowBudgetDashboard(true);
                     } else if (item.specialAction === 'backup') {
                       setBackupLoading(true);
@@ -918,33 +938,30 @@ export default function Home() {
                       setBackupLoading(false);
                     } else {
                       setShowStoreSales(true);
-                      }
-                      }}
-                      className={`${item.bgColor} rounded-2xl p-4 h-full shadow-md hover:shadow-xl transition-all duration-300 group relative overflow-hidden border border-white/50 backdrop-blur-sm cursor-pointer`}>
-                      </Link>
+                    }
+                  }}
+                  className={`${item.bgColor} rounded-2xl p-4 h-full shadow-md hover:shadow-xl transition-all duration-300 group relative overflow-hidden border border-white/50 backdrop-blur-sm cursor-pointer`}>
 
-                      {/* Subtle glow effect */}
-                      <motion.div
+                  {/* Subtle glow effect */}
+                  <motion.div
                     className="absolute inset-0 bg-white/30 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl" />
 
-
-                      {/* Icon centered */}
-                      <div className="flex flex-col items-center justify-center text-center relative z-10">
-                        <motion.div
+                  {/* Icon centered */}
+                  <div className="flex flex-col items-center justify-center text-center relative z-10">
+                    <motion.div
                       className={`w-12 h-12 ${item.iconBg} backdrop-blur-sm rounded-xl flex items-center justify-center mb-2`}
                       whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1 }}
                       transition={{ duration: 0.4 }}
                       animate={item.specialAction === 'backup' && backupLoading ? { rotate: 360 } : {}}
                       style={{ transition: backupLoading ? 'none' : undefined }}>
-
-                          <Icon className={`w-6 h-6 ${item.iconColor}`} />
-                        </motion.div>
-                        <h3 className={`font-bold ${item.textColor} text-sm`}>
-                          {item.specialAction === 'backup' && backupLoading ? 'Guardando...' : item.name}
-                        </h3>
-                        <p className="text-[10px] text-gray-500 mt-0.5">{item.description}</p>
-                      </div>
-                      </motion.div> :
+                      <Icon className={`w-6 h-6 ${item.iconColor}`} />
+                    </motion.div>
+                    <h3 className={`font-bold ${item.textColor} text-sm`}>
+                      {item.specialAction === 'backup' && backupLoading ? 'Guardando...' : item.name}
+                    </h3>
+                    <p className="text-[10px] text-gray-500 mt-0.5">{item.description}</p>
+                  </div>
+                </motion.div> :
 
                 <Link to={createPageUrl(item.page)}>
                       <motion.div
