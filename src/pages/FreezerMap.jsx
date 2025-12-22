@@ -321,10 +321,10 @@ export default function FreezerMap() {
 
     // Buscar el slot exacto por store_id, row, position Y slot_type
     const existing = slots.find((s) =>
-      s.store_id === `${selectedStore}_F${currentFreezer}` &&
-      s.row === slot.row &&
-      s.position === slot.position &&
-      s.slot_type === slot.slot_type
+    s.store_id === `${selectedStore}_F${currentFreezer}` &&
+    s.row === slot.row &&
+    s.position === slot.position &&
+    s.slot_type === slot.slot_type
     );
 
     if (existing?.id) {
@@ -374,10 +374,10 @@ export default function FreezerMap() {
     };
 
     const existing = slots.find((s) =>
-      s.store_id === `${selectedStore}_F${currentFreezer}` &&
-      s.row === selectedSlot.row &&
-      s.position === selectedSlot.position &&
-      s.slot_type === slotType
+    s.store_id === `${selectedStore}_F${currentFreezer}` &&
+    s.row === selectedSlot.row &&
+    s.position === selectedSlot.position &&
+    s.slot_type === slotType
     );
 
     updateSlotMutation.mutate({
@@ -419,10 +419,10 @@ export default function FreezerMap() {
       const slot = lastAction.slot;
       // Buscar por store_id, row, position Y slot_type
       const existing = slots.find((s) =>
-        s.store_id === slot.store_id &&
-        s.row === slot.row &&
-        s.position === slot.position &&
-        s.slot_type === slot.slot_type
+      s.store_id === slot.store_id &&
+      s.row === slot.row &&
+      s.position === slot.position &&
+      s.slot_type === slot.slot_type
       );
       if (existing?.id) {
         await base44.entities.FreezerSlot.update(existing.id, {
@@ -461,11 +461,11 @@ export default function FreezerMap() {
     for (const bajada of sourceRow) {
       // Duplicar slot frontal
       if (!bajada.front.is_empty) {
-        const targetSlot = slots.find((s) => 
-          s.store_id === `${selectedStore}_F${currentFreezer}` &&
-          s.row === targetRowIndex + 1 && 
-          s.position === bajada.position && 
-          s.slot_type === 'F'
+        const targetSlot = slots.find((s) =>
+        s.store_id === `${selectedStore}_F${currentFreezer}` &&
+        s.row === targetRowIndex + 1 &&
+        s.position === bajada.position &&
+        s.slot_type === 'F'
         );
         const slotData = {
           store_id: `${selectedStore}_F${currentFreezer}`,
@@ -487,11 +487,11 @@ export default function FreezerMap() {
 
       // Duplicar slot trasero
       if (!bajada.back.is_empty) {
-        const targetSlot = slots.find((s) => 
-          s.store_id === `${selectedStore}_F${currentFreezer}` &&
-          s.row === targetRowIndex + 1 && 
-          s.position === bajada.position && 
-          s.slot_type === 'T'
+        const targetSlot = slots.find((s) =>
+        s.store_id === `${selectedStore}_F${currentFreezer}` &&
+        s.row === targetRowIndex + 1 &&
+        s.position === bajada.position &&
+        s.slot_type === 'T'
         );
         const slotData = {
           store_id: `${selectedStore}_F${currentFreezer}`,
@@ -524,17 +524,17 @@ export default function FreezerMap() {
     e.preventDefault();
     if (!draggedSlot || draggedSlot.row === targetSlot.row && draggedSlot.position === targetSlot.position) return;
 
-    const draggedExisting = slots.find((s) => 
-      s.store_id === `${selectedStore}_F${currentFreezer}` &&
-      s.row === draggedSlot.row && 
-      s.position === draggedSlot.position &&
-      s.slot_type === draggedSlot.slot_type
+    const draggedExisting = slots.find((s) =>
+    s.store_id === `${selectedStore}_F${currentFreezer}` &&
+    s.row === draggedSlot.row &&
+    s.position === draggedSlot.position &&
+    s.slot_type === draggedSlot.slot_type
     );
-    const targetExisting = slots.find((s) => 
-      s.store_id === `${selectedStore}_F${currentFreezer}` &&
-      s.row === targetSlot.row && 
-      s.position === targetSlot.position &&
-      s.slot_type === targetSlot.slot_type
+    const targetExisting = slots.find((s) =>
+    s.store_id === `${selectedStore}_F${currentFreezer}` &&
+    s.row === targetSlot.row &&
+    s.position === targetSlot.position &&
+    s.slot_type === targetSlot.slot_type
     );
 
     if (draggedExisting) {
@@ -712,8 +712,8 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
               </Button>
             </Link>
             <div>
-              <h1 className="text-xl sm:text-2xl font-semibold text-gray-700">Mapa de Nevera #{currentFreezer}</h1>
-              {selectedStore && <p className="text-xs sm:text-sm text-gray-500">{selectedStore} - {selectedStoreName}</p>}
+              <h1 className="text-pink-700 text-xl font-semibold sm:text-2xl">Mapa de Nevera #{currentFreezer}</h1>
+              {selectedStore && <p className="text-pink-700 text-xs sm:text-sm">{selectedStore} - {selectedStoreName}</p>}
             </div>
           </div>
           <StoreSelector selectedStore={selectedStore} onStoreChange={handleStoreChange} />
