@@ -18,14 +18,18 @@ import CashierGoalsManager from '@/components/gamification/CashierGoalsManager';
 import { ViewProfileButton } from '@/components/cashier/CashierFullProfile';
 import CashierAssignmentSuggestion from '@/components/ai/CashierAssignmentSuggestion';
 import CashierSalesModal from '@/components/forms/CashierSalesModal';
+import ScoreBreakdown from '@/components/ranking/ScoreBreakdown';
+import LevelBadge from '@/components/ranking/LevelBadge';
+import TrafficLight from '@/components/ranking/TrafficLight';
+import CashierInsight from '@/components/ranking/CashierInsight';
 import { 
   ArrowLeft, Users, Search, TrendingUp, TrendingDown, 
   Award, Target, BarChart3, User, ChevronRight, Star,
-  Flame, Crown, Medal, Eye, Hash, Settings
+  Flame, Crown, Medal, Eye, Hash, Settings, Trophy, Zap, DollarSign, Receipt, Gift
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { startOfMonth, format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -106,22 +110,32 @@ export default function CashiersDashboard() {
     return stats;
   }, [activeCashiers, shiftRecords, dateRange]);
 
-  // Ranking por ventas - orden dinámico basado en múltiples factores
+  // Ranking NUEVO: Score Único (Ventas 50%, Ticket 30%, Sugeridos 20%)
   const rankedCashiers = useMemo(() => {
-    return Object.values(cashierStats)
+    const values = Object.values(cashierStats);
+    
+    const maxSales = Math.max(...values.map(x => x.totalSales), 1);
+    const maxTicket = Math.max(...values.map(x => x.avgTicket), 1);
+    const maxSuggested = Math.max(...values.map(x => x.totalSuggested), 1);
+    
+    return values
       .map(c => {
-        // Calcular score compuesto: ventas (50%), ticket promedio (30%), días trabajados (20%)
-        const maxSales = Math.max(...Object.values(cashierStats).map(x => x.totalSales), 1);
-        const maxTicket = Math.max(...Object.values(cashierStats).map(x => x.avgTicket), 1);
-        const maxDays = Math.max(...Object.values(cashierStats).map(x => x.daysWorked), 1);
-        
+        // Score Único: Ventas 50%, Ticket 30%, Sugeridos 20%
         const salesScore = (c.totalSales / maxSales) * 50;
         const ticketScore = (c.avgTicket / maxTicket) * 30;
-        const daysScore = (c.daysWorked / maxDays) * 20;
+        const suggestedScore = (c.totalSuggested / maxSuggested) * 20;
+        const overallScore = salesScore + ticketScore + suggestedScore;
         
-        return { ...c, compositeScore: salesScore + ticketScore + daysScore };
+        // Niveles de Progresión
+        let level = 'Rookie';
+        let levelColor = 'gray';
+        if (overallScore >= 80) { level = 'Elite'; levelColor = 'purple'; }
+        else if (overallScore >= 65) { level = 'Master'; levelColor = 'blue'; }
+        else if (overallScore >= 45) { level = 'Pro'; levelColor = 'green'; }
+        
+        return { ...c, overallScore, salesScore, ticketScore, suggestedScore, level, levelColor };
       })
-      .sort((a, b) => b.compositeScore - a.compositeScore)
+      .sort((a, b) => b.overallScore - a.overallScore)
       .map((c, idx) => ({ ...c, rank: idx + 1 }));
   }, [cashierStats]);
 
@@ -216,6 +230,52 @@ export default function CashiersDashboard() {
 
         {selectedStore ? (
           <div className="space-y-6">
+            {/* Explicación del Score - TRANSPARENCIA TOTAL */}
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-gradient-to-r from-purple-50 via-pink-50 to-rose-50 rounded-2xl p-5 border-2 border-purple-200 shadow-lg"
+            >
+              <div className="flex items-start gap-4">
+                <motion.div
+                  animate={{ rotate: [0, 360] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                  className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-lg flex-shrink-0"
+                >
+                  <Trophy className="w-6 h-6 text-white" />
+                </motion.div>
+                <div className="flex-1">
+                  <p className="text-base font-black text-gray-800 mb-3">🎯 Cómo funciona el Ranking de Popsy</p>
+                  <div className="grid grid-cols-3 gap-3 mb-3">
+                    <div className="bg-white/80 rounded-xl p-3 text-center border border-blue-200">
+                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center mx-auto mb-2">
+                        <DollarSign className="w-5 h-5 text-white" />
+                      </div>
+                      <p className="font-black text-blue-700 text-2xl">50%</p>
+                      <p className="text-xs text-gray-700 font-semibold">Ventas Totales</p>
+                    </div>
+                    <div className="bg-white/80 rounded-xl p-3 text-center border border-purple-200">
+                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-400 to-pink-600 flex items-center justify-center mx-auto mb-2">
+                        <Receipt className="w-5 h-5 text-white" />
+                      </div>
+                      <p className="font-black text-purple-700 text-2xl">30%</p>
+                      <p className="text-xs text-gray-700 font-semibold">Ticket Promedio</p>
+                    </div>
+                    <div className="bg-white/80 rounded-xl p-3 text-center border border-emerald-200">
+                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-400 to-green-600 flex items-center justify-center mx-auto mb-2">
+                        <Gift className="w-5 h-5 text-white" />
+                      </div>
+                      <p className="font-black text-emerald-700 text-2xl">20%</p>
+                      <p className="text-xs text-gray-700 font-semibold">Sugeridos</p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-600 text-center bg-white/60 rounded-lg py-2 px-3 italic">
+                    💡 El ranking premia el <strong>balance</strong>: no solo vendes mucho, también vendes bien y generas valor.
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+
             {/* Team Summary */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <motion.div 
@@ -275,15 +335,152 @@ export default function CashiersDashboard() {
               </motion.div>
             </div>
 
-            {/* Ranking y Lista de Cajeros */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Ranking visual con barras */}
-              <div className="lg:col-span-1">
-                <CashierRanking storeId={selectedStore} onSelectCashier={setSelectedCashier} />
-              </div>
+            {/* Podio Top 3 - VISUAL GAMING */}
+            {rankedCashiers.length >= 3 && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800 rounded-3xl p-6 shadow-2xl border border-white/10 overflow-hidden relative"
+              >
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-br from-purple-600/20 via-pink-600/20 to-orange-600/20"
+                  animate={{ opacity: [0.3, 0.6, 0.3] }}
+                  transition={{ duration: 3, repeat: Infinity }}
+                />
+                
+                <div className="relative z-10">
+                  <div className="flex items-center gap-3 mb-6">
+                    <motion.div
+                      animate={{ rotate: [0, 360] }}
+                      transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                      className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center"
+                    >
+                      <Trophy className="w-5 h-5 text-white" />
+                    </motion.div>
+                    <h3 className="text-xl font-black text-white">Podio del Período</h3>
+                  </div>
 
-              {/* Detalle del Cajero */}
-              <div className="lg:col-span-2" ref={analysisRef}>
+                  <div className="flex items-end justify-center gap-4 mb-6">
+                    {/* 2do Lugar */}
+                    {rankedCashiers[1] && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 50 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                        whileHover={{ scale: 1.05, y: -10 }}
+                        className="flex-1 max-w-[140px]"
+                      >
+                        <div className="bg-gradient-to-br from-slate-300 to-gray-400 rounded-t-2xl p-4 text-center relative">
+                          <motion.div
+                            animate={{ y: [0, -8, 0] }}
+                            transition={{ duration: 2, repeat: Infinity }}
+                            className="text-4xl mb-2"
+                          >
+                            🥈
+                          </motion.div>
+                          <div className="w-16 h-16 rounded-full mx-auto mb-2 overflow-hidden border-4 border-white/60">
+                            {rankedCashiers[1].photo_url ? (
+                              <img src={rankedCashiers[1].photo_url} alt={rankedCashiers[1].name} className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full bg-white/40 flex items-center justify-center text-2xl font-black text-white">
+                                {rankedCashiers[1].name?.charAt(0)}
+                              </div>
+                            )}
+                          </div>
+                          <p className="font-black text-white text-sm truncate mb-1">{rankedCashiers[1].name?.split(' ')[0]}</p>
+                          <LevelBadge level={rankedCashiers[1].level} score={rankedCashiers[1].overallScore} compact />
+                          <p className="text-2xl font-black text-white mt-2">{rankedCashiers[1].overallScore.toFixed(0)}</p>
+                          <p className="text-xs text-white/80">puntos</p>
+                        </div>
+                        <div className="bg-gradient-to-br from-slate-400 to-gray-500 h-24 rounded-b-xl flex items-center justify-center text-white font-bold">
+                          #2
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {/* 1er Lugar */}
+                    {rankedCashiers[0] && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 50 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 }}
+                        whileHover={{ scale: 1.05, y: -10 }}
+                        className="flex-1 max-w-[160px]"
+                      >
+                        <div className="bg-gradient-to-br from-yellow-300 via-amber-400 to-yellow-500 rounded-t-2xl p-5 text-center relative shadow-2xl shadow-amber-400/50">
+                          <motion.div
+                            animate={{ 
+                              rotate: [0, 10, -10, 0],
+                              scale: [1, 1.2, 1]
+                            }}
+                            transition={{ duration: 2, repeat: Infinity }}
+                            className="text-5xl mb-2"
+                          >
+                            👑
+                          </motion.div>
+                          <div className="w-20 h-20 rounded-full mx-auto mb-3 overflow-hidden border-4 border-white shadow-xl">
+                            {rankedCashiers[0].photo_url ? (
+                              <img src={rankedCashiers[0].photo_url} alt={rankedCashiers[0].name} className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full bg-white/40 flex items-center justify-center text-3xl font-black text-amber-700">
+                                {rankedCashiers[0].name?.charAt(0)}
+                              </div>
+                            )}
+                          </div>
+                          <p className="font-black text-gray-900 text-base truncate mb-2">{rankedCashiers[0].name?.split(' ')[0]}</p>
+                          <LevelBadge level={rankedCashiers[0].level} score={rankedCashiers[0].overallScore} compact />
+                          <p className="text-3xl font-black text-gray-900 mt-3">{rankedCashiers[0].overallScore.toFixed(0)}</p>
+                          <p className="text-xs text-gray-700 font-semibold">puntos</p>
+                        </div>
+                        <div className="bg-gradient-to-br from-amber-500 to-yellow-600 h-32 rounded-b-xl flex items-center justify-center text-white font-black text-xl shadow-lg">
+                          #1
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {/* 3er Lugar */}
+                    {rankedCashiers[2] && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 50 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3 }}
+                        whileHover={{ scale: 1.05, y: -10 }}
+                        className="flex-1 max-w-[140px]"
+                      >
+                        <div className="bg-gradient-to-br from-amber-400 to-orange-500 rounded-t-2xl p-4 text-center relative">
+                          <motion.div
+                            animate={{ y: [0, -8, 0] }}
+                            transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+                            className="text-4xl mb-2"
+                          >
+                            🥉
+                          </motion.div>
+                          <div className="w-16 h-16 rounded-full mx-auto mb-2 overflow-hidden border-4 border-white/60">
+                            {rankedCashiers[2].photo_url ? (
+                              <img src={rankedCashiers[2].photo_url} alt={rankedCashiers[2].name} className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full bg-white/40 flex items-center justify-center text-2xl font-black text-white">
+                                {rankedCashiers[2].name?.charAt(0)}
+                              </div>
+                            )}
+                          </div>
+                          <p className="font-black text-white text-sm truncate mb-1">{rankedCashiers[2].name?.split(' ')[0]}</p>
+                          <LevelBadge level={rankedCashiers[2].level} score={rankedCashiers[2].overallScore} compact />
+                          <p className="text-2xl font-black text-white mt-2">{rankedCashiers[2].overallScore.toFixed(0)}</p>
+                          <p className="text-xs text-white/80">puntos</p>
+                        </div>
+                        <div className="bg-gradient-to-br from-orange-500 to-amber-600 h-20 rounded-b-xl flex items-center justify-center text-white font-bold">
+                          #3
+                        </div>
+                      </motion.div>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Team Summary */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <AnimatePresence mode="wait">
                   {selectedCashier ? (
                     <motion.div
@@ -385,64 +582,54 @@ export default function CashiersDashboard() {
               </div>
             </div>
 
+            {/* RESUMEN EJECUTIVO DE EQUIPO */}
+            <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-cyan-50 shadow-xl">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-gray-800">
+                  <BarChart3 className="w-5 h-5 text-blue-600" />
+                  Resumen del Equipo
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="text-center">
+                    <p className="text-xs text-gray-600 mb-2">Nivel Promedio</p>
+                    <p className="text-2xl font-black text-blue-700">
+                      {(() => {
+                        const levels = { Elite: 4, Master: 3, Pro: 2, Rookie: 1 };
+                        const avg = rankedCashiers.reduce((sum, c) => sum + (levels[c.level] || 1), 0) / rankedCashiers.length;
+                        return avg >= 3.5 ? 'Elite' : avg >= 2.5 ? 'Master' : avg >= 1.5 ? 'Pro' : 'Rookie';
+                      })()}
+                    </p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xs text-gray-600 mb-2">Score Promedio</p>
+                    <p className="text-2xl font-black text-purple-700">
+                      {(rankedCashiers.reduce((sum, c) => sum + c.overallScore, 0) / rankedCashiers.length).toFixed(0)}
+                    </p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xs text-gray-600 mb-2">En Meta 🟢</p>
+                    <p className="text-2xl font-black text-emerald-700">
+                      {rankedCashiers.filter(c => c.totalSales >= teamTotals.avgSales && c.avgTicket >= teamTotals.avgTicket).length}
+                    </p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xs text-gray-600 mb-2">Críticos 🔴</p>
+                    <p className="text-2xl font-black text-red-700">
+                      {rankedCashiers.filter(c => c.totalSales < teamTotals.avgSales * 0.7).length}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Sugerencia IA de Asignación */}
             <CashierAssignmentSuggestion 
               storeId={selectedStore}
               cashiers={activeCashiers}
               shiftRecords={shiftRecords}
             />
-
-            {/* Top 3 Highlight */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-gradient-to-r from-pink-500 via-rose-500 to-pink-600 rounded-2xl shadow-xl p-6 text-white"
-            >
-              <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-                <Award className="w-6 h-6" />
-                Top 3 del Período
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {rankedCashiers.slice(0, 3).map((cashier, idx) => (
-                  <motion.div
-                    key={cashier.id}
-                    whileHover={{ scale: 1.03, y: -3 }}
-                    className="bg-white/15 backdrop-blur-sm rounded-xl p-4"
-                  >
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="relative">
-                        <div className="w-12 h-12 rounded-full bg-white/20 overflow-hidden flex items-center justify-center">
-                          {cashier.photo_url ? (
-                            <img src={cashier.photo_url} alt={cashier.name} className="w-full h-full object-cover" />
-                          ) : (
-                            <span className="text-2xl">{idx === 0 ? '🥇' : idx === 1 ? '🥈' : '🥉'}</span>
-                          )}
-                        </div>
-                        {cashier.photo_url && (
-                          <div className="absolute -bottom-1 -right-1 text-sm">
-                            {idx === 0 ? '🥇' : idx === 1 ? '🥈' : '🥉'}
-                          </div>
-                        )}
-                      </div>
-                      <div>
-                        <p className="font-bold">{cashier.name}</p>
-                        <p className="text-xs text-white/70">{cashier.daysWorked} turnos</p>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2 text-center">
-                      <div className="bg-white/10 rounded-lg p-2">
-                        <p className="text-lg font-bold">${Math.round(cashier.totalSales/1000000)}M</p>
-                        <p className="text-xs text-white/70">Ventas</p>
-                      </div>
-                      <div className="bg-white/10 rounded-lg p-2">
-                        <p className="text-lg font-bold">${Math.round(cashier.avgTicket/1000)}K</p>
-                        <p className="text-xs text-white/70">Ticket Prom</p>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
           </div>
         ) : (
           <div className="text-center py-20">
