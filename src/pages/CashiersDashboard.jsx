@@ -347,7 +347,7 @@ export default function CashiersDashboard() {
                     >
                       <div className="flex items-center gap-2 mb-3">
                         <span className="text-3xl">💰</span>
-                        <span className="text-xs font-bold text-white/90 uppercase tracking-wider">Mejor en Ventas</span>
+                        <span className="text-xs font-bold text-pink-700 uppercase tracking-wider">Mejor en Ventas</span>
                       </div>
                       <div className="flex items-center gap-3 mb-3">
                         <div className="relative">
@@ -367,16 +367,16 @@ export default function CashiersDashboard() {
                           </motion.div>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-black text-white truncate">
+                          <p className="text-sm font-black text-pink-900 truncate">
                             {actionableMetrics.bestInSales.name?.split(' ').slice(0, 2).join(' ')}
                           </p>
                         </div>
                       </div>
-                      <div className="bg-white/30 backdrop-blur-sm rounded-xl p-3">
-                        <p className="text-2xl font-black text-white">
+                      <div className="bg-white/70 backdrop-blur-sm rounded-xl p-3">
+                        <p className="text-2xl font-black text-pink-900">
                           {formatCurrency(actionableMetrics.bestInSales.totalSales)}
                         </p>
-                        <p className="text-xs text-white/80 font-medium">
+                        <p className="text-xs text-pink-700 font-medium">
                           {actionableMetrics.bestInSales.daysWorked} turnos trabajados
                         </p>
                       </div>
