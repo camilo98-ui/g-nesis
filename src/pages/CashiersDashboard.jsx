@@ -326,12 +326,12 @@ export default function CashiersDashboard() {
                   <motion.h2 
                     animate={{ scale: [1, 1.02, 1] }}
                     transition={{ duration: 2, repeat: Infinity }}
-                    className="text-3xl md:text-4xl font-black text-white drop-shadow-lg flex items-center gap-3"
+                    className="text-3xl md:text-4xl font-black text-pink-800 drop-shadow-sm flex items-center gap-3"
                   >
                     <span className="text-5xl">🏆</span>
                     Hall of Fame
                   </motion.h2>
-                  <p className="text-white/90 text-sm mt-1 font-medium">
+                  <p className="text-pink-700 text-sm mt-1 font-medium">
                     {format(dateRange.from, 'dd MMM', { locale: es })} - {format(dateRange.to, 'dd MMM yyyy', { locale: es })}
                   </p>
                 </div>
