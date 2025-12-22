@@ -479,8 +479,115 @@ export default function CashiersDashboard() {
               </motion.div>
             )}
 
-            {/* Team Summary */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {/* Lista de Cajeros con Gamificación Completa */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Lista Principal de Cajeros */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                    <BarChart3 className="w-5 h-5 text-purple-600" />
+                    Ranking Completo
+                  </h3>
+                  <div className="relative flex-1 max-w-xs ml-4">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Input
+                      placeholder="Buscar cajero..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10 bg-white border-gray-200 focus:border-purple-400"
+                    />
+                  </div>
+                </div>
+
+                {filteredCashiers.map((cashier, idx) => (
+                  <motion.div
+                    key={cashier.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: idx * 0.05 }}
+                    whileHover={{ scale: 1.02, x: 5 }}
+                    onClick={() => setSelectedCashier(cashier)}
+                    className={`cursor-pointer bg-gradient-to-br ${
+                      cashier.rank === 1 ? 'from-yellow-50 via-amber-50 to-orange-50 border-2 border-amber-300 shadow-xl' :
+                      cashier.rank <= 3 ? 'from-gray-50 to-slate-50 border-2 border-gray-300 shadow-lg' :
+                      'from-white to-gray-50 border border-gray-200 hover:border-purple-300 shadow-md'
+                    } rounded-2xl p-4 transition-all ${selectedCashier?.id === cashier.id ? 'ring-4 ring-purple-400' : ''}`}
+                  >
+                    <div className="flex items-center gap-4">
+                      {/* Rank Badge */}
+                      <motion.div
+                        whileHover={{ rotate: 360, scale: 1.15 }}
+                        transition={{ duration: 0.5 }}
+                        className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black text-xl shadow-lg ${
+                          cashier.rank === 1 ? 'bg-gradient-to-br from-yellow-400 to-amber-500 text-white' :
+                          cashier.rank === 2 ? 'bg-gradient-to-br from-slate-300 to-gray-400 text-white' :
+                          cashier.rank === 3 ? 'bg-gradient-to-br from-amber-500 to-orange-600 text-white' :
+                          'bg-gradient-to-br from-purple-100 to-pink-100 text-purple-700'
+                        }`}
+                      >
+                        {cashier.rank <= 3 ? (
+                          <span className="text-2xl">{cashier.rank === 1 ? '👑' : cashier.rank === 2 ? '🥈' : '🥉'}</span>
+                        ) : (
+                          `#${cashier.rank}`
+                        )}
+                      </motion.div>
+
+                      {/* Avatar */}
+                      <div className="w-12 h-12 rounded-xl overflow-hidden border-2 border-white shadow-md">
+                        {cashier.photo_url ? (
+                          <img src={cashier.photo_url} alt={cashier.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-pink-400 to-rose-500 flex items-center justify-center text-white font-black text-lg">
+                            {cashier.name?.charAt(0)}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Info */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <p className="font-black text-gray-800 truncate">{cashier.name}</p>
+                          <LevelBadge level={cashier.level} score={cashier.overallScore} compact />
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <BadgesDisplay cashierId={cashier.id} compact />
+                        </div>
+                      </div>
+
+                      {/* Score */}
+                      <div className="text-right">
+                        <motion.p
+                          animate={cashier.rank === 1 ? { scale: [1, 1.1, 1] } : {}}
+                          transition={{ duration: 2, repeat: Infinity }}
+                          className="text-3xl font-black bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent"
+                        >
+                          {cashier.overallScore.toFixed(0)}
+                        </motion.p>
+                        <p className="text-xs text-gray-500">pts</p>
+                      </div>
+                    </div>
+
+                    {/* Métricas compactas */}
+                    <div className="mt-3 pt-3 border-t border-gray-200 grid grid-cols-3 gap-2 text-xs">
+                      <div className="text-center">
+                        <p className="font-bold text-blue-600">{formatCurrency(cashier.totalSales)}</p>
+                        <p className="text-gray-500 text-[10px]">Ventas</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="font-bold text-purple-600">{formatCurrency(cashier.avgTicket)}</p>
+                        <p className="text-gray-500 text-[10px]">Ticket</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="font-bold text-emerald-600">{cashier.totalSuggested}</p>
+                        <p className="text-gray-500 text-[10px]">Sugeridos</p>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Detalle del Cajero */}
+              <div className="space-y-4" ref={analysisRef}>
                 <AnimatePresence mode="wait">
                   {selectedCashier ? (
                     <motion.div
@@ -490,6 +597,93 @@ export default function CashiersDashboard() {
                       exit={{ opacity: 0, y: -20 }}
                       className="space-y-4"
                     >
+                      {/* SCORE Y NIVEL - DESTACADO */}
+                      <Card className="border-2 border-purple-200 bg-gradient-to-br from-purple-50 via-pink-50 to-white shadow-xl">
+                        <CardHeader className="pb-3">
+                          <div className="flex items-center justify-between">
+                            <CardTitle className="flex items-center gap-2 text-gray-800">
+                              <Trophy className="w-5 h-5 text-purple-600" />
+                              Score y Nivel
+                            </CardTitle>
+                            <motion.div
+                              animate={{ rotate: [0, 10, -10, 0] }}
+                              transition={{ duration: 2, repeat: Infinity }}
+                              className="text-2xl"
+                            >
+                              🎮
+                            </motion.div>
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <ScoreBreakdown
+                              salesScore={selectedCashier.salesScore}
+                              ticketScore={selectedCashier.ticketScore}
+                              suggestedScore={selectedCashier.suggestedScore}
+                              overallScore={selectedCashier.overallScore}
+                            />
+                            <LevelBadge level={selectedCashier.level} score={selectedCashier.overallScore} />
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      {/* SEMÁFORO GERENCIAL - LECTURA RÁPIDA */}
+                      <Card className="border-2 border-slate-200 bg-white shadow-xl">
+                        <CardHeader className="pb-3">
+                          <CardTitle className="flex items-center gap-2 text-gray-800">
+                            <Target className="w-5 h-5 text-slate-600" />
+                            Semáforo de Desempeño
+                          </CardTitle>
+                          <p className="text-xs text-gray-500 mt-1">Identifica áreas críticas en 5 segundos</p>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <TrafficLight
+                              value={cashier.totalSales}
+                              target={teamTotals.avgSales}
+                              label="Ventas vs Equipo"
+                              type="sales"
+                            />
+                            <TrafficLight
+                              value={cashier.avgTicket}
+                              target={teamTotals.avgTicket}
+                              label="Ticket Promedio"
+                              type="ticket"
+                            />
+                            <TrafficLight
+                              value={cashier.totalSuggested}
+                              target={teamTotals.avgSuggested}
+                              label="Sugeridos"
+                              type="suggested"
+                            />
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      {/* INSIGHT AUTOMÁTICO DE LA SEMANA */}
+                      <CashierInsight
+                        cashierStats={cashier}
+                        teamAvg={{
+                          sales: teamTotals.avgSales,
+                          avgTicket: teamTotals.avgTicket,
+                          suggested: teamTotals.avgSuggested
+                        }}
+                        allRecords={shiftRecords.filter(r => r.cashier_id === cashier.id)}
+                      />
+
+                      {/* LOGROS Y BADGES */}
+                      <Card className="border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 shadow-xl">
+                        <CardHeader className="pb-3">
+                          <CardTitle className="flex items-center gap-2 text-gray-800">
+                            <Award className="w-5 h-5 text-amber-600" />
+                            Logros Desbloqueados
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <BadgesDisplay cashierId={selectedCashier.id} showAll />
+                        </CardContent>
+                      </Card>
+
                       {/* Perfil Visual estilo Facebook */}
                       <CashierVisualProfile 
                         cashier={selectedCashier}
@@ -501,65 +695,29 @@ export default function CashiersDashboard() {
                         }}
                       />
 
-                      {/* Análisis detallado */}
+                      {/* Análisis detallado con gráficas */}
                       <CashierAnalysis 
                         cashierId={selectedCashier.id}
                         cashierName={selectedCashier.name}
                         storeId={selectedStore}
                       />
 
-                      {/* Stats adicionales - PROMEDIOS */}
-                      <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3">
-                        <div className="bg-emerald-50 rounded-xl p-4 text-center">
-                         <p className="text-xs text-gray-500 mb-1">💰 Venta Prom/Día</p>
-                         <p className="text-lg font-black text-emerald-600">
-                           {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(Math.round(cashierStats[selectedCashier.id]?.avgSalesPerDay || 0))}
-                         </p>
-                         <p className="text-[9px] text-gray-400">{cashierStats[selectedCashier.id]?.daysWorked || 0} turnos</p>
-                        </div>
-                        <div className="bg-blue-50 rounded-xl p-4 text-center">
-                         <p className="text-xs text-gray-500 mb-1">🎫 Ticket Promedio</p>
-                         <p className="text-lg font-black text-blue-600">
-                           ${Math.round((cashierStats[selectedCashier.id]?.avgTicket || 0)/1000)}K
-                         </p>
-                         <p className="text-[9px] text-gray-400">ventas/transacciones</p>
-                        </div>
-                        <div className="bg-purple-50 rounded-xl p-4 text-center">
-                          <p className="text-xs text-gray-500 mb-1">⚡ Transacciones</p>
-                          <p className="text-lg font-black text-purple-600">
-                            {cashierStats[selectedCashier.id]?.totalTransactions || 0}
-                          </p>
-                          <p className="text-[9px] text-gray-400">totales</p>
-                        </div>
-                        <div className="bg-pink-50 rounded-xl p-4 text-center">
-                          <p className="text-xs text-gray-500 mb-1">🎁 Sugeridos Totales</p>
-                          <p className="text-lg font-black text-pink-600">
-                            {cashierStats[selectedCashier.id]?.totalSuggested || 0}
-                          </p>
-                          <p className="text-[9px] text-gray-400">en el período</p>
-                        </div>
-                      </div>
+                      {/* Metas personalizadas */}
+                      <CashierGoalsManager 
+                        cashierId={selectedCashier.id}
+                        cashierName={selectedCashier.name}
+                        storeId={selectedStore}
+                        shiftRecords={shiftRecords}
+                      />
 
-                      {/* Coach IA y Metas */}
-                      <div className="mt-4 flex gap-2 justify-end">
+                      {/* Coach IA */}
+                      <div className="flex gap-2 justify-end">
                         <GamificationCoach 
                           cashierId={selectedCashier.id}
                           cashierName={selectedCashier.name}
                           storeId={selectedStore}
                         />
                       </div>
-
-                      {/* Metas personalizadas */}
-                      <div className="mt-4">
-                        <CashierGoalsManager 
-                          cashierId={selectedCashier.id}
-                          cashierName={selectedCashier.name}
-                          storeId={selectedStore}
-                          shiftRecords={shiftRecords}
-                        />
-                      </div>
-
-                      {/* Los logros y comparación ya están en el perfil visual */}
                     </motion.div>
                   ) : (
                     <motion.div
