@@ -192,7 +192,10 @@ export default function CashiersDashboard() {
   // Indicadores accionables
   const actionableMetrics = useMemo(() => {
     const salesCompliance = storeMeta.salesGoal > 0 ? (teamTotals.totalSales / storeMeta.salesGoal) * 100 : 0;
-    const ticketCompliance = storeMeta.ticketGoal > 0 ? (teamTotals.avgTicket / storeMeta.ticketGoal) * 100 : 0;
+    
+    // Ticket promedio REAL de la tienda (ventas totales / transacciones totales)
+    const storeAvgTicket = teamTotals.totalTickets > 0 ? teamTotals.totalSales / teamTotals.totalTickets : 0;
+    const ticketCompliance = storeMeta.ticketGoal > 0 ? (storeAvgTicket / storeMeta.ticketGoal) * 100 : 0;
     
     // Cuántos cajeros están sobre meta (simplificado: consideramos sobre meta si supera promedio del equipo)
     const avgTeamSales = teamTotals.avgSales;
@@ -204,7 +207,8 @@ export default function CashiersDashboard() {
       ticketCompliance,
       ticketStatus: ticketCompliance >= 100 ? 'success' : ticketCompliance >= 90 ? 'warning' : 'critical',
       cashiersOverGoal,
-      topPerformer: rankedCashiers[0]
+      topPerformer: rankedCashiers[0],
+      storeAvgTicket // Exportar para mostrarlo en la card
     };
   }, [teamTotals, storeMeta, rankedCashiers]);
 
