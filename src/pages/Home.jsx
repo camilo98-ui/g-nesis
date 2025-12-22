@@ -12,7 +12,6 @@ import DirectoryModal from '@/components/DirectoryModal';
 import DailySalesForm from '@/components/forms/DailySalesForm';
 import ShiftRecordForm from '@/components/forms/ShiftRecordForm';
 import MonthlyBudgetDashboard from '@/components/budget/MonthlyBudgetDashboard';
-import ComparableAnalysisModal from '@/components/executive/ComparableAnalysisModal';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -175,7 +174,6 @@ export default function Home() {
   const [salesTab, setSalesTab] = useState('tienda');
   const [showBudgetDashboard, setShowBudgetDashboard] = useState(false);
   const [backupLoading, setBackupLoading] = useState(false);
-  const [showComparable, setShowComparable] = useState(false);
 
   const ROLES = [
   { 
@@ -876,10 +874,12 @@ export default function Home() {
                       </div>
                     </motion.div> :
                 item.isSpecialAction ?
+                <Link to={item.specialAction === 'comparable' ? createPageUrl('ExecutiveDashboard') + '?comparison=true' : '#'}>
                 <motion.div
                   onClick={async () => {
                     if (item.specialAction === 'comparable') {
-                      setShowComparable(true);
+                      // Redirigir al ejecutivo con comparación activa
+                      return;
                     } else if (item.specialAction === 'budgetTrend') {
                       setShowBudgetDashboard(true);
                     } else if (item.specialAction === 'backup') {
@@ -918,9 +918,10 @@ export default function Home() {
                       setBackupLoading(false);
                     } else {
                       setShowStoreSales(true);
-                    }
-                  }}
-                  className={`${item.bgColor} rounded-2xl p-4 h-full shadow-md hover:shadow-xl transition-all duration-300 group relative overflow-hidden border border-white/50 backdrop-blur-sm cursor-pointer`}>
+                      }
+                      }}
+                      className={`${item.bgColor} rounded-2xl p-4 h-full shadow-md hover:shadow-xl transition-all duration-300 group relative overflow-hidden border border-white/50 backdrop-blur-sm cursor-pointer`}>
+                      </Link>
 
                       {/* Subtle glow effect */}
                       <motion.div
@@ -1036,10 +1037,7 @@ export default function Home() {
         isOpen={showBudgetDashboard}
         onClose={() => setShowBudgetDashboard(false)} />
 
-      {/* Comparable Analysis Modal */}
-      <AnimatePresence>
-        {showComparable && <ComparableAnalysisModal onClose={() => setShowComparable(false)} />}
-      </AnimatePresence>
+
 
 
       {/* Store Sales Modal */}

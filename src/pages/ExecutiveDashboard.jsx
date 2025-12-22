@@ -87,6 +87,7 @@ const ExecutiveKPI = ({ title, value, subtitle, icon: Icon, badge, badgeColor = 
 export default function ExecutiveDashboard() {
   const urlParams = new URLSearchParams(window.location.search);
   const urlView = urlParams.get('view');
+  const urlComparison = urlParams.get('comparison');
   
   const [filterStatus, setFilterStatus] = useState('all');
   const [dateRange, setDateRange] = useState({ from: startOfMonth(new Date()), to: new Date() });
@@ -97,16 +98,24 @@ export default function ExecutiveDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeView, setActiveView] = useState(urlView || 'general');
   const [selectedStoreDetail, setSelectedStoreDetail] = useState(null);
-  const [chartView, setChartView] = useState('ventas'); // ventas, cumplimiento, proyeccion, eficiencia
+  const [chartView, setChartView] = useState('ventas');
   const [selectedMetric, setSelectedMetric] = useState(null);
   const [comparisonRange, setComparisonRange] = useState(null);
-  const [showComparison, setShowComparison] = useState(false);
+  const [showComparison, setShowComparison] = useState(urlComparison === 'true');
   
   useEffect(() => {
     if (urlView) {
       setActiveView(urlView);
     }
-  }, [urlView]);
+    if (urlComparison === 'true') {
+      setShowComparison(true);
+      // Establecer periodo de comparación por defecto (mes anterior)
+      const now = new Date();
+      const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+      setComparisonRange({ from: lastMonthStart, to: lastMonthEnd });
+    }
+  }, [urlView, urlComparison]);
 
   const activeRange = weekFilter || dateRange;
   const currentMonth = new Date().getMonth() + 1;
@@ -763,15 +772,39 @@ INSTRUCCIONES:
               <WeekFilter onWeekChange={setWeekFilter} />
               <DateFilter dateRange={dateRange} onDateChange={(range) => { setDateRange(range); setWeekFilter(null); }} />
               
-              {/* Botón de Comparación */}
+              {/* Botones de Modo */}
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Button
+                  variant={!showComparison ? "default" : "outline"}
+                  onClick={() => {
+                    setShowComparison(false);
+                    setComparisonRange(null);
+                  }}
+                  className={`gap-2 ${!showComparison ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg' : 'border-gray-300 hover:border-blue-500'}`}
+                >
+                  <Activity className="w-4 h-4" />
+                  Actual
+                </Button>
+              </motion.div>
+
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button
                   variant={showComparison ? "default" : "outline"}
-                  onClick={() => setShowComparison(!showComparison)}
+                  onClick={() => {
+                    if (!showComparison) {
+                      setShowComparison(true);
+                      if (!comparisonRange) {
+                        const now = new Date();
+                        const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                        const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+                        setComparisonRange({ from: lastMonthStart, to: lastMonthEnd });
+                      }
+                    }
+                  }}
                   className={`gap-2 ${showComparison ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg' : 'border-purple-300 hover:border-purple-500'}`}
                 >
                   <TrendingUp className="w-4 h-4" />
-                  {showComparison ? 'Comparación Activa' : 'Comparar Períodos'}
+                  Comparable
                 </Button>
               </motion.div>
 
