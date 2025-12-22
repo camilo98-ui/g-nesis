@@ -13,7 +13,7 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
 
   // Análisis completo de todas las neveras
   const fullAnalysis = useMemo(() => {
-    if (!allFreezersSlots || allFreezersSlots.length === 0) return { flavors: {}, total: 0, low: 0, empty: 0 };
+    if (!allFreezersSlots || allFreezersSlots.length === 0) return { flavors: [], total: 0, low: 0, empty: 0 };
     
     const analysis = {};
     let totalFilled = 0;
