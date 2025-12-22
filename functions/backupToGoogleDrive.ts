@@ -77,11 +77,13 @@ Deno.serve(async (req) => {
     });
 
     if (!uploadResponse.ok) {
-      const error = await uploadResponse.text();
-      throw new Error(`Google Drive upload failed: ${error}`);
+      const errorText = await uploadResponse.text();
+      console.error('Google Drive upload error:', errorText);
+      throw new Error(`Google Drive upload failed (${uploadResponse.status}): ${errorText}`);
     }
 
     const result = await uploadResponse.json();
+    console.log('File uploaded to Drive:', result);
 
     return Response.json({ 
       success: true,
@@ -97,9 +99,11 @@ Deno.serve(async (req) => {
     });
 
   } catch (error) {
+    console.error('Backup error:', error);
     return Response.json({ 
       success: false,
-      error: error.message 
+      error: error.message,
+      details: error.stack
     }, { status: 500 });
   }
 });

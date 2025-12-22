@@ -869,13 +869,16 @@ export default function Home() {
                       setBackupLoading(true);
                       try {
                         const response = await base44.functions.invoke('backupToGoogleDrive', {});
+                        console.log('Backup response:', response.data);
                         if (response.data.success) {
-                          toast.success(`✓ Backup creado: ${response.data.file_name}`);
+                          toast.success(`✓ Backup creado: ${response.data.file_name}`, { duration: 5000 });
                         } else {
-                          toast.error(response.data.error || 'Error al crear backup');
+                          toast.error(`Error: ${response.data.error}`, { duration: 7000 });
+                          console.error('Backup error details:', response.data);
                         }
                       } catch (error) {
-                        toast.error('Error al conectar con Google Drive');
+                        toast.error(`Error al conectar: ${error.message}`, { duration: 7000 });
+                        console.error('Backup exception:', error);
                       }
                       setBackupLoading(false);
                     } else {
