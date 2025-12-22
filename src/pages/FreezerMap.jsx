@@ -846,35 +846,118 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
 
             {/* Freezer Grid */}
             <div className="overflow-x-auto pb-4">
-              <motion.div style={{ transform: `scale(${zoom})`, transformOrigin: 'top center' }} className="min-w-[320px]">
-                <div className="relative rounded-2xl p-3 sm:p-5 mx-auto max-w-xl bg-gradient-to-b from-white via-gray-50 to-white border-2 border-pink-200 shadow-xl">
-                  {/* Logo */}
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
-                    <div className="px-4 py-1.5 rounded-full bg-white shadow-md">
-                      <img src={LOGO_URL} alt="Popsy" className="h-6 sm:h-8 object-contain" />
-                    </div>
-                  </div>
+              <motion.div 
+                style={{ transform: `scale(${zoom})`, transformOrigin: 'top center' }} 
+                className="min-w-[320px]"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <motion.div 
+                  className="relative rounded-3xl p-4 sm:p-6 mx-auto max-w-xl overflow-hidden"
+                  style={{
+                    background: 'linear-gradient(135deg, #ffffff 0%, #f9fafb 50%, #f3f4f6 100%)',
+                    boxShadow: '0 20px 60px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.8)'
+                  }}
+                >
+                  {/* Efectos de fondo animados */}
+                  <motion.div 
+                    className="absolute inset-0 opacity-30 pointer-events-none"
+                    style={{
+                      background: 'radial-gradient(circle at 20% 50%, rgba(236, 72, 153, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(168, 85, 247, 0.1) 0%, transparent 50%)'
+                    }}
+                    animate={{
+                      scale: [1, 1.1, 1],
+                      opacity: [0.2, 0.4, 0.2]
+                    }}
+                    transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+                  />
+
+                  {/* Borde con gradiente animado */}
+                  <motion.div 
+                    className="absolute inset-0 rounded-3xl"
+                    style={{
+                      background: 'linear-gradient(45deg, #ec4899, #a855f7, #ec4899)',
+                      backgroundSize: '200% 200%',
+                      padding: '3px',
+                      WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+                      WebkitMaskComposite: 'xor',
+                      maskComposite: 'exclude'
+                    }}
+                    animate={{
+                      backgroundPosition: ['0% 50%', '100% 50%', '0% 50%']
+                    }}
+                    transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
+                  />
+                  
+                  {/* Logo con efecto */}
+                  <motion.div 
+                    className="absolute -top-4 left-1/2 -translate-x-1/2 z-20"
+                    whileHover={{ scale: 1.1, rotate: [0, -5, 5, 0] }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <motion.div 
+                      className="px-5 py-2 rounded-2xl bg-white shadow-2xl border-2 border-pink-200"
+                      animate={{
+                        boxShadow: ['0 10px 30px rgba(236, 72, 153, 0.2)', '0 15px 40px rgba(168, 85, 247, 0.3)', '0 10px 30px rgba(236, 72, 153, 0.2)']
+                      }}
+                      transition={{ duration: 3, repeat: Infinity }}
+                    >
+                      <img src={LOGO_URL} alt="Popsy" className="h-7 sm:h-9 object-contain" />
+                    </motion.div>
+                  </motion.div>
 
                   {/* Grid - Bajadas con F (frontal) y T (trasero) */}
-                  <div className="space-y-3 mt-4">
+                  <div className="space-y-3 mt-6 relative z-10">
                     {freezerGrid.map((row, rowIndex) => (
-                      <div key={rowIndex} className="relative">
+                      <motion.div 
+                        key={rowIndex} 
+                        className="relative"
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: rowIndex * 0.05 }}
+                      >
                         {/* Row number */}
-                        <div className="absolute -left-5 sm:-left-7 top-1/2 -translate-y-1/2 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center text-[10px] sm:text-xs font-bold">
+                        <motion.div 
+                          className="absolute -left-5 sm:-left-7 top-1/2 -translate-y-1/2 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gradient-to-br from-pink-400 to-rose-500 text-white flex items-center justify-center text-[10px] sm:text-xs font-bold shadow-lg"
+                          whileHover={{ scale: 1.2, rotate: 360 }}
+                          transition={{ duration: 0.3 }}
+                        >
                           {rowIndex + 1}
-                        </div>
+                        </motion.div>
                         
                         {/* Row actions */}
-                        <button
+                        <motion.button
                           onClick={() => duplicateRow(rowIndex)}
-                          className="absolute -right-5 sm:-right-7 top-1/2 -translate-y-1/2 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gray-100 hover:bg-pink-100 text-gray-400 hover:text-pink-600 flex items-center justify-center transition-colors"
+                          className="absolute -right-5 sm:-right-7 top-1/2 -translate-y-1/2 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 hover:from-pink-100 hover:to-pink-200 text-gray-500 hover:text-pink-600 flex items-center justify-center transition-all shadow-md"
                           title="Duplicar fila"
+                          whileHover={{ scale: 1.2, rotate: 15 }}
+                          whileTap={{ scale: 0.9 }}
                         >
                           <Copy className="w-3 h-3" />
-                        </button>
+                        </motion.button>
 
                         {/* Bajadas - cada una con F y T en columna vertical */}
-                        <div className={`grid gap-3 p-2 rounded-xl bg-gray-100/50`} style={{ gridTemplateColumns: `repeat(${numCols}, minmax(0, 1fr))` }}>
+                        <div 
+                          className="grid gap-3 p-3 rounded-2xl relative overflow-hidden"
+                          style={{ 
+                            gridTemplateColumns: `repeat(${numCols}, minmax(0, 1fr))`,
+                            background: 'linear-gradient(135deg, rgba(243, 244, 246, 0.6) 0%, rgba(229, 231, 235, 0.4) 100%)',
+                            backdropFilter: 'blur(8px)',
+                            boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.05)'
+                          }}
+                        >
+                          {/* Efecto de brillo en la fila */}
+                          <motion.div
+                            className="absolute inset-0 opacity-20 pointer-events-none"
+                            style={{
+                              background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.5) 50%, transparent 100%)'
+                            }}
+                            animate={{
+                              x: ['-100%', '200%']
+                            }}
+                            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: rowIndex * 0.3 }}
+                          />
                           {row.map((bajada, bajadaIndex) => (
                             <div 
                               key={`${rowIndex}-${bajadaIndex}`} 
@@ -887,38 +970,64 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                                   setShowFlavorSelector(true);
                                 }}
                                 onDoubleClick={() => clearSlot(bajada.back)}
-                                whileHover={!bajada.back.is_empty ? { scale: 1.08, y: -2 } : { scale: 1.02 }}
-                                whileTap={{ scale: 0.95 }}
-                                className={`h-10 sm:h-11 rounded-lg cursor-pointer transition-all border-2 relative overflow-hidden ${
+                                whileHover={!bajada.back.is_empty ? { 
+                                  scale: 1.12, 
+                                  y: -3,
+                                  rotateX: 5,
+                                  boxShadow: `0 8px 25px ${bajada.back.color || '#a855f7'}60`
+                                } : { scale: 1.03 }}
+                                whileTap={{ scale: 0.92 }}
+                                className={`h-10 sm:h-11 rounded-xl cursor-pointer transition-all border-2 relative overflow-hidden ${
                                   bajada.back.is_empty 
-                                    ? 'bg-purple-50/50 border-dashed border-purple-200 hover:border-purple-400' 
-                                    : 'border-purple-300 shadow-md'
+                                    ? 'bg-purple-50/50 border-dashed border-purple-300 hover:border-purple-500' 
+                                    : 'border-purple-400 shadow-lg'
                                 }`}
                                 style={!bajada.back.is_empty ? { 
-                                  background: `linear-gradient(135deg, ${bajada.back.color}ee, ${bajada.back.color}99)`
+                                  background: `linear-gradient(135deg, ${bajada.back.color}ff, ${bajada.back.color}aa)`,
+                                  transformStyle: 'preserve-3d'
                                 } : {}}
                               >
                                 {!bajada.back.is_empty && (
-                                  <motion.div 
-                                    className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"
-                                    animate={{ opacity: [0.3, 0.6, 0.3] }}
-                                    transition={{ duration: 2, repeat: Infinity }}
-                                  />
+                                  <>
+                                    <motion.div 
+                                      className="absolute inset-0 bg-gradient-to-br from-white/40 via-white/10 to-transparent"
+                                      animate={{ 
+                                        opacity: [0.4, 0.8, 0.4],
+                                        scale: [1, 1.05, 1]
+                                      }}
+                                      transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                                    />
+                                    <motion.div
+                                      className="absolute top-0 left-0 right-0 h-1/2"
+                                      style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 100%)' }}
+                                    />
+                                  </>
                                 )}
-                                <div className="absolute top-0.5 left-0.5 bg-purple-500 text-white text-[6px] px-1 rounded font-bold z-10">T</div>
+                                <motion.div 
+                                  className="absolute top-0.5 left-0.5 bg-purple-600 text-white text-[6px] px-1.5 py-0.5 rounded-md font-bold z-10 shadow-sm"
+                                  whileHover={{ scale: 1.1 }}
+                                >
+                                  T
+                                </motion.div>
                                 {bajada.back.is_empty ? (
                                   <div className="h-full flex items-center justify-center">
-                                    <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 1.5, repeat: Infinity }}>
-                                      <Plus className="w-3 h-3 text-purple-300" />
+                                    <motion.div 
+                                      animate={{ 
+                                        scale: [1, 1.3, 1],
+                                        rotate: [0, 90, 0]
+                                      }} 
+                                      transition={{ duration: 2, repeat: Infinity }}
+                                    >
+                                      <Plus className="w-3 h-3 text-purple-400" />
                                     </motion.div>
                                   </div>
                                 ) : (
                                   <div className="h-full flex items-center justify-center pt-1.5 relative z-10">
                                     <span 
-                                      className="text-[7px] sm:text-[8px] font-bold text-center leading-tight px-0.5 line-clamp-2"
+                                      className="text-[7px] sm:text-[8px] font-black text-center leading-tight px-0.5 line-clamp-2"
                                       style={{ 
                                         color: getTextColor(bajada.back.color),
-                                        textShadow: getTextColor(bajada.back.color) === '#ffffff' ? '0 1px 3px rgba(0,0,0,0.6)' : '0 1px 2px rgba(255,255,255,0.4)'
+                                        textShadow: getTextColor(bajada.back.color) === '#ffffff' ? '0 2px 4px rgba(0,0,0,0.7)' : '0 2px 3px rgba(255,255,255,0.6)'
                                       }}
                                     >
                                       {bajada.back.flavor_name}
@@ -934,47 +1043,79 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                                   setShowFlavorSelector(true);
                                 }}
                                 onDoubleClick={() => clearSlot(bajada.front)}
-                                whileHover={!bajada.front.is_empty ? { scale: 1.08, y: -2 } : { scale: 1.02 }}
-                                whileTap={{ scale: 0.95 }}
-                                className={`h-11 sm:h-12 rounded-lg cursor-pointer transition-all border-2 shadow-lg relative overflow-hidden ${
+                                whileHover={!bajada.front.is_empty ? { 
+                                  scale: 1.15, 
+                                  y: -4,
+                                  rotateX: 8,
+                                  boxShadow: `0 12px 35px ${bajada.front.color || '#ec4899'}80`,
+                                  zIndex: 50
+                                } : { scale: 1.03 }}
+                                whileTap={{ scale: 0.92 }}
+                                className={`h-11 sm:h-12 rounded-xl cursor-pointer transition-all border-2 shadow-2xl relative overflow-hidden ${
                                   bajada.front.is_empty 
-                                    ? 'bg-white border-dashed border-pink-200 hover:border-pink-400' 
-                                    : 'border-pink-400'
+                                    ? 'bg-white border-dashed border-pink-300 hover:border-pink-500' 
+                                    : 'border-pink-500'
                                 }`}
                                 style={!bajada.front.is_empty ? { 
-                                  background: `linear-gradient(135deg, ${bajada.front.color}ff, ${bajada.front.color}bb)`,
-                                  boxShadow: `0 4px 12px ${bajada.front.color}40`
+                                  background: `linear-gradient(135deg, ${bajada.front.color}ff, ${bajada.front.color}cc)`,
+                                  transformStyle: 'preserve-3d'
                                 } : {}}
                               >
                                 {!bajada.front.is_empty && (
                                   <>
                                     <motion.div 
-                                      className="absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-transparent"
-                                      animate={{ opacity: [0.4, 0.7, 0.4] }}
-                                      transition={{ duration: 2, repeat: Infinity }}
+                                      className="absolute inset-0 bg-gradient-to-br from-white/50 via-white/20 to-transparent"
+                                      animate={{ 
+                                        opacity: [0.5, 0.9, 0.5],
+                                        scale: [1, 1.08, 1]
+                                      }}
+                                      transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                                    />
+                                    <motion.div
+                                      className="absolute top-0 left-0 right-0 h-1/2"
+                                      style={{ 
+                                        background: 'linear-gradient(180deg, rgba(255,255,255,0.4) 0%, transparent 100%)',
+                                        borderRadius: '12px 12px 0 0'
+                                      }}
                                     />
                                     <motion.div
                                       className="absolute inset-0"
-                                      style={{ background: `radial-gradient(circle at 30% 30%, ${bajada.front.color}22 0%, transparent 70%)` }}
-                                      animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
-                                      transition={{ duration: 3, repeat: Infinity }}
+                                      style={{ background: `radial-gradient(circle at 35% 35%, ${bajada.front.color}33 0%, transparent 65%)` }}
+                                      animate={{ 
+                                        scale: [1, 1.3, 1], 
+                                        opacity: [0.4, 0.7, 0.4],
+                                        rotate: [0, 10, 0]
+                                      }}
+                                      transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                                     />
                                   </>
                                 )}
-                                <div className="absolute top-0.5 left-0.5 bg-pink-500 text-white text-[6px] px-1 rounded font-bold z-10 shadow-sm">F</div>
+                                <motion.div 
+                                  className="absolute top-0.5 left-0.5 bg-pink-600 text-white text-[6px] px-1.5 py-0.5 rounded-md font-bold z-10 shadow-md"
+                                  whileHover={{ scale: 1.15 }}
+                                >
+                                  F
+                                </motion.div>
                                 {bajada.front.is_empty ? (
                                   <div className="h-full flex items-center justify-center">
-                                    <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 1.5, repeat: Infinity }}>
-                                      <Plus className="w-4 h-4 text-pink-300" />
+                                    <motion.div 
+                                      animate={{ 
+                                        scale: [1, 1.4, 1],
+                                        rotate: [0, 90, 0]
+                                      }} 
+                                      transition={{ duration: 2, repeat: Infinity }}
+                                    >
+                                      <Plus className="w-4 h-4 text-pink-400" />
                                     </motion.div>
                                   </div>
                                 ) : (
                                   <div className="h-full flex items-center justify-center pt-1.5 relative z-10">
                                     <span 
-                                      className="text-[8px] sm:text-[9px] font-bold text-center leading-tight px-0.5 line-clamp-2"
+                                      className="text-[8px] sm:text-[9px] font-black text-center leading-tight px-0.5 line-clamp-2"
                                       style={{ 
                                         color: getTextColor(bajada.front.color),
-                                        textShadow: getTextColor(bajada.front.color) === '#ffffff' ? '0 1px 3px rgba(0,0,0,0.6)' : '0 1px 2px rgba(255,255,255,0.5)'
+                                        textShadow: getTextColor(bajada.front.color) === '#ffffff' ? '0 2px 5px rgba(0,0,0,0.8)' : '0 2px 4px rgba(255,255,255,0.7)',
+                                        letterSpacing: '-0.02em'
                                       }}
                                     >
                                       {bajada.front.flavor_name}
