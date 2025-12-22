@@ -85,10 +85,30 @@ Deno.serve(async (req) => {
     const result = await uploadResponse.json();
     console.log('File uploaded to Drive:', result);
 
+    // Compartir archivo con el usuario
+    const shareResponse = await fetch(`https://www.googleapis.com/drive/v3/files/${result.id}/permissions`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        type: 'user',
+        role: 'writer',
+        emailAddress: 'gym.imparable24@gmail.com'
+      })
+    });
+
+    if (!shareResponse.ok) {
+      const shareError = await shareResponse.text();
+      console.error('Share error:', shareError);
+    }
+
     return Response.json({ 
       success: true,
       file_id: result.id,
       file_name: fileName,
+      drive_link: `https://drive.google.com/file/d/${result.id}/view`,
       records_backed_up: {
         stores: stores.length,
         cashiers: cashiers.length,

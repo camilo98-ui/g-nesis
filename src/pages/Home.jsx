@@ -871,7 +871,17 @@ export default function Home() {
                         const response = await base44.functions.invoke('backupToGoogleDrive', {});
                         console.log('Backup response:', response.data);
                         if (response.data.success) {
-                          toast.success(`✓ Backup creado: ${response.data.file_name}`, { duration: 5000 });
+                          toast.success(
+                            <div>
+                              <p className="font-bold">✓ Backup creado: {response.data.file_name}</p>
+                              {response.data.drive_link && (
+                                <a href={response.data.drive_link} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline text-xs">
+                                  Abrir en Drive
+                                </a>
+                              )}
+                            </div>,
+                            { duration: 8000 }
+                          );
                         } else {
                           toast.error(`Error: ${response.data.error}`, { duration: 7000 });
                           console.error('Backup error details:', response.data);
