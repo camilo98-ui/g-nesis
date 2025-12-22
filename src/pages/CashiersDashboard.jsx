@@ -373,7 +373,7 @@ export default function CashiersDashboard() {
                         </div>
                       </div>
                       <div className="bg-white/70 backdrop-blur-sm rounded-xl p-3">
-                        <p className="text-3xl font-black text-pink-900 tracking-tight">
+                        <p className="text-2xl font-black text-pink-900 tracking-tight">
                           {formatCurrency(actionableMetrics.bestInSales.totalSales)}
                         </p>
                         <p className="text-xs text-pink-700 font-medium mt-1">
@@ -418,7 +418,7 @@ export default function CashiersDashboard() {
                         </div>
                       </div>
                       <div className="bg-white/70 backdrop-blur-sm rounded-xl p-3">
-                        <p className="text-3xl font-black text-pink-900 tracking-tight">
+                        <p className="text-2xl font-black text-pink-900 tracking-tight">
                           {formatCurrency(actionableMetrics.bestInTicket.avgTicket)}
                         </p>
                         <p className="text-xs text-pink-700 font-medium mt-1">
@@ -463,7 +463,7 @@ export default function CashiersDashboard() {
                         </div>
                       </div>
                       <div className="bg-white/70 backdrop-blur-sm rounded-xl p-3">
-                        <p className="text-3xl font-black text-pink-900 tracking-tight">
+                        <p className="text-2xl font-black text-pink-900 tracking-tight">
                           {actionableMetrics.bestInTransactions.totalTransactions.toLocaleString('es-CO')}
                         </p>
                         <p className="text-xs text-pink-700 font-medium mt-1">
