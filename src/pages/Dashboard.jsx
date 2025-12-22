@@ -8,6 +8,7 @@ import StoreSelector, { STORES, getDisplayName } from '@/components/StoreSelecto
 import DateFilter from '@/components/DateFilter';
 import WeekFilter from '@/components/dashboard/WeekFilter';
 import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
+import ComparableChartsGrid from '@/components/executive/ComparableChartsGrid';
 
 import DailyGoalsCard from '@/components/gamification/DailyGoalsCard';
 import WeatherSalesImpactChart from '@/components/weather/WeatherSalesImpactChart';
@@ -1359,106 +1360,116 @@ export default function Dashboard() {
                     </ResponsiveContainer>
                   </div>
 
-                  {/* Stats comparativos con insights ejecutivos */}
+                   {/* Stats comparativos con insights ejecutivos */}
                   <div className="grid grid-cols-3 gap-4 mb-6">
-                   <div className="bg-emerald-500/20 rounded-xl p-4 border border-emerald-400/30">
-                     <p className="text-xs text-emerald-200 mb-1">Período Actual</p>
-                     <p className="text-2xl font-black text-white">
-                       {activeMetric === 'sales_comp' && formatCurrency(totals.sales)}
-                       {activeMetric === 'trans_comp' && totals.transactions.toLocaleString()}
-                       {activeMetric === 'ticket_comp' && formatCurrency(avgTicket)}
-                       {activeMetric === 'suggested_comp' && totals.suggested.toLocaleString()}
-                     </p>
-                   </div>
-                   <div className="bg-slate-500/20 rounded-xl p-4 border border-slate-400/30">
-                     <p className="text-xs text-slate-200 mb-1">Período Anterior</p>
-                     <p className="text-2xl font-black text-white">
-                       {activeMetric === 'sales_comp' && formatCurrency(comparisonTotals.sales)}
-                       {activeMetric === 'trans_comp' && comparisonTotals.transactions.toLocaleString()}
-                       {activeMetric === 'ticket_comp' && formatCurrency(comparisonTotals.transactions > 0 ? comparisonTotals.sales / comparisonTotals.transactions : 0)}
-                       {activeMetric === 'suggested_comp' && comparisonTotals.suggested.toLocaleString()}
-                     </p>
-                   </div>
-                   <div className={`rounded-xl p-4 border ${
-                     (activeMetric === 'sales_comp' && totals.sales > comparisonTotals.sales) ||
-                     (activeMetric === 'trans_comp' && totals.transactions > comparisonTotals.transactions) ||
-                     (activeMetric === 'ticket_comp' && avgTicket > (comparisonTotals.sales / comparisonTotals.transactions)) ||
-                     (activeMetric === 'suggested_comp' && totals.suggested > comparisonTotals.suggested)
-                       ? 'bg-emerald-500/20 border-emerald-400/30' 
-                       : 'bg-red-500/20 border-red-400/30'
-                   }`}>
-                     <p className={`text-xs mb-1 ${
-                       (activeMetric === 'sales_comp' && totals.sales > comparisonTotals.sales) ||
-                       (activeMetric === 'trans_comp' && totals.transactions > comparisonTotals.transactions) ||
-                       (activeMetric === 'ticket_comp' && avgTicket > (comparisonTotals.sales / comparisonTotals.transactions)) ||
-                       (activeMetric === 'suggested_comp' && totals.suggested > comparisonTotals.suggested)
-                         ? 'text-emerald-200' 
-                         : 'text-red-200'
-                     }`}>Variación</p>
-                     <p className={`text-2xl font-black ${
-                       (activeMetric === 'sales_comp' && totals.sales > comparisonTotals.sales) ||
-                       (activeMetric === 'trans_comp' && totals.transactions > comparisonTotals.transactions) ||
-                       (activeMetric === 'ticket_comp' && avgTicket > (comparisonTotals.sales / comparisonTotals.transactions)) ||
-                       (activeMetric === 'suggested_comp' && totals.suggested > comparisonTotals.suggested)
-                         ? 'text-emerald-400' 
-                         : 'text-red-400'
-                     }`}>
-                       {activeMetric === 'sales_comp' && 
-                         (totals.sales > comparisonTotals.sales ? '+' : '') + 
-                         ((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100).toFixed(1) + '%'
-                       }
-                       {activeMetric === 'trans_comp' && 
-                         (totals.transactions > comparisonTotals.transactions ? '+' : '') + 
-                         ((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100).toFixed(1) + '%'
-                       }
-                       {activeMetric === 'ticket_comp' && 
-                         (avgTicket > (comparisonTotals.sales / comparisonTotals.transactions) ? '+' : '') + 
-                         ((avgTicket - (comparisonTotals.sales / comparisonTotals.transactions)) / (comparisonTotals.sales / comparisonTotals.transactions) * 100).toFixed(1) + '%'
-                       }
-                       {activeMetric === 'suggested_comp' && 
-                         (totals.suggested > comparisonTotals.suggested ? '+' : '') + 
-                         ((totals.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100).toFixed(1) + '%'
-                       }
-                     </p>
-                   </div>
+                    <div className="bg-emerald-500/20 rounded-xl p-4 border border-emerald-400/30">
+                      <p className="text-xs text-emerald-200 mb-1">Período Actual</p>
+                      <p className="text-2xl font-black text-white">
+                        {activeMetric === 'sales_comp' && formatCurrency(totals.sales)}
+                        {activeMetric === 'trans_comp' && totals.transactions.toLocaleString()}
+                        {activeMetric === 'ticket_comp' && formatCurrency(avgTicket)}
+                        {activeMetric === 'suggested_comp' && totals.suggested.toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="bg-slate-500/20 rounded-xl p-4 border border-slate-400/30">
+                      <p className="text-xs text-slate-200 mb-1">Período Anterior</p>
+                      <p className="text-2xl font-black text-white">
+                        {activeMetric === 'sales_comp' && formatCurrency(comparisonTotals.sales)}
+                        {activeMetric === 'trans_comp' && comparisonTotals.transactions.toLocaleString()}
+                        {activeMetric === 'ticket_comp' && formatCurrency(comparisonTotals.transactions > 0 ? comparisonTotals.sales / comparisonTotals.transactions : 0)}
+                        {activeMetric === 'suggested_comp' && comparisonTotals.suggested.toLocaleString()}
+                      </p>
+                    </div>
+                    <div className={`rounded-xl p-4 border ${
+                      (activeMetric === 'sales_comp' && totals.sales > comparisonTotals.sales) ||
+                      (activeMetric === 'trans_comp' && totals.transactions > comparisonTotals.transactions) ||
+                      (activeMetric === 'ticket_comp' && avgTicket > (comparisonTotals.sales / comparisonTotals.transactions)) ||
+                      (activeMetric === 'suggested_comp' && totals.suggested > comparisonTotals.suggested)
+                        ? 'bg-emerald-500/20 border-emerald-400/30' 
+                        : 'bg-red-500/20 border-red-400/30'
+                    }`}>
+                      <p className={`text-xs mb-1 ${
+                        (activeMetric === 'sales_comp' && totals.sales > comparisonTotals.sales) ||
+                        (activeMetric === 'trans_comp' && totals.transactions > comparisonTotals.transactions) ||
+                        (activeMetric === 'ticket_comp' && avgTicket > (comparisonTotals.sales / comparisonTotals.transactions)) ||
+                        (activeMetric === 'suggested_comp' && totals.suggested > comparisonTotals.suggested)
+                          ? 'text-emerald-200' 
+                          : 'text-red-200'
+                      }`}>Variación</p>
+                      <p className={`text-2xl font-black ${
+                        (activeMetric === 'sales_comp' && totals.sales > comparisonTotals.sales) ||
+                        (activeMetric === 'trans_comp' && totals.transactions > comparisonTotals.transactions) ||
+                        (activeMetric === 'ticket_comp' && avgTicket > (comparisonTotals.sales / comparisonTotals.transactions)) ||
+                        (activeMetric === 'suggested_comp' && totals.suggested > comparisonTotals.suggested)
+                          ? 'text-emerald-400' 
+                          : 'text-red-400'
+                      }`}>
+                        {activeMetric === 'sales_comp' && 
+                          (totals.sales > comparisonTotals.sales ? '+' : '') + 
+                          ((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100).toFixed(1) + '%'
+                        }
+                        {activeMetric === 'trans_comp' && 
+                          (totals.transactions > comparisonTotals.transactions ? '+' : '') + 
+                          ((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100).toFixed(1) + '%'
+                        }
+                        {activeMetric === 'ticket_comp' && 
+                          (avgTicket > (comparisonTotals.sales / comparisonTotals.transactions) ? '+' : '') + 
+                          ((avgTicket - (comparisonTotals.sales / comparisonTotals.transactions)) / (comparisonTotals.sales / comparisonTotals.transactions) * 100).toFixed(1) + '%'
+                        }
+                        {activeMetric === 'suggested_comp' && 
+                          (totals.suggested > comparisonTotals.suggested ? '+' : '') + 
+                          ((totals.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100).toFixed(1) + '%'
+                        }
+                      </p>
+                    </div>
                   </div>
 
                   {/* Insight Ejecutivo */}
                   <div className="bg-blue-500/10 border border-blue-400/30 rounded-xl p-4">
-                   <div className="flex items-start gap-3">
-                     <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                       <Target className="w-4 h-4 text-blue-300" />
-                     </div>
-                     <div className="flex-1">
-                       <h5 className="text-sm font-bold text-white mb-1">Análisis Ejecutivo</h5>
-                       <p className="text-xs text-blue-100 leading-relaxed">
-                         {activeMetric === 'sales_comp' && (
-                           totals.sales > comparisonTotals.sales 
-                             ? `La facturación muestra crecimiento sostenido del ${((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100).toFixed(1)}%. Este incremento indica efectividad en las estrategias comerciales implementadas. Recomendación: Replicar las tácticas exitosas del período actual en otros puntos de venta.`
-                             : `Se observa una contracción de ${Math.abs((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100).toFixed(1)}% en ventas. Requiere análisis inmediato de: 1) Flujo de clientes, 2) Competencia directa, 3) Cambios en comportamiento de compra. Prioridad: Implementar plan de recuperación en las próximas 72 horas.`
-                         )}
-                         {activeMetric === 'trans_comp' && (
-                           totals.transactions > comparisonTotals.transactions
-                             ? `El tráfico de clientes aumentó ${((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100).toFixed(1)}%, indicando mayor captación y retención. Si las ventas no crecieron proporcionalmente, existe oportunidad crítica de optimizar ticket promedio mediante capacitación en venta consultiva.`
-                             : `Reducción de ${Math.abs((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100).toFixed(1)}% en flujo de clientes. Causas potenciales: factores externos (clima, eventos), competencia, o deterioro en servicio. Acción: Auditoría urgente de experiencia de cliente y revisión de estrategias de atracción.`
-                         )}
-                         {activeMetric === 'ticket_comp' && (
-                           avgTicket > (comparisonTotals.sales / comparisonTotals.transactions)
-                             ? `Mejora de ${((avgTicket - (comparisonTotals.sales / comparisonTotals.transactions)) / (comparisonTotals.sales / comparisonTotals.transactions) * 100).toFixed(1)}% en ticket promedio refleja mayor efectividad comercial y éxito en estrategias de venta cruzada/upselling. Este KPI es clave para rentabilidad. Recomendación: Documentar e institucionalizar prácticas exitosas del equipo.`
-                             : `El ticket promedio decreció ${Math.abs((avgTicket - (comparisonTotals.sales / comparisonTotals.transactions)) / (comparisonTotals.sales / comparisonTotals.transactions) * 100).toFixed(1)}%, señalando menor conversión por transacción. Posibles causas: cambio en mix de productos, falta de venta sugerida, o migración a productos de menor valor. Requiere refuerzo inmediato en técnicas de venta consultiva.`
-                         )}
-                         {activeMetric === 'suggested_comp' && (
-                           totals.suggested > comparisonTotals.suggested
-                             ? `Los sugeridos crecieron ${((totals.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100).toFixed(1)}%, evidenciando mejora en capacidades de venta consultiva del equipo. Cada unidad adicional impacta directamente en márgenes. Mantener incentivos y reconocimiento a top performers.`
-                             : `Disminución de ${Math.abs((totals.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100).toFixed(1)}% en venta de sugeridos representa pérdida directa de margen. Requiere intervención inmediata: 1) Reforzar entrenamiento, 2) Verificar disponibilidad de productos complementarios, 3) Revisar script de venta sugerida con el equipo.`
-                         )}
-                       </p>
-                     </div>
-                   </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <Target className="w-4 h-4 text-blue-300" />
+                      </div>
+                      <div className="flex-1">
+                        <h5 className="text-sm font-bold text-white mb-1">Análisis Ejecutivo</h5>
+                        <p className="text-xs text-blue-100 leading-relaxed">
+                          {activeMetric === 'sales_comp' && (
+                            totals.sales > comparisonTotals.sales 
+                              ? `La facturación muestra crecimiento sostenido del ${((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100).toFixed(1)}%. Este incremento indica efectividad en las estrategias comerciales implementadas. Recomendación: Replicar las tácticas exitosas del período actual en otros puntos de venta.`
+                              : `Se observa una contracción de ${Math.abs((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100).toFixed(1)}% en ventas. Requiere análisis inmediato de: 1) Flujo de clientes, 2) Competencia directa, 3) Cambios en comportamiento de compra. Prioridad: Implementar plan de recuperación en las próximas 72 horas.`
+                          )}
+                          {activeMetric === 'trans_comp' && (
+                            totals.transactions > comparisonTotals.transactions
+                              ? `El tráfico de clientes aumentó ${((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100).toFixed(1)}%, indicando mayor captación y retención. Si las ventas no crecieron proporcionalmente, existe oportunidad crítica de optimizar ticket promedio mediante capacitación en venta consultiva.`
+                              : `Reducción de ${Math.abs((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100).toFixed(1)}% en flujo de clientes. Causas potenciales: factores externos (clima, eventos), competencia, o deterioro en servicio. Acción: Auditoría urgente de experiencia de cliente y revisión de estrategias de atracción.`
+                          )}
+                          {activeMetric === 'ticket_comp' && (
+                            avgTicket > (comparisonTotals.sales / comparisonTotals.transactions)
+                              ? `Mejora de ${((avgTicket - (comparisonTotals.sales / comparisonTotals.transactions)) / (comparisonTotals.sales / comparisonTotals.transactions) * 100).toFixed(1)}% en ticket promedio refleja mayor efectividad comercial y éxito en estrategias de venta cruzada/upselling. Este KPI es clave para rentabilidad. Recomendación: Documentar e institucionalizar prácticas exitosas del equipo.`
+                              : `El ticket promedio decreció ${Math.abs((avgTicket - (comparisonTotals.sales / comparisonTotals.transactions)) / (comparisonTotals.sales / comparisonTotals.transactions) * 100).toFixed(1)}%, señalando menor conversión por transacción. Posibles causas: cambio en mix de productos, falta de venta sugerida, o migración a productos de menor valor. Requiere refuerzo inmediato en técnicas de venta consultiva.`
+                          )}
+                          {activeMetric === 'suggested_comp' && (
+                            totals.suggested > comparisonTotals.suggested
+                              ? `Los sugeridos crecieron ${((totals.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100).toFixed(1)}%, evidenciando mejora en capacidades de venta consultiva del equipo. Cada unidad adicional impacta directamente en márgenes. Mantener incentivos y reconocimiento a top performers.`
+                              : `Disminución de ${Math.abs((totals.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100).toFixed(1)}% en venta de sugeridos representa pérdida directa de margen. Requiere intervención inmediata: 1) Reforzar entrenamiento, 2) Verificar disponibilidad de productos complementarios, 3) Revisar script de venta sugerida con el equipo.`
+                          )}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </motion.div>
               )}
-            </AnimatePresence>
+              </AnimatePresence>
+
+              {/* Gráficas adicionales en modo comparable */}
+              {showComparison && comparisonTotals && !activeMetric && (
+              <ComparableChartsGrid 
+                chartData={chartData}
+                totals={totals}
+                comparisonTotals={comparisonTotals}
+                formatCurrency={formatCurrency}
+              />
+              )}
 
             {/* Overview Charts - Solo visible en modo ACTUAL */}
             {!activeMetric && !showComparison && (
