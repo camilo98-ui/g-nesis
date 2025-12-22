@@ -1135,7 +1135,7 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                       </motion.div>
                     ))}
                   </div>
-                </div>
+                </motion.div>
               </motion.div>
             </div>
 
