@@ -191,6 +191,14 @@ export default function ExecutiveDashboard() {
     return storesAnalysis.filter(s => s.status === filterStatus);
   }, [storesAnalysis, filterStatus]);
 
+  const comparisonData = useMemo(() => {
+    return filteredStores.map(s => ({
+      name: s.name, ventas: s.totalSales, presupuesto: s.salesBudget,
+      cumplimiento: s.salesCompliance, proyeccion: s.projection,
+      ticket: s.avgTicket, transacciones: s.totalTransactions
+    }));
+  }, [filteredStores]);
+
   // Análisis del período de comparación
   const comparisonAnalysis = useMemo(() => {
     if (!comparisonRange) return null;
@@ -238,10 +246,15 @@ export default function ExecutiveDashboard() {
         cumplimiento: current.salesCompliance,
         proyeccion: current.projection,
         presupuesto: current.salesBudget,
+        ventas: current.totalSales,
+        ticket: current.avgTicket,
+        transacciones: current.totalTransactions,
         growth: comparison?.totalSales > 0 ? ((current.totalSales - comparison.totalSales) / comparison.totalSales) * 100 : 0
       };
     });
   }, [storesAnalysis, comparisonAnalysis, comparisonData]);
+
+  const dataToDisplay = showComparison && comparisonRange ? comparisonChartData : comparisonData;
 
   // Totales comparativos
   const comparisonTotals = useMemo(() => {
