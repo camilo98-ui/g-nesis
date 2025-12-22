@@ -9,6 +9,7 @@ import FreezerSlotCell from '@/components/freezer/FreezerSlotCell';
 import FreezerAuditPanel from '@/components/freezer/FreezerAuditPanel';
 import FreezerHistoryPanel from '@/components/freezer/FreezerHistoryPanel';
 import FreezerDimensionsEditor from '@/components/freezer/FreezerDimensionsEditor';
+import SmartOrderPrediction from '@/components/freezer/SmartOrderPrediction';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
@@ -211,6 +212,19 @@ export default function FreezerMap() {
     queryFn: () => base44.entities.FreezerSlot.filter({ store_id: `${selectedStore}_F${currentFreezer}` }),
     enabled: !!selectedStore,
     staleTime: 0
+  });
+
+  // Fetch todas las neveras para análisis completo
+  const { data: allFreezersSlots = [] } = useQuery({
+    queryKey: ['allFreezersSlots', selectedStore],
+    queryFn: async () => {
+      const f1 = await base44.entities.FreezerSlot.filter({ store_id: `${selectedStore}_F1` });
+      const f2 = await base44.entities.FreezerSlot.filter({ store_id: `${selectedStore}_F2` });
+      const f3 = await base44.entities.FreezerSlot.filter({ store_id: `${selectedStore}_F3` });
+      return [...f1, ...f2, ...f3];
+    },
+    enabled: !!selectedStore,
+    staleTime: 30000
   });
 
   // Long press para borrar
@@ -867,76 +881,107 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                               className="flex flex-col gap-1"
                             >
                               {/* Slot Trasero (T) - arriba */}
-                              <div
+                              <motion.div
                                 onClick={() => {
                                   setSelectedSlot({ ...bajada.back, row: bajada.row, position: bajada.position, slot_type: 'T' });
                                   setShowFlavorSelector(true);
                                 }}
                                 onDoubleClick={() => clearSlot(bajada.back)}
-                                className={`h-10 sm:h-11 rounded-lg cursor-pointer transition-all border-2 relative ${
+                                whileHover={!bajada.back.is_empty ? { scale: 1.08, y: -2 } : { scale: 1.02 }}
+                                whileTap={{ scale: 0.95 }}
+                                className={`h-10 sm:h-11 rounded-lg cursor-pointer transition-all border-2 relative overflow-hidden ${
                                   bajada.back.is_empty 
                                     ? 'bg-purple-50/50 border-dashed border-purple-200 hover:border-purple-400' 
-                                    : 'border-purple-300 shadow-sm hover:scale-105'
+                                    : 'border-purple-300 shadow-md'
                                 }`}
                                 style={!bajada.back.is_empty ? { 
-                                  background: `linear-gradient(135deg, ${bajada.back.color}cc, ${bajada.back.color}88)` 
+                                  background: `linear-gradient(135deg, ${bajada.back.color}ee, ${bajada.back.color}99)`
                                 } : {}}
                               >
+                                {!bajada.back.is_empty && (
+                                  <motion.div 
+                                    className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"
+                                    animate={{ opacity: [0.3, 0.6, 0.3] }}
+                                    transition={{ duration: 2, repeat: Infinity }}
+                                  />
+                                )}
                                 <div className="absolute top-0.5 left-0.5 bg-purple-500 text-white text-[6px] px-1 rounded font-bold z-10">T</div>
                                 {bajada.back.is_empty ? (
                                   <div className="h-full flex items-center justify-center">
-                                    <Plus className="w-3 h-3 text-purple-300" />
+                                    <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 1.5, repeat: Infinity }}>
+                                      <Plus className="w-3 h-3 text-purple-300" />
+                                    </motion.div>
                                   </div>
                                 ) : (
-                                  <div className="h-full flex items-center justify-center pt-1.5">
+                                  <div className="h-full flex items-center justify-center pt-1.5 relative z-10">
                                     <span 
                                       className="text-[7px] sm:text-[8px] font-bold text-center leading-tight px-0.5 line-clamp-2"
                                       style={{ 
                                         color: getTextColor(bajada.back.color),
-                                        textShadow: getTextColor(bajada.back.color) === '#ffffff' ? '0 1px 2px rgba(0,0,0,0.5)' : '0 1px 1px rgba(255,255,255,0.3)'
+                                        textShadow: getTextColor(bajada.back.color) === '#ffffff' ? '0 1px 3px rgba(0,0,0,0.6)' : '0 1px 2px rgba(255,255,255,0.4)'
                                       }}
                                     >
                                       {bajada.back.flavor_name}
                                     </span>
                                   </div>
                                 )}
-                              </div>
+                              </motion.div>
                               
                               {/* Slot Frontal (F) - abajo */}
-                              <div
+                              <motion.div
                                 onClick={() => {
                                   setSelectedSlot({ ...bajada.front, row: bajada.row, position: bajada.position, slot_type: 'F' });
                                   setShowFlavorSelector(true);
                                 }}
                                 onDoubleClick={() => clearSlot(bajada.front)}
-                                className={`h-11 sm:h-12 rounded-lg cursor-pointer transition-all border-2 shadow-md relative ${
+                                whileHover={!bajada.front.is_empty ? { scale: 1.08, y: -2 } : { scale: 1.02 }}
+                                whileTap={{ scale: 0.95 }}
+                                className={`h-11 sm:h-12 rounded-lg cursor-pointer transition-all border-2 shadow-lg relative overflow-hidden ${
                                   bajada.front.is_empty 
                                     ? 'bg-white border-dashed border-pink-200 hover:border-pink-400' 
-                                    : 'border-pink-300 hover:scale-105'
+                                    : 'border-pink-400'
                                 }`}
                                 style={!bajada.front.is_empty ? { 
-                                  background: `linear-gradient(135deg, ${bajada.front.color}ee, ${bajada.front.color}aa)` 
+                                  background: `linear-gradient(135deg, ${bajada.front.color}ff, ${bajada.front.color}bb)`,
+                                  boxShadow: `0 4px 12px ${bajada.front.color}40`
                                 } : {}}
                               >
-                                <div className="absolute top-0.5 left-0.5 bg-pink-500 text-white text-[6px] px-1 rounded font-bold z-10">F</div>
+                                {!bajada.front.is_empty && (
+                                  <>
+                                    <motion.div 
+                                      className="absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-transparent"
+                                      animate={{ opacity: [0.4, 0.7, 0.4] }}
+                                      transition={{ duration: 2, repeat: Infinity }}
+                                    />
+                                    <motion.div
+                                      className="absolute inset-0"
+                                      style={{ background: `radial-gradient(circle at 30% 30%, ${bajada.front.color}22 0%, transparent 70%)` }}
+                                      animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
+                                      transition={{ duration: 3, repeat: Infinity }}
+                                    />
+                                  </>
+                                )}
+                                <div className="absolute top-0.5 left-0.5 bg-pink-500 text-white text-[6px] px-1 rounded font-bold z-10 shadow-sm">F</div>
                                 {bajada.front.is_empty ? (
                                   <div className="h-full flex items-center justify-center">
-                                    <Plus className="w-4 h-4 text-pink-300" />
+                                    <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 1.5, repeat: Infinity }}>
+                                      <Plus className="w-4 h-4 text-pink-300" />
+                                    </motion.div>
                                   </div>
                                 ) : (
-                                  <div className="h-full flex items-center justify-center pt-1.5">
+                                  <div className="h-full flex items-center justify-center pt-1.5 relative z-10">
                                     <span 
                                       className="text-[8px] sm:text-[9px] font-bold text-center leading-tight px-0.5 line-clamp-2"
                                       style={{ 
                                         color: getTextColor(bajada.front.color),
-                                        textShadow: getTextColor(bajada.front.color) === '#ffffff' ? '0 1px 2px rgba(0,0,0,0.5)' : '0 1px 1px rgba(255,255,255,0.3)'
+                                        textShadow: getTextColor(bajada.front.color) === '#ffffff' ? '0 1px 3px rgba(0,0,0,0.6)' : '0 1px 2px rgba(255,255,255,0.5)'
                                       }}
                                     >
                                       {bajada.front.flavor_name}
                                     </span>
                                   </div>
                                 )}
-                              </div>
+                              </motion.div>
                             </div>
                           ))}
                         </div>
@@ -946,6 +991,12 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                 </div>
               </motion.div>
             </div>
+
+            {/* Pronóstico de Pedido - Independiente */}
+            <SmartOrderPrediction 
+              allFreezersSlots={allFreezersSlots} 
+              currentFreezer={currentFreezer}
+            />
 
             {/* Info Panel */}
             <div className="mt-4 p-3 bg-white/80 rounded-xl shadow-sm space-y-3">

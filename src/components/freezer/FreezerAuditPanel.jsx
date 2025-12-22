@@ -141,8 +141,7 @@ export default function FreezerAuditPanel({
           </div>
         </div>
 
-        {/* Pronóstico de Pedido */}
-        <OrderPredictionPanel slots={allSlots} />
+
 
         {/* Issues List - Solo repetidos */}
         {repeatedFlavors?.length > 0 && (
