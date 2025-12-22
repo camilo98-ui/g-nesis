@@ -316,16 +316,6 @@ export default function ExecutiveDashboard() {
     });
   }, [storesAnalysis, allDailySales, allBudgets, currentMonth, currentYear]);
 
-  const comparisonData = useMemo(() => {
-    return filteredStores.map(s => ({
-      name: s.name, ventas: s.totalSales, presupuesto: s.salesBudget,
-      cumplimiento: s.salesCompliance, proyeccion: s.projection,
-      ticket: s.avgTicket, transacciones: s.totalTransactions
-    }));
-  }, [filteredStores]);
-
-  const dataToDisplay = showComparison && comparisonRange ? comparisonChartData : comparisonData;
-
   const weightData = useMemo(() => {
     return filteredStores.slice().sort((a, b) => b.weight - a.weight).map(s => ({
       name: s.name, peso: s.weight, presupuesto: s.salesBudget
