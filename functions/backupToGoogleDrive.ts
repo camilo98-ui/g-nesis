@@ -11,6 +11,12 @@ Deno.serve(async (req) => {
 
     // Obtener access token de Google Drive
     const accessToken = await base44.asServiceRole.connectors.getAccessToken('googledrive');
+    
+    if (!accessToken) {
+      throw new Error('No se pudo obtener el token de Google Drive. Verifica que la conexión esté activa.');
+    }
+    
+    console.log('Access token obtenido correctamente');
 
     // Recopilar datos de todas las entidades principales
     const [
@@ -56,6 +62,8 @@ Deno.serve(async (req) => {
 
     const jsonContent = JSON.stringify(backupData, null, 2);
     const fileName = `Popsy_Backup_${new Date().toISOString().split('T')[0]}.json`;
+    
+    console.log(`Preparando backup: ${fileName} (${jsonContent.length} bytes)`);
 
     // Crear archivo en Google Drive
     const metadata = {
@@ -68,6 +76,8 @@ Deno.serve(async (req) => {
     form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
     form.append('file', new Blob([jsonContent], { type: 'application/json' }));
 
+    console.log('Intentando subir archivo a Google Drive...');
+    
     const uploadResponse = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
       method: 'POST',
       headers: {
@@ -75,6 +85,8 @@ Deno.serve(async (req) => {
       },
       body: form
     });
+    
+    console.log(`Upload response status: ${uploadResponse.status}`);
 
     if (!uploadResponse.ok) {
       const errorText = await uploadResponse.text();
