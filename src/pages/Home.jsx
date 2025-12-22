@@ -824,7 +824,7 @@ export default function Home() {
 
             // Restricciones: Panel Ejecutivo solo para gerente, otras opciones solo si hay tienda seleccionada
             const needsStore = item.page !== 'ExecutiveDashboard';
-            if (needsStore && !selectedStore) return null;
+            if (needsStore && !selectedStore && item.requiredRole !== 'gerente') return null;
             if (item.requiredRole && selectedRole !== item.requiredRole) return null;
 
             // Restricciones por rol - solo embajador no ve Presupuestos
