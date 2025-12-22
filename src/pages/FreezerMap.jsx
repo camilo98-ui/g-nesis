@@ -415,11 +415,12 @@ export default function FreezerMap() {
 
     if (lastAction.action === 'clear' || lastAction.action === 'edit') {
       const slot = lastAction.slot;
-      // Buscar por row, position Y slot_type
+      // Buscar por store_id, row, position Y slot_type
       const existing = slots.find((s) =>
-      s.row === slot.row &&
-      s.position === slot.position &&
-      s.slot_type === slot.slot_type
+        s.store_id === slot.store_id &&
+        s.row === slot.row &&
+        s.position === slot.position &&
+        s.slot_type === slot.slot_type
       );
       if (existing?.id) {
         await base44.entities.FreezerSlot.update(existing.id, {
@@ -511,8 +512,18 @@ export default function FreezerMap() {
     e.preventDefault();
     if (!draggedSlot || draggedSlot.row === targetSlot.row && draggedSlot.position === targetSlot.position) return;
 
-    const draggedExisting = slots.find((s) => s.row === draggedSlot.row && s.position === draggedSlot.position);
-    const targetExisting = slots.find((s) => s.row === targetSlot.row && s.position === targetSlot.position);
+    const draggedExisting = slots.find((s) => 
+      s.store_id === `${selectedStore}_F${currentFreezer}` &&
+      s.row === draggedSlot.row && 
+      s.position === draggedSlot.position &&
+      s.slot_type === draggedSlot.slot_type
+    );
+    const targetExisting = slots.find((s) => 
+      s.store_id === `${selectedStore}_F${currentFreezer}` &&
+      s.row === targetSlot.row && 
+      s.position === targetSlot.position &&
+      s.slot_type === targetSlot.slot_type
+    );
 
     if (draggedExisting) {
       await base44.entities.FreezerSlot.update(draggedExisting.id, { row: targetSlot.row, position: targetSlot.position });
