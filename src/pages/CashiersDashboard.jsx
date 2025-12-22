@@ -294,7 +294,7 @@ export default function CashiersDashboard() {
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="relative bg-gradient-to-br from-pink-400 via-rose-500 to-pink-600 rounded-[2.5rem] shadow-2xl overflow-hidden p-8 mb-6"
+              className="relative bg-gradient-to-br from-pink-100 via-rose-200 to-pink-200 rounded-[2.5rem] shadow-2xl overflow-hidden p-8 mb-6"
             >
               {/* Efecto de brillo animado */}
               <motion.div
