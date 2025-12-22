@@ -392,7 +392,7 @@ export default function CashiersDashboard() {
                   </span>
                 </div>
                 <p className="text-xs text-gray-600 font-medium mb-2">
-                  {formatCurrency(teamTotals.avgTicket)} / {formatCurrency(storeMeta.ticketGoal)}
+                  {formatCurrency(actionableMetrics.storeAvgTicket)} / {formatCurrency(storeMeta.ticketGoal)}
                 </p>
                 <div className="h-2 bg-white/50 rounded-full overflow-hidden">
                   <motion.div
