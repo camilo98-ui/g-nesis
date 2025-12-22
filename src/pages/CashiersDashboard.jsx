@@ -166,21 +166,28 @@ export default function CashiersDashboard() {
     c.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Totales del equipo
+  // Totales del equipo - calculados directamente desde shiftRecords de la tienda
   const teamTotals = useMemo(() => {
-    const values = Object.values(cashierStats);
-    const totalSales = values.reduce((sum, c) => sum + c.totalSales, 0);
-    const totalTransactions = values.reduce((sum, c) => sum + c.totalTransactions, 0);
-    const totalSuggested = values.reduce((sum, c) => sum + c.totalSuggested, 0);
+    const filteredRecords = shiftRecords.filter(r => {
+      const d = new Date(r.date);
+      return d >= dateRange.from && d <= dateRange.to;
+    });
+
+    const totalSales = filteredRecords.reduce((sum, r) => sum + (r.sales || 0), 0);
+    const totalTransactions = filteredRecords.reduce((sum, r) => sum + (r.transactions || 0), 0);
+    const totalSuggested = filteredRecords.reduce((sum, r) => sum + (r.suggested_sales || 0), 0);
+    
+    const activeCashiersCount = activeCashiers.length;
+    
     return {
       totalSales,
       totalTickets: totalTransactions,
       avgTicket: totalTransactions > 0 ? totalSales / totalTransactions : 0,
-      avgSales: values.length > 0 ? totalSales / values.length : 0,
-      avgSuggested: values.length > 0 ? totalSuggested / values.length : 0,
-      totalCashiers: values.length
+      avgSales: activeCashiersCount > 0 ? totalSales / activeCashiersCount : 0,
+      avgSuggested: activeCashiersCount > 0 ? totalSuggested / activeCashiersCount : 0,
+      totalCashiers: activeCashiersCount
     };
-  }, [cashierStats]);
+  }, [shiftRecords, dateRange, activeCashiers]);
 
   // Indicadores accionables
   const actionableMetrics = useMemo(() => {
