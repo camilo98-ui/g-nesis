@@ -444,25 +444,35 @@ INSTRUCCIONES:
     };
   }, [storesAnalysis, zoneTotals, activeRange]);
 
-  // Detectar tiendas sin planner de la semana
-  const storesWithoutPlanner = useMemo(() => {
+  // Detectar tiendas con y sin planner de la semana
+  const plannerStatus = useMemo(() => {
     const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 }); // Lunes
     const weekEnd = endOfWeek(new Date(), { weekStartsOn: 1 }); // Domingo
     
-    const storesWithShifts = new Set(
-      allShifts
-        .filter(shift => {
-          try {
-            const shiftDate = new Date(shift.date);
-            return shiftDate >= weekStart && shiftDate <= weekEnd;
-          } catch {
-            return false;
-          }
-        })
-        .map(shift => shift.store_id)
-    );
+    const storeShiftsMap = new Map();
     
-    return STORES.filter(store => !storesWithShifts.has(store.code));
+    allShifts.forEach(shift => {
+      try {
+        const shiftDate = new Date(shift.date);
+        if (shiftDate >= weekStart && shiftDate <= weekEnd) {
+          if (!storeShiftsMap.has(shift.store_id)) {
+            storeShiftsMap.set(shift.store_id, []);
+          }
+          storeShiftsMap.get(shift.store_id).push(shift);
+        }
+      } catch {}
+    });
+    
+    const withPlanner = STORES.filter(store => storeShiftsMap.has(store.code))
+      .map(store => ({
+        ...store,
+        shiftsCount: storeShiftsMap.get(store.code).length,
+        lastUpdated: Math.max(...storeShiftsMap.get(store.code).map(s => new Date(s.updated_date || s.created_date).getTime()))
+      }));
+    
+    const withoutPlanner = STORES.filter(store => !storeShiftsMap.has(store.code));
+    
+    return { withPlanner, withoutPlanner };
   }, [allShifts]);
 
   const autoInsight = useMemo(() => {
@@ -656,12 +666,12 @@ INSTRUCCIONES:
                 <div className="flex items-center gap-3">
                   <Clock className="w-4 h-4" />
                   <span className={`text-sm ${activeView === 'planner' ? 'font-semibold' : 'font-medium'}`}>
-                    Planner Pendiente
+                    Planner
                   </span>
                 </div>
-                {storesWithoutPlanner.length > 0 && (
+                {plannerStatus.withoutPlanner.length > 0 && (
                   <span className="bg-orange-100 text-orange-700 text-xs font-semibold px-2 py-0.5 rounded-full">
-                    {storesWithoutPlanner.length}
+                    {plannerStatus.withoutPlanner.length}
                   </span>
                 )}
               </div>
@@ -857,63 +867,144 @@ INSTRUCCIONES:
                 animate={{ opacity: 1, y: 0 }}
                 className="mb-6"
               >
-                <h1 className="text-2xl font-bold text-gray-900 mb-1">Tiendas sin Planner Semanal</h1>
+                <h1 className="text-2xl font-bold text-gray-900 mb-1">Planner Semanal</h1>
                 <p className="text-sm text-gray-500">
-                  Tiendas que aún no han registrado horarios para la semana actual (Lunes - Domingo)
+                  Estado de planificación de horarios para la semana actual (Lunes - Domingo)
                 </p>
               </motion.div>
 
-              {storesWithoutPlanner.length === 0 ? (
+              {/* Resumen */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <Card className="border-emerald-100 bg-emerald-50/50">
-                  <CardContent className="pt-6 text-center">
-                    <div className="flex flex-col items-center gap-3">
-                      <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center">
-                        <CheckCircle className="w-8 h-8 text-emerald-600" />
-                      </div>
+                  <CardContent className="pt-5 pb-5">
+                    <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-lg font-bold text-emerald-900">¡Excelente!</p>
-                        <p className="text-sm text-emerald-700">Todas las tiendas tienen su planner completo</p>
+                        <p className="text-xs text-emerald-600 font-semibold mb-1">Planners Completos</p>
+                        <p className="text-3xl font-black text-emerald-700">{plannerStatus.withPlanner.length}</p>
                       </div>
+                      <CheckCircle className="w-10 h-10 text-emerald-400" />
                     </div>
                   </CardContent>
                 </Card>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {storesWithoutPlanner.map((store) => (
-                    <Link 
-                      key={store.code}
-                      to={`${createPageUrl('PopsyPlanner')}?store=${store.code}&returnView=planner`}
-                      onClick={() => localStorage.setItem('selectedStore', store.code)}
-                    >
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        whileHover={{ scale: 1.02 }}
+
+                <Card className="border-orange-100 bg-orange-50/50">
+                  <CardContent className="pt-5 pb-5">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs text-orange-600 font-semibold mb-1">Pendientes</p>
+                        <p className="text-3xl font-black text-orange-700">{plannerStatus.withoutPlanner.length}</p>
+                      </div>
+                      <Clock className="w-10 h-10 text-orange-400" />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-blue-100 bg-blue-50/50">
+                  <CardContent className="pt-5 pb-5">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs text-blue-600 font-semibold mb-1">Cobertura</p>
+                        <p className="text-3xl font-black text-blue-700">
+                          {Math.round((plannerStatus.withPlanner.length / STORES.length) * 100)}%
+                        </p>
+                      </div>
+                      <Target className="w-10 h-10 text-blue-400" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Tiendas CON planner */}
+              {plannerStatus.withPlanner.length > 0 && (
+                <div className="mb-6">
+                  <h2 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+                    <CheckCircle className="w-5 h-5 text-emerald-600" />
+                    Planners Completados ({plannerStatus.withPlanner.length})
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {plannerStatus.withPlanner.map((store) => (
+                      <Link 
+                        key={store.code}
+                        to={`${createPageUrl('PopsyPlanner')}?store=${store.code}&returnView=planner`}
+                        onClick={() => localStorage.setItem('selectedStore', store.code)}
                       >
-                        <Card className="border-orange-200 bg-orange-50/50 hover:shadow-lg transition-all cursor-pointer">
-                          <CardContent className="pt-6">
-                            <div className="flex items-start gap-3">
-                              <div className="p-2 rounded-lg bg-orange-100">
-                                <Clock className="w-5 h-5 text-orange-600" />
-                              </div>
-                              <div className="flex-1">
-                                <p className="font-bold text-gray-900 mb-1">{getDisplayName(store.code)}</p>
-                                <p className="text-xs text-gray-600 mb-2">{store.code}</p>
-                                <div className="flex items-center gap-1 text-orange-600">
-                                  <AlertTriangle className="w-3 h-3" />
-                                  <span className="text-xs font-semibold">Crear planner →</span>
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          whileHover={{ scale: 1.02 }}
+                        >
+                          <Card className="border-emerald-200 bg-emerald-50/30 hover:shadow-lg transition-all cursor-pointer">
+                            <CardContent className="pt-6">
+                              <div className="flex items-start gap-3">
+                                <div className="p-2 rounded-lg bg-emerald-100">
+                                  <CheckCircle className="w-5 h-5 text-emerald-600" />
+                                </div>
+                                <div className="flex-1">
+                                  <p className="font-bold text-gray-900 mb-1">{getDisplayName(store.code)}</p>
+                                  <p className="text-xs text-gray-600 mb-2">{store.code}</p>
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-xs text-emerald-600 font-semibold">
+                                      {store.shiftsCount} turnos programados
+                                    </span>
+                                    <span className="text-xs text-blue-600 hover:text-blue-800 font-medium">
+                                      Ver →
+                                    </span>
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </motion.div>
-                    </Link>
-                  ))}
+                            </CardContent>
+                          </Card>
+                        </motion.div>
+                      </Link>
+                    ))}
+                  </div>
                 </div>
               )}
 
-              <Card className="mt-6 border-blue-100 bg-blue-50/50">
+              {/* Tiendas SIN planner */}
+              {plannerStatus.withoutPlanner.length > 0 && (
+                <div className="mb-6">
+                  <h2 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+                    <Clock className="w-5 h-5 text-orange-600" />
+                    Planners Pendientes ({plannerStatus.withoutPlanner.length})
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {plannerStatus.withoutPlanner.map((store) => (
+                      <Link 
+                        key={store.code}
+                        to={`${createPageUrl('PopsyPlanner')}?store=${store.code}&returnView=planner`}
+                        onClick={() => localStorage.setItem('selectedStore', store.code)}
+                      >
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          whileHover={{ scale: 1.02 }}
+                        >
+                          <Card className="border-orange-200 bg-orange-50/50 hover:shadow-lg transition-all cursor-pointer">
+                            <CardContent className="pt-6">
+                              <div className="flex items-start gap-3">
+                                <div className="p-2 rounded-lg bg-orange-100">
+                                  <Clock className="w-5 h-5 text-orange-600" />
+                                </div>
+                                <div className="flex-1">
+                                  <p className="font-bold text-gray-900 mb-1">{getDisplayName(store.code)}</p>
+                                  <p className="text-xs text-gray-600 mb-2">{store.code}</p>
+                                  <div className="flex items-center gap-1 text-orange-600">
+                                    <AlertTriangle className="w-3 h-3" />
+                                    <span className="text-xs font-semibold">Crear planner →</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </motion.div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <Card className="border-blue-100 bg-blue-50/50">
                 <CardContent className="pt-6">
                   <div className="flex items-start gap-3">
                     <div className="p-2 rounded-lg bg-blue-100">
