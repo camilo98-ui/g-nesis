@@ -323,36 +323,26 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
           </motion.div>
 
           {/* Fecha */}
-          <div>
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15 }}
-              whileHover={{ scale: 1.01 }}
-              className="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-[20px] p-5 shadow-md border border-amber-100 hover:shadow-lg transition-all"
-            >
-
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15 }}
-              whileHover={{ scale: 1.01 }}
-              className="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-[20px] p-5 shadow-md border border-amber-100 hover:shadow-lg transition-all"
-            >
-              <Label className="text-amber-700 flex items-center gap-3 mb-3 text-base font-bold">
-                <div className="w-10 h-10 bg-amber-200/60 rounded-xl flex items-center justify-center">
-                  <Calendar className="w-6 h-6 text-amber-600" />
-                </div>
-                Fecha
-              </Label>
-                <Input 
-                  type="date" 
-                  value={formData.date}
-                  onChange={(e) => setFormData({...formData, date: e.target.value})}
-                  className="border-2 border-amber-200 focus:border-amber-400 bg-white rounded-xl text-base font-semibold h-12 focus:ring-2 focus:ring-amber-200 transition-all"
-                />
-              </motion.div>
-          </div>
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            whileHover={{ scale: 1.01 }}
+            className="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-[20px] p-5 shadow-md border border-amber-100 hover:shadow-lg transition-all"
+          >
+            <Label className="text-amber-700 flex items-center gap-3 mb-3 text-base font-bold">
+              <div className="w-10 h-10 bg-amber-200/60 rounded-xl flex items-center justify-center">
+                <Calendar className="w-6 h-6 text-amber-600" />
+              </div>
+              Fecha
+            </Label>
+            <Input 
+              type="date" 
+              value={formData.date}
+              onChange={(e) => setFormData({...formData, date: e.target.value})}
+              className="border-2 border-amber-200 focus:border-amber-400 bg-white rounded-xl text-base font-semibold h-12 focus:ring-2 focus:ring-amber-200 transition-all"
+            />
+          </motion.div>
 
           {/* Turno */}
           <motion.div
