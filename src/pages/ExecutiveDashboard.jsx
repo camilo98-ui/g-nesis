@@ -261,13 +261,6 @@ export default function ExecutiveDashboard() {
     });
   }, [storesAnalysis, comparisonAnalysis, comparisonData]);
 
-  const zoneTotals = useMemo(() => {
-    const totalSales = filteredStores.reduce((sum, s) => sum + s.totalSales, 0);
-    const totalBudget = filteredStores.reduce((sum, s) => sum + s.salesBudget, 0);
-    const totalProjection = filteredStores.reduce((sum, s) => sum + s.projection, 0);
-    return { totalSales, totalBudget, totalProjection };
-  }, [filteredStores]);
-
   const dataToDisplay = showComparison && comparisonRange ? comparisonChartData : comparisonData;
 
   // Totales comparativos
