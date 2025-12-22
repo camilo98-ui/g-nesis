@@ -121,6 +121,7 @@ Deno.serve(async (req) => {
       file_id: result.id,
       file_name: fileName,
       drive_link: `https://drive.google.com/file/d/${result.id}/view`,
+      full_backup: backupData,
       records_backed_up: {
         stores: stores.length,
         cashiers: cashiers.length,
