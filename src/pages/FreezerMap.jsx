@@ -12,10 +12,10 @@ import FreezerDimensionsEditor from '@/components/freezer/FreezerDimensionsEdito
 import SmartOrderPrediction from '@/components/freezer/SmartOrderPrediction';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { 
-  ArrowLeft, Sparkles, RotateCcw, ZoomIn, ZoomOut, 
-  Trash2, History, BarChart3, Undo2, Copy, Check, X, Plus, Search, FileDown
-} from 'lucide-react';
+import {
+  ArrowLeft, Sparkles, RotateCcw, ZoomIn, ZoomOut,
+  Trash2, History, BarChart3, Undo2, Copy, Check, X, Plus, Search, FileDown } from
+'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 
@@ -23,32 +23,32 @@ const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/pub
 
 // Sabores predefinidos - GOURMET Y EXCLUSIVO (SOLO LISTA OFICIAL)
 const POPSY_FLAVORS = [
-  // GOURMET (12 sabores)
-  { name: 'Limón N.', color: '#FFFACD', type: 'gourmet', line: 'gourmet', dark: true },
-  { name: 'Maracuyá N.', color: '#FFB347', type: 'gourmet', line: 'gourmet', dark: true },
-  { name: 'Mandarina N.', color: '#FFA500', type: 'gourmet', line: 'gourmet', dark: true },
-  { name: 'Vainilla', color: '#FFF8DC', type: 'gourmet', line: 'gourmet', dark: true },
-  { name: 'V. Francesa', color: '#FFFDD0', type: 'gourmet', line: 'gourmet', dark: true },
-  { name: 'V. Chips', color: '#F5DEB3', type: 'gourmet', line: 'gourmet', dark: true },
-  { name: 'Chocolate', color: '#5D3A1A', type: 'gourmet', line: 'gourmet', dark: false },
-  { name: 'Belga', color: '#3D2314', type: 'gourmet', line: 'gourmet', dark: false },
-  { name: 'Frutos', color: '#C71585', type: 'gourmet', line: 'gourmet', dark: false },
-  { name: 'Fresa', color: '#FFB5C5', type: 'gourmet', line: 'gourmet', dark: true },
-  { name: 'Arequipe', color: '#D4A574', type: 'gourmet', line: 'gourmet', dark: true },
-  { name: 'Ron', color: '#8B4513', type: 'gourmet', line: 'gourmet', dark: false },
-  // EXCLUSIVO (11 sabores)
-  { name: 'Cherry', color: '#DC143C', type: 'exclusivo', line: 'exclusivo', dark: false },
-  { name: 'Arroz', color: '#F5F5DC', type: 'exclusivo', line: 'exclusivo', dark: true },
-  { name: 'Chicle', color: '#FFB6C1', type: 'exclusivo', line: 'exclusivo', dark: true },
-  { name: 'Brownie', color: '#3D2314', type: 'exclusivo', line: 'exclusivo', dark: false },
-  { name: 'Crema Limón', color: '#FFFACD', type: 'exclusivo', line: 'exclusivo', dark: true },
-  { name: "M&M", color: '#E31837', type: 'exclusivo', line: 'exclusivo', dark: false },
-  { name: 'Milky', color: '#4169E1', type: 'exclusivo', line: 'exclusivo', dark: false },
-  { name: 'Oreo', color: '#1A1A1A', type: 'exclusivo', line: 'exclusivo', dark: false },
-  { name: 'Macadamia', color: '#DEB887', type: 'exclusivo', line: 'exclusivo', dark: true },
-  { name: 'Café', color: '#6F4E37', type: 'exclusivo', line: 'exclusivo', dark: false },
-  { name: 'Yogurt C.', color: '#FFF5EE', type: 'exclusivo', line: 'exclusivo', dark: true },
-];
+// GOURMET (12 sabores)
+{ name: 'Limón N.', color: '#FFFACD', type: 'gourmet', line: 'gourmet', dark: true },
+{ name: 'Maracuyá N.', color: '#FFB347', type: 'gourmet', line: 'gourmet', dark: true },
+{ name: 'Mandarina N.', color: '#FFA500', type: 'gourmet', line: 'gourmet', dark: true },
+{ name: 'Vainilla', color: '#FFF8DC', type: 'gourmet', line: 'gourmet', dark: true },
+{ name: 'V. Francesa', color: '#FFFDD0', type: 'gourmet', line: 'gourmet', dark: true },
+{ name: 'V. Chips', color: '#F5DEB3', type: 'gourmet', line: 'gourmet', dark: true },
+{ name: 'Chocolate', color: '#5D3A1A', type: 'gourmet', line: 'gourmet', dark: false },
+{ name: 'Belga', color: '#3D2314', type: 'gourmet', line: 'gourmet', dark: false },
+{ name: 'Frutos', color: '#C71585', type: 'gourmet', line: 'gourmet', dark: false },
+{ name: 'Fresa', color: '#FFB5C5', type: 'gourmet', line: 'gourmet', dark: true },
+{ name: 'Arequipe', color: '#D4A574', type: 'gourmet', line: 'gourmet', dark: true },
+{ name: 'Ron', color: '#8B4513', type: 'gourmet', line: 'gourmet', dark: false },
+// EXCLUSIVO (11 sabores)
+{ name: 'Cherry', color: '#DC143C', type: 'exclusivo', line: 'exclusivo', dark: false },
+{ name: 'Arroz', color: '#F5F5DC', type: 'exclusivo', line: 'exclusivo', dark: true },
+{ name: 'Chicle', color: '#FFB6C1', type: 'exclusivo', line: 'exclusivo', dark: true },
+{ name: 'Brownie', color: '#3D2314', type: 'exclusivo', line: 'exclusivo', dark: false },
+{ name: 'Crema Limón', color: '#FFFACD', type: 'exclusivo', line: 'exclusivo', dark: true },
+{ name: "M&M", color: '#E31837', type: 'exclusivo', line: 'exclusivo', dark: false },
+{ name: 'Milky', color: '#4169E1', type: 'exclusivo', line: 'exclusivo', dark: false },
+{ name: 'Oreo', color: '#1A1A1A', type: 'exclusivo', line: 'exclusivo', dark: false },
+{ name: 'Macadamia', color: '#DEB887', type: 'exclusivo', line: 'exclusivo', dark: true },
+{ name: 'Café', color: '#6F4E37', type: 'exclusivo', line: 'exclusivo', dark: false },
+{ name: 'Yogurt C.', color: '#FFF5EE', type: 'exclusivo', line: 'exclusivo', dark: true }];
+
 
 // Función para determinar si el texto debe ser oscuro o claro basado en el color de fondo
 const getTextColor = (hexColor) => {
@@ -65,33 +65,33 @@ const getTextColor = (hexColor) => {
 const IDEAL_RULES = {
   1: ['gourmet'], // Fila 1: Gourmet
   2: ['exclusivo'], // Fila 2: Exclusivos
-  3: ['gourmet', 'exclusivo'], // Fila 3: Mixto
+  3: ['gourmet', 'exclusivo'] // Fila 3: Mixto
 };
 
 // Modal de selección con búsqueda
 function FlavorSelectorModal({ selectedSlot, onClose, onSelect }) {
   const [search, setSearch] = useState('');
   const [slotType, setSlotType] = useState('F'); // F = Frontal, T = Trasero
-  
-  const filteredFlavors = POPSY_FLAVORS.filter(f => 
-    f.name.toLowerCase().includes(search.toLowerCase())
+
+  const filteredFlavors = POPSY_FLAVORS.filter((f) =>
+  f.name.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
-    <motion.div 
-      initial={{ opacity: 0 }} 
-      animate={{ opacity: 1 }} 
-      exit={{ opacity: 0 }} 
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" 
-      onClick={onClose}
-    >
-      <motion.div 
-        initial={{ scale: 0.9, y: 20 }} 
-        animate={{ scale: 1, y: 0 }} 
-        exit={{ scale: 0.9, y: 20 }} 
-        onClick={(e) => e.stopPropagation()} 
-        className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-4 max-h-[85vh] overflow-hidden flex flex-col"
-      >
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      onClick={onClose}>
+
+      <motion.div
+        initial={{ scale: 0.9, y: 20 }}
+        animate={{ scale: 1, y: 0 }}
+        exit={{ scale: 0.9, y: 20 }}
+        onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-4 max-h-[85vh] overflow-hidden flex flex-col">
+
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-bold text-gray-800">Seleccionar Sabor</h3>
           <Button variant="ghost" size="icon" onClick={onClose}>
@@ -102,20 +102,20 @@ function FlavorSelectorModal({ selectedSlot, onClose, onSelect }) {
         <div className="flex items-center gap-2 mb-3">
           <p className="text-xs text-gray-500">Bajada {selectedSlot?.row}, Pos {selectedSlot?.position}</p>
           <div className="flex gap-1 ml-auto">
-            <Button 
-              size="sm" 
+            <Button
+              size="sm"
               variant={slotType === 'F' ? 'default' : 'outline'}
               onClick={() => setSlotType('F')}
-              className={`text-xs h-7 ${slotType === 'F' ? 'bg-pink-500' : ''}`}
-            >
+              className={`text-xs h-7 ${slotType === 'F' ? 'bg-pink-500' : ''}`}>
+
               F Frontal
             </Button>
-            <Button 
-              size="sm" 
+            <Button
+              size="sm"
               variant={slotType === 'T' ? 'default' : 'outline'}
               onClick={() => setSlotType('T')}
-              className={`text-xs h-7 ${slotType === 'T' ? 'bg-purple-500' : ''}`}
-            >
+              className={`text-xs h-7 ${slotType === 'T' ? 'bg-purple-500' : ''}`}>
+
               T Trasero
             </Button>
           </div>
@@ -124,47 +124,47 @@ function FlavorSelectorModal({ selectedSlot, onClose, onSelect }) {
         {/* Search */}
         <div className="relative mb-3">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <Input 
-            placeholder="Buscar sabor..." 
-            value={search} 
+          <Input
+            placeholder="Buscar sabor..."
+            value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 bg-gray-50"
-          />
+            className="pl-9 bg-gray-50" />
+
         </div>
         
         {/* Flavors Grid */}
         <div className="grid grid-cols-3 gap-2 overflow-y-auto flex-1 pr-1">
           {/* Vacío */}
-          <button 
-            onClick={() => onSelect({ name: '', color: '', type: 'vacio', is_empty: true, slotType })} 
-            className="flex flex-col items-center p-2 rounded-lg border-2 border-dashed border-gray-300 hover:border-pink-400 transition-colors"
-          >
+          <button
+            onClick={() => onSelect({ name: '', color: '', type: 'vacio', is_empty: true, slotType })}
+            className="flex flex-col items-center p-2 rounded-lg border-2 border-dashed border-gray-300 hover:border-pink-400 transition-colors">
+
             <div className="w-8 h-8 rounded-full bg-gray-200 mb-1" />
             <span className="text-[10px] text-gray-500">Vacío</span>
           </button>
           
-          {filteredFlavors.map((flavor) => (
-            <button 
-              key={flavor.name} 
-              onClick={() => onSelect({ ...flavor, slotType })} 
-              className="flex flex-col items-center p-2 rounded-lg border border-gray-200 hover:border-pink-400 hover:bg-pink-50 transition-colors"
-            >
-              <div 
-                className="w-8 h-8 rounded-full shadow-md mb-1" 
-                style={{ background: `radial-gradient(circle at 30% 30%, ${flavor.color}ee, ${flavor.color}88)` }} 
-              />
+          {filteredFlavors.map((flavor) =>
+          <button
+            key={flavor.name}
+            onClick={() => onSelect({ ...flavor, slotType })}
+            className="flex flex-col items-center p-2 rounded-lg border border-gray-200 hover:border-pink-400 hover:bg-pink-50 transition-colors">
+
+              <div
+              className="w-8 h-8 rounded-full shadow-md mb-1"
+              style={{ background: `radial-gradient(circle at 30% 30%, ${flavor.color}ee, ${flavor.color}88)` }} />
+
               <span className="text-[9px] font-medium text-center leading-tight line-clamp-2">{flavor.name}</span>
               {flavor.brand && <Sparkles className="w-2.5 h-2.5 text-purple-500 mt-0.5" />}
             </button>
-          ))}
+          )}
         </div>
         
-        {filteredFlavors.length === 0 && search && (
-          <p className="text-center text-gray-400 text-sm py-4">No se encontró "{search}"</p>
-        )}
+        {filteredFlavors.length === 0 && search &&
+        <p className="text-center text-gray-400 text-sm py-4">No se encontró "{search}"</p>
+        }
       </motion.div>
-    </motion.div>
-  );
+    </motion.div>);
+
 }
 
 export default function FreezerMap() {
@@ -185,14 +185,14 @@ export default function FreezerMap() {
   const [currentFreezer, setCurrentFreezer] = useState(1);
   const [longPressSlot, setLongPressSlot] = useState(null);
   const longPressTimer = useRef(null);
-  
+
   // Dimensiones independientes por nevera
   const [freezerDimensions, setFreezerDimensions] = useState({
     1: { rows: 7, cols: 5 },
     2: { rows: 7, cols: 5 },
     3: { rows: 7, cols: 5 }
   });
-  
+
   const numRows = freezerDimensions[currentFreezer]?.rows || 7;
   const numCols = freezerDimensions[currentFreezer]?.cols || 5;
 
@@ -257,10 +257,10 @@ export default function FreezerMap() {
       const rowBajadas = [];
       for (let pos = 1; pos <= numCols; pos++) {
         // Cada posición es una "bajada" con slot frontal y trasero
-        const frontSlot = slots.find(s => s.row === row && s.position === pos && s.slot_type === 'F') ||
-          slots.find(s => s.row === row && s.position === pos && !s.slot_type);
-        const backSlot = slots.find(s => s.row === row && s.position === pos && s.slot_type === 'T');
-        
+        const frontSlot = slots.find((s) => s.row === row && s.position === pos && s.slot_type === 'F') ||
+        slots.find((s) => s.row === row && s.position === pos && !s.slot_type);
+        const backSlot = slots.find((s) => s.row === row && s.position === pos && s.slot_type === 'T');
+
         rowBajadas.push({
           row,
           position: pos,
@@ -288,11 +288,11 @@ export default function FreezerMap() {
         store_id: selectedStore,
         date: format(new Date(), 'yyyy-MM-dd'),
         snapshot: JSON.stringify(slots),
-        filled_slots: slots.filter(s => !s.is_empty && s.flavor_name).length,
+        filled_slots: slots.filter((s) => !s.is_empty && s.flavor_name).length,
         changes_count: changesCount,
         created_by_user: user?.full_name || user?.email || 'Usuario'
       });
-    } catch (e) { console.error(e); }
+    } catch (e) {console.error(e);}
   }, [selectedStore, slots]);
 
   // Mutation para actualizar slot
@@ -315,23 +315,23 @@ export default function FreezerMap() {
   // Borrar slot - CORREGIDO para identificar correctamente el slot por tipo
   const clearSlot = useCallback(async (slot) => {
     if (!slot || slot.is_empty) return;
-    
+
     // Guardar para undo
-    setUndoStack(prev => [...prev.slice(-9), { action: 'clear', slot: { ...slot } }]);
-    
+    setUndoStack((prev) => [...prev.slice(-9), { action: 'clear', slot: { ...slot } }]);
+
     // Buscar el slot exacto por row, position Y slot_type
-    const existing = slots.find(s => 
-      s.row === slot.row && 
-      s.position === slot.position && 
-      s.slot_type === slot.slot_type
+    const existing = slots.find((s) =>
+    s.row === slot.row &&
+    s.position === slot.position &&
+    s.slot_type === slot.slot_type
     );
-    
+
     if (existing?.id) {
       setSavingSlot({ row: slot.row, position: slot.position, saving: true });
       await base44.entities.FreezerSlot.update(existing.id, {
-        flavor_name: '', 
-        flavor_type: 'vacio', 
-        color: '', 
+        flavor_name: '',
+        flavor_type: 'vacio',
+        color: '',
         is_empty: true
       });
       queryClient.invalidateQueries(['freezerSlots']);
@@ -355,12 +355,12 @@ export default function FreezerMap() {
   // Seleccionar sabor
   const handleFlavorSelect = (flavor) => {
     if (!selectedSlot) return;
-    
+
     const slotType = flavor.slotType || selectedSlot.slot_type || 'F';
-    
-    setUndoStack(prev => [...prev.slice(-9), { action: 'edit', slot: { ...selectedSlot } }]);
+
+    setUndoStack((prev) => [...prev.slice(-9), { action: 'edit', slot: { ...selectedSlot } }]);
     setSavingSlot({ row: selectedSlot.row, position: selectedSlot.position, saving: true });
-    
+
     const slotData = {
       store_id: `${selectedStore}_F${currentFreezer}`,
       row: selectedSlot.row,
@@ -371,18 +371,18 @@ export default function FreezerMap() {
       color: flavor.color,
       is_empty: flavor.is_empty || false
     };
-    
-    const existing = slots.find(s => 
-      s.row === selectedSlot.row && 
-      s.position === selectedSlot.position && 
-      (s.slot_type === slotType || (!s.slot_type && slotType === 'F'))
+
+    const existing = slots.find((s) =>
+    s.row === selectedSlot.row &&
+    s.position === selectedSlot.position && (
+    s.slot_type === slotType || !s.slot_type && slotType === 'F')
     );
-    
+
     updateSlotMutation.mutate({
       slotData: existing ? { ...slotData, id: existing.id } : slotData,
       isNew: !existing
     });
-    
+
     setShowFlavorSelector(false);
     setSelectedSlot(null);
   };
@@ -390,18 +390,18 @@ export default function FreezerMap() {
   // Vaciar toda la nevera
   const clearAllSlots = async () => {
     if (!confirm('¿Seguro que deseas vaciar toda la nevera?')) return;
-    
-    setUndoStack(prev => [...prev.slice(-9), { action: 'clearAll', slots: [...slots] }]);
-    
+
+    setUndoStack((prev) => [...prev.slice(-9), { action: 'clearAll', slots: [...slots] }]);
+
     toast.info('Vaciando nevera...');
-    const filledSlots = slots.filter(s => !s.is_empty && s.flavor_name);
-    
-    await Promise.all(filledSlots.map(s => 
-      base44.entities.FreezerSlot.update(s.id, {
-        flavor_name: '', flavor_type: 'vacio', color: '', is_empty: true
-      })
+    const filledSlots = slots.filter((s) => !s.is_empty && s.flavor_name);
+
+    await Promise.all(filledSlots.map((s) =>
+    base44.entities.FreezerSlot.update(s.id, {
+      flavor_name: '', flavor_type: 'vacio', color: '', is_empty: true
+    })
     ));
-    
+
     queryClient.invalidateQueries(['freezerSlots']);
     toast.success('Nevera vaciada');
   };
@@ -409,23 +409,23 @@ export default function FreezerMap() {
   // Deshacer última acción - CORREGIDO para identificar slots por tipo
   const handleUndo = async () => {
     if (undoStack.length === 0) return;
-    
+
     const lastAction = undoStack[undoStack.length - 1];
-    setUndoStack(prev => prev.slice(0, -1));
-    
+    setUndoStack((prev) => prev.slice(0, -1));
+
     if (lastAction.action === 'clear' || lastAction.action === 'edit') {
       const slot = lastAction.slot;
       // Buscar por row, position Y slot_type
-      const existing = slots.find(s => 
-        s.row === slot.row && 
-        s.position === slot.position &&
-        s.slot_type === slot.slot_type
+      const existing = slots.find((s) =>
+      s.row === slot.row &&
+      s.position === slot.position &&
+      s.slot_type === slot.slot_type
       );
       if (existing?.id) {
         await base44.entities.FreezerSlot.update(existing.id, {
-          flavor_name: slot.flavor_name, 
+          flavor_name: slot.flavor_name,
           flavor_type: slot.flavor_type,
-          color: slot.color, 
+          color: slot.color,
           is_empty: slot.is_empty
         });
       }
@@ -433,15 +433,15 @@ export default function FreezerMap() {
       for (const slot of lastAction.slots) {
         if (slot.id && !slot.is_empty) {
           await base44.entities.FreezerSlot.update(slot.id, {
-            flavor_name: slot.flavor_name, 
+            flavor_name: slot.flavor_name,
             flavor_type: slot.flavor_type,
-            color: slot.color, 
+            color: slot.color,
             is_empty: slot.is_empty
           });
         }
       }
     }
-    
+
     queryClient.invalidateQueries(['freezerSlots']);
     toast.success('Acción deshecha');
   };
@@ -454,11 +454,11 @@ export default function FreezerMap() {
       toast.error('No hay fila disponible para duplicar');
       return;
     }
-    
+
     for (const bajada of sourceRow) {
       // Duplicar slot frontal
       if (!bajada.front.is_empty) {
-        const targetSlot = slots.find(s => s.row === targetRowIndex + 1 && s.position === bajada.position && s.slot_type === 'F');
+        const targetSlot = slots.find((s) => s.row === targetRowIndex + 1 && s.position === bajada.position && s.slot_type === 'F');
         const slotData = {
           store_id: `${selectedStore}_F${currentFreezer}`,
           row: targetRowIndex + 1,
@@ -476,10 +476,10 @@ export default function FreezerMap() {
           await base44.entities.FreezerSlot.create(slotData);
         }
       }
-      
+
       // Duplicar slot trasero
       if (!bajada.back.is_empty) {
-        const targetSlot = slots.find(s => s.row === targetRowIndex + 1 && s.position === bajada.position && s.slot_type === 'T');
+        const targetSlot = slots.find((s) => s.row === targetRowIndex + 1 && s.position === bajada.position && s.slot_type === 'T');
         const slotData = {
           store_id: `${selectedStore}_F${currentFreezer}`,
           row: targetRowIndex + 1,
@@ -498,7 +498,7 @@ export default function FreezerMap() {
         }
       }
     }
-    
+
     queryClient.invalidateQueries(['freezerSlots']);
     toast.success(`Fila ${rowIndex + 1} duplicada a fila ${targetRowIndex + 1} en Nevera #${currentFreezer}`);
   };
@@ -506,21 +506,21 @@ export default function FreezerMap() {
   // Drag & Drop
   const handleDragStart = (e, slot) => setDraggedSlot(slot);
   const handleDragEnd = () => setDraggedSlot(null);
-  
+
   const handleDrop = async (e, targetSlot) => {
     e.preventDefault();
-    if (!draggedSlot || (draggedSlot.row === targetSlot.row && draggedSlot.position === targetSlot.position)) return;
-    
-    const draggedExisting = slots.find(s => s.row === draggedSlot.row && s.position === draggedSlot.position);
-    const targetExisting = slots.find(s => s.row === targetSlot.row && s.position === targetSlot.position);
-    
+    if (!draggedSlot || draggedSlot.row === targetSlot.row && draggedSlot.position === targetSlot.position) return;
+
+    const draggedExisting = slots.find((s) => s.row === draggedSlot.row && s.position === draggedSlot.position);
+    const targetExisting = slots.find((s) => s.row === targetSlot.row && s.position === targetSlot.position);
+
     if (draggedExisting) {
       await base44.entities.FreezerSlot.update(draggedExisting.id, { row: targetSlot.row, position: targetSlot.position });
     }
     if (targetExisting) {
       await base44.entities.FreezerSlot.update(targetExisting.id, { row: draggedSlot.row, position: draggedSlot.position });
     }
-    
+
     queryClient.invalidateQueries(['freezerSlots']);
     toast.success('Sabores intercambiados');
     setDraggedSlot(null);
@@ -528,15 +528,15 @@ export default function FreezerMap() {
 
   // Auditoría
   const runAudit = useCallback(() => {
-    const filledSlots = slots.filter(s => !s.is_empty && s.flavor_name);
+    const filledSlots = slots.filter((s) => !s.is_empty && s.flavor_name);
     // Contar vacíos reales: numRows filas x numCols posiciones x 2 slots (F y T)
     const totalSlotsInFreezer = numRows * numCols * 2;
     const emptySlots = totalSlotsInFreezer - filledSlots.length;
-    
+
     // Detectar repetidos con más precisión
     const flavorCounts = {};
     const flavorDetails = {};
-    filledSlots.forEach(s => {
+    filledSlots.forEach((s) => {
       const key = s.flavor_name.toLowerCase().trim();
       flavorCounts[key] = (flavorCounts[key] || 0) + 1;
       if (!flavorDetails[key]) {
@@ -544,31 +544,31 @@ export default function FreezerMap() {
       }
       flavorDetails[key].positions.push(`${s.row}-${s.position}${s.slot_type || 'F'}`);
     });
-    const repeatedFlavors = Object.entries(flavorCounts)
-      .filter(([_, count]) => count > 2)
-      .map(([key, count]) => ({ 
-        name: flavorDetails[key].name, 
-        count,
-        positions: flavorDetails[key].positions.join(', ')
-      }));
-    
+    const repeatedFlavors = Object.entries(flavorCounts).
+    filter(([_, count]) => count > 2).
+    map(([key, count]) => ({
+      name: flavorDetails[key].name,
+      count,
+      positions: flavorDetails[key].positions.join(', ')
+    }));
+
     // Detectar mal ubicados
-    const misplacedSlots = filledSlots.filter(s => {
+    const misplacedSlots = filledSlots.filter((s) => {
       const idealTypes = IDEAL_RULES[s.row] || ['gourmet', 'exclusivo'];
       return !idealTypes.includes(s.flavor_type);
-    }).map(s => ({
+    }).map((s) => ({
       ...s,
       reason: `Debería estar en fila ${s.flavor_type === 'gourmet' ? 1 : 2}`
     }));
-    
+
     // Sugerencias
     const suggestions = [];
     if (emptySlots > 10) suggestions.push(`Hay ${emptySlots} espacios vacíos. Considera llenar la nevera.`);
-    if (repeatedFlavors.length > 0) suggestions.push(`Reduce sabores repetidos: ${repeatedFlavors.map(f => f.name).join(', ')}`);
+    if (repeatedFlavors.length > 0) suggestions.push(`Reduce sabores repetidos: ${repeatedFlavors.map((f) => f.name).join(', ')}`);
     if (misplacedSlots.length > 0) suggestions.push(`Reorganiza ${misplacedSlots.length} sabores mal ubicados según las reglas de exhibición.`);
-    
-    const efficiency = Math.round((filledSlots.length / totalSlotsInFreezer) * 100 - (misplacedSlots.length * 2) - (repeatedFlavors.length * 3));
-    
+
+    const efficiency = Math.round(filledSlots.length / totalSlotsInFreezer * 100 - misplacedSlots.length * 2 - repeatedFlavors.length * 3);
+
     setAuditData({
       totalSlots: totalSlotsInFreezer, filledSlots: filledSlots.length, emptySlots,
       misplacedSlots, repeatedFlavors, suggestions,
@@ -581,7 +581,7 @@ export default function FreezerMap() {
   const optimizeWithAI = async () => {
     setIsOptimizing(true);
     toast.info('🤖 IA optimizando la nevera...');
-    
+
     try {
       const result = await base44.integrations.Core.InvokeLLM({
         prompt: `Eres un experto en merchandising de heladerías. Organiza estos 42 espacios de nevera (7 filas x 6 posiciones) con estos sabores disponibles:
@@ -615,26 +615,26 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
           }
         }
       });
-      
+
       if (result?.layout && confirm('¿Aplicar la nueva distribución sugerida por la IA?')) {
         await saveToHistory();
-        
+
         for (const item of result.layout) {
-          const flavor = POPSY_FLAVORS.find(f => f.name === item.flavor_name);
-          const existing = slots.find(s => s.row === item.row && s.position === item.position);
+          const flavor = POPSY_FLAVORS.find((f) => f.name === item.flavor_name);
+          const existing = slots.find((s) => s.row === item.row && s.position === item.position);
           const slotData = {
             store_id: selectedStore, row: item.row, position: item.position,
             flavor_name: item.flavor_name, flavor_type: item.flavor_type,
             color: flavor?.color || '#FFB5C5', is_empty: false, stock_level: 'full'
           };
-          
+
           if (existing?.id) {
             await base44.entities.FreezerSlot.update(existing.id, slotData);
           } else {
             await base44.entities.FreezerSlot.create(slotData);
           }
         }
-        
+
         queryClient.invalidateQueries(['freezerSlots']);
         toast.success('✨ Nevera optimizada por IA');
       }
@@ -642,22 +642,22 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
       console.error(e);
       toast.error('Error al optimizar');
     }
-    
+
     setIsOptimizing(false);
   };
 
   // Restaurar historial
   const restoreFromHistory = async (entry) => {
     if (!confirm('¿Restaurar este mapa? Se perderán los cambios actuales.')) return;
-    
+
     try {
       const snapshot = JSON.parse(entry.snapshot);
-      
+
       // Limpiar actual
       for (const s of slots) {
         if (s.id) await base44.entities.FreezerSlot.delete(s.id);
       }
-      
+
       // Restaurar
       for (const s of snapshot) {
         await base44.entities.FreezerSlot.create({
@@ -666,7 +666,7 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
           color: s.color, is_empty: s.is_empty, stock_level: s.stock_level
         });
       }
-      
+
       queryClient.invalidateQueries(['freezerSlots']);
       toast.success('Mapa restaurado');
       setShowHistory(false);
@@ -675,7 +675,7 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
     }
   };
 
-  const selectedStoreName = STORES.find(s => s.code === selectedStore)?.name || '';
+  const selectedStoreName = STORES.find((s) => s.code === selectedStore)?.name || '';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50">
@@ -696,71 +696,71 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
           <StoreSelector selectedStore={selectedStore} onStoreChange={handleStoreChange} />
         </div>
 
-        {selectedStore ? (
-          <>
+        {selectedStore ?
+        <>
             {/* Toolbar */}
             <div className="flex flex-wrap items-center gap-2 mb-4 p-3 bg-white/80 rounded-xl shadow-sm">
               {/* Selector de Nevera */}
               <div className="flex items-center gap-1 bg-gradient-to-r from-cyan-100 to-blue-100 rounded-lg p-1">
-                {[1, 2, 3].map(num => (
-                  <Button
-                    key={num}
-                    size="sm"
-                    variant={currentFreezer === num ? "default" : "ghost"}
-                    onClick={() => setCurrentFreezer(num)}
-                    className={`text-xs h-7 px-3 ${currentFreezer === num ? 'bg-cyan-500 text-white' : 'text-cyan-700 hover:bg-cyan-200'}`}
-                  >
+                {[1, 2, 3].map((num) =>
+              <Button
+                key={num}
+                size="sm"
+                variant={currentFreezer === num ? "default" : "ghost"}
+                onClick={() => setCurrentFreezer(num)}
+                className={`text-xs h-7 px-3 ${currentFreezer === num ? 'bg-cyan-500 text-white' : 'text-cyan-700 hover:bg-cyan-200'}`}>
+
                     🧊 {num}
                   </Button>
-                ))}
+              )}
               </div>
               
               <div className="h-6 w-px bg-gray-200 mx-1" />
               
               <FreezerDimensionsEditor
-                currentRows={numRows}
-                currentCols={numCols}
-                onAddRow={() => {
-                  if (numRows < 10) {
-                    setFreezerDimensions(prev => ({
-                      ...prev,
-                      [currentFreezer]: { ...prev[currentFreezer], rows: numRows + 1 }
-                    }));
-                    toast.success(`Fila agregada a Nevera #${currentFreezer}`);
-                  } else {
-                    toast.error('Máximo 10 filas');
-                  }
-                }}
-                onRemoveRow={() => {
-                  if (numRows > 1) {
-                    setFreezerDimensions(prev => ({
-                      ...prev,
-                      [currentFreezer]: { ...prev[currentFreezer], rows: numRows - 1 }
-                    }));
-                    toast.success(`Fila eliminada de Nevera #${currentFreezer}`);
-                  }
-                }}
-                onAddCol={() => {
-                  if (numCols < 8) {
-                    setFreezerDimensions(prev => ({
-                      ...prev,
-                      [currentFreezer]: { ...prev[currentFreezer], cols: numCols + 1 }
-                    }));
-                    toast.success(`Columna agregada a Nevera #${currentFreezer}`);
-                  } else {
-                    toast.error('Máximo 8 columnas');
-                  }
-                }}
-                onRemoveCol={() => {
-                  if (numCols > 1) {
-                    setFreezerDimensions(prev => ({
-                      ...prev,
-                      [currentFreezer]: { ...prev[currentFreezer], cols: numCols - 1 }
-                    }));
-                    toast.success(`Columna eliminada de Nevera #${currentFreezer}`);
-                  }
-                }}
-              />
+              currentRows={numRows}
+              currentCols={numCols}
+              onAddRow={() => {
+                if (numRows < 10) {
+                  setFreezerDimensions((prev) => ({
+                    ...prev,
+                    [currentFreezer]: { ...prev[currentFreezer], rows: numRows + 1 }
+                  }));
+                  toast.success(`Fila agregada a Nevera #${currentFreezer}`);
+                } else {
+                  toast.error('Máximo 10 filas');
+                }
+              }}
+              onRemoveRow={() => {
+                if (numRows > 1) {
+                  setFreezerDimensions((prev) => ({
+                    ...prev,
+                    [currentFreezer]: { ...prev[currentFreezer], rows: numRows - 1 }
+                  }));
+                  toast.success(`Fila eliminada de Nevera #${currentFreezer}`);
+                }
+              }}
+              onAddCol={() => {
+                if (numCols < 8) {
+                  setFreezerDimensions((prev) => ({
+                    ...prev,
+                    [currentFreezer]: { ...prev[currentFreezer], cols: numCols + 1 }
+                  }));
+                  toast.success(`Columna agregada a Nevera #${currentFreezer}`);
+                } else {
+                  toast.error('Máximo 8 columnas');
+                }
+              }}
+              onRemoveCol={() => {
+                if (numCols > 1) {
+                  setFreezerDimensions((prev) => ({
+                    ...prev,
+                    [currentFreezer]: { ...prev[currentFreezer], cols: numCols - 1 }
+                  }));
+                  toast.success(`Columna eliminada de Nevera #${currentFreezer}`);
+                }
+              }} />
+
               
               <div className="h-6 w-px bg-gray-200 mx-1" />
               
@@ -784,15 +784,15 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                 <span className="hidden sm:inline">Historial</span>
               </Button>
               
-              <Button 
-                size="sm" 
-                variant="outline" 
-                onClick={() => {
-                  // Exportar a PDF usando window.print con estilos específicos
-                  const printContent = document.querySelector('.min-w-\\[320px\\]');
-                  if (printContent) {
-                    const printWindow = window.open('', '', 'width=800,height=600');
-                    printWindow.document.write(`
+              <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                // Exportar a PDF usando window.print con estilos específicos
+                const printContent = document.querySelector('.min-w-\\[320px\\]');
+                if (printContent) {
+                  const printWindow = window.open('', '', 'width=800,height=600');
+                  printWindow.document.write(`
                       <html>
                         <head>
                           <title>Mapa Nevera ${selectedStore} - Nevera #${currentFreezer}</title>
@@ -812,7 +812,7 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                           ${freezerGrid.map((row, rowIdx) => `
                             <div class="row">
                               <strong style="width:30px;">${rowIdx + 1}</strong>
-                              ${row.map(slot => `
+                              ${row.map((slot) => `
                                 <div class="slot" style="flex:1; background: ${slot.front.color || '#f3f4f6'}; color: ${slot.front.is_empty ? '#999' : '#000'}">
                                   <small>F:</small> ${slot.front.flavor_name || 'Vacío'}<br/>
                                   <small>T:</small> ${slot.back.flavor_name || 'Vacío'}
@@ -823,13 +823,13 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                         </body>
                       </html>
                     `);
-                    printWindow.document.close();
-                    printWindow.print();
-                  }
-                }} 
-                title="Exportar PDF"
-                className="text-rose-600 hover:bg-rose-50"
-              >
+                  printWindow.document.close();
+                  printWindow.print();
+                }
+              }}
+              title="Exportar PDF"
+              className="text-rose-600 hover:bg-rose-50">
+
                 <FileDown className="w-4 h-4 mr-1" />
                 <span className="hidden sm:inline">PDF</span>
               </Button>
@@ -838,304 +838,304 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
 
             {/* Freezer Grid */}
             <div className="overflow-x-auto pb-4">
-              <motion.div 
-                style={{ transform: `scale(${zoom})`, transformOrigin: 'top center' }} 
-                className="min-w-[320px]"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-              >
-                <motion.div 
-                  className="relative rounded-3xl p-4 sm:p-6 mx-auto max-w-xl overflow-hidden"
-                  style={{
-                    background: 'linear-gradient(135deg, #ffffff 0%, #f9fafb 50%, #f3f4f6 100%)',
-                    boxShadow: '0 20px 60px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.8)'
-                  }}
-                >
+              <motion.div
+              style={{ transform: `scale(${zoom})`, transformOrigin: 'top center' }} className="bg-transparent min-w-[320px]"
+
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}>
+
+                <motion.div
+                className="relative rounded-3xl p-4 sm:p-6 mx-auto max-w-xl overflow-hidden"
+                style={{
+                  background: 'linear-gradient(135deg, #ffffff 0%, #f9fafb 50%, #f3f4f6 100%)',
+                  boxShadow: '0 20px 60px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.8)'
+                }}>
+
                   {/* Efectos de fondo animados */}
-                  <motion.div 
-                    className="absolute inset-0 opacity-30 pointer-events-none"
-                    style={{
-                      background: 'radial-gradient(circle at 20% 50%, rgba(236, 72, 153, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(168, 85, 247, 0.1) 0%, transparent 50%)'
-                    }}
-                    animate={{
-                      scale: [1, 1.1, 1],
-                      opacity: [0.2, 0.4, 0.2]
-                    }}
-                    transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-                  />
+                  <motion.div
+                  className="absolute inset-0 opacity-30 pointer-events-none"
+                  style={{
+                    background: 'radial-gradient(circle at 20% 50%, rgba(236, 72, 153, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(168, 85, 247, 0.1) 0%, transparent 50%)'
+                  }}
+                  animate={{
+                    scale: [1, 1.1, 1],
+                    opacity: [0.2, 0.4, 0.2]
+                  }}
+                  transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }} />
+
 
                   {/* Borde con gradiente animado */}
-                  <motion.div 
-                    className="absolute inset-0 rounded-3xl"
-                    style={{
-                      background: 'linear-gradient(45deg, #ec4899, #a855f7, #ec4899)',
-                      backgroundSize: '200% 200%',
-                      padding: '3px',
-                      WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-                      WebkitMaskComposite: 'xor',
-                      maskComposite: 'exclude'
-                    }}
-                    animate={{
-                      backgroundPosition: ['0% 50%', '100% 50%', '0% 50%']
-                    }}
-                    transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
-                  />
+                  <motion.div className="bg-pink-700 rounded-3xl absolute inset-0"
+
+                style={{
+                  background: 'linear-gradient(45deg, #ec4899, #a855f7, #ec4899)',
+                  backgroundSize: '200% 200%',
+                  padding: '3px',
+                  WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+                  WebkitMaskComposite: 'xor',
+                  maskComposite: 'exclude'
+                }}
+                animate={{
+                  backgroundPosition: ['0% 50%', '100% 50%', '0% 50%']
+                }}
+                transition={{ duration: 5, repeat: Infinity, ease: "linear" }} />
+
                   
                   {/* Logo con efecto */}
-                  <motion.div 
-                    className="absolute -top-4 left-1/2 -translate-x-1/2 z-20"
-                    whileHover={{ scale: 1.1, rotate: [0, -5, 5, 0] }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <motion.div 
-                      className="px-5 py-2 rounded-2xl bg-white shadow-2xl border-2 border-pink-200"
-                      animate={{
-                        boxShadow: ['0 10px 30px rgba(236, 72, 153, 0.2)', '0 15px 40px rgba(168, 85, 247, 0.3)', '0 10px 30px rgba(236, 72, 153, 0.2)']
-                      }}
-                      transition={{ duration: 3, repeat: Infinity }}
-                    >
+                  <motion.div
+                  className="absolute -top-4 left-1/2 -translate-x-1/2 z-20"
+                  whileHover={{ scale: 1.1, rotate: [0, -5, 5, 0] }}
+                  transition={{ duration: 0.3 }}>
+
+                    <motion.div
+                    className="px-5 py-2 rounded-2xl bg-white shadow-2xl border-2 border-pink-200"
+                    animate={{
+                      boxShadow: ['0 10px 30px rgba(236, 72, 153, 0.2)', '0 15px 40px rgba(168, 85, 247, 0.3)', '0 10px 30px rgba(236, 72, 153, 0.2)']
+                    }}
+                    transition={{ duration: 3, repeat: Infinity }}>
+
                       <img src={LOGO_URL} alt="Popsy" className="h-7 sm:h-9 object-contain" />
                     </motion.div>
                   </motion.div>
 
                   {/* Grid - Bajadas con F (frontal) y T (trasero) */}
                   <div className="space-y-3 mt-6 relative z-10">
-                    {freezerGrid.map((row, rowIndex) => (
-                      <motion.div 
-                        key={rowIndex} 
-                        className="relative"
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: rowIndex * 0.05 }}
-                      >
+                    {freezerGrid.map((row, rowIndex) =>
+                  <motion.div
+                    key={rowIndex}
+                    className="relative"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: rowIndex * 0.05 }}>
+
                         {/* Row number */}
-                        <motion.div 
-                          className="absolute -left-5 sm:-left-7 top-1/2 -translate-y-1/2 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gradient-to-br from-pink-400 to-rose-500 text-white flex items-center justify-center text-[10px] sm:text-xs font-bold shadow-lg"
-                          whileHover={{ scale: 1.2, rotate: 360 }}
-                          transition={{ duration: 0.3 }}
-                        >
+                        <motion.div
+                      className="absolute -left-5 sm:-left-7 top-1/2 -translate-y-1/2 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gradient-to-br from-pink-400 to-rose-500 text-white flex items-center justify-center text-[10px] sm:text-xs font-bold shadow-lg"
+                      whileHover={{ scale: 1.2, rotate: 360 }}
+                      transition={{ duration: 0.3 }}>
+
                           {rowIndex + 1}
                         </motion.div>
                         
                         {/* Row actions */}
                         <motion.button
-                          onClick={() => duplicateRow(rowIndex)}
-                          className="absolute -right-5 sm:-right-7 top-1/2 -translate-y-1/2 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 hover:from-pink-100 hover:to-pink-200 text-gray-500 hover:text-pink-600 flex items-center justify-center transition-all shadow-md"
-                          title="Duplicar fila"
-                          whileHover={{ scale: 1.2, rotate: 15 }}
-                          whileTap={{ scale: 0.9 }}
-                        >
+                      onClick={() => duplicateRow(rowIndex)}
+                      className="absolute -right-5 sm:-right-7 top-1/2 -translate-y-1/2 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 hover:from-pink-100 hover:to-pink-200 text-gray-500 hover:text-pink-600 flex items-center justify-center transition-all shadow-md"
+                      title="Duplicar fila"
+                      whileHover={{ scale: 1.2, rotate: 15 }}
+                      whileTap={{ scale: 0.9 }}>
+
                           <Copy className="w-3 h-3" />
                         </motion.button>
 
                         {/* Bajadas - cada una con F y T en columna vertical */}
-                        <motion.div 
-                          className="grid gap-3 p-3 rounded-2xl relative overflow-hidden"
-                          style={{ 
-                            gridTemplateColumns: `repeat(${numCols}, minmax(0, 1fr))`,
-                            background: 'linear-gradient(135deg, rgba(243, 244, 246, 0.6) 0%, rgba(229, 231, 235, 0.4) 100%)',
-                            backdropFilter: 'blur(8px)',
-                            boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.05)'
-                          }}
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ delay: rowIndex * 0.08 }}
-                        >
+                        <motion.div
+                      className="grid gap-3 p-3 rounded-2xl relative overflow-hidden"
+                      style={{
+                        gridTemplateColumns: `repeat(${numCols}, minmax(0, 1fr))`,
+                        background: 'linear-gradient(135deg, rgba(243, 244, 246, 0.6) 0%, rgba(229, 231, 235, 0.4) 100%)',
+                        backdropFilter: 'blur(8px)',
+                        boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.05)'
+                      }}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: rowIndex * 0.08 }}>
+
                           {/* Efecto de brillo en la fila */}
                           <motion.div
-                            className="absolute inset-0 opacity-20 pointer-events-none"
-                            style={{
-                              background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.5) 50%, transparent 100%)'
-                            }}
-                            animate={{
-                              x: ['-100%', '200%']
-                            }}
-                            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: rowIndex * 0.3 }}
-                          />
-                          {row.map((bajada, bajadaIndex) => (
-                            <motion.div 
-                              key={`${rowIndex}-${bajadaIndex}`} 
-                              className="flex flex-col gap-1"
-                              initial={{ opacity: 0, scale: 0.8 }}
-                              animate={{ opacity: 1, scale: 1 }}
-                              transition={{ delay: (rowIndex * numCols + bajadaIndex) * 0.02 }}
-                            >
+                        className="absolute inset-0 opacity-20 pointer-events-none"
+                        style={{
+                          background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.5) 50%, transparent 100%)'
+                        }}
+                        animate={{
+                          x: ['-100%', '200%']
+                        }}
+                        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: rowIndex * 0.3 }} />
+
+                          {row.map((bajada, bajadaIndex) =>
+                      <motion.div
+                        key={`${rowIndex}-${bajadaIndex}`}
+                        className="flex flex-col gap-1"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: (rowIndex * numCols + bajadaIndex) * 0.02 }}>
+
                               {/* Slot Trasero (T) - arriba */}
                               <motion.div
-                                onClick={() => {
-                                  setSelectedSlot({ ...bajada.back, row: bajada.row, position: bajada.position, slot_type: 'T' });
-                                  setShowFlavorSelector(true);
-                                }}
-                                onDoubleClick={() => clearSlot(bajada.back)}
-                                whileHover={!bajada.back.is_empty ? { 
-                                  scale: 1.12, 
-                                  y: -3,
-                                  rotateX: 5,
-                                  boxShadow: `0 8px 25px ${bajada.back.color || '#a855f7'}60`
-                                } : { scale: 1.03 }}
-                                whileTap={{ scale: 0.92 }}
-                                className={`h-10 sm:h-11 rounded-xl cursor-pointer transition-all border-2 relative overflow-hidden ${
-                                  bajada.back.is_empty 
-                                    ? 'bg-purple-50/50 border-dashed border-purple-300 hover:border-purple-500' 
-                                    : 'border-purple-400 shadow-lg'
-                                }`}
-                                style={!bajada.back.is_empty ? { 
-                                  background: `linear-gradient(135deg, ${bajada.back.color}ff, ${bajada.back.color}aa)`,
-                                  transformStyle: 'preserve-3d'
-                                } : {}}
-                              >
-                                {!bajada.back.is_empty && (
-                                  <>
-                                    <motion.div 
-                                      className="absolute inset-0 bg-gradient-to-br from-white/40 via-white/10 to-transparent"
-                                      animate={{ 
-                                        opacity: [0.4, 0.8, 0.4],
-                                        scale: [1, 1.05, 1]
-                                      }}
-                                      transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-                                    />
+                          onClick={() => {
+                            setSelectedSlot({ ...bajada.back, row: bajada.row, position: bajada.position, slot_type: 'T' });
+                            setShowFlavorSelector(true);
+                          }}
+                          onDoubleClick={() => clearSlot(bajada.back)}
+                          whileHover={!bajada.back.is_empty ? {
+                            scale: 1.12,
+                            y: -3,
+                            rotateX: 5,
+                            boxShadow: `0 8px 25px ${bajada.back.color || '#a855f7'}60`
+                          } : { scale: 1.03 }}
+                          whileTap={{ scale: 0.92 }}
+                          className={`h-10 sm:h-11 rounded-xl cursor-pointer transition-all border-2 relative overflow-hidden ${
+                          bajada.back.is_empty ?
+                          'bg-purple-50/50 border-dashed border-purple-300 hover:border-purple-500' :
+                          'border-purple-400 shadow-lg'}`
+                          }
+                          style={!bajada.back.is_empty ? {
+                            background: `linear-gradient(135deg, ${bajada.back.color}ff, ${bajada.back.color}aa)`,
+                            transformStyle: 'preserve-3d'
+                          } : {}}>
+
+                                {!bajada.back.is_empty &&
+                          <>
                                     <motion.div
-                                      className="absolute top-0 left-0 right-0 h-1/2"
-                                      style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 100%)' }}
-                                    />
+                              className="absolute inset-0 bg-gradient-to-br from-white/40 via-white/10 to-transparent"
+                              animate={{
+                                opacity: [0.4, 0.8, 0.4],
+                                scale: [1, 1.05, 1]
+                              }}
+                              transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }} />
+
+                                    <motion.div
+                              className="absolute top-0 left-0 right-0 h-1/2"
+                              style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 100%)' }} />
+
                                   </>
-                                )}
-                                <motion.div 
-                                  className="absolute top-0.5 left-0.5 bg-purple-600 text-white text-[6px] px-1.5 py-0.5 rounded-md font-bold z-10 shadow-sm"
-                                  whileHover={{ scale: 1.1 }}
-                                >
+                          }
+                                <motion.div
+                            className="absolute top-0.5 left-0.5 bg-purple-600 text-white text-[6px] px-1.5 py-0.5 rounded-md font-bold z-10 shadow-sm"
+                            whileHover={{ scale: 1.1 }}>
+
                                   T
                                 </motion.div>
-                                {bajada.back.is_empty ? (
-                                  <div className="h-full flex items-center justify-center">
-                                    <motion.div 
-                                      animate={{ 
-                                        scale: [1, 1.3, 1],
-                                        rotate: [0, 90, 0]
-                                      }} 
-                                      transition={{ duration: 2, repeat: Infinity }}
-                                    >
+                                {bajada.back.is_empty ?
+                          <div className="h-full flex items-center justify-center">
+                                    <motion.div
+                              animate={{
+                                scale: [1, 1.3, 1],
+                                rotate: [0, 90, 0]
+                              }}
+                              transition={{ duration: 2, repeat: Infinity }}>
+
                                       <Plus className="w-3 h-3 text-purple-400" />
                                     </motion.div>
-                                  </div>
-                                ) : (
-                                  <div className="h-full flex items-center justify-center pt-1.5 relative z-10">
-                                    <span 
-                                      className="text-[7px] sm:text-[8px] font-black text-center leading-tight px-0.5 line-clamp-2"
-                                      style={{ 
-                                        color: getTextColor(bajada.back.color),
-                                        textShadow: getTextColor(bajada.back.color) === '#ffffff' ? '0 2px 4px rgba(0,0,0,0.7)' : '0 2px 3px rgba(255,255,255,0.6)'
-                                      }}
-                                    >
+                                  </div> :
+
+                          <div className="h-full flex items-center justify-center pt-1.5 relative z-10">
+                                    <span
+                              className="text-[7px] sm:text-[8px] font-black text-center leading-tight px-0.5 line-clamp-2"
+                              style={{
+                                color: getTextColor(bajada.back.color),
+                                textShadow: getTextColor(bajada.back.color) === '#ffffff' ? '0 2px 4px rgba(0,0,0,0.7)' : '0 2px 3px rgba(255,255,255,0.6)'
+                              }}>
+
                                       {bajada.back.flavor_name}
                                     </span>
                                   </div>
-                                )}
+                          }
                               </motion.div>
                               
                               {/* Slot Frontal (F) - abajo */}
                               <motion.div
-                                onClick={() => {
-                                  setSelectedSlot({ ...bajada.front, row: bajada.row, position: bajada.position, slot_type: 'F' });
-                                  setShowFlavorSelector(true);
-                                }}
-                                onDoubleClick={() => clearSlot(bajada.front)}
-                                whileHover={!bajada.front.is_empty ? { 
-                                  scale: 1.15, 
-                                  y: -4,
-                                  rotateX: 8,
-                                  boxShadow: `0 12px 35px ${bajada.front.color || '#ec4899'}80`,
-                                  zIndex: 50
-                                } : { scale: 1.03 }}
-                                whileTap={{ scale: 0.92 }}
-                                className={`h-11 sm:h-12 rounded-xl cursor-pointer transition-all border-2 shadow-2xl relative overflow-hidden ${
-                                  bajada.front.is_empty 
-                                    ? 'bg-white border-dashed border-pink-300 hover:border-pink-500' 
-                                    : 'border-pink-500'
-                                }`}
-                                style={!bajada.front.is_empty ? { 
-                                  background: `linear-gradient(135deg, ${bajada.front.color}ff, ${bajada.front.color}cc)`,
-                                  transformStyle: 'preserve-3d'
-                                } : {}}
-                              >
-                                {!bajada.front.is_empty && (
-                                  <>
-                                    <motion.div 
-                                      className="absolute inset-0 bg-gradient-to-br from-white/50 via-white/20 to-transparent"
-                                      animate={{ 
-                                        opacity: [0.5, 0.9, 0.5],
-                                        scale: [1, 1.08, 1]
-                                      }}
-                                      transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-                                    />
+                          onClick={() => {
+                            setSelectedSlot({ ...bajada.front, row: bajada.row, position: bajada.position, slot_type: 'F' });
+                            setShowFlavorSelector(true);
+                          }}
+                          onDoubleClick={() => clearSlot(bajada.front)}
+                          whileHover={!bajada.front.is_empty ? {
+                            scale: 1.15,
+                            y: -4,
+                            rotateX: 8,
+                            boxShadow: `0 12px 35px ${bajada.front.color || '#ec4899'}80`,
+                            zIndex: 50
+                          } : { scale: 1.03 }}
+                          whileTap={{ scale: 0.92 }}
+                          className={`h-11 sm:h-12 rounded-xl cursor-pointer transition-all border-2 shadow-2xl relative overflow-hidden ${
+                          bajada.front.is_empty ?
+                          'bg-white border-dashed border-pink-300 hover:border-pink-500' :
+                          'border-pink-500'}`
+                          }
+                          style={!bajada.front.is_empty ? {
+                            background: `linear-gradient(135deg, ${bajada.front.color}ff, ${bajada.front.color}cc)`,
+                            transformStyle: 'preserve-3d'
+                          } : {}}>
+
+                                {!bajada.front.is_empty &&
+                          <>
                                     <motion.div
-                                      className="absolute top-0 left-0 right-0 h-1/2"
-                                      style={{ 
-                                        background: 'linear-gradient(180deg, rgba(255,255,255,0.4) 0%, transparent 100%)',
-                                        borderRadius: '12px 12px 0 0'
-                                      }}
-                                    />
+                              className="absolute inset-0 bg-gradient-to-br from-white/50 via-white/20 to-transparent"
+                              animate={{
+                                opacity: [0.5, 0.9, 0.5],
+                                scale: [1, 1.08, 1]
+                              }}
+                              transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }} />
+
                                     <motion.div
-                                      className="absolute inset-0"
-                                      style={{ background: `radial-gradient(circle at 35% 35%, ${bajada.front.color}33 0%, transparent 65%)` }}
-                                      animate={{ 
-                                        scale: [1, 1.3, 1], 
-                                        opacity: [0.4, 0.7, 0.4],
-                                        rotate: [0, 10, 0]
-                                      }}
-                                      transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                                    />
+                              className="absolute top-0 left-0 right-0 h-1/2"
+                              style={{
+                                background: 'linear-gradient(180deg, rgba(255,255,255,0.4) 0%, transparent 100%)',
+                                borderRadius: '12px 12px 0 0'
+                              }} />
+
+                                    <motion.div
+                              className="absolute inset-0"
+                              style={{ background: `radial-gradient(circle at 35% 35%, ${bajada.front.color}33 0%, transparent 65%)` }}
+                              animate={{
+                                scale: [1, 1.3, 1],
+                                opacity: [0.4, 0.7, 0.4],
+                                rotate: [0, 10, 0]
+                              }}
+                              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} />
+
                                   </>
-                                )}
-                                <motion.div 
-                                  className="absolute top-0.5 left-0.5 bg-pink-600 text-white text-[6px] px-1.5 py-0.5 rounded-md font-bold z-10 shadow-md"
-                                  whileHover={{ scale: 1.15 }}
-                                >
+                          }
+                                <motion.div
+                            className="absolute top-0.5 left-0.5 bg-pink-600 text-white text-[6px] px-1.5 py-0.5 rounded-md font-bold z-10 shadow-md"
+                            whileHover={{ scale: 1.15 }}>
+
                                   F
                                 </motion.div>
-                                {bajada.front.is_empty ? (
-                                  <div className="h-full flex items-center justify-center">
-                                    <motion.div 
-                                      animate={{ 
-                                        scale: [1, 1.4, 1],
-                                        rotate: [0, 90, 0]
-                                      }} 
-                                      transition={{ duration: 2, repeat: Infinity }}
-                                    >
+                                {bajada.front.is_empty ?
+                          <div className="h-full flex items-center justify-center">
+                                    <motion.div
+                              animate={{
+                                scale: [1, 1.4, 1],
+                                rotate: [0, 90, 0]
+                              }}
+                              transition={{ duration: 2, repeat: Infinity }}>
+
                                       <Plus className="w-4 h-4 text-pink-400" />
                                     </motion.div>
-                                  </div>
-                                ) : (
-                                  <div className="h-full flex items-center justify-center pt-1.5 relative z-10">
-                                    <span 
-                                      className="text-[8px] sm:text-[9px] font-black text-center leading-tight px-0.5 line-clamp-2"
-                                      style={{ 
-                                        color: getTextColor(bajada.front.color),
-                                        textShadow: getTextColor(bajada.front.color) === '#ffffff' ? '0 2px 5px rgba(0,0,0,0.8)' : '0 2px 4px rgba(255,255,255,0.7)',
-                                        letterSpacing: '-0.02em'
-                                      }}
-                                    >
+                                  </div> :
+
+                          <div className="h-full flex items-center justify-center pt-1.5 relative z-10">
+                                    <span
+                              className="text-[8px] sm:text-[9px] font-black text-center leading-tight px-0.5 line-clamp-2"
+                              style={{
+                                color: getTextColor(bajada.front.color),
+                                textShadow: getTextColor(bajada.front.color) === '#ffffff' ? '0 2px 5px rgba(0,0,0,0.8)' : '0 2px 4px rgba(255,255,255,0.7)',
+                                letterSpacing: '-0.02em'
+                              }}>
+
                                       {bajada.front.flavor_name}
                                     </span>
                                   </div>
-                                )}
+                          }
                               </motion.div>
                             </motion.div>
-                          ))}
+                      )}
                         </motion.div>
                       </motion.div>
-                    ))}
+                  )}
                   </div>
                 </motion.div>
               </motion.div>
             </div>
 
             {/* Pronóstico de Pedido - Independiente */}
-            <SmartOrderPrediction 
-              allFreezersSlots={allFreezersSlots} 
-              currentFreezer={currentFreezer}
-            />
+            <SmartOrderPrediction
+            allFreezersSlots={allFreezersSlots}
+            currentFreezer={currentFreezer} />
+
 
             {/* Info Panel */}
             <div className="mt-4 p-3 bg-white/80 rounded-xl shadow-sm space-y-3">
@@ -1146,8 +1146,8 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                   Crear Nuevo Sabor
                 </button>
                 <AnimatePresence>
-                  {showAddFlavor && (
-                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="mt-2 space-y-2">
+                  {showAddFlavor &&
+                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="mt-2 space-y-2">
                       <Input placeholder="Nombre del sabor" value={newFlavor.name} onChange={(e) => setNewFlavor({ ...newFlavor, name: e.target.value })} className="text-sm" />
                       <div className="flex gap-2">
                         <Input type="color" value={newFlavor.color} onChange={(e) => setNewFlavor({ ...newFlavor, color: e.target.value })} className="w-12 h-9 p-1" />
@@ -1156,18 +1156,18 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                           <option value="exclusivo">✨ Exclusivo</option>
                         </select>
                         <Button size="sm" className="bg-pink-500 text-white" onClick={() => {
-                          if (newFlavor.name.trim()) {
-                            POPSY_FLAVORS.push({ name: newFlavor.name, color: newFlavor.color, type: newFlavor.line, line: newFlavor.line });
-                            toast.success(`Sabor "${newFlavor.name}" agregado`);
-                            setNewFlavor({ name: '', color: '#FFB5C5', line: 'gourmet' });
-                            setShowAddFlavor(false);
-                          }
-                        }}>
+                      if (newFlavor.name.trim()) {
+                        POPSY_FLAVORS.push({ name: newFlavor.name, color: newFlavor.color, type: newFlavor.line, line: newFlavor.line });
+                        toast.success(`Sabor "${newFlavor.name}" agregado`);
+                        setNewFlavor({ name: '', color: '#FFB5C5', line: 'gourmet' });
+                        setShowAddFlavor(false);
+                      }
+                    }}>
                           <Check className="w-4 h-4" />
                         </Button>
                       </div>
                     </motion.div>
-                  )}
+                }
                 </AnimatePresence>
               </div>
 
@@ -1180,25 +1180,25 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                 <span>Doble click = Borrar</span>
               </div>
             </div>
-          </>
-        ) : (
-          <div className="text-center py-16">
+          </> :
+
+        <div className="text-center py-16">
             <div className="text-6xl mb-4">🧊</div>
             <h2 className="text-xl font-bold text-gray-700 mb-2">Selecciona una tienda</h2>
             <p className="text-gray-400">Para ver y editar el mapa de la nevera</p>
           </div>
-        )}
+        }
       </div>
 
       {/* Flavor Selector Modal with Search */}
       <AnimatePresence>
-        {showFlavorSelector && (
-          <FlavorSelectorModal
-            selectedSlot={selectedSlot}
-            onClose={() => { setShowFlavorSelector(false); setSelectedSlot(null); }}
-            onSelect={handleFlavorSelect}
-          />
-        )}
+        {showFlavorSelector &&
+        <FlavorSelectorModal
+          selectedSlot={selectedSlot}
+          onClose={() => {setShowFlavorSelector(false);setSelectedSlot(null);}}
+          onSelect={handleFlavorSelect} />
+
+        }
       </AnimatePresence>
 
       {/* Audit Panel */}
@@ -1208,8 +1208,8 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
 
       {/* History Panel */}
       <AnimatePresence>
-        {showHistory && <FreezerHistoryPanel history={history.map(h => ({ ...h, filledSlots: h.filled_slots, changes: h.changes_count }))} onClose={() => setShowHistory(false)} onRestore={restoreFromHistory} isLoading={false} />}
+        {showHistory && <FreezerHistoryPanel history={history.map((h) => ({ ...h, filledSlots: h.filled_slots, changes: h.changes_count }))} onClose={() => setShowHistory(false)} onRestore={restoreFromHistory} isLoading={false} />}
       </AnimatePresence>
-    </div>
-  );
+    </div>);
+
 }
