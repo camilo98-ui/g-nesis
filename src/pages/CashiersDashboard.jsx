@@ -189,7 +189,7 @@ export default function CashiersDashboard() {
     };
   }, [shiftRecords, dateRange, activeCashiers]);
 
-  // Indicadores accionables
+  // Indicadores accionables y mejores cajeros por categoría
   const actionableMetrics = useMemo(() => {
     const salesCompliance = storeMeta.salesGoal > 0 ? (teamTotals.totalSales / storeMeta.salesGoal) * 100 : 0;
     
@@ -201,6 +201,11 @@ export default function CashiersDashboard() {
     const avgTeamSales = teamTotals.avgSales;
     const cashiersOverGoal = rankedCashiers.filter(c => c.totalSales > avgTeamSales).length;
 
+    // Mejores cajeros por categoría
+    const bestInSales = rankedCashiers.reduce((best, c) => !best || c.totalSales > best.totalSales ? c : best, null);
+    const bestInTicket = rankedCashiers.reduce((best, c) => !best || c.avgTicket > best.avgTicket ? c : best, null);
+    const bestInTransactions = rankedCashiers.reduce((best, c) => !best || c.totalTransactions > best.totalTransactions ? c : best, null);
+
     return {
       salesCompliance,
       salesStatus: salesCompliance >= 100 ? 'success' : salesCompliance >= 85 ? 'warning' : 'critical',
@@ -208,7 +213,10 @@ export default function CashiersDashboard() {
       ticketStatus: ticketCompliance >= 100 ? 'success' : ticketCompliance >= 90 ? 'warning' : 'critical',
       cashiersOverGoal,
       topPerformer: rankedCashiers[0],
-      storeAvgTicket // Exportar para mostrarlo en la card
+      storeAvgTicket,
+      bestInSales,
+      bestInTicket,
+      bestInTransactions
     };
   }, [teamTotals, storeMeta, rankedCashiers]);
 
