@@ -20,6 +20,7 @@ import {
   Lock, Eye, EyeOff, Receipt, Snowflake, Settings as SettingsIcon } from
 'lucide-react';
 import { Button } from "@/components/ui/button";
+import { toast } from 'sonner';
 
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/6a749247d_Capturadepantalla2025-11-251251441.png";
 
@@ -100,14 +101,17 @@ const MENU_ITEMS = [
   specialAction: 'budgetTrend'
 },
 {
-  name: 'Configuración',
+  name: 'Backup Drive',
   page: 'Settings',
-  icon: SettingsIcon,
-  description: 'Ajustes y backup',
-  bgColor: 'bg-gradient-to-br from-gray-100/90 to-slate-100/80',
-  iconBg: 'bg-gray-200/60',
-  iconColor: 'text-gray-500',
-  textColor: 'text-gray-700'
+  icon: Download,
+  description: 'Respaldar datos',
+  bgColor: 'bg-gradient-to-br from-blue-100/90 to-cyan-100/80',
+  iconBg: 'bg-blue-200/60',
+  iconColor: 'text-blue-500',
+  textColor: 'text-blue-700',
+  requiredRole: 'gerente',
+  isSpecialAction: true,
+  specialAction: 'backup'
 }];
 
 
@@ -156,6 +160,7 @@ export default function Home() {
   const [showStoreSales, setShowStoreSales] = useState(false);
   const [salesTab, setSalesTab] = useState('tienda');
   const [showBudgetDashboard, setShowBudgetDashboard] = useState(false);
+  const [backupLoading, setBackupLoading] = useState(false);
 
   const ROLES = [
   { 
@@ -857,9 +862,22 @@ export default function Home() {
                     </motion.div> :
                 item.isSpecialAction ?
                 <motion.div
-                  onClick={() => {
+                  onClick={async () => {
                     if (item.specialAction === 'budgetTrend') {
                       setShowBudgetDashboard(true);
+                    } else if (item.specialAction === 'backup') {
+                      setBackupLoading(true);
+                      try {
+                        const response = await base44.functions.invoke('backupToGoogleDrive', {});
+                        if (response.data.success) {
+                          toast.success(`✓ Backup creado: ${response.data.file_name}`);
+                        } else {
+                          toast.error(response.data.error || 'Error al crear backup');
+                        }
+                      } catch (error) {
+                        toast.error('Error al conectar con Google Drive');
+                      }
+                      setBackupLoading(false);
                     } else {
                       setShowStoreSales(true);
                     }
@@ -876,16 +894,18 @@ export default function Home() {
                         <motion.div
                       className={`w-12 h-12 ${item.iconBg} backdrop-blur-sm rounded-xl flex items-center justify-center mb-2`}
                       whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1 }}
-                      transition={{ duration: 0.4 }}>
+                      transition={{ duration: 0.4 }}
+                      animate={item.specialAction === 'backup' && backupLoading ? { rotate: 360 } : {}}
+                      style={{ transition: backupLoading ? 'none' : undefined }}>
 
                           <Icon className={`w-6 h-6 ${item.iconColor}`} />
                         </motion.div>
                         <h3 className={`font-bold ${item.textColor} text-sm`}>
-                          {item.name}
+                          {item.specialAction === 'backup' && backupLoading ? 'Guardando...' : item.name}
                         </h3>
                         <p className="text-[10px] text-gray-500 mt-0.5">{item.description}</p>
                       </div>
-                    </motion.div> :
+                      </motion.div> :
 
                 <Link to={createPageUrl(item.page)}>
                       <motion.div
