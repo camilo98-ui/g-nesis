@@ -925,16 +925,40 @@ export default function Dashboard() {
 
 
 
-            {/* Panel de comparación de totales mejorado - INTERACTIVO */}
+            {/* Sustentación Ejecutiva - Modo Comparable */}
+            {showComparison && comparisonTotals && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-gradient-to-r from-purple-50 to-pink-50 border-l-4 border-purple-500 rounded-xl p-4 shadow-sm mb-6"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <BarChart3 className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-bold text-purple-900 mb-1">Análisis Comparativo Entre Períodos</h4>
+                    <p className="text-sm text-purple-800 leading-relaxed">
+                      Este análisis compara el desempeño del período actual contra el período anterior seleccionado. 
+                      <span className="font-semibold"> Los indicadores de crecimiento porcentual, tendencias de mejora o deterioro, y cambios en patrones operativos 
+                      permiten evaluar la efectividad de estrategias implementadas y tomar decisiones basadas en datos para optimizar resultados futuros.</span>
+                      Las variaciones significativas (±10%) requieren análisis detallado de causas raíz.
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Panel de comparación de totales REDISEÑADO - PROFESIONAL */}
             {showComparison && comparisonTotals && (
               <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4"
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6"
               >
                 <motion.button
-                  whileHover={{ scale: 1.03, y: -4 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={{ scale: 1.02, y: -2 }}
+                  whileTap={{ scale: 0.99 }}
                   onClick={() => {
                     const newMetric = activeMetric === 'sales_comp' ? null : 'sales_comp';
                     setActiveMetric(newMetric);
@@ -947,72 +971,73 @@ export default function Dashboard() {
                       }, 100);
                     }
                   }}
-                  className={`group text-left border-2 rounded-2xl shadow-lg transition-all overflow-hidden relative ${
-                    activeMetric === 'sales_comp' ? 'ring-4 ring-emerald-300 shadow-2xl' : ''
-                  } ${
-                    comparisonTotals.sales > 0 && ((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100) >= 0 
-                      ? 'border-emerald-400 bg-gradient-to-br from-emerald-50 via-green-50 to-emerald-100' 
-                      : 'border-red-400 bg-gradient-to-br from-red-50 via-rose-50 to-red-100'
+                  className={`group relative overflow-hidden rounded-2xl transition-all cursor-pointer ${
+                    activeMetric === 'sales_comp' ? 'ring-2 ring-emerald-400 shadow-2xl' : 'shadow-lg hover:shadow-xl'
                   }`}
                 >
-                  {/* Efecto de brillo sutil */}
-                  <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/20 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  {/* Fondo con gradiente ejecutivo */}
+                  <div className={`absolute inset-0 ${
+                    comparisonTotals.sales > 0 && ((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100) >= 0 
+                      ? 'bg-gradient-to-br from-emerald-500 to-green-600' 
+                      : 'bg-gradient-to-br from-red-500 to-rose-600'
+                  }`} />
                   
-                  <CardContent className="pt-6 pb-6 relative">
+                  {/* Pattern overlay */}
+                  <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '20px 20px'}} />
+                  
+                  <CardContent className="relative pt-6 pb-6">
+                    {/* Header */}
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-2">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                          comparisonTotals.sales > 0 && ((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100) >= 0 
-                            ? 'bg-emerald-500/20' 
-                            : 'bg-red-500/20'
-                        }`}>
-                          <DollarSign className={`w-5 h-5 ${
-                            comparisonTotals.sales > 0 && ((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100) >= 0 
-                              ? 'text-emerald-600' 
-                              : 'text-red-600'
-                          }`} />
+                        <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                          <DollarSign className="w-5 h-5 text-white" />
                         </div>
-                        <p className="text-xs font-black text-gray-700 uppercase tracking-wider">Ventas</p>
+                        <span className="text-xs font-bold text-white/90 uppercase tracking-wider">Crecimiento Ventas</span>
                       </div>
                       <motion.div
-                        animate={{ scale: [1, 1.2, 1] }}
-                        transition={{ duration: 2, repeat: Infinity }}
+                        animate={{ rotate: [0, 10, -10, 0] }}
+                        transition={{ duration: 3, repeat: Infinity }}
                       >
                         {comparisonTotals.sales > 0 && ((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100) >= 0 ? 
-                          <TrendingUp className="w-6 h-6 text-emerald-600" /> : 
-                          <TrendingDown className="w-6 h-6 text-red-600" />
+                          <TrendingUp className="w-7 h-7 text-white drop-shadow-lg" /> : 
+                          <TrendingDown className="w-7 h-7 text-white drop-shadow-lg" />
                         }
                       </motion.div>
                     </div>
-                    <div className="mb-3">
-                      <p className={`text-4xl font-black mb-1 ${
-                        comparisonTotals.sales > 0 && ((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100) >= 0 
-                          ? 'text-emerald-700' 
-                          : 'text-red-700'
-                      }`}>
+
+                    {/* Porcentaje destacado */}
+                    <div className="mb-4">
+                      <motion.p 
+                        className="text-5xl font-black text-white drop-shadow-lg"
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ duration: 0.5 }}
+                      >
                         {comparisonTotals.sales > 0 ? (((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100) >= 0 ? '+' : '') + ((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100).toFixed(1) : 0}%
-                      </p>
-                      <p className="text-xs text-gray-600 font-bold">
-                        {formatCurrency(Math.abs(totals.sales - comparisonTotals.sales))} {totals.sales > comparisonTotals.sales ? 'más' : 'menos'}
+                      </motion.p>
+                      <p className="text-sm text-white/90 font-semibold mt-1">
+                        {formatCurrency(Math.abs(totals.sales - comparisonTotals.sales))} {totals.sales > comparisonTotals.sales ? 'más generado' : 'de diferencia'}
                       </p>
                     </div>
-                    <div className="space-y-2 bg-white/50 backdrop-blur-sm rounded-lg p-3">
+
+                    {/* Comparativa */}
+                    <div className="space-y-2 bg-white/10 backdrop-blur-md rounded-xl p-3 border border-white/20">
                       <div className="flex justify-between items-center">
-                        <span className="text-[10px] text-gray-500 uppercase font-semibold tracking-wide">Actual</span>
-                        <span className="text-sm font-black text-gray-800">{formatCurrency(totals.sales)}</span>
+                        <span className="text-xs text-white/80 font-medium">Período Actual</span>
+                        <span className="text-sm font-bold text-white">{formatCurrency(totals.sales)}</span>
                       </div>
-                      <div className="h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent" />
+                      <div className="h-px bg-white/30" />
                       <div className="flex justify-between items-center">
-                        <span className="text-[10px] text-gray-500 uppercase font-semibold tracking-wide">Anterior</span>
-                        <span className="text-sm font-semibold text-gray-600">{formatCurrency(comparisonTotals.sales)}</span>
+                        <span className="text-xs text-white/80 font-medium">Período Anterior</span>
+                        <span className="text-sm font-bold text-white/80">{formatCurrency(comparisonTotals.sales)}</span>
                       </div>
                     </div>
                   </CardContent>
                 </motion.button>
 
                 <motion.button
-                  whileHover={{ scale: 1.03, y: -4 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={{ scale: 1.02, y: -2 }}
+                  whileTap={{ scale: 0.99 }}
                   onClick={() => {
                     const newMetric = activeMetric === 'trans_comp' ? null : 'trans_comp';
                     setActiveMetric(newMetric);
@@ -1025,71 +1050,57 @@ export default function Dashboard() {
                       }, 100);
                     }
                   }}
-                  className={`group text-left border-2 rounded-2xl shadow-lg transition-all overflow-hidden relative ${
-                    activeMetric === 'trans_comp' ? 'ring-4 ring-purple-300 shadow-2xl' : ''
-                  } ${
-                    comparisonTotals.transactions > 0 && ((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100) >= 0 
-                      ? 'border-purple-400 bg-gradient-to-br from-purple-50 via-violet-50 to-purple-100' 
-                      : 'border-orange-400 bg-gradient-to-br from-orange-50 via-amber-50 to-orange-100'
+                  className={`group relative overflow-hidden rounded-2xl transition-all cursor-pointer ${
+                    activeMetric === 'trans_comp' ? 'ring-2 ring-purple-400 shadow-2xl' : 'shadow-lg hover:shadow-xl'
                   }`}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/20 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className={`absolute inset-0 ${
+                    comparisonTotals.transactions > 0 && ((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100) >= 0 
+                      ? 'bg-gradient-to-br from-purple-500 to-violet-600' 
+                      : 'bg-gradient-to-br from-orange-500 to-amber-600'
+                  }`} />
+                  <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '20px 20px'}} />
                   
-                  <CardContent className="pt-6 pb-6 relative">
+                  <CardContent className="relative pt-6 pb-6">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-2">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                          comparisonTotals.transactions > 0 && ((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100) >= 0 
-                            ? 'bg-purple-500/20' 
-                            : 'bg-orange-500/20'
-                        }`}>
-                          <Zap className={`w-5 h-5 ${
-                            comparisonTotals.transactions > 0 && ((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100) >= 0 
-                              ? 'text-purple-600' 
-                              : 'text-orange-600'
-                          }`} />
+                        <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                          <Zap className="w-5 h-5 text-white" />
                         </div>
-                        <p className="text-xs font-black text-gray-700 uppercase tracking-wider">Transacciones</p>
+                        <span className="text-xs font-bold text-white/90 uppercase tracking-wider">Flujo Clientes</span>
                       </div>
-                      <motion.div
-                        animate={{ scale: [1, 1.2, 1] }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                      >
+                      <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 3, repeat: Infinity }}>
                         {comparisonTotals.transactions > 0 && ((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100) >= 0 ? 
-                          <TrendingUp className="w-6 h-6 text-purple-600" /> : 
-                          <TrendingDown className="w-6 h-6 text-orange-600" />
+                          <TrendingUp className="w-7 h-7 text-white drop-shadow-lg" /> : 
+                          <TrendingDown className="w-7 h-7 text-white drop-shadow-lg" />
                         }
                       </motion.div>
                     </div>
-                    <div className="mb-3">
-                      <p className={`text-4xl font-black mb-1 ${
-                        comparisonTotals.transactions > 0 && ((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100) >= 0 
-                          ? 'text-purple-700' 
-                          : 'text-orange-700'
-                      }`}>
+                    <div className="mb-4">
+                      <motion.p className="text-5xl font-black text-white drop-shadow-lg" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.5 }}>
                         {comparisonTotals.transactions > 0 ? (((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100) >= 0 ? '+' : '') + ((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100).toFixed(1) : 0}%
-                      </p>
-                      <p className="text-xs text-gray-600 font-bold">
-                        {Math.abs(totals.transactions - comparisonTotals.transactions).toLocaleString()} {totals.transactions > comparisonTotals.transactions ? 'más' : 'menos'}
+                      </motion.p>
+                      <p className="text-sm text-white/90 font-semibold mt-1">
+                        {Math.abs(totals.transactions - comparisonTotals.transactions).toLocaleString()} {totals.transactions > comparisonTotals.transactions ? 'clientes más' : 'de variación'}
                       </p>
                     </div>
-                    <div className="space-y-2 bg-white/50 backdrop-blur-sm rounded-lg p-3">
+                    <div className="space-y-2 bg-white/10 backdrop-blur-md rounded-xl p-3 border border-white/20">
                       <div className="flex justify-between items-center">
-                        <span className="text-[10px] text-gray-500 uppercase font-semibold tracking-wide">Actual</span>
-                        <span className="text-sm font-black text-gray-800">{totals.transactions.toLocaleString()}</span>
+                        <span className="text-xs text-white/80 font-medium">Período Actual</span>
+                        <span className="text-sm font-bold text-white">{totals.transactions.toLocaleString()}</span>
                       </div>
-                      <div className="h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent" />
+                      <div className="h-px bg-white/30" />
                       <div className="flex justify-between items-center">
-                        <span className="text-[10px] text-gray-500 uppercase font-semibold tracking-wide">Anterior</span>
-                        <span className="text-sm font-semibold text-gray-600">{comparisonTotals.transactions.toLocaleString()}</span>
+                        <span className="text-xs text-white/80 font-medium">Período Anterior</span>
+                        <span className="text-sm font-bold text-white/80">{comparisonTotals.transactions.toLocaleString()}</span>
                       </div>
                     </div>
                   </CardContent>
                 </motion.button>
 
                 <motion.button
-                  whileHover={{ scale: 1.03, y: -4 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={{ scale: 1.02, y: -2 }}
+                  whileTap={{ scale: 0.99 }}
                   onClick={() => {
                     const newMetric = activeMetric === 'ticket_comp' ? null : 'ticket_comp';
                     setActiveMetric(newMetric);
@@ -1102,74 +1113,60 @@ export default function Dashboard() {
                       }, 100);
                     }
                   }}
-                  className={`group text-left border-2 rounded-2xl shadow-lg transition-all overflow-hidden relative ${
-                    activeMetric === 'ticket_comp' ? 'ring-4 ring-amber-300 shadow-2xl' : ''
-                  } ${
-                    avgTicket > (comparisonTotals.sales / comparisonTotals.transactions)
-                      ? 'border-emerald-400 bg-gradient-to-br from-emerald-50 via-green-50 to-emerald-100' 
-                      : 'border-amber-400 bg-gradient-to-br from-amber-50 via-yellow-50 to-amber-100'
+                  className={`group relative overflow-hidden rounded-2xl transition-all cursor-pointer ${
+                    activeMetric === 'ticket_comp' ? 'ring-2 ring-blue-400 shadow-2xl' : 'shadow-lg hover:shadow-xl'
                   }`}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/20 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className={`absolute inset-0 ${
+                    avgTicket > (comparisonTotals.sales / comparisonTotals.transactions)
+                      ? 'bg-gradient-to-br from-blue-500 to-cyan-600' 
+                      : 'bg-gradient-to-br from-amber-500 to-orange-600'
+                  }`} />
+                  <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '20px 20px'}} />
                   
-                  <CardContent className="pt-6 pb-6 relative">
+                  <CardContent className="relative pt-6 pb-6">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-2">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                          avgTicket > (comparisonTotals.sales / comparisonTotals.transactions)
-                            ? 'bg-emerald-500/20' 
-                            : 'bg-amber-500/20'
-                        }`}>
-                          <Receipt className={`w-5 h-5 ${
-                            avgTicket > (comparisonTotals.sales / comparisonTotals.transactions)
-                              ? 'text-emerald-600' 
-                              : 'text-amber-600'
-                          }`} />
+                        <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                          <Receipt className="w-5 h-5 text-white" />
                         </div>
-                        <p className="text-xs font-black text-gray-700 uppercase tracking-wider">Ticket</p>
+                        <span className="text-xs font-bold text-white/90 uppercase tracking-wider">Eficiencia Venta</span>
                       </div>
-                      <motion.div
-                        animate={{ scale: [1, 1.2, 1] }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                      >
+                      <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 3, repeat: Infinity }}>
                         {avgTicket > (comparisonTotals.sales / comparisonTotals.transactions) ? 
-                          <TrendingUp className="w-6 h-6 text-emerald-600" /> : 
-                          <TrendingDown className="w-6 h-6 text-red-600" />
+                          <TrendingUp className="w-7 h-7 text-white drop-shadow-lg" /> : 
+                          <TrendingDown className="w-7 h-7 text-white drop-shadow-lg" />
                         }
                       </motion.div>
                     </div>
-                    <div className="mb-3">
-                      <p className={`text-4xl font-black mb-1 ${
-                        avgTicket > (comparisonTotals.sales / comparisonTotals.transactions) 
-                          ? 'text-emerald-700' 
-                          : 'text-red-700'
-                      }`}>
+                    <div className="mb-4">
+                      <motion.p className="text-5xl font-black text-white drop-shadow-lg" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.5 }}>
                         {comparisonTotals.transactions > 0 ? 
                           (((avgTicket - (comparisonTotals.sales / comparisonTotals.transactions)) / (comparisonTotals.sales / comparisonTotals.transactions) * 100) >= 0 ? '+' : '') +
                           ((avgTicket - (comparisonTotals.sales / comparisonTotals.transactions)) / (comparisonTotals.sales / comparisonTotals.transactions) * 100).toFixed(1) 
                           : 0}%
-                      </p>
-                      <p className="text-xs text-gray-600 font-bold">
-                        {formatCurrency(Math.abs(avgTicket - (comparisonTotals.sales / comparisonTotals.transactions)))} {avgTicket > (comparisonTotals.sales / comparisonTotals.transactions) ? 'más' : 'menos'}
+                      </motion.p>
+                      <p className="text-sm text-white/90 font-semibold mt-1">
+                        {formatCurrency(Math.abs(avgTicket - (comparisonTotals.sales / comparisonTotals.transactions)))} {avgTicket > (comparisonTotals.sales / comparisonTotals.transactions) ? 'de mejora' : 'de variación'}
                       </p>
                     </div>
-                    <div className="space-y-2 bg-white/50 backdrop-blur-sm rounded-lg p-3">
+                    <div className="space-y-2 bg-white/10 backdrop-blur-md rounded-xl p-3 border border-white/20">
                       <div className="flex justify-between items-center">
-                        <span className="text-[10px] text-gray-500 uppercase font-semibold tracking-wide">Actual</span>
-                        <span className="text-sm font-black text-gray-800">{formatCurrency(avgTicket)}</span>
+                        <span className="text-xs text-white/80 font-medium">Período Actual</span>
+                        <span className="text-sm font-bold text-white">{formatCurrency(avgTicket)}</span>
                       </div>
-                      <div className="h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent" />
+                      <div className="h-px bg-white/30" />
                       <div className="flex justify-between items-center">
-                        <span className="text-[10px] text-gray-500 uppercase font-semibold tracking-wide">Anterior</span>
-                        <span className="text-sm font-semibold text-gray-600">{formatCurrency(comparisonTotals.transactions > 0 ? comparisonTotals.sales / comparisonTotals.transactions : 0)}</span>
+                        <span className="text-xs text-white/80 font-medium">Período Anterior</span>
+                        <span className="text-sm font-bold text-white/80">{formatCurrency(comparisonTotals.transactions > 0 ? comparisonTotals.sales / comparisonTotals.transactions : 0)}</span>
                       </div>
                     </div>
                   </CardContent>
                 </motion.button>
 
                 <motion.button
-                  whileHover={{ scale: 1.03, y: -4 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={{ scale: 1.02, y: -2 }}
+                  whileTap={{ scale: 0.99 }}
                   onClick={() => {
                     const newMetric = activeMetric === 'suggested_comp' ? null : 'suggested_comp';
                     setActiveMetric(newMetric);
@@ -1182,63 +1179,49 @@ export default function Dashboard() {
                       }, 100);
                     }
                   }}
-                  className={`group text-left border-2 rounded-2xl shadow-lg transition-all overflow-hidden relative ${
-                    activeMetric === 'suggested_comp' ? 'ring-4 ring-pink-300 shadow-2xl' : ''
-                  } ${
-                    comparisonTotals.suggested > 0 && ((totals.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100) >= 0 
-                      ? 'border-pink-400 bg-gradient-to-br from-pink-50 via-rose-50 to-pink-100' 
-                      : 'border-red-400 bg-gradient-to-br from-red-50 via-rose-50 to-red-100'
+                  className={`group relative overflow-hidden rounded-2xl transition-all cursor-pointer ${
+                    activeMetric === 'suggested_comp' ? 'ring-2 ring-pink-400 shadow-2xl' : 'shadow-lg hover:shadow-xl'
                   }`}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/20 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className={`absolute inset-0 ${
+                    comparisonTotals.suggested > 0 && ((totals.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100) >= 0 
+                      ? 'bg-gradient-to-br from-pink-500 to-rose-600' 
+                      : 'bg-gradient-to-br from-red-500 to-rose-600'
+                  }`} />
+                  <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '20px 20px'}} />
                   
-                  <CardContent className="pt-6 pb-6 relative">
+                  <CardContent className="relative pt-6 pb-6">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-2">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                          comparisonTotals.suggested > 0 && ((totals.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100) >= 0 
-                            ? 'bg-pink-500/20' 
-                            : 'bg-red-500/20'
-                        }`}>
-                          <Gift className={`w-5 h-5 ${
-                            comparisonTotals.suggested > 0 && ((totals.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100) >= 0 
-                              ? 'text-pink-600' 
-                              : 'text-red-600'
-                          }`} />
+                        <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                          <Gift className="w-5 h-5 text-white" />
                         </div>
-                        <p className="text-xs font-black text-gray-700 uppercase tracking-wider">Sugeridos</p>
+                        <span className="text-xs font-bold text-white/90 uppercase tracking-wider">Venta Cruzada</span>
                       </div>
-                      <motion.div
-                        animate={{ scale: [1, 1.2, 1] }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                      >
+                      <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 3, repeat: Infinity }}>
                         {comparisonTotals.suggested > 0 && ((totals.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100) >= 0 ? 
-                          <TrendingUp className="w-6 h-6 text-pink-600" /> : 
-                          <TrendingDown className="w-6 h-6 text-red-600" />
+                          <TrendingUp className="w-7 h-7 text-white drop-shadow-lg" /> : 
+                          <TrendingDown className="w-7 h-7 text-white drop-shadow-lg" />
                         }
                       </motion.div>
                     </div>
-                    <div className="mb-3">
-                      <p className={`text-4xl font-black mb-1 ${
-                        comparisonTotals.suggested > 0 && ((totals.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100) >= 0 
-                          ? 'text-pink-700' 
-                          : 'text-red-700'
-                      }`}>
+                    <div className="mb-4">
+                      <motion.p className="text-5xl font-black text-white drop-shadow-lg" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.5 }}>
                         {comparisonTotals.suggested > 0 ? (((totals.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100) >= 0 ? '+' : '') + ((totals.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100).toFixed(1) : 0}%
-                      </p>
-                      <p className="text-xs text-gray-600 font-bold">
-                        {Math.abs(totals.suggested - comparisonTotals.suggested).toLocaleString()} {totals.suggested > comparisonTotals.suggested ? 'más' : 'menos'}
+                      </motion.p>
+                      <p className="text-sm text-white/90 font-semibold mt-1">
+                        {Math.abs(totals.suggested - comparisonTotals.suggested).toLocaleString()} {totals.suggested > comparisonTotals.suggested ? 'más vendido' : 'de variación'}
                       </p>
                     </div>
-                    <div className="space-y-2 bg-white/50 backdrop-blur-sm rounded-lg p-3">
+                    <div className="space-y-2 bg-white/10 backdrop-blur-md rounded-xl p-3 border border-white/20">
                       <div className="flex justify-between items-center">
-                        <span className="text-[10px] text-gray-500 uppercase font-semibold tracking-wide">Actual</span>
-                        <span className="text-sm font-black text-gray-800">{totals.suggested.toLocaleString()}</span>
+                        <span className="text-xs text-white/80 font-medium">Período Actual</span>
+                        <span className="text-sm font-bold text-white">{totals.suggested.toLocaleString()}</span>
                       </div>
-                      <div className="h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent" />
+                      <div className="h-px bg-white/30" />
                       <div className="flex justify-between items-center">
-                        <span className="text-[10px] text-gray-500 uppercase font-semibold tracking-wide">Anterior</span>
-                        <span className="text-sm font-semibold text-gray-600">{comparisonTotals.suggested.toLocaleString()}</span>
+                        <span className="text-xs text-white/80 font-medium">Período Anterior</span>
+                        <span className="text-sm font-bold text-white/80">{comparisonTotals.suggested.toLocaleString()}</span>
                       </div>
                     </div>
                   </CardContent>
@@ -1376,68 +1359,102 @@ export default function Dashboard() {
                     </ResponsiveContainer>
                   </div>
 
-                  {/* Stats comparativos */}
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="bg-emerald-500/20 rounded-xl p-4 border border-emerald-400/30">
-                      <p className="text-xs text-emerald-200 mb-1">Período Actual</p>
-                      <p className="text-2xl font-black text-white">
-                        {activeMetric === 'sales_comp' && formatCurrency(totals.sales)}
-                        {activeMetric === 'trans_comp' && totals.transactions.toLocaleString()}
-                        {activeMetric === 'ticket_comp' && formatCurrency(avgTicket)}
-                        {activeMetric === 'suggested_comp' && totals.suggested.toLocaleString()}
-                      </p>
-                    </div>
-                    <div className="bg-slate-500/20 rounded-xl p-4 border border-slate-400/30">
-                      <p className="text-xs text-slate-200 mb-1">Período Anterior</p>
-                      <p className="text-2xl font-black text-white">
-                        {activeMetric === 'sales_comp' && formatCurrency(comparisonTotals.sales)}
-                        {activeMetric === 'trans_comp' && comparisonTotals.transactions.toLocaleString()}
-                        {activeMetric === 'ticket_comp' && formatCurrency(comparisonTotals.transactions > 0 ? comparisonTotals.sales / comparisonTotals.transactions : 0)}
-                        {activeMetric === 'suggested_comp' && comparisonTotals.suggested.toLocaleString()}
-                      </p>
-                    </div>
-                    <div className={`rounded-xl p-4 border ${
-                      (activeMetric === 'sales_comp' && totals.sales > comparisonTotals.sales) ||
-                      (activeMetric === 'trans_comp' && totals.transactions > comparisonTotals.transactions) ||
-                      (activeMetric === 'ticket_comp' && avgTicket > (comparisonTotals.sales / comparisonTotals.transactions)) ||
-                      (activeMetric === 'suggested_comp' && totals.suggested > comparisonTotals.suggested)
-                        ? 'bg-emerald-500/20 border-emerald-400/30' 
-                        : 'bg-red-500/20 border-red-400/30'
-                    }`}>
-                      <p className={`text-xs mb-1 ${
-                        (activeMetric === 'sales_comp' && totals.sales > comparisonTotals.sales) ||
-                        (activeMetric === 'trans_comp' && totals.transactions > comparisonTotals.transactions) ||
-                        (activeMetric === 'ticket_comp' && avgTicket > (comparisonTotals.sales / comparisonTotals.transactions)) ||
-                        (activeMetric === 'suggested_comp' && totals.suggested > comparisonTotals.suggested)
-                          ? 'text-emerald-200' 
-                          : 'text-red-200'
-                      }`}>Diferencia</p>
-                      <p className={`text-2xl font-black ${
-                        (activeMetric === 'sales_comp' && totals.sales > comparisonTotals.sales) ||
-                        (activeMetric === 'trans_comp' && totals.transactions > comparisonTotals.transactions) ||
-                        (activeMetric === 'ticket_comp' && avgTicket > (comparisonTotals.sales / comparisonTotals.transactions)) ||
-                        (activeMetric === 'suggested_comp' && totals.suggested > comparisonTotals.suggested)
-                          ? 'text-emerald-400' 
-                          : 'text-red-400'
-                      }`}>
-                        {activeMetric === 'sales_comp' && 
-                          (totals.sales > comparisonTotals.sales ? '+' : '') + 
-                          ((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100).toFixed(1) + '%'
-                        }
-                        {activeMetric === 'trans_comp' && 
-                          (totals.transactions > comparisonTotals.transactions ? '+' : '') + 
-                          ((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100).toFixed(1) + '%'
-                        }
-                        {activeMetric === 'ticket_comp' && 
-                          (avgTicket > (comparisonTotals.sales / comparisonTotals.transactions) ? '+' : '') + 
-                          ((avgTicket - (comparisonTotals.sales / comparisonTotals.transactions)) / (comparisonTotals.sales / comparisonTotals.transactions) * 100).toFixed(1) + '%'
-                        }
-                        {activeMetric === 'suggested_comp' && 
-                          (totals.suggested > comparisonTotals.suggested ? '+' : '') + 
-                          ((totals.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100).toFixed(1) + '%'
-                        }
-                      </p>
-                    </div>
+                  {/* Stats comparativos con insights ejecutivos */}
+                  <div className="grid grid-cols-3 gap-4 mb-6">
+                   <div className="bg-emerald-500/20 rounded-xl p-4 border border-emerald-400/30">
+                     <p className="text-xs text-emerald-200 mb-1">Período Actual</p>
+                     <p className="text-2xl font-black text-white">
+                       {activeMetric === 'sales_comp' && formatCurrency(totals.sales)}
+                       {activeMetric === 'trans_comp' && totals.transactions.toLocaleString()}
+                       {activeMetric === 'ticket_comp' && formatCurrency(avgTicket)}
+                       {activeMetric === 'suggested_comp' && totals.suggested.toLocaleString()}
+                     </p>
+                   </div>
+                   <div className="bg-slate-500/20 rounded-xl p-4 border border-slate-400/30">
+                     <p className="text-xs text-slate-200 mb-1">Período Anterior</p>
+                     <p className="text-2xl font-black text-white">
+                       {activeMetric === 'sales_comp' && formatCurrency(comparisonTotals.sales)}
+                       {activeMetric === 'trans_comp' && comparisonTotals.transactions.toLocaleString()}
+                       {activeMetric === 'ticket_comp' && formatCurrency(comparisonTotals.transactions > 0 ? comparisonTotals.sales / comparisonTotals.transactions : 0)}
+                       {activeMetric === 'suggested_comp' && comparisonTotals.suggested.toLocaleString()}
+                     </p>
+                   </div>
+                   <div className={`rounded-xl p-4 border ${
+                     (activeMetric === 'sales_comp' && totals.sales > comparisonTotals.sales) ||
+                     (activeMetric === 'trans_comp' && totals.transactions > comparisonTotals.transactions) ||
+                     (activeMetric === 'ticket_comp' && avgTicket > (comparisonTotals.sales / comparisonTotals.transactions)) ||
+                     (activeMetric === 'suggested_comp' && totals.suggested > comparisonTotals.suggested)
+                       ? 'bg-emerald-500/20 border-emerald-400/30' 
+                       : 'bg-red-500/20 border-red-400/30'
+                   }`}>
+                     <p className={`text-xs mb-1 ${
+                       (activeMetric === 'sales_comp' && totals.sales > comparisonTotals.sales) ||
+                       (activeMetric === 'trans_comp' && totals.transactions > comparisonTotals.transactions) ||
+                       (activeMetric === 'ticket_comp' && avgTicket > (comparisonTotals.sales / comparisonTotals.transactions)) ||
+                       (activeMetric === 'suggested_comp' && totals.suggested > comparisonTotals.suggested)
+                         ? 'text-emerald-200' 
+                         : 'text-red-200'
+                     }`}>Variación</p>
+                     <p className={`text-2xl font-black ${
+                       (activeMetric === 'sales_comp' && totals.sales > comparisonTotals.sales) ||
+                       (activeMetric === 'trans_comp' && totals.transactions > comparisonTotals.transactions) ||
+                       (activeMetric === 'ticket_comp' && avgTicket > (comparisonTotals.sales / comparisonTotals.transactions)) ||
+                       (activeMetric === 'suggested_comp' && totals.suggested > comparisonTotals.suggested)
+                         ? 'text-emerald-400' 
+                         : 'text-red-400'
+                     }`}>
+                       {activeMetric === 'sales_comp' && 
+                         (totals.sales > comparisonTotals.sales ? '+' : '') + 
+                         ((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100).toFixed(1) + '%'
+                       }
+                       {activeMetric === 'trans_comp' && 
+                         (totals.transactions > comparisonTotals.transactions ? '+' : '') + 
+                         ((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100).toFixed(1) + '%'
+                       }
+                       {activeMetric === 'ticket_comp' && 
+                         (avgTicket > (comparisonTotals.sales / comparisonTotals.transactions) ? '+' : '') + 
+                         ((avgTicket - (comparisonTotals.sales / comparisonTotals.transactions)) / (comparisonTotals.sales / comparisonTotals.transactions) * 100).toFixed(1) + '%'
+                       }
+                       {activeMetric === 'suggested_comp' && 
+                         (totals.suggested > comparisonTotals.suggested ? '+' : '') + 
+                         ((totals.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100).toFixed(1) + '%'
+                       }
+                     </p>
+                   </div>
+                  </div>
+
+                  {/* Insight Ejecutivo */}
+                  <div className="bg-blue-500/10 border border-blue-400/30 rounded-xl p-4">
+                   <div className="flex items-start gap-3">
+                     <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                       <Target className="w-4 h-4 text-blue-300" />
+                     </div>
+                     <div className="flex-1">
+                       <h5 className="text-sm font-bold text-white mb-1">Análisis Ejecutivo</h5>
+                       <p className="text-xs text-blue-100 leading-relaxed">
+                         {activeMetric === 'sales_comp' && (
+                           totals.sales > comparisonTotals.sales 
+                             ? `La facturación muestra crecimiento sostenido del ${((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100).toFixed(1)}%. Este incremento indica efectividad en las estrategias comerciales implementadas. Recomendación: Replicar las tácticas exitosas del período actual en otros puntos de venta.`
+                             : `Se observa una contracción de ${Math.abs((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100).toFixed(1)}% en ventas. Requiere análisis inmediato de: 1) Flujo de clientes, 2) Competencia directa, 3) Cambios en comportamiento de compra. Prioridad: Implementar plan de recuperación en las próximas 72 horas.`
+                         )}
+                         {activeMetric === 'trans_comp' && (
+                           totals.transactions > comparisonTotals.transactions
+                             ? `El tráfico de clientes aumentó ${((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100).toFixed(1)}%, indicando mayor captación y retención. Si las ventas no crecieron proporcionalmente, existe oportunidad crítica de optimizar ticket promedio mediante capacitación en venta consultiva.`
+                             : `Reducción de ${Math.abs((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100).toFixed(1)}% en flujo de clientes. Causas potenciales: factores externos (clima, eventos), competencia, o deterioro en servicio. Acción: Auditoría urgente de experiencia de cliente y revisión de estrategias de atracción.`
+                         )}
+                         {activeMetric === 'ticket_comp' && (
+                           avgTicket > (comparisonTotals.sales / comparisonTotals.transactions)
+                             ? `Mejora de ${((avgTicket - (comparisonTotals.sales / comparisonTotals.transactions)) / (comparisonTotals.sales / comparisonTotals.transactions) * 100).toFixed(1)}% en ticket promedio refleja mayor efectividad comercial y éxito en estrategias de venta cruzada/upselling. Este KPI es clave para rentabilidad. Recomendación: Documentar e institucionalizar prácticas exitosas del equipo.`
+                             : `El ticket promedio decreció ${Math.abs((avgTicket - (comparisonTotals.sales / comparisonTotals.transactions)) / (comparisonTotals.sales / comparisonTotals.transactions) * 100).toFixed(1)}%, señalando menor conversión por transacción. Posibles causas: cambio en mix de productos, falta de venta sugerida, o migración a productos de menor valor. Requiere refuerzo inmediato en técnicas de venta consultiva.`
+                         )}
+                         {activeMetric === 'suggested_comp' && (
+                           totals.suggested > comparisonTotals.suggested
+                             ? `Los sugeridos crecieron ${((totals.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100).toFixed(1)}%, evidenciando mejora en capacidades de venta consultiva del equipo. Cada unidad adicional impacta directamente en márgenes. Mantener incentivos y reconocimiento a top performers.`
+                             : `Disminución de ${Math.abs((totals.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100).toFixed(1)}% en venta de sugeridos representa pérdida directa de margen. Requiere intervención inmediata: 1) Reforzar entrenamiento, 2) Verificar disponibilidad de productos complementarios, 3) Revisar script de venta sugerida con el equipo.`
+                         )}
+                       </p>
+                     </div>
+                   </div>
                   </div>
                 </motion.div>
               )}
@@ -1450,15 +1467,41 @@ export default function Dashboard() {
                 animate={{ opacity: 1 }}
                 className="space-y-6"
               >
+                {/* Sustentación Ejecutiva - Modo Actual */}
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-500 rounded-xl p-4 shadow-sm"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <BarChart3 className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-bold text-blue-900 mb-1">Análisis del Período Actual</h4>
+                      <p className="text-sm text-blue-800 leading-relaxed">
+                        Este dashboard presenta el desempeño operativo del período seleccionado. Las gráficas muestran tendencias diarias de ventas, 
+                        distribución por horarios, evolución del ticket promedio y volumen transaccional. 
+                        <span className="font-semibold"> Estos indicadores permiten identificar patrones de consumo, picos de demanda y oportunidades de optimización en tiempo real.</span>
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+
                 {/* Main Charts Row */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {/* Sales Trend */}
                   <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
-                        <TrendingUp className="w-4 h-4 text-green-500" />
-                        Ventas Diarias {showComparison && '- Comparativo'}
-                      </CardTitle>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+                          <TrendingUp className="w-4 h-4 text-green-500" />
+                          Ventas Diarias {showComparison && '- Comparativo'}
+                        </CardTitle>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Evolución del ingreso bruto diario. Identifica tendencias, días atípicos y patrones estacionales para planificación estratégica.
+                      </p>
                     </CardHeader>
                     <CardContent>
                       <div className="h-64">
@@ -1514,6 +1557,9 @@ export default function Dashboard() {
                         <Zap className="w-4 h-4 text-purple-500" />
                         Transacciones vs Ventas {showComparison && '- Comparativo'}
                       </CardTitle>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Correlación entre volumen de clientes y facturación. Un alto volumen transaccional con baja venta indica oportunidad de mejorar ticket promedio.
+                      </p>
                     </CardHeader>
                     <CardContent>
                       <div className="h-64">
@@ -1549,6 +1595,9 @@ export default function Dashboard() {
                         <Receipt className="w-4 h-4 text-blue-500" />
                         Ticket Promedio {showComparison && '- Comparativo'}
                       </CardTitle>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Valor promedio por transacción. Indicador clave de eficiencia comercial y efectividad en estrategias de venta cruzada y upselling.
+                      </p>
                     </CardHeader>
                     <CardContent>
                       <div className="h-64">
@@ -1627,16 +1676,18 @@ export default function Dashboard() {
               }}
             />
 
-            {/* Daily Budget */}
-            <DailyBudgetCard 
-              dailySales={dailySales} 
-              budgets={budgets} 
-              storeId={selectedStore}
-              formatCurrency={formatCurrency}
-            />
+            {/* Daily Budget - Solo en modo ACTUAL */}
+            {!showComparison && (
+              <DailyBudgetCard 
+                dailySales={dailySales} 
+                budgets={budgets} 
+                storeId={selectedStore}
+                formatCurrency={formatCurrency}
+              />
+            )}
             
-            {/* Weather Impact Chart */}
-            {weatherData && (
+            {/* Weather Impact Chart - Solo en modo ACTUAL */}
+            {!showComparison && weatherData && (
               <WeatherSalesImpactChart 
                 weatherData={weatherData}
                 dailySales={dailySales}
