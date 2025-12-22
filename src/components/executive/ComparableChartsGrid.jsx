@@ -100,10 +100,18 @@ export default function ComparableChartsGrid({ chartData, totals, comparisonTota
               <Percent className="w-4 h-4 text-indigo-500" />
               Crecimiento Comparativo por Indicador
             </CardTitle>
-            <p className="text-xs text-gray-500 mt-1">
-              Compara el crecimiento porcentual de cada KPI. Un crecimiento balanceado indica salud operativa; 
-              desbalances sugieren áreas que requieren atención prioritaria.
-            </p>
+            <div className="mt-2 space-y-2">
+              <div className="bg-blue-50 border border-blue-200 rounded px-2 py-1">
+                <p className="text-[10px] text-blue-900 leading-tight">
+                  <span className="font-bold">Conclusión:</span> Compara crecimiento de cada métrica. Balanceado = salud operativa. Desbalanceado = problema específico.
+                </p>
+              </div>
+              <div className="bg-emerald-50 border border-emerald-200 rounded px-2 py-1">
+                <p className="text-[10px] text-emerald-900 leading-tight">
+                  <span className="font-bold">Acción:</span> Indicadores negativos necesitan plan de mejora inmediato. Priorizar por impacto en facturación.
+                </p>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="h-64">
@@ -137,10 +145,18 @@ export default function ComparableChartsGrid({ chartData, totals, comparisonTota
               <Activity className="w-4 h-4 text-emerald-500" />
               Variación Diaria de Ventas (%)
             </CardTitle>
-            <p className="text-xs text-gray-500 mt-1">
-              Fluctuación porcentual día a día entre períodos. Valores positivos consistentes indican mejora sostenida; 
-              volatilidad alta sugiere inconsistencia operativa que requiere estandarización.
-            </p>
+            <div className="mt-2 space-y-2">
+              <div className="bg-blue-50 border border-blue-200 rounded px-2 py-1">
+                <p className="text-[10px] text-blue-900 leading-tight">
+                  <span className="font-bold">Conclusión:</span> Cambio porcentual día a día. Línea estable arriba = mejora sostenida. Zigzag = inconsistencia.
+                </p>
+              </div>
+              <div className="bg-emerald-50 border border-emerald-200 rounded px-2 py-1">
+                <p className="text-[10px] text-emerald-900 leading-tight">
+                  <span className="font-bold">Acción:</span> Volatilidad alta requiere estandarizar procesos. Buscar causas de días irregulares.
+                </p>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="h-64">
@@ -174,9 +190,18 @@ export default function ComparableChartsGrid({ chartData, totals, comparisonTota
               <Zap className="w-4 h-4 text-purple-500" />
               Evolución de Tráfico vs Facturación
             </CardTitle>
-            <p className="text-xs text-gray-500 mt-1">
-              Correlación entre volumen de clientes y ventas en ambos períodos. Divergencia entre líneas indica cambios en comportamiento de compra o efectividad comercial.
-            </p>
+            <div className="mt-2 space-y-2">
+              <div className="bg-blue-50 border border-blue-200 rounded px-2 py-1">
+                <p className="text-[10px] text-blue-900 leading-tight">
+                  <span className="font-bold">Conclusión:</span> Relaciona clientes con ventas en ambos períodos. Tráfico arriba pero ventas planas = problema de conversión.
+                </p>
+              </div>
+              <div className="bg-emerald-50 border border-emerald-200 rounded px-2 py-1">
+                <p className="text-[10px] text-emerald-900 leading-tight">
+                  <span className="font-bold">Acción:</span> Si líneas divergen, revisar efectividad del equipo de ventas urgentemente.
+                </p>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="h-64">
@@ -211,9 +236,18 @@ export default function ComparableChartsGrid({ chartData, totals, comparisonTota
               <Target className="w-4 h-4 text-cyan-400" />
               Indicadores de Eficiencia Operativa
             </CardTitle>
-            <p className="text-xs text-slate-300 mt-1">
-              Métricas clave de productividad comercial. La eficiencia por transacción y tasa de conversión son drivers críticos de rentabilidad.
-            </p>
+            <div className="mt-2 space-y-2">
+              <div className="bg-blue-500/20 border border-blue-400/40 rounded px-2 py-1">
+                <p className="text-[10px] text-blue-100 leading-tight">
+                  <span className="font-bold">Conclusión:</span> Cuánto vendemos por cliente y qué % compra sugeridos. Baja eficiencia = dinero perdido.
+                </p>
+              </div>
+              <div className="bg-emerald-500/20 border border-emerald-400/40 rounded px-2 py-1">
+                <p className="text-[10px] text-emerald-100 leading-tight">
+                  <span className="font-bold">Acción:</span> Establecer metas individuales de eficiencia. Capacitar vendedores de bajo rendimiento.
+                </p>
+              </div>
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Venta por Transacción */}
@@ -286,10 +320,18 @@ export default function ComparableChartsGrid({ chartData, totals, comparisonTota
               <TrendingUp className="w-4 h-4 text-emerald-500" />
               Ventas Diarias: Período Actual vs Anterior
             </CardTitle>
-            <p className="text-xs text-gray-500 mt-1">
-              Comparación granular día por día. Identifique patrones: ¿los incrementos son consistentes o volátiles? 
-              Consistencia indica estrategias sostenibles; volatilidad sugiere factores externos o ejecución irregular.
-            </p>
+            <div className="mt-2 space-y-2">
+              <div className="bg-blue-50 border border-blue-200 rounded px-2 py-1">
+                <p className="text-[10px] text-blue-900 leading-tight">
+                  <span className="font-bold">Conclusión:</span> Vista completa día a día de ambos períodos. Línea actual arriba = mejoramos. Abajo = empeoramos.
+                </p>
+              </div>
+              <div className="bg-emerald-50 border border-emerald-200 rounded px-2 py-1">
+                <p className="text-[10px] text-emerald-900 leading-tight">
+                  <span className="font-bold">Acción:</span> Identificar días específicos de mejor/peor desempeño y buscar causas concretas para replicar o corregir.
+                </p>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="h-80">

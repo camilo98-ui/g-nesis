@@ -1567,19 +1567,38 @@ export default function Dashboard() {
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-500 rounded-xl p-4 shadow-sm"
+                  className="bg-gradient-to-r from-slate-50 to-gray-50 border-l-4 border-slate-700 rounded-xl shadow-sm"
                 >
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <BarChart3 className="w-5 h-5 text-white" />
+                  <div className="p-4">
+                    <div className="flex items-start gap-3 mb-4">
+                      <div className="w-10 h-10 bg-slate-700 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <BarChart3 className="w-5 h-5 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-bold text-slate-900 text-base">Desempeño del Período Actual</h4>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <h4 className="font-bold text-blue-900 mb-1">Análisis del Período Actual</h4>
-                      <p className="text-sm text-blue-800 leading-relaxed">
-                        Este dashboard presenta el desempeño operativo del período seleccionado. Las gráficas muestran tendencias diarias de ventas, 
-                        distribución por horarios, evolución del ticket promedio y volumen transaccional. 
-                        <span className="font-semibold"> Estos indicadores permiten identificar patrones de consumo, picos de demanda y oportunidades de optimización en tiempo real.</span>
-                      </p>
+
+                    <div className="grid md:grid-cols-2 gap-4">
+                      {/* Conclusiones */}
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                        <h5 className="font-bold text-blue-900 text-sm mb-2 flex items-center gap-1">
+                          <span className="text-blue-600">📊</span> Conclusiones
+                        </h5>
+                        <p className="text-xs text-blue-900 leading-relaxed">
+                          Estas gráficas revelan el comportamiento real del negocio día a día. Los picos y valles en ventas muestran qué días funcionan mejor. La distribución horaria indica cuándo se concentra la demanda. El ticket promedio muestra si estamos maximizando cada cliente que entra.
+                        </p>
+                      </div>
+
+                      {/* Plan de Acción */}
+                      <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
+                        <h5 className="font-bold text-emerald-900 text-sm mb-2 flex items-center gap-1">
+                          <span className="text-emerald-600">🎯</span> Plan de Acción
+                        </h5>
+                        <p className="text-xs text-emerald-900 leading-relaxed">
+                          1) Identificar qué días o turnos tienen mejor desempeño y buscar el patrón. 2) Reforzar personal en horarios pico para no perder ventas por falta de atención. 3) Si el ticket es bajo, capacitar en venta sugerida. 4) Días bajos requieren promociones específicas.
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </motion.div>
@@ -1653,9 +1672,18 @@ export default function Dashboard() {
                         <Zap className="w-4 h-4 text-purple-500" />
                         Transacciones vs Ventas {showComparison && '- Comparativo'}
                       </CardTitle>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Correlación entre volumen de clientes y facturación. Un alto volumen transaccional con baja venta indica oportunidad de mejorar ticket promedio.
-                      </p>
+                      <div className="mt-2 space-y-2">
+                        <div className="bg-blue-50 border border-blue-200 rounded px-2 py-1">
+                          <p className="text-[10px] text-blue-900 leading-tight">
+                            <span className="font-bold">Conclusión:</span> Relaciona cantidad de clientes con facturación. Muchos clientes pero pocas ventas = problema de conversión.
+                          </p>
+                        </div>
+                        <div className="bg-emerald-50 border border-emerald-200 rounded px-2 py-1">
+                          <p className="text-[10px] text-emerald-900 leading-tight">
+                            <span className="font-bold">Acción:</span> Si tráfico alto no genera ventas proporcionales, capacitar en técnicas de cierre inmediatamente.
+                          </p>
+                        </div>
+                      </div>
                     </CardHeader>
                     <CardContent>
                       <div className="h-64">
@@ -1691,9 +1719,18 @@ export default function Dashboard() {
                         <Receipt className="w-4 h-4 text-blue-500" />
                         Ticket Promedio {showComparison && '- Comparativo'}
                       </CardTitle>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Valor promedio por transacción. Indicador clave de eficiencia comercial y efectividad en estrategias de venta cruzada y upselling.
-                      </p>
+                      <div className="mt-2 space-y-2">
+                        <div className="bg-blue-50 border border-blue-200 rounded px-2 py-1">
+                          <p className="text-[10px] text-blue-900 leading-tight">
+                            <span className="font-bold">Conclusión:</span> Cuánto gasta cada cliente en promedio. Ticket bajo = estamos perdiendo dinero por venta.
+                          </p>
+                        </div>
+                        <div className="bg-emerald-50 border border-emerald-200 rounded px-2 py-1">
+                          <p className="text-[10px] text-emerald-900 leading-tight">
+                            <span className="font-bold">Acción:</span> Subir ticket con venta consultiva, combos y productos complementarios. Entrenar equipo en cross-selling.
+                          </p>
+                        </div>
+                      </div>
                     </CardHeader>
                     <CardContent>
                       <div className="h-64">
