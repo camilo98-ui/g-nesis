@@ -699,7 +699,7 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
         {selectedStore ? (
           <>
             {/* Toolbar */}
-            <div className="flex flex-wrap items-center gap-2 mb-4 p-2 bg-white/80 rounded-xl shadow-sm">
+            <div className="flex flex-wrap items-center gap-2 mb-4 p-3 bg-white/80 rounded-xl shadow-sm">
               {/* Selector de Nevera */}
               <div className="flex items-center gap-1 bg-gradient-to-r from-cyan-100 to-blue-100 rounded-lg p-1">
                 {[1, 2, 3].map(num => (
@@ -714,25 +714,6 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                   </Button>
                 ))}
               </div>
-              
-              <div className="h-6 w-px bg-gray-200 mx-1" />
-              
-              <Button size="sm" variant="outline" onClick={() => setZoom(Math.max(0.6, zoom - 0.1))}>
-                <ZoomOut className="w-4 h-4" />
-              </Button>
-              <span className="text-xs text-gray-500 w-10 text-center">{Math.round(zoom * 100)}%</span>
-              <Button size="sm" variant="outline" onClick={() => setZoom(Math.min(1.3, zoom + 0.1))}>
-                <ZoomIn className="w-4 h-4" />
-              </Button>
-              
-              <div className="h-6 w-px bg-gray-200 mx-1" />
-              
-              <Button size="sm" variant="outline" onClick={handleUndo} disabled={undoStack.length === 0} title="Deshacer">
-                <Undo2 className="w-4 h-4" />
-              </Button>
-              <Button size="sm" variant="outline" onClick={clearAllSlots} className="text-red-600 hover:bg-red-50" title="Vaciar Nevera">
-                <Trash2 className="w-4 h-4" />
-              </Button>
               
               <div className="h-6 w-px bg-gray-200 mx-1" />
               
@@ -780,6 +761,17 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                   }
                 }}
               />
+              
+              <div className="h-6 w-px bg-gray-200 mx-1" />
+              
+              <Button size="sm" variant="outline" onClick={handleUndo} disabled={undoStack.length === 0} title="Deshacer">
+                <Undo2 className="w-4 h-4 mr-1" />
+                <span className="hidden sm:inline">Deshacer</span>
+              </Button>
+              <Button size="sm" variant="outline" onClick={clearAllSlots} className="text-red-600 hover:bg-red-50" title="Vaciar Nevera">
+                <Trash2 className="w-4 h-4 mr-1" />
+                <span className="hidden sm:inline">Vaciar</span>
+              </Button>
               
               <div className="h-6 w-px bg-gray-200 mx-1" />
               
