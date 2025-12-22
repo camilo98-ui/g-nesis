@@ -1964,30 +1964,35 @@ export default function Dashboard() {
                         {item.isTrend && (
                           <div className="h-10 flex items-center relative">
                             <svg className="w-full h-full" viewBox="0 0 100 30">
+                              <defs>
+                                <linearGradient id="trendGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                  <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.3" />
+                                  <stop offset="100%" stopColor="#f59e0b" stopOpacity="1" />
+                                </linearGradient>
+                              </defs>
                               <motion.path
                                 d="M 0 25 Q 25 20 50 15 T 100 5"
                                 fill="none"
-                                stroke="#f59e0b"
+                                stroke="url(#trendGradient)"
                                 strokeWidth="3"
                                 initial={{ pathLength: 0 }}
                                 animate={{ pathLength: 1 }}
                                 transition={{ delay: idx * 0.1, duration: 1.5, ease: "easeInOut" }}
                               />
                               <motion.circle
+                                cx="50"
+                                cy="15"
                                 r="3"
                                 fill="#f59e0b"
-                                initial={{ offsetDistance: '0%', opacity: 0 }}
-                                animate={{ offsetDistance: '100%', opacity: [0, 1, 1, 0] }}
-                                transition={{ duration: 2, delay: idx * 0.1 + 1, repeat: Infinity, repeatDelay: 1 }}
-                              >
-                                <animateMotion dur="2s" repeatCount="indefinite" begin={`${idx * 0.1 + 1}s`}>
-                                  <mpath href="#trendPath" />
-                                </animateMotion>
-                              </motion.circle>
+                                initial={{ opacity: 0 }}
+                                animate={{ 
+                                  cx: [0, 50, 100],
+                                  cy: [25, 15, 5],
+                                  opacity: [0, 1, 1, 0] 
+                                }}
+                                transition={{ duration: 2, delay: idx * 0.1 + 1, repeat: Infinity, repeatDelay: 1, ease: "easeInOut" }}
+                              />
                             </svg>
-                            <defs>
-                              <path id="trendPath" d="M 0 25 Q 25 20 50 15 T 100 5" />
-                            </defs>
                           </div>
                         )}
                         
