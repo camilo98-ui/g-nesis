@@ -517,7 +517,7 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
                     >
                       <p className={`${isFirst ? 'text-xs' : 'text-[10px]'} font-medium text-gray-500`}>SCORE</p>
                       <p className={`${isFirst ? 'text-2xl' : 'text-lg'} font-black bg-gradient-to-r ${PODIUM_COLORS[podiumIdx]} bg-clip-text text-transparent`}>
-                        {cashier.overallScore?.toFixed(0) || '0'}
+                        {Math.round(cashier.managementScore || 0).toLocaleString('es-CO')}
                       </p>
                     </motion.div>
                     
