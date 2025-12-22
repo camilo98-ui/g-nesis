@@ -73,6 +73,12 @@ export default function CashiersDashboard() {
     refetchOnReconnect: true
   });
 
+  // Metas de la tienda (hardcoded, luego se puede traer de BD)
+  const storeMeta = {
+    salesGoal: 15000000, // Meta de ventas mensual
+    ticketGoal: 35000, // Meta de ticket promedio
+  };
+
   const activeCashiers = cashiers.filter(c => c.is_active !== false);
 
   // Calcular estadísticas de cada cajero
@@ -146,6 +152,25 @@ export default function CashiersDashboard() {
     };
   }, [cashierStats]);
 
+  // Indicadores accionables
+  const actionableMetrics = useMemo(() => {
+    const salesCompliance = storeMeta.salesGoal > 0 ? (teamTotals.totalSales / storeMeta.salesGoal) * 100 : 0;
+    const ticketCompliance = storeMeta.ticketGoal > 0 ? (teamTotals.avgTicket / storeMeta.ticketGoal) * 100 : 0;
+    
+    // Cuántos cajeros están sobre meta (simplificado: consideramos sobre meta si supera promedio del equipo)
+    const avgTeamSales = teamTotals.avgSales;
+    const cashiersOverGoal = rankedCashiers.filter(c => c.totalSales > avgTeamSales).length;
+
+    return {
+      salesCompliance,
+      salesStatus: salesCompliance >= 100 ? 'success' : salesCompliance >= 85 ? 'warning' : 'critical',
+      ticketCompliance,
+      ticketStatus: ticketCompliance >= 100 ? 'success' : ticketCompliance >= 90 ? 'warning' : 'critical',
+      cashiersOverGoal,
+      topPerformer: rankedCashiers[0]
+    };
+  }, [teamTotals, storeMeta, rankedCashiers]);
+
   // Auto scroll to analysis when cashier is selected
   const analysisRef = React.useRef(null);
   useEffect(() => {
@@ -216,62 +241,221 @@ export default function CashiersDashboard() {
 
         {selectedStore ? (
           <div className="space-y-6">
-            {/* Team Summary */}
+            {/* Indicadores Accionables */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {/* 1. Ventas vs Meta */}
               <motion.div 
                 whileHover={{ y: -5, scale: 1.02 }}
-                className="bg-gradient-to-br from-pink-50 to-rose-100 rounded-2xl p-5 shadow-sm"
+                className={`rounded-2xl p-5 shadow-lg border-2 relative overflow-hidden ${
+                  actionableMetrics.salesStatus === 'success' 
+                    ? 'bg-gradient-to-br from-emerald-50 to-green-100 border-emerald-300' 
+                    : actionableMetrics.salesStatus === 'warning'
+                      ? 'bg-gradient-to-br from-amber-50 to-yellow-100 border-amber-300'
+                      : 'bg-gradient-to-br from-red-50 to-rose-100 border-red-300'
+                }`}
               >
-                <div className="flex items-center gap-2 mb-2">
-                  <Users className="w-5 h-5 text-pink-500" />
-                  <span className="text-sm text-pink-600">Equipo Activo</span>
+                {/* Semáforo */}
+                <motion.div 
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className={`absolute top-3 right-3 w-3 h-3 rounded-full ${
+                    actionableMetrics.salesStatus === 'success' ? 'bg-emerald-500' :
+                    actionableMetrics.salesStatus === 'warning' ? 'bg-amber-500' : 'bg-red-500'
+                  } shadow-lg`}
+                />
+                
+                <div className="flex items-center gap-2 mb-3">
+                  <TrendingUp className={`w-5 h-5 ${
+                    actionableMetrics.salesStatus === 'success' ? 'text-emerald-600' :
+                    actionableMetrics.salesStatus === 'warning' ? 'text-amber-600' : 'text-red-600'
+                  }`} />
+                  <span className={`text-xs font-bold uppercase ${
+                    actionableMetrics.salesStatus === 'success' ? 'text-emerald-700' :
+                    actionableMetrics.salesStatus === 'warning' ? 'text-amber-700' : 'text-red-700'
+                  }`}>Ventas vs Meta</span>
                 </div>
-                <p className="text-3xl font-semibold text-gray-700">{teamTotals.totalCashiers}</p>
-                <p className="text-xs text-gray-500">cajeros trabajando</p>
+                
+                <p className={`text-4xl font-black mb-1 ${
+                  actionableMetrics.salesStatus === 'success' ? 'text-emerald-700' :
+                  actionableMetrics.salesStatus === 'warning' ? 'text-amber-700' : 'text-red-700'
+                }`}>
+                  {Math.round(actionableMetrics.salesCompliance)}%
+                </p>
+                <p className="text-xs text-gray-600 font-medium mb-2">
+                  {formatCurrency(teamTotals.totalSales)} / {formatCurrency(storeMeta.salesGoal)}
+                </p>
+                <div className="h-2 bg-white/50 rounded-full overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${Math.min(actionableMetrics.salesCompliance, 100)}%` }}
+                    transition={{ duration: 1, delay: 0.3 }}
+                    className={`h-full ${
+                      actionableMetrics.salesStatus === 'success' ? 'bg-emerald-500' :
+                      actionableMetrics.salesStatus === 'warning' ? 'bg-amber-500' : 'bg-red-500'
+                    }`}
+                  />
+                </div>
+                <p className={`text-[10px] font-black mt-2 uppercase tracking-wide ${
+                  actionableMetrics.salesStatus === 'success' ? 'text-emerald-600' :
+                  actionableMetrics.salesStatus === 'warning' ? 'text-amber-600' : 'text-red-600'
+                }`}>
+                  {actionableMetrics.salesStatus === 'success' ? '✓ SOBRE META' :
+                   actionableMetrics.salesStatus === 'warning' ? '⚠ CERCA DE META' : '✕ BAJO META'}
+                </p>
               </motion.div>
 
+              {/* 2. Ticket Promedio vs Meta */}
               <motion.div 
                 whileHover={{ y: -5, scale: 1.02 }}
-                className="bg-gradient-to-br from-emerald-50 to-green-100 rounded-2xl p-5 shadow-sm"
+                className={`rounded-2xl p-5 shadow-lg border-2 relative overflow-hidden ${
+                  actionableMetrics.ticketStatus === 'success' 
+                    ? 'bg-gradient-to-br from-blue-50 to-sky-100 border-blue-300' 
+                    : actionableMetrics.ticketStatus === 'warning'
+                      ? 'bg-gradient-to-br from-amber-50 to-yellow-100 border-amber-300'
+                      : 'bg-gradient-to-br from-red-50 to-rose-100 border-red-300'
+                }`}
               >
-                <div className="flex items-center gap-2 mb-2">
-                  <TrendingUp className="w-5 h-5 text-emerald-500" />
-                  <span className="text-sm text-emerald-600">Prom. por Cajero</span>
+                {/* Semáforo */}
+                <motion.div 
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ duration: 2, repeat: Infinity, delay: 0.2 }}
+                  className={`absolute top-3 right-3 w-3 h-3 rounded-full ${
+                    actionableMetrics.ticketStatus === 'success' ? 'bg-blue-500' :
+                    actionableMetrics.ticketStatus === 'warning' ? 'bg-amber-500' : 'bg-red-500'
+                  } shadow-lg`}
+                />
+                
+                <div className="flex items-center gap-2 mb-3">
+                  <Target className={`w-5 h-5 ${
+                    actionableMetrics.ticketStatus === 'success' ? 'text-blue-600' :
+                    actionableMetrics.ticketStatus === 'warning' ? 'text-amber-600' : 'text-red-600'
+                  }`} />
+                  <span className={`text-xs font-bold uppercase ${
+                    actionableMetrics.ticketStatus === 'success' ? 'text-blue-700' :
+                    actionableMetrics.ticketStatus === 'warning' ? 'text-amber-700' : 'text-red-700'
+                  }`}>Ticket vs Meta</span>
                 </div>
-                <p className="text-2xl font-semibold text-gray-700">
-                  {formatCurrency(teamTotals.avgSales)}
+                
+                <div className="flex items-baseline gap-2 mb-1">
+                  <p className={`text-4xl font-black ${
+                    actionableMetrics.ticketStatus === 'success' ? 'text-blue-700' :
+                    actionableMetrics.ticketStatus === 'warning' ? 'text-amber-700' : 'text-red-700'
+                  }`}>
+                    {Math.round(actionableMetrics.ticketCompliance)}%
+                  </p>
+                  <span className={`text-sm font-bold ${
+                    actionableMetrics.ticketCompliance >= 100 ? 'text-blue-600' : 'text-red-600'
+                  }`}>
+                    {actionableMetrics.ticketCompliance >= 100 ? '↑' : '↓'}
+                    {Math.abs(100 - Math.round(actionableMetrics.ticketCompliance))}%
+                  </span>
+                </div>
+                <p className="text-xs text-gray-600 font-medium mb-2">
+                  {formatCurrency(teamTotals.avgTicket)} / {formatCurrency(storeMeta.ticketGoal)}
                 </p>
-                <p className="text-xs text-gray-500">venta promedio</p>
+                <div className="h-2 bg-white/50 rounded-full overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${Math.min(actionableMetrics.ticketCompliance, 100)}%` }}
+                    transition={{ duration: 1, delay: 0.4 }}
+                    className={`h-full ${
+                      actionableMetrics.ticketStatus === 'success' ? 'bg-blue-500' :
+                      actionableMetrics.ticketStatus === 'warning' ? 'bg-amber-500' : 'bg-red-500'
+                    }`}
+                  />
+                </div>
+                <p className={`text-[10px] font-black mt-2 uppercase tracking-wide ${
+                  actionableMetrics.ticketStatus === 'success' ? 'text-blue-600' :
+                  actionableMetrics.ticketStatus === 'warning' ? 'text-amber-600' : 'text-red-600'
+                }`}>
+                  {actionableMetrics.ticketStatus === 'success' ? '✓ SOBRE META' :
+                   actionableMetrics.ticketStatus === 'warning' ? '⚠ CERCA DE META' : '✕ BAJO META'}
+                </p>
               </motion.div>
 
+              {/* 3. Productividad del Equipo */}
               <motion.div 
                 whileHover={{ y: -5, scale: 1.02 }}
-                className="bg-gradient-to-br from-blue-50 to-sky-100 rounded-2xl p-5 shadow-sm"
+                className="bg-gradient-to-br from-violet-50 to-purple-100 rounded-2xl p-5 shadow-lg border-2 border-violet-300 relative overflow-hidden"
               >
-                <div className="flex items-center gap-2 mb-2">
-                  <Target className="w-5 h-5 text-blue-500" />
-                  <span className="text-sm text-blue-600">Ticket Promedio</span>
+                <div className="flex items-center gap-2 mb-3">
+                  <Users className="w-5 h-5 text-violet-600" />
+                  <span className="text-xs font-bold uppercase text-violet-700">Productividad</span>
                 </div>
-                <p className="text-2xl font-semibold text-gray-700">
-                  {formatCurrency(teamTotals.avgTicket)}
+                
+                <div className="flex items-center gap-2 mb-2">
+                  <p className="text-5xl font-black text-violet-700">{actionableMetrics.cashiersOverGoal}</p>
+                  <div className="text-left">
+                    <p className="text-xl font-bold text-violet-600">de {teamTotals.totalCashiers}</p>
+                    <p className="text-[10px] text-gray-600 font-medium uppercase">sobre meta</p>
+                  </div>
+                </div>
+                
+                <Progress 
+                  value={(actionableMetrics.cashiersOverGoal / teamTotals.totalCashiers) * 100} 
+                  className="h-2 mb-2 bg-white/50"
+                />
+                
+                <p className={`text-xs font-black uppercase tracking-wide ${
+                  actionableMetrics.cashiersOverGoal >= teamTotals.totalCashiers * 0.7 ? 'text-violet-700' :
+                  actionableMetrics.cashiersOverGoal >= teamTotals.totalCashiers * 0.5 ? 'text-amber-600' : 'text-red-600'
+                }`}>
+                  {actionableMetrics.cashiersOverGoal >= teamTotals.totalCashiers * 0.7 ? '✓ EQUIPO FUERTE' :
+                   actionableMetrics.cashiersOverGoal >= teamTotals.totalCashiers * 0.5 ? '⚠ MEJORABLE' : '✕ NECESITA APOYO'}
                 </p>
-                <p className="text-xs text-gray-500">del equipo</p>
               </motion.div>
 
+              {/* 4. Top Performer */}
               <motion.div 
                 whileHover={{ y: -5, scale: 1.02 }}
-                className="bg-gradient-to-br from-amber-50 to-yellow-100 rounded-2xl p-5 shadow-sm"
+                onClick={() => actionableMetrics.topPerformer && setSelectedCashier(actionableMetrics.topPerformer)}
+                className="bg-gradient-to-br from-amber-100 via-yellow-100 to-amber-200 rounded-2xl p-5 shadow-lg border-2 border-amber-400 relative overflow-hidden cursor-pointer"
               >
-                <div className="flex items-center gap-2 mb-2">
-                  <Award className="w-5 h-5 text-amber-500" />
-                  <span className="text-sm text-amber-600">Top Performer</span>
+                {/* Corona animada */}
+                <motion.div
+                  animate={{ rotate: [-5, 5, -5], y: [0, -3, 0] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="absolute top-2 right-2 text-2xl"
+                >
+                  👑
+                </motion.div>
+
+                <div className="flex items-center gap-2 mb-3">
+                  <Star className="w-5 h-5 text-amber-600" />
+                  <span className="text-xs font-bold uppercase text-amber-700">Top Performer</span>
                 </div>
-                <p className="text-lg font-semibold text-gray-700 truncate">
-                  {rankedCashiers[0]?.name?.split(' ')[0] || '-'}
-                </p>
-                <p className="text-xs text-gray-500">
-                  {rankedCashiers[0] ? formatCurrency(rankedCashiers[0].totalSales) : 'Sin datos'}
-                </p>
+
+                {actionableMetrics.topPerformer ? (
+                  <>
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center shadow-md overflow-hidden">
+                        {actionableMetrics.topPerformer.photo_url ? (
+                          <img src={actionableMetrics.topPerformer.photo_url} alt="" className="w-full h-full object-cover" />
+                        ) : (
+                          <User className="w-5 h-5 text-white" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-base font-black text-amber-900 truncate leading-tight">
+                          {actionableMetrics.topPerformer.name?.split(' ').slice(0, 2).join(' ')}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-white/60 rounded-lg p-2 mb-1">
+                      <p className="text-xs text-gray-600 font-medium">Ventas Totales</p>
+                      <p className="text-2xl font-black text-amber-700">
+                        {formatCurrency(actionableMetrics.topPerformer.totalSales)}
+                      </p>
+                    </div>
+
+                    <p className="text-[10px] font-black text-amber-600 uppercase tracking-wide text-center">
+                      🏆 MEJOR DEL PERÍODO
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-sm text-gray-500 text-center">Sin datos</p>
+                )}
               </motion.div>
             </div>
 
