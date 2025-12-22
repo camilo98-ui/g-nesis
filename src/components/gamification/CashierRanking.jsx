@@ -387,86 +387,220 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
                 const cashier = ranking[podiumIdx];
                 if (!cashier) return null;
                 const Icon = PODIUM_ICONS[podiumIdx];
-                const heights = ['h-64', 'h-40', 'h-32'];
+                const heights = ['h-72', 'h-48', 'h-40'];
                 const height = heights[podiumIdx];
                 const isFirst = podiumIdx === 0;
+                const isSecond = podiumIdx === 1;
+                const isThird = podiumIdx === 2;
                 
                 return (
                   <motion.div
                     key={cashier.id}
                     initial={{ y: 100, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: podiumIdx * 0.15, type: "spring", stiffness: 100 }}
-                    whileHover={{ y: -8, scale: 1.02 }}
+                    transition={{ delay: podiumIdx * 0.2, type: "spring", stiffness: 120 }}
+                    whileHover={{ y: -12, scale: 1.05 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={() => onSelectCashier?.(cashier)}
-                    className="flex flex-col items-center cursor-pointer relative"
-                    style={{ zIndex: isFirst ? 10 : 5 }}
+                    className="flex flex-col items-center cursor-pointer relative group"
+                    style={{ zIndex: isFirst ? 20 : 10 }}
                   >
-                    {/* Corona para el primero */}
+                    {/* Efectos especiales para el primero */}
                     {isFirst && (
+                      <>
+                        {/* Corona flotante */}
+                        <motion.div
+                          animate={{ 
+                            y: [0, -8, 0], 
+                            rotate: [-8, 8, -8],
+                            scale: [1, 1.1, 1]
+                          }}
+                          transition={{ duration: 3, repeat: Infinity }}
+                          className="absolute -top-10 text-5xl"
+                        >
+                          👑
+                        </motion.div>
+                        
+                        {/* Partículas brillantes */}
+                        <motion.div
+                          animate={{ 
+                            opacity: [0.4, 1, 0.4],
+                            scale: [0.8, 1.2, 0.8]
+                          }}
+                          transition={{ duration: 2, repeat: Infinity }}
+                          className="absolute -top-6 -left-6 text-2xl"
+                        >
+                          ✨
+                        </motion.div>
+                        <motion.div
+                          animate={{ 
+                            opacity: [0.4, 1, 0.4],
+                            scale: [0.8, 1.2, 0.8]
+                          }}
+                          transition={{ duration: 2, repeat: Infinity, delay: 1 }}
+                          className="absolute -top-6 -right-6 text-2xl"
+                        >
+                          ⭐
+                        </motion.div>
+                      </>
+                    )}
+
+                    {/* Medallas para segundo y tercero */}
+                    {isSecond && (
                       <motion.div
-                        animate={{ y: [0, -5, 0], rotate: [-5, 5, -5] }}
+                        animate={{ rotate: [0, 10, -10, 0] }}
                         transition={{ duration: 2, repeat: Infinity }}
-                        className="absolute -top-8 text-4xl"
+                        className="absolute -top-6 text-3xl"
                       >
-                        👑
+                        🥈
+                      </motion.div>
+                    )}
+                    {isThird && (
+                      <motion.div
+                        animate={{ rotate: [0, -10, 10, 0] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                        className="absolute -top-6 text-3xl"
+                      >
+                        🥉
                       </motion.div>
                     )}
                     
-                    {/* Avatar animado */}
-                    <div className="relative mb-2">
-                      <AnimatedAvatar 
-                        cashier={cashier} 
-                        size={isFirst ? 'large' : 'medium'}
-                      />
-                      {/* Posición badge */}
-                      <div className={`absolute -bottom-2 left-1/2 -translate-x-1/2 ${isFirst ? 'w-8 h-8' : 'w-7 h-7'} rounded-full bg-white shadow-lg flex items-center justify-center border-2 ${isFirst ? 'border-pink-400' : podiumIdx === 1 ? 'border-purple-400' : 'border-amber-400'}`}>
-                        <span className={`${isFirst ? 'text-base' : 'text-sm'} font-black bg-gradient-to-r ${PODIUM_COLORS[podiumIdx]} bg-clip-text text-transparent`}>
+                    {/* Avatar con anillo pulsante */}
+                    <div className="relative mb-3">
+                      <motion.div
+                        animate={isFirst ? {
+                          boxShadow: [
+                            '0 0 0 0 rgba(236, 72, 153, 0)',
+                            '0 0 0 8px rgba(236, 72, 153, 0.2)',
+                            '0 0 0 0 rgba(236, 72, 153, 0)'
+                          ]
+                        } : {}}
+                        transition={{ duration: 2, repeat: Infinity }}
+                        className="rounded-full"
+                      >
+                        <AnimatedAvatar 
+                          cashier={cashier} 
+                          size={isFirst ? 'large' : 'medium'}
+                        />
+                      </motion.div>
+                      
+                      {/* Badge de posición mejorado */}
+                      <motion.div 
+                        animate={isFirst ? { 
+                          rotate: [0, 360],
+                          scale: [1, 1.15, 1]
+                        } : {}}
+                        transition={{ duration: 3, repeat: Infinity }}
+                        className={`absolute -bottom-3 left-1/2 -translate-x-1/2 ${isFirst ? 'w-10 h-10' : 'w-8 h-8'} rounded-full bg-gradient-to-br ${PODIUM_COLORS[podiumIdx]} shadow-2xl flex items-center justify-center border-4 border-white`}
+                      >
+                        <span className={`${isFirst ? 'text-lg' : 'text-sm'} font-black text-white drop-shadow-md`}>
                           {podiumIdx + 1}
                         </span>
-                      </div>
+                      </motion.div>
                     </div>
                     
-                    {/* Nombre */}
-                    <p className={`${isFirst ? 'text-sm' : 'text-xs'} font-black text-center mb-1 truncate w-24 text-gray-800`}>
-                      {cashier.name?.split(' ')[0]}
+                    {/* Nombre y Score */}
+                    <p className={`${isFirst ? 'text-base' : 'text-sm'} font-black text-center mb-2 w-28 text-gray-900`}>
+                      {cashier.name?.split(' ').slice(0, 2).join(' ')}
                     </p>
                     
-                    {/* Ventas */}
-                    <motion.p 
-                      className={`${isFirst ? 'text-xs' : 'text-[10px]'} font-bold mb-1 ${isFirst ? 'text-pink-600' : podiumIdx === 1 ? 'text-purple-600' : 'text-amber-600'}`}
-                      animate={{ scale: [1, 1.05, 1] }}
+                    {/* Score Total - DESTACADO */}
+                    <motion.div
+                      animate={isFirst ? { 
+                        scale: [1, 1.08, 1],
+                        y: [0, -2, 0]
+                      } : {}}
                       transition={{ duration: 2, repeat: Infinity }}
+                      className={`${isFirst ? 'mb-3' : 'mb-2'} px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-lg border-2 ${
+                        isFirst ? 'border-pink-300' : isSecond ? 'border-purple-300' : 'border-amber-300'
+                      }`}
                     >
-                      {formatCurrency(cashier.totalSales)}
-                    </motion.p>
+                      <p className={`${isFirst ? 'text-xs' : 'text-[10px]'} font-medium text-gray-500`}>SCORE</p>
+                      <p className={`${isFirst ? 'text-2xl' : 'text-lg'} font-black bg-gradient-to-r ${PODIUM_COLORS[podiumIdx]} bg-clip-text text-transparent`}>
+                        {cashier.overallScore?.toFixed(0) || '0'}
+                      </p>
+                    </motion.div>
                     
-                    {/* Barra con Ticket Promedio */}
+                    {/* Métricas compactas */}
+                    <div className="space-y-1 mb-2">
+                      <div className={`flex items-center gap-1.5 ${isFirst ? 'text-xs' : 'text-[10px]'} font-bold`}>
+                        <span className="text-emerald-600">💰</span>
+                        <span className="text-gray-700">{formatCurrency(cashier.totalSales)}</span>
+                      </div>
+                      <div className={`flex items-center gap-1.5 ${isFirst ? 'text-xs' : 'text-[10px]'} font-bold`}>
+                        <span className="text-blue-600">🎫</span>
+                        <span className="text-gray-700">{formatCurrency(cashier.avgTicket)}</span>
+                      </div>
+                      {cashier.totalSuggested > 0 && (
+                        <div className={`flex items-center gap-1.5 ${isFirst ? 'text-xs' : 'text-[10px]'} font-bold`}>
+                          <span className="text-pink-600">🎁</span>
+                          <span className="text-gray-700">{cashier.totalSuggested}</span>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Columna del podio mejorada */}
                     <motion.div 
                       initial={{ scaleY: 0 }}
                       animate={{ scaleY: 1 }}
-                      transition={{ delay: 0.5 + podiumIdx * 0.1, type: "spring" }}
-                      className={`${height} w-20 bg-gradient-to-t ${PODIUM_COLORS[podiumIdx]} rounded-t-2xl mt-2 flex flex-col items-center justify-center shadow-2xl relative overflow-hidden border-t-4 border-white`}
+                      transition={{ delay: 0.6 + podiumIdx * 0.15, type: "spring", damping: 15 }}
+                      className={`${height} ${isFirst ? 'w-28' : 'w-24'} bg-gradient-to-t ${PODIUM_COLORS[podiumIdx]} rounded-t-3xl mt-3 flex flex-col items-center justify-end pb-4 shadow-2xl relative overflow-hidden border-t-4 ${
+                        isFirst ? 'border-pink-400' : isSecond ? 'border-purple-400' : 'border-amber-400'
+                      }`}
                       style={{ transformOrigin: 'bottom' }}
                     >
-                      {/* Efecto brillo */}
+                      {/* Efecto brillante dinámico */}
                       <motion.div
-                        animate={{ x: ['-100%', '200%'] }}
-                        transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                        animate={{ x: ['-150%', '250%'] }}
+                        transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-12"
                       />
                       
-                      {/* Ticket Promedio */}
-                      <div className="relative z-10 text-center">
-                        <p className="text-[9px] text-white/70 font-medium mb-0.5">Ticket Prom</p>
-                        <motion.p 
-                          className="text-sm font-black text-white drop-shadow-md"
-                          animate={{ scale: [1, 1.08, 1] }}
-                          transition={{ duration: 1.5, repeat: Infinity }}
-                        >
-                          {formatCurrency(cashier.avgTicket)}
-                        </motion.p>
-                      </div>
+                      {/* Confetti para el primero */}
+                      {isFirst && (
+                        <>
+                          <motion.div
+                            animate={{ 
+                              y: [0, -10, 0],
+                              opacity: [0.6, 1, 0.6]
+                            }}
+                            transition={{ duration: 1.5, repeat: Infinity, delay: 0 }}
+                            className="absolute top-4 left-4 text-2xl"
+                          >
+                            ⭐
+                          </motion.div>
+                          <motion.div
+                            animate={{ 
+                              y: [0, -10, 0],
+                              opacity: [0.6, 1, 0.6]
+                            }}
+                            transition={{ duration: 1.5, repeat: Infinity, delay: 0.5 }}
+                            className="absolute top-4 right-4 text-2xl"
+                          >
+                            💫
+                          </motion.div>
+                        </>
+                      )}
+                      
+                      {/* Icono del rango */}
+                      <motion.div
+                        animate={{ 
+                          rotate: [0, 360],
+                          scale: [1, 1.1, 1]
+                        }}
+                        transition={{ 
+                          rotate: { duration: isFirst ? 4 : 6, repeat: Infinity, ease: "linear" },
+                          scale: { duration: 2, repeat: Infinity }
+                        }}
+                        className={`${isFirst ? 'w-12 h-12' : 'w-10 h-10'} rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-xl border-2 border-white/50 relative z-10`}
+                      >
+                        <Icon className={`${isFirst ? 'w-7 h-7' : 'w-5 h-5'} text-gray-700`} />
+                      </motion.div>
+
+                      {/* Texto en la columna */}
+                      <p className={`${isFirst ? 'text-xs' : 'text-[10px]'} text-white/90 font-black mt-2 uppercase tracking-wider relative z-10`}>
+                        {isFirst ? '¡Campeón!' : isSecond ? 'Subcampeón' : 'Tercer Lugar'}
+                      </p>
                     </motion.div>
                   </motion.div>
                 );
