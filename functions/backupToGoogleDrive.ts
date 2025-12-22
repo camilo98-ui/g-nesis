@@ -11,7 +11,16 @@ Deno.serve(async (req) => {
 
     console.log('Iniciando backup para:', user.email);
 
-    // Recopilar datos de todas las entidades principales
+    // Obtener token de Google Drive
+    const accessToken = await base44.asServiceRole.connectors.getAccessToken('googledrive');
+    
+    if (!accessToken) {
+      throw new Error('No hay conexión con Google Drive');
+    }
+
+    console.log('Token de Drive obtenido');
+
+    // Recopilar datos
     const [
       stores, cashiers, shiftRecords, budgets, dailySales, 
       shifts, courses, badges, goals, cleaningChecklists
@@ -28,7 +37,6 @@ Deno.serve(async (req) => {
       base44.asServiceRole.entities.CleaningChecklist.list()
     ]);
 
-    // Crear documento de backup en formato JSON
     const backupData = {
       app: 'Popsy Management',
       backup_date: new Date().toISOString(),
@@ -56,75 +64,77 @@ Deno.serve(async (req) => {
     const jsonContent = JSON.stringify(backupData, null, 2);
     const fileName = `Popsy_Backup_${new Date().toISOString().split('T')[0]}.json`;
     
-    console.log(`Creando backup: ${fileName}`);
+    console.log(`Subiendo a Drive: ${fileName}`);
 
-    // Subir el backup a Base44 storage
-    const file = new File([jsonContent], fileName, { type: 'application/json' });
-    const uploadResult = await base44.asServiceRole.integrations.Core.UploadFile({ file });
-    const fileUrl = uploadResult.file_url;
-    
-    console.log('Archivo subido a:', fileUrl);
+    // Subir a Google Drive
+    const metadata = {
+      name: fileName,
+      mimeType: 'application/json'
+    };
 
-    // Enviar email con el link
+    const form = new FormData();
+    form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+    form.append('file', new Blob([jsonContent], { type: 'application/json' }));
+
+    const uploadResponse = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`
+      },
+      body: form
+    });
+
+    if (!uploadResponse.ok) {
+      const errorText = await uploadResponse.text();
+      throw new Error(`Error de Drive: ${errorText}`);
+    }
+
+    const result = await uploadResponse.json();
+    console.log('Archivo creado en Drive:', result.id);
+
+    // Enviar email
     let emailSent = false;
     try {
-      console.log('Enviando email a:', user.email);
+      const driveLink = `https://drive.google.com/file/d/${result.id}/view`;
       
       await base44.asServiceRole.integrations.Core.SendEmail({
         from_name: 'Popsy Management',
         to: user.email,
-        subject: `🍦 Backup Popsy - ${fileName}`,
+        subject: `🍦 Backup Popsy en Drive - ${fileName}`,
         body: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #ec4899;">✅ Backup Completado</h2>
-            <p>Tu backup de Popsy Management se ha creado exitosamente.</p>
+            <h2 style="color: #ec4899;">✅ Backup Guardado en Drive</h2>
+            <p>Tu backup está en Google Drive.</p>
             
             <div style="background: #fce7f3; padding: 20px; border-radius: 10px; margin: 20px 0;">
               <h3 style="margin-top: 0;">📁 ${fileName}</h3>
-              <p><strong>Fecha:</strong> ${new Date().toLocaleString('es-CO')}</p>
-              <p><strong>Registros respaldados:</strong></p>
-              <ul>
-                <li>Tiendas: ${stores.length}</li>
-                <li>Cajeros: ${cashiers.length}</li>
-                <li>Registros de turnos: ${shiftRecords.length}</li>
-                <li>Turnos programados: ${shifts.length}</li>
-                <li>Cursos: ${courses.length}</li>
-                <li>Insignias: ${badges.length}</li>
-              </ul>
+              <p><strong>Registros:</strong> ${stores.length} tiendas, ${cashiers.length} cajeros, ${shiftRecords.length} turnos</p>
             </div>
             
-            <a href="${fileUrl}" style="display: inline-block; background: linear-gradient(to right, #ec4899, #f43f5e); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 10px 0;">
-              📥 Descargar Backup
+            <a href="${driveLink}" style="display: inline-block; background: linear-gradient(to right, #ec4899, #f43f5e); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold;">
+              📂 Abrir en Drive
             </a>
             
             <p style="color: #666; font-size: 12px; margin-top: 30px;">
-              Este archivo contiene todos tus datos en formato JSON. Guárdalo en un lugar seguro.
+              Busca "${fileName}" en tu Google Drive.
             </p>
           </div>
         `
       });
       
       emailSent = true;
-      console.log('✅ Email enviado correctamente');
     } catch (emailError) {
-      console.error('❌ Error enviando email:', emailError);
+      console.error('Error email:', emailError);
     }
 
-    console.log('✅ Backup completado');
-    
     return Response.json({ 
       success: true,
       file_name: fileName,
-      file_url: fileUrl,
+      drive_id: result.id,
+      drive_link: `https://drive.google.com/file/d/${result.id}/view`,
       full_backup: backupData,
       email_sent: emailSent,
-      records_backed_up: {
-        stores: stores.length,
-        cashiers: cashiers.length,
-        shift_records: shiftRecords.length,
-        shifts: shifts.length
-      },
-      message: `Backup creado y enviado a ${user.email}`
+      message: `Backup guardado en Drive. Busca "${fileName}"`
     });
 
   } catch (error) {
