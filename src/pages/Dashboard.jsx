@@ -11,7 +11,6 @@ import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
 import ComparableChartsGrid from '@/components/executive/ComparableChartsGrid';
 
 import DailyGoalsCard from '@/components/gamification/DailyGoalsCard';
-import WeatherSalesImpactChart from '@/components/weather/WeatherSalesImpactChart';
 import DailyBudgetCard from '@/components/dashboard/DailyBudgetCard';
 import ProjectionDetailModal from '@/components/dashboard/ProjectionDetailModal';
 import SalesByHourChart from '@/components/sales/SalesByHourChart';
@@ -1715,15 +1714,6 @@ export default function Dashboard() {
             dailySales={dailySales}
             budgets={budgets}
             storeId={selectedStore}
-            formatCurrency={formatCurrency} />
-
-          }
-            
-            {/* Weather Impact Chart - Solo en modo ACTUAL */}
-            {!showComparison && weatherData &&
-          <WeatherSalesImpactChart
-            weatherData={weatherData}
-            dailySales={dailySales}
             formatCurrency={formatCurrency} />
 
           }
