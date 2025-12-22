@@ -1,5 +1,6 @@
 import Budget from './pages/Budget';
 import CashierProfile from './pages/CashierProfile';
+import CashiersDashboard from './pages/CashiersDashboard';
 import Dashboard from './pages/Dashboard';
 import ExecutiveDashboard from './pages/ExecutiveDashboard';
 import FreezerMap from './pages/FreezerMap';
@@ -16,13 +17,13 @@ import SearchCashier from './pages/SearchCashier';
 import Settings from './pages/Settings';
 import Team from './pages/Team';
 import Training from './pages/Training';
-import CashiersDashboard from './pages/CashiersDashboard';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "Budget": Budget,
     "CashierProfile": CashierProfile,
+    "CashiersDashboard": CashiersDashboard,
     "Dashboard": Dashboard,
     "ExecutiveDashboard": ExecutiveDashboard,
     "FreezerMap": FreezerMap,
@@ -39,7 +40,6 @@ export const PAGES = {
     "Settings": Settings,
     "Team": Team,
     "Training": Training,
-    "CashiersDashboard": CashiersDashboard,
 }
 
 export const pagesConfig = {

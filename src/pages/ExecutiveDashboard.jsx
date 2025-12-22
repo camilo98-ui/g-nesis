@@ -26,6 +26,8 @@ import StoresDetailView from '../components/executive/StoresDetailView';
 import ComparableView from '../components/executive/ComparableView';
 import SalesForecastPanel from '../components/predictions/SalesForecastPanel';
 import StoreDetailModal from '../components/executive/StoreDetailModal';
+import PriorityActionsPanel from '../components/executive/PriorityActionsPanel';
+import StoreStatusCards from '../components/executive/StoreStatusCards';
 
 const COLORS = ['#3b82f6', '#60a5fa', '#93c5fd', '#dbeafe', '#1d4ed8', '#2563eb', '#1e40af'];
 
@@ -654,7 +656,7 @@ INSTRUCCIONES:
               </div>
             </motion.div>
 
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-4 mt-4 mb-2">Alertas</p>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-4 mt-4 mb-2">Operación</p>
             <motion.div
               whileHover={{ x: 3 }}
               onClick={() => setActiveView('planner')}
@@ -1066,74 +1068,118 @@ INSTRUCCIONES:
             {/* General View */}
             {activeView === 'general' && (
             <>
-            {/* Estado General Badge */}
-            {!isLoading && autoInsight && (
+            {/* Alerta Crítica Principal - Solo cuando >70% críticas */}
+            {!isLoading && statusCounts.critical >= STORES.length * 0.7 && (
               <motion.div
-                initial={{ opacity: 0, y: 5 }}
+                initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mb-6"
+                className="mb-6 bg-gradient-to-r from-red-500 to-rose-600 rounded-2xl p-6 text-white shadow-2xl border-2 border-red-400"
               >
-                <div className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold border ${
-                  autoInsight.type === 'danger' ? 'bg-red-50 text-red-700 border-red-200' :
-                  autoInsight.type === 'warning' ? 'bg-amber-50 text-amber-700 border-amber-200' :
-                  autoInsight.type === 'success' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                  'bg-gray-50 text-gray-700 border-gray-200'
-                }`}>
-                  <span className="text-base">{autoInsight.icon}</span>
-                  <span>{autoInsight.title}:</span>
-                  <span className="font-normal">{autoInsight.message}</span>
+                <div className="flex items-start gap-4">
+                  <motion.div
+                    animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className="text-5xl"
+                  >
+                    🚨
+                  </motion.div>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-black mb-2">ALERTA CRÍTICA - ACCIÓN INMEDIATA REQUERIDA</h3>
+                    <p className="text-red-100 text-sm font-medium mb-3">
+                      {statusCounts.critical} de {STORES.length} tiendas ({Math.round((statusCounts.critical/STORES.length)*100)}%) en estado crítico con cumplimiento inferior al 70%.
+                    </p>
+                    <div className="flex gap-3 mt-4">
+                      <Button 
+                        onClick={() => setActiveView('critical')}
+                        className="bg-white text-red-600 hover:bg-red-50 font-bold shadow-lg"
+                      >
+                        Ver Tiendas Críticas
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               </motion.div>
             )}
 
-            {/* KPIs Principales */}
+            {/* KPIs Principales - Optimizados */}
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
               {[1, 2, 3, 4, 5].map((i) => <KPISkeleton key={i} />)}
             </div>
           ) : zoneStatus && (
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-              <ExecutiveKPI
-                title="Ventas Acumuladas"
-                value={formatCurrency(zoneTotals.totalSales)}
-                subtitle={`Meta: ${formatCurrency(zoneTotals.totalBudget)}`}
-                icon={DollarSign}
-                badge={`${((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%`}
-                badgeColor={zoneTotals.totalSales >= zoneTotals.totalBudget * 0.9 ? 'green' : zoneTotals.totalSales >= zoneTotals.totalBudget * 0.7 ? 'amber' : 'red'}
-              />
-              <ExecutiveKPI
-                title="Proyección Mensual"
-                value={formatCurrency(zoneStatus.projection)}
-                subtitle={`Meta: ${formatCurrency(zoneStatus.totalBudget)}`}
-                icon={Target}
-                badge={`${zoneStatus.projectionCompliance.toFixed(0)}%`}
-                badgeColor={zoneStatus.projectionCompliance >= 95 ? 'green' : zoneStatus.projectionCompliance >= 85 ? 'amber' : 'red'}
-              />
-              <ExecutiveKPI
-                title="Brecha vs Meta"
-                value={formatCurrency(Math.abs(zoneStatus.gap))}
-                subtitle={zoneStatus.gap > 0 ? 'Por recuperar' : 'Excedente'}
-                icon={TrendingUp}
-                badge={zoneStatus.gap > 0 ? 'Déficit' : 'Superávit'}
-                badgeColor={zoneStatus.gap > 0 ? 'red' : 'green'}
-              />
-              <ExecutiveKPI
-                title="Ritmo Diario"
-                value={formatCurrency(zoneStatus.currentDailyAvg)}
-                subtitle={`Requerido: ${formatCurrency(zoneStatus.dailyRequired)}`}
-                icon={Zap}
-                badge={`${zoneStatus.daysElapsed}/${zoneStatus.daysElapsed + zoneStatus.daysRemaining} días`}
-                badgeColor="blue"
-              />
-              <ExecutiveKPI
-                title="Tiendas Críticas"
-                value={statusCounts.critical}
-                subtitle={`${((statusCounts.critical/STORES.length)*100).toFixed(0)}% del total`}
-                icon={AlertTriangle}
-                badge={statusCounts.critical === 0 ? 'Sin riesgo' : 'Requiere acción'}
-                badgeColor={statusCounts.critical === 0 ? 'green' : 'red'}
-              />
+            <>
+              {/* Pregunta Clave: ¿Dónde Estamos? */}
+              <div className="mb-2">
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">📍 ¿Dónde Estamos?</p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+                <ExecutiveKPI
+                  title="Ventas Acumuladas"
+                  value={formatCurrency(zoneTotals.totalSales)}
+                  subtitle={`de ${formatCurrency(zoneTotals.totalBudget)}`}
+                  icon={DollarSign}
+                  badge={`${((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%`}
+                  badgeColor={zoneTotals.totalSales >= zoneTotals.totalBudget * 0.9 ? 'green' : zoneTotals.totalSales >= zoneTotals.totalBudget * 0.7 ? 'amber' : 'red'}
+                />
+                <ExecutiveKPI
+                  title="Brecha vs Meta"
+                  value={formatCurrency(Math.abs(zoneStatus.gap))}
+                  subtitle={zoneStatus.gap > 0 ? 'Déficit por recuperar' : 'Superávit logrado'}
+                  icon={zoneStatus.gap > 0 ? TrendingDown : TrendingUp}
+                  badge={zoneStatus.gap > 0 ? 'Por cerrar' : 'Superado'}
+                  badgeColor={zoneStatus.gap > 0 ? 'red' : 'green'}
+                />
+                <ExecutiveKPI
+                  title="Ritmo Diario Actual"
+                  value={formatCurrency(zoneStatus.currentDailyAvg)}
+                  subtitle={`Requerido: ${formatCurrency(zoneStatus.dailyRequired)}`}
+                  icon={Zap}
+                  badge={zoneStatus.currentDailyAvg >= zoneStatus.dailyRequired ? '✓ En ritmo' : `↓ ${formatCurrency(zoneStatus.dailyRequired - zoneStatus.currentDailyAvg)} bajo`}
+                  badgeColor={zoneStatus.currentDailyAvg >= zoneStatus.dailyRequired ? 'green' : 'amber'}
+                />
+                <ExecutiveKPI
+                  title="Proyección de Cierre"
+                  value={formatCurrency(zoneStatus.projection)}
+                  subtitle={`${zoneStatus.projectionCompliance.toFixed(0)}% vs meta`}
+                  icon={Target}
+                  badge={zoneStatus.projectionCompliance >= 95 ? '✓ Alcanzable' : zoneStatus.projectionCompliance >= 85 ? '⚠ Riesgo' : '✗ Crítico'}
+                  badgeColor={zoneStatus.projectionCompliance >= 95 ? 'green' : zoneStatus.projectionCompliance >= 85 ? 'amber' : 'red'}
+                />
+                <ExecutiveKPI
+                  title="Estado de Tiendas"
+                  value={statusCounts.critical}
+                  subtitle={`${statusCounts.negative} en alerta, ${statusCounts.positive} en meta`}
+                  icon={AlertTriangle}
+                  badge={statusCounts.critical === 0 ? '✓ Controlado' : 'Acción requerida'}
+                  badgeColor={statusCounts.critical === 0 ? 'green' : statusCounts.critical >= STORES.length * 0.3 ? 'red' : 'amber'}
+                />
+              </div>
+            </>
+          )}
+
+          {/* Acciones Prioritarias Hoy */}
+          {!isLoading && (
+            <PriorityActionsPanel 
+              storesAnalysis={storesAnalysis}
+              formatCurrency={formatCurrency}
+              zoneTotals={zoneTotals}
+            />
+          )}
+
+          {/* Pregunta Clave: ¿A Dónde Vamos? */}
+          {!isLoading && (
+            <div className="mb-3 mt-6">
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">🎯 ¿A Dónde Vamos?</p>
             </div>
+          )}
+
+          {/* Clasificación Visual de Tiendas */}
+          {!isLoading && (
+            <StoreStatusCards 
+              storesAnalysis={storesAnalysis}
+              formatCurrency={formatCurrency}
+              zoneTotals={zoneTotals}
+            />
           )}
 
           {/* Panel de Comparación */}
@@ -1342,34 +1388,44 @@ INSTRUCCIONES:
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {chartView === 'ventas' && (
                     <>
-                      <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-white">
-                        <CardContent className="pt-4 pb-3">
-                          <p className="text-xs text-blue-600 font-semibold mb-1">Venta Total Zona</p>
-                          <p className="text-xl font-black text-blue-900">{formatCurrency(zoneTotals.totalSales)}</p>
-                          <p className="text-[10px] text-gray-500 mt-1">Meta: {formatCurrency(zoneTotals.totalBudget)}</p>
-                        </CardContent>
-                      </Card>
-                      <Card className="border-indigo-200 bg-gradient-to-br from-indigo-50 to-white">
-                        <CardContent className="pt-4 pb-3">
-                          <p className="text-xs text-indigo-600 font-semibold mb-1">Brecha vs Meta</p>
-                          <p className="text-xl font-black text-indigo-900">{formatCurrency(Math.abs(zoneTotals.totalBudget - zoneTotals.totalSales))}</p>
-                          <p className="text-[10px] text-gray-500 mt-1">{zoneTotals.totalSales >= zoneTotals.totalBudget ? 'Superado' : 'Por recuperar'}</p>
-                        </CardContent>
-                      </Card>
-                      <Card className="border-cyan-200 bg-gradient-to-br from-cyan-50 to-white">
-                        <CardContent className="pt-4 pb-3">
-                          <p className="text-xs text-cyan-600 font-semibold mb-1">Promedio por Tienda</p>
-                          <p className="text-xl font-black text-cyan-900">{formatCurrency(zoneTotals.totalSales / filteredStores.length)}</p>
-                          <p className="text-[10px] text-gray-500 mt-1">{filteredStores.length} tiendas activas</p>
-                        </CardContent>
-                      </Card>
-                      <Card className="border-teal-200 bg-gradient-to-br from-teal-50 to-white">
-                        <CardContent className="pt-4 pb-3">
-                          <p className="text-xs text-teal-600 font-semibold mb-1">Top Tienda</p>
-                          <p className="text-xl font-black text-teal-900">{formatCurrency(Math.max(...filteredStores.map(s => s.totalSales)))}</p>
-                          <p className="text-[10px] text-gray-500 mt-1">{filteredStores.sort((a,b) => b.totalSales - a.totalSales)[0]?.name}</p>
-                        </CardContent>
-                      </Card>
+                      <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+                        <Card className="border-blue-200 bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg">
+                          <CardContent className="pt-4 pb-3">
+                            <p className="text-xs text-blue-100 font-semibold mb-1">💰 Venta Total Zona</p>
+                            <p className="text-xl font-black">{formatCurrency(zoneTotals.totalSales)}</p>
+                            <p className="text-[10px] text-blue-100 mt-1">de {formatCurrency(zoneTotals.totalBudget)}</p>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                      <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+                        <Card className={`border-2 ${zoneTotals.totalSales >= zoneTotals.totalBudget ? 'bg-gradient-to-br from-emerald-500 to-green-600 border-emerald-300' : 'bg-gradient-to-br from-rose-500 to-red-600 border-red-300'} text-white shadow-lg`}>
+                          <CardContent className="pt-4 pb-3">
+                            <p className="text-xs font-semibold mb-1 opacity-90">
+                              {zoneTotals.totalSales >= zoneTotals.totalBudget ? '✓ Superávit' : '⚠ Brecha'}
+                            </p>
+                            <p className="text-xl font-black">{formatCurrency(Math.abs(zoneTotals.totalBudget - zoneTotals.totalSales))}</p>
+                            <p className="text-[10px] opacity-90 mt-1">{zoneTotals.totalSales >= zoneTotals.totalBudget ? 'Por encima' : 'Por recuperar'}</p>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                      <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+                        <Card className="border-cyan-200 bg-gradient-to-br from-cyan-50 to-white shadow-md">
+                          <CardContent className="pt-4 pb-3">
+                            <p className="text-xs text-cyan-600 font-semibold mb-1">📊 Prom/Tienda</p>
+                            <p className="text-xl font-black text-cyan-900">{formatCurrency(zoneTotals.totalSales / filteredStores.length)}</p>
+                            <p className="text-[10px] text-gray-500 mt-1">{filteredStores.length} tiendas</p>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                      <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+                        <Card className="border-amber-200 bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-lg">
+                          <CardContent className="pt-4 pb-3">
+                            <p className="text-xs font-semibold mb-1 opacity-90">⭐ Mejor Tienda</p>
+                            <p className="text-xl font-black">{formatCurrency(Math.max(...filteredStores.map(s => s.totalSales)))}</p>
+                            <p className="text-[10px] opacity-90 mt-1 truncate">{filteredStores.sort((a,b) => b.totalSales - a.totalSales)[0]?.name}</p>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
                     </>
                   )}
                   {chartView === 'cumplimiento' && (
@@ -2039,40 +2095,25 @@ INSTRUCCIONES:
                   })}
                 </div>
 
-                {/* Insight contextual por vista */}
-                <Card className={`border-2 ${
-                  chartView === 'ventas' ? 'border-blue-200 bg-blue-50' :
-                  chartView === 'cumplimiento' ? 'border-emerald-200 bg-emerald-50' :
-                  chartView === 'proyeccion' ? 'border-purple-200 bg-purple-50' :
-                  'border-amber-200 bg-amber-50'
-                }`}>
+                {/* Resumen Ejecutivo Diario */}
+                <Card className="border-2 border-slate-200 bg-gradient-to-br from-slate-50 to-gray-50 shadow-md">
                   <CardContent className="pt-4 pb-4">
                     <div className="flex items-start gap-3">
-                      <div className={`p-2 rounded-lg ${
-                        chartView === 'ventas' ? 'bg-blue-100' :
-                        chartView === 'cumplimiento' ? 'bg-emerald-100' :
-                        chartView === 'proyeccion' ? 'bg-purple-100' :
-                        'bg-amber-100'
-                      }`}>
-                        <Sparkles className={`w-5 h-5 ${
-                          chartView === 'ventas' ? 'text-blue-600' :
-                          chartView === 'cumplimiento' ? 'text-emerald-600' :
-                          chartView === 'proyeccion' ? 'text-purple-600' :
-                          'text-amber-600'
-                        }`} />
+                      <div className="p-2 rounded-lg bg-slate-100">
+                        <Sparkles className="w-5 h-5 text-slate-600" />
                       </div>
                       <div className="flex-1">
-                        <p className="text-xs font-bold text-gray-900 mb-1">
-                          {chartView === 'ventas' && '💰 Insight de Ventas'}
-                          {chartView === 'cumplimiento' && '✓ Insight de Cumplimiento'}
-                          {chartView === 'proyeccion' && '🎯 Insight Predictivo'}
-                          {chartView === 'eficiencia' && '⚡ Insight de Eficiencia'}
+                        <p className="text-sm font-bold text-gray-900 mb-2">
+                          {chartView === 'ventas' && '💰 Resumen de Ventas'}
+                          {chartView === 'cumplimiento' && '✓ Estado de Cumplimiento'}
+                          {chartView === 'proyeccion' && '🎯 Proyección de Cierre'}
+                          {chartView === 'eficiencia' && '⚡ Eficiencia Operativa'}
                         </p>
-                        <p className="text-xs text-gray-700 leading-relaxed">
-                          {chartView === 'ventas' && `La zona lleva ${formatCurrency(zoneTotals.totalSales)} de ${formatCurrency(zoneTotals.totalBudget)} meta. ${filteredStores.filter(s => s.totalSales >= s.salesBudget).length} tiendas ya superaron su objetivo.`}
-                          {chartView === 'cumplimiento' && `${statusCounts.positive} tiendas en meta, ${statusCounts.negative} en alerta y ${statusCounts.critical} críticas. El ${((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}% de cumplimiento general indica ${zoneTotals.totalSales >= zoneTotals.totalBudget * 0.9 ? 'buen desempeño' : 'necesidad de impulso'}.`}
-                          {chartView === 'proyeccion' && `Se proyecta cerrar en ${formatCurrency(zoneTotals.totalProjection)} (${((zoneTotals.totalProjection/zoneTotals.totalBudget)*100).toFixed(0)}% vs meta). ${storesAnalysis.filter(s => s.projectionCompliance >= 100).length} tiendas proyectan superar objetivo, ${storesAnalysis.filter(s => s.projectionCompliance < 85).length} en riesgo de no alcanzar.`}
-                          {chartView === 'eficiencia' && `Ticket promedio zona: ${formatCurrency(zoneTotals.totalSales / filteredStores.reduce((sum, s) => sum + s.totalTransactions, 0))}. ${filteredStores.filter(s => s.avgTicket > zoneTotals.totalSales / filteredStores.reduce((sum, s) => sum + s.totalTransactions, 0)).length} tiendas superan el promedio, optimizar las demás podría generar ${formatCurrency((filteredStores.reduce((sum, s) => sum + s.totalTransactions, 0) * 2000))} adicionales.`}
+                        <p className="text-xs text-gray-700 leading-relaxed font-medium">
+                          {chartView === 'ventas' && `Acumulado: ${formatCurrency(zoneTotals.totalSales)} (${((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%). ${filteredStores.filter(s => s.totalSales >= s.salesBudget).length}/${filteredStores.length} tiendas superaron meta.`}
+                          {chartView === 'cumplimiento' && `${statusCounts.positive} en meta ✓ | ${statusCounts.negative} en alerta ⚠ | ${statusCounts.critical} críticas ✗. ${zoneTotals.totalSales >= zoneTotals.totalBudget * 0.9 ? 'Zona en buen rumbo.' : 'Requiere impulso inmediato.'}`}
+                          {chartView === 'proyeccion' && `Cierre estimado: ${formatCurrency(zoneTotals.totalProjection)} (${((zoneTotals.totalProjection/zoneTotals.totalBudget)*100).toFixed(0)}%). ${storesAnalysis.filter(s => s.projectionCompliance >= 100).length} tiendas alcanzarán meta, ${storesAnalysis.filter(s => s.projectionCompliance < 85).length} en riesgo.`}
+                          {chartView === 'eficiencia' && `Ticket zona: ${formatCurrency(zoneTotals.totalSales / filteredStores.reduce((sum, s) => sum + s.totalTransactions, 0))}. ${filteredStores.filter(s => s.avgTicket > zoneTotals.totalSales / filteredStores.reduce((sum, s) => sum + s.totalTransactions, 0)).length}/${filteredStores.length} sobre promedio.`}
                         </p>
                       </div>
                     </div>
@@ -2082,134 +2123,48 @@ INSTRUCCIONES:
             </AnimatePresence>
           )}
 
-          {/* Indicadores Secundarios */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
-            {/* Donut de Cumplimiento */}
-            <Card className="border-gray-100 shadow-sm">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-semibold text-gray-900">Distribución de Cumplimiento</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={200}>
-                  <PieChart>
-                    <Pie
-                      data={[
-                        { name: 'En Meta', value: statusCounts.positive, fill: '#10b981' },
-                        { name: 'Alerta', value: statusCounts.negative, fill: '#f59e0b' },
-                        { name: 'Críticas', value: statusCounts.critical, fill: '#ef4444' }
-                      ]}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={50}
-                      outerRadius={80}
-                      dataKey="value"
-                      label={(entry) => `${entry.value}`}
-                    >
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
 
-            {/* Barras de Estado */}
-            <Card className="border-gray-100 shadow-sm">
+
+          {/* Insight IA Ejecutivo - Simplificado */}
+          {!isLoading && aiInsights && (
+            <Card className="border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 mb-6 shadow-lg">
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-semibold text-gray-900">Tiendas por Estado</CardTitle>
+                <CardTitle className="text-sm font-bold text-purple-900 flex items-center gap-2">
+                  <Brain className="w-5 h-5 text-purple-600" />
+                  Insight IA: Análisis Ejecutivo
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <div>
-                    <div className="flex justify-between text-xs mb-1">
-                      <span className="text-gray-600 font-medium">En Meta</span>
-                      <span className="font-semibold text-emerald-600">{statusCounts.positive}</span>
-                    </div>
-                    <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-emerald-500" style={{ width: `${(statusCounts.positive/STORES.length)*100}%` }} />
-                    </div>
+                  {/* Patrón Identificado */}
+                  <div className="bg-white/60 rounded-xl p-4 border border-purple-100">
+                    <p className="text-xs font-bold text-purple-700 mb-2 flex items-center gap-1">
+                      <span>🎯</span> Situación Actual
+                    </p>
+                    <p className="text-sm text-gray-800 leading-relaxed">{aiInsights.patron_critico}</p>
                   </div>
-                  <div>
-                    <div className="flex justify-between text-xs mb-1">
-                      <span className="text-gray-600 font-medium">En Alerta</span>
-                      <span className="font-semibold text-amber-600">{statusCounts.negative}</span>
-                    </div>
-                    <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-amber-500" style={{ width: `${(statusCounts.negative/STORES.length)*100}%` }} />
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex justify-between text-xs mb-1">
-                      <span className="text-gray-600 font-medium">Críticas</span>
-                      <span className="font-semibold text-red-600">{statusCounts.critical}</span>
-                    </div>
-                    <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-red-500" style={{ width: `${(statusCounts.critical/STORES.length)*100}%` }} />
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
 
-            {/* Tabla Top 5 Críticas */}
-            <Card className="border-gray-100 shadow-sm">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-semibold text-gray-900">Top 5 Tiendas Críticas</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {storesAnalysis
-                    .filter(s => s.status === 'critical' || s.status === 'negative')
-                    .sort((a, b) => a.salesCompliance - b.salesCompliance)
-                    .slice(0, 5)
-                    .map((store, idx) => (
-                      <div key={store.code} className="flex items-center justify-between text-xs py-1.5 border-b border-gray-100 last:border-0">
-                        <div className="flex items-center gap-2">
-                          <span className="w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center text-[10px] font-semibold text-gray-600">
-                            {idx + 1}
-                          </span>
-                          <span className="font-medium text-gray-800">{store.name}</span>
+                  {/* Acciones Top 3 */}
+                  <div className="bg-white/60 rounded-xl p-4 border border-emerald-100">
+                    <p className="text-xs font-bold text-emerald-700 mb-3 flex items-center gap-1">
+                      <span>⚡</span> Top 3 Acciones Inmediatas
+                    </p>
+                    <div className="space-y-2">
+                      {aiInsights.acciones_prioritarias?.slice(0, 3).map((accion, i) => (
+                        <div key={i} className="flex items-start gap-2">
+                          <span className="flex-shrink-0 w-5 h-5 rounded-full bg-emerald-200 text-emerald-800 font-black flex items-center justify-center text-[10px]">{i + 1}</span>
+                          <span className="text-xs text-gray-800 font-medium leading-relaxed">{accion}</span>
                         </div>
-                        <span className={`font-semibold ${
-                          store.salesCompliance >= 70 ? 'text-amber-600' : 'text-red-600'
-                        }`}>
-                          {store.salesCompliance.toFixed(0)}%
-                        </span>
-                      </div>
-                    ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* AI Insights */}
-          {!isLoading && aiInsights && (
-            <Card className="border-gray-100 shadow-sm mb-6">
-              <CardHeader className="border-b border-gray-100">
-                <CardTitle className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-                  <Brain className="w-4 h-4 text-blue-600" />
-                  Análisis Inteligente
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="bg-blue-50 rounded-lg p-4 border border-blue-100">
-                    <p className="text-xs font-semibold text-blue-700 mb-2">🎯 Patrón Crítico</p>
-                    <p className="text-xs text-gray-700 leading-relaxed">{aiInsights.patron_critico}</p>
-                  </div>
-                  <div className="bg-emerald-50 rounded-lg p-4 border border-emerald-100">
-                    <p className="text-xs font-semibold text-emerald-700 mb-2">⚡ Acciones Prioritarias</p>
-                    <ul className="space-y-1.5">
-                      {aiInsights.acciones_prioritarias?.map((accion, i) => (
-                        <li key={i} className="text-xs text-gray-700 flex items-start gap-2">
-                          <span className="flex-shrink-0 w-4 h-4 rounded-full bg-emerald-200 text-emerald-800 font-semibold flex items-center justify-center text-[10px]">{i + 1}</span>
-                          <span className="flex-1">{accion}</span>
-                        </li>
                       ))}
-                    </ul>
+                    </div>
                   </div>
-                  <div className="bg-amber-50 rounded-lg p-4 border border-amber-100">
-                    <p className="text-xs font-semibold text-amber-700 mb-2">💡 Oportunidades</p>
-                    <p className="text-xs text-gray-700 leading-relaxed">{aiInsights.oportunidades}</p>
+
+                  {/* Oportunidades */}
+                  <div className="bg-white/60 rounded-xl p-4 border border-amber-100">
+                    <p className="text-xs font-bold text-amber-700 mb-2 flex items-center gap-1">
+                      <span>💡</span> Oportunidad de Mejora
+                    </p>
+                    <p className="text-sm text-gray-800 leading-relaxed">{aiInsights.oportunidades}</p>
                   </div>
                 </div>
               </CardContent>
