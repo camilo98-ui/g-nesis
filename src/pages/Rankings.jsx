@@ -131,7 +131,7 @@ export default function Rankings() {
         cashier: cashiers.find(c => c.id === stats.cashier_id) || { name: 'Desconocido' }
       }));
 
-    // Best cashier of the store
+    // Best cashier of the store - SCORE ÚNICO (Ventas 50%, Ticket 30%, Sugeridos 20%)
     const maxSales = Math.max(...Object.values(cashierStats).map(s => s.totalSales), 1);
     const maxTicket = Math.max(...Object.values(cashierStats).filter(s => s.totalTransactions > 0).map(s => s.totalSales / s.totalTransactions), 1);
     const maxSuggested = Math.max(...Object.values(cashierStats).map(s => s.totalSuggested), 1);
@@ -139,11 +139,20 @@ export default function Rankings() {
     const bestCashier = Object.values(cashierStats)
       .filter(s => s.totalTransactions > 0)
       .map(stats => {
-        const salesScore = (stats.totalSales / maxSales) * 33;
-        const ticketScore = ((stats.totalSales / stats.totalTransactions) / maxTicket) * 33;
-        const suggestedScore = (stats.totalSuggested / maxSuggested) * 34;
+        // Nuevo Score Único: Ventas 50%, Ticket 30%, Sugeridos 20%
+        const salesScore = (stats.totalSales / maxSales) * 50;
+        const ticketScore = ((stats.totalSales / stats.totalTransactions) / maxTicket) * 30;
+        const suggestedScore = (stats.totalSuggested / maxSuggested) * 20;
         const overallScore = salesScore + ticketScore + suggestedScore;
-        return { ...stats, overallScore, salesScore, ticketScore, suggestedScore };
+        
+        // Niveles de progresión
+        let level = 'Rookie';
+        let levelColor = 'gray';
+        if (overallScore >= 80) { level = 'Elite'; levelColor = 'purple'; }
+        else if (overallScore >= 65) { level = 'Master'; levelColor = 'blue'; }
+        else if (overallScore >= 45) { level = 'Pro'; levelColor = 'green'; }
+        
+        return { ...stats, overallScore, salesScore, ticketScore, suggestedScore, level, levelColor };
       })
       .sort((a, b) => b.overallScore - a.overallScore)
       .map((stats, index) => ({
@@ -501,6 +510,38 @@ export default function Rankings() {
 
               {/* Best Cashier Tab */}
               <TabsContent value="best" className="space-y-4">
+                {/* Explicación del Score */}
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-gradient-to-r from-purple-100 via-pink-100 to-rose-100 rounded-2xl p-4 border-2 border-purple-200 shadow-lg mb-4"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-white/60 flex items-center justify-center flex-shrink-0">
+                      <Trophy className="w-5 h-5 text-purple-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-black text-gray-800 mb-2">🎯 Cómo se calcula el Score Total</p>
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div className="bg-white/60 rounded-lg p-2 text-center">
+                          <p className="font-black text-blue-700 text-lg">50%</p>
+                          <p className="text-gray-600 font-medium">Ventas Totales</p>
+                        </div>
+                        <div className="bg-white/60 rounded-lg p-2 text-center">
+                          <p className="font-black text-purple-700 text-lg">30%</p>
+                          <p className="text-gray-600 font-medium">Ticket Promedio</p>
+                        </div>
+                        <div className="bg-white/60 rounded-lg p-2 text-center">
+                          <p className="font-black text-emerald-700 text-lg">20%</p>
+                          <p className="text-gray-600 font-medium">Sugeridos</p>
+                        </div>
+                      </div>
+                      <p className="text-xs text-gray-600 mt-2 text-center italic">
+                        El ranking premia balance: no solo volumen, sino también calidad de venta.
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
                 {/* Performance Distribution Chart */}
                 {rankings.bestCashier?.length > 3 && (
                   <Card className="bg-white shadow-lg border-0 mb-4">
@@ -537,40 +578,24 @@ export default function Rankings() {
                 
                 {rankings.bestCashier?.length > 0 ? (
                   rankings.bestCashier.map((item, index) => (
-                    <motion.div
+                    <CashierRankingCard
                       key={item.cashier_id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      className={`p-4 rounded-xl border ${
-                        index === 0 ? 'bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-200' :
-                        index <= 2 ? 'bg-gradient-to-r from-gray-50 to-slate-50 border-gray-200' :
-                        'bg-white border-gray-100'
-                      }`}
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg ${
-                          index === 0 ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-white shadow-lg' :
-                          index === 1 ? 'bg-gradient-to-r from-gray-300 to-gray-400 text-white' :
-                          index === 2 ? 'bg-gradient-to-r from-orange-400 to-amber-600 text-white' :
-                          'bg-gray-100 text-gray-600'
-                        }`}>
-                          {index <= 2 ? <Crown className="w-5 h-5" /> : index + 1}
-                        </div>
-                        <div className="flex-1">
-                          <p className="font-bold text-gray-800">{item.cashier?.name}</p>
-                          <div className="flex flex-wrap gap-2 mt-1">
-                            <span className="text-[10px] bg-pink-100 text-pink-700 px-2 py-0.5 rounded-full">Ventas: {item.salesScore?.toFixed(0)}</span>
-                            <span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Ticket: {item.ticketScore?.toFixed(0)}</span>
-                            <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Sugeridos: {item.suggestedScore?.toFixed(0)}</span>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-xl font-bold text-amber-600">{item.overallScore?.toFixed(0)}</p>
-                          <p className="text-xs text-gray-400">puntos</p>
-                        </div>
-                      </div>
-                    </motion.div>
+                      cashier={item.cashier}
+                      rank={item.rank}
+                      sales={item.totalSales}
+                      tickets={item.totalTickets}
+                      transactions={item.totalTransactions}
+                      suggestedSales={item.totalSuggested}
+                      avgTicket={item.avgTicket}
+                      overallScore={item.overallScore}
+                      salesScore={item.salesScore}
+                      ticketScore={item.ticketScore}
+                      suggestedScore={item.suggestedScore}
+                      level={item.level}
+                      levelColor={item.levelColor}
+                      rankType="best"
+                      delay={index * 0.05}
+                    />
                   ))
                 ) : (
                   <div className="text-center py-12 bg-white rounded-2xl border border-gray-100">

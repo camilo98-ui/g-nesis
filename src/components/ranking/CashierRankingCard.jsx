@@ -1,6 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Trophy, Medal, Award, Crown, Receipt, Zap, Star, Flame, Sparkles, Calendar } from 'lucide-react';
+import { Trophy, Medal, Award, Crown, Receipt, Zap, Star, Flame, Sparkles, Calendar, ChevronRight } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import ScoreBreakdown from './ScoreBreakdown';
+import LevelBadge from './LevelBadge';
+import TrafficLight from './TrafficLight';
 
 const RANK_STYLES = {
   1: { 
@@ -35,8 +39,18 @@ export default function CashierRankingCard({
   suggestedSales,
   avgTicket,
   rankType = "sales",
-  delay = 0 
+  delay = 0,
+  // Nuevos props para gamificación completa
+  overallScore = 0,
+  salesScore = 0,
+  ticketScore = 0,
+  suggestedScore = 0,
+  level = 'Rookie',
+  levelColor = 'gray',
+  expanded = false,
+  onToggle = null
 }) {
+  const [isExpanded, setIsExpanded] = React.useState(expanded);
   const isTopThree = rank <= 3;
   const rankStyle = RANK_STYLES[rank];
   
@@ -48,7 +62,12 @@ export default function CashierRankingCard({
     }).format(Math.round(val));
   };
 
-  const calculatedAvgTicket = avgTicket || (tickets > 0 ? sales / tickets : 0);
+  const calculatedAvgTicket = avgTicket || (transactions > 0 ? sales / transactions : 0);
+
+  const handleToggle = () => {
+    setIsExpanded(!isExpanded);
+    if (onToggle) onToggle(!isExpanded);
+  };
 
   // Generar frase divertida basada en el rank
   const funPhrases = {
@@ -64,20 +83,23 @@ export default function CashierRankingCard({
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: -20, rotateY: -15 }}
-      animate={{ opacity: 1, x: 0, rotateY: 0 }}
-      transition={{ delay, duration: 0.4, type: "spring" }}
-      whileHover={{ scale: 1.05, x: 12, y: -5, rotateY: 5 }}
-      whileTap={{ scale: 0.97 }}
-      className={`relative overflow-hidden rounded-2xl cursor-pointer ${
-        isTopThree 
-          ? `bg-gradient-to-r ${rankStyle.bg} text-gray-800 shadow-2xl ${rankStyle.ring}` 
-          : 'bg-gradient-to-br from-white to-gray-50 border-2 border-gray-200 shadow-lg hover:shadow-2xl hover:border-pink-300'
-      } transition-all duration-300`}
-      style={{ transformStyle: 'preserve-3d' }}
-    >
-      <div className="p-5 flex items-center gap-4">
+    <TooltipProvider>
+      <motion.div
+        initial={{ opacity: 0, x: -20, rotateY: -15 }}
+        animate={{ opacity: 1, x: 0, rotateY: 0 }}
+        transition={{ delay, duration: 0.4, type: "spring" }}
+        whileHover={{ scale: 1.02, y: -3 }}
+        className={`relative overflow-hidden rounded-2xl ${
+          isTopThree 
+            ? `bg-gradient-to-r ${rankStyle.bg} text-gray-800 shadow-2xl ${rankStyle.ring}` 
+            : 'bg-gradient-to-br from-white to-gray-50 border-2 border-gray-200 shadow-lg hover:shadow-2xl hover:border-pink-300'
+        } transition-all duration-300`}
+        style={{ transformStyle: 'preserve-3d' }}
+      >
+        <div className="p-5"
+          onClick={handleToggle}
+        >
+          <div className="flex items-center gap-4 cursor-pointer">
         {/* Photo + Rank badge - MÁS GRANDE Y DIVERTIDO */}
         <div className="relative flex-shrink-0">
           <motion.div 
@@ -126,66 +148,167 @@ export default function CashierRankingCard({
 
         {/* Cashier info - MÁS VISUAL */}
         <div className="flex-grow min-w-0">
-          <h4 className={`font-black text-lg truncate ${isTopThree ? 'text-gray-900' : 'text-gray-800'}`}>
-            {cashier.name}
-          </h4>
-          <div className={`flex flex-wrap gap-2 mt-2 ${isTopThree ? 'text-gray-700' : 'text-gray-600'}`}>
-            <span className="flex items-center gap-1 bg-white/50 px-2 py-1 rounded-lg text-xs font-bold">
-              <Calendar className="w-3.5 h-3.5 text-gray-500" />
-              {cashier.daysWorked || 0} turnos
-            </span>
-            <span className="flex items-center gap-1 bg-white/50 px-2 py-1 rounded-lg text-xs font-bold">
-              <Receipt className="w-3.5 h-3.5 text-blue-500" />
-              Prom: {formatCurrency(cashier.avgDaily || 0)}
-            </span>
-            <span className="flex items-center gap-1 bg-white/50 px-2 py-1 rounded-lg text-xs font-bold">
-              <Zap className="w-3.5 h-3.5 text-purple-500" />
-              🎫 {formatCurrency(calculatedAvgTicket)}
-            </span>
+          <div className="flex items-center gap-2 mb-2">
+            <h4 className={`font-black text-lg truncate ${isTopThree ? 'text-gray-900' : 'text-gray-800'}`}>
+              {cashier.name}
+            </h4>
+            {rankType === 'best' && <LevelBadge level={level} score={overallScore} compact />}
+          </div>
+          
+          {rankType === 'best' && overallScore > 0 && (
+            <div className="flex items-center gap-2 mb-2">
+              <ScoreBreakdown 
+                salesScore={salesScore}
+                ticketScore={ticketScore}
+                suggestedScore={suggestedScore}
+                overallScore={overallScore}
+                compact
+              />
+            </div>
+          )}
+
+          <div className={`flex flex-wrap gap-2 ${isTopThree ? 'text-gray-700' : 'text-gray-600'}`}>
+            <Tooltip delayDuration={100}>
+              <TooltipTrigger asChild>
+                <span className="flex items-center gap-1 bg-white/60 px-2 py-1 rounded-lg text-xs font-bold cursor-pointer hover:bg-white/80 transition-colors">
+                  <Calendar className="w-3.5 h-3.5 text-gray-500" />
+                  {transactions || 0}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="bg-slate-800 border-none">
+                <p className="text-xs text-white">Transacciones totales</p>
+              </TooltipContent>
+            </Tooltip>
+            
+            <Tooltip delayDuration={100}>
+              <TooltipTrigger asChild>
+                <span className="flex items-center gap-1 bg-white/60 px-2 py-1 rounded-lg text-xs font-bold cursor-pointer hover:bg-white/80 transition-colors">
+                  <Receipt className="w-3.5 h-3.5 text-blue-500" />
+                  {formatCurrency(calculatedAvgTicket)}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="bg-slate-800 border-none">
+                <p className="text-xs text-white">Ticket Promedio</p>
+              </TooltipContent>
+            </Tooltip>
           </div>
         </div>
 
         {/* Main metric - MÁS DESTACADO */}
-        <div className="flex-shrink-0 text-right">
-          {rankType === "sales" && (
+        <div className="flex-shrink-0 text-right flex items-center gap-2">
+            {rankType === "sales" && (
+              <motion.div
+                whileHover={{ scale: 1.1 }}
+                className="space-y-1"
+              >
+                <p className={`text-2xl font-black ${isTopThree ? 'text-gray-900 drop-shadow-md' : 'text-fuchsia-600'}`}>
+                  {formatCurrency(sales)}
+                </p>
+                <p className={`text-xs font-medium ${isTopThree ? 'text-gray-700' : 'text-gray-500'}`}>
+                  ventas
+                </p>
+              </motion.div>
+            )}
+            {rankType === "ticket" && (
+              <motion.div
+                whileHover={{ scale: 1.1 }}
+              >
+                <p className={`text-2xl font-black ${isTopThree ? 'text-gray-900 drop-shadow-md' : 'text-sky-600'}`}>
+                  {formatCurrency(calculatedAvgTicket)}
+                </p>
+                <p className={`text-xs font-medium ${isTopThree ? 'text-gray-700' : 'text-gray-500'}`}>
+                  promedio
+                </p>
+              </motion.div>
+            )}
+            {rankType === "suggested" && (
+              <motion.div
+                whileHover={{ scale: 1.1 }}
+                className="space-y-1"
+              >
+                <p className={`text-2xl font-black ${isTopThree ? 'text-gray-900 drop-shadow-md' : 'text-pink-600'}`}>
+                  {suggestedSales} 🎁
+                </p>
+                <p className={`text-xs font-medium ${isTopThree ? 'text-gray-700' : 'text-gray-500'}`}>
+                  sugeridos
+                </p>
+              </motion.div>
+            )}
+            {rankType === "best" && (
+              <motion.div
+                whileHover={{ scale: 1.1 }}
+                className="space-y-1"
+              >
+                <p className={`text-3xl font-black ${isTopThree ? 'text-gray-900 drop-shadow-md' : 'text-purple-600'}`}>
+                  {overallScore.toFixed(0)}
+                </p>
+                <p className={`text-xs font-medium ${isTopThree ? 'text-gray-700' : 'text-gray-500'}`}>
+                  puntos
+                </p>
+              </motion.div>
+            )}
+            
+            {/* Botón expandir */}
             <motion.div
-              whileHover={{ scale: 1.1 }}
-              className="space-y-1"
+              animate={{ rotate: isExpanded ? 90 : 0 }}
+              transition={{ duration: 0.3 }}
+              className="ml-2"
             >
-              <p className={`text-2xl font-black ${isTopThree ? 'text-gray-900 drop-shadow-md' : 'text-fuchsia-600'}`}>
-                {formatCurrency(sales)}
-              </p>
-              <p className={`text-xs font-medium ${isTopThree ? 'text-gray-700' : 'text-gray-500'}`}>
-                Ticket Prom: {formatCurrency(calculatedAvgTicket)}
-              </p>
+              <ChevronRight className={`w-5 h-5 ${isTopThree ? 'text-gray-700' : 'text-gray-400'}`} />
             </motion.div>
-          )}
-          {rankType === "ticket" && (
-            <motion.div
-              whileHover={{ scale: 1.1 }}
-            >
-              <p className={`text-2xl font-black ${isTopThree ? 'text-gray-900 drop-shadow-md' : 'text-sky-600'}`}>
-                {formatCurrency(calculatedAvgTicket)}
-              </p>
-              <p className={`text-xs font-medium ${isTopThree ? 'text-gray-700' : 'text-gray-500'}`}>
-                promedio
-              </p>
-            </motion.div>
-          )}
-          {rankType === "suggested" && (
-            <motion.div
-              whileHover={{ scale: 1.1 }}
-              className="space-y-1"
-            >
-              <p className={`text-2xl font-black ${isTopThree ? 'text-gray-900 drop-shadow-md' : 'text-pink-600'}`}>
-                {suggestedSales} 🎁
-              </p>
-              <p className={`text-xs font-medium ${isTopThree ? 'text-gray-700' : 'text-gray-500'}`}>
-                sugeridos
-              </p>
-            </motion.div>
-          )}
+          </div>
         </div>
+
+        {/* Panel expandido con detalles completos */}
+        {isExpanded && rankType === 'best' && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            className="border-t border-white/50 pt-4 mt-4 space-y-4"
+          >
+            {/* Score Breakdown */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <ScoreBreakdown
+                salesScore={salesScore}
+                ticketScore={ticketScore}
+                suggestedScore={suggestedScore}
+                overallScore={overallScore}
+              />
+              
+              <LevelBadge level={level} score={overallScore} />
+            </div>
+
+            {/* Semáforos */}
+            <div className="space-y-2">
+              <p className="text-xs font-bold text-gray-600 uppercase">Semáforo de Desempeño</p>
+              <div className="grid grid-cols-3 gap-2">
+                <TrafficLight
+                  value={sales}
+                  target={sales * 0.9} // Simulación de meta
+                  label="Ventas"
+                  type="sales"
+                  compact
+                />
+                <TrafficLight
+                  value={calculatedAvgTicket}
+                  target={calculatedAvgTicket * 0.85}
+                  label="Ticket"
+                  type="ticket"
+                  compact
+                />
+                <TrafficLight
+                  value={suggestedSales}
+                  target={suggestedSales * 0.8}
+                  label="Sugeridos"
+                  type="suggested"
+                  compact
+                />
+              </div>
+            </div>
+          </motion.div>
+        )}
       </div>
 
       {/* Decorative elements - MÁS DIVERTIDOS */}
@@ -253,5 +376,6 @@ export default function CashierRankingCard({
         </motion.div>
       )}
     </motion.div>
+    </TooltipProvider>
   );
 }
