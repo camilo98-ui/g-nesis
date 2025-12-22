@@ -774,8 +774,21 @@ export default function Dashboard() {
           </div>
           <div className="flex flex-col md:flex-row gap-3 items-center">
             <StoreSelector selectedStore={selectedStore} onStoreChange={handleStoreChange} />
-            <WeekFilter onWeekChange={setWeekFilter} multiSelect={true} />
-            <DateFilter dateRange={dateRange} onDateChange={(range) => { setDateRange(range); setWeekFilter(null); }} />
+            {!showComparison && <WeekFilter onWeekChange={setWeekFilter} multiSelect={true} />}
+            <DateFilter 
+              dateRange={dateRange} 
+              onDateChange={(range) => { setDateRange(range); setWeekFilter(null); }}
+              buttonText={showComparison ? "📅 Período Actual" : undefined}
+              buttonClassName={showComparison ? "border-blue-300 hover:border-blue-500" : undefined}
+            />
+            {showComparison && (
+              <DateFilter 
+                dateRange={comparisonRange || { from: startOfMonth(new Date()), to: new Date() }} 
+                onDateChange={setComparisonRange}
+                buttonClassName="border-pink-300 hover:border-pink-500"
+                buttonText="📅 Comparar con"
+              />
+            )}
           </div>
         </div>
 
@@ -793,7 +806,7 @@ export default function Dashboard() {
                   }}
                   className={`gap-1 ${!showComparison ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg' : 'border-gray-300 hover:border-blue-500'}`}
                 >
-                  <TrendingUp className="w-4 h-4" />
+                  <Activity className="w-4 h-4" />
                   Actual
                 </Button>
               </motion.div>
@@ -818,23 +831,6 @@ export default function Dashboard() {
                   Comparable
                 </Button>
               </motion.div>
-              
-              <AnimatePresence>
-                {showComparison && (
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                  >
-                    <DateFilter 
-                      dateRange={comparisonRange || { from: startOfMonth(new Date()), to: new Date() }} 
-                      onDateChange={setComparisonRange}
-                      buttonClassName="border-pink-300 hover:border-pink-500"
-                      buttonText="📅 Período a Comparar"
-                    />
-                  </motion.div>
-                )}
-              </AnimatePresence>
 
               <StoreReportGenerator 
                 storeId={selectedStore}
