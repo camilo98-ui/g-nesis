@@ -373,10 +373,10 @@ export default function CashiersDashboard() {
                         </div>
                       </div>
                       <div className="bg-white/70 backdrop-blur-sm rounded-xl p-3">
-                        <p className="text-2xl font-black text-pink-900">
+                        <p className="text-3xl font-black text-pink-900 tracking-tight">
                           {formatCurrency(actionableMetrics.bestInSales.totalSales)}
                         </p>
-                        <p className="text-xs text-pink-700 font-medium">
+                        <p className="text-xs text-pink-700 font-medium mt-1">
                           {actionableMetrics.bestInSales.daysWorked} turnos trabajados
                         </p>
                       </div>
@@ -418,10 +418,10 @@ export default function CashiersDashboard() {
                         </div>
                       </div>
                       <div className="bg-white/70 backdrop-blur-sm rounded-xl p-3">
-                        <p className="text-2xl font-black text-pink-900">
+                        <p className="text-3xl font-black text-pink-900 tracking-tight">
                           {formatCurrency(actionableMetrics.bestInTicket.avgTicket)}
                         </p>
-                        <p className="text-xs text-pink-700 font-medium">
+                        <p className="text-xs text-pink-700 font-medium mt-1">
                           promedio por transacción
                         </p>
                       </div>
@@ -463,10 +463,10 @@ export default function CashiersDashboard() {
                         </div>
                       </div>
                       <div className="bg-white/70 backdrop-blur-sm rounded-xl p-3">
-                        <p className="text-2xl font-black text-pink-900">
-                          {actionableMetrics.bestInTransactions.totalTransactions}
+                        <p className="text-3xl font-black text-pink-900 tracking-tight">
+                          {actionableMetrics.bestInTransactions.totalTransactions.toLocaleString('es-CO')}
                         </p>
-                        <p className="text-xs text-pink-700 font-medium">
+                        <p className="text-xs text-pink-700 font-medium mt-1">
                           transacciones totales
                         </p>
                       </div>
