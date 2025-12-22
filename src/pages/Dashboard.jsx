@@ -1013,42 +1013,75 @@ export default function Dashboard() {
                 <motion.button
                   whileHover={{ scale: 1.03, y: -4 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => setActiveMetric(activeMetric === 'trans_comp' ? null : 'trans_comp')}
-                  className={`text-left border-2 rounded-2xl shadow-lg transition-all ${
-                    activeMetric === 'trans_comp' ? 'ring-4 ring-purple-300' : ''
+                  onClick={() => {
+                    const newMetric = activeMetric === 'trans_comp' ? null : 'trans_comp';
+                    setActiveMetric(newMetric);
+                    if (newMetric) {
+                      setTimeout(() => {
+                        const detailPanel = document.getElementById('detail-panel');
+                        if (detailPanel) {
+                          detailPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                      }, 100);
+                    }
+                  }}
+                  className={`group text-left border-2 rounded-2xl shadow-lg transition-all overflow-hidden relative ${
+                    activeMetric === 'trans_comp' ? 'ring-4 ring-purple-300 shadow-2xl' : ''
                   } ${
                     comparisonTotals.transactions > 0 && ((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100) >= 0 
-                      ? 'border-purple-400 bg-gradient-to-br from-purple-50 to-violet-50' 
-                      : 'border-orange-400 bg-gradient-to-br from-orange-50 to-amber-50'
+                      ? 'border-purple-400 bg-gradient-to-br from-purple-50 via-violet-50 to-purple-100' 
+                      : 'border-orange-400 bg-gradient-to-br from-orange-50 via-amber-50 to-orange-100'
                   }`}
                 >
-                  <CardContent className="pt-5 pb-5">
-                    <div className="flex items-center justify-between mb-3">
-                      <p className="text-xs font-black text-gray-700 uppercase tracking-wider">⚡ Δ Transacciones</p>
-                      {comparisonTotals.transactions > 0 && ((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100) >= 0 ? 
-                        <TrendingUp className="w-5 h-5 text-purple-600" /> : 
-                        <TrendingDown className="w-5 h-5 text-orange-600" />
-                      }
+                  <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/20 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  
+                  <CardContent className="pt-6 pb-6 relative">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-2">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                          comparisonTotals.transactions > 0 && ((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100) >= 0 
+                            ? 'bg-purple-500/20' 
+                            : 'bg-orange-500/20'
+                        }`}>
+                          <Zap className={`w-5 h-5 ${
+                            comparisonTotals.transactions > 0 && ((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100) >= 0 
+                              ? 'text-purple-600' 
+                              : 'text-orange-600'
+                          }`} />
+                        </div>
+                        <p className="text-xs font-black text-gray-700 uppercase tracking-wider">Transacciones</p>
+                      </div>
+                      <motion.div
+                        animate={{ scale: [1, 1.2, 1] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                      >
+                        {comparisonTotals.transactions > 0 && ((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100) >= 0 ? 
+                          <TrendingUp className="w-6 h-6 text-purple-600" /> : 
+                          <TrendingDown className="w-6 h-6 text-orange-600" />
+                        }
+                      </motion.div>
                     </div>
-                    <p className={`text-3xl font-black mb-2 ${
-                      comparisonTotals.transactions > 0 && ((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100) >= 0 
-                        ? 'text-purple-700' 
-                        : 'text-orange-700'
-                    }`}>
-                      {comparisonTotals.transactions > 0 ? (((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100) >= 0 ? '+' : '') + ((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100).toFixed(1) : 0}%
-                    </p>
-                    <div className="space-y-1">
-                      <p className="text-xs text-gray-600 font-semibold">
+                    <div className="mb-3">
+                      <p className={`text-4xl font-black mb-1 ${
+                        comparisonTotals.transactions > 0 && ((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100) >= 0 
+                          ? 'text-purple-700' 
+                          : 'text-orange-700'
+                      }`}>
+                        {comparisonTotals.transactions > 0 ? (((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100) >= 0 ? '+' : '') + ((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100).toFixed(1) : 0}%
+                      </p>
+                      <p className="text-xs text-gray-600 font-bold">
                         {Math.abs(totals.transactions - comparisonTotals.transactions).toLocaleString()} {totals.transactions > comparisonTotals.transactions ? 'más' : 'menos'}
                       </p>
-                      <div className="h-px bg-gray-200 my-2" />
-                      <div className="flex justify-between text-[10px] text-gray-600 font-medium">
-                        <span>Actual:</span>
-                        <span className="font-bold">{totals.transactions.toLocaleString()}</span>
+                    </div>
+                    <div className="space-y-2 bg-white/50 backdrop-blur-sm rounded-lg p-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[10px] text-gray-500 uppercase font-semibold tracking-wide">Actual</span>
+                        <span className="text-sm font-black text-gray-800">{totals.transactions.toLocaleString()}</span>
                       </div>
-                      <div className="flex justify-between text-[10px] text-gray-500">
-                        <span>Anterior:</span>
-                        <span>{comparisonTotals.transactions.toLocaleString()}</span>
+                      <div className="h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent" />
+                      <div className="flex justify-between items-center">
+                        <span className="text-[10px] text-gray-500 uppercase font-semibold tracking-wide">Anterior</span>
+                        <span className="text-sm font-semibold text-gray-600">{comparisonTotals.transactions.toLocaleString()}</span>
                       </div>
                     </div>
                   </CardContent>
