@@ -73,11 +73,41 @@ export default function CashiersDashboard() {
     refetchOnReconnect: true
   });
 
-  // Metas de la tienda (hardcoded, luego se puede traer de BD)
-  const storeMeta = {
-    salesGoal: 15000000, // Meta de ventas mensual
-    ticketGoal: 35000, // Meta de ticket promedio
-  };
+  // Cargar metas reales de la tienda
+  const { data: budgets = [] } = useQuery({
+    queryKey: ['budgets', selectedStore, dateRange],
+    queryFn: async () => {
+      const month = dateRange.from.getMonth() + 1;
+      const year = dateRange.from.getFullYear();
+      return await base44.entities.Budget.filter({ 
+        store_id: selectedStore,
+        month,
+        year
+      });
+    },
+    enabled: !!selectedStore && !!dateRange,
+  });
+
+  // Calcular metas proporcionales al período seleccionado
+  const storeMeta = useMemo(() => {
+    const budget = budgets[0];
+    if (!budget) {
+      return {
+        salesGoal: 15000000,
+        ticketGoal: 35000,
+      };
+    }
+
+    // Días del período seleccionado
+    const daysInPeriod = Math.ceil((dateRange.to - dateRange.from) / (1000 * 60 * 60 * 24)) + 1;
+    const daysInMonth = new Date(dateRange.from.getFullYear(), dateRange.from.getMonth() + 1, 0).getDate();
+    const proportion = daysInPeriod / daysInMonth;
+
+    return {
+      salesGoal: (budget.sales_budget || 15000000) * proportion,
+      ticketGoal: budget.tickets_budget || 35000,
+    };
+  }, [budgets, dateRange]);
 
   const activeCashiers = cashiers.filter(c => c.is_active !== false);
 
