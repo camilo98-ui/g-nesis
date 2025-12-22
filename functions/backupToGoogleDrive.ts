@@ -97,7 +97,7 @@ Deno.serve(async (req) => {
     const result = await uploadResponse.json();
     console.log('File uploaded to Drive:', result);
 
-    // Compartir archivo con el usuario
+    // Hacer el archivo accesible para cualquiera con el link
     const shareResponse = await fetch(`https://www.googleapis.com/drive/v3/files/${result.id}/permissions`, {
       method: 'POST',
       headers: {
@@ -105,9 +105,8 @@ Deno.serve(async (req) => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        type: 'user',
-        role: 'writer',
-        emailAddress: 'gym.imparable24@gmail.com'
+        type: 'anyone',
+        role: 'reader'
       })
     });
 
@@ -115,6 +114,39 @@ Deno.serve(async (req) => {
       const shareError = await shareResponse.text();
       console.error('Share error:', shareError);
     }
+
+    // Enviar email con el link
+    const downloadLink = `https://drive.google.com/uc?export=download&id=${result.id}`;
+    await base44.asServiceRole.integrations.Core.SendEmail({
+      to: user.email,
+      subject: `🍦 Backup Popsy - ${fileName}`,
+      body: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #ec4899;">✅ Backup Completado</h2>
+          <p>Tu backup de Popsy Management se ha creado exitosamente.</p>
+          
+          <div style="background: #fce7f3; padding: 20px; border-radius: 10px; margin: 20px 0;">
+            <h3 style="margin-top: 0;">📁 ${fileName}</h3>
+            <p><strong>Fecha:</strong> ${new Date().toLocaleString('es-CO')}</p>
+            <p><strong>Registros:</strong></p>
+            <ul>
+              <li>Tiendas: ${stores.length}</li>
+              <li>Cajeros: ${cashiers.length}</li>
+              <li>Registros de turnos: ${shiftRecords.length}</li>
+              <li>Turnos programados: ${shifts.length}</li>
+            </ul>
+          </div>
+          
+          <a href="${downloadLink}" style="display: inline-block; background: linear-gradient(to right, #ec4899, #f43f5e); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 10px 0;">
+            📥 Descargar Backup
+          </a>
+          
+          <p style="color: #666; font-size: 12px; margin-top: 30px;">
+            También puedes buscar el archivo "${fileName}" en tu Google Drive.
+          </p>
+        </div>
+      `
+    });
 
     return Response.json({ 
       success: true,
