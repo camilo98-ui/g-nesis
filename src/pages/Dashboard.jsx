@@ -1004,16 +1004,16 @@ export default function Dashboard() {
               </motion.div>
             )}
 
-            {/* Panel de comparación de totales REDISEÑADO - PROFESIONAL */}
+            {/* Panel de comparación COMPACTO */}
             {showComparison && comparisonTotals && (
               <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6"
+                className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6"
               >
                 <motion.button
-                  whileHover={{ scale: 1.02, y: -2 }}
-                  whileTap={{ scale: 0.99 }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={() => {
                     const newMetric = activeMetric === 'sales_comp' ? null : 'sales_comp';
                     setActiveMetric(newMetric);
@@ -1026,73 +1026,36 @@ export default function Dashboard() {
                       }, 100);
                     }
                   }}
-                  className={`group relative overflow-hidden rounded-2xl transition-all cursor-pointer ${
-                    activeMetric === 'sales_comp' ? 'ring-2 ring-emerald-400 shadow-2xl' : 'shadow-lg hover:shadow-xl'
+                  className={`relative overflow-hidden rounded-xl transition-all cursor-pointer p-3 ${
+                    activeMetric === 'sales_comp' ? 'ring-2 ring-emerald-400' : ''
+                  } ${
+                    comparisonTotals.sales > 0 && ((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100) >= 0 
+                      ? 'bg-gradient-to-r from-emerald-500 to-green-500' 
+                      : 'bg-gradient-to-r from-red-500 to-rose-500'
                   }`}
                 >
-                  {/* Fondo con gradiente ejecutivo */}
-                  <div className={`absolute inset-0 ${
-                    comparisonTotals.sales > 0 && ((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100) >= 0 
-                      ? 'bg-gradient-to-br from-emerald-500 to-green-600' 
-                      : 'bg-gradient-to-br from-red-500 to-rose-600'
-                  }`} />
-                  
-                  {/* Pattern overlay */}
-                  <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '20px 20px'}} />
-                  
-                  <CardContent className="relative pt-6 pb-6">
-                    {/* Header */}
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-2">
-                        <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                          <DollarSign className="w-5 h-5 text-white" />
-                        </div>
-                        <span className="text-xs font-bold text-white/90 uppercase tracking-wider">Crecimiento Ventas</span>
-                      </div>
-                      <motion.div
-                        animate={{ rotate: [0, 10, -10, 0] }}
-                        transition={{ duration: 3, repeat: Infinity }}
-                      >
-                        {comparisonTotals.sales > 0 && ((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100) >= 0 ? 
-                          <TrendingUp className="w-7 h-7 text-white drop-shadow-lg" /> : 
-                          <TrendingDown className="w-7 h-7 text-white drop-shadow-lg" />
-                        }
-                      </motion.div>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-1.5">
+                      <DollarSign className="w-4 h-4 text-white" />
+                      <span className="text-[10px] font-bold text-white uppercase">Ventas</span>
                     </div>
-
-                    {/* Porcentaje destacado */}
-                    <div className="mb-4">
-                      <motion.p 
-                        className="text-5xl font-black text-white drop-shadow-lg"
-                        initial={{ scale: 0.8, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ duration: 0.5 }}
-                      >
-                        {comparisonTotals.sales > 0 ? (((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100) >= 0 ? '+' : '') + ((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100).toFixed(1) : 0}%
-                      </motion.p>
-                      <p className="text-sm text-white/90 font-semibold mt-1">
-                        {formatCurrency(Math.abs(totals.sales - comparisonTotals.sales))} {totals.sales > comparisonTotals.sales ? 'más generado' : 'de diferencia'}
-                      </p>
-                    </div>
-
-                    {/* Comparativa */}
-                    <div className="space-y-2 bg-white/10 backdrop-blur-md rounded-xl p-3 border border-white/20">
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs text-white/80 font-medium">Período Actual</span>
-                        <span className="text-sm font-bold text-white">{formatCurrency(totals.sales)}</span>
-                      </div>
-                      <div className="h-px bg-white/30" />
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs text-white/80 font-medium">Período Anterior</span>
-                        <span className="text-sm font-bold text-white/80">{formatCurrency(comparisonTotals.sales)}</span>
-                      </div>
-                    </div>
-                  </CardContent>
+                    {comparisonTotals.sales > 0 && ((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100) >= 0 ? 
+                      <TrendingUp className="w-4 h-4 text-white" /> : 
+                      <TrendingDown className="w-4 h-4 text-white" />
+                    }
+                  </div>
+                  <p className="text-2xl font-black text-white mb-1">
+                    {comparisonTotals.sales > 0 ? (((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100) >= 0 ? '+' : '') + ((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100).toFixed(1) : 0}%
+                  </p>
+                  <div className="flex justify-between text-[9px] text-white/80">
+                    <span>Ant: {formatCurrency(comparisonTotals.sales).slice(0, -3)}</span>
+                    <span>Act: {formatCurrency(totals.sales).slice(0, -3)}</span>
+                  </div>
                 </motion.button>
 
                 <motion.button
-                  whileHover={{ scale: 1.02, y: -2 }}
-                  whileTap={{ scale: 0.99 }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={() => {
                     const newMetric = activeMetric === 'trans_comp' ? null : 'trans_comp';
                     setActiveMetric(newMetric);
@@ -1105,57 +1068,36 @@ export default function Dashboard() {
                       }, 100);
                     }
                   }}
-                  className={`group relative overflow-hidden rounded-2xl transition-all cursor-pointer ${
-                    activeMetric === 'trans_comp' ? 'ring-2 ring-purple-400 shadow-2xl' : 'shadow-lg hover:shadow-xl'
+                  className={`relative overflow-hidden rounded-xl transition-all cursor-pointer p-3 ${
+                    activeMetric === 'trans_comp' ? 'ring-2 ring-purple-400' : ''
+                  } ${
+                    comparisonTotals.transactions > 0 && ((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100) >= 0 
+                      ? 'bg-gradient-to-r from-purple-500 to-violet-500' 
+                      : 'bg-gradient-to-r from-orange-500 to-amber-500'
                   }`}
                 >
-                  <div className={`absolute inset-0 ${
-                    comparisonTotals.transactions > 0 && ((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100) >= 0 
-                      ? 'bg-gradient-to-br from-purple-500 to-violet-600' 
-                      : 'bg-gradient-to-br from-orange-500 to-amber-600'
-                  }`} />
-                  <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '20px 20px'}} />
-                  
-                  <CardContent className="relative pt-6 pb-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-2">
-                        <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                          <Zap className="w-5 h-5 text-white" />
-                        </div>
-                        <span className="text-xs font-bold text-white/90 uppercase tracking-wider">Flujo Clientes</span>
-                      </div>
-                      <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 3, repeat: Infinity }}>
-                        {comparisonTotals.transactions > 0 && ((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100) >= 0 ? 
-                          <TrendingUp className="w-7 h-7 text-white drop-shadow-lg" /> : 
-                          <TrendingDown className="w-7 h-7 text-white drop-shadow-lg" />
-                        }
-                      </motion.div>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-1.5">
+                      <Zap className="w-4 h-4 text-white" />
+                      <span className="text-[10px] font-bold text-white uppercase">Tráfico</span>
                     </div>
-                    <div className="mb-4">
-                      <motion.p className="text-5xl font-black text-white drop-shadow-lg" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.5 }}>
-                        {comparisonTotals.transactions > 0 ? (((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100) >= 0 ? '+' : '') + ((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100).toFixed(1) : 0}%
-                      </motion.p>
-                      <p className="text-sm text-white/90 font-semibold mt-1">
-                        {Math.abs(totals.transactions - comparisonTotals.transactions).toLocaleString()} {totals.transactions > comparisonTotals.transactions ? 'clientes más' : 'de variación'}
-                      </p>
-                    </div>
-                    <div className="space-y-2 bg-white/10 backdrop-blur-md rounded-xl p-3 border border-white/20">
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs text-white/80 font-medium">Período Actual</span>
-                        <span className="text-sm font-bold text-white">{totals.transactions.toLocaleString()}</span>
-                      </div>
-                      <div className="h-px bg-white/30" />
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs text-white/80 font-medium">Período Anterior</span>
-                        <span className="text-sm font-bold text-white/80">{comparisonTotals.transactions.toLocaleString()}</span>
-                      </div>
-                    </div>
-                  </CardContent>
+                    {comparisonTotals.transactions > 0 && ((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100) >= 0 ? 
+                      <TrendingUp className="w-4 h-4 text-white" /> : 
+                      <TrendingDown className="w-4 h-4 text-white" />
+                    }
+                  </div>
+                  <p className="text-2xl font-black text-white mb-1">
+                    {comparisonTotals.transactions > 0 ? (((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100) >= 0 ? '+' : '') + ((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100).toFixed(1) : 0}%
+                  </p>
+                  <div className="flex justify-between text-[9px] text-white/80">
+                    <span>Ant: {comparisonTotals.transactions.toLocaleString()}</span>
+                    <span>Act: {totals.transactions.toLocaleString()}</span>
+                  </div>
                 </motion.button>
 
                 <motion.button
-                  whileHover={{ scale: 1.02, y: -2 }}
-                  whileTap={{ scale: 0.99 }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={() => {
                     const newMetric = activeMetric === 'ticket_comp' ? null : 'ticket_comp';
                     setActiveMetric(newMetric);
@@ -1168,60 +1110,39 @@ export default function Dashboard() {
                       }, 100);
                     }
                   }}
-                  className={`group relative overflow-hidden rounded-2xl transition-all cursor-pointer ${
-                    activeMetric === 'ticket_comp' ? 'ring-2 ring-blue-400 shadow-2xl' : 'shadow-lg hover:shadow-xl'
+                  className={`relative overflow-hidden rounded-xl transition-all cursor-pointer p-3 ${
+                    activeMetric === 'ticket_comp' ? 'ring-2 ring-blue-400' : ''
+                  } ${
+                    avgTicket > (comparisonTotals.sales / comparisonTotals.transactions)
+                      ? 'bg-gradient-to-r from-blue-500 to-cyan-500' 
+                      : 'bg-gradient-to-r from-amber-500 to-orange-500'
                   }`}
                 >
-                  <div className={`absolute inset-0 ${
-                    avgTicket > (comparisonTotals.sales / comparisonTotals.transactions)
-                      ? 'bg-gradient-to-br from-blue-500 to-cyan-600' 
-                      : 'bg-gradient-to-br from-amber-500 to-orange-600'
-                  }`} />
-                  <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '20px 20px'}} />
-                  
-                  <CardContent className="relative pt-6 pb-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-2">
-                        <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                          <Receipt className="w-5 h-5 text-white" />
-                        </div>
-                        <span className="text-xs font-bold text-white/90 uppercase tracking-wider">Eficiencia Venta</span>
-                      </div>
-                      <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 3, repeat: Infinity }}>
-                        {avgTicket > (comparisonTotals.sales / comparisonTotals.transactions) ? 
-                          <TrendingUp className="w-7 h-7 text-white drop-shadow-lg" /> : 
-                          <TrendingDown className="w-7 h-7 text-white drop-shadow-lg" />
-                        }
-                      </motion.div>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-1.5">
+                      <Receipt className="w-4 h-4 text-white" />
+                      <span className="text-[10px] font-bold text-white uppercase">Ticket</span>
                     </div>
-                    <div className="mb-4">
-                      <motion.p className="text-5xl font-black text-white drop-shadow-lg" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.5 }}>
-                        {comparisonTotals.transactions > 0 ? 
-                          (((avgTicket - (comparisonTotals.sales / comparisonTotals.transactions)) / (comparisonTotals.sales / comparisonTotals.transactions) * 100) >= 0 ? '+' : '') +
-                          ((avgTicket - (comparisonTotals.sales / comparisonTotals.transactions)) / (comparisonTotals.sales / comparisonTotals.transactions) * 100).toFixed(1) 
-                          : 0}%
-                      </motion.p>
-                      <p className="text-sm text-white/90 font-semibold mt-1">
-                        {formatCurrency(Math.abs(avgTicket - (comparisonTotals.sales / comparisonTotals.transactions)))} {avgTicket > (comparisonTotals.sales / comparisonTotals.transactions) ? 'de mejora' : 'de variación'}
-                      </p>
-                    </div>
-                    <div className="space-y-2 bg-white/10 backdrop-blur-md rounded-xl p-3 border border-white/20">
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs text-white/80 font-medium">Período Actual</span>
-                        <span className="text-sm font-bold text-white">{formatCurrency(avgTicket)}</span>
-                      </div>
-                      <div className="h-px bg-white/30" />
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs text-white/80 font-medium">Período Anterior</span>
-                        <span className="text-sm font-bold text-white/80">{formatCurrency(comparisonTotals.transactions > 0 ? comparisonTotals.sales / comparisonTotals.transactions : 0)}</span>
-                      </div>
-                    </div>
-                  </CardContent>
+                    {avgTicket > (comparisonTotals.sales / comparisonTotals.transactions) ? 
+                      <TrendingUp className="w-4 h-4 text-white" /> : 
+                      <TrendingDown className="w-4 h-4 text-white" />
+                    }
+                  </div>
+                  <p className="text-2xl font-black text-white mb-1">
+                    {comparisonTotals.transactions > 0 ? 
+                      (((avgTicket - (comparisonTotals.sales / comparisonTotals.transactions)) / (comparisonTotals.sales / comparisonTotals.transactions) * 100) >= 0 ? '+' : '') +
+                      ((avgTicket - (comparisonTotals.sales / comparisonTotals.transactions)) / (comparisonTotals.sales / comparisonTotals.transactions) * 100).toFixed(1) 
+                      : 0}%
+                  </p>
+                  <div className="flex justify-between text-[9px] text-white/80">
+                    <span>Ant: {formatCurrency(comparisonTotals.transactions > 0 ? comparisonTotals.sales / comparisonTotals.transactions : 0).slice(0, -3)}</span>
+                    <span>Act: {formatCurrency(avgTicket).slice(0, -3)}</span>
+                  </div>
                 </motion.button>
 
                 <motion.button
-                  whileHover={{ scale: 1.02, y: -2 }}
-                  whileTap={{ scale: 0.99 }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={() => {
                     const newMetric = activeMetric === 'suggested_comp' ? null : 'suggested_comp';
                     setActiveMetric(newMetric);
@@ -1234,52 +1155,31 @@ export default function Dashboard() {
                       }, 100);
                     }
                   }}
-                  className={`group relative overflow-hidden rounded-2xl transition-all cursor-pointer ${
-                    activeMetric === 'suggested_comp' ? 'ring-2 ring-pink-400 shadow-2xl' : 'shadow-lg hover:shadow-xl'
+                  className={`relative overflow-hidden rounded-xl transition-all cursor-pointer p-3 ${
+                    activeMetric === 'suggested_comp' ? 'ring-2 ring-pink-400' : ''
+                  } ${
+                    comparisonTotals.suggested > 0 && ((totals.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100) >= 0 
+                      ? 'bg-gradient-to-r from-pink-500 to-rose-500' 
+                      : 'bg-gradient-to-r from-red-500 to-rose-500'
                   }`}
                 >
-                  <div className={`absolute inset-0 ${
-                    comparisonTotals.suggested > 0 && ((totals.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100) >= 0 
-                      ? 'bg-gradient-to-br from-pink-500 to-rose-600' 
-                      : 'bg-gradient-to-br from-red-500 to-rose-600'
-                  }`} />
-                  <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '20px 20px'}} />
-                  
-                  <CardContent className="relative pt-6 pb-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-2">
-                        <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                          <Gift className="w-5 h-5 text-white" />
-                        </div>
-                        <span className="text-xs font-bold text-white/90 uppercase tracking-wider">Venta Cruzada</span>
-                      </div>
-                      <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 3, repeat: Infinity }}>
-                        {comparisonTotals.suggested > 0 && ((totals.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100) >= 0 ? 
-                          <TrendingUp className="w-7 h-7 text-white drop-shadow-lg" /> : 
-                          <TrendingDown className="w-7 h-7 text-white drop-shadow-lg" />
-                        }
-                      </motion.div>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-1.5">
+                      <Gift className="w-4 h-4 text-white" />
+                      <span className="text-[10px] font-bold text-white uppercase">Sugeridos</span>
                     </div>
-                    <div className="mb-4">
-                      <motion.p className="text-5xl font-black text-white drop-shadow-lg" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.5 }}>
-                        {comparisonTotals.suggested > 0 ? (((totals.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100) >= 0 ? '+' : '') + ((totals.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100).toFixed(1) : 0}%
-                      </motion.p>
-                      <p className="text-sm text-white/90 font-semibold mt-1">
-                        {Math.abs(totals.suggested - comparisonTotals.suggested).toLocaleString()} {totals.suggested > comparisonTotals.suggested ? 'más vendido' : 'de variación'}
-                      </p>
-                    </div>
-                    <div className="space-y-2 bg-white/10 backdrop-blur-md rounded-xl p-3 border border-white/20">
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs text-white/80 font-medium">Período Actual</span>
-                        <span className="text-sm font-bold text-white">{totals.suggested.toLocaleString()}</span>
-                      </div>
-                      <div className="h-px bg-white/30" />
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs text-white/80 font-medium">Período Anterior</span>
-                        <span className="text-sm font-bold text-white/80">{comparisonTotals.suggested.toLocaleString()}</span>
-                      </div>
-                    </div>
-                  </CardContent>
+                    {comparisonTotals.suggested > 0 && ((totals.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100) >= 0 ? 
+                      <TrendingUp className="w-4 h-4 text-white" /> : 
+                      <TrendingDown className="w-4 h-4 text-white" />
+                    }
+                  </div>
+                  <p className="text-2xl font-black text-white mb-1">
+                    {comparisonTotals.suggested > 0 ? (((totals.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100) >= 0 ? '+' : '') + ((totals.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100).toFixed(1) : 0}%
+                  </p>
+                  <div className="flex justify-between text-[9px] text-white/80">
+                    <span>Ant: {comparisonTotals.suggested.toLocaleString()}</span>
+                    <span>Act: {totals.suggested.toLocaleString()}</span>
+                  </div>
                 </motion.button>
               </motion.div>
             )}
