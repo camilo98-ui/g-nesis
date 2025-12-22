@@ -24,7 +24,7 @@ import MonthlyBudgetManager from '@/components/budget/MonthlyBudgetManager';
 import { 
   DollarSign, Receipt, Zap, Gift, TrendingUp, TrendingDown, ArrowLeft,
   BarChart3, AlertTriangle, CheckCircle2, X, Target,
-  ClipboardCheck, Snowflake, Package, Calendar
+  ClipboardCheck, Snowflake, Package, Calendar, Activity
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -441,10 +441,12 @@ export default function Dashboard() {
   const [projectionMetric, setProjectionMetric] = useState(null);
 
   const [weatherData, setWeatherData] = useState(null);
-  const [weekFilter, setWeekFilter] = useState(null); // Filtro de semana independiente
+  const [weekFilter, setWeekFilter] = useState(null);
   const [showCompraVale, setShowCompraVale] = useState(false);
   const [showStoreSales, setShowStoreSales] = useState(false);
   const [showMonthlyBudget, setShowMonthlyBudget] = useState(false);
+  const [showComparison, setShowComparison] = useState(false);
+  const [comparisonRange, setComparisonRange] = useState(null);
   
   // Fetch weather data
   useEffect(() => {
@@ -541,20 +543,30 @@ export default function Dashboard() {
   const filteredSales = useMemo(() => {
     if (!dailySales.length) return [];
     
-    // Si hay filtro de semana activo, usarlo; sino usar el calendario
     const activeRange = weekFilter || dateRange;
     if (!activeRange?.from || !activeRange?.to) return [];
     
-    // Formatear fechas del rango a strings YYYY-MM-DD para comparación exacta
     const fromStr = format(activeRange.from, 'yyyy-MM-dd');
     const toStr = format(activeRange.to, 'yyyy-MM-dd');
     
     return dailySales.filter(s => {
-      // Extraer solo la fecha (YYYY-MM-DD) del registro
       const saleDateStr = s.date?.split('T')[0] || s.date;
       return saleDateStr >= fromStr && saleDateStr <= toStr;
     });
   }, [dailySales, dateRange, weekFilter]);
+
+  // Ventas del período de comparación
+  const comparisonSales = useMemo(() => {
+    if (!showComparison || !comparisonRange || !dailySales.length) return [];
+    
+    const fromStr = format(comparisonRange.from, 'yyyy-MM-dd');
+    const toStr = format(comparisonRange.to, 'yyyy-MM-dd');
+    
+    return dailySales.filter(s => {
+      const saleDateStr = s.date?.split('T')[0] || s.date;
+      return saleDateStr >= fromStr && saleDateStr <= toStr;
+    });
+  }, [dailySales, comparisonRange, showComparison]);
 
   const totals = useMemo(() => {
     return filteredSales.reduce((acc, s) => ({
@@ -564,6 +576,17 @@ export default function Dashboard() {
       suggested: acc.suggested + (s.total_suggested || 0)
     }), { sales: 0, tickets: 0, transactions: 0, suggested: 0 });
   }, [filteredSales]);
+
+  // Totales del período de comparación
+  const comparisonTotals = useMemo(() => {
+    if (!showComparison || !comparisonSales.length) return null;
+    return comparisonSales.reduce((acc, s) => ({
+      sales: acc.sales + (s.total_sales || 0),
+      tickets: acc.tickets + (s.total_tickets || 0),
+      transactions: acc.transactions + (s.total_transactions || 0),
+      suggested: acc.suggested + (s.total_suggested || 0)
+    }), { sales: 0, tickets: 0, transactions: 0, suggested: 0 });
+  }, [comparisonSales, showComparison]);
 
   const chartData = useMemo(() => {
     const activeRange = weekFilter || dateRange;
@@ -578,6 +601,31 @@ export default function Dashboard() {
       }) || {};
       const transactions = dayData.total_transactions || 0;
       const sales = dayData.total_sales || 0;
+
+      // Datos de comparación (mismo día relativo en el período de comparación)
+      let compData = {};
+      if (showComparison && comparisonRange) {
+        const daysDiff = Math.floor((day - activeRange.from) / (1000 * 60 * 60 * 24));
+        const compDay = new Date(comparisonRange.from);
+        compDay.setDate(compDay.getDate() + daysDiff);
+        
+        if (compDay <= comparisonRange.to) {
+          const compDayStr = format(compDay, 'yyyy-MM-dd');
+          const compDayData = dailySales.find(s => {
+            const saleDate = s.date?.split('T')[0] || s.date;
+            return saleDate === compDayStr;
+          }) || {};
+          const compTrans = compDayData.total_transactions || 0;
+          const compSales = compDayData.total_sales || 0;
+          compData = {
+            ventasComparacion: compSales,
+            transactionsComparacion: compTrans,
+            ticketComparacion: compTrans > 0 ? compSales / compTrans : 0,
+            suggestedComparacion: compDayData.total_suggested || 0
+          };
+        }
+      }
+
       return {
         date: format(day, 'dd', { locale: es }),
         fullDate: format(day, 'EEEE dd MMM', { locale: es }),
@@ -587,7 +635,8 @@ export default function Dashboard() {
         ticketPromedio: transactions > 0 ? sales / transactions : 0,
         transactions: transactions,
         suggested: dayData.total_suggested || 0,
-        index: idx
+        index: idx,
+        ...compData
       };
     });
     
@@ -605,7 +654,6 @@ export default function Dashboard() {
       const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
       const intercept = (sumY - slope * sumX) / n;
       
-      // Aplicar proyección a todos los datos
       return dataWithSales.map(d => ({
         ...d,
         proyeccion: slope * d.index + intercept
@@ -613,7 +661,7 @@ export default function Dashboard() {
     }
     
     return dataWithSales;
-  }, [dateRange, dailySales, weekFilter]);
+  }, [dateRange, dailySales, weekFilter, showComparison, comparisonRange]);
 
 
 
@@ -733,19 +781,61 @@ export default function Dashboard() {
 
         {selectedStore ? (
           <div className="space-y-6">
-            {/* Acciones rápidas - al inicio */}
-            <div className="flex justify-end gap-2">
+            {/* Acciones rápidas */}
+            <div className="flex justify-end gap-2 items-center">
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button
-                  variant="outline"
+                  variant={!showComparison ? "default" : "outline"}
                   size="sm"
-                  onClick={() => setShowCompraVale(true)}
-                  className="text-violet-600 border-violet-200 hover:bg-violet-50 hover:border-violet-300"
+                  onClick={() => {
+                    setShowComparison(false);
+                    setComparisonRange(null);
+                  }}
+                  className={`gap-1 ${!showComparison ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg' : 'border-gray-300 hover:border-blue-500'}`}
                 >
-                  <BarChart3 className="w-4 h-4 mr-1" />
+                  <TrendingUp className="w-4 h-4" />
+                  Actual
+                </Button>
+              </motion.div>
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Button
+                  variant={showComparison ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => {
+                    if (!showComparison) {
+                      setShowComparison(true);
+                      if (!comparisonRange) {
+                        const now = new Date();
+                        const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                        const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+                        setComparisonRange({ from: lastMonthStart, to: lastMonthEnd });
+                      }
+                    }
+                  }}
+                  className={`gap-1 ${showComparison ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg' : 'border-purple-300 hover:border-purple-500'}`}
+                >
+                  <BarChart3 className="w-4 h-4" />
                   Comparable
                 </Button>
               </motion.div>
+              
+              <AnimatePresence>
+                {showComparison && (
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                  >
+                    <DateFilter 
+                      dateRange={comparisonRange || { from: startOfMonth(new Date()), to: new Date() }} 
+                      onDateChange={setComparisonRange}
+                      buttonClassName="border-pink-300 hover:border-pink-500"
+                      buttonText="📅 Período a Comparar"
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               <StoreReportGenerator 
                 storeId={selectedStore}
                 storeName={selectedStoreName}
@@ -754,6 +844,48 @@ export default function Dashboard() {
             </div>
 
 
+
+            {/* Panel de comparación de totales */}
+            {showComparison && comparisonTotals && (
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4"
+              >
+                <Card className={`border-2 ${((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100) >= 0 ? 'border-emerald-300 bg-emerald-50' : 'border-red-300 bg-red-50'}`}>
+                  <CardContent className="pt-4 pb-4">
+                    <p className="text-xs font-bold text-gray-600 mb-1">Δ Ventas</p>
+                    <p className={`text-2xl font-black ${((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100) >= 0 ? 'text-emerald-700' : 'text-red-700'}`}>
+                      {((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100).toFixed(1)}%
+                    </p>
+                    <p className="text-xs text-gray-600">{formatCurrency(totals.sales - comparisonTotals.sales)}</p>
+                  </CardContent>
+                </Card>
+                <Card className="border-2 border-blue-300 bg-blue-50">
+                  <CardContent className="pt-4 pb-4">
+                    <p className="text-xs font-bold text-gray-600 mb-1">Actual vs Anterior</p>
+                    <p className="text-lg font-black text-blue-700">{formatCurrency(totals.sales)}</p>
+                    <p className="text-xs text-gray-600">vs {formatCurrency(comparisonTotals.sales)}</p>
+                  </CardContent>
+                </Card>
+                <Card className={`border-2 ${((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100) >= 0 ? 'border-purple-300 bg-purple-50' : 'border-orange-300 bg-orange-50'}`}>
+                  <CardContent className="pt-4 pb-4">
+                    <p className="text-xs font-bold text-gray-600 mb-1">Δ Transacciones</p>
+                    <p className={`text-2xl font-black ${((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100) >= 0 ? 'text-purple-700' : 'text-orange-700'}`}>
+                      {((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100).toFixed(1)}%
+                    </p>
+                    <p className="text-xs text-gray-600">{(totals.transactions - comparisonTotals.transactions).toLocaleString()}</p>
+                  </CardContent>
+                </Card>
+                <Card className="border-2 border-amber-300 bg-amber-50">
+                  <CardContent className="pt-4 pb-4">
+                    <p className="text-xs font-bold text-gray-600 mb-1">Ticket Promedio</p>
+                    <p className="text-lg font-black text-amber-700">{formatCurrency(avgTicket)}</p>
+                    <p className="text-xs text-gray-600">vs {formatCurrency(comparisonTotals.transactions > 0 ? comparisonTotals.sales / comparisonTotals.transactions : 0)}</p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
 
             {/* Metrics Grid - Clickeable */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -771,7 +903,6 @@ export default function Dashboard() {
                   onClick={() => {
                     const newMetric = activeMetric === metric.id ? null : metric.id;
                     setActiveMetric(newMetric);
-                    // Auto scroll to detail panel
                     if (newMetric) {
                       setTimeout(() => {
                         const detailPanel = document.getElementById('detail-panel');
@@ -820,7 +951,7 @@ export default function Dashboard() {
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
                         <TrendingUp className="w-4 h-4 text-green-500" />
-                        Ventas Diarias
+                        Ventas Diarias {showComparison && '- Comparativo'}
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -832,6 +963,10 @@ export default function Dashboard() {
                                 <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
                                 <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
                               </linearGradient>
+                              <linearGradient id="comparisonGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#94a3b8" stopOpacity={0.3}/>
+                                <stop offset="95%" stopColor="#94a3b8" stopOpacity={0}/>
+                              </linearGradient>
                             </defs>
                             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                             <XAxis dataKey="date" tick={{ fontSize: 11 }} />
@@ -839,10 +974,21 @@ export default function Dashboard() {
                             <Tooltip 
                               contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
                               labelFormatter={(label, payload) => payload?.[0]?.payload?.fullDate || label}
-                              formatter={(v) => [formatCurrency(v), '💰 Ventas']}
+                              formatter={(v, name) => [formatCurrency(v), name]}
                             />
                             <Legend />
-                            <Area type="monotone" dataKey="ventas" stroke="#10b981" strokeWidth={2} fill="url(#salesGrad)" name="Ventas" />
+                            {showComparison && comparisonTotals && (
+                              <Area 
+                                type="monotone" 
+                                dataKey="ventasComparacion" 
+                                stroke="#94a3b8" 
+                                strokeWidth={2} 
+                                fill="url(#comparisonGrad)" 
+                                name="Período Anterior"
+                                strokeDasharray="5 5"
+                              />
+                            )}
+                            <Area type="monotone" dataKey="ventas" stroke="#10b981" strokeWidth={2} fill="url(#salesGrad)" name={showComparison ? "Período Actual" : "Ventas"} />
                           </AreaChart>
                         </ResponsiveContainer>
                       </div>
@@ -860,7 +1006,7 @@ export default function Dashboard() {
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
                         <Zap className="w-4 h-4 text-purple-500" />
-                        Transacciones vs Ventas
+                        Transacciones vs Ventas {showComparison && '- Comparativo'}
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -870,14 +1016,20 @@ export default function Dashboard() {
                             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                             <XAxis dataKey="date" tick={{ fontSize: 11 }} />
                             <YAxis yAxisId="left" tick={{ fontSize: 11 }} />
-                            <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11 }} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M COP`} />
+                            <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11 }} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} />
                             <Tooltip 
                               contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
-                              formatter={(v, name) => [name === 'Ventas' ? formatCurrency(v) : v, name]}
+                              formatter={(v, name) => [name.includes('Ventas') ? formatCurrency(v) : v.toLocaleString(), name]}
                             />
                             <Legend />
-                            <Bar yAxisId="left" dataKey="transactions" fill="#a855f7" radius={[4, 4, 0, 0]} name="Transacciones" />
-                            <Line yAxisId="right" type="monotone" dataKey="ventas" stroke="#ec4899" strokeWidth={2} dot={{ fill: '#ec4899', r: 3 }} name="Ventas" />
+                            {showComparison && comparisonTotals && (
+                              <>
+                                <Bar yAxisId="left" dataKey="transactionsComparacion" fill="#cbd5e1" radius={[4, 4, 0, 0]} name="Trans. Anterior" />
+                                <Line yAxisId="right" type="monotone" dataKey="ventasComparacion" stroke="#94a3b8" strokeWidth={2} strokeDasharray="5 5" dot={{ fill: '#94a3b8', r: 3 }} name="Ventas Anterior" />
+                              </>
+                            )}
+                            <Bar yAxisId="left" dataKey="transactions" fill="#a855f7" radius={[4, 4, 0, 0]} name={showComparison ? "Trans. Actual" : "Transacciones"} />
+                            <Line yAxisId="right" type="monotone" dataKey="ventas" stroke="#ec4899" strokeWidth={2} dot={{ fill: '#ec4899', r: 3 }} name={showComparison ? "Ventas Actual" : "Ventas"} />
                           </ComposedChart>
                         </ResponsiveContainer>
                       </div>
@@ -889,7 +1041,7 @@ export default function Dashboard() {
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
                         <Receipt className="w-4 h-4 text-blue-500" />
-                        Ticket Promedio
+                        Ticket Promedio {showComparison && '- Comparativo'}
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -901,15 +1053,31 @@ export default function Dashboard() {
                                 <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
                                 <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
                               </linearGradient>
+                              <linearGradient id="ticketCompGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#94a3b8" stopOpacity={0.3}/>
+                                <stop offset="95%" stopColor="#94a3b8" stopOpacity={0}/>
+                              </linearGradient>
                             </defs>
                             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                             <XAxis dataKey="date" tick={{ fontSize: 11 }} />
                             <YAxis tickFormatter={(v) => `$${(v/1000).toFixed(0)}K`} tick={{ fontSize: 11 }} />
                             <Tooltip 
                               contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
-                              formatter={(v) => [formatCurrency(v), 'Ticket Promedio']}
+                              formatter={(v, name) => [formatCurrency(v), name]}
                             />
-                            <Area type="monotone" dataKey="ticketPromedio" stroke="#3b82f6" strokeWidth={2} fill="url(#ticketGrad)" />
+                            <Legend />
+                            {showComparison && comparisonTotals && (
+                              <Area 
+                                type="monotone" 
+                                dataKey="ticketComparacion" 
+                                stroke="#94a3b8" 
+                                strokeWidth={2} 
+                                fill="url(#ticketCompGrad)" 
+                                name="Ticket Anterior"
+                                strokeDasharray="5 5"
+                              />
+                            )}
+                            <Area type="monotone" dataKey="ticketPromedio" stroke="#3b82f6" strokeWidth={2} fill="url(#ticketGrad)" name={showComparison ? "Ticket Actual" : "Ticket Promedio"} />
                           </AreaChart>
                         </ResponsiveContainer>
                       </div>
