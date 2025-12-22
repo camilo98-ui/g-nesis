@@ -191,6 +191,13 @@ export default function ExecutiveDashboard() {
     return storesAnalysis.filter(s => s.status === filterStatus);
   }, [storesAnalysis, filterStatus]);
 
+  const zoneTotals = useMemo(() => {
+    const totalSales = filteredStores.reduce((sum, s) => sum + s.totalSales, 0);
+    const totalBudget = filteredStores.reduce((sum, s) => sum + s.salesBudget, 0);
+    const totalProjection = filteredStores.reduce((sum, s) => sum + s.projection, 0);
+    return { totalSales, totalBudget, totalProjection };
+  }, [filteredStores]);
+
   const comparisonData = useMemo(() => {
     return filteredStores.map(s => ({
       name: s.name, ventas: s.totalSales, presupuesto: s.salesBudget,
@@ -383,13 +390,6 @@ INSTRUCCIONES:
       generateAIInsights();
     }
   }, [salesForecast.length]);
-
-  const zoneTotals = useMemo(() => {
-    const totalSales = filteredStores.reduce((sum, s) => sum + s.totalSales, 0);
-    const totalBudget = filteredStores.reduce((sum, s) => sum + s.salesBudget, 0);
-    const totalProjection = filteredStores.reduce((sum, s) => sum + s.projection, 0);
-    return { totalSales, totalBudget, totalProjection };
-  }, [filteredStores]);
 
   // Auto Insight - Principal riesgo u oportunidad
   // Estado Maestro de la Zona
