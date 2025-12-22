@@ -85,7 +85,7 @@ function MetricCard({ title, value, budget, icon: Icon, bgColor, iconBg, iconCol
         >
           <Icon className={`w-6 h-6 ${iconColor}`} />
         </motion.div>
-        {budget > 0 && (
+        {budget > 0 && !showComparison && (
           <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold ${
             percentage >= 100 ? 'bg-green-100 text-green-700' : percentage >= 70 ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'
           }`}>
@@ -106,7 +106,7 @@ function MetricCard({ title, value, budget, icon: Icon, bgColor, iconBg, iconCol
         {formatValue(value)}
       </motion.p>
       
-      {budget > 0 && (
+      {budget > 0 && !showComparison && (
         <div className="mt-3">
           <div className="h-2 bg-white/50 rounded-full overflow-hidden">
             <motion.div 
@@ -1306,8 +1306,8 @@ export default function Dashboard() {
               )}
             </AnimatePresence>
 
-            {/* Overview Charts - Always visible */}
-            {!activeMetric && (
+            {/* Overview Charts - Solo visible en modo ACTUAL */}
+            {!activeMetric && !showComparison && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -1544,8 +1544,8 @@ export default function Dashboard() {
               )}
             </AnimatePresence>
 
-            {/* Proyección del Mes - Diseño Mejorado con Gráficas */}
-            {projections && (
+            {/* Proyección del Mes - Solo en modo ACTUAL */}
+            {projections && !showComparison && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
