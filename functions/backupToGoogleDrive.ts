@@ -90,56 +90,64 @@ Deno.serve(async (req) => {
     }
 
     const result = await uploadResponse.json();
-    console.log('Archivo creado en Drive:', result.id);
+    console.log('✅ Archivo en Drive ID:', result.id);
 
-    // También subir a Base44 para link de descarga directo
-    const file = new File([jsonContent], fileName, { type: 'application/json' });
-    const uploadResult = await base44.asServiceRole.integrations.Core.UploadFile({ file });
-    const downloadUrl = uploadResult.file_url;
-    
-    console.log('Link de descarga creado:', downloadUrl);
+    // Crear link de descarga de Drive
+    const driveDownloadLink = `https://drive.google.com/uc?export=download&id=${result.id}`;
+    const driveViewLink = `https://drive.google.com/file/d/${result.id}/view`;
 
     // Enviar email
     let emailSent = false;
     try {
+      console.log('Enviando email a:', user.email);
+      
       await base44.asServiceRole.integrations.Core.SendEmail({
         from_name: 'Popsy Management',
         to: user.email,
         subject: `🍦 Backup Popsy - ${fileName}`,
         body: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #ec4899;">✅ Backup Completado</h2>
-            <p>Tu backup está guardado en Google Drive y listo para descargar.</p>
+            <h2 style="color: #ec4899;">✅ Backup en Google Drive</h2>
+            <p>Tu backup se guardó exitosamente en tu Google Drive.</p>
             
             <div style="background: #fce7f3; padding: 20px; border-radius: 10px; margin: 20px 0;">
               <h3 style="margin-top: 0;">📁 ${fileName}</h3>
               <p><strong>Registros:</strong> ${stores.length} tiendas, ${cashiers.length} cajeros, ${shiftRecords.length} turnos</p>
+              <p><strong>Fecha:</strong> ${new Date().toLocaleString('es-CO')}</p>
             </div>
             
-            <a href="${downloadUrl}" style="display: inline-block; background: linear-gradient(to right, #ec4899, #f43f5e); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold;">
+            <a href="${driveDownloadLink}" style="display: inline-block; background: linear-gradient(to right, #ec4899, #f43f5e); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 10px 5px;">
               📥 Descargar Backup
             </a>
             
+            <a href="${driveViewLink}" style="display: inline-block; background: linear-gradient(to right, #3b82f6, #2563eb); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 10px 5px;">
+              📂 Ver en Drive
+            </a>
+            
             <p style="color: #666; font-size: 12px; margin-top: 30px;">
-              También puedes buscar "${fileName}" en tu Google Drive.
+              Busca el archivo en tu Google Drive: <strong>${fileName}</strong>
             </p>
           </div>
         `
       });
       
       emailSent = true;
+      console.log('✅ Email enviado');
     } catch (emailError) {
-      console.error('Error email:', emailError);
+      console.error('❌ Error email:', emailError);
     }
+
+    console.log('✅ Proceso completo');
 
     return Response.json({ 
       success: true,
       file_name: fileName,
       drive_id: result.id,
-      download_url: downloadUrl,
+      drive_link: driveViewLink,
+      download_link: driveDownloadLink,
       full_backup: backupData,
       email_sent: emailSent,
-      message: `Backup guardado en Drive y enviado por email`
+      message: `Backup guardado en Drive y enviado a ${user.email}`
     });
 
   } catch (error) {
