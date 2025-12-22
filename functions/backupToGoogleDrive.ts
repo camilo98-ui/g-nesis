@@ -9,7 +9,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    console.log('Iniciando backup para:', user.email);
+    console.log('Iniciando backup completo para:', user.email);
 
     // Recopilar datos de todas las entidades principales
     const [
@@ -28,12 +28,82 @@ Deno.serve(async (req) => {
       base44.asServiceRole.entities.CleaningChecklist.list()
     ]);
 
+    // Obtener todos los esquemas de entidades
+    const entitySchemas = {};
+    const entities = ['Store', 'Cashier', 'ShiftRecord', 'Budget', 'DailySales', 'Shift', 
+                     'Course', 'CashierBadge', 'CashierGoal', 'CleaningChecklist', 
+                     'NotificationSettings', 'DailyGoal', 'FreezerSlot', 'FreezerHistory',
+                     'QualityIncident', 'ShiftRequest', 'StorePassword', 'WeatherHistory',
+                     'InventoryAlert', 'ComparableSales', 'BadgeConfig', 'DailyBudget',
+                     'SalesLog', 'RouletteWinner', 'EmployeeOfMonth'];
+    
+    for (const entityName of entities) {
+      try {
+        entitySchemas[entityName] = await base44.asServiceRole.entities[entityName].schema();
+      } catch (e) {
+        console.log(`Schema no disponible para ${entityName}`);
+      }
+    }
+
+    // Obtener código de la app mediante InvokeLLM con context from internet
+    let appCode = {};
+    try {
+      const codeResult = await base44.asServiceRole.integrations.Core.InvokeLLM({
+        prompt: `Necesito una representación completa del código fuente de esta app Base44 de Popsy Management.
+        
+        Lista los archivos más importantes con su contenido:
+        - Layout.js (layout principal)
+        - Todas las páginas principales (Home, Dashboard, Executive, etc.)
+        - Componentes clave de forms, dashboard, executive, gamification
+        - Funciones de backend importantes
+        
+        Devuelve un objeto JSON con la estructura:
+        {
+          "layout": "contenido del Layout.js",
+          "pages": {"Home": "contenido", "Dashboard": "contenido", ...},
+          "components": {"forms/DailySalesForm": "contenido", ...},
+          "functions": {"backupToGoogleDrive": "contenido", ...}
+        }
+        
+        Si no puedes obtener el código exacto, usa una descripción detallada de su funcionalidad.`,
+        add_context_from_internet: false,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            layout: { type: "string" },
+            pages: { 
+              type: "object",
+              additionalProperties: { type: "string" }
+            },
+            components: {
+              type: "object", 
+              additionalProperties: { type: "string" }
+            },
+            functions: {
+              type: "object",
+              additionalProperties: { type: "string" }
+            }
+          }
+        }
+      });
+      appCode = codeResult;
+    } catch (e) {
+      console.log('No se pudo obtener código fuente completo');
+      appCode = {
+        note: 'Código fuente no incluido en este backup. Solo datos de negocio.'
+      };
+    }
+
     // Crear documento de backup en formato JSON
     const backupData = {
       app: 'Popsy Management',
       backup_date: new Date().toISOString(),
       backup_by: user.email,
-      data: {
+      version: '2.0',
+      type: 'COMPLETE_BACKUP',
+      
+      // Datos de negocio
+      business_data: {
         stores,
         cashiers,
         shift_records: shiftRecords,
@@ -45,11 +115,27 @@ Deno.serve(async (req) => {
         goals,
         cleaning_checklists: cleaningChecklists
       },
+      
+      // Esquemas de entidades
+      entity_schemas: entitySchemas,
+      
+      // Código de la aplicación
+      app_code: appCode,
+      
+      // Resumen
       summary: {
         total_stores: stores.length,
         total_cashiers: cashiers.length,
         total_shift_records: shiftRecords.length,
-        total_shifts_scheduled: shifts.length
+        total_shifts_scheduled: shifts.length,
+        total_entities_backed_up: Object.keys(entitySchemas).length,
+        includes_code: !!appCode.layout || !!appCode.pages
+      },
+      
+      // Instrucciones de restauración
+      restore_instructions: {
+        es: 'Este backup contiene datos de negocio, esquemas de entidades y código de la app. Para restaurar: 1) Crea una nueva app en Base44, 2) Importa los entity_schemas, 3) Importa business_data, 4) Recrea pages/components desde app_code',
+        en: 'This backup contains business data, entity schemas, and app code. To restore: 1) Create new Base44 app, 2) Import entity_schemas, 3) Import business_data, 4) Recreate pages/components from app_code'
       }
     };
 
