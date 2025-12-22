@@ -12,6 +12,7 @@ import DirectoryModal from '@/components/DirectoryModal';
 import DailySalesForm from '@/components/forms/DailySalesForm';
 import ShiftRecordForm from '@/components/forms/ShiftRecordForm';
 import MonthlyBudgetDashboard from '@/components/budget/MonthlyBudgetDashboard';
+import ComparableAnalysisModal from '@/components/executive/ComparableAnalysisModal';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -35,6 +36,19 @@ const MENU_ITEMS = [
   iconColor: 'text-slate-600',
   textColor: 'text-slate-700',
   requiredRole: 'gerente'
+},
+{
+  name: 'Comparable',
+  page: 'Comparable',
+  icon: TrendingUp,
+  description: 'Análisis Comparativo',
+  bgColor: 'bg-gradient-to-br from-indigo-100/90 to-blue-100/80',
+  iconBg: 'bg-indigo-200/60',
+  iconColor: 'text-indigo-600',
+  textColor: 'text-indigo-700',
+  requiredRole: 'gerente',
+  isSpecialAction: true,
+  specialAction: 'comparable'
 },
 {
   name: 'Tienda',
@@ -161,6 +175,7 @@ export default function Home() {
   const [salesTab, setSalesTab] = useState('tienda');
   const [showBudgetDashboard, setShowBudgetDashboard] = useState(false);
   const [backupLoading, setBackupLoading] = useState(false);
+  const [showComparable, setShowComparable] = useState(false);
 
   const ROLES = [
   { 
@@ -863,7 +878,9 @@ export default function Home() {
                 item.isSpecialAction ?
                 <motion.div
                   onClick={async () => {
-                    if (item.specialAction === 'budgetTrend') {
+                    if (item.specialAction === 'comparable') {
+                      setShowComparable(true);
+                    } else if (item.specialAction === 'budgetTrend') {
                       setShowBudgetDashboard(true);
                     } else if (item.specialAction === 'backup') {
                       setBackupLoading(true);
@@ -1018,6 +1035,11 @@ export default function Home() {
         storeName={selectedStoreName}
         isOpen={showBudgetDashboard}
         onClose={() => setShowBudgetDashboard(false)} />
+
+      {/* Comparable Analysis Modal */}
+      <AnimatePresence>
+        {showComparable && <ComparableAnalysisModal onClose={() => setShowComparable(false)} />}
+      </AnimatePresence>
 
 
       {/* Store Sales Modal */}
