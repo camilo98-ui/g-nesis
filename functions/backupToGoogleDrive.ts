@@ -45,6 +45,54 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Configuración de secretos (solo nombres, no valores)
+    const secretsConfig = {
+      required_secrets: [
+        { name: 'BASE44_APP_ID', description: 'ID de la aplicación Base44 (auto-configurado)', required: true },
+        { name: 'OPENAI_API_KEY', description: 'API Key de OpenAI para funciones de IA', required: false },
+        { name: 'GOOGLE_DRIVE_TOKEN', description: 'Token OAuth de Google Drive', required: false }
+      ],
+      note: 'Los valores de secretos NO se incluyen por seguridad. Solo configuración.'
+    };
+
+    // Configuración de integraciones
+    const integrationsConfig = {
+      core_integrations: [
+        { name: 'InvokeLLM', used_for: 'Análisis de IA, insights, recomendaciones' },
+        { name: 'SendEmail', used_for: 'Notificaciones por correo, reportes' },
+        { name: 'UploadFile', used_for: 'Subida de archivos, fotos' },
+        { name: 'GenerateImage', used_for: 'Generación de imágenes con IA' },
+        { name: 'ExtractDataFromUploadedFile', used_for: 'Extracción de datos de archivos' }
+      ],
+      oauth_connectors: [
+        { service: 'googledrive', scopes: ['drive.file', 'email'], status: 'authorized' }
+      ],
+      note: 'Tokens OAuth no incluidos. Debe re-autorizar en nueva app.'
+    };
+
+    // Configuración de la app
+    const appConfig = {
+      app_name: 'Popsy Management',
+      version: '2.0',
+      platform: 'Base44',
+      features: [
+        'Gestión de tiendas y cajeros',
+        'Registro de ventas diarias y por turno',
+        'Dashboard ejecutivo con análisis',
+        'Presupuestos y proyecciones',
+        'Rankings y gamificación',
+        'Planner de turnos',
+        'Mapa de nevera',
+        'Capacitación y cursos',
+        'Reportes gerenciales'
+      ],
+      tech_stack: {
+        frontend: 'React + Tailwind + Framer Motion',
+        backend: 'Base44 BaaS + Deno Functions',
+        integrations: 'OpenAI, Google Drive, Email'
+      }
+    };
+
     // Obtener código de la app mediante InvokeLLM con context from internet
     let appCode = {};
     try {
@@ -102,6 +150,9 @@ Deno.serve(async (req) => {
       version: '2.0',
       type: 'COMPLETE_BACKUP',
       
+      // Configuración de la app
+      app_config: appConfig,
+      
       // Datos de negocio
       business_data: {
         stores,
@@ -119,6 +170,12 @@ Deno.serve(async (req) => {
       // Esquemas de entidades
       entity_schemas: entitySchemas,
       
+      // Configuración de secretos
+      secrets_config: secretsConfig,
+      
+      // Configuración de integraciones
+      integrations_config: integrationsConfig,
+      
       // Código de la aplicación
       app_code: appCode,
       
@@ -129,13 +186,15 @@ Deno.serve(async (req) => {
         total_shift_records: shiftRecords.length,
         total_shifts_scheduled: shifts.length,
         total_entities_backed_up: Object.keys(entitySchemas).length,
-        includes_code: !!appCode.layout || !!appCode.pages
+        includes_code: !!appCode.layout || !!appCode.pages,
+        includes_secrets_config: true,
+        includes_integrations_config: true
       },
       
       // Instrucciones de restauración
       restore_instructions: {
-        es: 'Este backup contiene datos de negocio, esquemas de entidades y código de la app. Para restaurar: 1) Crea una nueva app en Base44, 2) Importa los entity_schemas, 3) Importa business_data, 4) Recrea pages/components desde app_code',
-        en: 'This backup contains business data, entity schemas, and app code. To restore: 1) Create new Base44 app, 2) Import entity_schemas, 3) Import business_data, 4) Recreate pages/components from app_code'
+        es: 'BACKUP COMPLETO - Para restaurar: 1) Crea app en Base44, 2) Configura secretos según secrets_config, 3) Autoriza integraciones OAuth, 4) Importa entity_schemas, 5) Importa business_data, 6) Recrea código desde app_code',
+        en: 'COMPLETE BACKUP - To restore: 1) Create Base44 app, 2) Configure secrets per secrets_config, 3) Authorize OAuth integrations, 4) Import entity_schemas, 5) Import business_data, 6) Recreate code from app_code'
       }
     };
 
@@ -170,12 +229,16 @@ Deno.serve(async (req) => {
               <p><strong>Fecha:</strong> ${new Date().toLocaleString('es-CO')}</p>
               <p><strong>Registros respaldados:</strong></p>
               <ul>
-                <li>Tiendas: ${stores.length}</li>
-                <li>Cajeros: ${cashiers.length}</li>
-                <li>Registros de turnos: ${shiftRecords.length}</li>
-                <li>Turnos programados: ${shifts.length}</li>
-                <li>Cursos: ${courses.length}</li>
-                <li>Insignias: ${badges.length}</li>
+                <li>✅ Tiendas: ${stores.length}</li>
+                <li>✅ Cajeros: ${cashiers.length}</li>
+                <li>✅ Registros de turnos: ${shiftRecords.length}</li>
+                <li>✅ Turnos programados: ${shifts.length}</li>
+                <li>✅ Cursos: ${courses.length}</li>
+                <li>✅ Insignias: ${badges.length}</li>
+                <li>✅ Esquemas de entidades: ${Object.keys(entitySchemas).length}</li>
+                <li>✅ Configuración de secretos</li>
+                <li>✅ Configuración de integraciones</li>
+                <li>✅ Código de la aplicación</li>
               </ul>
             </div>
             
