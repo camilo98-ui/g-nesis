@@ -17,7 +17,7 @@ import { useQuery } from '@tanstack/react-query';
 import {
   LayoutDashboard, Users, TrendingUp,
   Award, Target, Bell, Phone, Download, FileText,
-  Lock, Eye, EyeOff, Receipt, Snowflake } from
+  Lock, Eye, EyeOff, Receipt, Snowflake, Settings as SettingsIcon } from
 'lucide-react';
 import { Button } from "@/components/ui/button";
 
@@ -98,6 +98,16 @@ const MENU_ITEMS = [
   textColor: 'text-sky-700',
   isSpecialAction: true,
   specialAction: 'budgetTrend'
+},
+{
+  name: 'Configuración',
+  page: 'Settings',
+  icon: SettingsIcon,
+  description: 'Ajustes y backup',
+  bgColor: 'bg-gradient-to-br from-gray-100/90 to-slate-100/80',
+  iconBg: 'bg-gray-200/60',
+  iconColor: 'text-gray-500',
+  textColor: 'text-gray-700'
 }];
 
 
