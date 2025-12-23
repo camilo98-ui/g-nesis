@@ -489,9 +489,9 @@ export default function Home() {
                 {/* Feature list */}
                 <div className="space-y-4 pt-8">
                   {[
-                    { icon: TrendingUp, text: 'Métricas y KPIs en tiempo real' },
-                    { icon: Users, text: 'Gestión inteligente de equipos' },
-                    { icon: Target, text: 'Seguimiento automático de objetivos' }
+                    { icon: TrendingUp, title: 'Análisis en tiempo real', text: 'Métricas y KPIs actualizados al instante' },
+                    { icon: Users, title: 'Gestión de equipos', text: 'Optimiza el rendimiento de tu personal' },
+                    { icon: Target, title: 'Objetivos inteligentes', text: 'Seguimiento automático de metas' }
                   ].map((feature, i) => (
                     <motion.div
                       key={i}
@@ -503,7 +503,10 @@ export default function Home() {
                       <div className="w-10 h-10 rounded-lg bg-pink-100/80 flex items-center justify-center flex-shrink-0">
                         <feature.icon className="w-5 h-5 text-pink-600" />
                       </div>
-                      <p className="text-gray-700">{feature.text}</p>
+                      <div>
+                        <p className="text-gray-900 font-medium text-sm">{feature.title}</p>
+                        <p className="text-gray-600 text-xs">{feature.text}</p>
+                      </div>
                     </motion.div>
                   ))}
                 </div>
