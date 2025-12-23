@@ -12,12 +12,13 @@ import DirectoryModal from '@/components/DirectoryModal';
 import DailySalesForm from '@/components/forms/DailySalesForm';
 import ShiftRecordForm from '@/components/forms/ShiftRecordForm';
 import MonthlyBudgetDashboard from '@/components/budget/MonthlyBudgetDashboard';
+import { useTheme } from '@/components/ThemeProvider';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import {
   LayoutDashboard, Users, TrendingUp,
   Award, Target, Bell, Phone, Download, FileText,
-  Lock, Eye, EyeOff, Receipt, Snowflake, Settings as SettingsIcon, AlertTriangle, CheckCircle, Info } from
+  Lock, Eye, EyeOff, Receipt, Snowflake, Settings as SettingsIcon, AlertTriangle, CheckCircle, Info, Sun, Moon } from
 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { toast } from 'sonner';
@@ -157,6 +158,7 @@ const PastelConfetti = () =>
 
 
 export default function Home() {
+  const { theme, toggleTheme } = useTheme();
   const [selectedStore, setSelectedStore] = useState('');
   const [showNotifications, setShowNotifications] = useState(false);
   const [showStory, setShowStory] = useState(false);
@@ -736,9 +738,24 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-white relative overflow-hidden">
+    <div className="min-h-screen bg-app transition-colors duration-200 relative overflow-hidden">
       <PastelConfetti />
       <FloatingIceCreamsBg />
+
+      {/* Theme Toggle - Floating Button */}
+      <motion.button
+        onClick={toggleTheme}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        className="fixed top-4 right-4 z-50 w-12 h-12 rounded-full bg-surface border border-default shadow-card flex items-center justify-center text-brand hover:bg-brand-soft transition-all duration-200"
+        title={theme === 'light' ? 'Modo oscuro' : 'Modo claro'}
+      >
+        {theme === 'light' ? (
+          <Moon className="w-5 h-5" />
+        ) : (
+          <Sun className="w-5 h-5" />
+        )}
+      </motion.button>
 
       <div className="max-w-6xl mx-auto px-4 py-6 relative z-10">
 
