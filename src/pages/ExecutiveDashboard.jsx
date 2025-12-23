@@ -371,15 +371,6 @@ Genera:
             </div>
 
             <div className="flex items-center gap-4 mt-2">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setShowComparable(true)}
-                className="h-12 px-6 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold text-sm flex items-center gap-2 shadow-lg"
-              >
-                <TrendingUp className="w-4 h-4" />
-                Modo Comparable
-              </motion.button>
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <Input
@@ -405,6 +396,63 @@ Genera:
           </div>
         ) : (
           <>
+            {/* Botón Modo Comparable Destacado */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-12"
+            >
+              <motion.button
+                whileHover={{ scale: 1.02, y: -4 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setShowComparable(true)}
+                className="w-full relative overflow-hidden rounded-2xl p-8 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-purple-500/20 backdrop-blur-xl border-2 border-purple-500/40 hover:border-purple-400/60 transition-all group"
+              >
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-pink-500/30 to-purple-500/0"
+                  animate={{ x: ['-100%', '200%'] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                />
+                
+                <div className="relative z-10 flex items-center justify-between">
+                  <div className="flex items-center gap-6">
+                    <motion.div
+                      animate={{ rotate: [0, 10, -10, 0] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                      className="w-16 h-16 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/50"
+                    >
+                      <TrendingUp className="w-8 h-8 text-white" />
+                    </motion.div>
+                    <div className="text-left">
+                      <h3 className="text-2xl font-black text-white mb-1">Análisis Comparable</h3>
+                      <p className="text-slate-300 text-sm">Compara periodos, identifica tendencias y proyecta resultados</p>
+                    </div>
+                  </div>
+                  
+                  <motion.div
+                    className="flex items-center gap-3"
+                    animate={{ x: [0, 10, 0] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                  >
+                    <div className="text-right mr-4">
+                      <p className="text-xs text-purple-300 uppercase tracking-wider mb-1">Análisis Avanzado</p>
+                      <p className="text-sm text-white font-bold">Ventas • Transacciones • Ticket</p>
+                    </div>
+                    <div className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/20 group-hover:bg-white/20 transition-colors">
+                      <motion.div
+                        animate={{ x: [0, 3, 0] }}
+                        transition={{ duration: 1, repeat: Infinity }}
+                      >
+                        <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </motion.div>
+                    </div>
+                  </motion.div>
+                </div>
+              </motion.button>
+            </motion.div>
+
             {/* KPIs Interactivos Futuristas */}
             <div className="grid grid-cols-4 gap-8 mb-20">
               {/* Venta Total */}
