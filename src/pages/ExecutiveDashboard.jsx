@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { STORES, getDisplayName } from '@/components/StoreSelector';
 import DateFilter from '@/components/DateFilter';
-import { ArrowLeft, Search, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Search, TrendingUp, TrendingDown, Eye, Zap, Award } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { format, startOfMonth } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -18,7 +18,7 @@ export default function ExecutiveDashboard() {
   const [selectedStoreDetail, setSelectedStoreDetail] = useState(null);
   const [aiInsights, setAiInsights] = useState(null);
   const [loadingInsights, setLoadingInsights] = useState(false);
-  const [showPerspective, setShowPerspective] = useState(false);
+  const [hoveredKPI, setHoveredKPI] = useState(null);
 
   const currentMonth = new Date().getMonth() + 1;
   const currentYear = new Date().getFullYear();
@@ -190,27 +190,54 @@ ZONA: ${((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%
   }, [filteredStores]);
 
   return (
-    <div className="min-h-screen bg-[#fafafa]">
-      {/* Back Button - Floating */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden">
+      {/* Animated Background */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <motion.div
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.1, 0.15, 0.1],
+          }}
+          transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute -top-1/2 -right-1/2 w-[1200px] h-[1200px] bg-gradient-to-br from-pink-500/20 via-purple-500/20 to-blue-500/20 rounded-full blur-3xl"
+        />
+        <motion.div
+          animate={{
+            scale: [1, 1.3, 1],
+            opacity: [0.08, 0.12, 0.08],
+          }}
+          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut", delay: 5 }}
+          className="absolute -bottom-1/2 -left-1/2 w-[1000px] h-[1000px] bg-gradient-to-br from-blue-500/15 via-cyan-500/15 to-emerald-500/15 rounded-full blur-3xl"
+        />
+        
+        {/* Grid pattern */}
+        <div className="absolute inset-0 opacity-[0.02]"
+          style={{
+            backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
+            backgroundSize: '100px 100px'
+          }}
+        />
+      </div>
+
+      {/* Back Button */}
       <Link to={createPageUrl('Home')}>
         <motion.div
-          whileHover={{ x: -2 }}
-          className="fixed left-8 top-8 w-9 h-9 rounded-full bg-white border border-slate-200 hover:border-slate-300 flex items-center justify-center transition-all cursor-pointer z-50 shadow-sm"
+          whileHover={{ scale: 1.05, x: -3 }}
+          className="fixed left-8 top-8 w-11 h-11 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 hover:bg-white/20 flex items-center justify-center transition-all cursor-pointer z-50"
         >
-          <ArrowLeft className="w-4 h-4 text-slate-600" />
+          <ArrowLeft className="w-5 h-5 text-white" />
         </motion.div>
       </Link>
 
-      <div className="max-w-[1400px] mx-auto px-16 py-16">
-        {/* 1️⃣ HEADER EDITORIAL */}
-        <div className="mb-20">
+      <div className="max-w-[1600px] mx-auto px-12 py-16 relative z-10">
+        {/* Header */}
+        <div className="mb-16">
           <div className="flex items-start justify-between">
             <div>
               <motion.h1 
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-6xl font-black text-slate-900 mb-4 tracking-tight"
-                style={{ fontFamily: 'Inter, system-ui, -apple-system, sans-serif' }}
+                className="text-6xl font-black text-white mb-4 tracking-tight"
               >
                 Bogotá Noroccidente
               </motion.h1>
@@ -218,9 +245,9 @@ ZONA: ${((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.1 }}
-                className="text-lg text-slate-500 font-normal"
+                className="text-lg text-slate-400 font-normal"
               >
-                Estado operativo · {format(new Date(), 'EEEE dd \'de\' MMMM', { locale: es })}
+                {format(new Date(), 'EEEE dd \'de\' MMMM', { locale: es })}
               </motion.p>
             </div>
 
@@ -231,7 +258,7 @@ ZONA: ${((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%
                   placeholder="Buscar tienda..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-11 w-[320px] h-12 text-sm border-slate-200 focus:border-slate-400 rounded-lg bg-white shadow-sm"
+                  className="pl-11 w-[320px] h-12 text-sm bg-white/10 backdrop-blur-xl border-white/20 text-white placeholder:text-slate-400 focus:bg-white/20 focus:border-white/30"
                 />
               </div>
               <DateFilter 
@@ -243,264 +270,419 @@ ZONA: ${((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%
         </div>
 
         {isLoading ? (
-          <div className="grid grid-cols-4 gap-16 mb-24">
+          <div className="grid grid-cols-4 gap-8 mb-20">
             {[1,2,3,4].map(i => (
-              <div key={i} className="h-32 animate-pulse">
-                <div className="h-16 bg-slate-200 rounded mb-2 w-3/4" />
-                <div className="h-4 bg-slate-100 rounded w-1/2" />
-              </div>
+              <div key={i} className="bg-white/5 backdrop-blur-xl rounded-2xl h-48 animate-pulse" />
             ))}
           </div>
         ) : (
           <>
-            {/* 2️⃣ KPIs COMO TITULARES EDITORIALES */}
-            <div className="grid grid-cols-4 gap-16 mb-24">
+            {/* KPIs Interactivos Futuristas */}
+            <div className="grid grid-cols-4 gap-8 mb-20">
               {/* Venta Total */}
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                whileHover={{ scale: 1.03, y: -8 }}
+                onHoverStart={() => setHoveredKPI('sales')}
+                onHoverEnd={() => setHoveredKPI(null)}
+                className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl rounded-2xl p-8 border border-white/20 cursor-pointer overflow-hidden group"
               >
-                <p className="text-6xl font-black text-slate-900 mb-3 tracking-tighter tabular-nums">
-                  {formatShort(zoneTotals.totalSales)}
-                </p>
-                <p className="text-sm text-slate-500 font-normal">Venta total vs meta</p>
-                <div className="mt-4 flex items-center gap-3">
-                  <div className="flex-1 bg-slate-200 h-px">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${Math.min((zoneTotals.totalSales/zoneTotals.totalBudget)*100, 100)}%` }}
-                      transition={{ duration: 1.5, ease: "easeOut" }}
-                      className={`h-px ${
-                        (zoneTotals.totalSales/zoneTotals.totalBudget) >= 0.9 ? 'bg-emerald-600' :
-                        (zoneTotals.totalSales/zoneTotals.totalBudget) >= 0.7 ? 'bg-amber-600' : 'bg-red-600'
-                      }`}
-                    />
-                  </div>
-                  <span className="text-xs text-slate-400 font-normal tabular-nums">{formatShort(zoneTotals.totalBudget)}</span>
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-purple-500/0 group-hover:from-blue-500/20 group-hover:to-purple-500/20 transition-all duration-500"
+                />
+                
+                <div className="relative z-10">
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">💰 Venta Total</p>
+                  <motion.p 
+                    className="text-5xl font-black text-white mb-3 tracking-tight tabular-nums"
+                    animate={hoveredKPI === 'sales' ? { scale: 1.05 } : { scale: 1 }}
+                  >
+                    {formatShort(zoneTotals.totalSales)}
+                  </motion.p>
+                  
+                  <AnimatePresence mode="wait">
+                    {hoveredKPI === 'sales' ? (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="space-y-2"
+                      >
+                        <p className="text-sm text-blue-300 font-semibold">Meta: {formatShort(zoneTotals.totalBudget)}</p>
+                        <p className="text-xs text-slate-400">
+                          Promedio/tienda: {formatCurrency(zoneTotals.totalSales / storesAnalysis.filter(s => s.hasData).length)}
+                        </p>
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                      >
+                        <div className="bg-white/10 rounded-full h-2 overflow-hidden">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${Math.min((zoneTotals.totalSales/zoneTotals.totalBudget)*100, 100)}%` }}
+                            transition={{ duration: 1.2, ease: "easeOut" }}
+                            className={`h-full ${
+                              (zoneTotals.totalSales/zoneTotals.totalBudget) >= 0.9 ? 'bg-emerald-500' :
+                              (zoneTotals.totalSales/zoneTotals.totalBudget) >= 0.7 ? 'bg-amber-500' : 'bg-red-500'
+                            }`}
+                          />
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               </motion.div>
 
               {/* % Cumplimiento */}
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.05 }}
+                whileHover={{ scale: 1.03, y: -8 }}
+                onHoverStart={() => setHoveredKPI('compliance')}
+                onHoverEnd={() => setHoveredKPI(null)}
+                className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl rounded-2xl p-8 border border-white/20 cursor-pointer overflow-hidden group"
               >
-                <p className={`text-8xl font-black mb-3 tracking-tighter tabular-nums ${
-                  ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 90 ? 'text-emerald-600' :
-                  ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 70 ? 'text-amber-600' : 'text-red-600'
-                }`}>
-                  {((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%
-                </p>
-                <p className="text-sm text-slate-500 font-normal">Cumplimiento zona</p>
+                <motion.div
+                  className={`absolute inset-0 ${
+                    ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 90 
+                      ? 'bg-gradient-to-br from-emerald-500/0 to-green-500/0 group-hover:from-emerald-500/20 group-hover:to-green-500/20'
+                      : ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 70
+                      ? 'bg-gradient-to-br from-amber-500/0 to-orange-500/0 group-hover:from-amber-500/20 group-hover:to-orange-500/20'
+                      : 'bg-gradient-to-br from-red-500/0 to-rose-500/0 group-hover:from-red-500/20 group-hover:to-rose-500/20'
+                  } transition-all duration-500`}
+                />
+                
+                <div className="relative z-10">
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">📊 Cumplimiento</p>
+                  <motion.p 
+                    className={`text-7xl font-black mb-3 tracking-tight tabular-nums ${
+                      ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 90 ? 'text-emerald-400' :
+                      ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 70 ? 'text-amber-400' : 'text-red-400'
+                    }`}
+                    animate={hoveredKPI === 'compliance' ? { scale: 1.05 } : { scale: 1 }}
+                  >
+                    {((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%
+                  </motion.p>
+                  
+                  <AnimatePresence mode="wait">
+                    {hoveredKPI === 'compliance' ? (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="space-y-2"
+                      >
+                        <div className="flex justify-between text-xs">
+                          <span className="text-slate-400">En meta</span>
+                          <span className="text-emerald-400 font-bold">{statusCounts.positive}</span>
+                        </div>
+                        <div className="flex justify-between text-xs">
+                          <span className="text-slate-400">En alerta</span>
+                          <span className="text-amber-400 font-bold">{statusCounts.negative}</span>
+                        </div>
+                        <div className="flex justify-between text-xs">
+                          <span className="text-slate-400">Críticas</span>
+                          <span className="text-red-400 font-bold">{statusCounts.critical}</span>
+                        </div>
+                      </motion.div>
+                    ) : (
+                      <motion.p
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="text-sm text-slate-400"
+                      >
+                        de la zona
+                      </motion.p>
+                    )}
+                  </AnimatePresence>
+                </div>
               </motion.div>
 
               {/* Críticas */}
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
+                whileHover={{ scale: 1.03, y: -8 }}
+                onHoverStart={() => setHoveredKPI('critical')}
+                onHoverEnd={() => setHoveredKPI(null)}
+                className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl rounded-2xl p-8 border border-white/20 cursor-pointer overflow-hidden group"
               >
-                <p className={`text-8xl font-black mb-3 tracking-tighter tabular-nums ${
-                  statusCounts.critical > 0 ? 'text-red-600' : 'text-slate-300'
-                }`}>
-                  {statusCounts.critical}
-                </p>
-                <p className="text-sm text-slate-500 font-normal">Tiendas críticas</p>
-                {statusCounts.critical > 0 && (
-                  <p className="text-xs text-slate-400 mt-2 font-normal">
-                    {Math.round((statusCounts.critical/STORES.length)*100)}% del total
-                  </p>
-                )}
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-br from-red-500/0 to-rose-500/0 group-hover:from-red-500/20 group-hover:to-rose-500/20 transition-all duration-500"
+                />
+                
+                <div className="relative z-10">
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">🔴 Críticas</p>
+                  <motion.p 
+                    className={`text-7xl font-black mb-3 tracking-tight tabular-nums ${
+                      statusCounts.critical > 0 ? 'text-red-400' : 'text-slate-600'
+                    }`}
+                    animate={hoveredKPI === 'critical' ? { scale: 1.05 } : { scale: 1 }}
+                  >
+                    {statusCounts.critical}
+                  </motion.p>
+                  
+                  <AnimatePresence mode="wait">
+                    {hoveredKPI === 'critical' && statusCounts.critical > 0 ? (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="space-y-2"
+                      >
+                        <p className="text-sm text-red-300 font-semibold">
+                          {Math.round((statusCounts.critical/STORES.length)*100)}% del total
+                        </p>
+                        <p className="text-xs text-slate-400">
+                          Brecha: {formatCurrency(storesAnalysis.filter(s => s.status === 'critical').reduce((sum, s) => sum + s.gap, 0))}
+                        </p>
+                      </motion.div>
+                    ) : (
+                      <motion.p
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="text-sm text-slate-400"
+                      >
+                        {statusCounts.critical > 0 ? `${Math.round((statusCounts.critical/STORES.length)*100)}% del total` : 'Ninguna crítica'}
+                      </motion.p>
+                    )}
+                  </AnimatePresence>
+                </div>
               </motion.div>
 
               {/* En Meta */}
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.15 }}
+                whileHover={{ scale: 1.03, y: -8 }}
+                onHoverStart={() => setHoveredKPI('meta')}
+                onHoverEnd={() => setHoveredKPI(null)}
+                className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl rounded-2xl p-8 border border-white/20 cursor-pointer overflow-hidden group"
               >
-                <p className="text-8xl font-black text-emerald-600 mb-3 tracking-tighter tabular-nums">
-                  {statusCounts.positive}
-                </p>
-                <p className="text-sm text-slate-500 font-normal">En meta</p>
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-br from-emerald-500/0 to-green-500/0 group-hover:from-emerald-500/20 group-hover:to-green-500/20 transition-all duration-500"
+                />
+                
+                <div className="relative z-10">
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">🟢 En Meta</p>
+                  <motion.p 
+                    className="text-7xl font-black text-emerald-400 mb-3 tracking-tight tabular-nums"
+                    animate={hoveredKPI === 'meta' ? { scale: 1.05 } : { scale: 1 }}
+                  >
+                    {statusCounts.positive}
+                  </motion.p>
+                  
+                  <AnimatePresence mode="wait">
+                    {hoveredKPI === 'meta' && statusCounts.positive > 0 ? (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="space-y-2"
+                      >
+                        <p className="text-sm text-emerald-300 font-semibold">
+                          {Math.round((statusCounts.positive/STORES.length)*100)}% del total
+                        </p>
+                        <p className="text-xs text-slate-400">
+                          Superávit: {formatCurrency(storesAnalysis.filter(s => s.status === 'positive').reduce((sum, s) => sum - s.gap, 0))}
+                        </p>
+                      </motion.div>
+                    ) : (
+                      <motion.p
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="text-sm text-slate-400"
+                      >
+                        {statusCounts.positive > 0 ? `${Math.round((statusCounts.positive/STORES.length)*100)}% del total` : 'Ninguna en meta'}
+                      </motion.p>
+                    )}
+                  </AnimatePresence>
+                </div>
               </motion.div>
             </div>
 
-            {/* 3️⃣ ALERTA EDITORIAL */}
+            {/* Alerta Crítica */}
             {statusCounts.critical > 0 && (
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="mb-20"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-16"
               >
-                <div className={`py-8 px-10 rounded ${
-                  statusCounts.critical >= STORES.length * 0.7 ? 'bg-red-50' : 'bg-amber-50'
-                } border-l-2 ${
-                  statusCounts.critical >= STORES.length * 0.7 ? 'border-red-600' : 'border-amber-600'
-                }`}>
-                  <p className={`text-2xl font-bold mb-3 leading-tight ${
-                    statusCounts.critical >= STORES.length * 0.7 ? 'text-red-900' : 'text-amber-900'
-                  }`}>
-                    {statusCounts.critical} de {STORES.length} tiendas están en estado crítico ({'<'}70%)
-                  </p>
-                  <p className={`text-base mb-5 font-normal ${
-                    statusCounts.critical >= STORES.length * 0.7 ? 'text-red-800' : 'text-amber-800'
-                  }`}>
-                    {statusCounts.critical >= STORES.length * 0.7 
-                      ? 'Se requiere acción inmediata para cumplir meta mensual.'
-                      : 'Requiere atención urgente para alcanzar objetivo.'
-                    }
-                  </p>
-                  <button
-                    onClick={() => {
-                      const el = document.getElementById('stores-table');
-                      el?.scrollIntoView({ behavior: 'smooth' });
-                    }}
-                    className={`text-sm font-semibold underline ${
-                      statusCounts.critical >= STORES.length * 0.7 ? 'text-red-700' : 'text-amber-700'
-                    } hover:opacity-70 transition-opacity`}
-                  >
-                    Ver tiendas críticas →
-                  </button>
+                <div className={`relative rounded-xl p-10 overflow-hidden ${
+                  statusCounts.critical >= STORES.length * 0.7 
+                    ? 'bg-gradient-to-r from-red-500/90 to-rose-600/90' 
+                    : 'bg-gradient-to-r from-amber-500/90 to-orange-600/90'
+                } backdrop-blur-xl border border-white/20`}>
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent"
+                    animate={{ x: ['-100%', '100%'] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                  />
+                  
+                  <div className="relative z-10">
+                    <p className="text-3xl font-black text-white mb-4 leading-tight">
+                      {statusCounts.critical} de {STORES.length} tiendas están en estado crítico ({'<'}70%)
+                    </p>
+                    <p className="text-lg text-white/90 mb-6 font-medium">
+                      {statusCounts.critical >= STORES.length * 0.7 
+                        ? 'Se requiere acción inmediata para cumplir meta mensual.'
+                        : 'Requiere atención urgente para alcanzar objetivo.'
+                      }
+                    </p>
+                    <button
+                      onClick={() => {
+                        const el = document.getElementById('stores-table');
+                        el?.scrollIntoView({ behavior: 'smooth' });
+                      }}
+                      className="text-sm font-bold text-white underline hover:no-underline transition-all"
+                    >
+                      Ver tiendas críticas →
+                    </button>
+                  </div>
                 </div>
               </motion.div>
             )}
 
-            {/* Contexto pre-tabla */}
+            {/* Contexto */}
             <div className="mb-6">
-              <p className="text-sm font-medium text-slate-500">{tableContextSummary}</p>
+              <p className="text-sm font-medium text-slate-400">{tableContextSummary}</p>
             </div>
 
-            {/* 4️⃣ TABLA EDITORIAL - SALA DE GUERRA */}
-            <div id="stores-table" className="mb-24">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-slate-300">
-                    <th className="text-left pb-4 px-0 text-xs font-bold text-slate-600 uppercase tracking-wider">Tienda</th>
-                    <th className="text-right pb-4 px-0 text-xs font-bold text-slate-600 uppercase tracking-wider">% Cumplimiento</th>
-                    <th className="text-right pb-4 px-0 text-xs font-bold text-slate-600 uppercase tracking-wider">Venta vs Meta</th>
-                    <th className="text-right pb-4 px-0 text-xs font-bold text-slate-600 uppercase tracking-wider">Brecha $</th>
-                    <th className="text-center pb-4 px-0 text-xs font-bold text-slate-600 uppercase tracking-wider">Estado</th>
-                    <th className="text-left pb-4 px-0 text-xs font-bold text-slate-600 uppercase tracking-wider">Acción Sugerida</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredStores
-                    .sort((a, b) => {
-                      const statusOrder = { critical: 0, negative: 1, positive: 2, no_data: 3 };
-                      if (statusOrder[a.status] !== statusOrder[b.status]) {
-                        return statusOrder[a.status] - statusOrder[b.status];
-                      }
-                      return b.gap - a.gap;
-                    })
-                    .map((store, idx) => {
-                      const action = getExecutiveAction(store);
+            {/* Tabla Futurista */}
+            <div id="stores-table" className="mb-20">
+              <div className="bg-white/5 backdrop-blur-2xl rounded-xl border border-white/10 overflow-hidden">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-white/10">
+                      <th className="text-left py-5 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider">Tienda</th>
+                      <th className="text-right py-5 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider">% Cumplimiento</th>
+                      <th className="text-right py-5 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider">Venta vs Meta</th>
+                      <th className="text-right py-5 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider">Brecha $</th>
+                      <th className="text-center py-5 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider">Estado</th>
+                      <th className="text-left py-5 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider">Acción Sugerida</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredStores
+                      .sort((a, b) => {
+                        const statusOrder = { critical: 0, negative: 1, positive: 2, no_data: 3 };
+                        if (statusOrder[a.status] !== statusOrder[b.status]) {
+                          return statusOrder[a.status] - statusOrder[b.status];
+                        }
+                        return b.gap - a.gap;
+                      })
+                      .map((store, idx) => {
+                        const action = getExecutiveAction(store);
 
-                      return (
-                        <motion.tr
-                          key={store.code}
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ delay: idx * 0.01 }}
-                          onClick={() => store.hasData && setSelectedStoreDetail(store)}
-                          className={`border-b border-slate-100 group ${
-                            store.hasData ? 'cursor-pointer hover:bg-slate-50' : ''
-                          }`}
-                        >
-                          {/* Tienda */}
-                          <td className="py-7 px-0">
-                            <p className={`font-bold text-lg ${
-                              !store.hasData ? 'text-slate-400' : 'text-slate-900'
-                            }`}>
-                              {store.name}
-                            </p>
-                            <p className="text-xs text-slate-400 mt-1 font-normal">{store.code}</p>
-                          </td>
-
-                          {/* % Cumplimiento */}
-                          <td className="py-7 px-0">
-                            {!store.hasData ? (
-                              <span className="text-sm text-slate-400 italic block text-right font-normal">Sin ventas registradas</span>
-                            ) : (
-                              <div className="flex items-center justify-end gap-6">
-                                <div className="w-28 bg-slate-200 rounded-full h-1.5 overflow-hidden">
-                                  <motion.div
-                                    initial={{ width: 0 }}
-                                    animate={{ width: `${Math.min(store.salesCompliance, 100)}%` }}
-                                    transition={{ duration: 0.8, delay: idx * 0.01 }}
-                                    className={`h-full ${
-                                      store.salesCompliance >= 90 ? 'bg-emerald-600' :
-                                      store.salesCompliance >= 70 ? 'bg-amber-600' : 'bg-red-600'
-                                    }`}
-                                  />
-                                </div>
-                                <span className={`font-black text-3xl tabular-nums ${
-                                  store.salesCompliance >= 90 ? 'text-emerald-600' :
-                                  store.salesCompliance >= 70 ? 'text-amber-600' : 'text-red-600'
-                                }`}>
-                                  {store.salesCompliance.toFixed(0)}%
-                                </span>
-                              </div>
-                            )}
-                          </td>
-
-                          {/* Venta vs Meta */}
-                          <td className="py-7 px-0 text-right">
-                            {!store.hasData ? (
-                              <span className="text-sm text-slate-400">—</span>
-                            ) : (
-                              <div>
-                                <p className="font-bold text-slate-900 text-base tabular-nums">{formatCurrency(store.totalSales)}</p>
-                                <p className="text-xs text-slate-400 mt-1 font-normal">de {formatCurrency(store.salesBudget)}</p>
-                              </div>
-                            )}
-                          </td>
-
-                          {/* Brecha */}
-                          <td className="py-7 px-0 text-right">
-                            {!store.hasData ? (
-                              <span className="text-sm text-slate-400">—</span>
-                            ) : (
-                              <p className={`font-black text-xl tabular-nums ${
-                                store.gap > 0 ? 'text-red-600' : 'text-emerald-600'
+                        return (
+                          <motion.tr
+                            key={store.code}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: idx * 0.01 }}
+                            onClick={() => store.hasData && setSelectedStoreDetail(store)}
+                            className={`border-b border-white/5 group ${
+                              store.hasData ? 'cursor-pointer hover:bg-white/5' : ''
+                            }`}
+                          >
+                            <td className="py-7 px-6">
+                              <p className={`font-bold text-lg ${
+                                !store.hasData ? 'text-slate-600' : 'text-white'
                               }`}>
-                                {store.gap > 0 ? '-' : '+'}{formatCurrency(Math.abs(store.gap))}
+                                {store.name}
                               </p>
-                            )}
-                          </td>
+                              <p className="text-xs text-slate-500 mt-1">{store.code}</p>
+                            </td>
 
-                          {/* Estado - Punto Minimal */}
-                          <td className="py-7 px-0 text-center">
-                            <span className={`inline-block w-2.5 h-2.5 rounded-full ${
-                              store.status === 'no_data' ? 'bg-slate-300' :
-                              store.status === 'positive' ? 'bg-emerald-600' : 
-                              store.status === 'negative' ? 'bg-amber-600' : 'bg-red-600'
-                            }`} />
-                          </td>
+                            <td className="py-7 px-6">
+                              {!store.hasData ? (
+                                <span className="text-sm text-slate-500 italic block text-right">Sin ventas registradas</span>
+                              ) : (
+                                <div className="flex items-center justify-end gap-6">
+                                  <div className="w-32 bg-white/10 rounded-full h-1.5 overflow-hidden">
+                                    <motion.div
+                                      initial={{ width: 0 }}
+                                      animate={{ width: `${Math.min(store.salesCompliance, 100)}%` }}
+                                      transition={{ duration: 0.8, delay: idx * 0.01 }}
+                                      className={`h-full ${
+                                        store.salesCompliance >= 90 ? 'bg-emerald-500' :
+                                        store.salesCompliance >= 70 ? 'bg-amber-500' : 'bg-red-500'
+                                      }`}
+                                    />
+                                  </div>
+                                  <span className={`font-black text-3xl tabular-nums ${
+                                    store.salesCompliance >= 90 ? 'text-emerald-400' :
+                                    store.salesCompliance >= 70 ? 'text-amber-400' : 'text-red-400'
+                                  }`}>
+                                    {store.salesCompliance.toFixed(0)}%
+                                  </span>
+                                </div>
+                              )}
+                            </td>
 
-                          {/* Acción Sugerida */}
-                          <td className="py-7 px-0">
-                            <p className={`text-sm font-normal ${
-                              !store.hasData ? 'text-slate-400 italic' : 'text-slate-600'
-                            }`}>
-                              {action}
-                            </p>
-                          </td>
-                        </motion.tr>
-                      );
-                    })}
-                </tbody>
-              </table>
+                            <td className="py-7 px-6 text-right">
+                              {!store.hasData ? (
+                                <span className="text-sm text-slate-500">—</span>
+                              ) : (
+                                <div>
+                                  <p className="font-bold text-white text-base tabular-nums">{formatCurrency(store.totalSales)}</p>
+                                  <p className="text-xs text-slate-500 mt-1">de {formatCurrency(store.salesBudget)}</p>
+                                </div>
+                              )}
+                            </td>
+
+                            <td className="py-7 px-6 text-right">
+                              {!store.hasData ? (
+                                <span className="text-sm text-slate-500">—</span>
+                              ) : (
+                                <p className={`font-black text-xl tabular-nums ${
+                                  store.gap > 0 ? 'text-red-400' : 'text-emerald-400'
+                                }`}>
+                                  {store.gap > 0 ? '-' : '+'}{formatCurrency(Math.abs(store.gap))}
+                                </p>
+                              )}
+                            </td>
+
+                            <td className="py-7 px-6 text-center">
+                              <motion.span 
+                                whileHover={{ scale: 1.3 }}
+                                className={`inline-block w-3 h-3 rounded-full ${
+                                  store.status === 'no_data' ? 'bg-slate-600' :
+                                  store.status === 'positive' ? 'bg-emerald-500' : 
+                                  store.status === 'negative' ? 'bg-amber-500' : 'bg-red-500'
+                                }`} 
+                              />
+                            </td>
+
+                            <td className="py-7 px-6">
+                              <p className={`text-sm font-normal ${
+                                !store.hasData ? 'text-slate-500 italic' : 'text-slate-300'
+                              }`}>
+                                {action}
+                              </p>
+                            </td>
+                          </motion.tr>
+                        );
+                      })}
+                  </tbody>
+                </table>
+              </div>
             </div>
 
-            {/* División */}
-            <div className="border-t border-slate-300 mb-16" />
-
-            {/* 5️⃣ PRIORIDADES */}
+            {/* Prioridades Dinámicas */}
             <div className="mb-20">
-              <h2 className="text-3xl font-black text-slate-900 mb-10 tracking-tight">Prioridades de hoy</h2>
-              <div className="space-y-6">
+              <h2 className="text-3xl font-black text-white mb-10 tracking-tight">Prioridades de hoy</h2>
+              <div className="grid grid-cols-3 gap-6">
                 {/* Intervenir */}
                 {storesAnalysis
                   .filter(s => s.status === 'critical')
@@ -511,17 +693,45 @@ ZONA: ${((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%
                       key={store.code}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
+                      whileHover={{ scale: 1.02, y: -4 }}
                       onClick={() => setSelectedStoreDetail(store)}
-                      className="flex items-center justify-between py-6 px-8 bg-white border-l-4 border-red-600 hover:bg-slate-50 cursor-pointer transition-colors group"
+                      className="relative bg-gradient-to-br from-red-500/20 to-rose-600/20 backdrop-blur-xl rounded-xl p-8 border border-red-500/30 cursor-pointer overflow-hidden group"
                     >
-                      <div className="flex-1">
-                        <p className="text-xs font-bold text-red-600 uppercase tracking-wide mb-2">Intervenir Hoy</p>
-                        <p className="font-black text-slate-900 text-2xl mb-2">{store.name}</p>
-                        <p className="text-sm text-slate-600 font-normal">
-                          {store.salesCompliance.toFixed(0)}% cumplimiento · Brecha {formatCurrency(store.gap)}
-                        </p>
+                      <motion.div
+                        className="absolute inset-0 bg-gradient-to-br from-red-500/0 to-rose-600/0 group-hover:from-red-500/30 group-hover:to-rose-600/30 transition-all duration-500"
+                      />
+                      
+                      <div className="relative z-10">
+                        <div className="flex items-center gap-3 mb-5">
+                          <div className="w-12 h-12 bg-red-500 rounded-lg flex items-center justify-center">
+                            <TrendingDown className="w-6 h-6 text-white" />
+                          </div>
+                          <div>
+                            <p className="text-xs font-bold text-red-300 uppercase tracking-wide">Intervenir Hoy</p>
+                            <p className="font-black text-white text-xl">{store.name}</p>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-3 mb-6">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-slate-300">Cumplimiento</span>
+                            <span className="text-xl font-black text-red-300 tabular-nums">{store.salesCompliance.toFixed(0)}%</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-slate-300">Brecha</span>
+                            <span className="text-lg font-bold text-white tabular-nums">{formatCurrency(store.gap)}</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-slate-300">Venta diaria req.</span>
+                            <span className="text-sm font-semibold text-red-200 tabular-nums">{formatCurrency(store.gap / 7)}</span>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-2 text-white group-hover:text-red-200 transition-colors">
+                          <Eye className="w-4 h-4" />
+                          <span className="text-sm font-semibold">Ver detalle</span>
+                        </div>
                       </div>
-                      <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-red-600 group-hover:translate-x-1 transition-all" />
                     </motion.div>
                   ))}
 
@@ -533,20 +743,48 @@ ZONA: ${((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%
                   .map(store => (
                     <motion.div
                       key={store.code}
-                      initial={{ opacity: 0, y: 10 }}
+                      initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.05 }}
+                      whileHover={{ scale: 1.02, y: -4 }}
                       onClick={() => setSelectedStoreDetail(store)}
-                      className="flex items-center justify-between py-6 px-8 bg-white border-l-4 border-amber-600 hover:bg-slate-50 cursor-pointer transition-colors group"
+                      className="relative bg-gradient-to-br from-amber-500/20 to-orange-600/20 backdrop-blur-xl rounded-xl p-8 border border-amber-500/30 cursor-pointer overflow-hidden group"
                     >
-                      <div className="flex-1">
-                        <p className="text-xs font-bold text-amber-600 uppercase tracking-wide mb-2">Acelerar Ritmo</p>
-                        <p className="font-black text-slate-900 text-2xl mb-2">{store.name}</p>
-                        <p className="text-sm text-slate-600 font-normal">
-                          {store.salesCompliance.toFixed(0)}% cumplimiento · A {(90 - store.salesCompliance).toFixed(0)}% de meta
-                        </p>
+                      <motion.div
+                        className="absolute inset-0 bg-gradient-to-br from-amber-500/0 to-orange-600/0 group-hover:from-amber-500/30 group-hover:to-orange-600/30 transition-all duration-500"
+                      />
+                      
+                      <div className="relative z-10">
+                        <div className="flex items-center gap-3 mb-5">
+                          <div className="w-12 h-12 bg-amber-500 rounded-lg flex items-center justify-center">
+                            <Zap className="w-6 h-6 text-white" />
+                          </div>
+                          <div>
+                            <p className="text-xs font-bold text-amber-300 uppercase tracking-wide">Acelerar Ritmo</p>
+                            <p className="font-black text-white text-xl">{store.name}</p>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-3 mb-6">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-slate-300">Cumplimiento</span>
+                            <span className="text-xl font-black text-amber-300 tabular-nums">{store.salesCompliance.toFixed(0)}%</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-slate-300">Falta para 90%</span>
+                            <span className="text-lg font-bold text-white tabular-nums">{(90 - store.salesCompliance).toFixed(0)}%</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-slate-300">Proyección</span>
+                            <span className="text-sm font-semibold text-amber-200 tabular-nums">{formatCurrency(store.projection)}</span>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-2 text-white group-hover:text-amber-200 transition-colors">
+                          <Eye className="w-4 h-4" />
+                          <span className="text-sm font-semibold">Ver detalle</span>
+                        </div>
                       </div>
-                      <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-amber-600 group-hover:translate-x-1 transition-all" />
                     </motion.div>
                   ))}
 
@@ -561,86 +799,97 @@ ZONA: ${((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.1 }}
+                      whileHover={{ scale: 1.02, y: -4 }}
                       onClick={() => setSelectedStoreDetail(store)}
-                      className="flex items-center justify-between py-6 px-8 bg-white border-l-4 border-emerald-600 hover:bg-slate-50 cursor-pointer transition-colors group"
+                      className="relative bg-gradient-to-br from-emerald-500/20 to-green-600/20 backdrop-blur-xl rounded-xl p-8 border border-emerald-500/30 cursor-pointer overflow-hidden group"
                     >
-                      <div className="flex-1">
-                        <p className="text-xs font-bold text-emerald-600 uppercase tracking-wide mb-2">Reconocer</p>
-                        <p className="font-black text-slate-900 text-2xl mb-2">{store.name}</p>
-                        <p className="text-sm text-slate-600 font-normal">
-                          {store.salesCompliance.toFixed(0)}% cumplimiento · +{(store.salesCompliance - 100).toFixed(0)}% sobre meta
-                        </p>
+                      <motion.div
+                        className="absolute inset-0 bg-gradient-to-br from-emerald-500/0 to-green-600/0 group-hover:from-emerald-500/30 group-hover:to-green-600/30 transition-all duration-500"
+                      />
+                      
+                      <div className="relative z-10">
+                        <div className="flex items-center gap-3 mb-5">
+                          <div className="w-12 h-12 bg-emerald-500 rounded-lg flex items-center justify-center">
+                            <Award className="w-6 h-6 text-white" />
+                          </div>
+                          <div>
+                            <p className="text-xs font-bold text-emerald-300 uppercase tracking-wide">Reconocer</p>
+                            <p className="font-black text-white text-xl">{store.name}</p>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-3 mb-6">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-slate-300">Cumplimiento</span>
+                            <span className="text-xl font-black text-emerald-300 tabular-nums">{store.salesCompliance.toFixed(0)}%</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-slate-300">Sobre meta</span>
+                            <span className="text-lg font-bold text-white tabular-nums">+{(store.salesCompliance - 100).toFixed(0)}%</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-slate-300">Venta</span>
+                            <span className="text-sm font-semibold text-emerald-200 tabular-nums">{formatCurrency(store.totalSales)}</span>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-2 text-white group-hover:text-emerald-200 transition-colors">
+                          <Eye className="w-4 h-4" />
+                          <span className="text-sm font-semibold">Ver detalle</span>
+                        </div>
                       </div>
-                      <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-emerald-600 group-hover:translate-x-1 transition-all" />
                     </motion.div>
                   ))}
               </div>
             </div>
 
-            {/* 6️⃣ PERSPECTIVA */}
+            {/* Perspectiva */}
             {aiInsights?.insight && (
-              <div className="border-t border-slate-300 pt-12">
-                <button
-                  onClick={() => setShowPerspective(!showPerspective)}
-                  className="w-full flex items-center justify-between group mb-6"
-                >
-                  <p className="text-xl font-bold text-slate-900">Perspectiva</p>
+              <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-xl rounded-xl p-10 border border-purple-500/30">
+                <div className="flex items-start gap-6">
                   <motion.div
-                    animate={{ rotate: showPerspective ? 90 : 0 }}
-                    transition={{ duration: 0.2 }}
+                    animate={{ rotate: [0, 10, -10, 0] }}
+                    transition={{ duration: 3, repeat: Infinity }}
                   >
-                    <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-slate-600" />
+                    <Brain className="w-10 h-10 text-purple-400" />
                   </motion.div>
-                </button>
-
-                <AnimatePresence>
-                  {showPerspective && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="space-y-8"
-                    >
-                      {/* Insight */}
-                      <div className="bg-slate-50 rounded p-8">
-                        <p className="text-lg text-slate-800 leading-relaxed font-normal">
-                          {aiInsights.insight}
+                  <div className="flex-1">
+                    <p className="text-xs font-bold text-purple-300 uppercase tracking-wide mb-3">Insight IA</p>
+                    <p className="text-xl text-white leading-relaxed font-medium mb-6">
+                      {aiInsights.insight}
+                    </p>
+                    
+                    <div className="grid grid-cols-4 gap-6 pt-6 border-t border-white/10">
+                      <div>
+                        <p className="text-xs text-slate-400 mb-2">Proyección</p>
+                        <p className="text-2xl font-black text-white tabular-nums">{formatShort(zoneTotals.totalProjection)}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-slate-400 mb-2">% Proyectado</p>
+                        <p className={`text-2xl font-black tabular-nums ${
+                          ((zoneTotals.totalProjection/zoneTotals.totalBudget)*100) >= 100 ? 'text-emerald-400' :
+                          ((zoneTotals.totalProjection/zoneTotals.totalBudget)*100) >= 90 ? 'text-amber-400' : 'text-red-400'
+                        }`}>
+                          {((zoneTotals.totalProjection/zoneTotals.totalBudget)*100).toFixed(0)}%
                         </p>
                       </div>
-
-                      {/* Proyección */}
-                      <div className="grid grid-cols-4 gap-10">
-                        <div>
-                          <p className="text-xs text-slate-500 mb-2 font-medium uppercase tracking-wide">Proyección Cierre</p>
-                          <p className="text-3xl font-black text-slate-900 tabular-nums">{formatShort(zoneTotals.totalProjection)}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-slate-500 mb-2 font-medium uppercase tracking-wide">% Proyectado</p>
-                          <p className={`text-3xl font-black tabular-nums ${
-                            ((zoneTotals.totalProjection/zoneTotals.totalBudget)*100) >= 100 ? 'text-emerald-600' :
-                            ((zoneTotals.totalProjection/zoneTotals.totalBudget)*100) >= 90 ? 'text-amber-600' : 'text-red-600'
-                          }`}>
-                            {((zoneTotals.totalProjection/zoneTotals.totalBudget)*100).toFixed(0)}%
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-slate-500 mb-2 font-medium uppercase tracking-wide">Gap a Cerrar</p>
-                          <p className={`text-3xl font-black tabular-nums ${
-                            (zoneTotals.totalBudget - zoneTotals.totalProjection) <= 0 ? 'text-emerald-600' : 'text-red-600'
-                          }`}>
-                            {formatShort(Math.abs(zoneTotals.totalBudget - zoneTotals.totalProjection))}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-slate-500 mb-2 font-medium uppercase tracking-wide">Tiendas en Riesgo</p>
-                          <p className="text-3xl font-black text-slate-900 tabular-nums">
-                            {storesAnalysis.filter(s => s.hasData && (s.projection / s.salesBudget) < 0.85).length}
-                          </p>
-                        </div>
+                      <div>
+                        <p className="text-xs text-slate-400 mb-2">Gap a Cerrar</p>
+                        <p className={`text-2xl font-black tabular-nums ${
+                          (zoneTotals.totalBudget - zoneTotals.totalProjection) <= 0 ? 'text-emerald-400' : 'text-red-400'
+                        }`}>
+                          {formatShort(Math.abs(zoneTotals.totalBudget - zoneTotals.totalProjection))}
+                        </p>
                       </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                      <div>
+                        <p className="text-xs text-slate-400 mb-2">En Riesgo</p>
+                        <p className="text-2xl font-black text-white tabular-nums">
+                          {storesAnalysis.filter(s => s.hasData && (s.projection / s.salesBudget) < 0.85).length}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
           </>
