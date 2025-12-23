@@ -632,19 +632,20 @@ export default function Home() {
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                   >
-                    <label htmlFor="login-password" className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">
+                    <label htmlFor="login-password" className="block text-sm font-medium text-gray-900 mb-2">
                       Contraseña
                     </label>
                     <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                       <input
                         id="login-password"
                         type={showLoginPassword ? "text" : "password"}
-                        placeholder="Ingresa tu contraseña"
+                        placeholder="Sin contraseña"
                         value={loginPassword}
                         onChange={(e) => {setLoginPassword(e.target.value);setLoginError('');}}
                         onKeyDown={(e) => e.key === 'Enter' && !isSubmitting && handleLogin()}
                         disabled={isSubmitting}
-                        className="w-full pl-4 pr-10 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none text-sm text-gray-900 placeholder:text-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        className="w-full pl-10 pr-10 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none text-sm text-gray-900 placeholder:text-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                         aria-label="Campo de contraseña"
                         aria-invalid={!!loginError}
                         aria-describedby={loginError ? "password-error" : undefined} />
