@@ -129,31 +129,38 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
     <>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            className="w-full md:w-[300px] bg-white border-gray-200 hover:border-pink-300 transition-all shadow-md hover:shadow-lg rounded-xl justify-between group">
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <Button
+              variant="outline"
+              className="w-full md:w-[320px] bg-white border-2 border-pink-300 hover:border-pink-400 transition-all shadow-lg hover:shadow-xl rounded-2xl justify-between group relative overflow-hidden">
 
-            <div className="flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-pink-500" />
-              {selectedStore ?
-              <span className="text-pink-700 font-medium truncate">{getDisplayName(selectedStore)}</span> :
+              {/* Subtle gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-r from-pink-50/50 to-rose-50/50 opacity-0 group-hover:opacity-100 transition-opacity" />
 
-              <span className="text-gray-500">Selecciona una tienda</span>
-              }
-            </div>
-            <svg className="w-4 h-4 text-gray-400 group-hover:text-pink-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </Button>
+              <div className="flex items-center gap-3 relative z-10">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center shadow-md">
+                  <MapPin className="w-4 h-4 text-white" />
+                </div>
+                {selectedStore ?
+                <span className="text-pink-700 font-bold truncate">{getDisplayName(selectedStore)}</span> :
+
+                <span className="text-slate-600 font-medium">Selecciona una tienda</span>
+                }
+              </div>
+              <svg className="w-5 h-5 text-pink-500 group-hover:text-pink-600 transition-colors relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+              </svg>
+            </Button>
+          </motion.div>
         </PopoverTrigger>
-        <PopoverContent className="w-[320px] p-2" align="start" side="bottom" sideOffset={5}>
-          <div className="relative mb-2">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+        <PopoverContent className="w-[340px] p-3 shadow-2xl border-2 border-pink-200/50 rounded-2xl" align="start" side="bottom" sideOffset={8}>
+          <div className="relative mb-3">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
             <Input
               placeholder="Buscar tienda..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-8 h-9 text-sm bg-gray-50 placeholder:text-gray-600" />
+              className="pl-9 h-10 text-sm bg-slate-50 border-slate-200 focus:border-pink-400 focus:ring-pink-400 rounded-xl placeholder:text-slate-500 font-medium" />
 
           </div>
           <div className="max-h-[300px] overflow-y-auto space-y-1">
