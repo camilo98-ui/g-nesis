@@ -312,6 +312,12 @@ export default function Home() {
     queryFn: () => base44.entities.StorePassword.list()
   });
 
+  // Fetch role passwords
+  const { data: rolePasswords = [] } = useQuery({
+    queryKey: ['rolePasswords'],
+    queryFn: () => base44.entities.RolePassword.list()
+  });
+
   useEffect(() => {
     const handler = (e) => {
       e.preventDefault();
@@ -389,16 +395,21 @@ export default function Home() {
         }
       }
 
-    // Para otros roles: validar contraseña de tienda
+    // Para otros roles: validar contraseña de tienda o rol
     if (!pendingStore) {
       setLoginError('Selecciona una tienda');
       setIsSubmitting(false);
       return;
     }
 
+    // Primero buscar contraseña específica del rol
+    const rolePassword = rolePasswords.find((p) => p.store_code === pendingStore && p.role === selectedRole);
+    // Si no hay contraseña de rol, usar la general de tienda
     const storePassword = storePasswords.find((p) => p.store_code === pendingStore);
 
-    if (!storePassword?.password || loginPassword === storePassword.password) {
+    const requiredPassword = rolePassword?.password || storePassword?.password;
+
+    if (!requiredPassword || loginPassword === requiredPassword) {
       setLoginSuccess(true);
       
       setTimeout(() => {
