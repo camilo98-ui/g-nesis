@@ -444,20 +444,18 @@ export default function Home() {
   // Si no está logueado, mostrar pantalla de login
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-amber-50 relative overflow-hidden">
+      <div className="min-h-screen bg-[#F7F8FA] relative overflow-hidden">
         <div className="flex min-h-screen">
           {/* Left Panel - Branding (60%) */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="hidden lg:flex lg:w-[60%] bg-gradient-to-br from-pink-100/80 via-rose-100/60 to-purple-100/70 relative p-16 flex-col justify-between overflow-hidden"
+            className="hidden lg:flex lg:w-[60%] bg-gradient-to-br from-pink-50/70 via-white to-white relative p-16 flex-col justify-between overflow-hidden"
           >
-            {/* Decorative background elements */}
-            <div className="absolute inset-0">
-              <div className="absolute top-20 left-20 w-96 h-96 bg-pink-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '4s' }} />
-              <div className="absolute bottom-20 right-20 w-96 h-96 bg-purple-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '6s', animationDelay: '2s' }} />
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-rose-300/15 rounded-full blur-3xl" />
+            {/* Subtle background decoration */}
+            <div className="absolute inset-0 opacity-[0.015]">
+              <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-pink-500 rounded-full blur-3xl" />
             </div>
 
             {/* Content */}
@@ -479,12 +477,12 @@ export default function Home() {
                 transition={{ delay: 0.5 }}
                 className="space-y-6 max-w-xl"
               >
-                <h1 className="text-5xl font-bold text-gray-900 leading-tight drop-shadow-sm">
+                <h1 className="text-5xl font-bold text-gray-900 leading-tight">
                   Bienvenido a<br />
-                  <span className="bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">Popsy Management</span>
+                  <span className="text-pink-600">Popsy Management</span>
                 </h1>
 
-                <p className="text-lg text-gray-700 leading-relaxed">
+                <p className="text-lg text-gray-600 leading-relaxed">
                   Gestión empresarial en tiempo real
                 </p>
 
@@ -502,10 +500,10 @@ export default function Home() {
                       transition={{ delay: 0.7 + i * 0.1 }}
                       className="flex items-center gap-3"
                     >
-                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-pink-100 to-rose-100 shadow-sm flex items-center justify-center flex-shrink-0">
+                      <div className="w-10 h-10 rounded-lg bg-pink-100/80 flex items-center justify-center flex-shrink-0">
                         <feature.icon className="w-5 h-5 text-pink-600" />
                       </div>
-                      <p className="text-gray-800 font-medium">{feature.text}</p>
+                      <p className="text-gray-700">{feature.text}</p>
                     </motion.div>
                   ))}
                 </div>
@@ -524,18 +522,12 @@ export default function Home() {
           </motion.div>
 
           {/* Right Panel - Login Card (40%) */}
-          <div className="w-full lg:w-[40%] flex items-center justify-center p-6 lg:p-12 bg-gradient-to-br from-white via-pink-50/30 to-purple-50/30 relative overflow-hidden">
-            {/* Background decoration for right panel */}
-            <div className="absolute inset-0">
-              <div className="absolute -top-40 -right-40 w-80 h-80 bg-pink-300/20 rounded-full blur-3xl" />
-              <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-300/20 rounded-full blur-3xl" />
-            </div>
-
+          <div className="w-full lg:w-[40%] flex items-center justify-center p-6 lg:p-12">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="w-full max-w-md relative z-10"
+              className="w-full max-w-md"
             >
               {/* Mobile logo */}
               <div className="lg:hidden mb-8 text-center">
@@ -544,7 +536,7 @@ export default function Home() {
               </div>
 
               {/* Login Card */}
-              <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-pink-100/50 p-8 space-y-6">
+              <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-gray-100/50 p-8 space-y-6">
                 {/* Header */}
                 <div>
                   <h2 className="text-2xl font-bold text-gray-900 mb-1">Iniciar sesión</h2>
