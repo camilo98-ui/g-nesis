@@ -26,16 +26,35 @@ export default function StoreDetailModal({ store, onClose, allDailySales, dateRa
       .sort((a, b) => new Date(a.date) - new Date(b.date));
   }, [allDailySales, store.code, dateRange]);
 
-  // Datos por día
+  // Meta diaria (distribución proporcional del presupuesto mensual)
+  const dailyBudget = store.salesBudget > 0 ? store.salesBudget / 30 : 0;
+
+  // Datos por día con tendencia
   const dailyData = useMemo(() => {
     const allDays = eachDayOfInterval({ start: dateRange.from, end: dateRange.to });
-    return allDays.map(day => {
+    return allDays.map((day, idx) => {
       const dayStr = format(day, 'yyyy-MM-dd');
       const sale = storeSales.find(s => s.date === dayStr);
       const sales = sale?.total_sales || 0;
       const tickets = sale?.total_tickets || 0;
       const transactions = sale?.total_transactions || 0;
       const avgTicket = transactions > 0 ? sales / transactions : 0;
+      
+      // Calcular cumplimiento diario
+      const dailyCompliance = dailyBudget > 0 && sales > 0 ? (sales / dailyBudget) * 100 : 0;
+      const gap = dailyBudget - sales;
+      
+      // Tendencia vs día anterior
+      let trend = 0;
+      if (idx > 0) {
+        const prevDay = allDays[idx - 1];
+        const prevDayStr = format(prevDay, 'yyyy-MM-dd');
+        const prevSale = storeSales.find(s => s.date === prevDayStr);
+        const prevSales = prevSale?.total_sales || 0;
+        if (prevSales > 0 && sales > 0) {
+          trend = sales - prevSales;
+        }
+      }
       
       return {
         date: format(day, 'dd/MM', { locale: es }),
@@ -44,10 +63,13 @@ export default function StoreDetailModal({ store, onClose, allDailySales, dateRa
         sales,
         tickets,
         transactions,
-        avgTicket
+        avgTicket,
+        dailyCompliance,
+        gap,
+        trend
       };
     });
-  }, [storeSales, dateRange]);
+  }, [storeSales, dateRange, dailyBudget]);
 
   // Datos para venta vs transacciones
   const salesVsTransactions = useMemo(() => {
@@ -64,9 +86,9 @@ export default function StoreDetailModal({ store, onClose, allDailySales, dateRa
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-200">
-          <p className="text-xs font-semibold text-gray-900 mb-1 capitalize">{data.dayOfWeek}</p>
-          <p className="text-xs text-gray-500 mb-2">{label}</p>
+        <div className="bg-slate-900/95 backdrop-blur-xl p-3 rounded-lg shadow-lg border border-white/20">
+          <p className="text-xs font-semibold text-white mb-1 capitalize">{data.dayOfWeek}</p>
+          <p className="text-xs text-slate-400 mb-2">{label}</p>
           {payload.map((entry, index) => (
             <p key={index} className="text-xs font-medium" style={{ color: entry.color }}>
               {entry.name}: {entry.name.includes('Venta') || entry.name.includes('Ticket') ? formatCurrency(entry.value) : entry.value.toLocaleString()}
@@ -100,7 +122,7 @@ export default function StoreDetailModal({ store, onClose, allDailySales, dateRa
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
+        className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
         onClick={onClose}
       >
         <motion.div
@@ -108,10 +130,10 @@ export default function StoreDetailModal({ store, onClose, allDailySales, dateRa
           animate={{ scale: 1, y: 0 }}
           exit={{ scale: 0.9, y: 20 }}
           onClick={(e) => e.stopPropagation()}
-          className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl my-8 overflow-hidden"
+          className="bg-gradient-to-br from-slate-900 to-slate-950 rounded-2xl shadow-2xl w-full max-w-6xl my-8 overflow-hidden border border-white/10"
         >
           {/* Header */}
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white relative overflow-hidden">
+          <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-6 text-white relative overflow-hidden">
             <motion.div
               animate={{ x: ['0%', '100%'] }}
               transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
@@ -120,7 +142,7 @@ export default function StoreDetailModal({ store, onClose, allDailySales, dateRa
             <div className="relative z-10 flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-bold mb-1">{store.name}</h2>
-                <p className="text-blue-100 text-sm">{store.code}</p>
+                <p className="text-purple-100 text-sm">{store.code}</p>
               </div>
               <Button
                 variant="ghost"
@@ -134,6 +156,87 @@ export default function StoreDetailModal({ store, onClose, allDailySales, dateRa
           </div>
 
           <div className="p-6 max-h-[80vh] overflow-y-auto">
+            {/* Listado de Días con Tendencias */}
+            <div className="mb-8">
+              <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-purple-400" />
+                Desempeño Diario
+              </h3>
+              <div className="grid grid-cols-1 gap-2 max-h-[300px] overflow-y-auto pr-2">
+                {dailyData.filter(d => d.sales > 0).map((day, idx) => (
+                  <motion.div
+                    key={day.fullDate}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: idx * 0.03 }}
+                    className="bg-white/5 backdrop-blur-xl rounded-xl p-4 border border-white/10 hover:bg-white/10 transition-all"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <p className="text-sm font-bold text-white capitalize">{day.dayOfWeek}</p>
+                          <p className="text-xs text-slate-400">{day.date}</p>
+                          {day.trend !== 0 && (
+                            <motion.div
+                              animate={{ 
+                                y: day.trend > 0 ? [0, -2, 0] : [0, 2, 0],
+                                scale: [1, 1.1, 1]
+                              }}
+                              transition={{ duration: 1.5, repeat: Infinity }}
+                              className={`flex items-center gap-1 ${
+                                day.trend > 0 ? 'text-emerald-400' : 'text-red-400'
+                              }`}
+                            >
+                              {day.trend > 0 ? (
+                                <TrendingUp className="w-4 h-4" />
+                              ) : (
+                                <TrendingDown className="w-4 h-4" />
+                              )}
+                              <span className="text-xs font-bold">
+                                {formatCurrency(Math.abs(day.trend))}
+                              </span>
+                            </motion.div>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-xs text-slate-400">Venta:</span>
+                              <span className="text-sm font-bold text-white">{formatCurrency(day.sales)}</span>
+                            </div>
+                            <div className="w-full bg-white/10 rounded-full h-1 overflow-hidden">
+                              <motion.div
+                                initial={{ width: 0 }}
+                                animate={{ width: `${Math.min(day.dailyCompliance, 100)}%` }}
+                                transition={{ duration: 0.6, delay: idx * 0.03 }}
+                                className={`h-full ${
+                                  day.dailyCompliance >= 100 ? 'bg-emerald-500' :
+                                  day.dailyCompliance >= 70 ? 'bg-amber-500' : 'bg-red-500'
+                                }`}
+                              />
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className={`text-xl font-black tabular-nums ${
+                              day.dailyCompliance >= 100 ? 'text-emerald-400' :
+                              day.dailyCompliance >= 70 ? 'text-amber-400' : 'text-red-400'
+                            }`}>
+                              {day.dailyCompliance.toFixed(0)}%
+                            </p>
+                            <p className={`text-xs font-semibold ${
+                              day.gap <= 0 ? 'text-emerald-400' : 'text-red-400'
+                            }`}>
+                              {day.gap <= 0 ? '+' : ''}{formatCurrency(-day.gap)}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+
             {/* KPIs Interactivos */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
               <motion.button
@@ -143,7 +246,7 @@ export default function StoreDetailModal({ store, onClose, allDailySales, dateRa
                 className={`relative overflow-hidden rounded-2xl p-5 transition-all duration-300 group ${
                   activeMetric === 'ventas'
                     ? 'bg-gradient-to-br from-blue-500 to-indigo-600 shadow-xl shadow-blue-500/30'
-                    : 'bg-gradient-to-br from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 border-2 border-blue-200'
+                    : 'bg-white/5 hover:bg-white/10 border-2 border-white/10 hover:border-blue-500/30'
                 }`}
               >
                 <motion.div
@@ -156,32 +259,32 @@ export default function StoreDetailModal({ store, onClose, allDailySales, dateRa
                 <div className="relative z-10">
                   <div className="flex items-center justify-between mb-3">
                     <div className={`p-3 rounded-xl ${
-                      activeMetric === 'ventas' ? 'bg-white/20 backdrop-blur-sm' : 'bg-blue-200'
+                      activeMetric === 'ventas' ? 'bg-white/20 backdrop-blur-sm' : 'bg-white/10'
                     }`}>
-                      <DollarSign className={`w-5 h-5 ${activeMetric === 'ventas' ? 'text-white' : 'text-blue-600'}`} />
+                      <DollarSign className={`w-5 h-5 ${activeMetric === 'ventas' ? 'text-white' : 'text-blue-400'}`} />
                     </div>
                     <ChevronRight className={`w-5 h-5 transition-transform ${
-                      activeMetric === 'ventas' ? 'text-white translate-x-0' : 'text-blue-500 -translate-x-2 opacity-0 group-hover:translate-x-0 group-hover:opacity-100'
+                      activeMetric === 'ventas' ? 'text-white translate-x-0' : 'text-slate-400 -translate-x-2 opacity-0 group-hover:translate-x-0 group-hover:opacity-100'
                     }`} />
                   </div>
-                  <p className={`text-xs font-bold mb-2 ${activeMetric === 'ventas' ? 'text-white/80' : 'text-blue-600'}`}>
+                  <p className={`text-xs font-bold mb-2 ${activeMetric === 'ventas' ? 'text-white/80' : 'text-slate-400'}`}>
                     💰 VENTAS TOTALES
                   </p>
-                  <p className={`text-2xl font-black mb-1 ${activeMetric === 'ventas' ? 'text-white' : 'text-gray-900'}`}>
+                  <p className={`text-2xl font-black mb-1 ${activeMetric === 'ventas' ? 'text-white' : 'text-white'}`}>
                     {formatCurrency(totals.totalSales)}
                   </p>
                   <div className="flex items-center gap-2">
                     <div className={`flex-1 h-1.5 rounded-full overflow-hidden ${
-                      activeMetric === 'ventas' ? 'bg-white/20' : 'bg-blue-200'
+                      activeMetric === 'ventas' ? 'bg-white/20' : 'bg-white/10'
                     }`}>
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: '100%' }}
                         transition={{ duration: 1, delay: 0.2 }}
-                        className={activeMetric === 'ventas' ? 'h-full bg-white' : 'h-full bg-blue-600'}
+                        className={activeMetric === 'ventas' ? 'h-full bg-white' : 'h-full bg-blue-500'}
                       />
                     </div>
-                    <p className={`text-xs font-semibold ${activeMetric === 'ventas' ? 'text-white/90' : 'text-blue-700'}`}>
+                    <p className={`text-xs font-semibold ${activeMetric === 'ventas' ? 'text-white/90' : 'text-slate-300'}`}>
                       {formatCurrency(totals.avgDailySales)}/día
                     </p>
                   </div>
@@ -195,7 +298,7 @@ export default function StoreDetailModal({ store, onClose, allDailySales, dateRa
                 className={`relative overflow-hidden rounded-2xl p-5 transition-all duration-300 group ${
                   activeMetric === 'transacciones'
                     ? 'bg-gradient-to-br from-amber-500 to-orange-600 shadow-xl shadow-amber-500/30'
-                    : 'bg-gradient-to-br from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100 border-2 border-amber-200'
+                    : 'bg-white/5 hover:bg-white/10 border-2 border-white/10 hover:border-amber-500/30'
                 }`}
               >
                 <motion.div
@@ -208,32 +311,32 @@ export default function StoreDetailModal({ store, onClose, allDailySales, dateRa
                 <div className="relative z-10">
                   <div className="flex items-center justify-between mb-3">
                     <div className={`p-3 rounded-xl ${
-                      activeMetric === 'transacciones' ? 'bg-white/20 backdrop-blur-sm' : 'bg-amber-200'
+                      activeMetric === 'transacciones' ? 'bg-white/20 backdrop-blur-sm' : 'bg-white/10'
                     }`}>
-                      <Zap className={`w-5 h-5 ${activeMetric === 'transacciones' ? 'text-white' : 'text-amber-600'}`} />
+                      <Zap className={`w-5 h-5 ${activeMetric === 'transacciones' ? 'text-white' : 'text-amber-400'}`} />
                     </div>
                     <ChevronRight className={`w-5 h-5 transition-transform ${
-                      activeMetric === 'transacciones' ? 'text-white translate-x-0' : 'text-amber-500 -translate-x-2 opacity-0 group-hover:translate-x-0 group-hover:opacity-100'
+                      activeMetric === 'transacciones' ? 'text-white translate-x-0' : 'text-slate-400 -translate-x-2 opacity-0 group-hover:translate-x-0 group-hover:opacity-100'
                     }`} />
                   </div>
-                  <p className={`text-xs font-bold mb-2 ${activeMetric === 'transacciones' ? 'text-white/80' : 'text-amber-600'}`}>
+                  <p className={`text-xs font-bold mb-2 ${activeMetric === 'transacciones' ? 'text-white/80' : 'text-slate-400'}`}>
                     ⚡ TRANSACCIONES
                   </p>
-                  <p className={`text-2xl font-black mb-1 ${activeMetric === 'transacciones' ? 'text-white' : 'text-gray-900'}`}>
+                  <p className={`text-2xl font-black mb-1 ${activeMetric === 'transacciones' ? 'text-white' : 'text-white'}`}>
                     {totals.totalTransactions.toLocaleString()}
                   </p>
                   <div className="flex items-center gap-2">
                     <div className={`flex-1 h-1.5 rounded-full overflow-hidden ${
-                      activeMetric === 'transacciones' ? 'bg-white/20' : 'bg-amber-200'
+                      activeMetric === 'transacciones' ? 'bg-white/20' : 'bg-white/10'
                     }`}>
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: '100%' }}
                         transition={{ duration: 1, delay: 0.2 }}
-                        className={activeMetric === 'transacciones' ? 'h-full bg-white' : 'h-full bg-amber-600'}
+                        className={activeMetric === 'transacciones' ? 'h-full bg-white' : 'h-full bg-amber-500'}
                       />
                     </div>
-                    <p className={`text-xs font-semibold ${activeMetric === 'transacciones' ? 'text-white/90' : 'text-amber-700'}`}>
+                    <p className={`text-xs font-semibold ${activeMetric === 'transacciones' ? 'text-white/90' : 'text-slate-300'}`}>
                       {totals.daysWithSales} días
                     </p>
                   </div>
@@ -247,7 +350,7 @@ export default function StoreDetailModal({ store, onClose, allDailySales, dateRa
                 className={`relative overflow-hidden rounded-2xl p-5 transition-all duration-300 group ${
                   activeMetric === 'ticket'
                     ? 'bg-gradient-to-br from-emerald-500 to-green-600 shadow-xl shadow-emerald-500/30'
-                    : 'bg-gradient-to-br from-emerald-50 to-green-50 hover:from-emerald-100 hover:to-green-100 border-2 border-emerald-200'
+                    : 'bg-white/5 hover:bg-white/10 border-2 border-white/10 hover:border-emerald-500/30'
                 }`}
               >
                 <motion.div
@@ -260,32 +363,32 @@ export default function StoreDetailModal({ store, onClose, allDailySales, dateRa
                 <div className="relative z-10">
                   <div className="flex items-center justify-between mb-3">
                     <div className={`p-3 rounded-xl ${
-                      activeMetric === 'ticket' ? 'bg-white/20 backdrop-blur-sm' : 'bg-emerald-200'
+                      activeMetric === 'ticket' ? 'bg-white/20 backdrop-blur-sm' : 'bg-white/10'
                     }`}>
-                      <TrendingUp className={`w-5 h-5 ${activeMetric === 'ticket' ? 'text-white' : 'text-emerald-600'}`} />
+                      <TrendingUp className={`w-5 h-5 ${activeMetric === 'ticket' ? 'text-white' : 'text-emerald-400'}`} />
                     </div>
                     <ChevronRight className={`w-5 h-5 transition-transform ${
-                      activeMetric === 'ticket' ? 'text-white translate-x-0' : 'text-emerald-500 -translate-x-2 opacity-0 group-hover:translate-x-0 group-hover:opacity-100'
+                      activeMetric === 'ticket' ? 'text-white translate-x-0' : 'text-slate-400 -translate-x-2 opacity-0 group-hover:translate-x-0 group-hover:opacity-100'
                     }`} />
                   </div>
-                  <p className={`text-xs font-bold mb-2 ${activeMetric === 'ticket' ? 'text-white/80' : 'text-emerald-600'}`}>
+                  <p className={`text-xs font-bold mb-2 ${activeMetric === 'ticket' ? 'text-white/80' : 'text-slate-400'}`}>
                     🎯 TICKET PROMEDIO
                   </p>
-                  <p className={`text-2xl font-black mb-1 ${activeMetric === 'ticket' ? 'text-white' : 'text-gray-900'}`}>
+                  <p className={`text-2xl font-black mb-1 ${activeMetric === 'ticket' ? 'text-white' : 'text-white'}`}>
                     {formatCurrency(totals.avgTicket)}
                   </p>
                   <div className="flex items-center gap-2">
                     <div className={`flex-1 h-1.5 rounded-full overflow-hidden ${
-                      activeMetric === 'ticket' ? 'bg-white/20' : 'bg-emerald-200'
+                      activeMetric === 'ticket' ? 'bg-white/20' : 'bg-white/10'
                     }`}>
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: '100%' }}
                         transition={{ duration: 1, delay: 0.2 }}
-                        className={activeMetric === 'ticket' ? 'h-full bg-white' : 'h-full bg-emerald-600'}
+                        className={activeMetric === 'ticket' ? 'h-full bg-white' : 'h-full bg-emerald-500'}
                       />
                     </div>
-                    <p className={`text-xs font-semibold ${activeMetric === 'ticket' ? 'text-white/90' : 'text-emerald-700'}`}>
+                    <p className={`text-xs font-semibold ${activeMetric === 'ticket' ? 'text-white/90' : 'text-slate-300'}`}>
                       vs promedio
                     </p>
                   </div>
@@ -302,7 +405,7 @@ export default function StoreDetailModal({ store, onClose, allDailySales, dateRa
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3 }}
               >
-                <Card className="border-gray-100 shadow-lg">
+                <Card className="border-white/10 shadow-lg bg-white/5 backdrop-blur-xl">
                   <CardHeader className={`bg-gradient-to-r ${
                     activeMetric === 'ventas' ? 'from-blue-500 to-indigo-600' :
                     activeMetric === 'transacciones' ? 'from-amber-500 to-orange-600' :
@@ -329,17 +432,17 @@ export default function StoreDetailModal({ store, onClose, allDailySales, dateRa
                               <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
                             </linearGradient>
                           </defs>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" vertical={false} />
                           <XAxis 
                             dataKey="date" 
-                            tick={{ fontSize: 11, fill: '#6b7280' }}
+                            tick={{ fontSize: 11, fill: '#94a3b8' }}
                             angle={-45}
                             textAnchor="end"
                             height={70}
                           />
                           <YAxis 
                             tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} 
-                            tick={{ fontSize: 11, fill: '#6b7280' }}
+                            tick={{ fontSize: 11, fill: '#94a3b8' }}
                           />
                           <Tooltip content={<CustomTooltip />} />
                           <Legend />
@@ -364,23 +467,23 @@ export default function StoreDetailModal({ store, onClose, allDailySales, dateRa
                       )}
                       {activeMetric === 'transacciones' && (
                         <ComposedChart data={dailyData}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" vertical={false} />
                           <XAxis 
                             dataKey="date" 
-                            tick={{ fontSize: 11, fill: '#6b7280' }}
+                            tick={{ fontSize: 11, fill: '#94a3b8' }}
                             angle={-45}
                             textAnchor="end"
                             height={70}
                           />
                           <YAxis 
                             yAxisId="left"
-                            tick={{ fontSize: 11, fill: '#6b7280' }}
+                            tick={{ fontSize: 11, fill: '#94a3b8' }}
                           />
                           <YAxis 
                             yAxisId="right"
                             orientation="right"
                             tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} 
-                            tick={{ fontSize: 11, fill: '#6b7280' }}
+                            tick={{ fontSize: 11, fill: '#94a3b8' }}
                           />
                           <Tooltip content={<CustomTooltip />} />
                           <Legend />
@@ -404,17 +507,17 @@ export default function StoreDetailModal({ store, onClose, allDailySales, dateRa
                       )}
                       {activeMetric === 'ticket' && (
                         <ComposedChart data={dailyData}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" vertical={false} />
                           <XAxis 
                             dataKey="date" 
-                            tick={{ fontSize: 11, fill: '#6b7280' }}
+                            tick={{ fontSize: 11, fill: '#94a3b8' }}
                             angle={-45}
                             textAnchor="end"
                             height={70}
                           />
                           <YAxis 
                             tickFormatter={(v) => `$${(v/1000).toFixed(0)}k`} 
-                            tick={{ fontSize: 11, fill: '#6b7280' }}
+                            tick={{ fontSize: 11, fill: '#94a3b8' }}
                           />
                           <Tooltip content={<CustomTooltip />} />
                           <Legend />
