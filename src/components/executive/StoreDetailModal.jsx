@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, TrendingUp, Receipt, Zap, DollarSign, ChevronRight } from 'lucide-react';
+import { X, TrendingUp, TrendingDown, Receipt, Zap, DollarSign, ChevronRight } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
