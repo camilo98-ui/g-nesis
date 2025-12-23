@@ -477,13 +477,13 @@ export default function Home() {
                 transition={{ delay: 0.5 }}
                 className="space-y-6 max-w-xl"
               >
-                <h1 className="text-5xl font-bold text-gray-900 leading-tight">
-                  Bienvenido a<br />
+                <h1 className="text-5xl font-bold leading-tight">
+                  <span className="text-gray-900">Bienvenido a</span><br />
                   <span className="text-pink-600">Popsy Management</span>
                 </h1>
 
-                <p className="text-lg text-gray-600 leading-relaxed">
-                  Gestión empresarial en tiempo real
+                <p className="text-base text-gray-600 leading-relaxed">
+                  Plataforma de gestión empresarial para equipos de alto rendimiento
                 </p>
 
                 {/* Feature list */}
