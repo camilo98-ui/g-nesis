@@ -426,8 +426,74 @@ export default function Home() {
   if (!isLoggedIn) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-pink-50/30 relative overflow-hidden flex items-center justify-center p-4">
-        {/* Fondo sutil corporativo */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-pink-100/20 via-transparent to-transparent pointer-events-none" />
+        {/* Fondo geométrico sofisticado */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          {/* Gradientes animados */}
+          <motion.div
+            animate={{
+              scale: [1, 1.2, 1],
+              rotate: [0, 90, 0],
+              opacity: [0.15, 0.25, 0.15]
+            }}
+            transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute -top-48 -right-48 w-96 h-96 bg-gradient-to-br from-pink-300 to-rose-400 rounded-full blur-3xl"
+          />
+          <motion.div
+            animate={{
+              scale: [1, 1.3, 1],
+              rotate: [0, -90, 0],
+              opacity: [0.2, 0.3, 0.2]
+            }}
+            transition={{ duration: 25, repeat: Infinity, ease: "easeInOut", delay: 5 }}
+            className="absolute -bottom-48 -left-48 w-96 h-96 bg-gradient-to-tr from-purple-300 to-violet-400 rounded-full blur-3xl"
+          />
+
+          {/* Líneas diagonales decorativas */}
+          <motion.div
+            animate={{ x: [0, 100, 0], opacity: [0.03, 0.08, 0.03] }}
+            transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+            className="absolute top-0 left-0 w-full h-full"
+            style={{
+              backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 60px, rgba(236, 72, 153, 0.05) 60px, rgba(236, 72, 153, 0.05) 120px)',
+            }}
+          />
+
+          {/* Formas geométricas flotantes */}
+          <motion.div
+            animate={{ 
+              y: [0, -30, 0],
+              rotate: [0, 180, 360]
+            }}
+            transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute top-1/4 right-1/4 w-32 h-32 border-2 border-pink-200/30 rounded-2xl backdrop-blur-sm"
+          />
+          <motion.div
+            animate={{ 
+              y: [0, 40, 0],
+              rotate: [0, -180, -360]
+            }}
+            transition={{ duration: 25, repeat: Infinity, ease: "easeInOut", delay: 3 }}
+            className="absolute bottom-1/3 left-1/4 w-40 h-40 border-2 border-violet-200/30 rounded-full backdrop-blur-sm"
+          />
+
+          {/* Patrón de puntos modernos */}
+          <div 
+            className="absolute inset-0 opacity-[0.015]"
+            style={{
+              backgroundImage: 'radial-gradient(circle, #ec4899 1px, transparent 1px)',
+              backgroundSize: '40px 40px'
+            }}
+          />
+
+          {/* Efecto de brillo sutil */}
+          <motion.div
+            animate={{
+              backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+            }}
+            transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent bg-[length:200%_100%]"
+          />
+        </div>
         
         <motion.div
           initial={{ opacity: 0, y: 30 }}
