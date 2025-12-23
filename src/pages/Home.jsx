@@ -507,7 +507,7 @@ export default function Home() {
                       Popsy Management
                     </span>
                   </h1>
-                  <p className="text-lg xl:text-xl text-slate-700 leading-relaxed font-medium">
+                  <p className="text-lg xl:text-xl text-slate-600 leading-relaxed">
                     Plataforma de gestión empresarial para equipos de alto rendimiento
                   </p>
                 </div>
@@ -531,7 +531,7 @@ export default function Home() {
                       </div>
                       <div className="pt-3">
                         <p className="text-slate-900 font-bold text-lg xl:text-xl mb-1.5">{feature.title}</p>
-                        <p className="text-slate-700 text-sm xl:text-base leading-relaxed">{feature.text}</p>
+                        <p className="text-slate-600 text-sm xl:text-base leading-relaxed">{feature.text}</p>
                       </div>
                     </motion.div>
                   ))}
@@ -571,7 +571,7 @@ export default function Home() {
                   <h2 className="text-2xl sm:text-3xl lg:text-3xl xl:text-4xl font-bold text-slate-900 mb-2 lg:mb-3">
                     Iniciar sesión
                   </h2>
-                  <p className="text-sm sm:text-base text-slate-700 font-medium">Selecciona tu rol para comenzar</p>
+                  <p className="text-sm sm:text-base text-slate-600">Selecciona tu rol para comenzar</p>
                 </div>
 
                 {/* Selector de Rol como Cards - Mobile First */}
@@ -604,7 +604,7 @@ export default function Home() {
                           <p className="text-sm sm:text-base lg:text-lg font-bold text-slate-900 mb-0.5 lg:mb-1">
                             {role.name}
                           </p>
-                          <p className="text-xs sm:text-sm text-slate-700 leading-relaxed line-clamp-2 font-medium">
+                          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed line-clamp-2">
                             {role.description}
                           </p>
                         </div>
@@ -728,7 +728,7 @@ export default function Home() {
 
                 {/* Footer text - Mobile optimized */}
                 <div className="text-center pt-1">
-                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
+                  <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
                     Tu acceso define lo que puedes ver y gestionar.
                   </p>
                 </div>
