@@ -426,9 +426,9 @@ export default function Home() {
   if (!isLoggedIn) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-pink-50/30 relative overflow-hidden flex items-center justify-center p-4">
-        {/* Fondo geométrico sofisticado visible */}
+        {/* Fondo geométrico sofisticado con alto contraste */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          {/* Gradientes grandes y visibles */}
+          {/* Gradientes grandes y vibrantes */}
           <motion.div
             animate={{
               scale: [1, 1.15, 1],
@@ -436,7 +436,7 @@ export default function Home() {
               y: [-30, 30, -30]
             }}
             transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-br from-pink-200/40 via-rose-300/30 to-purple-200/40 rounded-full blur-3xl"
+            className="absolute top-0 right-0 w-[700px] h-[700px] bg-gradient-to-br from-pink-300/70 via-rose-400/50 to-purple-300/60 rounded-full blur-3xl"
           />
           <motion.div
             animate={{
@@ -445,82 +445,82 @@ export default function Home() {
               y: [30, -30, 30]
             }}
             transition={{ duration: 25, repeat: Infinity, ease: "easeInOut", delay: 5 }}
-            className="absolute bottom-0 left-0 w-[700px] h-[700px] bg-gradient-to-tr from-violet-200/40 via-purple-300/30 to-pink-200/40 rounded-full blur-3xl"
+            className="absolute bottom-0 left-0 w-[800px] h-[800px] bg-gradient-to-tr from-violet-300/70 via-purple-400/50 to-pink-300/60 rounded-full blur-3xl"
           />
 
-          {/* Grid de líneas modernas */}
+          {/* Grid de líneas con más contraste */}
           <div
-            className="absolute inset-0 opacity-[0.15]"
+            className="absolute inset-0 opacity-30"
             style={{
               backgroundImage: `
-                linear-gradient(to right, rgba(236, 72, 153, 0.1) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(139, 92, 246, 0.1) 1px, transparent 1px)
+                linear-gradient(to right, rgba(236, 72, 153, 0.25) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(139, 92, 246, 0.25) 1px, transparent 1px)
               `,
               backgroundSize: '80px 80px'
             }}
           />
 
-          {/* Formas geométricas grandes y visibles */}
+          {/* Formas geométricas con bordes más visibles */}
           <motion.div
             animate={{ 
               y: [0, -40, 0],
               rotate: [0, 360, 720],
-              opacity: [0.15, 0.25, 0.15]
+              opacity: [0.4, 0.6, 0.4]
             }}
             transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-1/4 right-1/5 w-64 h-64 border-4 border-pink-300/40 rounded-3xl backdrop-blur-sm shadow-2xl"
+            className="absolute top-1/4 right-1/5 w-72 h-72 border-4 border-pink-400/60 rounded-3xl backdrop-blur-sm shadow-2xl"
             style={{
-              background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.05), rgba(168, 85, 247, 0.05))'
+              background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.15), rgba(168, 85, 247, 0.15))'
             }}
           />
           <motion.div
             animate={{ 
               y: [0, 50, 0],
               rotate: [0, -360, -720],
-              opacity: [0.15, 0.25, 0.15]
+              opacity: [0.4, 0.6, 0.4]
             }}
             transition={{ duration: 25, repeat: Infinity, ease: "easeInOut", delay: 3 }}
-            className="absolute bottom-1/4 left-1/6 w-80 h-80 border-4 border-violet-300/40 rounded-full backdrop-blur-sm shadow-2xl"
+            className="absolute bottom-1/4 left-1/6 w-96 h-96 border-4 border-violet-400/60 rounded-full backdrop-blur-sm shadow-2xl"
             style={{
-              background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.05), rgba(236, 72, 153, 0.05))'
+              background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(236, 72, 153, 0.15))'
             }}
           />
 
-          {/* Círculos pequeños decorativos */}
+          {/* Círculos decorativos más brillantes */}
           <motion.div
             animate={{ 
               scale: [1, 1.5, 1],
-              opacity: [0.2, 0.4, 0.2]
+              opacity: [0.4, 0.7, 0.4]
             }}
             transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-1/3 left-1/3 w-32 h-32 bg-pink-300/20 rounded-full blur-xl"
+            className="absolute top-1/3 left-1/3 w-40 h-40 bg-pink-400/40 rounded-full blur-2xl"
           />
           <motion.div
             animate={{ 
               scale: [1, 1.5, 1],
-              opacity: [0.2, 0.4, 0.2]
+              opacity: [0.4, 0.7, 0.4]
             }}
             transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-            className="absolute bottom-1/3 right-1/3 w-40 h-40 bg-violet-300/20 rounded-full blur-xl"
+            className="absolute bottom-1/3 right-1/3 w-48 h-48 bg-violet-400/40 rounded-full blur-2xl"
           />
 
-          {/* Líneas diagonales sutiles pero visibles */}
+          {/* Líneas diagonales más notorias */}
           <motion.div
-            animate={{ x: [-100, 100, -100], opacity: [0.05, 0.12, 0.05] }}
+            animate={{ x: [-100, 100, -100], opacity: [0.12, 0.25, 0.12] }}
             transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
             className="absolute inset-0"
             style={{
-              backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 80px, rgba(236, 72, 153, 0.08) 80px, rgba(236, 72, 153, 0.08) 160px)',
+              backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 80px, rgba(236, 72, 153, 0.2) 80px, rgba(236, 72, 153, 0.2) 160px)',
             }}
           />
 
-          {/* Efecto de brillo animado */}
+          {/* Efecto de brillo más intenso */}
           <motion.div
             animate={{
               backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
             }}
             transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent bg-[length:200%_100%]"
+            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent bg-[length:200%_100%]"
           />
         </div>
         
