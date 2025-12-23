@@ -8,9 +8,10 @@ import { STORES, getDisplayName } from '@/components/StoreSelector';
 import DateFilter from '@/components/DateFilter';
 import { ArrowLeft, Search, TrendingUp, TrendingDown, Eye, Zap, Award, Brain } from 'lucide-react';
 import { Input } from "@/components/ui/input";
-import { format, startOfMonth } from 'date-fns';
+import { format, startOfMonth, eachDayOfInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
 import StoreDetailModal from '../components/executive/StoreDetailModal';
+import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, ResponsiveContainer } from 'recharts';
 
 export default function ExecutiveDashboard() {
   const [dateRange, setDateRange] = useState({ from: startOfMonth(new Date()), to: new Date() });
@@ -189,6 +190,56 @@ ZONA: ${((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%
     return `${criticalStores.length} tiendas críticas · Brecha total ${formatCurrency(totalGap)}`;
   }, [filteredStores]);
 
+  // Datos para gráficas de KPIs
+  const dailySalesData = useMemo(() => {
+    const days = eachDayOfInterval({ start: dateRange.from, end: dateRange.to });
+    return days.map(day => {
+      const daySales = allDailySales
+        .filter(s => {
+          try {
+            const d = new Date(s.date);
+            return d.toDateString() === day.toDateString();
+          } catch {
+            return false;
+          }
+        })
+        .reduce((sum, s) => sum + (s.total_sales || 0), 0);
+      
+      return {
+        date: format(day, 'dd/MM'),
+        sales: daySales / 1000000
+      };
+    });
+  }, [allDailySales, dateRange]);
+
+  const statusDistributionData = useMemo(() => [
+    { name: 'En Meta', value: statusCounts.positive, color: '#10b981' },
+    { name: 'Alerta', value: statusCounts.negative, color: '#f59e0b' },
+    { name: 'Críticas', value: statusCounts.critical, color: '#ef4444' }
+  ], [statusCounts]);
+
+  const criticalStoresData = useMemo(() => {
+    return storesAnalysis
+      .filter(s => s.status === 'critical')
+      .sort((a, b) => a.salesCompliance - b.salesCompliance)
+      .slice(0, 5)
+      .map(s => ({
+        name: s.name.substring(0, 8),
+        value: s.salesCompliance
+      }));
+  }, [storesAnalysis]);
+
+  const topStoresTrend = useMemo(() => {
+    return storesAnalysis
+      .filter(s => s.status === 'positive')
+      .sort((a, b) => b.salesCompliance - a.salesCompliance)
+      .slice(0, 5)
+      .map(s => ({
+        name: s.name.substring(0, 8),
+        value: s.salesCompliance
+      }));
+  }, [storesAnalysis]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden">
       {/* Animated Background */}
@@ -320,17 +371,25 @@ ZONA: ${((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                       >
-                        <div className="bg-white/10 rounded-full h-2 overflow-hidden">
-                          <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${Math.min((zoneTotals.totalSales/zoneTotals.totalBudget)*100, 100)}%` }}
-                            transition={{ duration: 1.2, ease: "easeOut" }}
-                            className={`h-full ${
-                              (zoneTotals.totalSales/zoneTotals.totalBudget) >= 0.9 ? 'bg-emerald-500' :
-                              (zoneTotals.totalSales/zoneTotals.totalBudget) >= 0.7 ? 'bg-amber-500' : 'bg-red-500'
-                            }`}
-                          />
-                        </div>
+                        <ResponsiveContainer width="100%" height={60}>
+                          <AreaChart data={dailySalesData}>
+                            <defs>
+                              <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                              </linearGradient>
+                            </defs>
+                            <Area 
+                              type="monotone" 
+                              dataKey="sales" 
+                              stroke="#3b82f6" 
+                              strokeWidth={2}
+                              fill="url(#salesGradient)" 
+                              animationDuration={800}
+                            />
+                          </AreaChart>
+                        </ResponsiveContainer>
+                        <p className="text-[10px] text-slate-500 text-center mt-1">Tendencia diaria (M)</p>
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -391,14 +450,31 @@ ZONA: ${((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%
                         </div>
                       </motion.div>
                     ) : (
-                      <motion.p
+                      <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="text-sm text-slate-400"
+                        className="flex justify-center"
                       >
-                        de la zona
-                      </motion.p>
+                        <ResponsiveContainer width="100%" height={80}>
+                          <PieChart>
+                            <Pie
+                              data={statusDistributionData}
+                              cx="50%"
+                              cy="50%"
+                              innerRadius={25}
+                              outerRadius={35}
+                              dataKey="value"
+                              animationDuration={800}
+                            >
+                              {statusDistributionData.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={entry.color} />
+                              ))}
+                            </Pie>
+                          </PieChart>
+                        </ResponsiveContainer>
+                        <p className="text-[10px] text-slate-500 text-center mt-1">Distribución</p>
+                      </motion.div>
                     )}
                   </AnimatePresence>
                 </div>
@@ -445,14 +521,24 @@ ZONA: ${((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%
                         </p>
                       </motion.div>
                     ) : (
-                      <motion.p
+                      <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="text-sm text-slate-400"
                       >
-                        {statusCounts.critical > 0 ? `${Math.round((statusCounts.critical/STORES.length)*100)}% del total` : 'Ninguna crítica'}
-                      </motion.p>
+                        {statusCounts.critical > 0 ? (
+                          <>
+                            <ResponsiveContainer width="100%" height={60}>
+                              <BarChart data={criticalStoresData}>
+                                <Bar dataKey="value" fill="#ef4444" radius={[4, 4, 0, 0]} animationDuration={800} />
+                              </BarChart>
+                            </ResponsiveContainer>
+                            <p className="text-[10px] text-slate-500 text-center mt-1">Top 5 más críticas</p>
+                          </>
+                        ) : (
+                          <p className="text-sm text-slate-400 text-center">Ninguna crítica</p>
+                        )}
+                      </motion.div>
                     )}
                   </AnimatePresence>
                 </div>
@@ -497,14 +583,31 @@ ZONA: ${((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%
                         </p>
                       </motion.div>
                     ) : (
-                      <motion.p
+                      <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="text-sm text-slate-400"
                       >
-                        {statusCounts.positive > 0 ? `${Math.round((statusCounts.positive/STORES.length)*100)}% del total` : 'Ninguna en meta'}
-                      </motion.p>
+                        {statusCounts.positive > 0 ? (
+                          <>
+                            <ResponsiveContainer width="100%" height={60}>
+                              <LineChart data={topStoresTrend}>
+                                <Line 
+                                  type="monotone" 
+                                  dataKey="value" 
+                                  stroke="#10b981" 
+                                  strokeWidth={2}
+                                  dot={{ fill: '#10b981', r: 3 }}
+                                  animationDuration={800}
+                                />
+                              </LineChart>
+                            </ResponsiveContainer>
+                            <p className="text-[10px] text-slate-500 text-center mt-1">Top 5 mejores</p>
+                          </>
+                        ) : (
+                          <p className="text-sm text-slate-400 text-center">Ninguna en meta</p>
+                        )}
+                      </motion.div>
                     )}
                   </AnimatePresence>
                 </div>
