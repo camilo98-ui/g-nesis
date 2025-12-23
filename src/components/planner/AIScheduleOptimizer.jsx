@@ -13,10 +13,11 @@ import { format, startOfWeek, endOfWeek, subWeeks, eachDayOfInterval } from 'dat
 import { es } from 'date-fns/locale';
 import { toast } from 'sonner';
 
-export default function AIScheduleOptimizer({ storeId, currentWeek, shifts, cashiers, sales, budgets }) {
+export default function AIScheduleOptimizer({ storeId, currentWeek, shifts, cashiers, sales, budgets, onDayScheduleClick }) {
   const [analyzing, setAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState(null);
   const [expanded, setExpanded] = useState(true);
+  const [selectedDay, setSelectedDay] = useState(null);
 
   // Obtener datos históricos (últimas 4 semanas)
   const { data: historicalShifts = [] } = useQuery({
@@ -415,30 +416,47 @@ Proporciona tu análisis en el siguiente formato JSON (sin markdown, solo JSON p
                         Predicción de Demanda por Día
                       </h4>
                       <div className="space-y-2">
-                        {analysis.demand_forecast.map((forecast, idx) => (
-                          <motion.div
-                            key={idx}
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: idx * 0.1 }}
-                            className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-                          >
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <Calendar className="w-4 h-4 text-gray-500" />
-                                <span className="font-bold text-gray-800 capitalize">{forecast.day}</span>
-                                <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${getDemandColor(forecast.predicted_demand)}`}>
-                                  {forecast.predicted_demand}
-                                </span>
+                        {analysis.demand_forecast.map((forecast, idx) => {
+                          const dayDate = weekStats?.days.find(d => 
+                            d.day.toLowerCase() === forecast.day.toLowerCase()
+                          )?.date;
+                          
+                          return (
+                            <motion.div
+                              key={idx}
+                              initial={{ opacity: 0, x: -20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: idx * 0.1 }}
+                              onClick={() => {
+                                if (dayDate && onDayScheduleClick) {
+                                  setSelectedDay(forecast.day);
+                                  onDayScheduleClick(dayDate, forecast.recommended_staff);
+                                }
+                              }}
+                              className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-blue-50 cursor-pointer transition-all hover:shadow-md"
+                            >
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <Calendar className="w-4 h-4 text-gray-500" />
+                                  <span className="font-bold text-gray-800 capitalize">{forecast.day}</span>
+                                  <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${getDemandColor(forecast.predicted_demand)}`}>
+                                    {forecast.predicted_demand}
+                                  </span>
+                                  {selectedDay === forecast.day && (
+                                    <span className="text-xs bg-blue-500 text-white px-2 py-0.5 rounded-full animate-pulse">
+                                      Seleccionado
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-xs text-gray-600">{forecast.reason}</p>
                               </div>
-                              <p className="text-xs text-gray-600">{forecast.reason}</p>
-                            </div>
-                            <div className="flex items-center gap-1 bg-blue-100 px-3 py-1 rounded-full">
-                              <Users className="w-4 h-4 text-blue-600" />
-                              <span className="font-bold text-blue-600">{forecast.recommended_staff}</span>
-                            </div>
-                          </motion.div>
-                        ))}
+                              <div className="flex items-center gap-1 bg-blue-100 px-3 py-1 rounded-full">
+                                <Users className="w-4 h-4 text-blue-600" />
+                                <span className="font-bold text-blue-600">{forecast.recommended_staff}</span>
+                              </div>
+                            </motion.div>
+                          );
+                        })}
                       </div>
                     </div>
                   )}
