@@ -444,18 +444,18 @@ export default function Home() {
   // Si no está logueado, mostrar pantalla de login
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-[#0F172A] relative overflow-hidden">
+      <div className="min-h-screen bg-[#F7F8FA] relative overflow-hidden">
         <div className="flex min-h-screen">
           {/* Left Panel - Branding (60%) */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="hidden lg:flex lg:w-[60%] bg-gradient-to-br from-[#111827] via-[#1F2937] to-[#111827] relative p-16 flex-col justify-between overflow-hidden"
+            className="hidden lg:flex lg:w-[60%] bg-gradient-to-br from-pink-50/70 via-white to-white relative p-16 flex-col justify-between overflow-hidden"
           >
             {/* Subtle background decoration */}
-            <div className="absolute inset-0 opacity-[0.03]">
-              <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-pink-500/20 rounded-full blur-3xl" />
+            <div className="absolute inset-0 opacity-[0.015]">
+              <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-pink-500 rounded-full blur-3xl" />
             </div>
 
             {/* Content */}
@@ -464,7 +464,7 @@ export default function Home() {
               <motion.img
                 src={LOGO_URL}
                 alt="Popsy Management"
-                className="h-16 object-contain mb-16 brightness-110"
+                className="h-16 object-contain mb-16"
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
@@ -477,12 +477,12 @@ export default function Home() {
                 transition={{ delay: 0.5 }}
                 className="space-y-6 max-w-xl"
               >
-                <h1 className="text-5xl font-bold text-[#F9FAFB] leading-tight">
+                <h1 className="text-5xl font-bold text-gray-900 leading-tight">
                   Bienvenido a<br />
-                  <span className="text-pink-500">Popsy Management</span>
+                  <span className="text-pink-600">Popsy Management</span>
                 </h1>
 
-                <p className="text-lg text-[#9CA3AF] leading-relaxed">
+                <p className="text-lg text-gray-600 leading-relaxed">
                   Gestión empresarial en tiempo real
                 </p>
 
@@ -500,10 +500,10 @@ export default function Home() {
                       transition={{ delay: 0.7 + i * 0.1 }}
                       className="flex items-center gap-3"
                     >
-                      <div className="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0">
-                        <feature.icon className="w-5 h-5 text-pink-500" />
+                      <div className="w-10 h-10 rounded-lg bg-pink-100/80 flex items-center justify-center flex-shrink-0">
+                        <feature.icon className="w-5 h-5 text-pink-600" />
                       </div>
-                      <p className="text-[#D1D5DB]">{feature.text}</p>
+                      <p className="text-gray-700">{feature.text}</p>
                     </motion.div>
                   ))}
                 </div>
@@ -515,14 +515,14 @@ export default function Home() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 1 }}
-              className="relative z-10 text-xs text-gray-500 opacity-60"
+              className="relative z-10 text-xs text-gray-400 opacity-60"
             >
               © 2025 Popsy Management
             </motion.div>
           </motion.div>
 
           {/* Right Panel - Login Card (40%) */}
-          <div className="w-full lg:w-[40%] flex items-center justify-center p-6 lg:p-12 bg-[#0F172A]">
+          <div className="w-full lg:w-[40%] flex items-center justify-center p-6 lg:p-12">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -531,21 +531,21 @@ export default function Home() {
             >
               {/* Mobile logo */}
               <div className="lg:hidden mb-8 text-center">
-                <img src={LOGO_URL} alt="Popsy" className="h-12 object-contain mx-auto mb-4 brightness-110" />
-                <h2 className="text-2xl font-bold text-[#F9FAFB]">Popsy Management</h2>
+                <img src={LOGO_URL} alt="Popsy" className="h-12 object-contain mx-auto mb-4" />
+                <h2 className="text-2xl font-bold text-gray-900">Popsy Management</h2>
               </div>
 
               {/* Login Card */}
-              <div className="bg-[#1F2937] rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.3)] border border-white/5 p-8 space-y-6">
+              <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-gray-100/50 p-8 space-y-6">
                 {/* Header */}
                 <div>
-                  <h2 className="text-2xl font-bold text-[#F9FAFB] mb-1">Iniciar sesión</h2>
-                  <p className="text-sm text-[#9CA3AF]">Accede a tu cuenta</p>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-1">Iniciar sesión</h2>
+                  <p className="text-sm text-gray-500">Accede a tu cuenta</p>
                 </div>
 
                 {/* Selector de Rol como Cards */}
                 <div>
-                  <label className="block text-xs font-semibold text-[#D1D5DB] uppercase tracking-wide mb-3">
+                  <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-3">
                     Selecciona tu rol
                   </label>
                   <div className="grid grid-cols-3 gap-3">
@@ -560,19 +560,19 @@ export default function Home() {
                           whileTap={{ scale: 0.98 }}
                           className={`relative p-4 rounded-xl border-2 transition-all text-center ${
                             isSelected
-                              ? 'border-pink-500 bg-pink-500/12 shadow-sm'
-                              : 'border-white/8 bg-transparent hover:border-white/15'
+                              ? 'border-pink-500 bg-[#FFF5FA] shadow-sm'
+                              : 'border-gray-200 bg-white hover:border-gray-300'
                           }`}
                         >
                           <div className={`w-10 h-10 rounded-lg mx-auto mb-2 flex items-center justify-center ${
-                            isSelected ? 'bg-pink-500/20' : 'bg-white/5'
+                            isSelected ? 'bg-pink-100' : 'bg-gray-50'
                           }`}>
                             <div className="w-5 h-5">
                               <RoleIcon roleId={role.id} isSelected={isSelected} />
                             </div>
                           </div>
                           <p className={`text-xs font-semibold ${
-                            isSelected ? 'text-pink-400' : 'text-[#D1D5DB]'
+                            isSelected ? 'text-pink-700' : 'text-gray-700'
                           }`}>
                             {role.name.split(' ')[0]}
                           </p>
@@ -598,9 +598,9 @@ export default function Home() {
                   <motion.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
-                    className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg"
+                    className="p-3 bg-blue-50/50 border border-blue-200/50 rounded-lg"
                   >
-                    <p className="text-xs text-blue-400 flex items-center gap-2">
+                    <p className="text-xs text-blue-700 flex items-center gap-2">
                       <Info className="w-4 h-4" />
                       <span>Acceso a panel ejecutivo global</span>
                     </p>
@@ -613,7 +613,7 @@ export default function Home() {
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                   >
-                    <label htmlFor="store-selector" className="block text-xs font-semibold text-[#D1D5DB] uppercase tracking-wide mb-2">
+                    <label htmlFor="store-selector" className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">
                       Ubicación
                     </label>
                     <StoreSelector
@@ -628,7 +628,7 @@ export default function Home() {
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                   >
-                    <label htmlFor="login-password" className="block text-xs font-semibold text-[#D1D5DB] uppercase tracking-wide mb-2">
+                    <label htmlFor="login-password" className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">
                       Contraseña
                     </label>
                     <div className="relative">
@@ -640,14 +640,14 @@ export default function Home() {
                         onChange={(e) => {setLoginPassword(e.target.value);setLoginError('');}}
                         onKeyDown={(e) => e.key === 'Enter' && !isSubmitting && handleLogin()}
                         disabled={isSubmitting}
-                        className="w-full pl-4 pr-10 py-3 bg-[#0F172A] border border-white/10 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none text-sm text-[#F9FAFB] placeholder:text-[#6B7280] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        className="w-full pl-4 pr-10 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none text-sm text-gray-900 placeholder:text-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                         aria-label="Campo de contraseña"
                         aria-invalid={!!loginError}
                         aria-describedby={loginError ? "password-error" : undefined} />
                       <button
                         type="button"
                         onClick={() => setShowLoginPassword(!showLoginPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#D1D5DB] transition-colors"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                       >
                         {showLoginPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
@@ -659,10 +659,10 @@ export default function Home() {
                   <motion.div
                     initial={{ opacity: 0, y: -5 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg"
+                    className="p-3 bg-red-50/50 border border-red-200/50 rounded-lg"
                     id="password-error"
                     role="alert">
-                    <p className="text-red-400 text-xs flex items-center gap-2">
+                    <p className="text-red-600 text-xs flex items-center gap-2">
                       <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
                       {loginError}
                     </p>
@@ -673,7 +673,7 @@ export default function Home() {
                 <Button
                   onClick={handleLogin}
                   disabled={(selectedRole !== 'gerente' && !pendingStore) || !selectedRole || isSubmitting}
-                  className="w-full bg-gradient-to-b from-[#EC4899] to-[#DB2777] hover:from-[#DB2777] hover:to-[#BE185D] text-white py-3 rounded-xl font-semibold text-sm shadow-[0_4px_14px_rgba(236,72,153,0.4)] hover:shadow-[0_6px_20px_rgba(236,72,153,0.5)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  className="w-full bg-gradient-to-b from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white py-3 rounded-xl font-semibold text-sm shadow-[0_4px_14px_rgba(236,72,153,0.25)] hover:shadow-[0_6px_20px_rgba(236,72,153,0.3)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 >
                   {isSubmitting ? (
                     <span className="flex items-center justify-center gap-2">
@@ -692,12 +692,12 @@ export default function Home() {
                 {/* Footer text */}
                 <div className="text-center space-y-2 pt-2">
                   <button 
-                    className="text-xs text-pink-500 hover:text-pink-400 transition-colors"
+                    className="text-xs text-pink-600 hover:text-pink-700 transition-colors"
                     onClick={() => alert('Contacta a soporte@popsy.com')}
                   >
                     ¿Problemas para acceder?
                   </button>
-                  <p className="text-[10px] text-gray-500 opacity-60">
+                  <p className="text-[10px] text-gray-400 opacity-60">
                     Al ingresar aceptas nuestros términos y políticas
                   </p>
                 </div>
