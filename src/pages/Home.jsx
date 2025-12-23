@@ -537,18 +537,14 @@ export default function Home() {
 
               {/* Login Card */}
               <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-gray-100/50 p-8 space-y-6">
-                {/* Header */}
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-1">Iniciar sesión</h2>
-                  <p className="text-sm text-gray-500">Accede a tu cuenta</p>
-                </div>
 
                 {/* Selector de Rol como Cards */}
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-3">
-                    Selecciona tu rol
+                  <label className="block text-sm font-medium text-gray-900 mb-1">
+                    Iniciar sesión
                   </label>
-                  <div className="grid grid-cols-3 gap-3">
+                  <p className="text-xs text-gray-600 mb-4">Selecciona tu rol para comenzar</p>
+                  <div className="space-y-3">
                     {ROLES.map((role) => {
                       const isSelected = selectedRole === role.id;
 
@@ -556,33 +552,38 @@ export default function Home() {
                         <motion.button
                           key={role.id}
                           onClick={() => {setSelectedRole(role.id);setLoginError('');}}
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          className={`relative p-4 rounded-xl border-2 transition-all text-center ${
+                          whileHover={{ scale: 1.01 }}
+                          whileTap={{ scale: 0.99 }}
+                          className={`relative w-full p-4 rounded-xl border-2 transition-all text-left flex items-center gap-3 ${
                             isSelected
-                              ? 'border-pink-500 bg-[#FFF5FA] shadow-sm'
-                              : 'border-gray-200 bg-white hover:border-gray-300'
+                              ? 'border-pink-500 bg-pink-50/50'
+                              : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50/50'
                           }`}
                         >
-                          <div className={`w-10 h-10 rounded-lg mx-auto mb-2 flex items-center justify-center ${
-                            isSelected ? 'bg-pink-100' : 'bg-gray-50'
+                          <div className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                            isSelected ? 'bg-pink-100' : 'bg-gray-100'
                           }`}>
-                            <div className="w-5 h-5">
+                            <div className="w-6 h-6">
                               <RoleIcon roleId={role.id} isSelected={isSelected} />
                             </div>
                           </div>
-                          <p className={`text-xs font-semibold ${
-                            isSelected ? 'text-pink-700' : 'text-gray-700'
-                          }`}>
-                            {role.name.split(' ')[0]}
-                          </p>
+                          <div className="flex-1">
+                            <p className={`text-sm font-bold ${
+                              isSelected ? 'text-gray-900' : 'text-gray-800'
+                            }`}>
+                              {role.name}
+                            </p>
+                            <p className="text-xs text-gray-600 mt-0.5">
+                              {role.description}
+                            </p>
+                          </div>
                           {isSelected && (
                             <motion.div
                               initial={{ scale: 0 }}
                               animate={{ scale: 1 }}
-                              className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-pink-500 flex items-center justify-center shadow-sm"
+                              className="w-6 h-6 rounded-full bg-pink-500 flex items-center justify-center flex-shrink-0"
                             >
-                              <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                               </svg>
                             </motion.div>
@@ -591,6 +592,9 @@ export default function Home() {
                       );
                     })}
                   </div>
+                  <p className="text-xs text-gray-500 mt-3 text-center">
+                    Puedes cambiar tu rol más adelante si es necesario.
+                  </p>
                 </div>
 
                 {/* Info para gerente */}
@@ -613,8 +617,8 @@ export default function Home() {
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                   >
-                    <label htmlFor="store-selector" className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">
-                      Ubicación
+                    <label htmlFor="store-selector" className="block text-sm font-medium text-gray-900 mb-2">
+                      Selecciona tu tienda
                     </label>
                     <StoreSelector
                       selectedStore={pendingStore}
@@ -690,15 +694,9 @@ export default function Home() {
                 </Button>
 
                 {/* Footer text */}
-                <div className="text-center space-y-2 pt-2">
-                  <button 
-                    className="text-xs text-pink-600 hover:text-pink-700 transition-colors"
-                    onClick={() => alert('Contacta a soporte@popsy.com')}
-                  >
-                    ¿Problemas para acceder?
-                  </button>
-                  <p className="text-[10px] text-gray-400 opacity-60">
-                    Al ingresar aceptas nuestros términos y políticas
+                <div className="text-center pt-2">
+                  <p className="text-xs text-gray-500">
+                    Tu acceso define lo que puedes ver y gestionar.
                   </p>
                 </div>
               </div>
