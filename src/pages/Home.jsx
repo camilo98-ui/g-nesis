@@ -444,400 +444,268 @@ export default function Home() {
   // Si no está logueado, mostrar pantalla de login
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-pink-50/30 relative overflow-hidden flex items-center justify-center p-4">
-        {/* Fondo geométrico sofisticado optimizado */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          {/* Gradientes principales - opacidad reducida */}
+      <div className="min-h-screen bg-[#F7F8FA] relative overflow-hidden">
+        <div className="flex min-h-screen">
+          {/* Left Panel - Branding (60%) */}
           <motion.div
-            animate={{
-              scale: [1, 1.15, 1],
-              x: [-50, 50, -50],
-              y: [-30, 30, -30]
-            }}
-            transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-0 right-0 w-[700px] h-[700px] bg-gradient-to-br from-pink-300/35 via-rose-400/25 to-purple-300/30 rounded-full blur-3xl"
-          />
-          <motion.div
-            animate={{
-              scale: [1, 1.2, 1],
-              x: [50, -50, 50],
-              y: [30, -30, 30]
-            }}
-            transition={{ duration: 25, repeat: Infinity, ease: "easeInOut", delay: 5 }}
-            className="absolute bottom-0 left-0 w-[800px] h-[800px] bg-gradient-to-tr from-violet-300/35 via-purple-400/25 to-pink-300/30 rounded-full blur-3xl"
-          />
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="hidden lg:flex lg:w-[60%] bg-gradient-to-br from-pink-50/40 via-white to-pink-50/30 relative p-16 flex-col justify-between overflow-hidden"
+          >
+            {/* Subtle background decoration */}
+            <div className="absolute inset-0 opacity-[0.03]">
+              <div className="absolute top-20 left-20 w-96 h-96 bg-pink-500 rounded-full blur-3xl" />
+              <div className="absolute bottom-20 right-20 w-96 h-96 bg-pink-400 rounded-full blur-3xl" />
+            </div>
 
-          {/* Grid sutil */}
-          <div
-            className="absolute inset-0 opacity-15"
-            style={{
-              backgroundImage: `
-                linear-gradient(to right, rgba(236, 72, 153, 0.15) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(139, 92, 246, 0.15) 1px, transparent 1px)
-              `,
-              backgroundSize: '80px 80px'
-            }}
-          />
-
-          {/* Forma geométrica principal */}
-          <motion.div
-            animate={{ 
-              y: [0, -40, 0],
-              rotate: [0, 360, 720],
-              opacity: [0.25, 0.4, 0.25]
-            }}
-            transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-1/4 right-1/5 w-72 h-72 border-4 border-pink-400/40 rounded-3xl backdrop-blur-sm shadow-2xl"
-            style={{
-              background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.1), rgba(168, 85, 247, 0.1))'
-            }}
-          />
-
-          {/* Efecto de brillo suave */}
-          <motion.div
-            animate={{
-              backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
-            }}
-            transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent bg-[length:200%_100%]"
-          />
-        </div>
-        
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="relative z-10 w-full max-w-5xl">
-
-          <div className="grid md:grid-cols-2 gap-6 md:gap-8 lg:gap-12 items-center">
-            {/* Panel Izquierdo - Branding */}
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2, duration: 0.6 }}
-              className="text-center md:text-left space-y-6">
-
+            {/* Content */}
+            <div className="relative z-10">
+              {/* Logo */}
               <motion.img
                 src={LOGO_URL}
-                alt="Popsy - Plataforma de gestión retail"
-                className="h-32 object-contain mx-auto md:mx-0 cursor-pointer drop-shadow-lg"
-                initial={{ opacity: 0, scale: 0.5 }}
-                animate={{
-                  opacity: 1,
-                  scale: [1, 1.03, 0.98, 1.02, 1],
-                  y: [0, -8, 0, -4, 0]
-                }}
-                transition={{
-                  opacity: { duration: 0.8, ease: "easeOut" },
-                  scale: { duration: 4, repeat: Infinity, ease: "easeInOut" },
-                  y: { duration: 3, repeat: Infinity, ease: "easeInOut" }
-                }}
-                whileHover={{ scale: 1.08, rotate: [0, -2, 2, 0] }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setShowStory(true)} />
-              
-              <p className="text-xs text-gray-500 text-center md:text-left -mt-2">
-                Ice Cream Retail Analytics Platform
-              </p>
+                alt="Popsy Management"
+                className="h-16 object-contain mb-16"
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+              />
 
-              <div>
-                <h1 className="text-4xl md:text-5xl font-black text-gray-900 mb-3 leading-tight">
+              {/* Main headline */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="space-y-6 max-w-xl"
+              >
+                <h1 className="text-5xl font-bold text-gray-900 leading-tight">
                   Bienvenido a<br />
-                  <span className="bg-gradient-to-r from-pink-500 via-rose-500 to-purple-500 bg-clip-text text-transparent">
-                    Popsy Management
-                  </span>
+                  <span className="text-pink-600">Popsy Management</span>
                 </h1>
-                <p className="text-lg text-gray-600 font-medium">
-                  Plataforma de gestión empresarial para equipos de alto rendimiento
+                
+                <p className="text-xl text-gray-600 leading-relaxed">
+                  Plataforma empresarial de análisis en tiempo real para equipos de alto rendimiento
                 </p>
-              </div>
 
-              <div className="hidden md:block space-y-3 pt-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-pink-100 flex items-center justify-center flex-shrink-0">
-                    <TrendingUp className="w-5 h-5 text-pink-600" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-900">Análisis en tiempo real</p>
-                    <p className="text-sm text-gray-600">Métricas y KPIs actualizados al instante</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center flex-shrink-0">
-                    <Users className="w-5 h-5 text-purple-600" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-900">Gestión de equipos</p>
-                    <p className="text-sm text-gray-600">Optimiza el rendimiento de tu personal</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
-                    <Target className="w-5 h-5 text-amber-600" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-900">Objetivos inteligentes</p>
-                    <p className="text-sm text-gray-600">Seguimiento automático de metas</p>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Panel Derecho - Login */}
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3, duration: 0.6 }}
-              className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
-
-              <div className="mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Iniciar sesión</h2>
-                <p className="text-gray-600 text-sm">Selecciona tu rol para comenzar</p>
-              </div>
-
-              {/* Selector de Rol Profesional */}
-              <div className="space-y-3 mb-4">
-                {ROLES.map((role, idx) => {
-                  const isSelected = selectedRole === role.id;
-                  const isRecommended = role.isRecommended;
-                  
-                  return (
-                    <motion.button
-                      key={role.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ 
-                        opacity: 1, 
-                        y: 0,
-                        scale: isSelected ? 1.02 : 1
-                      }}
-                      transition={{ 
-                        delay: 0.4 + idx * 0.1,
-                        scale: { duration: 0.12, ease: "easeOut" }
-                      }}
-                      whileHover={{ scale: isSelected ? 1.02 : 1.01 }}
-                      whileTap={{ scale: 0.99 }}
-                      onClick={() => {setSelectedRole(role.id);setLoginError('');}}
-                      className={`relative w-full p-4 rounded-xl transition-all duration-150 text-left focus-visible:ring-2 focus-visible:ring-pink-500 outline-none ${
-                        isSelected
-                          ? 'border-2 border-pink-500 bg-pink-50 shadow-lg'
-                          : isRecommended
-                            ? 'border-2 border-amber-300 bg-gradient-to-br from-amber-50 to-yellow-50/50 shadow-md hover:border-amber-400'
-                            : 'border-2 border-gray-200 bg-white hover:border-gray-300 hover:shadow-md'
-                      }`}
-                      aria-label={`Seleccionar rol ${role.name}`}
-                      role="radio"
-                      aria-checked={isSelected}>
-
-                      {isRecommended && !isSelected && (
-                        <>
-                          <span className="absolute -top-2 right-3 px-2 py-0.5 bg-amber-400 text-white text-[10px] font-bold rounded-full shadow-sm">
-                            RECOMENDADO
-                          </span>
-                          <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-amber-100 text-amber-700 text-[9px] font-semibold rounded-full whitespace-nowrap">
-                            Rol principal para líderes de tienda
-                          </span>
-                        </>
-                      )}
-
-                      <div className="flex items-center gap-3">
-                        <div className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                          isSelected
-                            ? `bg-gradient-to-br ${role.color} shadow-md`
-                            : isRecommended
-                              ? 'bg-amber-100'
-                              : 'bg-gray-100'
-                        }`}>
-                          <div className="w-6 h-6">
-                            <RoleIcon roleId={role.id} isSelected={isSelected} />
-                          </div>
-                        </div>
-
-                        <div className="flex-1">
-                          <p className={`font-bold text-sm mb-0.5 ${
-                            isSelected ? 'text-pink-900' : 'text-gray-900'
-                          }`}>
-                            {role.name}
-                          </p>
-                          <p className={`text-xs leading-snug ${
-                            isSelected ? 'text-pink-800' : isRecommended ? 'text-amber-700' : 'text-gray-700'
-                          }`}>
-                            {role.description}
-                          </p>
-                        </div>
-
-                        {isSelected && (
-                          <motion.div
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            className="w-6 h-6 rounded-full bg-pink-500 flex items-center justify-center flex-shrink-0 shadow">
-                            <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                            </svg>
-                          </motion.div>
-                        )}
+                {/* Feature list */}
+                <div className="space-y-4 pt-8">
+                  {[
+                    { icon: TrendingUp, text: 'Métricas y KPIs en tiempo real' },
+                    { icon: Users, text: 'Gestión inteligente de equipos' },
+                    { icon: Target, text: 'Seguimiento automático de objetivos' }
+                  ].map((feature, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.7 + i * 0.1 }}
+                      className="flex items-center gap-3"
+                    >
+                      <div className="w-10 h-10 rounded-lg bg-pink-100/80 flex items-center justify-center flex-shrink-0">
+                        <feature.icon className="w-5 h-5 text-pink-600" />
                       </div>
-                    </motion.button>
-                  );
-                })}
+                      <p className="text-gray-700">{feature.text}</p>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Footer */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1 }}
+              className="relative z-10 text-sm text-gray-500"
+            >
+              © 2025 Popsy Management. Todos los derechos reservados.
+            </motion.div>
+          </motion.div>
+
+          {/* Right Panel - Login Card (40%) */}
+          <div className="w-full lg:w-[40%] flex items-center justify-center p-6 lg:p-12">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="w-full max-w-md"
+            >
+              {/* Mobile logo */}
+              <div className="lg:hidden mb-8 text-center">
+                <img src={LOGO_URL} alt="Popsy" className="h-12 object-contain mx-auto mb-4" />
+                <h2 className="text-2xl font-bold text-gray-900">Popsy Management</h2>
               </div>
 
-              {/* Microcopy de claridad */}
-              <p className="text-xs text-gray-500 mb-6 text-center">
-                Puedes cambiar tu rol más adelante si es necesario.
-              </p>
+              {/* Login Card */}
+              <div className="bg-white rounded-2xl shadow-xl border border-gray-100/50 p-8 space-y-6">
+                {/* Header */}
+                <div className="mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-1">Iniciar sesión</h2>
+                  <p className="text-sm text-gray-500">Selecciona tu rol y ubicación</p>
+                </div>
 
-              {/* Info para gerente */}
-              {selectedRole === 'gerente' && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg"
-                >
-                  <p className="text-xs text-blue-700 flex items-center gap-2">
-                    <span className="text-base">ℹ️</span>
-                    <span className="font-medium">Acceso a panel ejecutivo global, sin necesidad de seleccionar tienda</span>
-                  </p>
-                </motion.div>
-              )}
-
-              {/* Selector de tienda */}
-              {selectedRole && selectedRole !== 'gerente' && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  className="mb-4">
-                  <label htmlFor="store-selector" className="block text-sm font-semibold text-gray-700 mb-2">
-                    Selecciona tu tienda
+                {/* Selector de Rol como Cards */}
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-3">
+                    Selecciona tu rol
                   </label>
-                  <StoreSelector
-                    selectedStore={pendingStore}
-                    onStoreChange={handleStoreSelect} />
-                  {!pendingStore && (
-                    <p className="text-xs text-amber-600 mt-1.5 flex items-center gap-1">
-                      <AlertTriangle className="w-3 h-3" />
-                      Requerido para continuar
-                    </p>
-                  )}
-                </motion.div>
-              )}
-
-              {/* Campo de contraseña */}
-              {selectedRole && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  className="mb-4">
-                  <label htmlFor="login-password" className="block text-sm font-semibold text-gray-700 mb-2">
-                    Contraseña
-                  </label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <input
-                      id="login-password"
-                      type={showLoginPassword ? "text" : "password"}
-                      placeholder={isGerente ? "Contraseña de gerente" : needsPassword ? "Ingresa contraseña" : "Sin contraseña"}
-                      value={loginPassword}
-                      onChange={(e) => {setLoginPassword(e.target.value);setLoginError('');}}
-                      onKeyDown={(e) => e.key === 'Enter' && !isSubmitting && handleLogin()}
-                      disabled={isSubmitting}
-                      className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent outline-none text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
-                      aria-label="Campo de contraseña"
-                      aria-invalid={!!loginError}
-                      aria-describedby={loginError ? "password-error" : undefined} />
-                    <button
-                      type="button"
-                      onClick={() => setShowLoginPassword(!showLoginPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus-visible:ring-2 focus-visible:ring-pink-500 rounded outline-none"
-                      aria-label={showLoginPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
-                      tabIndex={0}>
-                      {showLoginPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
+                  <div className="grid grid-cols-3 gap-2">
+                    {ROLES.map((role) => {
+                      const isSelected = selectedRole === role.id;
+                      
+                      return (
+                        <motion.button
+                          key={role.id}
+                          onClick={() => {setSelectedRole(role.id);setLoginError('');}}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          className={`relative p-3 rounded-xl border-2 transition-all text-center ${
+                            isSelected
+                              ? 'border-pink-500 bg-pink-50 shadow-md'
+                              : 'border-gray-200 bg-white hover:border-gray-300'
+                          }`}
+                        >
+                          <div className={`w-10 h-10 rounded-lg mx-auto mb-2 flex items-center justify-center ${
+                            isSelected ? 'bg-pink-100' : 'bg-gray-100'
+                          }`}>
+                            <div className="w-5 h-5">
+                              <RoleIcon roleId={role.id} isSelected={isSelected} />
+                            </div>
+                          </div>
+                          <p className={`text-xs font-semibold ${
+                            isSelected ? 'text-pink-900' : 'text-gray-700'
+                          }`}>
+                            {role.name.split(' ')[0]}
+                          </p>
+                          {isSelected && (
+                            <motion.div
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-pink-500 flex items-center justify-center shadow"
+                            >
+                              <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                              </svg>
+                            </motion.div>
+                          )}
+                        </motion.button>
+                      );
+                    })}
                   </div>
+                </div>
+
+                {/* Info para gerente */}
+                {selectedRole === 'gerente' && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    className="p-3 bg-blue-50/50 border border-blue-200/50 rounded-lg"
+                  >
+                    <p className="text-xs text-blue-700 flex items-center gap-2">
+                      <Info className="w-4 h-4" />
+                      <span>Acceso a panel ejecutivo global</span>
+                    </p>
+                  </motion.div>
+                )}
+
+                {/* Selector de tienda */}
+                {selectedRole && selectedRole !== 'gerente' && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                  >
+                    <label htmlFor="store-selector" className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">
+                      Ubicación
+                    </label>
+                    <StoreSelector
+                      selectedStore={pendingStore}
+                      onStoreChange={handleStoreSelect} />
+                  </motion.div>
+                )}
+
+                {/* Campo de contraseña */}
+                {selectedRole && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                  >
+                    <label htmlFor="login-password" className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">
+                      Contraseña
+                    </label>
+                    <div className="relative">
+                      <input
+                        id="login-password"
+                        type={showLoginPassword ? "text" : "password"}
+                        placeholder="Ingresa tu contraseña"
+                        value={loginPassword}
+                        onChange={(e) => {setLoginPassword(e.target.value);setLoginError('');}}
+                        onKeyDown={(e) => e.key === 'Enter' && !isSubmitting && handleLogin()}
+                        disabled={isSubmitting}
+                        className="w-full pl-4 pr-10 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none text-sm text-gray-900 placeholder:text-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        aria-label="Campo de contraseña"
+                        aria-invalid={!!loginError}
+                        aria-describedby={loginError ? "password-error" : undefined} />
+                      <button
+                        type="button"
+                        onClick={() => setShowLoginPassword(!showLoginPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      >
+                        {showLoginPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+
+                {loginError && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="p-3 bg-red-50/50 border border-red-200/50 rounded-lg"
+                    id="password-error"
+                    role="alert">
+                    <p className="text-red-600 text-xs flex items-center gap-2">
+                      <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
+                      {loginError}
+                    </p>
+                  </motion.div>
+                )}
+
+                {/* Botón de ingresar */}
+                <Button
+                  onClick={handleLogin}
+                  disabled={(selectedRole !== 'gerente' && !pendingStore) || !selectedRole || isSubmitting}
+                  className="w-full bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white py-3 rounded-lg font-semibold text-sm shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                >
+                  {isSubmitting ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                        className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
+                      />
+                      Ingresando...
+                    </span>
+                  ) : (
+                    'Gestionar mi punto'
+                  )}
+                </Button>
+
+                {/* Footer text */}
+                <div className="text-center space-y-2 pt-4">
                   <button 
-                    className="text-xs text-pink-600 hover:text-pink-700 hover:underline mt-2 focus-visible:ring-2 focus-visible:ring-pink-500 rounded outline-none"
-                    onClick={() => alert('Contacta a tu supervisor o escribe a soporte@popsy.com para restablecer tu contraseña.')}
+                    className="text-xs text-pink-600 hover:text-pink-700 transition-colors"
+                    onClick={() => alert('Contacta a soporte@popsy.com')}
                   >
                     ¿Problemas para acceder?
                   </button>
-                </motion.div>
-              )}
-
-              {loginError && (
-                <motion.div
-                  initial={{ opacity: 0, y: -5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg"
-                  id="password-error"
-                  role="alert">
-                  <p className="text-red-600 text-sm font-medium flex items-center gap-2">
-                    <AlertTriangle className="w-4 h-4 flex-shrink-0" />
-                    {loginError}
+                  <p className="text-[10px] text-gray-400">
+                    Al ingresar aceptas nuestros términos y políticas
                   </p>
-                </motion.div>
-              )}
-
-              {/* Contexto de confirmación */}
-              {selectedRole && (selectedRole === 'gerente' || pendingStore) && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mb-4 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
-                  <p className="text-sm text-gray-700">
-                    <span className="font-semibold text-blue-900">Entrarás como:</span>{' '}
-                    {ROLES.find(r => r.id === selectedRole)?.name}
-                    {pendingStore && (
-                      <>
-                        {' '}<span className="text-gray-400">–</span>{' '}
-                        <span className="font-medium text-blue-800">
-                          {STORES.find(s => s.code === pendingStore)?.displayName || pendingStore}
-                        </span>
-                      </>
-                    )}
-                  </p>
-                </motion.div>
-              )}
-
-              {/* Botón de ingresar dinámico */}
-              <Button
-                onClick={handleLogin}
-                disabled={(selectedRole !== 'gerente' && !pendingStore) || !selectedRole || isSubmitting}
-                className="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white py-3.5 rounded-lg font-semibold text-base shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all focus-visible:ring-2 focus-visible:ring-pink-600 focus-visible:ring-offset-2 outline-none"
-                title={!selectedRole ? "Selecciona un rol primero" : (selectedRole !== 'gerente' && !pendingStore) ? "Selecciona una tienda para continuar" : ""}
-                aria-busy={isSubmitting}>
-                {isSubmitting ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                      className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
-                    />
-                    Ingresando...
-                  </span>
-                ) : (
-                  selectedRole ? ROLES.find(r => r.id === selectedRole)?.buttonText || 'Ingresar al Dashboard' : 'Selecciona un rol'
-                )}
-              </Button>
-
-              {/* Microcopy de claridad bajo el botón */}
-              <p className="text-center text-xs text-gray-500 mt-3">
-                Tu acceso define lo que puedes ver y gestionar.
-              </p>
-
-              <p className="text-center text-xs text-gray-400 mt-4">
-                Al ingresar, aceptas nuestros términos de uso y privacidad.
-              </p>
-              
-              {/* Indicadores de seguridad */}
-              <div className="flex items-center justify-center gap-3 mt-3 text-[10px] text-gray-400">
-                <span className="flex items-center gap-1">🔒 Cifrado SSL</span>
-                <span>·</span>
-                <span className="flex items-center gap-1">🛡️ Datos protegidos</span>
-                <span>·</span>
-                <span className="flex items-center gap-1">✓ GDPR</span>
+                </div>
               </div>
             </motion.div>
           </div>
-        </motion.div>
+        </div>
 
         {/* Success Animation */}
         <AnimatePresence>
