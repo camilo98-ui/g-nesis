@@ -12,13 +12,12 @@ import DirectoryModal from '@/components/DirectoryModal';
 import DailySalesForm from '@/components/forms/DailySalesForm';
 import ShiftRecordForm from '@/components/forms/ShiftRecordForm';
 import MonthlyBudgetDashboard from '@/components/budget/MonthlyBudgetDashboard';
-import ThemeProvider, { useTheme } from '@/components/ThemeProvider';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import {
   LayoutDashboard, Users, TrendingUp,
   Award, Target, Bell, Phone, Download, FileText,
-  Lock, Eye, EyeOff, Receipt, Snowflake, Settings as SettingsIcon, AlertTriangle, CheckCircle, Info, Sun, Moon } from
+  Lock, Eye, EyeOff, Receipt, Snowflake, Settings as SettingsIcon, AlertTriangle, CheckCircle, Info } from
 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { toast } from 'sonner';
@@ -157,8 +156,7 @@ const PastelConfetti = () =>
   </div>;
 
 
-function HomeContent() {
-  const { theme, toggleTheme } = useTheme();
+export default function Home() {
   const [selectedStore, setSelectedStore] = useState('');
   const [showNotifications, setShowNotifications] = useState(false);
   const [showStory, setShowStory] = useState(false);
@@ -446,29 +444,14 @@ function HomeContent() {
   // Si no está logueado, mostrar pantalla de login
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-app transition-colors duration-200 relative overflow-hidden">
-        {/* Theme Toggle - Login Screen */}
-        <motion.button
-          onClick={toggleTheme}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          className="fixed top-4 right-4 z-50 w-12 h-12 rounded-full bg-surface border border-default shadow-card flex items-center justify-center text-brand hover:bg-brand-soft transition-all duration-200"
-          title={theme === 'light' ? 'Modo oscuro' : 'Modo claro'}
-        >
-          {theme === 'light' ? (
-            <Moon className="w-5 h-5" />
-          ) : (
-            <Sun className="w-5 h-5" />
-          )}
-        </motion.button>
-
+      <div className="min-h-screen bg-[#0F172A] relative overflow-hidden">
         <div className="flex min-h-screen">
           {/* Left Panel - Branding (60%) */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="hidden lg:flex lg:w-[60%] bg-gradient-to-br from-surface via-subtle to-surface relative p-16 flex-col justify-between overflow-hidden"
+            className="hidden lg:flex lg:w-[60%] bg-gradient-to-br from-[#111827] via-[#1F2937] to-[#111827] relative p-16 flex-col justify-between overflow-hidden"
           >
             {/* Subtle background decoration */}
             <div className="absolute inset-0 opacity-[0.03]">
@@ -539,7 +522,7 @@ function HomeContent() {
           </motion.div>
 
           {/* Right Panel - Login Card (40%) */}
-          <div className="w-full lg:w-[40%] flex items-center justify-center p-6 lg:p-12 bg-app">
+          <div className="w-full lg:w-[40%] flex items-center justify-center p-6 lg:p-12 bg-[#0F172A]">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -553,16 +536,16 @@ function HomeContent() {
               </div>
 
               {/* Login Card */}
-              <div className="bg-surface rounded-2xl shadow-card border border-default p-8 space-y-6">
+              <div className="bg-[#1F2937] rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.3)] border border-white/5 p-8 space-y-6">
                 {/* Header */}
                 <div>
-                  <h2 className="text-2xl font-bold text-primary mb-1">Iniciar sesión</h2>
-                  <p className="text-sm text-secondary">Accede a tu cuenta</p>
+                  <h2 className="text-2xl font-bold text-[#F9FAFB] mb-1">Iniciar sesión</h2>
+                  <p className="text-sm text-[#9CA3AF]">Accede a tu cuenta</p>
                 </div>
 
                 {/* Selector de Rol como Cards */}
                 <div>
-                  <label className="block text-xs font-semibold text-secondary uppercase tracking-wide mb-3">
+                  <label className="block text-xs font-semibold text-[#D1D5DB] uppercase tracking-wide mb-3">
                     Selecciona tu rol
                   </label>
                   <div className="grid grid-cols-3 gap-3">
@@ -577,19 +560,19 @@ function HomeContent() {
                           whileTap={{ scale: 0.98 }}
                           className={`relative p-4 rounded-xl border-2 transition-all text-center ${
                             isSelected
-                              ? 'border-pink-500 bg-brand-soft shadow-sm'
-                              : 'border-default bg-transparent hover:border-focus'
+                              ? 'border-pink-500 bg-pink-500/12 shadow-sm'
+                              : 'border-white/8 bg-transparent hover:border-white/15'
                           }`}
                         >
                           <div className={`w-10 h-10 rounded-lg mx-auto mb-2 flex items-center justify-center ${
-                            isSelected ? 'bg-brand-soft' : 'bg-subtle'
+                            isSelected ? 'bg-pink-500/20' : 'bg-white/5'
                           }`}>
                             <div className="w-5 h-5">
                               <RoleIcon roleId={role.id} isSelected={isSelected} />
                             </div>
                           </div>
                           <p className={`text-xs font-semibold ${
-                            isSelected ? 'text-brand' : 'text-secondary'
+                            isSelected ? 'text-pink-400' : 'text-[#D1D5DB]'
                           }`}>
                             {role.name.split(' ')[0]}
                           </p>
@@ -630,7 +613,7 @@ function HomeContent() {
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                   >
-                    <label htmlFor="store-selector" className="block text-xs font-semibold text-secondary uppercase tracking-wide mb-2">
+                    <label htmlFor="store-selector" className="block text-xs font-semibold text-[#D1D5DB] uppercase tracking-wide mb-2">
                       Ubicación
                     </label>
                     <StoreSelector
@@ -645,7 +628,7 @@ function HomeContent() {
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                   >
-                    <label htmlFor="login-password" className="block text-xs font-semibold text-secondary uppercase tracking-wide mb-2">
+                    <label htmlFor="login-password" className="block text-xs font-semibold text-[#D1D5DB] uppercase tracking-wide mb-2">
                       Contraseña
                     </label>
                     <div className="relative">
@@ -657,14 +640,14 @@ function HomeContent() {
                         onChange={(e) => {setLoginPassword(e.target.value);setLoginError('');}}
                         onKeyDown={(e) => e.key === 'Enter' && !isSubmitting && handleLogin()}
                         disabled={isSubmitting}
-                        className="w-full pl-4 pr-10 py-3 bg-app border border-default rounded-xl focus:ring-2 focus:ring-brand focus:border-brand outline-none text-sm text-primary placeholder:text-muted disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        className="w-full pl-4 pr-10 py-3 bg-[#0F172A] border border-white/10 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none text-sm text-[#F9FAFB] placeholder:text-[#6B7280] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                         aria-label="Campo de contraseña"
                         aria-invalid={!!loginError}
                         aria-describedby={loginError ? "password-error" : undefined} />
                       <button
                         type="button"
                         onClick={() => setShowLoginPassword(!showLoginPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-secondary hover:text-primary transition-colors"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#D1D5DB] transition-colors"
                       >
                         {showLoginPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
@@ -753,24 +736,9 @@ function HomeContent() {
   }
 
   return (
-    <div className="min-h-screen bg-app transition-colors duration-200 relative overflow-hidden">
+    <div className="min-h-screen bg-white relative overflow-hidden">
       <PastelConfetti />
       <FloatingIceCreamsBg />
-
-      {/* Theme Toggle - Floating Button */}
-      <motion.button
-        onClick={toggleTheme}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        className="fixed top-4 right-4 z-50 w-12 h-12 rounded-full bg-surface border border-default shadow-card flex items-center justify-center text-brand hover:bg-brand-soft transition-all duration-200"
-        title={theme === 'light' ? 'Modo oscuro' : 'Modo claro'}
-      >
-        {theme === 'light' ? (
-          <Moon className="w-5 h-5" />
-        ) : (
-          <Sun className="w-5 h-5" />
-        )}
-      </motion.button>
 
       <div className="max-w-6xl mx-auto px-4 py-6 relative z-10">
 
@@ -1282,12 +1250,4 @@ function HomeContent() {
       </AnimatePresence>
     </div>);
 
-}
-
-export default function Home() {
-  return (
-    <ThemeProvider>
-      <HomeContent />
-    </ThemeProvider>
-  );
 }
