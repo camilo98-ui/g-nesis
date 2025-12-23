@@ -6,7 +6,7 @@ import MotivationalHeader from '@/components/MotivationalHeader';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { TimeBasedThemeProvider, useTimeTheme } from '@/components/TimeBasedTheme';
 import { 
-  Home, LayoutDashboard, Menu, Snowflake, CalendarDays, TrendingUp
+  Home, LayoutDashboard, Menu, Snowflake, CalendarDays, TrendingUp, Sun, Moon, Clock
 } from 'lucide-react';
 import { Link as RouterLink } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -24,7 +24,7 @@ function LayoutContent({ children, currentPageName }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [selectedStore, setSelectedStore] = useState('');
   const [userRole, setUserRole] = useState('lider');
-  const { isDayMode } = useTimeTheme();
+  const { isDayMode, toggleTheme, isManual } = useTimeTheme();
 
   useEffect(() => {
     const saved = localStorage.getItem('selectedStore');
@@ -138,6 +138,30 @@ function LayoutContent({ children, currentPageName }) {
           <div className="flex items-center h-full">
             <SmartSearch storeId={selectedStore} />
           </div>
+
+          {/* Theme Toggle Button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleTheme}
+            className={`rounded-full transition-colors duration-700 relative ${
+              isDayMode
+                ? 'text-gray-400 hover:text-amber-500 hover:bg-amber-50'
+                : 'text-slate-400 hover:text-blue-400 hover:bg-blue-950/50'
+            }`}
+            title={isManual ? (isDayMode ? "Cambiar a modo noche" : "Cambiar a modo automático") : "Cambiar a modo manual"}
+          >
+            {isManual ? (
+              isDayMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />
+            ) : (
+              <Clock className="w-5 h-5" />
+            )}
+            {isManual && (
+              <span className={`absolute -bottom-1 -right-1 w-2 h-2 rounded-full ${
+                isDayMode ? 'bg-amber-500' : 'bg-blue-500'
+              }`} />
+            )}
+          </Button>
 
           {/* Logout Button */}
           <Button
