@@ -122,18 +122,19 @@ export default function StoreDetailModal({ store, onClose, allDailySales, dateRa
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
+        className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 overflow-y-auto"
         onClick={onClose}
       >
-        <motion.div
-          initial={{ scale: 0.9, y: 20 }}
-          animate={{ scale: 1, y: 0 }}
-          exit={{ scale: 0.9, y: 20 }}
-          onClick={(e) => e.stopPropagation()}
-          className="bg-gradient-to-br from-slate-900 to-slate-950 rounded-2xl shadow-2xl w-full max-w-6xl my-8 overflow-hidden border border-white/10"
-        >
-          {/* Header */}
-          <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-6 text-white relative overflow-hidden">
+        <div className="min-h-full flex items-center justify-center p-2 sm:p-4">
+          <motion.div
+            initial={{ scale: 0.9, y: 20 }}
+            animate={{ scale: 1, y: 0 }}
+            exit={{ scale: 0.9, y: 20 }}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-6xl my-4 sm:my-8 overflow-hidden border border-white/10"
+          >
+            {/* Header */}
+            <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-4 sm:p-6 text-white relative overflow-hidden">
             <motion.div
               animate={{ x: ['0%', '100%'] }}
               transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
@@ -141,40 +142,40 @@ export default function StoreDetailModal({ store, onClose, allDailySales, dateRa
             />
             <div className="relative z-10 flex items-center justify-between">
               <div>
-                <h2 className="text-2xl font-bold mb-1">{store.name}</h2>
-                <p className="text-purple-100 text-sm">{store.code}</p>
+                <h2 className="text-lg sm:text-2xl font-bold mb-1">{store.name}</h2>
+                <p className="text-purple-100 text-xs sm:text-sm">{store.code}</p>
               </div>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={onClose}
-                className="text-white hover:bg-white/20"
+                className="text-white hover:bg-white/20 flex-shrink-0"
               >
                 <X className="w-5 h-5" />
               </Button>
             </div>
           </div>
 
-          <div className="p-6 max-h-[80vh] overflow-y-auto">
+          <div className="p-3 sm:p-6">
             {/* Listado de Días con Tendencias */}
-            <div className="mb-8">
-              <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-purple-400" />
+            <div className="mb-6 sm:mb-8">
+              <h3 className="text-base sm:text-lg font-bold text-white mb-3 sm:mb-4 flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
                 Desempeño Diario
               </h3>
-              <div className="grid grid-cols-1 gap-2 max-h-[300px] overflow-y-auto pr-2">
+              <div className="grid grid-cols-1 gap-2 max-h-[250px] sm:max-h-[300px] overflow-y-auto pr-1 sm:pr-2">
                 {dailyData.filter(d => d.sales > 0).map((day, idx) => (
                   <motion.div
                     key={day.fullDate}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: idx * 0.03 }}
-                    className="bg-white/5 backdrop-blur-xl rounded-xl p-4 border border-white/10 hover:bg-white/10 transition-all"
+                    className="bg-white/5 backdrop-blur-xl rounded-lg sm:rounded-xl p-3 sm:p-4 border border-white/10 hover:bg-white/10 transition-all"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <p className="text-sm font-bold text-white capitalize">{day.dayOfWeek}</p>
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
+                          <p className="text-xs sm:text-sm font-bold text-white capitalize">{day.dayOfWeek}</p>
                           <p className="text-xs text-slate-400">{day.date}</p>
                           {day.trend !== 0 && (
                             <motion.div
@@ -198,27 +199,27 @@ export default function StoreDetailModal({ store, onClose, allDailySales, dateRa
                             </motion.div>
                           )}
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-2 gap-2 sm:gap-4">
                           <div>
-                            <p className="text-xs text-slate-400 mb-1">PPT Día</p>
-                            <p className="text-sm font-bold text-slate-300">{formatCurrency(dailyBudget)}</p>
+                            <p className="text-[10px] sm:text-xs text-slate-400 mb-1">PPT Día</p>
+                            <p className="text-xs sm:text-sm font-bold text-slate-300">{formatCurrency(dailyBudget)}</p>
                           </div>
                           <div>
-                            <p className="text-xs text-slate-400 mb-1">Venta Real</p>
-                            <p className="text-sm font-bold text-white">{formatCurrency(day.sales)}</p>
+                            <p className="text-[10px] sm:text-xs text-slate-400 mb-1">Venta Real</p>
+                            <p className="text-xs sm:text-sm font-bold text-white">{formatCurrency(day.sales)}</p>
                           </div>
                         </div>
-                        <div className="mt-3">
+                        <div className="mt-2 sm:mt-3">
                           <div className="flex items-center justify-between mb-1">
-                            <span className="text-xs text-slate-400">Cumplimiento</span>
-                            <p className={`text-lg font-black tabular-nums ${
+                            <span className="text-[10px] sm:text-xs text-slate-400">Cumplimiento</span>
+                            <p className={`text-base sm:text-lg font-black tabular-nums ${
                               day.dailyCompliance >= 100 ? 'text-emerald-400' :
                               day.dailyCompliance >= 70 ? 'text-amber-400' : 'text-red-400'
                             }`}>
                               {day.dailyCompliance.toFixed(0)}%
                             </p>
                           </div>
-                          <div className="w-full bg-white/10 rounded-full h-1.5 overflow-hidden">
+                          <div className="w-full bg-white/10 rounded-full h-1 sm:h-1.5 overflow-hidden">
                             <motion.div
                               initial={{ width: 0 }}
                               animate={{ width: `${Math.min(day.dailyCompliance, 100)}%` }}
@@ -229,7 +230,7 @@ export default function StoreDetailModal({ store, onClose, allDailySales, dateRa
                               }`}
                             />
                           </div>
-                          <p className={`text-xs font-semibold mt-1 text-right ${
+                          <p className={`text-[10px] sm:text-xs font-semibold mt-1 text-right ${
                             day.gap <= 0 ? 'text-emerald-400' : 'text-red-400'
                           }`}>
                             {day.gap <= 0 ? 'Superó por ' : 'Faltó '}{formatCurrency(Math.abs(day.gap))}
@@ -243,12 +244,12 @@ export default function StoreDetailModal({ store, onClose, allDailySales, dateRa
             </div>
 
             {/* KPIs Interactivos */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
               <motion.button
                 whileHover={{ scale: 1.03, y: -4 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setActiveMetric('ventas')}
-                className={`relative overflow-hidden rounded-2xl p-5 transition-all duration-300 group ${
+                className={`relative overflow-hidden rounded-xl sm:rounded-2xl p-4 sm:p-5 transition-all duration-300 group ${
                   activeMetric === 'ventas'
                     ? 'bg-gradient-to-br from-blue-500 to-indigo-600 shadow-xl shadow-blue-500/30'
                     : 'bg-white/5 hover:bg-white/10 border-2 border-white/10 hover:border-blue-500/30'
@@ -262,24 +263,24 @@ export default function StoreDetailModal({ store, onClose, allDailySales, dateRa
                   }`}
                 />
                 <div className="relative z-10">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className={`p-3 rounded-xl ${
+                  <div className="flex items-center justify-between mb-2 sm:mb-3">
+                    <div className={`p-2 sm:p-3 rounded-lg sm:rounded-xl ${
                       activeMetric === 'ventas' ? 'bg-white/20 backdrop-blur-sm' : 'bg-white/10'
                     }`}>
-                      <DollarSign className={`w-5 h-5 ${activeMetric === 'ventas' ? 'text-white' : 'text-blue-400'}`} />
+                      <DollarSign className={`w-4 h-4 sm:w-5 sm:h-5 ${activeMetric === 'ventas' ? 'text-white' : 'text-blue-400'}`} />
                     </div>
-                    <ChevronRight className={`w-5 h-5 transition-transform ${
+                    <ChevronRight className={`w-4 h-4 sm:w-5 sm:h-5 transition-transform ${
                       activeMetric === 'ventas' ? 'text-white translate-x-0' : 'text-slate-400 -translate-x-2 opacity-0 group-hover:translate-x-0 group-hover:opacity-100'
                     }`} />
                   </div>
-                  <p className={`text-xs font-bold mb-2 ${activeMetric === 'ventas' ? 'text-white/80' : 'text-slate-400'}`}>
+                  <p className={`text-[10px] sm:text-xs font-bold mb-1 sm:mb-2 ${activeMetric === 'ventas' ? 'text-white/80' : 'text-slate-400'}`}>
                     💰 VENTAS TOTALES
                   </p>
-                  <p className={`text-2xl font-black mb-1 ${activeMetric === 'ventas' ? 'text-white' : 'text-white'}`}>
+                  <p className={`text-lg sm:text-2xl font-black mb-1 ${activeMetric === 'ventas' ? 'text-white' : 'text-white'}`}>
                     {formatCurrency(totals.totalSales)}
                   </p>
                   <div className="flex items-center gap-2">
-                    <div className={`flex-1 h-1.5 rounded-full overflow-hidden ${
+                    <div className={`flex-1 h-1 sm:h-1.5 rounded-full overflow-hidden ${
                       activeMetric === 'ventas' ? 'bg-white/20' : 'bg-white/10'
                     }`}>
                       <motion.div
@@ -289,7 +290,7 @@ export default function StoreDetailModal({ store, onClose, allDailySales, dateRa
                         className={activeMetric === 'ventas' ? 'h-full bg-white' : 'h-full bg-blue-500'}
                       />
                     </div>
-                    <p className={`text-xs font-semibold ${activeMetric === 'ventas' ? 'text-white/90' : 'text-slate-300'}`}>
+                    <p className={`text-[10px] sm:text-xs font-semibold whitespace-nowrap ${activeMetric === 'ventas' ? 'text-white/90' : 'text-slate-300'}`}>
                       {formatCurrency(totals.avgDailySales)}/día
                     </p>
                   </div>
@@ -300,7 +301,7 @@ export default function StoreDetailModal({ store, onClose, allDailySales, dateRa
                 whileHover={{ scale: 1.03, y: -4 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setActiveMetric('transacciones')}
-                className={`relative overflow-hidden rounded-2xl p-5 transition-all duration-300 group ${
+                className={`relative overflow-hidden rounded-xl sm:rounded-2xl p-4 sm:p-5 transition-all duration-300 group ${
                   activeMetric === 'transacciones'
                     ? 'bg-gradient-to-br from-amber-500 to-orange-600 shadow-xl shadow-amber-500/30'
                     : 'bg-white/5 hover:bg-white/10 border-2 border-white/10 hover:border-amber-500/30'
@@ -352,7 +353,7 @@ export default function StoreDetailModal({ store, onClose, allDailySales, dateRa
                 whileHover={{ scale: 1.03, y: -4 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setActiveMetric('ticket')}
-                className={`relative overflow-hidden rounded-2xl p-5 transition-all duration-300 group ${
+                className={`relative overflow-hidden rounded-xl sm:rounded-2xl p-4 sm:p-5 transition-all duration-300 group ${
                   activeMetric === 'ticket'
                     ? 'bg-gradient-to-br from-emerald-500 to-green-600 shadow-xl shadow-emerald-500/30'
                     : 'bg-white/5 hover:bg-white/10 border-2 border-white/10 hover:border-emerald-500/30'
@@ -411,24 +412,24 @@ export default function StoreDetailModal({ store, onClose, allDailySales, dateRa
                 transition={{ duration: 0.3 }}
               >
                 <Card className="border-white/10 shadow-lg bg-white/5 backdrop-blur-xl">
-                  <CardHeader className={`bg-gradient-to-r ${
+                  <CardHeader className={`bg-gradient-to-r p-4 sm:p-6 ${
                     activeMetric === 'ventas' ? 'from-blue-500 to-indigo-600' :
                     activeMetric === 'transacciones' ? 'from-amber-500 to-orange-600' :
                     'from-emerald-500 to-green-600'
                   }`}>
-                    <CardTitle className="text-lg font-bold text-white flex items-center gap-2">
+                    <CardTitle className="text-sm sm:text-lg font-bold text-white flex items-center gap-2">
                       {activeMetric === 'ventas' && '💰 Análisis Detallado: Ventas vs Promedio Diario'}
                       {activeMetric === 'transacciones' && '⚡ Análisis Detallado: Transacciones vs Objetivos'}
                       {activeMetric === 'ticket' && '🎯 Análisis Detallado: Ticket Promedio vs Tendencia'}
                     </CardTitle>
-                    <p className="text-sm text-white/80 mt-1">
+                    <p className="text-xs sm:text-sm text-white/80 mt-1">
                       {activeMetric === 'ventas' && `Comparación de ventas diarias contra el promedio de ${formatCurrency(totals.avgDailySales)}`}
                       {activeMetric === 'transacciones' && `Evolución de transacciones y su impacto en los resultados totales`}
                       {activeMetric === 'ticket' && `Comportamiento del ticket promedio y su relación con las ventas`}
                     </p>
                   </CardHeader>
-                  <CardContent className="pt-6">
-                    <ResponsiveContainer width="100%" height={350}>
+                  <CardContent className="pt-4 sm:pt-6 p-2 sm:p-6">
+                    <ResponsiveContainer width="100%" height={300}>
                       {activeMetric === 'ventas' && (
                         <ComposedChart data={dailyData}>
                           <defs>
@@ -551,7 +552,8 @@ export default function StoreDetailModal({ store, onClose, allDailySales, dateRa
               </motion.div>
             </AnimatePresence>
           </div>
-        </motion.div>
+          </motion.div>
+        </div>
       </motion.div>
     </AnimatePresence>
   );
