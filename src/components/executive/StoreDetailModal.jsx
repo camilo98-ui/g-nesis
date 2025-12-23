@@ -198,37 +198,42 @@ export default function StoreDetailModal({ store, onClose, allDailySales, dateRa
                             </motion.div>
                           )}
                         </div>
-                        <div className="flex items-center gap-4">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="text-xs text-slate-400">Venta:</span>
-                              <span className="text-sm font-bold text-white">{formatCurrency(day.sales)}</span>
-                            </div>
-                            <div className="w-full bg-white/10 rounded-full h-1 overflow-hidden">
-                              <motion.div
-                                initial={{ width: 0 }}
-                                animate={{ width: `${Math.min(day.dailyCompliance, 100)}%` }}
-                                transition={{ duration: 0.6, delay: idx * 0.03 }}
-                                className={`h-full ${
-                                  day.dailyCompliance >= 100 ? 'bg-emerald-500' :
-                                  day.dailyCompliance >= 70 ? 'bg-amber-500' : 'bg-red-500'
-                                }`}
-                              />
-                            </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <p className="text-xs text-slate-400 mb-1">PPT Día</p>
+                            <p className="text-sm font-bold text-slate-300">{formatCurrency(dailyBudget)}</p>
                           </div>
-                          <div className="text-right">
-                            <p className={`text-xl font-black tabular-nums ${
+                          <div>
+                            <p className="text-xs text-slate-400 mb-1">Venta Real</p>
+                            <p className="text-sm font-bold text-white">{formatCurrency(day.sales)}</p>
+                          </div>
+                        </div>
+                        <div className="mt-3">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-xs text-slate-400">Cumplimiento</span>
+                            <p className={`text-lg font-black tabular-nums ${
                               day.dailyCompliance >= 100 ? 'text-emerald-400' :
                               day.dailyCompliance >= 70 ? 'text-amber-400' : 'text-red-400'
                             }`}>
                               {day.dailyCompliance.toFixed(0)}%
                             </p>
-                            <p className={`text-xs font-semibold ${
-                              day.gap <= 0 ? 'text-emerald-400' : 'text-red-400'
-                            }`}>
-                              {day.gap <= 0 ? '+' : ''}{formatCurrency(-day.gap)}
-                            </p>
                           </div>
+                          <div className="w-full bg-white/10 rounded-full h-1.5 overflow-hidden">
+                            <motion.div
+                              initial={{ width: 0 }}
+                              animate={{ width: `${Math.min(day.dailyCompliance, 100)}%` }}
+                              transition={{ duration: 0.6, delay: idx * 0.03 }}
+                              className={`h-full ${
+                                day.dailyCompliance >= 100 ? 'bg-emerald-500' :
+                                day.dailyCompliance >= 70 ? 'bg-amber-500' : 'bg-red-500'
+                              }`}
+                            />
+                          </div>
+                          <p className={`text-xs font-semibold mt-1 text-right ${
+                            day.gap <= 0 ? 'text-emerald-400' : 'text-red-400'
+                          }`}>
+                            {day.gap <= 0 ? 'Superó por ' : 'Faltó '}{formatCurrency(Math.abs(day.gap))}
+                          </p>
                         </div>
                       </div>
                     </div>
