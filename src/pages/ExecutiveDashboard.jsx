@@ -1233,12 +1233,13 @@ INSTRUCCIONES:
                   </p>
                   <p className="text-xs text-gray-500 mb-3">Month-end forecast</p>
                   <div className="text-xs bg-violet-50 text-violet-700 font-semibold px-3 py-2 rounded-lg inline-flex items-center gap-1">
-                    <TrendingUp className="w-3 h-3" />
-                    {zoneStatus.projectionCompliance.toFixed(0)}% goal achievement
+                   <TrendingUp className="w-3 h-3" />
+                   {zoneStatus.projectionCompliance.toFixed(0)}% goal achievement
                   </div>
-              </div>
-            </>
-          )}
+                  </motion.div>
+                  </div>
+                  </>
+                  )}
 
           {/* Acciones Prioritarias Hoy */}
           {!isLoading && (
