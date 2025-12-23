@@ -14,8 +14,10 @@ import StoreDetailModal from '../components/executive/StoreDetailModal';
 import KPIDetailModal from '../components/executive/KPIDetailModal';
 import ExecutiveComparable from '../components/executive/ExecutiveComparable';
 import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, ResponsiveContainer } from 'recharts';
+import { useTimeTheme } from '@/components/TimeBasedTheme';
 
 export default function ExecutiveDashboard() {
+  const { isDayMode } = useTimeTheme();
   const [dateRange, setDateRange] = useState({ from: startOfMonth(new Date()), to: new Date() });
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStoreDetail, setSelectedStoreDetail] = useState(null);
@@ -327,7 +329,11 @@ Genera:
   }, [storesAnalysis]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden">
+    <div className={`min-h-screen relative overflow-hidden transition-colors duration-700 ${
+      isDayMode
+        ? 'bg-gradient-to-br from-slate-50 via-white to-pink-50/30'
+        : 'bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950'
+    }`}>
       {/* Animated Background */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <motion.div
@@ -360,9 +366,13 @@ Genera:
       <Link to={createPageUrl('Home')}>
         <motion.div
           whileHover={{ scale: 1.05, x: -3 }}
-          className="fixed left-8 top-8 w-11 h-11 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 hover:bg-white/20 flex items-center justify-center transition-all cursor-pointer z-50"
+          className={`fixed left-4 sm:left-8 top-8 w-11 h-11 rounded-full backdrop-blur-xl border transition-all cursor-pointer z-50 flex items-center justify-center ${
+            isDayMode
+              ? 'bg-white/80 border-gray-200 hover:bg-white shadow-md'
+              : 'bg-white/10 border-white/20 hover:bg-white/20'
+          }`}
         >
-          <ArrowLeft className="w-5 h-5 text-white" />
+          <ArrowLeft className={`w-5 h-5 ${isDayMode ? 'text-gray-700' : 'text-white'}`} />
         </motion.div>
       </Link>
 
