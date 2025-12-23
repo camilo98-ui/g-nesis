@@ -451,12 +451,11 @@ export default function Home() {
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="hidden lg:flex lg:w-[60%] bg-gradient-to-br from-pink-50/40 via-white to-pink-50/30 relative p-16 flex-col justify-between overflow-hidden"
+            className="hidden lg:flex lg:w-[60%] bg-gradient-to-br from-pink-50/70 via-white to-white relative p-16 flex-col justify-between overflow-hidden"
           >
             {/* Subtle background decoration */}
-            <div className="absolute inset-0 opacity-[0.03]">
-              <div className="absolute top-20 left-20 w-96 h-96 bg-pink-500 rounded-full blur-3xl" />
-              <div className="absolute bottom-20 right-20 w-96 h-96 bg-pink-400 rounded-full blur-3xl" />
+            <div className="absolute inset-0 opacity-[0.015]">
+              <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-pink-500 rounded-full blur-3xl" />
             </div>
 
             {/* Content */}
@@ -483,8 +482,8 @@ export default function Home() {
                   <span className="text-pink-600">Popsy Management</span>
                 </h1>
                 
-                <p className="text-xl text-gray-600 leading-relaxed">
-                  Plataforma empresarial de análisis en tiempo real para equipos de alto rendimiento
+                <p className="text-lg text-gray-600 leading-relaxed">
+                  Gestión empresarial en tiempo real
                 </p>
 
                 {/* Feature list */}
@@ -516,9 +515,9 @@ export default function Home() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 1 }}
-              className="relative z-10 text-sm text-gray-500"
+              className="relative z-10 text-xs text-gray-400 opacity-60"
             >
-              © 2025 Popsy Management. Todos los derechos reservados.
+              © 2025 Popsy Management
             </motion.div>
           </motion.div>
 
@@ -537,11 +536,11 @@ export default function Home() {
               </div>
 
               {/* Login Card */}
-              <div className="bg-white rounded-2xl shadow-xl border border-gray-100/50 p-8 space-y-6">
+              <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-gray-100/50 p-8 space-y-6">
                 {/* Header */}
-                <div className="mb-6">
+                <div>
                   <h2 className="text-2xl font-bold text-gray-900 mb-1">Iniciar sesión</h2>
-                  <p className="text-sm text-gray-500">Selecciona tu rol y ubicación</p>
+                  <p className="text-sm text-gray-500">Accede a tu cuenta</p>
                 </div>
 
                 {/* Selector de Rol como Cards */}
@@ -549,7 +548,7 @@ export default function Home() {
                   <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-3">
                     Selecciona tu rol
                   </label>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-3 gap-3">
                     {ROLES.map((role) => {
                       const isSelected = selectedRole === role.id;
                       
@@ -559,21 +558,21 @@ export default function Home() {
                           onClick={() => {setSelectedRole(role.id);setLoginError('');}}
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
-                          className={`relative p-3 rounded-xl border-2 transition-all text-center ${
+                          className={`relative p-4 rounded-xl border-2 transition-all text-center ${
                             isSelected
-                              ? 'border-pink-500 bg-pink-50 shadow-md'
+                              ? 'border-pink-500 bg-[#FFF5FA] shadow-sm'
                               : 'border-gray-200 bg-white hover:border-gray-300'
                           }`}
                         >
                           <div className={`w-10 h-10 rounded-lg mx-auto mb-2 flex items-center justify-center ${
-                            isSelected ? 'bg-pink-100' : 'bg-gray-100'
+                            isSelected ? 'bg-pink-100' : 'bg-gray-50'
                           }`}>
                             <div className="w-5 h-5">
                               <RoleIcon roleId={role.id} isSelected={isSelected} />
                             </div>
                           </div>
                           <p className={`text-xs font-semibold ${
-                            isSelected ? 'text-pink-900' : 'text-gray-700'
+                            isSelected ? 'text-pink-700' : 'text-gray-700'
                           }`}>
                             {role.name.split(' ')[0]}
                           </p>
@@ -581,7 +580,7 @@ export default function Home() {
                             <motion.div
                               initial={{ scale: 0 }}
                               animate={{ scale: 1 }}
-                              className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-pink-500 flex items-center justify-center shadow"
+                              className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-pink-500 flex items-center justify-center shadow-sm"
                             >
                               <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
@@ -641,7 +640,7 @@ export default function Home() {
                         onChange={(e) => {setLoginPassword(e.target.value);setLoginError('');}}
                         onKeyDown={(e) => e.key === 'Enter' && !isSubmitting && handleLogin()}
                         disabled={isSubmitting}
-                        className="w-full pl-4 pr-10 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none text-sm text-gray-900 placeholder:text-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        className="w-full pl-4 pr-10 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none text-sm text-gray-900 placeholder:text-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                         aria-label="Campo de contraseña"
                         aria-invalid={!!loginError}
                         aria-describedby={loginError ? "password-error" : undefined} />
@@ -674,7 +673,7 @@ export default function Home() {
                 <Button
                   onClick={handleLogin}
                   disabled={(selectedRole !== 'gerente' && !pendingStore) || !selectedRole || isSubmitting}
-                  className="w-full bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white py-3 rounded-lg font-semibold text-sm shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  className="w-full bg-gradient-to-b from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white py-3 rounded-xl font-semibold text-sm shadow-[0_4px_14px_rgba(236,72,153,0.25)] hover:shadow-[0_6px_20px_rgba(236,72,153,0.3)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 >
                   {isSubmitting ? (
                     <span className="flex items-center justify-center gap-2">
@@ -691,14 +690,14 @@ export default function Home() {
                 </Button>
 
                 {/* Footer text */}
-                <div className="text-center space-y-2 pt-4">
+                <div className="text-center space-y-2 pt-2">
                   <button 
                     className="text-xs text-pink-600 hover:text-pink-700 transition-colors"
                     onClick={() => alert('Contacta a soporte@popsy.com')}
                   >
                     ¿Problemas para acceder?
                   </button>
-                  <p className="text-[10px] text-gray-400">
+                  <p className="text-[10px] text-gray-400 opacity-60">
                     Al ingresar aceptas nuestros términos y políticas
                   </p>
                 </div>
