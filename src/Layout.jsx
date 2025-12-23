@@ -4,7 +4,7 @@ import { createPageUrl } from '@/utils';
 import SmartSearch from '@/components/SmartSearch';
 import MotivationalHeader from '@/components/MotivationalHeader';
 import ErrorBoundary from '@/components/ErrorBoundary';
-import { useTheme } from '@/components/ThemeProvider';
+import ThemeProvider, { useTheme } from '@/components/ThemeProvider';
 import { 
   Home, LayoutDashboard, Menu, Snowflake, CalendarDays, TrendingUp, Sun, Moon
 } from 'lucide-react';
@@ -20,7 +20,7 @@ const NAV_ITEMS = [
   { name: 'Planner', page: 'PopsyPlanner', icon: CalendarDays, isIcon: true },
 ];
 
-export default function Layout({ children, currentPageName }) {
+function LayoutContent({ children, currentPageName }) {
   const { theme, toggleTheme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [selectedStore, setSelectedStore] = useState('');
@@ -244,5 +244,13 @@ export default function Layout({ children, currentPageName }) {
         </motion.main>
       </div>
     </ErrorBoundary>
-  );
-}
+    );
+    }
+
+    export default function Layout({ children, currentPageName }) {
+    return (
+    <ThemeProvider>
+    <LayoutContent children={children} currentPageName={currentPageName} />
+    </ThemeProvider>
+    );
+    }
