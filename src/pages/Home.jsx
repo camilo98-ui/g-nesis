@@ -174,6 +174,8 @@ export default function Home() {
   const [salesTab, setSalesTab] = useState('tienda');
   const [showBudgetDashboard, setShowBudgetDashboard] = useState(false);
   const [backupLoading, setBackupLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loginSuccess, setLoginSuccess] = useState(false);
 
   const ROLES = [
   { 
@@ -354,11 +356,16 @@ export default function Home() {
     setLoginError('');
   };
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
       if (!selectedRole) {
         setLoginError('Selecciona un rol');
         return;
       }
+
+      setIsSubmitting(true);
+
+      // Simular delay mínimo para mostrar loading
+      await new Promise(resolve => setTimeout(resolve, 400));
 
       // Guardar último rol usado
       localStorage.setItem('lastSelectedRole', selectedRole);
@@ -368,11 +375,16 @@ export default function Home() {
         if (loginPassword === '1998') {
           localStorage.setItem('userRole', selectedRole);
           localStorage.setItem('popsySession', JSON.stringify({ role: selectedRole, time: Date.now() }));
-          // Redirigir inmediatamente al panel ejecutivo
-          window.location.href = createPageUrl('ExecutiveDashboard');
+          
+          // Mostrar éxito antes de redirigir
+          setLoginSuccess(true);
+          setTimeout(() => {
+            window.location.href = createPageUrl('ExecutiveDashboard');
+          }, 800);
           return;
         } else {
           setLoginError('Contraseña de gerente incorrecta');
+          setIsSubmitting(false);
           return;
         }
       }
@@ -380,22 +392,29 @@ export default function Home() {
     // Para otros roles: validar contraseña de tienda
     if (!pendingStore) {
       setLoginError('Selecciona una tienda');
+      setIsSubmitting(false);
       return;
     }
 
     const storePassword = storePasswords.find((p) => p.store_code === pendingStore);
 
     if (!storePassword?.password || loginPassword === storePassword.password) {
-      setSelectedStore(pendingStore);
-      setIsLoggedIn(true);
-      localStorage.setItem('selectedStore', pendingStore);
-      localStorage.setItem('userRole', selectedRole);
-      localStorage.setItem('popsySession', JSON.stringify({ store: pendingStore, role: selectedRole, time: Date.now() }));
-      setShowWelcome(true);
-      setPendingStore('');
-      setLoginPassword('');
+      setLoginSuccess(true);
+      
+      setTimeout(() => {
+        setSelectedStore(pendingStore);
+        setIsLoggedIn(true);
+        localStorage.setItem('selectedStore', pendingStore);
+        localStorage.setItem('userRole', selectedRole);
+        localStorage.setItem('popsySession', JSON.stringify({ store: pendingStore, role: selectedRole, time: Date.now() }));
+        setShowWelcome(true);
+        setPendingStore('');
+        setLoginPassword('');
+        setIsSubmitting(false);
+      }, 800);
     } else {
       setLoginError('Contraseña incorrecta');
+      setIsSubmitting(false);
     }
   };
 
@@ -426,9 +445,9 @@ export default function Home() {
   if (!isLoggedIn) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-pink-50/30 relative overflow-hidden flex items-center justify-center p-4">
-        {/* Fondo geométrico sofisticado con alto contraste */}
+        {/* Fondo geométrico sofisticado optimizado */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          {/* Gradientes grandes y vibrantes */}
+          {/* Gradientes principales - opacidad reducida */}
           <motion.div
             animate={{
               scale: [1, 1.15, 1],
@@ -436,7 +455,7 @@ export default function Home() {
               y: [-30, 30, -30]
             }}
             transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-0 right-0 w-[700px] h-[700px] bg-gradient-to-br from-pink-300/70 via-rose-400/50 to-purple-300/60 rounded-full blur-3xl"
+            className="absolute top-0 right-0 w-[700px] h-[700px] bg-gradient-to-br from-pink-300/35 via-rose-400/25 to-purple-300/30 rounded-full blur-3xl"
           />
           <motion.div
             animate={{
@@ -445,82 +464,42 @@ export default function Home() {
               y: [30, -30, 30]
             }}
             transition={{ duration: 25, repeat: Infinity, ease: "easeInOut", delay: 5 }}
-            className="absolute bottom-0 left-0 w-[800px] h-[800px] bg-gradient-to-tr from-violet-300/70 via-purple-400/50 to-pink-300/60 rounded-full blur-3xl"
+            className="absolute bottom-0 left-0 w-[800px] h-[800px] bg-gradient-to-tr from-violet-300/35 via-purple-400/25 to-pink-300/30 rounded-full blur-3xl"
           />
 
-          {/* Grid de líneas con más contraste */}
+          {/* Grid sutil */}
           <div
-            className="absolute inset-0 opacity-30"
+            className="absolute inset-0 opacity-15"
             style={{
               backgroundImage: `
-                linear-gradient(to right, rgba(236, 72, 153, 0.25) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(139, 92, 246, 0.25) 1px, transparent 1px)
+                linear-gradient(to right, rgba(236, 72, 153, 0.15) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(139, 92, 246, 0.15) 1px, transparent 1px)
               `,
               backgroundSize: '80px 80px'
             }}
           />
 
-          {/* Formas geométricas con bordes más visibles */}
+          {/* Forma geométrica principal */}
           <motion.div
             animate={{ 
               y: [0, -40, 0],
               rotate: [0, 360, 720],
-              opacity: [0.4, 0.6, 0.4]
+              opacity: [0.25, 0.4, 0.25]
             }}
             transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-1/4 right-1/5 w-72 h-72 border-4 border-pink-400/60 rounded-3xl backdrop-blur-sm shadow-2xl"
+            className="absolute top-1/4 right-1/5 w-72 h-72 border-4 border-pink-400/40 rounded-3xl backdrop-blur-sm shadow-2xl"
             style={{
-              background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.15), rgba(168, 85, 247, 0.15))'
-            }}
-          />
-          <motion.div
-            animate={{ 
-              y: [0, 50, 0],
-              rotate: [0, -360, -720],
-              opacity: [0.4, 0.6, 0.4]
-            }}
-            transition={{ duration: 25, repeat: Infinity, ease: "easeInOut", delay: 3 }}
-            className="absolute bottom-1/4 left-1/6 w-96 h-96 border-4 border-violet-400/60 rounded-full backdrop-blur-sm shadow-2xl"
-            style={{
-              background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(236, 72, 153, 0.15))'
+              background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.1), rgba(168, 85, 247, 0.1))'
             }}
           />
 
-          {/* Círculos decorativos más brillantes */}
-          <motion.div
-            animate={{ 
-              scale: [1, 1.5, 1],
-              opacity: [0.4, 0.7, 0.4]
-            }}
-            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-1/3 left-1/3 w-40 h-40 bg-pink-400/40 rounded-full blur-2xl"
-          />
-          <motion.div
-            animate={{ 
-              scale: [1, 1.5, 1],
-              opacity: [0.4, 0.7, 0.4]
-            }}
-            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-            className="absolute bottom-1/3 right-1/3 w-48 h-48 bg-violet-400/40 rounded-full blur-2xl"
-          />
-
-          {/* Líneas diagonales más notorias */}
-          <motion.div
-            animate={{ x: [-100, 100, -100], opacity: [0.12, 0.25, 0.12] }}
-            transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-            className="absolute inset-0"
-            style={{
-              backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 80px, rgba(236, 72, 153, 0.2) 80px, rgba(236, 72, 153, 0.2) 160px)',
-            }}
-          />
-
-          {/* Efecto de brillo más intenso */}
+          {/* Efecto de brillo suave */}
           <motion.div
             animate={{
               backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
             }}
             transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent bg-[length:200%_100%]"
+            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent bg-[length:200%_100%]"
           />
         </div>
         
@@ -530,7 +509,7 @@ export default function Home() {
           transition={{ duration: 0.6 }}
           className="relative z-10 w-full max-w-5xl">
 
-          <div className="grid md:grid-cols-2 gap-8 items-center">
+          <div className="grid md:grid-cols-2 gap-6 md:gap-8 lg:gap-12 items-center">
             {/* Panel Izquierdo - Branding */}
             <motion.div
               initial={{ opacity: 0, x: -30 }}
@@ -540,7 +519,7 @@ export default function Home() {
 
               <motion.img
                 src={LOGO_URL}
-                alt="Popsy"
+                alt="Popsy - Plataforma de gestión retail"
                 className="h-32 object-contain mx-auto md:mx-0 cursor-pointer drop-shadow-lg"
                 initial={{ opacity: 0, scale: 0.5 }}
                 animate={{
@@ -556,6 +535,10 @@ export default function Home() {
                 whileHover={{ scale: 1.08, rotate: [0, -2, 2, 0] }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setShowStory(true)} />
+              
+              <p className="text-xs text-gray-500 text-center md:text-left -mt-2">
+                Ice Cream Retail Analytics Platform
+              </p>
 
               <div>
                 <h1 className="text-4xl md:text-5xl font-black text-gray-900 mb-3 leading-tight">
@@ -605,7 +588,7 @@ export default function Home() {
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3, duration: 0.6 }}
-              className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
+              className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
 
               <div className="mb-6">
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">Iniciar sesión</h2>
@@ -634,13 +617,16 @@ export default function Home() {
                       whileHover={{ scale: isSelected ? 1.02 : 1.01 }}
                       whileTap={{ scale: 0.99 }}
                       onClick={() => {setSelectedRole(role.id);setLoginError('');}}
-                      className={`relative w-full p-4 rounded-xl transition-all duration-150 text-left ${
+                      className={`relative w-full p-4 rounded-xl transition-all duration-150 text-left focus-visible:ring-2 focus-visible:ring-pink-500 outline-none ${
                         isSelected
                           ? 'border-2 border-pink-500 bg-pink-50 shadow-lg'
                           : isRecommended
                             ? 'border-2 border-amber-300 bg-gradient-to-br from-amber-50 to-yellow-50/50 shadow-md hover:border-amber-400'
-                            : 'border-2 border-gray-200 bg-white hover:border-gray-300 hover:shadow'
-                      }`}>
+                            : 'border-2 border-gray-200 bg-white hover:border-gray-300 hover:shadow-md'
+                      }`}
+                      aria-label={`Seleccionar rol ${role.name}`}
+                      role="radio"
+                      aria-checked={isSelected}>
 
                       {isRecommended && !isSelected && (
                         <>
@@ -673,7 +659,7 @@ export default function Home() {
                             {role.name}
                           </p>
                           <p className={`text-xs leading-snug ${
-                            isSelected ? 'text-pink-800' : isRecommended ? 'text-amber-700' : 'text-gray-600'
+                            isSelected ? 'text-pink-800' : isRecommended ? 'text-amber-700' : 'text-gray-700'
                           }`}>
                             {role.description}
                           </p>
@@ -700,18 +686,38 @@ export default function Home() {
                 Puedes cambiar tu rol más adelante si es necesario.
               </p>
 
+              {/* Info para gerente */}
+              {selectedRole === 'gerente' && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg"
+                >
+                  <p className="text-xs text-blue-700 flex items-center gap-2">
+                    <span className="text-base">ℹ️</span>
+                    <span className="font-medium">Acceso a panel ejecutivo global, sin necesidad de seleccionar tienda</span>
+                  </p>
+                </motion.div>
+              )}
+
               {/* Selector de tienda */}
               {selectedRole && selectedRole !== 'gerente' && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   className="mb-4">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label htmlFor="store-selector" className="block text-sm font-semibold text-gray-700 mb-2">
                     Selecciona tu tienda
                   </label>
                   <StoreSelector
                     selectedStore={pendingStore}
                     onStoreChange={handleStoreSelect} />
+                  {!pendingStore && (
+                    <p className="text-xs text-amber-600 mt-1.5 flex items-center gap-1">
+                      <AlertTriangle className="w-3 h-3" />
+                      Requerido para continuar
+                    </p>
+                  )}
                 </motion.div>
               )}
 
@@ -721,25 +727,38 @@ export default function Home() {
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   className="mb-4">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label htmlFor="login-password" className="block text-sm font-semibold text-gray-700 mb-2">
                     Contraseña
                   </label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <input
+                      id="login-password"
                       type={showLoginPassword ? "text" : "password"}
                       placeholder={isGerente ? "Contraseña de gerente" : needsPassword ? "Ingresa contraseña" : "Sin contraseña"}
                       value={loginPassword}
                       onChange={(e) => {setLoginPassword(e.target.value);setLoginError('');}}
-                      onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-                      className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent outline-none text-gray-900" />
+                      onKeyDown={(e) => e.key === 'Enter' && !isSubmitting && handleLogin()}
+                      disabled={isSubmitting}
+                      className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent outline-none text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                      aria-label="Campo de contraseña"
+                      aria-invalid={!!loginError}
+                      aria-describedby={loginError ? "password-error" : undefined} />
                     <button
                       type="button"
                       onClick={() => setShowLoginPassword(!showLoginPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus-visible:ring-2 focus-visible:ring-pink-500 rounded outline-none"
+                      aria-label={showLoginPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                      tabIndex={0}>
                       {showLoginPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
+                  <button 
+                    className="text-xs text-pink-600 hover:text-pink-700 hover:underline mt-2 focus-visible:ring-2 focus-visible:ring-pink-500 rounded outline-none"
+                    onClick={() => alert('Contacta a tu supervisor o escribe a soporte@popsy.com para restablecer tu contraseña.')}
+                  >
+                    ¿Problemas para acceder?
+                  </button>
                 </motion.div>
               )}
 
@@ -747,8 +766,13 @@ export default function Home() {
                 <motion.div
                   initial={{ opacity: 0, y: -5 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                  <p className="text-red-600 text-sm font-medium">{loginError}</p>
+                  className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg"
+                  id="password-error"
+                  role="alert">
+                  <p className="text-red-600 text-sm font-medium flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                    {loginError}
+                  </p>
                 </motion.div>
               )}
 
@@ -776,9 +800,22 @@ export default function Home() {
               {/* Botón de ingresar dinámico */}
               <Button
                 onClick={handleLogin}
-                disabled={(selectedRole !== 'gerente' && !pendingStore) || !selectedRole}
-                className="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white py-3.5 rounded-lg font-semibold text-base shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all">
-                {selectedRole ? ROLES.find(r => r.id === selectedRole)?.buttonText || 'Ingresar al Dashboard' : 'Selecciona un rol'}
+                disabled={(selectedRole !== 'gerente' && !pendingStore) || !selectedRole || isSubmitting}
+                className="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white py-3.5 rounded-lg font-semibold text-base shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all focus-visible:ring-2 focus-visible:ring-pink-600 focus-visible:ring-offset-2 outline-none"
+                title={!selectedRole ? "Selecciona un rol primero" : (selectedRole !== 'gerente' && !pendingStore) ? "Selecciona una tienda para continuar" : ""}
+                aria-busy={isSubmitting}>
+                {isSubmitting ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                    />
+                    Ingresando...
+                  </span>
+                ) : (
+                  selectedRole ? ROLES.find(r => r.id === selectedRole)?.buttonText || 'Ingresar al Dashboard' : 'Selecciona un rol'
+                )}
               </Button>
 
               {/* Microcopy de claridad bajo el botón */}
@@ -789,9 +826,39 @@ export default function Home() {
               <p className="text-center text-xs text-gray-400 mt-4">
                 Al ingresar, aceptas nuestros términos de uso y privacidad.
               </p>
+              
+              {/* Indicadores de seguridad */}
+              <div className="flex items-center justify-center gap-3 mt-3 text-[10px] text-gray-400">
+                <span className="flex items-center gap-1">🔒 Cifrado SSL</span>
+                <span>·</span>
+                <span className="flex items-center gap-1">🛡️ Datos protegidos</span>
+                <span>·</span>
+                <span className="flex items-center gap-1">✓ GDPR</span>
+              </div>
             </motion.div>
           </div>
         </motion.div>
+
+        {/* Success Animation */}
+        <AnimatePresence>
+          {loginSuccess && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-emerald-500/20 backdrop-blur-sm flex items-center justify-center z-50"
+            >
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                className="bg-white rounded-full p-6 shadow-2xl"
+              >
+                <CheckCircle className="w-20 h-20 text-emerald-600" />
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Popsy Story Modal */}
         <AnimatePresence>
