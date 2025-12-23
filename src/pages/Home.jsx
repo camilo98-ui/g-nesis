@@ -540,10 +540,10 @@ export default function Home() {
 
                 {/* Selector de Rol como Cards */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-900 mb-1">
+                  <h2 className="text-xl font-bold text-gray-900 mb-1">
                     Iniciar sesión
-                  </label>
-                  <p className="text-xs text-gray-600 mb-4">Selecciona tu rol para comenzar</p>
+                  </h2>
+                  <p className="text-sm text-gray-600 mb-4">Selecciona tu rol para comenzar</p>
                   <div className="space-y-3">
                     {ROLES.map((role) => {
                       const isSelected = selectedRole === role.id;
@@ -554,23 +554,21 @@ export default function Home() {
                           onClick={() => {setSelectedRole(role.id);setLoginError('');}}
                           whileHover={{ scale: 1.01 }}
                           whileTap={{ scale: 0.99 }}
-                          className={`relative w-full p-4 rounded-xl border-2 transition-all text-left flex items-center gap-3 ${
+                          className={`relative w-full p-3 rounded-lg border transition-all text-left flex items-center gap-3 ${
                             isSelected
-                              ? 'border-pink-500 bg-pink-50/50'
-                              : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50/50'
+                              ? 'border-pink-500 bg-pink-50'
+                              : 'border-gray-200 bg-white hover:border-gray-300'
                           }`}
                         >
-                          <div className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
                             isSelected ? 'bg-pink-100' : 'bg-gray-100'
                           }`}>
-                            <div className="w-6 h-6">
+                            <div className="w-5 h-5">
                               <RoleIcon roleId={role.id} isSelected={isSelected} />
                             </div>
                           </div>
                           <div className="flex-1">
-                            <p className={`text-sm font-bold ${
-                              isSelected ? 'text-gray-900' : 'text-gray-800'
-                            }`}>
+                            <p className="text-sm font-semibold text-gray-900">
                               {role.name}
                             </p>
                             <p className="text-xs text-gray-600 mt-0.5">
@@ -592,7 +590,7 @@ export default function Home() {
                       );
                     })}
                   </div>
-                  <p className="text-xs text-gray-500 mt-3 text-center">
+                  <p className="text-xs text-gray-600 mt-3 text-center">
                     Puedes cambiar tu rol más adelante si es necesario.
                   </p>
                 </div>
@@ -632,7 +630,7 @@ export default function Home() {
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                   >
-                    <label htmlFor="login-password" className="block text-sm font-medium text-gray-900 mb-2">
+                    <label htmlFor="login-password" className="block text-sm font-semibold text-gray-900 mb-2">
                       Contraseña
                     </label>
                     <div className="relative">
@@ -678,7 +676,7 @@ export default function Home() {
                 <Button
                   onClick={handleLogin}
                   disabled={(selectedRole !== 'gerente' && !pendingStore) || !selectedRole || isSubmitting}
-                  className="w-full bg-gradient-to-b from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white py-3 rounded-xl font-semibold text-sm shadow-[0_4px_14px_rgba(236,72,153,0.25)] hover:shadow-[0_6px_20px_rgba(236,72,153,0.3)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  className="w-full bg-pink-400 hover:bg-pink-500 text-white py-3 rounded-xl font-semibold text-sm shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 >
                   {isSubmitting ? (
                     <span className="flex items-center justify-center gap-2">
