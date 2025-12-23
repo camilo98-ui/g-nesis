@@ -6,8 +6,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { STORES, getDisplayName } from '@/components/StoreSelector';
 import DateFilter from '@/components/DateFilter';
-import { ArrowLeft, Search, ChevronDown, Eye } from 'lucide-react';
-import { Button } from "@/components/ui/button";
+import { ArrowLeft, Search, ChevronRight } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { format, startOfMonth } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -19,7 +18,7 @@ export default function ExecutiveDashboard() {
   const [selectedStoreDetail, setSelectedStoreDetail] = useState(null);
   const [aiInsights, setAiInsights] = useState(null);
   const [loadingInsights, setLoadingInsights] = useState(false);
-  const [showInsights, setShowInsights] = useState(false);
+  const [showPerspective, setShowPerspective] = useState(false);
 
   const currentMonth = new Date().getMonth() + 1;
   const currentYear = new Date().getFullYear();
@@ -48,7 +47,6 @@ export default function ExecutiveDashboard() {
       });
 
       const totalSales = Math.max(0, storeSales.reduce((sum, s) => sum + (s.total_sales || 0), 0));
-      const totalTickets = Math.max(0, storeSales.reduce((sum, s) => sum + (s.total_tickets || 0), 0));
       const totalTransactions = Math.max(0, storeSales.reduce((sum, s) => sum + (s.total_transactions || 0), 0));
       const avgTicket = totalTransactions > 0 ? totalSales / totalTransactions : 0;
 
@@ -73,9 +71,9 @@ export default function ExecutiveDashboard() {
       return {
         code: store.code,
         name: getDisplayName(store.code),
-        totalSales, totalTickets, totalTransactions, avgTicket,
+        totalSales, totalTransactions, avgTicket,
         salesBudget, salesCompliance, projection, status, gap,
-        hasData, daysElapsed, dailyAvg
+        hasData, dailyAvg
       };
     });
   }, [allDailySales, allBudgets, dateRange, currentMonth, currentYear]);
@@ -93,10 +91,7 @@ export default function ExecutiveDashboard() {
     style: 'currency', currency: 'COP', maximumFractionDigits: 0, minimumFractionDigits: 0
   }).format(Math.round(v));
 
-  const formatCurrencyShort = (v) => {
-    const millions = v / 1000000;
-    return `$${millions.toFixed(1)}M`;
-  };
+  const formatShort = (v) => `$${(v / 1000000).toFixed(1)}M`;
 
   const statusCounts = useMemo(() => ({
     positive: storesAnalysis.filter(s => s.status === 'positive').length,
@@ -113,7 +108,6 @@ export default function ExecutiveDashboard() {
     );
   }, [storesAnalysis, searchQuery]);
 
-  // Motor de acción sugerida CEO-level
   const getExecutiveAction = (store) => {
     if (!store.hasData) return 'Activar registro de ventas';
     
@@ -134,13 +128,12 @@ export default function ExecutiveDashboard() {
     }
     
     if (store.salesCompliance >= 110 && topStore?.code === store.code) {
-      return `Escalar mejores prácticas`;
+      return 'Escalar mejores prácticas';
     }
     
     return 'Sostener desempeño';
   };
 
-  // AI Insights
   const generateAIInsights = async () => {
     if (loadingInsights || aiInsights) return;
     setLoadingInsights(true);
@@ -150,13 +143,13 @@ export default function ExecutiveDashboard() {
       const topStore = storesWithData.sort((a, b) => b.salesCompliance - a.salesCompliance)[0];
       const worstStore = storesWithData.sort((a, b) => a.salesCompliance - b.salesCompliance)[0];
 
-      const prompt = `Eres un consultor estratégico C-level de retail. Genera UN insight ultra-específico de máximo 30 palabras:
+      const prompt = `Analiza esta situación de zona retail y genera UN insight ejecutivo de máximo 25 palabras:
 
-MEJOR: ${topStore.name} - ${topStore.salesCompliance.toFixed(0)}%
-PEOR: ${worstStore.name} - ${worstStore.salesCompliance.toFixed(0)}%
+MEJOR: ${topStore.name} ${topStore.salesCompliance.toFixed(0)}%
+PEOR: ${worstStore.name} ${worstStore.salesCompliance.toFixed(0)}%
 ZONA: ${((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%
 
-Dame 1 acción concreta que el gerente puede ejecutar HOY para mejorar el número.`;
+1 acción específica para HOY que mejore el resultado global.`;
 
       const result = await base44.integrations.Core.InvokeLLM({
         prompt,
@@ -190,47 +183,55 @@ Dame 1 acción concreta que el gerente puede ejecutar HOY para mejorar el númer
       if (alertStores.length === 0) {
         return `${filteredStores.filter(s => s.hasData).length} tiendas operando correctamente`;
       }
-      return `${alertStores.length} tiendas en alerta · Requieren impulso`;
+      return `${alertStores.length} tiendas requieren impulso`;
     }
     
-    return `${criticalStores.length} tiendas críticas · Brecha total: ${formatCurrency(totalGap)}`;
-  }, [filteredStores, formatCurrency]);
+    return `${criticalStores.length} tiendas críticas · Brecha total ${formatCurrency(totalGap)}`;
+  }, [filteredStores]);
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Minimal Navigation */}
-      <div className="fixed left-6 top-6 z-40">
-        <Link to={createPageUrl('Home')}>
-          <motion.div
-            whileHover={{ x: -3 }}
-            className="w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors cursor-pointer"
-          >
-            <ArrowLeft className="w-5 h-5 text-slate-600" />
-          </motion.div>
-        </Link>
-      </div>
+    <div className="min-h-screen bg-[#fafafa]">
+      {/* Back Button - Floating */}
+      <Link to={createPageUrl('Home')}>
+        <motion.div
+          whileHover={{ x: -2 }}
+          className="fixed left-8 top-8 w-9 h-9 rounded-full bg-white border border-slate-200 hover:border-slate-300 flex items-center justify-center transition-all cursor-pointer z-50 shadow-sm"
+        >
+          <ArrowLeft className="w-4 h-4 text-slate-600" />
+        </motion.div>
+      </Link>
 
-      <div className="max-w-[1600px] mx-auto px-12 py-12">
+      <div className="max-w-[1400px] mx-auto px-16 py-16">
         {/* 1️⃣ HEADER EDITORIAL */}
-        <div className="mb-16">
-          <div className="flex items-start justify-between mb-8">
+        <div className="mb-20">
+          <div className="flex items-start justify-between">
             <div>
-              <h1 className="text-5xl font-black text-slate-900 mb-3 tracking-tight">
+              <motion.h1 
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-6xl font-black text-slate-900 mb-4 tracking-tight"
+                style={{ fontFamily: 'Inter, system-ui, -apple-system, sans-serif' }}
+              >
                 Bogotá Noroccidente
-              </h1>
-              <p className="text-base text-slate-500 font-medium">
+              </motion.h1>
+              <motion.p 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.1 }}
+                className="text-lg text-slate-500 font-normal"
+              >
                 Estado operativo · {format(new Date(), 'EEEE dd \'de\' MMMM', { locale: es })}
-              </p>
+              </motion.p>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4 mt-2">
               <div className="relative">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <Input
                   placeholder="Buscar tienda..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 w-[300px] h-11 text-sm border-slate-200 focus:border-slate-400 rounded-lg bg-slate-50"
+                  className="pl-11 w-[320px] h-12 text-sm border-slate-200 focus:border-slate-400 rounded-lg bg-white shadow-sm"
                 />
               </div>
               <DateFilter 
@@ -242,69 +243,72 @@ Dame 1 acción concreta que el gerente puede ejecutar HOY para mejorar el númer
         </div>
 
         {isLoading ? (
-          <div className="grid grid-cols-4 gap-12 mb-20">
+          <div className="grid grid-cols-4 gap-16 mb-24">
             {[1,2,3,4].map(i => (
-              <div key={i} className="h-28 bg-slate-50 rounded animate-pulse" />
+              <div key={i} className="h-32 animate-pulse">
+                <div className="h-16 bg-slate-200 rounded mb-2 w-3/4" />
+                <div className="h-4 bg-slate-100 rounded w-1/2" />
+              </div>
             ))}
           </div>
         ) : (
           <>
-            {/* 2️⃣ KPIs COMO TITULARES */}
-            <div className="grid grid-cols-4 gap-12 mb-20">
+            {/* 2️⃣ KPIs COMO TITULARES EDITORIALES */}
+            <div className="grid grid-cols-4 gap-16 mb-24">
               {/* Venta Total */}
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
               >
-                <p className="text-6xl font-black text-slate-900 mb-2 tracking-tight">
-                  {formatCurrencyShort(zoneTotals.totalSales)}
+                <p className="text-6xl font-black text-slate-900 mb-3 tracking-tighter tabular-nums">
+                  {formatShort(zoneTotals.totalSales)}
                 </p>
-                <p className="text-sm text-slate-500 font-medium mb-1">Venta total vs meta</p>
-                <div className="flex items-center gap-2 mt-3">
-                  <div className="flex-1 bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                <p className="text-sm text-slate-500 font-normal">Venta total vs meta</p>
+                <div className="mt-4 flex items-center gap-3">
+                  <div className="flex-1 bg-slate-200 h-px">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${Math.min((zoneTotals.totalSales/zoneTotals.totalBudget)*100, 100)}%` }}
-                      transition={{ duration: 1.2 }}
-                      className={`h-full ${
+                      transition={{ duration: 1.5, ease: "easeOut" }}
+                      className={`h-px ${
                         (zoneTotals.totalSales/zoneTotals.totalBudget) >= 0.9 ? 'bg-emerald-600' :
                         (zoneTotals.totalSales/zoneTotals.totalBudget) >= 0.7 ? 'bg-amber-600' : 'bg-red-600'
                       }`}
                     />
                   </div>
-                  <span className="text-xs text-slate-400 font-medium">{formatCurrencyShort(zoneTotals.totalBudget)}</span>
+                  <span className="text-xs text-slate-400 font-normal tabular-nums">{formatShort(zoneTotals.totalBudget)}</span>
                 </div>
               </motion.div>
 
               {/* % Cumplimiento */}
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
                 transition={{ delay: 0.05 }}
               >
-                <p className={`text-7xl font-black mb-2 tracking-tight ${
+                <p className={`text-8xl font-black mb-3 tracking-tighter tabular-nums ${
                   ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 90 ? 'text-emerald-600' :
                   ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 70 ? 'text-amber-600' : 'text-red-600'
                 }`}>
                   {((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%
                 </p>
-                <p className="text-sm text-slate-500 font-medium">Cumplimiento zona</p>
+                <p className="text-sm text-slate-500 font-normal">Cumplimiento zona</p>
               </motion.div>
 
-              {/* Críticas - PROTAGONISTA */}
+              {/* Críticas */}
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
                 transition={{ delay: 0.1 }}
               >
-                <p className={`text-7xl font-black mb-2 tracking-tight ${
+                <p className={`text-8xl font-black mb-3 tracking-tighter tabular-nums ${
                   statusCounts.critical > 0 ? 'text-red-600' : 'text-slate-300'
                 }`}>
                   {statusCounts.critical}
                 </p>
-                <p className="text-sm text-slate-500 font-medium">Tiendas críticas</p>
+                <p className="text-sm text-slate-500 font-normal">Tiendas críticas</p>
                 {statusCounts.critical > 0 && (
-                  <p className="text-xs text-red-600 font-semibold mt-2">
+                  <p className="text-xs text-slate-400 mt-2 font-normal">
                     {Math.round((statusCounts.critical/STORES.length)*100)}% del total
                   </p>
                 )}
@@ -312,202 +316,191 @@ Dame 1 acción concreta que el gerente puede ejecutar HOY para mejorar el númer
 
               {/* En Meta */}
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
                 transition={{ delay: 0.15 }}
               >
-                <p className="text-7xl font-black text-emerald-600 mb-2 tracking-tight">
+                <p className="text-8xl font-black text-emerald-600 mb-3 tracking-tighter tabular-nums">
                   {statusCounts.positive}
                 </p>
-                <p className="text-sm text-slate-500 font-medium">En meta</p>
+                <p className="text-sm text-slate-500 font-normal">En meta</p>
               </motion.div>
             </div>
-
-            {/* División sutil */}
-            <div className="border-t border-slate-200 mb-12" />
 
             {/* 3️⃣ ALERTA EDITORIAL */}
             {statusCounts.critical > 0 && (
               <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mb-16"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="mb-20"
               >
-                <div className={`rounded-lg p-10 ${
-                  statusCounts.critical >= STORES.length * 0.7 
-                    ? 'bg-red-50 border-l-4 border-red-600' 
-                    : 'bg-amber-50 border-l-4 border-amber-600'
+                <div className={`py-8 px-10 rounded ${
+                  statusCounts.critical >= STORES.length * 0.7 ? 'bg-red-50' : 'bg-amber-50'
+                } border-l-2 ${
+                  statusCounts.critical >= STORES.length * 0.7 ? 'border-red-600' : 'border-amber-600'
                 }`}>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <p className={`text-3xl font-bold mb-4 leading-tight ${
-                        statusCounts.critical >= STORES.length * 0.7 ? 'text-red-900' : 'text-amber-900'
-                      }`}>
-                        {statusCounts.critical >= STORES.length * 0.7 ? '⚠️' : '⚠️'} {statusCounts.critical} de {STORES.length} tiendas están en estado crítico ({'<'}70%)
-                      </p>
-                      <p className={`text-base mb-6 font-medium ${
-                        statusCounts.critical >= STORES.length * 0.7 ? 'text-red-800' : 'text-amber-800'
-                      }`}>
-                        {statusCounts.critical >= STORES.length * 0.7 
-                          ? 'Se requiere acción inmediata para cumplir meta mensual.'
-                          : 'Requiere atención urgente para alcanzar objetivo.'
-                        }
-                      </p>
-                      <button
-                        onClick={() => {
-                          const el = document.getElementById('stores-table');
-                          el?.scrollIntoView({ behavior: 'smooth' });
-                        }}
-                        className={`text-sm font-semibold underline ${
-                          statusCounts.critical >= STORES.length * 0.7 ? 'text-red-700 hover:text-red-800' : 'text-amber-700 hover:text-amber-800'
-                        }`}
-                      >
-                        Ver tiendas críticas →
-                      </button>
-                    </div>
-                  </div>
+                  <p className={`text-2xl font-bold mb-3 leading-tight ${
+                    statusCounts.critical >= STORES.length * 0.7 ? 'text-red-900' : 'text-amber-900'
+                  }`}>
+                    {statusCounts.critical} de {STORES.length} tiendas están en estado crítico ({'<'}70%)
+                  </p>
+                  <p className={`text-base mb-5 font-normal ${
+                    statusCounts.critical >= STORES.length * 0.7 ? 'text-red-800' : 'text-amber-800'
+                  }`}>
+                    {statusCounts.critical >= STORES.length * 0.7 
+                      ? 'Se requiere acción inmediata para cumplir meta mensual.'
+                      : 'Requiere atención urgente para alcanzar objetivo.'
+                    }
+                  </p>
+                  <button
+                    onClick={() => {
+                      const el = document.getElementById('stores-table');
+                      el?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className={`text-sm font-semibold underline ${
+                      statusCounts.critical >= STORES.length * 0.7 ? 'text-red-700' : 'text-amber-700'
+                    } hover:opacity-70 transition-opacity`}
+                  >
+                    Ver tiendas críticas →
+                  </button>
                 </div>
               </motion.div>
             )}
 
-            {/* Resumen contextual */}
-            <div className="mb-4">
-              <p className="text-sm font-semibold text-slate-600">{tableContextSummary}</p>
+            {/* Contexto pre-tabla */}
+            <div className="mb-6">
+              <p className="text-sm font-medium text-slate-500">{tableContextSummary}</p>
             </div>
 
-            {/* 4️⃣ LISTA MAESTRA - SALA DE GUERRA */}
-            <div id="stores-table" className="mb-16">
-              <div className="border border-slate-200 rounded-lg overflow-hidden">
-                <table className="w-full">
-                  <thead>
-                    <tr className="bg-slate-50 border-b border-slate-200">
-                      <th className="text-left py-4 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider">Tienda</th>
-                      <th className="text-right py-4 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider">% Cumplimiento</th>
-                      <th className="text-right py-4 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider">Venta vs Meta</th>
-                      <th className="text-right py-4 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider">Brecha $</th>
-                      <th className="text-center py-4 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider">Estado</th>
-                      <th className="text-left py-4 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider">Acción Sugerida</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredStores
-                      .sort((a, b) => {
-                        const statusOrder = { critical: 0, negative: 1, positive: 2, no_data: 3 };
-                        if (statusOrder[a.status] !== statusOrder[b.status]) {
-                          return statusOrder[a.status] - statusOrder[b.status];
-                        }
-                        return b.gap - a.gap;
-                      })
-                      .map((store, idx) => {
-                        const action = getExecutiveAction(store);
+            {/* 4️⃣ TABLA EDITORIAL - SALA DE GUERRA */}
+            <div id="stores-table" className="mb-24">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-slate-300">
+                    <th className="text-left pb-4 px-0 text-xs font-bold text-slate-600 uppercase tracking-wider">Tienda</th>
+                    <th className="text-right pb-4 px-0 text-xs font-bold text-slate-600 uppercase tracking-wider">% Cumplimiento</th>
+                    <th className="text-right pb-4 px-0 text-xs font-bold text-slate-600 uppercase tracking-wider">Venta vs Meta</th>
+                    <th className="text-right pb-4 px-0 text-xs font-bold text-slate-600 uppercase tracking-wider">Brecha $</th>
+                    <th className="text-center pb-4 px-0 text-xs font-bold text-slate-600 uppercase tracking-wider">Estado</th>
+                    <th className="text-left pb-4 px-0 text-xs font-bold text-slate-600 uppercase tracking-wider">Acción Sugerida</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredStores
+                    .sort((a, b) => {
+                      const statusOrder = { critical: 0, negative: 1, positive: 2, no_data: 3 };
+                      if (statusOrder[a.status] !== statusOrder[b.status]) {
+                        return statusOrder[a.status] - statusOrder[b.status];
+                      }
+                      return b.gap - a.gap;
+                    })
+                    .map((store, idx) => {
+                      const action = getExecutiveAction(store);
 
-                        return (
-                          <motion.tr
-                            key={store.code}
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: idx * 0.01 }}
-                            onClick={() => store.hasData && setSelectedStoreDetail(store)}
-                            className={`border-b border-slate-100 group transition-all ${
-                              store.hasData ? 'cursor-pointer hover:bg-slate-50' : ''
-                            }`}
-                          >
-                            {/* Tienda */}
-                            <td className="py-6 px-6">
-                              <p className={`font-bold text-lg ${
-                                !store.hasData ? 'text-slate-400' : 'text-slate-900'
-                              }`}>
-                                {store.name}
-                              </p>
-                              <p className="text-xs text-slate-400 mt-0.5">{store.code}</p>
-                            </td>
+                      return (
+                        <motion.tr
+                          key={store.code}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ delay: idx * 0.01 }}
+                          onClick={() => store.hasData && setSelectedStoreDetail(store)}
+                          className={`border-b border-slate-100 group ${
+                            store.hasData ? 'cursor-pointer hover:bg-slate-50' : ''
+                          }`}
+                        >
+                          {/* Tienda */}
+                          <td className="py-7 px-0">
+                            <p className={`font-bold text-lg ${
+                              !store.hasData ? 'text-slate-400' : 'text-slate-900'
+                            }`}>
+                              {store.name}
+                            </p>
+                            <p className="text-xs text-slate-400 mt-1 font-normal">{store.code}</p>
+                          </td>
 
-                            {/* % Cumplimiento con Barra Minimal */}
-                            <td className="py-6 px-6">
-                              {!store.hasData ? (
-                                <span className="text-sm text-slate-400 italic block text-right">Sin ventas registradas</span>
-                              ) : (
-                                <div className="flex items-center justify-end gap-5">
-                                  <div className="w-32 bg-slate-100 rounded-full h-2 overflow-hidden">
-                                    <motion.div
-                                      initial={{ width: 0 }}
-                                      animate={{ width: `${Math.min(store.salesCompliance, 100)}%` }}
-                                      transition={{ duration: 0.8, delay: idx * 0.015 }}
-                                      className={`h-full ${
-                                        store.salesCompliance >= 90 ? 'bg-emerald-600' :
-                                        store.salesCompliance >= 70 ? 'bg-amber-600' : 'bg-red-600'
-                                      }`}
-                                    />
-                                  </div>
-                                  <span className={`font-black text-2xl tabular-nums ${
-                                    store.salesCompliance >= 90 ? 'text-emerald-600' :
-                                    store.salesCompliance >= 70 ? 'text-amber-600' : 'text-red-600'
-                                  }`}>
-                                    {store.salesCompliance.toFixed(0)}%
-                                  </span>
+                          {/* % Cumplimiento */}
+                          <td className="py-7 px-0">
+                            {!store.hasData ? (
+                              <span className="text-sm text-slate-400 italic block text-right font-normal">Sin ventas registradas</span>
+                            ) : (
+                              <div className="flex items-center justify-end gap-6">
+                                <div className="w-28 bg-slate-200 rounded-full h-1.5 overflow-hidden">
+                                  <motion.div
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${Math.min(store.salesCompliance, 100)}%` }}
+                                    transition={{ duration: 0.8, delay: idx * 0.01 }}
+                                    className={`h-full ${
+                                      store.salesCompliance >= 90 ? 'bg-emerald-600' :
+                                      store.salesCompliance >= 70 ? 'bg-amber-600' : 'bg-red-600'
+                                    }`}
+                                  />
                                 </div>
-                              )}
-                            </td>
-
-                            {/* Venta vs Meta */}
-                            <td className="py-6 px-6 text-right">
-                              {!store.hasData ? (
-                                <span className="text-sm text-slate-400">—</span>
-                              ) : (
-                                <div>
-                                  <p className="font-bold text-slate-900 text-base tabular-nums">{formatCurrency(store.totalSales)}</p>
-                                  <p className="text-xs text-slate-400 mt-1">de {formatCurrency(store.salesBudget)}</p>
-                                </div>
-                              )}
-                            </td>
-
-                            {/* Brecha */}
-                            <td className="py-6 px-6 text-right">
-                              {!store.hasData ? (
-                                <span className="text-sm text-slate-400">—</span>
-                              ) : (
-                                <p className={`font-black text-xl tabular-nums ${
-                                  store.gap > 0 ? 'text-red-600' : 'text-emerald-600'
+                                <span className={`font-black text-3xl tabular-nums ${
+                                  store.salesCompliance >= 90 ? 'text-emerald-600' :
+                                  store.salesCompliance >= 70 ? 'text-amber-600' : 'text-red-600'
                                 }`}>
-                                  {store.gap > 0 ? '-' : '+'}{formatCurrency(Math.abs(store.gap))}
-                                </p>
-                              )}
-                            </td>
+                                  {store.salesCompliance.toFixed(0)}%
+                                </span>
+                              </div>
+                            )}
+                          </td>
 
-                            {/* Estado - Punto Minimal */}
-                            <td className="py-6 px-6 text-center">
-                              <span className={`inline-block w-3 h-3 rounded-full ${
-                                store.status === 'no_data' ? 'bg-slate-300' :
-                                store.status === 'positive' ? 'bg-emerald-600' : 
-                                store.status === 'negative' ? 'bg-amber-600' : 'bg-red-600'
-                              }`} />
-                            </td>
+                          {/* Venta vs Meta */}
+                          <td className="py-7 px-0 text-right">
+                            {!store.hasData ? (
+                              <span className="text-sm text-slate-400">—</span>
+                            ) : (
+                              <div>
+                                <p className="font-bold text-slate-900 text-base tabular-nums">{formatCurrency(store.totalSales)}</p>
+                                <p className="text-xs text-slate-400 mt-1 font-normal">de {formatCurrency(store.salesBudget)}</p>
+                              </div>
+                            )}
+                          </td>
 
-                            {/* Acción Sugerida */}
-                            <td className="py-6 px-6">
-                              <p className={`text-sm font-medium ${
-                                !store.hasData ? 'text-slate-400 italic' :
-                                store.salesCompliance < 70 ? 'text-slate-700' :
-                                store.salesCompliance < 90 ? 'text-slate-600' : 'text-slate-500'
+                          {/* Brecha */}
+                          <td className="py-7 px-0 text-right">
+                            {!store.hasData ? (
+                              <span className="text-sm text-slate-400">—</span>
+                            ) : (
+                              <p className={`font-black text-xl tabular-nums ${
+                                store.gap > 0 ? 'text-red-600' : 'text-emerald-600'
                               }`}>
-                                {action}
+                                {store.gap > 0 ? '-' : '+'}{formatCurrency(Math.abs(store.gap))}
                               </p>
-                            </td>
-                          </motion.tr>
-                        );
-                      })}
-                  </tbody>
-                </table>
-              </div>
+                            )}
+                          </td>
+
+                          {/* Estado - Punto Minimal */}
+                          <td className="py-7 px-0 text-center">
+                            <span className={`inline-block w-2.5 h-2.5 rounded-full ${
+                              store.status === 'no_data' ? 'bg-slate-300' :
+                              store.status === 'positive' ? 'bg-emerald-600' : 
+                              store.status === 'negative' ? 'bg-amber-600' : 'bg-red-600'
+                            }`} />
+                          </td>
+
+                          {/* Acción Sugerida */}
+                          <td className="py-7 px-0">
+                            <p className={`text-sm font-normal ${
+                              !store.hasData ? 'text-slate-400 italic' : 'text-slate-600'
+                            }`}>
+                              {action}
+                            </p>
+                          </td>
+                        </motion.tr>
+                      );
+                    })}
+                </tbody>
+              </table>
             </div>
 
-            {/* División sutil */}
-            <div className="border-t border-slate-200 mb-12" />
+            {/* División */}
+            <div className="border-t border-slate-300 mb-16" />
 
-            {/* 5️⃣ ACCIONES PRIORITARIAS (MAX 3) */}
-            <div className="mb-16">
-              <h2 className="text-3xl font-black text-slate-900 mb-8 tracking-tight">Prioridades de hoy</h2>
-              <div className="grid grid-cols-3 gap-8">
+            {/* 5️⃣ PRIORIDADES */}
+            <div className="mb-20">
+              <h2 className="text-3xl font-black text-slate-900 mb-10 tracking-tight">Prioridades de hoy</h2>
+              <div className="space-y-6">
                 {/* Intervenir */}
                 {storesAnalysis
                   .filter(s => s.status === 'critical')
@@ -518,19 +511,17 @@ Dame 1 acción concreta que el gerente puede ejecutar HOY para mejorar el númer
                       key={store.code}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
-                      className="border-l-4 border-red-600 bg-red-50 rounded-r-lg p-6"
+                      onClick={() => setSelectedStoreDetail(store)}
+                      className="flex items-center justify-between py-6 px-8 bg-white border-l-4 border-red-600 hover:bg-slate-50 cursor-pointer transition-colors group"
                     >
-                      <p className="text-xs font-bold text-red-700 uppercase tracking-wide mb-3">Intervenir Hoy</p>
-                      <p className="font-black text-slate-900 text-xl mb-2">{store.name}</p>
-                      <p className="text-sm text-slate-700 mb-1">{store.salesCompliance.toFixed(0)}% cumplimiento</p>
-                      <p className="text-xs text-red-700 mb-6">Brecha: {formatCurrency(store.gap)}</p>
-                      <Button 
-                        onClick={() => setSelectedStoreDetail(store)}
-                        variant="outline"
-                        className="w-full border-red-600 text-red-700 hover:bg-red-600 hover:text-white font-semibold"
-                      >
-                        <Eye className="w-4 h-4 mr-2" /> Ver detalle
-                      </Button>
+                      <div className="flex-1">
+                        <p className="text-xs font-bold text-red-600 uppercase tracking-wide mb-2">Intervenir Hoy</p>
+                        <p className="font-black text-slate-900 text-2xl mb-2">{store.name}</p>
+                        <p className="text-sm text-slate-600 font-normal">
+                          {store.salesCompliance.toFixed(0)}% cumplimiento · Brecha {formatCurrency(store.gap)}
+                        </p>
+                      </div>
+                      <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-red-600 group-hover:translate-x-1 transition-all" />
                     </motion.div>
                   ))}
 
@@ -542,22 +533,20 @@ Dame 1 acción concreta que el gerente puede ejecutar HOY para mejorar el númer
                   .map(store => (
                     <motion.div
                       key={store.code}
-                      initial={{ opacity: 0, y: 20 }}
+                      initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.05 }}
-                      className="border-l-4 border-amber-600 bg-amber-50 rounded-r-lg p-6"
+                      onClick={() => setSelectedStoreDetail(store)}
+                      className="flex items-center justify-between py-6 px-8 bg-white border-l-4 border-amber-600 hover:bg-slate-50 cursor-pointer transition-colors group"
                     >
-                      <p className="text-xs font-bold text-amber-700 uppercase tracking-wide mb-3">Acelerar Ritmo</p>
-                      <p className="font-black text-slate-900 text-xl mb-2">{store.name}</p>
-                      <p className="text-sm text-slate-700 mb-1">{store.salesCompliance.toFixed(0)}% cumplimiento</p>
-                      <p className="text-xs text-amber-700 mb-6">A {(90 - store.salesCompliance).toFixed(0)}% de meta</p>
-                      <Button 
-                        onClick={() => setSelectedStoreDetail(store)}
-                        variant="outline"
-                        className="w-full border-amber-600 text-amber-700 hover:bg-amber-600 hover:text-white font-semibold"
-                      >
-                        <Eye className="w-4 h-4 mr-2" /> Ver detalle
-                      </Button>
+                      <div className="flex-1">
+                        <p className="text-xs font-bold text-amber-600 uppercase tracking-wide mb-2">Acelerar Ritmo</p>
+                        <p className="font-black text-slate-900 text-2xl mb-2">{store.name}</p>
+                        <p className="text-sm text-slate-600 font-normal">
+                          {store.salesCompliance.toFixed(0)}% cumplimiento · A {(90 - store.salesCompliance).toFixed(0)}% de meta
+                        </p>
+                      </div>
+                      <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-amber-600 group-hover:translate-x-1 transition-all" />
                     </motion.div>
                   ))}
 
@@ -572,94 +561,93 @@ Dame 1 acción concreta que el gerente puede ejecutar HOY para mejorar el númer
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.1 }}
-                      className="border-l-4 border-emerald-600 bg-emerald-50 rounded-r-lg p-6"
+                      onClick={() => setSelectedStoreDetail(store)}
+                      className="flex items-center justify-between py-6 px-8 bg-white border-l-4 border-emerald-600 hover:bg-slate-50 cursor-pointer transition-colors group"
                     >
-                      <p className="text-xs font-bold text-emerald-700 uppercase tracking-wide mb-3">Reconocer</p>
-                      <p className="font-black text-slate-900 text-xl mb-2">{store.name}</p>
-                      <p className="text-sm text-slate-700 mb-1">{store.salesCompliance.toFixed(0)}% cumplimiento</p>
-                      <p className="text-xs text-emerald-700 mb-6">+{(store.salesCompliance - 100).toFixed(0)}% sobre meta</p>
-                      <Button 
-                        onClick={() => setSelectedStoreDetail(store)}
-                        variant="outline"
-                        className="w-full border-emerald-600 text-emerald-700 hover:bg-emerald-600 hover:text-white font-semibold"
-                      >
-                        <Eye className="w-4 h-4 mr-2" /> Ver detalle
-                      </Button>
+                      <div className="flex-1">
+                        <p className="text-xs font-bold text-emerald-600 uppercase tracking-wide mb-2">Reconocer</p>
+                        <p className="font-black text-slate-900 text-2xl mb-2">{store.name}</p>
+                        <p className="text-sm text-slate-600 font-normal">
+                          {store.salesCompliance.toFixed(0)}% cumplimiento · +{(store.salesCompliance - 100).toFixed(0)}% sobre meta
+                        </p>
+                      </div>
+                      <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-emerald-600 group-hover:translate-x-1 transition-all" />
                     </motion.div>
                   ))}
               </div>
             </div>
 
-            {/* 6️⃣ PERSPECTIVA (Colapsable) */}
+            {/* 6️⃣ PERSPECTIVA */}
             {aiInsights?.insight && (
-              <details className="group" open={showInsights}>
-                <summary 
-                  className="cursor-pointer list-none mb-4" 
-                  onClick={(e) => {e.preventDefault(); setShowInsights(!showInsights);}}
+              <div className="border-t border-slate-300 pt-12">
+                <button
+                  onClick={() => setShowPerspective(!showPerspective)}
+                  className="w-full flex items-center justify-between group mb-6"
                 >
-                  <div className="flex items-center justify-between py-4 border-t border-slate-200">
-                    <p className="text-base font-bold text-slate-900">Perspectiva</p>
-                    <motion.div
-                      animate={{ rotate: showInsights ? 180 : 0 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <ChevronDown className="w-5 h-5 text-slate-400" />
-                    </motion.div>
-                  </div>
-                </summary>
-
-                {showInsights && (
+                  <p className="text-xl font-bold text-slate-900">Perspectiva</p>
                   <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    className="pb-8"
+                    animate={{ rotate: showPerspective ? 90 : 0 }}
+                    transition={{ duration: 0.2 }}
                   >
-                    {/* Insight */}
-                    <div className="bg-slate-50 rounded-lg p-6 mb-6">
-                      <p className="text-base text-slate-800 leading-relaxed font-medium">
-                        {aiInsights.insight}
-                      </p>
-                    </div>
-
-                    {/* Proyección Mini */}
-                    <div className="grid grid-cols-4 gap-6">
-                      <div>
-                        <p className="text-xs text-slate-500 mb-2 font-medium">Proyección Cierre</p>
-                        <p className="text-2xl font-black text-slate-900 tabular-nums">{formatCurrencyShort(zoneTotals.totalProjection)}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-slate-500 mb-2 font-medium">% Proyectado</p>
-                        <p className={`text-2xl font-black tabular-nums ${
-                          ((zoneTotals.totalProjection/zoneTotals.totalBudget)*100) >= 100 ? 'text-emerald-600' :
-                          ((zoneTotals.totalProjection/zoneTotals.totalBudget)*100) >= 90 ? 'text-amber-600' : 'text-red-600'
-                        }`}>
-                          {((zoneTotals.totalProjection/zoneTotals.totalBudget)*100).toFixed(0)}%
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-slate-500 mb-2 font-medium">Gap a Cerrar</p>
-                        <p className={`text-2xl font-black tabular-nums ${
-                          (zoneTotals.totalBudget - zoneTotals.totalProjection) <= 0 ? 'text-emerald-600' : 'text-red-600'
-                        }`}>
-                          {formatCurrencyShort(Math.abs(zoneTotals.totalBudget - zoneTotals.totalProjection))}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-slate-500 mb-2 font-medium">Tiendas en Riesgo</p>
-                        <p className="text-2xl font-black text-slate-900 tabular-nums">
-                          {storesAnalysis.filter(s => s.hasData && (s.projection / s.salesBudget) < 0.85).length}
-                        </p>
-                      </div>
-                    </div>
+                    <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-slate-600" />
                   </motion.div>
-                )}
-              </details>
+                </button>
+
+                <AnimatePresence>
+                  {showPerspective && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="space-y-8"
+                    >
+                      {/* Insight */}
+                      <div className="bg-slate-50 rounded p-8">
+                        <p className="text-lg text-slate-800 leading-relaxed font-normal">
+                          {aiInsights.insight}
+                        </p>
+                      </div>
+
+                      {/* Proyección */}
+                      <div className="grid grid-cols-4 gap-10">
+                        <div>
+                          <p className="text-xs text-slate-500 mb-2 font-medium uppercase tracking-wide">Proyección Cierre</p>
+                          <p className="text-3xl font-black text-slate-900 tabular-nums">{formatShort(zoneTotals.totalProjection)}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-slate-500 mb-2 font-medium uppercase tracking-wide">% Proyectado</p>
+                          <p className={`text-3xl font-black tabular-nums ${
+                            ((zoneTotals.totalProjection/zoneTotals.totalBudget)*100) >= 100 ? 'text-emerald-600' :
+                            ((zoneTotals.totalProjection/zoneTotals.totalBudget)*100) >= 90 ? 'text-amber-600' : 'text-red-600'
+                          }`}>
+                            {((zoneTotals.totalProjection/zoneTotals.totalBudget)*100).toFixed(0)}%
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-slate-500 mb-2 font-medium uppercase tracking-wide">Gap a Cerrar</p>
+                          <p className={`text-3xl font-black tabular-nums ${
+                            (zoneTotals.totalBudget - zoneTotals.totalProjection) <= 0 ? 'text-emerald-600' : 'text-red-600'
+                          }`}>
+                            {formatShort(Math.abs(zoneTotals.totalBudget - zoneTotals.totalProjection))}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-slate-500 mb-2 font-medium uppercase tracking-wide">Tiendas en Riesgo</p>
+                          <p className="text-3xl font-black text-slate-900 tabular-nums">
+                            {storesAnalysis.filter(s => s.hasData && (s.projection / s.salesBudget) < 0.85).length}
+                          </p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             )}
           </>
         )}
       </div>
 
-      {/* Modal Detalle Tienda */}
+      {/* Modal Detalle */}
       <AnimatePresence>
         {selectedStoreDetail && (
           <StoreDetailModal
