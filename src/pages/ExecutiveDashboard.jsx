@@ -189,23 +189,43 @@ export default function ExecutiveDashboard() {
 
     try {
       const storesWithData = storesAnalysis.filter(s => s.hasData);
+      const criticalStores = storesAnalysis.filter(s => s.status === 'critical');
       const topStore = storesWithData.sort((a, b) => b.salesCompliance - a.salesCompliance)[0];
       const worstStore = storesWithData.sort((a, b) => a.salesCompliance - b.salesCompliance)[0];
+      
+      const totalGap = criticalStores.reduce((sum, s) => sum + Math.max(0, s.gap), 0);
+      const avgTicketZone = zoneTotals.totalSales / zoneTotals.totalTransactions;
+      const daysLeft = Math.ceil((new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0) - new Date()) / (1000 * 60 * 60 * 24));
 
-      const prompt = `Analiza esta situación de zona retail y genera UN insight ejecutivo de máximo 25 palabras:
+      const prompt = `Eres un analista ejecutivo de retail. Analiza esta zona y genera un reporte estructurado:
 
-MEJOR: ${topStore.name} ${topStore.salesCompliance.toFixed(0)}%
-PEOR: ${worstStore.name} ${worstStore.salesCompliance.toFixed(0)}%
-ZONA: ${((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%
+DATOS DE LA ZONA:
+- Cumplimiento: ${((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(1)}%
+- Venta actual: $${(zoneTotals.totalSales/1000000).toFixed(1)}M de $${(zoneTotals.totalBudget/1000000).toFixed(1)}M
+- Brecha total: $${(totalGap/1000000).toFixed(1)}M
+- Tiendas críticas: ${criticalStores.length} de ${storesAnalysis.length}
+- Ticket promedio zona: $${avgTicketZone.toFixed(0)}
+- Días restantes del mes: ${daysLeft}
 
-1 acción específica para HOY que mejore el resultado global.`;
+TOP PERFORMER: ${topStore.name} (${topStore.salesCompliance.toFixed(0)}%, Ticket: $${topStore.avgTicket.toFixed(0)})
+PEOR PERFORMER: ${worstStore.name} (${worstStore.salesCompliance.toFixed(0)}%, Brecha: $${(worstStore.gap/1000000).toFixed(1)}M)
+
+TIENDAS CRÍTICAS DETALLE:
+${criticalStores.slice(0, 3).map(s => `- ${s.name}: ${s.salesCompliance.toFixed(0)}% (Brecha: $${(s.gap/1000000).toFixed(1)}M, Ticket: $${s.avgTicket.toFixed(0)})`).join('\n')}
+
+Genera:
+1. Estado numérico conciso (máx 30 palabras)
+2. Acción inmediata específica con números
+3. Pronóstico: Si se ejecuta, cuánto cerraría la brecha en %`;
 
       const result = await base44.integrations.Core.InvokeLLM({
         prompt,
         response_json_schema: {
           type: "object",
           properties: {
-            insight: { type: "string" }
+            estado_numerico: { type: "string" },
+            accion_inmediata: { type: "string" },
+            pronostico_impacto: { type: "string" }
           }
         }
       });
@@ -1070,50 +1090,96 @@ ZONA: ${((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%
               </div>
             </div>
 
-            {/* Perspectiva */}
-            {aiInsights?.insight && (
-              <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-xl rounded-xl p-10 border border-purple-500/30">
-                <div className="flex items-start gap-6">
-                  <motion.div
-                    animate={{ rotate: [0, 10, -10, 0] }}
-                    transition={{ duration: 3, repeat: Infinity }}
-                  >
-                    <Brain className="w-10 h-10 text-purple-400" />
-                  </motion.div>
-                  <div className="flex-1">
-                    <p className="text-xs font-bold text-purple-300 uppercase tracking-wide mb-3">Insight IA</p>
-                    <p className="text-xl text-white leading-relaxed font-medium mb-6">
-                      {aiInsights.insight}
-                    </p>
-                    
-                    <div className="grid grid-cols-4 gap-6 pt-6 border-t border-white/10">
-                      <div>
-                        <p className="text-xs text-slate-400 mb-2">Proyección</p>
-                        <p className="text-2xl font-black text-white tabular-nums">{formatShort(zoneTotals.totalProjection)}</p>
+            {/* Análisis Inteligente */}
+            {aiInsights && (
+              <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-xl rounded-xl border border-purple-500/30 overflow-hidden">
+                <div className="p-8 border-b border-purple-500/20">
+                  <div className="flex items-center gap-4 mb-6">
+                    <motion.div
+                      animate={{ rotate: [0, 10, -10, 0] }}
+                      transition={{ duration: 3, repeat: Infinity }}
+                      className="w-14 h-14 rounded-xl bg-purple-500/20 flex items-center justify-center"
+                    >
+                      <Brain className="w-8 h-8 text-purple-400" />
+                    </motion.div>
+                    <div>
+                      <p className="text-xs font-bold text-purple-300 uppercase tracking-wide">Análisis Predictivo IA</p>
+                      <p className="text-sm text-slate-400">Diagnóstico + Acción + Pronóstico</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-6">
+                    {/* Estado Numérico */}
+                    <div className="bg-white/5 rounded-xl p-6 border border-purple-500/20">
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="w-2 h-2 rounded-full bg-purple-400" />
+                        <p className="text-xs font-bold text-purple-300 uppercase tracking-wider">📊 Diagnóstico de Zona</p>
                       </div>
-                      <div>
-                        <p className="text-xs text-slate-400 mb-2">% Proyectado</p>
-                        <p className={`text-2xl font-black tabular-nums ${
-                          ((zoneTotals.totalProjection/zoneTotals.totalBudget)*100) >= 100 ? 'text-emerald-400' :
-                          ((zoneTotals.totalProjection/zoneTotals.totalBudget)*100) >= 90 ? 'text-amber-400' : 'text-red-400'
-                        }`}>
-                          {((zoneTotals.totalProjection/zoneTotals.totalBudget)*100).toFixed(0)}%
-                        </p>
+                      <p className="text-lg text-white leading-relaxed">
+                        {aiInsights.estado_numerico}
+                      </p>
+                    </div>
+
+                    {/* Acción Inmediata */}
+                    <div className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 rounded-xl p-6 border border-amber-500/30">
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                        <p className="text-xs font-bold text-amber-300 uppercase tracking-wider">🎯 Acción Inmediata Recomendada</p>
                       </div>
-                      <div>
-                        <p className="text-xs text-slate-400 mb-2">Gap a Cerrar</p>
-                        <p className={`text-2xl font-black tabular-nums ${
-                          (zoneTotals.totalBudget - zoneTotals.totalProjection) <= 0 ? 'text-emerald-400' : 'text-red-400'
-                        }`}>
-                          {formatShort(Math.abs(zoneTotals.totalBudget - zoneTotals.totalProjection))}
-                        </p>
+                      <p className="text-lg text-white leading-relaxed font-medium">
+                        {aiInsights.accion_inmediata}
+                      </p>
+                    </div>
+
+                    {/* Pronóstico */}
+                    <div className="bg-gradient-to-br from-emerald-500/10 to-green-500/10 rounded-xl p-6 border border-emerald-500/30">
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="w-2 h-2 rounded-full bg-emerald-400" />
+                        <p className="text-xs font-bold text-emerald-300 uppercase tracking-wider">📈 Pronóstico de Impacto</p>
                       </div>
-                      <div>
-                        <p className="text-xs text-slate-400 mb-2">En Riesgo</p>
-                        <p className="text-2xl font-black text-white tabular-nums">
-                          {storesAnalysis.filter(s => s.hasData && (s.projection / s.salesBudget) < 0.85).length}
-                        </p>
-                      </div>
+                      <p className="text-lg text-white leading-relaxed">
+                        {aiInsights.pronostico_impacto}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* KPIs de Proyección */}
+                <div className="p-8">
+                  <div className="grid grid-cols-4 gap-6">
+                    <div>
+                      <p className="text-xs text-slate-400 mb-2">Proyección Mes</p>
+                      <p className="text-3xl font-black text-white tabular-nums mb-1">{formatShort(zoneTotals.totalProjection)}</p>
+                      <p className="text-xs text-purple-300">vs {formatShort(zoneTotals.totalBudget)} meta</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-400 mb-2">% Proyectado</p>
+                      <p className={`text-3xl font-black tabular-nums ${
+                        ((zoneTotals.totalProjection/zoneTotals.totalBudget)*100) >= 100 ? 'text-emerald-400' :
+                        ((zoneTotals.totalProjection/zoneTotals.totalBudget)*100) >= 90 ? 'text-amber-400' : 'text-red-400'
+                      }`}>
+                        {((zoneTotals.totalProjection/zoneTotals.totalBudget)*100).toFixed(0)}%
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-400 mb-2">Gap a Cerrar</p>
+                      <p className={`text-3xl font-black tabular-nums ${
+                        (zoneTotals.totalBudget - zoneTotals.totalProjection) <= 0 ? 'text-emerald-400' : 'text-red-400'
+                      }`}>
+                        {formatShort(Math.abs(zoneTotals.totalBudget - zoneTotals.totalProjection))}
+                      </p>
+                      <p className="text-xs text-slate-400 mt-1">
+                        {((Math.abs(zoneTotals.totalBudget - zoneTotals.totalProjection)/zoneTotals.totalBudget)*100).toFixed(0)}% del total
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-400 mb-2">Tiendas en Riesgo</p>
+                      <p className="text-3xl font-black text-white tabular-nums mb-1">
+                        {storesAnalysis.filter(s => s.hasData && (s.projection / s.salesBudget) < 0.85).length}
+                      </p>
+                      <p className="text-xs text-red-400">
+                        {((storesAnalysis.filter(s => s.hasData && (s.projection / s.salesBudget) < 0.85).length / storesAnalysis.filter(s => s.hasData).length) * 100).toFixed(0)}% del total
+                      </p>
                     </div>
                   </div>
                 </div>
