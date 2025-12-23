@@ -464,7 +464,7 @@ export default function Home() {
               <motion.img
                 src={LOGO_URL}
                 alt="Popsy Management"
-                className="h-16 object-contain mb-16"
+                className="h-12 object-contain mb-12"
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
@@ -477,12 +477,12 @@ export default function Home() {
                 transition={{ delay: 0.5 }}
                 className="space-y-6 max-w-xl"
               >
-                <h1 className="text-5xl font-bold leading-tight">
-                  <span className="text-gray-900">Bienvenido a</span><br />
-                  <span className="text-pink-600">Popsy Management</span>
+                <h1 className="text-5xl font-bold leading-tight text-gray-900">
+                  Bienvenido a<br />
+                  <span className="text-pink-500">Popsy Management</span>
                 </h1>
 
-                <p className="text-base text-gray-600 leading-relaxed">
+                <p className="text-base text-gray-600 leading-relaxed mt-4">
                   Plataforma de gestión empresarial para equipos de alto rendimiento
                 </p>
 
@@ -498,14 +498,14 @@ export default function Home() {
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.7 + i * 0.1 }}
-                      className="flex items-center gap-3"
+                      className="flex items-start gap-4"
                     >
-                      <div className="w-10 h-10 rounded-lg bg-pink-100/80 flex items-center justify-center flex-shrink-0">
-                        <feature.icon className="w-5 h-5 text-pink-600" />
+                      <div className="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center flex-shrink-0">
+                        <feature.icon className="w-6 h-6 text-pink-500" />
                       </div>
-                      <div>
-                        <p className="text-gray-900 font-medium text-sm">{feature.title}</p>
-                        <p className="text-gray-600 text-xs">{feature.text}</p>
+                      <div className="pt-2">
+                        <p className="text-gray-900 font-semibold text-base">{feature.title}</p>
+                        <p className="text-gray-600 text-sm mt-1">{feature.text}</p>
                       </div>
                     </motion.div>
                   ))}
@@ -679,7 +679,7 @@ export default function Home() {
                 <Button
                   onClick={handleLogin}
                   disabled={(selectedRole !== 'gerente' && !pendingStore) || !selectedRole || isSubmitting}
-                  className="w-full bg-pink-400 hover:bg-pink-500 text-white py-3 rounded-xl font-semibold text-sm shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  className="w-full bg-pink-500 hover:bg-pink-600 text-white py-3 rounded-xl font-semibold text-sm shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 >
                   {isSubmitting ? (
                     <span className="flex items-center justify-center gap-2">
