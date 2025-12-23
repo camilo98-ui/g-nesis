@@ -940,29 +940,27 @@ Genera:
                                     }`}>
                                       {store.salesCompliance.toFixed(0)}%
                                     </span>
-                                    {store.prevCompliance > 0 && (
-                                      <motion.div
-                                        initial={{ scale: 0, rotate: -180 }}
-                                        animate={{ 
-                                          scale: 1, 
-                                          rotate: 0,
-                                          y: store.complianceTrend > 0 ? [0, -3, 0] : [0, 3, 0]
-                                        }}
-                                        transition={{ 
-                                          scale: { duration: 0.4, delay: idx * 0.01 },
-                                          y: { duration: 1.5, repeat: Infinity, ease: "easeInOut" }
-                                        }}
-                                        className={`${
-                                          store.complianceTrend > 0 ? 'text-emerald-400' : 'text-red-400'
-                                        }`}
-                                      >
-                                        {store.complianceTrend > 0 ? (
-                                          <TrendingUp className="w-6 h-6" />
-                                        ) : (
-                                          <TrendingDown className="w-6 h-6" />
-                                        )}
-                                      </motion.div>
-                                    )}
+                                    <motion.div
+                                      initial={{ scale: 0, rotate: -180 }}
+                                      animate={{ 
+                                        scale: 1, 
+                                        rotate: 0,
+                                        y: store.complianceTrend >= 0 ? [0, -3, 0] : [0, 3, 0]
+                                      }}
+                                      transition={{ 
+                                        scale: { duration: 0.4, delay: idx * 0.01 },
+                                        y: { duration: 1.5, repeat: Infinity, ease: "easeInOut" }
+                                      }}
+                                      className={`${
+                                        store.complianceTrend >= 0 ? 'text-emerald-400' : 'text-red-400'
+                                      }`}
+                                    >
+                                      {store.complianceTrend >= 0 ? (
+                                        <TrendingUp className="w-6 h-6" />
+                                      ) : (
+                                        <TrendingDown className="w-6 h-6" />
+                                      )}
+                                    </motion.div>
                                   </div>
                                 </div>
                               )}
