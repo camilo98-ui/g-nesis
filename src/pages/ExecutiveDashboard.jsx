@@ -376,15 +376,17 @@ Genera:
         </motion.div>
       </Link>
 
-      <div className="max-w-[1600px] mx-auto px-12 py-16 relative z-10">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 py-8 sm:py-12 lg:py-16 relative z-10">
         {/* Header */}
-        <div className="mb-16">
-          <div className="flex items-start justify-between">
-            <div>
+        <div className="mb-8 sm:mb-12 lg:mb-16">
+          <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
+            <div className="flex-1">
               <motion.h1 
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-6xl font-black text-white mb-4 tracking-tight"
+                className={`text-3xl sm:text-4xl lg:text-6xl font-black mb-2 sm:mb-4 tracking-tight transition-colors duration-700 ${
+                  isDayMode ? 'text-gray-900' : 'text-white'
+                }`}
               >
                 Bogotá Noroccidente
               </motion.h1>
@@ -392,20 +394,28 @@ Genera:
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.1 }}
-                className="text-lg text-slate-400 font-normal"
+                className={`text-sm sm:text-base lg:text-lg font-normal transition-colors duration-700 ${
+                  isDayMode ? 'text-gray-600' : 'text-slate-400'
+                }`}
               >
                 {format(new Date(), 'EEEE dd \'de\' MMMM', { locale: es })}
               </motion.p>
             </div>
 
-            <div className="flex items-center gap-4 mt-2">
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full sm:w-auto">
+              <div className="relative flex-1 sm:flex-none">
+                <Search className={`absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors duration-700 ${
+                  isDayMode ? 'text-gray-400' : 'text-slate-400'
+                }`} />
                 <Input
                   placeholder="Buscar tienda..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-11 w-[320px] h-12 text-sm bg-white/10 backdrop-blur-xl border-white/20 text-white placeholder:text-slate-400 focus:bg-white/20 focus:border-white/30"
+                  className={`pl-10 sm:pl-11 w-full sm:w-[280px] lg:w-[320px] h-10 sm:h-12 text-sm backdrop-blur-xl transition-colors duration-700 ${
+                    isDayMode
+                      ? 'bg-white border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-pink-400'
+                      : 'bg-white/10 border-white/20 text-white placeholder:text-slate-400 focus:bg-white/20 focus:border-white/30'
+                  }`}
                 />
               </div>
               <DateFilter 
@@ -417,9 +427,9 @@ Genera:
         </div>
 
         {isLoading ? (
-          <div className="grid grid-cols-4 gap-8 mb-20">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 mb-12 sm:mb-16 lg:mb-20">
             {[1,2,3,4].map(i => (
-              <div key={i} className="bg-white/5 backdrop-blur-xl rounded-2xl h-48 animate-pulse" />
+              <div key={i} className="bg-white/5 backdrop-blur-xl rounded-xl sm:rounded-2xl h-32 sm:h-40 lg:h-48 animate-pulse" />
             ))}
           </div>
         ) : (
@@ -428,13 +438,13 @@ Genera:
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-12"
+              className="mb-8 sm:mb-12"
             >
               <motion.button
                 whileHover={{ scale: 1.02, y: -4 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setShowComparable(true)}
-                className="w-full relative overflow-hidden rounded-2xl p-8 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-purple-500/20 backdrop-blur-xl border-2 border-purple-500/40 hover:border-purple-400/60 transition-all group"
+                className="w-full relative overflow-hidden rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-purple-500/20 backdrop-blur-xl border-2 border-purple-500/40 hover:border-purple-400/60 transition-all group"
               >
                 <motion.div
                   className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-pink-500/30 to-purple-500/0"
@@ -442,18 +452,18 @@ Genera:
                   transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
                 />
                 
-                <div className="relative z-10 flex items-center justify-between">
-                  <div className="flex items-center gap-6">
+                <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="flex items-center gap-3 sm:gap-4 lg:gap-6">
                     <motion.div
                       animate={{ rotate: [0, 10, -10, 0] }}
                       transition={{ duration: 2, repeat: Infinity }}
-                      className="w-16 h-16 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/50"
+                      className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-lg sm:rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/50 flex-shrink-0"
                     >
-                      <TrendingUp className="w-8 h-8 text-white" />
+                      <TrendingUp className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-white" />
                     </motion.div>
                     <div className="text-left">
-                      <h3 className="text-2xl font-black text-white mb-1">Análisis Comparable</h3>
-                      <p className="text-slate-300 text-sm">Compara periodos, identifica tendencias y proyecta resultados</p>
+                      <h3 className="text-lg sm:text-xl lg:text-2xl font-black text-white mb-1">Análisis Comparable</h3>
+                      <p className="text-slate-300 text-xs sm:text-sm">Compara periodos, identifica tendencias y proyecta resultados</p>
                     </div>
                   </div>
                   
@@ -482,7 +492,7 @@ Genera:
             </motion.div>
 
             {/* KPIs Interactivos Futuristas */}
-            <div className="grid grid-cols-4 gap-8 mb-20">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 mb-12 sm:mb-16 lg:mb-20">
               {/* Venta Total */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -491,16 +501,24 @@ Genera:
                 onHoverStart={() => setHoveredKPI('sales')}
                 onHoverEnd={() => setHoveredKPI(null)}
                 onClick={() => setSelectedKPIDetail('sales')}
-                className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl rounded-2xl p-8 border border-white/20 cursor-pointer overflow-hidden group"
+                className={`relative backdrop-blur-2xl rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 cursor-pointer overflow-hidden group transition-colors duration-700 ${
+                  isDayMode
+                    ? 'bg-gradient-to-br from-white to-blue-50/50 border border-gray-200 shadow-lg'
+                    : 'bg-gradient-to-br from-white/10 to-white/5 border border-white/20'
+                }`}
               >
                 <motion.div
                   className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-purple-500/0 group-hover:from-blue-500/20 group-hover:to-purple-500/20 transition-all duration-500"
                 />
                 
                 <div className="relative z-10">
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">💰 Venta Total</p>
+                  <p className={`text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-3 sm:mb-4 transition-colors duration-700 ${
+                    isDayMode ? 'text-gray-600' : 'text-slate-400'
+                  }`}>💰 Venta Total</p>
                   <motion.p 
-                    className="text-5xl font-black text-white mb-3 tracking-tight tabular-nums"
+                    className={`text-3xl sm:text-4xl lg:text-5xl font-black mb-2 sm:mb-3 tracking-tight tabular-nums transition-colors duration-700 ${
+                      isDayMode ? 'text-gray-900' : 'text-white'
+                    }`}
                     animate={hoveredKPI === 'sales' ? { scale: 1.05 } : { scale: 1 }}
                   >
                     {formatShort(zoneTotals.totalSales)}
@@ -559,7 +577,11 @@ Genera:
                 onHoverStart={() => setHoveredKPI('compliance')}
                 onHoverEnd={() => setHoveredKPI(null)}
                 onClick={() => setSelectedKPIDetail('compliance')}
-                className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl rounded-2xl p-8 border border-white/20 cursor-pointer overflow-hidden group"
+                className={`relative backdrop-blur-2xl rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 cursor-pointer overflow-hidden group transition-colors duration-700 ${
+                  isDayMode
+                    ? 'bg-gradient-to-br from-white to-emerald-50/50 border border-gray-200 shadow-lg'
+                    : 'bg-gradient-to-br from-white/10 to-white/5 border border-white/20'
+                }`}
               >
                 <motion.div
                   className={`absolute inset-0 ${
@@ -572,9 +594,11 @@ Genera:
                 />
                 
                 <div className="relative z-10">
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">📊 Cumplimiento</p>
+                  <p className={`text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-3 sm:mb-4 transition-colors duration-700 ${
+                    isDayMode ? 'text-gray-600' : 'text-slate-400'
+                  }`}>📊 Cumplimiento</p>
                   <motion.p 
-                    className={`text-7xl font-black mb-3 tracking-tight tabular-nums ${
+                    className={`text-4xl sm:text-5xl lg:text-7xl font-black mb-2 sm:mb-3 tracking-tight tabular-nums ${
                       ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 90 ? 'text-emerald-400' :
                       ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 70 ? 'text-amber-400' : 'text-red-400'
                     }`}
@@ -644,17 +668,23 @@ Genera:
                 onHoverStart={() => setHoveredKPI('critical')}
                 onHoverEnd={() => setHoveredKPI(null)}
                 onClick={() => setSelectedKPIDetail('critical')}
-                className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl rounded-2xl p-8 border border-white/20 cursor-pointer overflow-hidden group"
+                className={`relative backdrop-blur-2xl rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 cursor-pointer overflow-hidden group transition-colors duration-700 ${
+                  isDayMode
+                    ? 'bg-gradient-to-br from-white to-red-50/50 border border-gray-200 shadow-lg'
+                    : 'bg-gradient-to-br from-white/10 to-white/5 border border-white/20'
+                }`}
               >
                 <motion.div
                   className="absolute inset-0 bg-gradient-to-br from-red-500/0 to-rose-500/0 group-hover:from-red-500/20 group-hover:to-rose-500/20 transition-all duration-500"
                 />
                 
                 <div className="relative z-10">
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">🔴 Críticas</p>
+                  <p className={`text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-3 sm:mb-4 transition-colors duration-700 ${
+                    isDayMode ? 'text-gray-600' : 'text-slate-400'
+                  }`}>🔴 Críticas</p>
                   <motion.p 
-                    className={`text-7xl font-black mb-3 tracking-tight tabular-nums ${
-                      statusCounts.critical > 0 ? 'text-red-400' : 'text-slate-600'
+                    className={`text-4xl sm:text-5xl lg:text-7xl font-black mb-2 sm:mb-3 tracking-tight tabular-nums ${
+                      statusCounts.critical > 0 ? 'text-red-400' : (isDayMode ? 'text-gray-400' : 'text-slate-600')
                     }`}
                     animate={hoveredKPI === 'critical' ? { scale: 1.05 } : { scale: 1 }}
                   >
@@ -709,16 +739,22 @@ Genera:
                 onHoverStart={() => setHoveredKPI('meta')}
                 onHoverEnd={() => setHoveredKPI(null)}
                 onClick={() => setSelectedKPIDetail('meta')}
-                className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl rounded-2xl p-8 border border-white/20 cursor-pointer overflow-hidden group"
+                className={`relative backdrop-blur-2xl rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 cursor-pointer overflow-hidden group transition-colors duration-700 ${
+                  isDayMode
+                    ? 'bg-gradient-to-br from-white to-emerald-50/50 border border-gray-200 shadow-lg'
+                    : 'bg-gradient-to-br from-white/10 to-white/5 border border-white/20'
+                }`}
               >
                 <motion.div
                   className="absolute inset-0 bg-gradient-to-br from-emerald-500/0 to-green-500/0 group-hover:from-emerald-500/20 group-hover:to-green-500/20 transition-all duration-500"
                 />
                 
                 <div className="relative z-10">
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">🟢 En Meta</p>
+                  <p className={`text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-3 sm:mb-4 transition-colors duration-700 ${
+                    isDayMode ? 'text-gray-600' : 'text-slate-400'
+                  }`}>🟢 En Meta</p>
                   <motion.p 
-                    className="text-7xl font-black text-emerald-400 mb-3 tracking-tight tabular-nums"
+                    className="text-4xl sm:text-5xl lg:text-7xl font-black text-emerald-400 mb-2 sm:mb-3 tracking-tight tabular-nums"
                     animate={hoveredKPI === 'meta' ? { scale: 1.05 } : { scale: 1 }}
                   >
                     {statusCounts.positive}
@@ -814,19 +850,29 @@ Genera:
             )}
 
             {/* Contexto */}
-            <div className="mb-6">
-              <p className="text-sm font-medium text-slate-400">{tableContextSummary}</p>
+            <div className="mb-4 sm:mb-6">
+              <p className={`text-xs sm:text-sm font-medium transition-colors duration-700 ${
+                isDayMode ? 'text-gray-600' : 'text-slate-400'
+              }`}>{tableContextSummary}</p>
             </div>
 
             {/* Tabla Futurista */}
-            <div id="stores-table" className="mb-20">
-              <div className="bg-white/5 backdrop-blur-2xl rounded-xl border border-white/10 overflow-hidden">
-                <table className="w-full">
+            <div id="stores-table" className="mb-12 sm:mb-16 lg:mb-20 overflow-x-auto">
+              <div className={`backdrop-blur-2xl rounded-xl border overflow-hidden transition-colors duration-700 ${
+                isDayMode 
+                  ? 'bg-white border-gray-200 shadow-xl'
+                  : 'bg-white/5 border-white/10'
+              }`}>
+                <table className="w-full min-w-[800px]">
                   <thead>
-                    <tr className="border-b border-white/10">
+                    <tr className={`border-b transition-colors duration-700 ${
+                      isDayMode ? 'border-gray-200' : 'border-white/10'
+                    }`}>
                       <th 
                         onClick={() => handleSort('name')}
-                        className="text-left py-5 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider cursor-pointer hover:text-white transition-colors group"
+                        className={`text-left py-3 sm:py-5 px-3 sm:px-6 text-[10px] sm:text-xs font-bold uppercase tracking-wider cursor-pointer transition-colors group ${
+                          isDayMode ? 'text-gray-600 hover:text-gray-900' : 'text-slate-400 hover:text-white'
+                        }`}
                       >
                         <div className="flex items-center gap-2">
                           Tienda
@@ -918,13 +964,15 @@ Genera:
                               store.hasData ? 'cursor-pointer hover:bg-white/5' : ''
                             }`}
                           >
-                            <td className="py-7 px-6">
-                              <p className={`font-bold text-lg ${
-                                !store.hasData ? 'text-slate-600' : 'text-white'
+                            <td className="py-4 sm:py-7 px-3 sm:px-6">
+                              <p className={`font-bold text-sm sm:text-base lg:text-lg transition-colors duration-700 ${
+                                !store.hasData ? (isDayMode ? 'text-gray-400' : 'text-slate-600') : (isDayMode ? 'text-gray-900' : 'text-white')
                               }`}>
                                 {store.name}
                               </p>
-                              <p className="text-xs text-slate-500 mt-1">{store.code}</p>
+                              <p className={`text-xs mt-1 transition-colors duration-700 ${
+                                isDayMode ? 'text-gray-500' : 'text-slate-500'
+                              }`}>{store.code}</p>
                             </td>
 
                             <td className="py-7 px-6">
@@ -1026,9 +1074,11 @@ Genera:
             </div>
 
             {/* Prioridades Dinámicas */}
-            <div className="mb-20">
-              <h2 className="text-3xl font-black text-white mb-10 tracking-tight">Prioridades de hoy</h2>
-              <div className="grid grid-cols-3 gap-6">
+            <div className="mb-12 sm:mb-16 lg:mb-20">
+              <h2 className={`text-2xl sm:text-3xl font-black mb-6 sm:mb-8 lg:mb-10 tracking-tight transition-colors duration-700 ${
+                isDayMode ? 'text-gray-900' : 'text-white'
+              }`}>Prioridades de hoy</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
                 {/* Intervenir */}
                 {storesAnalysis
                   .filter(s => s.status === 'critical')
