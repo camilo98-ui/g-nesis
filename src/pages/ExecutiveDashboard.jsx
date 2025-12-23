@@ -553,278 +553,235 @@ INSTRUCCIONES:
   }, [storesAnalysis, salesForecast, zoneTotals, statusCounts, formatCurrency]);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-[#f5f5f7] flex relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-gradient-to-br from-pink-100/30 via-purple-100/20 to-transparent rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-[700px] h-[700px] bg-gradient-to-tr from-blue-100/30 via-violet-100/20 to-transparent rounded-full blur-3xl" />
+      </div>
+
       {/* Sidebar */}
       <motion.aside
         initial={{ x: -300 }}
         animate={{ x: sidebarOpen ? 0 : -280 }}
-        className="fixed left-0 top-0 h-full bg-white border-r border-gray-200 z-40"
+        className="fixed left-0 top-0 h-full bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 z-40 shadow-2xl"
         style={{ width: '280px' }}
       >
         <div className="p-6">
           <Link to={createPageUrl('Home')}>
-            <motion.div whileHover={{ scale: 1.02 }} className="flex items-center gap-3 mb-8 cursor-pointer">
-              <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center">
-                <Store className="w-5 h-5 text-white" />
-              </div>
+            <motion.div whileHover={{ scale: 1.03 }} className="flex items-center gap-3 mb-10 cursor-pointer">
+              <motion.div 
+                className="w-12 h-12 rounded-2xl bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center shadow-lg shadow-pink-500/30"
+                whileHover={{ rotate: [0, -10, 10, 0] }}
+                transition={{ duration: 0.3 }}
+              >
+                <Store className="w-6 h-6 text-white" />
+              </motion.div>
               <div>
-                <p className="text-sm font-bold text-gray-900">Popsy</p>
-                <p className="text-xs text-gray-500">Panel Ejecutivo</p>
+                <p className="text-base font-black text-white">Popsy</p>
+                <p className="text-xs text-slate-400">Analytics</p>
               </div>
             </motion.div>
           </Link>
 
           <nav className="space-y-1">
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-4 mb-2">Vistas</p>
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-4 mb-3">Dashboard</p>
             <motion.div
-              whileHover={{ x: 3 }}
+              whileHover={{ x: 4 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => setActiveView('general')}
-              className={`px-4 py-2.5 rounded-lg cursor-pointer transition-colors ${
-                activeView === 'general' ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-50 text-gray-700'
+              className={`px-4 py-3 rounded-xl cursor-pointer transition-all mx-2 ${
+                activeView === 'general' 
+                  ? 'bg-gradient-to-r from-pink-500 to-rose-600 text-white shadow-lg shadow-pink-500/30' 
+                  : 'hover:bg-slate-800/50 text-slate-300 hover:text-white'
               }`}
             >
               <div className="flex items-center gap-3">
-                <Activity className="w-4 h-4" />
-                <span className={`text-sm ${activeView === 'general' ? 'font-semibold' : 'font-medium'}`}>
-                  Resumen General
-                </span>
+                <Activity className="w-5 h-5" />
+                <span className="text-sm font-semibold">Analytics</span>
               </div>
             </motion.div>
 
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-4 mt-4 mb-2">Análisis</p>
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-4 mt-6 mb-3">Reports</p>
             <motion.div
-              whileHover={{ x: 3 }}
+              whileHover={{ x: 4 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => setActiveView('kpis')}
-              className={`px-4 py-2.5 rounded-lg cursor-pointer transition-colors ${
-                activeView === 'kpis' ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-50 text-gray-700'
+              className={`px-4 py-3 rounded-xl cursor-pointer transition-all mx-2 ${
+                activeView === 'kpis' 
+                  ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/30' 
+                  : 'hover:bg-slate-800/50 text-slate-300 hover:text-white'
               }`}
             >
               <div className="flex items-center gap-3">
-                <Target className="w-4 h-4" />
-                <span className={`text-sm ${activeView === 'kpis' ? 'font-semibold' : 'font-medium'}`}>
-                  KPIs Ejecutivos
-                </span>
+                <Target className="w-5 h-5" />
+                <span className="text-sm font-semibold">KPIs</span>
               </div>
             </motion.div>
             <motion.div
-              whileHover={{ x: 3 }}
+              whileHover={{ x: 4 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => setActiveView('charts')}
-              className={`px-4 py-2.5 rounded-lg cursor-pointer transition-colors ${
-                activeView === 'charts' ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-50 text-gray-700'
+              className={`px-4 py-3 rounded-xl cursor-pointer transition-all mx-2 ${
+                activeView === 'charts' 
+                  ? 'bg-gradient-to-r from-purple-500 to-violet-600 text-white shadow-lg shadow-purple-500/30' 
+                  : 'hover:bg-slate-800/50 text-slate-300 hover:text-white'
               }`}
             >
               <div className="flex items-center gap-3">
-                <BarChart3 className="w-4 h-4" />
-                <span className={`text-sm ${activeView === 'charts' ? 'font-semibold' : 'font-medium'}`}>
-                  Análisis Visual
-                </span>
+                <BarChart3 className="w-5 h-5" />
+                <span className="text-sm font-semibold">Charts</span>
               </div>
             </motion.div>
             <motion.div
-              whileHover={{ x: 3 }}
+              whileHover={{ x: 4 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => setActiveView('stores')}
-              className={`px-4 py-2.5 rounded-lg cursor-pointer transition-colors ${
-                activeView === 'stores' ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-50 text-gray-700'
+              className={`px-4 py-3 rounded-xl cursor-pointer transition-all mx-2 ${
+                activeView === 'stores' 
+                  ? 'bg-gradient-to-r from-emerald-500 to-green-600 text-white shadow-lg shadow-emerald-500/30' 
+                  : 'hover:bg-slate-800/50 text-slate-300 hover:text-white'
               }`}
             >
               <div className="flex items-center gap-3">
-                <Store className="w-4 h-4" />
-                <span className={`text-sm ${activeView === 'stores' ? 'font-semibold' : 'font-medium'}`}>
-                  Detalle por Tienda
-                </span>
+                <Store className="w-5 h-5" />
+                <span className="text-sm font-semibold">Stores</span>
               </div>
             </motion.div>
 
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-4 mt-4 mb-2">Predictivo</p>
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-4 mt-6 mb-3">AI Insights</p>
             <motion.div
-              whileHover={{ x: 3 }}
+              whileHover={{ x: 4 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => setActiveView('forecast')}
-              className={`px-4 py-2.5 rounded-lg cursor-pointer transition-colors ${
-                activeView === 'forecast' ? 'bg-purple-50 text-purple-700' : 'hover:bg-gray-50 text-gray-700'
+              className={`px-4 py-3 rounded-xl cursor-pointer transition-all mx-2 ${
+                activeView === 'forecast' 
+                  ? 'bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg shadow-violet-500/30' 
+                  : 'hover:bg-slate-800/50 text-slate-300 hover:text-white'
               }`}
             >
               <div className="flex items-center gap-3">
-                <TrendingUp className="w-4 h-4" />
-                <span className={`text-sm ${activeView === 'forecast' ? 'font-semibold' : 'font-medium'}`}>
-                  Pronóstico IA
-                </span>
+                <Brain className="w-5 h-5" />
+                <span className="text-sm font-semibold">Forecast</span>
               </div>
             </motion.div>
 
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-4 mt-4 mb-2">Operación</p>
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-4 mt-6 mb-3">Operations</p>
             <motion.div
-              whileHover={{ x: 3 }}
+              whileHover={{ x: 4 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => setActiveView('planner')}
-              className={`px-4 py-2.5 rounded-lg cursor-pointer transition-colors ${
-                activeView === 'planner' ? 'bg-orange-50 text-orange-700' : 'hover:bg-gray-50 text-gray-700'
+              className={`px-4 py-3 rounded-xl cursor-pointer transition-all mx-2 ${
+                activeView === 'planner' 
+                  ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-lg shadow-amber-500/30' 
+                  : 'hover:bg-slate-800/50 text-slate-300 hover:text-white'
               }`}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <Clock className="w-4 h-4" />
-                  <span className={`text-sm ${activeView === 'planner' ? 'font-semibold' : 'font-medium'}`}>
-                    Planner
-                  </span>
+                  <Clock className="w-5 h-5" />
+                  <span className="text-sm font-semibold">Schedule</span>
                 </div>
                 {plannerStatus.withoutPlanner.length > 0 && (
-                  <span className="bg-orange-100 text-orange-700 text-xs font-semibold px-2 py-0.5 rounded-full">
+                  <span className="bg-white/20 text-white text-xs font-bold px-2 py-0.5 rounded-full">
                     {plannerStatus.withoutPlanner.length}
                   </span>
                 )}
               </div>
             </motion.div>
             <motion.div
-              whileHover={{ x: 3 }}
+              whileHover={{ x: 4 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => setActiveView('critical')}
-              className={`px-4 py-2.5 rounded-lg cursor-pointer transition-colors ${
-                activeView === 'critical' ? 'bg-red-50 text-red-700' : 'hover:bg-gray-50 text-gray-700'
+              className={`px-4 py-3 rounded-xl cursor-pointer transition-all mx-2 ${
+                activeView === 'critical' 
+                  ? 'bg-gradient-to-r from-red-500 to-rose-600 text-white shadow-lg shadow-red-500/30' 
+                  : 'hover:bg-slate-800/50 text-slate-300 hover:text-white'
               }`}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <AlertTriangle className="w-4 h-4" />
-                  <span className={`text-sm ${activeView === 'critical' ? 'font-semibold' : 'font-medium'}`}>
-                    Tiendas Críticas
-                  </span>
+                  <AlertTriangle className="w-5 h-5" />
+                  <span className="text-sm font-semibold">Critical</span>
                 </div>
                 {statusCounts.critical > 0 && (
-                  <span className="bg-red-100 text-red-700 text-xs font-semibold px-2 py-0.5 rounded-full">
+                  <span className="bg-white/20 text-white text-xs font-bold px-2 py-0.5 rounded-full">
                     {statusCounts.critical}
                   </span>
                 )}
               </div>
             </motion.div>
             <motion.div
-              whileHover={{ x: 3 }}
+              whileHover={{ x: 4 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => setActiveView('alert')}
-              className={`px-4 py-2.5 rounded-lg cursor-pointer transition-colors ${
-                activeView === 'alert' ? 'bg-amber-50 text-amber-700' : 'hover:bg-gray-50 text-gray-700'
+              className={`px-4 py-3 rounded-xl cursor-pointer transition-all mx-2 ${
+                activeView === 'alert' 
+                  ? 'bg-gradient-to-r from-yellow-500 to-amber-600 text-white shadow-lg shadow-yellow-500/30' 
+                  : 'hover:bg-slate-800/50 text-slate-300 hover:text-white'
               }`}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <TrendingDown className="w-4 h-4" />
-                  <span className={`text-sm ${activeView === 'alert' ? 'font-semibold' : 'font-medium'}`}>
-                    En Alerta
-                  </span>
+                  <TrendingDown className="w-5 h-5" />
+                  <span className="text-sm font-semibold">Alerts</span>
                 </div>
                 {statusCounts.negative > 0 && (
-                  <span className="bg-amber-100 text-amber-700 text-xs font-semibold px-2 py-0.5 rounded-full">
+                  <span className="bg-white/20 text-white text-xs font-bold px-2 py-0.5 rounded-full">
                     {statusCounts.negative}
                   </span>
                 )}
               </div>
             </motion.div>
 
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-4 mt-4 mb-2">Acciones</p>
-            <Link to={createPageUrl('Home')}>
-              <motion.div
-                whileHover={{ x: 3 }}
-                className="px-4 py-2.5 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors text-gray-700"
-              >
-                <div className="flex items-center gap-3">
-                  <ArrowLeft className="w-4 h-4" />
-                  <span className="text-sm font-medium">Volver a Tiendas</span>
-                </div>
-              </motion.div>
-            </Link>
+            <div className="absolute bottom-6 left-6 right-6">
+              <Link to={createPageUrl('Home')}>
+                <motion.div
+                  whileHover={{ x: 4 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="px-4 py-3 rounded-xl hover:bg-slate-800/50 cursor-pointer transition-all text-slate-400 hover:text-white"
+                >
+                  <div className="flex items-center gap-3">
+                    <ArrowLeft className="w-5 h-5" />
+                    <span className="text-sm font-semibold">Back</span>
+                  </div>
+                </motion.div>
+              </Link>
+            </div>
             </nav>
             </div>
             </motion.aside>
 
       {/* Main Content */}
-      <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-[280px]' : 'ml-0'}`}>
-        <div className="p-8">
+      <div className={`flex-1 transition-all duration-300 relative ${sidebarOpen ? 'ml-[280px]' : 'ml-0'}`}>
+        <div className="p-6">
           {/* Header */}
-          <div className="flex items-center justify-between mb-8">
-            {activeView !== 'general' && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setActiveView('general')}
-                className="absolute top-8 left-[320px] text-slate-600 hover:text-slate-900"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Volver al Resumen
-              </Button>
-            )}
-
+          <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="rounded-xl hover:bg-slate-100"
+                className="rounded-xl hover:bg-white/80 backdrop-blur-sm"
               >
-                <Menu className="w-5 h-5 text-slate-600" />
+                <Menu className="w-5 h-5 text-slate-700" />
               </Button>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">
-                  Dashboard Ejecutivo
+                <h1 className="text-3xl font-black text-gray-900">
+                  Analytics
                 </h1>
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-gray-500 mt-0.5 flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                   {format(new Date(), 'EEEE, dd MMMM yyyy', { locale: es })}
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
-              <WeekFilter onWeekChange={setWeekFilter} />
-              <DateFilter dateRange={dateRange} onDateChange={(range) => { setDateRange(range); setWeekFilter(null); }} />
-              
-              {/* Botones de Modo */}
-              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <Button
-                  variant={!showComparison ? "default" : "outline"}
-                  onClick={() => {
-                    setShowComparison(false);
-                    setComparisonRange(null);
-                  }}
-                  className={`gap-2 ${!showComparison ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg' : 'border-gray-300 hover:border-blue-500'}`}
-                >
-                  <Activity className="w-4 h-4" />
-                  Actual
-                </Button>
-              </motion.div>
-
-              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <Button
-                  variant={showComparison ? "default" : "outline"}
-                  onClick={() => {
-                    if (!showComparison) {
-                      setShowComparison(true);
-                      if (!comparisonRange) {
-                        const now = new Date();
-                        const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-                        const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
-                        setComparisonRange({ from: lastMonthStart, to: lastMonthEnd });
-                      }
-                    }
-                  }}
-                  className={`gap-2 ${showComparison ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg' : 'border-purple-300 hover:border-purple-500'}`}
-                >
-                  <TrendingUp className="w-4 h-4" />
-                  Comparable
-                </Button>
-              </motion.div>
-
-              {/* Selector de Período de Comparación */}
-              <AnimatePresence>
-                {showComparison && (
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                  >
-                    <DateFilter 
-                      dateRange={comparisonRange || { from: startOfMonth(new Date()), to: new Date() }} 
-                      onDateChange={setComparisonRange}
-                      buttonClassName="border-pink-300 hover:border-pink-500"
-                      buttonText="📅 Período a Comparar"
-                    />
-                  </motion.div>
-                )}
-              </AnimatePresence>
+            <div className="flex items-center gap-2">
+              <DateFilter 
+                dateRange={dateRange} 
+                onDateChange={(range) => { setDateRange(range); setWeekFilter(null); }} 
+              />
             </div>
             </div>
 
@@ -1120,58 +1077,165 @@ INSTRUCCIONES:
               </motion.div>
             )}
 
-            {/* KPIs Principales - Optimizados */}
+            {/* KPIs Principales - Estilo moderno */}
           {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-              {[1, 2, 3, 4, 5].map((i) => <KPISkeleton key={i} />)}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+              {[1, 2, 3, 4].map((i) => <KPISkeleton key={i} />)}
             </div>
           ) : zoneStatus && (
             <>
-              {/* Pregunta Clave: ¿Dónde Estamos? */}
-              <div className="mb-2">
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">📍 ¿Dónde Estamos?</p>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-                <ExecutiveKPI
-                  title="Ventas Acumuladas"
-                  value={formatCurrency(zoneTotals.totalSales)}
-                  subtitle={`de ${formatCurrency(zoneTotals.totalBudget)}`}
-                  icon={DollarSign}
-                  badge={`${((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%`}
-                  badgeColor={zoneTotals.totalSales >= zoneTotals.totalBudget * 0.9 ? 'green' : zoneTotals.totalSales >= zoneTotals.totalBudget * 0.7 ? 'amber' : 'red'}
-                />
-                <ExecutiveKPI
-                  title="Brecha vs Meta"
-                  value={formatCurrency(Math.abs(zoneStatus.gap))}
-                  subtitle={zoneStatus.gap > 0 ? 'Déficit por recuperar' : 'Superávit logrado'}
-                  icon={zoneStatus.gap > 0 ? TrendingDown : TrendingUp}
-                  badge={zoneStatus.gap > 0 ? 'Por cerrar' : 'Superado'}
-                  badgeColor={zoneStatus.gap > 0 ? 'red' : 'green'}
-                />
-                <ExecutiveKPI
-                  title="Ritmo Diario Actual"
-                  value={formatCurrency(zoneStatus.currentDailyAvg)}
-                  subtitle={`Requerido: ${formatCurrency(zoneStatus.dailyRequired)}`}
-                  icon={Zap}
-                  badge={zoneStatus.currentDailyAvg >= zoneStatus.dailyRequired ? '✓ En ritmo' : `↓ ${formatCurrency(zoneStatus.dailyRequired - zoneStatus.currentDailyAvg)} bajo`}
-                  badgeColor={zoneStatus.currentDailyAvg >= zoneStatus.dailyRequired ? 'green' : 'amber'}
-                />
-                <ExecutiveKPI
-                  title="Proyección de Cierre"
-                  value={formatCurrency(zoneStatus.projection)}
-                  subtitle={`${zoneStatus.projectionCompliance.toFixed(0)}% vs meta`}
-                  icon={Target}
-                  badge={zoneStatus.projectionCompliance >= 95 ? '✓ Alcanzable' : zoneStatus.projectionCompliance >= 85 ? '⚠ Riesgo' : '✗ Crítico'}
-                  badgeColor={zoneStatus.projectionCompliance >= 95 ? 'green' : zoneStatus.projectionCompliance >= 85 ? 'amber' : 'red'}
-                />
-                <ExecutiveKPI
-                  title="Estado de Tiendas"
-                  value={statusCounts.critical}
-                  subtitle={`${statusCounts.negative} en alerta, ${statusCounts.positive} en meta`}
-                  icon={AlertTriangle}
-                  badge={statusCounts.critical === 0 ? '✓ Controlado' : 'Acción requerida'}
-                  badgeColor={statusCounts.critical === 0 ? 'green' : statusCounts.critical >= STORES.length * 0.3 ? 'red' : 'amber'}
-                />
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                {/* Total Sales Card - Grande estilo imagen */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  whileHover={{ y: -4 }}
+                  className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-pink-400 via-rose-500 to-pink-600 p-6 shadow-2xl shadow-pink-500/30"
+                >
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent"
+                    animate={{ x: ['-100%', '100%'] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                  />
+                  <div className="relative z-10">
+                    <div className="flex items-center justify-between mb-3">
+                      <p className="text-sm font-bold text-pink-100 uppercase tracking-wide">Total Sales</p>
+                      <motion.div
+                        animate={{ rotate: [0, 10, -10, 0] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                      >
+                        <DollarSign className="w-6 h-6 text-white/80" />
+                      </motion.div>
+                    </div>
+                    <p className="text-4xl font-black text-white mb-4">
+                      {(zoneTotals.totalSales / 1000000).toFixed(1)}M
+                    </p>
+                    
+                    {/* Mini sparkline */}
+                    <div className="flex items-end gap-1 h-12 mb-3">
+                      {storesAnalysis.slice(0, 12).map((s, i) => {
+                        const maxSales = Math.max(...storesAnalysis.map(st => st.totalSales));
+                        const height = (s.totalSales / maxSales) * 100;
+                        return (
+                          <motion.div
+                            key={i}
+                            initial={{ height: 0 }}
+                            animate={{ height: `${height}%` }}
+                            transition={{ delay: i * 0.05 }}
+                            className="flex-1 bg-white/40 rounded-t-sm min-h-[4px]"
+                          />
+                        );
+                      })}
+                    </div>
+                    
+                    <div className="grid grid-cols-3 gap-3 text-center">
+                      <div>
+                        <p className="text-[10px] text-pink-100 font-semibold">Target</p>
+                        <p className="text-sm font-black text-white">${(zoneTotals.totalBudget / 1000000).toFixed(1)}M</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-pink-100 font-semibold">Users</p>
+                        <p className="text-sm font-black text-white">{allCashiers.length}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-pink-100 font-semibold">Stores</p>
+                        <p className="text-sm font-black text-white">{STORES.length}</p>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+
+                {/* Cumplimiento Card */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  whileHover={{ y: -4 }}
+                  className="bg-white rounded-3xl p-6 shadow-lg border border-gray-100"
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">Performance</p>
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-green-500 flex items-center justify-center">
+                      <CheckCircle className="w-4 h-4 text-white" />
+                    </div>
+                  </div>
+                  <p className="text-3xl font-black text-gray-900 mb-1">
+                    {((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%
+                  </p>
+                  <p className="text-xs text-gray-500 mb-4">Budget completion</p>
+                  
+                  {/* Progress bar */}
+                  <div className="bg-gray-100 rounded-full h-2 overflow-hidden mb-3">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${Math.min(((zoneTotals.totalSales/zoneTotals.totalBudget)*100), 100)}%` }}
+                      transition={{ duration: 1, ease: "easeOut" }}
+                      className="h-full bg-gradient-to-r from-emerald-400 to-green-500 rounded-full"
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                    <div className="bg-emerald-50 rounded-lg py-2">
+                      <p className="text-emerald-700 font-black">{statusCounts.positive}</p>
+                      <p className="text-[9px] text-gray-500">On track</p>
+                    </div>
+                    <div className="bg-amber-50 rounded-lg py-2">
+                      <p className="text-amber-700 font-black">{statusCounts.negative}</p>
+                      <p className="text-[9px] text-gray-500">Warning</p>
+                    </div>
+                    <div className="bg-red-50 rounded-lg py-2">
+                      <p className="text-red-700 font-black">{statusCounts.critical}</p>
+                      <p className="text-[9px] text-gray-500">Critical</p>
+                    </div>
+                  </div>
+                </motion.div>
+
+                {/* Comments/Insights Card */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  whileHover={{ y: -4 }}
+                  className="bg-gradient-to-br from-pink-100/60 to-rose-100/60 backdrop-blur-sm rounded-3xl p-6 shadow-lg border border-pink-200/50"
+                >
+                  <div className="flex items-start gap-3 mb-3">
+                    <div className="p-2 rounded-xl bg-white/60">
+                      <Sparkles className="w-4 h-4 text-pink-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-xs font-bold text-pink-700 uppercase mb-1">AI Insights</p>
+                      <p className="text-2xl font-black text-pink-900">{storesAnalysis.filter(s => s.salesCompliance >= 100).length}</p>
+                    </div>
+                  </div>
+                  <div className="h-12 flex items-end gap-1">
+                    {storesAnalysis.slice(0, 15).map((_, i) => (
+                      <div key={i} className="flex-1 bg-pink-400/40 rounded-t-sm" style={{ height: `${20 + Math.random() * 60}%` }} />
+                    ))}
+                  </div>
+                </motion.div>
+
+                {/* Projection Card */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  whileHover={{ y: -4 }}
+                  className="bg-white rounded-3xl p-6 shadow-lg border border-gray-100"
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">Projection</p>
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-400 to-purple-500 flex items-center justify-center">
+                      <Target className="w-4 h-4 text-white" />
+                    </div>
+                  </div>
+                  <p className="text-3xl font-black text-gray-900 mb-1">
+                    {(zoneStatus.projection / 1000000).toFixed(1)}M
+                  </p>
+                  <p className="text-xs text-gray-500 mb-3">Month-end forecast</p>
+                  <div className="text-xs bg-violet-50 text-violet-700 font-semibold px-3 py-2 rounded-lg inline-flex items-center gap-1">
+                    <TrendingUp className="w-3 h-3" />
+                    {zoneStatus.projectionCompliance.toFixed(0)}% goal achievement
+                  </div>
               </div>
             </>
           )}
