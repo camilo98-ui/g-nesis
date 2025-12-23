@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { STORES, getDisplayName } from '@/components/StoreSelector';
 import DateFilter from '@/components/DateFilter';
-import { ArrowLeft, Search, TrendingUp, TrendingDown, Eye, Zap, Award, Brain } from 'lucide-react';
+import { ArrowLeft, Search, TrendingUp, TrendingDown, Eye, Zap, Award, Brain, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { format, startOfMonth, eachDayOfInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -24,6 +24,7 @@ export default function ExecutiveDashboard() {
   const [hoveredKPI, setHoveredKPI] = useState(null);
   const [selectedKPIDetail, setSelectedKPIDetail] = useState(null);
   const [showComparable, setShowComparable] = useState(false);
+  const [sortConfig, setSortConfig] = useState({ key: 'status', direction: 'asc' });
 
   const currentMonth = new Date().getMonth() + 1;
   const currentYear = new Date().getFullYear();
@@ -112,6 +113,49 @@ export default function ExecutiveDashboard() {
       s.code.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [storesAnalysis, searchQuery]);
+
+  const handleSort = (key) => {
+    setSortConfig(prevConfig => ({
+      key,
+      direction: prevConfig.key === key && prevConfig.direction === 'asc' ? 'desc' : 'asc'
+    }));
+  };
+
+  const sortedStores = useMemo(() => {
+    const sorted = [...filteredStores];
+    
+    if (sortConfig.key === 'status') {
+      const statusOrder = { critical: 0, negative: 1, positive: 2, no_data: 3 };
+      sorted.sort((a, b) => {
+        const order = sortConfig.direction === 'asc' 
+          ? statusOrder[a.status] - statusOrder[b.status]
+          : statusOrder[b.status] - statusOrder[a.status];
+        return order !== 0 ? order : b.gap - a.gap;
+      });
+    } else if (sortConfig.key === 'name') {
+      sorted.sort((a, b) => {
+        const comparison = a.name.localeCompare(b.name);
+        return sortConfig.direction === 'asc' ? comparison : -comparison;
+      });
+    } else if (sortConfig.key === 'compliance') {
+      sorted.sort((a, b) => {
+        const comparison = a.salesCompliance - b.salesCompliance;
+        return sortConfig.direction === 'asc' ? comparison : -comparison;
+      });
+    } else if (sortConfig.key === 'sales') {
+      sorted.sort((a, b) => {
+        const comparison = a.totalSales - b.totalSales;
+        return sortConfig.direction === 'asc' ? comparison : -comparison;
+      });
+    } else if (sortConfig.key === 'gap') {
+      sorted.sort((a, b) => {
+        const comparison = a.gap - b.gap;
+        return sortConfig.direction === 'asc' ? comparison : -comparison;
+      });
+    }
+    
+    return sorted;
+  }, [filteredStores, sortConfig]);
 
   const getExecutiveAction = (store) => {
     if (!store.hasData) return 'Activar registro de ventas';
@@ -684,23 +728,86 @@ ZONA: ${((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-white/10">
-                      <th className="text-left py-5 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider">Tienda</th>
-                      <th className="text-right py-5 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider">% Cumplimiento</th>
-                      <th className="text-right py-5 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider">Venta vs Meta</th>
-                      <th className="text-right py-5 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider">Brecha $</th>
-                      <th className="text-center py-5 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider">Estado</th>
+                      <th 
+                        onClick={() => handleSort('name')}
+                        className="text-left py-5 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider cursor-pointer hover:text-white transition-colors group"
+                      >
+                        <div className="flex items-center gap-2">
+                          Tienda
+                          {sortConfig.key === 'name' ? (
+                            sortConfig.direction === 'asc' ? 
+                              <ArrowUp className="w-3 h-3" /> : 
+                              <ArrowDown className="w-3 h-3" />
+                          ) : (
+                            <ArrowUpDown className="w-3 h-3 opacity-0 group-hover:opacity-50" />
+                          )}
+                        </div>
+                      </th>
+                      <th 
+                        onClick={() => handleSort('compliance')}
+                        className="text-right py-5 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider cursor-pointer hover:text-white transition-colors group"
+                      >
+                        <div className="flex items-center justify-end gap-2">
+                          % Cumplimiento
+                          {sortConfig.key === 'compliance' ? (
+                            sortConfig.direction === 'asc' ? 
+                              <ArrowUp className="w-3 h-3" /> : 
+                              <ArrowDown className="w-3 h-3" />
+                          ) : (
+                            <ArrowUpDown className="w-3 h-3 opacity-0 group-hover:opacity-50" />
+                          )}
+                        </div>
+                      </th>
+                      <th 
+                        onClick={() => handleSort('sales')}
+                        className="text-right py-5 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider cursor-pointer hover:text-white transition-colors group"
+                      >
+                        <div className="flex items-center justify-end gap-2">
+                          Venta vs Meta
+                          {sortConfig.key === 'sales' ? (
+                            sortConfig.direction === 'asc' ? 
+                              <ArrowUp className="w-3 h-3" /> : 
+                              <ArrowDown className="w-3 h-3" />
+                          ) : (
+                            <ArrowUpDown className="w-3 h-3 opacity-0 group-hover:opacity-50" />
+                          )}
+                        </div>
+                      </th>
+                      <th 
+                        onClick={() => handleSort('gap')}
+                        className="text-right py-5 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider cursor-pointer hover:text-white transition-colors group"
+                      >
+                        <div className="flex items-center justify-end gap-2">
+                          Brecha $
+                          {sortConfig.key === 'gap' ? (
+                            sortConfig.direction === 'asc' ? 
+                              <ArrowUp className="w-3 h-3" /> : 
+                              <ArrowDown className="w-3 h-3" />
+                          ) : (
+                            <ArrowUpDown className="w-3 h-3 opacity-0 group-hover:opacity-50" />
+                          )}
+                        </div>
+                      </th>
+                      <th 
+                        onClick={() => handleSort('status')}
+                        className="text-center py-5 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider cursor-pointer hover:text-white transition-colors group"
+                      >
+                        <div className="flex items-center justify-center gap-2">
+                          Estado
+                          {sortConfig.key === 'status' ? (
+                            sortConfig.direction === 'asc' ? 
+                              <ArrowUp className="w-3 h-3" /> : 
+                              <ArrowDown className="w-3 h-3" />
+                          ) : (
+                            <ArrowUpDown className="w-3 h-3 opacity-0 group-hover:opacity-50" />
+                          )}
+                        </div>
+                      </th>
                       <th className="text-left py-5 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider">Acción Sugerida</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredStores
-                      .sort((a, b) => {
-                        const statusOrder = { critical: 0, negative: 1, positive: 2, no_data: 3 };
-                        if (statusOrder[a.status] !== statusOrder[b.status]) {
-                          return statusOrder[a.status] - statusOrder[b.status];
-                        }
-                        return b.gap - a.gap;
-                      })
+                    {sortedStores
                       .map((store, idx) => {
                         const action = getExecutiveAction(store);
 
