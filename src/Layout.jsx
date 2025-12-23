@@ -195,24 +195,69 @@ export default function Layout({ children, currentPageName }) {
           transition={{ duration: 0.3 }}
           className="pt-[88px] min-h-screen pb-4 relative"
         >
-          {/* Animated gradient background */}
-          <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+          {/* Premium Modern Background */}
+          <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none bg-gradient-to-br from-slate-50 via-white to-pink-50/30">
+            {/* Animated gradient orbs */}
             <motion.div
               animate={{
-                background: [
-                  'radial-gradient(circle at 20% 30%, rgba(252, 231, 243, 0.3) 0%, transparent 50%)',
-                  'radial-gradient(circle at 80% 70%, rgba(243, 232, 255, 0.3) 0%, transparent 50%)',
-                  'radial-gradient(circle at 40% 60%, rgba(254, 243, 199, 0.3) 0%, transparent 50%)',
-                  'radial-gradient(circle at 20% 30%, rgba(252, 231, 243, 0.3) 0%, transparent 50%)',
-                ]
+                x: [0, 100, 0],
+                y: [0, -50, 0],
+                scale: [1, 1.1, 1],
               }}
-              transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-              className="absolute inset-0"
+              transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute top-20 right-[10%] w-[500px] h-[500px] bg-gradient-to-br from-pink-300/20 via-rose-300/15 to-transparent rounded-full blur-3xl"
+            />
+            <motion.div
+              animate={{
+                x: [0, -80, 0],
+                y: [0, 80, 0],
+                scale: [1, 1.15, 1],
+              }}
+              transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute bottom-20 left-[15%] w-[600px] h-[600px] bg-gradient-to-br from-purple-300/15 via-pink-300/20 to-transparent rounded-full blur-3xl"
+            />
+            <motion.div
+              animate={{
+                x: [0, 60, 0],
+                y: [0, -60, 0],
+                scale: [1, 1.2, 1],
+              }}
+              transition={{ duration: 30, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute top-[40%] left-[5%] w-[400px] h-[400px] bg-gradient-to-br from-blue-300/10 via-cyan-300/15 to-transparent rounded-full blur-3xl"
+            />
+
+            {/* Geometric shapes */}
+            <div className="absolute top-[15%] right-[20%] w-32 h-32 border border-pink-200/30 rounded-2xl rotate-12 opacity-40" />
+            <div className="absolute bottom-[25%] left-[25%] w-24 h-24 border border-purple-200/30 rounded-full opacity-30" />
+            <div className="absolute top-[60%] right-[35%] w-20 h-20 border border-blue-200/30 rounded-xl -rotate-6 opacity-40" />
+
+            {/* Subtle grid overlay */}
+            <div className="absolute inset-0 opacity-[0.015]"
+                 style={{
+                   backgroundImage: 'linear-gradient(rgba(236, 72, 153, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(236, 72, 153, 0.1) 1px, transparent 1px)',
+                   backgroundSize: '60px 60px'
+                 }}
+            />
+
+            {/* Glassmorphism layers */}
+            <motion.div
+              animate={{
+                opacity: [0.3, 0.5, 0.3],
+              }}
+              transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute top-[10%] left-[40%] w-64 h-64 bg-gradient-to-br from-white/40 to-pink-100/30 rounded-full backdrop-blur-3xl"
+            />
+            <motion.div
+              animate={{
+                opacity: [0.4, 0.6, 0.4],
+              }}
+              transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+              className="absolute bottom-[15%] right-[30%] w-48 h-48 bg-gradient-to-br from-white/30 to-purple-100/30 rounded-full backdrop-blur-3xl"
             />
           </div>
 
           <motion.div 
-            className="container mx-auto px-2 sm:px-4"
+            className="container mx-auto px-2 sm:px-4 relative z-10"
             initial={{ y: 20 }}
             animate={{ y: 0 }}
             transition={{ duration: 0.4, ease: "easeOut" }}
