@@ -12,7 +12,7 @@ import DirectoryModal from '@/components/DirectoryModal';
 import DailySalesForm from '@/components/forms/DailySalesForm';
 import ShiftRecordForm from '@/components/forms/ShiftRecordForm';
 import MonthlyBudgetDashboard from '@/components/budget/MonthlyBudgetDashboard';
-import { useTheme } from '@/components/ThemeProvider';
+import ThemeProvider, { useTheme } from '@/components/ThemeProvider';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import {
