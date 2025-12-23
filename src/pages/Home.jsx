@@ -444,28 +444,28 @@ export default function Home() {
   // Si no está logueado, mostrar pantalla de login
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-[#FEF7F8] relative overflow-hidden">
-        <div className="flex min-h-screen">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-pink-50/30 relative overflow-hidden">
+        {/* Decorative blobs */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-pink-200/20 to-purple-200/20 rounded-full blur-3xl" />
+          <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-br from-blue-200/20 to-pink-200/20 rounded-full blur-3xl" />
+        </div>
+
+        <div className="flex min-h-screen relative z-10">
           {/* Left Panel - Branding (55%) */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="hidden lg:flex lg:w-[55%] bg-gradient-to-br from-pink-50/50 via-white to-white relative p-16 flex-col justify-center overflow-hidden"
+            className="hidden lg:flex lg:w-[55%] relative p-20 flex-col justify-center"
           >
-            {/* Subtle background decoration */}
-            <div className="absolute inset-0 opacity-[0.02]">
-              <div className="absolute top-20 left-20 w-[500px] h-[500px] bg-pink-400 rounded-full blur-3xl" />
-              <div className="absolute bottom-20 right-20 w-[400px] h-[400px] bg-purple-300 rounded-full blur-3xl" />
-            </div>
-
             {/* Content */}
-            <div className="relative z-10 max-w-xl">
+            <div className="max-w-xl">
               {/* Logo */}
               <motion.img
                 src={LOGO_URL}
                 alt="Popsy Management"
-                className="h-14 object-contain mb-16"
+                className="h-16 object-contain mb-20"
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
@@ -476,37 +476,40 @@ export default function Home() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
-                className="space-y-6"
+                className="space-y-8"
               >
-                <h1 className="text-5xl font-bold leading-tight">
-                  <span className="text-gray-900">Bienvenido a</span><br />
-                  <span className="bg-gradient-to-r from-pink-500 to-pink-600 bg-clip-text text-transparent">Popsy Management</span>
-                </h1>
-
-                <p className="text-base text-gray-600 leading-relaxed">
-                  Plataforma de gestión empresarial para equipos de alto rendimiento
-                </p>
+                <div>
+                  <h1 className="text-6xl font-bold leading-[1.1] mb-5">
+                    <span className="text-slate-900">Bienvenido a</span><br />
+                    <span className="bg-gradient-to-r from-pink-500 via-pink-600 to-rose-600 bg-clip-text text-transparent">
+                      Popsy Management
+                    </span>
+                  </h1>
+                  <p className="text-lg text-slate-600 leading-relaxed">
+                    Plataforma de gestión empresarial para equipos de alto rendimiento
+                  </p>
+                </div>
 
                 {/* Feature list */}
-                <div className="space-y-5 pt-10">
+                <div className="space-y-6 pt-8">
                   {[
-                    { icon: TrendingUp, title: 'Análisis en tiempo real', text: 'Métricas y KPIs actualizados al instante' },
-                    { icon: Users, title: 'Gestión de equipos', text: 'Optimiza el rendimiento de tu personal' },
-                    { icon: Target, title: 'Objetivos inteligentes', text: 'Seguimiento automático de metas' }
+                    { icon: TrendingUp, title: 'Métricas y KPIs en tiempo real', text: 'Monitoreo continuo del desempeño empresarial' },
+                    { icon: Users, title: 'Gestión inteligente de equipos', text: 'Optimiza recursos y maximiza productividad' },
+                    { icon: Target, title: 'Seguimiento automático de objetivos', text: 'Cumple tus metas con análisis predictivo' }
                   ].map((feature, i) => (
                     <motion.div
                       key={i}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.7 + i * 0.1 }}
-                      className="flex items-start gap-4"
+                      transition={{ delay: 0.7 + i * 0.15 }}
+                      className="flex items-start gap-5"
                     >
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-100 to-pink-200 flex items-center justify-center flex-shrink-0 shadow-sm">
-                        <feature.icon className="w-6 h-6 text-pink-600" />
+                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center flex-shrink-0 shadow-lg shadow-pink-500/25">
+                        <feature.icon className="w-7 h-7 text-white" />
                       </div>
-                      <div className="pt-2.5">
-                        <p className="text-gray-900 font-semibold text-base mb-1">{feature.title}</p>
-                        <p className="text-gray-600 text-sm leading-relaxed">{feature.text}</p>
+                      <div className="pt-3">
+                        <p className="text-slate-900 font-bold text-lg mb-1.5">{feature.title}</p>
+                        <p className="text-slate-600 text-sm leading-relaxed">{feature.text}</p>
                       </div>
                     </motion.div>
                   ))}
@@ -516,32 +519,34 @@ export default function Home() {
           </motion.div>
 
           {/* Right Panel - Login Card (45%) */}
-          <div className="w-full lg:w-[45%] flex items-center justify-center p-6 lg:p-12 bg-white">
+          <div className="w-full lg:w-[45%] flex items-center justify-center p-8 lg:p-16 bg-white/80 backdrop-blur-xl">
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="w-full max-w-lg"
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3, type: "spring" }}
+              className="w-full max-w-xl"
             >
               {/* Mobile logo */}
-              <div className="lg:hidden mb-8 text-center">
-                <img src={LOGO_URL} alt="Popsy" className="h-12 object-contain mx-auto mb-4" />
-                <h2 className="text-2xl font-bold text-gray-900">Popsy Management</h2>
+              <div className="lg:hidden mb-10 text-center">
+                <img src={LOGO_URL} alt="Popsy" className="h-14 object-contain mx-auto mb-5" />
+                <h2 className="text-3xl font-bold text-slate-900">Popsy Management</h2>
+                <p className="text-slate-600 text-sm mt-2">Sistema de gestión empresarial</p>
               </div>
 
               {/* Login Card */}
-              <div className="bg-white rounded-3xl shadow-[0_4px_30px_rgba(0,0,0,0.08)] border border-gray-100 p-10 space-y-7">
+              <div className="bg-white rounded-[32px] shadow-[0_20px_70px_rgba(0,0,0,0.08)] border border-slate-200/50 p-12 space-y-8"
+                   style={{ boxShadow: '0 20px 70px -20px rgba(236, 72, 153, 0.15), 0 0 1px rgba(0,0,0,0.05)' }}>
 
                 {/* Header */}
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                <div className="text-center mb-2">
+                  <h2 className="text-3xl font-bold text-slate-900 mb-3">
                     Iniciar sesión
                   </h2>
-                  <p className="text-sm text-gray-600">Selecciona tu rol para comenzar</p>
+                  <p className="text-base text-slate-600">Selecciona tu rol para comenzar</p>
                 </div>
 
                 {/* Selector de Rol como Cards */}
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {ROLES.map((role) => {
                     const isSelected = selectedRole === role.id;
 
@@ -549,34 +554,37 @@ export default function Home() {
                       <motion.button
                         key={role.id}
                         onClick={() => {setSelectedRole(role.id);setLoginError('');}}
-                        whileHover={{ scale: 1.01, y: -1 }}
-                        whileTap={{ scale: 0.99 }}
-                        className={`relative w-full p-4 rounded-xl border-2 transition-all text-left flex items-center gap-4 ${
+                        whileHover={{ scale: 1.02, y: -2 }}
+                        whileTap={{ scale: 0.98 }}
+                        className={`relative w-full p-5 rounded-2xl border-2 transition-all duration-300 text-left flex items-center gap-5 ${
                           isSelected
-                            ? 'border-pink-500 bg-pink-50/50 shadow-sm'
-                            : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
+                            ? 'border-pink-500 bg-gradient-to-r from-pink-50 to-rose-50 shadow-lg shadow-pink-500/20'
+                            : 'border-slate-200 bg-white hover:border-pink-300 hover:shadow-md'
                         }`}
                       >
-                        <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                          isSelected ? 'bg-pink-100' : 'bg-gray-100'
+                        <div className={`w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0 transition-all ${
+                          isSelected 
+                            ? 'bg-gradient-to-br from-pink-500 to-rose-500 shadow-lg shadow-pink-500/30' 
+                            : 'bg-slate-100'
                         }`}>
-                          <div className="w-6 h-6">
+                          <div className="w-8 h-8">
                             <RoleIcon roleId={role.id} isSelected={isSelected} />
                           </div>
                         </div>
-                        <div className="flex-1">
-                          <p className="text-sm font-semibold text-gray-900 mb-0.5">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-base font-bold text-slate-900 mb-1">
                             {role.name}
                           </p>
-                          <p className="text-xs text-gray-600 leading-relaxed">
+                          <p className="text-sm text-slate-600 leading-relaxed">
                             {role.description}
                           </p>
                         </div>
                         {isSelected && (
                           <motion.div
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            className="w-6 h-6 rounded-full bg-pink-500 flex items-center justify-center flex-shrink-0"
+                            initial={{ scale: 0, rotate: -180 }}
+                            animate={{ scale: 1, rotate: 0 }}
+                            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                            className="w-7 h-7 rounded-full bg-pink-500 flex items-center justify-center flex-shrink-0 shadow-md"
                           >
                             <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
@@ -588,19 +596,16 @@ export default function Home() {
                   })}
                 </div>
 
-                <p className="text-xs text-gray-500 text-center -mt-2">
-                  Puedes cambiar tu rol más adelante si es necesario.
-                </p>
-
                 {/* Info para gerente */}
                 {selectedRole === 'gerente' && (
                   <motion.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
-                    className="p-3 bg-blue-50 border border-blue-200 rounded-xl"
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    className="p-4 bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-2xl"
                   >
-                    <p className="text-xs text-blue-700 flex items-center gap-2">
-                      <Info className="w-4 h-4" />
+                    <p className="text-sm text-blue-700 flex items-center gap-2 font-medium">
+                      <Info className="w-5 h-5" />
                       <span>Acceso a panel ejecutivo global</span>
                     </p>
                   </motion.div>
@@ -611,8 +616,9 @@ export default function Home() {
                   <motion.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   >
-                    <label htmlFor="store-selector" className="block text-sm font-semibold text-gray-900 mb-2">
+                    <label htmlFor="store-selector" className="block text-base font-bold text-slate-900 mb-3">
                       Selecciona tu tienda
                     </label>
                     <StoreSelector
@@ -626,12 +632,13 @@ export default function Home() {
                   <motion.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   >
-                    <label htmlFor="login-password" className="block text-sm font-semibold text-gray-900 mb-2">
+                    <label htmlFor="login-password" className="block text-base font-bold text-slate-900 mb-3">
                       Contraseña
                     </label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                       <input
                         id="login-password"
                         type={showLoginPassword ? "text" : "password"}
@@ -640,16 +647,16 @@ export default function Home() {
                         onChange={(e) => {setLoginPassword(e.target.value);setLoginError('');}}
                         onKeyDown={(e) => e.key === 'Enter' && !isSubmitting && handleLogin()}
                         disabled={isSubmitting}
-                        className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none text-sm text-gray-900 placeholder:text-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        className="w-full pl-12 pr-12 py-4 border-2 border-slate-200 rounded-2xl focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none text-base text-slate-900 placeholder:text-slate-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                         aria-label="Campo de contraseña"
                         aria-invalid={!!loginError}
                         aria-describedby={loginError ? "password-error" : undefined} />
                       <button
                         type="button"
                         onClick={() => setShowLoginPassword(!showLoginPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
                       >
-                        {showLoginPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        {showLoginPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                       </button>
                     </div>
                   </motion.div>
@@ -659,11 +666,12 @@ export default function Home() {
                   <motion.div
                     initial={{ opacity: 0, y: -5 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="p-3 bg-red-50 border border-red-200 rounded-xl"
+                    transition={{ type: "spring", stiffness: 300 }}
+                    className="p-4 bg-gradient-to-r from-red-50 to-pink-50 border-2 border-red-200 rounded-2xl"
                     id="password-error"
                     role="alert">
-                    <p className="text-red-600 text-xs flex items-center gap-2">
-                      <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
+                    <p className="text-red-600 text-sm flex items-center gap-2 font-medium">
+                      <AlertTriangle className="w-5 h-5 flex-shrink-0" />
                       {loginError}
                     </p>
                   </motion.div>
@@ -673,14 +681,14 @@ export default function Home() {
                 <Button
                   onClick={handleLogin}
                   disabled={(selectedRole !== 'gerente' && !pendingStore) || !selectedRole || isSubmitting}
-                  className="w-full bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white py-3.5 rounded-xl font-semibold text-sm shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  className="w-full bg-gradient-to-r from-pink-500 via-pink-600 to-rose-600 hover:from-pink-600 hover:via-pink-700 hover:to-rose-700 text-white py-4 rounded-2xl font-bold text-base shadow-xl shadow-pink-500/30 hover:shadow-2xl hover:shadow-pink-500/40 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 hover:-translate-y-0.5"
                 >
                   {isSubmitting ? (
-                    <span className="flex items-center justify-center gap-2">
+                    <span className="flex items-center justify-center gap-3">
                       <motion.div
                         animate={{ rotate: 360 }}
                         transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                        className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
+                        className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
                       />
                       Ingresando...
                     </span>
@@ -690,8 +698,8 @@ export default function Home() {
                 </Button>
 
                 {/* Footer text */}
-                <div className="text-center">
-                  <p className="text-xs text-gray-500">
+                <div className="text-center pt-2">
+                  <p className="text-sm text-slate-500">
                     Tu acceso define lo que puedes ver y gestionar.
                   </p>
                 </div>
