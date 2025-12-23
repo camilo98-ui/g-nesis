@@ -447,6 +447,21 @@ export default function Home() {
   if (!isLoggedIn) {
     return (
       <div className="min-h-screen bg-[#0F172A] relative overflow-hidden">
+        {/* Theme Toggle - Login Screen */}
+        <motion.button
+          onClick={toggleTheme}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          className="fixed top-4 right-4 z-50 w-12 h-12 rounded-full bg-[#1F2937] border border-white/10 shadow-lg flex items-center justify-center text-pink-500 hover:bg-[#374151] transition-all duration-200"
+          title={theme === 'light' ? 'Modo oscuro' : 'Modo claro'}
+        >
+          {theme === 'light' ? (
+            <Moon className="w-5 h-5" />
+          ) : (
+            <Sun className="w-5 h-5" />
+          )}
+        </motion.button>
+
         <div className="flex min-h-screen">
           {/* Left Panel - Branding (60%) */}
           <motion.div
