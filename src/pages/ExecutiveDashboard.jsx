@@ -11,6 +11,8 @@ import { Input } from "@/components/ui/input";
 import { format, startOfMonth, eachDayOfInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
 import StoreDetailModal from '../components/executive/StoreDetailModal';
+import KPIDetailModal from '../components/executive/KPIDetailModal';
+import ExecutiveComparable from '../components/executive/ExecutiveComparable';
 import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, ResponsiveContainer } from 'recharts';
 
 export default function ExecutiveDashboard() {
@@ -20,6 +22,8 @@ export default function ExecutiveDashboard() {
   const [aiInsights, setAiInsights] = useState(null);
   const [loadingInsights, setLoadingInsights] = useState(false);
   const [hoveredKPI, setHoveredKPI] = useState(null);
+  const [selectedKPIDetail, setSelectedKPIDetail] = useState(null);
+  const [showComparable, setShowComparable] = useState(false);
 
   const currentMonth = new Date().getMonth() + 1;
   const currentYear = new Date().getFullYear();
@@ -303,6 +307,15 @@ ZONA: ${((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%
             </div>
 
             <div className="flex items-center gap-4 mt-2">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setShowComparable(true)}
+                className="h-12 px-6 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold text-sm flex items-center gap-2 shadow-lg"
+              >
+                <TrendingUp className="w-4 h-4" />
+                Modo Comparable
+              </motion.button>
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <Input
@@ -337,6 +350,7 @@ ZONA: ${((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%
                 whileHover={{ scale: 1.03, y: -8 }}
                 onHoverStart={() => setHoveredKPI('sales')}
                 onHoverEnd={() => setHoveredKPI(null)}
+                onClick={() => setSelectedKPIDetail('sales')}
                 className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl rounded-2xl p-8 border border-white/20 cursor-pointer overflow-hidden group"
               >
                 <motion.div
@@ -404,6 +418,7 @@ ZONA: ${((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%
                 whileHover={{ scale: 1.03, y: -8 }}
                 onHoverStart={() => setHoveredKPI('compliance')}
                 onHoverEnd={() => setHoveredKPI(null)}
+                onClick={() => setSelectedKPIDetail('compliance')}
                 className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl rounded-2xl p-8 border border-white/20 cursor-pointer overflow-hidden group"
               >
                 <motion.div
@@ -488,6 +503,7 @@ ZONA: ${((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%
                 whileHover={{ scale: 1.03, y: -8 }}
                 onHoverStart={() => setHoveredKPI('critical')}
                 onHoverEnd={() => setHoveredKPI(null)}
+                onClick={() => setSelectedKPIDetail('critical')}
                 className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl rounded-2xl p-8 border border-white/20 cursor-pointer overflow-hidden group"
               >
                 <motion.div
@@ -552,6 +568,7 @@ ZONA: ${((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%
                 whileHover={{ scale: 1.03, y: -8 }}
                 onHoverStart={() => setHoveredKPI('meta')}
                 onHoverEnd={() => setHoveredKPI(null)}
+                onClick={() => setSelectedKPIDetail('meta')}
                 className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl rounded-2xl p-8 border border-white/20 cursor-pointer overflow-hidden group"
               >
                 <motion.div
@@ -999,7 +1016,7 @@ ZONA: ${((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%
         )}
       </div>
 
-      {/* Modal Detalle */}
+      {/* Modal Detalle Tienda */}
       <AnimatePresence>
         {selectedStoreDetail && (
           <StoreDetailModal
@@ -1007,6 +1024,30 @@ ZONA: ${((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%
             onClose={() => setSelectedStoreDetail(null)}
             allDailySales={allDailySales}
             dateRange={dateRange}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Modal Detalle KPI */}
+      <AnimatePresence>
+        {selectedKPIDetail && (
+          <KPIDetailModal
+            kpiType={selectedKPIDetail}
+            onClose={() => setSelectedKPIDetail(null)}
+            data={{ allDailySales, allBudgets }}
+            dateRange={dateRange}
+            storesAnalysis={storesAnalysis}
+            zoneTotals={zoneTotals}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Modal Comparable */}
+      <AnimatePresence>
+        {showComparable && (
+          <ExecutiveComparable
+            onClose={() => setShowComparable(false)}
+            allDailySales={allDailySales}
           />
         )}
       </AnimatePresence>
