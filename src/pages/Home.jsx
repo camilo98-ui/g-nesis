@@ -444,27 +444,28 @@ export default function Home() {
   // Si no está logueado, mostrar pantalla de login
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-[#F7F8FA] relative overflow-hidden">
+      <div className="min-h-screen bg-[#FEF7F8] relative overflow-hidden">
         <div className="flex min-h-screen">
-          {/* Left Panel - Branding (60%) */}
+          {/* Left Panel - Branding (55%) */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="hidden lg:flex lg:w-[60%] bg-gradient-to-br from-pink-50/70 via-white to-white relative p-16 flex-col justify-between overflow-hidden"
+            className="hidden lg:flex lg:w-[55%] bg-gradient-to-br from-pink-50/50 via-white to-white relative p-16 flex-col justify-center overflow-hidden"
           >
             {/* Subtle background decoration */}
-            <div className="absolute inset-0 opacity-[0.015]">
-              <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-pink-500 rounded-full blur-3xl" />
+            <div className="absolute inset-0 opacity-[0.02]">
+              <div className="absolute top-20 left-20 w-[500px] h-[500px] bg-pink-400 rounded-full blur-3xl" />
+              <div className="absolute bottom-20 right-20 w-[400px] h-[400px] bg-purple-300 rounded-full blur-3xl" />
             </div>
 
             {/* Content */}
-            <div className="relative z-10">
+            <div className="relative z-10 max-w-xl">
               {/* Logo */}
               <motion.img
                 src={LOGO_URL}
                 alt="Popsy Management"
-                className="h-12 object-contain mb-12"
+                className="h-14 object-contain mb-16"
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
@@ -475,19 +476,19 @@ export default function Home() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
-                className="space-y-6 max-w-xl"
+                className="space-y-6"
               >
-                <h1 className="text-5xl font-bold leading-tight text-gray-900">
-                  Bienvenido a<br />
-                  <span className="text-pink-500">Popsy Management</span>
+                <h1 className="text-5xl font-bold leading-tight">
+                  <span className="text-gray-900">Bienvenido a</span><br />
+                  <span className="bg-gradient-to-r from-pink-500 to-pink-600 bg-clip-text text-transparent">Popsy Management</span>
                 </h1>
 
-                <p className="text-base text-gray-600 leading-relaxed mt-4">
+                <p className="text-base text-gray-600 leading-relaxed">
                   Plataforma de gestión empresarial para equipos de alto rendimiento
                 </p>
 
                 {/* Feature list */}
-                <div className="space-y-4 pt-8">
+                <div className="space-y-5 pt-10">
                   {[
                     { icon: TrendingUp, title: 'Análisis en tiempo real', text: 'Métricas y KPIs actualizados al instante' },
                     { icon: Users, title: 'Gestión de equipos', text: 'Optimiza el rendimiento de tu personal' },
@@ -500,37 +501,27 @@ export default function Home() {
                       transition={{ delay: 0.7 + i * 0.1 }}
                       className="flex items-start gap-4"
                     >
-                      <div className="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center flex-shrink-0">
-                        <feature.icon className="w-6 h-6 text-pink-500" />
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-100 to-pink-200 flex items-center justify-center flex-shrink-0 shadow-sm">
+                        <feature.icon className="w-6 h-6 text-pink-600" />
                       </div>
-                      <div className="pt-2">
-                        <p className="text-gray-900 font-semibold text-base">{feature.title}</p>
-                        <p className="text-gray-600 text-sm mt-1">{feature.text}</p>
+                      <div className="pt-2.5">
+                        <p className="text-gray-900 font-semibold text-base mb-1">{feature.title}</p>
+                        <p className="text-gray-600 text-sm leading-relaxed">{feature.text}</p>
                       </div>
                     </motion.div>
                   ))}
                 </div>
               </motion.div>
             </div>
-
-            {/* Footer */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1 }}
-              className="relative z-10 text-xs text-gray-400 opacity-60"
-            >
-              © 2025 Popsy Management
-            </motion.div>
           </motion.div>
 
-          {/* Right Panel - Login Card (40%) */}
-          <div className="w-full lg:w-[40%] flex items-center justify-center p-6 lg:p-12">
+          {/* Right Panel - Login Card (45%) */}
+          <div className="w-full lg:w-[45%] flex items-center justify-center p-6 lg:p-12 bg-white">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="w-full max-w-md"
+              className="w-full max-w-lg"
             >
               {/* Mobile logo */}
               <div className="lg:hidden mb-8 text-center">
@@ -539,71 +530,74 @@ export default function Home() {
               </div>
 
               {/* Login Card */}
-              <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-gray-100/50 p-8 space-y-6">
+              <div className="bg-white rounded-3xl shadow-[0_4px_30px_rgba(0,0,0,0.08)] border border-gray-100 p-10 space-y-7">
 
-                {/* Selector de Rol como Cards */}
+                {/* Header */}
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900 mb-1">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">
                     Iniciar sesión
                   </h2>
-                  <p className="text-sm text-gray-600 mb-4">Selecciona tu rol para comenzar</p>
-                  <div className="space-y-3">
-                    {ROLES.map((role) => {
-                      const isSelected = selectedRole === role.id;
-
-                      return (
-                        <motion.button
-                          key={role.id}
-                          onClick={() => {setSelectedRole(role.id);setLoginError('');}}
-                          whileHover={{ scale: 1.01 }}
-                          whileTap={{ scale: 0.99 }}
-                          className={`relative w-full p-3 rounded-lg border transition-all text-left flex items-center gap-3 ${
-                            isSelected
-                              ? 'border-pink-500 bg-pink-50'
-                              : 'border-gray-200 bg-white hover:border-gray-300'
-                          }`}
-                        >
-                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                            isSelected ? 'bg-pink-100' : 'bg-gray-100'
-                          }`}>
-                            <div className="w-5 h-5">
-                              <RoleIcon roleId={role.id} isSelected={isSelected} />
-                            </div>
-                          </div>
-                          <div className="flex-1">
-                            <p className="text-sm font-semibold text-gray-900">
-                              {role.name}
-                            </p>
-                            <p className="text-xs text-gray-600 mt-0.5">
-                              {role.description}
-                            </p>
-                          </div>
-                          {isSelected && (
-                            <motion.div
-                              initial={{ scale: 0 }}
-                              animate={{ scale: 1 }}
-                              className="w-6 h-6 rounded-full bg-pink-500 flex items-center justify-center flex-shrink-0"
-                            >
-                              <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                              </svg>
-                            </motion.div>
-                          )}
-                        </motion.button>
-                      );
-                    })}
-                  </div>
-                  <p className="text-xs text-gray-600 mt-3 text-center">
-                    Puedes cambiar tu rol más adelante si es necesario.
-                  </p>
+                  <p className="text-sm text-gray-600">Selecciona tu rol para comenzar</p>
                 </div>
+
+                {/* Selector de Rol como Cards */}
+                <div className="space-y-3">
+                  {ROLES.map((role) => {
+                    const isSelected = selectedRole === role.id;
+
+                    return (
+                      <motion.button
+                        key={role.id}
+                        onClick={() => {setSelectedRole(role.id);setLoginError('');}}
+                        whileHover={{ scale: 1.01, y: -1 }}
+                        whileTap={{ scale: 0.99 }}
+                        className={`relative w-full p-4 rounded-xl border-2 transition-all text-left flex items-center gap-4 ${
+                          isSelected
+                            ? 'border-pink-500 bg-pink-50/50 shadow-sm'
+                            : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
+                        }`}
+                      >
+                        <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                          isSelected ? 'bg-pink-100' : 'bg-gray-100'
+                        }`}>
+                          <div className="w-6 h-6">
+                            <RoleIcon roleId={role.id} isSelected={isSelected} />
+                          </div>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-semibold text-gray-900 mb-0.5">
+                            {role.name}
+                          </p>
+                          <p className="text-xs text-gray-600 leading-relaxed">
+                            {role.description}
+                          </p>
+                        </div>
+                        {isSelected && (
+                          <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            className="w-6 h-6 rounded-full bg-pink-500 flex items-center justify-center flex-shrink-0"
+                          >
+                            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                            </svg>
+                          </motion.div>
+                        )}
+                      </motion.button>
+                    );
+                  })}
+                </div>
+
+                <p className="text-xs text-gray-500 text-center -mt-2">
+                  Puedes cambiar tu rol más adelante si es necesario.
+                </p>
 
                 {/* Info para gerente */}
                 {selectedRole === 'gerente' && (
                   <motion.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
-                    className="p-3 bg-blue-50/50 border border-blue-200/50 rounded-lg"
+                    className="p-3 bg-blue-50 border border-blue-200 rounded-xl"
                   >
                     <p className="text-xs text-blue-700 flex items-center gap-2">
                       <Info className="w-4 h-4" />
@@ -618,7 +612,7 @@ export default function Home() {
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                   >
-                    <label htmlFor="store-selector" className="block text-sm font-medium text-gray-900 mb-2">
+                    <label htmlFor="store-selector" className="block text-sm font-semibold text-gray-900 mb-2">
                       Selecciona tu tienda
                     </label>
                     <StoreSelector
@@ -646,7 +640,7 @@ export default function Home() {
                         onChange={(e) => {setLoginPassword(e.target.value);setLoginError('');}}
                         onKeyDown={(e) => e.key === 'Enter' && !isSubmitting && handleLogin()}
                         disabled={isSubmitting}
-                        className="w-full pl-10 pr-10 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none text-sm text-gray-900 placeholder:text-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none text-sm text-gray-900 placeholder:text-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                         aria-label="Campo de contraseña"
                         aria-invalid={!!loginError}
                         aria-describedby={loginError ? "password-error" : undefined} />
@@ -665,7 +659,7 @@ export default function Home() {
                   <motion.div
                     initial={{ opacity: 0, y: -5 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="p-3 bg-red-50/50 border border-red-200/50 rounded-lg"
+                    className="p-3 bg-red-50 border border-red-200 rounded-xl"
                     id="password-error"
                     role="alert">
                     <p className="text-red-600 text-xs flex items-center gap-2">
@@ -679,7 +673,7 @@ export default function Home() {
                 <Button
                   onClick={handleLogin}
                   disabled={(selectedRole !== 'gerente' && !pendingStore) || !selectedRole || isSubmitting}
-                  className="w-full bg-pink-500 hover:bg-pink-600 text-white py-3 rounded-xl font-semibold text-sm shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  className="w-full bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white py-3.5 rounded-xl font-semibold text-sm shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 >
                   {isSubmitting ? (
                     <span className="flex items-center justify-center gap-2">
@@ -696,7 +690,7 @@ export default function Home() {
                 </Button>
 
                 {/* Footer text */}
-                <div className="text-center pt-2">
+                <div className="text-center">
                   <p className="text-xs text-gray-500">
                     Tu acceso define lo que puedes ver y gestionar.
                   </p>
