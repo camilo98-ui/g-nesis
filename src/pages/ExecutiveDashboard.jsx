@@ -42,6 +42,9 @@ export default function ExecutiveDashboard() {
   const isLoading = loadingSales || loadingBudgets;
 
   const storesAnalysis = useMemo(() => {
+    const prevMonth = currentMonth === 1 ? 12 : currentMonth - 1;
+    const prevYear = currentMonth === 1 ? currentYear - 1 : currentYear;
+
     return STORES.map(store => {
       const storeSales = allDailySales.filter(s => {
         try {
@@ -62,6 +65,21 @@ export default function ExecutiveDashboard() {
       const salesCompliance = salesBudget > 0 && totalSales > 0 ? (totalSales / salesBudget) * 100 : 0;
       const hasData = storeSales.length > 0 && totalSales > 0;
 
+      // Calcular cumplimiento del mes anterior
+      const prevMonthSales = allDailySales.filter(s => {
+        try {
+          const d = new Date(s.date);
+          return s.store_id === store.code && d.getMonth() + 1 === prevMonth && d.getFullYear() === prevYear;
+        } catch {
+          return false;
+        }
+      });
+      const prevTotalSales = prevMonthSales.reduce((sum, s) => sum + (s.total_sales || 0), 0);
+      const prevBudget = allBudgets.find(b => b.store_id === store.code && b.month === prevMonth && b.year === prevYear);
+      const prevSalesBudget = prevBudget?.sales_budget || 0;
+      const prevCompliance = prevSalesBudget > 0 && prevTotalSales > 0 ? (prevTotalSales / prevSalesBudget) * 100 : 0;
+      const complianceTrend = prevCompliance > 0 ? salesCompliance - prevCompliance : 0;
+
       const daysElapsed = Math.max(1, storeSales.length);
       const daysInPeriod = Math.max(1, Math.ceil((dateRange.to - dateRange.from) / (1000 * 60 * 60 * 24)));
       const dailyAvg = daysElapsed > 0 && totalSales > 0 ? totalSales / daysElapsed : 0;
@@ -79,7 +97,7 @@ export default function ExecutiveDashboard() {
         name: getDisplayName(store.code),
         totalSales, totalTransactions, avgTicket,
         salesBudget, salesCompliance, projection, status, gap,
-        hasData, dailyAvg
+        hasData, dailyAvg, complianceTrend, prevCompliance
       };
     });
   }, [allDailySales, allBudgets, dateRange, currentMonth, currentYear]);
@@ -915,12 +933,37 @@ Genera:
                                       }`}
                                     />
                                   </div>
-                                  <span className={`font-black text-3xl tabular-nums ${
-                                    store.salesCompliance >= 90 ? 'text-emerald-400' :
-                                    store.salesCompliance >= 70 ? 'text-amber-400' : 'text-red-400'
-                                  }`}>
-                                    {store.salesCompliance.toFixed(0)}%
-                                  </span>
+                                  <div className="flex items-center gap-3">
+                                    <span className={`font-black text-3xl tabular-nums ${
+                                      store.salesCompliance >= 90 ? 'text-emerald-400' :
+                                      store.salesCompliance >= 70 ? 'text-amber-400' : 'text-red-400'
+                                    }`}>
+                                      {store.salesCompliance.toFixed(0)}%
+                                    </span>
+                                    {store.prevCompliance > 0 && (
+                                      <motion.div
+                                        initial={{ scale: 0, rotate: -180 }}
+                                        animate={{ 
+                                          scale: 1, 
+                                          rotate: 0,
+                                          y: store.complianceTrend > 0 ? [0, -3, 0] : [0, 3, 0]
+                                        }}
+                                        transition={{ 
+                                          scale: { duration: 0.4, delay: idx * 0.01 },
+                                          y: { duration: 1.5, repeat: Infinity, ease: "easeInOut" }
+                                        }}
+                                        className={`${
+                                          store.complianceTrend > 0 ? 'text-emerald-400' : 'text-red-400'
+                                        }`}
+                                      >
+                                        {store.complianceTrend > 0 ? (
+                                          <TrendingUp className="w-6 h-6" />
+                                        ) : (
+                                          <TrendingDown className="w-6 h-6" />
+                                        )}
+                                      </motion.div>
+                                    )}
+                                  </div>
                                 </div>
                               )}
                             </td>
