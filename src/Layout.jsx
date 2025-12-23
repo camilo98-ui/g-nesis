@@ -305,3 +305,11 @@ function LayoutContent({ children, currentPageName }) {
     </ErrorBoundary>
   );
 }
+
+export default function Layout(props) {
+  return (
+    <TimeBasedThemeProvider>
+      <LayoutContent {...props} />
+    </TimeBasedThemeProvider>
+  );
+}
