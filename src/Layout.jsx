@@ -4,8 +4,9 @@ import { createPageUrl } from '@/utils';
 import SmartSearch from '@/components/SmartSearch';
 import MotivationalHeader from '@/components/MotivationalHeader';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import { useTheme } from '@/components/ThemeProvider';
 import { 
-  Home, LayoutDashboard, Menu, Snowflake, CalendarDays, TrendingUp
+  Home, LayoutDashboard, Menu, Snowflake, CalendarDays, TrendingUp, Sun, Moon
 } from 'lucide-react';
 import { Link as RouterLink } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ const NAV_ITEMS = [
 ];
 
 export default function Layout({ children, currentPageName }) {
+  const { theme, toggleTheme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [selectedStore, setSelectedStore] = useState('');
   const [userRole, setUserRole] = useState('lider');
@@ -33,14 +35,14 @@ export default function Layout({ children, currentPageName }) {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-app transition-colors duration-200">
         {/* Motivational Banner - Pastel muy suave */}
-        <div className="fixed top-0 left-0 right-0 h-8 bg-gradient-to-r from-pink-50/70 via-rose-50/60 to-amber-50/70 z-50 border-b border-pink-100/50">
+        <div className="fixed top-0 left-0 right-0 h-8 bg-gradient-to-r from-pink-50/70 via-rose-50/60 to-amber-50/70 dark:from-pink-500/10 dark:via-rose-500/10 dark:to-amber-500/10 z-50 border-b border-subtle transition-colors duration-200">
           <MotivationalHeader />
         </div>
 
       {/* Top Header Bar */}
-      <header className="fixed top-8 left-0 right-0 h-14 bg-white border-b border-gray-100 z-50 px-4 flex items-center justify-between shadow-sm">
+      <header className="fixed top-8 left-0 right-0 h-14 bg-surface border-b border-default z-50 px-4 flex items-center justify-between shadow-sm transition-colors duration-200">
         {/* Logo izquierda y ubicación */}
         <div className="flex items-center gap-3">
           {currentPageName !== 'Home' && (
@@ -55,7 +57,7 @@ export default function Layout({ children, currentPageName }) {
             </Link>
           )}
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1 text-gray-400 text-xs">
+            <div className="flex items-center gap-1 text-muted text-xs">
               <span>📍</span>
               <span className="hidden sm:inline">Bogotá Noroccidente</span>
             </div>
@@ -123,6 +125,21 @@ export default function Layout({ children, currentPageName }) {
             <SmartSearch storeId={selectedStore} />
           </div>
 
+          {/* Theme Toggle */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleTheme}
+            className="rounded-full text-secondary hover:text-brand hover:bg-brand-soft transition-colors"
+            title={theme === 'light' ? 'Modo oscuro' : 'Modo claro'}
+          >
+            {theme === 'light' ? (
+              <Moon className="w-5 h-5" />
+            ) : (
+              <Sun className="w-5 h-5" />
+            )}
+          </Button>
+
           {/* Logout Button */}
           <Button
             variant="ghost"
@@ -132,7 +149,7 @@ export default function Layout({ children, currentPageName }) {
               localStorage.removeItem('popsySession');
               window.location.href = '/Home';
             }}
-            className="rounded-full text-gray-400 hover:text-pink-500 hover:bg-pink-50"
+            className="rounded-full text-secondary hover:text-brand hover:bg-brand-soft transition-colors"
             title="Cerrar sesión"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -144,12 +161,12 @@ export default function Layout({ children, currentPageName }) {
 
           {/* Mobile Menu */}
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-            <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <Menu className="w-6 h-6 text-gray-600" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-72 bg-white">
+          <SheetTrigger asChild className="md:hidden">
+            <Button variant="ghost" size="icon" className="rounded-full">
+              <Menu className="w-6 h-6 text-secondary" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="right" className="w-72 bg-surface transition-colors duration-200">
               <div className="mt-4 mb-6">
                 <img src={LOGO_URL} alt="Popsy" className="h-12 object-contain" />
               </div>
@@ -193,17 +210,22 @@ export default function Layout({ children, currentPageName }) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
-          className="pt-[88px] min-h-screen pb-4 relative"
+          className="pt-[88px] min-h-screen pb-4 relative transition-colors duration-200"
         >
           {/* Animated gradient background */}
           <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
             <motion.div
               animate={{
-                background: [
+                background: theme === 'light' ? [
                   'radial-gradient(circle at 20% 30%, rgba(252, 231, 243, 0.3) 0%, transparent 50%)',
                   'radial-gradient(circle at 80% 70%, rgba(243, 232, 255, 0.3) 0%, transparent 50%)',
                   'radial-gradient(circle at 40% 60%, rgba(254, 243, 199, 0.3) 0%, transparent 50%)',
                   'radial-gradient(circle at 20% 30%, rgba(252, 231, 243, 0.3) 0%, transparent 50%)',
+                ] : [
+                  'radial-gradient(circle at 20% 30%, rgba(236, 72, 153, 0.05) 0%, transparent 50%)',
+                  'radial-gradient(circle at 80% 70%, rgba(236, 72, 153, 0.05) 0%, transparent 50%)',
+                  'radial-gradient(circle at 40% 60%, rgba(236, 72, 153, 0.05) 0%, transparent 50%)',
+                  'radial-gradient(circle at 20% 30%, rgba(236, 72, 153, 0.05) 0%, transparent 50%)',
                 ]
               }}
               transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
