@@ -1066,12 +1066,16 @@ export default function Home() {
                   {/* Icon centered */}
                   <div className="flex flex-col items-center justify-center text-center relative z-10">
                     <motion.div
-                      className={`w-12 h-12 ${item.iconBg} backdrop-blur-sm rounded-xl flex items-center justify-center mb-2`}
-                      whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1 }}
-                      transition={{ duration: 0.4 }}
-                      animate={item.specialAction === 'backup' && backupLoading ? { rotate: 360 } : {}}
-                      style={{ transition: backupLoading ? 'none' : undefined }}>
-                      <Icon className={`w-6 h-6 ${item.iconColor}`} />
+                    className={`w-12 h-12 ${item.iconBg} backdrop-blur-sm rounded-xl flex items-center justify-center mb-2`}
+                    whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1 }}
+                    transition={{ duration: 0.4 }}
+                    animate={item.specialAction === 'backup' && backupLoading ? { rotate: 360 } : {}}
+                    style={{ transition: backupLoading ? 'none' : undefined }}>
+                    {item.icon ? (
+                    <Icon className={`w-6 h-6 ${item.iconColor}`} />
+                    ) : (
+                    <LogOut className={`w-6 h-6 ${item.iconColor}`} />
+                    )}
                     </motion.div>
                     <h3 className={`font-bold ${item.textColor} text-sm`}>
                       {item.specialAction === 'backup' && backupLoading ? 'Guardando...' : item.name}
