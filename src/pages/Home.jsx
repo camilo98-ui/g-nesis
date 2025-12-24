@@ -18,7 +18,7 @@ import { useQuery } from '@tanstack/react-query';
 import {
   LayoutDashboard, Users, TrendingUp,
   Award, Target, Bell, Phone, Download, FileText,
-  Lock, Eye, EyeOff, Receipt, Snowflake, Settings as SettingsIcon, AlertTriangle, CheckCircle, Info } from
+  Lock, Eye, EyeOff, Receipt, Snowflake, Settings as SettingsIcon, AlertTriangle, CheckCircle, Info, CalendarDays, LogOut } from
 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { toast } from 'sonner';
@@ -26,17 +26,39 @@ import { toast } from 'sonner';
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/6a749247d_Capturadepantalla2025-11-251251441.png";
 
 const MENU_ITEMS = [
-{
-  name: 'Panel Ejecutivo',
-  page: 'ExecutiveDashboard',
-  icon: TrendingUp,
-  description: 'Análisis Gerencial',
-  bgColor: 'bg-gradient-to-br from-slate-100/90 to-gray-100/80',
-  iconBg: 'bg-slate-200/60',
-  iconColor: 'text-slate-600',
-  textColor: 'text-slate-700',
-  requiredRole: 'gerente'
-},
+  {
+    name: 'Planner',
+    page: 'PopsyPlanner',
+    icon: CalendarDays,
+    description: 'Gestión de turnos',
+    bgColor: 'bg-gradient-to-br from-violet-100/90 to-purple-100/80',
+    iconBg: 'bg-violet-200/60',
+    iconColor: 'text-violet-500',
+    textColor: 'text-violet-700'
+  },
+  {
+    name: 'Cerrar Sesión',
+    page: 'Home',
+    icon: null,
+    description: 'Salir',
+    bgColor: 'bg-gradient-to-br from-red-100/90 to-rose-100/80',
+    iconBg: 'bg-red-200/60',
+    iconColor: 'text-red-500',
+    textColor: 'text-red-700',
+    isSpecialAction: true,
+    specialAction: 'logout'
+  },
+  {
+    name: 'Panel Ejecutivo',
+    page: 'ExecutiveDashboard',
+    icon: TrendingUp,
+    description: 'Análisis Gerencial',
+    bgColor: 'bg-gradient-to-br from-slate-100/90 to-gray-100/80',
+    iconBg: 'bg-slate-200/60',
+    iconColor: 'text-slate-600',
+    textColor: 'text-slate-700',
+    requiredRole: 'gerente'
+  },
 {
   name: 'Comparable',
   page: 'Comparable',
@@ -989,7 +1011,11 @@ export default function Home() {
                 item.isSpecialAction ?
                 <motion.div
                   onClick={async () => {
-                    if (item.specialAction === 'budgetTrend') {
+                    if (item.specialAction === 'logout') {
+                      localStorage.removeItem('selectedStore');
+                      localStorage.removeItem('popsySession');
+                      window.location.href = '/Home';
+                    } else if (item.specialAction === 'budgetTrend') {
                       setShowBudgetDashboard(true);
                     } else if (item.specialAction === 'backup') {
                       setBackupLoading(true);
