@@ -8,17 +8,20 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, parseISO, eachDayOfInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
 import toast from 'react-hot-toast';
-import { BarChart, Bar, LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
+import { AreaChart, Area, BarChart, Bar, LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 
 export default function ExperienciaPopsyModal({ onClose, storeId, userRole }) {
-  const [currentScreen, setCurrentScreen] = useState('login'); // login, validation, survey, profile, ranking, dashboard
+  const [currentScreen, setCurrentScreen] = useState('selectUser'); // selectUser, login, validation, survey, profile, ranking, dashboard, setPassword
   const [invoiceSerial, setInvoiceSerial] = useState('');
   const [validating, setValidating] = useState(false);
   const [validatedInvoice, setValidatedInvoice] = useState(null);
   const [sessionCashier, setSessionCashier] = useState(null);
+  const [selectedUser, setSelectedUser] = useState(null);
   const [loginPassword, setLoginPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   
   const queryClient = useQueryClient();
   const today = format(new Date(), 'yyyy-MM-dd');
@@ -29,9 +32,19 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userRole }) {
     if (savedSession) {
       const session = JSON.parse(savedSession);
       setSessionCashier(session);
+      setSelectedUser(session);
       setCurrentScreen('validation');
     }
   }, [storeId]);
+
+  const { data: cashierPasswords = [] } = useQuery({
+    queryKey: ['cashierPasswords', storeId],
+    queryFn: async () => {
+      const all = await base44.entities.RolePassword.list();
+      return all.filter(p => p.store_code === storeId);
+    },
+    enabled: !!storeId
+  });
 
   // Queries
   const { data: todayExperiences = [] } = useQuery({
@@ -119,6 +132,35 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userRole }) {
     }
   });
 
+  // Configurar contraseña del usuario
+  const savePasswordMutation = useMutation({
+    mutationFn: async ({ cashierId, password }) => {
+      const existing = cashierPasswords.find(p => p.role === cashierId);
+      if (existing) {
+        return base44.entities.RolePassword.update(existing.id, { password });
+      } else {
+        return base44.entities.RolePassword.create({ 
+          store_code: storeId, 
+          role: cashierId, 
+          password 
+        });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cashierPasswords'] });
+      toast.success('Contraseña guardada exitosamente');
+      setCurrentScreen('login');
+    }
+  });
+
+  const handleSavePassword = () => {
+    if (!newPassword.trim() || newPassword !== confirmPassword) {
+      toast.error('Las contraseñas no coinciden');
+      return;
+    }
+    savePasswordMutation.mutate({ cashierId: selectedUser.id, password: newPassword });
+  };
+
   // Login de anfitrión
   const handleLogin = () => {
     if (!loginPassword.trim()) {
@@ -126,35 +168,15 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userRole }) {
       return;
     }
 
-    // Líder puede usar contraseña de tienda
-    if (userRole === 'lider') {
-      const storePassword = storePasswords.find(p => p.store_code === storeId);
-      if (loginPassword === storePassword?.password) {
-        const defaultCashier = { id: 'lider_' + storeId, name: 'Líder de Tienda', position: 'Líder' };
-        setSessionCashier(defaultCashier);
-        localStorage.setItem(`experienciaPopsy_${storeId}`, JSON.stringify(defaultCashier));
-        setCurrentScreen('validation');
-        toast.success('Bienvenido, Líder');
-        return;
-      }
-    }
-
-    // Embajadores con contraseña de rol o personal
-    const rolePassword = rolePasswords.find(p => p.store_code === storeId && p.role === 'embajador');
+    // Buscar contraseña del usuario seleccionado
+    const userPassword = cashierPasswords.find(p => p.role === selectedUser.id);
     
-    // Buscar cajero que coincida
-    const matchingCashier = allCashiers.find(c => {
-      // Opción 1: Contraseña específica del cajero (si se implementa)
-      // Opción 2: Contraseña de rol embajador
-      return rolePassword && loginPassword === rolePassword.password;
-    });
-
-    if (matchingCashier || (rolePassword && loginPassword === rolePassword.password)) {
-      const cashier = matchingCashier || allCashiers[0];
-      setSessionCashier(cashier);
-      localStorage.setItem(`experienciaPopsy_${storeId}`, JSON.stringify(cashier));
+    // Si no tiene contraseña, cualquier cosa pasa
+    if (!userPassword || loginPassword === userPassword.password) {
+      setSessionCashier(selectedUser);
+      localStorage.setItem(`experienciaPopsy_${storeId}`, JSON.stringify(selectedUser));
       setCurrentScreen('validation');
-      toast.success(`Bienvenido, ${cashier.name}`);
+      toast.success(`Bienvenido, ${selectedUser.name}`);
     } else {
       setLoginError('Contraseña incorrecta');
     }
@@ -164,7 +186,8 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userRole }) {
   const handleLogout = () => {
     localStorage.removeItem(`experienciaPopsy_${storeId}`);
     setSessionCashier(null);
-    setCurrentScreen('login');
+    setSelectedUser(null);
+    setCurrentScreen('selectUser');
     setLoginPassword('');
     toast.success('Sesión cerrada');
   };
@@ -376,10 +399,10 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userRole }) {
             animate={{ scale: 1, y: 0 }}
             exit={{ scale: 0.95, y: 20 }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl sm:rounded-3xl max-w-6xl w-full shadow-2xl overflow-hidden border border-white/10"
+            className="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 rounded-2xl sm:rounded-3xl max-w-6xl w-full shadow-2xl overflow-hidden border border-slate-200"
           >
             {/* Header */}
-            <div className="bg-gradient-to-r from-pink-600 via-purple-600 to-pink-600 p-4 sm:p-6 relative overflow-hidden">
+            <div className="bg-gradient-to-r from-blue-500 via-indigo-500 to-blue-500 p-4 sm:p-6 relative overflow-hidden">
               <motion.div
                 animate={{ x: ['0%', '100%'] }}
                 transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
@@ -434,7 +457,7 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userRole }) {
                         onClick={() => setCurrentScreen(tab.id)}
                         className={`px-3 sm:px-4 py-2 rounded-xl flex items-center gap-2 transition-all whitespace-nowrap text-xs sm:text-sm ${
                           currentScreen === tab.id
-                            ? 'bg-white text-pink-600 shadow-lg font-bold'
+                            ? 'bg-white text-blue-600 shadow-lg font-bold'
                             : 'bg-white/20 text-white hover:bg-white/30'
                         }`}
                       >
@@ -450,8 +473,50 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userRole }) {
             {/* Content */}
             <div className="p-3 sm:p-6">
               <AnimatePresence mode="wait">
+                {/* SELECT USER SCREEN */}
+                {currentScreen === 'selectUser' && (
+                  <motion.div
+                    key="selectUser"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    className="space-y-6"
+                  >
+                    <div className="text-center">
+                      <h3 className="text-2xl sm:text-3xl font-black text-slate-800 mb-2">¿Quién inicia turno hoy?</h3>
+                      <p className="text-slate-600 text-sm sm:text-base">Selecciona tu nombre para continuar</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[500px] overflow-y-auto">
+                      {allCashiers.map((cashier) => (
+                        <motion.button
+                          key={cashier.id}
+                          whileHover={{ scale: 1.03, y: -3 }}
+                          whileTap={{ scale: 0.97 }}
+                          onClick={() => {
+                            setSelectedUser(cashier);
+                            setCurrentScreen('login');
+                          }}
+                          className="bg-white rounded-xl p-5 border-2 border-slate-200 hover:border-blue-400 hover:shadow-lg transition-all text-left"
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white font-bold text-xl shadow-md">
+                              {cashier.name.charAt(0)}
+                            </div>
+                            <div className="flex-1">
+                              <p className="font-bold text-slate-900 text-lg">{cashier.name}</p>
+                              <p className="text-sm text-slate-500">{cashier.position || 'Anfitrión'}</p>
+                            </div>
+                            <ChevronRight className="w-5 h-5 text-blue-500" />
+                          </div>
+                        </motion.button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+
                 {/* LOGIN SCREEN */}
-                {currentScreen === 'login' && (
+                {currentScreen === 'login' && selectedUser && (
                   <motion.div
                     key="login"
                     initial={{ opacity: 0, y: 20 }}
@@ -459,9 +524,21 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userRole }) {
                     exit={{ opacity: 0, y: -20 }}
                     className="max-w-md mx-auto space-y-6"
                   >
+                    <div className="bg-gradient-to-r from-blue-100 to-indigo-100 rounded-2xl p-5 border border-blue-200 mb-6">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg">
+                          {selectedUser.name.charAt(0)}
+                        </div>
+                        <div>
+                          <p className="font-bold text-slate-800">{selectedUser.name}</p>
+                          <p className="text-sm text-slate-600">{selectedUser.position || 'Anfitrión'}</p>
+                        </div>
+                      </div>
+                    </div>
+
                     <div className="text-center">
-                      <h3 className="text-2xl sm:text-3xl font-black text-white mb-2">Iniciar Turno</h3>
-                      <p className="text-slate-400 text-sm sm:text-base">Ingresa tu contraseña para comenzar</p>
+                      <h3 className="text-2xl sm:text-3xl font-black text-slate-800 mb-2">Ingresa tu contraseña</h3>
+                      <p className="text-slate-600 text-sm sm:text-base">Para comenzar tu turno</p>
                     </div>
 
                     <div className="space-y-4">
@@ -471,18 +548,92 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userRole }) {
                         value={loginPassword}
                         onChange={(e) => { setLoginPassword(e.target.value); setLoginError(''); }}
                         onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-                        className="h-14 text-lg bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                        className="h-14 text-lg bg-white border-slate-300 text-slate-900 placeholder:text-slate-400"
                       />
                       
                       {loginError && (
-                        <p className="text-red-400 text-sm text-center">{loginError}</p>
+                        <p className="text-red-500 text-sm text-center font-medium">{loginError}</p>
                       )}
 
                       <Button
                         onClick={handleLogin}
-                        className="w-full h-14 bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white font-bold text-lg"
+                        className="w-full h-14 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-bold text-lg shadow-lg"
                       >
                         Iniciar Turno
+                      </Button>
+
+                      <Button
+                        onClick={() => setCurrentScreen('setPassword')}
+                        variant="outline"
+                        className="w-full h-12 border-slate-300 text-slate-700 hover:bg-slate-100"
+                      >
+                        Configurar mi contraseña
+                      </Button>
+
+                      <Button
+                        onClick={() => {
+                          setSelectedUser(null);
+                          setCurrentScreen('selectUser');
+                        }}
+                        variant="ghost"
+                        className="w-full text-slate-600 hover:text-slate-800"
+                      >
+                        ← Cambiar usuario
+                      </Button>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* SET PASSWORD SCREEN */}
+                {currentScreen === 'setPassword' && selectedUser && (
+                  <motion.div
+                    key="setPassword"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    className="max-w-md mx-auto space-y-6"
+                  >
+                    <div className="text-center">
+                      <h3 className="text-2xl font-black text-slate-800 mb-2">Configurar Contraseña</h3>
+                      <p className="text-slate-600">Para {selectedUser.name}</p>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-2">Nueva Contraseña</label>
+                        <Input
+                          type="password"
+                          placeholder="Ingresa contraseña"
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          className="h-12 bg-white border-slate-300"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-2">Confirmar Contraseña</label>
+                        <Input
+                          type="password"
+                          placeholder="Confirma contraseña"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          className="h-12 bg-white border-slate-300"
+                        />
+                      </div>
+
+                      <Button
+                        onClick={handleSavePassword}
+                        disabled={savePasswordMutation.isPending}
+                        className="w-full h-12 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white font-bold"
+                      >
+                        {savePasswordMutation.isPending ? 'Guardando...' : 'Guardar Contraseña'}
+                      </Button>
+
+                      <Button
+                        onClick={() => setCurrentScreen('login')}
+                        variant="outline"
+                        className="w-full border-slate-300 text-slate-700"
+                      >
+                        Cancelar
                       </Button>
                     </div>
                   </motion.div>
@@ -498,8 +649,8 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userRole }) {
                     className="space-y-6"
                   >
                     <div className="text-center">
-                      <h3 className="text-2xl sm:text-3xl font-black text-white mb-2">Validar Factura</h3>
-                      <p className="text-slate-400">Ingresa el número de factura</p>
+                      <h3 className="text-2xl sm:text-3xl font-black text-slate-800 mb-2">Validar Factura</h3>
+                      <p className="text-slate-600">Ingresa el número de factura</p>
                     </div>
 
                     <div className="space-y-4 max-w-md mx-auto">
@@ -508,21 +659,23 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userRole }) {
                         value={invoiceSerial}
                         onChange={(e) => setInvoiceSerial(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleValidateInvoice()}
-                        className="h-14 text-lg text-center font-bold bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                        className="h-14 text-lg text-center font-bold bg-white border-slate-300 text-slate-900 placeholder:text-slate-400"
                         disabled={validating}
                       />
-                      <Button
-                        onClick={handleValidateInvoice}
-                        disabled={validating || !invoiceSerial.trim()}
-                        className="w-full h-14 bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white font-bold text-lg"
-                      >
-                        {validating ? 'Validando...' : 'Validar Factura'}
-                      </Button>
+                      <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                        <Button
+                          onClick={handleValidateInvoice}
+                          disabled={validating || !invoiceSerial.trim()}
+                          className="w-full h-14 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-bold text-lg shadow-lg"
+                        >
+                          {validating ? 'Validando...' : 'Validar Factura'}
+                        </Button>
+                      </motion.div>
                     </div>
 
                     {todayExperiences.length > 0 && (
-                      <div className="bg-emerald-500/20 rounded-xl p-4 border border-emerald-500/30 max-w-md mx-auto">
-                        <p className="text-sm text-center text-emerald-300">
+                      <div className="bg-emerald-50 rounded-xl p-4 border border-emerald-200 max-w-md mx-auto">
+                        <p className="text-sm text-center text-emerald-700 font-semibold">
                           <strong>{todayExperiences.length}</strong> encuestas completadas hoy ✨
                         </p>
                       </div>
@@ -537,7 +690,7 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userRole }) {
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.9 }}
-                    className="fixed inset-0 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 z-50 flex flex-col items-center justify-center p-4"
+                    className="fixed inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-blue-100 z-50 flex flex-col items-center justify-center p-4"
                   >
                     <motion.div
                       initial={{ y: -20, opacity: 0 }}
@@ -545,11 +698,11 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userRole }) {
                       transition={{ delay: 0.2 }}
                       className="text-center mb-12"
                     >
-                      <h3 className="text-3xl sm:text-5xl font-black text-white mb-4">¿Cómo fue tu experiencia?</h3>
-                      <p className="text-slate-300 text-lg sm:text-xl">Selecciona una opción</p>
+                      <h3 className="text-3xl sm:text-5xl font-black text-slate-800 mb-4">¿Cómo fue tu experiencia?</h3>
+                      <p className="text-slate-600 text-lg sm:text-xl">Selecciona una opción</p>
                     </motion.div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 w-full max-w-4xl">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 w-full max-w-5xl px-4">
                       {[
                         { rating: 'excelente', emoji: '😀', label: 'Excelente', color: 'from-emerald-400 to-green-500', delay: 0.3 },
                         { rating: 'normal', emoji: '😐', label: 'Normal', color: 'from-amber-400 to-orange-500', delay: 0.4 },
@@ -560,19 +713,19 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userRole }) {
                           initial={{ scale: 0, rotate: -180 }}
                           animate={{ scale: 1, rotate: 0 }}
                           transition={{ delay: option.delay, type: "spring", stiffness: 200 }}
-                          whileHover={{ scale: 1.1, y: -10 }}
-                          whileTap={{ scale: 0.9 }}
+                          whileHover={{ scale: 1.08, y: -15 }}
+                          whileTap={{ scale: 0.95 }}
                           onClick={() => handleSurveySubmit(option.rating)}
-                          className={`bg-gradient-to-br ${option.color} rounded-3xl p-8 sm:p-12 text-white shadow-2xl hover:shadow-3xl transition-all aspect-square flex flex-col items-center justify-center`}
+                          className={`bg-gradient-to-br ${option.color} rounded-3xl p-10 sm:p-16 text-white shadow-2xl hover:shadow-3xl transition-all aspect-square flex flex-col items-center justify-center`}
                         >
                           <motion.div 
-                            className="text-7xl sm:text-9xl mb-4"
-                            animate={{ scale: [1, 1.2, 1] }}
+                            className="text-8xl sm:text-9xl mb-6"
+                            animate={{ scale: [1, 1.15, 1] }}
                             transition={{ duration: 2, repeat: Infinity }}
                           >
                             {option.emoji}
                           </motion.div>
-                          <p className="font-black text-2xl sm:text-3xl">{option.label}</p>
+                          <p className="font-black text-3xl sm:text-4xl">{option.label}</p>
                         </motion.button>
                       ))}
                     </div>
@@ -589,47 +742,47 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userRole }) {
                     className="space-y-6"
                   >
                     {/* Header del Perfil */}
-                    <div className="bg-gradient-to-r from-pink-500/20 to-purple-500/20 rounded-2xl p-6 border border-pink-500/30">
+                    <div className="bg-gradient-to-r from-blue-100 to-indigo-100 rounded-2xl p-6 border border-blue-200">
                       <div className="flex items-center gap-4 mb-4">
-                        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-pink-500 to-purple-500 flex items-center justify-center text-white font-black text-2xl">
+                        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-black text-2xl shadow-lg">
                           {sessionCashier.name.charAt(0)}
                         </div>
                         <div>
-                          <h3 className="text-2xl font-black text-white">{sessionCashier.name}</h3>
-                          <p className="text-slate-400">{sessionCashier.position || 'Anfitrión'}</p>
+                          <h3 className="text-2xl font-black text-slate-800">{sessionCashier.name}</h3>
+                          <p className="text-slate-600">{sessionCashier.position || 'Anfitrión'}</p>
                         </div>
                       </div>
 
                       {/* KPIs del día */}
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-                          <Trophy className="w-5 h-5 text-purple-400 mb-2" />
-                          <p className="text-xs text-slate-400 mb-1">Puntos Hoy</p>
-                          <p className="text-2xl font-black text-white">{cashierStats.total}</p>
-                        </div>
-                        <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-                          <Target className="w-5 h-5 text-emerald-400 mb-2" />
-                          <p className="text-xs text-slate-400 mb-1">% Excelentes</p>
-                          <p className="text-2xl font-black text-emerald-400">{cashierStats.excellentPercent}%</p>
-                        </div>
-                        <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-                          <Zap className="w-5 h-5 text-amber-400 mb-2" />
-                          <p className="text-xs text-slate-400 mb-1">Sugeridos</p>
-                          <p className="text-2xl font-black text-amber-400">{cashierStats.suggested}</p>
-                        </div>
-                        <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-                          <Star className="w-5 h-5 text-pink-400 mb-2" />
-                          <p className="text-xs text-slate-400 mb-1">Encuestas</p>
-                          <p className="text-2xl font-black text-pink-400">{cashierStats.surveys}</p>
-                        </div>
+                        <motion.div whileHover={{ scale: 1.05 }} className="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+                          <Trophy className="w-5 h-5 text-indigo-500 mb-2" />
+                          <p className="text-xs text-slate-600 mb-1">Puntos Hoy</p>
+                          <p className="text-2xl font-black text-slate-800">{cashierStats.total}</p>
+                        </motion.div>
+                        <motion.div whileHover={{ scale: 1.05 }} className="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+                          <Target className="w-5 h-5 text-emerald-500 mb-2" />
+                          <p className="text-xs text-slate-600 mb-1">% Excelentes</p>
+                          <p className="text-2xl font-black text-emerald-600">{cashierStats.excellentPercent}%</p>
+                        </motion.div>
+                        <motion.div whileHover={{ scale: 1.05 }} className="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+                          <Zap className="w-5 h-5 text-amber-500 mb-2" />
+                          <p className="text-xs text-slate-600 mb-1">Sugeridos</p>
+                          <p className="text-2xl font-black text-amber-600">{cashierStats.suggested}</p>
+                        </motion.div>
+                        <motion.div whileHover={{ scale: 1.05 }} className="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+                          <Star className="w-5 h-5 text-blue-500 mb-2" />
+                          <p className="text-xs text-slate-600 mb-1">Encuestas</p>
+                          <p className="text-2xl font-black text-blue-600">{cashierStats.surveys}</p>
+                        </motion.div>
                       </div>
                     </div>
 
                     {/* Gráfica de Desempeño */}
                     {dailyHistory.length > 0 && (
-                      <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
-                        <h4 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                          <TrendingUp className="w-5 h-5 text-purple-400" />
+                      <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                        <h4 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                          <TrendingUp className="w-5 h-5 text-indigo-500" />
                           Historial de Puntos (Últimos 30 días)
                         </h4>
                         <ResponsiveContainer width="100%" height={200}>
@@ -654,8 +807,8 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userRole }) {
                     )}
 
                     {/* Desglose de Calificaciones */}
-                    <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
-                      <h4 className="text-lg font-bold text-white mb-4">Desglose de Calificaciones Hoy</h4>
+                    <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                      <h4 className="text-lg font-bold text-slate-800 mb-4">Desglose de Calificaciones Hoy</h4>
                       <div className="grid grid-cols-3 gap-4">
                         <div className="text-center">
                           <div className="text-4xl mb-2">😀</div>
@@ -676,9 +829,9 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userRole }) {
                     </div>
 
                     {/* Historial de Facturas del día */}
-                    <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
-                      <h4 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                        <Calendar className="w-5 h-5 text-pink-400" />
+                    <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                      <h4 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <Calendar className="w-5 h-5 text-blue-500" />
                         Encuestas de Hoy
                       </h4>
                       <div className="space-y-2 max-h-60 overflow-y-auto">
@@ -686,23 +839,27 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userRole }) {
                           .filter(e => e.date === today)
                           .sort((a, b) => new Date(b.created_date) - new Date(a.created_date))
                           .map((exp, idx) => (
-                            <div key={idx} className="bg-white/5 rounded-lg p-3 flex items-center justify-between">
+                            <motion.div 
+                              key={idx} 
+                              whileHover={{ scale: 1.02, x: 3 }}
+                              className="bg-slate-50 rounded-lg p-3 flex items-center justify-between border border-slate-200"
+                            >
                               <div className="flex items-center gap-3">
                                 <div className="text-2xl">
                                   {exp.experience_rating === 'excelente' ? '😀' : exp.experience_rating === 'normal' ? '😐' : '☹️'}
                                 </div>
                                 <div>
-                                  <p className="text-white font-semibold text-sm">Factura #{exp.invoice_serial}</p>
-                                  <p className="text-xs text-slate-400">
+                                  <p className="text-slate-800 font-semibold text-sm">Factura #{exp.invoice_serial}</p>
+                                  <p className="text-xs text-slate-500">
                                     {format(parseISO(exp.created_date), 'HH:mm', { locale: es })}
                                   </p>
                                 </div>
                               </div>
                               <div className="text-right">
-                                <p className="text-lg font-black text-purple-400">+{exp.total_points}</p>
-                                <p className="text-xs text-slate-400">puntos</p>
+                                <p className="text-lg font-black text-indigo-600">+{exp.total_points}</p>
+                                <p className="text-xs text-slate-500">puntos</p>
                               </div>
-                            </div>
+                            </motion.div>
                           ))}
                       </div>
                     </div>
@@ -719,15 +876,16 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userRole }) {
                   >
                     {/* Semanal */}
                     <div>
-                      <h3 className="text-xl font-black text-white mb-4">🏆 Top 5 Semanal</h3>
+                      <h3 className="text-xl font-black text-slate-800 mb-4">🏆 Top 5 Semanal</h3>
                       <div className="space-y-2">
                         {weeklyRanking.map((user, idx) => (
-                          <div
+                          <motion.div
                             key={user.id}
+                            whileHover={{ scale: 1.02, x: 3 }}
                             className={`flex items-center justify-between p-4 rounded-xl ${
                               user.id === sessionCashier?.id
-                                ? 'bg-gradient-to-r from-pink-500/30 to-purple-500/30 border-2 border-pink-400'
-                                : 'bg-white/5 border border-white/10'
+                                ? 'bg-gradient-to-r from-blue-100 to-indigo-100 border-2 border-blue-400'
+                                : 'bg-white border border-slate-200'
                             }`}
                           >
                             <div className="flex items-center gap-3">
@@ -740,37 +898,38 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userRole }) {
                                 {idx + 1}
                               </div>
                               <div>
-                                <p className="font-bold text-white">{user.name}</p>
-                                <p className="text-xs text-slate-400">{user.excellentPercent}% excelentes</p>
+                                <p className="font-bold text-slate-800">{user.name}</p>
+                                <p className="text-xs text-slate-500">{user.excellentPercent}% excelentes</p>
                               </div>
                             </div>
-                            <p className="text-2xl font-black text-purple-400">{user.points}</p>
-                          </div>
+                            <p className="text-2xl font-black text-indigo-600">{user.points}</p>
+                          </motion.div>
                         ))}
                       </div>
                     </div>
 
                     {/* Mensual */}
                     <div>
-                      <h3 className="text-xl font-black text-white mb-4">📅 Top 10 Mensual</h3>
+                      <h3 className="text-xl font-black text-slate-800 mb-4">📅 Top 10 Mensual</h3>
                       <div className="space-y-2 max-h-80 overflow-y-auto">
                         {monthlyRanking.map((user, idx) => (
-                          <div
+                          <motion.div
                             key={user.id}
+                            whileHover={{ scale: 1.02, x: 3 }}
                             className={`flex items-center justify-between p-3 rounded-xl ${
                               user.id === sessionCashier?.id
-                                ? 'bg-gradient-to-r from-pink-500/30 to-purple-500/30 border-2 border-pink-400'
-                                : 'bg-white/5 border border-white/10'
+                                ? 'bg-gradient-to-r from-blue-100 to-indigo-100 border-2 border-blue-400'
+                                : 'bg-white border border-slate-200'
                             }`}
                           >
                             <div className="flex items-center gap-3">
-                              <span className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold text-slate-400">
+                              <span className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-700">
                                 {idx + 1}
                               </span>
-                              <p className="font-semibold text-white text-sm">{user.name}</p>
+                              <p className="font-semibold text-slate-800 text-sm">{user.name}</p>
                             </div>
-                            <p className="text-lg font-black text-purple-400">{user.points}</p>
-                          </div>
+                            <p className="text-lg font-black text-indigo-600">{user.points}</p>
+                          </motion.div>
                         ))}
                       </div>
                     </div>
@@ -786,32 +945,32 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userRole }) {
                     className="space-y-6"
                   >
                     <div className="text-center">
-                      <h3 className="text-2xl font-black text-white mb-2">Dashboard Gerencial</h3>
-                      <p className="text-slate-400">Métricas de hoy</p>
+                      <h3 className="text-2xl font-black text-slate-800 mb-2">Dashboard Gerencial</h3>
+                      <p className="text-slate-600">Métricas de hoy</p>
                     </div>
 
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                      <div className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-xl p-6 border border-blue-500/30">
-                        <p className="text-xs text-blue-300 uppercase mb-2">Encuestas</p>
-                        <p className="text-4xl font-black text-white">{dashboardStats.totalSurveys}</p>
-                      </div>
-                      <div className="bg-gradient-to-br from-emerald-500/20 to-green-500/20 rounded-xl p-6 border border-emerald-500/30">
-                        <p className="text-xs text-emerald-300 uppercase mb-2">% Excelente</p>
-                        <p className="text-4xl font-black text-white">{dashboardStats.excellentPercent}%</p>
-                      </div>
-                      <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl p-6 border border-purple-500/30">
-                        <p className="text-xs text-purple-300 uppercase mb-2">Puntos Prom.</p>
-                        <p className="text-4xl font-black text-white">{dashboardStats.avgPoints}</p>
-                      </div>
-                      <div className="bg-gradient-to-br from-amber-500/20 to-orange-500/20 rounded-xl p-6 border border-amber-500/30">
-                        <p className="text-xs text-amber-300 uppercase mb-2">% Sugeridos</p>
-                        <p className="text-4xl font-black text-white">{dashboardStats.suggestedPercent}%</p>
-                      </div>
+                      <motion.div whileHover={{ scale: 1.05 }} className="bg-gradient-to-br from-blue-100 to-cyan-100 rounded-xl p-6 border border-blue-200 shadow-sm">
+                        <p className="text-xs text-blue-700 uppercase mb-2">Encuestas</p>
+                        <p className="text-4xl font-black text-slate-800">{dashboardStats.totalSurveys}</p>
+                      </motion.div>
+                      <motion.div whileHover={{ scale: 1.05 }} className="bg-gradient-to-br from-emerald-100 to-green-100 rounded-xl p-6 border border-emerald-200 shadow-sm">
+                        <p className="text-xs text-emerald-700 uppercase mb-2">% Excelente</p>
+                        <p className="text-4xl font-black text-slate-800">{dashboardStats.excellentPercent}%</p>
+                      </motion.div>
+                      <motion.div whileHover={{ scale: 1.05 }} className="bg-gradient-to-br from-indigo-100 to-purple-100 rounded-xl p-6 border border-indigo-200 shadow-sm">
+                        <p className="text-xs text-indigo-700 uppercase mb-2">Puntos Prom.</p>
+                        <p className="text-4xl font-black text-slate-800">{dashboardStats.avgPoints}</p>
+                      </motion.div>
+                      <motion.div whileHover={{ scale: 1.05 }} className="bg-gradient-to-br from-amber-100 to-orange-100 rounded-xl p-6 border border-amber-200 shadow-sm">
+                        <p className="text-xs text-amber-700 uppercase mb-2">% Sugeridos</p>
+                        <p className="text-4xl font-black text-slate-800">{dashboardStats.suggestedPercent}%</p>
+                      </motion.div>
                     </div>
 
                     {/* Ranking del día */}
-                    <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-                      <h4 className="font-bold text-white mb-3">Ranking de Hoy</h4>
+                    <div className="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+                      <h4 className="font-bold text-slate-800 mb-3">Ranking de Hoy</h4>
                       <div className="space-y-2 max-h-60 overflow-y-auto">
                         {Object.entries(
                           todayExperiences.reduce((acc, exp) => {
@@ -822,9 +981,9 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userRole }) {
                         )
                           .sort((a, b) => b[1].points - a[1].points)
                           .map(([id, data], idx) => (
-                            <div key={id} className="flex items-center justify-between p-2 bg-white/5 rounded-lg">
-                              <span className="text-sm font-semibold text-white">{data.name}</span>
-                              <span className="text-lg font-black text-purple-400">{data.points}</span>
+                            <div key={id} className="flex items-center justify-between p-2 bg-slate-50 rounded-lg border border-slate-200">
+                              <span className="text-sm font-semibold text-slate-800">{data.name}</span>
+                              <span className="text-lg font-black text-indigo-600">{data.points}</span>
                             </div>
                           ))}
                       </div>
