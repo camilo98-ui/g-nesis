@@ -9,6 +9,7 @@ import NotificationSetup from '@/components/NotificationSetup';
 import ManagerialReportModal from '@/components/reports/ManagerialReportModal';
 import PopsyStoryModal from '@/components/PopsyStoryModal';
 import DirectoryModal from '@/components/DirectoryModal';
+import ExperienciaPopsyModal from '@/components/experience/ExperienciaPopsyModal';
 import DailySalesForm from '@/components/forms/DailySalesForm';
 import ShiftRecordForm from '@/components/forms/ShiftRecordForm';
 import MonthlyBudgetDashboard from '@/components/budget/MonthlyBudgetDashboard';
@@ -176,6 +177,7 @@ export default function Home() {
   const [backupLoading, setBackupLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loginSuccess, setLoginSuccess] = useState(false);
+  const [showExperienciaPopsy, setShowExperienciaPopsy] = useState(false);
 
   const ROLES = [
   { 
@@ -841,6 +843,20 @@ export default function Home() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-4 flex justify-center gap-2 flex-wrap">
 
+            {/* BOTÓN EXPERIENCIA POPSY */}
+            <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowExperienciaPopsy(true)}
+                className="text-white bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 transition-all shadow-md hover:shadow-lg">
+                <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 2, repeat: Infinity }}>
+                  ✨
+                </motion.div>
+                <span className="ml-1 font-bold">Experiencia Popsy</span>
+              </Button>
+            </motion.div>
+
             <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }}>
               <Button
               variant="ghost"
@@ -1234,6 +1250,19 @@ export default function Home() {
             </motion.div>
           </motion.div>
         }
+      </AnimatePresence>
+
+      {/* Experiencia Popsy Modal */}
+      <AnimatePresence>
+        {showExperienciaPopsy && (
+          <ExperienciaPopsyModal
+            onClose={() => setShowExperienciaPopsy(false)}
+            storeId={selectedStore}
+            userId="temp_user"
+            userName="Usuario"
+            userRole={selectedRole}
+          />
+        )}
       </AnimatePresence>
 
       {/* Install App Modal */}
