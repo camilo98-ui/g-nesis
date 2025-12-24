@@ -746,12 +746,7 @@ export default function Home() {
 
           {/* Right Panel - Login Card (45%) - Mobile First */}
           <div className="w-full lg:w-[45%] flex items-center justify-center p-4 sm:p-6 lg:p-12 xl:p-16 min-h-screen lg:min-h-0">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2, type: "spring" }}
-              className="w-full max-w-md lg:max-w-lg xl:max-w-xl"
-            >
+            <div className="w-full max-w-md lg:max-w-lg xl:max-w-xl">
               {/* Mobile logo and branding */}
               <div className="lg:hidden mb-10 text-center">
                 <motion.img 
@@ -1025,9 +1020,10 @@ export default function Home() {
                   </p>
                 </div>
                 </div>
-              </motion.div>
-          </div>
-        </div>
+                </motion.div>
+                </div>
+                </div>
+                </div>
 
         {/* Success Animation */}
         <AnimatePresence>
