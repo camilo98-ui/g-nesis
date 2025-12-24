@@ -84,6 +84,7 @@ export default function ExecutiveDashboard() {
       const daysInPeriod = Math.max(1, Math.ceil((dateRange.to - dateRange.from) / (1000 * 60 * 60 * 24)));
       const dailyAvg = daysElapsed > 0 && totalSales > 0 ? totalSales / daysElapsed : 0;
       const projection = dailyAvg > 0 ? dailyAvg * daysInPeriod : 0;
+      const avgDailyTransactions = daysElapsed > 0 && totalTransactions > 0 ? totalTransactions / daysElapsed : 0;
 
       let status = 'positive';
       if (!hasData) status = 'no_data';
@@ -97,7 +98,7 @@ export default function ExecutiveDashboard() {
         name: getDisplayName(store.code),
         totalSales, totalTransactions, avgTicket,
         salesBudget, salesCompliance, projection, status, gap,
-        hasData, dailyAvg, complianceTrend, prevCompliance
+        hasData, dailyAvg, avgDailyTransactions, complianceTrend, prevCompliance
       };
     });
   }, [allDailySales, allBudgets, dateRange, currentMonth, currentYear]);
@@ -874,6 +875,12 @@ Genera:
                           )}
                         </div>
                       </th>
+                      <th className="text-right py-5 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                        Prom. Venta/Día
+                      </th>
+                      <th className="text-right py-5 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                        Prom. Trans/Día
+                      </th>
                       <th 
                         onClick={() => handleSort('status')}
                         className="text-center py-5 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider cursor-pointer hover:text-white transition-colors group"
@@ -986,6 +993,28 @@ Genera:
                                 }`}>
                                   {store.gap > 0 ? '-' : '+'}{formatCurrency(Math.abs(store.gap))}
                                 </p>
+                              )}
+                            </td>
+
+                            <td className="py-7 px-6 text-right">
+                              {!store.hasData ? (
+                                <span className="text-sm text-slate-500">—</span>
+                              ) : (
+                                <div>
+                                  <p className="font-bold text-white text-base tabular-nums">{formatCurrency(store.dailyAvg)}</p>
+                                  <p className="text-xs text-slate-500 mt-1">por día</p>
+                                </div>
+                              )}
+                            </td>
+
+                            <td className="py-7 px-6 text-right">
+                              {!store.hasData ? (
+                                <span className="text-sm text-slate-500">—</span>
+                              ) : (
+                                <div>
+                                  <p className="font-bold text-cyan-400 text-base tabular-nums">{store.avgDailyTransactions.toFixed(0)}</p>
+                                  <p className="text-xs text-slate-500 mt-1">trans/día</p>
+                                </div>
                               )}
                             </td>
 
