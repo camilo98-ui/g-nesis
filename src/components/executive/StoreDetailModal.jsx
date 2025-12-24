@@ -122,7 +122,7 @@ export default function StoreDetailModal({ store, onClose, allDailySales, dateRa
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 overflow-y-auto"
+        className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] overflow-y-auto"
         onClick={onClose}
       >
         <div className="min-h-full flex items-center justify-center p-2 sm:p-4">
