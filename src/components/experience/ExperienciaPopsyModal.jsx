@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Check, AlertCircle, Star, TrendingUp, Award, Sparkles, ChevronRight } from 'lucide-react';
+import { X, Check, AlertCircle, Star, TrendingUp, Award, Sparkles, ChevronRight, User } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { base44 } from '@/api/base44Client';
@@ -10,10 +10,11 @@ import { es } from 'date-fns/locale';
 import toast from 'react-hot-toast';
 
 export default function ExperienciaPopsyModal({ onClose, storeId, userId, userName, userRole }) {
-  const [currentScreen, setCurrentScreen] = useState('validation'); // validation, survey, myPerformance, ranking, dashboard
+  const [currentScreen, setCurrentScreen] = useState('selectCashier'); // selectCashier, validation, survey, myPerformance, ranking, dashboard
   const [invoiceSerial, setInvoiceSerial] = useState('');
   const [validating, setValidating] = useState(false);
   const [validatedInvoice, setValidatedInvoice] = useState(null);
+  const [selectedCashier, setSelectedCashier] = useState(null);
   
   const queryClient = useQueryClient();
   const today = format(new Date(), 'yyyy-MM-dd');
@@ -32,9 +33,9 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userId, userNa
   });
 
   const { data: myDailyPoints } = useQuery({
-    queryKey: ['myDailyPoints', userId, today],
-    queryFn: () => base44.entities.UserDailyPoints.filter({ cashier_id: userId, date: today }),
-    enabled: !!userId
+    queryKey: ['myDailyPoints', selectedCashier?.id, today],
+    queryFn: () => base44.entities.UserDailyPoints.filter({ cashier_id: selectedCashier?.id, date: today }),
+    enabled: !!selectedCashier
   });
 
   const { data: weeklyExperiences = [] } = useQuery({
@@ -146,8 +147,8 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userId, userNa
     await createExperienceMutation.mutateAsync({
       invoice_serial: invoiceSerial,
       store_id: storeId,
-      cashier_id: userId,
-      cashier_name: userName,
+      cashier_id: selectedCashier.id,
+      cashier_name: selectedCashier.name,
       experience_rating: rating,
       experience_points: experiencePoints,
       suggested_sales_points: suggestedSalesPoints,
@@ -175,8 +176,8 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userId, userNa
       });
     } else {
       await createDailyPointsMutation.mutateAsync({
-        cashier_id: userId,
-        cashier_name: userName,
+        cashier_id: selectedCashier.id,
+        cashier_name: selectedCashier.name,
         store_id: storeId,
         date: today,
         experience_points: experiencePoints,
@@ -195,7 +196,8 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userId, userNa
     setTimeout(() => {
       setInvoiceSerial('');
       setValidatedInvoice(null);
-      setCurrentScreen('validation');
+      setCurrentScreen('selectCashier');
+      setSelectedCashier(null);
     }, 2000);
   };
 
@@ -340,7 +342,7 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userId, userNa
               {/* Navigation Tabs */}
               <div className="mt-6 flex gap-2 overflow-x-auto pb-2">
                 {[
-                  { id: 'validation', label: 'Encuesta', icon: Star },
+                  { id: 'selectCashier', label: 'Encuesta', icon: Star },
                   { id: 'myPerformance', label: 'Mi Desempeño', icon: TrendingUp },
                   { id: 'ranking', label: 'Ranking', icon: Award },
                   ...(userRole === 'lider' ? [{ id: 'dashboard', label: 'Dashboard', icon: Sparkles }] : [])
@@ -367,7 +369,48 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userId, userNa
             {/* Content */}
             <div className="p-6">
               <AnimatePresence mode="wait">
-                {currentScreen === 'validation' && (
+                {currentScreen === 'selectCashier' && (
+                  <motion.div
+                    key="selectCashier"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    className="space-y-6"
+                  >
+                    <div className="text-center">
+                      <h3 className="text-2xl font-black text-gray-900 mb-2">¿Quién está en zona de experiencia?</h3>
+                      <p className="text-gray-600">Selecciona el colaborador</p>
+                    </div>
+
+                    <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                      {allCashiers.map((cashier) => (
+                        <motion.button
+                          key={cashier.id}
+                          whileHover={{ scale: 1.02, x: 5 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => {
+                            setSelectedCashier(cashier);
+                            setCurrentScreen('validation');
+                          }}
+                          className="w-full p-4 rounded-xl bg-white hover:bg-gradient-to-r hover:from-pink-50 hover:to-purple-50 border-2 border-gray-200 hover:border-pink-300 transition-all text-left"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-400 to-purple-400 flex items-center justify-center text-white font-bold text-lg">
+                              {cashier.name.charAt(0)}
+                            </div>
+                            <div>
+                              <p className="font-bold text-gray-900">{cashier.name}</p>
+                              <p className="text-sm text-gray-600">{cashier.position || 'Colaborador'}</p>
+                            </div>
+                            <ChevronRight className="w-5 h-5 text-pink-500 ml-auto" />
+                          </div>
+                        </motion.button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+
+                {currentScreen === 'validation' && selectedCashier && (
                   <motion.div
                     key="validation"
                     initial={{ opacity: 0, x: -20 }}
@@ -376,6 +419,10 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userId, userNa
                     className="space-y-6"
                   >
                     <div className="text-center">
+                      <div className="mb-4 p-3 bg-gradient-to-r from-pink-100 to-purple-100 rounded-xl">
+                        <p className="text-sm text-gray-600">Zona de experiencia:</p>
+                        <p className="font-bold text-pink-700">{selectedCashier.name}</p>
+                      </div>
                       <h3 className="text-2xl font-black text-gray-900 mb-2">Validar Factura</h3>
                       <p className="text-gray-600">Ingresa el número de factura para comenzar</p>
                     </div>
@@ -452,7 +499,7 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userId, userNa
                   >
                     <div className="text-center">
                       <h3 className="text-2xl font-black text-gray-900 mb-2">Mi Desempeño de Hoy</h3>
-                      <p className="text-gray-600">{userName}</p>
+                      <p className="text-gray-600">{selectedCashier?.name || 'Selecciona un colaborador'}</p>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
@@ -501,7 +548,7 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userId, userNa
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: idx * 0.05 }}
                             className={`flex items-center justify-between p-4 rounded-xl ${
-                              user.id === userId
+                              user.id === selectedCashier?.id
                                 ? 'bg-gradient-to-r from-pink-200 to-purple-200 border-2 border-pink-400'
                                 : 'bg-white border-2 border-gray-200'
                             }`}
@@ -534,7 +581,7 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userId, userNa
                           <div
                             key={user.id}
                             className={`flex items-center justify-between p-3 rounded-xl ${
-                              user.id === userId
+                              user.id === selectedCashier?.id
                                 ? 'bg-gradient-to-r from-pink-200 to-purple-200 border-2 border-pink-400'
                                 : 'bg-white border border-gray-200'
                             }`}

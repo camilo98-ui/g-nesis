@@ -126,6 +126,19 @@ const MENU_ITEMS = [
   requiredRole: 'gerente',
   isSpecialAction: true,
   specialAction: 'backup'
+},
+{
+  name: 'Experiencia Popsy',
+  page: 'ExperienciaPopsy',
+  icon: Award,
+  description: 'Encuesta clientes',
+  bgColor: 'bg-gradient-to-br from-pink-100/90 to-purple-100/80',
+  iconBg: 'bg-pink-200/60',
+  iconColor: 'text-pink-500',
+  textColor: 'text-pink-700',
+  isSpecialAction: true,
+  specialAction: 'experiencia',
+  restrictedStores: ['BTA 78', 'TUNJA 2', 'BTA 62', 'BTA 28', 'BTA 89', 'TUNJA 1', 'BTA 16']
 }];
 
 
@@ -843,20 +856,6 @@ export default function Home() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-4 flex justify-center gap-2 flex-wrap">
 
-            {/* BOTÓN EXPERIENCIA POPSY */}
-            <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }}>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowExperienciaPopsy(true)}
-                className="text-white bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 transition-all shadow-md hover:shadow-lg">
-                <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 2, repeat: Infinity }}>
-                  ✨
-                </motion.div>
-                <span className="ml-1 font-bold">Experiencia Popsy</span>
-              </Button>
-            </motion.div>
-
             <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }}>
               <Button
               variant="ghost"
@@ -926,6 +925,9 @@ export default function Home() {
             const needsStore = item.page !== 'ExecutiveDashboard';
             if (needsStore && !selectedStore && item.requiredRole !== 'gerente') return null;
             if (item.requiredRole && selectedRole !== item.requiredRole) return null;
+            
+            // Restricción de tiendas específicas para Experiencia Popsy
+            if (item.restrictedStores && !item.restrictedStores.includes(selectedStore)) return null;
 
             // Restricciones por rol - solo embajador no ve Presupuestos
             const isLocked = selectedRole === 'embajador' && item.page === 'Budget';
@@ -1023,6 +1025,8 @@ export default function Home() {
                         console.error('❌ Exception:', error);
                       }
                       setBackupLoading(false);
+                    } else if (item.specialAction === 'experiencia') {
+                      setShowExperienciaPopsy(true);
                     } else {
                       setShowStoreSales(true);
                     }
