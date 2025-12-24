@@ -61,9 +61,43 @@ export default function Layout({ children, currentPageName }) {
               <MotivationalHeader />
             </div>
 
-            {/* Right Actions - Search y Logout */}
+            {/* Right Actions - Nav Buttons y Logout */}
             <div className="flex items-center gap-2">
-              <SmartSearch storeId={selectedStore} />
+              {/* Navigation Buttons */}
+              <div className="flex items-center gap-1 bg-white/80 backdrop-blur-sm px-2 py-1 rounded-full shadow-md border border-gray-100">
+                {NAV_ITEMS.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = currentPageName === item.page;
+                  const isLocked = (userRole === 'calidad' && item.page === 'Management') ||
+                                  (userRole === 'c_interno' && item.page !== 'Home' && item.page !== 'PopsyPlanner');
+                  
+                  if (isLocked) return null;
+                  
+                  return (
+                    <Link key={item.page} to={createPageUrl(item.page)}>
+                      <motion.div
+                        whileHover={{ scale: 1.1, y: -2 }}
+                        whileTap={{ scale: 0.95 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                      >
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className={`transition-all duration-200 w-9 h-9 rounded-full ${isActive 
+                            ? item.page === 'Home' 
+                              ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-md' 
+                              : 'bg-gradient-to-r from-violet-500 to-purple-500 text-white shadow-md'
+                            : item.page === 'Home'
+                              ? 'text-rose-500 hover:text-rose-600 hover:bg-rose-50'
+                              : 'text-violet-500 hover:text-violet-600 hover:bg-violet-50'}`}
+                        >
+                          <Icon className="w-4 h-4" />
+                        </Button>
+                      </motion.div>
+                    </Link>
+                  );
+                })}
+              </div>
               
               <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
                 <Button
@@ -127,48 +161,14 @@ export default function Layout({ children, currentPageName }) {
           </div>
         </div>
 
-        {/* Nav flotante centrado */}
-        <nav className="fixed top-14 left-1/2 -translate-x-1/2 z-40 flex items-center gap-1 bg-white/80 backdrop-blur-sm px-2 py-1 rounded-full shadow-lg border border-gray-100">
-          {NAV_ITEMS.map((item) => {
-            const Icon = item.icon;
-            const isActive = currentPageName === item.page;
-            const isLocked = (userRole === 'calidad' && item.page === 'Management') ||
-                            (userRole === 'c_interno' && item.page !== 'Home' && item.page !== 'PopsyPlanner');
-            
-            if (isLocked) return null;
-            
-            return (
-              <Link key={item.page} to={createPageUrl(item.page)}>
-                <motion.div
-                  whileHover={{ scale: 1.1, y: -3 }}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                >
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className={`transition-all duration-200 w-10 h-10 rounded-full ${isActive 
-                      ? item.page === 'Home' 
-                        ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-md' 
-                        : 'bg-gradient-to-r from-violet-500 to-purple-500 text-white shadow-md'
-                      : item.page === 'Home'
-                        ? 'text-rose-500 hover:text-rose-600 hover:bg-rose-50'
-                        : 'text-violet-500 hover:text-violet-600 hover:bg-violet-50'}`}
-                  >
-                    <Icon className="w-5 h-5" />
-                  </Button>
-                </motion.div>
-              </Link>
-            );
-          })}
-        </nav>
+
 
         {/* Main Content */}
         <motion.main 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
-          className="pt-[72px] min-h-screen pb-4 relative"
+          className="pt-[52px] min-h-screen pb-4 relative"
         >
           {/* Premium Modern Background */}
           <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none bg-gradient-to-br from-slate-50 via-white to-pink-50/30">
