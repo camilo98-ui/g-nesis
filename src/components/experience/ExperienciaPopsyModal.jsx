@@ -224,20 +224,16 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userRole }) {
 
   // Enviar encuesta
   const handleSurveySubmit = async (rating) => {
-    const ratingMessages = {
-      excelente: '¡Gracias por tu excelente calificación! 🎉',
-      normal: 'Gracias por tu opinión, trabajaremos para mejorar 💪',
-      mala: 'Lamentamos tu experiencia, trabajaremos para ser mejores 🙏'
-    };
-
-    toast.success(ratingMessages[rating]);
+    setCurrentScreen('validation');
+    setInvoiceSerial('');
+    setValidatedInvoice(null);
 
     const experiencePoints = rating === 'excelente' ? 8 : rating === 'normal' ? 4 : 0;
     const suggestedProducts = validatedInvoice?.suggested_items || 0;
     const suggestedSalesPoints = Math.min(suggestedProducts * 2, 20);
     const totalPoints = experiencePoints + suggestedSalesPoints;
 
-    await createExperienceMutation.mutateAsync({
+    const experienceData = {
       invoice_serial: invoiceSerial,
       store_id: storeId,
       cashier_id: sessionCashier.id,
@@ -249,44 +245,48 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userRole }) {
       date: today,
       has_suggested_products: suggestedProducts > 0,
       suggested_products_count: suggestedProducts
-    });
+    };
 
     const existingPoints = cashierDailyPoints?.[0];
     
-    if (existingPoints) {
-      await updateDailyPointsMutation.mutateAsync({
-        id: existingPoints.id,
-        data: {
-          experience_points: existingPoints.experience_points + experiencePoints,
-          suggested_sales_points: existingPoints.suggested_sales_points + suggestedSalesPoints,
-          total_points: existingPoints.total_points + totalPoints,
-          excellent_count: existingPoints.excellent_count + (rating === 'excelente' ? 1 : 0),
-          normal_count: existingPoints.normal_count + (rating === 'normal' ? 1 : 0),
-          bad_count: existingPoints.bad_count + (rating === 'mala' ? 1 : 0),
-          total_surveys: existingPoints.total_surveys + 1
-        }
-      });
-    } else {
-      await createDailyPointsMutation.mutateAsync({
-        cashier_id: sessionCashier.id,
-        cashier_name: sessionCashier.name,
-        store_id: storeId,
-        date: today,
-        experience_points: experiencePoints,
-        suggested_sales_points: suggestedSalesPoints,
-        total_points: totalPoints,
-        excellent_count: rating === 'excelente' ? 1 : 0,
-        normal_count: rating === 'normal' ? 1 : 0,
-        bad_count: rating === 'mala' ? 1 : 0,
-        total_surveys: 1
-      });
+    try {
+      if (existingPoints) {
+        await Promise.all([
+          createExperienceMutation.mutateAsync(experienceData),
+          updateDailyPointsMutation.mutateAsync({
+            id: existingPoints.id,
+            data: {
+              experience_points: existingPoints.experience_points + experiencePoints,
+              suggested_sales_points: existingPoints.suggested_sales_points + suggestedSalesPoints,
+              total_points: existingPoints.total_points + totalPoints,
+              excellent_count: existingPoints.excellent_count + (rating === 'excelente' ? 1 : 0),
+              normal_count: existingPoints.normal_count + (rating === 'normal' ? 1 : 0),
+              bad_count: existingPoints.bad_count + (rating === 'mala' ? 1 : 0),
+              total_surveys: existingPoints.total_surveys + 1
+            }
+          })
+        ]);
+      } else {
+        await Promise.all([
+          createExperienceMutation.mutateAsync(experienceData),
+          createDailyPointsMutation.mutateAsync({
+            cashier_id: sessionCashier.id,
+            cashier_name: sessionCashier.name,
+            store_id: storeId,
+            date: today,
+            experience_points: experiencePoints,
+            suggested_sales_points: suggestedSalesPoints,
+            total_points: totalPoints,
+            excellent_count: rating === 'excelente' ? 1 : 0,
+            normal_count: rating === 'normal' ? 1 : 0,
+            bad_count: rating === 'mala' ? 1 : 0,
+            total_surveys: 1
+          })
+        ]);
+      }
+    } catch (error) {
+      console.error('Error saving survey:', error);
     }
-
-    setTimeout(() => {
-      setInvoiceSerial('');
-      setValidatedInvoice(null);
-      setCurrentScreen('validation');
-    }, 2000);
   };
 
   // Stats del anfitrión
@@ -704,30 +704,41 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userRole }) {
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 w-full max-w-5xl px-4">
                       {[
-                        { rating: 'excelente', emoji: '😀', label: 'Excelente', color: 'from-emerald-400 to-green-500', delay: 0.3 },
-                        { rating: 'normal', emoji: '😐', label: 'Normal', color: 'from-amber-400 to-orange-500', delay: 0.4 },
-                        { rating: 'mala', emoji: '☹️', label: 'Mala', color: 'from-red-400 to-rose-500', delay: 0.5 }
-                      ].map((option) => (
-                        <motion.button
-                          key={option.rating}
-                          initial={{ scale: 0, rotate: -180 }}
-                          animate={{ scale: 1, rotate: 0 }}
-                          transition={{ delay: option.delay, type: "spring", stiffness: 200 }}
-                          whileHover={{ scale: 1.08, y: -15 }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={() => handleSurveySubmit(option.rating)}
-                          className={`bg-gradient-to-br ${option.color} rounded-3xl p-10 sm:p-16 text-white shadow-2xl hover:shadow-3xl transition-all aspect-square flex flex-col items-center justify-center`}
-                        >
-                          <motion.div 
-                            className="text-8xl sm:text-9xl mb-6"
-                            animate={{ scale: [1, 1.15, 1] }}
-                            transition={{ duration: 2, repeat: Infinity }}
+                        { rating: 'excelente', emoji: '😀', hoverEmoji: '🤩', label: 'Excelente', color: 'from-emerald-400 to-green-500', delay: 0.3, message: '¡Gracias por tu excelente opinión! 🎉✨' },
+                        { rating: 'normal', emoji: '😐', hoverEmoji: '🙂', label: 'Normal', color: 'from-amber-400 to-orange-500', delay: 0.4, message: '¡Gracias por tu opinión! Seguiremos mejorando 💪' },
+                        { rating: 'mala', emoji: '☹️', hoverEmoji: '😢', label: 'Mala', color: 'from-red-400 to-rose-500', delay: 0.5, message: 'Gracias por tu honestidad, trabajaremos para mejorar 🙏💙' }
+                      ].map((option) => {
+                        const [isHovered, setIsHovered] = React.useState(false);
+                        return (
+                          <motion.button
+                            key={option.rating}
+                            initial={{ scale: 0, rotate: -180 }}
+                            animate={{ scale: 1, rotate: 0 }}
+                            transition={{ delay: option.delay, type: "spring", stiffness: 200 }}
+                            whileHover={{ scale: 1.05, y: -10 }}
+                            whileTap={{ scale: 0.95 }}
+                            onHoverStart={() => setIsHovered(true)}
+                            onHoverEnd={() => setIsHovered(false)}
+                            onClick={() => {
+                              toast.success(option.message, { duration: 3000 });
+                              handleSurveySubmit(option.rating);
+                            }}
+                            className={`bg-gradient-to-br ${option.color} rounded-3xl p-10 sm:p-16 text-white shadow-2xl hover:shadow-3xl transition-all aspect-square flex flex-col items-center justify-center`}
                           >
-                            {option.emoji}
-                          </motion.div>
-                          <p className="font-black text-3xl sm:text-4xl">{option.label}</p>
-                        </motion.button>
-                      ))}
+                            <motion.div 
+                              className="text-8xl sm:text-9xl mb-6"
+                              animate={{ 
+                                scale: isHovered ? [1, 1.2, 1] : 1,
+                                rotate: isHovered ? [0, -10, 10, 0] : 0
+                              }}
+                              transition={{ duration: 0.3 }}
+                            >
+                              {isHovered ? option.hoverEmoji : option.emoji}
+                            </motion.div>
+                            <p className="font-black text-3xl sm:text-4xl">{option.label}</p>
+                          </motion.button>
+                        );
+                      })}
                     </div>
                   </motion.div>
                 )}
