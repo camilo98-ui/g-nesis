@@ -35,7 +35,7 @@ export default function Layout({ children, currentPageName }) {
     <ErrorBoundary>
       <div className="min-h-screen bg-white">
         {/* Motivational Banner con botones integrados */}
-        <div className="fixed top-0 left-0 right-0 h-12 bg-gradient-to-r from-pink-50/70 via-rose-50/60 to-amber-50/70 z-40 border-b border-pink-100/50">
+        <div className="fixed top-0 left-0 right-0 h-12 bg-gradient-to-r from-pink-50/70 via-rose-50/60 to-amber-50/70 z-50 border-b border-pink-100/50 shadow-sm">
           <div className="h-full flex items-center justify-between px-4">
             {/* Logo y ubicación */}
             <div className="flex items-center gap-3">
