@@ -114,32 +114,33 @@ export default function ExecutiveComparable({ onClose, allDailySales }) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       onClick={onClose}
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-6"
+      className="fixed inset-0 bg-black/70 backdrop-blur-md z-[100] overflow-y-auto"
     >
-      <motion.div
-        initial={{ scale: 0.95, y: 20 }}
-        animate={{ scale: 1, y: 0 }}
-        exit={{ scale: 0.95, y: 20 }}
-        onClick={(e) => e.stopPropagation()}
-        className="bg-gradient-to-br from-slate-900 to-slate-950 rounded-2xl border border-white/20 max-w-7xl w-full max-h-[90vh] overflow-hidden shadow-2xl"
-      >
+      <div className="min-h-full flex items-start justify-center p-4 sm:p-6 py-8">
+        <motion.div
+          initial={{ scale: 0.95, y: 20 }}
+          animate={{ scale: 1, y: 0 }}
+          exit={{ scale: 0.95, y: 20 }}
+          onClick={(e) => e.stopPropagation()}
+          className="bg-gradient-to-br from-slate-900 to-slate-950 rounded-2xl border border-white/20 max-w-7xl w-full shadow-2xl my-4"
+        >
         {/* Header */}
-        <div className="p-8 border-b border-white/10">
-          <div className="flex items-start justify-between mb-6">
+        <div className="p-6 sm:p-8 border-b border-white/10">
+          <div className="flex items-start justify-between mb-4 sm:mb-6">
             <div>
-              <h2 className="text-4xl font-black text-white mb-2">Análisis Comparable</h2>
-              <p className="text-slate-400">Compara el rendimiento entre dos periodos</p>
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white mb-2">Análisis Comparable</h2>
+              <p className="text-sm sm:text-base text-slate-400">Compara el rendimiento entre dos periodos</p>
             </div>
             <button
               onClick={onClose}
-              className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+              className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors flex-shrink-0"
             >
               <X className="w-5 h-5 text-white" />
             </button>
           </div>
 
           {/* Filtros de Fecha */}
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <div className="bg-white/5 rounded-xl p-4 border border-purple-500/30">
               <div className="flex items-center gap-2 mb-3">
                 <Calendar className="w-4 h-4 text-purple-400" />
@@ -155,25 +156,25 @@ export default function ExecutiveComparable({ onClose, allDailySales }) {
               <DateFilter dateRange={period2} onDateChange={setPeriod2} />
             </div>
           </div>
-        </div>
+          </div>
 
-        {/* Content */}
-        <div className="p-8 overflow-y-auto max-h-[calc(90vh-240px)]">
-          <div className="space-y-8">
+          {/* Content */}
+          <div className="p-4 sm:p-6 lg:p-8">
+          <div className="space-y-6 sm:space-y-8">
             {/* KPIs de Cambio Global */}
-            <div className="grid grid-cols-3 gap-6">
-              <div className="bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl p-6 border border-blue-500/30">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+              <div className="bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl p-4 sm:p-6 border border-blue-500/30">
                 <p className="text-xs text-slate-400 uppercase tracking-wider mb-2">Cambio en Ventas</p>
-                <div className="flex items-center gap-3">
-                  <p className={`text-4xl font-black ${zoneTotals.salesChange >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <p className={`text-2xl sm:text-3xl lg:text-4xl font-black ${zoneTotals.salesChange >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                     {zoneTotals.salesChange >= 0 ? '+' : ''}{zoneTotals.salesChange.toFixed(1)}%
                   </p>
                   {zoneTotals.salesChange >= 0 ? 
-                    <TrendingUp className="w-8 h-8 text-emerald-400" /> : 
-                    <TrendingDown className="w-8 h-8 text-red-400" />
+                    <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 text-emerald-400" /> : 
+                    <TrendingDown className="w-6 h-6 sm:w-8 sm:h-8 text-red-400" />
                   }
                 </div>
-                <p className="text-sm text-slate-400 mt-2">
+                <p className="text-xs sm:text-sm text-slate-400 mt-2">
                   {formatCurrency(zoneTotals.p1Sales)} → {formatCurrency(zoneTotals.p2Sales)}
                 </p>
               </div>
@@ -212,9 +213,9 @@ export default function ExecutiveComparable({ onClose, allDailySales }) {
             </div>
 
             {/* Gráfica de Ventas Comparadas */}
-            <div className="bg-white/5 backdrop-blur-xl rounded-xl p-6 border border-white/10">
-              <h3 className="text-xl font-bold text-white mb-6">💰 Comparación de Ventas por Tienda</h3>
-              <ResponsiveContainer width="100%" height={400}>
+            <div className="bg-white/5 backdrop-blur-xl rounded-xl p-4 sm:p-6 border border-white/10">
+              <h3 className="text-base sm:text-lg lg:text-xl font-bold text-white mb-4 sm:mb-6">💰 Comparación de Ventas por Tienda</h3>
+              <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={comparisonData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
                   <XAxis dataKey="name" stroke="#94a3b8" angle={-45} textAnchor="end" height={100} style={{ fontSize: '11px' }} />
@@ -228,9 +229,9 @@ export default function ExecutiveComparable({ onClose, allDailySales }) {
             </div>
 
             {/* Gráfica de Transacciones */}
-            <div className="bg-white/5 backdrop-blur-xl rounded-xl p-6 border border-white/10">
-              <h3 className="text-xl font-bold text-white mb-6">🛒 Comparación de Transacciones</h3>
-              <ResponsiveContainer width="100%" height={350}>
+            <div className="bg-white/5 backdrop-blur-xl rounded-xl p-4 sm:p-6 border border-white/10">
+              <h3 className="text-base sm:text-lg lg:text-xl font-bold text-white mb-4 sm:mb-6">🛒 Comparación de Transacciones</h3>
+              <ResponsiveContainer width="100%" height={280}>
                 <LineChart data={comparisonData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
                   <XAxis dataKey="name" stroke="#94a3b8" angle={-45} textAnchor="end" height={100} style={{ fontSize: '11px' }} />
@@ -245,8 +246,8 @@ export default function ExecutiveComparable({ onClose, allDailySales }) {
 
             {/* Tabla Comparativa */}
             <div className="bg-white/5 backdrop-blur-xl rounded-xl border border-white/10 overflow-hidden">
-              <div className="p-6 border-b border-white/10">
-                <h3 className="text-xl font-bold text-white">📋 Detalle Comparativo</h3>
+              <div className="p-4 sm:p-6 border-b border-white/10">
+                <h3 className="text-base sm:text-lg lg:text-xl font-bold text-white">📋 Detalle Comparativo</h3>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full">
@@ -294,8 +295,9 @@ export default function ExecutiveComparable({ onClose, allDailySales }) {
               </div>
             </div>
           </div>
-        </div>
-      </motion.div>
-    </motion.div>
+          </div>
+          </motion.div>
+          </div>
+          </motion.div>
   );
 }
