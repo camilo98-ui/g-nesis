@@ -28,7 +28,7 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userId, userNa
 
   const { data: todaySales = [] } = useQuery({
     queryKey: ['todaySales', storeId, today],
-    queryFn: () => base44.entities.SalesLog.filter({ store_id: storeId, date: today }),
+    queryFn: () => base44.entities.DailySales.filter({ store_id: storeId, date: today }),
     enabled: !!storeId
   });
 
@@ -101,15 +101,6 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userId, userNa
     setValidating(true);
 
     try {
-      // Verificar que exista en ventas del día
-      const saleExists = todaySales.some(s => s.invoice_number === invoiceSerial);
-      
-      if (!saleExists) {
-        toast.error('Factura no encontrada en las ventas de hoy');
-        setValidating(false);
-        return;
-      }
-
       // Verificar que no haya sido usada hoy
       const alreadyUsed = todayExperiences.some(e => e.invoice_serial === invoiceSerial);
       
@@ -122,13 +113,13 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userId, userNa
         return;
       }
 
-      // Validación exitosa
-      const sale = todaySales.find(s => s.invoice_number === invoiceSerial);
-      setValidatedInvoice(sale);
+      // Validación exitosa - simplificada para permitir cualquier número
+      setValidatedInvoice({ invoice_number: invoiceSerial, suggested_items: 0 });
       setCurrentScreen('survey');
       toast.success('¡Factura válida! Comparte tu experiencia');
     } catch (error) {
       toast.error('Error al validar factura');
+      console.error(error);
     }
 
     setValidating(false);
