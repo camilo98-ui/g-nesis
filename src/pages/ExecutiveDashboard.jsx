@@ -361,7 +361,7 @@ Genera:
       <Link to={createPageUrl('Home')}>
         <motion.div
           whileHover={{ scale: 1.05, x: -3 }}
-          className="fixed left-8 top-8 w-11 h-11 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 hover:bg-white/20 flex items-center justify-center transition-all cursor-pointer z-50"
+          className="fixed left-4 sm:left-6 top-6 sm:top-8 w-11 h-11 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 hover:bg-white/20 flex items-center justify-center transition-all cursor-pointer z-50"
         >
           <ArrowLeft className="w-5 h-5 text-white" />
         </motion.div>
