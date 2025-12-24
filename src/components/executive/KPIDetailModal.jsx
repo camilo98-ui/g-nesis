@@ -121,7 +121,7 @@ export default function KPIDetailModal({ kpiType, onClose, data, dateRange, stor
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       onClick={onClose}
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-6"
+      className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center p-6"
     >
       <motion.div
         initial={{ scale: 0.9, y: 20 }}
