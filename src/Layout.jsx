@@ -35,12 +35,12 @@ export default function Layout({ children, currentPageName }) {
     <ErrorBoundary>
       <div className="min-h-screen bg-white">
         {/* Motivational Banner - Pastel muy suave */}
-        <div className="fixed top-0 left-0 right-0 h-8 bg-gradient-to-r from-pink-50/70 via-rose-50/60 to-amber-50/70 z-50 border-b border-pink-100/50">
+        <div className="fixed top-0 left-0 right-0 h-8 bg-gradient-to-r from-pink-50/70 via-rose-50/60 to-amber-50/70 z-40 border-b border-pink-100/50">
           <MotivationalHeader />
         </div>
 
       {/* Top Header Bar */}
-      <header className="fixed top-8 left-0 right-0 h-14 bg-white border-b border-gray-100 z-50 px-4 flex items-center justify-between shadow-sm">
+      <header className="fixed top-8 left-0 right-0 h-14 bg-white border-b border-gray-100 z-40 px-4 flex items-center justify-between shadow-sm">
         {/* Logo izquierda y ubicación */}
         <div className="flex items-center gap-3">
           {currentPageName !== 'Home' && (
