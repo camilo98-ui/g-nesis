@@ -195,156 +195,64 @@ export default function Layout({ children, currentPageName }) {
           transition={{ duration: 0.3 }}
           className="pt-[88px] min-h-screen pb-4 relative"
         >
-          {/* Ultra Premium Sophisticated Background */}
-          <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-            {/* Base gradient with depth */}
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-purple-900/30 to-pink-900/20" />
-            
-            {/* Animated mesh gradient */}
+          {/* Premium Modern Background */}
+          <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none bg-gradient-to-br from-slate-50 via-white to-pink-50/30">
+            {/* Animated gradient orbs */}
             <motion.div
               animate={{
-                backgroundPosition: ['0% 0%', '100% 100%', '0% 0%'],
-              }}
-              transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-              className="absolute inset-0 opacity-30"
-              style={{
-                backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(236, 72, 153, 0.3) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(168, 85, 247, 0.3) 0%, transparent 50%), radial-gradient(circle at 40% 20%, rgba(59, 130, 246, 0.2) 0%, transparent 50%)',
-                backgroundSize: '100% 100%'
-              }}
-            />
-            
-            {/* Large animated orbs with glow */}
-            <motion.div
-              animate={{
-                x: [0, 150, 0],
-                y: [0, -100, 0],
-                scale: [1, 1.3, 1],
-                rotate: [0, 180, 360],
-              }}
-              transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute top-10 right-[5%] w-[700px] h-[700px] bg-gradient-to-br from-pink-500/40 via-rose-500/30 to-purple-500/20 rounded-full blur-[120px]"
-              style={{
-                boxShadow: '0 0 200px 100px rgba(236, 72, 153, 0.3)',
-              }}
-            />
-            <motion.div
-              animate={{
-                x: [0, -120, 0],
-                y: [0, 100, 0],
-                scale: [1, 1.4, 1],
-                rotate: [0, -180, -360],
-              }}
-              transition={{ duration: 30, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute bottom-10 left-[5%] w-[800px] h-[800px] bg-gradient-to-br from-purple-500/40 via-indigo-500/30 to-blue-500/20 rounded-full blur-[120px]"
-              style={{
-                boxShadow: '0 0 200px 100px rgba(168, 85, 247, 0.3)',
-              }}
-            />
-            <motion.div
-              animate={{
-                x: [0, 80, 0],
-                y: [0, -80, 0],
-                scale: [1, 1.25, 1],
-                rotate: [0, 120, 240],
-              }}
-              transition={{ duration: 35, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute top-[35%] left-[45%] w-[600px] h-[600px] bg-gradient-to-br from-cyan-500/30 via-blue-500/25 to-purple-500/20 rounded-full blur-[100px]"
-              style={{
-                boxShadow: '0 0 180px 90px rgba(59, 130, 246, 0.2)',
-              }}
-            />
-
-            {/* Animated geometric shapes with neon glow */}
-            <motion.div
-              animate={{
-                rotate: [0, 360],
+                x: [0, 100, 0],
+                y: [0, -50, 0],
                 scale: [1, 1.1, 1],
               }}
-              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-              className="absolute top-[10%] right-[15%] w-64 h-64 border-2 border-pink-400/40 rounded-3xl"
-              style={{
-                boxShadow: '0 0 40px rgba(236, 72, 153, 0.5), inset 0 0 40px rgba(236, 72, 153, 0.2)',
-              }}
+              transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute top-20 right-[10%] w-[500px] h-[500px] bg-gradient-to-br from-pink-300/20 via-rose-300/15 to-transparent rounded-full blur-3xl"
             />
             <motion.div
               animate={{
-                rotate: [0, -360],
+                x: [0, -80, 0],
+                y: [0, 80, 0],
                 scale: [1, 1.15, 1],
               }}
-              transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-              className="absolute bottom-[20%] left-[20%] w-48 h-48 border-2 border-purple-400/40 rounded-full"
-              style={{
-                boxShadow: '0 0 40px rgba(168, 85, 247, 0.5), inset 0 0 40px rgba(168, 85, 247, 0.2)',
-              }}
+              transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute bottom-20 left-[15%] w-[600px] h-[600px] bg-gradient-to-br from-purple-300/15 via-pink-300/20 to-transparent rounded-full blur-3xl"
             />
             <motion.div
               animate={{
-                rotate: [0, 180, 360],
-                x: [0, 30, 0],
-                y: [0, -30, 0],
+                x: [0, 60, 0],
+                y: [0, -60, 0],
+                scale: [1, 1.2, 1],
               }}
-              transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute top-[55%] right-[25%] w-32 h-32 border-2 border-blue-400/40 rounded-2xl"
-              style={{
-                boxShadow: '0 0 30px rgba(59, 130, 246, 0.5), inset 0 0 30px rgba(59, 130, 246, 0.2)',
-              }}
+              transition={{ duration: 30, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute top-[40%] left-[5%] w-[400px] h-[400px] bg-gradient-to-br from-blue-300/10 via-cyan-300/15 to-transparent rounded-full blur-3xl"
             />
 
-            {/* Hexagonal pattern overlay */}
-            <div className="absolute inset-0 opacity-[0.03]"
+            {/* Geometric shapes */}
+            <div className="absolute top-[15%] right-[20%] w-32 h-32 border border-pink-200/30 rounded-2xl rotate-12 opacity-40" />
+            <div className="absolute bottom-[25%] left-[25%] w-24 h-24 border border-purple-200/30 rounded-full opacity-30" />
+            <div className="absolute top-[60%] right-[35%] w-20 h-20 border border-blue-200/30 rounded-xl -rotate-6 opacity-40" />
+
+            {/* Subtle grid overlay */}
+            <div className="absolute inset-0 opacity-[0.015]"
                  style={{
-                   backgroundImage: 'radial-gradient(circle, rgba(236, 72, 153, 0.8) 1px, transparent 1px)',
-                   backgroundSize: '50px 50px',
+                   backgroundImage: 'linear-gradient(rgba(236, 72, 153, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(236, 72, 153, 0.1) 1px, transparent 1px)',
+                   backgroundSize: '60px 60px'
                  }}
             />
 
-            {/* Dynamic light rays */}
+            {/* Glassmorphism layers */}
             <motion.div
               animate={{
-                opacity: [0.1, 0.3, 0.1],
-                rotate: [0, 10, 0],
+                opacity: [0.3, 0.5, 0.3],
               }}
               transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute top-0 left-1/2 -translate-x-1/2 w-[2px] h-full bg-gradient-to-b from-pink-500/50 via-purple-500/30 to-transparent"
-              style={{
-                boxShadow: '0 0 20px 5px rgba(236, 72, 153, 0.3)',
-              }}
-            />
-
-            {/* Floating glassmorphism particles */}
-            <motion.div
-              animate={{
-                y: [0, -30, 0],
-                opacity: [0.4, 0.7, 0.4],
-              }}
-              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute top-[15%] left-[35%] w-32 h-32 bg-white/10 rounded-full backdrop-blur-xl"
-              style={{
-                boxShadow: '0 0 40px rgba(255, 255, 255, 0.2)',
-              }}
+              className="absolute top-[10%] left-[40%] w-64 h-64 bg-gradient-to-br from-white/40 to-pink-100/30 rounded-full backdrop-blur-3xl"
             />
             <motion.div
               animate={{
-                y: [0, 40, 0],
-                opacity: [0.3, 0.6, 0.3],
+                opacity: [0.4, 0.6, 0.4],
               }}
-              transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-              className="absolute bottom-[25%] right-[40%] w-24 h-24 bg-white/10 rounded-full backdrop-blur-xl"
-              style={{
-                boxShadow: '0 0 30px rgba(255, 255, 255, 0.2)',
-              }}
-            />
-            <motion.div
-              animate={{
-                y: [0, -25, 0],
-                x: [0, 15, 0],
-                opacity: [0.35, 0.65, 0.35],
-              }}
-              transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-              className="absolute top-[60%] left-[60%] w-20 h-20 bg-white/10 rounded-full backdrop-blur-xl"
-              style={{
-                boxShadow: '0 0 25px rgba(255, 255, 255, 0.2)',
-              }}
+              transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+              className="absolute bottom-[15%] right-[30%] w-48 h-48 bg-gradient-to-br from-white/30 to-purple-100/30 rounded-full backdrop-blur-3xl"
             />
           </div>
 

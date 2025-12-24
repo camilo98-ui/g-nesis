@@ -455,190 +455,33 @@ export default function Home() {
   // Si no está logueado, mostrar pantalla de login
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-950 relative overflow-hidden">
-        {/* Ultra Sophisticated Premium Background */}
+      <div className="min-h-screen bg-gradient-to-br from-white via-slate-50/50 to-pink-50/40 relative overflow-hidden">
+        {/* Premium Background Effects */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {/* Animated mesh gradient with glow */}
+          {/* Animated gradient orbs */}
           <motion.div
             animate={{
-              backgroundPosition: ['0% 0%', '100% 100%', '0% 0%'],
-              opacity: [0.4, 0.6, 0.4],
-            }}
-            transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-            className="absolute inset-0"
-            style={{
-              backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(236, 72, 153, 0.4) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(168, 85, 247, 0.4) 0%, transparent 50%), radial-gradient(circle at 40% 20%, rgba(59, 130, 246, 0.3) 0%, transparent 50%)',
-              backgroundSize: '200% 200%',
-            }}
-          />
-
-          {/* Large glowing orbs with advanced effects */}
-          <motion.div
-            animate={{
-              x: [0, 200, 0],
-              y: [0, -150, 0],
-              scale: [1, 1.4, 1],
-              rotate: [0, 180, 360],
-            }}
-            transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute -top-32 -right-32 w-[800px] h-[800px] bg-gradient-to-br from-pink-500/50 via-rose-500/40 to-purple-500/30 rounded-full blur-[150px]"
-            style={{
-              boxShadow: '0 0 300px 150px rgba(236, 72, 153, 0.4)',
-            }}
-          />
-          <motion.div
-            animate={{
-              x: [0, -150, 0],
-              y: [0, 120, 0],
-              scale: [1, 1.5, 1],
-              rotate: [0, -180, -360],
-            }}
-            transition={{ duration: 30, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute -bottom-32 -left-32 w-[900px] h-[900px] bg-gradient-to-br from-purple-500/50 via-indigo-500/40 to-blue-500/30 rounded-full blur-[150px]"
-            style={{
-              boxShadow: '0 0 300px 150px rgba(168, 85, 247, 0.4)',
-            }}
-          />
-          <motion.div
-            animate={{
-              x: [0, 100, 0],
-              y: [0, -100, 0],
-              scale: [1, 1.3, 1],
-              rotate: [0, 120, 240],
-            }}
-            transition={{ duration: 35, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-[40%] left-[45%] w-[700px] h-[700px] bg-gradient-to-br from-cyan-500/40 via-blue-500/35 to-purple-500/30 rounded-full blur-[130px]"
-            style={{
-              boxShadow: '0 0 250px 120px rgba(59, 130, 246, 0.3)',
-            }}
-          />
-
-          {/* Animated geometric shapes with neon borders */}
-          <motion.div
-            animate={{
-              rotate: [0, 360],
-              scale: [1, 1.15, 1],
-            }}
-            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-            className="absolute top-[8%] right-[12%] w-80 h-80 border-2 border-pink-400/50 rounded-[40px]"
-            style={{
-              boxShadow: '0 0 60px rgba(236, 72, 153, 0.6), inset 0 0 60px rgba(236, 72, 153, 0.3)',
-            }}
-          />
-          <motion.div
-            animate={{
-              rotate: [0, -360],
               scale: [1, 1.2, 1],
+              opacity: [0.3, 0.5, 0.3],
             }}
-            transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-            className="absolute bottom-[15%] left-[15%] w-64 h-64 border-2 border-purple-400/50 rounded-full"
-            style={{
-              boxShadow: '0 0 50px rgba(168, 85, 247, 0.6), inset 0 0 50px rgba(168, 85, 247, 0.3)',
-            }}
+            transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute -top-48 -right-48 w-[600px] h-[600px] bg-gradient-to-br from-pink-400/20 via-rose-400/15 to-transparent rounded-full blur-3xl"
           />
           <motion.div
             animate={{
-              rotate: [0, 180, 360],
-              x: [0, 40, 0],
-              y: [0, -40, 0],
+              scale: [1, 1.15, 1],
+              opacity: [0.2, 0.4, 0.2],
             }}
-            transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-[50%] right-[20%] w-48 h-48 border-2 border-blue-400/50 rounded-3xl"
-            style={{
-              boxShadow: '0 0 45px rgba(59, 130, 246, 0.6), inset 0 0 45px rgba(59, 130, 246, 0.3)',
-            }}
+            transition={{ duration: 20, repeat: Infinity, ease: "easeInOut", delay: 3 }}
+            className="absolute -bottom-48 -left-48 w-[700px] h-[700px] bg-gradient-to-br from-purple-400/15 via-blue-400/10 to-transparent rounded-full blur-3xl"
           />
           
-          {/* Additional decorative shapes */}
-          <motion.div
-            animate={{
-              rotate: [0, -90, -180],
-              scale: [1, 1.1, 1],
-            }}
-            transition={{ duration: 22, repeat: Infinity, ease: "linear" }}
-            className="absolute top-[25%] left-[8%] w-40 h-40 border-2 border-cyan-400/40 rounded-2xl"
-            style={{
-              boxShadow: '0 0 35px rgba(34, 211, 238, 0.5), inset 0 0 35px rgba(34, 211, 238, 0.2)',
-            }}
-          />
-          <motion.div
-            animate={{
-              rotate: [0, 270, 360],
-              scale: [1, 1.25, 1],
-            }}
-            transition={{ duration: 28, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute bottom-[35%] right-[35%] w-32 h-32 border-2 border-rose-400/40 rounded-full"
-            style={{
-              boxShadow: '0 0 40px rgba(251, 113, 133, 0.5), inset 0 0 40px rgba(251, 113, 133, 0.2)',
-            }}
-          />
-
-          {/* Hexagonal grid pattern */}
-          <div className="absolute inset-0 opacity-[0.04]"
+          {/* Subtle grid pattern */}
+          <div className="absolute inset-0 opacity-[0.02]"
                style={{
-                 backgroundImage: 'radial-gradient(circle, rgba(236, 72, 153, 0.9) 2px, transparent 2px)',
-                 backgroundSize: '60px 60px',
+                 backgroundImage: 'linear-gradient(rgba(100,100,100,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(100,100,100,0.1) 1px, transparent 1px)',
+                 backgroundSize: '80px 80px'
                }}
-          />
-
-          {/* Dynamic light beams */}
-          <motion.div
-            animate={{
-              opacity: [0.2, 0.4, 0.2],
-              rotate: [0, 15, 0],
-            }}
-            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-0 left-1/3 w-1 h-full bg-gradient-to-b from-pink-500/60 via-purple-500/40 to-transparent"
-            style={{
-              boxShadow: '0 0 30px 8px rgba(236, 72, 153, 0.4)',
-            }}
-          />
-          <motion.div
-            animate={{
-              opacity: [0.15, 0.35, 0.15],
-              rotate: [0, -12, 0],
-            }}
-            transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-            className="absolute top-0 right-1/3 w-1 h-full bg-gradient-to-b from-purple-500/60 via-blue-500/40 to-transparent"
-            style={{
-              boxShadow: '0 0 25px 6px rgba(168, 85, 247, 0.4)',
-            }}
-          />
-
-          {/* Floating glassmorphism particles */}
-          <motion.div
-            animate={{
-              y: [0, -40, 0],
-              opacity: [0.5, 0.8, 0.5],
-            }}
-            transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-[12%] left-[30%] w-40 h-40 bg-white/10 rounded-full backdrop-blur-2xl"
-            style={{
-              boxShadow: '0 0 60px rgba(255, 255, 255, 0.3)',
-            }}
-          />
-          <motion.div
-            animate={{
-              y: [0, 50, 0],
-              opacity: [0.4, 0.7, 0.4],
-            }}
-            transition={{ duration: 9, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
-            className="absolute bottom-[20%] right-[35%] w-32 h-32 bg-white/10 rounded-full backdrop-blur-2xl"
-            style={{
-              boxShadow: '0 0 50px rgba(255, 255, 255, 0.3)',
-            }}
-          />
-          <motion.div
-            animate={{
-              y: [0, -35, 0],
-              x: [0, 20, 0],
-              opacity: [0.45, 0.75, 0.45],
-            }}
-            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 3 }}
-            className="absolute top-[55%] left-[55%] w-28 h-28 bg-white/10 rounded-full backdrop-blur-2xl"
-            style={{
-              boxShadow: '0 0 45px rgba(255, 255, 255, 0.3)',
-            }}
           />
         </div>
 
@@ -651,33 +494,14 @@ export default function Home() {
             className="hidden lg:flex lg:w-[55%] relative px-12 xl:px-20 py-20 flex-col justify-center"
           >
             <div className="max-w-xl">
-              {/* Logo - Large, Dynamic & Animated */}
+              {/* Logo */}
               <motion.img
                 src={LOGO_URL}
                 alt="Popsy Management"
-                className="h-32 xl:h-40 object-contain mb-16 xl:mb-20"
-                initial={{ opacity: 0, y: -30, scale: 0.5 }}
-                animate={{ 
-                  opacity: 1,
-                  y: [0, -20, 0, -10, 0],
-                  scale: [1, 1.1, 0.98, 1.05, 1],
-                  rotate: [0, -4, 4, -2, 0]
-                }}
-                transition={{
-                  opacity: { duration: 0.8 },
-                  y: { duration: 5, repeat: Infinity, ease: "easeInOut" },
-                  scale: { duration: 6, repeat: Infinity, ease: "easeInOut" },
-                  rotate: { duration: 7, repeat: Infinity, ease: "easeInOut" }
-                }}
-                whileHover={{ 
-                  scale: 1.2, 
-                  rotate: [0, -8, 8, -5, 5, 0],
-                  transition: { duration: 0.6 }
-                }}
-                whileTap={{ scale: 0.95 }}
-                style={{
-                  filter: 'drop-shadow(0 0 40px rgba(236, 72, 153, 0.8)) drop-shadow(0 0 80px rgba(168, 85, 247, 0.6))',
-                }}
+                className="h-16 xl:h-20 object-contain mb-16 xl:mb-20"
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
               />
 
               {/* Main headline */}
@@ -689,19 +513,12 @@ export default function Home() {
               >
                 <div>
                   <h1 className="text-5xl xl:text-6xl font-bold leading-[1.05] mb-6">
-                    <span className="text-white">Bienvenido a</span><br />
-                    <motion.span 
-                      className="bg-gradient-to-r from-pink-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent"
-                      animate={{
-                        backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
-                      }}
-                      transition={{ duration: 5, repeat: Infinity }}
-                      style={{ backgroundSize: '200% 200%' }}
-                    >
+                    <span className="text-slate-900">Bienvenido a</span><br />
+                    <span className="bg-gradient-to-r from-pink-500 via-pink-600 to-rose-600 bg-clip-text text-transparent">
                       Popsy Management
-                    </motion.span>
+                    </span>
                   </h1>
-                  <p className="text-lg xl:text-xl text-slate-300 leading-relaxed">
+                  <p className="text-lg xl:text-xl text-slate-600 leading-relaxed">
                     Plataforma de gestión empresarial para equipos de alto rendimiento
                   </p>
                 </div>
@@ -720,22 +537,12 @@ export default function Home() {
                       transition={{ delay: 0.7 + i * 0.15 }}
                       className="flex items-start gap-5"
                     >
-                      <motion.div 
-                        className="w-14 h-14 xl:w-16 xl:h-16 rounded-2xl bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center flex-shrink-0"
-                        animate={{
-                          boxShadow: [
-                            '0 10px 40px rgba(236, 72, 153, 0.4)',
-                            '0 10px 60px rgba(236, 72, 153, 0.6)',
-                            '0 10px 40px rgba(236, 72, 153, 0.4)',
-                          ]
-                        }}
-                        transition={{ duration: 3, repeat: Infinity }}
-                      >
+                      <div className="w-14 h-14 xl:w-16 xl:h-16 rounded-2xl bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center flex-shrink-0 shadow-lg shadow-pink-500/25">
                         <feature.icon className="w-7 h-7 xl:w-8 xl:h-8 text-white" />
-                      </motion.div>
+                      </div>
                       <div className="pt-3">
-                        <p className="text-white font-bold text-lg xl:text-xl mb-1.5">{feature.title}</p>
-                        <p className="text-slate-300 text-sm xl:text-base leading-relaxed">{feature.text}</p>
+                        <p className="text-slate-900 font-bold text-lg xl:text-xl mb-1.5">{feature.title}</p>
+                        <p className="text-slate-600 text-sm xl:text-base leading-relaxed">{feature.text}</p>
                       </div>
                     </motion.div>
                   ))}
@@ -753,97 +560,29 @@ export default function Home() {
               className="w-full max-w-md lg:max-w-lg xl:max-w-xl"
             >
               {/* Mobile logo and branding */}
-              <div className="lg:hidden mb-10 text-center">
+              <div className="lg:hidden mb-8 text-center">
                 <motion.img 
                   src={LOGO_URL} 
                   alt="Popsy" 
-                  className="h-28 sm:h-32 object-contain mx-auto mb-8"
-                  initial={{ scale: 0.5, opacity: 0, y: -30 }}
-                  animate={{ 
-                    scale: [1, 1.08, 0.95, 1.05, 1],
-                    opacity: 1,
-                    y: [0, -15, 0, -8, 0],
-                    rotate: [0, -3, 3, -2, 0]
-                  }}
-                  transition={{
-                    opacity: { duration: 0.6 },
-                    scale: { duration: 5, repeat: Infinity, ease: "easeInOut" },
-                    y: { duration: 4, repeat: Infinity, ease: "easeInOut" },
-                    rotate: { duration: 6, repeat: Infinity, ease: "easeInOut" }
-                  }}
-                  whileHover={{ 
-                    scale: 1.15, 
-                    rotate: [0, -5, 5, -3, 3, 0],
-                    transition: { duration: 0.5 }
-                  }}
-                  whileTap={{ scale: 0.9 }}
-                  style={{
-                    filter: 'drop-shadow(0 0 30px rgba(236, 72, 153, 0.6)) drop-shadow(0 0 60px rgba(168, 85, 247, 0.4))',
-                  }}
+                  className="h-16 object-contain mx-auto mb-6"
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: 0.1 }}
                 />
-                <motion.h2 
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                  className="text-3xl sm:text-4xl font-black bg-gradient-to-r from-pink-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent mb-3"
-                >
-                  Popsy Management
-                </motion.h2>
-                <motion.p 
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.4 }}
-                  className="text-slate-300 text-sm sm:text-base"
-                >
-                  Sistema de gestión empresarial
-                </motion.p>
+                <h2 className="text-3xl font-bold text-slate-900 mb-2">Popsy Management</h2>
+                <p className="text-slate-600 text-base">Sistema de gestión empresarial</p>
               </div>
 
-              {/* Login Card - Ultra Premium with Glow */}
-              <motion.div 
-                className="relative"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.2 }}
-              >
-                {/* Animated glow border */}
-                <motion.div
-                  animate={{
-                    opacity: [0.5, 1, 0.5],
-                    scale: [1, 1.02, 1],
-                  }}
-                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                  className="absolute -inset-1 bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500 rounded-[28px] lg:rounded-[36px] blur-xl opacity-75"
-                  style={{
-                    boxShadow: '0 0 80px rgba(236, 72, 153, 0.8), 0 0 120px rgba(168, 85, 247, 0.6)',
-                  }}
-                />
-                
-                {/* Secondary glow pulse */}
-                <motion.div
-                  animate={{
-                    opacity: [0.3, 0.6, 0.3],
-                    scale: [0.98, 1.04, 0.98],
-                  }}
-                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
-                  className="absolute -inset-2 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 rounded-[30px] lg:rounded-[38px] blur-2xl opacity-50"
-                />
-
-                <div className="relative bg-gradient-to-br from-slate-900/95 via-purple-900/90 to-slate-900/95 backdrop-blur-2xl rounded-3xl lg:rounded-[32px] border-2 border-white/20 p-6 sm:p-8 lg:p-10 xl:p-12 space-y-6 lg:space-y-8"
-                     style={{ 
-                       boxShadow: '0 25px 100px -15px rgba(236, 72, 153, 0.5), 0 10px 40px -10px rgba(168, 85, 247, 0.4), inset 0 2px 20px rgba(255, 255, 255, 0.1)' 
-                     }}>
+              {/* Login Card - Optimized for mobile */}
+              <div className="bg-white/95 backdrop-blur-xl rounded-3xl lg:rounded-[32px] shadow-2xl border border-slate-200/60 p-6 sm:p-8 lg:p-10 xl:p-12 space-y-6 lg:space-y-8"
+                   style={{ boxShadow: '0 25px 80px -15px rgba(236, 72, 153, 0.2), 0 10px 30px -10px rgba(0, 0, 0, 0.1)' }}>
 
                 {/* Header - Mobile optimized */}
                 <div className="text-center">
-                  <motion.h2 
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-2xl sm:text-3xl lg:text-3xl xl:text-4xl font-black bg-gradient-to-r from-pink-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent mb-2 lg:mb-3"
-                  >
+                  <h2 className="text-2xl sm:text-3xl lg:text-3xl xl:text-4xl font-bold text-slate-900 mb-2 lg:mb-3">
                     Iniciar sesión
-                  </motion.h2>
-                  <p className="text-sm sm:text-base text-slate-300">Selecciona tu rol para comenzar</p>
+                  </h2>
+                  <p className="text-sm sm:text-base text-slate-600">Selecciona tu rol para comenzar</p>
                 </div>
 
                 {/* Selector de Rol como Cards - Mobile First */}
@@ -855,45 +594,28 @@ export default function Home() {
                       <motion.button
                         key={role.id}
                         onClick={() => {setSelectedRole(role.id);setLoginError('');}}
-                        whileHover={{ scale: 1.02, y: -2 }}
+                        whileHover={{ scale: 1.01 }}
                         whileTap={{ scale: 0.97 }}
                         className={`relative w-full p-4 sm:p-5 rounded-2xl lg:rounded-3xl border-2 transition-all duration-300 text-left flex items-center gap-3 sm:gap-4 lg:gap-5 touch-manipulation ${
                           isSelected
-                            ? 'border-pink-500/80 bg-gradient-to-r from-pink-500/20 to-purple-500/20 backdrop-blur-sm shadow-2xl'
-                            : 'border-white/20 bg-white/5 backdrop-blur-sm hover:border-pink-400/60 hover:bg-white/10 hover:shadow-xl active:border-pink-500/80'
+                            ? 'border-pink-500 bg-gradient-to-r from-pink-50 to-rose-50 shadow-lg shadow-pink-500/20'
+                            : 'border-slate-200 bg-white hover:border-pink-300 hover:shadow-md active:border-pink-400'
                         }`}
-                        style={isSelected ? {
-                          boxShadow: '0 0 40px rgba(236, 72, 153, 0.5), 0 10px 30px rgba(168, 85, 247, 0.3), inset 0 1px 10px rgba(255, 255, 255, 0.2)'
-                        } : {}}
                       >
-                        <motion.div 
-                          className={`w-14 h-14 sm:w-16 sm:h-16 rounded-xl lg:rounded-2xl flex items-center justify-center flex-shrink-0 transition-all ${
-                            isSelected 
-                              ? 'bg-gradient-to-br from-pink-500 to-purple-600' 
-                              : 'bg-white/10 backdrop-blur-sm'
-                          }`}
-                          animate={isSelected ? {
-                            boxShadow: [
-                              '0 0 20px rgba(236, 72, 153, 0.6)',
-                              '0 0 40px rgba(236, 72, 153, 0.8)',
-                              '0 0 20px rgba(236, 72, 153, 0.6)',
-                            ]
-                          } : {}}
-                          transition={{ duration: 2, repeat: Infinity }}
-                        >
+                        <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-xl lg:rounded-2xl flex items-center justify-center flex-shrink-0 transition-all ${
+                          isSelected 
+                            ? 'bg-gradient-to-br from-pink-500 to-rose-500 shadow-lg shadow-pink-500/30' 
+                            : 'bg-slate-100'
+                        }`}>
                           <div className="w-7 h-7 sm:w-8 sm:h-8">
                             <RoleIcon roleId={role.id} isSelected={isSelected} />
                           </div>
-                        </motion.div>
+                        </div>
                         <div className="flex-1 min-w-0">
-                          <p className={`text-sm sm:text-base lg:text-lg font-bold mb-0.5 lg:mb-1 ${
-                            isSelected ? 'text-white' : 'text-slate-200'
-                          }`}>
+                          <p className="text-sm sm:text-base lg:text-lg font-bold text-slate-900 mb-0.5 lg:mb-1">
                             {role.name}
                           </p>
-                          <p className={`text-xs sm:text-sm leading-relaxed line-clamp-2 ${
-                            isSelected ? 'text-slate-300' : 'text-slate-400'
-                          }`}>
+                          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed line-clamp-2">
                             {role.description}
                           </p>
                         </div>
@@ -920,12 +642,9 @@ export default function Home() {
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                    className="p-3.5 sm:p-4 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-blue-400/40 rounded-xl lg:rounded-2xl backdrop-blur-sm"
-                    style={{
-                      boxShadow: '0 0 20px rgba(59, 130, 246, 0.3), inset 0 1px 10px rgba(255, 255, 255, 0.1)'
-                    }}
+                    className="p-3.5 sm:p-4 bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-xl lg:rounded-2xl"
                   >
-                    <p className="text-xs sm:text-sm text-blue-200 flex items-center gap-2 font-medium">
+                    <p className="text-xs sm:text-sm text-blue-700 flex items-center gap-2 font-medium">
                       <Info className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
                       <span>Acceso a panel ejecutivo global</span>
                     </p>
@@ -939,7 +658,7 @@ export default function Home() {
                     animate={{ opacity: 1, height: 'auto' }}
                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   >
-                    <label htmlFor="store-selector" className="block text-sm sm:text-base font-bold text-white mb-2.5 lg:mb-3">
+                    <label htmlFor="store-selector" className="block text-sm sm:text-base font-bold text-slate-900 mb-2.5 lg:mb-3">
                       Selecciona tu tienda
                     </label>
                     <StoreSelector
@@ -955,7 +674,7 @@ export default function Home() {
                     animate={{ opacity: 1, height: 'auto' }}
                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   >
-                    <label htmlFor="login-password" className="block text-sm sm:text-base font-bold text-white mb-2.5 lg:mb-3">
+                    <label htmlFor="login-password" className="block text-sm sm:text-base font-bold text-slate-900 mb-2.5 lg:mb-3">
                       Contraseña
                     </label>
                     <div className="relative">
@@ -968,14 +687,14 @@ export default function Home() {
                         onChange={(e) => {setLoginPassword(e.target.value);setLoginError('');}}
                         onKeyDown={(e) => e.key === 'Enter' && !isSubmitting && handleLogin()}
                         disabled={isSubmitting}
-                        className="w-full pl-11 sm:pl-12 pr-11 sm:pr-12 py-3.5 sm:py-4 border-2 border-white/20 bg-white/5 backdrop-blur-sm rounded-xl lg:rounded-2xl focus:ring-2 focus:ring-pink-500 focus:border-pink-500/60 outline-none text-sm sm:text-base text-white placeholder:text-slate-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all touch-manipulation"
+                        className="w-full pl-11 sm:pl-12 pr-11 sm:pr-12 py-3.5 sm:py-4 border-2 border-slate-200 rounded-xl lg:rounded-2xl focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none text-sm sm:text-base text-slate-900 placeholder:text-slate-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all touch-manipulation"
                         aria-label="Campo de contraseña"
                         aria-invalid={!!loginError}
                         aria-describedby={loginError ? "password-error" : undefined} />
                       <button
                         type="button"
                         onClick={() => setShowLoginPassword(!showLoginPassword)}
-                        className="absolute right-3.5 sm:right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 active:text-white transition-colors touch-manipulation"
+                        className="absolute right-3.5 sm:right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 active:text-slate-700 transition-colors touch-manipulation"
                       >
                         {showLoginPassword ? <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" /> : <Eye className="w-4 h-4 sm:w-5 sm:h-5" />}
                       </button>
@@ -1020,12 +739,11 @@ export default function Home() {
 
                 {/* Footer text - Mobile optimized */}
                 <div className="text-center pt-1">
-                  <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
+                  <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
                     Tu acceso define lo que puedes ver y gestionar.
                   </p>
                 </div>
-                </div>
-              </motion.div>
+              </div>
             </motion.div>
           </div>
         </div>
