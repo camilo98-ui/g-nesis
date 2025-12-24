@@ -34,82 +34,128 @@ export default function Layout({ children, currentPageName }) {
   return (
     <ErrorBoundary>
       <div className="min-h-screen bg-white">
-        {/* Motivational Banner - Pastel muy suave */}
-        <div className="fixed top-0 left-0 right-0 h-8 bg-gradient-to-r from-pink-50/70 via-rose-50/60 to-amber-50/70 z-40 border-b border-pink-100/50">
-          <MotivationalHeader />
-        </div>
+        {/* Motivational Banner con botones integrados */}
+        <div className="fixed top-0 left-0 right-0 h-12 bg-gradient-to-r from-pink-50/70 via-rose-50/60 to-amber-50/70 z-40 border-b border-pink-100/50">
+          <div className="h-full flex items-center justify-between px-4">
+            {/* Logo y ubicación */}
+            <div className="flex items-center gap-3">
+              {currentPageName !== 'Home' && (
+                <Link to={createPageUrl('Home')}>
+                  <motion.img 
+                    src={LOGO_URL} 
+                    alt="Popsy" 
+                    className="h-8 object-contain"
+                    whileHover={{ scale: 1.05 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  />
+                </Link>
+              )}
+              <div className="flex items-center gap-1 text-gray-400 text-xs">
+                <span>📍</span>
+                <span className="hidden sm:inline">Bogotá Noroccidente</span>
+              </div>
+            </div>
 
-      {/* Top Header Bar */}
-      <header className="fixed top-8 left-0 right-0 h-14 bg-white border-b border-gray-100 z-40 px-4 flex items-center justify-between shadow-sm">
-        {/* Logo izquierda y ubicación */}
-        <div className="flex items-center gap-3">
-          {currentPageName !== 'Home' && (
-            <Link to={createPageUrl('Home')} className="flex items-center">
-              <motion.img 
-                src={LOGO_URL} 
-                alt="Popsy" 
-                className="h-8 md:h-10 object-contain"
-                whileHover={{ scale: 1.05 }}
-                transition={{ type: "spring", stiffness: 300 }}
-              />
-            </Link>
-          )}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1 text-gray-400 text-xs">
-              <span>📍</span>
-              <span className="hidden sm:inline">Bogotá Noroccidente</span>
+            {/* Motivational Text Center */}
+            <div className="flex-1 flex justify-center">
+              <MotivationalHeader />
+            </div>
+
+            {/* Right Actions - Search y Logout */}
+            <div className="flex items-center gap-2">
+              <SmartSearch storeId={selectedStore} />
+              
+              <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    localStorage.removeItem('selectedStore');
+                    localStorage.removeItem('popsySession');
+                    window.location.href = '/Home';
+                  }}
+                  className="rounded-full text-gray-400 hover:text-pink-500 hover:bg-pink-50 w-8 h-8"
+                  title="Cerrar sesión"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" y1="12" x2="9" y2="12" />
+                  </svg>
+                </Button>
+              </motion.div>
+
+              {/* Mobile Menu */}
+              <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+                <SheetTrigger asChild className="md:hidden">
+                  <Button variant="ghost" size="icon" className="rounded-full w-8 h-8">
+                    <Menu className="w-5 h-5 text-gray-600" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-72 bg-white">
+                  <div className="mt-4 mb-6">
+                    <img src={LOGO_URL} alt="Popsy" className="h-12 object-contain" />
+                  </div>
+
+                  <nav className="space-y-1">
+                    {NAV_ITEMS.map((item) => {
+                      const Icon = item.icon;
+                      const isActive = currentPageName === item.page;
+                      return (
+                        <Link key={item.page} to={createPageUrl(item.page)} onClick={() => setMobileOpen(false)}>
+                          <motion.div
+                            whileHover={{ x: 5 }}
+                            whileTap={{ scale: 0.98 }}
+                            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                              isActive 
+                                ? item.page === 'Home'
+                                  ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white'
+                                  : 'bg-gradient-to-r from-violet-500 to-purple-500 text-white'
+                                : 'text-gray-600 hover:bg-pink-50'
+                            }`}
+                          >
+                            <Icon className="w-5 h-5" />
+                            <span className="font-medium">{item.name}</span>
+                          </motion.div>
+                        </Link>
+                      );
+                    })}
+                  </nav>
+                </SheetContent>
+              </Sheet>
             </div>
           </div>
         </div>
 
-        {/* Center Nav - Visible en todos los dispositivos */}
-        <nav className="flex items-center gap-1 justify-center absolute left-1/2 -translate-x-1/2">
+        {/* Nav flotante centrado */}
+        <nav className="fixed top-14 left-1/2 -translate-x-1/2 z-40 flex items-center gap-1 bg-white/80 backdrop-blur-sm px-2 py-1 rounded-full shadow-lg border border-gray-100">
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             const isActive = currentPageName === item.page;
-            
-            // Restricciones por rol
             const isLocked = (userRole === 'calidad' && item.page === 'Management') ||
                             (userRole === 'c_interno' && item.page !== 'Home' && item.page !== 'PopsyPlanner');
             
-            if (isLocked) {
-              return (
+            if (isLocked) return null;
+            
+            return (
+              <Link key={item.page} to={createPageUrl(item.page)}>
                 <motion.div
-                  key={item.page}
-                  whileHover={{ scale: 1.02 }}
+                  whileHover={{ scale: 1.1, y: -3 }}
+                  whileTap={{ scale: 0.95 }}
                   transition={{ type: "spring", stiffness: 400, damping: 17 }}
                 >
                   <Button
                     variant="ghost"
                     size="icon"
-                    disabled
-                    className="transition-all duration-200 w-10 h-10 text-gray-300 cursor-not-allowed opacity-50"
+                    className={`transition-all duration-200 w-10 h-10 rounded-full ${isActive 
+                      ? item.page === 'Home' 
+                        ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-md' 
+                        : 'bg-gradient-to-r from-violet-500 to-purple-500 text-white shadow-md'
+                      : item.page === 'Home'
+                        ? 'text-rose-500 hover:text-rose-600 hover:bg-rose-50'
+                        : 'text-violet-500 hover:text-violet-600 hover:bg-violet-50'}`}
                   >
                     <Icon className="w-5 h-5" />
-                  </Button>
-                </motion.div>
-              );
-            }
-            
-            return (
-              <Link key={item.page} to={createPageUrl(item.page)}>
-                <motion.div
-                  whileHover={{ scale: 1.05, y: -2 }}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                >
-                  <Button
-                  variant="ghost"
-                  size="icon"
-                  className={`transition-all duration-200 w-10 h-10 ${isActive 
-                    ? item.page === 'Home' 
-                                                ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg' 
-                                                : 'bg-gradient-to-r from-violet-500 to-purple-500 text-white shadow-lg'
-                                              : item.page === 'Home'
-                                                  ? 'text-rose-500 hover:text-rose-600 hover:bg-rose-50'
-                                                  : 'text-violet-500 hover:text-violet-600 hover:bg-violet-50'}`}
-                  >
-                  <Icon className="w-5 h-5" />
                   </Button>
                 </motion.div>
               </Link>
@@ -117,83 +163,12 @@ export default function Layout({ children, currentPageName }) {
           })}
         </nav>
 
-        {/* Right Actions */}
-        <div className="flex items-center gap-2 h-full">
-          <div className="flex items-center h-full">
-            <SmartSearch storeId={selectedStore} />
-          </div>
-
-          {/* Logout Button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => {
-              localStorage.removeItem('selectedStore');
-              localStorage.removeItem('popsySession');
-              window.location.href = '/Home';
-            }}
-            className="rounded-full text-gray-400 hover:text-pink-500 hover:bg-pink-50"
-            title="Cerrar sesión"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-              <polyline points="16 17 21 12 16 7" />
-              <line x1="21" y1="12" x2="9" y2="12" />
-            </svg>
-          </Button>
-
-          {/* Mobile Menu */}
-          <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-            <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <Menu className="w-6 h-6 text-gray-600" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-72 bg-white">
-              <div className="mt-4 mb-6">
-                <img src={LOGO_URL} alt="Popsy" className="h-12 object-contain" />
-              </div>
-
-              <nav className="space-y-1">
-                {NAV_ITEMS.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = currentPageName === item.page;
-                  const itemName = item.name;
-                  return (
-                    <Link
-                      key={item.page}
-                      to={createPageUrl(item.page)}
-                      onClick={() => setMobileOpen(false)}
-                    >
-                      <motion.div
-                        whileHover={{ x: 5 }}
-                        whileTap={{ scale: 0.98 }}
-                        className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-                          isActive 
-                            ? item.page === 'Home'
-                                                                  ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white'
-                                                                  : 'bg-gradient-to-r from-violet-500 to-purple-500 text-white'
-                            : 'text-gray-600 hover:bg-pink-50'
-                        }`}
-                      >
-                        <Icon className="w-5 h-5" />
-                        <span className="font-medium">{itemName}</span>
-                      </motion.div>
-                    </Link>
-                  );
-                })}
-              </nav>
-            </SheetContent>
-          </Sheet>
-        </div>
-      </header>
-
         {/* Main Content */}
         <motion.main 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
-          className="pt-[88px] min-h-screen pb-4 relative"
+          className="pt-[72px] min-h-screen pb-4 relative"
         >
           {/* Premium Modern Background */}
           <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none bg-gradient-to-br from-slate-50 via-white to-pink-50/30">
