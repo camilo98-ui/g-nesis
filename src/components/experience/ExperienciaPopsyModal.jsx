@@ -723,42 +723,36 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userRole }) {
                     </motion.div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 w-full max-w-5xl px-4">
-                      {[
-                        { rating: 'excelente', emoji: '😀', hoverEmoji: '🤩', label: 'Excelente', color: 'from-emerald-400 to-green-500', delay: 0.3, message: '¡Gracias por tu excelente opinión! 🎉✨' },
-                        { rating: 'normal', emoji: '😐', hoverEmoji: '🙂', label: 'Normal', color: 'from-amber-400 to-orange-500', delay: 0.4, message: '¡Gracias por tu opinión! Seguiremos mejorando 💪' },
-                        { rating: 'mala', emoji: '☹️', hoverEmoji: '😢', label: 'Mala', color: 'from-red-400 to-rose-500', delay: 0.5, message: 'Gracias por tu honestidad, trabajaremos para mejorar 🙏💙' }
-                      ].map((option) => {
-                        const [isHovered, setIsHovered] = React.useState(false);
-                        return (
-                          <motion.button
-                            key={option.rating}
-                            initial={{ scale: 0, rotate: -180 }}
-                            animate={{ scale: 1, rotate: 0 }}
-                            transition={{ delay: option.delay, type: "spring", stiffness: 200 }}
-                            whileHover={{ scale: 1.05, y: -10 }}
-                            whileTap={{ scale: 0.95 }}
-                            onHoverStart={() => setIsHovered(true)}
-                            onHoverEnd={() => setIsHovered(false)}
-                            onClick={() => {
-                              toast.success(option.message, { duration: 3000 });
-                              handleSurveySubmit(option.rating);
-                            }}
-                            className={`bg-gradient-to-br ${option.color} rounded-3xl p-10 sm:p-16 text-white shadow-2xl hover:shadow-3xl transition-all aspect-square flex flex-col items-center justify-center`}
-                          >
-                            <motion.div 
-                              className="text-8xl sm:text-9xl mb-6"
-                              animate={{ 
-                                scale: isHovered ? [1, 1.2, 1] : 1,
-                                rotate: isHovered ? [0, -10, 10, 0] : 0
-                              }}
-                              transition={{ duration: 0.3 }}
-                            >
-                              {isHovered ? option.hoverEmoji : option.emoji}
-                            </motion.div>
-                            <p className="font-black text-3xl sm:text-4xl">{option.label}</p>
-                          </motion.button>
-                        );
-                      })}
+                      <SurveyButton 
+                        rating="excelente"
+                        emoji="😀"
+                        hoverEmoji="🤩"
+                        label="Excelente"
+                        color="from-emerald-400 to-green-500"
+                        delay={0.3}
+                        message="¡Gracias por tu excelente opinión! 🎉✨"
+                        onSubmit={handleSurveySubmit}
+                      />
+                      <SurveyButton 
+                        rating="normal"
+                        emoji="😐"
+                        hoverEmoji="🙂"
+                        label="Normal"
+                        color="from-amber-400 to-orange-500"
+                        delay={0.4}
+                        message="¡Gracias por tu opinión! Seguiremos mejorando 💪"
+                        onSubmit={handleSurveySubmit}
+                      />
+                      <SurveyButton 
+                        rating="mala"
+                        emoji="☹️"
+                        hoverEmoji="😢"
+                        label="Mala"
+                        color="from-red-400 to-rose-500"
+                        delay={0.5}
+                        message="Gracias por tu honestidad, trabajaremos para mejorar 🙏💙"
+                        onSubmit={handleSurveySubmit}
+                      />
                     </div>
                   </motion.div>
                 )}
