@@ -934,20 +934,23 @@ export default function Home() {
         }
 
         {/* Menu Grid */}
-{selectedStore || selectedRole === 'gerente' ? (
+        {(selectedStore || selectedRole === 'gerente') && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
 
-            {MENU_ITEMS.map((item, index) => {
+            {MENU_ITEMS.filter((item) => {
               // Restricciones: Panel Ejecutivo solo para gerente, otras opciones solo si hay tienda seleccionada
               const needsStore = item.page !== 'ExecutiveDashboard';
-              if (needsStore && !selectedStore && item.requiredRole !== 'gerente') return null;
-              if (item.requiredRole && selectedRole !== item.requiredRole) return null;
+              if (needsStore && !selectedStore && item.requiredRole !== 'gerente') return false;
+              if (item.requiredRole && selectedRole !== item.requiredRole) return false;
               
               // Restricción de tiendas específicas para Experiencia Popsy
-              if (item.restrictedStores && !item.restrictedStores.includes(selectedStore)) return null;
+              if (item.restrictedStores && !item.restrictedStores.includes(selectedStore)) return false;
+              
+              return true;
+            }).map((item, index) => {
             const Icon = item.icon;
 
             // Restricciones por rol - solo embajador no ve Presupuestos
