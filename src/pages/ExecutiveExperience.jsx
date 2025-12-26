@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { ArrowLeft, Sparkles, TrendingUp, Award, Target, Store as StoreIcon, Calendar } from 'lucide-react';
+import { ArrowLeft, Sparkles, TrendingUp, Award, Target, Store as StoreIcon, Calendar, LogOut } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from "@/components/ui/button";
@@ -161,6 +161,20 @@ export default function ExecutiveExperience() {
               <p className="text-slate-600 text-sm">Vista consolidada por tiendas</p>
             </div>
           </div>
+          <Button
+            onClick={() => {
+              localStorage.removeItem('selectedStore');
+              localStorage.removeItem('popsySession');
+              localStorage.removeItem('userRole');
+              window.location.href = createPageUrl('Home');
+            }}
+            variant="ghost"
+            size="sm"
+            className="text-slate-600 hover:text-red-600 hover:bg-red-50"
+          >
+            <LogOut className="w-4 h-4 mr-1" />
+            Cerrar Sesión
+          </Button>
         </div>
 
         {/* Period Filter */}
