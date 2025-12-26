@@ -27,28 +27,6 @@ const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/pub
 
 const MENU_ITEMS = [
   {
-    name: 'Planner',
-    page: 'PopsyPlanner',
-    icon: CalendarDays,
-    description: 'Gestión de turnos',
-    bgColor: 'bg-gradient-to-br from-violet-100/90 to-purple-100/80',
-    iconBg: 'bg-violet-200/60',
-    iconColor: 'text-violet-500',
-    textColor: 'text-violet-700'
-  },
-  {
-    name: 'Cerrar Sesión',
-    page: 'Home',
-    icon: null,
-    description: 'Salir',
-    bgColor: 'bg-gradient-to-br from-red-100/90 to-rose-100/80',
-    iconBg: 'bg-red-200/60',
-    iconColor: 'text-red-500',
-    textColor: 'text-red-700',
-    isSpecialAction: true,
-    specialAction: 'logout'
-  },
-  {
     name: 'Panel Ejecutivo',
     page: 'ExecutiveDashboard',
     icon: TrendingUp,
@@ -124,18 +102,7 @@ const MENU_ITEMS = [
   iconColor: 'text-amber-500',
   textColor: 'text-amber-700'
 },
-{
-  name: 'Presupuestos',
-  page: 'Budget',
-  icon: Target,
-  description: 'Metas',
-  bgColor: 'bg-gradient-to-br from-sky-100/90 to-blue-100/80',
-  iconBg: 'bg-sky-200/60',
-  iconColor: 'text-sky-500',
-  textColor: 'text-sky-700',
-  isSpecialAction: true,
-  specialAction: 'budgetTrend'
-},
+
 {
   name: 'Backup Drive',
   page: 'Settings',
@@ -884,28 +851,43 @@ export default function Home() {
               <Button
               variant="ghost"
               size="sm"
-              onClick={() => setShowNotifications(true)}
-              className="text-gray-500 hover:text-pink-600 hover:bg-pink-50 transition-all">
-
-                <motion.div animate={{ rotate: [0, 15, -15, 0] }} transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}>
-                  <Bell className="w-4 h-4 mr-1" />
-                </motion.div>
-                Alertas
+              onClick={() => {
+                localStorage.removeItem('selectedStore');
+                localStorage.removeItem('popsySession');
+                window.location.href = '/Home';
+              }}
+              className="text-gray-500 hover:text-red-600 hover:bg-red-50 transition-all">
+                <LogOut className="w-4 h-4 mr-1" />
+                Cerrar Sesión
               </Button>
             </motion.div>
             <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }}>
               <Button
               variant="ghost"
               size="sm"
-              onClick={() => setShowDirectory(true)}
-              className="text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition-all">
+              onClick={() => setShowBudgetDashboard(true)}
+              className="text-gray-500 hover:text-sky-600 hover:bg-sky-50 transition-all">
 
-                <motion.div animate={{ y: [0, -2, 0] }} transition={{ duration: 1.5, repeat: Infinity }}>
-                  <Phone className="w-4 h-4 mr-1" />
+                <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 2, repeat: Infinity }}>
+                  <Target className="w-4 h-4 mr-1" />
                 </motion.div>
-                Directorio
+                Presupuestos
               </Button>
             </motion.div>
+            <Link to={createPageUrl('PopsyPlanner')}>
+              <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }}>
+                <Button
+                variant="ghost"
+                size="sm"
+                className="text-gray-500 hover:text-violet-600 hover:bg-violet-50 transition-all">
+
+                  <motion.div animate={{ rotate: [0, 5, -5, 0] }} transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}>
+                    <CalendarDays className="w-4 h-4 mr-1" />
+                  </motion.div>
+                  Planner
+                </Button>
+              </motion.div>
+            </Link>
             <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }}>
               <Button
               variant="ghost"
