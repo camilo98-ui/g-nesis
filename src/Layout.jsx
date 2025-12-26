@@ -4,6 +4,7 @@ import { createPageUrl } from '@/utils';
 import SmartSearch from '@/components/SmartSearch';
 import MotivationalHeader from '@/components/MotivationalHeader';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import { base44 } from '@/api/base44Client';
 import { 
   Home, LayoutDashboard, Menu, Snowflake, CalendarDays, TrendingUp
 } from 'lucide-react';
@@ -23,6 +24,8 @@ export default function Layout({ children, currentPageName }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [selectedStore, setSelectedStore] = useState('');
   const [userRole, setUserRole] = useState('lider');
+  const [isAuthChecking, setIsAuthChecking] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem('selectedStore');
@@ -30,6 +33,41 @@ export default function Layout({ children, currentPageName }) {
     if (saved) setSelectedStore(saved);
     if (savedRole) setUserRole(savedRole);
   }, []);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const authenticated = await base44.auth.isAuthenticated();
+        setIsAuthenticated(authenticated);
+        
+        if (!authenticated && currentPageName !== 'Home') {
+          base44.auth.redirectToLogin(window.location.pathname);
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
+        setIsAuthenticated(false);
+      } finally {
+        setIsAuthChecking(false);
+      }
+    };
+    
+    checkAuth();
+  }, [currentPageName]);
+
+  if (isAuthChecking) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            className="w-16 h-16 border-4 border-pink-500 border-t-transparent rounded-full mx-auto mb-4"
+          />
+          <p className="text-slate-600 font-semibold">Verificando acceso...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <ErrorBoundary>
