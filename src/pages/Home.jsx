@@ -801,11 +801,14 @@ export default function Home() {
                   <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
                     Tu acceso define lo que puedes ver y gestionar.
                   </p>
+                  <Link to={createPageUrl('PrivacyPolicy')} className="text-xs text-pink-600 hover:underline mt-2 inline-block">
+                    Política de Privacidad
+                  </Link>
                 </div>
-              </div>
-            </motion.div>
-          </div>
-        </div>
+                </div>
+                </motion.div>
+                </div>
+                </div>
 
         {/* Success Animation */}
         <AnimatePresence>

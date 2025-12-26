@@ -20,6 +20,7 @@ import Settings from './pages/Settings';
 import Team from './pages/Team';
 import Training from './pages/Training';
 import ExecutiveExperience from './pages/ExecutiveExperience';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 import __Layout from './Layout.jsx';
 
 
@@ -46,6 +47,7 @@ export const PAGES = {
     "Team": Team,
     "Training": Training,
     "ExecutiveExperience": ExecutiveExperience,
+    "PrivacyPolicy": PrivacyPolicy,
 }
 
 export const pagesConfig = {
