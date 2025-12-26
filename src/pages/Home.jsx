@@ -180,8 +180,6 @@ export default function Home() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loginSuccess, setLoginSuccess] = useState(false);
   const [showExperienciaPopsy, setShowExperienciaPopsy] = useState(false);
-  const [customerComment, setCustomerComment] = useState('');
-  const [showCommentInput, setShowCommentInput] = useState(false);
 
   const ROLES = [
   { 

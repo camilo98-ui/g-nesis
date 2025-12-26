@@ -55,6 +55,8 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userRole }) {
   const [loginError, setLoginError] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [customerComment, setCustomerComment] = useState('');
+  const [showCommentInput, setShowCommentInput] = useState(false);
   
   const queryClient = useQueryClient();
   const today = format(new Date(), 'yyyy-MM-dd');
