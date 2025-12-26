@@ -851,7 +851,7 @@ export default function Home() {
         </motion.div>
 
         {/* Quick Actions - Más dinámicos */}
-        {selectedStore &&
+        {(selectedStore || selectedRole === 'gerente') &&
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -864,6 +864,7 @@ export default function Home() {
               onClick={() => {
                 localStorage.removeItem('selectedStore');
                 localStorage.removeItem('popsySession');
+                localStorage.removeItem('userRole');
                 window.location.href = '/Home';
               }}
               className="text-gray-500 hover:text-red-600 hover:bg-red-50 transition-all">
