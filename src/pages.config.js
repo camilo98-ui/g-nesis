@@ -1,6 +1,7 @@
 import Budget from './pages/Budget';
 import CashierProfile from './pages/CashierProfile';
 import CashiersDashboard from './pages/CashiersDashboard';
+import Communication from './pages/Communication';
 import Dashboard from './pages/Dashboard';
 import DesignSystem from './pages/DesignSystem';
 import ExecutiveDashboard from './pages/ExecutiveDashboard';
@@ -18,7 +19,6 @@ import SearchCashier from './pages/SearchCashier';
 import Settings from './pages/Settings';
 import Team from './pages/Team';
 import Training from './pages/Training';
-import Communication from './pages/Communication';
 import __Layout from './Layout.jsx';
 
 
@@ -26,6 +26,7 @@ export const PAGES = {
     "Budget": Budget,
     "CashierProfile": CashierProfile,
     "CashiersDashboard": CashiersDashboard,
+    "Communication": Communication,
     "Dashboard": Dashboard,
     "DesignSystem": DesignSystem,
     "ExecutiveDashboard": ExecutiveDashboard,
@@ -43,7 +44,6 @@ export const PAGES = {
     "Settings": Settings,
     "Team": Team,
     "Training": Training,
-    "Communication": Communication,
 }
 
 export const pagesConfig = {

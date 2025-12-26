@@ -10,6 +10,7 @@ import ManagerialReportModal from '@/components/reports/ManagerialReportModal';
 import PopsyStoryModal from '@/components/PopsyStoryModal';
 import DirectoryModal from '@/components/DirectoryModal';
 import ExperienciaPopsyModal from '@/components/experience/ExperienciaPopsyModal';
+import CustomerExperienceModal from '@/components/customer/CustomerExperienceModal';
 import DailySalesForm from '@/components/forms/DailySalesForm';
 import ShiftRecordForm from '@/components/forms/ShiftRecordForm';
 import MonthlyBudgetDashboard from '@/components/budget/MonthlyBudgetDashboard';
@@ -138,6 +139,18 @@ const MENU_ITEMS = [
   isSpecialAction: true,
   specialAction: 'experiencia',
   restrictedStores: ['BTA 78', 'TUNJA 2', 'BTA 62', 'BTA 28', 'BTA 89', 'TUNJA 1', 'BTA 16']
+},
+{
+  name: 'Experiencia Cliente',
+  page: 'CustomerExperience',
+  icon: Sparkles,
+  description: 'Feedback rápido',
+  bgColor: 'bg-gradient-to-br from-purple-100/90 to-fuchsia-100/80',
+  iconBg: 'bg-purple-200/60',
+  iconColor: 'text-purple-500',
+  textColor: 'text-purple-700',
+  isSpecialAction: true,
+  specialAction: 'customerFeedback'
 }];
 
 
@@ -190,6 +203,7 @@ export default function Home() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loginSuccess, setLoginSuccess] = useState(false);
   const [showExperienciaPopsy, setShowExperienciaPopsy] = useState(false);
+  const [showCustomerExperience, setShowCustomerExperience] = useState(false);
 
   const ROLES = [
   { 
@@ -1047,6 +1061,8 @@ export default function Home() {
                       setBackupLoading(false);
                     } else if (item.specialAction === 'experiencia') {
                       setShowExperienciaPopsy(true);
+                    } else if (item.specialAction === 'customerFeedback') {
+                      setShowCustomerExperience(true);
                     } else {
                       setShowStoreSales(true);
                     }
@@ -1289,6 +1305,16 @@ export default function Home() {
             userId="temp_user"
             userName="Usuario"
             userRole={selectedRole}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Customer Experience Modal */}
+      <AnimatePresence>
+        {showCustomerExperience && (
+          <CustomerExperienceModal
+            onClose={() => setShowCustomerExperience(false)}
+            storeId={selectedStore}
           />
         )}
       </AnimatePresence>
