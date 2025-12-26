@@ -19,7 +19,7 @@ import { useQuery } from '@tanstack/react-query';
 import {
   LayoutDashboard, Users, TrendingUp,
   Award, Target, Bell, Phone, Download, FileText,
-  Lock, Eye, EyeOff, Receipt, Snowflake, Settings as SettingsIcon, AlertTriangle, CheckCircle, Info, CalendarDays, LogOut } from
+  Lock, Eye, EyeOff, Receipt, Snowflake, Settings as SettingsIcon, AlertTriangle, CheckCircle, Info, CalendarDays, LogOut, Sparkles } from
 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { toast } from 'sonner';
