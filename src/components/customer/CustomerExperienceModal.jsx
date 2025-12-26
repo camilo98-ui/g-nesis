@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Check, Sparkles } from 'lucide-react';
+import { X, Check, Sparkles, ChevronRight, Lock, Eye, EyeOff } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { toast } from 'sonner';
 
 const RatingCard = ({ rating, emoji, color, gradient, label, onClick, disabled }) => {
   return (
@@ -116,12 +119,46 @@ const SuccessAnimation = ({ rating, message, onComplete }) => {
   );
 };
 
-export default function CustomerExperienceModal({ onClose, storeId }) {
+export default function CustomerExperienceModal({ onClose, storeId, userRole }) {
+  const [currentScreen, setCurrentScreen] = useState('selectUser'); // selectUser, login, validation, survey
   const [status, setStatus] = useState('idle'); // idle, saving, success
   const [selectedRating, setSelectedRating] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
+  const [sessionCashier, setSessionCashier] = useState(null);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [loginPassword, setLoginPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [loginError, setLoginError] = useState('');
+  const [invoiceSerial, setInvoiceSerial] = useState('');
+  const [validating, setValidating] = useState(false);
 
   const queryClient = useQueryClient();
+
+  // Cargar sesión guardada
+  useEffect(() => {
+    const savedSession = localStorage.getItem(`customerExperience_${storeId}`);
+    if (savedSession) {
+      const session = JSON.parse(savedSession);
+      setSessionCashier(session);
+      setSelectedUser(session);
+      setCurrentScreen('validation');
+    }
+  }, [storeId]);
+
+  const { data: allCashiers = [] } = useQuery({
+    queryKey: ['cashiers', storeId],
+    queryFn: () => base44.entities.Cashier.filter({ store_id: storeId, is_active: true }),
+    enabled: !!storeId
+  });
+
+  const { data: cashierPasswords = [] } = useQuery({
+    queryKey: ['cashierPasswords', storeId],
+    queryFn: async () => {
+      const all = await base44.entities.RolePassword.list();
+      return all.filter(p => p.store_code === storeId);
+    },
+    enabled: !!storeId
+  });
 
   const { data: todayFeedback = [] } = useQuery({
     queryKey: ['customerFeedback', storeId, format(new Date(), 'yyyy-MM-dd')],
@@ -129,7 +166,7 @@ export default function CustomerExperienceModal({ onClose, storeId }) {
       const all = await base44.entities.CustomerFeedback.list('-created_date');
       return all.filter(f => f.store_id === storeId && f.date === format(new Date(), 'yyyy-MM-dd'));
     },
-    enabled: !!storeId
+    enabled: !!storeId && currentScreen === 'survey'
   });
 
   const saveFeedbackMutation = useMutation({
@@ -143,9 +180,81 @@ export default function CustomerExperienceModal({ onClose, storeId }) {
     }
   });
 
+  // Login de anfitrión
+  const handleLogin = () => {
+    const userPassword = cashierPasswords.find(p => p.role === selectedUser?.id);
+    
+    if (!userPassword) {
+      setSessionCashier(selectedUser);
+      localStorage.setItem(`customerExperience_${storeId}`, JSON.stringify(selectedUser));
+      setCurrentScreen('validation');
+      setLoginPassword('');
+      setLoginError('');
+      toast.success(`Bienvenido, ${selectedUser.name}`);
+      return;
+    }
+
+    if (!loginPassword.trim()) {
+      setLoginError('Ingresa tu contraseña');
+      return;
+    }
+    
+    if (loginPassword === userPassword.password) {
+      setSessionCashier(selectedUser);
+      localStorage.setItem(`customerExperience_${storeId}`, JSON.stringify(selectedUser));
+      setCurrentScreen('validation');
+      setLoginPassword('');
+      setLoginError('');
+      toast.success(`Bienvenido, ${selectedUser.name}`);
+    } else {
+      setLoginError('Contraseña incorrecta');
+    }
+  };
+
+  // Cerrar sesión
+  const handleLogout = () => {
+    localStorage.removeItem(`customerExperience_${storeId}`);
+    setSessionCashier(null);
+    setSelectedUser(null);
+    setCurrentScreen('selectUser');
+    setLoginPassword('');
+    toast.success('Sesión cerrada');
+  };
+
+  // Validación de factura
+  const handleValidateInvoice = async () => {
+    if (!invoiceSerial.trim()) {
+      toast.error('Ingresa un número de factura');
+      return;
+    }
+
+    setValidating(true);
+
+    try {
+      const alreadyUsed = todayFeedback.some(e => e.device === invoiceSerial);
+      
+      if (alreadyUsed) {
+        toast.error('Esta factura ya fue evaluada hoy. ¡Gracias por tu opinión!');
+        setValidating(false);
+        setTimeout(() => setInvoiceSerial(''), 2000);
+        return;
+      }
+
+      setCurrentScreen('survey');
+      toast.success('¡Factura válida! Comparte tu experiencia');
+    } catch (error) {
+      toast.error('Error al validar factura');
+      console.error(error);
+    }
+
+    setValidating(false);
+  };
+
   const handleRatingClick = (rating) => {
     if (status !== 'idle') return;
 
+    const currentInvoice = invoiceSerial;
+    
     setStatus('saving');
     setSelectedRating(rating);
 
@@ -178,7 +287,7 @@ export default function CustomerExperienceModal({ onClose, storeId }) {
       points: config.points,
       date: format(now, 'yyyy-MM-dd'),
       time: format(now, 'HH:mm:ss'),
-      device: navigator.userAgent.substring(0, 50)
+      device: currentInvoice
     });
   };
 
@@ -186,6 +295,8 @@ export default function CustomerExperienceModal({ onClose, storeId }) {
     setStatus('idle');
     setSelectedRating(null);
     setSuccessMessage('');
+    setInvoiceSerial('');
+    setCurrentScreen('validation');
   };
 
   const totalToday = todayFeedback.length;
@@ -198,6 +309,154 @@ export default function CustomerExperienceModal({ onClose, storeId }) {
     ? Math.round((((npsData.promotor || 0) - (npsData.detractor || 0)) / totalToday) * 100)
     : 0;
 
+  // SELECT USER SCREEN
+  if (currentScreen === 'selectUser') {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 bg-gradient-to-br from-purple-900 via-pink-900 to-rose-900 z-50 flex items-center justify-center p-6"
+        onClick={onClose}
+      >
+        <motion.div
+          initial={{ scale: 0.9, y: 20 }}
+          animate={{ scale: 1, y: 0 }}
+          onClick={(e) => e.stopPropagation()}
+          className="bg-white rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        >
+          <h2 className="text-3xl font-black text-slate-800 mb-6 text-center">¿Quién atendió al cliente?</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {allCashiers.map((cashier) => (
+              <motion.button
+                key={cashier.id}
+                whileHover={{ scale: 1.03, y: -3 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => {
+                  setSelectedUser(cashier);
+                  setCurrentScreen('login');
+                }}
+                className="bg-gradient-to-r from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100 rounded-xl p-4 border-2 border-purple-200 hover:border-purple-400 transition-all"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center text-white font-bold text-lg">
+                    {cashier.name.charAt(0)}
+                  </div>
+                  <div className="text-left flex-1">
+                    <p className="font-bold text-slate-900">{cashier.name}</p>
+                    <p className="text-sm text-slate-600">{cashier.position || 'Anfitrión'}</p>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-purple-500" />
+                </div>
+              </motion.button>
+            ))}
+          </div>
+        </motion.div>
+      </motion.div>
+    );
+  }
+
+  // LOGIN SCREEN
+  if (currentScreen === 'login' && selectedUser) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="fixed inset-0 bg-gradient-to-br from-purple-900 via-pink-900 to-rose-900 z-50 flex items-center justify-center p-6"
+      >
+        <motion.div
+          initial={{ scale: 0.9, y: 20 }}
+          animate={{ scale: 1, y: 0 }}
+          className="bg-white rounded-3xl p-8 max-w-md w-full"
+        >
+          <div className="text-center mb-6">
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center text-white font-black text-3xl mx-auto mb-4">
+              {selectedUser.name.charAt(0)}
+            </div>
+            <h3 className="text-2xl font-black text-slate-800">{selectedUser.name}</h3>
+            <p className="text-slate-600">{selectedUser.position || 'Anfitrión'}</p>
+          </div>
+
+          <div className="space-y-4">
+            <div className="relative">
+              <Input
+                type={showPassword ? "text" : "password"}
+                placeholder="Contraseña"
+                value={loginPassword}
+                onChange={(e) => { setLoginPassword(e.target.value); setLoginError(''); }}
+                onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+                className="h-14 text-lg pr-12"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"
+              >
+                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              </button>
+            </div>
+            
+            {loginError && (
+              <p className="text-red-500 text-sm text-center font-medium">{loginError}</p>
+            )}
+
+            <Button onClick={handleLogin} className="w-full h-14 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold text-lg">
+              Iniciar
+            </Button>
+
+            <Button onClick={() => setCurrentScreen('selectUser')} variant="ghost" className="w-full">
+              ← Cambiar usuario
+            </Button>
+          </div>
+        </motion.div>
+      </motion.div>
+    );
+  }
+
+  // VALIDATION SCREEN
+  if (currentScreen === 'validation' && sessionCashier) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="fixed inset-0 bg-gradient-to-br from-purple-900 via-pink-900 to-rose-900 z-50 flex items-center justify-center p-6"
+      >
+        <motion.div
+          initial={{ scale: 0.9, y: 20 }}
+          animate={{ scale: 1, y: 0 }}
+          className="bg-white rounded-3xl p-8 max-w-md w-full"
+        >
+          <div className="text-center mb-6">
+            <h3 className="text-3xl font-black text-slate-800 mb-2">Validar Factura</h3>
+            <p className="text-slate-600">Ingresa el número de factura del cliente</p>
+          </div>
+
+          <div className="space-y-4">
+            <Input
+              placeholder="Número de factura"
+              value={invoiceSerial}
+              onChange={(e) => setInvoiceSerial(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleValidateInvoice()}
+              className="h-14 text-lg text-center font-bold"
+              disabled={validating}
+            />
+            <Button
+              onClick={handleValidateInvoice}
+              disabled={validating || !invoiceSerial.trim()}
+              className="w-full h-14 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold text-lg"
+            >
+              {validating ? 'Validando...' : 'Continuar'}
+            </Button>
+            <Button onClick={handleLogout} variant="outline" className="w-full">
+              Cerrar sesión
+            </Button>
+          </div>
+        </motion.div>
+      </motion.div>
+    );
+  }
+
+  // SURVEY SCREEN
   return (
     <AnimatePresence>
       <motion.div
@@ -205,7 +464,7 @@ export default function CustomerExperienceModal({ onClose, storeId }) {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 bg-gradient-to-br from-slate-900 via-purple-900 to-pink-900 z-50 overflow-hidden"
-        onClick={status === 'idle' ? onClose : undefined}
+        onClick={status === 'idle' ? undefined : undefined}
       >
         {/* Animated background elements */}
         <div className="absolute inset-0 overflow-hidden">

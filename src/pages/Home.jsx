@@ -1315,6 +1315,7 @@ export default function Home() {
           <CustomerExperienceModal
             onClose={() => setShowCustomerExperience(false)}
             storeId={selectedStore}
+            userRole={selectedRole}
           />
         )}
       </AnimatePresence>
