@@ -172,6 +172,15 @@ export default function CustomerExperienceModal({ onClose, storeId, userRole }) 
     enabled: !!storeId
   });
 
+  const { data: recentFeedback = [] } = useQuery({
+    queryKey: ['recentFeedback', storeId],
+    queryFn: async () => {
+      const all = await base44.entities.CustomerFeedback.list('-created_date');
+      return all.filter(f => f.store_id === storeId).slice(0, 20);
+    },
+    enabled: !!storeId && currentScreen === 'validation'
+  });
+
   const { data: allStoreFeedback = [] } = useQuery({
     queryKey: ['allStoreFeedback', storeId],
     queryFn: async () => {
@@ -639,11 +648,92 @@ export default function CustomerExperienceModal({ onClose, storeId, userRole }) 
                       </Button>
                     </div>
 
+                    {/* Resumen del día con gráfica */}
                     {todayFeedback.length > 0 && (
-                      <div className="bg-emerald-50 rounded-xl p-4 border border-emerald-200 max-w-md mx-auto">
-                        <p className="text-sm text-center text-emerald-700 font-semibold">
-                          <strong>{todayFeedback.length}</strong> encuestas hoy ✨
-                        </p>
+                      <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl p-6 border border-emerald-200">
+                        <h4 className="text-lg font-bold text-slate-800 mb-4 text-center">Resumen de Hoy</h4>
+                        <div className="grid grid-cols-2 gap-4 mb-4">
+                          <div className="bg-white rounded-xl p-4 text-center border border-emerald-200">
+                            <p className="text-3xl font-black text-emerald-600">{todayFeedback.length}</p>
+                            <p className="text-xs text-slate-600">Encuestas</p>
+                          </div>
+                          <div className="bg-white rounded-xl p-4 text-center border border-emerald-200">
+                            <p className="text-3xl font-black text-purple-600">{npsScore}</p>
+                            <p className="text-xs text-slate-600">NPS Score</p>
+                          </div>
+                        </div>
+                        <ResponsiveContainer width="100%" height={150}>
+                          <BarChart data={[
+                            { name: 'Excelente', value: npsData.promotor || 0, color: '#10b981' },
+                            { name: 'Normal', value: npsData.pasivo || 0, color: '#f59e0b' },
+                            { name: 'Mala', value: npsData.detractor || 0, color: '#ef4444' }
+                          ]}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
+                            <XAxis dataKey="name" stroke="#94a3b8" style={{ fontSize: '11px' }} />
+                            <YAxis stroke="#94a3b8" style={{ fontSize: '11px' }} />
+                            <Tooltip 
+                              contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff' }}
+                            />
+                            <Bar dataKey="value" radius={[8, 8, 0, 0]}>
+                              {[
+                                { color: '#10b981' },
+                                { color: '#f59e0b' },
+                                { color: '#ef4444' }
+                              ].map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={entry.color} />
+                              ))}
+                            </Bar>
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+                    )}
+
+                    {/* Historial de encuestas recientes */}
+                    {recentFeedback.length > 0 && (
+                      <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                        <h4 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                          <Calendar className="w-5 h-5 text-purple-500" />
+                          Historial de Encuestas (Últimas 20)
+                        </h4>
+                        <div className="space-y-2 max-h-96 overflow-y-auto">
+                          {recentFeedback.map((feedback, idx) => (
+                            <motion.div
+                              key={idx}
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: idx * 0.05 }}
+                              className={`rounded-xl p-4 border-2 ${
+                                feedback.rating === 'excelente' ? 'bg-emerald-50 border-emerald-200' :
+                                feedback.rating === 'normal' ? 'bg-amber-50 border-amber-200' :
+                                'bg-red-50 border-red-200'
+                              }`}
+                            >
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                  <div className="text-3xl">
+                                    {feedback.rating === 'excelente' ? '😀' : feedback.rating === 'normal' ? '😐' : '☹️'}
+                                  </div>
+                                  <div>
+                                    <p className="text-slate-800 font-bold text-sm">Factura #{feedback.device}</p>
+                                    <p className="text-xs text-slate-600">
+                                      {format(parseISO(feedback.created_date), "d 'de' MMMM, HH:mm", { locale: es })}
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="text-right">
+                                  <p className={`text-2xl font-black ${
+                                    feedback.nps_type === 'promotor' ? 'text-emerald-600' :
+                                    feedback.nps_type === 'pasivo' ? 'text-amber-600' :
+                                    'text-red-600'
+                                  }`}>
+                                    {feedback.points > 0 ? '+' : ''}{feedback.points}
+                                  </p>
+                                  <p className="text-xs text-slate-500 uppercase font-bold">{feedback.nps_type}</p>
+                                </div>
+                              </div>
+                            </motion.div>
+                          ))}
+                        </div>
                       </div>
                     )}
                   </motion.div>
@@ -823,47 +913,145 @@ export default function CustomerExperienceModal({ onClose, storeId, userRole }) 
                 {/* RANKING TAB */}
                 {currentScreen === 'ranking' && (
                   <motion.div key="ranking" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-                    {/* Semanal */}
+                    {/* Podio Semanal */}
                     <div>
-                      <h3 className="text-xl font-black text-slate-800 mb-4">🏆 Top 5 Semanal</h3>
-                      <div className="space-y-2">
-                        {weeklyRanking.map((user, idx) => (
+                      <h3 className="text-2xl font-black text-slate-800 mb-6 text-center">🏆 Podio Semanal</h3>
+                      
+                      {/* Podio 3D */}
+                      <div className="flex items-end justify-center gap-4 mb-8">
+                        {/* Segundo lugar */}
+                        {weeklyRanking[1] && (
                           <motion.div
-                            key={user.id}
-                            whileHover={{ scale: 1.02, x: 3 }}
-                            className={`flex items-center justify-between p-4 rounded-xl ${
-                              user.id.includes(sessionCashier?.id)
-                                ? 'bg-gradient-to-r from-purple-100 to-pink-100 border-2 border-purple-400'
-                                : 'bg-white border border-slate-200'
-                            }`}
+                            initial={{ y: 50, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ delay: 0.2 }}
+                            className="flex flex-col items-center"
                           >
-                            <div className="flex items-center gap-3">
-                              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-black ${
-                                idx === 0 ? 'bg-yellow-400 text-white' :
-                                idx === 1 ? 'bg-gray-300 text-white' :
-                                idx === 2 ? 'bg-orange-400 text-white' :
-                                'bg-slate-200 text-slate-700'
-                              }`}>
-                                {idx + 1}
-                              </div>
-                              <div>
-                                <p className="font-bold text-slate-800">{user.name}</p>
-                                <p className="text-xs text-slate-500">{user.promotorPercent}% promotores</p>
-                              </div>
+                            <motion.div
+                              whileHover={{ scale: 1.1, rotate: 5 }}
+                              className={`w-20 h-20 rounded-full flex items-center justify-center mb-3 shadow-xl ${
+                                weeklyRanking[1].id.includes(sessionCashier?.id) 
+                                  ? 'bg-gradient-to-br from-purple-400 to-pink-500 border-4 border-purple-300' 
+                                  : 'bg-gradient-to-br from-slate-300 to-gray-400 border-4 border-slate-200'
+                              }`}
+                            >
+                              <span className="text-3xl">🥈</span>
+                            </motion.div>
+                            <div className="bg-gradient-to-b from-slate-200 to-slate-300 rounded-t-2xl p-4 w-32 h-28 flex flex-col items-center justify-center shadow-lg">
+                              <p className="text-sm font-bold text-slate-800 text-center mb-1 truncate w-full">{weeklyRanking[1].name}</p>
+                              <p className="text-2xl font-black text-purple-600">{weeklyRanking[1].points}</p>
+                              <p className="text-xs text-slate-600">{weeklyRanking[1].promotorPercent}% ⭐</p>
                             </div>
-                            <p className="text-2xl font-black text-purple-600">{user.points}</p>
                           </motion.div>
-                        ))}
+                        )}
+
+                        {/* Primer lugar */}
+                        {weeklyRanking[0] && (
+                          <motion.div
+                            initial={{ y: 50, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ delay: 0.1 }}
+                            className="flex flex-col items-center"
+                          >
+                            <motion.div
+                              animate={{ 
+                                y: [0, -10, 0],
+                                rotate: [0, 5, -5, 0]
+                              }}
+                              transition={{ duration: 3, repeat: Infinity }}
+                              className={`w-24 h-24 rounded-full flex items-center justify-center mb-3 shadow-2xl ${
+                                weeklyRanking[0].id.includes(sessionCashier?.id)
+                                  ? 'bg-gradient-to-br from-purple-500 to-pink-600 border-4 border-purple-400'
+                                  : 'bg-gradient-to-br from-yellow-300 to-yellow-500 border-4 border-yellow-200'
+                              }`}
+                            >
+                              <span className="text-4xl">👑</span>
+                            </motion.div>
+                            <div className="bg-gradient-to-b from-yellow-200 to-yellow-400 rounded-t-2xl p-4 w-36 h-40 flex flex-col items-center justify-center shadow-2xl relative">
+                              <motion.div
+                                animate={{ rotate: [0, 360] }}
+                                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                                className="absolute -top-2 -right-2 w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center"
+                              >
+                                <Trophy className="w-5 h-5 text-white" />
+                              </motion.div>
+                              <p className="text-base font-bold text-slate-800 text-center mb-2 truncate w-full">{weeklyRanking[0].name}</p>
+                              <p className="text-3xl font-black text-purple-600">{weeklyRanking[0].points}</p>
+                              <p className="text-xs text-slate-600">{weeklyRanking[0].promotorPercent}% ⭐</p>
+                            </div>
+                          </motion.div>
+                        )}
+
+                        {/* Tercer lugar */}
+                        {weeklyRanking[2] && (
+                          <motion.div
+                            initial={{ y: 50, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ delay: 0.3 }}
+                            className="flex flex-col items-center"
+                          >
+                            <motion.div
+                              whileHover={{ scale: 1.1, rotate: -5 }}
+                              className={`w-20 h-20 rounded-full flex items-center justify-center mb-3 shadow-xl ${
+                                weeklyRanking[2].id.includes(sessionCashier?.id)
+                                  ? 'bg-gradient-to-br from-purple-400 to-pink-500 border-4 border-purple-300'
+                                  : 'bg-gradient-to-br from-orange-300 to-orange-500 border-4 border-orange-200'
+                              }`}
+                            >
+                              <span className="text-3xl">🥉</span>
+                            </motion.div>
+                            <div className="bg-gradient-to-b from-orange-200 to-orange-300 rounded-t-2xl p-4 w-32 h-24 flex flex-col items-center justify-center shadow-lg">
+                              <p className="text-sm font-bold text-slate-800 text-center mb-1 truncate w-full">{weeklyRanking[2].name}</p>
+                              <p className="text-2xl font-black text-purple-600">{weeklyRanking[2].points}</p>
+                              <p className="text-xs text-slate-600">{weeklyRanking[2].promotorPercent}% ⭐</p>
+                            </div>
+                          </motion.div>
+                        )}
                       </div>
+
+                      {/* Resto del ranking semanal */}
+                      {weeklyRanking.length > 3 && (
+                        <div className="space-y-2">
+                          <h4 className="text-sm font-bold text-slate-600 mb-2">Resto del Top 5</h4>
+                          {weeklyRanking.slice(3).map((user, idx) => (
+                            <motion.div
+                              key={user.id}
+                              whileHover={{ scale: 1.02, x: 3 }}
+                              className={`flex items-center justify-between p-3 rounded-xl ${
+                                user.id.includes(sessionCashier?.id)
+                                  ? 'bg-gradient-to-r from-purple-100 to-pink-100 border-2 border-purple-400'
+                                  : 'bg-white border border-slate-200'
+                              }`}
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center font-black text-slate-700">
+                                  {idx + 4}
+                                </div>
+                                <p className="font-bold text-slate-800 text-sm">{user.name}</p>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-xl font-black text-purple-600">{user.points}</p>
+                                <p className="text-xs text-slate-500">{user.promotorPercent}% ⭐</p>
+                              </div>
+                            </motion.div>
+                          ))}
+                        </div>
+                      )}
                     </div>
 
-                    {/* Mensual */}
+                    {/* Ranking Mensual */}
                     <div>
-                      <h3 className="text-xl font-black text-slate-800 mb-4">📅 Top 10 Mensual</h3>
+                      <h3 className="text-xl font-black text-slate-800 mb-4 flex items-center gap-2">
+                        <Calendar className="w-6 h-6 text-purple-500" />
+                        Top 10 Mensual
+                      </h3>
                       <div className="space-y-2 max-h-80 overflow-y-auto">
                         {monthlyRanking.map((user, idx) => (
                           <motion.div
                             key={user.id}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: idx * 0.05 }}
                             whileHover={{ scale: 1.02, x: 3 }}
                             className={`flex items-center justify-between p-3 rounded-xl ${
                               user.id.includes(sessionCashier?.id)
@@ -872,16 +1060,48 @@ export default function CustomerExperienceModal({ onClose, storeId, userRole }) 
                             }`}
                           >
                             <div className="flex items-center gap-3">
-                              <span className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-700">
+                              <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black ${
+                                idx < 3 ? 'bg-gradient-to-br from-purple-400 to-pink-500 text-white' : 'bg-slate-200 text-slate-700'
+                              }`}>
                                 {idx + 1}
                               </span>
                               <p className="font-semibold text-slate-800 text-sm">{user.name}</p>
                             </div>
-                            <p className="text-lg font-black text-purple-600">{user.points}</p>
+                            <div className="text-right">
+                              <p className="text-lg font-black text-purple-600">{user.points}</p>
+                              <p className="text-xs text-slate-500">{user.promotorPercent}% ⭐</p>
+                            </div>
                           </motion.div>
                         ))}
                       </div>
                     </div>
+
+                    {/* Gráfica comparativa del ranking */}
+                    {weeklyRanking.length > 0 && (
+                      <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                        <h4 className="text-lg font-bold text-slate-800 mb-4">Comparativa de Puntos - Top 5</h4>
+                        <ResponsiveContainer width="100%" height={250}>
+                          <BarChart data={weeklyRanking}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
+                            <XAxis dataKey="name" stroke="#94a3b8" style={{ fontSize: '11px' }} />
+                            <YAxis stroke="#94a3b8" style={{ fontSize: '11px' }} />
+                            <Tooltip 
+                              contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff' }}
+                            />
+                            <Bar dataKey="points" radius={[8, 8, 0, 0]}>
+                              {weeklyRanking.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={
+                                  index === 0 ? '#eab308' : 
+                                  index === 1 ? '#94a3b8' : 
+                                  index === 2 ? '#fb923c' : 
+                                  '#a855f7'
+                                } />
+                              ))}
+                            </Bar>
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+                    )}
                   </motion.div>
                 )}
               </AnimatePresence>
