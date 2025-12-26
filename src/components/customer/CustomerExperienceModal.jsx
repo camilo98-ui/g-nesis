@@ -83,7 +83,7 @@ const SuccessAnimation = ({ rating, message, onComplete }) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8 }}
-          className="text-2xl sm:text-3xl text-white/90 font-medium max-w-2xl leading-relaxed"
+          className="text-2xl sm:text-3xl text-white font-bold max-w-3xl leading-relaxed px-8"
         >
           {message}
         </motion.p>
