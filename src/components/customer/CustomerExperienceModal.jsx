@@ -1091,10 +1091,10 @@ export default function CustomerExperienceModal({ onClose, storeId, userRole }) 
               </AnimatePresence>
             </div>
           </div>
-          </div>
-          </div>
-          );
-          }
+        </div>
+      </motion.div>
+    );
+  }
 
   // SURVEY SCREEN
   return (
