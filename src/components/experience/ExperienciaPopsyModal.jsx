@@ -224,17 +224,19 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userRole }) {
 
   // Enviar encuesta
   const handleSurveySubmit = async (rating) => {
+    const currentInvoice = invoiceSerial;
+    
     setCurrentScreen('validation');
     setInvoiceSerial('');
     setValidatedInvoice(null);
 
     const experiencePoints = rating === 'excelente' ? 8 : rating === 'normal' ? 4 : 0;
-    const suggestedProducts = validatedInvoice?.suggested_items || 0;
-    const suggestedSalesPoints = Math.min(suggestedProducts * 2, 20);
+    const suggestedProducts = 0;
+    const suggestedSalesPoints = 0;
     const totalPoints = experiencePoints + suggestedSalesPoints;
 
     const experienceData = {
-      invoice_serial: invoiceSerial,
+      invoice_serial: currentInvoice,
       store_id: storeId,
       cashier_id: sessionCashier.id,
       cashier_name: sessionCashier.name,
