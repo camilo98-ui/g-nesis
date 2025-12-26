@@ -330,6 +330,8 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userRole }) {
 
   // Historial por día (últimos 30 días)
   const dailyHistory = useMemo(() => {
+    if (!sessionCashier) return [];
+    
     const last30Days = eachDayOfInterval({
       start: new Date(new Date().setDate(new Date().getDate() - 29)),
       end: new Date()
@@ -339,7 +341,7 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userRole }) {
       const dayStr = format(day, 'yyyy-MM-dd');
       const dayExperiences = cashierExperiences.filter(e => e.date === dayStr);
       
-      const totalPoints = dayExperiences.reduce((sum, e) => sum + e.total_points, 0);
+      const totalPoints = dayExperiences.reduce((sum, e) => sum + (e.total_points || 0), 0);
       const excellent = dayExperiences.filter(e => e.experience_rating === 'excelente').length;
       const total = dayExperiences.length;
 
@@ -351,7 +353,7 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userRole }) {
         excellentPercent: total > 0 ? ((excellent / total) * 100).toFixed(0) : 0
       };
     }).filter(d => d.surveys > 0);
-  }, [cashierExperiences]);
+  }, [cashierExperiences, sessionCashier]);
 
   // Rankings
   const weeklyRanking = useMemo(() => {
