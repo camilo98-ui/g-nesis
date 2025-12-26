@@ -8,7 +8,7 @@ import { es } from 'date-fns/locale';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from 'sonner';
-import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
+import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from 'recharts';
 
 const RatingCard = ({ rating, emoji, color, gradient, label, onClick, disabled }) => {
   return (
@@ -460,7 +460,8 @@ export default function CustomerExperienceModal({ onClose, storeId, userRole }) 
                 key={cashier.id}
                 whileHover={{ scale: 1.03, y: -3 }}
                 whileTap={{ scale: 0.97 }}
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   setSelectedUser(cashier);
                   setCurrentScreen('login');
                 }}
@@ -591,7 +592,10 @@ export default function CustomerExperienceModal({ onClose, storeId, userRole }) 
                   return (
                     <button
                       key={tab.id}
-                      onClick={() => setCurrentScreen(tab.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCurrentScreen(tab.id);
+                      }}
                       className={`px-4 py-2 rounded-xl flex items-center gap-2 transition-all whitespace-nowrap ${
                         currentScreen === tab.id
                           ? 'bg-white text-purple-600 shadow-lg font-bold'
@@ -685,49 +689,131 @@ export default function CustomerExperienceModal({ onClose, storeId, userRole }) 
                       </div>
                     </div>
 
-                    {/* Gráfica de Desempeño */}
+                    {/* Gráficas interactivas */}
                     {dailyHistory.length > 0 && (
-                      <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-                        <h4 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                          <TrendingUp className="w-5 h-5 text-purple-500" />
-                          Historial de Puntos (Últimos 30 días)
-                        </h4>
-                        <ResponsiveContainer width="100%" height={200}>
-                          <AreaChart data={dailyHistory}>
-                            <defs>
-                              <linearGradient id="colorPoints" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#a855f7" stopOpacity={0.8}/>
-                                <stop offset="95%" stopColor="#a855f7" stopOpacity={0}/>
-                              </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
-                            <XAxis dataKey="date" stroke="#94a3b8" style={{ fontSize: '11px' }} />
-                            <YAxis stroke="#94a3b8" style={{ fontSize: '11px' }} />
-                            <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px' }} />
-                            <Area type="monotone" dataKey="points" stroke="#a855f7" strokeWidth={3} fill="url(#colorPoints)" />
-                          </AreaChart>
-                        </ResponsiveContainer>
-                      </div>
+                      <>
+                        {/* Área Chart - Puntos */}
+                        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                          <h4 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                            <TrendingUp className="w-5 h-5 text-purple-500" />
+                            Historial de Puntos (Últimos 30 días)
+                          </h4>
+                          <ResponsiveContainer width="100%" height={250}>
+                            <AreaChart data={dailyHistory}>
+                              <defs>
+                                <linearGradient id="colorPoints" x1="0" y1="0" x2="0" y2="1">
+                                  <stop offset="5%" stopColor="#a855f7" stopOpacity={0.8}/>
+                                  <stop offset="95%" stopColor="#a855f7" stopOpacity={0}/>
+                                </linearGradient>
+                              </defs>
+                              <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
+                              <XAxis dataKey="date" stroke="#94a3b8" style={{ fontSize: '11px' }} />
+                              <YAxis stroke="#94a3b8" style={{ fontSize: '11px' }} />
+                              <Tooltip 
+                                contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff' }}
+                                labelStyle={{ color: '#fff' }}
+                              />
+                              <Area type="monotone" dataKey="points" stroke="#a855f7" strokeWidth={3} fill="url(#colorPoints)" />
+                            </AreaChart>
+                          </ResponsiveContainer>
+                        </div>
+
+                        {/* Bar Chart - Encuestas por día */}
+                        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                          <h4 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                            <Star className="w-5 h-5 text-amber-500" />
+                            Encuestas Diarias (Últimos 30 días)
+                          </h4>
+                          <ResponsiveContainer width="100%" height={250}>
+                            <BarChart data={dailyHistory}>
+                              <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
+                              <XAxis dataKey="date" stroke="#94a3b8" style={{ fontSize: '11px' }} />
+                              <YAxis stroke="#94a3b8" style={{ fontSize: '11px' }} />
+                              <Tooltip 
+                                contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff' }}
+                                labelStyle={{ color: '#fff' }}
+                              />
+                              <Bar dataKey="surveys" fill="#f59e0b" radius={[8, 8, 0, 0]} />
+                            </BarChart>
+                          </ResponsiveContainer>
+                        </div>
+
+                        {/* Line Chart - % Promotores */}
+                        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                          <h4 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                            <Target className="w-5 h-5 text-emerald-500" />
+                            % Promotores (Últimos 30 días)
+                          </h4>
+                          <ResponsiveContainer width="100%" height={250}>
+                            <LineChart data={dailyHistory}>
+                              <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
+                              <XAxis dataKey="date" stroke="#94a3b8" style={{ fontSize: '11px' }} />
+                              <YAxis stroke="#94a3b8" style={{ fontSize: '11px' }} />
+                              <Tooltip 
+                                contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff' }}
+                                labelStyle={{ color: '#fff' }}
+                                formatter={(value) => `${value}%`}
+                              />
+                              <Line type="monotone" dataKey="promotorPercent" stroke="#10b981" strokeWidth={3} dot={{ fill: '#10b981', r: 4 }} />
+                            </LineChart>
+                          </ResponsiveContainer>
+                        </div>
+                      </>
                     )}
 
-                    {/* Desglose NPS */}
+                    {/* Desglose NPS con Pie Chart */}
                     <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
                       <h4 className="text-lg font-bold text-slate-800 mb-4">Desglose NPS</h4>
-                      <div className="grid grid-cols-3 gap-4">
-                        <div className="text-center">
-                          <div className="text-4xl mb-2">😀</div>
-                          <p className="text-2xl font-black text-emerald-500">{cashierStats.promotores}</p>
-                          <p className="text-xs text-slate-500">Promotores</p>
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        {/* Stats Cards */}
+                        <div className="grid grid-cols-3 gap-3">
+                          <div className="text-center bg-emerald-50 rounded-xl p-4 border border-emerald-200">
+                            <div className="text-3xl mb-2">😀</div>
+                            <p className="text-2xl font-black text-emerald-500">{cashierStats.promotores}</p>
+                            <p className="text-xs text-slate-600">Promotores</p>
+                          </div>
+                          <div className="text-center bg-amber-50 rounded-xl p-4 border border-amber-200">
+                            <div className="text-3xl mb-2">😐</div>
+                            <p className="text-2xl font-black text-amber-500">{cashierStats.pasivos}</p>
+                            <p className="text-xs text-slate-600">Pasivos</p>
+                          </div>
+                          <div className="text-center bg-red-50 rounded-xl p-4 border border-red-200">
+                            <div className="text-3xl mb-2">☹️</div>
+                            <p className="text-2xl font-black text-red-500">{cashierStats.detractores}</p>
+                            <p className="text-xs text-slate-600">Detractores</p>
+                          </div>
                         </div>
-                        <div className="text-center">
-                          <div className="text-4xl mb-2">😐</div>
-                          <p className="text-2xl font-black text-amber-500">{cashierStats.pasivos}</p>
-                          <p className="text-xs text-slate-500">Pasivos</p>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-4xl mb-2">☹️</div>
-                          <p className="text-2xl font-black text-red-500">{cashierStats.detractores}</p>
-                          <p className="text-xs text-slate-500">Detractores</p>
+
+                        {/* Pie Chart */}
+                        <div className="flex items-center justify-center">
+                          <ResponsiveContainer width="100%" height={200}>
+                            <PieChart>
+                              <Pie
+                                data={[
+                                  { name: 'Promotores', value: cashierStats.promotores, color: '#10b981' },
+                                  { name: 'Pasivos', value: cashierStats.pasivos, color: '#f59e0b' },
+                                  { name: 'Detractores', value: cashierStats.detractores, color: '#ef4444' }
+                                ]}
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={50}
+                                outerRadius={80}
+                                paddingAngle={5}
+                                dataKey="value"
+                              >
+                                {[
+                                  { color: '#10b981' },
+                                  { color: '#f59e0b' },
+                                  { color: '#ef4444' }
+                                ].map((entry, index) => (
+                                  <Cell key={`cell-${index}`} fill={entry.color} />
+                                ))}
+                              </Pie>
+                              <Tooltip 
+                                contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff' }}
+                              />
+                            </PieChart>
+                          </ResponsiveContainer>
                         </div>
                       </div>
                     </div>
