@@ -10,6 +10,39 @@ import { es } from 'date-fns/locale';
 import toast from 'react-hot-toast';
 import { AreaChart, Area, BarChart, Bar, LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 
+function SurveyButton({ rating, emoji, hoverEmoji, label, color, delay, message, onSubmit }) {
+  const [isHovered, setIsHovered] = useState(false);
+  
+  return (
+    <motion.button
+      initial={{ scale: 0, rotate: -180 }}
+      animate={{ scale: 1, rotate: 0 }}
+      transition={{ delay, type: "spring", stiffness: 200 }}
+      whileHover={{ scale: 1.05, y: -10 }}
+      whileTap={{ scale: 0.95 }}
+      onHoverStart={() => setIsHovered(true)}
+      onHoverEnd={() => setIsHovered(false)}
+      onClick={() => {
+        toast.success(message, { duration: 3000 });
+        onSubmit(rating);
+      }}
+      className={`bg-gradient-to-br ${color} rounded-3xl p-10 sm:p-16 text-white shadow-2xl hover:shadow-3xl transition-all aspect-square flex flex-col items-center justify-center`}
+    >
+      <motion.div 
+        className="text-8xl sm:text-9xl mb-6"
+        animate={{ 
+          scale: isHovered ? [1, 1.2, 1] : 1,
+          rotate: isHovered ? [0, -10, 10, 0] : 0
+        }}
+        transition={{ duration: 0.3 }}
+      >
+        {isHovered ? hoverEmoji : emoji}
+      </motion.div>
+      <p className="font-black text-3xl sm:text-4xl">{label}</p>
+    </motion.button>
+  );
+}
+
 export default function ExperienciaPopsyModal({ onClose, storeId, userRole }) {
   const [currentScreen, setCurrentScreen] = useState('selectUser'); // selectUser, login, validation, survey, profile, ranking, dashboard, setPassword
   const [invoiceSerial, setInvoiceSerial] = useState('');
