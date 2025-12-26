@@ -111,8 +111,17 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userRole }) {
   const { data: cashierExperiences = [] } = useQuery({
     queryKey: ['cashierExperiences', sessionCashier?.id, storeId],
     queryFn: async () => {
-      const all = await base44.entities.CustomerExperience.list();
+      const all = await base44.entities.CustomerExperience.list('-created_date');
       return all.filter(e => e.store_id === storeId && e.cashier_id === sessionCashier?.id);
+    },
+    enabled: !!sessionCashier
+  });
+
+  const { data: cashierBadges = [] } = useQuery({
+    queryKey: ['cashierBadges', sessionCashier?.id],
+    queryFn: async () => {
+      const all = await base44.entities.ExperienceBadge.list('-earned_date');
+      return all.filter(b => b.cashier_id === sessionCashier?.id);
     },
     enabled: !!sessionCashier
   });
@@ -271,10 +280,17 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userRole }) {
   // Enviar encuesta
   const handleSurveySubmit = async (rating) => {
     const currentInvoice = invoiceSerial;
+    const comment = customerComment.trim();
     
     setCurrentScreen('validation');
     setInvoiceSerial('');
     setValidatedInvoice(null);
+    setCustomerComment('');
+    setShowCommentInput(false);
+
+    const now = new Date();
+    const hour = now.getHours();
+    const timeOfDay = hour < 12 ? 'mañana' : hour < 18 ? 'tarde' : 'noche';
 
     const experiencePoints = rating === 'excelente' ? 8 : rating === 'normal' ? 4 : 0;
     const suggestedProducts = 0;
@@ -292,7 +308,9 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userRole }) {
       total_points: totalPoints,
       date: today,
       has_suggested_products: suggestedProducts > 0,
-      suggested_products_count: suggestedProducts
+      suggested_products_count: suggestedProducts,
+      customer_comment: comment || undefined,
+      time_of_day: timeOfDay
     };
 
     const existingPoints = cashierDailyPoints?.[0];
@@ -332,11 +350,63 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userRole }) {
           })
         ]);
       }
+
+      // Check and award badges
+      await checkAndAwardBadges(rating);
       
       toast.success('¡Encuesta registrada con éxito!');
     } catch (error) {
       console.error('Error saving survey:', error);
       toast.error('Error al guardar la encuesta. Intenta de nuevo.');
+    }
+  };
+
+  // Sistema de insignias
+  const checkAndAwardBadges = async (rating) => {
+    try {
+      const todayExcellent = cashierExperiences.filter(e => e.date === today && e.experience_rating === 'excelente').length + (rating === 'excelente' ? 1 : 0);
+      const totalExcellent = cashierExperiences.filter(e => e.experience_rating === 'excelente').length + (rating === 'excelente' ? 1 : 0);
+      const totalSurveys = cashierExperiences.length + 1;
+
+      // Primer excelente
+      if (totalExcellent === 1 && rating === 'excelente' && !cashierBadges.find(b => b.badge_type === 'primer_excelente')) {
+        await base44.entities.ExperienceBadge.create({
+          cashier_id: sessionCashier.id,
+          badge_type: 'primer_excelente',
+          earned_date: today,
+          description: '¡Tu primera encuesta excelente!',
+          icon: '🌟'
+        });
+        toast.success('🎉 ¡Insignia desbloqueada: Primera Estrella!', { duration: 5000 });
+      }
+
+      // 100 encuestas
+      if (totalSurveys === 100 && !cashierBadges.find(b => b.badge_type === 'cien_encuestas')) {
+        await base44.entities.ExperienceBadge.create({
+          cashier_id: sessionCashier.id,
+          badge_type: 'cien_encuestas',
+          earned_date: today,
+          description: '¡100 encuestas completadas!',
+          icon: '💯'
+        });
+        toast.success('🎉 ¡Insignia desbloqueada: Centenario!', { duration: 5000 });
+      }
+
+      // Día perfecto (todas excelentes hoy)
+      if (todayExcellent >= 5 && todayExcellent === (cashierStats.surveys + 1) && !cashierBadges.find(b => b.badge_type === 'perfecto_dia' && b.earned_date === today)) {
+        await base44.entities.ExperienceBadge.create({
+          cashier_id: sessionCashier.id,
+          badge_type: 'perfecto_dia',
+          earned_date: today,
+          description: '¡Día perfecto con todas excelentes!',
+          icon: '🏆'
+        });
+        toast.success('🎉 ¡Insignia desbloqueada: Día Perfecto!', { duration: 5000 });
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['cashierBadges'] });
+    } catch (error) {
+      console.error('Error checking badges:', error);
     }
   };
 
@@ -743,19 +813,19 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userRole }) {
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.9 }}
-                    className="fixed inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-blue-100 z-50 flex flex-col items-center justify-center p-4"
+                    className="fixed inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-blue-100 z-50 flex flex-col items-center justify-center p-4 overflow-y-auto"
                   >
                     <motion.div
                       initial={{ y: -20, opacity: 0 }}
                       animate={{ y: 0, opacity: 1 }}
                       transition={{ delay: 0.2 }}
-                      className="text-center mb-12"
+                      className="text-center mb-8"
                     >
                       <h3 className="text-3xl sm:text-5xl font-black text-slate-800 mb-4">¿Cómo fue tu experiencia?</h3>
                       <p className="text-slate-600 text-lg sm:text-xl">Selecciona una opción</p>
                     </motion.div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 w-full max-w-5xl px-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 w-full max-w-5xl px-4 mb-6">
                       <SurveyButton 
                         rating="excelente"
                         emoji="😀"
@@ -787,6 +857,45 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userRole }) {
                         onSubmit={handleSurveySubmit}
                       />
                     </div>
+
+                    {/* Comentario opcional */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.6 }}
+                      className="w-full max-w-2xl px-4"
+                    >
+                      {!showCommentInput ? (
+                        <Button
+                          onClick={() => setShowCommentInput(true)}
+                          variant="outline"
+                          className="w-full bg-white/80 backdrop-blur-sm border-2 border-slate-300 hover:border-blue-400 text-slate-700"
+                        >
+                          💬 Agregar comentario (opcional)
+                        </Button>
+                      ) : (
+                        <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-4 border-2 border-blue-300 shadow-lg">
+                          <textarea
+                            placeholder="¿Algún comentario adicional?"
+                            value={customerComment}
+                            onChange={(e) => setCustomerComment(e.target.value)}
+                            className="w-full h-24 p-3 border-2 border-slate-200 rounded-xl resize-none focus:outline-none focus:border-blue-400 text-slate-700"
+                            maxLength={200}
+                          />
+                          <div className="flex justify-between items-center mt-2">
+                            <span className="text-xs text-slate-500">{customerComment.length}/200</span>
+                            <Button
+                              onClick={() => {setShowCommentInput(false); setCustomerComment('');}}
+                              variant="ghost"
+                              size="sm"
+                              className="text-slate-500"
+                            >
+                              Cancelar
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </motion.div>
                   </motion.div>
                 )}
 
@@ -886,43 +995,95 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userRole }) {
                       </div>
                     </div>
 
-                    {/* Historial de Facturas del día */}
+                    {/* Insignias desbloqueadas */}
+                    {cashierBadges.length > 0 && (
+                      <div className="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-2xl p-6 border border-amber-200 shadow-sm">
+                        <h4 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                          <Award className="w-5 h-5 text-amber-500" />
+                          Insignias Desbloqueadas
+                        </h4>
+                        <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+                          {cashierBadges.map((badge, idx) => (
+                            <motion.div
+                              key={idx}
+                              whileHover={{ scale: 1.1, rotate: 5 }}
+                              className="bg-white rounded-xl p-3 border-2 border-amber-300 shadow-sm text-center"
+                            >
+                              <div className="text-3xl mb-1">{badge.icon}</div>
+                              <p className="text-xs font-bold text-slate-700 leading-tight">{badge.description}</p>
+                            </motion.div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Historial detallado de encuestas */}
                     <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
                       <h4 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
                         <Calendar className="w-5 h-5 text-blue-500" />
-                        Encuestas de Hoy
+                        Historial de Encuestas (Últimas 30)
                       </h4>
-                      <div className="space-y-2 max-h-60 overflow-y-auto">
-                        {cashierExperiences
-                          .filter(e => e.date === today)
-                          .sort((a, b) => new Date(b.created_date) - new Date(a.created_date))
-                          .map((exp, idx) => (
-                            <motion.div 
-                              key={idx} 
-                              whileHover={{ scale: 1.02, x: 3 }}
-                              className="bg-slate-50 rounded-lg p-3 flex items-center justify-between border border-slate-200"
-                            >
+                      <div className="space-y-3 max-h-96 overflow-y-auto">
+                        {cashierExperiences.slice(0, 30).map((exp, idx) => (
+                          <motion.div 
+                            key={idx} 
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: idx * 0.05 }}
+                            className={`rounded-xl p-4 border-2 ${
+                              exp.experience_rating === 'excelente' ? 'bg-emerald-50 border-emerald-200' :
+                              exp.experience_rating === 'normal' ? 'bg-amber-50 border-amber-200' :
+                              'bg-red-50 border-red-200'
+                            }`}
+                          >
+                            <div className="flex items-start justify-between mb-2">
                               <div className="flex items-center gap-3">
-                                <div className="text-2xl">
+                                <div className="text-3xl">
                                   {exp.experience_rating === 'excelente' ? '😀' : exp.experience_rating === 'normal' ? '😐' : '☹️'}
                                 </div>
                                 <div>
-                                  <p className="text-slate-800 font-semibold text-sm">Factura #{exp.invoice_serial}</p>
-                                  <p className="text-xs text-slate-500">
-                                    {format(parseISO(exp.created_date), 'HH:mm', { locale: es })}
+                                  <p className="text-slate-800 font-bold text-sm">Factura #{exp.invoice_serial}</p>
+                                  <p className="text-xs text-slate-600">
+                                    {format(parseISO(exp.created_date), "d 'de' MMMM, HH:mm", { locale: es })}
                                   </p>
+                                  {exp.time_of_day && (
+                                    <span className="text-xs text-slate-500">
+                                      {exp.time_of_day === 'mañana' ? '🌅' : exp.time_of_day === 'tarde' ? '☀️' : '🌙'} {exp.time_of_day}
+                                    </span>
+                                  )}
                                 </div>
                               </div>
                               <div className="text-right">
-                                <p className="text-lg font-black text-indigo-600">+{exp.total_points}</p>
+                                <p className={`text-2xl font-black ${
+                                  exp.experience_rating === 'excelente' ? 'text-emerald-600' :
+                                  exp.experience_rating === 'normal' ? 'text-amber-600' :
+                                  'text-red-600'
+                                }`}>+{exp.total_points}</p>
                                 <p className="text-xs text-slate-500">puntos</p>
                               </div>
-                            </motion.div>
-                          ))}
+                            </div>
+                            {/* Desglose de puntos */}
+                            <div className="flex gap-3 text-xs text-slate-600 mb-2">
+                              <span className="bg-white/60 px-2 py-1 rounded-lg">
+                                ⭐ Experiencia: +{exp.experience_points}
+                              </span>
+                              {exp.suggested_sales_points > 0 && (
+                                <span className="bg-white/60 px-2 py-1 rounded-lg">
+                                  🎯 Sugeridos: +{exp.suggested_sales_points}
+                                </span>
+                              )}
+                            </div>
+                            {exp.customer_comment && (
+                              <div className="bg-white/70 rounded-lg p-2 mt-2">
+                                <p className="text-xs text-slate-700 italic">💬 "{exp.customer_comment}"</p>
+                              </div>
+                            )}
+                          </motion.div>
+                        ))}
                       </div>
                     </div>
-                  </motion.div>
-                )}
+                    </motion.div>
+                    )}
 
                 {/* RANKING SCREEN */}
                 {currentScreen === 'ranking' && (
