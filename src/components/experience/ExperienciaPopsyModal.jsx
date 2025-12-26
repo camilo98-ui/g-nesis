@@ -163,19 +163,32 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userRole }) {
 
   // Login de anfitrión
   const handleLogin = () => {
+    // Buscar contraseña del usuario seleccionado
+    const userPassword = cashierPasswords.find(p => p.role === selectedUser?.id);
+    
+    // Si no tiene contraseña configurada, permitir acceso sin contraseña
+    if (!userPassword) {
+      setSessionCashier(selectedUser);
+      localStorage.setItem(`experienciaPopsy_${storeId}`, JSON.stringify(selectedUser));
+      setCurrentScreen('validation');
+      setLoginPassword('');
+      setLoginError('');
+      toast.success(`Bienvenido, ${selectedUser.name}`);
+      return;
+    }
+
+    // Si tiene contraseña, validar
     if (!loginPassword.trim()) {
       setLoginError('Ingresa tu contraseña');
       return;
     }
-
-    // Buscar contraseña del usuario seleccionado
-    const userPassword = cashierPasswords.find(p => p.role === selectedUser.id);
     
-    // Si no tiene contraseña, cualquier cosa pasa
-    if (!userPassword || loginPassword === userPassword.password) {
+    if (loginPassword === userPassword.password) {
       setSessionCashier(selectedUser);
       localStorage.setItem(`experienciaPopsy_${storeId}`, JSON.stringify(selectedUser));
       setCurrentScreen('validation');
+      setLoginPassword('');
+      setLoginError('');
       toast.success(`Bienvenido, ${selectedUser.name}`);
     } else {
       setLoginError('Contraseña incorrecta');
