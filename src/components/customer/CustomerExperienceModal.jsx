@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Check, Sparkles, ChevronRight, Lock, Eye, EyeOff } from 'lucide-react';
+import { X, Check, Sparkles, ChevronRight, Lock, Eye, EyeOff, TrendingUp, Award, Star, Trophy, Target, Calendar, LogOut } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
-import { format } from 'date-fns';
+import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, parseISO, eachDayOfInterval } from 'date-fns';
+import { es } from 'date-fns/locale';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from 'sonner';
+import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 
 const RatingCard = ({ rating, emoji, color, gradient, label, onClick, disabled }) => {
   return (
@@ -120,7 +122,7 @@ const SuccessAnimation = ({ rating, message, onComplete }) => {
 };
 
 export default function CustomerExperienceModal({ onClose, storeId, userRole }) {
-  const [currentScreen, setCurrentScreen] = useState('selectUser'); // selectUser, login, validation, survey
+  const [currentScreen, setCurrentScreen] = useState('selectUser'); // selectUser, login, validation, survey, profile, ranking
   const [status, setStatus] = useState('idle'); // idle, saving, success
   const [selectedRating, setSelectedRating] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
@@ -133,6 +135,7 @@ export default function CustomerExperienceModal({ onClose, storeId, userRole }) 
   const [validating, setValidating] = useState(false);
 
   const queryClient = useQueryClient();
+  const today = format(new Date(), 'yyyy-MM-dd');
 
   // Cargar sesión guardada
   useEffect(() => {
@@ -161,12 +164,43 @@ export default function CustomerExperienceModal({ onClose, storeId, userRole }) 
   });
 
   const { data: todayFeedback = [] } = useQuery({
-    queryKey: ['customerFeedback', storeId, format(new Date(), 'yyyy-MM-dd')],
+    queryKey: ['customerFeedback', storeId, today],
     queryFn: async () => {
       const all = await base44.entities.CustomerFeedback.list('-created_date');
-      return all.filter(f => f.store_id === storeId && f.date === format(new Date(), 'yyyy-MM-dd'));
+      return all.filter(f => f.store_id === storeId && f.date === today);
     },
-    enabled: !!storeId && currentScreen === 'survey'
+    enabled: !!storeId
+  });
+
+  const { data: allStoreFeedback = [] } = useQuery({
+    queryKey: ['allStoreFeedback', storeId],
+    queryFn: async () => {
+      const all = await base44.entities.CustomerFeedback.list('-created_date');
+      return all.filter(f => f.store_id === storeId);
+    },
+    enabled: !!storeId && !!sessionCashier
+  });
+
+  const { data: weeklyFeedback = [] } = useQuery({
+    queryKey: ['weeklyFeedback', storeId],
+    queryFn: async () => {
+      const start = format(startOfWeek(new Date(), { weekStartsOn: 1 }), 'yyyy-MM-dd');
+      const end = format(endOfWeek(new Date(), { weekStartsOn: 1 }), 'yyyy-MM-dd');
+      const all = await base44.entities.CustomerFeedback.list('-created_date');
+      return all.filter(f => f.store_id === storeId && f.date >= start && f.date <= end);
+    },
+    enabled: !!storeId && currentScreen === 'ranking'
+  });
+
+  const { data: monthlyFeedback = [] } = useQuery({
+    queryKey: ['monthlyFeedback', storeId],
+    queryFn: async () => {
+      const start = format(startOfMonth(new Date()), 'yyyy-MM-dd');
+      const end = format(endOfMonth(new Date()), 'yyyy-MM-dd');
+      const all = await base44.entities.CustomerFeedback.list('-created_date');
+      return all.filter(f => f.store_id === storeId && f.date >= start && f.date <= end);
+    },
+    enabled: !!storeId && currentScreen === 'ranking'
   });
 
   const saveFeedbackMutation = useMutation({
@@ -299,6 +333,100 @@ export default function CustomerExperienceModal({ onClose, storeId, userRole }) 
     setCurrentScreen('validation');
   };
 
+  // Stats del cajero
+  const cashierStats = useMemo(() => {
+    if (!sessionCashier) return { totalPoints: 0, totalSurveys: 0, promotores: 0, pasivos: 0, detractores: 0, nps: 0 };
+    
+    const cashierFeedback = allStoreFeedback.filter(f => f.device && f.device.includes(sessionCashier.id));
+    const totalPoints = cashierFeedback.reduce((sum, f) => sum + (f.points || 0), 0);
+    const totalSurveys = cashierFeedback.length;
+    
+    const npsData = cashierFeedback.reduce((acc, f) => {
+      acc[f.nps_type] = (acc[f.nps_type] || 0) + 1;
+      return acc;
+    }, {});
+    
+    const nps = totalSurveys > 0 
+      ? Math.round((((npsData.promotor || 0) - (npsData.detractor || 0)) / totalSurveys) * 100)
+      : 0;
+    
+    return {
+      totalPoints,
+      totalSurveys,
+      promotores: npsData.promotor || 0,
+      pasivos: npsData.pasivo || 0,
+      detractores: npsData.detractor || 0,
+      nps
+    };
+  }, [sessionCashier, allStoreFeedback]);
+
+  // Historial diario (últimos 30 días)
+  const dailyHistory = useMemo(() => {
+    if (!sessionCashier) return [];
+    
+    const last30Days = eachDayOfInterval({
+      start: new Date(new Date().setDate(new Date().getDate() - 29)),
+      end: new Date()
+    });
+
+    return last30Days.map(day => {
+      const dayStr = format(day, 'yyyy-MM-dd');
+      const dayFeedback = allStoreFeedback.filter(f => f.date === dayStr && f.device && f.device.includes(sessionCashier.id));
+      
+      const points = dayFeedback.reduce((sum, f) => sum + (f.points || 0), 0);
+      const promotores = dayFeedback.filter(f => f.nps_type === 'promotor').length;
+      
+      return {
+        date: format(day, 'dd/MM'),
+        fullDate: dayStr,
+        points,
+        surveys: dayFeedback.length,
+        promotorPercent: dayFeedback.length > 0 ? ((promotores / dayFeedback.length) * 100).toFixed(0) : 0
+      };
+    }).filter(d => d.surveys > 0);
+  }, [sessionCashier, allStoreFeedback]);
+
+  // Rankings
+  const weeklyRanking = useMemo(() => {
+    const userPoints = {};
+    weeklyFeedback.forEach(f => {
+      const userId = f.device || 'unknown';
+      if (!userPoints[userId]) userPoints[userId] = { name: 'Usuario', points: 0, surveys: 0, promotores: 0 };
+      userPoints[userId].points += f.points || 0;
+      userPoints[userId].surveys += 1;
+      if (f.nps_type === 'promotor') userPoints[userId].promotores += 1;
+    });
+
+    return Object.entries(userPoints)
+      .map(([id, data]) => ({ 
+        id, 
+        ...data, 
+        promotorPercent: data.surveys > 0 ? ((data.promotores / data.surveys) * 100).toFixed(0) : 0 
+      }))
+      .sort((a, b) => b.points - a.points)
+      .slice(0, 5);
+  }, [weeklyFeedback]);
+
+  const monthlyRanking = useMemo(() => {
+    const userPoints = {};
+    monthlyFeedback.forEach(f => {
+      const userId = f.device || 'unknown';
+      if (!userPoints[userId]) userPoints[userId] = { name: 'Usuario', points: 0, surveys: 0, promotores: 0 };
+      userPoints[userId].points += f.points || 0;
+      userPoints[userId].surveys += 1;
+      if (f.nps_type === 'promotor') userPoints[userId].promotores += 1;
+    });
+
+    return Object.entries(userPoints)
+      .map(([id, data]) => ({ 
+        id, 
+        ...data, 
+        promotorPercent: data.surveys > 0 ? ((data.promotores / data.surveys) * 100).toFixed(0) : 0 
+      }))
+      .sort((a, b) => b.points - a.points)
+      .slice(0, 10);
+  }, [monthlyFeedback]);
+
   const totalToday = todayFeedback.length;
   const npsData = todayFeedback.reduce((acc, f) => {
     acc[f.nps_type] = (acc[f.nps_type] || 0) + 1;
@@ -413,45 +541,267 @@ export default function CustomerExperienceModal({ onClose, storeId, userRole }) 
     );
   }
 
-  // VALIDATION SCREEN
-  if (currentScreen === 'validation' && sessionCashier) {
+  // VALIDATION/PROFILE/RANKING SCREENS
+  if ((currentScreen === 'validation' || currentScreen === 'profile' || currentScreen === 'ranking') && sessionCashier) {
     return (
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="fixed inset-0 bg-gradient-to-br from-purple-900 via-pink-900 to-rose-900 z-50 flex items-center justify-center p-6"
+        className="fixed inset-0 bg-gradient-to-br from-purple-900 via-pink-900 to-rose-900 z-50 overflow-y-auto"
       >
-        <motion.div
-          initial={{ scale: 0.9, y: 20 }}
-          animate={{ scale: 1, y: 0 }}
-          className="bg-white rounded-3xl p-8 max-w-md w-full"
-        >
-          <div className="text-center mb-6">
-            <h3 className="text-3xl font-black text-slate-800 mb-2">Validar Factura</h3>
-            <p className="text-slate-600">Ingresa el número de factura del cliente</p>
-          </div>
+        <div className="min-h-full flex items-center justify-center p-6">
+          <motion.div
+            initial={{ scale: 0.9, y: 20 }}
+            animate={{ scale: 1, y: 0 }}
+            className="bg-gradient-to-br from-slate-50 via-purple-50 to-pink-50 rounded-3xl w-full max-w-4xl shadow-2xl overflow-hidden"
+          >
+            {/* Header */}
+            <div className="bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 p-6 relative overflow-hidden">
+              <motion.div
+                animate={{ x: ['0%', '100%'] }}
+                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+              />
+              <div className="relative z-10 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                    <Sparkles className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-black text-white">Experiencia Cliente</h2>
+                    <p className="text-white/80 text-sm">{sessionCashier.name}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button onClick={handleLogout} variant="ghost" size="sm" className="text-white/80 hover:text-white hover:bg-white/20">
+                    <LogOut className="w-4 h-4 mr-1" />
+                    Cerrar
+                  </Button>
+                </div>
+              </div>
 
-          <div className="space-y-4">
-            <Input
-              placeholder="Número de factura"
-              value={invoiceSerial}
-              onChange={(e) => setInvoiceSerial(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleValidateInvoice()}
-              className="h-14 text-lg text-center font-bold"
-              disabled={validating}
-            />
-            <Button
-              onClick={handleValidateInvoice}
-              disabled={validating || !invoiceSerial.trim()}
-              className="w-full h-14 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold text-lg"
-            >
-              {validating ? 'Validando...' : 'Continuar'}
-            </Button>
-            <Button onClick={handleLogout} variant="outline" className="w-full">
-              Cerrar sesión
-            </Button>
-          </div>
-        </motion.div>
+              {/* Navigation Tabs */}
+              <div className="mt-6 flex gap-2 overflow-x-auto pb-2">
+                {[
+                  { id: 'validation', label: 'Encuesta', icon: Star },
+                  { id: 'profile', label: 'Mi Perfil', icon: TrendingUp },
+                  { id: 'ranking', label: 'Ranking', icon: Award }
+                ].map((tab) => {
+                  const Icon = tab.icon;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setCurrentScreen(tab.id)}
+                      className={`px-4 py-2 rounded-xl flex items-center gap-2 transition-all whitespace-nowrap ${
+                        currentScreen === tab.id
+                          ? 'bg-white text-purple-600 shadow-lg font-bold'
+                          : 'bg-white/20 text-white hover:bg-white/30'
+                      }`}
+                    >
+                      <Icon className="w-4 h-4" />
+                      <span className="font-bold">{tab.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="p-6">
+              <AnimatePresence mode="wait">
+                {/* VALIDATION TAB */}
+                {currentScreen === 'validation' && (
+                  <motion.div key="validation" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="space-y-6">
+                    <div className="text-center">
+                      <h3 className="text-2xl font-black text-slate-800 mb-2">Validar Factura</h3>
+                      <p className="text-slate-600">Ingresa el número de factura del cliente</p>
+                    </div>
+
+                    <div className="space-y-4 max-w-md mx-auto">
+                      <Input
+                        placeholder="Número de factura"
+                        value={invoiceSerial}
+                        onChange={(e) => setInvoiceSerial(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleValidateInvoice()}
+                        className="h-14 text-lg text-center font-bold"
+                        disabled={validating}
+                      />
+                      <Button
+                        onClick={handleValidateInvoice}
+                        disabled={validating || !invoiceSerial.trim()}
+                        className="w-full h-14 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold text-lg"
+                      >
+                        {validating ? 'Validando...' : 'Continuar'}
+                      </Button>
+                    </div>
+
+                    {todayFeedback.length > 0 && (
+                      <div className="bg-emerald-50 rounded-xl p-4 border border-emerald-200 max-w-md mx-auto">
+                        <p className="text-sm text-center text-emerald-700 font-semibold">
+                          <strong>{todayFeedback.length}</strong> encuestas hoy ✨
+                        </p>
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+
+                {/* PROFILE TAB */}
+                {currentScreen === 'profile' && (
+                  <motion.div key="profile" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
+                    {/* Header del Perfil */}
+                    <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-2xl p-6 border border-purple-200">
+                      <div className="flex items-center gap-4 mb-4">
+                        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white font-black text-2xl shadow-lg">
+                          {sessionCashier.name.charAt(0)}
+                        </div>
+                        <div>
+                          <h3 className="text-2xl font-black text-slate-800">{sessionCashier.name}</h3>
+                          <p className="text-slate-600">{sessionCashier.position || 'Anfitrión'}</p>
+                        </div>
+                      </div>
+
+                      {/* KPIs del perfil */}
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <motion.div whileHover={{ scale: 1.05 }} className="bg-white rounded-xl p-4 border border-purple-200 shadow-sm">
+                          <Trophy className="w-5 h-5 text-purple-500 mb-2" />
+                          <p className="text-xs text-slate-600 mb-1">Puntos Total</p>
+                          <p className="text-2xl font-black text-slate-800">{cashierStats.totalPoints}</p>
+                        </motion.div>
+                        <motion.div whileHover={{ scale: 1.05 }} className="bg-white rounded-xl p-4 border border-purple-200 shadow-sm">
+                          <Target className="w-5 h-5 text-emerald-500 mb-2" />
+                          <p className="text-xs text-slate-600 mb-1">NPS Score</p>
+                          <p className="text-2xl font-black text-emerald-600">{cashierStats.nps}</p>
+                        </motion.div>
+                        <motion.div whileHover={{ scale: 1.05 }} className="bg-white rounded-xl p-4 border border-purple-200 shadow-sm">
+                          <Star className="w-5 h-5 text-amber-500 mb-2" />
+                          <p className="text-xs text-slate-600 mb-1">Promotores</p>
+                          <p className="text-2xl font-black text-amber-600">{cashierStats.promotores}</p>
+                        </motion.div>
+                        <motion.div whileHover={{ scale: 1.05 }} className="bg-white rounded-xl p-4 border border-purple-200 shadow-sm">
+                          <Calendar className="w-5 h-5 text-blue-500 mb-2" />
+                          <p className="text-xs text-slate-600 mb-1">Encuestas</p>
+                          <p className="text-2xl font-black text-blue-600">{cashierStats.totalSurveys}</p>
+                        </motion.div>
+                      </div>
+                    </div>
+
+                    {/* Gráfica de Desempeño */}
+                    {dailyHistory.length > 0 && (
+                      <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                        <h4 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                          <TrendingUp className="w-5 h-5 text-purple-500" />
+                          Historial de Puntos (Últimos 30 días)
+                        </h4>
+                        <ResponsiveContainer width="100%" height={200}>
+                          <AreaChart data={dailyHistory}>
+                            <defs>
+                              <linearGradient id="colorPoints" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#a855f7" stopOpacity={0.8}/>
+                                <stop offset="95%" stopColor="#a855f7" stopOpacity={0}/>
+                              </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
+                            <XAxis dataKey="date" stroke="#94a3b8" style={{ fontSize: '11px' }} />
+                            <YAxis stroke="#94a3b8" style={{ fontSize: '11px' }} />
+                            <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px' }} />
+                            <Area type="monotone" dataKey="points" stroke="#a855f7" strokeWidth={3} fill="url(#colorPoints)" />
+                          </AreaChart>
+                        </ResponsiveContainer>
+                      </div>
+                    )}
+
+                    {/* Desglose NPS */}
+                    <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                      <h4 className="text-lg font-bold text-slate-800 mb-4">Desglose NPS</h4>
+                      <div className="grid grid-cols-3 gap-4">
+                        <div className="text-center">
+                          <div className="text-4xl mb-2">😀</div>
+                          <p className="text-2xl font-black text-emerald-500">{cashierStats.promotores}</p>
+                          <p className="text-xs text-slate-500">Promotores</p>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-4xl mb-2">😐</div>
+                          <p className="text-2xl font-black text-amber-500">{cashierStats.pasivos}</p>
+                          <p className="text-xs text-slate-500">Pasivos</p>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-4xl mb-2">☹️</div>
+                          <p className="text-2xl font-black text-red-500">{cashierStats.detractores}</p>
+                          <p className="text-xs text-slate-500">Detractores</p>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* RANKING TAB */}
+                {currentScreen === 'ranking' && (
+                  <motion.div key="ranking" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+                    {/* Semanal */}
+                    <div>
+                      <h3 className="text-xl font-black text-slate-800 mb-4">🏆 Top 5 Semanal</h3>
+                      <div className="space-y-2">
+                        {weeklyRanking.map((user, idx) => (
+                          <motion.div
+                            key={user.id}
+                            whileHover={{ scale: 1.02, x: 3 }}
+                            className={`flex items-center justify-between p-4 rounded-xl ${
+                              user.id.includes(sessionCashier?.id)
+                                ? 'bg-gradient-to-r from-purple-100 to-pink-100 border-2 border-purple-400'
+                                : 'bg-white border border-slate-200'
+                            }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-black ${
+                                idx === 0 ? 'bg-yellow-400 text-white' :
+                                idx === 1 ? 'bg-gray-300 text-white' :
+                                idx === 2 ? 'bg-orange-400 text-white' :
+                                'bg-slate-200 text-slate-700'
+                              }`}>
+                                {idx + 1}
+                              </div>
+                              <div>
+                                <p className="font-bold text-slate-800">{user.name}</p>
+                                <p className="text-xs text-slate-500">{user.promotorPercent}% promotores</p>
+                              </div>
+                            </div>
+                            <p className="text-2xl font-black text-purple-600">{user.points}</p>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Mensual */}
+                    <div>
+                      <h3 className="text-xl font-black text-slate-800 mb-4">📅 Top 10 Mensual</h3>
+                      <div className="space-y-2 max-h-80 overflow-y-auto">
+                        {monthlyRanking.map((user, idx) => (
+                          <motion.div
+                            key={user.id}
+                            whileHover={{ scale: 1.02, x: 3 }}
+                            className={`flex items-center justify-between p-3 rounded-xl ${
+                              user.id.includes(sessionCashier?.id)
+                                ? 'bg-gradient-to-r from-purple-100 to-pink-100 border-2 border-purple-400'
+                                : 'bg-white border border-slate-200'
+                            }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <span className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-700">
+                                {idx + 1}
+                              </span>
+                              <p className="font-semibold text-slate-800 text-sm">{user.name}</p>
+                            </div>
+                            <p className="text-lg font-black text-purple-600">{user.points}</p>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </motion.div>
+        </div>
       </motion.div>
     );
   }
