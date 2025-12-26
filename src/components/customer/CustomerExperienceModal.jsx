@@ -151,7 +151,9 @@ export default function CustomerExperienceModal({ onClose, storeId, userRole }) 
   const { data: allCashiers = [] } = useQuery({
     queryKey: ['cashiers', storeId],
     queryFn: () => base44.entities.Cashier.filter({ store_id: storeId, is_active: true }),
-    enabled: !!storeId
+    enabled: !!storeId && currentScreen === 'selectUser',
+    staleTime: 5 * 60 * 1000,
+    cacheTime: 10 * 60 * 1000
   });
 
   const { data: cashierPasswords = [] } = useQuery({
@@ -160,7 +162,9 @@ export default function CustomerExperienceModal({ onClose, storeId, userRole }) 
       const all = await base44.entities.RolePassword.list();
       return all.filter(p => p.store_code === storeId);
     },
-    enabled: !!storeId
+    enabled: !!storeId && (currentScreen === 'login' || currentScreen === 'selectUser'),
+    staleTime: 10 * 60 * 1000,
+    cacheTime: 15 * 60 * 1000
   });
 
   const { data: todayFeedback = [] } = useQuery({
@@ -169,7 +173,10 @@ export default function CustomerExperienceModal({ onClose, storeId, userRole }) 
       const all = await base44.entities.CustomerFeedback.list('-created_date');
       return all.filter(f => f.store_id === storeId && f.date === today);
     },
-    enabled: !!storeId
+    enabled: !!storeId && currentScreen === 'validation',
+    staleTime: 30 * 1000,
+    cacheTime: 2 * 60 * 1000,
+    refetchInterval: false
   });
 
   const { data: recentFeedback = [] } = useQuery({
@@ -178,7 +185,9 @@ export default function CustomerExperienceModal({ onClose, storeId, userRole }) 
       const all = await base44.entities.CustomerFeedback.list('-created_date');
       return all.filter(f => f.store_id === storeId).slice(0, 20);
     },
-    enabled: !!storeId && currentScreen === 'validation'
+    enabled: !!storeId && currentScreen === 'validation',
+    staleTime: 30 * 1000,
+    cacheTime: 2 * 60 * 1000
   });
 
   const { data: allStoreFeedback = [] } = useQuery({
@@ -187,7 +196,9 @@ export default function CustomerExperienceModal({ onClose, storeId, userRole }) 
       const all = await base44.entities.CustomerFeedback.list('-created_date');
       return all.filter(f => f.store_id === storeId);
     },
-    enabled: !!storeId && !!sessionCashier
+    enabled: !!storeId && !!sessionCashier && currentScreen === 'profile',
+    staleTime: 60 * 1000,
+    cacheTime: 5 * 60 * 1000
   });
 
   const { data: weeklyFeedback = [] } = useQuery({
@@ -198,7 +209,9 @@ export default function CustomerExperienceModal({ onClose, storeId, userRole }) 
       const all = await base44.entities.CustomerFeedback.list('-created_date');
       return all.filter(f => f.store_id === storeId && f.date >= start && f.date <= end);
     },
-    enabled: !!storeId && currentScreen === 'ranking'
+    enabled: !!storeId && currentScreen === 'ranking',
+    staleTime: 60 * 1000,
+    cacheTime: 5 * 60 * 1000
   });
 
   const { data: monthlyFeedback = [] } = useQuery({
@@ -209,17 +222,21 @@ export default function CustomerExperienceModal({ onClose, storeId, userRole }) 
       const all = await base44.entities.CustomerFeedback.list('-created_date');
       return all.filter(f => f.store_id === storeId && f.date >= start && f.date <= end);
     },
-    enabled: !!storeId && currentScreen === 'ranking'
+    enabled: !!storeId && currentScreen === 'ranking',
+    staleTime: 60 * 1000,
+    cacheTime: 5 * 60 * 1000
   });
 
   const saveFeedbackMutation = useMutation({
     mutationFn: (data) => base44.entities.CustomerFeedback.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['customerFeedback'] });
+      queryClient.invalidateQueries({ queryKey: ['customerFeedback', storeId, today] });
+      queryClient.invalidateQueries({ queryKey: ['recentFeedback', storeId] });
       setStatus('success');
     },
     onError: () => {
       setStatus('idle');
+      toast.error('Error al guardar');
     }
   });
 
@@ -449,26 +466,13 @@ export default function CustomerExperienceModal({ onClose, storeId, userRole }) 
   // SELECT USER SCREEN
   if (currentScreen === 'selectUser') {
     return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-gradient-to-br from-purple-900 via-pink-900 to-rose-900 z-50 flex items-center justify-center p-6"
-        onClick={onClose}
-      >
-        <motion.div
-          initial={{ scale: 0.9, y: 20 }}
-          animate={{ scale: 1, y: 0 }}
-          onClick={(e) => e.stopPropagation()}
-          className="bg-white rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
-        >
+      <div className="fixed inset-0 bg-gradient-to-br from-purple-900 via-pink-900 to-rose-900 z-50 flex items-center justify-center p-6" onClick={onClose}>
+        <div onClick={(e) => e.stopPropagation()} className="bg-white rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
           <h2 className="text-3xl font-black text-slate-800 mb-6 text-center">¿Quién atendió al cliente?</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {allCashiers.map((cashier) => (
-              <motion.button
+              <button
                 key={cashier.id}
-                whileHover={{ scale: 1.03, y: -3 }}
-                whileTap={{ scale: 0.97 }}
                 onClick={(e) => {
                   e.stopPropagation();
                   setSelectedUser(cashier);
@@ -485,28 +489,20 @@ export default function CustomerExperienceModal({ onClose, storeId, userRole }) 
                     <p className="text-sm text-slate-600">{cashier.position || 'Anfitrión'}</p>
                   </div>
                   <ChevronRight className="w-5 h-5 text-purple-500" />
-                </div>
-              </motion.button>
-            ))}
-          </div>
-        </motion.div>
-      </motion.div>
-    );
-  }
+                  </div>
+                  </button>
+                  ))}
+                  </div>
+                  </div>
+                  </div>
+                  );
+                  }
 
   // LOGIN SCREEN
   if (currentScreen === 'login' && selectedUser) {
     return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="fixed inset-0 bg-gradient-to-br from-purple-900 via-pink-900 to-rose-900 z-50 flex items-center justify-center p-6"
-      >
-        <motion.div
-          initial={{ scale: 0.9, y: 20 }}
-          animate={{ scale: 1, y: 0 }}
-          className="bg-white rounded-3xl p-8 max-w-md w-full"
-        >
+      <div className="fixed inset-0 bg-gradient-to-br from-purple-900 via-pink-900 to-rose-900 z-50 flex items-center justify-center p-6">
+        <div className="bg-white rounded-3xl p-8 max-w-md w-full">
           <div className="text-center mb-6">
             <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center text-white font-black text-3xl mx-auto mb-4">
               {selectedUser.name.charAt(0)}
@@ -545,11 +541,11 @@ export default function CustomerExperienceModal({ onClose, storeId, userRole }) 
             <Button onClick={() => setCurrentScreen('selectUser')} variant="ghost" className="w-full">
               ← Cambiar usuario
             </Button>
-          </div>
-        </motion.div>
-      </motion.div>
-    );
-  }
+            </div>
+            </div>
+            </div>
+            );
+            }
 
   // VALIDATION/PROFILE/RANKING SCREENS
   if ((currentScreen === 'validation' || currentScreen === 'profile' || currentScreen === 'ranking') && sessionCashier) {
@@ -560,19 +556,10 @@ export default function CustomerExperienceModal({ onClose, storeId, userRole }) 
         className="fixed inset-0 bg-gradient-to-br from-purple-900 via-pink-900 to-rose-900 z-50 overflow-y-auto"
       >
         <div className="min-h-full flex items-center justify-center p-6">
-          <motion.div
-            initial={{ scale: 0.9, y: 20 }}
-            animate={{ scale: 1, y: 0 }}
-            className="bg-gradient-to-br from-slate-50 via-purple-50 to-pink-50 rounded-3xl w-full max-w-4xl shadow-2xl overflow-hidden"
-          >
+          <div className="bg-gradient-to-br from-slate-50 via-purple-50 to-pink-50 rounded-3xl w-full max-w-4xl shadow-2xl overflow-hidden">
             {/* Header */}
-            <div className="bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 p-6 relative overflow-hidden">
-              <motion.div
-                animate={{ x: ['0%', '100%'] }}
-                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-              />
-              <div className="relative z-10 flex items-center justify-between">
+            <div className="bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 p-6">
+              <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
                     <Sparkles className="w-6 h-6 text-white" />
@@ -697,11 +684,8 @@ export default function CustomerExperienceModal({ onClose, storeId, userRole }) 
                         </h4>
                         <div className="space-y-2 max-h-96 overflow-y-auto">
                           {recentFeedback.map((feedback, idx) => (
-                            <motion.div
+                            <div
                               key={idx}
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{ delay: idx * 0.05 }}
                               className={`rounded-xl p-4 border-2 ${
                                 feedback.rating === 'excelente' ? 'bg-emerald-50 border-emerald-200' :
                                 feedback.rating === 'normal' ? 'bg-amber-50 border-amber-200' :
@@ -731,7 +715,7 @@ export default function CustomerExperienceModal({ onClose, storeId, userRole }) 
                                   <p className="text-xs text-slate-500 uppercase font-bold">{feedback.nps_type}</p>
                                 </div>
                               </div>
-                            </motion.div>
+                            </div>
                           ))}
                         </div>
                       </div>
@@ -1106,11 +1090,11 @@ export default function CustomerExperienceModal({ onClose, storeId, userRole }) 
                 )}
               </AnimatePresence>
             </div>
-          </motion.div>
-        </div>
-      </motion.div>
-    );
-  }
+          </div>
+          </div>
+          </div>
+          );
+          }
 
   // SURVEY SCREEN
   return (
