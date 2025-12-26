@@ -258,13 +258,13 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userRole }) {
           updateDailyPointsMutation.mutateAsync({
             id: existingPoints.id,
             data: {
-              experience_points: existingPoints.experience_points + experiencePoints,
-              suggested_sales_points: existingPoints.suggested_sales_points + suggestedSalesPoints,
-              total_points: existingPoints.total_points + totalPoints,
-              excellent_count: existingPoints.excellent_count + (rating === 'excelente' ? 1 : 0),
-              normal_count: existingPoints.normal_count + (rating === 'normal' ? 1 : 0),
-              bad_count: existingPoints.bad_count + (rating === 'mala' ? 1 : 0),
-              total_surveys: existingPoints.total_surveys + 1
+              experience_points: (existingPoints.experience_points || 0) + experiencePoints,
+              suggested_sales_points: (existingPoints.suggested_sales_points || 0) + suggestedSalesPoints,
+              total_points: (existingPoints.total_points || 0) + totalPoints,
+              excellent_count: (existingPoints.excellent_count || 0) + (rating === 'excelente' ? 1 : 0),
+              normal_count: (existingPoints.normal_count || 0) + (rating === 'normal' ? 1 : 0),
+              bad_count: (existingPoints.bad_count || 0) + (rating === 'mala' ? 1 : 0),
+              total_surveys: (existingPoints.total_surveys || 0) + 1
             }
           })
         ]);
@@ -286,8 +286,11 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userRole }) {
           })
         ]);
       }
+      
+      toast.success('¡Encuesta registrada con éxito!');
     } catch (error) {
       console.error('Error saving survey:', error);
+      toast.error('Error al guardar la encuesta. Intenta de nuevo.');
     }
   };
 
