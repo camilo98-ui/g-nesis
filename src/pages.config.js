@@ -21,6 +21,7 @@ import Team from './pages/Team';
 import Training from './pages/Training';
 import ExecutiveExperience from './pages/ExecutiveExperience';
 import PrivacyPolicy from './pages/PrivacyPolicy';
+import TWAGuide from './pages/TWAGuide';
 import __Layout from './Layout.jsx';
 
 
@@ -48,6 +49,7 @@ export const PAGES = {
     "Training": Training,
     "ExecutiveExperience": ExecutiveExperience,
     "PrivacyPolicy": PrivacyPolicy,
+    "TWAGuide": TWAGuide,
 }
 
 export const pagesConfig = {
