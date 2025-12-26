@@ -799,20 +799,22 @@ export default function Home() {
           <motion.img
             src={LOGO_URL}
             alt="Popsy"
-            className="h-32 sm:h-36 md:h-40 object-contain mx-auto mb-2 cursor-pointer drop-shadow-lg"
-            initial={{ opacity: 0, scale: 0.5 }}
+            className="h-48 sm:h-56 md:h-64 object-contain mx-auto mb-4 cursor-pointer drop-shadow-2xl"
+            initial={{ opacity: 0, scale: 0.5, y: -50 }}
             animate={{
               opacity: 1,
-              scale: [1, 1.03, 0.98, 1.02, 1],
-              y: [0, -8, 0, -4, 0]
+              scale: 1,
+              y: [0, -20, 0, -10, 0],
+              rotate: [0, 2, -2, 1, 0]
             }}
             transition={{
               opacity: { duration: 0.8, ease: "easeOut" },
-              scale: { duration: 4, repeat: Infinity, ease: "easeInOut" },
-              y: { duration: 3, repeat: Infinity, ease: "easeInOut" }
+              scale: { duration: 0.8, ease: "easeOut" },
+              y: { duration: 4, repeat: Infinity, ease: "easeInOut" },
+              rotate: { duration: 5, repeat: Infinity, ease: "easeInOut" }
             }}
-            whileHover={{ scale: 1.08, rotate: [0, -2, 2, 0] }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.1, y: -25, rotate: [0, -3, 3, 0] }}
+            whileTap={{ scale: 0.9 }}
             onClick={() => setShowStory(true)} />
 
           <motion.p
