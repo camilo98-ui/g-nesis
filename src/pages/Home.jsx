@@ -1112,8 +1112,8 @@ export default function Home() {
                 </motion.div>);
 
           })}
-          </motion.div> :
-        null}
+          </motion.div>
+        ) : null}
         
       </div>
 
