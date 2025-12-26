@@ -26,6 +26,16 @@ import { toast } from 'sonner';
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/6a749247d_Capturadepantalla2025-11-251251441.png";
 
 const MENU_ITEMS = [
+{
+  name: 'Comunicación',
+  page: 'Communication',
+  icon: Phone,
+  description: 'Chat y anuncios',
+  bgColor: 'bg-gradient-to-br from-blue-100/90 to-cyan-100/80',
+  iconBg: 'bg-blue-200/60',
+  iconColor: 'text-blue-500',
+  textColor: 'text-blue-700'
+},
   {
     name: 'Panel Ejecutivo',
     page: 'ExecutiveDashboard',

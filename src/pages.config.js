@@ -18,6 +18,7 @@ import SearchCashier from './pages/SearchCashier';
 import Settings from './pages/Settings';
 import Team from './pages/Team';
 import Training from './pages/Training';
+import Communication from './pages/Communication';
 import __Layout from './Layout.jsx';
 
 
@@ -42,6 +43,7 @@ export const PAGES = {
     "Settings": Settings,
     "Team": Team,
     "Training": Training,
+    "Communication": Communication,
 }
 
 export const pagesConfig = {
