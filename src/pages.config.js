@@ -19,6 +19,7 @@ import SearchCashier from './pages/SearchCashier';
 import Settings from './pages/Settings';
 import Team from './pages/Team';
 import Training from './pages/Training';
+import ExecutiveExperience from './pages/ExecutiveExperience';
 import __Layout from './Layout.jsx';
 
 
@@ -44,6 +45,7 @@ export const PAGES = {
     "Settings": Settings,
     "Team": Team,
     "Training": Training,
+    "ExecutiveExperience": ExecutiveExperience,
 }
 
 export const pagesConfig = {

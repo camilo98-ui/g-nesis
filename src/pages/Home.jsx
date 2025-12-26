@@ -38,6 +38,17 @@ const MENU_ITEMS = [
     textColor: 'text-slate-700',
     requiredRole: 'gerente'
   },
+  {
+    name: 'Experiencia Gerencial',
+    page: 'ExecutiveExperience',
+    icon: Sparkles,
+    description: 'NPS por tiendas',
+    bgColor: 'bg-gradient-to-br from-pink-100/90 to-purple-100/80',
+    iconBg: 'bg-pink-200/60',
+    iconColor: 'text-pink-500',
+    textColor: 'text-pink-700',
+    requiredRole: 'gerente'
+  },
 {
   name: 'Comparable',
   page: 'Comparable',
