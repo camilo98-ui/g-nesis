@@ -310,19 +310,19 @@ export default function ExperienciaPopsyModal({ onClose, storeId, userRole }) {
   // Stats del anfitrión
   const cashierStats = useMemo(() => {
     const points = cashierDailyPoints?.[0];
-    if (!points) return { total: 0, excellent: 0, suggested: 0, surveys: 0, excellentPercent: 0 };
+    if (!points) return { total: 0, excellent: 0, normal: 0, bad: 0, suggested: 0, surveys: 0, excellentPercent: 0, streak: 0 };
 
-    const excellentPercent = points.total_surveys > 0 
-      ? ((points.excellent_count / points.total_surveys) * 100).toFixed(0)
+    const excellentPercent = (points.total_surveys || 0) > 0 
+      ? (((points.excellent_count || 0) / (points.total_surveys || 0)) * 100).toFixed(0)
       : 0;
 
     return {
-      total: points.total_points,
-      excellent: points.excellent_count,
-      normal: points.normal_count,
-      bad: points.bad_count,
-      suggested: points.suggested_sales_points,
-      surveys: points.total_surveys,
+      total: points.total_points || 0,
+      excellent: points.excellent_count || 0,
+      normal: points.normal_count || 0,
+      bad: points.bad_count || 0,
+      suggested: points.suggested_sales_points || 0,
+      surveys: points.total_surveys || 0,
       excellentPercent,
       streak: points.consecutive_days_streak || 0
     };
