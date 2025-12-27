@@ -15,57 +15,224 @@ import WelcomeGreeting from './WelcomeGreeting';
 const ModernEmoji = ({ type, size = 120 }) => {
   const emojis = {
     excelente: (
-      <div className="relative" style={{ width: size, height: size }}>
-        <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-2xl">
+      <motion.div 
+        className="relative" 
+        style={{ width: size, height: size }}
+        animate={{ 
+          rotate: [0, -5, 5, -3, 3, 0],
+          scale: [1, 1.05, 1]
+        }}
+        transition={{ 
+          duration: 2,
+          repeat: Infinity,
+          repeatDelay: 1
+        }}
+      >
+        <svg viewBox="0 0 120 120" className="w-full h-full drop-shadow-2xl">
           <defs>
             <radialGradient id="face-excellent">
               <stop offset="0%" stopColor="#FFD700" />
-              <stop offset="100%" stopColor="#FFA500" />
+              <stop offset="50%" stopColor="#FFC107" />
+              <stop offset="100%" stopColor="#FF6B9D" />
             </radialGradient>
-            <filter id="shadow">
-              <feDropShadow dx="0" dy="4" stdDeviation="4" floodOpacity="0.3"/>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+              <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
             </filter>
           </defs>
-          <circle cx="50" cy="50" r="45" fill="url(#face-excellent)" filter="url(#shadow)"/>
-          <circle cx="35" cy="40" r="5" fill="#333"/>
-          <circle cx="65" cy="40" r="5" fill="#333"/>
-          <path d="M 30 55 Q 50 70 70 55" stroke="#333" strokeWidth="3" fill="none" strokeLinecap="round"/>
-          <circle cx="28" cy="48" r="8" fill="#FF69B4" opacity="0.3"/>
-          <circle cx="72" cy="48" r="8" fill="#FF69B4" opacity="0.3"/>
+          
+          {/* Face */}
+          <motion.circle 
+            cx="60" cy="60" r="50" 
+            fill="url(#face-excellent)" 
+            filter="url(#glow)"
+          />
+          
+          {/* Sparkles */}
+          <motion.g
+            animate={{ 
+              opacity: [0, 1, 0],
+              scale: [0.8, 1.2, 0.8]
+            }}
+            transition={{ duration: 1.5, repeat: Infinity, delay: 0 }}
+          >
+            <circle cx="25" cy="30" r="3" fill="#fff" opacity="0.8"/>
+          </motion.g>
+          <motion.g
+            animate={{ 
+              opacity: [0, 1, 0],
+              scale: [0.8, 1.2, 0.8]
+            }}
+            transition={{ duration: 1.5, repeat: Infinity, delay: 0.3 }}
+          >
+            <circle cx="95" cy="35" r="2.5" fill="#fff" opacity="0.8"/>
+          </motion.g>
+          <motion.g
+            animate={{ 
+              opacity: [0, 1, 0],
+              scale: [0.8, 1.2, 0.8]
+            }}
+            transition={{ duration: 1.5, repeat: Infinity, delay: 0.6 }}
+          >
+            <circle cx="20" cy="70" r="2" fill="#fff" opacity="0.8"/>
+          </motion.g>
+          
+          {/* Happy eyes */}
+          <motion.g
+            animate={{ scaleY: [1, 0.3, 1] }}
+            transition={{ duration: 3, repeat: Infinity, repeatDelay: 2 }}
+          >
+            <path d="M 40 45 Q 45 40 50 45" stroke="#2D3748" strokeWidth="4" fill="none" strokeLinecap="round"/>
+            <path d="M 70 45 Q 75 40 80 45" stroke="#2D3748" strokeWidth="4" fill="none" strokeLinecap="round"/>
+          </motion.g>
+          
+          {/* Big smile */}
+          <motion.path 
+            d="M 35 65 Q 60 85 85 65" 
+            stroke="#2D3748" 
+            strokeWidth="5" 
+            fill="none" 
+            strokeLinecap="round"
+            animate={{ d: ["M 35 65 Q 60 85 85 65", "M 35 65 Q 60 88 85 65", "M 35 65 Q 60 85 85 65"] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          />
+          
+          {/* Rosy cheeks */}
+          <motion.circle 
+            cx="30" cy="60" r="10" 
+            fill="#FF69B4" 
+            opacity="0.4"
+            animate={{ scale: [1, 1.1, 1] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          />
+          <motion.circle 
+            cx="90" cy="60" r="10" 
+            fill="#FF69B4" 
+            opacity="0.4"
+            animate={{ scale: [1, 1.1, 1] }}
+            transition={{ duration: 1.5, repeat: Infinity, delay: 0.3 }}
+          />
         </svg>
-      </div>
+      </motion.div>
     ),
     normal: (
-      <div className="relative" style={{ width: size, height: size }}>
-        <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-2xl">
+      <motion.div 
+        className="relative" 
+        style={{ width: size, height: size }}
+        animate={{ 
+          y: [0, -5, 0]
+        }}
+        transition={{ 
+          duration: 2,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+      >
+        <svg viewBox="0 0 120 120" className="w-full h-full drop-shadow-2xl">
           <defs>
             <radialGradient id="face-normal">
-              <stop offset="0%" stopColor="#FFE4B5" />
-              <stop offset="100%" stopColor="#DEB887" />
+              <stop offset="0%" stopColor="#FFF4E6" />
+              <stop offset="100%" stopColor="#FFE0B2" />
             </radialGradient>
           </defs>
-          <circle cx="50" cy="50" r="45" fill="url(#face-normal)" filter="url(#shadow)"/>
-          <circle cx="35" cy="40" r="5" fill="#333"/>
-          <circle cx="65" cy="40" r="5" fill="#333"/>
-          <line x1="30" y1="60" x2="70" y2="60" stroke="#333" strokeWidth="3" strokeLinecap="round"/>
+          
+          {/* Face */}
+          <circle cx="60" cy="60" r="50" fill="url(#face-normal)"/>
+          
+          {/* Eyes */}
+          <motion.g
+            animate={{ scaleY: [1, 0.2, 1] }}
+            transition={{ duration: 4, repeat: Infinity, repeatDelay: 3 }}
+          >
+            <circle cx="45" cy="50" r="6" fill="#2D3748"/>
+            <circle cx="75" cy="50" r="6" fill="#2D3748"/>
+          </motion.g>
+          
+          {/* Neutral mouth */}
+          <motion.line 
+            x1="40" y1="75" x2="80" y2="75" 
+            stroke="#2D3748" 
+            strokeWidth="4" 
+            strokeLinecap="round"
+            animate={{ x1: [40, 42, 40], x2: [80, 78, 80] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          />
+          
+          {/* Subtle cheeks */}
+          <circle cx="32" cy="65" r="8" fill="#FFB74D" opacity="0.2"/>
+          <circle cx="88" cy="65" r="8" fill="#FFB74D" opacity="0.2"/>
         </svg>
-      </div>
+      </motion.div>
     ),
     mala: (
-      <div className="relative" style={{ width: size, height: size }}>
-        <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-2xl">
+      <motion.div 
+        className="relative" 
+        style={{ width: size, height: size }}
+        animate={{ 
+          rotate: [0, 3, -3, 0],
+          y: [0, 3, 0]
+        }}
+        transition={{ 
+          duration: 2,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+      >
+        <svg viewBox="0 0 120 120" className="w-full h-full drop-shadow-2xl">
           <defs>
             <radialGradient id="face-bad">
-              <stop offset="0%" stopColor="#FFA07A" />
-              <stop offset="100%" stopColor="#FF6347" />
+              <stop offset="0%" stopColor="#FFCDD2" />
+              <stop offset="100%" stopColor="#EF5350" />
             </radialGradient>
           </defs>
-          <circle cx="50" cy="50" r="45" fill="url(#face-bad)" filter="url(#shadow)"/>
-          <circle cx="35" cy="40" r="5" fill="#333"/>
-          <circle cx="65" cy="40" r="5" fill="#333"/>
-          <path d="M 30 65 Q 50 50 70 65" stroke="#333" strokeWidth="3" fill="none" strokeLinecap="round"/>
+          
+          {/* Face */}
+          <circle cx="60" cy="60" r="50" fill="url(#face-bad)"/>
+          
+          {/* Sad eyes */}
+          <motion.g
+            animate={{ y: [0, 2, 0] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            <path d="M 40 48 Q 45 52 50 48" stroke="#2D3748" strokeWidth="4" fill="none" strokeLinecap="round"/>
+            <path d="M 70 48 Q 75 52 80 48" stroke="#2D3748" strokeWidth="4" fill="none" strokeLinecap="round"/>
+          </motion.g>
+          
+          {/* Tears */}
+          <motion.g
+            animate={{ 
+              y: [0, 10, 15],
+              opacity: [0, 1, 0]
+            }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            <ellipse cx="42" cy="60" rx="3" ry="5" fill="#4FC3F7" opacity="0.6"/>
+          </motion.g>
+          <motion.g
+            animate={{ 
+              y: [0, 10, 15],
+              opacity: [0, 1, 0]
+            }}
+            transition={{ duration: 2, repeat: Infinity, delay: 0.3 }}
+          >
+            <ellipse cx="78" cy="60" rx="3" ry="5" fill="#4FC3F7" opacity="0.6"/>
+          </motion.g>
+          
+          {/* Sad mouth */}
+          <motion.path 
+            d="M 40 80 Q 60 68 80 80" 
+            stroke="#2D3748" 
+            strokeWidth="4" 
+            fill="none" 
+            strokeLinecap="round"
+            animate={{ d: ["M 40 80 Q 60 68 80 80", "M 40 80 Q 60 65 80 80", "M 40 80 Q 60 68 80 80"] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          />
         </svg>
-      </div>
+      </motion.div>
     )
   };
   
@@ -104,7 +271,7 @@ const SuccessAnimation = ({ rating, message, onComplete }) => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-gradient-to-br from-emerald-100 via-teal-100 to-cyan-100 flex items-center justify-center z-50 p-8"
+      className="fixed inset-0 bg-gradient-to-br from-pink-100 via-rose-100 to-pink-200 flex items-center justify-center z-50 p-8"
     >
       <div className="text-center">
         <motion.div
@@ -113,7 +280,7 @@ const SuccessAnimation = ({ rating, message, onComplete }) => {
           transition={{ type: "spring", stiffness: 200, delay: 0.1 }}
           className="bg-white/40 backdrop-blur-xl rounded-full w-32 h-32 flex items-center justify-center mb-6 mx-auto shadow-2xl"
         >
-          <Check className="w-20 h-20 text-emerald-600" strokeWidth={3} />
+          <Check className="w-20 h-20 text-pink-600" strokeWidth={3} />
         </motion.div>
 
         <motion.div
