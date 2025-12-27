@@ -79,14 +79,24 @@ export default function ThemeSelector({ isOpen, onClose }) {
     if (!theme) return;
 
     const root = document.documentElement;
+    
+    // Remove existing theme classes
+    root.classList.remove('theme-classic', 'theme-dark', 'theme-mint', 'theme-sunset', 'theme-ocean');
+    root.classList.add(`theme-${themeId}`);
+    
+    // Set data attribute for CSS selectors
+    root.setAttribute('data-theme', themeId);
+    
+    // Apply CSS variables
     root.style.setProperty('--theme-primary', theme.colors.primary);
     root.style.setProperty('--theme-secondary', theme.colors.secondary);
     root.style.setProperty('--theme-bg', theme.colors.bg);
     root.style.setProperty('--theme-text', theme.colors.text);
-    
-    // Apply theme class for additional styling
-    root.className = root.className.replace(/theme-\w+/g, '');
-    root.classList.add(`theme-${themeId}`);
+
+    // Force repaint
+    document.body.style.display = 'none';
+    document.body.offsetHeight;
+    document.body.style.display = '';
   };
 
   const handleThemeSelect = (themeId) => {
