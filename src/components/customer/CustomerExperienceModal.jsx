@@ -15,312 +15,95 @@ import WelcomeGreeting from './WelcomeGreeting';
 const ModernEmoji = ({ type, size = 120 }) => {
   const emojis = {
     excelente: (
-      <motion.div 
+      <div 
         className="relative" 
         style={{ width: size, height: size }}
-        animate={{ 
-          rotate: [0, -3, 3, -2, 2, 0],
-          scale: [1, 1.08, 1]
-        }}
-        transition={{ 
-          duration: 2.5,
-          repeat: Infinity,
-          repeatDelay: 1.5,
-          ease: "easeInOut"
-        }}
       >
-        <svg viewBox="0 0 140 140" className="w-full h-full" style={{ filter: 'drop-shadow(0 8px 16px rgba(255, 107, 157, 0.4))' }}>
+        <svg viewBox="0 0 120 120" className="w-full h-full drop-shadow-lg">
           <defs>
-            {/* 3D Face Gradient */}
-            <radialGradient id="face-excellent-3d" cx="45%" cy="35%">
+            <radialGradient id="face-excellent-3d">
               <stop offset="0%" stopColor="#FFE66D" />
-              <stop offset="30%" stopColor="#FFCC00" />
-              <stop offset="70%" stopColor="#FFB800" />
               <stop offset="100%" stopColor="#FF6B9D" />
             </radialGradient>
-            
-            {/* Shine Effect */}
-            <radialGradient id="shine-excellent" cx="40%" cy="30%">
-              <stop offset="0%" stopColor="#fff" stopOpacity="0.6" />
-              <stop offset="50%" stopColor="#fff" stopOpacity="0.2" />
-              <stop offset="100%" stopColor="#fff" stopOpacity="0" />
-            </radialGradient>
-            
-            {/* Shadow */}
-            <radialGradient id="shadow-excellent">
-              <stop offset="0%" stopColor="#000" stopOpacity="0" />
-              <stop offset="100%" stopColor="#000" stopOpacity="0.15" />
-            </radialGradient>
-            
-            <filter id="gel-effect">
-              <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
-              <feOffset dx="0" dy="2" result="offsetblur"/>
-              <feComponentTransfer>
-                <feFuncA type="linear" slope="0.3"/>
-              </feComponentTransfer>
-              <feMerge>
-                <feMergeNode/>
-                <feMergeNode in="SourceGraphic"/>
-              </feMerge>
-            </filter>
           </defs>
           
-          {/* Shadow base */}
-          <ellipse cx="70" cy="128" rx="48" ry="8" fill="url(#shadow-excellent)" opacity="0.3"/>
+          <circle cx="60" cy="60" r="50" fill="url(#face-excellent-3d)"/>
+          <ellipse cx="50" cy="45" rx="25" ry="30" fill="#fff" opacity="0.3"/>
           
-          {/* Main Face - 3D sphere */}
-          <circle cx="70" cy="70" r="55" fill="url(#face-excellent-3d)" filter="url(#gel-effect)"/>
+          <circle cx="25" cy="30" r="3" fill="#fff" opacity="0.8"/>
+          <circle cx="95" cy="35" r="2" fill="#fff" opacity="0.8"/>
           
-          {/* Gel shine overlay */}
-          <ellipse cx="55" cy="50" rx="30" ry="35" fill="url(#shine-excellent)" opacity="0.8"/>
+          <path d="M 40 50 Q 45 45 50 50" stroke="#3D2817" strokeWidth="4" fill="none" strokeLinecap="round"/>
+          <path d="M 70 50 Q 75 45 80 50" stroke="#3D2817" strokeWidth="4" fill="none" strokeLinecap="round"/>
           
-          {/* Sparkle stars */}
-          <motion.g
-            animate={{ 
-              opacity: [0, 1, 0],
-              scale: [0.6, 1.3, 0.6],
-              rotate: [0, 180, 360]
-            }}
-            transition={{ duration: 2, repeat: Infinity, delay: 0 }}
-          >
-            <path d="M 25 35 L 27 40 L 32 40 L 28 43 L 30 48 L 25 45 L 20 48 L 22 43 L 18 40 L 23 40 Z" fill="#FFF" opacity="0.9"/>
-          </motion.g>
-          <motion.g
-            animate={{ 
-              opacity: [0, 1, 0],
-              scale: [0.6, 1.3, 0.6],
-              rotate: [0, -180, -360]
-            }}
-            transition={{ duration: 2, repeat: Infinity, delay: 0.4 }}
-          >
-            <path d="M 110 45 L 112 50 L 117 50 L 113 53 L 115 58 L 110 55 L 105 58 L 107 53 L 103 50 L 108 50 Z" fill="#FFF" opacity="0.9"/>
-          </motion.g>
-          <motion.g
-            animate={{ 
-              opacity: [0, 1, 0],
-              scale: [0.6, 1.3, 0.6],
-              rotate: [0, 180, 360]
-            }}
-            transition={{ duration: 2, repeat: Infinity, delay: 0.8 }}
-          >
-            <path d="M 25 95 L 27 100 L 32 100 L 28 103 L 30 108 L 25 105 L 20 108 L 22 103 L 18 100 L 23 100 Z" fill="#FFF" opacity="0.9"/>
-          </motion.g>
+          <path d="M 35 65 Q 60 82 85 65" stroke="#3D2817" strokeWidth="4" fill="none" strokeLinecap="round"/>
           
-          {/* Eyes - Happy squint with shine */}
-          <motion.g
-            animate={{ scaleY: [1, 0.2, 1] }}
-            transition={{ duration: 3.5, repeat: Infinity, repeatDelay: 2.5 }}
-          >
-            <path d="M 45 55 Q 50 48 55 55" stroke="#3D2817" strokeWidth="5" fill="none" strokeLinecap="round"/>
-            <path d="M 85 55 Q 90 48 95 55" stroke="#3D2817" strokeWidth="5" fill="none" strokeLinecap="round"/>
-            {/* Eye shine dots */}
-            <circle cx="48" cy="50" r="2" fill="#3D2817"/>
-            <circle cx="88" cy="50" r="2" fill="#3D2817"/>
-          </motion.g>
-          
-          {/* Big happy smile with depth */}
-          <motion.g
-            animate={{ 
-              scaleX: [1, 1.05, 1],
-              y: [0, 2, 0]
-            }}
-            transition={{ duration: 2, repeat: Infinity }}
-          >
-            <path d="M 40 75 Q 70 95 100 75" fill="#3D2817" opacity="0.7"/>
-            <path d="M 42 75 Q 70 92 98 75" fill="#FF5582" />
-            <ellipse cx="70" cy="82" rx="22" ry="8" fill="#E83D6C" opacity="0.6"/>
-          </motion.g>
-          
-          {/* Chubby rosy cheeks with 3D effect */}
-          <motion.g
-            animate={{ scale: [1, 1.12, 1] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          >
-            <ellipse cx="32" cy="72" rx="14" ry="16" fill="#FF9EB7" opacity="0.5"/>
-            <ellipse cx="28" cy="68" rx="8" ry="10" fill="#FFB8D1" opacity="0.6"/>
-          </motion.g>
-          <motion.g
-            animate={{ scale: [1, 1.12, 1] }}
-            transition={{ duration: 2, repeat: Infinity, delay: 0.3 }}
-          >
-            <ellipse cx="108" cy="72" rx="14" ry="16" fill="#FF9EB7" opacity="0.5"/>
-            <ellipse cx="112" cy="68" rx="8" ry="10" fill="#FFB8D1" opacity="0.6"/>
-          </motion.g>
+          <ellipse cx="30" cy="65" rx="12" ry="14" fill="#FF9EB7" opacity="0.5"/>
+          <ellipse cx="90" cy="65" rx="12" ry="14" fill="#FF9EB7" opacity="0.5"/>
         </svg>
-      </motion.div>
+      </div>
     ),
     normal: (
-      <motion.div 
+      <div 
         className="relative" 
         style={{ width: size, height: size }}
-        animate={{ 
-          y: [0, -6, 0],
-          rotate: [0, 2, -2, 0]
-        }}
-        transition={{ 
-          duration: 3,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
       >
-        <svg viewBox="0 0 140 140" className="w-full h-full" style={{ filter: 'drop-shadow(0 8px 16px rgba(255, 183, 77, 0.3))' }}>
+        <svg viewBox="0 0 120 120" className="w-full h-full drop-shadow-lg">
           <defs>
-            <radialGradient id="face-normal-3d" cx="45%" cy="35%">
+            <radialGradient id="face-normal-3d">
               <stop offset="0%" stopColor="#FFF9E6" />
-              <stop offset="30%" stopColor="#FFECB3" />
-              <stop offset="70%" stopColor="#FFD54F" />
               <stop offset="100%" stopColor="#FFB74D" />
             </radialGradient>
-            
-            <radialGradient id="shine-normal" cx="40%" cy="30%">
-              <stop offset="0%" stopColor="#fff" stopOpacity="0.5" />
-              <stop offset="50%" stopColor="#fff" stopOpacity="0.15" />
-              <stop offset="100%" stopColor="#fff" stopOpacity="0" />
-            </radialGradient>
-            
-            <radialGradient id="shadow-normal">
-              <stop offset="0%" stopColor="#000" stopOpacity="0" />
-              <stop offset="100%" stopColor="#000" stopOpacity="0.12" />
-            </radialGradient>
           </defs>
           
-          <ellipse cx="70" cy="128" rx="48" ry="8" fill="url(#shadow-normal)" opacity="0.3"/>
+          <circle cx="60" cy="60" r="50" fill="url(#face-normal-3d)"/>
+          <ellipse cx="50" cy="45" rx="25" ry="30" fill="#fff" opacity="0.3"/>
           
-          <circle cx="70" cy="70" r="55" fill="url(#face-normal-3d)" filter="url(#gel-effect)"/>
+          <circle cx="45" cy="53" r="7" fill="#3D2817"/>
+          <circle cx="75" cy="53" r="7" fill="#3D2817"/>
+          <circle cx="43" cy="51" r="2" fill="#fff" opacity="0.7"/>
+          <circle cx="73" cy="51" r="2" fill="#fff" opacity="0.7"/>
           
-          <ellipse cx="55" cy="50" rx="30" ry="35" fill="url(#shine-normal)" opacity="0.7"/>
+          <line x1="45" y1="70" x2="75" y2="70" stroke="#3D2817" strokeWidth="4" strokeLinecap="round"/>
           
-          {/* Relaxed eyes with blink */}
-          <motion.g
-            animate={{ scaleY: [1, 0.15, 1] }}
-            transition={{ duration: 5, repeat: Infinity, repeatDelay: 4 }}
-          >
-            <circle cx="50" cy="58" r="8" fill="#3D2817"/>
-            <circle cx="90" cy="58" r="8" fill="#3D2817"/>
-            <circle cx="48" cy="55" r="3" fill="#fff" opacity="0.7"/>
-            <circle cx="88" cy="55" r="3" fill="#fff" opacity="0.7"/>
-          </motion.g>
-          
-          {/* Chill wavy mouth */}
-          <motion.path
-            d="M 50 85 Q 70 88 90 85"
-            stroke="#3D2817"
-            strokeWidth="4"
-            fill="none"
-            strokeLinecap="round"
-            animate={{ 
-              d: ["M 50 85 Q 70 88 90 85", "M 50 85 Q 70 90 90 85", "M 50 85 Q 70 88 90 85"]
-            }}
-            transition={{ duration: 2.5, repeat: Infinity }}
-          />
-          
-          {/* Subtle cheeks */}
-          <ellipse cx="35" cy="75" rx="12" ry="14" fill="#FFCC80" opacity="0.3"/>
-          <ellipse cx="105" cy="75" rx="12" ry="14" fill="#FFCC80" opacity="0.3"/>
+          <ellipse cx="32" cy="65" rx="10" ry="12" fill="#FFCC80" opacity="0.3"/>
+          <ellipse cx="88" cy="65" rx="10" ry="12" fill="#FFCC80" opacity="0.3"/>
         </svg>
-      </motion.div>
+      </div>
     ),
     mala: (
-      <motion.div 
+      <div 
         className="relative" 
         style={{ width: size, height: size }}
-        animate={{ 
-          rotate: [0, 4, -4, 2, -2, 0],
-          y: [0, 4, 0]
-        }}
-        transition={{ 
-          duration: 2.5,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
       >
-        <svg viewBox="0 0 140 140" className="w-full h-full" style={{ filter: 'drop-shadow(0 8px 16px rgba(239, 83, 80, 0.35))' }}>
+        <svg viewBox="0 0 120 120" className="w-full h-full drop-shadow-lg">
           <defs>
-            <radialGradient id="face-bad-3d" cx="45%" cy="35%">
+            <radialGradient id="face-bad-3d">
               <stop offset="0%" stopColor="#FFE5E8" />
-              <stop offset="30%" stopColor="#FFCDD2" />
-              <stop offset="70%" stopColor="#EF9A9A" />
               <stop offset="100%" stopColor="#EF5350" />
-            </radialGradient>
-            
-            <radialGradient id="shine-bad" cx="40%" cy="30%">
-              <stop offset="0%" stopColor="#fff" stopOpacity="0.4" />
-              <stop offset="50%" stopColor="#fff" stopOpacity="0.1" />
-              <stop offset="100%" stopColor="#fff" stopOpacity="0" />
-            </radialGradient>
-            
-            <radialGradient id="shadow-bad">
-              <stop offset="0%" stopColor="#000" stopOpacity="0" />
-              <stop offset="100%" stopColor="#000" stopOpacity="0.15" />
             </radialGradient>
           </defs>
           
-          <ellipse cx="70" cy="128" rx="48" ry="8" fill="url(#shadow-bad)" opacity="0.3"/>
+          <circle cx="60" cy="60" r="50" fill="url(#face-bad-3d)"/>
+          <ellipse cx="50" cy="45" rx="25" ry="30" fill="#fff" opacity="0.3"/>
           
-          <circle cx="70" cy="70" r="55" fill="url(#face-bad-3d)" filter="url(#gel-effect)"/>
+          <path d="M 38 48 Q 43 52 48 48" stroke="#3D2817" strokeWidth="4" fill="none" strokeLinecap="round"/>
+          <path d="M 72 48 Q 77 52 82 48" stroke="#3D2817" strokeWidth="4" fill="none" strokeLinecap="round"/>
           
-          <ellipse cx="55" cy="50" rx="30" ry="35" fill="url(#shine-bad)" opacity="0.6"/>
+          <circle cx="45" cy="57" r="6" fill="#3D2817"/>
+          <circle cx="75" cy="57" r="6" fill="#3D2817"/>
+          <circle cx="43" cy="55" r="2" fill="#fff" opacity="0.6"/>
+          <circle cx="73" cy="55" r="2" fill="#fff" opacity="0.6"/>
           
-          {/* Sad eyebrows */}
-          <motion.g
-            animate={{ y: [0, 2, 0] }}
-            transition={{ duration: 2.5, repeat: Infinity }}
-          >
-            <path d="M 42 48 Q 47 52 52 48" stroke="#3D2817" strokeWidth="5" fill="none" strokeLinecap="round"/>
-            <path d="M 88 48 Q 93 52 98 48" stroke="#3D2817" strokeWidth="5" fill="none" strokeLinecap="round"/>
-          </motion.g>
+          <ellipse cx="42" cy="67" rx="3" ry="6" fill="#81D4FA" opacity="0.7"/>
+          <ellipse cx="78" cy="67" rx="3" ry="6" fill="#81D4FA" opacity="0.7"/>
           
-          {/* Big sad eyes with tears */}
-          <motion.g
-            animate={{ scaleY: [1, 0.85, 1] }}
-            transition={{ duration: 3, repeat: Infinity }}
-          >
-            <circle cx="50" cy="62" r="7" fill="#3D2817"/>
-            <circle cx="90" cy="62" r="7" fill="#3D2817"/>
-            <circle cx="48" cy="59" r="2.5" fill="#fff" opacity="0.6"/>
-            <circle cx="88" cy="59" r="2.5" fill="#fff" opacity="0.6"/>
-          </motion.g>
+          <path d="M 42 78 Q 60 68 78 78" stroke="#3D2817" strokeWidth="4" fill="none" strokeLinecap="round"/>
           
-          {/* Animated tears */}
-          <motion.g
-            animate={{ 
-              y: [0, 18, 20],
-              opacity: [0, 1, 0]
-            }}
-            transition={{ duration: 2.5, repeat: Infinity }}
-          >
-            <ellipse cx="46" cy="70" rx="4" ry="7" fill="#81D4FA" opacity="0.8"/>
-            <ellipse cx="43" cy="72" rx="2" ry="3" fill="#B3E5FC" opacity="0.6"/>
-          </motion.g>
-          <motion.g
-            animate={{ 
-              y: [0, 18, 20],
-              opacity: [0, 1, 0]
-            }}
-            transition={{ duration: 2.5, repeat: Infinity, delay: 0.4 }}
-          >
-            <ellipse cx="86" cy="70" rx="4" ry="7" fill="#81D4FA" opacity="0.8"/>
-            <ellipse cx="89" cy="72" rx="2" ry="3" fill="#B3E5FC" opacity="0.6"/>
-          </motion.g>
-          
-          {/* Exaggerated pout with depth */}
-          <motion.g
-            animate={{ 
-              scaleY: [1, 1.08, 1],
-              y: [0, 1, 0]
-            }}
-            transition={{ duration: 2, repeat: Infinity }}
-          >
-            <path d="M 45 90 Q 70 75 95 90" fill="#3D2817" opacity="0.15"/>
-            <path d="M 47 90 Q 70 77 93 90" stroke="#3D2817" strokeWidth="5" fill="none" strokeLinecap="round"/>
-            <ellipse cx="70" cy="92" rx="15" ry="8" fill="#FF8A80" opacity="0.4"/>
-          </motion.g>
-          
-          {/* Sad blush */}
-          <ellipse cx="35" cy="78" rx="13" ry="15" fill="#FFAB91" opacity="0.4"/>
-          <ellipse cx="105" cy="78" rx="13" ry="15" fill="#FFAB91" opacity="0.4"/>
+          <ellipse cx="33" cy="70" rx="11" ry="13" fill="#FFAB91" opacity="0.4"/>
+          <ellipse cx="87" cy="70" rx="11" ry="13" fill="#FFAB91" opacity="0.4"/>
         </svg>
-      </motion.div>
+      </div>
     )
   };
   
