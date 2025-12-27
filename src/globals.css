@@ -31,95 +31,199 @@ css
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
 
-    /* Theme Variables */
+    /* Classic Popsy Theme (Default) */
     --theme-primary: #ec4899;
+    --theme-primary-hover: #db2777;
     --theme-secondary: #f43f5e;
     --theme-bg: #ffffff;
+    --theme-bg-alt: #f8fafc;
     --theme-text: #1e293b;
+    --theme-text-light: #64748b;
+    --theme-border: #e2e8f0;
+    --theme-card: #ffffff;
   }
+}
 
-  /* Dark Pro Theme */
-  .theme-dark {
-    --theme-primary: #f472b6;
-    --theme-secondary: #fb7185;
-    --theme-bg: #0f172a;
-    --theme-text: #f1f5f9;
-    background-color: #0f172a;
+@layer base {
+  * {
+    @apply border-border;
   }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
 
-  .theme-dark body {
-    background-color: #0f172a;
-    color: #f1f5f9;
-  }
+/* Classic Popsy Theme */
+.theme-classic {
+  --theme-primary: #ec4899;
+  --theme-primary-hover: #db2777;
+  --theme-secondary: #f43f5e;
+  --theme-bg: #ffffff;
+  --theme-bg-alt: #fef2f2;
+  --theme-text: #1e293b;
+  --theme-text-light: #64748b;
+  --theme-border: #fecdd3;
+  --theme-card: #ffffff;
+}
 
-  /* Fresh Mint Theme */
-  .theme-mint {
-    --theme-primary: #10b981;
-    --theme-secondary: #14b8a6;
-    --theme-bg: #ffffff;
-    --theme-text: #1e293b;
-  }
+/* Dark Pro Theme */
+.theme-dark {
+  --theme-primary: #f472b6;
+  --theme-primary-hover: #ec4899;
+  --theme-secondary: #fb7185;
+  --theme-bg: #0f172a;
+  --theme-bg-alt: #1e293b;
+  --theme-text: #f1f5f9;
+  --theme-text-light: #94a3b8;
+  --theme-border: #334155;
+  --theme-card: #1e293b;
+}
 
-  /* Sunset Warm Theme */
-  .theme-sunset {
-    --theme-primary: #fb923c;
-    --theme-secondary: #f97316;
-    --theme-bg: #ffffff;
-    --theme-text: #1e293b;
-  }
+.theme-dark body {
+  background-color: #0f172a !important;
+}
 
-  /* Ocean Blue Theme */
-  .theme-ocean {
-    --theme-primary: #3b82f6;
-    --theme-secondary: #06b6d4;
-    --theme-bg: #ffffff;
-    --theme-text: #1e293b;
-  }
+/* Fresh Mint Theme */
+.theme-mint {
+  --theme-primary: #10b981;
+  --theme-primary-hover: #059669;
+  --theme-secondary: #14b8a6;
+  --theme-bg: #ffffff;
+  --theme-bg-alt: #ecfdf5;
+  --theme-text: #1e293b;
+  --theme-text-light: #64748b;
+  --theme-border: #a7f3d0;
+  --theme-card: #ffffff;
+}
 
-  /* Apply theme colors to gradients and buttons */
-  [data-theme="mint"] .bg-gradient-to-r.from-pink-500 {
-    background: linear-gradient(to right, #10b981, #14b8a6) !important;
-  }
+/* Sunset Warm Theme */
+.theme-sunset {
+  --theme-primary: #fb923c;
+  --theme-primary-hover: #f97316;
+  --theme-secondary: #f59e0b;
+  --theme-bg: #ffffff;
+  --theme-bg-alt: #fff7ed;
+  --theme-text: #1e293b;
+  --theme-text-light: #64748b;
+  --theme-border: #fed7aa;
+  --theme-card: #ffffff;
+}
 
-  [data-theme="sunset"] .bg-gradient-to-r.from-pink-500 {
-    background: linear-gradient(to right, #fb923c, #f97316) !important;
-  }
+/* Ocean Blue Theme */
+.theme-ocean {
+  --theme-primary: #3b82f6;
+  --theme-primary-hover: #2563eb;
+  --theme-secondary: #06b6d4;
+  --theme-bg: #ffffff;
+  --theme-bg-alt: #eff6ff;
+  --theme-text: #1e293b;
+  --theme-text-light: #64748b;
+  --theme-border: #bfdbfe;
+  --theme-card: #ffffff;
+}
 
-  [data-theme="ocean"] .bg-gradient-to-r.from-pink-500 {
-    background: linear-gradient(to right, #3b82f6, #06b6d4) !important;
-  }
+/* Apply theme to all elements */
+body {
+  background-color: var(--theme-bg) !important;
+  color: var(--theme-text) !important;
+}
 
-  [data-theme="dark"] .bg-gradient-to-r.from-pink-500 {
-    background: linear-gradient(to right, #f472b6, #fb7185) !important;
-  }
+/* Pink gradients become theme-colored */
+.bg-gradient-to-r.from-pink-500,
+.bg-gradient-to-r.from-pink-400,
+.bg-gradient-to-br.from-pink-50,
+.bg-gradient-to-br.from-pink-100 {
+  background: linear-gradient(to right, var(--theme-primary), var(--theme-secondary)) !important;
+}
 
-  [data-theme="mint"] .border-pink-500 {
-    border-color: #10b981 !important;
-  }
+.bg-gradient-to-br.from-pink-50.to-purple-50,
+.bg-gradient-to-br.from-pink-50.via-purple-50.to-blue-50 {
+  background: linear-gradient(to bottom right, var(--theme-bg-alt), var(--theme-bg)) !important;
+}
 
-  [data-theme="sunset"] .border-pink-500 {
-    border-color: #fb923c !important;
-  }
+/* Card backgrounds */
+.bg-pink-100,
+.bg-pink-50,
+.from-pink-100,
+.to-purple-100,
+.from-pink-50,
+.to-rose-50 {
+  background-color: var(--theme-bg-alt) !important;
+}
 
-  [data-theme="ocean"] .border-pink-500 {
-    border-color: #3b82f6 !important;
-  }
+/* Borders */
+.border-pink-500,
+.border-pink-400,
+.border-pink-200,
+.border-pink-300 {
+  border-color: var(--theme-primary) !important;
+}
 
-  [data-theme="dark"] .border-pink-500 {
-    border-color: #f472b6 !important;
-  }
+/* Text colors */
+.text-pink-500,
+.text-pink-600,
+.text-pink-700,
+.text-rose-600 {
+  color: var(--theme-primary) !important;
+}
 
-  [data-theme="dark"] .bg-white {
-    background-color: #1e293b !important;
-  }
+/* Icon colors */
+.text-pink-500,
+.text-pink-600 {
+  color: var(--theme-primary) !important;
+}
 
-  [data-theme="dark"] .text-slate-900 {
-    color: #f1f5f9 !important;
-  }
+/* Hover states */
+.hover\:border-pink-300:hover,
+.hover\:border-pink-400:hover {
+  border-color: var(--theme-primary) !important;
+}
 
-  [data-theme="dark"] .border-slate-200 {
-    border-color: #334155 !important;
-  }
+.hover\:text-pink-600:hover {
+  color: var(--theme-primary-hover) !important;
+}
+
+.hover\:from-pink-600:hover {
+  background: linear-gradient(to right, var(--theme-primary-hover), var(--theme-secondary)) !important;
+}
+
+/* Shadows */
+.shadow-pink-500\/30,
+.shadow-pink-500\/20,
+.shadow-pink-200\/50 {
+  --tw-shadow-color: var(--theme-primary);
+  --tw-shadow: var(--tw-shadow-colored);
+}
+
+/* Dark theme specific overrides */
+.theme-dark .bg-white {
+  background-color: var(--theme-card) !important;
+}
+
+.theme-dark .text-slate-900,
+.theme-dark .text-slate-800,
+.theme-dark .text-slate-700 {
+  color: var(--theme-text) !important;
+}
+
+.theme-dark .text-slate-600,
+.theme-dark .text-slate-500 {
+  color: var(--theme-text-light) !important;
+}
+
+.theme-dark .border-slate-200,
+.theme-dark .border-slate-300 {
+  border-color: var(--theme-border) !important;
+}
+
+.theme-dark .bg-slate-50,
+.theme-dark .bg-slate-100 {
+  background-color: var(--theme-bg-alt) !important;
+}
+
+/* No indexar en motores de búsqueda */
+meta[name="robots"] {
+  content: "noindex, nofollow";
 }
 
 @layer base {
