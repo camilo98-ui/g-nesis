@@ -1,3 +1,4 @@
+css
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -29,6 +30,44 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+
+    /* Theme Variables */
+    --theme-primary: #ec4899;
+    --theme-secondary: #f43f5e;
+    --theme-bg: #ffffff;
+    --theme-text: #1e293b;
+  }
+
+  /* Dark Pro Theme */
+  .theme-dark {
+    --theme-primary: #f472b6;
+    --theme-secondary: #fb7185;
+    --theme-bg: #0f172a;
+    --theme-text: #f1f5f9;
+  }
+
+  /* Fresh Mint Theme */
+  .theme-mint {
+    --theme-primary: #10b981;
+    --theme-secondary: #14b8a6;
+    --theme-bg: #ffffff;
+    --theme-text: #1e293b;
+  }
+
+  /* Sunset Warm Theme */
+  .theme-sunset {
+    --theme-primary: #fb923c;
+    --theme-secondary: #f97316;
+    --theme-bg: #ffffff;
+    --theme-text: #1e293b;
+  }
+
+  /* Ocean Blue Theme */
+  .theme-ocean {
+    --theme-primary: #3b82f6;
+    --theme-secondary: #06b6d4;
+    --theme-bg: #ffffff;
+    --theme-text: #1e293b;
   }
 }
 
