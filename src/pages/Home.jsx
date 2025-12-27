@@ -14,7 +14,7 @@ import CustomerExperienceModal from '@/components/customer/CustomerExperienceMod
 import DailySalesForm from '@/components/forms/DailySalesForm';
 import ShiftRecordForm from '@/components/forms/ShiftRecordForm';
 import MonthlyBudgetDashboard from '@/components/budget/MonthlyBudgetDashboard';
-import ThemeSelector from '@/components/ThemeSelector';
+
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -195,7 +195,7 @@ export default function Home() {
   const [showCustomerExperience, setShowCustomerExperience] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [isAuthenticatedUser, setIsAuthenticatedUser] = useState(false);
-  const [showThemeSelector, setShowThemeSelector] = useState(false);
+
 
   const ROLES = [
   { 
@@ -1058,16 +1058,7 @@ export default function Home() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-4 flex justify-center gap-2 flex-wrap">
 
-            <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }}>
-              <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowThemeSelector(true)}
-              className="text-gray-500 hover:text-purple-600 hover:bg-purple-50 transition-all">
-                <Palette className="w-4 h-4 mr-1" />
-                Tema
-              </Button>
-            </motion.div>
+
             <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }}>
               <Button
               variant="ghost"
@@ -1520,11 +1511,7 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      {/* Theme Selector Modal */}
-      <ThemeSelector
-        isOpen={showThemeSelector}
-        onClose={() => setShowThemeSelector(false)}
-      />
+
 
       {/* Install App Modal */}
       <AnimatePresence>
