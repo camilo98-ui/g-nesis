@@ -63,15 +63,12 @@ export default function Layout({ children, currentPageName }) {
 
   if (isAuthChecking) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{
-        background: 'linear-gradient(to bottom right, var(--theme-bg-alt, #fef2f2), var(--theme-bg, #ffffff))'
-      }}>
+      <div className="min-h-screen app-background flex items-center justify-center">
         <div className="text-center">
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-            className="w-16 h-16 border-4 border-t-transparent rounded-full mx-auto mb-4"
-            style={{ borderColor: 'var(--theme-primary, #ec4899)', borderTopColor: 'transparent' }}
+            className="w-16 h-16 border-4 theme-border-primary border-t-transparent rounded-full mx-auto mb-4"
           />
           <p className="text-slate-600 font-semibold">Verificando acceso...</p>
         </div>
@@ -81,7 +78,7 @@ export default function Layout({ children, currentPageName }) {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen" style={{ backgroundColor: 'var(--theme-bg)', color: 'var(--theme-text)' }}>
+      <div className="min-h-screen app-container">
 
 
 
@@ -93,9 +90,7 @@ export default function Layout({ children, currentPageName }) {
           className="pt-4 min-h-screen pb-4 relative"
         >
           {/* Premium Modern Background */}
-          <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none" style={{ 
-            background: `linear-gradient(to bottom right, var(--theme-bg-alt, #f8fafc), var(--theme-bg, #ffffff))`
-          }}>
+          <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none app-background">
             {/* Animated gradient orbs */}
             <motion.div
               animate={{
@@ -104,10 +99,7 @@ export default function Layout({ children, currentPageName }) {
                 scale: [1, 1.1, 1],
               }}
               transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute top-20 right-[10%] w-[500px] h-[500px] rounded-full blur-3xl"
-              style={{ 
-                background: `radial-gradient(circle, ${document.documentElement.style.getPropertyValue('--theme-primary')}20, transparent)`
-              }}
+              className="absolute top-20 right-[10%] w-[500px] h-[500px] theme-orb-1 rounded-full blur-3xl"
             />
             <motion.div
               animate={{
@@ -116,10 +108,7 @@ export default function Layout({ children, currentPageName }) {
                 scale: [1, 1.15, 1],
               }}
               transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute bottom-20 left-[15%] w-[600px] h-[600px] rounded-full blur-3xl"
-              style={{ 
-                background: `radial-gradient(circle, ${document.documentElement.style.getPropertyValue('--theme-secondary')}15, transparent)`
-              }}
+              className="absolute bottom-20 left-[15%] w-[600px] h-[600px] theme-orb-2 rounded-full blur-3xl"
             />
             <motion.div
               animate={{
@@ -135,14 +124,6 @@ export default function Layout({ children, currentPageName }) {
             <div className="absolute top-[15%] right-[20%] w-32 h-32 border border-pink-200/30 rounded-2xl rotate-12 opacity-40" />
             <div className="absolute bottom-[25%] left-[25%] w-24 h-24 border border-purple-200/30 rounded-full opacity-30" />
             <div className="absolute top-[60%] right-[35%] w-20 h-20 border border-blue-200/30 rounded-xl -rotate-6 opacity-40" />
-
-            {/* Subtle grid overlay */}
-            <div className="absolute inset-0 opacity-[0.015]"
-                 style={{
-                   backgroundImage: 'linear-gradient(rgba(236, 72, 153, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(236, 72, 153, 0.1) 1px, transparent 1px)',
-                   backgroundSize: '60px 60px'
-                 }}
-            />
 
             {/* Glassmorphism layers */}
             <motion.div
