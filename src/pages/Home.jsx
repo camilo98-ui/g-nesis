@@ -557,10 +557,18 @@ export default function Home() {
               <motion.img
                 src={LOGO_URL}
                 alt="Popsy Management"
-                className="h-16 xl:h-20 object-contain mb-16 xl:mb-20"
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
+                className="h-24 xl:h-28 object-contain mb-16 xl:mb-20 drop-shadow-2xl"
+                initial={{ opacity: 0, scale: 0.8, y: -30 }}
+                animate={{ 
+                  opacity: 1, 
+                  scale: 1,
+                  y: [0, -12, 0]
+                }}
+                transition={{ 
+                  opacity: { duration: 0.8 },
+                  scale: { duration: 0.8 },
+                  y: { duration: 3, repeat: Infinity, ease: "easeInOut" }
+                }}
               />
 
               {/* Main headline */}
@@ -623,10 +631,18 @@ export default function Home() {
                 <motion.img 
                   src={LOGO_URL} 
                   alt="Popsy" 
-                  className="h-16 object-contain mx-auto mb-6"
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: 0.1 }}
+                  className="h-24 object-contain mx-auto mb-6 drop-shadow-2xl"
+                  initial={{ scale: 0.8, opacity: 0, y: -20 }}
+                  animate={{ 
+                    scale: 1, 
+                    opacity: 1,
+                    y: [0, -10, 0]
+                  }}
+                  transition={{ 
+                    scale: { duration: 0.6 },
+                    opacity: { duration: 0.6 },
+                    y: { duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 0.6 }
+                  }}
                 />
                 <h2 className="text-3xl font-bold text-slate-900 mb-2">Popsy Management</h2>
                 <p className="text-slate-600 text-base">Sistema de gestión empresarial</p>
