@@ -106,11 +106,6 @@ export default function ThemeSelector({ isOpen, onClose }) {
     localStorage.setItem('popsyTheme', themeId);
     localStorage.setItem('popsyUseSystemTheme', 'false');
     setUseSystemTheme(false);
-    
-    // Force reload to ensure all components get the new theme
-    setTimeout(() => {
-      window.location.reload();
-    }, 300);
   };
 
   const handlePreview = (themeId) => {
