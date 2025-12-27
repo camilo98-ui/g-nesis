@@ -387,13 +387,23 @@ export default function Home() {
       setIsLoggedIn(true);
     }
 
-    // Recordar último rol usado
+    // Preseleccionar último rol usado automáticamente
     if (!isLoggedIn && lastRole) {
       setSelectedRole(lastRole);
     }
 
     localStorage.setItem('lastVisitTime', now.toString());
   }, []);
+
+  // Auto-focus en contraseña cuando se selecciona rol
+  useEffect(() => {
+    if (selectedRole && !isLoggedIn) {
+      setTimeout(() => {
+        const passwordInput = document.getElementById('login-password');
+        if (passwordInput) passwordInput.focus();
+      }, 300);
+    }
+  }, [selectedRole, isLoggedIn]);
 
   const handleStoreSelect = (store) => {
     setPendingStore(store);
@@ -551,27 +561,38 @@ export default function Home() {
             >
               <div className="mb-8">
                 <h1 className="text-2xl font-bold text-slate-900 mb-1">Iniciar sesión</h1>
-                <p className="text-slate-600 text-sm">Selecciona tu rol para comenzar</p>
+                <p className="text-slate-600 text-sm">Continúa con tu rol</p>
               </div>
 
               <div className="space-y-3 mb-6">
                 {ROLES.map((role, index) => {
                   const isSelected = selectedRole === role.id;
+                  const lastUsedRole = localStorage.getItem('lastSelectedRole');
+                  const isLastUsed = role.id === lastUsedRole && !isSelected;
                   
                   return (
                     <motion.button
                       key={role.id}
-                      onClick={() => {setSelectedRole(role.id);setLoginError('');}}
+                      onClick={() => {
+                        setSelectedRole(role.id);
+                        setLoginError('');
+                        localStorage.setItem('lastSelectedRole', role.id);
+                      }}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.15 + index * 0.08 }}
                       whileTap={{ scale: 0.98 }}
-                      className={`w-full min-h-[64px] p-4 rounded-2xl border-2 transition-all duration-200 text-left touch-manipulation ${
+                      className={`relative w-full min-h-[64px] p-4 rounded-2xl border-2 transition-all duration-200 text-left touch-manipulation ${
                         isSelected
                           ? 'border-pink-500 bg-pink-50/80 shadow-md shadow-pink-200/50'
                           : 'border-slate-200 bg-white hover:border-slate-300 active:border-pink-300'
                       }`}
                     >
+                      {isLastUsed && (
+                        <div className="absolute -top-2 right-3 px-2 py-0.5 bg-gradient-to-r from-pink-500 to-rose-500 rounded-full text-[10px] font-bold text-white shadow-sm">
+                          Usado recientemente
+                        </div>
+                      )}
                       <div className="flex items-center gap-3">
                         <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${
                           isSelected 
@@ -632,15 +653,19 @@ export default function Home() {
                   animate={{ opacity: 1, height: 'auto' }}
                   className="mb-4"
                 >
-                  <label className="block text-sm font-semibold text-slate-900 mb-2">Contraseña</label>
+                  <label htmlFor="login-password" className="block text-sm font-semibold text-slate-900 mb-2">
+                    Contraseña
+                  </label>
                   <div className="relative">
                     <input
+                      id="login-password"
                       type={showLoginPassword ? "text" : "password"}
-                      placeholder="Sin contraseña"
+                      placeholder="••••••"
                       value={loginPassword}
                       onChange={(e) => {setLoginPassword(e.target.value);setLoginError('');}}
                       onKeyDown={(e) => e.key === 'Enter' && !isSubmitting && handleLogin()}
                       disabled={isSubmitting}
+                      autoComplete="current-password"
                       className="w-full h-14 pl-4 pr-12 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none text-base text-slate-900 placeholder:text-slate-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all touch-manipulation"
                     />
                     <button
@@ -689,10 +714,17 @@ export default function Home() {
                     transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                     className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
                   />
-                  Ingresando...
+                  Entrando...
                 </span>
               ) : (
-                'Gestionar mi punto'
+                <span className="flex flex-col items-center">
+                  <span className="text-base font-bold">Entrar</span>
+                  {selectedRole && (
+                    <span className="text-xs font-normal text-white/80">
+                      Como {ROLES.find(r => r.id === selectedRole)?.name}
+                    </span>
+                  )}
+                </span>
               )}
             </Button>
           </div>
@@ -764,17 +796,23 @@ export default function Home() {
                 
                 <div className="text-center">
                   <h2 className="text-4xl font-bold text-slate-900 mb-3">Iniciar sesión</h2>
-                  <p className="text-base text-slate-600">Selecciona tu rol para comenzar</p>
+                  <p className="text-base text-slate-600">Continúa con tu rol</p>
                 </div>
 
                 <div className="space-y-4">
                   {ROLES.map((role) => {
                     const isSelected = selectedRole === role.id;
+                    const lastUsedRole = localStorage.getItem('lastSelectedRole');
+                    const isLastUsed = role.id === lastUsedRole && !isSelected;
 
                     return (
                       <motion.button
                         key={role.id}
-                        onClick={() => {setSelectedRole(role.id);setLoginError('');}}
+                        onClick={() => {
+                          setSelectedRole(role.id);
+                          setLoginError('');
+                          localStorage.setItem('lastSelectedRole', role.id);
+                        }}
                         whileHover={{ scale: 1.01 }}
                         whileTap={{ scale: 0.97 }}
                         className={`relative w-full p-5 rounded-3xl border-2 transition-all duration-300 text-left flex items-center gap-5 ${
@@ -783,6 +821,11 @@ export default function Home() {
                             : 'border-slate-200 bg-white hover:border-pink-300 hover:shadow-md'
                         }`}
                       >
+                        {isLastUsed && (
+                          <div className="absolute -top-2.5 right-4 px-3 py-1 bg-gradient-to-r from-pink-500 to-rose-500 rounded-full text-[11px] font-bold text-white shadow-md">
+                            Usado recientemente
+                          </div>
+                        )}
                         <div className={`w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0 transition-all ${
                           isSelected ? 'bg-gradient-to-br from-pink-500 to-rose-500 shadow-lg shadow-pink-500/30' : 'bg-slate-100'
                         }`}>
@@ -842,16 +885,20 @@ export default function Home() {
                     animate={{ opacity: 1, height: 'auto' }}
                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   >
-                    <label className="block text-base font-bold text-slate-900 mb-3">Contraseña</label>
+                    <label htmlFor="login-password-desktop" className="block text-base font-bold text-slate-900 mb-3">
+                      Contraseña
+                    </label>
                     <div className="relative">
                       <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                       <input
+                        id="login-password-desktop"
                         type={showLoginPassword ? "text" : "password"}
-                        placeholder="Sin contraseña"
+                        placeholder="••••••"
                         value={loginPassword}
                         onChange={(e) => {setLoginPassword(e.target.value);setLoginError('');}}
                         onKeyDown={(e) => e.key === 'Enter' && !isSubmitting && handleLogin()}
                         disabled={isSubmitting}
+                        autoComplete="current-password"
                         className="w-full pl-12 pr-12 py-4 border-2 border-slate-200 rounded-2xl focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none text-base text-slate-900 placeholder:text-slate-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                       />
                       <button
@@ -862,6 +909,7 @@ export default function Home() {
                         {showLoginPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                       </button>
                     </div>
+                    <p className="text-xs text-slate-500 mt-2">Contraseña asignada por la empresa</p>
                   </motion.div>
                 )}
 
@@ -891,17 +939,23 @@ export default function Home() {
                         transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                         className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
                       />
-                      Ingresando...
+                      Entrando...
                     </span>
                   ) : (
-                    'Gestionar mi punto'
+                    <span className="flex flex-col items-center">
+                      <span className="text-lg font-bold">Entrar</span>
+                      {selectedRole && (
+                        <span className="text-sm font-normal text-white/80 mt-0.5">
+                          Como {ROLES.find(r => r.id === selectedRole)?.name}
+                        </span>
+                      )}
+                    </span>
                   )}
                 </Button>
 
                 <div className="text-center pt-1">
-                  <p className="text-sm text-slate-500 leading-relaxed">Tu acceso define lo que puedes ver y gestionar.</p>
-                  <Link to={createPageUrl('PrivacyPolicy')} className="text-xs text-pink-600 hover:underline mt-2 inline-block">
-                    Política de Privacidad
+                  <Link to={createPageUrl('ExecutiveDashboard')} className="text-xs text-slate-400 hover:text-pink-600 transition-colors inline-block">
+                    Acceso administrativo
                   </Link>
                 </div>
               </div>
