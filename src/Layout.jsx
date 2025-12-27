@@ -32,6 +32,13 @@ export default function Layout({ children, currentPageName }) {
     const savedRole = localStorage.getItem('userRole');
     if (saved) setSelectedStore(saved);
     if (savedRole) setUserRole(savedRole);
+    
+    // Apply saved theme on mount
+    const savedTheme = localStorage.getItem('popsyTheme') || 'classic';
+    const root = document.documentElement;
+    root.classList.remove('theme-classic', 'theme-dark', 'theme-mint', 'theme-sunset', 'theme-ocean');
+    root.classList.add(`theme-${savedTheme}`);
+    root.setAttribute('data-theme', savedTheme);
   }, []);
 
   useEffect(() => {
@@ -56,12 +63,15 @@ export default function Layout({ children, currentPageName }) {
 
   if (isAuthChecking) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{
+        background: 'linear-gradient(to bottom right, var(--theme-bg-alt, #fef2f2), var(--theme-bg, #ffffff))'
+      }}>
         <div className="text-center">
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-            className="w-16 h-16 border-4 border-pink-500 border-t-transparent rounded-full mx-auto mb-4"
+            className="w-16 h-16 border-4 border-t-transparent rounded-full mx-auto mb-4"
+            style={{ borderColor: 'var(--theme-primary, #ec4899)', borderTopColor: 'transparent' }}
           />
           <p className="text-slate-600 font-semibold">Verificando acceso...</p>
         </div>
@@ -71,7 +81,7 @@ export default function Layout({ children, currentPageName }) {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen" style={{ backgroundColor: 'var(--theme-bg)', color: 'var(--theme-text)' }}>
 
 
 
@@ -83,7 +93,9 @@ export default function Layout({ children, currentPageName }) {
           className="pt-4 min-h-screen pb-4 relative"
         >
           {/* Premium Modern Background */}
-          <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none bg-gradient-to-br from-slate-50 via-white to-pink-50/30">
+          <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none" style={{ 
+            background: `linear-gradient(to bottom right, var(--theme-bg-alt, #f8fafc), var(--theme-bg, #ffffff))`
+          }}>
             {/* Animated gradient orbs */}
             <motion.div
               animate={{
@@ -92,7 +104,10 @@ export default function Layout({ children, currentPageName }) {
                 scale: [1, 1.1, 1],
               }}
               transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute top-20 right-[10%] w-[500px] h-[500px] bg-gradient-to-br from-pink-300/20 via-rose-300/15 to-transparent rounded-full blur-3xl"
+              className="absolute top-20 right-[10%] w-[500px] h-[500px] rounded-full blur-3xl"
+              style={{ 
+                background: `radial-gradient(circle, ${document.documentElement.style.getPropertyValue('--theme-primary')}20, transparent)`
+              }}
             />
             <motion.div
               animate={{
@@ -101,7 +116,10 @@ export default function Layout({ children, currentPageName }) {
                 scale: [1, 1.15, 1],
               }}
               transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute bottom-20 left-[15%] w-[600px] h-[600px] bg-gradient-to-br from-purple-300/15 via-pink-300/20 to-transparent rounded-full blur-3xl"
+              className="absolute bottom-20 left-[15%] w-[600px] h-[600px] rounded-full blur-3xl"
+              style={{ 
+                background: `radial-gradient(circle, ${document.documentElement.style.getPropertyValue('--theme-secondary')}15, transparent)`
+              }}
             />
             <motion.div
               animate={{
