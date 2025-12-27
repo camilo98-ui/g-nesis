@@ -221,18 +221,26 @@ body {
   background-color: var(--theme-bg-alt) !important;
 }
 
-/* No indexar en motores de búsqueda */
-meta[name="robots"] {
-  content: "noindex, nofollow";
+/* Theme utility classes */
+.app-container {
+  background-color: var(--theme-bg) !important;
+  color: var(--theme-text) !important;
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
+.app-background {
+  background: linear-gradient(to bottom right, var(--theme-bg-alt), var(--theme-bg)) !important;
+}
+
+.theme-border-primary {
+  border-color: var(--theme-primary) !important;
+}
+
+.theme-orb-1 {
+  background: radial-gradient(circle, var(--theme-primary)20, transparent) !important;
+}
+
+.theme-orb-2 {
+  background: radial-gradient(circle, var(--theme-secondary)15, transparent) !important;
 }
 
 /* No indexar en motores de búsqueda */
