@@ -11,7 +11,6 @@ import {
 import { Link as RouterLink } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { motion } from 'framer-motion';
 
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/6a749247d_Capturadepantalla2025-11-251251441.png";
 
@@ -42,78 +41,18 @@ export default function Layout({ children, currentPageName }) {
   return (
     <ErrorBoundary>
       <div className="min-h-screen app-container">
-
-
-
         {/* Main Content */}
-        <motion.main 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3 }}
-          className="pt-4 min-h-screen pb-4 relative"
-        >
-          {/* Premium Modern Background */}
+        <main className="pt-4 min-h-screen pb-4 relative">
+          {/* Simplified Static Background */}
           <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none app-background">
-            {/* Animated gradient orbs */}
-            <motion.div
-              animate={{
-                x: [0, 100, 0],
-                y: [0, -50, 0],
-                scale: [1, 1.1, 1],
-              }}
-              transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute top-20 right-[10%] w-[500px] h-[500px] theme-orb-1 rounded-full blur-3xl"
-            />
-            <motion.div
-              animate={{
-                x: [0, -80, 0],
-                y: [0, 80, 0],
-                scale: [1, 1.15, 1],
-              }}
-              transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute bottom-20 left-[15%] w-[600px] h-[600px] theme-orb-2 rounded-full blur-3xl"
-            />
-            <motion.div
-              animate={{
-                x: [0, 60, 0],
-                y: [0, -60, 0],
-                scale: [1, 1.2, 1],
-              }}
-              transition={{ duration: 30, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute top-[40%] left-[5%] w-[400px] h-[400px] bg-gradient-to-br from-blue-300/10 via-cyan-300/15 to-transparent rounded-full blur-3xl"
-            />
-
-            {/* Geometric shapes */}
-            <div className="absolute top-[15%] right-[20%] w-32 h-32 border border-pink-200/30 rounded-2xl rotate-12 opacity-40" />
-            <div className="absolute bottom-[25%] left-[25%] w-24 h-24 border border-purple-200/30 rounded-full opacity-30" />
-            <div className="absolute top-[60%] right-[35%] w-20 h-20 border border-blue-200/30 rounded-xl -rotate-6 opacity-40" />
-
-            {/* Glassmorphism layers */}
-            <motion.div
-              animate={{
-                opacity: [0.3, 0.5, 0.3],
-              }}
-              transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute top-[10%] left-[40%] w-64 h-64 bg-gradient-to-br from-white/40 to-pink-100/30 rounded-full backdrop-blur-3xl"
-            />
-            <motion.div
-              animate={{
-                opacity: [0.4, 0.6, 0.4],
-              }}
-              transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-              className="absolute bottom-[15%] right-[30%] w-48 h-48 bg-gradient-to-br from-white/30 to-purple-100/30 rounded-full backdrop-blur-3xl"
-            />
+            <div className="absolute top-20 right-[10%] w-[500px] h-[500px] theme-orb-1 rounded-full blur-3xl opacity-40" />
+            <div className="absolute bottom-20 left-[15%] w-[600px] h-[600px] theme-orb-2 rounded-full blur-3xl opacity-30" />
           </div>
 
-          <motion.div 
-            className="container mx-auto px-2 sm:px-4 relative z-10"
-            initial={{ y: 20 }}
-            animate={{ y: 0 }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
-          >
+          <div className="container mx-auto px-2 sm:px-4 relative z-10">
             {children}
-          </motion.div>
-        </motion.main>
+          </div>
+        </main>
       </div>
     </ErrorBoundary>
   );

@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import StoreSelector, { STORES } from '@/components/StoreSelector';
 import WelcomeToast from '@/components/WelcomeToast';
-import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
 import NotificationSetup from '@/components/NotificationSetup';
 import ManagerialReportModal from '@/components/reports/ManagerialReportModal';
 import PopsyStoryModal from '@/components/PopsyStoryModal';
@@ -143,8 +142,7 @@ const MENU_ITEMS = [
 }];
 
 
-// Confetti pastel simplificado para mejor rendimiento
-const PastelConfetti = () => null;
+
 
 
 export default function Home() {
@@ -873,71 +871,39 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white relative overflow-hidden">
-      <PastelConfetti />
-      <FloatingIceCreamsBg />
 
       <div className="max-w-6xl mx-auto px-4 py-6 relative z-10">
 
 
-        {/* Header con logo animado premium */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-6">
-
+        {/* Header con logo animado */}
+        <div className="text-center mb-6">
           <motion.img
             src={LOGO_URL}
             alt="Popsy"
             className="h-32 sm:h-36 md:h-40 object-contain mx-auto mb-2 cursor-pointer drop-shadow-lg"
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{
-              opacity: 1,
-              scale: [1, 1.03, 0.98, 1.02, 1],
-              y: [0, -8, 0, -4, 0]
-            }}
-            transition={{
-              opacity: { duration: 0.8, ease: "easeOut" },
-              scale: { duration: 4, repeat: Infinity, ease: "easeInOut" },
-              y: { duration: 3, repeat: Infinity, ease: "easeInOut" }
-            }}
-            whileHover={{ scale: 1.08, rotate: [0, -2, 2, 0] }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setShowStory(true)} />
+            animate={{ y: [0, -8, 0] }}
+            transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+            onClick={() => setShowStory(true)}
+          />
 
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-            className="text-gray-400 text-sm mb-3">
+          <p className="text-gray-400 text-sm mb-3">Sistema de Gestión</p>
 
-            Sistema de Gestión
-          </motion.p>
-          
           {/* Store Selector */}
-          <motion.div
-            className="flex flex-col items-center gap-2"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}>
-
+          <div className="flex flex-col items-center gap-2">
             <p className="text-gray-600 font-medium text-sm">¿A qué tienda deseas ingresar?</p>
             <StoreSelector
               selectedStore={selectedStore}
-              onStoreChange={handleStoreChange} />
+              onStoreChange={handleStoreChange}
+            />
+          </div>
+        </div>
 
-          </motion.div>
-        </motion.div>
-
-        {/* Quick Actions - Más dinámicos */}
+        {/* Quick Actions */}
         {(selectedStore || selectedRole === 'gerente') &&
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-4 flex justify-center gap-2 flex-wrap">
+        <div className="mb-4 flex justify-center gap-2 flex-wrap">
 
 
-            <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }}>
-              <Button
+            <Button
               variant="ghost"
               size="sm"
               onClick={() => {
@@ -946,73 +912,54 @@ export default function Home() {
                 localStorage.removeItem('userRole');
                 window.location.href = '/Home';
               }}
-              className="text-gray-500 hover:text-red-600 hover:bg-red-50 transition-all">
-                <LogOut className="w-4 h-4 mr-1" />
-                Cerrar Sesión
-              </Button>
-            </motion.div>
-            <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }}>
-              <Button
+              className="text-gray-500 hover:text-red-600 hover:bg-red-50 transition-all"
+            >
+              <LogOut className="w-4 h-4 mr-1" />
+              Cerrar Sesión
+            </Button>
+            <Button
               variant="ghost"
               size="sm"
               onClick={() => setShowBudgetDashboard(true)}
-              className="text-gray-500 hover:text-sky-600 hover:bg-sky-50 transition-all">
-
-                <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 2, repeat: Infinity }}>
-                  <Target className="w-4 h-4 mr-1" />
-                </motion.div>
-                Presupuestos
-              </Button>
-            </motion.div>
+              className="text-gray-500 hover:text-sky-600 hover:bg-sky-50 transition-all"
+            >
+              <Target className="w-4 h-4 mr-1" />
+              Presupuestos
+            </Button>
             <Link to={createPageUrl('PopsyPlanner')}>
-              <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }}>
-                <Button
+              <Button
                 variant="ghost"
                 size="sm"
-                className="text-gray-500 hover:text-violet-600 hover:bg-violet-50 transition-all">
-
-                  <motion.div animate={{ rotate: [0, 5, -5, 0] }} transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}>
-                    <CalendarDays className="w-4 h-4 mr-1" />
-                  </motion.div>
-                  Planner
-                </Button>
-              </motion.div>
+                className="text-gray-500 hover:text-violet-600 hover:bg-violet-50 transition-all"
+              >
+                <CalendarDays className="w-4 h-4 mr-1" />
+                Planner
+              </Button>
             </Link>
-            <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }}>
-              <Button
+            <Button
               variant="ghost"
               size="sm"
               onClick={() => setShowInstall(true)}
-              className="text-gray-500 hover:text-purple-600 hover:bg-purple-50 transition-all">
-
-                <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 2, repeat: Infinity }}>
-                  <Download className="w-4 h-4 mr-1" />
-                </motion.div>
-                Instalar App
-              </Button>
-            </motion.div>
-            <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }}>
-              <Button
+              className="text-gray-500 hover:text-purple-600 hover:bg-purple-50 transition-all"
+            >
+              <Download className="w-4 h-4 mr-1" />
+              Instalar App
+            </Button>
+            <Button
               variant="ghost"
               size="sm"
               onClick={() => setShowReport(true)}
-              className="text-gray-500 hover:text-rose-600 hover:bg-rose-50 transition-all">
-
-                <motion.div animate={{ y: [0, -2, 0] }} transition={{ duration: 1.5, repeat: Infinity }}>
-                  <FileText className="w-4 h-4 mr-1" />
-                </motion.div>
-                Informe Gerencial
-              </Button>
-            </motion.div>
-          </motion.div>
+              className="text-gray-500 hover:text-rose-600 hover:bg-rose-50 transition-all"
+            >
+              <FileText className="w-4 h-4 mr-1" />
+              Informe
+            </Button>
+            </div>
         }
 
         {/* Menu Grid */}
         {(selectedStore || selectedRole === 'gerente') && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
 
             {MENU_ITEMS.filter((item) => {
               // Restricciones: Panel Ejecutivo solo para gerente, otras opciones solo si hay tienda seleccionada
@@ -1031,17 +978,10 @@ export default function Home() {
             const isLocked = selectedRole === 'embajador' && item.page === 'Budget';
 
             return (
-              <motion.div
-                key={item.name}
-                initial={{ opacity: 0, y: 30, scale: 0.9 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ delay: index * 0.08, type: "spring", stiffness: 200 }}
-                whileHover={!isLocked ? { y: -8, scale: 1.05 } : {}}
-                whileTap={!isLocked ? { scale: 0.95 } : {}}>
+              <div key={item.name}>
 
                   {isLocked ?
-                <motion.div
-                  className={`${item.bgColor} rounded-2xl p-4 h-full shadow-md transition-all duration-300 group relative overflow-hidden border border-white/50 backdrop-blur-sm opacity-60 cursor-not-allowed`}>
+                  <div className={`${item.bgColor} rounded-2xl p-4 h-full shadow-md transition-all duration-300 group relative overflow-hidden border border-white/50 backdrop-blur-sm opacity-60 cursor-not-allowed`}>
 
                       {/* Lock overlay */}
                       <div className="absolute inset-0 bg-gray-900/10 rounded-2xl flex items-center justify-center z-20">
@@ -1049,43 +989,33 @@ export default function Home() {
                       </div>
                       
                       <div className="flex flex-col items-center justify-center text-center relative z-10">
-                        <motion.div
-                      className={`w-12 h-12 ${item.iconBg} backdrop-blur-sm rounded-xl flex items-center justify-center mb-2`}>
-
+                        <div className={`w-12 h-12 ${item.iconBg} backdrop-blur-sm rounded-xl flex items-center justify-center mb-2`}>
                           <Icon className={`w-6 h-6 ${item.iconColor}`} />
-                        </motion.div>
+                        </div>
                         <h3 className={`font-bold ${item.textColor} text-sm`}>
                           {item.name}
                         </h3>
                         <p className="text-[10px] text-gray-500 mt-0.5">{item.description}</p>
                       </div>
-                    </motion.div> :
+                      </div> :
                 item.isSpecialAction && item.specialAction === 'comparable' ?
                 <Link to={createPageUrl('ExecutiveDashboard') + '?comparison=true'}>
-                  <motion.div
-                    className={`${item.bgColor} rounded-2xl p-4 h-full shadow-md hover:shadow-xl transition-all duration-300 group relative overflow-hidden border border-white/50 backdrop-blur-sm cursor-pointer`}>
+                  <div className={`${item.bgColor} rounded-2xl p-4 h-full shadow-md hover:shadow-xl transition-all duration-300 group relative overflow-hidden border border-white/50 backdrop-blur-sm cursor-pointer`}>
                     
-                    {/* Subtle glow effect */}
-                    <motion.div
-                      className="absolute inset-0 bg-white/30 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl" />
-
                     {/* Icon centered */}
                     <div className="flex flex-col items-center justify-center text-center relative z-10">
-                      <motion.div
-                        className={`w-12 h-12 ${item.iconBg} backdrop-blur-sm rounded-xl flex items-center justify-center mb-2`}
-                        whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1 }}
-                        transition={{ duration: 0.4 }}>
+                      <div className={`w-12 h-12 ${item.iconBg} backdrop-blur-sm rounded-xl flex items-center justify-center mb-2`}>
                         <Icon className={`w-6 h-6 ${item.iconColor}`} />
-                      </motion.div>
+                      </div>
                       <h3 className={`font-bold ${item.textColor} text-sm`}>
                         {item.name}
                       </h3>
                       <p className="text-[10px] text-gray-500 mt-0.5">{item.description}</p>
                     </div>
-                  </motion.div>
-                </Link> :
+                    </div>
+                    </Link> :
                 item.isSpecialAction ?
-                <motion.div
+                <div
                   onClick={async () => {
                     if (item.specialAction === 'logout') {
                       localStorage.removeItem('selectedStore');
@@ -1135,32 +1065,23 @@ export default function Home() {
                       setShowStoreSales(true);
                     }
                   }}
-                  className={`${item.bgColor} rounded-2xl p-4 h-full shadow-md hover:shadow-xl transition-all duration-300 group relative overflow-hidden border border-white/50 backdrop-blur-sm cursor-pointer`}>
-
-                  {/* Subtle glow effect */}
-                  <motion.div
-                    className="absolute inset-0 bg-white/30 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl" />
-
+                  className={`${item.bgColor} rounded-2xl p-4 h-full shadow-md hover:shadow-xl transition-all duration-300 group relative overflow-hidden border border-white/50 backdrop-blur-sm cursor-pointer`}
+                  >
                   {/* Icon centered */}
                   <div className="flex flex-col items-center justify-center text-center relative z-10">
-                    <motion.div
-                    className={`w-12 h-12 ${item.iconBg} backdrop-blur-sm rounded-xl flex items-center justify-center mb-2`}
-                    whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1 }}
-                    transition={{ duration: 0.4 }}
-                    animate={item.specialAction === 'backup' && backupLoading ? { rotate: 360 } : {}}
-                    style={{ transition: backupLoading ? 'none' : undefined }}>
-                    {item.icon ? (
-                    <Icon className={`w-6 h-6 ${item.iconColor}`} />
-                    ) : (
-                    <LogOut className={`w-6 h-6 ${item.iconColor}`} />
-                    )}
-                    </motion.div>
+                    <div className={`w-12 h-12 ${item.iconBg} backdrop-blur-sm rounded-xl flex items-center justify-center mb-2`}>
+                      {item.icon ? (
+                        <Icon className={`w-6 h-6 ${item.iconColor}`} />
+                      ) : (
+                        <LogOut className={`w-6 h-6 ${item.iconColor}`} />
+                      )}
+                    </div>
                     <h3 className={`font-bold ${item.textColor} text-sm`}>
                       {item.specialAction === 'backup' && backupLoading ? 'Guardando...' : item.name}
                     </h3>
                     <p className="text-[10px] text-gray-500 mt-0.5">{item.description}</p>
                   </div>
-                </motion.div> :
+                  </div> :
 
                 <Link to={createPageUrl(item.page)}>
                       <motion.div
@@ -1191,8 +1112,8 @@ export default function Home() {
                 </motion.div>);
 
           })}
-        </motion.div>
-        )}
+          </div>
+          )}
         
       </div>
 
