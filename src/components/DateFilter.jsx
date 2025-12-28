@@ -269,7 +269,7 @@ function CustomCalendar({ selected, onSelect, onClose, onApply }) {
           </div>
 
       {/* Navegación */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+      <div className={`flex items-center justify-between px-4 ${isMobile ? 'py-4' : 'py-3'} border-b border-gray-100 flex-shrink-0`}>
         <motion.button
             whileHover={{ scale: 1.1, x: -2 }}
             whileTap={{ scale: 0.9 }}
