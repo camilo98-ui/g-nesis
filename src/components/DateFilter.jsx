@@ -338,7 +338,7 @@ function CustomCalendar({ selected, onSelect, onClose, onApply }) {
         }
       
       {/* Meses */}
-      <div className={`flex ${isMobile ? '' : 'divide-x divide-gray-100'}`}>
+      <div className={`flex ${isMobile ? 'overflow-y-auto flex-1' : 'divide-x divide-gray-100'}`}>
         {months.map((month, i) =>
           <div key={i} className={isMobile ? 'w-full' : ''}>{renderMonth(month)}</div>
           )}
