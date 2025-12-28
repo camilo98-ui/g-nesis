@@ -42,10 +42,11 @@ const MilkshakeCup = ({ color = "#C2185B" }) => (
 
 const IceCreamOutline = ({ color = "#C2185B" }) => (
   <svg viewBox="0 0 50 50" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M20 24 L25 40 L30 24"/>
-    <circle cx="25" cy="18" r="7"/>
-    <circle cx="19" cy="16" r="5"/>
-    <circle cx="31" cy="16" r="5"/>
+    <path d="M20 22 L25 38 L30 22" fill="none"/>
+    <line x1="22.5" y1="26" x2="25" y2="35"/>
+    <line x1="27.5" y1="26" x2="25" y2="35"/>
+    <circle cx="22" cy="17" r="5"/>
+    <circle cx="28" cy="17" r="5"/>
   </svg>
 );
 
