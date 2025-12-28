@@ -345,7 +345,7 @@ function CustomCalendar({ selected, onSelect, onClose, onApply }) {
       </div>
       
           {/* Footer */}
-          <div className={`px-4 py-3 border-t border-gray-100 bg-gray-50/50 ${isMobile ? 'flex-col space-y-3' : 'flex items-center justify-between'}`}>
+          <div className={`px-4 ${isMobile ? 'py-4' : 'py-3'} border-t border-gray-100 bg-gray-50/50 ${isMobile ? 'flex-col space-y-3' : 'flex items-center justify-between'} flex-shrink-0`}>
             <div className={`flex items-center gap-2 ${isMobile ? 'justify-center' : ''}`}>
               {tempSelection?.from ?
             <motion.div
