@@ -473,7 +473,7 @@ export default function Home() {
         </div>
 
         {/* Mobile/Tablet View */}
-        <div className="lg:hidden min-h-screen flex flex-col bg-white justify-center">
+        <div className="lg:hidden min-h-screen flex flex-col justify-center">
           <div className="flex-1 flex flex-col justify-center px-4 py-8 max-h-screen overflow-y-auto">
             <div className="max-w-md mx-auto w-full">
               <div className="mb-8 text-center">
@@ -830,7 +830,7 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-white relative overflow-hidden">
+    <div className="min-h-screen relative overflow-hidden">
 
       <div className="max-w-6xl mx-auto px-4 py-6 relative z-10">
 

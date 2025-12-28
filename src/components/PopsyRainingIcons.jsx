@@ -57,7 +57,7 @@ const RAIN_ITEMS = Array.from({ length: 40 }, (_, i) => ({
 
 export default function PopsyRainingIcons() {
   return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 1 }}>
+    <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
       {RAIN_ITEMS.map((item) => {
         const IconComponent = item.IconComponent;
         return (
