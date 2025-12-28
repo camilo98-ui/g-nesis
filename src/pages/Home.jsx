@@ -467,18 +467,15 @@ export default function Home() {
         </div>
 
         {/* Mobile/Tablet View */}
-        <div className="lg:hidden min-h-screen flex flex-col bg-white">
-          <div className="pt-8 pb-4 px-4 text-center">
-            <img 
-              src={LOGO_URL} 
-              alt="Popsy" 
-              className="h-16 object-contain mx-auto"
-            />
-          </div>
-
-          <div className="flex-1 overflow-y-auto px-4 py-4 pb-32">
-            <div className="max-w-md mx-auto">
-              <div className="mb-6 text-center">
+        <div className="lg:hidden min-h-screen flex flex-col bg-white justify-center">
+          <div className="flex-1 flex flex-col justify-center px-4 py-8 max-h-screen overflow-y-auto">
+            <div className="max-w-md mx-auto w-full">
+              <div className="mb-8 text-center">
+                <img 
+                  src={LOGO_URL} 
+                  alt="Popsy" 
+                  className="h-24 object-contain mx-auto mb-6"
+                />
                 <h1 className="text-2xl font-bold text-slate-900 mb-1">Iniciar sesión</h1>
                 <p className="text-slate-600 text-sm">Continúa con tu rol</p>
               </div>
@@ -587,29 +584,27 @@ export default function Home() {
                 </div>
               )}
 
-              <div className="text-center mt-4 mb-2">
+              <Button
+                onClick={handleLogin}
+                disabled={(selectedRole !== 'gerente' && !pendingStore) || !selectedRole || isSubmitting}
+                className="w-full h-12 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl font-bold text-base disabled:opacity-40 mt-4"
+              >
+                {isSubmitting ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Entrando...
+                  </span>
+                ) : (
+                  'Entrar'
+                )}
+              </Button>
+
+              <div className="text-center mt-4">
                 <Link to={createPageUrl('ExecutiveDashboard')} className="text-xs text-slate-500">
                   ¿Eres administrador?
                 </Link>
               </div>
             </div>
-          </div>
-
-          <div className="fixed bottom-0 left-0 right-0 bg-white p-4 border-t border-slate-100 shadow-lg">
-            <Button
-              onClick={handleLogin}
-              disabled={(selectedRole !== 'gerente' && !pendingStore) || !selectedRole || isSubmitting}
-              className="w-full h-12 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl font-bold text-base disabled:opacity-40"
-            >
-              {isSubmitting ? (
-                <span className="flex items-center justify-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Entrando...
-                </span>
-              ) : (
-                'Entrar'
-              )}
-            </Button>
           </div>
         </div>
 
