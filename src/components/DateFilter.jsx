@@ -140,16 +140,16 @@ function CustomCalendar({ selected, onSelect, onClose, onApply }) {
     const offset = startDay === 0 ? 6 : startDay - 1;
 
     return (
-      <div className="p-3">
-        <div className="text-center font-semibold text-gray-800 mb-3 capitalize text-sm">
+      <div className={`${isMobile ? 'p-4' : 'p-3'}`}>
+        <div className={`text-center font-semibold text-gray-800 ${isMobile ? 'mb-4 text-base' : 'mb-3 text-sm'} capitalize`}>
           {format(month, 'MMMM yyyy', { locale: es })}
         </div>
-        <div className="grid grid-cols-7 gap-1 mb-2">
+        <div className={`grid grid-cols-7 ${isMobile ? 'gap-2 mb-3' : 'gap-1 mb-2'}`}>
           {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((d, i) =>
-          <div key={i} className="text-center text-[10px] text-gray-400 font-bold">{d}</div>
+          <div key={i} className={`text-center ${isMobile ? 'text-xs' : 'text-[10px]'} text-gray-400 font-bold`}>{d}</div>
           )}
         </div>
-        <div className="grid grid-cols-7 gap-1">
+        <div className={`grid grid-cols-7 ${isMobile ? 'gap-2' : 'gap-1'}`}>
           {Array.from({ length: offset }).map((_, i) => <div key={`e-${i}`} className="h-8" />)}
           {days.map((day) => {
             const inRange = isInRange(day);
