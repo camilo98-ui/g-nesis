@@ -185,21 +185,21 @@ function CustomCalendar({ selected, onSelect, onClose, onApply }) {
   };
 
   return (
-    <div className="select-none bg-white rounded-2xl overflow-hidden shadow-xl border border-pink-100">
+    <div className={`select-none bg-white rounded-2xl overflow-hidden shadow-xl border border-pink-100 ${isMobile ? 'max-h-[85vh] flex flex-col' : ''}`}>
       {/* Tabs: Calendario / Semanas */}
-      <div className="flex border-b border-pink-100">
+      <div className="flex border-b border-pink-100 flex-shrink-0">
         <button
           onClick={() => setShowWeeks(false)}
-          className={`flex-1 py-2.5 text-xs font-medium transition-all ${!showWeeks ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white' : 'bg-pink-50 text-pink-600 hover:bg-pink-100'}`}>
+          className={`flex-1 py-3 text-xs font-medium transition-all ${!showWeeks ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white' : 'bg-pink-50 text-pink-600 hover:bg-pink-100'}`}>
 
-          <CalendarRange className="w-3.5 h-3.5 inline mr-1" />
+          <CalendarRange className="w-4 h-4 inline mr-1" />
           Calendario
         </button>
         <button
           onClick={() => setShowWeeks(true)}
-          className={`flex-1 py-2.5 text-xs font-medium transition-all ${showWeeks ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white' : 'bg-pink-50 text-pink-600 hover:bg-pink-100'}`}>
+          className={`flex-1 py-3 text-xs font-medium transition-all ${showWeeks ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white' : 'bg-pink-50 text-pink-600 hover:bg-pink-100'}`}>
 
-          <Calendar className="w-3.5 h-3.5 inline mr-1" />
+          <Calendar className="w-4 h-4 inline mr-1" />
           Semanas
         </button>
       </div>
