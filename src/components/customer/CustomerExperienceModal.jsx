@@ -121,10 +121,10 @@ const RatingCard = ({ rating, label, onClick, disabled }) => {
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`bg-gradient-to-br ${gradients[rating]} rounded-3xl p-8 sm:p-12 shadow-xl hover:shadow-2xl transition-all aspect-square flex flex-col items-center justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed border-2 border-white/60 hover:scale-105 active:scale-95`}
+      className={`bg-gradient-to-br ${gradients[rating]} rounded-2xl sm:rounded-3xl p-6 sm:p-12 shadow-xl hover:shadow-2xl transition-all flex flex-col items-center justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed border-2 border-white/60 hover:scale-105 active:scale-95 min-h-[200px] sm:min-h-0 sm:aspect-square`}
     >
-      <div className="mb-4">
-        <ModernEmoji type={rating} size={100} />
+      <div className="mb-3 sm:mb-4">
+        <ModernEmoji type={rating} size={window.innerWidth < 640 ? 70 : 100} />
       </div>
       <p className="text-2xl sm:text-3xl font-black text-slate-800">{label}</p>
     </button>
@@ -1144,7 +1144,7 @@ export default function CustomerExperienceModal({ onClose, storeId, userRole }) 
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 max-w-5xl w-full mb-6">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-6 max-w-5xl w-full mb-6 px-2">
             <RatingCard
               rating="excelente"
               label="Excelente"
