@@ -329,74 +329,40 @@ Genera:
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden">
-      {/* Animated Background */}
+      {/* Simplified Background - Static */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <motion.div
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.1, 0.15, 0.1],
-          }}
-          transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute -top-1/2 -right-1/2 w-[1200px] h-[1200px] bg-gradient-to-br from-pink-500/20 via-purple-500/20 to-blue-500/20 rounded-full blur-3xl"
-        />
-        <motion.div
-          animate={{
-            scale: [1, 1.3, 1],
-            opacity: [0.08, 0.12, 0.08],
-          }}
-          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut", delay: 5 }}
-          className="absolute -bottom-1/2 -left-1/2 w-[1000px] h-[1000px] bg-gradient-to-br from-blue-500/15 via-cyan-500/15 to-emerald-500/15 rounded-full blur-3xl"
-        />
-        
-        {/* Grid pattern */}
-        <div className="absolute inset-0 opacity-[0.02]"
-          style={{
-            backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
-            backgroundSize: '100px 100px'
-          }}
-        />
+        <div className="absolute -top-1/2 -right-1/2 w-[1200px] h-[1200px] bg-gradient-to-br from-pink-500/15 via-purple-500/15 to-blue-500/15 rounded-full blur-3xl opacity-60" />
+        <div className="absolute -bottom-1/2 -left-1/2 w-[1000px] h-[1000px] bg-gradient-to-br from-blue-500/10 via-cyan-500/10 to-emerald-500/10 rounded-full blur-3xl opacity-50" />
       </div>
 
       {/* Back Button */}
       <Link to={createPageUrl('Home')}>
-        <motion.div
-          whileHover={{ scale: 1.05, x: -3 }}
-          className="fixed left-4 sm:left-6 top-6 sm:top-8 w-11 h-11 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 hover:bg-white/20 flex items-center justify-center transition-all cursor-pointer z-50"
-        >
-          <ArrowLeft className="w-5 h-5 text-white" />
-        </motion.div>
+        <div className="fixed left-3 sm:left-6 top-4 sm:top-8 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 hover:bg-white/20 flex items-center justify-center transition-all cursor-pointer z-50">
+          <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+        </div>
       </Link>
 
-      <div className="max-w-[1600px] mx-auto px-12 py-16 relative z-10">
-        {/* Header */}
-        <div className="mb-16">
-          <div className="flex items-start justify-between">
-            <div>
-              <motion.h1 
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-6xl font-black text-white mb-4 tracking-tight"
-              >
+      <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-12 py-6 sm:py-12 lg:py-16 relative z-10">
+        {/* Header - Responsive */}
+        <div className="mb-6 sm:mb-12 lg:mb-16">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="text-center sm:text-left w-full sm:w-auto">
+              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white mb-2 tracking-tight">
                 Bogotá Noroccidente
-              </motion.h1>
-              <motion.p 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.1 }}
-                className="text-lg text-slate-400 font-normal"
-              >
+              </h1>
+              <p className="text-sm sm:text-base lg:text-lg text-slate-400 font-normal">
                 {format(new Date(), 'EEEE dd \'de\' MMMM', { locale: es })}
-              </motion.p>
+              </p>
             </div>
 
-            <div className="flex items-center gap-4 mt-2">
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+              <div className="relative w-full sm:w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <Input
-                  placeholder="Buscar tienda..."
+                  placeholder="Buscar..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-11 w-[320px] h-12 text-sm bg-white/10 backdrop-blur-xl border-white/20 text-white placeholder:text-slate-400 focus:bg-white/20 focus:border-white/30"
+                  className="pl-10 h-10 text-sm bg-white/10 backdrop-blur-xl border-white/20 text-white placeholder:text-slate-400"
                 />
               </div>
               <DateFilter 
@@ -408,386 +374,134 @@ Genera:
         </div>
 
         {isLoading ? (
-          <div className="grid grid-cols-4 gap-8 mb-20">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-8">
             {[1,2,3,4].map(i => (
-              <div key={i} className="bg-white/5 backdrop-blur-xl rounded-2xl h-48 animate-pulse" />
+              <div key={i} className="bg-white/5 backdrop-blur-xl rounded-xl h-32 sm:h-48 animate-pulse" />
             ))}
           </div>
         ) : (
           <>
-            {/* Botón Modo Comparable Destacado */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mb-12"
-            >
-              <motion.button
-                whileHover={{ scale: 1.02, y: -4 }}
-                whileTap={{ scale: 0.98 }}
+            {/* Botón Modo Comparable - Responsive */}
+            <div className="mb-6 sm:mb-10">
+              <button
                 onClick={() => setShowComparable(true)}
-                className="w-full relative overflow-hidden rounded-2xl p-8 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-purple-500/20 backdrop-blur-xl border-2 border-purple-500/40 hover:border-purple-400/60 transition-all group"
+                className="w-full rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-purple-500/20 backdrop-blur-xl border border-purple-500/40 hover:border-purple-400/60 transition-all"
               >
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-pink-500/30 to-purple-500/0"
-                  animate={{ x: ['-100%', '200%'] }}
-                  transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                />
-                
-                <div className="relative z-10 flex items-center justify-between">
-                  <div className="flex items-center gap-6">
-                    <motion.div
-                      animate={{ rotate: [0, 10, -10, 0] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                      className="w-16 h-16 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/50"
-                    >
-                      <TrendingUp className="w-8 h-8 text-white" />
-                    </motion.div>
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 sm:gap-4 lg:gap-6">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 rounded-lg sm:rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
+                      <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-white" />
+                    </div>
                     <div className="text-left">
-                      <h3 className="text-2xl font-black text-white mb-1">Análisis Comparable</h3>
-                      <p className="text-slate-300 text-sm">Compara periodos, identifica tendencias y proyecta resultados</p>
+                      <h3 className="text-base sm:text-xl lg:text-2xl font-black text-white mb-0.5">Análisis Comparable</h3>
+                      <p className="text-slate-300 text-xs sm:text-sm hidden sm:block">Compara periodos, identifica tendencias y proyecta resultados</p>
                     </div>
                   </div>
                   
-                  <motion.div
-                    className="flex items-center gap-3"
-                    animate={{ x: [0, 10, 0] }}
-                    transition={{ duration: 1.5, repeat: Infinity }}
-                  >
-                    <div className="text-right mr-4">
-                      <p className="text-xs text-purple-300 uppercase tracking-wider mb-1">Análisis Avanzado</p>
-                      <p className="text-sm text-white font-bold">Ventas • Transacciones • Ticket</p>
-                    </div>
-                    <div className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/20 group-hover:bg-white/20 transition-colors">
-                      <motion.div
-                        animate={{ x: [0, 3, 0] }}
-                        transition={{ duration: 1, repeat: Infinity }}
-                      >
-                        <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </motion.div>
-                    </div>
-                  </motion.div>
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/20 flex-shrink-0">
+                    <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
                 </div>
-              </motion.button>
-            </motion.div>
+              </button>
+            </div>
 
-            {/* KPIs Interactivos Futuristas */}
-            <div className="grid grid-cols-4 gap-8 mb-20">
+            {/* KPIs - Grid Responsive */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 lg:gap-8 mb-8 sm:mb-12 lg:mb-20">
               {/* Venta Total */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                whileHover={{ scale: 1.03, y: -8 }}
-                onHoverStart={() => setHoveredKPI('sales')}
-                onHoverEnd={() => setHoveredKPI(null)}
+              <div
                 onClick={() => setSelectedKPIDetail('sales')}
-                className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl rounded-2xl p-8 border border-white/20 cursor-pointer overflow-hidden group"
+                className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 border border-white/20 cursor-pointer"
               >
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-purple-500/0 group-hover:from-blue-500/20 group-hover:to-purple-500/20 transition-all duration-500"
-                />
-                
                 <div className="relative z-10">
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">💰 Venta Total</p>
-                  <motion.p 
-                    className="text-5xl font-black text-white mb-3 tracking-tight tabular-nums"
-                    animate={hoveredKPI === 'sales' ? { scale: 1.05 } : { scale: 1 }}
-                  >
+                  <p className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 sm:mb-4">💰 Venta Total</p>
+                  <p className="text-2xl sm:text-4xl lg:text-5xl font-black text-white mb-2 sm:mb-3 tracking-tight tabular-nums">
                     {formatShort(zoneTotals.totalSales)}
-                  </motion.p>
-                  
-                  <AnimatePresence mode="wait">
-                    {hoveredKPI === 'sales' ? (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        className="space-y-2"
-                      >
-                        <p className="text-sm text-blue-300 font-semibold">Meta: {formatShort(zoneTotals.totalBudget)}</p>
-                        <p className="text-xs text-slate-400">
-                          Promedio/tienda: {formatCurrency(zoneTotals.totalSales / storesAnalysis.filter(s => s.hasData).length)}
-                        </p>
-                      </motion.div>
-                    ) : (
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                      >
-                        <ResponsiveContainer width="100%" height={60}>
-                          <AreaChart data={dailySalesData}>
-                            <defs>
-                              <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                              </linearGradient>
-                            </defs>
-                            <Area 
-                              type="monotone" 
-                              dataKey="sales" 
-                              stroke="#3b82f6" 
-                              strokeWidth={2}
-                              fill="url(#salesGradient)" 
-                              animationDuration={800}
-                            />
-                          </AreaChart>
-                        </ResponsiveContainer>
-                        <p className="text-[10px] text-slate-500 text-center mt-1">Tendencia diaria (M)</p>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  </p>
+                  <p className="text-[10px] sm:text-xs text-blue-300 font-semibold">Meta: {formatShort(zoneTotals.totalBudget)}</p>
                 </div>
-              </motion.div>
+              </div>
 
               {/* % Cumplimiento */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.05 }}
-                whileHover={{ scale: 1.03, y: -8 }}
-                onHoverStart={() => setHoveredKPI('compliance')}
-                onHoverEnd={() => setHoveredKPI(null)}
+              <div
                 onClick={() => setSelectedKPIDetail('compliance')}
-                className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl rounded-2xl p-8 border border-white/20 cursor-pointer overflow-hidden group"
+                className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 border border-white/20 cursor-pointer"
               >
-                <motion.div
-                  className={`absolute inset-0 ${
-                    ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 90 
-                      ? 'bg-gradient-to-br from-emerald-500/0 to-green-500/0 group-hover:from-emerald-500/20 group-hover:to-green-500/20'
-                      : ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 70
-                      ? 'bg-gradient-to-br from-amber-500/0 to-orange-500/0 group-hover:from-amber-500/20 group-hover:to-orange-500/20'
-                      : 'bg-gradient-to-br from-red-500/0 to-rose-500/0 group-hover:from-red-500/20 group-hover:to-rose-500/20'
-                  } transition-all duration-500`}
-                />
-                
                 <div className="relative z-10">
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">📊 Cumplimiento</p>
-                  <motion.p 
-                    className={`text-7xl font-black mb-3 tracking-tight tabular-nums ${
-                      ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 90 ? 'text-emerald-400' :
-                      ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 70 ? 'text-amber-400' : 'text-red-400'
-                    }`}
-                    animate={hoveredKPI === 'compliance' ? { scale: 1.05 } : { scale: 1 }}
-                  >
+                  <p className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 sm:mb-4">📊 Cumplimiento</p>
+                  <p className={`text-3xl sm:text-5xl lg:text-7xl font-black mb-2 sm:mb-3 tracking-tight tabular-nums ${
+                    ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 90 ? 'text-emerald-400' :
+                    ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 70 ? 'text-amber-400' : 'text-red-400'
+                  }`}>
                     {((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%
-                  </motion.p>
-                  
-                  <AnimatePresence mode="wait">
-                    {hoveredKPI === 'compliance' ? (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        className="space-y-2"
-                      >
-                        <div className="flex justify-between text-xs">
-                          <span className="text-slate-400">En meta</span>
-                          <span className="text-emerald-400 font-bold">{statusCounts.positive}</span>
-                        </div>
-                        <div className="flex justify-between text-xs">
-                          <span className="text-slate-400">En alerta</span>
-                          <span className="text-amber-400 font-bold">{statusCounts.negative}</span>
-                        </div>
-                        <div className="flex justify-between text-xs">
-                          <span className="text-slate-400">Críticas</span>
-                          <span className="text-red-400 font-bold">{statusCounts.critical}</span>
-                        </div>
-                      </motion.div>
-                    ) : (
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="flex justify-center"
-                      >
-                        <ResponsiveContainer width="100%" height={80}>
-                          <PieChart>
-                            <Pie
-                              data={statusDistributionData}
-                              cx="50%"
-                              cy="50%"
-                              innerRadius={25}
-                              outerRadius={35}
-                              dataKey="value"
-                              animationDuration={800}
-                            >
-                              {statusDistributionData.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={entry.color} />
-                              ))}
-                            </Pie>
-                          </PieChart>
-                        </ResponsiveContainer>
-                        <p className="text-[10px] text-slate-500 text-center mt-1">Distribución</p>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  </p>
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-[10px] sm:text-xs">
+                      <span className="text-slate-400">Meta</span>
+                      <span className="text-emerald-400 font-bold">{statusCounts.positive}</span>
+                    </div>
+                    <div className="flex justify-between text-[10px] sm:text-xs">
+                      <span className="text-slate-400">Críticas</span>
+                      <span className="text-red-400 font-bold">{statusCounts.critical}</span>
+                    </div>
+                  </div>
                 </div>
-              </motion.div>
+              </div>
 
               {/* Críticas */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                whileHover={{ scale: 1.03, y: -8 }}
-                onHoverStart={() => setHoveredKPI('critical')}
-                onHoverEnd={() => setHoveredKPI(null)}
+              <div
                 onClick={() => setSelectedKPIDetail('critical')}
-                className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl rounded-2xl p-8 border border-white/20 cursor-pointer overflow-hidden group"
+                className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 border border-white/20 cursor-pointer"
               >
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-br from-red-500/0 to-rose-500/0 group-hover:from-red-500/20 group-hover:to-rose-500/20 transition-all duration-500"
-                />
-                
                 <div className="relative z-10">
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">🔴 Críticas</p>
-                  <motion.p 
-                    className={`text-7xl font-black mb-3 tracking-tight tabular-nums ${
-                      statusCounts.critical > 0 ? 'text-red-400' : 'text-slate-600'
-                    }`}
-                    animate={hoveredKPI === 'critical' ? { scale: 1.05 } : { scale: 1 }}
-                  >
+                  <p className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 sm:mb-4">🔴 Críticas</p>
+                  <p className={`text-3xl sm:text-5xl lg:text-7xl font-black mb-2 sm:mb-3 tracking-tight tabular-nums ${
+                    statusCounts.critical > 0 ? 'text-red-400' : 'text-slate-600'
+                  }`}>
                     {statusCounts.critical}
-                  </motion.p>
-                  
-                  <AnimatePresence mode="wait">
-                    {hoveredKPI === 'critical' && statusCounts.critical > 0 ? (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        className="space-y-2"
-                      >
-                        <p className="text-sm text-red-300 font-semibold">
-                          {Math.round((statusCounts.critical/STORES.length)*100)}% del total
-                        </p>
-                        <p className="text-xs text-slate-400">
-                          Brecha: {formatCurrency(storesAnalysis.filter(s => s.status === 'critical').reduce((sum, s) => sum + s.gap, 0))}
-                        </p>
-                      </motion.div>
-                    ) : (
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                      >
-                        {statusCounts.critical > 0 ? (
-                          <>
-                            <ResponsiveContainer width="100%" height={60}>
-                              <BarChart data={criticalStoresData}>
-                                <Bar dataKey="value" fill="#ef4444" radius={[4, 4, 0, 0]} animationDuration={800} />
-                              </BarChart>
-                            </ResponsiveContainer>
-                            <p className="text-[10px] text-slate-500 text-center mt-1">Top 5 más críticas</p>
-                          </>
-                        ) : (
-                          <p className="text-sm text-slate-400 text-center">Ninguna crítica</p>
-                        )}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  </p>
+                  {statusCounts.critical > 0 && (
+                    <p className="text-[10px] sm:text-xs text-red-300 font-semibold">
+                      {Math.round((statusCounts.critical/STORES.length)*100)}% del total
+                    </p>
+                  )}
                 </div>
-              </motion.div>
+              </div>
 
               {/* En Meta */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.15 }}
-                whileHover={{ scale: 1.03, y: -8 }}
-                onHoverStart={() => setHoveredKPI('meta')}
-                onHoverEnd={() => setHoveredKPI(null)}
+              <div
                 onClick={() => setSelectedKPIDetail('meta')}
-                className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl rounded-2xl p-8 border border-white/20 cursor-pointer overflow-hidden group"
+                className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 border border-white/20 cursor-pointer"
               >
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-br from-emerald-500/0 to-green-500/0 group-hover:from-emerald-500/20 group-hover:to-green-500/20 transition-all duration-500"
-                />
-                
                 <div className="relative z-10">
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">🟢 En Meta</p>
-                  <motion.p 
-                    className="text-7xl font-black text-emerald-400 mb-3 tracking-tight tabular-nums"
-                    animate={hoveredKPI === 'meta' ? { scale: 1.05 } : { scale: 1 }}
-                  >
+                  <p className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 sm:mb-4">🟢 En Meta</p>
+                  <p className="text-3xl sm:text-5xl lg:text-7xl font-black text-emerald-400 mb-2 sm:mb-3 tracking-tight tabular-nums">
                     {statusCounts.positive}
-                  </motion.p>
-                  
-                  <AnimatePresence mode="wait">
-                    {hoveredKPI === 'meta' && statusCounts.positive > 0 ? (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        className="space-y-2"
-                      >
-                        <p className="text-sm text-emerald-300 font-semibold">
-                          {Math.round((statusCounts.positive/STORES.length)*100)}% del total
-                        </p>
-                        <p className="text-xs text-slate-400">
-                          Superávit: {formatCurrency(storesAnalysis.filter(s => s.status === 'positive').reduce((sum, s) => sum - s.gap, 0))}
-                        </p>
-                      </motion.div>
-                    ) : (
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                      >
-                        {statusCounts.positive > 0 ? (
-                          <>
-                            <ResponsiveContainer width="100%" height={60}>
-                              <LineChart data={topStoresTrend}>
-                                <Line 
-                                  type="monotone" 
-                                  dataKey="value" 
-                                  stroke="#10b981" 
-                                  strokeWidth={2}
-                                  dot={{ fill: '#10b981', r: 3 }}
-                                  animationDuration={800}
-                                />
-                              </LineChart>
-                            </ResponsiveContainer>
-                            <p className="text-[10px] text-slate-500 text-center mt-1">Top 5 mejores</p>
-                          </>
-                        ) : (
-                          <p className="text-sm text-slate-400 text-center">Ninguna en meta</p>
-                        )}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  </p>
+                  <p className="text-[10px] sm:text-xs text-emerald-300 font-semibold">
+                    {Math.round((statusCounts.positive/STORES.length)*100)}% del total
+                  </p>
                 </div>
-              </motion.div>
+              </div>
             </div>
 
             {/* Alerta Crítica */}
             {statusCounts.critical > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mb-16"
-              >
-                <div className={`relative rounded-xl p-10 overflow-hidden ${
+              <div className="mb-6 sm:mb-10 lg:mb-16">
+                <div className={`relative rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-10 overflow-hidden ${
                   statusCounts.critical >= STORES.length * 0.7 
                     ? 'bg-gradient-to-r from-red-500/90 to-rose-600/90' 
                     : 'bg-gradient-to-r from-amber-500/90 to-orange-600/90'
                 } backdrop-blur-xl border border-white/20`}>
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent"
-                    animate={{ x: ['-100%', '100%'] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                  />
-                  
                   <div className="relative z-10">
-                    <p className="text-3xl font-black text-white mb-4 leading-tight">
-                      {statusCounts.critical} de {STORES.length} tiendas están en estado crítico ({'<'}70%)
+                    <p className="text-base sm:text-2xl lg:text-3xl font-black text-white mb-2 sm:mb-4 leading-tight">
+                      {statusCounts.critical} de {STORES.length} tiendas críticas ({'<'}70%)
                     </p>
-                    <p className="text-lg text-white/90 mb-6 font-medium">
+                    <p className="text-sm sm:text-base lg:text-lg text-white/90 mb-3 sm:mb-6 font-medium">
                       {statusCounts.critical >= STORES.length * 0.7 
-                        ? 'Se requiere acción inmediata para cumplir meta mensual.'
-                        : 'Requiere atención urgente para alcanzar objetivo.'
+                        ? 'Acción inmediata requerida'
+                        : 'Requiere atención urgente'
                       }
                     </p>
                     <button
@@ -795,29 +509,29 @@ Genera:
                         const el = document.getElementById('stores-table');
                         el?.scrollIntoView({ behavior: 'smooth' });
                       }}
-                      className="text-sm font-bold text-white underline hover:no-underline transition-all"
+                      className="text-xs sm:text-sm font-bold text-white underline"
                     >
-                      Ver tiendas críticas →
+                      Ver tiendas →
                     </button>
                   </div>
                 </div>
-              </motion.div>
+              </div>
             )}
 
             {/* Contexto */}
-            <div className="mb-6">
-              <p className="text-sm font-medium text-slate-400">{tableContextSummary}</p>
+            <div className="mb-4 sm:mb-6">
+              <p className="text-xs sm:text-sm font-medium text-slate-400">{tableContextSummary}</p>
             </div>
 
-            {/* Tabla Futurista */}
-            <div id="stores-table" className="mb-20">
-              <div className="bg-white/5 backdrop-blur-2xl rounded-xl border border-white/10 overflow-hidden">
-                <table className="w-full">
+            {/* Tabla - Responsive con scroll horizontal en móvil */}
+            <div id="stores-table" className="mb-8 sm:mb-12 lg:mb-20">
+              <div className="bg-white/5 backdrop-blur-2xl rounded-xl border border-white/10 overflow-x-auto">
+                <table className="w-full min-w-[800px]">
                   <thead>
                     <tr className="border-b border-white/10">
                       <th 
                         onClick={() => handleSort('name')}
-                        className="text-left py-5 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider cursor-pointer hover:text-white transition-colors group"
+                        className="text-left py-3 px-3 sm:py-4 sm:px-4 lg:py-5 lg:px-6 text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider cursor-pointer"
                       >
                         <div className="flex items-center gap-2">
                           Tienda
@@ -832,7 +546,7 @@ Genera:
                       </th>
                       <th 
                         onClick={() => handleSort('compliance')}
-                        className="text-right py-5 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider cursor-pointer hover:text-white transition-colors group"
+                        className="text-right py-3 px-3 sm:py-4 sm:px-4 lg:py-5 lg:px-6 text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider cursor-pointer"
                       >
                         <div className="flex items-center justify-end gap-2">
                           % Cumplimiento
@@ -847,7 +561,7 @@ Genera:
                       </th>
                       <th 
                         onClick={() => handleSort('sales')}
-                        className="text-right py-5 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider cursor-pointer hover:text-white transition-colors group"
+                        className="text-right py-3 px-3 sm:py-4 sm:px-4 lg:py-5 lg:px-6 text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider cursor-pointer hidden sm:table-cell"
                       >
                         <div className="flex items-center justify-end gap-2">
                           Venta vs Meta
@@ -862,7 +576,7 @@ Genera:
                       </th>
                       <th 
                         onClick={() => handleSort('gap')}
-                        className="text-right py-5 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider cursor-pointer hover:text-white transition-colors group"
+                        className="text-right py-3 px-3 sm:py-4 sm:px-4 lg:py-5 lg:px-6 text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider cursor-pointer hidden lg:table-cell"
                       >
                         <div className="flex items-center justify-end gap-2">
                           Brecha $
@@ -875,15 +589,15 @@ Genera:
                           )}
                         </div>
                       </th>
-                      <th className="text-right py-5 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider">
-                        Prom. Venta/Día
+                      <th className="text-right py-3 px-3 sm:py-4 sm:px-4 lg:py-5 lg:px-6 text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider hidden lg:table-cell">
+                        Venta/Día
                       </th>
-                      <th className="text-right py-5 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider">
-                        Prom. Trans/Día
+                      <th className="text-right py-3 px-3 sm:py-4 sm:px-4 lg:py-5 lg:px-6 text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider hidden lg:table-cell">
+                        Trans/Día
                       </th>
                       <th 
                         onClick={() => handleSort('status')}
-                        className="text-center py-5 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider cursor-pointer hover:text-white transition-colors group"
+                        className="text-center py-3 px-3 sm:py-4 sm:px-4 lg:py-5 lg:px-6 text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider cursor-pointer"
                       >
                         <div className="flex items-center justify-center gap-2">
                           Estado
@@ -896,7 +610,7 @@ Genera:
                           )}
                         </div>
                       </th>
-                      <th className="text-left py-5 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider">Acción Sugerida</th>
+                      <th className="text-left py-3 px-3 sm:py-4 sm:px-4 lg:py-5 lg:px-6 text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider hidden xl:table-cell">Acción</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -905,138 +619,101 @@ Genera:
                         const action = getExecutiveAction(store);
 
                         return (
-                          <motion.tr
+                          <tr
                             key={store.code}
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: idx * 0.01 }}
                             onClick={() => store.hasData && setSelectedStoreDetail(store)}
-                            className={`border-b border-white/5 group ${
+                            className={`border-b border-white/5 ${
                               store.hasData ? 'cursor-pointer hover:bg-white/5' : ''
                             }`}
                           >
-                            <td className="py-7 px-6">
-                              <p className={`font-bold text-lg ${
+                            <td className="py-3 px-3 sm:py-5 sm:px-4 lg:py-7 lg:px-6">
+                              <p className={`font-bold text-sm sm:text-base lg:text-lg ${
                                 !store.hasData ? 'text-slate-600' : 'text-white'
                               }`}>
                                 {store.name}
                               </p>
-                              <p className="text-xs text-slate-500 mt-1">{store.code}</p>
+                              <p className="text-[10px] sm:text-xs text-slate-500 mt-0.5">{store.code}</p>
                             </td>
 
-                            <td className="py-7 px-6">
+                            <td className="py-3 px-3 sm:py-5 sm:px-4 lg:py-7 lg:px-6">
                               {!store.hasData ? (
-                                <span className="text-sm text-slate-500 italic block text-right">Sin ventas registradas</span>
+                                <span className="text-xs sm:text-sm text-slate-500 italic block text-right">Sin datos</span>
                               ) : (
-                                <div className="flex items-center justify-end gap-6">
-                                  <div className="w-32 bg-white/10 rounded-full h-1.5 overflow-hidden">
-                                    <motion.div
-                                      initial={{ width: 0 }}
-                                      animate={{ width: `${Math.min(store.salesCompliance, 100)}%` }}
-                                      transition={{ duration: 0.8, delay: idx * 0.01 }}
+                                <div className="flex items-center justify-end gap-2 sm:gap-4">
+                                  <div className="w-16 sm:w-24 lg:w-32 bg-white/10 rounded-full h-1 sm:h-1.5 overflow-hidden">
+                                    <div
+                                      style={{ width: `${Math.min(store.salesCompliance, 100)}%` }}
                                       className={`h-full ${
                                         store.salesCompliance >= 90 ? 'bg-emerald-500' :
                                         store.salesCompliance >= 70 ? 'bg-amber-500' : 'bg-red-500'
                                       }`}
                                     />
                                   </div>
-                                  <div className="flex items-center gap-3">
-                                    <span className={`font-black text-3xl tabular-nums ${
-                                      store.salesCompliance >= 90 ? 'text-emerald-400' :
-                                      store.salesCompliance >= 70 ? 'text-amber-400' : 'text-red-400'
-                                    }`}>
-                                      {store.salesCompliance.toFixed(0)}%
-                                    </span>
-                                    <motion.div
-                                      initial={{ scale: 0, rotate: -180 }}
-                                      animate={{ 
-                                        scale: 1, 
-                                        rotate: 0,
-                                        y: store.complianceTrend >= 0 ? [0, -3, 0] : [0, 3, 0]
-                                      }}
-                                      transition={{ 
-                                        scale: { duration: 0.4, delay: idx * 0.01 },
-                                        y: { duration: 1.5, repeat: Infinity, ease: "easeInOut" }
-                                      }}
-                                      className={`${
-                                        store.complianceTrend >= 0 ? 'text-emerald-400' : 'text-red-400'
-                                      }`}
-                                    >
-                                      {store.complianceTrend >= 0 ? (
-                                        <TrendingUp className="w-6 h-6" />
-                                      ) : (
-                                        <TrendingDown className="w-6 h-6" />
-                                      )}
-                                    </motion.div>
-                                  </div>
+                                  <span className={`font-black text-lg sm:text-2xl lg:text-3xl tabular-nums ${
+                                    store.salesCompliance >= 90 ? 'text-emerald-400' :
+                                    store.salesCompliance >= 70 ? 'text-amber-400' : 'text-red-400'
+                                  }`}>
+                                    {store.salesCompliance.toFixed(0)}%
+                                  </span>
                                 </div>
                               )}
                             </td>
 
-                            <td className="py-7 px-6 text-right">
+                            <td className="py-3 px-3 sm:py-5 sm:px-4 lg:py-7 lg:px-6 text-right hidden sm:table-cell">
                               {!store.hasData ? (
-                                <span className="text-sm text-slate-500">—</span>
+                                <span className="text-xs sm:text-sm text-slate-500">—</span>
                               ) : (
                                 <div>
-                                  <p className="font-bold text-white text-base tabular-nums">{formatCurrency(store.totalSales)}</p>
-                                  <p className="text-xs text-slate-500 mt-1">de {formatCurrency(store.salesBudget)}</p>
+                                  <p className="font-bold text-white text-xs sm:text-sm lg:text-base tabular-nums">{formatShort(store.totalSales)}</p>
+                                  <p className="text-[10px] sm:text-xs text-slate-500 mt-0.5">de {formatShort(store.salesBudget)}</p>
                                 </div>
                               )}
                             </td>
 
-                            <td className="py-7 px-6 text-right">
+                            <td className="py-3 px-3 sm:py-5 sm:px-4 lg:py-7 lg:px-6 text-right hidden lg:table-cell">
                               {!store.hasData ? (
                                 <span className="text-sm text-slate-500">—</span>
                               ) : (
-                                <p className={`font-black text-xl tabular-nums ${
+                                <p className={`font-black text-base lg:text-xl tabular-nums ${
                                   store.gap > 0 ? 'text-red-400' : 'text-emerald-400'
                                 }`}>
-                                  {store.gap > 0 ? '-' : '+'}{formatCurrency(Math.abs(store.gap))}
+                                  {formatShort(Math.abs(store.gap))}
                                 </p>
                               )}
                             </td>
 
-                            <td className="py-7 px-6 text-right">
+                            <td className="py-3 px-3 sm:py-5 sm:px-4 lg:py-7 lg:px-6 text-right hidden lg:table-cell">
                               {!store.hasData ? (
                                 <span className="text-sm text-slate-500">—</span>
                               ) : (
-                                <div>
-                                  <p className="font-bold text-white text-base tabular-nums">{formatCurrency(store.dailyAvg)}</p>
-                                  <p className="text-xs text-slate-500 mt-1">por día</p>
-                                </div>
+                                <p className="font-bold text-white text-sm lg:text-base tabular-nums">{formatShort(store.dailyAvg)}</p>
                               )}
                             </td>
 
-                            <td className="py-7 px-6 text-right">
+                            <td className="py-3 px-3 sm:py-5 sm:px-4 lg:py-7 lg:px-6 text-right hidden lg:table-cell">
                               {!store.hasData ? (
                                 <span className="text-sm text-slate-500">—</span>
                               ) : (
-                                <div>
-                                  <p className="font-bold text-cyan-400 text-base tabular-nums">{store.avgDailyTransactions.toFixed(0)}</p>
-                                  <p className="text-xs text-slate-500 mt-1">trans/día</p>
-                                </div>
+                                <p className="font-bold text-cyan-400 text-sm lg:text-base tabular-nums">{store.avgDailyTransactions.toFixed(0)}</p>
                               )}
                             </td>
 
-                            <td className="py-7 px-6 text-center">
-                              <motion.span 
-                                whileHover={{ scale: 1.3 }}
-                                className={`inline-block w-3 h-3 rounded-full ${
-                                  store.status === 'no_data' ? 'bg-slate-600' :
-                                  store.status === 'positive' ? 'bg-emerald-500' : 
-                                  store.status === 'negative' ? 'bg-amber-500' : 'bg-red-500'
-                                }`} 
-                              />
+                            <td className="py-3 px-3 sm:py-5 sm:px-4 lg:py-7 lg:px-6 text-center">
+                              <span className={`inline-block w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full ${
+                                store.status === 'no_data' ? 'bg-slate-600' :
+                                store.status === 'positive' ? 'bg-emerald-500' : 
+                                store.status === 'negative' ? 'bg-amber-500' : 'bg-red-500'
+                              }`} />
                             </td>
 
-                            <td className="py-7 px-6">
-                              <p className={`text-sm font-normal ${
+                            <td className="py-3 px-3 sm:py-5 sm:px-4 lg:py-7 lg:px-6 hidden xl:table-cell">
+                              <p className={`text-xs sm:text-sm font-normal ${
                                 !store.hasData ? 'text-slate-500 italic' : 'text-slate-300'
                               }`}>
                                 {action}
                               </p>
                             </td>
-                          </motion.tr>
+                          </tr>
                         );
                       })}
                   </tbody>
@@ -1045,59 +722,48 @@ Genera:
             </div>
 
             {/* Prioridades Dinámicas */}
-            <div className="mb-20">
-              <h2 className="text-3xl font-black text-white mb-10 tracking-tight">Prioridades de hoy</h2>
-              <div className="grid grid-cols-3 gap-6">
+            <div className="mb-8 sm:mb-12 lg:mb-20">
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-white mb-4 sm:mb-6 lg:mb-10 tracking-tight">Prioridades de hoy</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
                 {/* Intervenir */}
                 {storesAnalysis
                   .filter(s => s.status === 'critical')
                   .sort((a, b) => b.gap - a.gap)
                   .slice(0, 1)
                   .map(store => (
-                    <motion.div
+                    <div
                       key={store.code}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      whileHover={{ scale: 1.02, y: -4 }}
                       onClick={() => setSelectedStoreDetail(store)}
-                      className="relative bg-gradient-to-br from-red-500/20 to-rose-600/20 backdrop-blur-xl rounded-xl p-8 border border-red-500/30 cursor-pointer overflow-hidden group"
+                      className="relative bg-gradient-to-br from-red-500/20 to-rose-600/20 backdrop-blur-xl rounded-xl p-4 sm:p-6 lg:p-8 border border-red-500/30 cursor-pointer"
                     >
-                      <motion.div
-                        className="absolute inset-0 bg-gradient-to-br from-red-500/0 to-rose-600/0 group-hover:from-red-500/30 group-hover:to-rose-600/30 transition-all duration-500"
-                      />
-                      
                       <div className="relative z-10">
-                        <div className="flex items-center gap-3 mb-5">
-                          <div className="w-12 h-12 bg-red-500 rounded-lg flex items-center justify-center">
-                            <TrendingDown className="w-6 h-6 text-white" />
+                        <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-5">
+                          <div className="w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-red-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <TrendingDown className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-white" />
                           </div>
                           <div>
-                            <p className="text-xs font-bold text-red-300 uppercase tracking-wide">Intervenir Hoy</p>
-                            <p className="font-black text-white text-xl">{store.name}</p>
+                            <p className="text-[10px] sm:text-xs font-bold text-red-300 uppercase tracking-wide">Intervenir Hoy</p>
+                            <p className="font-black text-white text-sm sm:text-base lg:text-xl">{store.name}</p>
                           </div>
                         </div>
                         
-                        <div className="space-y-3 mb-6">
+                        <div className="space-y-2 sm:space-y-3 mb-3 sm:mb-6">
                           <div className="flex justify-between items-center">
-                            <span className="text-sm text-slate-300">Cumplimiento</span>
-                            <span className="text-xl font-black text-red-300 tabular-nums">{store.salesCompliance.toFixed(0)}%</span>
+                            <span className="text-xs sm:text-sm text-slate-300">Cumplimiento</span>
+                            <span className="text-base sm:text-lg lg:text-xl font-black text-red-300 tabular-nums">{store.salesCompliance.toFixed(0)}%</span>
                           </div>
                           <div className="flex justify-between items-center">
-                            <span className="text-sm text-slate-300">Brecha</span>
-                            <span className="text-lg font-bold text-white tabular-nums">{formatCurrency(store.gap)}</span>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span className="text-sm text-slate-300">Venta diaria req.</span>
-                            <span className="text-sm font-semibold text-red-200 tabular-nums">{formatCurrency(store.gap / 7)}</span>
+                            <span className="text-xs sm:text-sm text-slate-300">Brecha</span>
+                            <span className="text-sm sm:text-base lg:text-lg font-bold text-white tabular-nums">{formatShort(store.gap)}</span>
                           </div>
                         </div>
                         
-                        <div className="flex items-center gap-2 text-white group-hover:text-red-200 transition-colors">
-                          <Eye className="w-4 h-4" />
-                          <span className="text-sm font-semibold">Ver detalle</span>
+                        <div className="flex items-center gap-2 text-white text-xs sm:text-sm">
+                          <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
+                          <span className="font-semibold">Ver detalle</span>
                         </div>
                       </div>
-                    </motion.div>
+                    </div>
                   ))}
 
                 {/* Acelerar */}
@@ -1106,51 +772,39 @@ Genera:
                   .sort((a, b) => b.salesCompliance - a.salesCompliance)
                   .slice(0, 1)
                   .map(store => (
-                    <motion.div
+                    <div
                       key={store.code}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.05 }}
-                      whileHover={{ scale: 1.02, y: -4 }}
                       onClick={() => setSelectedStoreDetail(store)}
-                      className="relative bg-gradient-to-br from-amber-500/20 to-orange-600/20 backdrop-blur-xl rounded-xl p-8 border border-amber-500/30 cursor-pointer overflow-hidden group"
+                      className="relative bg-gradient-to-br from-amber-500/20 to-orange-600/20 backdrop-blur-xl rounded-xl p-4 sm:p-6 lg:p-8 border border-amber-500/30 cursor-pointer"
                     >
-                      <motion.div
-                        className="absolute inset-0 bg-gradient-to-br from-amber-500/0 to-orange-600/0 group-hover:from-amber-500/30 group-hover:to-orange-600/30 transition-all duration-500"
-                      />
-                      
                       <div className="relative z-10">
-                        <div className="flex items-center gap-3 mb-5">
-                          <div className="w-12 h-12 bg-amber-500 rounded-lg flex items-center justify-center">
-                            <Zap className="w-6 h-6 text-white" />
+                        <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-5">
+                          <div className="w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-amber-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <Zap className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-white" />
                           </div>
                           <div>
-                            <p className="text-xs font-bold text-amber-300 uppercase tracking-wide">Acelerar Ritmo</p>
-                            <p className="font-black text-white text-xl">{store.name}</p>
+                            <p className="text-[10px] sm:text-xs font-bold text-amber-300 uppercase tracking-wide">Acelerar</p>
+                            <p className="font-black text-white text-sm sm:text-base lg:text-xl">{store.name}</p>
                           </div>
                         </div>
                         
-                        <div className="space-y-3 mb-6">
+                        <div className="space-y-2 sm:space-y-3 mb-3 sm:mb-6">
                           <div className="flex justify-between items-center">
-                            <span className="text-sm text-slate-300">Cumplimiento</span>
-                            <span className="text-xl font-black text-amber-300 tabular-nums">{store.salesCompliance.toFixed(0)}%</span>
+                            <span className="text-xs sm:text-sm text-slate-300">Cumplimiento</span>
+                            <span className="text-base sm:text-lg lg:text-xl font-black text-amber-300 tabular-nums">{store.salesCompliance.toFixed(0)}%</span>
                           </div>
                           <div className="flex justify-between items-center">
-                            <span className="text-sm text-slate-300">Falta para 90%</span>
-                            <span className="text-lg font-bold text-white tabular-nums">{(90 - store.salesCompliance).toFixed(0)}%</span>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span className="text-sm text-slate-300">Proyección</span>
-                            <span className="text-sm font-semibold text-amber-200 tabular-nums">{formatCurrency(store.projection)}</span>
+                            <span className="text-xs sm:text-sm text-slate-300">Falta 90%</span>
+                            <span className="text-sm sm:text-base lg:text-lg font-bold text-white tabular-nums">{(90 - store.salesCompliance).toFixed(0)}%</span>
                           </div>
                         </div>
                         
-                        <div className="flex items-center gap-2 text-white group-hover:text-amber-200 transition-colors">
-                          <Eye className="w-4 h-4" />
-                          <span className="text-sm font-semibold">Ver detalle</span>
+                        <div className="flex items-center gap-2 text-white text-xs sm:text-sm">
+                          <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
+                          <span className="font-semibold">Ver detalle</span>
                         </div>
                       </div>
-                    </motion.div>
+                    </div>
                   ))}
 
                 {/* Reconocer */}
@@ -1159,120 +813,104 @@ Genera:
                   .sort((a, b) => b.salesCompliance - a.salesCompliance)
                   .slice(0, 1)
                   .map(store => (
-                    <motion.div
+                    <div
                       key={store.code}
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.1 }}
-                      whileHover={{ scale: 1.02, y: -4 }}
                       onClick={() => setSelectedStoreDetail(store)}
-                      className="relative bg-gradient-to-br from-emerald-500/20 to-green-600/20 backdrop-blur-xl rounded-xl p-8 border border-emerald-500/30 cursor-pointer overflow-hidden group"
+                      className="relative bg-gradient-to-br from-emerald-500/20 to-green-600/20 backdrop-blur-xl rounded-xl p-4 sm:p-6 lg:p-8 border border-emerald-500/30 cursor-pointer"
                     >
-                      <motion.div
-                        className="absolute inset-0 bg-gradient-to-br from-emerald-500/0 to-green-600/0 group-hover:from-emerald-500/30 group-hover:to-green-600/30 transition-all duration-500"
-                      />
-                      
                       <div className="relative z-10">
-                        <div className="flex items-center gap-3 mb-5">
-                          <div className="w-12 h-12 bg-emerald-500 rounded-lg flex items-center justify-center">
-                            <Award className="w-6 h-6 text-white" />
+                        <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-5">
+                          <div className="w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-emerald-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <Award className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-white" />
                           </div>
                           <div>
-                            <p className="text-xs font-bold text-emerald-300 uppercase tracking-wide">Reconocer</p>
-                            <p className="font-black text-white text-xl">{store.name}</p>
+                            <p className="text-[10px] sm:text-xs font-bold text-emerald-300 uppercase tracking-wide">Reconocer</p>
+                            <p className="font-black text-white text-sm sm:text-base lg:text-xl">{store.name}</p>
                           </div>
                         </div>
                         
-                        <div className="space-y-3 mb-6">
+                        <div className="space-y-2 sm:space-y-3 mb-3 sm:mb-6">
                           <div className="flex justify-between items-center">
-                            <span className="text-sm text-slate-300">Cumplimiento</span>
-                            <span className="text-xl font-black text-emerald-300 tabular-nums">{store.salesCompliance.toFixed(0)}%</span>
+                            <span className="text-xs sm:text-sm text-slate-300">Cumplimiento</span>
+                            <span className="text-base sm:text-lg lg:text-xl font-black text-emerald-300 tabular-nums">{store.salesCompliance.toFixed(0)}%</span>
                           </div>
                           <div className="flex justify-between items-center">
-                            <span className="text-sm text-slate-300">Sobre meta</span>
-                            <span className="text-lg font-bold text-white tabular-nums">+{(store.salesCompliance - 100).toFixed(0)}%</span>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span className="text-sm text-slate-300">Venta</span>
-                            <span className="text-sm font-semibold text-emerald-200 tabular-nums">{formatCurrency(store.totalSales)}</span>
+                            <span className="text-xs sm:text-sm text-slate-300">Sobre meta</span>
+                            <span className="text-sm sm:text-base lg:text-lg font-bold text-white tabular-nums">+{(store.salesCompliance - 100).toFixed(0)}%</span>
                           </div>
                         </div>
                         
-                        <div className="flex items-center gap-2 text-white group-hover:text-emerald-200 transition-colors">
-                          <Eye className="w-4 h-4" />
-                          <span className="text-sm font-semibold">Ver detalle</span>
+                        <div className="flex items-center gap-2 text-white text-xs sm:text-sm">
+                          <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
+                          <span className="font-semibold">Ver detalle</span>
                         </div>
                       </div>
-                    </motion.div>
+                    </div>
                   ))}
               </div>
             </div>
 
-            {/* Análisis Inteligente */}
+            {/* Análisis Inteligente - Oculto en móvil, visible en desktop */}
             {aiInsights && (
-              <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-xl rounded-xl border border-purple-500/30 overflow-hidden">
-                <div className="p-8 border-b border-purple-500/20">
-                  <div className="flex items-center gap-4 mb-6">
-                    <motion.div
-                      animate={{ rotate: [0, 10, -10, 0] }}
-                      transition={{ duration: 3, repeat: Infinity }}
-                      className="w-14 h-14 rounded-xl bg-purple-500/20 flex items-center justify-center"
-                    >
-                      <Brain className="w-8 h-8 text-purple-400" />
-                    </motion.div>
+              <div className="hidden lg:block bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-xl rounded-xl border border-purple-500/30 overflow-hidden">
+                <div className="p-6 lg:p-8 border-b border-purple-500/20">
+                  <div className="flex items-center gap-3 lg:gap-4 mb-4 lg:mb-6">
+                    <div className="w-10 h-10 lg:w-14 lg:h-14 rounded-xl bg-purple-500/20 flex items-center justify-center">
+                      <Brain className="w-6 h-6 lg:w-8 lg:h-8 text-purple-400" />
+                    </div>
                     <div>
-                      <p className="text-xs font-bold text-purple-300 uppercase tracking-wide">Análisis Predictivo IA</p>
-                      <p className="text-sm text-slate-400">Diagnóstico + Acción + Pronóstico</p>
+                      <p className="text-xs font-bold text-purple-300 uppercase tracking-wide">Análisis IA</p>
+                      <p className="text-xs lg:text-sm text-slate-400">Diagnóstico + Acción</p>
                     </div>
                   </div>
 
-                  <div className="space-y-6">
+                  <div className="space-y-4 lg:space-y-6">
                     {/* Estado Numérico */}
-                    <div className="bg-white/5 rounded-xl p-6 border border-purple-500/20">
-                      <div className="flex items-center gap-2 mb-3">
-                        <div className="w-2 h-2 rounded-full bg-purple-400" />
-                        <p className="text-xs font-bold text-purple-300 uppercase tracking-wider">📊 Diagnóstico de Zona</p>
+                    <div className="bg-white/5 rounded-xl p-4 lg:p-6 border border-purple-500/20">
+                      <div className="flex items-center gap-2 mb-2 lg:mb-3">
+                        <div className="w-1.5 h-1.5 lg:w-2 lg:h-2 rounded-full bg-purple-400" />
+                        <p className="text-[10px] lg:text-xs font-bold text-purple-300 uppercase tracking-wider">📊 Diagnóstico</p>
                       </div>
-                      <p className="text-lg text-white leading-relaxed">
+                      <p className="text-sm lg:text-lg text-white leading-relaxed">
                         {aiInsights.estado_numerico}
                       </p>
                     </div>
 
                     {/* Acción Inmediata */}
-                    <div className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 rounded-xl p-6 border border-amber-500/30">
-                      <div className="flex items-center gap-2 mb-3">
-                        <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-                        <p className="text-xs font-bold text-amber-300 uppercase tracking-wider">🎯 Acción Inmediata Recomendada</p>
+                    <div className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 rounded-xl p-4 lg:p-6 border border-amber-500/30">
+                      <div className="flex items-center gap-2 mb-2 lg:mb-3">
+                        <div className="w-1.5 h-1.5 lg:w-2 lg:h-2 rounded-full bg-amber-400" />
+                        <p className="text-[10px] lg:text-xs font-bold text-amber-300 uppercase tracking-wider">🎯 Acción</p>
                       </div>
-                      <p className="text-lg text-white leading-relaxed font-medium">
+                      <p className="text-sm lg:text-lg text-white leading-relaxed font-medium">
                         {aiInsights.accion_inmediata}
                       </p>
                     </div>
 
                     {/* Pronóstico */}
-                    <div className="bg-gradient-to-br from-emerald-500/10 to-green-500/10 rounded-xl p-6 border border-emerald-500/30">
-                      <div className="flex items-center gap-2 mb-3">
-                        <div className="w-2 h-2 rounded-full bg-emerald-400" />
-                        <p className="text-xs font-bold text-emerald-300 uppercase tracking-wider">📈 Pronóstico de Impacto</p>
+                    <div className="bg-gradient-to-br from-emerald-500/10 to-green-500/10 rounded-xl p-4 lg:p-6 border border-emerald-500/30">
+                      <div className="flex items-center gap-2 mb-2 lg:mb-3">
+                        <div className="w-1.5 h-1.5 lg:w-2 lg:h-2 rounded-full bg-emerald-400" />
+                        <p className="text-[10px] lg:text-xs font-bold text-emerald-300 uppercase tracking-wider">📈 Pronóstico</p>
                       </div>
-                      <p className="text-lg text-white leading-relaxed">
+                      <p className="text-sm lg:text-lg text-white leading-relaxed">
                         {aiInsights.pronostico_impacto}
                       </p>
                     </div>
                   </div>
                 </div>
 
-                {/* KPIs de Proyección */}
-                <div className="p-8">
-                  <div className="grid grid-cols-4 gap-6">
+                {/* KPIs de Proyección - Oculto en móvil */}
+                <div className="hidden lg:block p-6 lg:p-8">
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
                     <div>
                       <p className="text-xs text-slate-400 mb-2">Proyección Mes</p>
-                      <p className="text-3xl font-black text-white tabular-nums mb-1">{formatShort(zoneTotals.totalProjection)}</p>
-                      <p className="text-xs text-purple-300">vs {formatShort(zoneTotals.totalBudget)} meta</p>
+                      <p className="text-2xl lg:text-3xl font-black text-white tabular-nums mb-1">{formatShort(zoneTotals.totalProjection)}</p>
+                      <p className="text-xs text-purple-300">vs {formatShort(zoneTotals.totalBudget)}</p>
                     </div>
                     <div>
                       <p className="text-xs text-slate-400 mb-2">% Proyectado</p>
-                      <p className={`text-3xl font-black tabular-nums ${
+                      <p className={`text-2xl lg:text-3xl font-black tabular-nums ${
                         ((zoneTotals.totalProjection/zoneTotals.totalBudget)*100) >= 100 ? 'text-emerald-400' :
                         ((zoneTotals.totalProjection/zoneTotals.totalBudget)*100) >= 90 ? 'text-amber-400' : 'text-red-400'
                       }`}>
@@ -1281,22 +919,16 @@ Genera:
                     </div>
                     <div>
                       <p className="text-xs text-slate-400 mb-2">Gap a Cerrar</p>
-                      <p className={`text-3xl font-black tabular-nums ${
+                      <p className={`text-2xl lg:text-3xl font-black tabular-nums ${
                         (zoneTotals.totalBudget - zoneTotals.totalProjection) <= 0 ? 'text-emerald-400' : 'text-red-400'
                       }`}>
                         {formatShort(Math.abs(zoneTotals.totalBudget - zoneTotals.totalProjection))}
                       </p>
-                      <p className="text-xs text-slate-400 mt-1">
-                        {((Math.abs(zoneTotals.totalBudget - zoneTotals.totalProjection)/zoneTotals.totalBudget)*100).toFixed(0)}% del total
-                      </p>
                     </div>
                     <div>
-                      <p className="text-xs text-slate-400 mb-2">Tiendas en Riesgo</p>
-                      <p className="text-3xl font-black text-white tabular-nums mb-1">
+                      <p className="text-xs text-slate-400 mb-2">En Riesgo</p>
+                      <p className="text-2xl lg:text-3xl font-black text-white tabular-nums mb-1">
                         {storesAnalysis.filter(s => s.hasData && (s.projection / s.salesBudget) < 0.85).length}
-                      </p>
-                      <p className="text-xs text-red-400">
-                        {((storesAnalysis.filter(s => s.hasData && (s.projection / s.salesBudget) < 0.85).length / storesAnalysis.filter(s => s.hasData).length) * 100).toFixed(0)}% del total
                       </p>
                     </div>
                   </div>
