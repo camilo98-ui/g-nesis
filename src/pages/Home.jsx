@@ -471,10 +471,21 @@ export default function Home() {
           <div className="flex-1 flex flex-col justify-center px-4 py-8 max-h-screen overflow-y-auto">
             <div className="max-w-md mx-auto w-full">
               <div className="mb-8 text-center">
-                <img 
+                <motion.img 
                   src={LOGO_URL} 
                   alt="Popsy" 
-                  className="h-24 object-contain mx-auto mb-6"
+                  className="h-32 object-contain mx-auto mb-6"
+                  initial={{ opacity: 0, scale: 0.8, y: -20 }}
+                  animate={{ 
+                    opacity: 1, 
+                    scale: 1,
+                    y: [0, -12, 0]
+                  }}
+                  transition={{
+                    opacity: { duration: 0.6 },
+                    scale: { duration: 0.6 },
+                    y: { duration: 2.5, repeat: Infinity, ease: "easeInOut" }
+                  }}
                 />
                 <h1 className="text-2xl font-bold text-slate-900 mb-1">Iniciar sesión</h1>
                 <p className="text-slate-600 text-sm">Continúa con tu rol</p>
