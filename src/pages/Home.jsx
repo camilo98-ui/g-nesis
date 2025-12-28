@@ -1084,32 +1084,21 @@ export default function Home() {
                   </div> :
 
                 <Link to={createPageUrl(item.page)}>
-                      <motion.div
-                    className={`${item.bgColor} rounded-2xl p-4 h-full shadow-md hover:shadow-xl transition-all duration-300 group relative overflow-hidden border border-white/50 backdrop-blur-sm`}>
-
-                        {/* Subtle glow effect */}
-                        <motion.div
-                      className="absolute inset-0 bg-white/30 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl" />
-
-
-                        {/* Icon centered */}
-                        <div className="flex flex-col items-center justify-center text-center relative z-10">
-                          <motion.div
-                        className={`w-12 h-12 ${item.iconBg} backdrop-blur-sm rounded-xl flex items-center justify-center mb-2`}
-                        whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1 }}
-                        transition={{ duration: 0.4 }}>
-
-                            <Icon className={`w-6 h-6 ${item.iconColor}`} />
-                          </motion.div>
-                          <h3 className={`font-bold ${item.textColor} text-sm`}>
-                            {item.name}
-                          </h3>
-                          <p className="text-[10px] text-gray-500 mt-0.5">{item.description}</p>
-                        </div>
-                      </motion.div>
-                    </Link>
+                  <div className={`${item.bgColor} rounded-2xl p-4 h-full shadow-md hover:shadow-xl transition-all duration-300 group relative overflow-hidden border border-white/50 backdrop-blur-sm`}>
+                    {/* Icon centered */}
+                    <div className="flex flex-col items-center justify-center text-center relative z-10">
+                      <div className={`w-12 h-12 ${item.iconBg} backdrop-blur-sm rounded-xl flex items-center justify-center mb-2`}>
+                        <Icon className={`w-6 h-6 ${item.iconColor}`} />
+                      </div>
+                      <h3 className={`font-bold ${item.textColor} text-sm`}>
+                        {item.name}
+                      </h3>
+                      <p className="text-[10px] text-gray-500 mt-0.5">{item.description}</p>
+                    </div>
+                  </div>
+                </Link>
                 }
-                </motion.div>);
+                </div>);
 
           })}
           </div>
