@@ -24,8 +24,6 @@ export default function Layout({ children, currentPageName }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [selectedStore, setSelectedStore] = useState('');
   const [userRole, setUserRole] = useState('lider');
-  const [isAuthChecking, setIsAuthChecking] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem('selectedStore');
@@ -40,41 +38,6 @@ export default function Layout({ children, currentPageName }) {
     root.classList.add(`theme-${savedTheme}`);
     root.setAttribute('data-theme', savedTheme);
   }, []);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const authenticated = await base44.auth.isAuthenticated();
-        setIsAuthenticated(authenticated);
-        
-        if (!authenticated && currentPageName !== 'Home') {
-          base44.auth.redirectToLogin(window.location.pathname);
-        }
-      } catch (error) {
-        console.error('Auth check error:', error);
-        setIsAuthenticated(false);
-      } finally {
-        setIsAuthChecking(false);
-      }
-    };
-    
-    checkAuth();
-  }, [currentPageName]);
-
-  if (isAuthChecking) {
-    return (
-      <div className="min-h-screen app-background flex items-center justify-center">
-        <div className="text-center">
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-            className="w-16 h-16 border-4 theme-border-primary border-t-transparent rounded-full mx-auto mb-4"
-          />
-          <p className="text-slate-600 font-semibold">Verificando acceso...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <ErrorBoundary>

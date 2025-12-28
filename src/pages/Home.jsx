@@ -193,8 +193,6 @@ export default function Home() {
   const [loginSuccess, setLoginSuccess] = useState(false);
   const [showExperienciaPopsy, setShowExperienciaPopsy] = useState(false);
   const [showCustomerExperience, setShowCustomerExperience] = useState(false);
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-  const [isAuthenticatedUser, setIsAuthenticatedUser] = useState(false);
 
 
   const ROLES = [
@@ -502,26 +500,6 @@ export default function Home() {
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const needsPassword = pendingStore;
   const isGerente = selectedRole === 'gerente';
-
-  // Verificando autenticación de Base44
-  if (isCheckingAuth) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 flex items-center justify-center">
-        <div className="text-center">
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-            className="w-16 h-16 border-4 border-pink-500 border-t-transparent rounded-full mx-auto mb-4"
-          />
-          <p className="text-slate-600 font-semibold">Verificando acceso...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticatedUser) {
-    return null;
-  }
 
   // Si no está logueado, mostrar pantalla de login
   if (!isLoggedIn) {
