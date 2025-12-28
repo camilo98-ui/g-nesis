@@ -206,9 +206,9 @@ function CustomCalendar({ selected, onSelect, onClose, onApply }) {
 
       {showWeeks ? (
       /* Vista de semanas */
-      <div className="p-3">
+      <div className={`p-3 ${isMobile ? 'flex-1 overflow-y-auto' : ''}`}>
           <p className="text-xs text-gray-500 mb-2 text-center">Selecciona una o más semanas</p>
-          <div className="max-h-64 overflow-y-auto space-y-1.5">
+          <div className={`${isMobile ? 'max-h-full' : 'max-h-64'} overflow-y-auto space-y-1.5`}>
             {weeksOfYear.map((week) => {
             const isSelected = selectedWeeks.some((w) => w.number === week.number);
             return (
