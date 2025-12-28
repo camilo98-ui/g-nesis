@@ -1,21 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import StoreSelector, { STORES } from '@/components/StoreSelector';
-import WelcomeToast from '@/components/WelcomeToast';
-import NotificationSetup from '@/components/NotificationSetup';
-import ManagerialReportModal from '@/components/reports/ManagerialReportModal';
-import PopsyStoryModal from '@/components/PopsyStoryModal';
-import DirectoryModal from '@/components/DirectoryModal';
-import ExperienciaPopsyModal from '@/components/experience/ExperienciaPopsyModal';
-import CustomerExperienceModal from '@/components/customer/CustomerExperienceModal';
-import DailySalesForm from '@/components/forms/DailySalesForm';
-import ShiftRecordForm from '@/components/forms/ShiftRecordForm';
-import MonthlyBudgetDashboard from '@/components/budget/MonthlyBudgetDashboard';
-
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
+
+// Lazy load de componentes pesados
+const WelcomeToast = lazy(() => import('@/components/WelcomeToast'));
+const NotificationSetup = lazy(() => import('@/components/NotificationSetup'));
+const ManagerialReportModal = lazy(() => import('@/components/reports/ManagerialReportModal'));
+const PopsyStoryModal = lazy(() => import('@/components/PopsyStoryModal'));
+const DirectoryModal = lazy(() => import('@/components/DirectoryModal'));
+const ExperienciaPopsyModal = lazy(() => import('@/components/experience/ExperienciaPopsyModal'));
+const CustomerExperienceModal = lazy(() => import('@/components/customer/CustomerExperienceModal'));
+const DailySalesForm = lazy(() => import('@/components/forms/DailySalesForm'));
+const ShiftRecordForm = lazy(() => import('@/components/forms/ShiftRecordForm'));
+const MonthlyBudgetDashboard = lazy(() => import('@/components/budget/MonthlyBudgetDashboard'));
 import {
   LayoutDashboard, Users, TrendingUp,
   Award, Target, Bell, Phone, Download, FileText,
@@ -298,16 +299,19 @@ export default function Home() {
     return null;
   };
 
-  // Fetch store passwords
+  // Fetch passwords solo cuando hay rol seleccionado
   const { data: storePasswords = [] } = useQuery({
     queryKey: ['storePasswords'],
-    queryFn: () => base44.entities.StorePassword.list()
+    queryFn: () => base44.entities.StorePassword.list(),
+    enabled: !!selectedRole && !isLoggedIn,
+    staleTime: 10 * 60 * 1000
   });
 
-  // Fetch role passwords
   const { data: rolePasswords = [] } = useQuery({
     queryKey: ['rolePasswords'],
-    queryFn: () => base44.entities.RolePassword.list()
+    queryFn: () => base44.entities.RolePassword.list(),
+    enabled: !!selectedRole && !isLoggedIn,
+    staleTime: 10 * 60 * 1000
   });
 
   useEffect(() => {
@@ -619,23 +623,17 @@ export default function Home() {
 
         {/* Desktop View */}
         <div className="hidden lg:flex min-h-screen relative z-10">
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="w-[55%] px-20 py-20 flex flex-col justify-center"
-          >
+          <div className="w-[55%] px-20 py-20 flex flex-col justify-center">
             <div className="max-w-xl">
               <motion.img
                 src={LOGO_URL}
                 alt="Popsy Management"
                 className="h-24 xl:h-28 object-contain mb-20 drop-shadow-2xl"
-                initial={{ opacity: 0, scale: 0.8, y: -30 }}
-                animate={{ opacity: 1, scale: 1, y: [0, -12, 0] }}
-                transition={{ opacity: { duration: 0.8 }, scale: { duration: 0.8 }, y: { duration: 3, repeat: Infinity, ease: "easeInOut" } }}
+                animate={{ y: [0, -12, 0] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
               />
 
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="space-y-10">
+              <div className="space-y-10">
                 <div>
                   <h1 className="text-6xl font-bold leading-tight mb-6">
                     <span className="text-slate-900">Bienvenido a</span><br />
@@ -650,13 +648,7 @@ export default function Home() {
                     { icon: Users, title: 'Gestión inteligente de equipos', text: 'Optimiza recursos y maximiza productividad' },
                     { icon: Target, title: 'Seguimiento automático de objetivos', text: 'Cumple tus metas con análisis predictivo' }
                   ].map((feature, i) => (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.7 + i * 0.15 }}
-                      className="flex items-start gap-5"
-                    >
+                    <div key={i} className="flex items-start gap-5">
                       <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center flex-shrink-0 shadow-lg shadow-pink-500/25">
                         <feature.icon className="w-8 h-8 text-white" />
                       </div>
@@ -664,20 +656,15 @@ export default function Home() {
                         <p className="text-slate-900 font-bold text-xl mb-1.5">{feature.title}</p>
                         <p className="text-slate-600 text-base leading-relaxed">{feature.text}</p>
                       </div>
-                    </motion.div>
+                    </div>
                   ))}
                 </div>
-              </motion.div>
+              </div>
             </div>
-          </motion.div>
+          </div>
 
           <div className="w-[45%] flex items-center justify-center p-16">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2, type: "spring" }}
-              className="w-full max-w-xl"
-            >
+            <div className="w-full max-w-xl">
               <div className="bg-white/95 backdrop-blur-xl rounded-[32px] shadow-2xl border border-slate-200/60 p-12 space-y-8"
                    style={{ boxShadow: '0 25px 80px -15px rgba(236, 72, 153, 0.2), 0 10px 30px -10px rgba(0, 0, 0, 0.1)' }}>
                 
@@ -693,15 +680,13 @@ export default function Home() {
                     const isLastUsed = role.id === lastUsedRole && !isSelected;
 
                     return (
-                      <motion.button
+                      <button
                         key={role.id}
                         onClick={() => {
                           setSelectedRole(role.id);
                           setLoginError('');
                           localStorage.setItem('lastSelectedRole', role.id);
                         }}
-                        whileHover={{ scale: 1.01 }}
-                        whileTap={{ scale: 0.97 }}
                         className={`relative w-full p-5 rounded-3xl border-2 transition-all duration-300 text-left flex items-center gap-5 ${
                           isSelected
                             ? 'border-pink-500 bg-gradient-to-r from-pink-50 to-rose-50 shadow-lg shadow-pink-500/20'
@@ -725,53 +710,35 @@ export default function Home() {
                           <p className="text-sm text-slate-600 leading-relaxed">{role.description}</p>
                         </div>
                         {isSelected && (
-                          <motion.div
-                            initial={{ scale: 0, rotate: -180 }}
-                            animate={{ scale: 1, rotate: 0 }}
-                            transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                            className="w-7 h-7 rounded-full bg-pink-500 flex items-center justify-center flex-shrink-0 shadow-md"
-                          >
+                          <div className="w-7 h-7 rounded-full bg-pink-500 flex items-center justify-center flex-shrink-0 shadow-md">
                             <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                             </svg>
-                          </motion.div>
+                          </div>
                         )}
-                      </motion.button>
+                      </button>
                     );
                   })}
                 </div>
 
                 {selectedRole === 'gerente' && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                    className="p-4 bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-2xl"
-                  >
+                  <div className="p-4 bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-2xl">
                     <p className="text-sm text-blue-700 flex items-center gap-2 font-medium">
                       <Info className="w-5 h-5 flex-shrink-0" />
                       Acceso a panel ejecutivo global
                     </p>
-                  </motion.div>
+                  </div>
                 )}
 
                 {selectedRole && selectedRole !== 'gerente' && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  >
+                  <div>
                     <label className="block text-base font-bold text-slate-900 mb-3">Selecciona tu tienda</label>
                     <StoreSelector selectedStore={pendingStore} onStoreChange={handleStoreSelect} />
-                  </motion.div>
+                  </div>
                 )}
 
                 {selectedRole && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  >
+                  <div>
                     <label htmlFor="login-password-desktop" className="block text-base font-bold text-slate-900 mb-3">
                       Contraseña
                     </label>
@@ -797,21 +764,16 @@ export default function Home() {
                       </button>
                     </div>
                     <p className="text-xs text-slate-500 mt-2">Contraseña asignada por la empresa</p>
-                  </motion.div>
+                  </div>
                 )}
 
                 {loginError && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ type: "spring", stiffness: 300 }}
-                    className="p-4 bg-gradient-to-r from-red-50 to-pink-50 border-2 border-red-200 rounded-2xl"
-                  >
+                  <div className="p-4 bg-gradient-to-r from-red-50 to-pink-50 border-2 border-red-200 rounded-2xl">
                     <p className="text-red-600 text-sm flex items-center gap-2 font-medium">
                       <AlertTriangle className="w-5 h-5 flex-shrink-0" />
                       {loginError}
                     </p>
-                  </motion.div>
+                  </div>
                 )}
 
                 <Button
@@ -821,11 +783,7 @@ export default function Home() {
                 >
                   {isSubmitting ? (
                     <span className="flex items-center justify-center gap-3">
-                      <motion.div
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                        className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
-                      />
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                       Entrando...
                     </span>
                   ) : (
@@ -846,25 +804,23 @@ export default function Home() {
                   </Link>
                 </div>
               </div>
-            </motion.div>
+            </div>
           </div>
         </div>
 
         {/* Success Animation */}
-        <AnimatePresence>
-          {loginSuccess && (
-            <div className="fixed inset-0 bg-emerald-500/20 flex items-center justify-center z-50">
-              <div className="bg-white rounded-full p-6 shadow-2xl">
-                <CheckCircle className="w-16 h-16 text-emerald-600" />
-              </div>
+        {loginSuccess && (
+          <div className="fixed inset-0 bg-emerald-500/20 flex items-center justify-center z-50">
+            <div className="bg-white rounded-full p-6 shadow-2xl">
+              <CheckCircle className="w-16 h-16 text-emerald-600" />
             </div>
-          )}
-        </AnimatePresence>
+          </div>
+        )}
 
         {/* Popsy Story Modal */}
-        <AnimatePresence>
+        <Suspense fallback={null}>
           {showStory && <PopsyStoryModal onClose={() => setShowStory(false)} />}
-        </AnimatePresence>
+        </Suspense>
       </div>);
 
   }
@@ -1107,86 +1063,67 @@ export default function Home() {
 
 
 
-      {/* Notifications Setup Modal */}
-      <AnimatePresence>
-        {showNotifications &&
-        <NotificationSetup
-          storeId={selectedStore}
-          isOpen={showNotifications}
-          onClose={() => setShowNotifications(false)} />
+      {/* Modales con Lazy Loading */}
+      <Suspense fallback={null}>
+        <AnimatePresence>
+          {showNotifications && (
+            <NotificationSetup
+              storeId={selectedStore}
+              isOpen={showNotifications}
+              onClose={() => setShowNotifications(false)}
+            />
+          )}
+        </AnimatePresence>
 
-        }
-      </AnimatePresence>
+        <AnimatePresence>
+          {showStory && <PopsyStoryModal onClose={() => setShowStory(false)} />}
+        </AnimatePresence>
 
-      {/* Popsy Story Modal */}
-      <AnimatePresence>
-        {showStory &&
-        <PopsyStoryModal onClose={() => setShowStory(false)} />
-        }
-      </AnimatePresence>
+        <AnimatePresence>
+          {showDirectory && <DirectoryModal onClose={() => setShowDirectory(false)} />}
+        </AnimatePresence>
 
-      {/* Directory Modal */}
-      <AnimatePresence>
-        {showDirectory &&
-        <DirectoryModal onClose={() => setShowDirectory(false)} />
-        }
-      </AnimatePresence>
+        <AnimatePresence>
+          {showWelcome && selectedStore && (
+            <WelcomeToast
+              storeName={selectedStoreName}
+              storeCode={selectedStore}
+              onClose={() => setShowWelcome(false)}
+            />
+          )}
+        </AnimatePresence>
 
-      {/* Welcome Toast */}
-      <AnimatePresence>
-        {showWelcome && selectedStore &&
-        <WelcomeToast
-          storeName={selectedStoreName}
-          storeCode={selectedStore}
-          onClose={() => setShowWelcome(false)} />
+        <AnimatePresence>
+          {showReport && (
+            <ManagerialReportModal
+              storeId={selectedStore}
+              storeName={selectedStoreName}
+              storeCode={selectedStore}
+              onClose={() => setShowReport(false)}
+            />
+          )}
+        </AnimatePresence>
 
-        }
-      </AnimatePresence>
-
-      {/* Managerial Report Modal */}
-      <AnimatePresence>
-        {showReport &&
-        <ManagerialReportModal
-          storeId={selectedStore}
-          storeName={selectedStoreName}
-          storeCode={selectedStore}
-          onClose={() => setShowReport(false)} />
-
-        }
-      </AnimatePresence>
-
-      {/* Budget Dashboard Modal */}
-      <MonthlyBudgetDashboard
-        storeId={selectedStore}
-        storeName={selectedStoreName}
-        isOpen={showBudgetDashboard}
-        onClose={() => setShowBudgetDashboard(false)} />
+        {showBudgetDashboard && (
+          <MonthlyBudgetDashboard
+            storeId={selectedStore}
+            storeName={selectedStoreName}
+            isOpen={showBudgetDashboard}
+            onClose={() => setShowBudgetDashboard(false)}
+          />
+        )}
+      </Suspense>
 
 
 
 
       {/* Store Sales Modal */}
-      <AnimatePresence>
-        {showStoreSales &&
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
-          onClick={() => setShowStoreSales(false)}>
-
-            <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            onClick={(e) => e.stopPropagation()}
-            className="bg-gradient-to-br from-pink-50/80 via-purple-50/60 to-amber-50/80 backdrop-blur-xl rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden my-8 border border-pink-200/50">
-
-              <div className="bg-gradient-to-r from-pink-400/90 via-rose-400/90 to-pink-400/90 p-5 text-white text-center relative">
-                <button
-                onClick={() => setShowStoreSales(false)}
-                className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors">
-
+      <Suspense fallback={null}>
+        {showStoreSales && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowStoreSales(false)}>
+            <div onClick={(e) => e.stopPropagation()} className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden">
+              <div className="bg-gradient-to-r from-pink-400 to-rose-400 p-5 text-white text-center relative">
+                <button onClick={() => setShowStoreSales(false)} className="absolute top-4 right-4 text-white/80 hover:text-white">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
@@ -1195,86 +1132,42 @@ export default function Home() {
                 <h2 className="text-xl font-bold">Registrar Ventas</h2>
               </div>
 
-              {/* Tabs */}
-              <div className="flex border-b border-pink-200/50 bg-white/50">
+              <div className="flex border-b border-pink-200 bg-white">
                 <button
-                onClick={() => setSalesTab('tienda')}
-                className={`flex-1 py-4 px-6 font-bold text-sm transition-all relative ${
-                salesTab === 'tienda' ?
-                'text-pink-600' :
-                'text-gray-500 hover:text-pink-500'}`
-                }>
-
-                  <span className="flex items-center justify-center gap-2">
-                    🏪 Venta de Tienda
-                  </span>
-                  {salesTab === 'tienda' &&
-                <motion.div
-                  layoutId="salesTab"
-                  className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-pink-500 to-rose-500 rounded-t-full" />
-
-                }
+                  onClick={() => setSalesTab('tienda')}
+                  className={`flex-1 py-4 px-6 font-bold text-sm transition-all relative ${
+                    salesTab === 'tienda' ? 'text-pink-600' : 'text-gray-500'
+                  }`}
+                >
+                  🏪 Venta de Tienda
+                  {salesTab === 'tienda' && (
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-pink-500 rounded-t-full" />
+                  )}
                 </button>
                 <button
-                onClick={() => setSalesTab('cajero')}
-                className={`flex-1 py-4 px-6 font-bold text-sm transition-all relative ${
-                salesTab === 'cajero' ?
-                'text-violet-600' :
-                'text-gray-500 hover:text-violet-500'}`
-                }>
-
-                  <span className="flex items-center justify-center gap-2">
-                    👤 Venta de Cajero
-                  </span>
-                  {salesTab === 'cajero' &&
-                <motion.div
-                  layoutId="salesTab"
-                  className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-violet-500 to-purple-500 rounded-t-full" />
-
-                }
+                  onClick={() => setSalesTab('cajero')}
+                  className={`flex-1 py-4 px-6 font-bold text-sm transition-all relative ${
+                    salesTab === 'cajero' ? 'text-violet-600' : 'text-gray-500'
+                  }`}
+                >
+                  👤 Venta de Cajero
+                  {salesTab === 'cajero' && (
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-violet-500 rounded-t-full" />
+                  )}
                 </button>
               </div>
 
               <div className="p-6 max-h-[70vh] overflow-y-auto">
-                <AnimatePresence mode="wait">
-                  {salesTab === 'tienda' ?
-                <motion.div
-                  key="tienda"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
-                  transition={{ duration: 0.3 }}>
-
-                      <DailySalesForm
-                    storeId={selectedStore}
-                    onSuccess={() => {
-                      setShowStoreSales(false);
-                    }} />
-
-                    </motion.div> :
-
-                <motion.div
-                  key="cajero"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.3 }}>
-
-                      <ShiftRecordForm
-                    storeId={selectedStore}
-                    onSuccess={() => {}} />
-
-                    </motion.div>
-                }
-                </AnimatePresence>
+                {salesTab === 'tienda' ? (
+                  <DailySalesForm storeId={selectedStore} onSuccess={() => setShowStoreSales(false)} />
+                ) : (
+                  <ShiftRecordForm storeId={selectedStore} onSuccess={() => {}} />
+                )}
               </div>
-            </motion.div>
-          </motion.div>
-        }
-      </AnimatePresence>
+            </div>
+          </div>
+        )}
 
-      {/* Experiencia Popsy Modal */}
-      <AnimatePresence>
         {showExperienciaPopsy && (
           <ExperienciaPopsyModal
             onClose={() => setShowExperienciaPopsy(false)}
@@ -1284,10 +1177,7 @@ export default function Home() {
             userRole={selectedRole}
           />
         )}
-      </AnimatePresence>
 
-      {/* Customer Experience Modal */}
-      <AnimatePresence>
         {showCustomerExperience && (
           <CustomerExperienceModal
             onClose={() => setShowCustomerExperience(false)}
@@ -1295,35 +1185,22 @@ export default function Home() {
             userRole={selectedRole}
           />
         )}
-      </AnimatePresence>
+      </Suspense>
 
 
 
       {/* Install App Modal */}
-      <AnimatePresence>
-        {showInstall &&
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-          onClick={() => setShowInstall(false)}>
+      {showInstall && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowInstall(false)}>
+          <div onClick={(e) => e.stopPropagation()} className="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden">
+            <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-5 text-white text-center">
+              <Download className="w-10 h-10 mx-auto mb-2" />
+              <h2 className="text-xl font-bold">Instalar Popsy App</h2>
+              <p className="text-white/80 text-sm">Accede más rápido</p>
+            </div>
 
-            <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden">
-
-              <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-5 text-white text-center">
-                <Download className="w-10 h-10 mx-auto mb-2" />
-                <h2 className="text-xl font-bold">Instalar Popsy App</h2>
-                <p className="text-white/80 text-sm">Accede más rápido desde tu dispositivo</p>
-              </div>
-
-              <div className="p-5 space-y-4">
-                <Button
+            <div className="p-5">
+              <Button
                 onClick={async () => {
                   if (deferredPrompt) {
                     deferredPrompt.prompt();
@@ -1333,26 +1210,24 @@ export default function Home() {
                       setShowInstall(false);
                     }
                   } else {
-                    // Para iOS/Safari mostrar instrucciones rápidas
-                    alert('Para instalar:\n\niPhone/iPad: Toca Compartir ⬆️ → "Añadir a inicio"\n\nAndroid: Menú ⋮ → "Instalar app"\n\nPC: Busca el ícono ⊕ en la barra de Chrome');
+                    alert('Para instalar:\n\niPhone/iPad: Toca Compartir ⬆️ → "Añadir a inicio"\n\nAndroid: Menú ⋮ → "Instalar app"');
                   }
                 }}
-                className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-6">
+                className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-6"
+              >
+                <Download className="w-5 h-5 mr-2" />
+                {deferredPrompt ? 'Instalar ahora' : 'Ver instrucciones'}
+              </Button>
+            </div>
 
-                    <Download className="w-5 h-5 mr-2" />
-                    {deferredPrompt ? 'Instalar ahora' : 'Ver instrucciones'}
-                  </Button>
-              </div>
-
-              <div className="p-4 bg-gray-50 border-t text-center">
-                <Button variant="ghost" onClick={() => setShowInstall(false)} className="text-gray-500">
-                  Cerrar
-                </Button>
-              </div>
-            </motion.div>
-          </motion.div>
-        }
-      </AnimatePresence>
+            <div className="p-4 bg-gray-50 border-t text-center">
+              <Button variant="ghost" onClick={() => setShowInstall(false)} className="text-gray-500">
+                Cerrar
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>);
 
 }
