@@ -337,27 +337,6 @@ export default function Home() {
   });
 
   useEffect(() => {
-    const checkAuthentication = async () => {
-      try {
-        const authenticated = await base44.auth.isAuthenticated();
-        setIsAuthenticatedUser(authenticated);
-        
-        if (!authenticated) {
-          base44.auth.redirectToLogin();
-        }
-      } catch (error) {
-        console.error('Auth error:', error);
-        setIsAuthenticatedUser(false);
-        base44.auth.redirectToLogin();
-      } finally {
-        setIsCheckingAuth(false);
-      }
-    };
-
-    checkAuthentication();
-  }, []);
-
-  useEffect(() => {
     const handler = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
