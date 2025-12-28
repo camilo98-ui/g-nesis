@@ -140,17 +140,17 @@ function CustomCalendar({ selected, onSelect, onClose, onApply }) {
     const offset = startDay === 0 ? 6 : startDay - 1;
 
     return (
-      <div className={`${isMobile ? 'p-4' : 'p-3'}`}>
-        <div className={`text-center font-semibold text-gray-800 ${isMobile ? 'mb-4 text-base' : 'mb-3 text-sm'} capitalize`}>
+      <div className={`${isMobile ? 'p-2' : 'p-3'}`}>
+        <div className={`text-center font-semibold text-gray-800 ${isMobile ? 'mb-2 text-sm' : 'mb-3 text-sm'} capitalize`}>
           {format(month, 'MMMM yyyy', { locale: es })}
         </div>
-        <div className={`grid grid-cols-7 ${isMobile ? 'gap-2 mb-3' : 'gap-1 mb-2'}`}>
+        <div className={`grid grid-cols-7 ${isMobile ? 'gap-1 mb-2' : 'gap-1 mb-2'}`}>
           {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((d, i) =>
-          <div key={i} className={`text-center ${isMobile ? 'text-xs' : 'text-[10px]'} text-gray-400 font-bold`}>{d}</div>
+          <div key={i} className={`text-center ${isMobile ? 'text-[10px]' : 'text-[10px]'} text-gray-400 font-bold`}>{d}</div>
           )}
         </div>
-        <div className={`grid grid-cols-7 ${isMobile ? 'gap-2' : 'gap-1'}`}>
-          {Array.from({ length: offset }).map((_, i) => <div key={`e-${i}`} className={`${isMobile ? 'h-11' : 'h-8'}`} />)}
+        <div className={`grid grid-cols-7 ${isMobile ? 'gap-1' : 'gap-1'}`}>
+          {Array.from({ length: offset }).map((_, i) => <div key={`e-${i}`} className={`${isMobile ? 'h-8' : 'h-8'}`} />)}
           {days.map((day) => {
             const inRange = isInRange(day);
             const start = isStart(day);
@@ -164,7 +164,7 @@ function CustomCalendar({ selected, onSelect, onClose, onApply }) {
                 onMouseEnter={() => handleDayHover(day)}
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
-                className={`${isMobile ? 'h-11 w-11 text-sm' : 'h-8 w-8 text-xs'} rounded-full transition-all relative flex items-center justify-center mx-auto
+                className={`${isMobile ? 'h-8 w-8 text-xs' : 'h-8 w-8 text-xs'} rounded-full transition-all relative flex items-center justify-center mx-auto
                   ${inRange && !start && !end ? 'bg-gradient-to-r from-pink-100 to-rose-100' : ''}
                   ${start ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white font-bold shadow-md' : ''}
                   ${end && !start ? 'bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold shadow-md' : ''}
@@ -185,19 +185,19 @@ function CustomCalendar({ selected, onSelect, onClose, onApply }) {
   };
 
   return (
-    <div className={`select-none bg-white rounded-2xl overflow-hidden shadow-xl border border-pink-100 ${isMobile ? 'h-[90vh] flex flex-col' : ''}`}>
+    <div className={`select-none bg-white rounded-2xl overflow-hidden shadow-xl border border-pink-100 ${isMobile ? 'h-[85vh] flex flex-col' : ''}`}>
       {/* Tabs: Calendario / Semanas */}
       <div className="flex border-b border-pink-100 flex-shrink-0">
         <button
           onClick={() => setShowWeeks(false)}
-          className={`flex-1 py-3 text-xs font-medium transition-all ${!showWeeks ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white' : 'bg-pink-50 text-pink-600 hover:bg-pink-100'}`}>
+          className={`flex-1 ${isMobile ? 'py-2' : 'py-3'} text-xs font-medium transition-all ${!showWeeks ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white' : 'bg-pink-50 text-pink-600 hover:bg-pink-100'}`}>
 
           <CalendarRange className="w-4 h-4 inline mr-1" />
           Calendario
         </button>
         <button
           onClick={() => setShowWeeks(true)}
-          className={`flex-1 py-3 text-xs font-medium transition-all ${showWeeks ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white' : 'bg-pink-50 text-pink-600 hover:bg-pink-100'}`}>
+          className={`flex-1 ${isMobile ? 'py-2' : 'py-3'} text-xs font-medium transition-all ${showWeeks ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white' : 'bg-pink-50 text-pink-600 hover:bg-pink-100'}`}>
 
           <Calendar className="w-4 h-4 inline mr-1" />
           Semanas
@@ -257,15 +257,15 @@ function CustomCalendar({ selected, onSelect, onClose, onApply }) {
 
       <>
           {/* Quick Options */}
-          <div className={`p-3 bg-gradient-to-r from-pink-50 to-rose-50 border-b border-pink-100 flex-shrink-0 ${isMobile ? 'overflow-x-auto' : ''}`}>
-            <div className={`flex ${isMobile ? 'gap-2' : 'flex-wrap gap-1.5'}`}>
+          <div className={`${isMobile ? 'p-2' : 'p-3'} bg-gradient-to-r from-pink-50 to-rose-50 border-b border-pink-100 flex-shrink-0 ${isMobile ? 'overflow-x-auto' : ''}`}>
+            <div className={`flex ${isMobile ? 'gap-1.5' : 'flex-wrap gap-1.5'}`}>
               {QUICK_OPTIONS.map((opt) =>
             <motion.button
               key={opt.label}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => handleQuickSelect(opt.getValue())}
-              className={`${isMobile ? 'px-4 py-2 text-sm whitespace-nowrap' : 'px-3 py-1.5 text-xs'} font-medium rounded-full bg-white border border-pink-200 text-pink-600 hover:bg-pink-500 hover:text-white hover:border-pink-500 transition-all shadow-sm`}>
+              className={`${isMobile ? 'px-2.5 py-1.5 text-[11px] whitespace-nowrap' : 'px-3 py-1.5 text-xs'} font-medium rounded-full bg-white border border-pink-200 text-pink-600 hover:bg-pink-500 hover:text-white hover:border-pink-500 transition-all shadow-sm`}>
 
                   {opt.label}
                 </motion.button>
@@ -274,7 +274,7 @@ function CustomCalendar({ selected, onSelect, onClose, onApply }) {
           </div>
 
       {/* Navegación */}
-      <div className={`flex items-center justify-between px-4 ${isMobile ? 'py-4' : 'py-3'} border-b border-gray-100 flex-shrink-0`}>
+      <div className={`flex items-center justify-between ${isMobile ? 'px-2 py-2' : 'px-4 py-3'} border-b border-gray-100 flex-shrink-0`}>
         <motion.button
             whileHover={{ scale: 1.1, x: -2 }}
             whileTap={{ scale: 0.9 }}
@@ -350,7 +350,7 @@ function CustomCalendar({ selected, onSelect, onClose, onApply }) {
       </div>
       
           {/* Footer */}
-          <div className={`px-4 ${isMobile ? 'py-4' : 'py-3'} border-t border-gray-100 bg-gray-50/50 ${isMobile ? 'flex-col space-y-3' : 'flex items-center justify-between'} flex-shrink-0`}>
+          <div className={`${isMobile ? 'px-2 py-2' : 'px-4 py-3'} border-t border-gray-100 bg-gray-50/50 ${isMobile ? 'flex-col space-y-2' : 'flex items-center justify-between'} flex-shrink-0`}>
             <div className={`flex items-center gap-2 ${isMobile ? 'justify-center' : ''}`}>
               {tempSelection?.from ?
             <motion.div
@@ -392,7 +392,7 @@ function CustomCalendar({ selected, onSelect, onClose, onApply }) {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleApply}
-              className={`${isMobile ? 'w-full py-4' : 'px-4 py-1.5'} rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white ${isMobile ? 'text-base' : 'text-sm'} font-bold shadow-lg flex items-center justify-center gap-2`}>
+              className={`${isMobile ? 'w-full py-3' : 'px-4 py-1.5'} rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white ${isMobile ? 'text-sm' : 'text-sm'} font-bold shadow-lg flex items-center justify-center gap-2`}>
 
                   <Check className={`${isMobile ? 'w-5 h-5' : 'w-4 h-4'}`} /> Aplicar Fechas
                 </motion.button>
