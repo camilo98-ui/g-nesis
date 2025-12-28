@@ -15,18 +15,29 @@ const CookieIcon = ({ color = "#C2185B" }) => (
 
 const IceCreamCone = ({ color = "#C2185B" }) => (
   <svg viewBox="0 0 50 50" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M20 25 L25 42 L30 25"/>
-    <path d="M22 27 L25 37 M25 37 L28 27"/>
-    <circle cx="25" cy="20" r="8"/>
-    <path d="M18 18 Q25 10 32 18"/>
+    <path d="M21 23 L25 40 L29 23 Z"/>
+    <line x1="23" y1="27" x2="25" y2="36"/>
+    <line x1="27" y1="27" x2="25" y2="36"/>
+    <circle cx="25" cy="18" r="7"/>
+    <ellipse cx="22" cy="15" rx="3" ry="2" fill={color} opacity="0.3"/>
   </svg>
 );
 
 const PopsyCup = ({ color = "#C2185B" }) => (
   <svg viewBox="0 0 50 50" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round">
-    <rect x="18" y="18" width="14" height="18" rx="2"/>
-    <line x1="16" y1="18" x2="34" y2="18"/>
-    <path d="M20 25 L30 25 M20 30 L30 30"/>
+    <rect x="17" y="20" width="16" height="20" rx="2"/>
+    <ellipse cx="25" cy="20" rx="8" ry="2"/>
+    <text x="25" y="32" fontSize="6" fill={color} textAnchor="middle" fontWeight="bold">Popsy</text>
+  </svg>
+);
+
+const MilkshakeCup = ({ color = "#C2185B" }) => (
+  <svg viewBox="0 0 50 50" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M19 22 L17 38 C17 40 19 41 25 41 C31 41 33 40 33 38 L31 22 Z"/>
+    <ellipse cx="25" cy="22" rx="6.5" ry="2"/>
+    <line x1="25" y1="14" x2="25" y2="22"/>
+    <circle cx="25" cy="12" r="2"/>
+    <text x="25" y="32" fontSize="5" fill={color} textAnchor="middle" fontWeight="bold">Popsy</text>
   </svg>
 );
 
@@ -39,8 +50,8 @@ const IceCreamOutline = ({ color = "#C2185B" }) => (
   </svg>
 );
 
-const ICON_COMPONENTS = [CookieIcon, IceCreamCone, PopsyCup, IceCreamOutline];
-const COLORS = ["#C2185B", "#C2185B", "#C2185B", "#C2185B"];
+const ICON_COMPONENTS = [CookieIcon, IceCreamCone, PopsyCup, IceCreamOutline, MilkshakeCup];
+const COLORS = ["#C2185B", "#C2185B", "#C2185B", "#C2185B", "#C2185B"];
 
 const RAIN_ITEMS = Array.from({ length: 45 }, (_, i) => ({
   id: i,
