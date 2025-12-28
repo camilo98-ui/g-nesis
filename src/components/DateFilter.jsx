@@ -185,7 +185,7 @@ function CustomCalendar({ selected, onSelect, onClose, onApply }) {
   };
 
   return (
-    <div className={`select-none bg-white rounded-2xl overflow-hidden shadow-xl border border-pink-100 ${isMobile ? 'max-h-[85vh] flex flex-col' : ''}`}>
+    <div className={`select-none bg-white rounded-2xl overflow-hidden shadow-xl border border-pink-100 ${isMobile ? 'h-[90vh] flex flex-col' : ''}`}>
       {/* Tabs: Calendario / Semanas */}
       <div className="flex border-b border-pink-100 flex-shrink-0">
         <button
