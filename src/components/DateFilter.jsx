@@ -252,8 +252,8 @@ function CustomCalendar({ selected, onSelect, onClose, onApply }) {
 
       <>
           {/* Quick Options */}
-          <div className="p-3 bg-gradient-to-r from-pink-50 to-rose-50 border-b border-pink-100">
-            <div className="flex flex-wrap gap-1.5">
+          <div className={`p-3 bg-gradient-to-r from-pink-50 to-rose-50 border-b border-pink-100 flex-shrink-0 ${isMobile ? 'overflow-x-auto' : ''}`}>
+            <div className={`flex ${isMobile ? 'gap-2' : 'flex-wrap gap-1.5'}`}>
               {QUICK_OPTIONS.map((opt) =>
             <motion.button
               key={opt.label}
