@@ -4,6 +4,7 @@ import { createPageUrl } from '@/utils';
 import SmartSearch from '@/components/SmartSearch';
 import MotivationalHeader from '@/components/MotivationalHeader';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import PopsyRainingIcons from '@/components/PopsyRainingIcons';
 import { base44 } from '@/api/base44Client';
 import { 
   Home, LayoutDashboard, Menu, Snowflake, CalendarDays, TrendingUp
@@ -41,6 +42,9 @@ export default function Layout({ children, currentPageName }) {
   return (
     <ErrorBoundary>
       <div className="min-h-screen app-container">
+        {/* Lluvia de iconos Popsy */}
+        <PopsyRainingIcons />
+
         {/* Main Content */}
         <main className="pt-4 min-h-screen pb-4 relative">
           {/* Simplified Static Background */}

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import StoreSelector, { STORES } from '@/components/StoreSelector';
+import PopsyRainingIcons from '@/components/PopsyRainingIcons';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 
@@ -462,6 +463,9 @@ export default function Home() {
   if (!isLoggedIn) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-white via-slate-50/50 to-pink-50/40 relative overflow-hidden">
+        {/* Lluvia de iconos Popsy */}
+        <PopsyRainingIcons />
+
         {/* Background Effects - Desktop only */}
         <div className="hidden lg:block absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute -top-48 -right-48 w-[600px] h-[600px] bg-gradient-to-br from-pink-400/15 via-rose-400/10 to-transparent rounded-full blur-3xl opacity-50" />
