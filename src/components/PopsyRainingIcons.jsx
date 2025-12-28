@@ -4,12 +4,12 @@ import { motion } from 'framer-motion';
 // SVG Icons minimalistas estilo línea
 const CookieIcon = ({ color = "#C2185B" }) => (
   <svg viewBox="0 0 50 50" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round">
-    <circle cx="25" cy="25" r="18"/>
+    <path d="M 7 25 A 18 18 0 1 1 25 7 A 18 18 0 0 1 43 25 A 18 18 0 0 1 35 40 L 35 35 A 8 8 0 0 0 38 28 L 38 22 A 8 8 0 0 0 33 16 L 35 13" fill="none"/>
     <circle cx="18" cy="20" r="1.5" fill={color}/>
-    <circle cx="32" cy="20" r="1.5" fill={color}/>
-    <circle cx="25" cy="28" r="1.5" fill={color}/>
-    <circle cx="17" cy="30" r="1.5" fill={color}/>
-    <circle cx="33" cy="30" r="1.5" fill={color}/>
+    <circle cx="28" cy="20" r="1.5" fill={color}/>
+    <circle cx="22" cy="28" r="1.5" fill={color}/>
+    <circle cx="15" cy="30" r="1.5" fill={color}/>
+    <circle cx="28" cy="32" r="1.5" fill={color}/>
   </svg>
 );
 
