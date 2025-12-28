@@ -249,11 +249,16 @@ export default function FreezerMap() {
     setUndoStack([]);
   };
 
-  const { data: slots = [], isLoading } = useQuery({
+  const { data: slots = [], isLoading, refetch } = useQuery({
     queryKey: ['freezerSlots', selectedStore, currentFreezer],
-    queryFn: () => base44.entities.FreezerSlot.filter({ store_id: `${selectedStore}_F${currentFreezer}` }),
+    queryFn: async () => {
+      const result = await base44.entities.FreezerSlot.filter({ store_id: `${selectedStore}_F${currentFreezer}` });
+      return result;
+    },
     enabled: !!selectedStore,
-    staleTime: 0
+    staleTime: 1000,
+    refetchOnMount: true,
+    refetchOnWindowFocus: false
   });
 
   // Fetch todas las neveras para análisis completo
@@ -337,18 +342,30 @@ export default function FreezerMap() {
     } catch (e) {console.error(e);}
   }, [selectedStore, slots]);
 
-  // Mutation para actualizar slot
+  // Mutation para actualizar slot - MEJORADO para evitar que se borren
   const updateSlotMutation = useMutation({
     mutationFn: async ({ slotData, isNew }) => {
-      if (isNew) return base44.entities.FreezerSlot.create(slotData);
-      return base44.entities.FreezerSlot.update(slotData.id, slotData);
+      // CRÍTICO: Asegurar que SIEMPRE incluya store_id completo
+      const finalSlotData = {
+        ...slotData,
+        store_id: `${selectedStore}_F${currentFreezer}`
+      };
+      
+      if (isNew) {
+        return await base44.entities.FreezerSlot.create(finalSlotData);
+      }
+      return await base44.entities.FreezerSlot.update(slotData.id, finalSlotData);
     },
-    onSuccess: (data, variables) => {
-      queryClient.invalidateQueries(['freezerSlots']);
+    onSuccess: async (data, variables) => {
+      await queryClient.invalidateQueries(['freezerSlots']);
+      await queryClient.invalidateQueries(['allFreezersSlots']);
+      await refetch();
       setSavingSlot({ row: variables.slotData.row, position: variables.slotData.position, success: true });
       setTimeout(() => setSavingSlot(null), 1000);
+      toast.success('✓ Guardado');
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Error al guardar slot:', error);
       toast.error('Error al guardar');
       setSavingSlot(null);
     }
@@ -1036,20 +1053,19 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                           }}
                           onDoubleClick={() => clearSlot(bajada.back)}
                           whileHover={!bajada.back.is_empty ? {
-                            scale: 1.12,
-                            y: -3,
-                            rotateX: 5,
+                            scale: 1.08,
+                            y: -2,
                             boxShadow: `0 8px 25px ${bajada.back.color || '#a855f7'}60`
                           } : { scale: 1.03 }}
-                          whileTap={{ scale: 0.92 }}
-                          className={`h-10 sm:h-11 rounded-xl cursor-pointer transition-all border-2 relative overflow-hidden ${
+                          whileTap={{ scale: 0.95 }}
+                          className={`h-11 sm:h-12 rounded-xl cursor-pointer transition-all border-2 relative overflow-hidden ${
                           bajada.back.is_empty ?
                           'bg-purple-50/50 border-dashed border-purple-300 hover:border-purple-500' :
-                          'border-purple-400 shadow-lg'}`
+                          'border-purple-400 shadow-xl'}`
                           }
                           style={!bajada.back.is_empty ? {
-                            background: `linear-gradient(135deg, ${bajada.back.color}ff, ${bajada.back.color}aa)`,
-                            transformStyle: 'preserve-3d'
+                            background: `linear-gradient(145deg, ${bajada.back.color}ff 0%, ${bajada.back.color}ee 50%, ${bajada.back.color}cc 100%)`,
+                            boxShadow: `0 8px 20px ${bajada.back.color}50, inset 0 2px 10px rgba(255,255,255,0.25)`
                           } : {}}>
 
                                 {!bajada.back.is_empty &&
@@ -1109,21 +1125,20 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                           }}
                           onDoubleClick={() => clearSlot(bajada.front)}
                           whileHover={!bajada.front.is_empty ? {
-                            scale: 1.15,
-                            y: -4,
-                            rotateX: 8,
-                            boxShadow: `0 12px 35px ${bajada.front.color || '#ec4899'}80`,
+                            scale: 1.1,
+                            y: -3,
+                            boxShadow: `0 12px 35px ${bajada.front.color || '#ec4899'}70`,
                             zIndex: 50
                           } : { scale: 1.03 }}
-                          whileTap={{ scale: 0.92 }}
-                          className={`h-11 sm:h-12 rounded-xl cursor-pointer transition-all border-2 shadow-2xl relative overflow-hidden ${
+                          whileTap={{ scale: 0.95 }}
+                          className={`h-12 sm:h-14 rounded-xl cursor-pointer transition-all border-2 shadow-xl relative overflow-hidden ${
                           bajada.front.is_empty ?
                           'bg-white border-dashed border-pink-300 hover:border-pink-500' :
                           'border-pink-500'}`
                           }
                           style={!bajada.front.is_empty ? {
-                            background: `linear-gradient(135deg, ${bajada.front.color}ff, ${bajada.front.color}cc)`,
-                            transformStyle: 'preserve-3d'
+                            background: `linear-gradient(145deg, ${bajada.front.color}ff 0%, ${bajada.front.color}ee 50%, ${bajada.front.color}cc 100%)`,
+                            boxShadow: `0 10px 25px ${bajada.front.color}60, inset 0 3px 12px rgba(255,255,255,0.3)`
                           } : {}}>
 
                                 {!bajada.front.is_empty &&

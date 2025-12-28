@@ -69,7 +69,7 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
     };
   }, [fullAnalysis]);
 
-  // Pedido Semanal (robusto)
+  // Pedido Semanal (robusto) - CORREGIDO: suma totalCount de cada sabor
   const weeklyOrder = useMemo(() => {
     const gourmet = [...urgent.filter((f) => GOURMET_FLAVORS.includes(f.name)), ...highRotation.filter((f) => GOURMET_FLAVORS.includes(f.name))];
     const exclusivo = [...urgent.filter((f) => EXCLUSIVO_FLAVORS.includes(f.name)), ...highRotation.filter((f) => EXCLUSIVO_FLAVORS.includes(f.name))];
@@ -78,23 +78,32 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
     const additionalGourmet = mediumRotation.filter((f) => GOURMET_FLAVORS.includes(f.name)).slice(0, 2);
     const additionalExclusivo = mediumRotation.filter((f) => EXCLUSIVO_FLAVORS.includes(f.name)).slice(0, 2);
 
+    const allGourmet = [...gourmet, ...additionalGourmet];
+    const allExclusivo = [...exclusivo, ...additionalExclusivo];
+
+    // CORRECCIÓN: sumar totalCount de cada sabor
+    const totalGourmetCubetas = allGourmet.reduce((sum, f) => sum + f.totalCount, 0);
+    const totalExclusivoCubetas = allExclusivo.reduce((sum, f) => sum + f.totalCount, 0);
+
     return {
-      gourmet: [...gourmet, ...additionalGourmet],
-      exclusivo: [...exclusivo, ...additionalExclusivo],
-      total: gourmet.length + exclusivo.length + additionalGourmet.length + additionalExclusivo.length
+      gourmet: allGourmet,
+      exclusivo: allExclusivo,
+      total: totalGourmetCubetas + totalExclusivoCubetas
     };
   }, [urgent, highRotation, mediumRotation]);
 
-  // Pedido Adicional (complemento)
+  // Pedido Adicional (complemento) - CORREGIDO: suma totalCount
   const additionalOrder = useMemo(() => {
-    // Solo los que ya se están acabando pero no son urgentes
     const gourmet = mediumRotation.filter((f) => GOURMET_FLAVORS.includes(f.name) && f.lowCount === 1);
     const exclusivo = mediumRotation.filter((f) => EXCLUSIVO_FLAVORS.includes(f.name) && f.lowCount === 1);
+
+    const totalGourmetCubetas = gourmet.reduce((sum, f) => sum + f.totalCount, 0);
+    const totalExclusivoCubetas = exclusivo.reduce((sum, f) => sum + f.totalCount, 0);
 
     return {
       gourmet,
       exclusivo,
-      total: gourmet.length + exclusivo.length
+      total: totalGourmetCubetas + totalExclusivoCubetas
     };
   }, [mediumRotation]);
 
