@@ -520,7 +520,7 @@ Genera:
         </div>
 
         {/* Content */}
-        <div className="p-3 sm:p-6 overflow-y-auto max-h-[55vh]">
+        <div className="p-6 overflow-y-auto max-h-[55vh]">
           {!storeId ? (
             <div className="text-center py-10">
               <Store className="w-16 h-16 text-gray-300 mx-auto mb-4" />
@@ -529,47 +529,47 @@ Genera:
           ) : (
             <>
               {/* Metrics Preview */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-4 sm:mb-6">
-                <div className="bg-gradient-to-br from-pink-50 to-rose-100 rounded-lg sm:rounded-xl p-2 sm:p-4 text-center">
-                  <p className="text-base sm:text-xl font-bold text-gray-800">{formatCurrency(metrics.totalSales)}</p>
-                  <p className="text-[10px] sm:text-xs text-gray-500 mt-0.5">Venta del Mes</p>
+              <div className="grid grid-cols-4 gap-3 mb-6">
+                <div className="bg-gradient-to-br from-pink-50 to-rose-100 rounded-xl p-4 text-center">
+                  <p className="text-xl font-bold text-gray-800">{formatCurrency(metrics.totalSales)}</p>
+                  <p className="text-xs text-gray-500">Venta del Mes</p>
                 </div>
-                <div className={`rounded-lg sm:rounded-xl p-2 sm:p-4 text-center ${
+                <div className={`rounded-xl p-4 text-center ${
                   metrics.compliance >= 100 ? 'bg-gradient-to-br from-green-50 to-emerald-100' :
                   metrics.compliance >= 80 ? 'bg-gradient-to-br from-amber-50 to-yellow-100' :
                   'bg-gradient-to-br from-red-50 to-rose-100'
                 }`}>
-                  <p className={`text-base sm:text-xl font-bold ${
+                  <p className={`text-xl font-bold ${
                     metrics.compliance >= 100 ? 'text-green-600' :
                     metrics.compliance >= 80 ? 'text-amber-600' : 'text-red-600'
                   }`}>{metrics.compliance.toFixed(1)}%</p>
-                  <p className="text-[10px] sm:text-xs text-gray-500 mt-0.5">Cumplimiento</p>
+                  <p className="text-xs text-gray-500">Cumplimiento</p>
                 </div>
-                <div className="bg-gradient-to-br from-violet-50 to-purple-100 rounded-lg sm:rounded-xl p-2 sm:p-4 text-center">
-                  <p className="text-base sm:text-xl font-bold text-gray-800">{formatCurrency(metrics.avgTicket)}</p>
-                  <p className="text-[10px] sm:text-xs text-gray-500 mt-0.5">Ticket Prom.</p>
+                <div className="bg-gradient-to-br from-violet-50 to-purple-100 rounded-xl p-4 text-center">
+                  <p className="text-xl font-bold text-gray-800">{formatCurrency(metrics.avgTicket)}</p>
+                  <p className="text-xs text-gray-500">Ticket Prom.</p>
                 </div>
-                <div className="bg-gradient-to-br from-sky-50 to-blue-100 rounded-lg sm:rounded-xl p-2 sm:p-4 text-center">
-                  <p className="text-base sm:text-xl font-bold text-gray-800">{metrics.totalTransactions.toLocaleString()}</p>
-                  <p className="text-[10px] sm:text-xs text-gray-500 mt-0.5">Transacciones</p>
+                <div className="bg-gradient-to-br from-sky-50 to-blue-100 rounded-xl p-4 text-center">
+                  <p className="text-xl font-bold text-gray-800">{metrics.totalTransactions.toLocaleString()}</p>
+                  <p className="text-xs text-gray-500">Transacciones</p>
                 </div>
               </div>
 
               {/* Top Cashiers */}
-              <div className="mb-4 sm:mb-6">
-                <h3 className="font-medium text-gray-700 mb-2 sm:mb-3 flex items-center gap-2 text-sm sm:text-base">
-                  <Award className="w-3 h-3 sm:w-4 sm:h-4 text-amber-500" /> Top Cajeros
+              <div className="mb-6">
+                <h3 className="font-medium text-gray-700 mb-3 flex items-center gap-2">
+                  <Award className="w-4 h-4 text-amber-500" /> Top Cajeros
                 </h3>
-                <div className="space-y-1.5 sm:space-y-2">
+                <div className="space-y-2">
                   {cashierPerformance.slice(0, 3).map((c, i) => (
-                    <div key={c.id} className="flex items-center justify-between bg-gray-50 rounded-lg p-2 sm:p-3">
-                      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                        <span className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center text-white text-[10px] sm:text-xs font-bold flex-shrink-0 ${
+                    <div key={c.id} className="flex items-center justify-between bg-gray-50 rounded-lg p-3">
+                      <div className="flex items-center gap-3">
+                        <span className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold ${
                           i === 0 ? 'bg-amber-500' : i === 1 ? 'bg-gray-400' : 'bg-amber-700'
                         }`}>{i + 1}</span>
-                        <span className="font-medium text-gray-700 text-xs sm:text-sm truncate">{c.name}</span>
+                        <span className="font-medium text-gray-700">{c.name}</span>
                       </div>
-                      <span className="text-gray-600 font-medium text-xs sm:text-sm ml-2">{formatCurrency(c.sales)}</span>
+                      <span className="text-gray-600 font-medium">{formatCurrency(c.sales)}</span>
                     </div>
                   ))}
                 </div>

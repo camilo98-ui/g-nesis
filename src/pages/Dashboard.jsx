@@ -1184,7 +1184,7 @@ export default function Dashboard() {
           }
 
             {/* Metrics Grid - Clickeable */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {metrics.map((metric) =>
             <MetricCard
               key={metric.id}
@@ -1503,7 +1503,7 @@ export default function Dashboard() {
                 </motion.div>
 
                 {/* Main Charts Row */}
-                <div className="grid grid-cols-1 gap-4 sm:gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {/* Sales Trend */}
                   <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
                     <CardHeader className="pb-2">
@@ -1569,7 +1569,7 @@ export default function Dashboard() {
                 </div>
 
                 {/* Second Row */}
-                <div className="grid grid-cols-1 gap-4 sm:gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {/* Transacciones vs Venta */}
                   <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
                     <CardHeader className="pb-2">
