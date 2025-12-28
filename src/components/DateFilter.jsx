@@ -387,9 +387,9 @@ function CustomCalendar({ selected, onSelect, onClose, onApply }) {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleApply}
-              className={`${isMobile ? 'w-full py-3' : 'px-4 py-1.5'} rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white text-sm font-bold shadow-md flex items-center justify-center gap-2`}>
+              className={`${isMobile ? 'w-full py-4' : 'px-4 py-1.5'} rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white ${isMobile ? 'text-base' : 'text-sm'} font-bold shadow-lg flex items-center justify-center gap-2`}>
 
-                  <Check className="w-4 h-4" /> Aplicar Fechas
+                  <Check className={`${isMobile ? 'w-5 h-5' : 'w-4 h-4'}`} /> Aplicar Fechas
                 </motion.button>
             }
             </div>
