@@ -242,9 +242,9 @@ function CustomCalendar({ selected, onSelect, onClose, onApply }) {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           onClick={applyWeeks}
-          className="w-full mt-3 py-2 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white text-xs font-medium shadow-md flex items-center justify-center gap-1">
+          className={`w-full mt-3 ${isMobile ? 'py-4' : 'py-2'} rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white ${isMobile ? 'text-base' : 'text-xs'} font-bold shadow-lg flex items-center justify-center gap-2`}>
 
-              <Check className="w-3.5 h-3.5" />
+              <Check className={`${isMobile ? 'w-5 h-5' : 'w-3.5 h-3.5'}`} />
               Aplicar {selectedWeeks.length} semana{selectedWeeks.length > 1 ? 's' : ''}
             </motion.button>
         }
