@@ -260,7 +260,7 @@ function CustomCalendar({ selected, onSelect, onClose, onApply }) {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => handleQuickSelect(opt.getValue())}
-              className="px-3 py-1.5 text-xs font-medium rounded-full bg-white border border-pink-200 text-pink-600 hover:bg-pink-500 hover:text-white hover:border-pink-500 transition-all shadow-sm">
+              className={`${isMobile ? 'px-4 py-2 text-sm whitespace-nowrap' : 'px-3 py-1.5 text-xs'} font-medium rounded-full bg-white border border-pink-200 text-pink-600 hover:bg-pink-500 hover:text-white hover:border-pink-500 transition-all shadow-sm`}>
 
                   {opt.label}
                 </motion.button>
