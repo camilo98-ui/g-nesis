@@ -205,8 +205,9 @@ function CustomCalendar({ selected, onSelect, onClose, onApply }) {
       </div>
 
       {showWeeks ? (
-      /* Vista de semanas */
-      <div className={`p-3 flex-1 overflow-y-auto`}>
+      <>
+        {/* Vista de semanas */}
+        <div className={`p-3 flex-1 overflow-y-auto`}>
           <p className="text-xs text-gray-500 mb-2 text-center">Selecciona una o más semanas</p>
           <div className={`space-y-1.5`}>
             {weeksOfYear.map((week) => {
@@ -238,7 +239,7 @@ function CustomCalendar({ selected, onSelect, onClose, onApply }) {
           })}
           </div>
         </div>
-        {selectedWeeks.length > 0 &&
+        {selectedWeeks.length > 0 && (
           <div className="p-3 border-t border-pink-100 flex-shrink-0">
             <motion.button
               initial={{ opacity: 0, y: 10 }}
@@ -250,8 +251,9 @@ function CustomCalendar({ selected, onSelect, onClose, onApply }) {
               Aplicar {selectedWeeks.length} semana{selectedWeeks.length > 1 ? 's' : ''}
             </motion.button>
           </div>
-        }
-      </div>) :
+        )}
+      </>
+      ) :
 
       <>
           {/* Quick Options */}
