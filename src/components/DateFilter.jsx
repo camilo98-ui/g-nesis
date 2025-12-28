@@ -150,7 +150,7 @@ function CustomCalendar({ selected, onSelect, onClose, onApply }) {
           )}
         </div>
         <div className={`grid grid-cols-7 ${isMobile ? 'gap-2' : 'gap-1'}`}>
-          {Array.from({ length: offset }).map((_, i) => <div key={`e-${i}`} className="h-8" />)}
+          {Array.from({ length: offset }).map((_, i) => <div key={`e-${i}`} className={`${isMobile ? 'h-11' : 'h-8'}`} />)}
           {days.map((day) => {
             const inRange = isInRange(day);
             const start = isStart(day);
@@ -164,7 +164,7 @@ function CustomCalendar({ selected, onSelect, onClose, onApply }) {
                 onMouseEnter={() => handleDayHover(day)}
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
-                className={`h-8 w-8 text-xs rounded-full transition-all relative flex items-center justify-center mx-auto
+                className={`${isMobile ? 'h-11 w-11 text-sm' : 'h-8 w-8 text-xs'} rounded-full transition-all relative flex items-center justify-center mx-auto
                   ${inRange && !start && !end ? 'bg-gradient-to-r from-pink-100 to-rose-100' : ''}
                   ${start ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white font-bold shadow-md' : ''}
                   ${end && !start ? 'bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold shadow-md' : ''}
