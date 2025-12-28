@@ -15,11 +15,10 @@ const CookieIcon = ({ color = "#C2185B" }) => (
 
 const IceCreamCone = ({ color = "#C2185B" }) => (
   <svg viewBox="0 0 50 50" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21 23 L25 40 L29 23 Z"/>
-    <line x1="23" y1="27" x2="25" y2="36"/>
-    <line x1="27" y1="27" x2="25" y2="36"/>
-    <circle cx="25" cy="18" r="7"/>
-    <ellipse cx="22" cy="15" rx="3" ry="2" fill={color} opacity="0.3"/>
+    <path d="M20 22 L25 38 L30 22" fill="none"/>
+    <line x1="22.5" y1="26" x2="25" y2="35"/>
+    <line x1="27.5" y1="26" x2="25" y2="35"/>
+    <circle cx="25" cy="17" r="6.5"/>
   </svg>
 );
 
