@@ -21,33 +21,100 @@ import { format } from 'date-fns';
 
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/c3a36de58_Capturadepantalla2025-11-251251441.png";
 
-// Sabores predefinidos - GOURMET Y EXCLUSIVO (SOLO LISTA OFICIAL)
+// Función para generar color dinámico basado en nombre del sabor
+const getFlavorColor = (flavorName) => {
+  const name = flavorName.toLowerCase();
+  
+  // Chocolates y oscuros
+  if (name.includes('chocolate') || name.includes('belga')) return '#3D2314';
+  if (name.includes('brownie')) return '#4A2511';
+  if (name.includes('oreo')) return '#1A1A1A';
+  if (name.includes('café') || name.includes('coffee')) return '#6F4E37';
+  if (name.includes('ron') || name.includes('whisky')) return '#8B4513';
+  
+  // Frutas rojas y rosadas
+  if (name.includes('fresa') || name.includes('strawberry')) return '#FF6B9D';
+  if (name.includes('cherry') || name.includes('cereza')) return '#DC143C';
+  if (name.includes('frambuesa') || name.includes('raspberry')) return '#E30B5C';
+  if (name.includes('frutos')) return '#C71585';
+  if (name.includes('chicle') || name.includes('gum')) return '#FFB6C1';
+  
+  // Naranjas y amarillos
+  if (name.includes('maracuyá') || name.includes('passion')) return '#FFB347';
+  if (name.includes('mandarina') || name.includes('orange')) return '#FFA500';
+  if (name.includes('mango')) return '#FFBF00';
+  if (name.includes('durazno') || name.includes('peach')) return '#FFDAB9';
+  if (name.includes('naranja')) return '#FF8C00';
+  
+  // Limones y cítricos
+  if (name.includes('limón') || name.includes('lemon')) return '#FFF44F';
+  if (name.includes('crema limón') || name.includes('lemon cream')) return '#FFFACD';
+  if (name.includes('lima') || name.includes('lime')) return '#C7EA46';
+  
+  // Vainillas y cremas
+  if (name.includes('vainilla') || name.includes('vanilla')) return '#F3E5AB';
+  if (name.includes('v. francesa')) return '#FFFDD0';
+  if (name.includes('v. chips')) return '#F5DEB3';
+  if (name.includes('crema')) return '#FFFACD';
+  
+  // Caramelos y dulces
+  if (name.includes('arequipe') || name.includes('dulce')) return '#D4A574';
+  if (name.includes('m&m')) return '#E31837';
+  if (name.includes('milky')) return '#4169E1';
+  if (name.includes('snickers')) return '#7B3F00';
+  if (name.includes('kit kat')) return '#D70026';
+  
+  // Verdes y menta
+  if (name.includes('menta') || name.includes('mint')) return '#98FF98';
+  if (name.includes('pistacho') || name.includes('pistachio')) return '#93C572';
+  
+  // Morados y azules
+  if (name.includes('mora') || name.includes('blackberry')) return '#8B008B';
+  if (name.includes('arándano') || name.includes('blueberry')) return '#4169E1';
+  if (name.includes('uva') || name.includes('grape')) return '#6A0DAD';
+  
+  // Otros
+  if (name.includes('coco') || name.includes('coconut')) return '#FFFEF0';
+  if (name.includes('nuez') || name.includes('nut')) return '#C19A6B';
+  if (name.includes('macadamia')) return '#DEB887';
+  if (name.includes('arroz') || name.includes('rice')) return '#F5F5DC';
+  if (name.includes('yogurt')) return '#FFF5EE';
+  
+  // Default rosado
+  return '#FFB5C5';
+};
+
+// Sabores predefinidos - GOURMET Y EXCLUSIVO
 const POPSY_FLAVORS = [
-// GOURMET (12 sabores)
-{ name: 'Limón N.', color: '#FFFACD', type: 'gourmet', line: 'gourmet', dark: true },
-{ name: 'Maracuyá N.', color: '#FFB347', type: 'gourmet', line: 'gourmet', dark: true },
-{ name: 'Mandarina N.', color: '#FFA500', type: 'gourmet', line: 'gourmet', dark: true },
-{ name: 'Vainilla', color: '#FFF8DC', type: 'gourmet', line: 'gourmet', dark: true },
-{ name: 'V. Francesa', color: '#FFFDD0', type: 'gourmet', line: 'gourmet', dark: true },
-{ name: 'V. Chips', color: '#F5DEB3', type: 'gourmet', line: 'gourmet', dark: true },
-{ name: 'Chocolate', color: '#5D3A1A', type: 'gourmet', line: 'gourmet', dark: false },
-{ name: 'Belga', color: '#3D2314', type: 'gourmet', line: 'gourmet', dark: false },
-{ name: 'Frutos', color: '#C71585', type: 'gourmet', line: 'gourmet', dark: false },
-{ name: 'Fresa', color: '#FFB5C5', type: 'gourmet', line: 'gourmet', dark: true },
-{ name: 'Arequipe', color: '#D4A574', type: 'gourmet', line: 'gourmet', dark: true },
-{ name: 'Ron', color: '#8B4513', type: 'gourmet', line: 'gourmet', dark: false },
-// EXCLUSIVO (11 sabores)
-{ name: 'Cherry', color: '#DC143C', type: 'exclusivo', line: 'exclusivo', dark: false },
-{ name: 'Arroz', color: '#F5F5DC', type: 'exclusivo', line: 'exclusivo', dark: true },
-{ name: 'Chicle', color: '#FFB6C1', type: 'exclusivo', line: 'exclusivo', dark: true },
-{ name: 'Brownie', color: '#3D2314', type: 'exclusivo', line: 'exclusivo', dark: false },
-{ name: 'Crema Limón', color: '#FFFACD', type: 'exclusivo', line: 'exclusivo', dark: true },
-{ name: "M&M", color: '#E31837', type: 'exclusivo', line: 'exclusivo', dark: false },
-{ name: 'Milky', color: '#4169E1', type: 'exclusivo', line: 'exclusivo', dark: false },
-{ name: 'Oreo', color: '#1A1A1A', type: 'exclusivo', line: 'exclusivo', dark: false },
-{ name: 'Macadamia', color: '#DEB887', type: 'exclusivo', line: 'exclusivo', dark: true },
-{ name: 'Café', color: '#6F4E37', type: 'exclusivo', line: 'exclusivo', dark: false },
-{ name: 'Yogurt C.', color: '#FFF5EE', type: 'exclusivo', line: 'exclusivo', dark: true }];
+// GOURMET
+{ name: 'Limón N.', type: 'gourmet', line: 'gourmet' },
+{ name: 'Maracuyá N.', type: 'gourmet', line: 'gourmet' },
+{ name: 'Mandarina N.', type: 'gourmet', line: 'gourmet' },
+{ name: 'Vainilla', type: 'gourmet', line: 'gourmet' },
+{ name: 'V. Francesa', type: 'gourmet', line: 'gourmet' },
+{ name: 'V. Chips', type: 'gourmet', line: 'gourmet' },
+{ name: 'Chocolate', type: 'gourmet', line: 'gourmet' },
+{ name: 'Belga', type: 'gourmet', line: 'gourmet' },
+{ name: 'Frutos', type: 'gourmet', line: 'gourmet' },
+{ name: 'Fresa', type: 'gourmet', line: 'gourmet' },
+{ name: 'Arequipe', type: 'gourmet', line: 'gourmet' },
+{ name: 'Ron', type: 'gourmet', line: 'gourmet' },
+// EXCLUSIVO
+{ name: 'Cherry', type: 'exclusivo', line: 'exclusivo' },
+{ name: 'Arroz', type: 'exclusivo', line: 'exclusivo' },
+{ name: 'Chicle', type: 'exclusivo', line: 'exclusivo' },
+{ name: 'Brownie', type: 'exclusivo', line: 'exclusivo' },
+{ name: 'Crema Limón', type: 'exclusivo', line: 'exclusivo' },
+{ name: "M&M", type: 'exclusivo', line: 'exclusivo' },
+{ name: 'Milky', type: 'exclusivo', line: 'exclusivo' },
+{ name: 'Oreo', type: 'exclusivo', line: 'exclusivo' },
+{ name: 'Macadamia', type: 'exclusivo', line: 'exclusivo' },
+{ name: 'Café', type: 'exclusivo', line: 'exclusivo' },
+{ name: 'Yogurt C.', type: 'exclusivo', line: 'exclusivo' }].map(f => ({
+  ...f,
+  color: getFlavorColor(f.name),
+  dark: ['#3D2314', '#4A2511', '#1A1A1A', '#6F4E37', '#8B4513', '#DC143C', '#E30B5C', '#C71585', '#E31837', '#4169E1', '#7B3F00', '#D70026', '#8B008B', '#6A0DAD'].includes(getFlavorColor(f.name))
+}));
 
 
 // Función para determinar si el texto debe ser oscuro o claro basado en el color de fondo
@@ -68,57 +135,30 @@ const IDEAL_RULES = {
   3: ['gourmet', 'exclusivo'] // Fila 3: Mixto
 };
 
-// Modal de selección con búsqueda
+// Modal simplificado - SIN selección F/T (se infiere del slot clickeado)
 function FlavorSelectorModal({ selectedSlot, onClose, onSelect }) {
   const [search, setSearch] = useState('');
-  const [slotType, setSlotType] = useState('F'); // F = Frontal, T = Trasero
 
   const filteredFlavors = POPSY_FLAVORS.filter((f) =>
-  f.name.toLowerCase().includes(search.toLowerCase())
+    f.name.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-      onClick={onClose}>
-
-      <motion.div
-        initial={{ scale: 0.9, y: 20 }}
-        animate={{ scale: 1, y: 0 }}
-        exit={{ scale: 0.9, y: 20 }}
-        onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-4 max-h-[85vh] overflow-hidden flex flex-col">
-
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-4 max-h-[85vh] overflow-hidden flex flex-col">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="font-bold text-gray-800">Seleccionar Sabor</h3>
+          <div>
+            <h3 className="font-bold text-gray-800">Seleccionar Sabor</h3>
+            <p className="text-xs text-gray-500">
+              Bajada {selectedSlot?.row}, Pos {selectedSlot?.position} - 
+              <span className={selectedSlot?.slot_type === 'F' ? 'text-pink-600 font-bold' : 'text-purple-600 font-bold'}>
+                {' '}{selectedSlot?.slot_type === 'F' ? 'FRONTAL' : 'TRASERO'}
+              </span>
+            </p>
+          </div>
           <Button variant="ghost" size="icon" onClick={onClose}>
             <X className="w-4 h-4" />
           </Button>
-        </div>
-        
-        <div className="flex items-center gap-2 mb-3">
-          <p className="text-xs text-gray-500">Bajada {selectedSlot?.row}, Pos {selectedSlot?.position}</p>
-          <div className="flex gap-1 ml-auto">
-            <Button
-              size="sm"
-              variant={slotType === 'F' ? 'default' : 'outline'}
-              onClick={() => setSlotType('F')}
-              className={`text-xs h-7 ${slotType === 'F' ? 'bg-pink-500' : ''}`}>
-
-              F Frontal
-            </Button>
-            <Button
-              size="sm"
-              variant={slotType === 'T' ? 'default' : 'outline'}
-              onClick={() => setSlotType('T')}
-              className={`text-xs h-7 ${slotType === 'T' ? 'bg-purple-500' : ''}`}>
-
-              T Trasero
-            </Button>
-          </div>
         </div>
         
         {/* Search */}
@@ -128,43 +168,45 @@ function FlavorSelectorModal({ selectedSlot, onClose, onSelect }) {
             placeholder="Buscar sabor..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 bg-gray-50" />
-
+            className="pl-9 bg-gray-50"
+          />
         </div>
         
         {/* Flavors Grid */}
         <div className="grid grid-cols-3 gap-2 overflow-y-auto flex-1 pr-1">
           {/* Vacío */}
           <button
-            onClick={() => onSelect({ name: '', color: '', type: 'vacio', is_empty: true, slotType })}
-            className="flex flex-col items-center p-2 rounded-lg border-2 border-dashed border-gray-300 hover:border-pink-400 transition-colors">
-
-            <div className="w-8 h-8 rounded-full bg-gray-200 mb-1" />
+            onClick={() => onSelect({ name: '', color: '', type: 'vacio', is_empty: true })}
+            className="flex flex-col items-center p-2 rounded-lg border-2 border-dashed border-gray-300 hover:border-pink-400 transition-colors"
+          >
+            <div className="w-10 h-10 rounded-full bg-gray-200 mb-1" />
             <span className="text-[10px] text-gray-500">Vacío</span>
           </button>
           
-          {filteredFlavors.map((flavor) =>
-          <button
-            key={flavor.name}
-            onClick={() => onSelect({ ...flavor, slotType })}
-            className="flex flex-col items-center p-2 rounded-lg border border-gray-200 hover:border-pink-400 hover:bg-pink-50 transition-colors">
-
+          {filteredFlavors.map((flavor) => (
+            <button
+              key={flavor.name}
+              onClick={() => onSelect(flavor)}
+              className="flex flex-col items-center p-2 rounded-lg border border-gray-200 hover:border-pink-400 hover:bg-pink-50 transition-colors"
+            >
               <div
-              className="w-8 h-8 rounded-full shadow-md mb-1"
-              style={{ background: `radial-gradient(circle at 30% 30%, ${flavor.color}ee, ${flavor.color}88)` }} />
-
+                className="w-10 h-10 rounded-full shadow-md mb-1"
+                style={{ 
+                  background: `radial-gradient(circle at 35% 35%, ${flavor.color}ff, ${flavor.color}cc, ${flavor.color}99)`,
+                  boxShadow: `0 4px 12px ${flavor.color}40`
+                }}
+              />
               <span className="text-[9px] font-medium text-center leading-tight line-clamp-2">{flavor.name}</span>
-              {flavor.brand && <Sparkles className="w-2.5 h-2.5 text-purple-500 mt-0.5" />}
             </button>
-          )}
+          ))}
         </div>
         
-        {filteredFlavors.length === 0 && search &&
-        <p className="text-center text-gray-400 text-sm py-4">No se encontró "{search}"</p>
-        }
-      </motion.div>
-    </motion.div>);
-
+        {filteredFlavors.length === 0 && search && (
+          <p className="text-center text-gray-400 text-sm py-4">No se encontró "{search}"</p>
+        )}
+      </div>
+    </div>
+  );
 }
 
 export default function FreezerMap() {
@@ -353,11 +395,12 @@ export default function FreezerMap() {
     setShowFlavorSelector(true);
   };
 
-  // Seleccionar sabor
+  // Seleccionar sabor - CORREGIDO: mantener slot_type del slot clickeado
   const handleFlavorSelect = (flavor) => {
     if (!selectedSlot) return;
 
-    const slotType = flavor.slotType || selectedSlot.slot_type || 'F';
+    // CRÍTICO: usar el slot_type del slot que fue clickeado
+    const slotType = selectedSlot.slot_type;
 
     setUndoStack((prev) => [...prev.slice(-9), { action: 'edit', slot: { ...selectedSlot } }]);
     setSavingSlot({ row: selectedSlot.row, position: selectedSlot.position, saving: true });
@@ -369,15 +412,16 @@ export default function FreezerMap() {
       slot_type: slotType,
       flavor_name: flavor.name,
       flavor_type: flavor.type || flavor.line,
-      color: flavor.color,
-      is_empty: flavor.is_empty || false
+      color: flavor.color || getFlavorColor(flavor.name),
+      is_empty: flavor.is_empty || false,
+      stock_level: 'full'
     };
 
     const existing = slots.find((s) =>
-    s.store_id === `${selectedStore}_F${currentFreezer}` &&
-    s.row === selectedSlot.row &&
-    s.position === selectedSlot.position &&
-    s.slot_type === slotType
+      s.store_id === `${selectedStore}_F${currentFreezer}` &&
+      s.row === selectedSlot.row &&
+      s.position === selectedSlot.position &&
+      s.slot_type === slotType
     );
 
     updateSlotMutation.mutate({

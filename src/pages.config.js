@@ -5,11 +5,13 @@ import Communication from './pages/Communication';
 import Dashboard from './pages/Dashboard';
 import DesignSystem from './pages/DesignSystem';
 import ExecutiveDashboard from './pages/ExecutiveDashboard';
+import ExecutiveExperience from './pages/ExecutiveExperience';
 import FreezerMap from './pages/FreezerMap';
 import Home from './pages/Home';
 import Management from './pages/Management';
 import PopsyPlanner from './pages/PopsyPlanner';
 import PredictiveAnalytics from './pages/PredictiveAnalytics';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 import Quality from './pages/Quality';
 import Rankings from './pages/Rankings';
 import Reports from './pages/Reports';
@@ -17,11 +19,9 @@ import RoulettePopsy from './pages/RoulettePopsy';
 import Sales from './pages/Sales';
 import SearchCashier from './pages/SearchCashier';
 import Settings from './pages/Settings';
+import TWAGuide from './pages/TWAGuide';
 import Team from './pages/Team';
 import Training from './pages/Training';
-import ExecutiveExperience from './pages/ExecutiveExperience';
-import PrivacyPolicy from './pages/PrivacyPolicy';
-import TWAGuide from './pages/TWAGuide';
 import __Layout from './Layout.jsx';
 
 
@@ -33,11 +33,13 @@ export const PAGES = {
     "Dashboard": Dashboard,
     "DesignSystem": DesignSystem,
     "ExecutiveDashboard": ExecutiveDashboard,
+    "ExecutiveExperience": ExecutiveExperience,
     "FreezerMap": FreezerMap,
     "Home": Home,
     "Management": Management,
     "PopsyPlanner": PopsyPlanner,
     "PredictiveAnalytics": PredictiveAnalytics,
+    "PrivacyPolicy": PrivacyPolicy,
     "Quality": Quality,
     "Rankings": Rankings,
     "Reports": Reports,
@@ -45,11 +47,9 @@ export const PAGES = {
     "Sales": Sales,
     "SearchCashier": SearchCashier,
     "Settings": Settings,
+    "TWAGuide": TWAGuide,
     "Team": Team,
     "Training": Training,
-    "ExecutiveExperience": ExecutiveExperience,
-    "PrivacyPolicy": PrivacyPolicy,
-    "TWAGuide": TWAGuide,
 }
 
 export const pagesConfig = {
