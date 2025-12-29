@@ -21,6 +21,7 @@ const SALARY_PER_HOUR = 6000; // Salario base por hora en Colombia
 // Cálculos según legislación laboral Colombia
 const calculatePayroll = (shifts, cashiers, dateRange) => {
   const payrollData = {};
+  const weeklyHours = {}; // Rastrear horas por semana
 
   shifts.forEach(shift => {
     if (!shift.cashier_id || !shift.start_time || !shift.end_time) return;
@@ -53,7 +54,9 @@ const calculatePayroll = (shifts, cashiers, dateRange) => {
         sunday_pay: 0,
         holiday_pay: 0,
         total_pay: 0,
-        shifts_count: 0
+        shifts_count: 0,
+        exceeds_weekly_limit: false,
+        weekly_hours_breakdown: {}
       };
     }
 
@@ -69,6 +72,15 @@ const calculatePayroll = (shifts, cashiers, dateRange) => {
     
     const totalHours = totalMinutes / 60;
     data.total_hours += totalHours;
+
+    // Rastrear horas por semana (semana empieza lunes)
+    const weekStart = format(startOfWeek(parseISO(shiftDate), { weekStartsOn: 1 }), 'yyyy-MM-dd');
+    if (!weeklyHours[shift.cashier_id]) weeklyHours[shift.cashier_id] = {};
+    if (!weeklyHours[shift.cashier_id][weekStart]) weeklyHours[shift.cashier_id][weekStart] = 0;
+    weeklyHours[shift.cashier_id][weekStart] += totalHours;
+    
+    if (!data.weekly_hours_breakdown[weekStart]) data.weekly_hours_breakdown[weekStart] = 0;
+    data.weekly_hours_breakdown[weekStart] += totalHours;
 
     // Verificar si es domingo o festivo
     const isHoliday = HOLIDAYS_2025.includes(shiftDate);
@@ -94,15 +106,18 @@ const calculatePayroll = (shifts, cashiers, dateRange) => {
 
     data.night_hours += nightHours;
 
-    // Horas extras (más de 8 horas diarias o 48 semanales) = 25% extra
-    const overtimeThreshold = 8;
-    if (totalHours > overtimeThreshold) {
-      const overtimeHours = totalHours - overtimeThreshold;
-      data.overtime_hours += overtimeHours;
-      data.regular_hours += overtimeThreshold;
+    // Horas extras diarias (más de 8 horas) o semanales (más de 44 horas)
+    const dailyOvertimeThreshold = 8;
+    let dailyOvertime = 0;
+    
+    if (totalHours > dailyOvertimeThreshold) {
+      dailyOvertime = totalHours - dailyOvertimeThreshold;
+      data.regular_hours += dailyOvertimeThreshold;
     } else {
       data.regular_hours += totalHours;
     }
+    
+    data.overtime_hours += dailyOvertime;
 
     // Dominicales = Recargo 75%
     if (isSundayShift) {
@@ -146,6 +161,23 @@ const calculatePayroll = (shifts, cashiers, dateRange) => {
       data.overtime_pay + 
       data.sunday_pay + 
       data.holiday_pay;
+  });
+
+  // Segundo paso: calcular horas extras por exceso semanal (más de 44h/semana)
+  Object.keys(payrollData).forEach(cashierId => {
+    const data = payrollData[cashierId];
+    const cashierWeeklyHours = weeklyHours[cashierId] || {};
+    
+    Object.entries(cashierWeeklyHours).forEach(([week, hours]) => {
+      const WEEKLY_LIMIT = 44;
+      if (hours > WEEKLY_LIMIT) {
+        data.exceeds_weekly_limit = true;
+        const weeklyOvertime = hours - WEEKLY_LIMIT;
+        data.overtime_hours += weeklyOvertime;
+        data.overtime_pay += weeklyOvertime * SALARY_PER_HOUR * 0.25;
+        data.total_pay += weeklyOvertime * SALARY_PER_HOUR * 0.25;
+      }
+    });
   });
 
   return Object.values(payrollData);
@@ -356,11 +388,16 @@ export default function PayrollSummary({ shifts, cashiers, storeId }) {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: idx * 0.05 }}
-                    className="hover:bg-violet-50/50 transition-colors"
+                    className={`hover:bg-violet-50/50 transition-colors ${data.exceeds_weekly_limit ? 'bg-amber-50/50' : ''}`}
                   >
                     <td className="px-4 py-3">
-                      <div>
+                      <div className="flex items-center gap-2">
                         <p className="font-medium text-gray-800 text-sm">{data.cashier_name}</p>
+                        {data.exceeds_weekly_limit && (
+                          <Badge variant="outline" className="bg-amber-100 text-amber-700 border-amber-300 text-xs">
+                            ⚠️ +44h/sem
+                          </Badge>
+                        )}
                       </div>
                     </td>
                     <td className="px-4 py-3">
@@ -423,13 +460,35 @@ export default function PayrollSummary({ shifts, cashiers, storeId }) {
         </CardContent>
       </Card>
 
+      {/* Alertas de cumplimiento legal */}
+      {payrollData.some(d => d.exceeds_weekly_limit) && (
+        <Card className="bg-red-50 border-red-200">
+          <CardContent className="p-4">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                <span className="text-xl">⚠️</span>
+              </div>
+              <div>
+                <p className="font-bold text-red-800 mb-1">Alerta: Límite Semanal Excedido</p>
+                <p className="text-sm text-red-700">
+                  Algunos colaboradores superan las <strong>44 horas semanales</strong> permitidas por ley. 
+                  Las horas adicionales se calculan como extras (+25%), pero se recomienda ajustar la programación 
+                  para cumplir con la jornada legal máxima.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Nota legal */}
       <Card className="bg-amber-50 border-amber-200">
         <CardContent className="p-4">
           <p className="text-xs text-amber-800">
-            <strong>⚠️ Nota:</strong> Este cálculo es estimado basado en legislación laboral colombiana vigente. 
-            Considera salario base de {formatCurrency(SALARY_PER_HOUR)}/hora, recargo nocturno 35% (21:00-06:00), 
-            horas extras 25%, dominicales y festivos 75%. Verifica con tu contador para cálculos oficiales.
+            <strong>⚠️ Nota Legal:</strong> Cálculo basado en legislación colombiana vigente con límite de <strong>44 horas semanales</strong>. 
+            Salario base {formatCurrency(SALARY_PER_HOUR)}/hora, recargo nocturno 35% (21:00-06:00), 
+            horas extras 25% (más de 8h diarias o 44h semanales), dominicales y festivos 75%. 
+            Verifica con tu contador para cálculos oficiales y deducciones de ley.
           </p>
         </CardContent>
       </Card>
