@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
@@ -15,6 +15,7 @@ const HOLIDAYS_2025 = [
 ];
 
 export default function PlannerStatusPanel({ stores }) {
+  const [activeFilter, setActiveFilter] = useState('all');
   const currentWeekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
   const currentWeekEnd = endOfWeek(new Date(), { weekStartsOn: 1 });
 
@@ -94,8 +95,17 @@ export default function PlannerStatusPanel({ stores }) {
     const withPlanner = plannerStatus.filter(s => s.hasPlanner).length;
     const pending = plannerStatus.length - withPlanner;
     const totalOvertime = plannerStatus.reduce((sum, s) => sum + s.overtimeHours, 0);
-    return { withPlanner, pending, totalOvertime };
+    const withOvertime = plannerStatus.filter(s => s.overtimeHours > 0).length;
+    return { withPlanner, pending, totalOvertime, withOvertime };
   }, [plannerStatus]);
+
+  const filteredStores = useMemo(() => {
+    if (activeFilter === 'all') return plannerStatus;
+    if (activeFilter === 'complete') return plannerStatus.filter(s => s.hasPlanner);
+    if (activeFilter === 'pending') return plannerStatus.filter(s => !s.hasPlanner);
+    if (activeFilter === 'overtime') return plannerStatus.filter(s => s.overtimeHours > 0);
+    return plannerStatus;
+  }, [plannerStatus, activeFilter]);
 
   return (
     <div className="space-y-6">
@@ -111,8 +121,31 @@ export default function PlannerStatusPanel({ stores }) {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-4">
-          <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+        <div className="grid grid-cols-4 gap-4">
+          <button
+            onClick={() => setActiveFilter('all')}
+            className={`rounded-xl p-4 border transition-all ${
+              activeFilter === 'all' 
+                ? 'bg-indigo-500/20 border-indigo-500/50' 
+                : 'bg-white/5 border-white/10 hover:bg-white/10'
+            }`}
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <Calendar className="w-5 h-5 text-indigo-400" />
+              <p className="text-xs text-slate-400 font-medium">Todas</p>
+            </div>
+            <p className="text-3xl font-black text-white">{plannerStatus.length}</p>
+            <p className="text-xs text-slate-500 mt-1">Total tiendas</p>
+          </button>
+
+          <button
+            onClick={() => setActiveFilter('complete')}
+            className={`rounded-xl p-4 border transition-all ${
+              activeFilter === 'complete' 
+                ? 'bg-emerald-500/20 border-emerald-500/50' 
+                : 'bg-white/5 border-white/10 hover:bg-white/10'
+            }`}
+          >
             <div className="flex items-center gap-2 mb-2">
               <CheckCircle2 className="w-5 h-5 text-emerald-400" />
               <p className="text-xs text-slate-400 font-medium">Con Planner</p>
@@ -121,9 +154,16 @@ export default function PlannerStatusPanel({ stores }) {
             <p className="text-xs text-slate-500 mt-1">
               {Math.round((stats.withPlanner / plannerStatus.length) * 100)}% del total
             </p>
-          </div>
+          </button>
 
-          <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+          <button
+            onClick={() => setActiveFilter('pending')}
+            className={`rounded-xl p-4 border transition-all ${
+              activeFilter === 'pending' 
+                ? 'bg-amber-500/20 border-amber-500/50' 
+                : 'bg-white/5 border-white/10 hover:bg-white/10'
+            }`}
+          >
             <div className="flex items-center gap-2 mb-2">
               <AlertCircle className="w-5 h-5 text-amber-400" />
               <p className="text-xs text-slate-400 font-medium">Pendientes</p>
@@ -132,16 +172,23 @@ export default function PlannerStatusPanel({ stores }) {
             <p className="text-xs text-slate-500 mt-1">
               {Math.round((stats.pending / plannerStatus.length) * 100)}% del total
             </p>
-          </div>
+          </button>
 
-          <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+          <button
+            onClick={() => setActiveFilter('overtime')}
+            className={`rounded-xl p-4 border transition-all ${
+              activeFilter === 'overtime' 
+                ? 'bg-red-500/20 border-red-500/50' 
+                : 'bg-white/5 border-white/10 hover:bg-white/10'
+            }`}
+          >
             <div className="flex items-center gap-2 mb-2">
               <Clock className="w-5 h-5 text-red-400" />
               <p className="text-xs text-slate-400 font-medium">Horas Extras</p>
             </div>
             <p className="text-3xl font-black text-red-400">{stats.totalOvertime.toFixed(1)}h</p>
-            <p className="text-xs text-slate-500 mt-1">Total zona</p>
-          </div>
+            <p className="text-xs text-slate-500 mt-1">{stats.withOvertime} tiendas</p>
+          </button>
         </div>
       </div>
 
@@ -166,7 +213,7 @@ export default function PlannerStatusPanel({ stores }) {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {plannerStatus
+              {filteredStores
                 .sort((a, b) => {
                   if (a.hasPlanner === b.hasPlanner) {
                     return b.overtimeHours - a.overtimeHours;
