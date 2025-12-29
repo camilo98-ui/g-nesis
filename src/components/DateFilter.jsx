@@ -215,28 +215,28 @@ function CustomCalendar({ selected, onSelect, onClose, onApply, initialTab = 'we
             return (
               <motion.button
                 key={week.number}
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.99 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => toggleWeekSelection(week)}
-                className={`w-full flex items-center justify-between p-2.5 rounded-lg text-xs transition-all ${
+                className={`w-full flex items-center justify-between p-3 rounded-xl text-sm transition-all ${
                 isSelected ?
-                'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-md' :
+                'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg' :
                 week.isCurrent ?
-                'bg-pink-50 border-2 border-pink-300 text-pink-700' :
-                'bg-gray-50 hover:bg-pink-50 text-gray-700'}`
+                'bg-pink-100 border-2 border-pink-400 text-pink-800' :
+                'bg-white border-2 border-gray-200 hover:border-pink-300 text-gray-700'}`
                 }>
 
-                  <div className="flex items-center gap-2">
-                    <span className={`w-6 h-6 rounded-full flex items-center justify-center font-bold ${isSelected ? 'bg-white/20' : 'bg-pink-100 text-pink-600'}`}>
+                  <div className="flex items-center gap-3">
+                    <span className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${isSelected ? 'bg-white/20' : 'bg-pink-500 text-white'}`}>
                       {week.number}
                     </span>
-                    <span className="font-medium">{week.label}</span>
+                    <span className="font-semibold">{week.label}</span>
                   </div>
-                  {isSelected && <Check className="w-4 h-4" />}
-                  {week.isCurrent && !isSelected && <span className="text-[10px] bg-pink-200 text-pink-700 px-1.5 py-0.5 rounded-full">Actual</span>}
+                  {isSelected && <Check className="w-5 h-5" />}
+                  {week.isCurrent && !isSelected && <span className="text-[10px] bg-pink-500 text-white px-2 py-1 rounded-full font-bold">Actual</span>}
                 </motion.button>);
 
-          })}
+            })}
           </div>
         </div>
         {selectedWeeks.length > 0 && (
