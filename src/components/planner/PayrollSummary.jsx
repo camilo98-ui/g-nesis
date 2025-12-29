@@ -138,10 +138,9 @@ const calculatePayroll = (shifts, cashiers, dateRange) => {
     // Recargo nocturno (35% adicional)
     data.night_surcharge += nightHours * baseHourlyPay * 0.35;
 
-    // Horas extras (25% adicional)
-    if (totalHours > overtimeThreshold) {
-      const overtimeHours = totalHours - overtimeThreshold;
-      data.overtime_pay += overtimeHours * baseHourlyPay * 0.25;
+    // Horas extras diarias (25% adicional)
+    if (dailyOvertime > 0) {
+      data.overtime_pay += dailyOvertime * baseHourlyPay * 0.25;
     }
 
     // Dominicales (75% adicional)
