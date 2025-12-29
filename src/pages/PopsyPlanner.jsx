@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { createPageUrl } from '@/utils';
-import { Calendar as CalendarIcon, Sparkles, BarChart3, UserPlus, MessageCircle, ArrowLeft } from 'lucide-react';
+import { Calendar as CalendarIcon, Sparkles, BarChart3, UserPlus, MessageCircle, ArrowLeft, DollarSign } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format, startOfWeek, endOfWeek, eachDayOfInterval } from 'date-fns';
@@ -17,6 +17,7 @@ import AIScheduleAssistant from '@/components/planner/AIScheduleAssistant';
 import ConeoRotationSuggestion from '@/components/planner/ConeoRotationSuggestion';
 import AIScheduleOptimizer from '@/components/planner/AIScheduleOptimizer';
 import { generateSchedulePDF } from '@/components/planner/SchedulePDFExport';
+import PayrollSummary from '@/components/planner/PayrollSummary';
 
 export default function PopsyPlanner() {
   const [selectedStore, setSelectedStore] = useState('');
@@ -196,6 +197,9 @@ export default function PopsyPlanner() {
               <TabsTrigger value="stats" className="gap-2 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-400 data-[state=active]:to-teal-400 data-[state=active]:text-white">
                 <BarChart3 className="w-4 h-4" /> Reportes
               </TabsTrigger>
+              <TabsTrigger value="payroll" className="gap-2 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-400 data-[state=active]:to-purple-400 data-[state=active]:text-white">
+                <DollarSign className="w-4 h-4" /> Nómina
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="calendar" className="mt-0 space-y-4">
@@ -248,6 +252,24 @@ export default function PopsyPlanner() {
                     cashiers={cashiers}
                   />
                 </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="payroll" className="mt-0">
+              {isReadOnly ? (
+                <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
+                  <div className="w-16 h-16 bg-amber-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                    <span className="text-3xl">🔒</span>
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-700 mb-2">Acceso Restringido</h3>
+                  <p className="text-gray-500 text-sm">La nómina solo está disponible para Líderes de Experiencia</p>
+                </div>
+              ) : (
+                <PayrollSummary 
+                  shifts={shifts}
+                  cashiers={cashiers}
+                  storeId={selectedStore}
+                />
               )}
             </TabsContent>
           </Tabs>
