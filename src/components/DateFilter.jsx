@@ -39,12 +39,12 @@ function generateWeeksOfYear() {
 }
 
 // Calendario personalizado más dinámico y bonito
-function CustomCalendar({ selected, onSelect, onClose, onApply }) {
+function CustomCalendar({ selected, onSelect, onClose, onApply, initialTab = 'weeks' }) {
   const [currentMonth, setCurrentMonth] = useState(selected?.from || new Date());
   const [hoverDate, setHoverDate] = useState(null);
   const [selectingEnd, setSelectingEnd] = useState(false);
   const [tempSelection, setTempSelection] = useState(selected);
-  const [showWeeks, setShowWeeks] = useState(false);
+  const [showWeeks, setShowWeeks] = useState(initialTab === 'weeks');
   const [selectedWeeks, setSelectedWeeks] = useState([]);
   const [isMobile, setIsMobile] = useState(false);
   const [showYearSelector, setShowYearSelector] = useState(false);
@@ -186,15 +186,8 @@ function CustomCalendar({ selected, onSelect, onClose, onApply }) {
 
   return (
     <div className={`select-none bg-white rounded-2xl overflow-hidden shadow-xl border border-pink-100 ${isMobile ? 'max-h-[80vh] flex flex-col' : ''}`}>
-      {/* Tabs: Calendario / Semanas */}
+      {/* Tabs: Semanas / Calendario */}
       <div className="flex border-b border-pink-100 flex-shrink-0">
-        <button
-          onClick={() => setShowWeeks(false)}
-          className={`flex-1 ${isMobile ? 'py-2' : 'py-3'} text-xs font-medium transition-all ${!showWeeks ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white' : 'bg-pink-50 text-pink-600 hover:bg-pink-100'}`}>
-
-          <CalendarRange className="w-4 h-4 inline mr-1" />
-          Calendario
-        </button>
         <button
           onClick={() => setShowWeeks(true)}
           className={`flex-1 ${isMobile ? 'py-2' : 'py-3'} text-xs font-medium transition-all ${showWeeks ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white' : 'bg-pink-50 text-pink-600 hover:bg-pink-100'}`}>
@@ -202,14 +195,21 @@ function CustomCalendar({ selected, onSelect, onClose, onApply }) {
           <Calendar className="w-4 h-4 inline mr-1" />
           Semanas
         </button>
+        <button
+          onClick={() => setShowWeeks(false)}
+          className={`flex-1 ${isMobile ? 'py-2' : 'py-3'} text-xs font-medium transition-all ${!showWeeks ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white' : 'bg-pink-50 text-pink-600 hover:bg-pink-100'}`}>
+
+          <CalendarRange className="w-4 h-4 inline mr-1" />
+          Calendario
+        </button>
       </div>
 
       {showWeeks ? (
       <>
         {/* Vista de semanas */}
         <div className={`p-3 flex-1 overflow-y-auto`}>
-          <p className="text-xs text-gray-500 mb-2 text-center">Selecciona una o más semanas</p>
-          <div className={`space-y-1.5`}>
+          <p className="text-xs text-pink-600 mb-3 text-center font-medium">Selecciona una o más semanas</p>
+          <div className={`space-y-2`}>
             {weeksOfYear.map((week) => {
             const isSelected = selectedWeeks.some((w) => w.number === week.number);
             return (
@@ -240,14 +240,14 @@ function CustomCalendar({ selected, onSelect, onClose, onApply }) {
           </div>
         </div>
         {selectedWeeks.length > 0 && (
-          <div className="p-3 border-t border-pink-100 flex-shrink-0">
+          <div className="p-4 border-t border-pink-200 flex-shrink-0 bg-pink-50">
             <motion.button
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               onClick={applyWeeks}
-              className={`w-full ${isMobile ? 'py-4' : 'py-2'} rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white ${isMobile ? 'text-base' : 'text-xs'} font-bold shadow-lg flex items-center justify-center gap-2`}>
+              className={`w-full py-3 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white text-sm font-bold shadow-lg flex items-center justify-center gap-2 hover:shadow-xl transition-shadow`}>
 
-              <Check className={`${isMobile ? 'w-5 h-5' : 'w-3.5 h-3.5'}`} />
+              <Check className="w-5 h-5" />
               Aplicar {selectedWeeks.length} semana{selectedWeeks.length > 1 ? 's' : ''}
             </motion.button>
           </div>
@@ -406,9 +406,10 @@ function CustomCalendar({ selected, onSelect, onClose, onApply }) {
 
 export default function DateFilter({ dateRange, onDateChange, buttonClassName = '', buttonText = null }) {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('weeks'); // 'weeks' o 'calendar'
 
   const getDateLabel = () => {
-    if (!dateRange?.from) return 'Calendario';
+    if (!dateRange?.from) return 'Seleccionar';
     if (dateRange.from && dateRange.to && isSameDay(dateRange.from, dateRange.to)) {
       return format(dateRange.from, 'dd MMM', { locale: es });
     }
@@ -436,7 +437,8 @@ export default function DateFilter({ dateRange, onDateChange, buttonClassName = 
             selected={dateRange}
             onSelect={onDateChange}
             onClose={() => setIsCalendarOpen(false)}
-            onApply={() => setIsCalendarOpen(false)} />
+            onApply={() => setIsCalendarOpen(false)}
+            initialTab={activeTab} />
 
         </PopoverContent>
       </Popover>
