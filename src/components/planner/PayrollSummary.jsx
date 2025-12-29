@@ -16,9 +16,7 @@ const HOLIDAYS_2025 = [
   '2025-12-08', '2025-12-25'
 ];
 
-const SALARY_PER_HOUR = 6000; // Salario base por hora en Colombia
-
-// Cálculos según legislación laboral Colombia
+// Análisis de turnos según legislación laboral Colombia
 const calculatePayroll = (shifts, cashiers, dateRange) => {
   const payrollData = {};
   const weeklyHours = {}; // Rastrear horas por semana
@@ -48,12 +46,6 @@ const calculatePayroll = (shifts, cashiers, dateRange) => {
         overtime_hours: 0,
         sunday_hours: 0,
         holiday_hours: 0,
-        regular_pay: 0,
-        night_surcharge: 0,
-        overtime_pay: 0,
-        sunday_pay: 0,
-        holiday_pay: 0,
-        total_pay: 0,
         shifts_count: 0,
         exceeds_weekly_limit: false,
         weekly_hours_breakdown: {}
@@ -128,38 +120,6 @@ const calculatePayroll = (shifts, cashiers, dateRange) => {
     if (isHoliday) {
       data.holiday_hours += totalHours;
     }
-
-    // Cálculos de pago
-    const baseHourlyPay = SALARY_PER_HOUR;
-    
-    // Pago regular
-    data.regular_pay += (totalHours - nightHours) * baseHourlyPay;
-
-    // Recargo nocturno (35% adicional)
-    data.night_surcharge += nightHours * baseHourlyPay * 0.35;
-
-    // Horas extras diarias (25% adicional)
-    if (dailyOvertime > 0) {
-      data.overtime_pay += dailyOvertime * baseHourlyPay * 0.25;
-    }
-
-    // Dominicales (75% adicional)
-    if (isSundayShift) {
-      data.sunday_pay += totalHours * baseHourlyPay * 0.75;
-    }
-
-    // Festivos (75% adicional)
-    if (isHoliday) {
-      data.holiday_pay += totalHours * baseHourlyPay * 0.75;
-    }
-
-    // Total
-    data.total_pay = 
-      data.regular_pay + 
-      data.night_surcharge + 
-      data.overtime_pay + 
-      data.sunday_pay + 
-      data.holiday_pay;
   });
 
   // Segundo paso: calcular horas extras por exceso semanal (más de 44h/semana)
@@ -173,8 +133,6 @@ const calculatePayroll = (shifts, cashiers, dateRange) => {
         data.exceeds_weekly_limit = true;
         const weeklyOvertime = hours - WEEKLY_LIMIT;
         data.overtime_hours += weeklyOvertime;
-        data.overtime_pay += weeklyOvertime * SALARY_PER_HOUR * 0.25;
-        data.total_pay += weeklyOvertime * SALARY_PER_HOUR * 0.25;
       }
     });
   });
@@ -199,11 +157,6 @@ export default function PayrollSummary({ shifts, cashiers, storeId }) {
       overtime_hours: acc.overtime_hours + curr.overtime_hours,
       sunday_hours: acc.sunday_hours + curr.sunday_hours,
       holiday_hours: acc.holiday_hours + curr.holiday_hours,
-      total_pay: acc.total_pay + curr.total_pay,
-      night_surcharge: acc.night_surcharge + curr.night_surcharge,
-      overtime_pay: acc.overtime_pay + curr.overtime_pay,
-      sunday_pay: acc.sunday_pay + curr.sunday_pay,
-      holiday_pay: acc.holiday_pay + curr.holiday_pay,
       shifts_count: acc.shifts_count + curr.shifts_count
     }), {
       total_hours: 0,
@@ -211,25 +164,12 @@ export default function PayrollSummary({ shifts, cashiers, storeId }) {
       overtime_hours: 0,
       sunday_hours: 0,
       holiday_hours: 0,
-      total_pay: 0,
-      night_surcharge: 0,
-      overtime_pay: 0,
-      sunday_pay: 0,
-      holiday_pay: 0,
       shifts_count: 0
     });
   }, [payrollData]);
 
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('es-CO', {
-      style: 'currency',
-      currency: 'COP',
-      minimumFractionDigits: 0
-    }).format(amount);
-  };
-
   const exportToCSV = () => {
-    const headers = ['Colaborador', 'Cargo', 'Turnos', 'Horas Totales', 'H. Nocturnas', 'H. Extras', 'H. Dominicales', 'H. Festivos', 'Pago Base', 'Recargo Nocturno', 'Pago H. Extras', 'Pago Dominical', 'Pago Festivo', 'Total a Pagar'];
+    const headers = ['Colaborador', 'Cargo', 'Turnos', 'Horas Totales', 'H. Nocturnas', 'H. Extras', 'H. Dominicales', 'H. Festivos'];
     const rows = payrollData.map(d => [
       d.cashier_name,
       d.position,
@@ -238,13 +178,7 @@ export default function PayrollSummary({ shifts, cashiers, storeId }) {
       d.night_hours.toFixed(2),
       d.overtime_hours.toFixed(2),
       d.sunday_hours.toFixed(2),
-      d.holiday_hours.toFixed(2),
-      d.regular_pay.toFixed(0),
-      d.night_surcharge.toFixed(0),
-      d.overtime_pay.toFixed(0),
-      d.sunday_pay.toFixed(0),
-      d.holiday_pay.toFixed(0),
-      d.total_pay.toFixed(0)
+      d.holiday_hours.toFixed(2)
     ]);
 
     const csv = [headers, ...rows].map(row => row.join(',')).join('\n');
@@ -267,8 +201,8 @@ export default function PayrollSummary({ shifts, cashiers, storeId }) {
                 <DollarSign className="w-5 h-5 text-white" />
               </div>
               <div>
-                <CardTitle className="text-xl font-bold text-gray-800">Resumen de Nómina</CardTitle>
-                <p className="text-sm text-gray-500">Cálculo automático de recargos y extras</p>
+                <CardTitle className="text-xl font-bold text-gray-800">Análisis de Turnos</CardTitle>
+                <p className="text-sm text-gray-500">Seguimiento de horas y cumplimiento legal</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -311,49 +245,45 @@ export default function PayrollSummary({ shifts, cashiers, storeId }) {
           <p className="text-xs opacity-75">Recargo +35%</p>
         </motion.div>
 
-        <motion.div whileHover={{ y: -4 }} className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-4 text-white shadow-lg">
+        <motion.div whileHover={{ y: -4 }} className="bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl p-4 text-white shadow-lg">
           <div className="flex items-center gap-2 mb-2">
             <TrendingUp className="w-5 h-5" />
-            <p className="text-xs font-medium opacity-90">Total Nómina</p>
+            <p className="text-xs font-medium opacity-90">H. Extras</p>
           </div>
-          <p className="text-xl font-bold">{formatCurrency(totals.total_pay)}</p>
-          <p className="text-xs opacity-75">Incluye recargos</p>
+          <p className="text-2xl font-bold">{totals.overtime_hours.toFixed(1)}h</p>
+          <p className="text-xs opacity-75">Diarias + Semanales</p>
         </motion.div>
       </div>
 
-      {/* Desglose por tipo de pago */}
+      {/* Desglose de horas especiales */}
       <Card>
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
             <Calendar className="w-5 h-5 text-violet-500" />
-            Desglose Total de Nómina
+            Desglose de Horas Especiales
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            <div className="p-3 bg-gray-50 rounded-lg">
-              <p className="text-xs text-gray-500 mb-1">Pago Base</p>
-              <p className="text-lg font-bold text-gray-800">{formatCurrency(totals.total_pay - totals.night_surcharge - totals.overtime_pay - totals.sunday_pay - totals.holiday_pay)}</p>
-            </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="p-3 bg-indigo-50 rounded-lg">
-              <p className="text-xs text-indigo-600 mb-1">Recargo Nocturno</p>
-              <p className="text-lg font-bold text-indigo-700">{formatCurrency(totals.night_surcharge)}</p>
-              <p className="text-xs text-indigo-500">{totals.night_hours.toFixed(1)}h × 35%</p>
+              <p className="text-xs text-indigo-600 mb-1">Horas Nocturnas</p>
+              <p className="text-2xl font-bold text-indigo-700">{totals.night_hours.toFixed(1)}h</p>
+              <p className="text-xs text-indigo-500">21:00 - 06:00 (+35%)</p>
             </div>
             <div className="p-3 bg-amber-50 rounded-lg">
               <p className="text-xs text-amber-600 mb-1">Horas Extras</p>
-              <p className="text-lg font-bold text-amber-700">{formatCurrency(totals.overtime_pay)}</p>
-              <p className="text-xs text-amber-500">{totals.overtime_hours.toFixed(1)}h × 25%</p>
+              <p className="text-2xl font-bold text-amber-700">{totals.overtime_hours.toFixed(1)}h</p>
+              <p className="text-xs text-amber-500">+8h/día o +44h/sem (+25%)</p>
             </div>
             <div className="p-3 bg-blue-50 rounded-lg">
               <p className="text-xs text-blue-600 mb-1">Dominicales</p>
-              <p className="text-lg font-bold text-blue-700">{formatCurrency(totals.sunday_pay)}</p>
-              <p className="text-xs text-blue-500">{totals.sunday_hours.toFixed(1)}h × 75%</p>
+              <p className="text-2xl font-bold text-blue-700">{totals.sunday_hours.toFixed(1)}h</p>
+              <p className="text-xs text-blue-500">Domingos (+75%)</p>
             </div>
             <div className="p-3 bg-rose-50 rounded-lg">
               <p className="text-xs text-rose-600 mb-1">Festivos</p>
-              <p className="text-lg font-bold text-rose-700">{formatCurrency(totals.holiday_pay)}</p>
-              <p className="text-xs text-rose-500">{totals.holiday_hours.toFixed(1)}h × 75%</p>
+              <p className="text-2xl font-bold text-rose-700">{totals.holiday_hours.toFixed(1)}h</p>
+              <p className="text-xs text-rose-500">Días festivos (+75%)</p>
             </div>
           </div>
         </CardContent>
@@ -377,7 +307,6 @@ export default function PayrollSummary({ shifts, cashiers, storeId }) {
                   <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600">H. Extras</th>
                   <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600">Dominical</th>
                   <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600">Festivo</th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600">Total a Pagar</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -436,9 +365,6 @@ export default function PayrollSummary({ shifts, cashiers, storeId }) {
                         <span className="text-xs text-gray-400">-</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-right">
-                      <span className="text-sm font-bold text-emerald-600">{formatCurrency(data.total_pay)}</span>
-                    </td>
                   </motion.tr>
                 ))}
               </tbody>
@@ -451,7 +377,6 @@ export default function PayrollSummary({ shifts, cashiers, storeId }) {
                   <td className="px-4 py-3 text-center font-bold text-amber-700">{totals.overtime_hours.toFixed(1)}h</td>
                   <td className="px-4 py-3 text-center font-bold text-blue-700">{totals.sunday_hours.toFixed(1)}h</td>
                   <td className="px-4 py-3 text-center font-bold text-rose-700">{totals.holiday_hours.toFixed(1)}h</td>
-                  <td className="px-4 py-3 text-right font-bold text-emerald-700 text-lg">{formatCurrency(totals.total_pay)}</td>
                 </tr>
               </tfoot>
             </table>
@@ -484,10 +409,9 @@ export default function PayrollSummary({ shifts, cashiers, storeId }) {
       <Card className="bg-amber-50 border-amber-200">
         <CardContent className="p-4">
           <p className="text-xs text-amber-800">
-            <strong>⚠️ Nota Legal:</strong> Cálculo basado en legislación colombiana vigente con límite de <strong>44 horas semanales</strong>. 
-            Salario base {formatCurrency(SALARY_PER_HOUR)}/hora, recargo nocturno 35% (21:00-06:00), 
-            horas extras 25% (más de 8h diarias o 44h semanales), dominicales y festivos 75%. 
-            Verifica con tu contador para cálculos oficiales y deducciones de ley.
+            <strong>⚠️ Nota Legal:</strong> Este es un reporte informativo basado en legislación colombiana vigente con límite de <strong>44 horas semanales</strong>. 
+            Los recargos aplicables son: nocturno 35% (21:00-06:00), horas extras 25% (más de 8h diarias o 44h semanales), 
+            dominicales y festivos 75%. Este reporte no sustituye la nómina oficial.
           </p>
         </CardContent>
       </Card>
