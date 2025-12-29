@@ -15,7 +15,7 @@ const HOLIDAYS_2025 = [
 ];
 
 export default function PlannerStatusPanel({ stores }) {
-  const [activeFilter, setActiveFilter] = useState('all');
+  const [activeFilter, setActiveFilter] = useState(null);
   const currentWeekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
   const currentWeekEnd = endOfWeek(new Date(), { weekStartsOn: 1 });
 
@@ -100,12 +100,17 @@ export default function PlannerStatusPanel({ stores }) {
   }, [plannerStatus]);
 
   const filteredStores = useMemo(() => {
+    if (!activeFilter) return [];
     if (activeFilter === 'all') return plannerStatus;
     if (activeFilter === 'complete') return plannerStatus.filter(s => s.hasPlanner);
     if (activeFilter === 'pending') return plannerStatus.filter(s => !s.hasPlanner);
     if (activeFilter === 'overtime') return plannerStatus.filter(s => s.overtimeHours > 0);
-    return plannerStatus;
+    return [];
   }, [plannerStatus, activeFilter]);
+
+  const handleFilterClick = (filter) => {
+    setActiveFilter(activeFilter === filter ? null : filter);
+  };
 
   return (
     <div className="space-y-6">
@@ -123,11 +128,11 @@ export default function PlannerStatusPanel({ stores }) {
 
         <div className="grid grid-cols-4 gap-4">
           <button
-            onClick={() => setActiveFilter('all')}
+            onClick={() => handleFilterClick('all')}
             className={`rounded-xl p-4 border transition-all ${
               activeFilter === 'all' 
-                ? 'bg-indigo-500/20 border-indigo-500/50' 
-                : 'bg-white/5 border-white/10 hover:bg-white/10'
+                ? 'bg-indigo-500/20 border-indigo-500/50 shadow-lg' 
+                : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-indigo-500/30'
             }`}
           >
             <div className="flex items-center gap-2 mb-2">
@@ -139,11 +144,11 @@ export default function PlannerStatusPanel({ stores }) {
           </button>
 
           <button
-            onClick={() => setActiveFilter('complete')}
+            onClick={() => handleFilterClick('complete')}
             className={`rounded-xl p-4 border transition-all ${
               activeFilter === 'complete' 
-                ? 'bg-emerald-500/20 border-emerald-500/50' 
-                : 'bg-white/5 border-white/10 hover:bg-white/10'
+                ? 'bg-emerald-500/20 border-emerald-500/50 shadow-lg' 
+                : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-emerald-500/30'
             }`}
           >
             <div className="flex items-center gap-2 mb-2">
@@ -157,11 +162,11 @@ export default function PlannerStatusPanel({ stores }) {
           </button>
 
           <button
-            onClick={() => setActiveFilter('pending')}
+            onClick={() => handleFilterClick('pending')}
             className={`rounded-xl p-4 border transition-all ${
               activeFilter === 'pending' 
-                ? 'bg-amber-500/20 border-amber-500/50' 
-                : 'bg-white/5 border-white/10 hover:bg-white/10'
+                ? 'bg-amber-500/20 border-amber-500/50 shadow-lg' 
+                : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-amber-500/30'
             }`}
           >
             <div className="flex items-center gap-2 mb-2">
@@ -175,11 +180,11 @@ export default function PlannerStatusPanel({ stores }) {
           </button>
 
           <button
-            onClick={() => setActiveFilter('overtime')}
+            onClick={() => handleFilterClick('overtime')}
             className={`rounded-xl p-4 border transition-all ${
               activeFilter === 'overtime' 
-                ? 'bg-red-500/20 border-red-500/50' 
-                : 'bg-white/5 border-white/10 hover:bg-white/10'
+                ? 'bg-red-500/20 border-red-500/50 shadow-lg' 
+                : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-red-500/30'
             }`}
           >
             <div className="flex items-center gap-2 mb-2">
@@ -192,8 +197,14 @@ export default function PlannerStatusPanel({ stores }) {
         </div>
       </div>
 
-      {/* Lista de tiendas */}
-      <div className="bg-white/5 backdrop-blur-2xl rounded-xl border border-white/10 overflow-hidden">
+      {/* Lista de tiendas - Solo se muestra cuando hay un filtro activo */}
+      {activeFilter && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          className="bg-white/5 backdrop-blur-2xl rounded-xl border border-white/10 overflow-hidden"
+        >
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-white/5 border-b border-white/10">
@@ -273,7 +284,8 @@ export default function PlannerStatusPanel({ stores }) {
             </tbody>
           </table>
         </div>
-      </div>
+        </motion.div>
+      )}
 
       {/* Alerta si hay muchas horas extras */}
       {stats.totalOvertime > 50 && (
