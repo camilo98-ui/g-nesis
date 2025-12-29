@@ -4,7 +4,6 @@ import CashiersDashboard from './pages/CashiersDashboard';
 import Communication from './pages/Communication';
 import Dashboard from './pages/Dashboard';
 import DesignSystem from './pages/DesignSystem';
-import ExecutiveDashboard from './pages/ExecutiveDashboard';
 import ExecutiveExperience from './pages/ExecutiveExperience';
 import FreezerMap from './pages/FreezerMap';
 import Home from './pages/Home';
@@ -22,6 +21,7 @@ import Settings from './pages/Settings';
 import TWAGuide from './pages/TWAGuide';
 import Team from './pages/Team';
 import Training from './pages/Training';
+import ExecutiveDashboard from './pages/ExecutiveDashboard';
 import __Layout from './Layout.jsx';
 
 
@@ -32,7 +32,6 @@ export const PAGES = {
     "Communication": Communication,
     "Dashboard": Dashboard,
     "DesignSystem": DesignSystem,
-    "ExecutiveDashboard": ExecutiveDashboard,
     "ExecutiveExperience": ExecutiveExperience,
     "FreezerMap": FreezerMap,
     "Home": Home,
@@ -50,6 +49,7 @@ export const PAGES = {
     "TWAGuide": TWAGuide,
     "Team": Team,
     "Training": Training,
+    "ExecutiveDashboard": ExecutiveDashboard,
 }
 
 export const pagesConfig = {

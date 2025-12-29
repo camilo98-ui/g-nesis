@@ -6,13 +6,15 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { STORES, getDisplayName } from '@/components/StoreSelector';
 import DateFilter from '@/components/DateFilter';
-import { ArrowLeft, Search, TrendingUp, TrendingDown, Eye, Zap, Award, Brain, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { ArrowLeft, Search, TrendingUp, TrendingDown, Eye, Zap, Award, Brain, ArrowUpDown, ArrowUp, ArrowDown, BarChart3, Settings, X } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { format, startOfMonth, eachDayOfInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
 import StoreDetailModal from '../components/executive/StoreDetailModal';
 import KPIDetailModal from '../components/executive/KPIDetailModal';
 import ExecutiveComparable from '../components/executive/ExecutiveComparable';
+import ZoneBudgetManager from '../components/executive/ZoneBudgetManager';
+import ZoneChartsPanel from '../components/executive/ZoneChartsPanel';
 import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, ResponsiveContainer } from 'recharts';
 
 export default function ExecutiveDashboard() {
@@ -24,7 +26,11 @@ export default function ExecutiveDashboard() {
   const [hoveredKPI, setHoveredKPI] = useState(null);
   const [selectedKPIDetail, setSelectedKPIDetail] = useState(null);
   const [showComparable, setShowComparable] = useState(false);
+  const [showBudgetManager, setShowBudgetManager] = useState(false);
+  const [showZoneCharts, setShowZoneCharts] = useState(false);
   const [sortConfig, setSortConfig] = useState({ key: 'status', direction: 'asc' });
+
+  const ZONE_NAME = 'Bogotá Noroccidente';
 
   const currentMonth = new Date().getMonth() + 1;
   const currentYear = new Date().getFullYear();
@@ -38,6 +44,15 @@ export default function ExecutiveDashboard() {
     queryKey: ['allBudgets'],
     queryFn: () => base44.entities.Budget.list()
   });
+
+  const { data: zoneBudgets = [] } = useQuery({
+    queryKey: ['zoneBudgets', ZONE_NAME],
+    queryFn: () => base44.entities.ZoneBudget.filter({ zone_name: ZONE_NAME })
+  });
+
+  const currentZoneBudget = useMemo(() => {
+    return zoneBudgets.find(b => b.month === currentMonth && b.year === currentYear);
+  }, [zoneBudgets, currentMonth, currentYear]);
 
   const isLoading = loadingSales || loadingBudgets;
 
@@ -369,6 +384,13 @@ Genera:
                 dateRange={dateRange} 
                 onDateChange={setDateRange} 
               />
+              <button
+                onClick={() => setShowBudgetManager(true)}
+                className="h-10 px-4 rounded-full bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 flex items-center gap-2 text-white text-sm font-medium transition-all"
+              >
+                <Settings className="w-4 h-4" />
+                Presupuesto
+              </button>
             </div>
           </div>
         </div>
@@ -381,25 +403,46 @@ Genera:
           </div>
         ) : (
           <>
-            {/* Botón Modo Comparable - Responsive */}
-            <div className="mb-6 sm:mb-10">
+            {/* Botones de Análisis */}
+            <div className="mb-6 sm:mb-10 grid grid-cols-1 sm:grid-cols-2 gap-4">
               <button
                 onClick={() => setShowComparable(true)}
-                className="w-full rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-purple-500/20 backdrop-blur-xl border border-purple-500/40 hover:border-purple-400/60 transition-all"
+                className="w-full rounded-xl p-4 sm:p-6 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-purple-500/20 backdrop-blur-xl border border-purple-500/40 hover:border-purple-400/60 transition-all"
               >
                 <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3 sm:gap-4 lg:gap-6">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 rounded-lg sm:rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
-                      <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-white" />
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
+                      <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                     </div>
                     <div className="text-left">
-                      <h3 className="text-base sm:text-xl lg:text-2xl font-black text-white mb-0.5">Análisis Comparable</h3>
-                      <p className="text-slate-300 text-xs sm:text-sm hidden sm:block">Compara periodos, identifica tendencias y proyecta resultados</p>
+                      <h3 className="text-base sm:text-xl font-black text-white mb-0.5">Análisis Comparable</h3>
+                      <p className="text-slate-300 text-xs hidden sm:block">Compara periodos y tendencias</p>
                     </div>
                   </div>
-                  
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/20 flex-shrink-0">
-                    <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center border border-white/20">
+                    <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </div>
+              </button>
+
+              <button
+                onClick={() => setShowZoneCharts(true)}
+                className="w-full rounded-xl p-4 sm:p-6 bg-gradient-to-r from-blue-500/20 via-cyan-500/20 to-blue-500/20 backdrop-blur-xl border border-blue-500/40 hover:border-blue-400/60 transition-all"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg">
+                      <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                    </div>
+                    <div className="text-left">
+                      <h3 className="text-base sm:text-xl font-black text-white mb-0.5">Gráficas de Zona</h3>
+                      <p className="text-slate-300 text-xs hidden sm:block">Análisis visual detallado</p>
+                    </div>
+                  </div>
+                  <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center border border-white/20">
+                    <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
                   </div>
@@ -429,12 +472,21 @@ Genera:
                 className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 border border-white/20 cursor-pointer"
               >
                 <div className="relative z-10">
-                  <p className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 sm:mb-4">📊 Cumplimiento</p>
+                  <p className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 sm:mb-4">
+                    📊 Cumplimiento {currentZoneBudget ? 'vs Zona' : 'vs Tiendas'}
+                  </p>
                   <p className={`text-3xl sm:text-5xl lg:text-7xl font-black mb-2 sm:mb-3 tracking-tight tabular-nums ${
-                    ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 90 ? 'text-emerald-400' :
-                    ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 70 ? 'text-amber-400' : 'text-red-400'
+                    currentZoneBudget ? 
+                      ((zoneTotals.totalSales/currentZoneBudget.sales_budget)*100) >= 90 ? 'text-emerald-400' :
+                      ((zoneTotals.totalSales/currentZoneBudget.sales_budget)*100) >= 70 ? 'text-amber-400' : 'text-red-400'
+                    :
+                      ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 90 ? 'text-emerald-400' :
+                      ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 70 ? 'text-amber-400' : 'text-red-400'
                   }`}>
-                    {((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%
+                    {currentZoneBudget ? 
+                      ((zoneTotals.totalSales/currentZoneBudget.sales_budget)*100).toFixed(0) :
+                      ((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)
+                    }%
                   </p>
                   <div className="space-y-1">
                     <div className="flex justify-between text-[10px] sm:text-xs">
@@ -972,6 +1024,66 @@ Genera:
             onClose={() => setShowComparable(false)}
             allDailySales={allDailySales}
           />
+        )}
+      </AnimatePresence>
+
+      {/* Modal Budget Manager */}
+      <AnimatePresence>
+        {showBudgetManager && (
+          <ZoneBudgetManager
+            zoneName={ZONE_NAME}
+            onClose={() => setShowBudgetManager(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Modal Zone Charts */}
+      <AnimatePresence>
+        {showZoneCharts && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setShowZoneCharts(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl border border-white/20 max-w-7xl w-full max-h-[90vh] overflow-hidden"
+            >
+              <div className="bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border-b border-white/10 p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+                      <BarChart3 className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-black text-white">Análisis de Zona</h2>
+                      <p className="text-sm text-slate-300">{ZONE_NAME}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowZoneCharts(false)}
+                    className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center"
+                  >
+                    <X className="w-5 h-5 text-white" />
+                  </button>
+                </div>
+              </div>
+              <div className="p-6 overflow-y-auto max-h-[calc(90vh-100px)]">
+                <ZoneChartsPanel
+                  allDailySales={allDailySales}
+                  storesAnalysis={storesAnalysis}
+                  dateRange={dateRange}
+                  zoneTotals={zoneTotals}
+                  zoneBudget={currentZoneBudget}
+                />
+              </div>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>
