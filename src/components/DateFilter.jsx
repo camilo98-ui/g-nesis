@@ -35,7 +35,8 @@ function generateWeeksOfYear() {
     });
   }
 
-  return weeks.reverse();
+  // Ordenar de más reciente a más antigua
+  return weeks.sort((a, b) => b.number - a.number);
 }
 
 // Calendario personalizado más dinámico y bonito
@@ -207,9 +208,9 @@ function CustomCalendar({ selected, onSelect, onClose, onApply, initialTab = 'we
       {showWeeks ? (
       <>
         {/* Vista de semanas */}
-        <div className={`p-3 flex-1 overflow-y-auto`}>
+        <div className="p-3 overflow-y-auto" style={{ maxHeight: '400px' }}>
           <p className="text-xs text-pink-600 mb-3 text-center font-medium">Selecciona una o más semanas</p>
-          <div className={`space-y-2`}>
+          <div className="space-y-2">
             {weeksOfYear.map((week) => {
             const isSelected = selectedWeeks.some((w) => w.number === week.number);
             return (
