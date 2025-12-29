@@ -15,6 +15,7 @@ import KPIDetailModal from '../components/executive/KPIDetailModal';
 import ExecutiveComparable from '../components/executive/ExecutiveComparable';
 import ZoneBudgetManager from '../components/executive/ZoneBudgetManager';
 import ZoneChartsPanel from '../components/executive/ZoneChartsPanel';
+import PlannerStatusPanel from '../components/executive/PlannerStatusPanel';
 import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, ResponsiveContainer } from 'recharts';
 
 export default function ExecutiveDashboard() {
@@ -569,6 +570,11 @@ Genera:
                 </div>
               </div>
             )}
+
+            {/* Panel de Estado del Planner */}
+            <div className="mb-8 sm:mb-12 lg:mb-20">
+              <PlannerStatusPanel stores={STORES.map(s => ({ code: s.code, name: getDisplayName(s.code) }))} />
+            </div>
 
             {/* Contexto */}
             <div className="mb-4 sm:mb-6">
