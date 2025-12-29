@@ -20,20 +20,21 @@ const QUICK_OPTIONS = [
 function generateWeeksOfYear() {
   const now = new Date();
   const yearStart = startOfYear(now);
-  const yearEnd = new Date(now.getFullYear(), 11, 31);
   const currentWeekNum = getWeek(now, { weekStartsOn: 1 });
-  const totalWeeks = getWeek(yearEnd, { weekStartsOn: 1 });
   const weeks = [];
 
-  for (let i = 1; i <= totalWeeks; i++) {
-    const weekStart = startOfWeek(addWeeks(yearStart, i - 1), { weekStartsOn: 1 });
+  // Generar 52 semanas del año
+  for (let i = 0; i < 52; i++) {
+    const weekStart = startOfWeek(addWeeks(yearStart, i), { weekStartsOn: 1 });
     const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
+    const weekNum = i + 1;
+    
     weeks.push({
-      number: i,
+      number: weekNum,
       start: weekStart,
       end: weekEnd,
       label: `${format(weekStart, 'dd MMM', { locale: es })} - ${format(weekEnd, 'dd MMM', { locale: es })}`,
-      isCurrent: i === currentWeekNum
+      isCurrent: weekNum === currentWeekNum
     });
   }
 
