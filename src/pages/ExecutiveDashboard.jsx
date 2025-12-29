@@ -328,35 +328,41 @@ Genera:
   }, [storesAnalysis]);
 
   return (
-    <div className="min-h-screen bg-gray-50 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden">
+      {/* Simplified Background - Static */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute -top-1/2 -right-1/2 w-[1200px] h-[1200px] bg-gradient-to-br from-pink-500/15 via-purple-500/15 to-blue-500/15 rounded-full blur-3xl opacity-60" />
+        <div className="absolute -bottom-1/2 -left-1/2 w-[1000px] h-[1000px] bg-gradient-to-br from-blue-500/10 via-cyan-500/10 to-emerald-500/10 rounded-full blur-3xl opacity-50" />
+      </div>
+
       {/* Back Button */}
       <Link to={createPageUrl('Home')}>
-        <div className="fixed left-3 sm:left-6 top-4 sm:top-8 w-10 h-10 sm:w-11 sm:h-11 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 hover:shadow-md flex items-center justify-center transition-all cursor-pointer z-50">
-          <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700" />
+        <div className="fixed left-3 sm:left-6 top-4 sm:top-8 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 hover:bg-white/20 flex items-center justify-center transition-all cursor-pointer z-50">
+          <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
         </div>
       </Link>
 
-      <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-12 py-6 sm:py-8 lg:py-12 relative z-10">
+      <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-12 py-6 sm:py-12 lg:py-16 relative z-10">
         {/* Header - Responsive */}
-        <div className="mb-6 sm:mb-8 lg:mb-10">
+        <div className="mb-6 sm:mb-12 lg:mb-16">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="text-center sm:text-left w-full sm:w-auto">
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-1 tracking-tight">
+              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white mb-2 tracking-tight">
                 Bogotá Noroccidente
               </h1>
-              <p className="text-xs sm:text-sm text-gray-500 font-normal">
+              <p className="text-sm sm:text-base lg:text-lg text-slate-400 font-normal">
                 {format(new Date(), 'EEEE dd \'de\' MMMM', { locale: es })}
               </p>
             </div>
 
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
               <div className="relative w-full sm:w-64">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <Input
-                  placeholder="Buscar tienda..."
+                  placeholder="Buscar..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 h-9 text-sm bg-white border-gray-200 text-gray-900 placeholder:text-gray-400"
+                  className="pl-10 h-10 text-sm bg-white/10 backdrop-blur-xl border-white/20 text-white placeholder:text-slate-400"
                 />
               </div>
               <DateFilter 
@@ -368,32 +374,32 @@ Genera:
         </div>
 
         {isLoading ? (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-8">
             {[1,2,3,4].map(i => (
-              <div key={i} className="bg-white rounded-lg h-32 sm:h-40 animate-pulse border border-gray-200" />
+              <div key={i} className="bg-white/5 backdrop-blur-xl rounded-xl h-32 sm:h-48 animate-pulse" />
             ))}
           </div>
         ) : (
           <>
             {/* Botón Modo Comparable - Responsive */}
-            <div className="mb-6 sm:mb-8">
+            <div className="mb-6 sm:mb-10">
               <button
                 onClick={() => setShowComparable(true)}
-                className="w-full rounded-lg p-4 sm:p-5 bg-white border border-gray-200 hover:border-teal-400 hover:shadow-md transition-all"
+                className="w-full rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-purple-500/20 backdrop-blur-xl border border-purple-500/40 hover:border-purple-400/60 transition-all"
               >
                 <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3 sm:gap-4">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-teal-500 flex items-center justify-center">
-                      <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                  <div className="flex items-center gap-3 sm:gap-4 lg:gap-6">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 rounded-lg sm:rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
+                      <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-white" />
                     </div>
                     <div className="text-left">
-                      <h3 className="text-sm sm:text-base font-bold text-gray-900 mb-0.5">Análisis Comparable</h3>
-                      <p className="text-gray-500 text-xs hidden sm:block">Compara periodos e identifica tendencias</p>
+                      <h3 className="text-base sm:text-xl lg:text-2xl font-black text-white mb-0.5">Análisis Comparable</h3>
+                      <p className="text-slate-300 text-xs sm:text-sm hidden sm:block">Compara periodos, identifica tendencias y proyecta resultados</p>
                     </div>
                   </div>
                   
-                  <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
-                    <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/20 flex-shrink-0">
+                    <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
                   </div>
@@ -402,120 +408,130 @@ Genera:
             </div>
 
             {/* KPIs - Grid Responsive */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 lg:gap-8 mb-8 sm:mb-12 lg:mb-20">
               {/* Venta Total */}
               <div
                 onClick={() => setSelectedKPIDetail('sales')}
-                className="bg-white rounded-lg p-4 sm:p-6 border border-gray-200 hover:shadow-lg hover:border-teal-400 cursor-pointer transition-all"
+                className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 border border-white/20 cursor-pointer"
               >
-                <p className="text-[10px] sm:text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 sm:mb-3">Venta Total</p>
-                <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-1 sm:mb-2 tabular-nums">
-                  {formatShort(zoneTotals.totalSales)}
-                </p>
-                <p className="text-[10px] sm:text-xs text-gray-500">Meta: {formatShort(zoneTotals.totalBudget)}</p>
+                <div className="relative z-10">
+                  <p className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 sm:mb-4">💰 Venta Total</p>
+                  <p className="text-2xl sm:text-4xl lg:text-5xl font-black text-white mb-2 sm:mb-3 tracking-tight tabular-nums">
+                    {formatShort(zoneTotals.totalSales)}
+                  </p>
+                  <p className="text-[10px] sm:text-xs text-blue-300 font-semibold">Meta: {formatShort(zoneTotals.totalBudget)}</p>
+                </div>
               </div>
 
               {/* % Cumplimiento */}
               <div
                 onClick={() => setSelectedKPIDetail('compliance')}
-                className="bg-white rounded-lg p-4 sm:p-6 border border-gray-200 hover:shadow-lg hover:border-teal-400 cursor-pointer transition-all"
+                className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 border border-white/20 cursor-pointer"
               >
-                <p className="text-[10px] sm:text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 sm:mb-3">Cumplimiento</p>
-                <p className={`text-3xl sm:text-4xl lg:text-5xl font-bold mb-1 sm:mb-2 tabular-nums ${
-                  ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 90 ? 'text-teal-600' :
-                  ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 70 ? 'text-amber-600' : 'text-red-600'
-                }`}>
-                  {((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%
-                </p>
-                <div className="flex gap-3 text-[10px] sm:text-xs">
-                  <span className="text-gray-500">En Meta: <span className="font-semibold text-teal-600">{statusCounts.positive}</span></span>
-                  <span className="text-gray-500">Críticas: <span className="font-semibold text-red-600">{statusCounts.critical}</span></span>
+                <div className="relative z-10">
+                  <p className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 sm:mb-4">📊 Cumplimiento</p>
+                  <p className={`text-3xl sm:text-5xl lg:text-7xl font-black mb-2 sm:mb-3 tracking-tight tabular-nums ${
+                    ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 90 ? 'text-emerald-400' :
+                    ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 70 ? 'text-amber-400' : 'text-red-400'
+                  }`}>
+                    {((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%
+                  </p>
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-[10px] sm:text-xs">
+                      <span className="text-slate-400">Meta</span>
+                      <span className="text-emerald-400 font-bold">{statusCounts.positive}</span>
+                    </div>
+                    <div className="flex justify-between text-[10px] sm:text-xs">
+                      <span className="text-slate-400">Críticas</span>
+                      <span className="text-red-400 font-bold">{statusCounts.critical}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
               {/* Críticas */}
               <div
                 onClick={() => setSelectedKPIDetail('critical')}
-                className="bg-white rounded-lg p-4 sm:p-6 border border-gray-200 hover:shadow-lg hover:border-red-400 cursor-pointer transition-all"
+                className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 border border-white/20 cursor-pointer"
               >
-                <p className="text-[10px] sm:text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 sm:mb-3">Tiendas Críticas</p>
-                <p className={`text-3xl sm:text-4xl lg:text-5xl font-bold mb-1 sm:mb-2 tabular-nums ${
-                  statusCounts.critical > 0 ? 'text-red-600' : 'text-gray-300'
-                }`}>
-                  {statusCounts.critical}
-                </p>
-                {statusCounts.critical > 0 && (
-                  <p className="text-[10px] sm:text-xs text-gray-500">
-                    {Math.round((statusCounts.critical/STORES.length)*100)}% del total
+                <div className="relative z-10">
+                  <p className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 sm:mb-4">🔴 Críticas</p>
+                  <p className={`text-3xl sm:text-5xl lg:text-7xl font-black mb-2 sm:mb-3 tracking-tight tabular-nums ${
+                    statusCounts.critical > 0 ? 'text-red-400' : 'text-slate-600'
+                  }`}>
+                    {statusCounts.critical}
                   </p>
-                )}
+                  {statusCounts.critical > 0 && (
+                    <p className="text-[10px] sm:text-xs text-red-300 font-semibold">
+                      {Math.round((statusCounts.critical/STORES.length)*100)}% del total
+                    </p>
+                  )}
+                </div>
               </div>
 
               {/* En Meta */}
               <div
                 onClick={() => setSelectedKPIDetail('meta')}
-                className="bg-white rounded-lg p-4 sm:p-6 border border-gray-200 hover:shadow-lg hover:border-teal-400 cursor-pointer transition-all"
+                className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 border border-white/20 cursor-pointer"
               >
-                <p className="text-[10px] sm:text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 sm:mb-3">En Meta</p>
-                <p className="text-3xl sm:text-4xl lg:text-5xl font-bold text-teal-600 mb-1 sm:mb-2 tabular-nums">
-                  {statusCounts.positive}
-                </p>
-                <p className="text-[10px] sm:text-xs text-gray-500">
-                  {Math.round((statusCounts.positive/STORES.length)*100)}% del total
-                </p>
+                <div className="relative z-10">
+                  <p className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 sm:mb-4">🟢 En Meta</p>
+                  <p className="text-3xl sm:text-5xl lg:text-7xl font-black text-emerald-400 mb-2 sm:mb-3 tracking-tight tabular-nums">
+                    {statusCounts.positive}
+                  </p>
+                  <p className="text-[10px] sm:text-xs text-emerald-300 font-semibold">
+                    {Math.round((statusCounts.positive/STORES.length)*100)}% del total
+                  </p>
+                </div>
               </div>
             </div>
 
             {/* Alerta Crítica */}
             {statusCounts.critical > 0 && (
-              <div className="mb-6 sm:mb-8">
-                <div className={`rounded-lg p-4 sm:p-5 border-l-4 ${
+              <div className="mb-6 sm:mb-10 lg:mb-16">
+                <div className={`relative rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-10 overflow-hidden ${
                   statusCounts.critical >= STORES.length * 0.7 
-                    ? 'bg-red-50 border-red-600' 
-                    : 'bg-amber-50 border-amber-500'
-                }`}>
-                  <p className="text-sm sm:text-base font-bold mb-1 ${
-                    statusCounts.critical >= STORES.length * 0.7 ? 'text-red-900' : 'text-amber-900'
-                  }">
-                    {statusCounts.critical} de {STORES.length} tiendas críticas ({'<'}70%)
-                  </p>
-                  <p className="text-xs sm:text-sm mb-2 ${
-                    statusCounts.critical >= STORES.length * 0.7 ? 'text-red-700' : 'text-amber-700'
-                  }">
-                    {statusCounts.critical >= STORES.length * 0.7 
-                      ? 'Acción inmediata requerida'
-                      : 'Requiere atención urgente'
-                    }
-                  </p>
-                  <button
-                    onClick={() => {
-                      const el = document.getElementById('stores-table');
-                      el?.scrollIntoView({ behavior: 'smooth' });
-                    }}
-                    className={`text-xs font-semibold underline ${
-                      statusCounts.critical >= STORES.length * 0.7 ? 'text-red-900' : 'text-amber-900'
-                    }`}
-                  >
-                    Ver tiendas →
-                  </button>
+                    ? 'bg-gradient-to-r from-red-500/90 to-rose-600/90' 
+                    : 'bg-gradient-to-r from-amber-500/90 to-orange-600/90'
+                } backdrop-blur-xl border border-white/20`}>
+                  <div className="relative z-10">
+                    <p className="text-base sm:text-2xl lg:text-3xl font-black text-white mb-2 sm:mb-4 leading-tight">
+                      {statusCounts.critical} de {STORES.length} tiendas críticas ({'<'}70%)
+                    </p>
+                    <p className="text-sm sm:text-base lg:text-lg text-white/90 mb-3 sm:mb-6 font-medium">
+                      {statusCounts.critical >= STORES.length * 0.7 
+                        ? 'Acción inmediata requerida'
+                        : 'Requiere atención urgente'
+                      }
+                    </p>
+                    <button
+                      onClick={() => {
+                        const el = document.getElementById('stores-table');
+                        el?.scrollIntoView({ behavior: 'smooth' });
+                      }}
+                      className="text-xs sm:text-sm font-bold text-white underline"
+                    >
+                      Ver tiendas →
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
 
             {/* Contexto */}
-            <div className="mb-3 sm:mb-4">
-              <p className="text-xs sm:text-sm font-medium text-gray-600">{tableContextSummary}</p>
+            <div className="mb-4 sm:mb-6">
+              <p className="text-xs sm:text-sm font-medium text-slate-400">{tableContextSummary}</p>
             </div>
 
             {/* Tabla - Responsive con scroll horizontal en móvil */}
-            <div id="stores-table" className="mb-8 sm:mb-12">
-              <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-x-auto">
+            <div id="stores-table" className="mb-8 sm:mb-12 lg:mb-20">
+              <div className="bg-white/5 backdrop-blur-2xl rounded-xl border border-white/10 overflow-x-auto">
                 <table className="w-full min-w-[800px]">
-                  <thead className="bg-gray-50">
-                    <tr className="border-b border-gray-200">
+                  <thead>
+                    <tr className="border-b border-white/10">
                       <th 
                         onClick={() => handleSort('name')}
-                        className="text-left py-3 px-3 sm:py-3 sm:px-4 lg:py-4 lg:px-5 text-[10px] sm:text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer"
+                        className="text-left py-3 px-3 sm:py-4 sm:px-4 lg:py-5 lg:px-6 text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider cursor-pointer"
                       >
                         <div className="flex items-center gap-2">
                           Tienda
@@ -530,7 +546,7 @@ Genera:
                       </th>
                       <th 
                         onClick={() => handleSort('compliance')}
-                        className="text-right py-3 px-3 sm:py-3 sm:px-4 lg:py-4 lg:px-5 text-[10px] sm:text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer"
+                        className="text-right py-3 px-3 sm:py-4 sm:px-4 lg:py-5 lg:px-6 text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider cursor-pointer"
                       >
                         <div className="flex items-center justify-end gap-2">
                           % Cumplimiento
@@ -545,7 +561,7 @@ Genera:
                       </th>
                       <th 
                         onClick={() => handleSort('sales')}
-                        className="text-right py-3 px-3 sm:py-3 sm:px-4 lg:py-4 lg:px-5 text-[10px] sm:text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer hidden sm:table-cell"
+                        className="text-right py-3 px-3 sm:py-4 sm:px-4 lg:py-5 lg:px-6 text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider cursor-pointer hidden sm:table-cell"
                       >
                         <div className="flex items-center justify-end gap-2">
                           Venta vs Meta
@@ -560,7 +576,7 @@ Genera:
                       </th>
                       <th 
                         onClick={() => handleSort('gap')}
-                        className="text-right py-3 px-3 sm:py-3 sm:px-4 lg:py-4 lg:px-5 text-[10px] sm:text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer hidden lg:table-cell"
+                        className="text-right py-3 px-3 sm:py-4 sm:px-4 lg:py-5 lg:px-6 text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider cursor-pointer hidden lg:table-cell"
                       >
                         <div className="flex items-center justify-end gap-2">
                           Brecha $
@@ -573,15 +589,15 @@ Genera:
                           )}
                         </div>
                       </th>
-                      <th className="text-right py-3 px-3 sm:py-3 sm:px-4 lg:py-4 lg:px-5 text-[10px] sm:text-xs font-semibold text-gray-600 uppercase tracking-wider hidden lg:table-cell">
+                      <th className="text-right py-3 px-3 sm:py-4 sm:px-4 lg:py-5 lg:px-6 text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider hidden lg:table-cell">
                         Venta/Día
                       </th>
-                      <th className="text-right py-3 px-3 sm:py-3 sm:px-4 lg:py-4 lg:px-5 text-[10px] sm:text-xs font-semibold text-gray-600 uppercase tracking-wider hidden lg:table-cell">
+                      <th className="text-right py-3 px-3 sm:py-4 sm:px-4 lg:py-5 lg:px-6 text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider hidden lg:table-cell">
                         Trans/Día
                       </th>
                       <th 
                         onClick={() => handleSort('status')}
-                        className="text-center py-3 px-3 sm:py-3 sm:px-4 lg:py-4 lg:px-5 text-[10px] sm:text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer"
+                        className="text-center py-3 px-3 sm:py-4 sm:px-4 lg:py-5 lg:px-6 text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider cursor-pointer"
                       >
                         <div className="flex items-center justify-center gap-2">
                           Estado
@@ -594,7 +610,7 @@ Genera:
                           )}
                         </div>
                       </th>
-                      <th className="text-left py-3 px-3 sm:py-3 sm:px-4 lg:py-4 lg:px-5 text-[10px] sm:text-xs font-semibold text-gray-600 uppercase tracking-wider hidden xl:table-cell">Acción</th>
+                      <th className="text-left py-3 px-3 sm:py-4 sm:px-4 lg:py-5 lg:px-6 text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider hidden xl:table-cell">Acción</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -606,36 +622,36 @@ Genera:
                           <tr
                             key={store.code}
                             onClick={() => store.hasData && setSelectedStoreDetail(store)}
-                            className={`border-b border-gray-100 ${
-                              store.hasData ? 'cursor-pointer hover:bg-gray-50' : ''
+                            className={`border-b border-white/5 ${
+                              store.hasData ? 'cursor-pointer hover:bg-white/5' : ''
                             }`}
                           >
-                            <td className="py-3 px-3 sm:py-4 sm:px-4 lg:py-5 lg:px-5">
-                              <p className={`font-semibold text-sm sm:text-base ${
-                                !store.hasData ? 'text-gray-400' : 'text-gray-900'
+                            <td className="py-3 px-3 sm:py-5 sm:px-4 lg:py-7 lg:px-6">
+                              <p className={`font-bold text-sm sm:text-base lg:text-lg ${
+                                !store.hasData ? 'text-slate-600' : 'text-white'
                               }`}>
                                 {store.name}
                               </p>
-                              <p className="text-[10px] sm:text-xs text-gray-500 mt-0.5">{store.code}</p>
+                              <p className="text-[10px] sm:text-xs text-slate-500 mt-0.5">{store.code}</p>
                             </td>
 
-                            <td className="py-3 px-3 sm:py-4 sm:px-4 lg:py-5 lg:px-5">
+                            <td className="py-3 px-3 sm:py-5 sm:px-4 lg:py-7 lg:px-6">
                               {!store.hasData ? (
-                                <span className="text-xs sm:text-sm text-gray-400 italic block text-right">Sin datos</span>
+                                <span className="text-xs sm:text-sm text-slate-500 italic block text-right">Sin datos</span>
                               ) : (
-                                <div className="flex items-center justify-end gap-2 sm:gap-3">
-                                  <div className="w-16 sm:w-20 bg-gray-100 rounded-full h-1.5 overflow-hidden">
+                                <div className="flex items-center justify-end gap-2 sm:gap-4">
+                                  <div className="w-16 sm:w-24 lg:w-32 bg-white/10 rounded-full h-1 sm:h-1.5 overflow-hidden">
                                     <div
                                       style={{ width: `${Math.min(store.salesCompliance, 100)}%` }}
                                       className={`h-full ${
-                                        store.salesCompliance >= 90 ? 'bg-teal-500' :
+                                        store.salesCompliance >= 90 ? 'bg-emerald-500' :
                                         store.salesCompliance >= 70 ? 'bg-amber-500' : 'bg-red-500'
                                       }`}
                                     />
                                   </div>
-                                  <span className={`font-bold text-base sm:text-xl lg:text-2xl tabular-nums ${
-                                    store.salesCompliance >= 90 ? 'text-teal-600' :
-                                    store.salesCompliance >= 70 ? 'text-amber-600' : 'text-red-600'
+                                  <span className={`font-black text-lg sm:text-2xl lg:text-3xl tabular-nums ${
+                                    store.salesCompliance >= 90 ? 'text-emerald-400' :
+                                    store.salesCompliance >= 70 ? 'text-amber-400' : 'text-red-400'
                                   }`}>
                                     {store.salesCompliance.toFixed(0)}%
                                   </span>
@@ -643,56 +659,56 @@ Genera:
                               )}
                             </td>
 
-                            <td className="py-3 px-3 sm:py-4 sm:px-4 lg:py-5 lg:px-5 text-right hidden sm:table-cell">
+                            <td className="py-3 px-3 sm:py-5 sm:px-4 lg:py-7 lg:px-6 text-right hidden sm:table-cell">
                               {!store.hasData ? (
-                                <span className="text-xs sm:text-sm text-gray-400">—</span>
+                                <span className="text-xs sm:text-sm text-slate-500">—</span>
                               ) : (
                                 <div>
-                                  <p className="font-semibold text-gray-900 text-xs sm:text-sm tabular-nums">{formatShort(store.totalSales)}</p>
-                                  <p className="text-[10px] sm:text-xs text-gray-500 mt-0.5">de {formatShort(store.salesBudget)}</p>
+                                  <p className="font-bold text-white text-xs sm:text-sm lg:text-base tabular-nums">{formatShort(store.totalSales)}</p>
+                                  <p className="text-[10px] sm:text-xs text-slate-500 mt-0.5">de {formatShort(store.salesBudget)}</p>
                                 </div>
                               )}
                             </td>
 
-                            <td className="py-3 px-3 sm:py-4 sm:px-4 lg:py-5 lg:px-5 text-right hidden lg:table-cell">
+                            <td className="py-3 px-3 sm:py-5 sm:px-4 lg:py-7 lg:px-6 text-right hidden lg:table-cell">
                               {!store.hasData ? (
-                                <span className="text-sm text-gray-400">—</span>
+                                <span className="text-sm text-slate-500">—</span>
                               ) : (
-                                <p className={`font-bold text-sm lg:text-base tabular-nums ${
-                                  store.gap > 0 ? 'text-red-600' : 'text-teal-600'
+                                <p className={`font-black text-base lg:text-xl tabular-nums ${
+                                  store.gap > 0 ? 'text-red-400' : 'text-emerald-400'
                                 }`}>
                                   {formatShort(Math.abs(store.gap))}
                                 </p>
                               )}
                             </td>
 
-                            <td className="py-3 px-3 sm:py-4 sm:px-4 lg:py-5 lg:px-5 text-right hidden lg:table-cell">
+                            <td className="py-3 px-3 sm:py-5 sm:px-4 lg:py-7 lg:px-6 text-right hidden lg:table-cell">
                               {!store.hasData ? (
-                                <span className="text-sm text-gray-400">—</span>
+                                <span className="text-sm text-slate-500">—</span>
                               ) : (
-                                <p className="font-semibold text-gray-900 text-sm tabular-nums">{formatShort(store.dailyAvg)}</p>
+                                <p className="font-bold text-white text-sm lg:text-base tabular-nums">{formatShort(store.dailyAvg)}</p>
                               )}
                             </td>
 
-                            <td className="py-3 px-3 sm:py-4 sm:px-4 lg:py-5 lg:px-5 text-right hidden lg:table-cell">
+                            <td className="py-3 px-3 sm:py-5 sm:px-4 lg:py-7 lg:px-6 text-right hidden lg:table-cell">
                               {!store.hasData ? (
-                                <span className="text-sm text-gray-400">—</span>
+                                <span className="text-sm text-slate-500">—</span>
                               ) : (
-                                <p className="font-semibold text-gray-900 text-sm tabular-nums">{store.avgDailyTransactions.toFixed(0)}</p>
+                                <p className="font-bold text-cyan-400 text-sm lg:text-base tabular-nums">{store.avgDailyTransactions.toFixed(0)}</p>
                               )}
                             </td>
 
-                            <td className="py-3 px-3 sm:py-4 sm:px-4 lg:py-5 lg:px-5 text-center">
+                            <td className="py-3 px-3 sm:py-5 sm:px-4 lg:py-7 lg:px-6 text-center">
                               <span className={`inline-block w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full ${
-                                store.status === 'no_data' ? 'bg-gray-300' :
-                                store.status === 'positive' ? 'bg-teal-500' : 
+                                store.status === 'no_data' ? 'bg-slate-600' :
+                                store.status === 'positive' ? 'bg-emerald-500' : 
                                 store.status === 'negative' ? 'bg-amber-500' : 'bg-red-500'
                               }`} />
                             </td>
 
-                            <td className="py-3 px-3 sm:py-4 sm:px-4 lg:py-5 lg:px-5 hidden xl:table-cell">
-                              <p className={`text-xs sm:text-sm ${
-                                !store.hasData ? 'text-gray-400 italic' : 'text-gray-600'
+                            <td className="py-3 px-3 sm:py-5 sm:px-4 lg:py-7 lg:px-6 hidden xl:table-cell">
+                              <p className={`text-xs sm:text-sm font-normal ${
+                                !store.hasData ? 'text-slate-500 italic' : 'text-slate-300'
                               }`}>
                                 {action}
                               </p>
@@ -706,9 +722,9 @@ Genera:
             </div>
 
             {/* Prioridades Dinámicas */}
-            <div className="mb-8 sm:mb-12">
-              <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-4 sm:mb-5 tracking-tight">Prioridades de hoy</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+            <div className="mb-8 sm:mb-12 lg:mb-20">
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-white mb-4 sm:mb-6 lg:mb-10 tracking-tight">Prioridades de hoy</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
                 {/* Intervenir */}
                 {storesAnalysis
                   .filter(s => s.status === 'critical')
@@ -718,32 +734,34 @@ Genera:
                     <div
                       key={store.code}
                       onClick={() => setSelectedStoreDetail(store)}
-                      className="bg-white rounded-lg p-4 sm:p-5 border-l-4 border-red-600 hover:shadow-lg cursor-pointer transition-all"
+                      className="relative bg-gradient-to-br from-red-500/20 to-rose-600/20 backdrop-blur-xl rounded-xl p-4 sm:p-6 lg:p-8 border border-red-500/30 cursor-pointer"
                     >
-                      <div className="flex items-center gap-2 sm:gap-3 mb-3">
-                        <div className="w-9 h-9 sm:w-10 sm:h-10 bg-red-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                          <TrendingDown className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                      <div className="relative z-10">
+                        <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-5">
+                          <div className="w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-red-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <TrendingDown className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-white" />
+                          </div>
+                          <div>
+                            <p className="text-[10px] sm:text-xs font-bold text-red-300 uppercase tracking-wide">Intervenir Hoy</p>
+                            <p className="font-black text-white text-sm sm:text-base lg:text-xl">{store.name}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-[10px] sm:text-xs font-semibold text-red-600 uppercase tracking-wide">Intervenir Hoy</p>
-                          <p className="font-bold text-gray-900 text-sm sm:text-base">{store.name}</p>
+                        
+                        <div className="space-y-2 sm:space-y-3 mb-3 sm:mb-6">
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs sm:text-sm text-slate-300">Cumplimiento</span>
+                            <span className="text-base sm:text-lg lg:text-xl font-black text-red-300 tabular-nums">{store.salesCompliance.toFixed(0)}%</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs sm:text-sm text-slate-300">Brecha</span>
+                            <span className="text-sm sm:text-base lg:text-lg font-bold text-white tabular-nums">{formatShort(store.gap)}</span>
+                          </div>
                         </div>
-                      </div>
-                      
-                      <div className="space-y-2 mb-3">
-                        <div className="flex justify-between items-center">
-                          <span className="text-xs sm:text-sm text-gray-600">Cumplimiento</span>
-                          <span className="text-base sm:text-lg font-bold text-red-600 tabular-nums">{store.salesCompliance.toFixed(0)}%</span>
+                        
+                        <div className="flex items-center gap-2 text-white text-xs sm:text-sm">
+                          <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
+                          <span className="font-semibold">Ver detalle</span>
                         </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-xs sm:text-sm text-gray-600">Brecha</span>
-                          <span className="text-sm sm:text-base font-semibold text-gray-900 tabular-nums">{formatShort(store.gap)}</span>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center gap-2 text-teal-600 text-xs sm:text-sm font-medium">
-                        <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
-                        <span>Ver detalle</span>
                       </div>
                     </div>
                   ))}
@@ -757,32 +775,34 @@ Genera:
                     <div
                       key={store.code}
                       onClick={() => setSelectedStoreDetail(store)}
-                      className="bg-white rounded-lg p-4 sm:p-5 border-l-4 border-amber-500 hover:shadow-lg cursor-pointer transition-all"
+                      className="relative bg-gradient-to-br from-amber-500/20 to-orange-600/20 backdrop-blur-xl rounded-xl p-4 sm:p-6 lg:p-8 border border-amber-500/30 cursor-pointer"
                     >
-                      <div className="flex items-center gap-2 sm:gap-3 mb-3">
-                        <div className="w-9 h-9 sm:w-10 sm:h-10 bg-amber-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                          <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                      <div className="relative z-10">
+                        <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-5">
+                          <div className="w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-amber-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <Zap className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-white" />
+                          </div>
+                          <div>
+                            <p className="text-[10px] sm:text-xs font-bold text-amber-300 uppercase tracking-wide">Acelerar</p>
+                            <p className="font-black text-white text-sm sm:text-base lg:text-xl">{store.name}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-[10px] sm:text-xs font-semibold text-amber-600 uppercase tracking-wide">Acelerar</p>
-                          <p className="font-bold text-gray-900 text-sm sm:text-base">{store.name}</p>
+                        
+                        <div className="space-y-2 sm:space-y-3 mb-3 sm:mb-6">
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs sm:text-sm text-slate-300">Cumplimiento</span>
+                            <span className="text-base sm:text-lg lg:text-xl font-black text-amber-300 tabular-nums">{store.salesCompliance.toFixed(0)}%</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs sm:text-sm text-slate-300">Falta 90%</span>
+                            <span className="text-sm sm:text-base lg:text-lg font-bold text-white tabular-nums">{(90 - store.salesCompliance).toFixed(0)}%</span>
+                          </div>
                         </div>
-                      </div>
-                      
-                      <div className="space-y-2 mb-3">
-                        <div className="flex justify-between items-center">
-                          <span className="text-xs sm:text-sm text-gray-600">Cumplimiento</span>
-                          <span className="text-base sm:text-lg font-bold text-amber-600 tabular-nums">{store.salesCompliance.toFixed(0)}%</span>
+                        
+                        <div className="flex items-center gap-2 text-white text-xs sm:text-sm">
+                          <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
+                          <span className="font-semibold">Ver detalle</span>
                         </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-xs sm:text-sm text-gray-600">Falta 90%</span>
-                          <span className="text-sm sm:text-base font-semibold text-gray-900 tabular-nums">{(90 - store.salesCompliance).toFixed(0)}%</span>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center gap-2 text-teal-600 text-xs sm:text-sm font-medium">
-                        <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
-                        <span>Ver detalle</span>
                       </div>
                     </div>
                   ))}
@@ -796,32 +816,34 @@ Genera:
                     <div
                       key={store.code}
                       onClick={() => setSelectedStoreDetail(store)}
-                      className="bg-white rounded-lg p-4 sm:p-5 border-l-4 border-teal-500 hover:shadow-lg cursor-pointer transition-all"
+                      className="relative bg-gradient-to-br from-emerald-500/20 to-green-600/20 backdrop-blur-xl rounded-xl p-4 sm:p-6 lg:p-8 border border-emerald-500/30 cursor-pointer"
                     >
-                      <div className="flex items-center gap-2 sm:gap-3 mb-3">
-                        <div className="w-9 h-9 sm:w-10 sm:h-10 bg-teal-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                          <Award className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                      <div className="relative z-10">
+                        <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-5">
+                          <div className="w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-emerald-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <Award className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-white" />
+                          </div>
+                          <div>
+                            <p className="text-[10px] sm:text-xs font-bold text-emerald-300 uppercase tracking-wide">Reconocer</p>
+                            <p className="font-black text-white text-sm sm:text-base lg:text-xl">{store.name}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-[10px] sm:text-xs font-semibold text-teal-600 uppercase tracking-wide">Reconocer</p>
-                          <p className="font-bold text-gray-900 text-sm sm:text-base">{store.name}</p>
+                        
+                        <div className="space-y-2 sm:space-y-3 mb-3 sm:mb-6">
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs sm:text-sm text-slate-300">Cumplimiento</span>
+                            <span className="text-base sm:text-lg lg:text-xl font-black text-emerald-300 tabular-nums">{store.salesCompliance.toFixed(0)}%</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs sm:text-sm text-slate-300">Sobre meta</span>
+                            <span className="text-sm sm:text-base lg:text-lg font-bold text-white tabular-nums">+{(store.salesCompliance - 100).toFixed(0)}%</span>
+                          </div>
                         </div>
-                      </div>
-                      
-                      <div className="space-y-2 mb-3">
-                        <div className="flex justify-between items-center">
-                          <span className="text-xs sm:text-sm text-gray-600">Cumplimiento</span>
-                          <span className="text-base sm:text-lg font-bold text-teal-600 tabular-nums">{store.salesCompliance.toFixed(0)}%</span>
+                        
+                        <div className="flex items-center gap-2 text-white text-xs sm:text-sm">
+                          <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
+                          <span className="font-semibold">Ver detalle</span>
                         </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-xs sm:text-sm text-gray-600">Sobre meta</span>
-                          <span className="text-sm sm:text-base font-semibold text-gray-900 tabular-nums">+{(store.salesCompliance - 100).toFixed(0)}%</span>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center gap-2 text-teal-600 text-xs sm:text-sm font-medium">
-                        <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
-                        <span>Ver detalle</span>
                       </div>
                     </div>
                   ))}
@@ -830,82 +852,82 @@ Genera:
 
             {/* Análisis Inteligente - Oculto en móvil, visible en desktop */}
             {aiInsights && (
-              <div className="hidden lg:block bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-                <div className="p-5 lg:p-6 border-b border-gray-200">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-lg bg-teal-100 flex items-center justify-center">
-                      <Brain className="w-6 h-6 text-teal-600" />
+              <div className="hidden lg:block bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-xl rounded-xl border border-purple-500/30 overflow-hidden">
+                <div className="p-6 lg:p-8 border-b border-purple-500/20">
+                  <div className="flex items-center gap-3 lg:gap-4 mb-4 lg:mb-6">
+                    <div className="w-10 h-10 lg:w-14 lg:h-14 rounded-xl bg-purple-500/20 flex items-center justify-center">
+                      <Brain className="w-6 h-6 lg:w-8 lg:h-8 text-purple-400" />
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-gray-900">Análisis IA</p>
-                      <p className="text-xs text-gray-500">Diagnóstico + Acción</p>
+                      <p className="text-xs font-bold text-purple-300 uppercase tracking-wide">Análisis IA</p>
+                      <p className="text-xs lg:text-sm text-slate-400">Diagnóstico + Acción</p>
                     </div>
                   </div>
 
-                  <div className="space-y-4">
+                  <div className="space-y-4 lg:space-y-6">
                     {/* Estado Numérico */}
-                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-teal-500" />
-                        <p className="text-[10px] font-semibold text-gray-600 uppercase tracking-wider">Diagnóstico</p>
+                    <div className="bg-white/5 rounded-xl p-4 lg:p-6 border border-purple-500/20">
+                      <div className="flex items-center gap-2 mb-2 lg:mb-3">
+                        <div className="w-1.5 h-1.5 lg:w-2 lg:h-2 rounded-full bg-purple-400" />
+                        <p className="text-[10px] lg:text-xs font-bold text-purple-300 uppercase tracking-wider">📊 Diagnóstico</p>
                       </div>
-                      <p className="text-sm text-gray-900 leading-relaxed">
+                      <p className="text-sm lg:text-lg text-white leading-relaxed">
                         {aiInsights.estado_numerico}
                       </p>
                     </div>
 
                     {/* Acción Inmediata */}
-                    <div className="bg-amber-50 rounded-lg p-4 border border-amber-200">
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                        <p className="text-[10px] font-semibold text-amber-700 uppercase tracking-wider">Acción</p>
+                    <div className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 rounded-xl p-4 lg:p-6 border border-amber-500/30">
+                      <div className="flex items-center gap-2 mb-2 lg:mb-3">
+                        <div className="w-1.5 h-1.5 lg:w-2 lg:h-2 rounded-full bg-amber-400" />
+                        <p className="text-[10px] lg:text-xs font-bold text-amber-300 uppercase tracking-wider">🎯 Acción</p>
                       </div>
-                      <p className="text-sm text-gray-900 leading-relaxed font-medium">
+                      <p className="text-sm lg:text-lg text-white leading-relaxed font-medium">
                         {aiInsights.accion_inmediata}
                       </p>
                     </div>
 
                     {/* Pronóstico */}
-                    <div className="bg-teal-50 rounded-lg p-4 border border-teal-200">
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-teal-500" />
-                        <p className="text-[10px] font-semibold text-teal-700 uppercase tracking-wider">Pronóstico</p>
+                    <div className="bg-gradient-to-br from-emerald-500/10 to-green-500/10 rounded-xl p-4 lg:p-6 border border-emerald-500/30">
+                      <div className="flex items-center gap-2 mb-2 lg:mb-3">
+                        <div className="w-1.5 h-1.5 lg:w-2 lg:h-2 rounded-full bg-emerald-400" />
+                        <p className="text-[10px] lg:text-xs font-bold text-emerald-300 uppercase tracking-wider">📈 Pronóstico</p>
                       </div>
-                      <p className="text-sm text-gray-900 leading-relaxed">
+                      <p className="text-sm lg:text-lg text-white leading-relaxed">
                         {aiInsights.pronostico_impacto}
                       </p>
                     </div>
                   </div>
                 </div>
 
-                {/* KPIs de Proyección */}
-                <div className="p-5 lg:p-6 bg-gray-50">
-                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* KPIs de Proyección - Oculto en móvil */}
+                <div className="hidden lg:block p-6 lg:p-8">
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
                     <div>
-                      <p className="text-xs text-gray-500 mb-1">Proyección Mes</p>
-                      <p className="text-xl font-bold text-gray-900 tabular-nums">{formatShort(zoneTotals.totalProjection)}</p>
-                      <p className="text-xs text-gray-500">vs {formatShort(zoneTotals.totalBudget)}</p>
+                      <p className="text-xs text-slate-400 mb-2">Proyección Mes</p>
+                      <p className="text-2xl lg:text-3xl font-black text-white tabular-nums mb-1">{formatShort(zoneTotals.totalProjection)}</p>
+                      <p className="text-xs text-purple-300">vs {formatShort(zoneTotals.totalBudget)}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500 mb-1">% Proyectado</p>
-                      <p className={`text-xl font-bold tabular-nums ${
-                        ((zoneTotals.totalProjection/zoneTotals.totalBudget)*100) >= 100 ? 'text-teal-600' :
-                        ((zoneTotals.totalProjection/zoneTotals.totalBudget)*100) >= 90 ? 'text-amber-600' : 'text-red-600'
+                      <p className="text-xs text-slate-400 mb-2">% Proyectado</p>
+                      <p className={`text-2xl lg:text-3xl font-black tabular-nums ${
+                        ((zoneTotals.totalProjection/zoneTotals.totalBudget)*100) >= 100 ? 'text-emerald-400' :
+                        ((zoneTotals.totalProjection/zoneTotals.totalBudget)*100) >= 90 ? 'text-amber-400' : 'text-red-400'
                       }`}>
                         {((zoneTotals.totalProjection/zoneTotals.totalBudget)*100).toFixed(0)}%
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500 mb-1">Gap a Cerrar</p>
-                      <p className={`text-xl font-bold tabular-nums ${
-                        (zoneTotals.totalBudget - zoneTotals.totalProjection) <= 0 ? 'text-teal-600' : 'text-red-600'
+                      <p className="text-xs text-slate-400 mb-2">Gap a Cerrar</p>
+                      <p className={`text-2xl lg:text-3xl font-black tabular-nums ${
+                        (zoneTotals.totalBudget - zoneTotals.totalProjection) <= 0 ? 'text-emerald-400' : 'text-red-400'
                       }`}>
                         {formatShort(Math.abs(zoneTotals.totalBudget - zoneTotals.totalProjection))}
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500 mb-1">En Riesgo</p>
-                      <p className="text-xl font-bold text-gray-900 tabular-nums">
+                      <p className="text-xs text-slate-400 mb-2">En Riesgo</p>
+                      <p className="text-2xl lg:text-3xl font-black text-white tabular-nums mb-1">
                         {storesAnalysis.filter(s => s.hasData && (s.projection / s.salesBudget) < 0.85).length}
                       </p>
                     </div>
