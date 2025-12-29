@@ -38,8 +38,8 @@ function generateWeeksOfYear() {
     });
   }
 
-  // Ordenar de más reciente a más antigua
-  return weeks.sort((a, b) => b.number - a.number);
+  // Ordenar de semana 1 a semana 52
+  return weeks;
 }
 
 // Calendario personalizado más dinámico y bonito
