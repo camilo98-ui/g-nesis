@@ -20,17 +20,19 @@ const QUICK_OPTIONS = [
 function generateWeeksOfYear() {
   const now = new Date();
   const yearStart = startOfYear(now);
+  const yearEnd = new Date(now.getFullYear(), 11, 31);
   const currentWeekNum = getWeek(now, { weekStartsOn: 1 });
+  const totalWeeks = getWeek(yearEnd, { weekStartsOn: 1 });
   const weeks = [];
 
-  for (let i = 1; i <= currentWeekNum; i++) {
+  for (let i = 1; i <= totalWeeks; i++) {
     const weekStart = startOfWeek(addWeeks(yearStart, i - 1), { weekStartsOn: 1 });
     const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
     weeks.push({
       number: i,
       start: weekStart,
-      end: weekEnd > now ? now : weekEnd,
-      label: `${format(weekStart, 'dd MMM', { locale: es })} - ${format(weekEnd > now ? now : weekEnd, 'dd MMM', { locale: es })}`,
+      end: weekEnd,
+      label: `${format(weekStart, 'dd MMM', { locale: es })} - ${format(weekEnd, 'dd MMM', { locale: es })}`,
       isCurrent: i === currentWeekNum
     });
   }
