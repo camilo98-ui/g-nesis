@@ -903,7 +903,7 @@ export default function Dashboard() {
             {!showComparison && <WeekFilter onWeekChange={setWeekFilter} multiSelect={true} />}
             <DateFilter
               dateRange={dateRange}
-              onDateChange={(range) => {setDateRange(range);setWeekFilter(null);}}
+              onDateChange={handleDateChange}
               buttonText={showComparison ? "📅 Período Actual" : undefined}
               buttonClassName={showComparison ? "border-blue-300 hover:border-blue-500" : undefined} />
 
