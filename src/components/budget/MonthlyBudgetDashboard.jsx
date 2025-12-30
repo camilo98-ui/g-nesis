@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { X, Plus, Edit2, Trash2, TrendingUp, Target, Calendar, DollarSign, Save, Receipt, Zap, Gift } from 'lucide-react';
+import { X, Plus, Edit2, Trash2, TrendingUp, Target, Calendar, DollarSign, Save, Receipt, Zap, Gift, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { format, startOfYear, endOfYear, eachMonthOfInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -67,6 +67,24 @@ export default function MonthlyBudgetDashboard({ storeId, storeName, isOpen, onC
       toast.success('Presupuesto eliminado');
     },
     onError: () => toast.error('Error al eliminar')
+  });
+
+  // Toggle active budget mutation
+  const toggleActiveMutation = useMutation({
+    mutationFn: async (budgetId) => {
+      // Desactivar todos los presupuestos de la tienda
+      const allBudgets = await base44.entities.Budget.filter({ store_id: storeId });
+      await Promise.all(
+        allBudgets.map(b => base44.entities.Budget.update(b.id, { is_active: false }))
+      );
+      // Activar el seleccionado
+      await base44.entities.Budget.update(budgetId, { is_active: true });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['budgets']);
+      toast.success('Presupuesto activo actualizado');
+    },
+    onError: () => toast.error('Error al activar')
   });
 
   const resetForm = () => {
@@ -402,13 +420,24 @@ export default function MonthlyBudgetDashboard({ storeId, storeName, isOpen, onC
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: index * 0.05 }}
-                            className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow"
+                            className={`border rounded-xl p-4 hover:shadow-md transition-all ${
+                              budget.is_active
+                                ? 'bg-emerald-50/50 border-emerald-500/50'
+                                : 'bg-white border-gray-200'
+                            }`}
                           >
                             <div className="flex items-center justify-between">
                               <div className="flex-1">
-                                <h4 className="font-bold text-gray-800">
-                                  {format(new Date(budget.year, budget.month - 1), 'MMMM yyyy', { locale: es })}
-                                </h4>
+                                <div className="flex items-center gap-2">
+                                  <h4 className="font-bold text-gray-800">
+                                    {format(new Date(budget.year, budget.month - 1), 'MMMM yyyy', { locale: es })}
+                                  </h4>
+                                  {budget.is_active && (
+                                    <span className="text-xs bg-emerald-500 text-white px-2 py-0.5 rounded-full font-bold">
+                                      ACTIVO
+                                    </span>
+                                  )}
+                                </div>
                                 <div className="grid grid-cols-2 gap-3 mt-2 text-xs">
                                   <div className="bg-pink-50 rounded-lg p-2">
                                     <p className="text-gray-500 mb-0.5">💰 Ventas</p>
@@ -445,6 +474,17 @@ export default function MonthlyBudgetDashboard({ storeId, storeName, isOpen, onC
                                 </div>
                               </div>
                               <div className="flex items-center gap-2 ml-4">
+                                <button
+                                  onClick={() => toggleActiveMutation.mutate(budget.id)}
+                                  className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all ${
+                                    budget.is_active
+                                      ? 'bg-emerald-500 text-white'
+                                      : 'bg-gray-100 hover:bg-gray-200 text-gray-400'
+                                  }`}
+                                  title={budget.is_active ? 'Presupuesto activo' : 'Marcar como activo'}
+                                >
+                                  <Check className="w-4 h-4" />
+                                </button>
                                 <Button
                                   variant="ghost"
                                   size="icon"
