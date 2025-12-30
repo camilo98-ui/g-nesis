@@ -516,7 +516,16 @@ export default function Dashboard() {
 
   const { data: dailySales = [] } = useQuery({
     queryKey: ['dailySales', selectedStore],
-    queryFn: () => base44.entities.DailySales.filter({ store_id: selectedStore }),
+    queryFn: async () => {
+      const monthStart = format(startOfMonth(new Date()), 'yyyy-MM-dd');
+      const monthEnd = format(endOfMonth(new Date()), 'yyyy-MM-dd');
+      const allSales = await base44.entities.DailySales.filter({ store_id: selectedStore });
+      // Filtrar solo ventas del mes actual
+      return allSales.filter(sale => {
+        const saleDate = sale.date?.split('T')[0] || sale.date;
+        return saleDate >= monthStart && saleDate <= monthEnd;
+      });
+    },
     enabled: !!selectedStore,
     staleTime: 0,
     cacheTime: 0,
@@ -526,7 +535,14 @@ export default function Dashboard() {
 
   const { data: budgets = [] } = useQuery({
     queryKey: ['budgets', selectedStore],
-    queryFn: () => base44.entities.Budget.filter({ store_id: selectedStore }),
+    queryFn: async () => {
+      const now = new Date();
+      const currentMonth = now.getMonth() + 1;
+      const currentYear = now.getFullYear();
+      const allBudgets = await base44.entities.Budget.filter({ store_id: selectedStore });
+      // Filtrar solo presupuestos del mes/año actual
+      return allBudgets.filter(b => b.month === currentMonth && b.year === currentYear);
+    },
     enabled: !!selectedStore,
     staleTime: 0,
     cacheTime: 0,
