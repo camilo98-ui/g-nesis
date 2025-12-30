@@ -136,10 +136,12 @@ const IDEAL_RULES = {
 };
 
 // Modal simplificado - SIN selección F/T (se infiere del slot clickeado)
-function FlavorSelectorModal({ selectedSlot, onClose, onSelect }) {
+function FlavorSelectorModal({ selectedSlot, onClose, onSelect, customFlavors }) {
   const [search, setSearch] = useState('');
 
-  const filteredFlavors = POPSY_FLAVORS.filter((f) =>
+  // Combinar sabores predefinidos con personalizados
+  const allFlavors = [...POPSY_FLAVORS, ...customFlavors];
+  const filteredFlavors = allFlavors.filter((f) =>
     f.name.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -227,6 +229,7 @@ export default function FreezerMap() {
   const [currentFreezer, setCurrentFreezer] = useState(1);
   const [longPressSlot, setLongPressSlot] = useState(null);
   const longPressTimer = useRef(null);
+  const [customFlavors, setCustomFlavors] = useState([]);
 
   // Dimensiones independientes por nevera
   const [freezerDimensions, setFreezerDimensions] = useState({
@@ -238,9 +241,21 @@ export default function FreezerMap() {
   const numRows = freezerDimensions[currentFreezer]?.rows || 7;
   const numCols = freezerDimensions[currentFreezer]?.cols || 5;
 
+  // Cargar sabores personalizados al inicio
   useEffect(() => {
     const saved = localStorage.getItem('selectedStore');
     if (saved) setSelectedStore(saved);
+    
+    // Cargar sabores personalizados del localStorage
+    const savedFlavors = localStorage.getItem('customFlavors');
+    if (savedFlavors) {
+      try {
+        const parsed = JSON.parse(savedFlavors);
+        setCustomFlavors(parsed);
+      } catch (e) {
+        console.error('Error cargando sabores personalizados:', e);
+      }
+    }
   }, []);
 
   const handleStoreChange = (store) => {
@@ -1239,8 +1254,23 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                         </select>
                         <Button size="sm" className="bg-pink-500 text-white" onClick={() => {
                       if (newFlavor.name.trim()) {
-                        POPSY_FLAVORS.push({ name: newFlavor.name, color: newFlavor.color, type: newFlavor.line, line: newFlavor.line });
-                        toast.success(`Sabor "${newFlavor.name}" agregado`);
+                        // Crear el nuevo sabor con todas sus propiedades
+                        const flavorToAdd = {
+                          name: newFlavor.name,
+                          color: newFlavor.color,
+                          type: newFlavor.line,
+                          line: newFlavor.line,
+                          dark: ['#3D2314', '#4A2511', '#1A1A1A', '#6F4E37', '#8B4513', '#DC143C', '#E30B5C', '#C71585', '#E31837', '#4169E1', '#7B3F00', '#D70026', '#8B008B', '#6A0DAD'].includes(newFlavor.color)
+                        };
+                        
+                        // Agregar a sabores personalizados
+                        const updatedCustomFlavors = [...customFlavors, flavorToAdd];
+                        setCustomFlavors(updatedCustomFlavors);
+                        
+                        // Guardar en localStorage para persistencia
+                        localStorage.setItem('customFlavors', JSON.stringify(updatedCustomFlavors));
+                        
+                        toast.success(`Sabor "${newFlavor.name}" agregado y guardado`);
                         setNewFlavor({ name: '', color: '#FFB5C5', line: 'gourmet' });
                         setShowAddFlavor(false);
                       }
@@ -1278,7 +1308,8 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
         <FlavorSelectorModal
           selectedSlot={selectedSlot}
           onClose={() => {setShowFlavorSelector(false);setSelectedSlot(null);}}
-          onSelect={handleFlavorSelect} />
+          onSelect={handleFlavorSelect}
+          customFlavors={customFlavors} />
 
         }
       </AnimatePresence>
