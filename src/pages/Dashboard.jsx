@@ -468,13 +468,24 @@ function DetailPanel({ metric, data, onClose, chartData, formatCurrency, shiftDa
 
 export default function Dashboard() {
   const [selectedStore, setSelectedStore] = useState('');
-  // Inicializar con la semana actual del mes (lunes a domingo)
+  // Inicializar con acumulado desde inicio de mes hasta fin de semana actual
   const [dateRange, setDateRange] = useState({
-    from: startOfWeek(new Date(), { weekStartsOn: 1 }),
+    from: startOfMonth(new Date()),
     to: endOfWeek(new Date(), { weekStartsOn: 1 })
   });
   const [activeMetric, setActiveMetric] = useState(null);
   const [projectionMetric, setProjectionMetric] = useState(null);
+
+  // Handler para ajustar el rango al cambiar semanas
+  const handleDateChange = (newRange) => {
+    if (newRange?.from && newRange?.to) {
+      // Siempre mostrar acumulado desde inicio del mes hasta el final de la semana seleccionada
+      setDateRange({
+        from: startOfMonth(newRange.from),
+        to: newRange.to
+      });
+    }
+  };
 
   const [weatherData, setWeatherData] = useState(null);
   const [weekFilter, setWeekFilter] = useState(null);
