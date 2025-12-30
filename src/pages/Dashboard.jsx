@@ -980,10 +980,10 @@ export default function Dashboard() {
                       </h5>
                       <p className="text-xs text-blue-900 leading-relaxed">
                         {(() => {
-                      const salesGrowth = comparisonTotals.sales > 0 ? (totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100 : 0;
-                      const transGrowth = comparisonTotals.transactions > 0 ? (totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100 : 0;
-                      const ticketChange = comparisonTotals.transactions > 0 && totals.transactions > 0 ?
-                      (totals.sales / totals.transactions - comparisonTotals.sales / comparisonTotals.transactions) / (comparisonTotals.sales / comparisonTotals.transactions) * 100 :
+                      const salesGrowth = comparisonTotals.sales > 0 ? (totalsMonth.sales - comparisonTotals.sales) / comparisonTotals.sales * 100 : 0;
+                      const transGrowth = comparisonTotals.transactions > 0 ? (totalsMonth.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100 : 0;
+                      const ticketChange = comparisonTotals.transactions > 0 && totalsMonth.transactions > 0 ?
+                      (totalsMonth.sales / totalsMonth.transactions - comparisonTotals.sales / comparisonTotals.transactions) / (comparisonTotals.sales / comparisonTotals.transactions) * 100 :
                       0;
 
                       if (salesGrowth > 10 && transGrowth > 5 && ticketChange > 0) {
@@ -1008,10 +1008,10 @@ export default function Dashboard() {
                       </h5>
                       <p className="text-xs text-emerald-900 leading-relaxed">
                         {(() => {
-                      const salesGrowth = comparisonTotals.sales > 0 ? (totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100 : 0;
-                      const transGrowth = comparisonTotals.transactions > 0 ? (totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100 : 0;
-                      const ticketChange = comparisonTotals.transactions > 0 && totals.transactions > 0 ?
-                      (totals.sales / totals.transactions - comparisonTotals.sales / comparisonTotals.transactions) / (comparisonTotals.sales / comparisonTotals.transactions) * 100 :
+                      const salesGrowth = comparisonTotals.sales > 0 ? (totalsMonth.sales - comparisonTotals.sales) / comparisonTotals.sales * 100 : 0;
+                      const transGrowth = comparisonTotals.transactions > 0 ? (totalsMonth.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100 : 0;
+                      const ticketChange = comparisonTotals.transactions > 0 && totalsMonth.transactions > 0 ?
+                      (totalsMonth.sales / totalsMonth.transactions - comparisonTotals.sales / comparisonTotals.transactions) / (comparisonTotals.sales / comparisonTotals.transactions) * 100 :
                       0;
 
                       if (salesGrowth > 10 && transGrowth > 5 && ticketChange > 0) {
@@ -1058,7 +1058,7 @@ export default function Dashboard() {
               className={`relative overflow-hidden rounded-xl transition-all cursor-pointer p-3 ${
               activeMetric === 'sales_comp' ? 'ring-2 ring-emerald-400' : ''} ${
 
-              comparisonTotals.sales > 0 && (totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100 >= 0 ?
+              comparisonTotals.sales > 0 && (totalsMonth.sales - comparisonTotals.sales) / comparisonTotals.sales * 100 >= 0 ?
               'bg-gradient-to-r from-emerald-500 to-green-500' :
               'bg-gradient-to-r from-red-500 to-rose-500'}`
               }>
@@ -1068,17 +1068,17 @@ export default function Dashboard() {
                       <DollarSign className="w-4 h-4 text-white" />
                       <span className="text-[10px] font-bold text-white uppercase">Ventas</span>
                     </div>
-                    {comparisonTotals.sales > 0 && (totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100 >= 0 ?
+                    {comparisonTotals.sales > 0 && (totalsMonth.sales - comparisonTotals.sales) / comparisonTotals.sales * 100 >= 0 ?
                 <TrendingUp className="w-4 h-4 text-white" /> :
                 <TrendingDown className="w-4 h-4 text-white" />
                 }
                   </div>
                   <p className="text-2xl font-black text-white mb-1">
-                    {comparisonTotals.sales > 0 ? ((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100 >= 0 ? '+' : '') + ((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100).toFixed(1) : 0}%
+                    {comparisonTotals.sales > 0 ? ((totalsMonth.sales - comparisonTotals.sales) / comparisonTotals.sales * 100 >= 0 ? '+' : '') + ((totalsMonth.sales - comparisonTotals.sales) / comparisonTotals.sales * 100).toFixed(1) : 0}%
                   </p>
                   <div className="flex justify-between text-[9px] text-white/80">
                     <span>Ant: {formatCurrency(comparisonTotals.sales).slice(0, -3)}</span>
-                    <span>Act: {formatCurrency(totals.sales).slice(0, -3)}</span>
+                    <span>Act: {formatCurrency(totalsMonth.sales).slice(0, -3)}</span>
                   </div>
                 </motion.button>
 
@@ -1100,7 +1100,7 @@ export default function Dashboard() {
               className={`relative overflow-hidden rounded-xl transition-all cursor-pointer p-3 ${
               activeMetric === 'trans_comp' ? 'ring-2 ring-purple-400' : ''} ${
 
-              comparisonTotals.transactions > 0 && (totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100 >= 0 ?
+              comparisonTotals.transactions > 0 && (totalsMonth.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100 >= 0 ?
               'bg-gradient-to-r from-purple-500 to-violet-500' :
               'bg-gradient-to-r from-orange-500 to-amber-500'}`
               }>
@@ -1110,17 +1110,17 @@ export default function Dashboard() {
                       <Zap className="w-4 h-4 text-white" />
                       <span className="text-[10px] font-bold text-white uppercase">Tráfico</span>
                     </div>
-                    {comparisonTotals.transactions > 0 && (totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100 >= 0 ?
+                    {comparisonTotals.transactions > 0 && (totalsMonth.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100 >= 0 ?
                 <TrendingUp className="w-4 h-4 text-white" /> :
                 <TrendingDown className="w-4 h-4 text-white" />
                 }
                   </div>
                   <p className="text-2xl font-black text-white mb-1">
-                    {comparisonTotals.transactions > 0 ? ((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100 >= 0 ? '+' : '') + ((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100).toFixed(1) : 0}%
+                    {comparisonTotals.transactions > 0 ? ((totalsMonth.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100 >= 0 ? '+' : '') + ((totalsMonth.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100).toFixed(1) : 0}%
                   </p>
                   <div className="flex justify-between text-[9px] text-white/80">
                     <span>Ant: {comparisonTotals.transactions.toLocaleString()}</span>
-                    <span>Act: {totals.transactions.toLocaleString()}</span>
+                    <span>Act: {totalsMonth.transactions.toLocaleString()}</span>
                   </div>
                 </motion.button>
 
@@ -1142,7 +1142,7 @@ export default function Dashboard() {
               className={`relative overflow-hidden rounded-xl transition-all cursor-pointer p-3 ${
               activeMetric === 'ticket_comp' ? 'ring-2 ring-blue-400' : ''} ${
 
-              avgTicket > comparisonTotals.sales / comparisonTotals.transactions ?
+              avgTicketMonth > comparisonTotals.sales / comparisonTotals.transactions ?
               'bg-gradient-to-r from-blue-500 to-cyan-500' :
               'bg-gradient-to-r from-amber-500 to-orange-500'}`
               }>
@@ -1152,20 +1152,20 @@ export default function Dashboard() {
                       <Receipt className="w-4 h-4 text-white" />
                       <span className="text-[10px] font-bold text-white uppercase">Ticket</span>
                     </div>
-                    {avgTicket > comparisonTotals.sales / comparisonTotals.transactions ?
+                    {avgTicketMonth > comparisonTotals.sales / comparisonTotals.transactions ?
                 <TrendingUp className="w-4 h-4 text-white" /> :
                 <TrendingDown className="w-4 h-4 text-white" />
                 }
                   </div>
                   <p className="text-2xl font-black text-white mb-1">
                     {comparisonTotals.transactions > 0 ?
-                ((avgTicket - comparisonTotals.sales / comparisonTotals.transactions) / (comparisonTotals.sales / comparisonTotals.transactions) * 100 >= 0 ? '+' : '') +
-                ((avgTicket - comparisonTotals.sales / comparisonTotals.transactions) / (comparisonTotals.sales / comparisonTotals.transactions) * 100).toFixed(1) :
+                ((avgTicketMonth - comparisonTotals.sales / comparisonTotals.transactions) / (comparisonTotals.sales / comparisonTotals.transactions) * 100 >= 0 ? '+' : '') +
+                ((avgTicketMonth - comparisonTotals.sales / comparisonTotals.transactions) / (comparisonTotals.sales / comparisonTotals.transactions) * 100).toFixed(1) :
                 0}%
                   </p>
                   <div className="flex justify-between text-[9px] text-white/80">
                     <span>Ant: {formatCurrency(comparisonTotals.transactions > 0 ? comparisonTotals.sales / comparisonTotals.transactions : 0).slice(0, -3)}</span>
-                    <span>Act: {formatCurrency(avgTicket).slice(0, -3)}</span>
+                    <span>Act: {formatCurrency(avgTicketMonth).slice(0, -3)}</span>
                   </div>
                 </motion.button>
 
@@ -1187,7 +1187,7 @@ export default function Dashboard() {
               className={`relative overflow-hidden rounded-xl transition-all cursor-pointer p-3 ${
               activeMetric === 'suggested_comp' ? 'ring-2 ring-pink-400' : ''} ${
 
-              comparisonTotals.suggested > 0 && (totals.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100 >= 0 ?
+              comparisonTotals.suggested > 0 && (totalsMonth.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100 >= 0 ?
               'bg-gradient-to-r from-pink-500 to-rose-500' :
               'bg-gradient-to-r from-red-500 to-rose-500'}`
               }>
@@ -1197,17 +1197,17 @@ export default function Dashboard() {
                       <Gift className="w-4 h-4 text-white" />
                       <span className="text-[10px] font-bold text-white uppercase">Sugeridos</span>
                     </div>
-                    {comparisonTotals.suggested > 0 && (totals.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100 >= 0 ?
+                    {comparisonTotals.suggested > 0 && (totalsMonth.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100 >= 0 ?
                 <TrendingUp className="w-4 h-4 text-white" /> :
                 <TrendingDown className="w-4 h-4 text-white" />
                 }
                   </div>
                   <p className="text-2xl font-black text-white mb-1">
-                    {comparisonTotals.suggested > 0 ? ((totals.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100 >= 0 ? '+' : '') + ((totals.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100).toFixed(1) : 0}%
+                    {comparisonTotals.suggested > 0 ? ((totalsMonth.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100 >= 0 ? '+' : '') + ((totalsMonth.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100).toFixed(1) : 0}%
                   </p>
                   <div className="flex justify-between text-[9px] text-white/80">
                     <span>Ant: {comparisonTotals.suggested.toLocaleString()}</span>
-                    <span>Act: {totals.suggested.toLocaleString()}</span>
+                    <span>Act: {totalsMonth.suggested.toLocaleString()}</span>
                   </div>
                 </motion.button>
               </motion.div>
@@ -1348,10 +1348,10 @@ export default function Dashboard() {
                     <div className="bg-emerald-500/20 rounded-xl p-4 border border-emerald-400/30">
                       <p className="text-xs text-emerald-200 mb-1">Período Actual</p>
                       <p className="text-2xl font-black text-white">
-                        {activeMetric === 'sales_comp' && formatCurrency(totals.sales)}
-                        {activeMetric === 'trans_comp' && totals.transactions.toLocaleString()}
-                        {activeMetric === 'ticket_comp' && formatCurrency(avgTicket)}
-                        {activeMetric === 'suggested_comp' && totals.suggested.toLocaleString()}
+                        {activeMetric === 'sales_comp' && formatCurrency(totalsMonth.sales)}
+                        {activeMetric === 'trans_comp' && totalsMonth.transactions.toLocaleString()}
+                        {activeMetric === 'ticket_comp' && formatCurrency(avgTicketMonth)}
+                        {activeMetric === 'suggested_comp' && totalsMonth.suggested.toLocaleString()}
                       </p>
                     </div>
                     <div className="bg-slate-500/20 rounded-xl p-4 border border-slate-400/30">
@@ -1364,44 +1364,44 @@ export default function Dashboard() {
                       </p>
                     </div>
                     <div className={`rounded-xl p-4 border ${
-                activeMetric === 'sales_comp' && totals.sales > comparisonTotals.sales ||
-                activeMetric === 'trans_comp' && totals.transactions > comparisonTotals.transactions ||
-                activeMetric === 'ticket_comp' && avgTicket > comparisonTotals.sales / comparisonTotals.transactions ||
-                activeMetric === 'suggested_comp' && totals.suggested > comparisonTotals.suggested ?
+                activeMetric === 'sales_comp' && totalsMonth.sales > comparisonTotals.sales ||
+                activeMetric === 'trans_comp' && totalsMonth.transactions > comparisonTotals.transactions ||
+                activeMetric === 'ticket_comp' && avgTicketMonth > comparisonTotals.sales / comparisonTotals.transactions ||
+                activeMetric === 'suggested_comp' && totalsMonth.suggested > comparisonTotals.suggested ?
                 'bg-emerald-500/20 border-emerald-400/30' :
                 'bg-red-500/20 border-red-400/30'}`
                 }>
                       <p className={`text-xs mb-1 ${
-                  activeMetric === 'sales_comp' && totals.sales > comparisonTotals.sales ||
-                  activeMetric === 'trans_comp' && totals.transactions > comparisonTotals.transactions ||
-                  activeMetric === 'ticket_comp' && avgTicket > comparisonTotals.sales / comparisonTotals.transactions ||
-                  activeMetric === 'suggested_comp' && totals.suggested > comparisonTotals.suggested ?
+                  activeMetric === 'sales_comp' && totalsMonth.sales > comparisonTotals.sales ||
+                  activeMetric === 'trans_comp' && totalsMonth.transactions > comparisonTotals.transactions ||
+                  activeMetric === 'ticket_comp' && avgTicketMonth > comparisonTotals.sales / comparisonTotals.transactions ||
+                  activeMetric === 'suggested_comp' && totalsMonth.suggested > comparisonTotals.suggested ?
                   'text-emerald-200' :
                   'text-red-200'}`
                   }>Variación</p>
                       <p className={`text-2xl font-black ${
-                  activeMetric === 'sales_comp' && totals.sales > comparisonTotals.sales ||
-                  activeMetric === 'trans_comp' && totals.transactions > comparisonTotals.transactions ||
-                  activeMetric === 'ticket_comp' && avgTicket > comparisonTotals.sales / comparisonTotals.transactions ||
-                  activeMetric === 'suggested_comp' && totals.suggested > comparisonTotals.suggested ?
+                  activeMetric === 'sales_comp' && totalsMonth.sales > comparisonTotals.sales ||
+                  activeMetric === 'trans_comp' && totalsMonth.transactions > comparisonTotals.transactions ||
+                  activeMetric === 'ticket_comp' && avgTicketMonth > comparisonTotals.sales / comparisonTotals.transactions ||
+                  activeMetric === 'suggested_comp' && totalsMonth.suggested > comparisonTotals.suggested ?
                   'text-emerald-400' :
                   'text-red-400'}`
                   }>
                         {activeMetric === 'sales_comp' &&
-                    (totals.sales > comparisonTotals.sales ? '+' : '') +
-                    ((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100).toFixed(1) + '%'
+                    (totalsMonth.sales > comparisonTotals.sales ? '+' : '') +
+                    ((totalsMonth.sales - comparisonTotals.sales) / comparisonTotals.sales * 100).toFixed(1) + '%'
                     }
                         {activeMetric === 'trans_comp' &&
-                    (totals.transactions > comparisonTotals.transactions ? '+' : '') +
-                    ((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100).toFixed(1) + '%'
+                    (totalsMonth.transactions > comparisonTotals.transactions ? '+' : '') +
+                    ((totalsMonth.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100).toFixed(1) + '%'
                     }
                         {activeMetric === 'ticket_comp' &&
-                    (avgTicket > comparisonTotals.sales / comparisonTotals.transactions ? '+' : '') +
-                    ((avgTicket - comparisonTotals.sales / comparisonTotals.transactions) / (comparisonTotals.sales / comparisonTotals.transactions) * 100).toFixed(1) + '%'
+                    (avgTicketMonth > comparisonTotals.sales / comparisonTotals.transactions ? '+' : '') +
+                    ((avgTicketMonth - comparisonTotals.sales / comparisonTotals.transactions) / (comparisonTotals.sales / comparisonTotals.transactions) * 100).toFixed(1) + '%'
                     }
                         {activeMetric === 'suggested_comp' &&
-                    (totals.suggested > comparisonTotals.suggested ? '+' : '') +
-                    ((totals.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100).toFixed(1) + '%'
+                    (totalsMonth.suggested > comparisonTotals.suggested ? '+' : '') +
+                    ((totalsMonth.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100).toFixed(1) + '%'
                     }
                       </p>
                     </div>
@@ -1418,24 +1418,24 @@ export default function Dashboard() {
                           </h5>
                           <p className="text-xs text-blue-100 leading-relaxed">
                             {activeMetric === 'sales_comp' && (
-                        totals.sales > comparisonTotals.sales ?
-                        `La facturación creció ${((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100).toFixed(1)}%, superando el período anterior por ${formatCurrency(totals.sales - comparisonTotals.sales)}. Este resultado demuestra que las estrategias comerciales actuales están funcionando y el equipo está ejecutando efectivamente.` :
-                        `Las ventas cayeron ${Math.abs((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100).toFixed(1)}%, representando ${formatCurrency(Math.abs(totals.sales - comparisonTotals.sales))} menos que el período anterior. Esta contracción impacta directamente los objetivos mensuales y señala problemas operativos o de mercado que deben resolverse urgentemente.`)
+                        totalsMonth.sales > comparisonTotals.sales ?
+                        `La facturación creció ${((totalsMonth.sales - comparisonTotals.sales) / comparisonTotals.sales * 100).toFixed(1)}%, superando el período anterior por ${formatCurrency(totalsMonth.sales - comparisonTotals.sales)}. Este resultado demuestra que las estrategias comerciales actuales están funcionando y el equipo está ejecutando efectivamente.` :
+                        `Las ventas cayeron ${Math.abs((totalsMonth.sales - comparisonTotals.sales) / comparisonTotals.sales * 100).toFixed(1)}%, representando ${formatCurrency(Math.abs(totalsMonth.sales - comparisonTotals.sales))} menos que el período anterior. Esta contracción impacta directamente los objetivos mensuales y señala problemas operativos o de mercado que deben resolverse urgentemente.`)
                         }
                             {activeMetric === 'trans_comp' && (
-                        totals.transactions > comparisonTotals.transactions ?
-                        `El tráfico aumentó ${((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100).toFixed(1)}%, con ${Math.abs(totals.transactions - comparisonTotals.transactions)} clientes adicionales. Esto indica éxito en captación, pero debe verificarse si las ventas crecieron proporcionalmente para confirmar efectividad comercial.` :
-                        `Perdimos ${Math.abs(totals.transactions - comparisonTotals.transactions)} clientes (${Math.abs((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100).toFixed(1)}% menos tráfico). Esto es crítico porque reduce oportunidades de venta. Probablemente causado por factores externos, competencia o deterioro en servicio que aleja a los clientes.`)
+                        totalsMonth.transactions > comparisonTotals.transactions ?
+                        `El tráfico aumentó ${((totalsMonth.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100).toFixed(1)}%, con ${Math.abs(totalsMonth.transactions - comparisonTotals.transactions)} clientes adicionales. Esto indica éxito en captación, pero debe verificarse si las ventas crecieron proporcionalmente para confirmar efectividad comercial.` :
+                        `Perdimos ${Math.abs(totalsMonth.transactions - comparisonTotals.transactions)} clientes (${Math.abs((totalsMonth.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100).toFixed(1)}% menos tráfico). Esto es crítico porque reduce oportunidades de venta. Probablemente causado por factores externos, competencia o deterioro en servicio que aleja a los clientes.`)
                         }
                             {activeMetric === 'ticket_comp' && (
-                        avgTicket > comparisonTotals.sales / comparisonTotals.transactions ?
-                        `El ticket promedio mejoró ${((avgTicket - comparisonTotals.sales / comparisonTotals.transactions) / (comparisonTotals.sales / comparisonTotals.transactions) * 100).toFixed(1)}% (${formatCurrency(avgTicket - comparisonTotals.sales / comparisonTotals.transactions)} más por cliente). Cada cliente está comprando más, lo que maximiza rentabilidad y evidencia mejor capacidad de venta consultiva del equipo.` :
-                        `El ticket promedio bajó ${Math.abs((avgTicket - comparisonTotals.sales / comparisonTotals.transactions) / (comparisonTotals.sales / comparisonTotals.transactions) * 100).toFixed(1)}%. Los clientes compran menos por visita, afectando márgenes. Esto sugiere falta de venta sugerida, problemas en mix de productos o migración a opciones de menor valor.`)
+                        avgTicketMonth > comparisonTotals.sales / comparisonTotals.transactions ?
+                        `El ticket promedio mejoró ${((avgTicketMonth - comparisonTotals.sales / comparisonTotals.transactions) / (comparisonTotals.sales / comparisonTotals.transactions) * 100).toFixed(1)}% (${formatCurrency(avgTicketMonth - comparisonTotals.sales / comparisonTotals.transactions)} más por cliente). Cada cliente está comprando más, lo que maximiza rentabilidad y evidencia mejor capacidad de venta consultiva del equipo.` :
+                        `El ticket promedio bajó ${Math.abs((avgTicketMonth - comparisonTotals.sales / comparisonTotals.transactions) / (comparisonTotals.sales / comparisonTotals.transactions) * 100).toFixed(1)}%. Los clientes compran menos por visita, afectando márgenes. Esto sugiere falta de venta sugerida, problemas en mix de productos o migración a opciones de menor valor.`)
                         }
                             {activeMetric === 'suggested_comp' && (
-                        totals.suggested > comparisonTotals.suggested ?
-                        `Los sugeridos crecieron ${((totals.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100).toFixed(1)}%, vendiendo ${Math.abs(totals.suggested - comparisonTotals.suggested)} unidades más. Esto impacta directamente la rentabilidad porque cada sugerido tiene mayor margen y demuestra habilidad comercial del equipo.` :
-                        `Vendimos ${Math.abs(totals.suggested - comparisonTotals.suggested)} sugeridos menos (${Math.abs((totals.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100).toFixed(1)}% de caída). Esto representa pérdida directa de margen y señala que el equipo no está ejecutando técnicas de venta consultiva efectivamente.`)
+                        totalsMonth.suggested > comparisonTotals.suggested ?
+                        `Los sugeridos crecieron ${((totalsMonth.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100).toFixed(1)}%, vendiendo ${Math.abs(totalsMonth.suggested - comparisonTotals.suggested)} unidades más. Esto impacta directamente la rentabilidad porque cada sugerido tiene mayor margen y demuestra habilidad comercial del equipo.` :
+                        `Vendimos ${Math.abs(totalsMonth.suggested - comparisonTotals.suggested)} sugeridos menos (${Math.abs((totalsMonth.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100).toFixed(1)}% de caída). Esto representa pérdida directa de margen y señala que el equipo no está ejecutando técnicas de venta consultiva efectivamente.`)
                         }
                           </p>
                         </div>
@@ -1447,22 +1447,22 @@ export default function Dashboard() {
                           </h5>
                           <p className="text-xs text-emerald-100 leading-relaxed">
                             {activeMetric === 'sales_comp' && (
-                        totals.sales > comparisonTotals.sales ?
+                        totalsMonth.sales > comparisonTotals.sales ?
                         `1) Documentar qué hizo diferente el equipo este período (horarios, productos, técnicas). 2) Replicar estas prácticas exitosas en otros puntos. 3) Establecer nueva meta 10-15% superior para mantener momentum. Resultado esperado: consolidar crecimiento y llevarlo a otros puntos de venta.` :
                         `PLAN URGENTE: 1) Reunión HOY con equipo para identificar problemas específicos. 2) Analizar competencia directa esta semana. 3) Lanzar promoción agresiva en 48hrs para reactivar. 4) Revisar experiencia de cliente completamente. Resultado esperado: detener caída en 7 días máximo.`)
                         }
                             {activeMetric === 'trans_comp' && (
-                        totals.transactions > comparisonTotals.transactions ?
+                        totalsMonth.transactions > comparisonTotals.transactions ?
                         `1) Analizar si ventas crecieron al mismo ritmo que tráfico. 2) Si no, capacitar equipo en cierre de ventas esta semana. 3) Implementar seguimiento diario de conversión por vendedor. Resultado esperado: convertir el mayor tráfico en ventas proporcionalmente mayores.` :
                         `PRIORIDAD ALTA: 1) Identificar por qué perdimos clientes (auditoría de servicio en 24hrs). 2) Revisar presencia digital y competencia. 3) Activar campaña de reactivación inmediata. 4) Mejorar experiencia física del punto. Resultado esperado: recuperar al menos 50% del tráfico perdido en 14 días.`)
                         }
                             {activeMetric === 'ticket_comp' && (
-                        avgTicket > comparisonTotals.sales / comparisonTotals.transactions ?
+                        avgTicketMonth > comparisonTotals.sales / comparisonTotals.transactions ?
                         `1) Identificar qué vendedores tienen mejor ticket y documentar su método. 2) Capacitar resto del equipo en estas técnicas. 3) Establecer metas individuales de ticket para todos. Resultado esperado: llevar a todos los vendedores al nivel del mejor performer.` :
                         `ACCIÓN INMEDIATA: 1) Entrenamiento intensivo en venta sugerida mañana. 2) Implementar script obligatorio de cierre. 3) Verificar disponibilidad de productos complementarios. 4) Supervisión diaria de ticket por vendedor. Resultado esperado: recuperar ticket promedio anterior en 10 días.`)
                         }
                             {activeMetric === 'suggested_comp' && (
-                        totals.suggested > comparisonTotals.suggested ?
+                        totalsMonth.suggested > comparisonTotals.suggested ?
                         `1) Reconocer públicamente a vendedores con más sugeridos. 2) Crear competencia interna con premio semanal. 3) Mantener inventario óptimo de productos complementarios. Resultado esperado: mantener y superar nivel actual, estableciendo nuevo estándar.` :
                         `INTERVENCIÓN URGENTE: 1) Reforzar capacitación en venta consultiva esta semana. 2) Revisar inventario de productos complementarios. 3) Implementar script de sugerido obligatorio. 4) Seguimiento diario individual. Resultado esperado: duplicar sugeridos en 14 días.`)
                         }
