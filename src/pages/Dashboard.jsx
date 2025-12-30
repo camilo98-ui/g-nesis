@@ -29,7 +29,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { startOfMonth, endOfMonth, differenceInDays, format, eachDayOfInterval, isSameDay } from 'date-fns';
+import { startOfMonth, endOfMonth, differenceInDays, format, eachDayOfInterval, isSameDay, startOfWeek, endOfWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -468,9 +468,10 @@ function DetailPanel({ metric, data, onClose, chartData, formatCurrency, shiftDa
 
 export default function Dashboard() {
   const [selectedStore, setSelectedStore] = useState('');
+  // Inicializar con la semana actual del mes (lunes a domingo)
   const [dateRange, setDateRange] = useState({
-    from: startOfMonth(new Date()),
-    to: new Date()
+    from: startOfWeek(new Date(), { weekStartsOn: 1 }),
+    to: endOfWeek(new Date(), { weekStartsOn: 1 })
   });
   const [activeMetric, setActiveMetric] = useState(null);
   const [projectionMetric, setProjectionMetric] = useState(null);
