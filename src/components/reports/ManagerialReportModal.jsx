@@ -1,13 +1,14 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FileText, Download, Loader2, X, BarChart3, Users, TrendingUp, Store, Calendar as CalendarIcon, Target, Award } from 'lucide-react';
+import { FileText, Download, Loader2, X, BarChart3, Users, TrendingUp, Store, Calendar as CalendarIcon, Target, Award, ArrowUp, ArrowDown, Activity, DollarSign, Zap, AlertCircle, TrendingDown } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { base44 } from '@/api/base44Client';
-import { format, startOfMonth, endOfMonth, subDays, startOfWeek, endOfWeek } from 'date-fns';
+import { format, startOfMonth, endOfMonth, subDays, startOfWeek, endOfWeek, subMonths, differenceInDays } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useQuery } from '@tanstack/react-query';
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart, PieChart, Pie, Cell, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ComposedChart } from 'recharts';
 
 export default function ManagerialReportModal({ storeId, storeName, storeCode, onClose }) {
   const [loading, setLoading] = useState(false);
@@ -45,27 +46,62 @@ export default function ManagerialReportModal({ storeId, storeName, storeCode, o
     enabled: !!storeId
   });
 
-  // Calculate metrics
+  // Calculate advanced metrics
   const metrics = useMemo(() => {
-    const currentMonthSales = dailySales.filter(s => {
+    const currentPeriodSales = dailySales.filter(s => {
       const saleDate = new Date(s.date);
       return dateRange.from && dateRange.to && saleDate >= dateRange.from && saleDate <= dateRange.to;
     });
 
-    const totalSales = currentMonthSales.reduce((sum, s) => sum + (s.total_sales || 0), 0);
-    const totalTickets = currentMonthSales.reduce((sum, s) => sum + (s.total_tickets || 0), 0);
-    const totalTransactions = currentMonthSales.reduce((sum, s) => sum + (s.total_transactions || 0), 0);
-    const totalSuggested = currentMonthSales.reduce((sum, s) => sum + (s.total_suggested || 0), 0);
+    // Previous period comparison
+    const daysInPeriod = differenceInDays(dateRange.to, dateRange.from) + 1;
+    const previousPeriodEnd = subDays(dateRange.from, 1);
+    const previousPeriodStart = subDays(previousPeriodEnd, daysInPeriod - 1);
+    
+    const previousPeriodSales = dailySales.filter(s => {
+      const saleDate = new Date(s.date);
+      return saleDate >= previousPeriodStart && saleDate <= previousPeriodEnd;
+    });
+
+    const totalSales = currentPeriodSales.reduce((sum, s) => sum + (s.total_sales || 0), 0);
+    const totalTickets = currentPeriodSales.reduce((sum, s) => sum + (s.total_tickets || 0), 0);
+    const totalTransactions = currentPeriodSales.reduce((sum, s) => sum + (s.total_transactions || 0), 0);
+    const totalSuggested = currentPeriodSales.reduce((sum, s) => sum + (s.total_suggested || 0), 0);
     const avgTicket = totalTransactions > 0 ? totalSales / totalTransactions : 0;
+
+    const prevTotalSales = previousPeriodSales.reduce((sum, s) => sum + (s.total_sales || 0), 0);
+    const prevTotalTransactions = previousPeriodSales.reduce((sum, s) => sum + (s.total_transactions || 0), 0);
+    const prevAvgTicket = prevTotalTransactions > 0 ? prevTotalSales / prevTotalTransactions : 0;
+
+    const salesGrowth = prevTotalSales > 0 ? ((totalSales - prevTotalSales) / prevTotalSales) * 100 : 0;
+    const transGrowth = prevTotalTransactions > 0 ? ((totalTransactions - prevTotalTransactions) / prevTotalTransactions) * 100 : 0;
+    const ticketGrowth = prevAvgTicket > 0 ? ((avgTicket - prevAvgTicket) / prevAvgTicket) * 100 : 0;
 
     const currentBudget = budgets.find(b => 
       b.month === today.getMonth() + 1 && b.year === today.getFullYear()
     );
     const budgetAmount = currentBudget?.sales_budget || 0;
     const compliance = budgetAmount > 0 ? (totalSales / budgetAmount) * 100 : 0;
+    const budgetGap = budgetAmount - totalSales;
+    const dailyNeeded = budgetGap > 0 ? budgetGap / Math.max(1, daysInPeriod - currentPeriodSales.length) : 0;
 
-    // Daily trend
-    const last14Days = currentMonthSales.slice(0, 14).reverse();
+    // Trend analysis
+    const dailyTrend = currentPeriodSales
+      .sort((a, b) => new Date(a.date) - new Date(b.date))
+      .map(s => ({
+        date: s.date,
+        sales: s.total_sales,
+        transactions: s.total_transactions,
+        avgTicket: s.total_transactions > 0 ? s.total_sales / s.total_transactions : 0,
+        suggested: s.total_suggested
+      }));
+
+    // Performance score
+    const complianceScore = Math.min(compliance / 100, 1) * 30;
+    const growthScore = Math.min(Math.max(salesGrowth / 10, -1), 1) * 30 + 15;
+    const ticketScore = Math.min(Math.max(ticketGrowth / 5, -1), 1) * 20 + 10;
+    const suggestedScore = totalTransactions > 0 ? Math.min((totalSuggested / totalTransactions) * 100, 25) : 0;
+    const performanceScore = complianceScore + growthScore + ticketScore + suggestedScore;
 
     return {
       totalSales,
@@ -75,10 +111,20 @@ export default function ManagerialReportModal({ storeId, storeName, storeCode, o
       avgTicket,
       budgetAmount,
       compliance,
-      daysCount: currentMonthSales.length,
-      dailyTrend: last14Days
+      budgetGap,
+      dailyNeeded,
+      daysCount: currentPeriodSales.length,
+      dailyTrend,
+      prevTotalSales,
+      prevTotalTransactions,
+      prevAvgTicket,
+      salesGrowth,
+      transGrowth,
+      ticketGrowth,
+      performanceScore: Math.round(performanceScore),
+      suggestedRate: totalTransactions > 0 ? (totalSuggested / totalTransactions) * 100 : 0
     };
-  }, [dailySales, budgets, dateRange]);
+  }, [dailySales, budgets, dateRange, today]);
 
   // Cashier performance
   const cashierPerformance = useMemo(() => {
@@ -105,30 +151,64 @@ export default function ManagerialReportModal({ storeId, storeName, storeCode, o
     setLoading(true);
     try {
       const response = await base44.integrations.Core.InvokeLLM({
-        prompt: `Genera un análisis ejecutivo breve para la tienda ${storeCode} - ${storeName} de Popsy (heladería):
+        prompt: `Eres un analista financiero senior. Genera un informe ejecutivo profesional y cuantitativo para ${storeCode} - ${storeName}:
 
-MÉTRICAS DEL MES:
-- Venta total: ${formatCurrency(metrics.totalSales)}
-- Presupuesto: ${formatCurrency(metrics.budgetAmount)}
-- Cumplimiento: ${metrics.compliance.toFixed(1)}%
-- Ticket promedio: ${formatCurrency(metrics.avgTicket)}
-- Transacciones: ${metrics.totalTransactions}
+ANÁLISIS FINANCIERO:
+- Venta: ${formatCurrency(metrics.totalSales)} (${metrics.salesGrowth >= 0 ? '+' : ''}${metrics.salesGrowth.toFixed(1)}% vs período anterior)
+- Presupuesto: ${formatCurrency(metrics.budgetAmount)} | Cumplimiento: ${metrics.compliance.toFixed(1)}%
+- Gap presupuestal: ${formatCurrency(metrics.budgetGap)} | Necesidad diaria: ${formatCurrency(metrics.dailyNeeded)}
+- Ticket promedio: ${formatCurrency(metrics.avgTicket)} (${metrics.ticketGrowth >= 0 ? '+' : ''}${metrics.ticketGrowth.toFixed(1)}%)
+- Transacciones: ${metrics.totalTransactions} (${metrics.transGrowth >= 0 ? '+' : ''}${metrics.transGrowth.toFixed(1)}%)
+- Tasa de sugeridos: ${metrics.suggestedRate.toFixed(1)}%
+- Score de desempeño: ${metrics.performanceScore}/100
 
-TOP 3 CAJEROS:
-${cashierPerformance.slice(0, 3).map((c, i) => `${i + 1}. ${c.name}: ${formatCurrency(c.sales)}`).join('\n')}
+TOP CAJEROS:
+${cashierPerformance.slice(0, 3).map((c, i) => `${i + 1}. ${c.name}: ${formatCurrency(c.sales)} (${c.shifts} turnos, ${formatCurrency(c.avgTicket)} ticket prom.)`).join('\n')}
 
-Genera:
-1. Resumen ejecutivo (2-3 líneas)
-2. 3 fortalezas principales
-3. 3 oportunidades de mejora
-4. 3 acciones recomendadas para la próxima semana`,
+Genera JSON con:
+1. resumen_ejecutivo: Análisis de 3-4 líneas con enfoque en números y proyecciones
+2. kpis_criticos: Array de 4 objetos {metrica, valor_actual, objetivo, accion_numerica}
+3. proyecciones: Objeto con {ventas_proyectadas_mes, probabilidad_cumplimiento, dias_restantes, venta_diaria_requerida}
+4. plan_accion: Array de 5 acciones específicas con metas numéricas
+5. alertas_riesgo: Array de 3 riesgos cuantificables
+6. oportunidades: Array de 3 oportunidades con impacto numérico estimado`,
         response_json_schema: {
           type: "object",
           properties: {
-            resumen: { type: "string" },
-            fortalezas: { type: "array", items: { type: "string" } },
-            mejoras: { type: "array", items: { type: "string" } },
-            acciones: { type: "array", items: { type: "string" } }
+            resumen_ejecutivo: { type: "string" },
+            kpis_criticos: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  metrica: { type: "string" },
+                  valor_actual: { type: "string" },
+                  objetivo: { type: "string" },
+                  accion_numerica: { type: "string" }
+                }
+              }
+            },
+            proyecciones: {
+              type: "object",
+              properties: {
+                ventas_proyectadas_mes: { type: "string" },
+                probabilidad_cumplimiento: { type: "string" },
+                dias_restantes: { type: "number" },
+                venta_diaria_requerida: { type: "string" }
+              }
+            },
+            plan_accion: {
+              type: "array",
+              items: { type: "string" }
+            },
+            alertas_riesgo: {
+              type: "array",
+              items: { type: "string" }
+            },
+            oportunidades: {
+              type: "array",
+              items: { type: "string" }
+            }
           }
         }
       });
@@ -520,7 +600,7 @@ Genera:
         </div>
 
         {/* Content */}
-        <div className="p-6 overflow-y-auto max-h-[55vh]">
+        <div className="p-6 overflow-y-auto max-h-[65vh]">
           {!storeId ? (
             <div className="text-center py-10">
               <Store className="w-16 h-16 text-gray-300 mx-auto mb-4" />
@@ -528,48 +608,206 @@ Genera:
             </div>
           ) : (
             <>
-              {/* Metrics Preview */}
-              <div className="grid grid-cols-4 gap-3 mb-6">
-                <div className="bg-gradient-to-br from-pink-50 to-rose-100 rounded-xl p-4 text-center">
-                  <p className="text-xl font-bold text-gray-800">{formatCurrency(metrics.totalSales)}</p>
-                  <p className="text-xs text-gray-500">Venta del Mes</p>
+              {/* Performance Score */}
+              <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-5 mb-5 text-white">
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <p className="text-sm text-slate-300 mb-1">Score de Desempeño</p>
+                    <p className="text-4xl font-black">{metrics.performanceScore}<span className="text-xl text-slate-400">/100</span></p>
+                  </div>
+                  <div className={`w-20 h-20 rounded-full flex items-center justify-center text-2xl font-black ${
+                    metrics.performanceScore >= 80 ? 'bg-emerald-500' :
+                    metrics.performanceScore >= 60 ? 'bg-amber-500' : 'bg-red-500'
+                  }`}>
+                    {metrics.performanceScore >= 80 ? '🚀' : metrics.performanceScore >= 60 ? '⚡' : '⚠️'}
+                  </div>
                 </div>
-                <div className={`rounded-xl p-4 text-center ${
-                  metrics.compliance >= 100 ? 'bg-gradient-to-br from-green-50 to-emerald-100' :
-                  metrics.compliance >= 80 ? 'bg-gradient-to-br from-amber-50 to-yellow-100' :
-                  'bg-gradient-to-br from-red-50 to-rose-100'
-                }`}>
-                  <p className={`text-xl font-bold ${
-                    metrics.compliance >= 100 ? 'text-green-600' :
-                    metrics.compliance >= 80 ? 'text-amber-600' : 'text-red-600'
-                  }`}>{metrics.compliance.toFixed(1)}%</p>
-                  <p className="text-xs text-gray-500">Cumplimiento</p>
-                </div>
-                <div className="bg-gradient-to-br from-violet-50 to-purple-100 rounded-xl p-4 text-center">
-                  <p className="text-xl font-bold text-gray-800">{formatCurrency(metrics.avgTicket)}</p>
-                  <p className="text-xs text-gray-500">Ticket Prom.</p>
-                </div>
-                <div className="bg-gradient-to-br from-sky-50 to-blue-100 rounded-xl p-4 text-center">
-                  <p className="text-xl font-bold text-gray-800">{metrics.totalTransactions.toLocaleString()}</p>
-                  <p className="text-xs text-gray-500">Transacciones</p>
+                <div className="grid grid-cols-3 gap-3 text-xs">
+                  <div className="bg-white/10 rounded-lg p-2">
+                    <p className="text-slate-400">Cumplimiento</p>
+                    <p className="font-bold text-lg">{metrics.compliance.toFixed(0)}%</p>
+                  </div>
+                  <div className="bg-white/10 rounded-lg p-2">
+                    <p className="text-slate-400">Crecimiento</p>
+                    <p className={`font-bold text-lg ${metrics.salesGrowth >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                      {metrics.salesGrowth >= 0 ? '+' : ''}{metrics.salesGrowth.toFixed(1)}%
+                    </p>
+                  </div>
+                  <div className="bg-white/10 rounded-lg p-2">
+                    <p className="text-slate-400">Sugeridos</p>
+                    <p className="font-bold text-lg">{metrics.suggestedRate.toFixed(1)}%</p>
+                  </div>
                 </div>
               </div>
 
-              {/* Top Cashiers */}
-              <div className="mb-6">
-                <h3 className="font-medium text-gray-700 mb-3 flex items-center gap-2">
-                  <Award className="w-4 h-4 text-amber-500" /> Top Cajeros
+              {/* Key Metrics Grid */}
+              <div className="grid grid-cols-2 gap-3 mb-5">
+                <div className="bg-white border-2 border-gray-200 rounded-xl p-4">
+                  <div className="flex items-start justify-between mb-2">
+                    <div>
+                      <p className="text-xs text-gray-500 font-medium">Ventas Totales</p>
+                      <p className="text-2xl font-black text-gray-900">{formatCurrency(metrics.totalSales)}</p>
+                    </div>
+                    <DollarSign className="w-8 h-8 text-emerald-500 opacity-80" />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {metrics.salesGrowth >= 0 ? (
+                      <><ArrowUp className="w-4 h-4 text-emerald-500" />
+                      <p className="text-sm text-emerald-600 font-bold">+{metrics.salesGrowth.toFixed(1)}%</p></>
+                    ) : (
+                      <><ArrowDown className="w-4 h-4 text-red-500" />
+                      <p className="text-sm text-red-600 font-bold">{metrics.salesGrowth.toFixed(1)}%</p></>
+                    )}
+                    <p className="text-xs text-gray-500">vs período anterior</p>
+                  </div>
+                </div>
+
+                <div className="bg-white border-2 border-gray-200 rounded-xl p-4">
+                  <div className="flex items-start justify-between mb-2">
+                    <div>
+                      <p className="text-xs text-gray-500 font-medium">Ticket Promedio</p>
+                      <p className="text-2xl font-black text-gray-900">{formatCurrency(metrics.avgTicket)}</p>
+                    </div>
+                    <Activity className="w-8 h-8 text-purple-500 opacity-80" />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {metrics.ticketGrowth >= 0 ? (
+                      <><ArrowUp className="w-4 h-4 text-emerald-500" />
+                      <p className="text-sm text-emerald-600 font-bold">+{metrics.ticketGrowth.toFixed(1)}%</p></>
+                    ) : (
+                      <><ArrowDown className="w-4 h-4 text-red-500" />
+                      <p className="text-sm text-red-600 font-bold">{metrics.ticketGrowth.toFixed(1)}%</p></>
+                    )}
+                    <p className="text-xs text-gray-500">vs período anterior</p>
+                  </div>
+                </div>
+
+                <div className={`rounded-xl p-4 border-2 ${
+                  metrics.compliance >= 100 ? 'bg-emerald-50 border-emerald-500' :
+                  metrics.compliance >= 80 ? 'bg-amber-50 border-amber-500' :
+                  'bg-red-50 border-red-500'
+                }`}>
+                  <div className="flex items-start justify-between mb-2">
+                    <div>
+                      <p className="text-xs font-medium text-gray-600">Cumplimiento</p>
+                      <p className={`text-2xl font-black ${
+                        metrics.compliance >= 100 ? 'text-emerald-600' :
+                        metrics.compliance >= 80 ? 'text-amber-600' : 'text-red-600'
+                      }`}>{metrics.compliance.toFixed(1)}%</p>
+                    </div>
+                    <Target className={`w-8 h-8 opacity-80 ${
+                      metrics.compliance >= 100 ? 'text-emerald-500' :
+                      metrics.compliance >= 80 ? 'text-amber-500' : 'text-red-500'
+                    }`} />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs text-gray-600">Meta: {formatCurrency(metrics.budgetAmount)}</p>
+                    {metrics.budgetGap > 0 && (
+                      <p className="text-xs font-bold text-red-600">Falta: {formatCurrency(metrics.budgetGap)}</p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-300 rounded-xl p-4">
+                  <div className="flex items-start justify-between mb-2">
+                    <div>
+                      <p className="text-xs text-gray-600 font-medium">Transacciones</p>
+                      <p className="text-2xl font-black text-gray-900">{metrics.totalTransactions.toLocaleString()}</p>
+                    </div>
+                    <Zap className="w-8 h-8 text-blue-500 opacity-80" />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {metrics.transGrowth >= 0 ? (
+                      <><ArrowUp className="w-4 h-4 text-emerald-500" />
+                      <p className="text-sm text-emerald-600 font-bold">+{metrics.transGrowth.toFixed(1)}%</p></>
+                    ) : (
+                      <><ArrowDown className="w-4 h-4 text-red-500" />
+                      <p className="text-sm text-red-600 font-bold">{metrics.transGrowth.toFixed(1)}%</p></>
+                    )}
+                    <p className="text-xs text-gray-500">vs anterior</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Charts Section */}
+              <div className="space-y-4 mb-5">
+                {/* Trend Chart */}
+                <div className="bg-white border border-gray-200 rounded-xl p-4">
+                  <h3 className="font-bold text-sm text-gray-700 mb-3 flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4 text-blue-500" />
+                    Tendencia de Ventas y Ticket Promedio
+                  </h3>
+                  <ResponsiveContainer width="100%" height={200}>
+                    <ComposedChart data={metrics.dailyTrend}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                      <XAxis dataKey="date" tick={{ fontSize: 10 }} tickFormatter={(val) => format(new Date(val), 'dd/MM')} />
+                      <YAxis yAxisId="left" tick={{ fontSize: 10 }} tickFormatter={(val) => `$${(val/1000).toFixed(0)}k`} />
+                      <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 10 }} tickFormatter={(val) => `$${(val/1000).toFixed(0)}k`} />
+                      <Tooltip formatter={(val) => formatCurrency(val)} />
+                      <Legend wrapperStyle={{ fontSize: '11px' }} />
+                      <Bar yAxisId="left" dataKey="sales" fill="#10b981" name="Ventas" radius={[8, 8, 0, 0]} />
+                      <Line yAxisId="right" type="monotone" dataKey="avgTicket" stroke="#8b5cf6" strokeWidth={3} name="Ticket Prom." dot={{ r: 4 }} />
+                    </ComposedChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* Performance Distribution */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-white border border-gray-200 rounded-xl p-4">
+                    <h3 className="font-bold text-sm text-gray-700 mb-3">Transacciones Diarias</h3>
+                    <ResponsiveContainer width="100%" height={160}>
+                      <BarChart data={metrics.dailyTrend}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                        <XAxis dataKey="date" tick={{ fontSize: 9 }} tickFormatter={(val) => format(new Date(val), 'dd')} />
+                        <YAxis tick={{ fontSize: 9 }} />
+                        <Tooltip />
+                        <Bar dataKey="transactions" fill="#3b82f6" radius={[6, 6, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  <div className="bg-white border border-gray-200 rounded-xl p-4">
+                    <h3 className="font-bold text-sm text-gray-700 mb-3">Sugeridos por Día</h3>
+                    <ResponsiveContainer width="100%" height={160}>
+                      <AreaChart data={metrics.dailyTrend}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                        <XAxis dataKey="date" tick={{ fontSize: 9 }} tickFormatter={(val) => format(new Date(val), 'dd')} />
+                        <YAxis tick={{ fontSize: 9 }} />
+                        <Tooltip />
+                        <defs>
+                          <linearGradient id="colorSuggested" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.8}/>
+                            <stop offset="95%" stopColor="#f59e0b" stopOpacity={0.1}/>
+                          </linearGradient>
+                        </defs>
+                        <Area type="monotone" dataKey="suggested" stroke="#f59e0b" strokeWidth={2} fill="url(#colorSuggested)" />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </div>
+
+              {/* Top Performers */}
+              <div className="bg-gradient-to-br from-amber-50 to-yellow-50 border border-amber-200 rounded-xl p-4 mb-5">
+                <h3 className="font-bold text-sm text-gray-700 mb-3 flex items-center gap-2">
+                  <Award className="w-4 h-4 text-amber-500" /> Top 5 Colaboradores
                 </h3>
                 <div className="space-y-2">
-                  {cashierPerformance.slice(0, 3).map((c, i) => (
-                    <div key={c.id} className="flex items-center justify-between bg-gray-50 rounded-lg p-3">
+                  {cashierPerformance.slice(0, 5).map((c, i) => (
+                    <div key={c.id} className="bg-white rounded-lg p-3 flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <span className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold ${
-                          i === 0 ? 'bg-amber-500' : i === 1 ? 'bg-gray-400' : 'bg-amber-700'
-                        }`}>{i + 1}</span>
-                        <span className="font-medium text-gray-700">{c.name}</span>
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold ${
+                          i === 0 ? 'bg-gradient-to-br from-amber-400 to-yellow-500' :
+                          i === 1 ? 'bg-gradient-to-br from-gray-400 to-gray-500' :
+                          i === 2 ? 'bg-gradient-to-br from-amber-600 to-amber-700' :
+                          'bg-gradient-to-br from-slate-400 to-slate-500'
+                        }`}>#{i + 1}</div>
+                        <div>
+                          <p className="font-bold text-gray-800 text-sm">{c.name}</p>
+                          <p className="text-xs text-gray-500">{c.shifts} turnos • {formatCurrency(c.avgTicket)} ticket prom.</p>
+                        </div>
                       </div>
-                      <span className="text-gray-600 font-medium">{formatCurrency(c.sales)}</span>
+                      <p className="font-black text-lg text-gray-900">{formatCurrency(c.sales)}</p>
                     </div>
                   ))}
                 </div>
@@ -577,10 +815,107 @@ Genera:
 
               {/* AI Insights */}
               {aiInsights && (
-                <div className="bg-amber-50 rounded-xl p-4 mb-4 border border-amber-200">
-                  <p className="text-sm text-gray-700">
-                    <strong>📋 Resumen:</strong> {aiInsights.resumen}
-                  </p>
+                <div className="space-y-4">
+                  {/* Executive Summary */}
+                  <div className="bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-300 rounded-xl p-4">
+                    <h3 className="font-bold text-sm text-gray-800 mb-2 flex items-center gap-2">
+                      <FileText className="w-4 h-4 text-blue-600" /> Resumen Ejecutivo
+                    </h3>
+                    <p className="text-sm text-gray-700 leading-relaxed">{aiInsights.resumen_ejecutivo}</p>
+                  </div>
+
+                  {/* Projections */}
+                  {aiInsights.proyecciones && (
+                    <div className="bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-300 rounded-xl p-4">
+                      <h3 className="font-bold text-sm text-gray-800 mb-3 flex items-center gap-2">
+                        <TrendingUp className="w-4 h-4 text-purple-600" /> Proyecciones y Metas
+                      </h3>
+                      <div className="grid grid-cols-2 gap-3 text-xs">
+                        <div className="bg-white rounded-lg p-3">
+                          <p className="text-gray-600 mb-1">Ventas Proyectadas</p>
+                          <p className="font-black text-lg text-purple-600">{aiInsights.proyecciones.ventas_proyectadas_mes}</p>
+                        </div>
+                        <div className="bg-white rounded-lg p-3">
+                          <p className="text-gray-600 mb-1">Probabilidad Cumplimiento</p>
+                          <p className="font-black text-lg text-purple-600">{aiInsights.proyecciones.probabilidad_cumplimiento}</p>
+                        </div>
+                        <div className="bg-white rounded-lg p-3">
+                          <p className="text-gray-600 mb-1">Días Restantes</p>
+                          <p className="font-black text-lg text-gray-700">{aiInsights.proyecciones.dias_restantes}</p>
+                        </div>
+                        <div className="bg-white rounded-lg p-3">
+                          <p className="text-gray-600 mb-1">Venta Diaria Requerida</p>
+                          <p className="font-black text-lg text-orange-600">{aiInsights.proyecciones.venta_diaria_requerida}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* KPIs Críticos */}
+                  {aiInsights.kpis_criticos && aiInsights.kpis_criticos.length > 0 && (
+                    <div className="bg-white border-2 border-gray-300 rounded-xl p-4">
+                      <h3 className="font-bold text-sm text-gray-800 mb-3 flex items-center gap-2">
+                        <Target className="w-4 h-4 text-red-600" /> KPIs Críticos
+                      </h3>
+                      <div className="space-y-2">
+                        {aiInsights.kpis_criticos.map((kpi, i) => (
+                          <div key={i} className="bg-gray-50 rounded-lg p-3">
+                            <div className="flex items-start justify-between mb-2">
+                              <p className="font-bold text-sm text-gray-800">{kpi.metrica}</p>
+                              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold">{kpi.valor_actual}</span>
+                            </div>
+                            <p className="text-xs text-gray-600 mb-1"><strong>Objetivo:</strong> {kpi.objetivo}</p>
+                            <p className="text-xs text-blue-600">→ {kpi.accion_numerica}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Action Plan */}
+                  {aiInsights.plan_accion && aiInsights.plan_accion.length > 0 && (
+                    <div className="bg-gradient-to-br from-emerald-50 to-green-50 border-2 border-emerald-300 rounded-xl p-4">
+                      <h3 className="font-bold text-sm text-gray-800 mb-3 flex items-center gap-2">
+                        <Zap className="w-4 h-4 text-emerald-600" /> Plan de Acción Inmediato
+                      </h3>
+                      <div className="space-y-2">
+                        {aiInsights.plan_accion.map((accion, i) => (
+                          <div key={i} className="flex items-start gap-2 bg-white rounded-lg p-2">
+                            <span className="bg-emerald-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold flex-shrink-0">{i + 1}</span>
+                            <p className="text-xs text-gray-700 leading-relaxed">{accion}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Risks & Opportunities */}
+                  <div className="grid grid-cols-2 gap-3">
+                    {aiInsights.alertas_riesgo && aiInsights.alertas_riesgo.length > 0 && (
+                      <div className="bg-gradient-to-br from-red-50 to-pink-50 border-2 border-red-300 rounded-xl p-4">
+                        <h3 className="font-bold text-xs text-gray-800 mb-2 flex items-center gap-1">
+                          <AlertCircle className="w-3 h-3 text-red-600" /> Alertas de Riesgo
+                        </h3>
+                        <ul className="space-y-1">
+                          {aiInsights.alertas_riesgo.map((alerta, i) => (
+                            <li key={i} className="text-xs text-gray-700 leading-snug pl-3 border-l-2 border-red-400">{alerta}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {aiInsights.oportunidades && aiInsights.oportunidades.length > 0 && (
+                      <div className="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-300 rounded-xl p-4">
+                        <h3 className="font-bold text-xs text-gray-800 mb-2 flex items-center gap-1">
+                          <TrendingUp className="w-3 h-3 text-amber-600" /> Oportunidades
+                        </h3>
+                        <ul className="space-y-1">
+                          {aiInsights.oportunidades.map((opp, i) => (
+                            <li key={i} className="text-xs text-gray-700 leading-snug pl-3 border-l-2 border-amber-400">{opp}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 
@@ -589,13 +924,12 @@ Genera:
                 <Button
                   onClick={generateAIInsights}
                   disabled={loading}
-                  variant="outline"
-                  className="w-full mb-4 border-pink-200 text-pink-600 hover:bg-pink-50"
+                  className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-bold shadow-lg"
                 >
                   {loading ? (
-                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Analizando datos...</>
+                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Generando Análisis Profesional...</>
                   ) : (
-                    <><BarChart3 className="w-4 h-4 mr-2" /> Generar Análisis con IA</>
+                    <><BarChart3 className="w-4 h-4 mr-2" /> Generar Informe Ejecutivo con IA</>
                   )}
                 </Button>
               )}
