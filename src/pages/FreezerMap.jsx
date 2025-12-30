@@ -947,30 +947,71 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                 <motion.div
                 className="relative rounded-3xl p-4 sm:p-6 mx-auto max-w-xl overflow-hidden"
                 style={{
-                  background: 'linear-gradient(135deg, #ffffff 0%, #f9fafb 50%, #f3f4f6 100%)',
-                  boxShadow: '0 20px 60px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.8)'
+                  background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 25%, #fed7aa 50%, #fecaca 75%, #fae8ff 100%)',
+                  boxShadow: '0 25px 70px rgba(236,72,153,0.4), 0 10px 30px rgba(168,85,247,0.3), inset 0 2px 10px rgba(255,255,255,0.8)'
                 }}>
 
-                  {/* Efectos de fondo animados */}
-                  <motion.div
-                  className="absolute inset-0 opacity-30 pointer-events-none"
-                  style={{
-                    background: 'radial-gradient(circle at 20% 50%, rgba(236, 72, 153, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(168, 85, 247, 0.1) 0%, transparent 50%)'
-                  }}
-                  animate={{
-                    scale: [1, 1.1, 1],
-                    opacity: [0.2, 0.4, 0.2]
-                  }}
-                  transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }} />
+                  {/* Burbujas flotantes de colores */}
+                  {[...Array(8)].map((_, i) => (
+                    <motion.div
+                      key={i}
+                      className="absolute rounded-full pointer-events-none"
+                      style={{
+                        width: Math.random() * 60 + 30,
+                        height: Math.random() * 60 + 30,
+                        left: `${Math.random() * 100}%`,
+                        top: `${Math.random() * 100}%`,
+                        background: ['#ec4899', '#a855f7', '#06b6d4', '#f59e0b', '#10b981', '#ef4444'][i % 6],
+                        opacity: 0.15,
+                        filter: 'blur(20px)'
+                      }}
+                      animate={{
+                        y: [0, -30, 0],
+                        x: [0, Math.random() * 20 - 10, 0],
+                        scale: [1, 1.2, 1],
+                        opacity: [0.1, 0.25, 0.1]
+                      }}
+                      transition={{
+                        duration: 4 + Math.random() * 3,
+                        repeat: Infinity,
+                        delay: i * 0.5,
+                        ease: "easeInOut"
+                      }}
+                    />
+                  ))}
 
+                  {/* Estrellas brillantes */}
+                  {[...Array(12)].map((_, i) => (
+                    <motion.div
+                      key={`star-${i}`}
+                      className="absolute text-yellow-300"
+                      style={{
+                        left: `${Math.random() * 100}%`,
+                        top: `${Math.random() * 100}%`,
+                        fontSize: Math.random() * 16 + 8
+                      }}
+                      animate={{
+                        scale: [0, 1.5, 0],
+                        rotate: [0, 180, 360],
+                        opacity: [0, 1, 0]
+                      }}
+                      transition={{
+                        duration: 2 + Math.random(),
+                        repeat: Infinity,
+                        delay: i * 0.3,
+                        ease: "easeInOut"
+                      }}
+                    >
+                      ✨
+                    </motion.div>
+                  ))}
 
-                  {/* Borde con gradiente animado */}
-                  <motion.div className="bg-pink-700 rounded-3xl absolute inset-0"
-
+                  {/* Borde arcoíris animado */}
+                  <motion.div className="rounded-3xl absolute inset-0"
                 style={{
-                  background: 'linear-gradient(45deg, #ec4899, #a855f7, #ec4899)',
-                  backgroundSize: '200% 200%',
-                  padding: '3px',
+                  background: 'linear-gradient(45deg, #ec4899, #a855f7, #06b6d4, #10b981, #f59e0b, #ef4444, #ec4899)',
+                  backgroundSize: '400% 400%',
+                  padding: '4px',
                   WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
                   WebkitMaskComposite: 'xor',
                   maskComposite: 'exclude'
@@ -978,7 +1019,7 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                 animate={{
                   backgroundPosition: ['0% 50%', '100% 50%', '0% 50%']
                 }}
-                transition={{ duration: 5, repeat: Infinity, ease: "linear" }} />
+                transition={{ duration: 4, repeat: Infinity, ease: "linear" }} />
 
                   
                   {/* Logo con efecto */}
@@ -1008,11 +1049,17 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: rowIndex * 0.05 }}>
 
-                        {/* Row number */}
+                        {/* Row number con colores rotando */}
                         <motion.div
-                      className="absolute -left-5 sm:-left-7 top-1/2 -translate-y-1/2 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gradient-to-br from-pink-400 to-rose-500 text-white flex items-center justify-center text-[10px] sm:text-xs font-bold shadow-lg"
-                      whileHover={{ scale: 1.2, rotate: 360 }}
-                      transition={{ duration: 0.3 }}>
+                      className="absolute -left-5 sm:-left-7 top-1/2 -translate-y-1/2 w-6 h-6 sm:w-7 sm:h-7 rounded-full text-white flex items-center justify-center text-[10px] sm:text-xs font-bold shadow-xl"
+                      style={{
+                        background: ['linear-gradient(135deg, #ec4899, #f43f5e)', 'linear-gradient(135deg, #a855f7, #8b5cf6)', 'linear-gradient(135deg, #06b6d4, #0891b2)', 'linear-gradient(135deg, #10b981, #059669)', 'linear-gradient(135deg, #f59e0b, #d97706)', 'linear-gradient(135deg, #ef4444, #dc2626)', 'linear-gradient(135deg, #6366f1, #4f46e5)'][rowIndex % 7]
+                      }}
+                      whileHover={{ scale: 1.3, rotate: 360 }}
+                      animate={{
+                        boxShadow: ['0 4px 15px rgba(236,72,153,0.5)', '0 6px 20px rgba(168,85,247,0.6)', '0 4px 15px rgba(236,72,153,0.5)']
+                      }}
+                      transition={{ duration: 2, repeat: Infinity }}>
 
                           {rowIndex + 1}
                         </motion.div>
@@ -1028,29 +1075,51 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                           <Copy className="w-3 h-3" />
                         </motion.button>
 
-                        {/* Bajadas - cada una con F y T en columna vertical */}
+                        {/* Bajadas con fondo dinámico */}
                         <motion.div
                       className="grid gap-3 p-3 rounded-2xl relative overflow-hidden"
                       style={{
                         gridTemplateColumns: `repeat(${numCols}, minmax(0, 1fr))`,
-                        background: 'linear-gradient(135deg, rgba(243, 244, 246, 0.6) 0%, rgba(229, 231, 235, 0.4) 100%)',
-                        backdropFilter: 'blur(8px)',
-                        boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.05)'
+                        background: ['linear-gradient(135deg, rgba(254,202,202,0.4), rgba(252,165,165,0.3))', 'linear-gradient(135deg, rgba(254,215,170,0.4), rgba(253,186,116,0.3))', 'linear-gradient(135deg, rgba(254,240,138,0.4), rgba(253,224,71,0.3))', 'linear-gradient(135deg, rgba(167,243,208,0.4), rgba(110,231,183,0.3))', 'linear-gradient(135deg, rgba(191,219,254,0.4), rgba(147,197,253,0.3))', 'linear-gradient(135deg, rgba(221,214,254,0.4), rgba(196,181,253,0.3))', 'linear-gradient(135deg, rgba(251,207,232,0.4), rgba(249,168,212,0.3))'][rowIndex % 7],
+                        backdropFilter: 'blur(10px)',
+                        boxShadow: 'inset 0 2px 15px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.05)'
                       }}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
                       transition={{ delay: rowIndex * 0.08 }}>
 
-                          {/* Efecto de brillo en la fila */}
+                          {/* Onda de arcoíris */}
                           <motion.div
-                        className="absolute inset-0 opacity-20 pointer-events-none"
+                        className="absolute inset-0 opacity-30 pointer-events-none"
                         style={{
-                          background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.5) 50%, transparent 100%)'
+                          background: 'linear-gradient(90deg, transparent 0%, rgba(236,72,153,0.3) 20%, rgba(168,85,247,0.3) 40%, rgba(6,182,212,0.3) 60%, rgba(16,185,129,0.3) 80%, transparent 100%)'
                         }}
                         animate={{
-                          x: ['-100%', '200%']
+                          x: ['-150%', '250%']
                         }}
-                        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: rowIndex * 0.3 }} />
+                        transition={{ duration: 4, repeat: Infinity, ease: "linear", delay: rowIndex * 0.5 }} />
+
+                          {/* Partículas flotantes */}
+                          {[...Array(3)].map((_, i) => (
+                            <motion.div
+                              key={`particle-${i}`}
+                              className="absolute w-2 h-2 rounded-full bg-white"
+                              style={{
+                                left: `${(i + 1) * 25}%`,
+                                opacity: 0.4
+                              }}
+                              animate={{
+                                y: ['100%', '-20%'],
+                                x: [0, Math.random() * 20 - 10, 0],
+                                scale: [0, 1, 0]
+                              }}
+                              transition={{
+                                duration: 3 + i,
+                                repeat: Infinity,
+                                delay: i * 0.8
+                              }}
+                            />
+                          ))}
 
                           {row.map((bajada, bajadaIndex) =>
                       <motion.div
@@ -1060,7 +1129,7 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: (rowIndex * numCols + bajadaIndex) * 0.02 }}>
 
-                              {/* Slot Trasero (T) - arriba */}
+                              {/* Slot Trasero (T) - arriba con efectos mejorados */}
                               <motion.div
                           onClick={() => {
                             setSelectedSlot({ ...bajada.back, row: bajada.row, position: bajada.position, slot_type: 'T' });
@@ -1068,34 +1137,46 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                           }}
                           onDoubleClick={() => clearSlot(bajada.back)}
                           whileHover={!bajada.back.is_empty ? {
-                            scale: 1.08,
-                            y: -2,
-                            boxShadow: `0 8px 25px ${bajada.back.color || '#a855f7'}60`
-                          } : { scale: 1.03 }}
-                          whileTap={{ scale: 0.95 }}
+                            scale: 1.12,
+                            y: -4,
+                            rotate: [0, -2, 2, 0],
+                            boxShadow: `0 12px 35px ${bajada.back.color || '#a855f7'}70, 0 0 20px ${bajada.back.color || '#a855f7'}40`
+                          } : { scale: 1.05, rotate: [0, 5, -5, 0] }}
+                          whileTap={{ scale: 0.92, rotate: 0 }}
                           className={`h-11 sm:h-12 rounded-xl cursor-pointer transition-all border-2 relative overflow-hidden ${
                           bajada.back.is_empty ?
-                          'bg-purple-50/50 border-dashed border-purple-300 hover:border-purple-500' :
-                          'border-purple-400 shadow-xl'}`
+                          'bg-gradient-to-br from-purple-100/70 to-violet-100/50 border-dashed border-purple-400 hover:border-purple-600' :
+                          'border-purple-500 shadow-2xl'}`
                           }
                           style={!bajada.back.is_empty ? {
-                            background: `linear-gradient(145deg, ${bajada.back.color}ff 0%, ${bajada.back.color}ee 50%, ${bajada.back.color}cc 100%)`,
-                            boxShadow: `0 8px 20px ${bajada.back.color}50, inset 0 2px 10px rgba(255,255,255,0.25)`
+                            background: `radial-gradient(circle at 30% 30%, ${bajada.back.color}ff 0%, ${bajada.back.color}ee 40%, ${bajada.back.color}cc 100%)`,
+                            boxShadow: `0 10px 25px ${bajada.back.color}60, inset 0 3px 15px rgba(255,255,255,0.4), 0 0 30px ${bajada.back.color}30`
                           } : {}}>
 
                                 {!bajada.back.is_empty &&
                           <>
                                     <motion.div
-                              className="absolute inset-0 bg-gradient-to-br from-white/40 via-white/10 to-transparent"
+                              className="absolute inset-0 bg-gradient-to-br from-white/60 via-white/20 to-transparent"
                               animate={{
-                                opacity: [0.4, 0.8, 0.4],
-                                scale: [1, 1.05, 1]
+                                opacity: [0.5, 1, 0.5],
+                                scale: [1, 1.1, 1],
+                                rotate: [0, 5, 0]
                               }}
-                              transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }} />
+                              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} />
 
                                     <motion.div
-                              className="absolute top-0 left-0 right-0 h-1/2"
-                              style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 100%)' }} />
+                              className="absolute top-0 left-0 right-0 h-2/3"
+                              style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.5) 0%, transparent 100%)', borderRadius: '12px 12px 0 0' }} />
+
+                                    {/* Brillo tipo cristal */}
+                                    <motion.div
+                              className="absolute top-1 right-1 w-3 h-3 rounded-full bg-white"
+                              style={{ opacity: 0.7, filter: 'blur(2px)' }}
+                              animate={{
+                                scale: [1, 1.3, 1],
+                                opacity: [0.5, 0.9, 0.5]
+                              }}
+                              transition={{ duration: 2, repeat: Infinity }} />
 
                                   </>
                           }
@@ -1132,7 +1213,7 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                           }
                               </motion.div>
                               
-                              {/* Slot Frontal (F) - abajo */}
+                              {/* Slot Frontal (F) - abajo con efectos premium */}
                               <motion.div
                           onClick={() => {
                             setSelectedSlot({ ...bajada.front, row: bajada.row, position: bajada.position, slot_type: 'F' });
@@ -1140,48 +1221,71 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                           }}
                           onDoubleClick={() => clearSlot(bajada.front)}
                           whileHover={!bajada.front.is_empty ? {
-                            scale: 1.1,
-                            y: -3,
-                            boxShadow: `0 12px 35px ${bajada.front.color || '#ec4899'}70`,
+                            scale: 1.15,
+                            y: -5,
+                            rotate: [0, -3, 3, 0],
+                            boxShadow: `0 15px 45px ${bajada.front.color || '#ec4899'}80, 0 0 30px ${bajada.front.color || '#ec4899'}50`,
                             zIndex: 50
-                          } : { scale: 1.03 }}
-                          whileTap={{ scale: 0.95 }}
-                          className={`h-12 sm:h-14 rounded-xl cursor-pointer transition-all border-2 shadow-xl relative overflow-hidden ${
+                          } : { scale: 1.05, rotate: [0, 5, -5, 0] }}
+                          whileTap={{ scale: 0.92, rotate: 0 }}
+                          className={`h-12 sm:h-14 rounded-xl cursor-pointer transition-all border-2 shadow-2xl relative overflow-hidden ${
                           bajada.front.is_empty ?
-                          'bg-white border-dashed border-pink-300 hover:border-pink-500' :
-                          'border-pink-500'}`
+                          'bg-gradient-to-br from-pink-100/70 to-rose-100/50 border-dashed border-pink-400 hover:border-pink-600' :
+                          'border-pink-600'}`
                           }
                           style={!bajada.front.is_empty ? {
-                            background: `linear-gradient(145deg, ${bajada.front.color}ff 0%, ${bajada.front.color}ee 50%, ${bajada.front.color}cc 100%)`,
-                            boxShadow: `0 10px 25px ${bajada.front.color}60, inset 0 3px 12px rgba(255,255,255,0.3)`
+                            background: `radial-gradient(circle at 30% 30%, ${bajada.front.color}ff 0%, ${bajada.front.color}ee 40%, ${bajada.front.color}cc 100%)`,
+                            boxShadow: `0 12px 30px ${bajada.front.color}70, inset 0 4px 15px rgba(255,255,255,0.5), 0 0 40px ${bajada.front.color}40`
                           } : {}}>
 
                                 {!bajada.front.is_empty &&
                           <>
                                     <motion.div
-                              className="absolute inset-0 bg-gradient-to-br from-white/50 via-white/20 to-transparent"
+                              className="absolute inset-0 bg-gradient-to-br from-white/70 via-white/30 to-transparent"
                               animate={{
-                                opacity: [0.5, 0.9, 0.5],
-                                scale: [1, 1.08, 1]
+                                opacity: [0.6, 1, 0.6],
+                                scale: [1, 1.12, 1],
+                                rotate: [0, 10, 0]
                               }}
-                              transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }} />
+                              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} />
 
                                     <motion.div
-                              className="absolute top-0 left-0 right-0 h-1/2"
+                              className="absolute top-0 left-0 right-0 h-2/3"
                               style={{
-                                background: 'linear-gradient(180deg, rgba(255,255,255,0.4) 0%, transparent 100%)',
+                                background: 'linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%)',
                                 borderRadius: '12px 12px 0 0'
                               }} />
 
                                     <motion.div
                               className="absolute inset-0"
-                              style={{ background: `radial-gradient(circle at 35% 35%, ${bajada.front.color}33 0%, transparent 65%)` }}
+                              style={{ background: `radial-gradient(circle at 35% 35%, ${bajada.front.color}40 0%, transparent 60%)` }}
                               animate={{
-                                scale: [1, 1.3, 1],
-                                opacity: [0.4, 0.7, 0.4],
-                                rotate: [0, 10, 0]
+                                scale: [1, 1.4, 1],
+                                opacity: [0.5, 0.8, 0.5],
+                                rotate: [0, 15, 0]
                               }}
                               transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} />
+
+                                    {/* Brillos tipo diamante */}
+                                    <motion.div
+                              className="absolute top-1 right-1 w-4 h-4 rounded-full bg-white"
+                              style={{ opacity: 0.8, filter: 'blur(3px)' }}
+                              animate={{
+                                scale: [1, 1.5, 1],
+                                opacity: [0.6, 1, 0.6]
+                              }}
+                              transition={{ duration: 2, repeat: Infinity }} />
+
+                                    {/* Destellos */}
+                                    <motion.div
+                              className="absolute bottom-1 left-1 text-[10px]"
+                              animate={{
+                                scale: [0, 1.2, 0],
+                                rotate: [0, 180, 360]
+                              }}
+                              transition={{ duration: 3, repeat: Infinity, delay: 0.5 }}>
+                              ✨
+                            </motion.div>
 
                                   </>
                           }
