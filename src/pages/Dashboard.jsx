@@ -595,6 +595,21 @@ export default function Dashboard() {
     });
   }, [dailySales, dateRange, weekFilter]);
 
+  // Ventas del mes completo (para métricas siempre acumuladas)
+  const monthSales = useMemo(() => {
+    if (!dailySales.length) return [];
+    
+    const monthStart = startOfMonth(new Date());
+    const monthEnd = new Date();
+    const fromStr = format(monthStart, 'yyyy-MM-dd');
+    const toStr = format(monthEnd, 'yyyy-MM-dd');
+
+    return dailySales.filter((s) => {
+      const saleDateStr = s.date?.split('T')[0] || s.date;
+      return saleDateStr >= fromStr && saleDateStr <= toStr;
+    });
+  }, [dailySales]);
+
   // Ventas del período de comparación
   const comparisonSales = useMemo(() => {
     if (!showComparison || !comparisonRange || !dailySales.length) return [];
@@ -616,6 +631,16 @@ export default function Dashboard() {
       suggested: acc.suggested + (s.total_suggested || 0)
     }), { sales: 0, tickets: 0, transactions: 0, suggested: 0 });
   }, [filteredSales]);
+
+  // Totales del mes completo (siempre acumulado del mes actual)
+  const totalsMonth = useMemo(() => {
+    return monthSales.reduce((acc, s) => ({
+      sales: acc.sales + (s.total_sales || 0),
+      tickets: acc.tickets + (s.total_tickets || 0),
+      transactions: acc.transactions + (s.total_transactions || 0),
+      suggested: acc.suggested + (s.total_suggested || 0)
+    }), { sales: 0, tickets: 0, transactions: 0, suggested: 0 });
+  }, [monthSales]);
 
   // Totales del período de comparación
   const comparisonTotals = useMemo(() => {
@@ -709,22 +734,22 @@ export default function Dashboard() {
 
 
 
-  // Proyecciones
+  // Proyecciones (basadas en MES COMPLETO)
   const projections = useMemo(() => {
     if (!currentBudget?.sales_budget) return null;
     const now = new Date();
     const monthStart = startOfMonth(now);
     const monthEnd = endOfMonth(now);
     const totalDays = differenceInDays(monthEnd, monthStart) + 1;
-    const daysElapsed = filteredSales.length || 1;
+    const daysElapsed = monthSales.length || 1;
     const daysRemaining = totalDays - daysElapsed;
 
-    const dailyAvgSales = totals.sales / daysElapsed;
-    const projectedSales = totals.sales + dailyAvgSales * daysRemaining;
-    const salesGap = currentBudget.sales_budget - totals.sales;
+    const dailyAvgSales = totalsMonth.sales / daysElapsed;
+    const projectedSales = totalsMonth.sales + dailyAvgSales * daysRemaining;
+    const salesGap = currentBudget.sales_budget - totalsMonth.sales;
     const requiredDailySales = daysRemaining > 0 ? salesGap / daysRemaining : 0;
 
-    const avgTicket = totals.transactions > 0 ? totals.sales / totals.transactions : 0;
+    const avgTicket = totalsMonth.transactions > 0 ? totalsMonth.sales / totalsMonth.transactions : 0;
     const budgetTicket = currentBudget.tickets_budget || avgTicket;
 
     // Datos para proyección
@@ -761,7 +786,7 @@ export default function Dashboard() {
       budget: currentBudget.sales_budget,
       chartData
     };
-  }, [currentBudget, totals, filteredSales, chartData]);
+  }, [currentBudget, totalsMonth, monthSales, chartData]);
 
   const formatCurrency = (val) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(Math.round(val));
   const selectedStoreName = STORES.find((s) => s.code === selectedStore)?.name || '';
@@ -776,8 +801,8 @@ export default function Dashboard() {
     return null;
   };
 
-  // Calcular ticket promedio correctamente
-  const avgTicket = totals.transactions > 0 ? totals.sales / totals.transactions : 0;
+  // Calcular ticket promedio correctamente (MES COMPLETO para métricas)
+  const avgTicketMonth = totalsMonth.transactions > 0 ? totalsMonth.sales / totalsMonth.transactions : 0;
   const comparisonAvgTicket = comparisonTotals && comparisonTotals.transactions > 0 ?
   comparisonTotals.sales / comparisonTotals.transactions :
   0;
@@ -786,7 +811,7 @@ export default function Dashboard() {
   {
     id: 'sales',
     title: 'Ventas Totales',
-    value: totals.sales,
+    value: totalsMonth.sales,
     comparisonValue: comparisonTotals?.sales,
     budget: currentBudget.sales_budget,
     icon: DollarSign,
@@ -798,7 +823,7 @@ export default function Dashboard() {
   {
     id: 'tickets',
     title: 'Ticket Promedio',
-    value: avgTicket,
+    value: avgTicketMonth,
     comparisonValue: comparisonAvgTicket,
     budget: currentBudget.tickets_budget,
     icon: Receipt,
@@ -810,7 +835,7 @@ export default function Dashboard() {
   {
     id: 'transactions',
     title: 'Transacciones',
-    value: totals.transactions,
+    value: totalsMonth.transactions,
     comparisonValue: comparisonTotals?.transactions,
     budget: currentBudget.transactions_budget,
     icon: Zap,
@@ -821,7 +846,7 @@ export default function Dashboard() {
   {
     id: 'suggested',
     title: 'Sugeridos',
-    value: totals.suggested,
+    value: totalsMonth.suggested,
     comparisonValue: comparisonTotals?.suggested,
     budget: currentBudget.suggested_budget,
     icon: Gift,
@@ -1785,24 +1810,24 @@ export default function Dashboard() {
                         <circle cx="48" cy="48" r="42" stroke="rgba(255,255,255,0.1)" strokeWidth="8" fill="none" />
                         <motion.circle
                       cx="48" cy="48" r="42"
-                      stroke={totals.sales / (currentBudget?.sales_budget || 1) * 100 >= 70 ? '#10b981' : '#f59e0b'}
+                      stroke={totalsMonth.sales / (currentBudget?.sales_budget || 1) * 100 >= 70 ? '#10b981' : '#f59e0b'}
                       strokeWidth="8"
                       fill="none"
                       strokeLinecap="round"
                       initial={{ strokeDasharray: "0 264" }}
-                      animate={{ strokeDasharray: `${Math.min(totals.sales / (currentBudget?.sales_budget || 1) * 264, 264)} 264` }}
+                      animate={{ strokeDasharray: `${Math.min(totalsMonth.sales / (currentBudget?.sales_budget || 1) * 264, 264)} 264` }}
                       transition={{ duration: 1.5 }} />
 
                       </svg>
                       <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <motion.span
+                       <motion.span
                       className="text-2xl font-black text-white"
                       animate={{ scale: [1, 1.05, 1] }}
                       transition={{ duration: 2, repeat: Infinity }}>
 
-                          {currentBudget?.sales_budget > 0 ? (totals.sales / currentBudget.sales_budget * 100).toFixed(0) : 0}%
-                        </motion.span>
-                        <span className="text-[10px] text-white/60">Venta Actual</span>
+                         {currentBudget?.sales_budget > 0 ? (totalsMonth.sales / currentBudget.sales_budget * 100).toFixed(0) : 0}%
+                       </motion.span>
+                       <span className="text-[10px] text-white/60">Venta Actual</span>
                       </div>
                     </div>
                   </div>
@@ -1814,13 +1839,13 @@ export default function Dashboard() {
               {
                 key: 'sales',
                 label: 'Venta Actual',
-                value: totals.sales,
+                value: totalsMonth.sales,
                 icon: DollarSign,
                 iconBg: 'bg-emerald-500/20',
                 iconColor: 'text-emerald-400',
                 barColor: 'bg-emerald-400/60',
                 chartData: chartData.slice(-7).map((d) => d.ventas),
-                footer: `${(totals.sales / (currentBudget?.sales_budget || 1) * 100).toFixed(0)}% de meta`
+                footer: `${(totalsMonth.sales / (currentBudget?.sales_budget || 1) * 100).toFixed(0)}% de meta`
               },
               {
                 key: 'projection',
@@ -1983,21 +2008,21 @@ export default function Dashboard() {
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-white/70 text-sm">Progreso de Venta</span>
                       <span className="text-white font-bold">
-                        {formatCurrency(currentBudget?.sales_budget - totals.sales)} por vender
+                        {formatCurrency(currentBudget?.sales_budget - totalsMonth.sales)} por vender
                       </span>
                     </div>
                     <div className="relative h-4 bg-white/10 rounded-full overflow-hidden">
                       <motion.div
                     className="absolute h-full bg-gradient-to-r from-pink-500 to-violet-500 rounded-full"
                     initial={{ width: 0 }}
-                    animate={{ width: `${Math.min(totals.sales / (currentBudget?.sales_budget || 1) * 100, 100)}%` }}
+                    animate={{ width: `${Math.min(totalsMonth.sales / (currentBudget?.sales_budget || 1) * 100, 100)}%` }}
                     transition={{ duration: 1 }} />
 
                       {/* Marcador del 100% */}
                       <div className="absolute right-0 top-0 h-full w-0.5 bg-white/50" />
                     </div>
                     <div className="flex justify-between mt-2 text-[10px] text-white/50">
-                      <span>Venta Actual: {(totals.sales / (currentBudget?.sales_budget || 1) * 100).toFixed(0)}%</span>
+                      <span>Venta Actual: {(totalsMonth.sales / (currentBudget?.sales_budget || 1) * 100).toFixed(0)}%</span>
                       <span>Meta: 100%</span>
                     </div>
                   </div>
@@ -2020,23 +2045,23 @@ export default function Dashboard() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <motion.div whileHover={{ scale: 1.05, y: -3 }} className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
                   <p className="text-white/70 text-sm">Venta Total</p>
-                  <p className="text-2xl font-semibold">{formatCurrency(totals.sales)}</p>
-                  <p className="text-xs text-white/50 mt-1">{filteredSales.length} días</p>
+                  <p className="text-2xl font-semibold">{formatCurrency(totalsMonth.sales)}</p>
+                  <p className="text-xs text-white/50 mt-1">{monthSales.length} días</p>
                 </motion.div>
                 <motion.div whileHover={{ scale: 1.05, y: -3 }} className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
                   <p className="text-white/70 text-sm">Ticket Promedio</p>
-                  <p className="text-2xl font-semibold">{formatCurrency(totals.transactions > 0 ? totals.sales / totals.transactions : 0)}</p>
+                  <p className="text-2xl font-semibold">{formatCurrency(totalsMonth.transactions > 0 ? totalsMonth.sales / totalsMonth.transactions : 0)}</p>
                   <p className="text-xs text-white/50 mt-1">Venta ÷ Transacciones</p>
                 </motion.div>
                 <motion.div whileHover={{ scale: 1.05, y: -3 }} className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
                   <p className="text-white/70 text-sm">Total Transacciones</p>
-                  <p className="text-2xl font-semibold">{totals.transactions.toLocaleString()}</p>
+                  <p className="text-2xl font-semibold">{totalsMonth.transactions.toLocaleString()}</p>
                   <p className="text-xs text-white/50 mt-1">Ventas realizadas</p>
                 </motion.div>
                 <motion.div whileHover={{ scale: 1.05, y: -3 }} className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
                   <p className="text-white/70 text-sm">Sugeridos Vendidos</p>
-                  <p className="text-2xl font-semibold">{totals.suggested.toLocaleString()}</p>
-                  <p className="text-xs text-white/50 mt-1">{totals.transactions > 0 ? (totals.suggested / totals.transactions * 100).toFixed(0) : 0}% de conversión</p>
+                  <p className="text-2xl font-semibold">{totalsMonth.suggested.toLocaleString()}</p>
+                  <p className="text-xs text-white/50 mt-1">{totalsMonth.transactions > 0 ? (totalsMonth.suggested / totalsMonth.transactions * 100).toFixed(0) : 0}% de conversión</p>
                 </motion.div>
               </div>
             </motion.div>
