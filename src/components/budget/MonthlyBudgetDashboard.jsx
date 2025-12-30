@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { X, Plus, Edit2, Trash2, TrendingUp, Target, Calendar, DollarSign, Save, Receipt, Zap, Gift, Check } from 'lucide-react';
+import { X, Plus, Edit2, Trash2, TrendingUp, Target, Calendar, DollarSign, Save, Receipt, Zap, Gift, Check, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import { format, startOfYear, endOfYear, eachMonthOfInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -157,6 +157,26 @@ export default function MonthlyBudgetDashboard({ storeId, storeName, isOpen, onC
     style: 'currency', currency: 'COP', maximumFractionDigits: 0 
   }).format(Math.round(val));
 
+  // Presupuesto activo
+  const activeBudget = budgets.find(b => b.is_active === true);
+  
+  // Calcular cumplimiento del presupuesto activo
+  const activeBudgetStats = useMemo(() => {
+    if (!activeBudget) return null;
+    
+    const monthSales = dailySales
+      .filter(s => {
+        const date = new Date(s.date);
+        return date.getMonth() + 1 === activeBudget.month && date.getFullYear() === activeBudget.year;
+      })
+      .reduce((sum, s) => sum + (s.total_sales || 0), 0);
+    
+    const compliance = activeBudget.sales_budget > 0 ? (monthSales / activeBudget.sales_budget) * 100 : 0;
+    const gap = activeBudget.sales_budget - monthSales;
+    
+    return { monthSales, compliance, gap };
+  }, [activeBudget, dailySales]);
+
   const totalBudget = budgets.reduce((sum, b) => sum + (b.sales_budget || 0), 0);
   const avgGrowth = growthData.length > 1 
     ? Math.round(growthData.reduce((sum, d) => sum + d.growth, 0) / (growthData.length - 1))
@@ -220,35 +240,108 @@ export default function MonthlyBudgetDashboard({ storeId, storeName, isOpen, onC
             <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
               {/* Stats */}
               <div className="grid grid-cols-3 gap-4 mb-6">
-                <motion.div 
-                  initial={{ opacity: 0, y: 20 }} 
-                  animate={{ opacity: 1, y: 0 }}
-                  className="bg-gradient-to-br from-sky-50 to-blue-50 rounded-xl p-4 border border-sky-200"
-                >
-                  <Calendar className="w-5 h-5 text-sky-500 mb-2" />
-                  <p className="text-xs text-sky-600 font-medium mb-1">Meses Registrados</p>
-                  <p className="text-2xl font-black text-sky-700">{budgets.length}</p>
-                </motion.div>
-                <motion.div 
-                  initial={{ opacity: 0, y: 20 }} 
-                  animate={{ opacity: 1, y: 0 }} 
-                  transition={{ delay: 0.1 }}
-                  className="bg-gradient-to-br from-violet-50 to-purple-50 rounded-xl p-4 border border-violet-200"
-                >
-                  <DollarSign className="w-5 h-5 text-violet-500 mb-2" />
-                  <p className="text-xs text-violet-600 font-medium mb-1">Total Presupuestado</p>
-                  <p className="text-2xl font-black text-violet-700">{formatCurrency(totalBudget)}</p>
-                </motion.div>
-                <motion.div 
-                  initial={{ opacity: 0, y: 20 }} 
-                  animate={{ opacity: 1, y: 0 }} 
-                  transition={{ delay: 0.2 }}
-                  className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl p-4 border border-emerald-200"
-                >
-                  <TrendingUp className="w-5 h-5 text-emerald-500 mb-2" />
-                  <p className="text-xs text-emerald-600 font-medium mb-1">Crecimiento Promedio</p>
-                  <p className="text-2xl font-black text-emerald-700">{avgGrowth}%</p>
-                </motion.div>
+                {activeBudget && activeBudgetStats ? (
+                  <>
+                    <motion.div 
+                      initial={{ opacity: 0, y: 20 }} 
+                      animate={{ opacity: 1, y: 0 }}
+                      className="bg-gradient-to-br from-purple-50 to-violet-50 rounded-xl p-4 border border-purple-200"
+                    >
+                      <Target className="w-5 h-5 text-purple-500 mb-2" />
+                      <p className="text-xs text-purple-600 font-medium mb-1">Presupuesto Activo</p>
+                      <p className="text-2xl font-black text-purple-700">{formatCurrency(activeBudget.sales_budget)}</p>
+                      <p className="text-xs text-purple-500 mt-1">
+                        {format(new Date(activeBudget.year, activeBudget.month - 1), 'MMMM yyyy', { locale: es })}
+                      </p>
+                    </motion.div>
+                    <motion.div 
+                      initial={{ opacity: 0, y: 20 }} 
+                      animate={{ opacity: 1, y: 0 }} 
+                      transition={{ delay: 0.1 }}
+                      className={`bg-gradient-to-br rounded-xl p-4 border ${
+                        activeBudgetStats.compliance >= 90 
+                          ? 'from-emerald-50 to-green-50 border-emerald-200'
+                          : activeBudgetStats.compliance >= 70
+                          ? 'from-amber-50 to-yellow-50 border-amber-200'
+                          : 'from-red-50 to-rose-50 border-red-200'
+                      }`}
+                    >
+                      <TrendingUp className={`w-5 h-5 mb-2 ${
+                        activeBudgetStats.compliance >= 90 ? 'text-emerald-500'
+                        : activeBudgetStats.compliance >= 70 ? 'text-amber-500'
+                        : 'text-red-500'
+                      }`} />
+                      <p className={`text-xs font-medium mb-1 ${
+                        activeBudgetStats.compliance >= 90 ? 'text-emerald-600'
+                        : activeBudgetStats.compliance >= 70 ? 'text-amber-600'
+                        : 'text-red-600'
+                      }`}>Cumplimiento Real</p>
+                      <p className={`text-2xl font-black ${
+                        activeBudgetStats.compliance >= 90 ? 'text-emerald-700'
+                        : activeBudgetStats.compliance >= 70 ? 'text-amber-700'
+                        : 'text-red-700'
+                      }`}>{activeBudgetStats.compliance.toFixed(0)}%</p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {formatCurrency(activeBudgetStats.monthSales)} vendidos
+                      </p>
+                    </motion.div>
+                    <motion.div 
+                      initial={{ opacity: 0, y: 20 }} 
+                      animate={{ opacity: 1, y: 0 }} 
+                      transition={{ delay: 0.2 }}
+                      className={`bg-gradient-to-br rounded-xl p-4 border ${
+                        activeBudgetStats.gap <= 0
+                          ? 'from-emerald-50 to-green-50 border-emerald-200'
+                          : 'from-sky-50 to-blue-50 border-sky-200'
+                      }`}
+                    >
+                      <DollarSign className={`w-5 h-5 mb-2 ${
+                        activeBudgetStats.gap <= 0 ? 'text-emerald-500' : 'text-sky-500'
+                      }`} />
+                      <p className={`text-xs font-medium mb-1 ${
+                        activeBudgetStats.gap <= 0 ? 'text-emerald-600' : 'text-sky-600'
+                      }`}>{activeBudgetStats.gap <= 0 ? 'Meta Superada' : 'Brecha Restante'}</p>
+                      <p className={`text-2xl font-black ${
+                        activeBudgetStats.gap <= 0 ? 'text-emerald-700' : 'text-sky-700'
+                      }`}>{formatCurrency(Math.abs(activeBudgetStats.gap))}</p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {activeBudgetStats.gap <= 0 ? '¡Felicitaciones!' : 'Por alcanzar'}
+                      </p>
+                    </motion.div>
+                  </>
+                ) : (
+                  <>
+                    <motion.div 
+                      initial={{ opacity: 0, y: 20 }} 
+                      animate={{ opacity: 1, y: 0 }}
+                      className="bg-gradient-to-br from-sky-50 to-blue-50 rounded-xl p-4 border border-sky-200"
+                    >
+                      <Calendar className="w-5 h-5 text-sky-500 mb-2" />
+                      <p className="text-xs text-sky-600 font-medium mb-1">Meses Registrados</p>
+                      <p className="text-2xl font-black text-sky-700">{budgets.length}</p>
+                    </motion.div>
+                    <motion.div 
+                      initial={{ opacity: 0, y: 20 }} 
+                      animate={{ opacity: 1, y: 0 }} 
+                      transition={{ delay: 0.1 }}
+                      className="bg-gradient-to-br from-violet-50 to-purple-50 rounded-xl p-4 border border-violet-200"
+                    >
+                      <DollarSign className="w-5 h-5 text-violet-500 mb-2" />
+                      <p className="text-xs text-violet-600 font-medium mb-1">Total Presupuestado</p>
+                      <p className="text-2xl font-black text-violet-700">{formatCurrency(totalBudget)}</p>
+                    </motion.div>
+                    <motion.div 
+                      initial={{ opacity: 0, y: 20 }} 
+                      animate={{ opacity: 1, y: 0 }} 
+                      transition={{ delay: 0.2 }}
+                      className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-4 border border-amber-200"
+                    >
+                      <AlertTriangle className="w-5 h-5 text-amber-500 mb-2" />
+                      <p className="text-xs text-amber-600 font-medium mb-1">Sin Presupuesto Activo</p>
+                      <p className="text-sm font-bold text-amber-700">Marca uno como activo</p>
+                    </motion.div>
+                  </>
+                )}
               </div>
 
               {/* Form Modal */}
