@@ -18,16 +18,28 @@ export default function MonthlyBudgetManager({ storeId, isOpen, onClose, onSucce
   const [customBudgets, setCustomBudgets] = useState({});
   const [useCustom, setUseCustom] = useState(false);
 
-  // Fetch datos históricos para análisis inteligente
+  // Fetch datos históricos para análisis inteligente - SOLO MES ACTUAL
   const { data: historicalSales = [] } = useQuery({
     queryKey: ['historicalSales', storeId],
-    queryFn: () => base44.entities.DailySales.filter({ store_id: storeId }),
+    queryFn: async () => {
+      const monthStart = format(startOfMonth(new Date()), 'yyyy-MM-dd');
+      const monthEnd = format(endOfMonth(new Date()), 'yyyy-MM-dd');
+      const allSales = await base44.entities.DailySales.filter({ store_id: storeId });
+      // Filtrar solo ventas del mes actual
+      return allSales.filter(sale => sale.date >= monthStart && sale.date <= monthEnd);
+    },
     enabled: !!storeId && isOpen
   });
 
   const { data: currentDailyBudgets = [] } = useQuery({
     queryKey: ['currentDailyBudgets', storeId],
-    queryFn: () => base44.entities.DailyBudget.filter({ store_id: storeId }),
+    queryFn: async () => {
+      const monthStart = format(startOfMonth(new Date()), 'yyyy-MM-dd');
+      const monthEnd = format(endOfMonth(new Date()), 'yyyy-MM-dd');
+      const allBudgets = await base44.entities.DailyBudget.filter({ store_id: storeId });
+      // Filtrar solo presupuestos del mes actual
+      return allBudgets.filter(budget => budget.date >= monthStart && budget.date <= monthEnd);
+    },
     enabled: !!storeId && isOpen
   });
 
