@@ -552,7 +552,16 @@ export default function Dashboard() {
 
   const { data: shiftRecords = [] } = useQuery({
     queryKey: ['shiftRecords', selectedStore],
-    queryFn: () => base44.entities.ShiftRecord.filter({ store_id: selectedStore }),
+    queryFn: async () => {
+      const monthStart = format(startOfMonth(new Date()), 'yyyy-MM-dd');
+      const monthEnd = format(endOfMonth(new Date()), 'yyyy-MM-dd');
+      const allRecords = await base44.entities.ShiftRecord.filter({ store_id: selectedStore });
+      // Filtrar solo registros del mes actual
+      return allRecords.filter(record => {
+        const recordDate = record.date?.split('T')[0] || record.date;
+        return recordDate >= monthStart && recordDate <= monthEnd;
+      });
+    },
     enabled: !!selectedStore,
     staleTime: 0,
     cacheTime: 0,
