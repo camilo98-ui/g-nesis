@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { X, Plus, Save, DollarSign, Calendar, Pencil, Trash2 } from 'lucide-react';
+import { X, Plus, Save, DollarSign, Calendar, Pencil, Trash2, Check } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -37,6 +37,19 @@ export default function ZoneBudgetManager({ zoneName, onClose }) {
       queryClient.invalidateQueries(['zoneBudgets']);
       setEditing(null);
     }
+  });
+
+  const toggleActiveMutation = useMutation({
+    mutationFn: async (budgetId) => {
+      // Primero desactivar todos los presupuestos de la zona
+      const allBudgets = await base44.entities.ZoneBudget.filter({ zone_name: zoneName });
+      await Promise.all(
+        allBudgets.map(b => base44.entities.ZoneBudget.update(b.id, { is_active: false }))
+      );
+      // Luego activar el seleccionado
+      await base44.entities.ZoneBudget.update(budgetId, { is_active: true });
+    },
+    onSuccess: () => queryClient.invalidateQueries(['zoneBudgets'])
   });
 
   const deleteMutation = useMutation({
@@ -202,14 +215,23 @@ export default function ZoneBudgetManager({ zoneName, onClose }) {
                 .map((budget) => (
                   <div
                     key={budget.id}
-                    className="bg-white/5 rounded-lg p-4 border border-white/10 flex items-center justify-between"
+                    className={`rounded-lg p-4 border flex items-center justify-between transition-all ${
+                      budget.is_active 
+                        ? 'bg-emerald-500/20 border-emerald-500/50' 
+                        : 'bg-white/5 border-white/10'
+                    }`}
                   >
-                    <div>
+                    <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <Calendar className="w-4 h-4 text-purple-400" />
                         <p className="font-bold text-white">
                           {monthNames[budget.month - 1]} {budget.year}
                         </p>
+                        {budget.is_active && (
+                          <span className="text-xs bg-emerald-500 text-white px-2 py-0.5 rounded-full font-bold">
+                            ACTIVO
+                          </span>
+                        )}
                       </div>
                       <p className="text-2xl font-black text-white mb-1">
                         {formatCurrency(budget.sales_budget)}
@@ -219,6 +241,17 @@ export default function ZoneBudgetManager({ zoneName, onClose }) {
                       )}
                     </div>
                     <div className="flex gap-2">
+                      <button
+                        onClick={() => toggleActiveMutation.mutate(budget.id)}
+                        className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all ${
+                          budget.is_active
+                            ? 'bg-emerald-500 text-white'
+                            : 'bg-white/10 hover:bg-white/20 text-white'
+                        }`}
+                        title={budget.is_active ? 'Presupuesto activo' : 'Marcar como activo'}
+                      >
+                        <Check className="w-4 h-4" />
+                      </button>
                       <button
                         onClick={() => handleEdit(budget)}
                         className="w-9 h-9 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center"

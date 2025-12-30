@@ -52,6 +52,11 @@ export default function ExecutiveDashboard() {
   });
 
   const currentZoneBudget = useMemo(() => {
+    // Primero buscar el presupuesto activo
+    const activeBudget = zoneBudgets.find(b => b.is_active === true);
+    if (activeBudget) return activeBudget;
+    
+    // Si no hay activo, usar el del mes/año actual
     return zoneBudgets.find(b => b.month === currentMonth && b.year === currentYear);
   }, [zoneBudgets, currentMonth, currentYear]);
 
