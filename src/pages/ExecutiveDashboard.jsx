@@ -80,7 +80,9 @@ export default function ExecutiveDashboard() {
       const totalTransactions = Math.max(0, storeSales.reduce((sum, s) => sum + (s.total_transactions || 0), 0));
       const avgTicket = totalTransactions > 0 ? totalSales / totalTransactions : 0;
 
-      const budget = allBudgets.find(b => b.store_id === store.code && b.month === currentMonth && b.year === currentYear);
+      // Buscar primero el presupuesto activo de la tienda
+      const activeBudget = allBudgets.find(b => b.store_id === store.code && b.is_active === true);
+      const budget = activeBudget || allBudgets.find(b => b.store_id === store.code && b.month === currentMonth && b.year === currentYear);
       const salesBudget = Math.max(0, budget?.sales_budget || 0);
 
       const salesCompliance = salesBudget > 0 && totalSales > 0 ? (totalSales / salesBudget) * 100 : 0;

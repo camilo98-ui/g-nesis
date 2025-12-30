@@ -571,6 +571,11 @@ export default function Dashboard() {
 
 
   const currentBudget = useMemo(() => {
+    // Primero buscar el presupuesto activo
+    const activeBudget = budgets.find((b) => b.is_active === true);
+    if (activeBudget) return activeBudget;
+    
+    // Si no hay activo, usar el del mes/año actual
     const now = new Date();
     return budgets.find((b) => b.month === now.getMonth() + 1 && b.year === now.getFullYear()) || {};
   }, [budgets]);
