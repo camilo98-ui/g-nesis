@@ -1,12 +1,12 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { X, Calendar, DollarSign, Save, Sparkles, Zap } from 'lucide-react';
+import { X, Calendar, DollarSign, Save, Sparkles, Zap, TrendingUp, AlertTriangle, Brain } from 'lucide-react';
 import { toast } from 'sonner';
-import { startOfMonth, endOfMonth, eachDayOfInterval, format, getDay } from 'date-fns';
+import { startOfMonth, endOfMonth, eachDayOfInterval, format, getDay, isBefore, isAfter, startOfDay, isSameDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 export default function MonthlyBudgetManager({ storeId, isOpen, onClose, onSuccess }) {
@@ -18,34 +18,96 @@ export default function MonthlyBudgetManager({ storeId, isOpen, onClose, onSucce
   const [customBudgets, setCustomBudgets] = useState({});
   const [useCustom, setUseCustom] = useState(false);
 
+  // Fetch datos históricos para análisis inteligente
+  const { data: historicalSales = [] } = useQuery({
+    queryKey: ['historicalSales', storeId],
+    queryFn: () => base44.entities.DailySales.filter({ store_id: storeId }),
+    enabled: !!storeId && isOpen
+  });
+
+  const { data: currentDailyBudgets = [] } = useQuery({
+    queryKey: ['currentDailyBudgets', storeId],
+    queryFn: () => base44.entities.DailyBudget.filter({ store_id: storeId }),
+    enabled: !!storeId && isOpen
+  });
+
+  // Análisis inteligente de patrones históricos
+  const historicalAnalysis = useMemo(() => {
+    if (!historicalSales.length) return null;
+
+    // Agrupar ventas por día de la semana de los últimos 3 meses
+    const salesByDayOfWeek = { 0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 6: [] };
+    
+    historicalSales.forEach(sale => {
+      const date = new Date(sale.date);
+      const dayOfWeek = getDay(date);
+      const sales = sale.total_sales || 0;
+      if (sales > 0) {
+        salesByDayOfWeek[dayOfWeek].push(sales);
+      }
+    });
+
+    // Calcular promedio por día de semana
+    const avgByDayOfWeek = {};
+    let totalAvg = 0;
+    let count = 0;
+    
+    Object.keys(salesByDayOfWeek).forEach(day => {
+      const sales = salesByDayOfWeek[day];
+      if (sales.length > 0) {
+        const avg = sales.reduce((a, b) => a + b, 0) / sales.length;
+        avgByDayOfWeek[day] = avg;
+        totalAvg += avg;
+        count++;
+      }
+    });
+    
+    const overallAvg = count > 0 ? totalAvg / count : 0;
+
+    // Calcular multiplicadores basados en datos reales
+    const multipliers = {};
+    Object.keys(avgByDayOfWeek).forEach(day => {
+      multipliers[day] = overallAvg > 0 ? avgByDayOfWeek[day] / overallAvg : 1;
+    });
+
+    return { multipliers, avgByDayOfWeek, overallAvg };
+  }, [historicalSales]);
+
   // Calcular días del mes con distribución inteligente
   const monthDays = useMemo(() => {
     const monthStart = startOfMonth(new Date());
     const monthEnd = endOfMonth(new Date());
     const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
+    const today = startOfDay(new Date());
     
     return days.map(day => {
       const dayOfWeek = getDay(day);
-      const isWeekend = dayOfWeek === 0 || dayOfWeek === 6; // Sábado o Domingo
+      const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
       const isFriday = dayOfWeek === 5;
+      const isPast = isBefore(day, today);
+      const isToday = isSameDay(day, today);
       
-      // Distribución analítica por día de la semana basada en comportamiento real:
-      // Domingo (0): +50% - día de mayor venta
-      // Sábado (6): +45% - segundo día más fuerte
-      // Viernes (5): +25% - día fuerte
-      // Jueves (4): +15% - día medio-alto
-      // Miércoles (3): +5% - día medio
-      // Martes (2): +0% - día base
-      // Lunes (1): -10% - día más bajo
-      
+      // Usar multiplicadores del análisis histórico si existen, sino usar valores predeterminados
       let multiplier = 1;
-      if (dayOfWeek === 0) multiplier = 1.5;      // Domingo +50%
-      else if (dayOfWeek === 6) multiplier = 1.45; // Sábado +45%
-      else if (dayOfWeek === 5) multiplier = 1.25; // Viernes +25%
-      else if (dayOfWeek === 4) multiplier = 1.15; // Jueves +15%
-      else if (dayOfWeek === 3) multiplier = 1.05; // Miércoles +5%
-      else if (dayOfWeek === 2) multiplier = 1;    // Martes base
-      else multiplier = 0.9;                        // Lunes -10%
+      if (historicalAnalysis?.multipliers?.[dayOfWeek]) {
+        multiplier = historicalAnalysis.multipliers[dayOfWeek];
+      } else {
+        // Valores predeterminados si no hay historial
+        if (dayOfWeek === 0) multiplier = 1.5;
+        else if (dayOfWeek === 6) multiplier = 1.45;
+        else if (dayOfWeek === 5) multiplier = 1.25;
+        else if (dayOfWeek === 4) multiplier = 1.15;
+        else if (dayOfWeek === 3) multiplier = 1.05;
+        else if (dayOfWeek === 2) multiplier = 1;
+        else multiplier = 0.9;
+      }
+      
+      // Encontrar venta real del día si existe
+      const actualSale = historicalSales.find(s => {
+        const saleDate = new Date(s.date);
+        return isSameDay(saleDate, day);
+      });
+      const actualSales = actualSale?.total_sales || 0;
       
       return {
         date: format(day, 'yyyy-MM-dd'),
@@ -54,29 +116,71 @@ export default function MonthlyBudgetManager({ storeId, isOpen, onClose, onSucce
         dayOfWeek,
         isWeekend,
         isFriday,
-        multiplier
+        isPast,
+        isToday,
+        multiplier,
+        actualSales
       };
     });
-  }, []);
+  }, [historicalSales, historicalAnalysis]);
 
-  // Distribuir presupuesto de forma inteligente
+  // Distribuir presupuesto de forma inteligente con ajuste dinámico de brechas
   const distributedBudgets = useMemo(() => {
     if (!monthlyBudget) return {};
     
     const total = parseFloat(monthlyBudget);
     if (isNaN(total) || total <= 0) return {};
     
-    // Calcular suma de multiplicadores
-    const totalMultiplier = monthDays.reduce((sum, d) => sum + d.multiplier, 0);
+    const today = startOfDay(new Date());
+    const futureDays = monthDays.filter(d => !d.isPast);
+    const pastDays = monthDays.filter(d => d.isPast);
     
-    // Distribuir según multiplicador
+    // Calcular brecha acumulada de días pasados
+    let accumulatedGap = 0;
+    pastDays.forEach(day => {
+      const existingBudget = currentDailyBudgets.find(b => b.date === day.date);
+      if (existingBudget) {
+        const dayGap = existingBudget.budget_amount - day.actualSales;
+        if (dayGap > 0) {
+          accumulatedGap += dayGap;
+        }
+      }
+    });
+
+    // Ventas totales ya realizadas
+    const totalPastSales = pastDays.reduce((sum, d) => sum + d.actualSales, 0);
+    
+    // Presupuesto restante = presupuesto total - ventas realizadas + brecha acumulada
+    const remainingBudget = total - totalPastSales + accumulatedGap;
+    
+    // Distribuir el presupuesto restante entre los días futuros
+    const futureTotalMultiplier = futureDays.reduce((sum, d) => sum + d.multiplier, 0);
+    
     const budgets = {};
-    monthDays.forEach(day => {
-      budgets[day.date] = Math.round((total / totalMultiplier) * day.multiplier);
+    
+    // Días pasados mantienen su presupuesto original o se actualizan con venta real
+    pastDays.forEach(day => {
+      const existingBudget = currentDailyBudgets.find(b => b.date === day.date);
+      if (existingBudget) {
+        budgets[day.date] = existingBudget.budget_amount;
+      } else {
+        // Si no existe, calcularlo proporcionalmente
+        const totalMultiplier = monthDays.reduce((sum, d) => sum + d.multiplier, 0);
+        budgets[day.date] = Math.round((total / totalMultiplier) * day.multiplier);
+      }
+    });
+    
+    // Días futuros reciben distribución ajustada con brecha acumulada
+    futureDays.forEach(day => {
+      if (futureTotalMultiplier > 0) {
+        budgets[day.date] = Math.round((remainingBudget / futureTotalMultiplier) * day.multiplier);
+      } else {
+        budgets[day.date] = 0;
+      }
     });
     
     return budgets;
-  }, [monthlyBudget, monthDays]);
+  }, [monthlyBudget, monthDays, currentDailyBudgets, historicalSales]);
 
   const saveMutation = useMutation({
     mutationFn: async () => {
@@ -253,9 +357,64 @@ export default function MonthlyBudgetManager({ storeId, isOpen, onClose, onSucce
                 </div>
               </div>
 
-              <p className="text-xs text-gray-500 mb-4 bg-violet-50 p-3 rounded-lg border border-violet-200">
-                💡 Distribución diaria analítica de ventas: Dom +50%, Sáb +45%, Vie +25%, Jue +15%, Mié +5%, Mar base, Lun -10%
-              </p>
+              {/* Análisis inteligente */}
+              {historicalAnalysis && (
+                <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl p-4 border border-blue-200 mb-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Brain className="w-5 h-5 text-blue-600" />
+                    <h3 className="text-sm font-bold text-blue-800">Análisis Inteligente del Historial</h3>
+                  </div>
+                  <div className="grid grid-cols-7 gap-2 text-center">
+                    {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map((dayName, idx) => {
+                      const mult = historicalAnalysis.multipliers?.[idx === 6 ? 0 : idx + 1] || 1;
+                      const avg = historicalAnalysis.avgByDayOfWeek?.[idx === 6 ? 0 : idx + 1] || 0;
+                      return (
+                        <div key={dayName} className="bg-white rounded-lg p-2 border border-blue-100">
+                          <p className="text-[9px] font-bold text-gray-600">{dayName}</p>
+                          <p className="text-xs font-black text-blue-700">{(mult * 100).toFixed(0)}%</p>
+                          <p className="text-[8px] text-gray-500">${(avg / 1000000).toFixed(1)}M</p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <p className="text-xs text-blue-700 mt-3">
+                    🧠 Basado en {historicalSales.filter(s => s.total_sales > 0).length} días de historial real
+                  </p>
+                </div>
+              )}
+
+              {/* Alerta de brecha acumulada */}
+              {monthlyBudget && (() => {
+                const pastDays = monthDays.filter(d => d.isPast);
+                const accGap = pastDays.reduce((sum, day) => {
+                  const existing = currentDailyBudgets.find(b => b.date === day.date);
+                  if (existing && day.actualSales > 0) {
+                    return sum + Math.max(0, existing.budget_amount - day.actualSales);
+                  }
+                  return sum;
+                }, 0);
+                
+                if (accGap > 0) {
+                  return (
+                    <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-4 border border-amber-300 mb-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <AlertTriangle className="w-5 h-5 text-amber-600" />
+                        <h3 className="text-sm font-bold text-amber-800">Brecha Acumulada Detectada</h3>
+                      </div>
+                      <p className="text-xs text-amber-700 mb-2">
+                        Los días pasados no cumplieron meta. La brecha de <span className="font-bold">{formatCurrency(accGap)}</span> se redistribuye automáticamente en los días restantes.
+                      </p>
+                      <div className="flex items-center gap-2 text-xs">
+                        <TrendingUp className="w-4 h-4 text-amber-600" />
+                        <span className="text-amber-800 font-medium">
+                          Presupuesto diario ajustado para recuperar
+                        </span>
+                      </div>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
 
               {/* Preview de distribución */}
               {monthlyBudget && distributedBudgets && (
@@ -273,25 +432,66 @@ export default function MonthlyBudgetManager({ storeId, isOpen, onClose, onSucce
                   
                   <div className="grid grid-cols-7 gap-1 max-h-64 overflow-y-auto">
                     {monthDays.map(day => {
-                      const budget = distributedBudgets[day.date];
+                      const budget = distributedBudgets[day.date] || 0;
+                      const actualSales = day.actualSales || 0;
+                      const compliance = budget > 0 ? (actualSales / budget) * 100 : 0;
+                      const dayGap = budget - actualSales;
+                      
                       return (
                         <motion.div
                           key={day.date}
                           whileHover={{ scale: 1.05 }}
-                          className={`p-2 rounded-lg text-center transition-all ${
-                            day.isWeekend 
-                              ? 'bg-gradient-to-br from-pink-200 to-rose-300 border-2 border-pink-400' 
-                              : day.isFriday
-                                ? 'bg-gradient-to-br from-amber-100 to-yellow-200 border-2 border-amber-300'
-                                : 'bg-white border border-gray-200'
+                          title={`${day.dayName} ${day.dayNum}\nPresupuesto: ${formatCurrency(budget)}${
+                            day.isPast && actualSales > 0 
+                              ? `\nVenta real: ${formatCurrency(actualSales)}\nCumplimiento: ${compliance.toFixed(0)}%`
+                              : ''
+                          }`}
+                          className={`p-2 rounded-lg text-center transition-all cursor-pointer ${
+                            day.isPast && actualSales > 0
+                              ? compliance >= 100
+                                ? 'bg-gradient-to-br from-emerald-200 to-green-300 border-2 border-emerald-500'
+                                : compliance >= 70
+                                  ? 'bg-gradient-to-br from-amber-200 to-yellow-300 border-2 border-amber-500'
+                                  : 'bg-gradient-to-br from-red-200 to-rose-300 border-2 border-red-500'
+                              : day.isToday
+                                ? 'bg-gradient-to-br from-blue-200 to-cyan-300 border-2 border-blue-500'
+                                : day.isWeekend 
+                                  ? 'bg-gradient-to-br from-pink-100 to-rose-200 border-2 border-pink-300' 
+                                  : day.isFriday
+                                    ? 'bg-gradient-to-br from-amber-50 to-yellow-100 border border-amber-200'
+                                    : 'bg-white border border-gray-200'
                           }`}
                         >
-                          <p className={`text-xs font-bold ${day.isWeekend ? 'text-pink-800' : day.isFriday ? 'text-amber-800' : 'text-gray-700'}`}>
+                          <p className={`text-xs font-bold ${
+                            day.isPast && actualSales > 0
+                              ? compliance >= 100 ? 'text-emerald-900' : compliance >= 70 ? 'text-amber-900' : 'text-red-900'
+                              : day.isToday ? 'text-blue-900'
+                              : day.isWeekend ? 'text-pink-800' 
+                              : day.isFriday ? 'text-amber-700' 
+                              : 'text-gray-700'
+                          }`}>
                             {day.dayNum}
                           </p>
-                          <p className={`text-[9px] font-medium ${day.isWeekend ? 'text-pink-600' : day.isFriday ? 'text-amber-600' : 'text-gray-500'}`}>
+                          <p className={`text-[9px] font-medium ${
+                            day.isPast && actualSales > 0
+                              ? compliance >= 100 ? 'text-emerald-700' : compliance >= 70 ? 'text-amber-700' : 'text-red-700'
+                              : day.isToday ? 'text-blue-700'
+                              : day.isWeekend ? 'text-pink-600' 
+                              : day.isFriday ? 'text-amber-600' 
+                              : 'text-gray-500'
+                          }`}>
                             ${Math.round(budget / 1000000)}M
                           </p>
+                          {day.isPast && actualSales > 0 && (
+                            <p className={`text-[8px] font-bold ${
+                              compliance >= 100 ? 'text-emerald-800' : 'text-red-800'
+                            }`}>
+                              {compliance >= 100 ? '✓' : dayGap > 0 ? `-$${(dayGap/1000000).toFixed(1)}M` : '✓'}
+                            </p>
+                          )}
+                          {day.isToday && (
+                            <p className="text-[7px] font-bold text-blue-800">HOY</p>
+                          )}
                         </motion.div>
                       );
                     })}
@@ -300,16 +500,20 @@ export default function MonthlyBudgetManager({ storeId, isOpen, onClose, onSucce
                   {/* Leyenda */}
                   <div className="flex justify-center gap-2 mt-3 text-xs flex-wrap">
                     <div className="flex items-center gap-1">
-                      <div className="w-3 h-3 rounded bg-gradient-to-br from-pink-200 to-rose-300" />
+                      <div className="w-3 h-3 rounded bg-gradient-to-br from-emerald-200 to-green-300 border border-emerald-500" />
+                      <span className="text-gray-600">Meta cumplida</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="w-3 h-3 rounded bg-gradient-to-br from-red-200 to-rose-300 border border-red-500" />
+                      <span className="text-gray-600">No cumplió</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="w-3 h-3 rounded bg-gradient-to-br from-blue-200 to-cyan-300 border border-blue-500" />
+                      <span className="text-gray-600">Hoy</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="w-3 h-3 rounded bg-gradient-to-br from-pink-100 to-rose-200 border border-pink-300" />
                       <span className="text-gray-600">Fin de semana</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <div className="w-3 h-3 rounded bg-gradient-to-br from-amber-100 to-yellow-200" />
-                      <span className="text-gray-600">Viernes</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <div className="w-3 h-3 rounded bg-white border border-gray-200" />
-                      <span className="text-gray-600">Entre semana</span>
                     </div>
                   </div>
                 </div>
