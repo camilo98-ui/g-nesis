@@ -880,7 +880,31 @@ export default function Home() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setShowBudgetDashboard(true)}
+              onClick={() => {
+                // Si es gerente, mostrar el modal de zona
+                if (selectedRole === 'gerente') {
+                  // Importar dinámicamente y mostrar ZoneBudgetManager
+                  import('@/components/executive/ZoneBudgetManager').then(module => {
+                    const ZoneBudgetManager = module.default;
+                    // Crear un estado temporal para mostrar el modal
+                    const modalRoot = document.createElement('div');
+                    document.body.appendChild(modalRoot);
+                    const root = require('react-dom/client').createRoot(modalRoot);
+                    const handleClose = () => {
+                      root.unmount();
+                      document.body.removeChild(modalRoot);
+                    };
+                    root.render(
+                      React.createElement(ZoneBudgetManager, {
+                        zoneName: 'Bogotá Noroccidente',
+                        onClose: handleClose
+                      })
+                    );
+                  });
+                } else {
+                  setShowBudgetDashboard(true);
+                }
+              }}
               className="text-gray-500 hover:text-sky-600 hover:bg-sky-50 transition-all"
             >
               <Target className="w-4 h-4 mr-1" />
