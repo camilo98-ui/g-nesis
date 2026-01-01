@@ -295,23 +295,63 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                     <ChevronUp className="w-5 h-5" />
                   </button>
                 </div>
-                <ResponsiveContainer width="100%" height={200}>
+                <ResponsiveContainer width="100%" height={250}>
                   <AreaChart data={budgetData.dailyTrendData}>
                     <defs>
                       <linearGradient id="colorVentas" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8}/>
-                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor="#10b981" stopOpacity={0.1}/>
+                      </linearGradient>
+                      <linearGradient id="colorPresupuesto" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#ef4444" stopOpacity={0.05}/>
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                    <XAxis dataKey="date" stroke="#64748b" fontSize={10} />
-                    <YAxis stroke="#64748b" fontSize={10} />
-                    <Tooltip 
-                      contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff' }}
-                      formatter={(value) => formatCurrency(value)}
+                    <XAxis 
+                      dataKey="date" 
+                      stroke="#64748b" 
+                      fontSize={10}
+                      angle={-45}
+                      textAnchor="end"
+                      height={60}
                     />
-                    <ReferenceLine y={budgetData.dailyBaseBudget} stroke="#ef4444" strokeDasharray="3 3" label="Meta" />
-                    <Area type="monotone" dataKey="ventas" stroke="#3b82f6" fillOpacity={1} fill="url(#colorVentas)" />
+                    <YAxis 
+                      stroke="#64748b" 
+                      fontSize={10}
+                      tickFormatter={(value) => `$${(value / 1000000).toFixed(1)}M`}
+                    />
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '12px', color: '#fff', padding: '12px' }}
+                      labelFormatter={(label, payload) => payload?.[0]?.payload?.fullDate || label}
+                      formatter={(value, name) => [
+                        formatCurrency(value), 
+                        name === 'ventas' ? '💰 Venta Real' : '🎯 Presupuesto'
+                      ]}
+                    />
+                    <Legend 
+                      wrapperStyle={{ paddingTop: '10px' }}
+                      formatter={(value) => value === 'ventas' ? '💰 Venta Real' : '🎯 Presupuesto Diario'}
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey="presupuesto" 
+                      stroke="#ef4444" 
+                      strokeWidth={2}
+                      strokeDasharray="5 5"
+                      fillOpacity={1} 
+                      fill="url(#colorPresupuesto)"
+                      name="presupuesto"
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey="ventas" 
+                      stroke="#10b981" 
+                      strokeWidth={3}
+                      fillOpacity={1} 
+                      fill="url(#colorVentas)"
+                      name="ventas"
+                    />
                   </AreaChart>
                 </ResponsiveContainer>
               </motion.div>
