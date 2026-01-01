@@ -332,19 +332,6 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                   <p className="text-sm font-bold text-white">
                     {budgetData.todayCompliance.toFixed(0)}% del objetivo
                   </p>
-                  <div className="pt-2 mt-2 border-t border-white/20">
-                    <p className="text-[10px] text-white/60 mb-1">Proyección Semana {budgetData.currentWeekNumber}:</p>
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm font-bold text-white">
-                        {formatCurrency(budgetData.weekProjection)}
-                      </p>
-                      <p className={`text-xs font-bold ${
-                        budgetData.projectionCompliance >= 100 ? 'text-white' : 'text-white/70'
-                      }`}>
-                        {budgetData.projectionCompliance.toFixed(0)}%
-                      </p>
-                    </div>
-                  </div>
                 </div>
                 <div className="flex items-center gap-2 mt-3 text-white/80">
                   {expandedSection === 'daily' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -487,27 +474,45 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                 {expandedSection === 'weekly' ? <ChevronUp className="w-4 h-4 text-purple-500/80" /> : <ChevronDown className="w-4 h-4 text-purple-500/80" />}
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               <div>
                 <p className="text-xs text-purple-600/80 mb-1">Meta Semanal</p>
-                <p className="text-xl font-black text-purple-700">
+                <p className="text-lg font-black text-purple-700">
                   {formatCurrency(budgetData.weeklyBudget)}
                 </p>
               </div>
               <div>
-                <p className="text-xs text-purple-600/80 mb-1">Venta Semanal</p>
-                <p className="text-xl font-black text-purple-700">
+                <p className="text-xs text-purple-600/80 mb-1">Venta Actual</p>
+                <p className="text-lg font-black text-purple-700">
                   {formatCurrency(budgetData.currentWeekSales)}
                 </p>
               </div>
+              <div>
+                <p className="text-xs text-indigo-600/80 mb-1">Proyección</p>
+                <p className="text-lg font-black text-indigo-700">
+                  {formatCurrency(budgetData.weekProjection)}
+                </p>
+              </div>
             </div>
-            <div className="mt-3 h-2 bg-white/50 rounded-full overflow-hidden">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${Math.min(budgetData.weeklyCompliance, 100)}%` }}
-                transition={{ duration: 1, delay: 0.2 }}
-                className="h-full bg-gradient-to-r from-purple-400/80 to-pink-400/80 rounded-full"
-              />
+            <div className="mt-3 space-y-1.5">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-purple-600/70">Cumplimiento actual</span>
+                <span className="font-bold text-purple-700">{budgetData.weeklyCompliance.toFixed(0)}%</span>
+              </div>
+              <div className="h-2 bg-white/50 rounded-full overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${Math.min(budgetData.weeklyCompliance, 100)}%` }}
+                  transition={{ duration: 1, delay: 0.2 }}
+                  className="h-full bg-gradient-to-r from-purple-400/80 to-pink-400/80 rounded-full"
+                />
+              </div>
+              <div className="flex items-center justify-between text-xs pt-1">
+                <span className="text-indigo-600/70">Proyección de cierre</span>
+                <span className={`font-bold ${budgetData.projectionCompliance >= 100 ? 'text-emerald-600' : 'text-amber-600'}`}>
+                  {budgetData.projectionCompliance.toFixed(0)}%
+                </span>
+              </div>
             </div>
           </motion.button>
 
