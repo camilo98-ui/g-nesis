@@ -269,7 +269,8 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
           {/* Presupuesto del Día - DESTACADO */}
           <motion.div
             whileHover={{ scale: 1.02, y: -2 }}
-            className="w-full bg-gradient-to-br from-rose-400/80 to-pink-400/80 rounded-2xl shadow-md p-6 border border-rose-300/40 relative overflow-hidden"
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="w-full bg-gradient-to-br from-rose-400/80 to-pink-400/80 rounded-2xl shadow-md p-6 border border-rose-300/40 relative overflow-hidden cursor-pointer"
           >
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-4">
@@ -328,14 +329,10 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                 </div>
               )}
 
-              <motion.button
-                whileTap={{ scale: 0.98 }}
-                onClick={() => setIsExpanded(!isExpanded)}
-                className="flex items-center gap-2 text-white/80 pt-2 border-t border-white/20 w-full hover:text-white transition-colors"
-              >
+              <div className="flex items-center justify-center gap-2 text-white/80 pt-2 border-t border-white/20 w-full">
                 {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                 <span className="text-xs font-medium">{isExpanded ? 'Ver menos' : 'Ver más detalles'}</span>
-              </motion.button>
+              </div>
             </div>
           </motion.div>
 
