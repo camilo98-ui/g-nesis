@@ -338,7 +338,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                className="bg-white rounded-xl p-4 border border-slate-200 shadow-lg"
+                className="bg-white rounded-xl p-4 border border-slate-200/60 shadow-sm"
               >
                 <div className="flex items-center justify-between mb-3">
                   <h4 className="font-bold text-slate-900 flex items-center gap-2">
@@ -495,7 +495,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                className="bg-white rounded-xl p-4 border border-slate-200 shadow-lg"
+                className="bg-white rounded-xl p-4 border border-slate-200/60 shadow-sm"
               >
                 <div className="flex items-center justify-between mb-3">
                   <h4 className="font-bold text-slate-900 flex items-center gap-2">
