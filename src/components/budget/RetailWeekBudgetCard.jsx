@@ -323,11 +323,37 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                     />
                     <Tooltip 
                       contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '12px', color: '#fff', padding: '12px' }}
-                      labelFormatter={(label, payload) => payload?.[0]?.payload?.fullDate || label}
-                      formatter={(value, name) => [
-                        formatCurrency(value), 
-                        name === 'ventas' ? '💰 Venta Real' : '🎯 Presupuesto'
-                      ]}
+                      labelFormatter={(label, payload) => {
+                        const data = payload?.[0]?.payload;
+                        return data?.fullDate || label;
+                      }}
+                      formatter={(value, name, props) => {
+                        const cumplimiento = props.payload.cumplimiento;
+                        if (name === 'ventas') {
+                          return [
+                            <div key="ventas" style={{ fontSize: '13px', fontWeight: 'bold' }}>
+                              {formatCurrency(value)}
+                              {cumplimiento > 0 && (
+                                <span style={{ 
+                                  marginLeft: '8px', 
+                                  color: cumplimiento >= 100 ? '#10b981' : '#f59e0b',
+                                  fontSize: '11px'
+                                }}>
+                                  ({cumplimiento.toFixed(0)}%)
+                                </span>
+                              )}
+                            </div>,
+                            '💰 Venta Real'
+                          ];
+                        } else {
+                          return [
+                            <div key="ppto" style={{ fontSize: '13px', fontWeight: 'bold' }}>
+                              {formatCurrency(value)}
+                            </div>,
+                            '🎯 Presupuesto Diario'
+                          ];
+                        }
+                      }}
                     />
                     <Legend 
                       wrapperStyle={{ paddingTop: '10px' }}
