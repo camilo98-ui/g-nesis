@@ -383,23 +383,47 @@ export default function Home() {
       // Guardar último rol usado
       localStorage.setItem('lastSelectedRole', selectedRole);
 
-      // Gerente con clave 1998 - redirigir directo al panel ejecutivo
-      if (selectedRole === 'gerente') {
-        if (loginPassword === '1998') {
-          localStorage.setItem('userRole', selectedRole);
+      // Contraseña maestra 1998 - permite acceso a todo
+      if (loginPassword === '1998') {
+        localStorage.setItem('userRole', selectedRole);
+        
+        // Si no hay tienda seleccionada y es gerente, ir al panel ejecutivo
+        if (!pendingStore && selectedRole === 'gerente') {
           localStorage.setItem('popsySession', JSON.stringify({ role: selectedRole, time: Date.now() }));
-          
-          // Mostrar éxito antes de redirigir
           setLoginSuccess(true);
           setTimeout(() => {
             window.location.href = createPageUrl('ExecutiveDashboard');
           }, 800);
           return;
-        } else {
-          setLoginError('Contraseña de gerente incorrecta');
-          setIsSubmitting(false);
+        }
+        
+        // Si hay tienda seleccionada, entrar a esa tienda
+        if (pendingStore) {
+          setLoginSuccess(true);
+          setTimeout(() => {
+            setSelectedStore(pendingStore);
+            setIsLoggedIn(true);
+            localStorage.setItem('selectedStore', pendingStore);
+            localStorage.setItem('popsySession', JSON.stringify({ store: pendingStore, role: selectedRole, time: Date.now() }));
+            setShowWelcome(true);
+            setPendingStore('');
+            setLoginPassword('');
+            setIsSubmitting(false);
+          }, 800);
           return;
         }
+        
+        // Si no hay tienda y no es gerente, pedir seleccionar tienda
+        setLoginError('Selecciona una tienda');
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Gerente sin contraseña maestra
+      if (selectedRole === 'gerente') {
+        setLoginError('Contraseña de gerente incorrecta');
+        setIsSubmitting(false);
+        return;
       }
 
     // Para otros roles: validar contraseña de tienda o rol
