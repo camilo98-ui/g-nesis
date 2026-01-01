@@ -450,7 +450,9 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <Calendar className="w-5 h-5 text-purple-400/70" />
-                    <h4 className="font-bold text-purple-700/80">Semana {budgetData.currentWeekNumber} (Lun-Dom)</h4>
+                    <h4 className="font-bold text-purple-700/80">
+                      Semana {budgetData.currentWeekNumber} ({format(currentWeekStart, 'dd MMM', { locale: es })} - {format(currentWeekEnd, 'dd MMM', { locale: es })})
+                    </h4>
                   </div>
                   <div className={`px-3 py-1 rounded-full text-xs font-bold ${
                     budgetData.weeklyCompliance >= 100 
