@@ -115,90 +115,90 @@ export default function PlannerStatusPanel({ stores }) {
   return (
     <div className="space-y-6">
       {/* Header con estadísticas */}
-      <div className="bg-gradient-to-br from-indigo-500/10 to-purple-500/10 backdrop-blur-xl rounded-2xl border border-indigo-500/30 p-6">
-        <div className="flex items-center gap-4 mb-6">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center">
-            <Calendar className="w-6 h-6 text-white" />
+      <div className="bg-gradient-to-br from-indigo-500/10 to-purple-500/10 backdrop-blur-xl rounded-xl md:rounded-2xl border border-indigo-500/30 p-3 md:p-6">
+        <div className="flex items-center gap-2 md:gap-4 mb-4 md:mb-6">
+          <div className="w-9 h-9 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center flex-shrink-0">
+            <Calendar className="w-4 h-4 md:w-6 md:h-6 text-white" />
           </div>
-          <div>
-            <h3 className="text-2xl font-black text-white">Estado del Planner</h3>
-            <p className="text-sm text-slate-400">Semana actual</p>
+          <div className="min-w-0">
+            <h3 className="text-base md:text-2xl font-black text-white truncate">Estado del Planner</h3>
+            <p className="text-xs md:text-sm text-slate-400">Semana actual</p>
           </div>
         </div>
 
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
           <button
             onClick={() => handleFilterClick('all')}
-            className={`rounded-xl p-4 border transition-all ${
+            className={`rounded-lg md:rounded-xl p-2.5 md:p-4 border transition-all ${
               activeFilter === 'all' 
                 ? 'bg-indigo-500/20 border-indigo-500/50 shadow-lg' 
                 : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-indigo-500/30'
             }`}
           >
-            <div className="flex items-center gap-2 mb-2">
-              <Calendar className="w-5 h-5 text-indigo-400" />
-              <p className="text-xs text-slate-400 font-medium">Todas</p>
+            <div className="flex items-center gap-1.5 md:gap-2 mb-1 md:mb-2">
+              <Calendar className="w-3.5 h-3.5 md:w-5 md:h-5 text-indigo-400 flex-shrink-0" />
+              <p className="text-[10px] md:text-xs text-slate-400 font-medium">Todas</p>
             </div>
-            <p className="text-3xl font-black text-white">{plannerStatus.length}</p>
-            <p className="text-xs text-slate-500 mt-1">Total tiendas</p>
+            <p className="text-xl md:text-3xl font-black text-white">{plannerStatus.length}</p>
+            <p className="text-[9px] md:text-xs text-slate-500 mt-0.5 md:mt-1">Total tiendas</p>
           </button>
 
           <button
             onClick={() => handleFilterClick('complete')}
-            className={`rounded-xl p-4 border transition-all ${
+            className={`rounded-lg md:rounded-xl p-2.5 md:p-4 border transition-all ${
               activeFilter === 'complete' 
                 ? 'bg-emerald-500/20 border-emerald-500/50 shadow-lg' 
                 : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-emerald-500/30'
             }`}
           >
-            <div className="flex items-center gap-2 mb-2">
-              <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-              <p className="text-xs text-slate-400 font-medium">Con Planner</p>
+            <div className="flex items-center gap-1.5 md:gap-2 mb-1 md:mb-2">
+              <CheckCircle2 className="w-3.5 h-3.5 md:w-5 md:h-5 text-emerald-400 flex-shrink-0" />
+              <p className="text-[10px] md:text-xs text-slate-400 font-medium">Con Planner</p>
             </div>
-            <p className="text-3xl font-black text-emerald-400">{stats.withPlanner}</p>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xl md:text-3xl font-black text-emerald-400">{stats.withPlanner}</p>
+            <p className="text-[9px] md:text-xs text-slate-500 mt-0.5 md:mt-1">
               {Math.round((stats.withPlanner / plannerStatus.length) * 100)}% del total
             </p>
           </button>
 
           <button
             onClick={() => handleFilterClick('pending')}
-            className={`rounded-xl p-4 border transition-all ${
+            className={`rounded-lg md:rounded-xl p-2.5 md:p-4 border transition-all ${
               activeFilter === 'pending' 
                 ? 'bg-amber-500/20 border-amber-500/50 shadow-lg' 
                 : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-amber-500/30'
             }`}
           >
-            <div className="flex items-center gap-2 mb-2">
-              <AlertCircle className="w-5 h-5 text-amber-400" />
-              <p className="text-xs text-slate-400 font-medium">Pendientes</p>
+            <div className="flex items-center gap-1.5 md:gap-2 mb-1 md:mb-2">
+              <AlertCircle className="w-3.5 h-3.5 md:w-5 md:h-5 text-amber-400 flex-shrink-0" />
+              <p className="text-[10px] md:text-xs text-slate-400 font-medium">Pendientes</p>
             </div>
-            <p className="text-3xl font-black text-amber-400">{stats.pending}</p>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xl md:text-3xl font-black text-amber-400">{stats.pending}</p>
+            <p className="text-[9px] md:text-xs text-slate-500 mt-0.5 md:mt-1">
               {Math.round((stats.pending / plannerStatus.length) * 100)}% del total
             </p>
           </button>
 
           <button
             onClick={() => handleFilterClick('overtime')}
-            className={`rounded-xl p-4 border transition-all ${
+            className={`rounded-lg md:rounded-xl p-2.5 md:p-4 border transition-all ${
               activeFilter === 'overtime' 
                 ? 'bg-red-500/20 border-red-500/50 shadow-lg' 
                 : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-red-500/30'
             }`}
           >
-            <div className="flex items-center gap-2 mb-2">
-              <Clock className="w-5 h-5 text-red-400" />
-              <p className="text-xs text-slate-400 font-medium">Horas Extras</p>
+            <div className="flex items-center gap-1.5 md:gap-2 mb-1 md:mb-2">
+              <Clock className="w-3.5 h-3.5 md:w-5 md:h-5 text-red-400 flex-shrink-0" />
+              <p className="text-[10px] md:text-xs text-slate-400 font-medium">Horas Extras</p>
             </div>
-            <p className="text-3xl font-black text-red-400">{stats.totalOvertime.toFixed(1)}h</p>
-            <p className="text-xs text-slate-500 mt-1">{stats.withOvertime} tiendas</p>
+            <p className="text-xl md:text-3xl font-black text-red-400">{stats.totalOvertime.toFixed(1)}h</p>
+            <p className="text-[9px] md:text-xs text-slate-500 mt-0.5 md:mt-1">{stats.withOvertime} tiendas</p>
           </button>
         </div>
       </div>
 
       {/* Lista de tiendas - Solo se muestra cuando hay un filtro activo */}
-      {activeFilter && (
+      {activeFilter && filteredStores.length > 0 && (
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -206,19 +206,19 @@ export default function PlannerStatusPanel({ stores }) {
           className="bg-white/5 backdrop-blur-2xl rounded-xl border border-white/10 overflow-hidden"
         >
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[600px]">
             <thead className="bg-white/5 border-b border-white/10">
               <tr>
-                <th className="text-left py-4 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                <th className="text-left py-2.5 px-3 md:py-4 md:px-6 text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider">
                   Tienda
                 </th>
-                <th className="text-center py-4 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                <th className="text-center py-2.5 px-3 md:py-4 md:px-6 text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider">
                   Estado
                 </th>
-                <th className="text-center py-4 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                <th className="text-center py-2.5 px-3 md:py-4 md:px-6 text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider">
                   Turnos
                 </th>
-                <th className="text-center py-4 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                <th className="text-center py-2.5 px-3 md:py-4 md:px-6 text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider">
                   H. Extras
                 </th>
               </tr>
@@ -227,9 +227,9 @@ export default function PlannerStatusPanel({ stores }) {
               {filteredStores
                 .sort((a, b) => {
                   if (a.hasPlanner === b.hasPlanner) {
-                    return b.overtimeHours - a.overtimeHours;
+                    return b.totalShifts - a.totalShifts;
                   }
-                  return a.hasPlanner ? 1 : -1;
+                  return a.hasPlanner ? -1 : 1;
                 })
                 .map((store, idx) => (
                   <motion.tr
@@ -239,36 +239,36 @@ export default function PlannerStatusPanel({ stores }) {
                     transition={{ delay: idx * 0.03 }}
                     className="hover:bg-white/5 transition-colors"
                   >
-                    <td className="py-4 px-6">
-                      <p className="font-bold text-white">{store.name}</p>
-                      <p className="text-xs text-slate-500">{store.code}</p>
+                    <td className="py-2.5 px-3 md:py-4 md:px-6">
+                      <p className="font-bold text-white text-xs md:text-base">{store.name}</p>
+                      <p className="text-[10px] md:text-xs text-slate-500">{store.code}</p>
                     </td>
                     
-                    <td className="py-4 px-6 text-center">
+                    <td className="py-2.5 px-3 md:py-4 md:px-6 text-center">
                       {store.hasPlanner ? (
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/30">
-                          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                          <span className="text-xs font-bold text-emerald-400">Completo</span>
+                        <div className="inline-flex items-center gap-1 md:gap-2 px-2 md:px-3 py-0.5 md:py-1 rounded-full bg-emerald-500/20 border border-emerald-500/30">
+                          <CheckCircle2 className="w-3 h-3 md:w-4 md:h-4 text-emerald-400" />
+                          <span className="text-[10px] md:text-xs font-bold text-emerald-400">Completo</span>
                         </div>
                       ) : (
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/30">
-                          <AlertCircle className="w-4 h-4 text-amber-400" />
-                          <span className="text-xs font-bold text-amber-400">Pendiente</span>
+                        <div className="inline-flex items-center gap-1 md:gap-2 px-2 md:px-3 py-0.5 md:py-1 rounded-full bg-amber-500/20 border border-amber-500/30">
+                          <AlertCircle className="w-3 h-3 md:w-4 md:h-4 text-amber-400" />
+                          <span className="text-[10px] md:text-xs font-bold text-amber-400">Pendiente</span>
                         </div>
                       )}
                     </td>
                     
-                    <td className="py-4 px-6 text-center">
-                      <span className="text-lg font-black text-white">
+                    <td className="py-2.5 px-3 md:py-4 md:px-6 text-center">
+                      <span className="text-base md:text-lg font-black text-white">
                         {store.totalShifts}
                       </span>
                     </td>
                     
-                    <td className="py-4 px-6 text-center">
+                    <td className="py-2.5 px-3 md:py-4 md:px-6 text-center">
                       {store.overtimeHours > 0 ? (
-                        <div className="inline-flex items-center gap-2">
-                          <Clock className="w-4 h-4 text-red-400" />
-                          <span className={`text-lg font-black ${
+                        <div className="inline-flex items-center gap-1 md:gap-2">
+                          <Clock className="w-3 h-3 md:w-4 md:h-4 text-red-400" />
+                          <span className={`text-sm md:text-lg font-black ${
                             store.overtimeHours > 10 ? 'text-red-400' :
                             store.overtimeHours > 5 ? 'text-amber-400' : 'text-white'
                           }`}>
@@ -276,7 +276,7 @@ export default function PlannerStatusPanel({ stores }) {
                           </span>
                         </div>
                       ) : (
-                        <span className="text-sm text-slate-500">—</span>
+                        <span className="text-xs md:text-sm text-slate-500">—</span>
                       )}
                     </td>
                   </motion.tr>
@@ -289,14 +289,14 @@ export default function PlannerStatusPanel({ stores }) {
 
       {/* Alerta si hay muchas horas extras */}
       {stats.totalOvertime > 50 && (
-        <div className="bg-gradient-to-r from-red-500/20 to-rose-500/20 backdrop-blur-xl rounded-xl border border-red-500/30 p-6">
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center flex-shrink-0">
-              <AlertCircle className="w-5 h-5 text-red-400" />
+        <div className="bg-gradient-to-r from-red-500/20 to-rose-500/20 backdrop-blur-xl rounded-xl border border-red-500/30 p-3 md:p-6">
+          <div className="flex items-start gap-2 md:gap-3">
+            <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-red-500/20 flex items-center justify-center flex-shrink-0">
+              <AlertCircle className="w-4 h-4 md:w-5 md:h-5 text-red-400" />
             </div>
-            <div>
-              <p className="font-bold text-red-400 mb-1">Alerta: Alto volumen de horas extras</p>
-              <p className="text-sm text-slate-300">
+            <div className="min-w-0">
+              <p className="font-bold text-red-400 mb-1 text-xs md:text-base">Alerta: Alto volumen de horas extras</p>
+              <p className="text-xs md:text-sm text-slate-300 leading-relaxed">
                 La zona está generando <strong>{stats.totalOvertime.toFixed(1)} horas extras</strong> esta semana. 
                 Considera ajustar la programación para optimizar costos laborales y cumplir con la jornada legal máxima.
               </p>
@@ -306,8 +306,8 @@ export default function PlannerStatusPanel({ stores }) {
       )}
 
       {/* Nota legal */}
-      <div className="bg-amber-500/10 backdrop-blur-xl rounded-xl border border-amber-500/20 p-4">
-        <p className="text-xs text-amber-200">
+      <div className="bg-amber-500/10 backdrop-blur-xl rounded-xl border border-amber-500/20 p-3 md:p-4">
+        <p className="text-[10px] md:text-xs text-amber-200 leading-relaxed">
           <strong>⚠️ Nota:</strong> Cálculo basado en legislación colombiana vigente (máximo 44h semanales, 
           extras después de 8h diarias). Las horas extras generan un recargo del 25%. 
           Los dominicales y festivos tienen recargos adicionales.
