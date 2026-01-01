@@ -28,7 +28,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       { weekStartsOn: 1 }
     );
 
-    // Calcular días por semana y presupuesto diario base
+    // Calcular días del mes que efectivamente tienen venta (lunes a domingo del mes)
     const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd }).length;
 
     // Analizar histórico de ventas por día de la semana (0=Domingo, 6=Sábado)
@@ -61,15 +61,19 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       totalWeeklyAvg > 0 ? avg / totalWeeklyAvg : 1/7
     );
 
-    // Calcular presupuesto base (si no hay histórico, distribuir equitativamente)
-    const dailyBaseBudget = activeBudget.sales_budget / daysInMonth;
+    // Calcular presupuesto base más realista (95% del presupuesto total para dejar margen)
+    const dailyBaseBudget = (activeBudget.sales_budget * 0.95) / daysInMonth;
 
-    // Función para obtener presupuesto ajustado según día de la semana
+    // Función para obtener presupuesto ajustado según día de la semana y tendencia histórica
     const getDailyBudget = (date) => {
       if (totalWeeklyAvg === 0) return dailyBaseBudget; // Sin histórico
       const dayOfWeek = date.getDay();
       const weeklyBudgetAvg = dailyBaseBudget * 7;
-      return weeklyBudgetAvg * weightByDayOfWeek[dayOfWeek];
+      const historicalBudget = weeklyBudgetAvg * weightByDayOfWeek[dayOfWeek];
+      
+      // Si hay histórico, usar 90% del histórico + 10% del presupuesto base (más alcanzable)
+      const historicalWeight = countByDayOfWeek[dayOfWeek] >= 4 ? 0.9 : 0.7;
+      return (historicalBudget * historicalWeight) + (dailyBaseBudget * (1 - historicalWeight));
     };
 
     // Ventas acumuladas hasta hoy
@@ -100,17 +104,24 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
     // Presupuesto restante a alcanzar
     const remainingBudget = activeBudget.sales_budget - salesUntilYesterday - todayActualSales;
 
-    // Presupuesto del día redistribuido (usando presupuesto ajustado del día actual)
+    // Presupuesto del día ajustado (más realista y alcanzable)
     let adjustedDailyBudget = getDailyBudget(now);
-    if (remainingDays > 0 && remainingBudget > 0) {
-      // Redistribuir brecha sobre días restantes manteniendo proporciones
+    
+    // Si hay brecha acumulada, redistribuir de forma progresiva (no agresiva)
+    if (remainingDays > 0 && accumulatedGap > 0) {
       const remainingDaysArray = eachDayOfInterval({ start: now, end: monthEnd });
       const totalWeightRemaining = remainingDaysArray.reduce((sum, day) => {
         const dayOfWeek = day.getDay();
         return sum + (weightByDayOfWeek[dayOfWeek] || 1/7);
       }, 0);
       const todayWeight = weightByDayOfWeek[now.getDay()] || 1/7;
-      adjustedDailyBudget = (remainingBudget / totalWeightRemaining) * todayWeight;
+      
+      // Redistribuir solo 70% de la brecha para mantener meta alcanzable
+      const redistributionBudget = remainingBudget + (accumulatedGap * 0.7);
+      const redistributedBudget = (redistributionBudget / totalWeightRemaining) * todayWeight;
+      
+      // Usar el mayor entre el presupuesto base y el redistribuido (pero no exceder 130% del base)
+      adjustedDailyBudget = Math.min(Math.max(getDailyBudget(now), redistributedBudget), getDailyBudget(now) * 1.3);
     }
 
     // Calcular número de semana retail (considerando semanas que empiezan antes del mes)
@@ -129,9 +140,11 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       }
     }).reduce((sum, s) => sum + (s.total_sales || 0), 0);
 
-    // Presupuesto semanal proporcional - suma de presupuestos diarios ajustados
+    // Presupuesto semanal - SOLO días que caen en el mes actual (calendario retail)
     const daysInCurrentWeek = eachDayOfInterval({ start: currentWeekStart, end: currentWeekEnd })
       .filter(d => d >= monthStart && d <= monthEnd);
+    
+    // Si la semana tiene menos de 7 días en el mes, ajustar proporcionalmente
     const weeklyBudget = daysInCurrentWeek.reduce((sum, day) => sum + getDailyBudget(day), 0);
 
     // Calcular proyección de la semana basada en ritmo actual
