@@ -287,57 +287,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
               </div>
             </motion.button>
 
-            {/* Venta del Día */}
-            <motion.button
-              whileHover={{ scale: 1.02, y: -2 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => toggleSection('daily')}
-              className={`rounded-2xl shadow-md p-6 text-left border relative overflow-hidden group ${
-                budgetData.todayCompliance >= 100 
-                  ? 'bg-gradient-to-br from-emerald-400/90 to-emerald-500/90 border-emerald-300/50' 
-                  : budgetData.todayCompliance >= 70
-                  ? 'bg-gradient-to-br from-amber-400/90 to-amber-500/90 border-amber-300/50'
-                  : 'bg-gradient-to-br from-rose-400/90 to-rose-500/90 border-rose-300/50'
-              }`}
-            >
-              <div className="relative z-10">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <TrendingUp className="w-6 h-6 text-white" />
-                    <p className="text-sm text-white/80 font-medium">Venta Hoy</p>
-                  </div>
-                  <div className={`flex items-center gap-1 ${
-                    budgetData.todayCompliance >= 100 ? 'text-white' : 'text-white/90'
-                  }`}>
-                    {budgetData.todayCompliance >= 100 ? 
-                      <CheckCircle2 className="w-4 h-4" /> : 
-                      <AlertTriangle className="w-4 h-4" />
-                    }
-                  </div>
-                </div>
-                <p className="text-4xl font-black text-white mb-2">
-                  {formatCurrency(budgetData.todayActualSales)}
-                </p>
-                <div className="space-y-2">
-                  <div className="relative h-3 bg-white/20 rounded-full overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${Math.min(budgetData.todayCompliance, 100)}%` }}
-                      transition={{ duration: 1, ease: "easeOut" }}
-                      className="h-full bg-white rounded-full"
-                    />
-                  </div>
-                  <p className="text-sm font-bold text-white">
-                    {budgetData.todayCompliance.toFixed(0)}% del objetivo
-                  </p>
-                </div>
-                <div className="flex items-center gap-2 mt-3 text-white/80">
-                  {expandedSection === 'daily' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                  <span className="text-xs font-medium">Ver tendencia diaria</span>
-                </div>
-              </div>
-            </motion.button>
-          </div>
+            </div>
 
           {/* Gráfico de Tendencia Diaria */}
           <AnimatePresence>
