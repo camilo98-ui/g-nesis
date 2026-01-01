@@ -3,55 +3,40 @@ import { motion } from 'framer-motion';
 
 // SVG Icons minimalistas estilo línea
 const CookieIcon = ({ color = "#C2185B" }) => (
-  <svg viewBox="0 0 50 50" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round">
+  <svg viewBox="0 0 50 50" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round">
     <circle cx="25" cy="25" r="18"/>
-    <circle cx="18" cy="20" r="2" fill="#8B4513" opacity="0.8"/>
-    <circle cx="32" cy="20" r="2" fill="#8B4513" opacity="0.8"/>
-    <circle cx="25" cy="28" r="2.2" fill="#8B4513" opacity="0.8"/>
-    <circle cx="17" cy="30" r="1.8" fill="#8B4513" opacity="0.8"/>
-    <circle cx="33" cy="30" r="1.8" fill="#8B4513" opacity="0.8"/>
-    <circle cx="22" cy="24" r="1" fill="#FF69B4" opacity="0.6"/>
-    <circle cx="28" cy="25" r="1" fill="#87CEEB" opacity="0.6"/>
-    <circle cx="25" cy="33" r="1" fill="#FFD700" opacity="0.6"/>
+    <circle cx="18" cy="20" r="1.5" fill={color}/>
+    <circle cx="32" cy="20" r="1.5" fill={color}/>
+    <circle cx="25" cy="28" r="1.5" fill={color}/>
+    <circle cx="17" cy="30" r="1.5" fill={color}/>
+    <circle cx="33" cy="30" r="1.5" fill={color}/>
   </svg>
 );
 
 const IceCreamCone = ({ color = "#C2185B" }) => (
-  <svg viewBox="0 0 50 50" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+  <svg viewBox="0 0 50 50" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M20 22 L25 38 L30 22" fill="none"/>
     <line x1="22.5" y1="26" x2="25" y2="35"/>
     <line x1="27.5" y1="26" x2="25" y2="35"/>
     <circle cx="25" cy="17" r="6.5"/>
-    <circle cx="22" cy="15" r="3" opacity="0.6"/>
-    <circle cx="28" cy="16" r="2.5" opacity="0.6"/>
-    <rect x="23" y="14" width="2" height="1.5" fill="#FF1493" opacity="0.8" rx="0.3"/>
-    <rect x="27" y="15" width="1.5" height="1" fill="#00CED1" opacity="0.8" rx="0.3"/>
-    <rect x="24" y="18" width="1.8" height="1.2" fill="#FFD700" opacity="0.8" rx="0.3"/>
   </svg>
 );
 
 const PopsyCup = ({ color = "#C2185B" }) => (
-  <svg viewBox="0 0 50 50" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round">
-    <path d="M19 20 L18 38 C18 39.5 20 41 25 41 C30 41 32 39.5 32 38 L31 20 Z"/>
-    <ellipse cx="25" cy="20" rx="6.5" ry="2"/>
-    <rect x="24" y="41" width="2" height="4" fill={color} opacity="0.8" rx="0.5"/>
-    <text x="25" y="31" fontSize="5.5" fill={color} textAnchor="middle" fontWeight="bold" fontStyle="italic">Popsy</text>
-    <circle cx="22" cy="24" r="0.8" fill="#FF69B4" opacity="0.7"/>
-    <circle cx="28" cy="26" r="0.8" fill="#87CEEB" opacity="0.7"/>
-    <circle cx="25" cy="35" r="0.8" fill="#FFD700" opacity="0.7"/>
+  <svg viewBox="0 0 50 50" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round">
+    <rect x="17" y="20" width="16" height="20" rx="2"/>
+    <ellipse cx="25" cy="20" rx="8" ry="2"/>
+    <text x="25" y="32" fontSize="6" fill={color} textAnchor="middle" fontWeight="bold">Popsy</text>
   </svg>
 );
 
-const IceCreamCupScoop = ({ color = "#C2185B" }) => (
-  <svg viewBox="0 0 50 50" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M19 23 L18 38 C18 39.5 20 41 25 41 C30 41 32 39.5 32 38 L31 23 Z"/>
-    <ellipse cx="25" cy="23" rx="6.5" ry="2"/>
-    <circle cx="25" cy="16" r="7"/>
-    <circle cx="22" cy="14" r="4" opacity="0.7"/>
-    <circle cx="28" cy="15" r="4.5" opacity="0.7"/>
-    <circle cx="24" cy="17" r="1.5" fill="#ffffff" opacity="0.5"/>
-    <circle cx="26" cy="14" r="1.2" fill="#ffffff" opacity="0.5"/>
-    <text x="25" y="33" fontSize="4.5" fill={color} textAnchor="middle" fontWeight="bold" fontStyle="italic">P</text>
+const MilkshakeCup = ({ color = "#C2185B" }) => (
+  <svg viewBox="0 0 50 50" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M19 22 L17 38 C17 40 19 41 25 41 C31 41 33 40 33 38 L31 22 Z"/>
+    <ellipse cx="25" cy="22" rx="6.5" ry="2"/>
+    <line x1="25" y1="14" x2="25" y2="22"/>
+    <circle cx="25" cy="12" r="2"/>
+    <text x="25" y="32" fontSize="5" fill={color} textAnchor="middle" fontWeight="bold">Popsy</text>
   </svg>
 );
 
@@ -65,18 +50,18 @@ const IceCreamOutline = ({ color = "#C2185B" }) => (
   </svg>
 );
 
-const ICON_COMPONENTS = [CookieIcon, IceCreamCone, PopsyCup, IceCreamOutline, IceCreamCupScoop];
+const ICON_COMPONENTS = [CookieIcon, IceCreamCone, PopsyCup, IceCreamOutline, MilkshakeCup];
 const COLORS = ["#C2185B", "#C2185B", "#C2185B", "#C2185B", "#C2185B"];
 
-const RAIN_ITEMS = Array.from({ length: 50 }, (_, i) => ({
+const RAIN_ITEMS = Array.from({ length: 45 }, (_, i) => ({
   id: i,
   IconComponent: ICON_COMPONENTS[i % ICON_COMPONENTS.length],
   color: COLORS[i % COLORS.length],
   left: `${Math.random() * 100}%`,
-  size: 32 + Math.random() * 35,
+  size: 28 + Math.random() * 30,
   delay: Math.random() * 10,
   duration: 12 + Math.random() * 10,
-  opacity: 0.09 + Math.random() * 0.14,
+  opacity: 0.08 + Math.random() * 0.12,
   rotation: Math.random() * 360
 }));
 
