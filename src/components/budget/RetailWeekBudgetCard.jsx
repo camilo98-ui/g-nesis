@@ -359,46 +359,46 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                   <AreaChart data={budgetData.dailyTrendData}>
                     <defs>
                       <linearGradient id="colorVentas" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#ec4899" stopOpacity={0.9}/>
-                        <stop offset="50%" stopColor="#f472b6" stopOpacity={0.5}/>
-                        <stop offset="95%" stopColor="#fda4af" stopOpacity={0.1}/>
+                        <stop offset="5%" stopColor="#fda4af" stopOpacity={0.5}/>
+                        <stop offset="50%" stopColor="#fecdd3" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#ffe4e6" stopOpacity={0.1}/>
                       </linearGradient>
                       <linearGradient id="colorPresupuesto" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#c026d3" stopOpacity={0.5}/>
-                        <stop offset="95%" stopColor="#e879f9" stopOpacity={0.1}/>
+                        <stop offset="5%" stopColor="#e9d5ff" stopOpacity={0.4}/>
+                        <stop offset="95%" stopColor="#f3e8ff" stopOpacity={0.1}/>
                       </linearGradient>
                       <filter id="glow">
-                        <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                        <feGaussianBlur stdDeviation="1" result="coloredBlur"/>
                         <feMerge>
                           <feMergeNode in="coloredBlur"/>
                           <feMergeNode in="SourceGraphic"/>
                         </feMerge>
                       </filter>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#fecdd3" opacity={0.3} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#fecdd3" opacity={0.2} />
                     <XAxis 
                       dataKey="date" 
-                      stroke="#be185d" 
+                      stroke="#9ca3af" 
                       fontSize={11}
                       angle={-35}
                       textAnchor="end"
                       height={65}
-                      tick={{ fontWeight: 500 }}
+                      tick={{ fontWeight: 400 }}
                     />
                     <YAxis 
-                      stroke="#be185d" 
+                      stroke="#9ca3af" 
                       fontSize={11}
                       tickFormatter={(value) => `$${(value / 1000000).toFixed(1)}M`}
-                      tick={{ fontWeight: 500 }}
+                      tick={{ fontWeight: 400 }}
                     />
                     <Tooltip 
                       contentStyle={{ 
-                        background: 'linear-gradient(135deg, #ec4899 0%, #c026d3 100%)', 
+                        background: 'linear-gradient(135deg, #fda4af 0%, #e9d5ff 100%)', 
                         border: 'none', 
                         borderRadius: '16px', 
                         color: '#fff', 
                         padding: '16px',
-                        boxShadow: '0 8px 32px rgba(236, 72, 153, 0.4)'
+                        boxShadow: '0 8px 32px rgba(253, 164, 175, 0.25)'
                       }}
                       labelFormatter={(label, payload) => {
                         const data = payload?.[0]?.payload;
@@ -440,8 +440,8 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                     <Area 
                       type="monotone" 
                       dataKey="presupuesto" 
-                      stroke="#c026d3" 
-                      strokeWidth={2.5}
+                      stroke="#d8b4fe" 
+                      strokeWidth={2}
                       strokeDasharray="6 4"
                       fillOpacity={1} 
                       fill="url(#colorPresupuesto)"
@@ -452,8 +452,8 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                     <Area 
                       type="monotone" 
                       dataKey="ventas" 
-                      stroke="#ec4899" 
-                      strokeWidth={4}
+                      stroke="#fda4af" 
+                      strokeWidth={3}
                       fillOpacity={1} 
                       fill="url(#colorVentas)"
                       name="ventas"
