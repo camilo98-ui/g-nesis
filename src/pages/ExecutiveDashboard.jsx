@@ -67,13 +67,13 @@ export default function ExecutiveDashboard() {
     const prevYear = currentMonth === 1 ? currentYear - 1 : currentYear;
 
     return STORES.map(store => {
+      const fromStr = format(dateRange.from, 'yyyy-MM-dd');
+      const toStr = format(dateRange.to, 'yyyy-MM-dd');
+      
       const storeSales = allDailySales.filter(s => {
-        try {
-          const d = new Date(s.date);
-          return s.store_id === store.code && !isNaN(d.getTime()) && d >= dateRange.from && d <= dateRange.to;
-        } catch {
-          return false;
-        }
+        if (s.store_id !== store.code) return false;
+        const saleDateStr = s.date?.split('T')[0] || s.date;
+        return saleDateStr >= fromStr && saleDateStr <= toStr;
       });
 
       const totalSales = Math.max(0, storeSales.reduce((sum, s) => sum + (s.total_sales || 0), 0));
@@ -90,9 +90,11 @@ export default function ExecutiveDashboard() {
 
       // Calcular cumplimiento del mes anterior
       const prevMonthSales = allDailySales.filter(s => {
+        if (s.store_id !== store.code) return false;
+        const saleDateStr = s.date?.split('T')[0] || s.date;
         try {
-          const d = new Date(s.date);
-          return s.store_id === store.code && d.getMonth() + 1 === prevMonth && d.getFullYear() === prevYear;
+          const d = new Date(saleDateStr);
+          return d.getMonth() + 1 === prevMonth && d.getFullYear() === prevYear;
         } catch {
           return false;
         }
@@ -304,14 +306,11 @@ Genera:
   const dailySalesData = useMemo(() => {
     const days = eachDayOfInterval({ start: dateRange.from, end: dateRange.to });
     return days.map(day => {
+      const dayStr = format(day, 'yyyy-MM-dd');
       const daySales = allDailySales
         .filter(s => {
-          try {
-            const d = new Date(s.date);
-            return d.toDateString() === day.toDateString();
-          } catch {
-            return false;
-          }
+          const saleDateStr = s.date?.split('T')[0] || s.date;
+          return saleDateStr === dayStr;
         })
         .reduce((sum, s) => sum + (s.total_sales || 0), 0);
       
