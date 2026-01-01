@@ -51,6 +51,10 @@ export default function PopsyRainingIcons() {
               src={item.iconUrl} 
               alt="Popsy"
               className="w-full h-full object-contain"
+              style={{
+                mixBlendMode: 'multiply',
+                opacity: 0.6
+              }}
             />
           </motion.div>
         );
