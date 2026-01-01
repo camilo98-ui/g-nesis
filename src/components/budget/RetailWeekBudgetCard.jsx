@@ -246,48 +246,44 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
 
         <CardContent className="p-6 space-y-4">
           {/* Presupuesto del Día - DESTACADO */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Meta del Día */}
-            <motion.button
-              whileHover={{ scale: 1.02, y: -2 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => toggleSection('daily')}
-              className="bg-gradient-to-br from-blue-400/90 to-blue-500/90 rounded-2xl shadow-md p-6 text-left border border-blue-300/50 relative overflow-hidden group"
-            >
-              <div className="relative z-10">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <Target className="w-6 h-6 text-white" />
-                    <p className="text-sm text-white/80 font-medium">Meta del Día</p>
-                  </div>
-                  {needsRecovery && (
-                    <div className="px-2 py-1 bg-amber-200/80 rounded-full">
-                      <p className="text-[10px] font-black text-amber-800">AJUSTADO</p>
-                    </div>
-                  )}
+          <motion.button
+            whileHover={{ scale: 1.02, y: -2 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => toggleSection('daily')}
+            className="w-full bg-gradient-to-br from-blue-400/90 to-blue-500/90 rounded-2xl shadow-md p-6 text-left border border-blue-300/50 relative overflow-hidden group"
+          >
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Target className="w-6 h-6 text-white" />
+                  <p className="text-sm text-white/80 font-medium">Meta del Día</p>
                 </div>
-                <motion.p
-                  key={budgetData.adjustedDailyBudget}
-                  initial={{ scale: 1.2, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  className="text-4xl font-black text-white mb-2"
-                >
-                  {formatCurrency(budgetData.adjustedDailyBudget)}
-                </motion.p>
                 {needsRecovery && (
-                  <p className="text-xs text-white/70 flex items-center gap-1">
-                    <AlertTriangle className="w-3 h-3" />
-                    Incluye recuperación de {formatCurrency(budgetData.accumulatedGap)}
-                  </p>
+                  <div className="px-2 py-1 bg-amber-200/80 rounded-full">
+                    <p className="text-[10px] font-black text-amber-800">AJUSTADO</p>
+                  </div>
                 )}
-                <div className="flex items-center gap-2 mt-3 text-white/80">
-                  {expandedSection === 'daily' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                  <span className="text-xs font-medium">Ver tendencia diaria</span>
-                </div>
               </div>
-            </motion.button>
-
+              <motion.p
+                key={budgetData.adjustedDailyBudget}
+                initial={{ scale: 1.2, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="text-4xl font-black text-white mb-2"
+              >
+                {formatCurrency(budgetData.adjustedDailyBudget)}
+              </motion.p>
+              {needsRecovery && (
+                <p className="text-xs text-white/70 flex items-center gap-1">
+                  <AlertTriangle className="w-3 h-3" />
+                  Incluye recuperación de {formatCurrency(budgetData.accumulatedGap)}
+                </p>
+              )}
+              <div className="flex items-center gap-2 mt-3 text-white/80">
+                {expandedSection === 'daily' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                <span className="text-xs font-medium">Ver tendencia diaria</span>
+              </div>
             </div>
+          </motion.button>
 
           {/* Gráfico de Tendencia Diaria */}
           <AnimatePresence>
