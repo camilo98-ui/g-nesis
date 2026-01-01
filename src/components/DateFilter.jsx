@@ -144,17 +144,17 @@ function CustomCalendar({ selected, onSelect, onClose, onApply, initialTab = 'we
     const offset = startDay === 0 ? 6 : startDay - 1;
 
     return (
-      <div className={`${isMobile ? 'px-1.5 py-1' : 'p-3'}`}>
-        <div className={`text-center font-semibold text-gray-800 ${isMobile ? 'mb-1 text-[11px]' : 'mb-3 text-sm'} capitalize`}>
+      <div className={`${isMobile ? 'px-2 py-1.5' : 'p-3'}`}>
+        <div className={`text-center font-semibold text-gray-800 ${isMobile ? 'mb-2 text-xs' : 'mb-3 text-sm'} capitalize`}>
           {format(month, 'MMMM yyyy', { locale: es })}
         </div>
-        <div className={`grid grid-cols-7 ${isMobile ? 'gap-0.5 mb-0.5' : 'gap-1 mb-2'}`}>
+        <div className={`grid grid-cols-7 ${isMobile ? 'gap-1 mb-1.5' : 'gap-1 mb-2'}`}>
           {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((d, i) =>
-          <div key={i} className={`text-center ${isMobile ? 'text-[8px]' : 'text-[10px]'} text-gray-400 font-bold`}>{d}</div>
+          <div key={i} className={`text-center ${isMobile ? 'text-[10px]' : 'text-[10px]'} text-gray-500 font-bold`}>{d}</div>
           )}
         </div>
-        <div className={`grid grid-cols-7 ${isMobile ? 'gap-0.5' : 'gap-1'}`}>
-          {Array.from({ length: offset }).map((_, i) => <div key={`e-${i}`} className={`${isMobile ? 'h-6' : 'h-8'}`} />)}
+        <div className={`grid grid-cols-7 ${isMobile ? 'gap-1' : 'gap-1'}`}>
+          {Array.from({ length: offset }).map((_, i) => <div key={`e-${i}`} className={`${isMobile ? 'h-8' : 'h-9'}`} />)}
           {days.map((day) => {
             const inRange = isInRange(day);
             const start = isStart(day);
@@ -166,9 +166,9 @@ function CustomCalendar({ selected, onSelect, onClose, onApply, initialTab = 'we
                 key={day.toISOString()}
                 onClick={() => handleDayClick(day)}
                 onMouseEnter={() => handleDayHover(day)}
-                whileHover={{ scale: 1.05 }}
+                whileHover={{ scale: 1.08 }}
                 whileTap={{ scale: 0.95 }}
-                className={`${isMobile ? 'h-6 w-6 text-[10px]' : 'h-8 w-8 text-xs'} rounded-full transition-all relative flex items-center justify-center mx-auto
+                className={`${isMobile ? 'h-8 w-8 text-[11px]' : 'h-9 w-9 text-xs'} rounded-full transition-all relative flex items-center justify-center mx-auto font-medium
                   ${inRange && !start && !end ? 'bg-gradient-to-r from-pink-100 to-rose-100' : ''}
                   ${start ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white font-bold shadow-md' : ''}
                   ${end && !start ? 'bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold shadow-md' : ''}
@@ -189,7 +189,7 @@ function CustomCalendar({ selected, onSelect, onClose, onApply, initialTab = 'we
   };
 
   return (
-    <div className={`select-none bg-white rounded-2xl overflow-hidden shadow-xl border border-pink-100 ${isMobile ? 'max-h-[80vh] flex flex-col' : ''}`}>
+    <div className={`select-none bg-white rounded-2xl overflow-hidden shadow-xl border border-pink-100 ${isMobile ? 'max-h-[85vh] flex flex-col w-[95vw] max-w-sm' : ''}`}>
       {/* Tabs: Semanas / Calendario */}
       <div className="flex border-b border-pink-100 flex-shrink-0">
         <button
