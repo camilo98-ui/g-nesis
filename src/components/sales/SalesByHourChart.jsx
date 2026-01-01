@@ -87,13 +87,13 @@ export default function SalesByHourChart({ shiftRecords = [], formatCurrency }) 
   return (
     <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
-          <Clock className="w-4 h-4 text-orange-500" />
+        <CardTitle className="text-xs md:text-sm font-medium text-gray-600 flex items-center gap-1.5 md:gap-2">
+          <Clock className="w-3.5 h-3.5 md:w-4 md:h-4 text-orange-500" />
           Ventas por Hora
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="h-64">
+        <div className="h-48 md:h-64">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={hourlyData}>
               <defs>
@@ -103,10 +103,10 @@ export default function SalesByHourChart({ shiftRecords = [], formatCurrency }) 
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey="hourLabel" tick={{ fontSize: 11 }} />
-              <YAxis tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M COP`} tick={{ fontSize: 11 }} />
+              <XAxis dataKey="hourLabel" tick={{ fontSize: 9 }} className="md:text-[11px]" />
+              <YAxis tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} tick={{ fontSize: 9 }} className="md:text-[11px]" />
               <Tooltip 
-                contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
+                contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)', fontSize: '11px' }}
                 formatter={(v) => [formatCurrency ? formatCurrency(v) : `$${v}`, 'Ventas']}
                 labelFormatter={(label) => `Hora: ${label}`}
               />
@@ -116,7 +116,7 @@ export default function SalesByHourChart({ shiftRecords = [], formatCurrency }) 
         </div>
         
         {/* Indicadores de turno con mini gráficas */}
-        <div className="grid grid-cols-3 gap-3 mt-4">
+        <div className="grid grid-cols-3 gap-2 md:gap-3 mt-3 md:mt-4">
           {Object.entries(SHIFT_TIMES).map(([key, shift]) => {
             const Icon = shift.icon;
             const shiftSales = shiftRecords
@@ -140,19 +140,19 @@ export default function SalesByHourChart({ shiftRecords = [], formatCurrency }) 
                 onClick={() => setSelectedShift(selectedShift === key ? 'all' : key)}
                 whileHover={{ scale: 1.05, y: -3 }}
                 whileTap={{ scale: 0.98 }}
-                className={`bg-gradient-to-br ${shift.bgColor} rounded-xl p-3 text-center shadow-md transition-all ${
-                  selectedShift === key ? 'ring-2 ring-offset-2' : ''
+                className={`bg-gradient-to-br ${shift.bgColor} rounded-lg md:rounded-xl p-2 md:p-3 text-center shadow-md transition-all ${
+                  selectedShift === key ? 'ring-2 ring-offset-1 md:ring-offset-2' : ''
                 }`}
                 style={{ ringColor: shift.color }}
               >
-                <div className="flex items-center justify-between mb-2">
-                  <Icon className="w-5 h-5" style={{ color: shift.color }} />
-                  <span className="text-[10px] font-medium text-gray-600">{shiftCount} reg</span>
+                <div className="flex items-center justify-between mb-1.5 md:mb-2">
+                  <Icon className="w-3.5 h-3.5 md:w-5 md:h-5 flex-shrink-0" style={{ color: shift.color }} />
+                  <span className="text-[8px] md:text-[10px] font-medium text-gray-600">{shiftCount} reg</span>
                 </div>
                 
                 {/* Mini gráfica sparkline */}
                 {shiftHourlyData.length > 0 && (
-                  <div className="h-8 mb-2 -mx-2">
+                  <div className="h-6 md:h-8 mb-1.5 md:mb-2 -mx-1 md:-mx-2">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={shiftHourlyData}>
                         <defs>
@@ -174,20 +174,20 @@ export default function SalesByHourChart({ shiftRecords = [], formatCurrency }) 
                   </div>
                 )}
                 
-                <p className="text-xs font-medium text-gray-700">{shift.label}</p>
-                <p className="text-base font-bold mb-1" style={{ color: shift.color }}>
-                  {formatCurrency ? formatCurrency(shiftSales) : `$${Math.round(shiftSales/1000000)}M COP`}
+                <p className="text-[10px] md:text-xs font-medium text-gray-700 truncate">{shift.label}</p>
+                <p className="text-xs md:text-base font-bold mb-1 leading-tight truncate" style={{ color: shift.color }}>
+                  {formatCurrency ? formatCurrency(shiftSales) : `$${Math.round(shiftSales/1000000)}M`}
                 </p>
                 
                 {/* Indicadores adicionales */}
-                <div className="flex justify-around text-[9px] text-gray-500 pt-2 border-t border-gray-200/50">
+                <div className="flex justify-around text-[8px] md:text-[9px] text-gray-500 pt-1.5 md:pt-2 border-t border-gray-200/50">
                   <div>
                     <p className="font-medium">Trans</p>
                     <p className="font-bold text-gray-700">{shiftTransactions}</p>
                   </div>
                   <div>
                     <p className="font-medium">Ticket</p>
-                    <p className="font-bold text-gray-700">
+                    <p className="font-bold text-gray-700 truncate">
                       {avgTicket > 0 ? `$${Math.round(avgTicket/1000)}K` : '-'}
                     </p>
                   </div>
