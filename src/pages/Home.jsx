@@ -487,9 +487,6 @@ export default function Home() {
   if (!isLoggedIn) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-white via-slate-50/50 to-pink-50/40 relative overflow-hidden">
-        {/* Lluvia de iconos Popsy */}
-        <PopsyRainingIcons />
-
         {/* Background Effects - Desktop only */}
         <div className="hidden lg:block absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute -top-48 -right-48 w-[600px] h-[600px] bg-gradient-to-br from-pink-400/15 via-rose-400/10 to-transparent rounded-full blur-3xl opacity-50" />
@@ -855,7 +852,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen relative overflow-hidden">
-
       <div className="max-w-6xl mx-auto px-4 py-6 relative z-10">
 
 

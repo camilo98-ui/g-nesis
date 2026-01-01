@@ -42,9 +42,6 @@ export default function Layout({ children, currentPageName }) {
   return (
     <ErrorBoundary>
       <div className="min-h-screen app-container">
-        {/* Lluvia de iconos Popsy */}
-        <PopsyRainingIcons />
-
         {/* Main Content */}
         <main className="pt-4 min-h-screen pb-4 relative">
           {/* Simplified Static Background */}
