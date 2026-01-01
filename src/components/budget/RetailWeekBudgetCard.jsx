@@ -254,7 +254,6 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
               onClick={() => toggleSection('daily')}
               className="bg-gradient-to-br from-blue-400/90 to-blue-500/90 rounded-2xl shadow-md p-6 text-left border border-blue-300/50 relative overflow-hidden group"
             >
-              <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="relative z-10">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
@@ -301,7 +300,6 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                   : 'bg-gradient-to-br from-rose-400/90 to-rose-500/90 border-rose-300/50'
               }`}
             >
-              <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="relative z-10">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
