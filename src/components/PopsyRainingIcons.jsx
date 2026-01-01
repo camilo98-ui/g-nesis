@@ -51,9 +51,6 @@ export default function PopsyRainingIcons() {
               src={item.iconUrl} 
               alt="Popsy"
               className="w-full h-full object-contain"
-              style={{
-                filter: 'brightness(0) saturate(100%) invert(20%) sepia(83%) saturate(2519%) hue-rotate(314deg) brightness(91%) contrast(91%)'
-              }}
             />
           </motion.div>
         );
