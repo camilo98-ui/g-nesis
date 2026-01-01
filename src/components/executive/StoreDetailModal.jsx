@@ -14,16 +14,20 @@ export default function StoreDetailModal({ store, onClose, allDailySales, dateRa
   const [activeMetric, setActiveMetric] = useState('ventas');
   // Filtrar ventas de la tienda en el rango
   const storeSales = useMemo(() => {
+    const fromStr = format(dateRange.from, 'yyyy-MM-dd');
+    const toStr = format(dateRange.to, 'yyyy-MM-dd');
+    
     return allDailySales
       .filter(s => {
-        try {
-          const d = new Date(s.date);
-          return s.store_id === store.code && !isNaN(d.getTime()) && d >= dateRange.from && d <= dateRange.to;
-        } catch {
-          return false;
-        }
+        if (s.store_id !== store.code) return false;
+        const saleDateStr = s.date?.split('T')[0] || s.date;
+        return saleDateStr >= fromStr && saleDateStr <= toStr;
       })
-      .sort((a, b) => new Date(a.date) - new Date(b.date));
+      .sort((a, b) => {
+        const dateA = a.date?.split('T')[0] || a.date;
+        const dateB = b.date?.split('T')[0] || b.date;
+        return dateA.localeCompare(dateB);
+      });
   }, [allDailySales, store.code, dateRange]);
 
   // Meta diaria (distribución proporcional del presupuesto mensual)
