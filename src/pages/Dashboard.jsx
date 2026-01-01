@@ -1509,46 +1509,6 @@ export default function Dashboard() {
             animate={{ opacity: 1 }}
             className="space-y-6">
 
-                {/* Sustentación Ejecutiva - Modo Actual */}
-                <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-gradient-to-r from-slate-50 to-gray-50 border-l-4 border-slate-700 rounded-xl shadow-sm">
-
-                  <div className="p-4">
-                    <div className="flex items-start gap-3 mb-4">
-                      <div className="w-10 h-10 bg-slate-700 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <BarChart3 className="w-5 h-5 text-white" />
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-bold text-slate-900 text-base">Desempeño del Período Actual</h4>
-                      </div>
-                    </div>
-
-                    <div className="grid md:grid-cols-2 gap-4">
-                      {/* Conclusiones */}
-                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                        <h5 className="font-bold text-blue-900 text-sm mb-2 flex items-center gap-1">
-                          <span className="text-blue-600">📊</span> Conclusiones
-                        </h5>
-                        <p className="text-xs text-blue-900 leading-relaxed">
-                          Estas gráficas revelan el comportamiento real del negocio día a día. Los picos y valles en ventas muestran qué días funcionan mejor. La distribución horaria indica cuándo se concentra la demanda. El ticket promedio muestra si estamos maximizando cada cliente que entra.
-                        </p>
-                      </div>
-
-                      {/* Plan de Acción */}
-                      <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
-                        <h5 className="font-bold text-emerald-900 text-sm mb-2 flex items-center gap-1">
-                          <span className="text-emerald-600">🎯</span> Plan de Acción
-                        </h5>
-                        <p className="text-xs text-emerald-900 leading-relaxed">
-                          1) Identificar qué días o turnos tienen mejor desempeño y buscar el patrón. 2) Reforzar personal en horarios pico para no perder ventas por falta de atención. 3) Si el ticket es bajo, capacitar en venta sugerida. 4) Días bajos requieren promociones específicas.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-
                 {/* Main Charts Row */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {/* Sales Trend */}
