@@ -393,12 +393,18 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                     />
                     <Tooltip 
                       contentStyle={{ 
-                        background: 'linear-gradient(135deg, #fda4af 0%, #e9d5ff 100%)', 
-                        border: 'none', 
-                        borderRadius: '16px', 
-                        color: '#fff', 
-                        padding: '16px',
-                        boxShadow: '0 8px 32px rgba(253, 164, 175, 0.25)'
+                        background: '#ffffff', 
+                        border: '2px solid #fda4af', 
+                        borderRadius: '12px', 
+                        color: '#1e293b', 
+                        padding: '12px 16px',
+                        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)'
+                      }}
+                      labelStyle={{
+                        color: '#64748b',
+                        fontSize: '12px',
+                        fontWeight: '600',
+                        marginBottom: '8px'
                       }}
                       labelFormatter={(label, payload) => {
                         const data = payload?.[0]?.payload;
@@ -408,13 +414,14 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                         const cumplimiento = props.payload.cumplimiento;
                         if (name === 'ventas') {
                           return [
-                            <div key="ventas" style={{ fontSize: '14px', fontWeight: 'bold' }}>
+                            <div key="ventas" style={{ fontSize: '14px', fontWeight: 'bold', color: '#0f172a' }}>
                               {formatCurrency(value)}
                               {cumplimiento > 0 && (
                                 <span style={{ 
                                   marginLeft: '8px', 
-                                  color: cumplimiento >= 100 ? '#86efac' : '#fcd34d',
-                                  fontSize: '12px'
+                                  color: cumplimiento >= 100 ? '#059669' : '#d97706',
+                                  fontSize: '12px',
+                                  fontWeight: '700'
                                 }}>
                                   ({cumplimiento.toFixed(0)}%)
                                 </span>
@@ -424,7 +431,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                           ];
                         } else {
                           return [
-                            <div key="ppto" style={{ fontSize: '14px', fontWeight: 'bold' }}>
+                            <div key="ppto" style={{ fontSize: '14px', fontWeight: 'bold', color: '#0f172a' }}>
                               {formatCurrency(value)}
                             </div>,
                             '🎯 Presupuesto Diario'
