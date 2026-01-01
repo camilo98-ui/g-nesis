@@ -12,6 +12,7 @@ import ComparableChartsGrid from '@/components/executive/ComparableChartsGrid';
 
 import DailyGoalsCard from '@/components/gamification/DailyGoalsCard';
 import DailyBudgetCard from '@/components/dashboard/DailyBudgetCard';
+import RetailWeekBudgetCard from '@/components/budget/RetailWeekBudgetCard';
 import ProjectionDetailModal from '@/components/dashboard/ProjectionDetailModal';
 import SalesByHourChart from '@/components/sales/SalesByHourChart';
 
@@ -1738,6 +1739,16 @@ export default function Dashboard() {
               queryClient.invalidateQueries(['budgets']);
             }} />
 
+
+            {/* Retail Week Budget - Solo en modo ACTUAL */}
+            {!showComparison && currentBudget?.sales_budget &&
+          <RetailWeekBudgetCard
+            dailySales={dailySales}
+            activeBudget={currentBudget}
+            storeId={selectedStore}
+            formatCurrency={formatCurrency} />
+
+          }
 
             {/* Daily Budget - Solo en modo ACTUAL */}
             {!showComparison &&
