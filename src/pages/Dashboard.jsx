@@ -1248,6 +1248,16 @@ export default function Dashboard() {
             )}
             </div>
 
+            {/* Retail Week Budget - Presupuesto del Día (MÁS IMPORTANTE) */}
+            {!showComparison && currentBudget?.sales_budget &&
+          <RetailWeekBudgetCard
+            dailySales={dailySales}
+            activeBudget={currentBudget}
+            storeId={selectedStore}
+            formatCurrency={formatCurrency} />
+
+          }
+
             {/* Detail Panel */}
             <AnimatePresence>
               {activeMetric && !activeMetric.includes('_comp') &&
@@ -1739,16 +1749,6 @@ export default function Dashboard() {
               queryClient.invalidateQueries(['budgets']);
             }} />
 
-
-            {/* Retail Week Budget - Solo en modo ACTUAL */}
-            {!showComparison && currentBudget?.sales_budget &&
-          <RetailWeekBudgetCard
-            dailySales={dailySales}
-            activeBudget={currentBudget}
-            storeId={selectedStore}
-            formatCurrency={formatCurrency} />
-
-          }
 
             {/* Daily Budget - Solo en modo ACTUAL */}
             {!showComparison &&
