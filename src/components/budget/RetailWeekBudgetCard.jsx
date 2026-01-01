@@ -217,14 +217,14 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       animate={{ opacity: 1, y: 0 }}
       className="mb-6"
     >
-      <Card className="bg-gradient-to-br from-slate-50/50 via-blue-50/20 to-indigo-50/20 border border-slate-200/60 shadow-lg overflow-hidden">
-        <CardHeader className="bg-gradient-to-r from-blue-100/30 to-indigo-100/30 border-b border-slate-200/40 pb-4">
+      <Card className="bg-gradient-to-br from-rose-50/30 via-pink-50/20 to-purple-50/20 border border-rose-200/40 shadow-lg overflow-hidden">
+        <CardHeader className="bg-gradient-to-r from-rose-100/20 to-pink-100/20 border-b border-rose-200/30 pb-4">
           <div className="flex items-center justify-between">
             <CardTitle className="text-xl font-black text-slate-900 flex items-center gap-3">
               <motion.div
                 animate={{ rotate: [0, 360] }}
                 transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-400/80 to-indigo-400/80 flex items-center justify-center shadow-md"
+                className="w-12 h-12 rounded-xl bg-gradient-to-br from-rose-400/60 to-pink-400/60 flex items-center justify-center shadow-md"
               >
                 <Target className="w-7 h-7 text-white" />
               </motion.div>
@@ -250,7 +250,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
             whileHover={{ scale: 1.02, y: -2 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => toggleSection('daily')}
-            className="w-full bg-gradient-to-br from-blue-400/90 to-blue-500/90 rounded-2xl shadow-md p-6 text-left border border-blue-300/50 relative overflow-hidden group"
+            className="w-full bg-gradient-to-br from-rose-400/80 to-pink-400/80 rounded-2xl shadow-md p-6 text-left border border-rose-300/40 relative overflow-hidden group"
           >
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-4">
@@ -259,8 +259,8 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                   <p className="text-sm text-white/80 font-medium">Meta del Día</p>
                 </div>
                 {needsRecovery && (
-                  <div className="px-2 py-1 bg-amber-200/80 rounded-full">
-                    <p className="text-[10px] font-black text-amber-800">AJUSTADO</p>
+                  <div className="px-2 py-1 bg-amber-100/60 rounded-full">
+                    <p className="text-[10px] font-black text-amber-700">AJUSTADO</p>
                   </div>
                 )}
               </div>
@@ -327,7 +327,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
               >
                 <div className="flex items-center justify-between mb-3">
                   <h4 className="font-bold text-slate-900 flex items-center gap-2">
-                    <LineChart className="w-5 h-5 text-blue-500/80" />
+                    <LineChart className="w-5 h-5 text-rose-400/70" />
                     Tendencia Diaria del Mes
                   </h4>
                   <button
@@ -431,60 +431,60 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
             whileHover={{ scale: 1.01, y: -2 }}
             whileTap={{ scale: 0.99 }}
             onClick={() => toggleSection('weekly')}
-            className="w-full bg-gradient-to-r from-purple-50/60 to-pink-50/60 rounded-xl p-4 border border-purple-200/50 hover:border-purple-300/60 transition-all text-left"
+            className="w-full bg-gradient-to-r from-purple-50/40 to-pink-50/40 rounded-xl p-4 border border-purple-200/40 hover:border-pink-300/50 transition-all text-left"
           >
             <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-purple-500/80" />
-                <h4 className="font-bold text-purple-800/90">Semana {budgetData.currentWeekNumber} (Lun-Dom)</h4>
+            <div className="flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-purple-400/70" />
+              <h4 className="font-bold text-purple-700/80">Semana {budgetData.currentWeekNumber} (Lun-Dom)</h4>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className={`px-3 py-1 rounded-full text-xs font-bold ${
+                budgetData.weeklyCompliance >= 100 
+                  ? 'bg-emerald-100/60 text-emerald-600' 
+                  : 'bg-amber-100/60 text-amber-600'
+              }`}>
+                {budgetData.weeklyCompliance.toFixed(0)}%
               </div>
-              <div className="flex items-center gap-3">
-                <div className={`px-3 py-1 rounded-full text-xs font-bold ${
-                  budgetData.weeklyCompliance >= 100 
-                    ? 'bg-emerald-100/80 text-emerald-700' 
-                    : 'bg-amber-100/80 text-amber-700'
-                }`}>
-                  {budgetData.weeklyCompliance.toFixed(0)}%
-                </div>
-                {expandedSection === 'weekly' ? <ChevronUp className="w-4 h-4 text-purple-500/80" /> : <ChevronDown className="w-4 h-4 text-purple-500/80" />}
-              </div>
+              {expandedSection === 'weekly' ? <ChevronUp className="w-4 h-4 text-purple-400/70" /> : <ChevronDown className="w-4 h-4 text-purple-400/70" />}
+            </div>
             </div>
             <div className="grid grid-cols-3 gap-3">
               <div>
-                <p className="text-xs text-purple-600/80 mb-1">Meta Semanal</p>
-                <p className="text-lg font-black text-purple-700">
+                <p className="text-xs text-purple-500/70 mb-1">Meta Semanal</p>
+                <p className="text-lg font-black text-purple-600">
                   {formatCurrency(budgetData.weeklyBudget)}
                 </p>
               </div>
               <div>
-                <p className="text-xs text-purple-600/80 mb-1">Venta Actual</p>
-                <p className="text-lg font-black text-purple-700">
+                <p className="text-xs text-purple-500/70 mb-1">Venta Actual</p>
+                <p className="text-lg font-black text-purple-600">
                   {formatCurrency(budgetData.currentWeekSales)}
                 </p>
               </div>
               <div>
-                <p className="text-xs text-indigo-600/80 mb-1">Proyección</p>
-                <p className="text-lg font-black text-indigo-700">
+                <p className="text-xs text-pink-500/70 mb-1">Proyección</p>
+                <p className="text-lg font-black text-pink-600">
                   {formatCurrency(budgetData.weekProjection)}
                 </p>
               </div>
             </div>
             <div className="mt-3 space-y-1.5">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-purple-600/70">Cumplimiento actual</span>
-                <span className="font-bold text-purple-700">{budgetData.weeklyCompliance.toFixed(0)}%</span>
+                <span className="text-purple-500/60">Cumplimiento actual</span>
+                <span className="font-bold text-purple-600">{budgetData.weeklyCompliance.toFixed(0)}%</span>
               </div>
               <div className="h-2 bg-white/50 rounded-full overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${Math.min(budgetData.weeklyCompliance, 100)}%` }}
                   transition={{ duration: 1, delay: 0.2 }}
-                  className="h-full bg-gradient-to-r from-purple-400/80 to-pink-400/80 rounded-full"
+                  className="h-full bg-gradient-to-r from-purple-400/60 to-pink-400/60 rounded-full"
                 />
               </div>
               <div className="flex items-center justify-between text-xs pt-1">
-                <span className="text-indigo-600/70">Proyección de cierre</span>
-                <span className={`font-bold ${budgetData.projectionCompliance >= 100 ? 'text-emerald-600' : 'text-amber-600'}`}>
+                <span className="text-pink-500/60">Proyección de cierre</span>
+                <span className={`font-bold ${budgetData.projectionCompliance >= 100 ? 'text-emerald-500' : 'text-amber-500'}`}>
                   {budgetData.projectionCompliance.toFixed(0)}%
                 </span>
               </div>
@@ -502,7 +502,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
               >
                 <div className="flex items-center justify-between mb-3">
                   <h4 className="font-bold text-slate-900 flex items-center gap-2">
-                    <BarChart3 className="w-5 h-5 text-purple-500/80" />
+                    <BarChart3 className="w-5 h-5 text-purple-400/70" />
                     Comparativa Semanal
                   </h4>
                   <button
@@ -533,30 +533,30 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <motion.div
               whileHover={{ scale: 1.03, y: -2 }}
-              className="bg-gradient-to-br from-slate-50/80 to-slate-100/80 rounded-lg p-3 border border-slate-200/50"
+              className="bg-gradient-to-br from-rose-50/40 to-pink-50/40 rounded-lg p-3 border border-rose-200/40"
             >
-              <p className="text-xs text-slate-600 mb-1">Base Diaria</p>
-              <p className="text-lg font-bold text-slate-700">
+              <p className="text-xs text-rose-500/70 mb-1">Base Diaria</p>
+              <p className="text-lg font-bold text-rose-600">
                 {formatCurrency(budgetData.dailyBaseBudget)}
               </p>
             </motion.div>
 
             <motion.div
               whileHover={{ scale: 1.03, y: -2 }}
-              className="bg-gradient-to-br from-blue-50/70 to-cyan-50/70 rounded-lg p-3 border border-blue-200/50"
+              className="bg-gradient-to-br from-purple-50/40 to-violet-50/40 rounded-lg p-3 border border-purple-200/40"
             >
-              <p className="text-xs text-blue-600/80 mb-1">Días Restantes</p>
-              <p className="text-lg font-bold text-blue-700">
+              <p className="text-xs text-purple-500/70 mb-1">Días Restantes</p>
+              <p className="text-lg font-bold text-purple-600">
                 {budgetData.remainingDays}
               </p>
             </motion.div>
 
             <motion.div
               whileHover={{ scale: 1.03, y: -2 }}
-              className="bg-gradient-to-br from-purple-50/70 to-violet-50/70 rounded-lg p-3 border border-purple-200/50"
+              className="bg-gradient-to-br from-pink-50/40 to-rose-50/40 rounded-lg p-3 border border-pink-200/40"
             >
-              <p className="text-xs text-purple-600/80 mb-1">Por Vender</p>
-              <p className="text-lg font-bold text-purple-700">
+              <p className="text-xs text-pink-500/70 mb-1">Por Vender</p>
+              <p className="text-lg font-bold text-pink-600">
                 {formatCurrency(budgetData.remainingBudget)}
               </p>
             </motion.div>
@@ -565,14 +565,14 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
               whileHover={{ scale: 1.03, y: -2 }}
               className={`rounded-lg p-3 border ${
                 isOnTrack 
-                  ? 'bg-gradient-to-br from-emerald-50/70 to-green-50/70 border-emerald-200/50' 
-                  : 'bg-gradient-to-br from-amber-50/70 to-orange-50/70 border-amber-200/50'
+                  ? 'bg-gradient-to-br from-emerald-50/40 to-green-50/40 border-emerald-200/40' 
+                  : 'bg-gradient-to-br from-amber-50/40 to-orange-50/40 border-amber-200/40'
               }`}
             >
-              <p className={`text-xs mb-1 ${isOnTrack ? 'text-emerald-600/80' : 'text-amber-600/80'}`}>
+              <p className={`text-xs mb-1 ${isOnTrack ? 'text-emerald-500/70' : 'text-amber-500/70'}`}>
                 Cumplimiento
               </p>
-              <p className={`text-lg font-bold ${isOnTrack ? 'text-emerald-700' : 'text-amber-700'}`}>
+              <p className={`text-lg font-bold ${isOnTrack ? 'text-emerald-600' : 'text-amber-600'}`}>
                 {budgetData.compliance.toFixed(1)}%
               </p>
             </motion.div>
@@ -583,15 +583,15 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="bg-amber-50/60 border-l-4 border-amber-400/70 rounded-r-lg p-4"
+              className="bg-amber-50/40 border-l-4 border-amber-400/50 rounded-r-lg p-4"
             >
               <div className="flex items-start gap-3">
-                <AlertTriangle className="w-5 h-5 text-amber-500/80 flex-shrink-0 mt-0.5" />
+                <AlertTriangle className="w-5 h-5 text-amber-500/70 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="font-bold text-amber-800/90 text-sm mb-1">
+                  <p className="font-bold text-amber-700/80 text-sm mb-1">
                     Presupuesto Redistribuido
                   </p>
-                  <p className="text-xs text-amber-700/90 leading-relaxed">
+                  <p className="text-xs text-amber-600/80 leading-relaxed">
                     Existe una brecha de {formatCurrency(budgetData.accumulatedGap)} que debe recuperarse. 
                     El presupuesto diario se ajustó de {formatCurrency(budgetData.dailyBaseBudget)} a {formatCurrency(budgetData.adjustedDailyBudget)} 
                     para alcanzar la meta del mes en los {budgetData.remainingDays} días restantes.
@@ -603,15 +603,15 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="bg-emerald-50/60 border-l-4 border-emerald-400/70 rounded-r-lg p-4"
+              className="bg-emerald-50/40 border-l-4 border-emerald-400/50 rounded-r-lg p-4"
             >
               <div className="flex items-start gap-3">
-                <CheckCircle2 className="w-5 h-5 text-emerald-500/80 flex-shrink-0 mt-0.5" />
+                <CheckCircle2 className="w-5 h-5 text-emerald-500/70 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="font-bold text-emerald-800/90 text-sm mb-1">
+                  <p className="font-bold text-emerald-700/80 text-sm mb-1">
                     ¡En meta!
                   </p>
-                  <p className="text-xs text-emerald-700/90 leading-relaxed">
+                  <p className="text-xs text-emerald-600/80 leading-relaxed">
                     El negocio está cumpliendo el presupuesto. Mantén el ritmo de ventas para alcanzar 
                     la meta del mes. Presupuesto diario: {formatCurrency(budgetData.adjustedDailyBudget)}
                   </p>
