@@ -96,19 +96,19 @@ export default function WeekFilter({ selectedWeek, onWeekChange, multiSelect = t
           </Button>
         </motion.div>
       </PopoverTrigger>
-      <PopoverContent className="w-72 p-0 border-0 shadow-xl" align="start">
+      <PopoverContent className="w-[95vw] max-w-sm md:w-80 p-0 border-0 shadow-xl" align="start">
         <div className="bg-white rounded-2xl overflow-hidden border border-pink-100">
           {/* Header */}
-          <div className="bg-gradient-to-r from-pink-500 to-rose-500 p-3 text-white">
+          <div className="bg-gradient-to-r from-pink-500 to-rose-500 p-4 md:p-3 text-white">
             <div className="flex items-center gap-2">
-              <Calendar className="w-5 h-5" />
-              <span className="font-bold">Seleccionar Semana</span>
+              <Calendar className="w-5 h-5 md:w-5 md:h-5" />
+              <span className="font-bold text-base md:text-sm">Seleccionar Semana</span>
             </div>
-            <p className="text-xs text-white/80 mt-1">Año {new Date().getFullYear()}</p>
+            <p className="text-xs md:text-xs text-white/80 mt-1">Año {new Date().getFullYear()}</p>
           </div>
 
           {/* Lista de semanas */}
-          <div className="max-h-64 overflow-y-auto p-2">
+          <div className="max-h-[50vh] md:max-h-64 overflow-y-auto p-3 md:p-2">
             {weeksOfYear.map((week, idx) => {
               const isSelected = multiSelect ?
               selectedWeeks.some((w) => w.weekNum === week.weekNum) :
@@ -121,7 +121,7 @@ export default function WeekFilter({ selectedWeek, onWeekChange, multiSelect = t
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: idx * 0.02 }}
                   onClick={() => handleSelectWeek(week)}
-                  className={`w-full flex items-center justify-between p-2.5 rounded-xl mb-1 transition-all ${
+                  className={`w-full flex items-center justify-between p-3.5 md:p-2.5 rounded-xl mb-2 md:mb-1 transition-all ${
                   isSelected ?
                   'bg-gradient-to-r from-pink-100 to-rose-100 border-2 border-pink-300' :
                   week.isCurrent ?
@@ -131,26 +131,26 @@ export default function WeekFilter({ selectedWeek, onWeekChange, multiSelect = t
 
                   <div className="text-left">
                     <div className="flex items-center gap-2">
-                      <span className={`font-bold text-sm ${
+                      <span className={`font-bold text-base md:text-sm ${
                       isSelected ? 'text-pink-600' : 'text-gray-700'}`
                       }>
                         {week.label}
                       </span>
                       {week.isCurrent &&
-                      <span className="px-1.5 py-0.5 bg-pink-500 text-white text-[9px] rounded-full font-bold">
+                      <span className="px-2 py-1 md:px-1.5 md:py-0.5 bg-pink-500 text-white text-[10px] md:text-[9px] rounded-full font-bold">
                           HOY
                         </span>
                       }
                     </div>
-                    <span className="text-xs text-gray-500">{week.dateRange}</span>
+                    <span className="text-sm md:text-xs text-gray-500">{week.dateRange}</span>
                   </div>
                   {isSelected &&
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="w-5 h-5 rounded-full bg-pink-500 flex items-center justify-center">
+                    className="w-6 h-6 md:w-5 md:h-5 rounded-full bg-pink-500 flex items-center justify-center">
 
-                      <Check className="w-3 h-3 text-white" />
+                      <Check className="w-4 h-4 md:w-3 md:h-3 text-white" />
                     </motion.div>
                   }
                 </motion.button>);
@@ -159,12 +159,12 @@ export default function WeekFilter({ selectedWeek, onWeekChange, multiSelect = t
           </div>
 
           {/* Footer */}
-          <div className="p-2 border-t border-gray-100 bg-gray-50 space-y-1">
+          <div className="p-3 md:p-2 border-t border-gray-100 bg-gray-50 space-y-2 md:space-y-1">
             {multiSelect && selectedWeeks.length > 0 &&
             <Button
               size="sm"
               onClick={handleApplyMulti}
-              className="w-full bg-gradient-to-r from-pink-500 to-rose-500 text-white">
+              className="w-full bg-gradient-to-r from-pink-500 to-rose-500 text-white h-10 md:h-9 text-sm md:text-sm">
 
                 Aplicar ({selectedWeeks.length} semana{selectedWeeks.length > 1 ? 's' : ''})
               </Button>
@@ -178,7 +178,7 @@ export default function WeekFilter({ selectedWeek, onWeekChange, multiSelect = t
                 onWeekChange?.(null);
                 setIsOpen(false);
               }}
-              className="w-full text-gray-500 hover:text-pink-600">
+              className="w-full text-gray-500 hover:text-pink-600 h-10 md:h-9 text-sm md:text-sm">
 
               Limpiar filtro
             </Button>
