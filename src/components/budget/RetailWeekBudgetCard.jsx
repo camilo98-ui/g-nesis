@@ -253,7 +253,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
             className="w-full bg-gradient-to-br from-blue-400/90 to-blue-500/90 rounded-2xl shadow-md p-6 text-left border border-blue-300/50 relative overflow-hidden group"
           >
             <div className="relative z-10">
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <Target className="w-6 h-6 text-white" />
                   <p className="text-sm text-white/80 font-medium">Meta del Día</p>
@@ -264,21 +264,52 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                   </div>
                 )}
               </div>
-              <motion.p
-                key={budgetData.adjustedDailyBudget}
-                initial={{ scale: 1.2, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                className="text-4xl font-black text-white mb-2"
-              >
-                {formatCurrency(budgetData.adjustedDailyBudget)}
-              </motion.p>
+
+              <div className="grid grid-cols-2 gap-6 mb-4">
+                <div>
+                  <p className="text-xs text-white/60 mb-2">Presupuesto del Día</p>
+                  <motion.p
+                    key={budgetData.adjustedDailyBudget}
+                    initial={{ scale: 1.2, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="text-4xl font-black text-white"
+                  >
+                    {formatCurrency(budgetData.adjustedDailyBudget)}
+                  </motion.p>
+                </div>
+                <div>
+                  <p className="text-xs text-white/60 mb-2">Venta Actual</p>
+                  <p className="text-4xl font-black text-white">
+                    {formatCurrency(budgetData.todayActualSales)}
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-2 mb-4">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-white/70">Cumplimiento del día</span>
+                  <span className="font-bold text-white">{budgetData.todayCompliance.toFixed(0)}%</span>
+                </div>
+                <div className="relative h-3 bg-white/20 rounded-full overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${Math.min(budgetData.todayCompliance, 100)}%` }}
+                    transition={{ duration: 1, ease: "easeOut" }}
+                    className="h-full bg-white rounded-full"
+                  />
+                </div>
+              </div>
+
               {needsRecovery && (
-                <p className="text-xs text-white/70 flex items-center gap-1">
-                  <AlertTriangle className="w-3 h-3" />
-                  Incluye recuperación de {formatCurrency(budgetData.accumulatedGap)}
-                </p>
+                <div className="bg-white/10 rounded-lg p-3 mb-3">
+                  <p className="text-xs text-white/70 flex items-center gap-1">
+                    <AlertTriangle className="w-3 h-3" />
+                    Incluye recuperación de {formatCurrency(budgetData.accumulatedGap)}
+                  </p>
+                </div>
               )}
-              <div className="flex items-center gap-2 mt-3 text-white/80">
+
+              <div className="flex items-center gap-2 text-white/80 pt-2 border-t border-white/20">
                 {expandedSection === 'daily' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                 <span className="text-xs font-medium">Ver tendencia diaria</span>
               </div>
