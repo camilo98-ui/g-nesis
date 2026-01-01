@@ -17,7 +17,11 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
     const monthStart = startOfMonth(now);
     const monthEnd = endOfMonth(now);
 
-    // Obtener semanas retail del mes (lunes a domingo)
+    // Semana retail actual: de lunes a domingo (puede empezar en mes anterior)
+    const currentWeekStart = startOfWeek(now, { weekStartsOn: 1 });
+    const currentWeekEnd = endOfWeek(now, { weekStartsOn: 1 });
+
+    // Obtener todas las semanas retail que tocan el mes actual
     const weeks = eachWeekOfInterval(
       { start: monthStart, end: monthEnd },
       { weekStartsOn: 1 }
@@ -61,9 +65,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       adjustedDailyBudget = remainingBudget / remainingDays;
     }
 
-    // Calcular semana retail actual
-    const currentWeekStart = startOfWeek(now, { weekStartsOn: 1 });
-    const currentWeekEnd = endOfWeek(now, { weekStartsOn: 1 });
+    // Calcular número de semana retail (considerando semanas que empiezan antes del mes)
     const currentWeekNumber = weeks.findIndex(w => {
       const weekEnd = endOfWeek(w, { weekStartsOn: 1 });
       return now >= w && now <= weekEnd;
@@ -80,11 +82,12 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       .filter(d => d >= monthStart && d <= monthEnd).length;
     const weeklyBudget = dailyBaseBudget * daysInCurrentWeek;
 
-    // Datos para gráficos
-    const dailyTrendData = eachDayOfInterval({ start: monthStart, end: now }).map(day => {
+    // Datos para gráficos - incluir TODOS los días de la semana retail actual (incluso del mes anterior)
+    const dailyTrendData = eachDayOfInterval({ start: currentWeekStart, end: now }).map(day => {
       const sale = dailySales.find(s => isSameDay(new Date(s.date), day));
       return {
         date: format(day, 'dd MMM', { locale: es }),
+        fullDate: format(day, 'EEEE dd MMM', { locale: es }),
         ventas: sale?.total_sales || 0,
         presupuesto: dailyBaseBudget,
         cumplimiento: sale?.total_sales ? (sale.total_sales / dailyBaseBudget * 100) : 0

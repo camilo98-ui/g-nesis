@@ -519,13 +519,20 @@ export default function Dashboard() {
   const { data: dailySales = [] } = useQuery({
     queryKey: ['dailySales', selectedStore],
     queryFn: async () => {
-      const monthStart = format(startOfMonth(new Date()), 'yyyy-MM-dd');
-      const monthEnd = format(endOfMonth(new Date()), 'yyyy-MM-dd');
+      const now = new Date();
+      const monthStart = format(startOfMonth(now), 'yyyy-MM-dd');
+      const monthEnd = format(endOfMonth(now), 'yyyy-MM-dd');
+      
+      // Incluir también días de la semana retail que caen en el mes anterior
+      const currentWeekStart = startOfWeek(now, { weekStartsOn: 1 });
+      const weekStartStr = format(currentWeekStart, 'yyyy-MM-dd');
+      
       const allSales = await base44.entities.DailySales.filter({ store_id: selectedStore });
-      // Filtrar solo ventas del mes actual
+      
+      // Filtrar ventas del mes actual + días de la semana retail actual del mes anterior
       return allSales.filter(sale => {
         const saleDate = sale.date?.split('T')[0] || sale.date;
-        return saleDate >= monthStart && saleDate <= monthEnd;
+        return saleDate >= weekStartStr && saleDate <= monthEnd;
       });
     },
     enabled: !!selectedStore,
