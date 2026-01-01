@@ -355,34 +355,51 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                     Tendencia Diaria del Mes
                   </h4>
                 </div>
-                <ResponsiveContainer width="100%" height={250}>
+                <ResponsiveContainer width="100%" height={280}>
                   <AreaChart data={budgetData.dailyTrendData}>
                     <defs>
                       <linearGradient id="colorVentas" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.8}/>
-                        <stop offset="95%" stopColor="#10b981" stopOpacity={0.1}/>
+                        <stop offset="5%" stopColor="#ec4899" stopOpacity={0.9}/>
+                        <stop offset="50%" stopColor="#f472b6" stopOpacity={0.5}/>
+                        <stop offset="95%" stopColor="#fda4af" stopOpacity={0.1}/>
                       </linearGradient>
                       <linearGradient id="colorPresupuesto" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#ef4444" stopOpacity={0.05}/>
+                        <stop offset="5%" stopColor="#c026d3" stopOpacity={0.5}/>
+                        <stop offset="95%" stopColor="#e879f9" stopOpacity={0.1}/>
                       </linearGradient>
+                      <filter id="glow">
+                        <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                        <feMerge>
+                          <feMergeNode in="coloredBlur"/>
+                          <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                      </filter>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#fecdd3" opacity={0.3} />
                     <XAxis 
                       dataKey="date" 
-                      stroke="#64748b" 
-                      fontSize={10}
-                      angle={-45}
+                      stroke="#be185d" 
+                      fontSize={11}
+                      angle={-35}
                       textAnchor="end"
-                      height={60}
+                      height={65}
+                      tick={{ fontWeight: 500 }}
                     />
                     <YAxis 
-                      stroke="#64748b" 
-                      fontSize={10}
+                      stroke="#be185d" 
+                      fontSize={11}
                       tickFormatter={(value) => `$${(value / 1000000).toFixed(1)}M`}
+                      tick={{ fontWeight: 500 }}
                     />
                     <Tooltip 
-                      contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '12px', color: '#fff', padding: '12px' }}
+                      contentStyle={{ 
+                        background: 'linear-gradient(135deg, #ec4899 0%, #c026d3 100%)', 
+                        border: 'none', 
+                        borderRadius: '16px', 
+                        color: '#fff', 
+                        padding: '16px',
+                        boxShadow: '0 8px 32px rgba(236, 72, 153, 0.4)'
+                      }}
                       labelFormatter={(label, payload) => {
                         const data = payload?.[0]?.payload;
                         return data?.fullDate || label;
@@ -391,13 +408,13 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                         const cumplimiento = props.payload.cumplimiento;
                         if (name === 'ventas') {
                           return [
-                            <div key="ventas" style={{ fontSize: '13px', fontWeight: 'bold' }}>
+                            <div key="ventas" style={{ fontSize: '14px', fontWeight: 'bold' }}>
                               {formatCurrency(value)}
                               {cumplimiento > 0 && (
                                 <span style={{ 
                                   marginLeft: '8px', 
-                                  color: cumplimiento >= 100 ? '#10b981' : '#f59e0b',
-                                  fontSize: '11px'
+                                  color: cumplimiento >= 100 ? '#86efac' : '#fcd34d',
+                                  fontSize: '12px'
                                 }}>
                                   ({cumplimiento.toFixed(0)}%)
                                 </span>
@@ -407,7 +424,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                           ];
                         } else {
                           return [
-                            <div key="ppto" style={{ fontSize: '13px', fontWeight: 'bold' }}>
+                            <div key="ppto" style={{ fontSize: '14px', fontWeight: 'bold' }}>
                               {formatCurrency(value)}
                             </div>,
                             '🎯 Presupuesto Diario'
@@ -416,27 +433,33 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                       }}
                     />
                     <Legend 
-                      wrapperStyle={{ paddingTop: '10px' }}
+                      wrapperStyle={{ paddingTop: '12px' }}
                       formatter={(value) => value === 'ventas' ? '💰 Venta Real' : '🎯 Presupuesto Diario'}
+                      iconType="circle"
                     />
                     <Area 
                       type="monotone" 
                       dataKey="presupuesto" 
-                      stroke="#ef4444" 
-                      strokeWidth={2}
-                      strokeDasharray="5 5"
+                      stroke="#c026d3" 
+                      strokeWidth={2.5}
+                      strokeDasharray="6 4"
                       fillOpacity={1} 
                       fill="url(#colorPresupuesto)"
                       name="presupuesto"
+                      animationDuration={1500}
+                      animationEasing="ease-out"
                     />
                     <Area 
                       type="monotone" 
                       dataKey="ventas" 
-                      stroke="#10b981" 
-                      strokeWidth={3}
+                      stroke="#ec4899" 
+                      strokeWidth={4}
                       fillOpacity={1} 
                       fill="url(#colorVentas)"
                       name="ventas"
+                      animationDuration={1800}
+                      animationEasing="ease-out"
+                      filter="url(#glow)"
                     />
                   </AreaChart>
                 </ResponsiveContainer>
