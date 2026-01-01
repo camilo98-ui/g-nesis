@@ -84,13 +84,22 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
 
     // Datos para gráficos - incluir TODOS los días de la semana retail actual (incluso del mes anterior)
     const dailyTrendData = eachDayOfInterval({ start: currentWeekStart, end: now }).map(day => {
-      const sale = dailySales.find(s => isSameDay(new Date(s.date), day));
+      // Buscar venta exacta del día comparando fechas
+      const sale = dailySales.find(s => {
+        const saleDate = new Date(s.date);
+        return saleDate.getFullYear() === day.getFullYear() &&
+               saleDate.getMonth() === day.getMonth() &&
+               saleDate.getDate() === day.getDate();
+      });
+
+      const ventasDelDia = sale ? (sale.total_sales || 0) : 0;
+
       return {
         date: format(day, 'dd MMM', { locale: es }),
         fullDate: format(day, 'EEEE dd MMM', { locale: es }),
-        ventas: sale?.total_sales || 0,
+        ventas: ventasDelDia,
         presupuesto: dailyBaseBudget,
-        cumplimiento: sale?.total_sales ? (sale.total_sales / dailyBaseBudget * 100) : 0
+        cumplimiento: ventasDelDia > 0 ? (ventasDelDia / dailyBaseBudget * 100) : 0
       };
     });
 
