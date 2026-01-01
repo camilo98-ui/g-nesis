@@ -11,7 +11,6 @@ import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
 import ComparableChartsGrid from '@/components/executive/ComparableChartsGrid';
 
 import DailyGoalsCard from '@/components/gamification/DailyGoalsCard';
-import DailyBudgetCard from '@/components/dashboard/DailyBudgetCard';
 import RetailWeekBudgetCard from '@/components/budget/RetailWeekBudgetCard';
 import ProjectionDetailModal from '@/components/dashboard/ProjectionDetailModal';
 import SalesByHourChart from '@/components/sales/SalesByHourChart';
@@ -1715,15 +1714,7 @@ export default function Dashboard() {
             }} />
 
 
-            {/* Daily Budget - Solo en modo ACTUAL */}
-            {!showComparison &&
-          <DailyBudgetCard
-            dailySales={dailySales}
-            budgets={budgets}
-            storeId={selectedStore}
-            formatCurrency={formatCurrency} />
 
-          }
 
             {/* Compra Vale Modal */}
             <AnimatePresence>
