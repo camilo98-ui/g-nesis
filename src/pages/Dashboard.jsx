@@ -1689,19 +1689,7 @@ export default function Dashboard() {
 
 
 
-            {/* Monthly Budget Manager Button */}
-            <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}>
 
-              <Button
-              onClick={() => setShowMonthlyBudget(true)}
-              className="mb-4 bg-gradient-to-r from-violet-500 to-purple-600 text-white gap-2">
-
-                <Calendar className="w-4 h-4" />
-                Configurar Presupuestos del Mes
-              </Button>
-            </motion.div>
 
             {/* Monthly Budget Manager Modal */}
             <MonthlyBudgetManager
