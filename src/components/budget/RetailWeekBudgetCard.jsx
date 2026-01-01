@@ -8,6 +8,7 @@ import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, R
 
 export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId, formatCurrency }) {
   const [expandedSection, setExpandedSection] = useState(null);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   // Calcular datos del presupuesto retail
   const budgetData = useMemo(() => {
@@ -253,11 +254,9 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
 
         <CardContent className="p-6 space-y-4">
           {/* Presupuesto del Día - DESTACADO */}
-          <motion.button
+          <motion.div
             whileHover={{ scale: 1.02, y: -2 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => toggleSection('daily')}
-            className="w-full bg-gradient-to-br from-rose-400/80 to-pink-400/80 rounded-2xl shadow-md p-6 text-left border border-rose-300/40 relative overflow-hidden group"
+            className="w-full bg-gradient-to-br from-rose-400/80 to-pink-400/80 rounded-2xl shadow-md p-6 border border-rose-300/40 relative overflow-hidden"
           >
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-4">
@@ -316,16 +315,22 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                 </div>
               )}
 
-              <div className="flex items-center gap-2 text-white/80 pt-2 border-t border-white/20">
-                {expandedSection === 'daily' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                <span className="text-xs font-medium">Ver tendencia diaria</span>
-              </div>
+              <motion.button
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="flex items-center gap-2 text-white/80 pt-2 border-t border-white/20 w-full hover:text-white transition-colors"
+              >
+                {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                <span className="text-xs font-medium">{isExpanded ? 'Ver menos' : 'Ver más detalles'}</span>
+              </motion.button>
             </div>
-          </motion.button>
+          </motion.div>
 
-          {/* Gráfico de Tendencia Diaria */}
+          {/* Contenido expandible */}
           <AnimatePresence>
-            {expandedSection === 'daily' && (
+            {isExpanded && (
+              <>
+                {/* Gráfico de Tendencia Diaria */}
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
@@ -337,12 +342,6 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                     <LineChart className="w-5 h-5 text-rose-400/70" />
                     Tendencia Diaria del Mes
                   </h4>
-                  <button
-                    onClick={() => setExpandedSection(null)}
-                    className="text-slate-400 hover:text-slate-600"
-                  >
-                    <ChevronUp className="w-5 h-5" />
-                  </button>
                 </div>
                 <ResponsiveContainer width="100%" height={250}>
                   <AreaChart data={budgetData.dailyTrendData}>
@@ -430,33 +429,28 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                   </AreaChart>
                 </ResponsiveContainer>
               </motion.div>
-            )}
-          </AnimatePresence>
 
-          {/* Semana Retail */}
-          <motion.button
-            whileHover={{ scale: 1.01, y: -2 }}
-            whileTap={{ scale: 0.99 }}
-            onClick={() => toggleSection('weekly')}
-            className="w-full bg-gradient-to-r from-purple-50/40 to-pink-50/40 rounded-xl p-4 border border-purple-200/40 hover:border-pink-300/50 transition-all text-left"
-          >
-            <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-purple-400/70" />
-              <h4 className="font-bold text-purple-700/80">Semana {budgetData.currentWeekNumber} (Lun-Dom)</h4>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className={`px-3 py-1 rounded-full text-xs font-bold ${
-                budgetData.weeklyCompliance >= 100 
-                  ? 'bg-emerald-100/60 text-emerald-600' 
-                  : 'bg-amber-100/60 text-amber-600'
-              }`}>
-                {budgetData.weeklyCompliance.toFixed(0)}%
-              </div>
-              {expandedSection === 'weekly' ? <ChevronUp className="w-4 h-4 text-purple-400/70" /> : <ChevronDown className="w-4 h-4 text-purple-400/70" />}
-            </div>
-            </div>
-            <div className="grid grid-cols-3 gap-3">
+              {/* Semana Retail */}
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="w-full bg-gradient-to-r from-purple-50/40 to-pink-50/40 rounded-xl p-4 border border-purple-200/40"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-5 h-5 text-purple-400/70" />
+                    <h4 className="font-bold text-purple-700/80">Semana {budgetData.currentWeekNumber} (Lun-Dom)</h4>
+                  </div>
+                  <div className={`px-3 py-1 rounded-full text-xs font-bold ${
+                    budgetData.weeklyCompliance >= 100 
+                      ? 'bg-emerald-100/60 text-emerald-600' 
+                      : 'bg-amber-100/60 text-amber-600'
+                  }`}>
+                    {budgetData.weeklyCompliance.toFixed(0)}%
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-3">
               <div>
                 <p className="text-xs text-purple-500/70 mb-1">Meta Semanal</p>
                 <p className="text-lg font-black text-purple-600">
@@ -474,9 +468,9 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                 <p className="text-lg font-black text-pink-600">
                   {formatCurrency(budgetData.weekProjection)}
                 </p>
-              </div>
-            </div>
-            <div className="mt-3 space-y-1.5">
+                  </div>
+                </div>
+                <div className="mt-3 space-y-1.5">
               <div className="flex items-center justify-between text-xs">
                 <span className="text-purple-500/60">Cumplimiento actual</span>
                 <span className="font-bold text-purple-600">{budgetData.weeklyCompliance.toFixed(0)}%</span>
@@ -494,13 +488,11 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                 <span className={`font-bold ${budgetData.projectionCompliance >= 100 ? 'text-emerald-500' : 'text-amber-500'}`}>
                   {budgetData.projectionCompliance.toFixed(0)}%
                 </span>
-              </div>
-            </div>
-          </motion.button>
+                  </div>
+                </div>
+              </motion.div>
 
-          {/* Gráfico de Semanas */}
-          <AnimatePresence>
-            {expandedSection === 'weekly' && (
+              {/* Gráfico de Semanas */}
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
@@ -512,12 +504,6 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                     <BarChart3 className="w-5 h-5 text-purple-400/70" />
                     Comparativa Semanal
                   </h4>
-                  <button
-                    onClick={() => setExpandedSection(null)}
-                    className="text-slate-400 hover:text-slate-600"
-                  >
-                    <ChevronUp className="w-5 h-5" />
-                  </button>
                 </div>
                 <ResponsiveContainer width="100%" height={200}>
                   <BarChart data={budgetData.weeklyData}>
@@ -533,11 +519,9 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                   </BarChart>
                 </ResponsiveContainer>
               </motion.div>
-            )}
-          </AnimatePresence>
 
-          {/* Grid de métricas resumidas */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {/* Grid de métricas resumidas */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <motion.div
               whileHover={{ scale: 1.03, y: -2 }}
               className="bg-gradient-to-br from-rose-50/40 to-pink-50/40 rounded-lg p-3 border border-rose-200/40"
@@ -582,16 +566,16 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
               <p className={`text-lg font-bold ${isOnTrack ? 'text-emerald-600' : 'text-amber-600'}`}>
                 {budgetData.compliance.toFixed(1)}%
               </p>
-            </motion.div>
-          </div>
+                </motion.div>
+              </div>
 
-          {/* Mensaje de estado */}
-          {needsRecovery ? (
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="bg-amber-50/40 border-l-4 border-amber-400/50 rounded-r-lg p-4"
-            >
+              {/* Mensaje de estado */}
+              {needsRecovery ? (
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="bg-amber-50/40 border-l-4 border-amber-400/50 rounded-r-lg p-4"
+                >
               <div className="flex items-start gap-3">
                 <AlertTriangle className="w-5 h-5 text-amber-500/70 flex-shrink-0 mt-0.5" />
                 <div>
@@ -604,14 +588,14 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                     para alcanzar la meta del mes en los {budgetData.remainingDays} días restantes.
                   </p>
                 </div>
-              </div>
-            </motion.div>
-          ) : (
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="bg-emerald-50/40 border-l-4 border-emerald-400/50 rounded-r-lg p-4"
-            >
+                  </div>
+                </motion.div>
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="bg-emerald-50/40 border-l-4 border-emerald-400/50 rounded-r-lg p-4"
+                >
               <div className="flex items-start gap-3">
                 <CheckCircle2 className="w-5 h-5 text-emerald-500/70 flex-shrink-0 mt-0.5" />
                 <div>
@@ -623,9 +607,12 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                     la meta del mes. Presupuesto diario: {formatCurrency(budgetData.adjustedDailyBudget)}
                   </p>
                 </div>
-              </div>
-            </motion.div>
-          )}
+                  </div>
+                </motion.div>
+              )}
+            </>
+            )}
+          </AnimatePresence>
         </CardContent>
       </Card>
     </motion.div>
