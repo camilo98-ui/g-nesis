@@ -31,7 +31,6 @@ export default function PopsyRainingIcons() {
             style={{
               left: item.left,
               width: item.size,
-              height: item.size,
               opacity: item.opacity
             }}
             initial={{ y: -100, rotate: 0 }}
@@ -50,7 +49,7 @@ export default function PopsyRainingIcons() {
             <img 
               src={item.iconUrl} 
               alt="Popsy"
-              className="w-full h-full object-contain"
+              style={{ width: '100%', height: 'auto' }}
             />
           </motion.div>
         );
