@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Target, TrendingUp, TrendingDown, Calendar, AlertTriangle, CheckCircle2, ChevronDown, ChevronUp, BarChart3, LineChart } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { format, startOfMonth, endOfMonth, eachWeekOfInterval, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachWeekOfInterval, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Legend } from 'recharts';
 
@@ -84,12 +84,14 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
 
     // Datos para gráficos - incluir TODOS los días de la semana retail actual (incluso del mes anterior)
     const dailyTrendData = eachDayOfInterval({ start: currentWeekStart, end: now }).map(day => {
-      // Buscar venta exacta del día comparando fechas
+      // Buscar venta exacta del día usando parseISO
       const sale = dailySales.find(s => {
-        const saleDate = new Date(s.date);
-        return saleDate.getFullYear() === day.getFullYear() &&
-               saleDate.getMonth() === day.getMonth() &&
-               saleDate.getDate() === day.getDate();
+        try {
+          const saleDate = parseISO(s.date);
+          return isSameDay(saleDate, day);
+        } catch {
+          return false;
+        }
       });
 
       const ventasDelDia = sale ? (sale.total_sales || 0) : 0;
