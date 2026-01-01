@@ -976,9 +976,8 @@ export default function Dashboard() {
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-gradient-to-r from-slate-50 to-gray-50 border-l-4 border-slate-700 rounded-xl shadow-sm mb-6 overflow-hidden">
+            className="bg-gradient-to-r from-slate-50 to-gray-50 border-l-4 border-slate-700 rounded-xl shadow-sm mb-6 overflow-hidden p-4">
 
-                <div className="p-4">
                   <div className="flex items-start gap-3 mb-4">
                     <div className="w-10 h-10 bg-slate-700 rounded-lg flex items-center justify-center flex-shrink-0">
                       <BarChart3 className="w-5 h-5 text-white" />
@@ -991,61 +990,9 @@ export default function Dashboard() {
                   <div className="grid md:grid-cols-2 gap-4">
                     {/* Conclusiones */}
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                      <h5 className="font-bold text-blue-900 text-sm mb-2 flex items-center gap-1">
-                        <span className="text-blue-600">📊</span> Conclusiones
-                      </h5>
-                      <p className="text-xs text-blue-900 leading-relaxed">
-                        {(() => {
-                      const salesGrowth = comparisonTotals.sales > 0 ? (totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100 : 0;
-                      const transGrowth = comparisonTotals.transactions > 0 ? (totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100 : 0;
-                      const ticketChange = comparisonTotals.transactions > 0 && totals.transactions > 0 ?
-                      (totals.sales / totals.transactions - comparisonTotals.sales / comparisonTotals.transactions) / (comparisonTotals.sales / comparisonTotals.transactions) * 100 :
-                      0;
-
-                      if (salesGrowth > 10 && transGrowth > 5 && ticketChange > 0) {
-                        return `El negocio muestra salud robusta: crecimiento de ${salesGrowth.toFixed(1)}% en facturación, impulsado por mayor tráfico (+${transGrowth.toFixed(1)}%) y mejor ticket promedio (+${ticketChange.toFixed(1)}%). Esto indica efectividad en captación de clientes y capacidad comercial del equipo.`;
-                      } else if (salesGrowth > 0 && transGrowth < 0) {
-                        return `Facturación creció ${salesGrowth.toFixed(1)}% pese a caída de ${Math.abs(transGrowth).toFixed(1)}% en tráfico. La mejora en ticket promedio compensó la reducción de clientes, pero la dependencia de menos clientes es riesgosa para sostenibilidad.`;
-                      } else if (salesGrowth < 0 && transGrowth > 0) {
-                        return `Situación crítica: más clientes (+${transGrowth.toFixed(1)}%) pero menos ventas (${salesGrowth.toFixed(1)}%). El ticket promedio cayó significativamente, revelando falta de efectividad comercial en conversión.`;
-                      } else if (salesGrowth < -5) {
-                        return `Deterioro preocupante de ${Math.abs(salesGrowth).toFixed(1)}% en ventas. La caída simultánea en tráfico y eficiencia comercial indica problemas operativos, de mercado o competitivos que requieren atención inmediata.`;
-                      } else {
-                        return `Desempeño estable con variación menor al 5%. Si bien muestra consistencia, la falta de crecimiento sugiere estancamiento y necesidad de estrategias para impulsar resultados.`;
-                      }
-                    })()}
-                      </p>
-                    </div>
-
-                    {/* Plan de Acción */}
-                    <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
-                      <h5 className="font-bold text-emerald-900 text-sm mb-2 flex items-center gap-1">
-                        <span className="text-emerald-600">🎯</span> Plan de Acción
-                      </h5>
-                      <p className="text-xs text-emerald-900 leading-relaxed">
-                        {(() => {
-                      const salesGrowth = comparisonTotals.sales > 0 ? (totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100 : 0;
-                      const transGrowth = comparisonTotals.transactions > 0 ? (totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100 : 0;
-                      const ticketChange = comparisonTotals.transactions > 0 && totals.transactions > 0 ?
-                      (totals.sales / totals.transactions - comparisonTotals.sales / comparisonTotals.transactions) / (comparisonTotals.sales / comparisonTotals.transactions) * 100 :
-                      0;
-
-                      if (salesGrowth > 10 && transGrowth > 5 && ticketChange > 0) {
-                        return `1) Documentar prácticas exitosas del equipo actual para replicarlas. 2) Incrementar inversión en estrategias de atracción que están funcionando. 3) Establecer nuevas metas 15-20% superiores para mantener momentum de crecimiento.`;
-                      } else if (salesGrowth > 0 && transGrowth < 0) {
-                        return `1) URGENTE: Auditar causas de pérdida de tráfico (competencia, ubicación, marketing). 2) Implementar estrategias de captación: promociones, redes sociales, alianzas. 3) Mientras tanto, reforzar venta cruzada para maximizar cada cliente que ingresa.`;
-                      } else if (salesGrowth < 0 && transGrowth > 0) {
-                        return `1) PRIORIDAD MÁXIMA: Capacitación intensiva en técnicas de venta consultiva y cierre. 2) Revisar pricing y mix de productos - puede estar desbalanceado. 3) Implementar script de venta sugerida y supervisión diaria de conversión por vendedor.`;
-                      } else if (salesGrowth < -5) {
-                        return `PLAN DE RECUPERACIÓN INMEDIATO: 1) Reunión con equipo en 24hrs para diagnóstico de campo. 2) Análisis competitivo urgente del entorno. 3) Promoción agresiva corto plazo para reactivar tráfico. 4) Revisión de servicio al cliente y experiencia de compra. Objetivo: detener caída en 7 días.`;
-                      } else {
-                        return `1) Definir objetivos de crecimiento ambiciosos (15-20%) para próximo período. 2) Probar estrategias nuevas: productos, promociones, horarios. 3) Benchmarking con tiendas de mejor desempeño. 4) Establecer incentivos al equipo por superación de metas.`;
-                      }
-                    })()}
-                      </p>
+...
                     </div>
                   </div>
-                </div>
               </motion.div>
           }
 
