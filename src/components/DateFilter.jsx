@@ -144,17 +144,17 @@ function CustomCalendar({ selected, onSelect, onClose, onApply, initialTab = 'we
     const offset = startDay === 0 ? 6 : startDay - 1;
 
     return (
-      <div className={`${isMobile ? 'px-2 py-1.5' : 'p-3'}`}>
-        <div className={`text-center font-semibold text-gray-800 ${isMobile ? 'mb-2 text-xs' : 'mb-3 text-sm'} capitalize`}>
+      <div className={`${isMobile ? 'px-3 py-2' : 'p-3'}`}>
+        <div className={`text-center font-semibold text-gray-800 ${isMobile ? 'mb-2.5 text-sm' : 'mb-3 text-sm'} capitalize`}>
           {format(month, 'MMMM yyyy', { locale: es })}
         </div>
-        <div className={`grid grid-cols-7 ${isMobile ? 'gap-1 mb-1.5' : 'gap-1 mb-2'}`}>
+        <div className={`grid grid-cols-7 ${isMobile ? 'gap-1.5 mb-2' : 'gap-1 mb-2'}`}>
           {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((d, i) =>
-          <div key={i} className={`text-center ${isMobile ? 'text-[10px]' : 'text-[10px]'} text-gray-500 font-bold`}>{d}</div>
+          <div key={i} className={`text-center ${isMobile ? 'text-xs' : 'text-[10px]'} text-gray-500 font-bold`}>{d}</div>
           )}
         </div>
-        <div className={`grid grid-cols-7 ${isMobile ? 'gap-1' : 'gap-1'}`}>
-          {Array.from({ length: offset }).map((_, i) => <div key={`e-${i}`} className={`${isMobile ? 'h-8' : 'h-9'}`} />)}
+        <div className={`grid grid-cols-7 ${isMobile ? 'gap-1.5' : 'gap-1'}`}>
+          {Array.from({ length: offset }).map((_, i) => <div key={`e-${i}`} className={`${isMobile ? 'h-9' : 'h-9'}`} />)}
           {days.map((day) => {
             const inRange = isInRange(day);
             const start = isStart(day);
@@ -168,7 +168,7 @@ function CustomCalendar({ selected, onSelect, onClose, onApply, initialTab = 'we
                 onMouseEnter={() => handleDayHover(day)}
                 whileHover={{ scale: 1.08 }}
                 whileTap={{ scale: 0.95 }}
-                className={`${isMobile ? 'h-8 w-8 text-[11px]' : 'h-9 w-9 text-xs'} rounded-full transition-all relative flex items-center justify-center mx-auto font-medium
+                className={`${isMobile ? 'h-9 w-9 text-xs' : 'h-9 w-9 text-xs'} rounded-full transition-all relative flex items-center justify-center mx-auto font-medium
                   ${inRange && !start && !end ? 'bg-gradient-to-r from-pink-100 to-rose-100' : ''}
                   ${start ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white font-bold shadow-md' : ''}
                   ${end && !start ? 'bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold shadow-md' : ''}
@@ -278,21 +278,21 @@ function CustomCalendar({ selected, onSelect, onClose, onApply, initialTab = 'we
           </div>
 
       {/* Navegación */}
-      <div className={`flex items-center justify-between ${isMobile ? 'px-2 py-1' : 'px-4 py-3'} border-b border-gray-100 flex-shrink-0`}>
+      <div className={`flex items-center justify-between ${isMobile ? 'px-3 py-2.5' : 'px-4 py-3'} border-b border-gray-100 flex-shrink-0`}>
         <motion.button
             whileHover={{ scale: 1.1, x: -2 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-            className={`${isMobile ? 'p-1' : 'p-1.5'} rounded-full hover:bg-pink-50 text-pink-500`}>
+            className={`${isMobile ? 'p-2' : 'p-1.5'} rounded-full hover:bg-pink-50 text-pink-500`}>
 
-          <ChevronLeft className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'}`} />
+          <ChevronLeft className={`${isMobile ? 'h-5 w-5' : 'h-5 w-5'}`} />
         </motion.button>
         <div className={`flex ${isMobile ? 'gap-2' : 'gap-6'} items-center`}>
           {months.map((m, i) =>
             <button
               key={i}
               onClick={() => setShowYearSelector(!showYearSelector)}
-              className={`${isMobile ? 'text-xs' : 'text-sm'} font-bold text-gray-700 capitalize hover:text-pink-600 transition-colors`}>
+              className={`${isMobile ? 'text-sm' : 'text-sm'} font-bold text-gray-700 capitalize hover:text-pink-600 transition-colors`}>
 
               {format(m, isMobile ? 'MMMM yyyy' : 'MMMM', { locale: es })}
               {!isMobile && i === 0 &&
@@ -307,9 +307,9 @@ function CustomCalendar({ selected, onSelect, onClose, onApply, initialTab = 'we
             whileHover={{ scale: 1.1, x: 2 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-            className={`${isMobile ? 'p-1' : 'p-1.5'} rounded-full hover:bg-pink-50 text-pink-500`}>
+            className={`${isMobile ? 'p-2' : 'p-1.5'} rounded-full hover:bg-pink-50 text-pink-500`}>
 
-          <ChevronRight className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'}`} />
+          <ChevronRight className={`${isMobile ? 'h-5 w-5' : 'h-5 w-5'}`} />
         </motion.button>
       </div>
 
@@ -353,28 +353,28 @@ function CustomCalendar({ selected, onSelect, onClose, onApply, initialTab = 'we
           )}
       </div>
       
-          <div className={`${isMobile ? 'px-2 py-1.5' : 'px-4 py-3'} border-t border-gray-100 bg-gray-50/50 ${isMobile ? 'flex-col space-y-1.5' : 'flex items-center justify-between'} flex-shrink-0`}>
-            <div className={`flex items-center ${isMobile ? 'gap-1 justify-center' : 'gap-2'}`}>
+          <div className={`${isMobile ? 'px-3 py-3' : 'px-4 py-3'} border-t border-gray-100 bg-gray-50/50 ${isMobile ? 'flex-col space-y-2' : 'flex items-center justify-between'} flex-shrink-0`}>
+            <div className={`flex items-center ${isMobile ? 'gap-2 justify-center' : 'gap-2'}`}>
               {tempSelection?.from ?
             <motion.div
               initial={{ opacity: 0, y: 5 }}
               animate={{ opacity: 1, y: 0 }}
-              className={`flex items-center ${isMobile ? 'gap-1' : 'gap-2'} text-sm`}>
+              className={`flex items-center ${isMobile ? 'gap-2' : 'gap-2'} text-sm`}>
 
-                  <span className={`${isMobile ? 'px-1.5 py-0.5 text-[9px]' : 'px-2 py-1 text-xs'} bg-pink-100 text-pink-700 rounded font-medium`}>
+                  <span className={`${isMobile ? 'px-2 py-1 text-[11px]' : 'px-2 py-1 text-xs'} bg-pink-100 text-pink-700 rounded font-medium`}>
                     {format(tempSelection.from, 'dd MMM', { locale: es })}
                   </span>
                   {tempSelection.to && !isSameDay(tempSelection.from, tempSelection.to) &&
               <>
-                      <span className={`${isMobile ? 'text-[9px]' : ''} text-gray-400`}>→</span>
-                      <span className={`${isMobile ? 'px-1.5 py-0.5 text-[9px]' : 'px-2 py-1 text-xs'} bg-rose-100 text-rose-700 rounded font-medium`}>
+                      <span className={`${isMobile ? 'text-[11px]' : ''} text-gray-400`}>→</span>
+                      <span className={`${isMobile ? 'px-2 py-1 text-[11px]' : 'px-2 py-1 text-xs'} bg-rose-100 text-rose-700 rounded font-medium`}>
                         {format(tempSelection.to, 'dd MMM', { locale: es })}
                       </span>
                     </>
               }
                 </motion.div> :
 
-            <span className={`${isMobile ? 'text-[9px]' : 'text-xs'} text-gray-400`}>Selecciona una fecha</span>
+            <span className={`${isMobile ? 'text-xs' : 'text-xs'} text-gray-400`}>Selecciona una fecha</span>
             }
             </div>
             <div className={`flex items-center gap-2 ${isMobile ? 'justify-center w-full' : ''}`}>
@@ -395,9 +395,9 @@ function CustomCalendar({ selected, onSelect, onClose, onApply, initialTab = 'we
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleApply}
-              className={`${isMobile ? 'w-full py-2.5' : 'px-4 py-1.5'} rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white ${isMobile ? 'text-xs' : 'text-sm'} font-bold shadow-lg flex items-center justify-center gap-2`}>
+              className={`${isMobile ? 'w-full py-3' : 'px-4 py-1.5'} rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white ${isMobile ? 'text-sm' : 'text-sm'} font-bold shadow-lg flex items-center justify-center gap-2`}>
 
-                  <Check className={`${isMobile ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} /> Aplicar
+                  <Check className={`${isMobile ? 'w-4 h-4' : 'w-4 h-4'}`} /> Aplicar
                 </motion.button>
             }
             </div>
