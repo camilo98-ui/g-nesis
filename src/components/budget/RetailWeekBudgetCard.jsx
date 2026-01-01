@@ -61,8 +61,8 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       totalWeeklyAvg > 0 ? avg / totalWeeklyAvg : 1/7
     );
 
-    // Calcular presupuesto base más realista (95% del presupuesto total para dejar margen)
-    const dailyBaseBudget = (activeBudget.sales_budget * 0.95) / daysInMonth;
+    // Calcular presupuesto base usando el 100% del presupuesto mensual
+    const dailyBaseBudget = activeBudget.sales_budget / daysInMonth;
 
     // Función para obtener presupuesto ajustado según día de la semana y tendencia histórica
     const getDailyBudget = (date) => {
@@ -71,8 +71,8 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       const weeklyBudgetAvg = dailyBaseBudget * 7;
       const historicalBudget = weeklyBudgetAvg * weightByDayOfWeek[dayOfWeek];
       
-      // Si hay histórico, usar 90% del histórico + 10% del presupuesto base (más alcanzable)
-      const historicalWeight = countByDayOfWeek[dayOfWeek] >= 4 ? 0.9 : 0.7;
+      // Usar promedio entre histórico y presupuesto base
+      const historicalWeight = countByDayOfWeek[dayOfWeek] >= 4 ? 0.95 : 0.85;
       return (historicalBudget * historicalWeight) + (dailyBaseBudget * (1 - historicalWeight));
     };
 
@@ -104,10 +104,10 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
     // Presupuesto restante a alcanzar
     const remainingBudget = activeBudget.sales_budget - salesUntilYesterday - todayActualSales;
 
-    // Presupuesto del día ajustado (más realista y alcanzable)
+    // Presupuesto del día ajustado
     let adjustedDailyBudget = getDailyBudget(now);
     
-    // Si hay brecha acumulada, redistribuir de forma progresiva (no agresiva)
+    // Si hay brecha acumulada, redistribuir
     if (remainingDays > 0 && accumulatedGap > 0) {
       const remainingDaysArray = eachDayOfInterval({ start: now, end: monthEnd });
       const totalWeightRemaining = remainingDaysArray.reduce((sum, day) => {
@@ -116,12 +116,12 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       }, 0);
       const todayWeight = weightByDayOfWeek[now.getDay()] || 1/7;
       
-      // Redistribuir solo 70% de la brecha para mantener meta alcanzable
-      const redistributionBudget = remainingBudget + (accumulatedGap * 0.7);
+      // Redistribuir 85% de la brecha
+      const redistributionBudget = remainingBudget + (accumulatedGap * 0.85);
       const redistributedBudget = (redistributionBudget / totalWeightRemaining) * todayWeight;
       
-      // Usar el mayor entre el presupuesto base y el redistribuido (pero no exceder 130% del base)
-      adjustedDailyBudget = Math.min(Math.max(getDailyBudget(now), redistributedBudget), getDailyBudget(now) * 1.3);
+      // No limitar el presupuesto redistribuido
+      adjustedDailyBudget = Math.max(getDailyBudget(now), redistributedBudget);
     }
 
     // Calcular número de semana retail (considerando semanas que empiezan antes del mes)
