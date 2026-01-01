@@ -127,6 +127,14 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       .filter(d => d >= monthStart && d <= monthEnd);
     const weeklyBudget = daysInCurrentWeek.reduce((sum, day) => sum + getDailyBudget(day), 0);
 
+    // Calcular proyección de la semana basada en ritmo actual
+    const daysPassedInWeek = eachDayOfInterval({ start: currentWeekStart, end: now })
+      .filter(d => d <= now).length;
+    const avgDailySales = daysPassedInWeek > 0 ? currentWeekSales / daysPassedInWeek : 0;
+    const totalDaysInWeek = eachDayOfInterval({ start: currentWeekStart, end: currentWeekEnd }).length;
+    const weekProjection = avgDailySales * totalDaysInWeek;
+    const projectionCompliance = weeklyBudget > 0 ? (weekProjection / weeklyBudget * 100) : 0;
+
     // Datos para gráficos - incluir TODOS los días de la semana retail actual (incluso del mes anterior)
     const dailyTrendData = eachDayOfInterval({ start: currentWeekStart, end: now }).map(day => {
       // Buscar venta exacta del día usando parseISO
@@ -187,6 +195,8 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       currentWeekSales,
       weeklyBudget,
       weeklyCompliance: weeklyBudget > 0 ? (currentWeekSales / weeklyBudget * 100) : 0,
+      weekProjection,
+      projectionCompliance,
       dailyTrendData,
       weeklyData
     };
@@ -322,6 +332,19 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                   <p className="text-sm font-bold text-white">
                     {budgetData.todayCompliance.toFixed(0)}% del objetivo
                   </p>
+                  <div className="pt-2 mt-2 border-t border-white/20">
+                    <p className="text-[10px] text-white/60 mb-1">Proyección Semana {budgetData.currentWeekNumber}:</p>
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-bold text-white">
+                        {formatCurrency(budgetData.weekProjection)}
+                      </p>
+                      <p className={`text-xs font-bold ${
+                        budgetData.projectionCompliance >= 100 ? 'text-white' : 'text-white/70'
+                      }`}>
+                        {budgetData.projectionCompliance.toFixed(0)}%
+                      </p>
+                    </div>
+                  </div>
                 </div>
                 <div className="flex items-center gap-2 mt-3 text-white/80">
                   {expandedSection === 'daily' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
