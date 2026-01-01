@@ -43,6 +43,12 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       } catch {}
     });
 
+    // Promedio histórico del día de la semana actual
+    const todayDayOfWeek = now.getDay();
+    const historicalAvgToday = countByDayOfWeek[todayDayOfWeek] > 0 
+      ? salesByDayOfWeek[todayDayOfWeek] / countByDayOfWeek[todayDayOfWeek]
+      : 0;
+
     // Calcular promedio por día de semana
     const avgByDayOfWeek = salesByDayOfWeek.map((sum, idx) => 
       countByDayOfWeek[idx] > 0 ? sum / countByDayOfWeek[idx] : 0
@@ -183,6 +189,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       dailyBaseBudget,
       adjustedDailyBudget,
       todayActualSales,
+      historicalAvgToday,
       accumulatedGap,
       remainingDays,
       remainingBudget,
@@ -278,9 +285,9 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                   </motion.p>
                 </div>
                 <div>
-                  <p className="text-xs text-white/60 mb-2">Venta Actual</p>
+                  <p className="text-xs text-white/60 mb-2">Promedio Histórico Hoy</p>
                   <p className="text-4xl font-black text-white">
-                    {formatCurrency(budgetData.todayActualSales)}
+                    {formatCurrency(budgetData.historicalAvgToday)}
                   </p>
                 </div>
               </div>
