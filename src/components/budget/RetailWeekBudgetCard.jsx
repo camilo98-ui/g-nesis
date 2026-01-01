@@ -71,10 +71,14 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       return now >= w && now <= weekEnd;
     }) + 1;
 
-    // Ventas de la semana actual
+    // Ventas de la semana actual - usar parseISO para parseo correcto
     const currentWeekSales = dailySales.filter(s => {
-      const saleDate = new Date(s.date);
-      return saleDate >= currentWeekStart && saleDate <= currentWeekEnd;
+      try {
+        const saleDate = parseISO(s.date);
+        return saleDate >= currentWeekStart && saleDate <= currentWeekEnd;
+      } catch {
+        return false;
+      }
     }).reduce((sum, s) => sum + (s.total_sales || 0), 0);
 
     // Presupuesto semanal proporcional
