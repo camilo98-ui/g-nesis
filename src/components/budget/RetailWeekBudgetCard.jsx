@@ -4,7 +4,7 @@ import { Target, TrendingUp, TrendingDown, Calendar, AlertTriangle, CheckCircle2
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format, startOfMonth, endOfMonth, eachWeekOfInterval, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
+import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Legend } from 'recharts';
 
 export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId, formatCurrency }) {
   const [expandedSection, setExpandedSection] = useState(null);
