@@ -955,7 +955,15 @@ export default function Dashboard() {
 
             </div>
 
+            {/* Retail Week Budget - PRESUPUESTO DEL DÍA (LO MÁS IMPORTANTE) */}
+            {!showComparison && currentBudget?.sales_budget &&
+          <RetailWeekBudgetCard
+            dailySales={dailySales}
+            activeBudget={currentBudget}
+            storeId={selectedStore}
+            formatCurrency={formatCurrency} />
 
+          }
 
             {/* Sustentación Ejecutiva - Modo Comparable */}
             {showComparison && comparisonTotals &&
