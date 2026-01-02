@@ -88,8 +88,10 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       totalWeeklyAvg > 0 ? avg / totalWeeklyAvg : 1/7
     );
 
-    // Calcular presupuesto base usando el 100% del presupuesto mensual
-    const dailyBaseBudget = activeBudget.sales_budget / daysInMonth;
+    // Calcular presupuesto base usando el 105% del presupuesto mensual para cumplir meta ambiciosa
+    const TARGET_PERCENTAGE = 1.05; // 105% del presupuesto
+    const adjustedMonthlyBudget = activeBudget.sales_budget * TARGET_PERCENTAGE;
+    const dailyBaseBudget = adjustedMonthlyBudget / daysInMonth;
 
     // Función para obtener presupuesto ajustado según día de la semana y tendencia histórica
     const getDailyBudget = (date) => {
@@ -98,13 +100,13 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
 
       // Si hay suficiente histórico, usar directamente el promedio histórico escalado al presupuesto mensual
       if (countByDayOfWeek[dayOfWeek] >= 3) {
-        // Escalar el promedio histórico para que la suma semanal coincida con el presupuesto mensual
+        // Escalar el promedio histórico para que la suma semanal coincida con el presupuesto mensual ajustado al 105%
         const totalHistoricalAvg = avgByDayOfWeek.reduce((a, b) => a + b, 0);
         const monthlyHistoricalProjection = totalHistoricalAvg * (daysInMonth / 7);
-        const scaleFactor = activeBudget.sales_budget / monthlyHistoricalProjection;
+        const scaleFactor = adjustedMonthlyBudget / monthlyHistoricalProjection;
         return avgByDayOfWeek[dayOfWeek] * scaleFactor;
       } else {
-        // Sin suficiente histórico, usar presupuesto base
+        // Sin suficiente histórico, usar presupuesto base ajustado
         return dailyBaseBudget;
       }
     };
@@ -134,8 +136,8 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
     // Días restantes del mes (incluyendo hoy)
     const remainingDays = eachDayOfInterval({ start: now, end: monthEnd }).length;
 
-    // Presupuesto restante a alcanzar
-    const remainingBudget = activeBudget.sales_budget - salesUntilYesterday - todayActualSales;
+    // Presupuesto restante a alcanzar (meta del 105%)
+    const remainingBudget = adjustedMonthlyBudget - salesUntilYesterday - todayActualSales;
 
     // Presupuesto del día ajustado según patrón histórico
     let adjustedDailyBudget = getDailyBudget(now);
@@ -348,7 +350,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
 
               <div className="grid grid-cols-2 gap-3 md:gap-6 mb-3 md:mb-4">
                 <div>
-                  <p className="text-[10px] md:text-xs text-white/60 mb-1 md:mb-2">Presupuesto del Día</p>
+                  <p className="text-[10px] md:text-xs text-white/60 mb-1 md:mb-2">Meta del Día (105%)</p>
                   <motion.p
                     key={budgetData.adjustedDailyBudget}
                     initial={{ scale: 1.2, opacity: 0 }}
@@ -357,6 +359,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                   >
                     {formatCurrency(budgetData.adjustedDailyBudget)}
                   </motion.p>
+                  <p className="text-[8px] md:text-[10px] text-white/50 mt-0.5">Base: {formatCurrency(budgetData.adjustedDailyBudget / 1.05)}</p>
                 </div>
                 <div>
                   <p className="text-[10px] md:text-xs text-white/60 mb-1 md:mb-2">Promedio Histórico Hoy</p>
@@ -1302,7 +1305,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                           </ul>
                         </div>
                         <p className="text-xs text-slate-600 mt-3">
-                          ✅ Continúa con este ritmo constante para garantizar el cumplimiento del presupuesto mensual de {formatCurrency(activeBudget.sales_budget)}.
+                          ✅ Continúa con este ritmo constante para garantizar el cumplimiento de la meta ambiciosa del 105%: {formatCurrency(adjustedMonthlyBudget)}.
                         </p>
                       </div>
                     )}
