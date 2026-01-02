@@ -585,8 +585,8 @@ export default function Home() {
                           </div>
                         </motion.div>
                         <div className="flex-1 min-w-0">
-                          <p className={`font-bold text-[15px] leading-tight ${isSelected ? 'text-white' : 'text-slate-900'}`}>{role.name}</p>
-                          <p className={`text-[11px] leading-tight mt-0.5 ${isSelected ? 'text-white/90' : 'text-slate-600'}`}>{role.description}</p>
+                          <p className={`font-bold text-[15px] leading-tight ${isSelected ? 'text-slate-800' : 'text-slate-900'}`}>{role.name}</p>
+                          <p className={`text-[11px] leading-tight mt-0.5 ${isSelected ? 'text-slate-600' : 'text-slate-600'}`}>{role.description}</p>
                         </div>
                         {isSelected && (
                           <motion.div 
@@ -793,8 +793,8 @@ export default function Home() {
                           </div>
                         </motion.div>
                         <div className="flex-1 min-w-0">
-                          <p className={`text-lg font-bold mb-1 ${isSelected ? 'text-white' : 'text-slate-900'}`}>{role.name}</p>
-                          <p className={`text-sm leading-relaxed ${isSelected ? 'text-white/90' : 'text-slate-600'}`}>{role.description}</p>
+                          <p className={`text-lg font-bold mb-1 ${isSelected ? 'text-slate-800' : 'text-slate-900'}`}>{role.name}</p>
+                          <p className={`text-sm leading-relaxed ${isSelected ? 'text-slate-600' : 'text-slate-600'}`}>{role.description}</p>
                         </div>
                         {isSelected && (
                           <motion.div 
