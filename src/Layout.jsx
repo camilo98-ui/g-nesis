@@ -107,13 +107,6 @@ export default function Layout({ children, currentPageName }) {
     const savedRole = localStorage.getItem('userRole');
     if (saved) setSelectedStore(saved);
     if (savedRole) setUserRole(savedRole);
-
-    // Apply saved theme on mount
-    const savedTheme = localStorage.getItem('popsyTheme') || 'classic';
-    const root = document.documentElement;
-    root.classList.remove('theme-classic', 'theme-dark', 'theme-mint', 'theme-sunset', 'theme-ocean');
-    root.classList.add(`theme-${savedTheme}`);
-    root.setAttribute('data-theme', savedTheme);
   }, []);
 
   return (
