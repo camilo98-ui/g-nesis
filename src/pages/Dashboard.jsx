@@ -23,7 +23,6 @@ import StoreSalesModal from '@/components/forms/StoreSalesModal';
 import MonthlyBudgetManager from '@/components/budget/MonthlyBudgetManager';
 import ChartInsight from '@/components/dashboard/ChartInsight';
 
-
 import {
   DollarSign, Receipt, Zap, Gift, TrendingUp, TrendingDown, ArrowLeft,
   BarChart3, AlertTriangle, CheckCircle2, X, Target,

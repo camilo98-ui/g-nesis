@@ -63,11 +63,6 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
     const salesByDayOfWeek = [0, 0, 0, 0, 0, 0, 0]; // Sum
     const countByDayOfWeek = [0, 0, 0, 0, 0, 0, 0]; // Count
 
-    console.log('🔍 Analizando dailySales:', { 
-      totalRecords: dailySales.length,
-      sample: dailySales.slice(0, 3)
-    });
-
     dailySales.forEach(s => {
       try {
         const saleDate = parseISO(s.date);
@@ -79,11 +74,6 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       } catch (error) {
         console.error('Error parsing date:', s.date, error);
       }
-    });
-
-    console.log('📊 Resultados por día de semana:', {
-      salesByDay: salesByDayOfWeek,
-      countByDay: countByDayOfWeek
     });
 
     // Promedio histórico del día de la semana actual (ej: promedio de todos los jueves)
@@ -330,8 +320,6 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
         </CardHeader>
 
         <CardContent className="p-3 md:p-6 space-y-3 md:space-y-4">
-
-
           {/* Sin Presupuesto - Mensaje */}
           {budgetData?.noBudget ? (
             <motion.div
@@ -367,14 +355,9 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                   <p className="text-xs md:text-sm text-white/80 font-medium">Meta del Día</p>
                 </div>
                 {needsRecovery && (
-                  <motion.div
-                    animate={{ scale: [1, 1.05, 1] }}
-                    transition={{ duration: 1.5, repeat: Infinity }}
-                    className="flex items-center gap-1.5 px-2 md:px-3 py-1 bg-red-500/90 rounded-full border-2 border-white/50"
-                  >
-                    <AlertTriangle className="w-3 h-3 text-white" />
-                    <p className="text-[9px] md:text-[11px] font-black text-white">BRECHA: {formatCurrency(budgetData.accumulatedGap)}</p>
-                  </motion.div>
+                  <div className="px-1.5 md:px-2 py-0.5 md:py-1 bg-amber-100/60 rounded-full">
+                    <p className="text-[8px] md:text-[10px] font-black text-amber-700">AJUSTADO</p>
+                  </div>
                 )}
               </div>
 
