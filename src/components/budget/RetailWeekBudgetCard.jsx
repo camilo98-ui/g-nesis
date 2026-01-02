@@ -9,6 +9,7 @@ import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, R
 export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId, formatCurrency, onConfigureBudget }) {
   const [expandedSection, setExpandedSection] = useState(null);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [selectedMetric, setSelectedMetric] = useState(null);
 
   // Calcular datos del presupuesto retail
   const budgetData = useMemo(() => {
@@ -780,42 +781,60 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
 
               {/* Grid de métricas resumidas */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
-              <motion.div
+              <motion.button
               whileHover={{ scale: 1.03, y: -2 }}
-              className="bg-gradient-to-br from-rose-50/40 to-pink-50/40 rounded-lg p-2 md:p-3 border border-rose-200/40"
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setSelectedMetric(selectedMetric === 'base' ? null : 'base')}
+              className={`bg-gradient-to-br from-rose-50/40 to-pink-50/40 rounded-lg p-2 md:p-3 border transition-all text-left ${
+                selectedMetric === 'base' ? 'border-rose-400 ring-2 ring-rose-300' : 'border-rose-200/40'
+              }`}
               >
               <p className="text-[10px] md:text-xs text-rose-500/70 mb-1">Base Diaria</p>
               <p className="text-sm md:text-lg font-bold text-rose-600 leading-tight">
                 {formatCurrency(budgetData.dailyBaseBudget)}
               </p>
-              </motion.div>
+              </motion.button>
 
-              <motion.div
+              <motion.button
               whileHover={{ scale: 1.03, y: -2 }}
-              className="bg-gradient-to-br from-emerald-50/40 to-green-50/40 rounded-lg p-2 md:p-3 border border-emerald-200/40"
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setSelectedMetric(selectedMetric === 'remaining' ? null : 'remaining')}
+              className={`bg-gradient-to-br from-emerald-50/40 to-green-50/40 rounded-lg p-2 md:p-3 border transition-all text-left ${
+                selectedMetric === 'remaining' ? 'border-emerald-400 ring-2 ring-emerald-300' : 'border-emerald-200/40'
+              }`}
               >
               <p className="text-[10px] md:text-xs text-emerald-500/70 mb-1">Días Restantes</p>
               <p className="text-sm md:text-lg font-bold text-emerald-600">
                 {budgetData.remainingDays}
               </p>
-              </motion.div>
+              </motion.button>
 
-              <motion.div
+              <motion.button
               whileHover={{ scale: 1.03, y: -2 }}
-              className="bg-gradient-to-br from-rose-50/40 to-pink-50/40 rounded-lg p-2 md:p-3 border border-rose-200/40"
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setSelectedMetric(selectedMetric === 'pending' ? null : 'pending')}
+              className={`bg-gradient-to-br from-rose-50/40 to-pink-50/40 rounded-lg p-2 md:p-3 border transition-all text-left ${
+                selectedMetric === 'pending' ? 'border-rose-400 ring-2 ring-rose-300' : 'border-rose-200/40'
+              }`}
               >
               <p className="text-[10px] md:text-xs text-rose-500/70 mb-1">Por Vender</p>
               <p className="text-sm md:text-lg font-bold text-rose-600 leading-tight">
                 {formatCurrency(budgetData.remainingBudget)}
               </p>
-              </motion.div>
+              </motion.button>
 
-              <motion.div
+              <motion.button
               whileHover={{ scale: 1.03, y: -2 }}
-              className={`rounded-lg p-2 md:p-3 border ${
-                isOnTrack 
-                  ? 'bg-gradient-to-br from-emerald-50/40 to-green-50/40 border-emerald-200/40' 
-                  : 'bg-gradient-to-br from-rose-50/40 to-pink-50/40 border-rose-200/40'
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setSelectedMetric(selectedMetric === 'compliance' ? null : 'compliance')}
+              className={`rounded-lg p-2 md:p-3 border transition-all text-left ${
+                selectedMetric === 'compliance' 
+                  ? isOnTrack 
+                    ? 'border-emerald-400 ring-2 ring-emerald-300' 
+                    : 'border-rose-400 ring-2 ring-rose-300'
+                  : isOnTrack 
+                    ? 'bg-gradient-to-br from-emerald-50/40 to-green-50/40 border-emerald-200/40' 
+                    : 'bg-gradient-to-br from-rose-50/40 to-pink-50/40 border-rose-200/40'
               }`}
               >
               <p className={`text-[10px] md:text-xs mb-1 ${isOnTrack ? 'text-emerald-500/70' : 'text-rose-500/70'}`}>
@@ -824,8 +843,168 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
               <p className={`text-sm md:text-lg font-bold ${isOnTrack ? 'text-emerald-600' : 'text-rose-600'}`}>
                 {budgetData.compliance.toFixed(1)}%
               </p>
-                </motion.div>
+                </motion.button>
               </div>
+
+              {/* Detalle de métrica seleccionada */}
+              <AnimatePresence>
+                {selectedMetric && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="bg-white rounded-xl p-3 md:p-4 border border-slate-200 shadow-sm"
+                  >
+                    {selectedMetric === 'base' && (
+                      <div>
+                        <h4 className="text-sm md:text-base font-bold text-slate-900 mb-3">Presupuesto Base vs Ajustado</h4>
+                        <div className="grid grid-cols-2 gap-3 mb-3">
+                          <div className="bg-rose-50 rounded-lg p-3">
+                            <p className="text-xs text-rose-600 mb-1">Base Diaria</p>
+                            <p className="text-lg font-black text-rose-700">{formatCurrency(budgetData.dailyBaseBudget)}</p>
+                          </div>
+                          <div className="bg-amber-50 rounded-lg p-3">
+                            <p className="text-xs text-amber-600 mb-1">Meta Ajustada Hoy</p>
+                            <p className="text-lg font-black text-amber-700">{formatCurrency(budgetData.adjustedDailyBudget)}</p>
+                          </div>
+                        </div>
+                        <ResponsiveContainer width="100%" height={150}>
+                          <BarChart data={[
+                            { name: 'Base', value: budgetData.dailyBaseBudget },
+                            { name: 'Ajustado', value: budgetData.adjustedDailyBudget }
+                          ]}>
+                            <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                            <XAxis dataKey="name" fontSize={11} />
+                            <YAxis fontSize={11} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} />
+                            <Tooltip formatter={(v) => formatCurrency(v)} />
+                            <Bar dataKey="value" radius={[8, 8, 0, 0]}>
+                              <Cell fill="#fda4af" />
+                              <Cell fill="#fbbf24" />
+                            </Bar>
+                          </BarChart>
+                        </ResponsiveContainer>
+                        <p className="text-xs text-slate-600 mt-2">
+                          {budgetData.adjustedDailyBudget > budgetData.dailyBaseBudget 
+                            ? `⬆️ Meta ajustada ${((budgetData.adjustedDailyBudget/budgetData.dailyBaseBudget - 1) * 100).toFixed(0)}% más alta para recuperar brecha`
+                            : `✓ Meta base sin ajustes necesarios`}
+                        </p>
+                      </div>
+                    )}
+
+                    {selectedMetric === 'remaining' && (
+                      <div>
+                        <h4 className="text-sm md:text-base font-bold text-slate-900 mb-3">Proyección de Días Restantes</h4>
+                        <div className="space-y-2 mb-3">
+                          <div className="flex justify-between items-center p-2 bg-emerald-50 rounded-lg">
+                            <span className="text-xs text-emerald-700">Días restantes</span>
+                            <span className="font-bold text-emerald-900">{budgetData.remainingDays} días</span>
+                          </div>
+                          <div className="flex justify-between items-center p-2 bg-rose-50 rounded-lg">
+                            <span className="text-xs text-rose-700">Promedio diario necesario</span>
+                            <span className="font-bold text-rose-900">{formatCurrency(budgetData.remainingBudget / budgetData.remainingDays)}</span>
+                          </div>
+                          <div className="flex justify-between items-center p-2 bg-slate-50 rounded-lg">
+                            <span className="text-xs text-slate-700">Ritmo actual</span>
+                            <span className="font-bold text-slate-900">{formatCurrency(budgetData.todayActualSales)}/día</span>
+                          </div>
+                        </div>
+                        <ResponsiveContainer width="100%" height={150}>
+                          <BarChart data={budgetData.dailyTrendData.slice(-7)}>
+                            <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                            <XAxis dataKey="date" fontSize={9} angle={-45} textAnchor="end" height={50} />
+                            <YAxis fontSize={10} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} />
+                            <Tooltip formatter={(v) => formatCurrency(v)} />
+                            <Bar dataKey="ventas" fill="#a7f3d0" radius={[6, 6, 0, 0]} />
+                          </BarChart>
+                        </ResponsiveContainer>
+                        <p className="text-xs text-slate-600 mt-2">
+                          📊 Últimos 7 días de ventas • Promedio: {formatCurrency(budgetData.dailyTrendData.slice(-7).reduce((a,b) => a + b.ventas, 0) / 7)}
+                        </p>
+                      </div>
+                    )}
+
+                    {selectedMetric === 'pending' && (
+                      <div>
+                        <h4 className="text-sm md:text-base font-bold text-slate-900 mb-3">Análisis de Venta Pendiente</h4>
+                        <div className="grid grid-cols-2 gap-2 mb-3">
+                          <div className="bg-slate-50 rounded-lg p-2">
+                            <p className="text-[10px] text-slate-600">Vendido</p>
+                            <p className="text-base font-bold text-slate-900">{formatCurrency(budgetData.salesUntilYesterday + budgetData.todayActualSales)}</p>
+                          </div>
+                          <div className="bg-rose-50 rounded-lg p-2">
+                            <p className="text-[10px] text-rose-600">Por Vender</p>
+                            <p className="text-base font-bold text-rose-900">{formatCurrency(budgetData.remainingBudget)}</p>
+                          </div>
+                        </div>
+                        <ResponsiveContainer width="100%" height={120}>
+                          <BarChart layout="vertical" data={[
+                            { name: 'Vendido', value: budgetData.salesUntilYesterday + budgetData.todayActualSales, fill: '#10b981' },
+                            { name: 'Por Vender', value: budgetData.remainingBudget, fill: '#fda4af' }
+                          ]}>
+                            <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                            <XAxis type="number" fontSize={10} tickFormatter={(v) => `$${(v/1000000).toFixed(0)}M`} />
+                            <YAxis type="category" dataKey="name" fontSize={11} width={70} />
+                            <Tooltip formatter={(v) => formatCurrency(v)} />
+                            <Bar dataKey="value" radius={[0, 8, 8, 0]}>
+                              {[{ fill: '#10b981' }, { fill: '#fda4af' }].map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={entry.fill} />
+                              ))}
+                            </Bar>
+                          </BarChart>
+                        </ResponsiveContainer>
+                        <p className="text-xs text-slate-600 mt-2">
+                          {budgetData.remainingBudget > 0 
+                            ? `💪 Faltan ${formatCurrency(budgetData.remainingBudget)} para alcanzar el presupuesto mensual` 
+                            : `🎉 ¡Presupuesto mensual alcanzado!`}
+                        </p>
+                      </div>
+                    )}
+
+                    {selectedMetric === 'compliance' && (
+                      <div>
+                        <h4 className="text-sm md:text-base font-bold text-slate-900 mb-3">Evolución del Cumplimiento</h4>
+                        <div className="bg-gradient-to-r from-rose-50 to-emerald-50 rounded-lg p-3 mb-3">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-xs text-slate-700">Cumplimiento Actual</span>
+                            <span className={`text-2xl font-black ${budgetData.compliance >= 95 ? 'text-emerald-600' : 'text-amber-600'}`}>
+                              {budgetData.compliance.toFixed(1)}%
+                            </span>
+                          </div>
+                          <div className="h-3 bg-white rounded-full overflow-hidden">
+                            <motion.div
+                              initial={{ width: 0 }}
+                              animate={{ width: `${Math.min(budgetData.compliance, 100)}%` }}
+                              transition={{ duration: 1 }}
+                              className={`h-full rounded-full ${budgetData.compliance >= 95 ? 'bg-gradient-to-r from-emerald-400 to-green-500' : 'bg-gradient-to-r from-amber-400 to-orange-500'}`}
+                            />
+                          </div>
+                        </div>
+                        <ResponsiveContainer width="100%" height={150}>
+                          <AreaChart data={budgetData.dailyTrendData}>
+                            <defs>
+                              <linearGradient id="complianceGradient" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#10b981" stopOpacity={0.6}/>
+                                <stop offset="100%" stopColor="#10b981" stopOpacity={0.1}/>
+                              </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                            <XAxis dataKey="date" fontSize={9} angle={-45} textAnchor="end" height={50} />
+                            <YAxis fontSize={10} tickFormatter={(v) => `${v}%`} domain={[0, 150]} />
+                            <Tooltip formatter={(v) => `${v.toFixed(1)}%`} />
+                            <ReferenceLine y={100} stroke="#10b981" strokeDasharray="3 3" strokeWidth={2} label={{ value: '100%', fill: '#10b981', fontSize: 10 }} />
+                            <Area type="monotone" dataKey="cumplimiento" stroke="#10b981" strokeWidth={2} fill="url(#complianceGradient)" />
+                          </AreaChart>
+                        </ResponsiveContainer>
+                        <p className="text-xs text-slate-600 mt-2">
+                          {budgetData.compliance >= 100 
+                            ? `🎯 ¡Excelente! Superando la meta en ${(budgetData.compliance - 100).toFixed(1)}%` 
+                            : `📈 Faltan ${(100 - budgetData.compliance).toFixed(1)} puntos para alcanzar el 100%`}
+                        </p>
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               {/* Mensaje de estado */}
               {needsRecovery ? (
