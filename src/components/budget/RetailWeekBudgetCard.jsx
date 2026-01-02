@@ -638,24 +638,45 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-2 md:gap-3">
-              <div>
+              <motion.button
+                whileHover={{ scale: 1.03, y: -2 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setSelectedMetric(selectedMetric === 'weekly-budget' ? null : 'weekly-budget')}
+                className={`bg-purple-50 rounded-lg p-2 md:p-3 border transition-all text-left ${
+                  selectedMetric === 'weekly-budget' ? 'border-purple-400 ring-2 ring-purple-300' : 'border-purple-200/40'
+                }`}
+              >
                 <p className="text-[10px] md:text-xs text-purple-500/70 mb-1">Meta Semanal</p>
                 <p className="text-sm md:text-lg font-black text-purple-600 leading-tight">
                   {formatCurrency(budgetData.weeklyBudget)}
                 </p>
-              </div>
-              <div>
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.03, y: -2 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setSelectedMetric(selectedMetric === 'weekly-sales' ? null : 'weekly-sales')}
+                className={`bg-purple-50 rounded-lg p-2 md:p-3 border transition-all text-left ${
+                  selectedMetric === 'weekly-sales' ? 'border-purple-400 ring-2 ring-purple-300' : 'border-purple-200/40'
+                }`}
+              >
                 <p className="text-[10px] md:text-xs text-purple-500/70 mb-1">Venta Actual</p>
                 <p className="text-sm md:text-lg font-black text-purple-600 leading-tight">
                   {formatCurrency(budgetData.currentWeekSales)}
                 </p>
-              </div>
-              <div>
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.03, y: -2 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setSelectedMetric(selectedMetric === 'weekly-projection' ? null : 'weekly-projection')}
+                className={`bg-pink-50 rounded-lg p-2 md:p-3 border transition-all text-left ${
+                  selectedMetric === 'weekly-projection' ? 'border-pink-400 ring-2 ring-pink-300' : 'border-pink-200/40'
+                }`}
+              >
                 <p className="text-[10px] md:text-xs text-pink-500/70 mb-1">Proyección</p>
                 <p className="text-sm md:text-lg font-black text-pink-600 leading-tight">
                   {formatCurrency(budgetData.weekProjection)}
                 </p>
-                  </div>
+              </motion.button>
                 </div>
                 <div className="mt-3 space-y-1.5">
               <div className="flex items-center justify-between text-xs">
@@ -1001,6 +1022,114 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                           {budgetData.compliance >= 100 
                             ? `🎯 ¡Excelente! Superando la meta en ${(budgetData.compliance - 100).toFixed(1)}%` 
                             : `📈 Faltan ${(100 - budgetData.compliance).toFixed(1)} puntos para alcanzar el 100%`}
+                        </p>
+                      </div>
+                    )}
+
+                    {selectedMetric === 'weekly-budget' && (
+                      <div>
+                        <h4 className="text-sm md:text-base font-bold text-slate-900 mb-3">Desglose de Meta Semanal</h4>
+                        <div className="space-y-2 mb-3">
+                          <div className="flex justify-between items-center p-2 bg-purple-50 rounded-lg">
+                            <span className="text-xs text-purple-700">Presupuesto total semana</span>
+                            <span className="font-bold text-purple-900">{formatCurrency(budgetData.weeklyBudget)}</span>
+                          </div>
+                          <div className="flex justify-between items-center p-2 bg-slate-50 rounded-lg">
+                            <span className="text-xs text-slate-700">Días en la semana (en mes)</span>
+                            <span className="font-bold text-slate-900">{eachDayOfInterval({ start: budgetData.currentWeekStart, end: budgetData.currentWeekEnd }).filter(d => d >= startOfMonth(new Date()) && d <= endOfMonth(new Date())).length} días</span>
+                          </div>
+                          <div className="flex justify-between items-center p-2 bg-purple-50 rounded-lg">
+                            <span className="text-xs text-purple-700">Promedio diario requerido</span>
+                            <span className="font-bold text-purple-900">{formatCurrency(budgetData.weeklyBudget / 7)}</span>
+                          </div>
+                        </div>
+                        <ResponsiveContainer width="100%" height={150}>
+                          <BarChart data={budgetData.dailyTrendData}>
+                            <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                            <XAxis dataKey="date" fontSize={9} angle={-45} textAnchor="end" height={50} />
+                            <YAxis fontSize={10} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} />
+                            <Tooltip formatter={(v) => formatCurrency(v)} />
+                            <Bar dataKey="presupuesto" fill="#a78bfa" radius={[6, 6, 0, 0]} />
+                          </BarChart>
+                        </ResponsiveContainer>
+                        <p className="text-xs text-slate-600 mt-2">
+                          📆 Meta distribuida según patrón histórico de cada día de la semana
+                        </p>
+                      </div>
+                    )}
+
+                    {selectedMetric === 'weekly-sales' && (
+                      <div>
+                        <h4 className="text-sm md:text-base font-bold text-slate-900 mb-3">Ventas de la Semana</h4>
+                        <div className="grid grid-cols-2 gap-2 mb-3">
+                          <div className="bg-purple-50 rounded-lg p-2">
+                            <p className="text-[10px] text-purple-600">Venta Acumulada</p>
+                            <p className="text-base font-bold text-purple-900">{formatCurrency(budgetData.currentWeekSales)}</p>
+                          </div>
+                          <div className="bg-emerald-50 rounded-lg p-2">
+                            <p className="text-[10px] text-emerald-600">% de Meta</p>
+                            <p className="text-base font-bold text-emerald-900">{budgetData.weeklyCompliance.toFixed(1)}%</p>
+                          </div>
+                        </div>
+                        <ResponsiveContainer width="100%" height={150}>
+                          <AreaChart data={budgetData.dailyTrendData}>
+                            <defs>
+                              <linearGradient id="weekSalesGradient" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#a78bfa" stopOpacity={0.6}/>
+                                <stop offset="100%" stopColor="#a78bfa" stopOpacity={0.1}/>
+                              </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                            <XAxis dataKey="date" fontSize={9} angle={-45} textAnchor="end" height={50} />
+                            <YAxis fontSize={10} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} />
+                            <Tooltip formatter={(v) => formatCurrency(v)} />
+                            <Area type="monotone" dataKey="ventas" stroke="#a78bfa" strokeWidth={2} fill="url(#weekSalesGradient)" />
+                          </AreaChart>
+                        </ResponsiveContainer>
+                        <p className="text-xs text-slate-600 mt-2">
+                          {budgetData.weeklyCompliance >= 100 
+                            ? `🎉 ¡Superando la meta semanal en ${(budgetData.weeklyCompliance - 100).toFixed(1)}%!` 
+                            : `💪 Faltan ${formatCurrency(budgetData.weeklyBudget - budgetData.currentWeekSales)} para cumplir la meta`}
+                        </p>
+                      </div>
+                    )}
+
+                    {selectedMetric === 'weekly-projection' && (
+                      <div>
+                        <h4 className="text-sm md:text-base font-bold text-slate-900 mb-3">Proyección de Cierre Semanal</h4>
+                        <div className="space-y-2 mb-3">
+                          <div className="flex justify-between items-center p-2 bg-pink-50 rounded-lg">
+                            <span className="text-xs text-pink-700">Proyección de cierre</span>
+                            <span className="font-bold text-pink-900">{formatCurrency(budgetData.weekProjection)}</span>
+                          </div>
+                          <div className="flex justify-between items-center p-2 bg-purple-50 rounded-lg">
+                            <span className="text-xs text-purple-700">Meta semanal</span>
+                            <span className="font-bold text-purple-900">{formatCurrency(budgetData.weeklyBudget)}</span>
+                          </div>
+                          <div className={`flex justify-between items-center p-2 rounded-lg ${budgetData.projectionCompliance >= 100 ? 'bg-emerald-50' : 'bg-amber-50'}`}>
+                            <span className={`text-xs ${budgetData.projectionCompliance >= 100 ? 'text-emerald-700' : 'text-amber-700'}`}>Cumplimiento proyectado</span>
+                            <span className={`font-bold ${budgetData.projectionCompliance >= 100 ? 'text-emerald-900' : 'text-amber-900'}`}>{budgetData.projectionCompliance.toFixed(1)}%</span>
+                          </div>
+                        </div>
+                        <ResponsiveContainer width="100%" height={120}>
+                          <BarChart layout="vertical" data={[
+                            { name: 'Proyección', value: budgetData.weekProjection },
+                            { name: 'Meta', value: budgetData.weeklyBudget }
+                          ]}>
+                            <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                            <XAxis type="number" fontSize={10} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} />
+                            <YAxis type="category" dataKey="name" fontSize={11} width={80} />
+                            <Tooltip formatter={(v) => formatCurrency(v)} />
+                            <Bar dataKey="value" radius={[0, 8, 8, 0]}>
+                              <Cell fill="#f9a8d4" />
+                              <Cell fill="#a78bfa" />
+                            </Bar>
+                          </BarChart>
+                        </ResponsiveContainer>
+                        <p className="text-xs text-slate-600 mt-2">
+                          {budgetData.projectionCompliance >= 100 
+                            ? `🚀 Al ritmo actual, superarás la meta semanal en ${(budgetData.projectionCompliance - 100).toFixed(1)}%` 
+                            : `⚠️ Necesitas acelerar el ritmo para alcanzar la meta semanal`}
                         </p>
                       </div>
                     )}
