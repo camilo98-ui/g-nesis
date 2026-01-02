@@ -735,41 +735,63 @@ export default function Dashboard() {
 
 
 
-  // Proyecciones
+  // Proyecciones - CÁLCULO ESTABLE basado en días del mes
   const projections = useMemo(() => {
     if (!currentBudget?.sales_budget) return null;
     const now = new Date();
     const monthStart = startOfMonth(now);
     const monthEnd = endOfMonth(now);
     const totalDays = differenceInDays(monthEnd, monthStart) + 1;
-    const daysElapsed = filteredSales.length || 1;
+    
+    // Usar SOLO datos del mes actual para proyección
+    const monthSales = dailySales.filter(s => {
+      const saleDate = s.date?.split('T')[0] || s.date;
+      const saleMonth = new Date(saleDate).getMonth();
+      const currentMonth = now.getMonth();
+      return saleMonth === currentMonth;
+    });
+    
+    // Calcular ventas acumuladas del mes
+    const monthTotals = monthSales.reduce((acc, s) => ({
+      sales: acc.sales + (s.total_sales || 0),
+      transactions: acc.transactions + (s.total_transactions || 0)
+    }), { sales: 0, transactions: 0 });
+    
+    // Días transcurridos del mes hasta HOY
+    const daysElapsed = now.getDate();
     const daysRemaining = totalDays - daysElapsed;
 
-    const dailyAvgSales = totals.sales / daysElapsed;
-    const projectedSales = totals.sales + dailyAvgSales * daysRemaining;
-    const salesGap = currentBudget.sales_budget - totals.sales;
+    // Promedio diario REAL del mes
+    const dailyAvgSales = daysElapsed > 0 ? monthTotals.sales / daysElapsed : 0;
+    
+    // Proyección = venta actual + (promedio diario × días restantes)
+    const projectedSales = monthTotals.sales + (dailyAvgSales * daysRemaining);
+    
+    // Brecha = lo que falta vender
+    const salesGap = currentBudget.sales_budget - monthTotals.sales;
+    
+    // Venta diaria requerida para alcanzar meta
     const requiredDailySales = daysRemaining > 0 ? salesGap / daysRemaining : 0;
 
-    const avgTicket = totals.transactions > 0 ? totals.sales / totals.transactions : 0;
+    const avgTicket = monthTotals.transactions > 0 ? monthTotals.sales / monthTotals.transactions : 0;
     const budgetTicket = currentBudget.tickets_budget || avgTicket;
 
-    // Datos para proyección
+    // Datos para gráfica de proyección
     const projectionData = [];
     let accumulated = 0;
-    chartData.forEach((d, i) => {
-      accumulated += d.ventas;
-      projectionData.push({ day: `Día ${i + 1}`, real: accumulated, proyectado: null });
-    });
-    for (let i = 0; i < daysRemaining; i++) {
-      accumulated += dailyAvgSales;
-      projectionData.push({ day: `Día ${chartData.length + i + 1}`, real: null, proyectado: accumulated });
+    
+    // Días reales con ventas
+    for (let i = 1; i <= daysElapsed; i++) {
+      const daySale = monthSales.find(s => new Date(s.date).getDate() === i);
+      accumulated += daySale?.total_sales || 0;
+      projectionData.push({ day: `Día ${i}`, real: accumulated, proyectado: null });
     }
-
-    // Datos para requerimiento diario
-    const dailyRequired = Array.from({ length: daysRemaining }, (_, i) => ({
-      day: `Día ${i + 1}`,
-      required: requiredDailySales
-    }));
+    
+    // Proyección días restantes
+    for (let i = 1; i <= daysRemaining; i++) {
+      accumulated += dailyAvgSales;
+      projectionData.push({ day: `Día ${daysElapsed + i}`, real: null, proyectado: accumulated });
+    }
 
     return {
       projectedSales,
@@ -782,12 +804,11 @@ export default function Dashboard() {
       salesOnTrack: projectedSales >= currentBudget.sales_budget * 0.95,
       ticketOnTrack: avgTicket >= budgetTicket * 0.95,
       projectionData,
-      dailyRequired,
-      totals,
+      totals: monthTotals,
       budget: currentBudget.sales_budget,
-      chartData
+      dailyAvgSales
     };
-  }, [currentBudget, totals, filteredSales, chartData]);
+  }, [currentBudget, dailySales]);
 
   const formatCurrency = (val) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(Math.round(val));
   const selectedStoreName = STORES.find((s) => s.code === selectedStore)?.name || '';
