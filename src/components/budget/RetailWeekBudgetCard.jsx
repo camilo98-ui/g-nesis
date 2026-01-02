@@ -209,8 +209,8 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
     const daysInCurrentWeek = eachDayOfInterval({ start: currentWeekStart, end: currentWeekEnd })
       .filter(d => d >= monthStart && d <= monthEnd);
     
-    // Meta semanal más agresiva: 110% del presupuesto base para hacer más desafiante
-    const WEEKLY_TARGET = 1.10;
+    // Meta semanal más agresiva: 120% del presupuesto base para hacer más desafiante
+    const WEEKLY_TARGET = 1.20;
     const weeklyBudget = daysInCurrentWeek.reduce((sum, day) => sum + getDailyBudget(day), 0) * WEEKLY_TARGET;
 
     // Calcular proyección de la semana - SUAVIZADA con histórico
