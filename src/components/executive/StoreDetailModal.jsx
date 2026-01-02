@@ -8,7 +8,6 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Area, AreaChart
 } from 'recharts';
 import { format, eachDayOfInterval } from 'date-fns';
-import { es } from 'date-fns/locale';
 
 export default function StoreDetailModal({ store, onClose, allDailySales, dateRange }) {
   const [activeMetric, setActiveMetric] = useState('ventas');
@@ -61,9 +60,9 @@ export default function StoreDetailModal({ store, onClose, allDailySales, dateRa
       }
       
       return {
-        date: format(day, 'dd/MM', { locale: es }),
+        date: format(day, 'dd/MM'),
         fullDate: dayStr,
-        dayOfWeek: format(day, 'EEEE', { locale: es }),
+        dayOfWeek: format(day, 'EEEE'),
         sales,
         tickets,
         transactions,

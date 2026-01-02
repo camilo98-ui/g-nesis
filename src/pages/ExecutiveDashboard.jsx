@@ -9,7 +9,6 @@ import DateFilter from '@/components/DateFilter';
 import { ArrowLeft, Search, TrendingUp, TrendingDown, Eye, Zap, Award, Brain, ArrowUpDown, ArrowUp, ArrowDown, BarChart3, Settings, X } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { format, startOfMonth, eachDayOfInterval, startOfWeek, endOfWeek, parseISO } from 'date-fns';
-import { es } from 'date-fns/locale';
 import StoreDetailModal from '../components/executive/StoreDetailModal';
 import KPIDetailModal from '../components/executive/KPIDetailModal';
 import ExecutiveComparable from '../components/executive/ExecutiveComparable';
@@ -407,7 +406,7 @@ Genera:
                 Bogotá Noroccidente
               </h1>
               <p className="text-sm sm:text-base lg:text-lg text-slate-400 font-normal">
-                {format(new Date(), 'EEEE dd \'de\' MMMM', { locale: es })}
+                {format(new Date(), 'EEEE dd \'de\' MMMM')}
               </p>
             </div>
 

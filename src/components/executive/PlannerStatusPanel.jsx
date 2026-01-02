@@ -4,7 +4,6 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { Calendar, CheckCircle2, AlertCircle, Clock } from 'lucide-react';
 import { startOfWeek, endOfWeek, isWithinInterval, differenceInMinutes, parse, isSunday, parseISO } from 'date-fns';
-import { es } from 'date-fns/locale';
 
 // Días festivos Colombia 2025
 const HOLIDAYS_2025 = [
