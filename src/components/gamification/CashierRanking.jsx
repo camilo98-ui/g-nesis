@@ -230,11 +230,14 @@ function RankingCalendar({ selected, onSelect, onApply }) {
   );
 }
 
-export default function CashierRanking({ storeId, onSelectCashier }) {
+export default function CashierRanking({ storeId, onSelectCashier, dateRange: externalDateRange }) {
   const [dateRange, setDateRange] = useState({
     from: startOfMonth(new Date()),
     to: new Date()
   });
+  
+  // Usar dateRange externo si existe, sino el local
+  const activeDateRange = externalDateRange || dateRange;
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [weekFilter, setWeekFilter] = useState(null);
 
@@ -255,7 +258,7 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
 
   // Calcular ranking con score de gestión integral
   const ranking = useMemo(() => {
-    const activeRange = weekFilter || dateRange;
+    const activeRange = weekFilter || activeDateRange;
     const filteredRecords = shiftRecords.filter(r => {
       try {
         const d = new Date(r.date);
@@ -320,7 +323,7 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
       })
       .sort((a, b) => b.overallScore - a.overallScore)
       .map((c, idx) => ({ ...c, rank: idx + 1 }));
-  }, [cashiers, shiftRecords, dateRange, weekFilter]);
+  }, [cashiers, shiftRecords, activeDateRange, weekFilter]);
 
   const formatCurrency = (val) => {
     if (val >= 1000000) return `$${Math.round(val/1000000)}M`;
@@ -329,7 +332,7 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
   };
 
   const getDateLabel = () => {
-    const activeRange = weekFilter || dateRange;
+    const activeRange = weekFilter || activeDateRange;
     if (isSameDay(activeRange.from, activeRange.to)) {
       return format(activeRange.from, 'dd MMM', { locale: es });
     }
