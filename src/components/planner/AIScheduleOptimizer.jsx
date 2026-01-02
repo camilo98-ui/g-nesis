@@ -178,10 +178,11 @@ export default function AIScheduleOptimizer({ storeId, currentWeek, shifts, cash
       const currentWeekData = {
         week: format(currentWeek, "'Semana' w - MMM yyyy", { locale: es }),
         stats: weekStats,
-        cashiers: cashiers.length
+        cashiers: cashiers.length,
+        cashiersList: cashiers.map(c => ({ id: c.id, name: c.name, position: c.position || 'cajero' }))
       };
 
-      const prompt = `Eres un experto en optimización de horarios para Popsy. Analiza los siguientes datos y proporciona recomendaciones INCLUYENDO PROPUESTA DE HORARIOS:
+      const prompt = `Eres un experto en optimización de horarios para Popsy. Analiza los siguientes datos y proporciona recomendaciones INCLUYENDO PROPUESTA DE HORARIOS CON PERSONAS ASIGNADAS:
 
 **DATOS HISTÓRICOS (últimas 4 semanas):**
 - Total de turnos: ${historicalSummary.totalShifts}
@@ -201,6 +202,9 @@ ${historicalSummary.weatherImpact.map(w => `- ${w.condition}: ${w.count} días, 
 - Total de horas: ${currentWeekData.stats?.totalHours.toFixed(1) || 0}h
 - Promedio de personal por día: ${currentWeekData.stats?.avgStaffPerDay || 0}
 - Colaboradores disponibles: ${currentWeekData.cashiers}
+
+**LISTA DE COLABORADORES DISPONIBLES:**
+${currentWeekData.cashiersList.map(c => `- ${c.name} (ID: ${c.id}, Cargo: ${c.position})`).join('\n')}
 
 **Desglose por día de la semana actual:**
 ${weekStats?.days.map(d => `- ${d.day}: ${d.shifts} turnos, ${d.hours.toFixed(1)}h, ${d.staff} personas`).join('\n') || ''}
@@ -222,6 +226,9 @@ ${weekStats?.days.map(d => `- ${d.day}: ${d.shifts} turnos, ${d.hours.toFixed(1)
 - Con 3-4 personas: combinar estaciones (excepto caja que va sola)
 - Con 2 personas: caja + alguien que hace todo lo demás
 - Ser inteligente en las combinaciones según demanda del día
+- DEBES asignar personas específicas (usar cashier_id y cashier_name de la lista)
+- Distribuir equitativamente las horas para cumplir 44h máximas semanales
+- Incluir 1 día de descanso por persona
 
 Proporciona tu análisis en el siguiente formato JSON (sin markdown, solo JSON puro):
 {
@@ -233,14 +240,16 @@ Proporciona tu análisis en el siguiente formato JSON (sin markdown, solo JSON p
       "reason": "Explicación breve",
       "proposed_schedules": [
         {
-          "shift": "Turno 1",
+          "cashier_id": "abc123",
+          "cashier_name": "Juan Pérez",
           "start_time": "09:30",
           "end_time": "17:30",
           "station": "Caja",
           "hours": 8
         },
         {
-          "shift": "Turno 2",
+          "cashier_id": "def456",
+          "cashier_name": "María López",
           "start_time": "09:30",
           "end_time": "17:30",
           "station": "Coneo + Coordinación",
@@ -285,7 +294,8 @@ Proporciona tu análisis en el siguiente formato JSON (sin markdown, solo JSON p
                     items: {
                       type: 'object',
                       properties: {
-                        shift: { type: 'string' },
+                        cashier_id: { type: 'string' },
+                        cashier_name: { type: 'string' },
                         start_time: { type: 'string' },
                         end_time: { type: 'string' },
                         station: { type: 'string' },
@@ -497,22 +507,42 @@ Proporciona tu análisis en el siguiente formato JSON (sin markdown, solo JSON p
                                </div>
                                <p className="text-xs text-gray-600 mb-2">{forecast.reason}</p>
 
-                               {/* Planta propuesta con estaciones */}
+                               {/* Planta propuesta - Tipo calendario */}
                                {forecast.proposed_schedules && forecast.proposed_schedules.length > 0 && (
-                                 <div className="mt-2 space-y-1">
-                                   <p className="text-xs font-bold text-gray-700">Planta propuesta:</p>
-                                   {forecast.proposed_schedules.map((schedule, schedIdx) => (
-                                     <div key={schedIdx} className="flex items-center gap-2 text-xs bg-white rounded px-2 py-1 border border-gray-200">
-                                       <div className="flex items-center gap-1 flex-1">
-                                         <Clock className="w-3 h-3 text-blue-500" />
-                                         <span className="text-gray-600">{schedule.start_time} - {schedule.end_time}</span>
-                                         <span className="text-gray-400">({schedule.hours}h)</span>
-                                       </div>
-                                       <div className="flex items-center gap-1 bg-purple-50 px-2 py-0.5 rounded">
-                                         <span className="font-bold text-purple-700">{schedule.station}</span>
-                                       </div>
-                                     </div>
-                                   ))}
+                                 <div className="mt-3 bg-gradient-to-br from-white to-purple-50 rounded-lg p-3 border border-purple-200">
+                                   <p className="text-xs font-bold text-gray-700 mb-2 flex items-center gap-1">
+                                     <Users className="w-3 h-3 text-purple-500" />
+                                     Planta del día:
+                                   </p>
+                                   <div className="space-y-2">
+                                     {forecast.proposed_schedules.map((schedule, schedIdx) => (
+                                       <motion.div 
+                                         key={schedIdx}
+                                         initial={{ opacity: 0, x: -10 }}
+                                         animate={{ opacity: 1, x: 0 }}
+                                         transition={{ delay: schedIdx * 0.05 }}
+                                         className="flex items-center gap-2 bg-white rounded-lg p-2 border border-gray-200 hover:border-purple-300 hover:shadow-sm transition-all"
+                                       >
+                                         <div className="flex-1 space-y-1">
+                                           <div className="flex items-center gap-2">
+                                             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white font-bold text-xs">
+                                               {schedule.cashier_name?.charAt(0) || '?'}
+                                             </div>
+                                             <div className="flex-1">
+                                               <p className="text-xs font-bold text-gray-800">{schedule.cashier_name || 'Sin asignar'}</p>
+                                               <div className="flex items-center gap-1 text-xs text-gray-600">
+                                                 <Clock className="w-3 h-3" />
+                                                 {schedule.start_time} - {schedule.end_time} ({schedule.hours}h)
+                                               </div>
+                                             </div>
+                                           </div>
+                                         </div>
+                                         <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 rounded text-xs font-bold whitespace-nowrap">
+                                           {schedule.station}
+                                         </div>
+                                       </motion.div>
+                                     ))}
+                                   </div>
                                  </div>
                                )}
                               </div>
