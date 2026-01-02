@@ -17,12 +17,12 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { startOfMonth } from 'date-fns';
+import { startOfMonth, startOfWeek } from 'date-fns';
 
 export default function Rankings() {
   const [selectedStore, setSelectedStore] = useState('');
   const [dateRange, setDateRange] = useState({
-    from: startOfMonth(new Date()),
+    from: startOfWeek(startOfMonth(new Date()), { weekStartsOn: 1 }),
     to: new Date()
   });
   const [activeTab, setActiveTab] = useState('sales');
