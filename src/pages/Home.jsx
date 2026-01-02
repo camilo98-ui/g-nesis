@@ -911,8 +911,8 @@ export default function Home() {
         <Suspense fallback={null}>
           {showStory && <PopsyStoryModal onClose={() => setShowStory(false)} />}
         </Suspense>
-      </div>);
-
+      </div>
+    );
   }
 
   return (
@@ -1172,9 +1172,8 @@ export default function Home() {
           })}
           </div>
           )}
-          </div>
-
-
+        </div>
+      </div>
 
       {/* Modales con Lazy Loading */}
       <Suspense fallback={null}>
@@ -1367,6 +1366,6 @@ export default function Home() {
           </motion.div>
         </div>
       )}
-    </div>);
-
+    </div>
+  );
 }
