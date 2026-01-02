@@ -16,7 +16,7 @@ import { toast } from 'sonner';
 export default function AIScheduleOptimizer({ storeId, currentWeek, shifts, cashiers, sales, budgets, onDayScheduleClick }) {
   const [analyzing, setAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState(null);
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(false);
   const [selectedDay, setSelectedDay] = useState(null);
 
   // Obtener datos históricos (últimas 4 semanas)
