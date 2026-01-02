@@ -290,7 +290,14 @@ export default function CashierRanking({ storeId, onSelectCashier, dateRange: ex
       const historicalAvgDaily = historicalDays > 0 ? historicalSales / historicalDays : 0;
       
       cashierStats[c.id] = {
-        ...c,
+        id: c.id,
+        name: c.name,
+        photo_url: c.photo_url,
+        email: c.email,
+        phone: c.phone,
+        position: c.position,
+        hire_date: c.hire_date,
+        is_active: c.is_active,
         totalSales,
         totalTickets,
         totalTransactions,
