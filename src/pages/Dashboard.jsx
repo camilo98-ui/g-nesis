@@ -454,14 +454,11 @@ function DetailPanel({ metric, data, onClose, chartData, formatCurrency, shiftDa
           <X className="w-5 h-5" />
         </Button>
       </div>
-      {/* Insight sutil */}
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="text-xs text-gray-400 mb-4 italic border-l-2 border-pink-200 pl-3">
-
-        💡 {insights[metric]}
-      </motion.p>
+      <ChartInsight 
+        data={chartData} 
+        metric={metric === 'sales' ? 'ventas' : metric === 'tickets' ? 'ticketPromedio' : metric}
+        formatCurrency={formatCurrency}
+      />
       {getChartContent()}
     </motion.div>);
 
