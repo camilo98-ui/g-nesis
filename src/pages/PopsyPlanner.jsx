@@ -107,7 +107,7 @@ export default function PopsyPlanner() {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <button 
-                onClick={() => navigate(createPageUrl('Home'))}
+                onClick={() => window.history.back()}
                 className="text-pink-600 hover:text-pink-700 p-2 rounded-lg hover:bg-pink-50 transition-colors"
               >
                 <ArrowLeft className="w-6 h-6" />

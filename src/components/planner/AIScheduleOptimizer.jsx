@@ -16,7 +16,7 @@ import { toast } from 'sonner';
 export default function AIScheduleOptimizer({ storeId, currentWeek, shifts, cashiers, sales, budgets, onDayScheduleClick }) {
   const [analyzing, setAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState(null);
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(true);
   const [selectedDay, setSelectedDay] = useState(null);
 
   // Obtener datos históricos (últimas 4 semanas)
@@ -178,11 +178,10 @@ export default function AIScheduleOptimizer({ storeId, currentWeek, shifts, cash
       const currentWeekData = {
         week: format(currentWeek, "'Semana' w - MMM yyyy", { locale: es }),
         stats: weekStats,
-        cashiers: cashiers.length,
-        cashiersList: cashiers.map(c => ({ id: c.id, name: c.name, position: c.position || 'cajero' }))
+        cashiers: cashiers.length
       };
 
-      const prompt = `Eres un experto en optimización de horarios para Popsy. Analiza los siguientes datos y proporciona recomendaciones INCLUYENDO PROPUESTA DE HORARIOS CON PERSONAS ASIGNADAS:
+      const prompt = `Eres un experto en optimización de horarios para Popsy. Analiza los siguientes datos y proporciona recomendaciones:
 
 **DATOS HISTÓRICOS (últimas 4 semanas):**
 - Total de turnos: ${historicalSummary.totalShifts}
@@ -203,33 +202,8 @@ ${historicalSummary.weatherImpact.map(w => `- ${w.condition}: ${w.count} días, 
 - Promedio de personal por día: ${currentWeekData.stats?.avgStaffPerDay || 0}
 - Colaboradores disponibles: ${currentWeekData.cashiers}
 
-**LISTA DE COLABORADORES DISPONIBLES:**
-${currentWeekData.cashiersList.map(c => `- ${c.name} (ID: ${c.id}, Cargo: ${c.position})`).join('\n')}
-
 **Desglose por día de la semana actual:**
 ${weekStats?.days.map(d => `- ${d.day}: ${d.shifts} turnos, ${d.hours.toFixed(1)}h, ${d.staff} personas`).join('\n') || ''}
-
-**RESTRICCIONES LABORALES:**
-- Jornada máxima semanal: 44 horas
-- Incluir 1 día de descanso por semana
-- Horarios operativos típicos: 9:30 AM a 9:00 PM
-
-**ESTACIONES DISPONIBLES Y REGLAS:**
-- Caja: siempre dedicado, no hace doble rol
-- Coneo + Coordinación de entrega: pueden combinarse si hay poco personal
-- Bebidas + Especialidades: pueden combinarse si hay poco personal
-- Toma de pedidos: puede combinarse con otras estaciones
-- Cookie Jar, Stocker, Experiencia: asignar según demanda
-
-**INSTRUCCIONES CRÍTICAS PARA ASIGNAR ESTACIONES:**
-- OBLIGATORIO: Si recomiendas N personas en 'recommended_staff', DEBES crear EXACTAMENTE N horarios en 'proposed_schedules'
-- Por ejemplo: si recommended_staff = 8, DEBES tener 8 objetos en proposed_schedules
-- Con 5+ personas: asignar estaciones individuales
-- Con 3-4 personas: combinar estaciones (excepto caja que va sola)
-- Con 2 personas: caja + alguien que hace todo lo demás
-- DEBES asignar personas específicas diferentes para cada horario (usar cashier_id y cashier_name de la lista)
-- Distribuir equitativamente las horas para cumplir 44h máximas semanales
-- NO REPETIR la misma persona en el mismo día (cada persona aparece UNA VEZ por día)
 
 Proporciona tu análisis en el siguiente formato JSON (sin markdown, solo JSON puro):
 {
@@ -238,25 +212,7 @@ Proporciona tu análisis en el siguiente formato JSON (sin markdown, solo JSON p
       "day": "lunes",
       "predicted_demand": "alta/media/baja",
       "recommended_staff": 5,
-      "reason": "Explicación breve",
-      "proposed_schedules": [
-        {
-          "cashier_id": "abc123",
-          "cashier_name": "Juan Pérez",
-          "start_time": "09:30",
-          "end_time": "17:30",
-          "station": "Caja",
-          "hours": 8
-        },
-        {
-          "cashier_id": "def456",
-          "cashier_name": "María López",
-          "start_time": "09:30",
-          "end_time": "17:30",
-          "station": "Coneo + Coordinación",
-          "hours": 8
-        }
-      ]
+      "reason": "Explicación breve"
     }
   ],
   "optimization_suggestions": [
@@ -289,21 +245,7 @@ Proporciona tu análisis en el siguiente formato JSON (sin markdown, solo JSON p
                   day: { type: 'string' },
                   predicted_demand: { type: 'string' },
                   recommended_staff: { type: 'number' },
-                  reason: { type: 'string' },
-                  proposed_schedules: {
-                    type: 'array',
-                    items: {
-                      type: 'object',
-                      properties: {
-                        cashier_id: { type: 'string' },
-                        cashier_name: { type: 'string' },
-                        start_time: { type: 'string' },
-                        end_time: { type: 'string' },
-                        station: { type: 'string' },
-                        hours: { type: 'number' }
-                      }
-                    }
-                  }
+                  reason: { type: 'string' }
                 }
               }
             },
@@ -494,69 +436,23 @@ Proporciona tu análisis en el siguiente formato JSON (sin markdown, solo JSON p
                               className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-blue-50 cursor-pointer transition-all hover:shadow-md"
                             >
                               <div className="flex-1">
-                               <div className="flex items-center gap-2 mb-1">
-                                 <Calendar className="w-4 h-4 text-gray-500" />
-                                 <span className="font-bold text-gray-800 capitalize">{forecast.day}</span>
-                                 <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${getDemandColor(forecast.predicted_demand)}`}>
-                                   {forecast.predicted_demand}
-                                 </span>
-                                 {selectedDay === forecast.day && (
-                                   <span className="text-xs bg-blue-500 text-white px-2 py-0.5 rounded-full animate-pulse">
-                                     Seleccionado
-                                   </span>
-                                 )}
-                               </div>
-                               <p className="text-xs text-gray-600 mb-2">{forecast.reason}</p>
-
-                               {/* Planta propuesta - Tipo calendario */}
-                               {forecast.proposed_schedules && forecast.proposed_schedules.length > 0 && (
-                                 <div className="mt-3 bg-gradient-to-br from-white to-purple-50 rounded-lg p-3 border border-purple-200">
-                                   <p className="text-xs font-bold text-gray-700 mb-2 flex items-center gap-1">
-                                     <Users className="w-3 h-3 text-purple-500" />
-                                     Planta del día:
-                                   </p>
-                                   <div className="space-y-2">
-                                     {forecast.proposed_schedules.map((schedule, schedIdx) => (
-                                       <motion.div 
-                                         key={schedIdx}
-                                         initial={{ opacity: 0, x: -10 }}
-                                         animate={{ opacity: 1, x: 0 }}
-                                         transition={{ delay: schedIdx * 0.05 }}
-                                         className="flex items-center gap-2 bg-white rounded-lg p-2 border border-gray-200 hover:border-purple-300 hover:shadow-sm transition-all"
-                                       >
-                                         <div className="flex-1 space-y-1">
-                                           <div className="flex items-center gap-2">
-                                             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white font-bold text-xs">
-                                               {schedule.cashier_name?.charAt(0) || '?'}
-                                             </div>
-                                             <div className="flex-1">
-                                               <p className="text-xs font-bold text-gray-800">{schedule.cashier_name || 'Sin asignar'}</p>
-                                               <div className="flex items-center gap-1 text-xs text-gray-600">
-                                                 <Clock className="w-3 h-3" />
-                                                 {schedule.start_time} - {schedule.end_time} ({schedule.hours}h)
-                                               </div>
-                                             </div>
-                                           </div>
-                                         </div>
-                                         <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 rounded text-xs font-bold whitespace-nowrap">
-                                           {schedule.station}
-                                         </div>
-                                       </motion.div>
-                                     ))}
-                                   </div>
-                                 </div>
-                               )}
+                                <div className="flex items-center gap-2 mb-1">
+                                  <Calendar className="w-4 h-4 text-gray-500" />
+                                  <span className="font-bold text-gray-800 capitalize">{forecast.day}</span>
+                                  <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${getDemandColor(forecast.predicted_demand)}`}>
+                                    {forecast.predicted_demand}
+                                  </span>
+                                  {selectedDay === forecast.day && (
+                                    <span className="text-xs bg-blue-500 text-white px-2 py-0.5 rounded-full animate-pulse">
+                                      Seleccionado
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-xs text-gray-600">{forecast.reason}</p>
                               </div>
-                              <div className="flex flex-col items-center gap-1">
-                               <div className="flex items-center gap-1 bg-blue-100 px-3 py-1 rounded-full">
-                                 <Users className="w-4 h-4 text-blue-600" />
-                                 <span className="font-bold text-blue-600">{forecast.recommended_staff}</span>
-                               </div>
-                               {forecast.proposed_schedules && (
-                                 <span className="text-xs text-gray-500">
-                                   {forecast.proposed_schedules.reduce((sum, s) => sum + s.hours, 0)}h
-                                 </span>
-                               )}
+                              <div className="flex items-center gap-1 bg-blue-100 px-3 py-1 rounded-full">
+                                <Users className="w-4 h-4 text-blue-600" />
+                                <span className="font-bold text-blue-600">{forecast.recommended_staff}</span>
                               </div>
                             </motion.div>
                           );
