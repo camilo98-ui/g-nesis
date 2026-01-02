@@ -221,14 +221,15 @@ ${weekStats?.days.map(d => `- ${d.day}: ${d.shifts} turnos, ${d.hours.toFixed(1)
 - Toma de pedidos: puede combinarse con otras estaciones
 - Cookie Jar, Stocker, Experiencia: asignar según demanda
 
-**INSTRUCCIONES PARA ASIGNAR ESTACIONES:**
+**INSTRUCCIONES CRÍTICAS PARA ASIGNAR ESTACIONES:**
+- OBLIGATORIO: Si recomiendas N personas en 'recommended_staff', DEBES crear EXACTAMENTE N horarios en 'proposed_schedules'
+- Por ejemplo: si recommended_staff = 8, DEBES tener 8 objetos en proposed_schedules
 - Con 5+ personas: asignar estaciones individuales
 - Con 3-4 personas: combinar estaciones (excepto caja que va sola)
 - Con 2 personas: caja + alguien que hace todo lo demás
-- Ser inteligente en las combinaciones según demanda del día
-- DEBES asignar personas específicas (usar cashier_id y cashier_name de la lista)
+- DEBES asignar personas específicas diferentes para cada horario (usar cashier_id y cashier_name de la lista)
 - Distribuir equitativamente las horas para cumplir 44h máximas semanales
-- Incluir 1 día de descanso por persona
+- NO REPETIR la misma persona en el mismo día (cada persona aparece UNA VEZ por día)
 
 Proporciona tu análisis en el siguiente formato JSON (sin markdown, solo JSON puro):
 {
