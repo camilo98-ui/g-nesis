@@ -953,16 +953,6 @@ export default function Dashboard() {
                 </Button>
               </motion.div>
 
-              <StoreReportGenerator
-              storeId={selectedStore}
-              storeName={selectedStoreName}
-              storeCode={selectedStore} />
-
-              <PresentationGenerator
-              storeId={selectedStore}
-              storeName={selectedStoreName}
-              storeCode={selectedStore} />
-
               </div>
 
             {/* Retail Week Budget - PRESUPUESTO DEL DÍA (LO MÁS IMPORTANTE) */}
