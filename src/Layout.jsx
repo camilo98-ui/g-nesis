@@ -137,5 +137,6 @@ export default function Layout({ children, currentPageName }) {
         </main>
       </div>
     </ErrorBoundary>
-  );
+  </DateFilterProvider>
+);
 }
