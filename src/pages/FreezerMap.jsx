@@ -357,19 +357,21 @@ export default function FreezerMap() {
     } catch (e) {console.error(e);}
   }, [selectedStore, slots]);
 
-  // Mutation para actualizar slot - MEJORADO para evitar que se borren
+  // Mutation para actualizar slot - CORREGIDO para evitar sobrescribir store_id
   const updateSlotMutation = useMutation({
     mutationFn: async ({ slotData, isNew }) => {
-      // CRÍTICO: Asegurar que SIEMPRE incluya store_id completo
-      const finalSlotData = {
-        ...slotData,
-        store_id: `${selectedStore}_F${currentFreezer}`
-      };
-      
       if (isNew) {
+        // Para nuevo: incluir store_id completo
+        const finalSlotData = {
+          ...slotData,
+          store_id: `${selectedStore}_F${currentFreezer}`
+        };
         return await base44.entities.FreezerSlot.create(finalSlotData);
       }
-      return await base44.entities.FreezerSlot.update(slotData.id, finalSlotData);
+      
+      // Para update: NO enviar store_id, solo los campos editables
+      const { store_id, id, ...editableFields } = slotData;
+      return await base44.entities.FreezerSlot.update(id, editableFields);
     },
     onSuccess: async (data, variables) => {
       await queryClient.invalidateQueries(['freezerSlots']);
@@ -403,13 +405,16 @@ export default function FreezerMap() {
 
     if (existing?.id) {
       setSavingSlot({ row: slot.row, position: slot.position, saving: true });
+      // Solo actualizar los campos necesarios sin tocar store_id
       await base44.entities.FreezerSlot.update(existing.id, {
         flavor_name: '',
         flavor_type: 'vacio',
         color: '',
-        is_empty: true
+        is_empty: true,
+        stock_level: 'full'
       });
-      queryClient.invalidateQueries(['freezerSlots']);
+      await queryClient.invalidateQueries(['freezerSlots']);
+      await refetch();
       setSavingSlot({ row: slot.row, position: slot.position, success: true });
       setTimeout(() => setSavingSlot(null), 800);
       toast.success(`Slot ${slot.slot_type} vaciado`);
@@ -476,11 +481,16 @@ export default function FreezerMap() {
 
     await Promise.all(filledSlots.map((s) =>
     base44.entities.FreezerSlot.update(s.id, {
-      flavor_name: '', flavor_type: 'vacio', color: '', is_empty: true
+      flavor_name: '', 
+      flavor_type: 'vacio', 
+      color: '', 
+      is_empty: true,
+      stock_level: 'full'
     })
     ));
 
-    queryClient.invalidateQueries(['freezerSlots']);
+    await queryClient.invalidateQueries(['freezerSlots']);
+    await refetch();
     toast.success('Nevera vaciada');
   };
 
@@ -501,11 +511,13 @@ export default function FreezerMap() {
       s.slot_type === slot.slot_type
       );
       if (existing?.id) {
+        // No sobrescribir store_id en undo
         await base44.entities.FreezerSlot.update(existing.id, {
           flavor_name: slot.flavor_name,
           flavor_type: slot.flavor_type,
           color: slot.color,
-          is_empty: slot.is_empty
+          is_empty: slot.is_empty,
+          stock_level: slot.stock_level || 'full'
         });
       }
     } else if (lastAction.action === 'clearAll') {
