@@ -791,38 +791,38 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
               </p>
               </motion.div>
 
-            <motion.div
+              <motion.div
               whileHover={{ scale: 1.03, y: -2 }}
-              className="bg-gradient-to-br from-purple-50/40 to-violet-50/40 rounded-lg p-2 md:p-3 border border-purple-200/40"
-            >
-              <p className="text-[10px] md:text-xs text-purple-500/70 mb-1">Días Restantes</p>
-              <p className="text-sm md:text-lg font-bold text-purple-600">
+              className="bg-gradient-to-br from-emerald-50/40 to-green-50/40 rounded-lg p-2 md:p-3 border border-emerald-200/40"
+              >
+              <p className="text-[10px] md:text-xs text-emerald-500/70 mb-1">Días Restantes</p>
+              <p className="text-sm md:text-lg font-bold text-emerald-600">
                 {budgetData.remainingDays}
               </p>
-            </motion.div>
+              </motion.div>
 
-            <motion.div
+              <motion.div
               whileHover={{ scale: 1.03, y: -2 }}
-              className="bg-gradient-to-br from-pink-50/40 to-rose-50/40 rounded-lg p-2 md:p-3 border border-pink-200/40"
-            >
-              <p className="text-[10px] md:text-xs text-pink-500/70 mb-1">Por Vender</p>
-              <p className="text-sm md:text-lg font-bold text-pink-600 leading-tight">
+              className="bg-gradient-to-br from-rose-50/40 to-pink-50/40 rounded-lg p-2 md:p-3 border border-rose-200/40"
+              >
+              <p className="text-[10px] md:text-xs text-rose-500/70 mb-1">Por Vender</p>
+              <p className="text-sm md:text-lg font-bold text-rose-600 leading-tight">
                 {formatCurrency(budgetData.remainingBudget)}
               </p>
-            </motion.div>
+              </motion.div>
 
-            <motion.div
+              <motion.div
               whileHover={{ scale: 1.03, y: -2 }}
               className={`rounded-lg p-2 md:p-3 border ${
                 isOnTrack 
                   ? 'bg-gradient-to-br from-emerald-50/40 to-green-50/40 border-emerald-200/40' 
-                  : 'bg-gradient-to-br from-amber-50/40 to-orange-50/40 border-amber-200/40'
+                  : 'bg-gradient-to-br from-rose-50/40 to-pink-50/40 border-rose-200/40'
               }`}
-            >
-              <p className={`text-[10px] md:text-xs mb-1 ${isOnTrack ? 'text-emerald-500/70' : 'text-amber-500/70'}`}>
+              >
+              <p className={`text-[10px] md:text-xs mb-1 ${isOnTrack ? 'text-emerald-500/70' : 'text-rose-500/70'}`}>
                 Cumplimiento
               </p>
-              <p className={`text-sm md:text-lg font-bold ${isOnTrack ? 'text-emerald-600' : 'text-amber-600'}`}>
+              <p className={`text-sm md:text-lg font-bold ${isOnTrack ? 'text-emerald-600' : 'text-rose-600'}`}>
                 {budgetData.compliance.toFixed(1)}%
               </p>
                 </motion.div>
