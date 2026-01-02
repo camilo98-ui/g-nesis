@@ -900,7 +900,7 @@ export default function Home() {
                     Acceso administrativo
                   </Link>
                 </div>
-              </div>
+              </motion.div>
             </div>
           </div>
         </div>
