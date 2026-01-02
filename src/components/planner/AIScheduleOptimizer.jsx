@@ -210,6 +210,19 @@ ${weekStats?.days.map(d => `- ${d.day}: ${d.shifts} turnos, ${d.hours.toFixed(1)
 - Incluir 1 día de descanso por semana
 - Horarios operativos típicos: 9:30 AM a 9:00 PM
 
+**ESTACIONES DISPONIBLES Y REGLAS:**
+- Caja: siempre dedicado, no hace doble rol
+- Coneo + Coordinación de entrega: pueden combinarse si hay poco personal
+- Bebidas + Especialidades: pueden combinarse si hay poco personal
+- Toma de pedidos: puede combinarse con otras estaciones
+- Cookie Jar, Stocker, Experiencia: asignar según demanda
+
+**INSTRUCCIONES PARA ASIGNAR ESTACIONES:**
+- Con 5+ personas: asignar estaciones individuales
+- Con 3-4 personas: combinar estaciones (excepto caja que va sola)
+- Con 2 personas: caja + alguien que hace todo lo demás
+- Ser inteligente en las combinaciones según demanda del día
+
 Proporciona tu análisis en el siguiente formato JSON (sin markdown, solo JSON puro):
 {
   "demand_forecast": [
@@ -223,7 +236,14 @@ Proporciona tu análisis en el siguiente formato JSON (sin markdown, solo JSON p
           "shift": "Turno 1",
           "start_time": "09:30",
           "end_time": "17:30",
-          "role": "caja",
+          "station": "Caja",
+          "hours": 8
+        },
+        {
+          "shift": "Turno 2",
+          "start_time": "09:30",
+          "end_time": "17:30",
+          "station": "Coneo + Coordinación",
           "hours": 8
         }
       ]
@@ -268,7 +288,7 @@ Proporciona tu análisis en el siguiente formato JSON (sin markdown, solo JSON p
                         shift: { type: 'string' },
                         start_time: { type: 'string' },
                         end_time: { type: 'string' },
-                        role: { type: 'string' },
+                        station: { type: 'string' },
                         hours: { type: 'number' }
                       }
                     }
@@ -477,17 +497,20 @@ Proporciona tu análisis en el siguiente formato JSON (sin markdown, solo JSON p
                                </div>
                                <p className="text-xs text-gray-600 mb-2">{forecast.reason}</p>
 
-                               {/* Horarios propuestos */}
+                               {/* Planta propuesta con estaciones */}
                                {forecast.proposed_schedules && forecast.proposed_schedules.length > 0 && (
                                  <div className="mt-2 space-y-1">
-                                   <p className="text-xs font-bold text-gray-700">Horarios propuestos:</p>
+                                   <p className="text-xs font-bold text-gray-700">Planta propuesta:</p>
                                    {forecast.proposed_schedules.map((schedule, schedIdx) => (
-                                     <div key={schedIdx} className="flex items-center gap-2 text-xs bg-white rounded px-2 py-1">
-                                       <Clock className="w-3 h-3 text-blue-500" />
-                                       <span className="font-medium">{schedule.shift}:</span>
-                                       <span className="text-gray-600">{schedule.start_time} - {schedule.end_time}</span>
-                                       <span className="text-gray-500">({schedule.hours}h)</span>
-                                       <span className="text-purple-600 ml-auto">{schedule.role}</span>
+                                     <div key={schedIdx} className="flex items-center gap-2 text-xs bg-white rounded px-2 py-1 border border-gray-200">
+                                       <div className="flex items-center gap-1 flex-1">
+                                         <Clock className="w-3 h-3 text-blue-500" />
+                                         <span className="text-gray-600">{schedule.start_time} - {schedule.end_time}</span>
+                                         <span className="text-gray-400">({schedule.hours}h)</span>
+                                       </div>
+                                       <div className="flex items-center gap-1 bg-purple-50 px-2 py-0.5 rounded">
+                                         <span className="font-bold text-purple-700">{schedule.station}</span>
+                                       </div>
                                      </div>
                                    ))}
                                  </div>
