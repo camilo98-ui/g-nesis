@@ -486,7 +486,7 @@ export default function Home() {
   // Si no está logueado, mostrar pantalla de login
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-violet-50 via-fuchsia-50 to-cyan-50 relative overflow-hidden">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100 relative overflow-hidden">
         {/* Animated Background Effects */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <motion.div 
@@ -496,7 +496,7 @@ export default function Home() {
               scale: [1, 1.2, 1]
             }}
             transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute -top-48 -right-48 w-[800px] h-[800px] bg-gradient-to-br from-fuchsia-400/20 via-pink-400/15 to-transparent rounded-full blur-3xl"
+            className="absolute -top-48 -right-48 w-[800px] h-[800px] bg-gradient-to-br from-slate-200/20 via-gray-200/15 to-transparent rounded-full blur-3xl"
           />
           <motion.div 
             animate={{ 
@@ -505,7 +505,7 @@ export default function Home() {
               scale: [1, 1.3, 1]
             }}
             transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute -bottom-48 -left-48 w-[900px] h-[900px] bg-gradient-to-br from-cyan-400/15 via-violet-400/10 to-transparent rounded-full blur-3xl"
+            className="absolute -bottom-48 -left-48 w-[900px] h-[900px] bg-gradient-to-br from-gray-300/15 via-slate-300/10 to-transparent rounded-full blur-3xl"
           />
           <motion.div 
             animate={{ 
@@ -513,7 +513,7 @@ export default function Home() {
               scale: [1, 1.1, 1]
             }}
             transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-purple-300/10 via-pink-300/10 to-transparent rounded-full blur-3xl"
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-slate-200/10 via-gray-200/10 to-transparent rounded-full blur-3xl"
           />
         </div>
 
@@ -538,7 +538,7 @@ export default function Home() {
                     y: { duration: 2.5, repeat: Infinity, ease: "easeInOut" }
                   }}
                 />
-                <h1 className="text-2xl font-black bg-gradient-to-r from-fuchsia-600 via-pink-500 to-violet-600 bg-clip-text text-transparent mb-1">Iniciar sesión</h1>
+                <h1 className="text-2xl font-black text-slate-800 mb-1">Iniciar sesión</h1>
                 <p className="text-slate-600 text-sm font-medium">Selecciona tu rol y comienza</p>
               </div>
 
@@ -558,15 +558,15 @@ export default function Home() {
                       }}
                       className={`relative w-full min-h-[60px] p-3.5 rounded-2xl border-2 transition-all duration-300 text-left ${
                         isSelected
-                          ? 'border-transparent bg-gradient-to-r from-fuchsia-500 via-pink-500 to-violet-500 shadow-xl shadow-pink-500/50 scale-[1.02]'
-                          : 'border-slate-200 bg-white/80 backdrop-blur-sm active:border-pink-300 hover:scale-[1.01] hover:shadow-lg'
+                          ? 'border-slate-400 bg-slate-700 shadow-xl shadow-slate-500/30 scale-[1.02]'
+                          : 'border-slate-200 bg-white/80 backdrop-blur-sm active:border-slate-300 hover:scale-[1.01] hover:shadow-lg'
                       }`}
                     >
                       {isLastUsed && (
                         <motion.div 
                           animate={{ scale: [1, 1.1, 1] }}
                           transition={{ duration: 2, repeat: Infinity }}
-                          className="absolute -top-2 right-2 px-2 py-0.5 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full text-[9px] font-bold text-white shadow-lg"
+                          className="absolute -top-2 right-2 px-2 py-0.5 bg-slate-600 rounded-full text-[9px] font-bold text-white shadow-lg"
                         >
                           ✨ Reciente
                         </motion.div>
@@ -594,7 +594,7 @@ export default function Home() {
                             animate={{ scale: 1 }}
                             className="w-5 h-5 rounded-full bg-white flex items-center justify-center flex-shrink-0 shadow-md"
                           >
-                            <CheckCircle className="w-3.5 h-3.5 text-fuchsia-600" strokeWidth={3} />
+                            <CheckCircle className="w-3.5 h-3.5 text-slate-700" strokeWidth={3} />
                           </motion.div>
                         )}
                       </div>
@@ -661,7 +661,7 @@ export default function Home() {
                 <Button
                   onClick={handleLogin}
                   disabled={(selectedRole !== 'gerente' && !pendingStore) || !selectedRole || isSubmitting}
-                  className="w-full h-12 bg-gradient-to-r from-fuchsia-600 via-pink-500 to-violet-600 hover:from-fuchsia-700 hover:via-pink-600 hover:to-violet-700 text-white rounded-2xl font-bold text-base disabled:opacity-40 mt-4 shadow-xl shadow-pink-500/50"
+                  className="w-full h-12 bg-slate-700 hover:bg-slate-800 text-white rounded-2xl font-bold text-base disabled:opacity-40 mt-4 shadow-xl"
                 >
                 {isSubmitting ? (
                   <span className="flex items-center justify-center gap-2">
@@ -703,24 +703,18 @@ export default function Home() {
                     className="text-6xl font-black leading-tight mb-6"
                   >
                     <span className="text-slate-900">Bienvenido a</span><br />
-                    <motion.span 
-                      animate={{ 
-                        backgroundPosition: ['0% 50%', '100% 50%', '0% 50%']
-                      }}
-                      transition={{ duration: 5, repeat: Infinity }}
-                      className="bg-gradient-to-r from-fuchsia-600 via-pink-500 to-violet-600 bg-clip-text text-transparent bg-[length:200%_auto]"
-                    >
+                    <span className="text-slate-800">
                       Popsy Management
-                    </motion.span>
+                    </span>
                   </motion.h1>
                   <p className="text-xl text-slate-700 leading-relaxed font-medium">Gestión empresarial inteligente para equipos de alto impacto 🚀</p>
                 </div>
 
                 <div className="space-y-7 pt-6">
                   {[
-                    { icon: TrendingUp, title: 'Métricas en tiempo real', text: 'Monitoreo continuo del desempeño', gradient: 'from-fuchsia-500 to-pink-500' },
-                    { icon: Users, title: 'Gestión de equipos', text: 'Optimiza recursos y productividad', gradient: 'from-pink-500 to-violet-500' },
-                    { icon: Target, title: 'Logro de objetivos', text: 'Cumple metas con análisis predictivo', gradient: 'from-violet-500 to-cyan-500' }
+                    { icon: TrendingUp, title: 'Métricas en tiempo real', text: 'Monitoreo continuo del desempeño', gradient: 'from-slate-600 to-slate-700' },
+                    { icon: Users, title: 'Gestión de equipos', text: 'Optimiza recursos y productividad', gradient: 'from-slate-600 to-slate-700' },
+                    { icon: Target, title: 'Logro de objetivos', text: 'Cumple metas con análisis predictivo', gradient: 'from-slate-600 to-slate-700' }
                   ].map((feature, i) => (
                     <motion.div 
                       key={i} 
@@ -755,8 +749,8 @@ export default function Home() {
                 style={{ boxShadow: '0 25px 80px -15px rgba(217, 70, 239, 0.3), 0 10px 30px -10px rgba(0, 0, 0, 0.15)' }}>
                 
                 <div className="text-center">
-                  <h2 className="text-4xl font-black bg-gradient-to-r from-fuchsia-600 via-pink-500 to-violet-600 bg-clip-text text-transparent mb-3">Iniciar sesión</h2>
-                  <p className="text-base text-slate-700 font-medium">Selecciona tu rol y despega 🚀</p>
+                  <h2 className="text-4xl font-black text-slate-800 mb-3">Iniciar sesión</h2>
+                  <p className="text-base text-slate-600 font-medium">Selecciona tu rol y comienza</p>
                 </div>
 
                 <div className="space-y-4">
@@ -775,15 +769,15 @@ export default function Home() {
                         }}
                         className={`relative w-full p-5 rounded-3xl border-2 transition-all duration-300 text-left flex items-center gap-5 ${
                           isSelected
-                            ? 'border-transparent bg-gradient-to-r from-fuchsia-500 via-pink-500 to-violet-500 shadow-2xl shadow-fuchsia-500/40 scale-[1.02]'
-                            : 'border-slate-200 bg-white/70 backdrop-blur-sm hover:border-fuchsia-300 hover:shadow-lg hover:scale-[1.01]'
+                            ? 'border-slate-400 bg-slate-700 shadow-2xl shadow-slate-500/30 scale-[1.02]'
+                            : 'border-slate-200 bg-white/70 backdrop-blur-sm hover:border-slate-300 hover:shadow-lg hover:scale-[1.01]'
                         }`}
                       >
                         {isLastUsed && (
                           <motion.div 
                             animate={{ scale: [1, 1.05, 1] }}
                             transition={{ duration: 2, repeat: Infinity }}
-                            className="absolute -top-2.5 right-4 px-3 py-1 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full text-[11px] font-bold text-white shadow-xl"
+                            className="absolute -top-2.5 right-4 px-3 py-1 bg-slate-600 rounded-full text-[11px] font-bold text-white shadow-xl"
                           >
                             ✨ Reciente
                           </motion.div>
@@ -808,7 +802,7 @@ export default function Home() {
                             animate={{ scale: 1, rotate: 0 }}
                             className="w-7 h-7 rounded-full bg-white flex items-center justify-center flex-shrink-0 shadow-xl"
                           >
-                            <CheckCircle className="w-5 h-5 text-fuchsia-600" strokeWidth={3} />
+                            <CheckCircle className="w-5 h-5 text-slate-700" strokeWidth={3} />
                           </motion.div>
                         )}
                       </button>
@@ -875,7 +869,7 @@ export default function Home() {
                   <Button
                     onClick={handleLogin}
                     disabled={(selectedRole !== 'gerente' && !pendingStore) || !selectedRole || isSubmitting}
-                    className="w-full bg-gradient-to-r from-fuchsia-600 via-pink-500 to-violet-600 hover:from-fuchsia-700 hover:via-pink-600 hover:to-violet-700 text-white py-5 rounded-2xl font-black text-lg shadow-2xl shadow-fuchsia-500/40 hover:shadow-2xl hover:shadow-fuchsia-500/60 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                    className="w-full bg-slate-700 hover:bg-slate-800 text-white py-5 rounded-2xl font-black text-lg shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
                   >
                   {isSubmitting ? (
                     <span className="flex items-center justify-center gap-3">
@@ -896,7 +890,7 @@ export default function Home() {
                 </motion.div>
 
                 <div className="text-center pt-1">
-                  <Link to={createPageUrl('ExecutiveDashboard')} className="text-xs text-slate-400 hover:text-pink-600 transition-colors inline-block">
+                  <Link to={createPageUrl('ExecutiveDashboard')} className="text-xs text-slate-400 hover:text-slate-600 transition-colors inline-block">
                     Acceso administrativo
                   </Link>
                 </div>
