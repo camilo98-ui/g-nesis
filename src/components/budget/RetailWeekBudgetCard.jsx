@@ -847,13 +847,15 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
               </div>
 
               {/* Detalle de métrica seleccionada */}
-              <AnimatePresence>
+              <AnimatePresence mode="wait">
                 {selectedMetric && (
                   <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="bg-white rounded-xl p-3 md:p-4 border border-slate-200 shadow-sm"
+                    key={selectedMetric}
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                    className="bg-white rounded-xl p-3 md:p-4 border border-slate-200 shadow-sm overflow-hidden"
                   >
                     {selectedMetric === 'base' && (
                       <div>
