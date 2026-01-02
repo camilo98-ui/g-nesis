@@ -962,12 +962,13 @@ export default function Dashboard() {
             </div>
 
             {/* Retail Week Budget - PRESUPUESTO DEL DÍA (LO MÁS IMPORTANTE) */}
-            {!showComparison && currentBudget?.sales_budget &&
+            {!showComparison &&
           <RetailWeekBudgetCard
             dailySales={dailySales}
             activeBudget={currentBudget}
             storeId={selectedStore}
-            formatCurrency={formatCurrency} />
+            formatCurrency={formatCurrency}
+            onConfigureBudget={() => setShowMonthlyBudget(true)} />
 
           }
 

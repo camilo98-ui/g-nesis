@@ -6,13 +6,37 @@ import { format, startOfMonth, endOfMonth, eachWeekOfInterval, startOfWeek, endO
 import { es } from 'date-fns/locale';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Legend } from 'recharts';
 
-export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId, formatCurrency }) {
+export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId, formatCurrency, onConfigureBudget }) {
   const [expandedSection, setExpandedSection] = useState(null);
   const [isExpanded, setIsExpanded] = useState(false);
 
   // Calcular datos del presupuesto retail
   const budgetData = useMemo(() => {
-    if (!activeBudget?.sales_budget) return null;
+    if (!activeBudget?.sales_budget) {
+      // Sin presupuesto, mostrar solo información básica
+      const now = new Date();
+      const monthStart = startOfMonth(now);
+      const monthEnd = endOfMonth(now);
+      const currentWeekStart = startOfWeek(now, { weekStartsOn: 1 });
+      const currentWeekEnd = endOfWeek(now, { weekStartsOn: 1 });
+      
+      const weeks = eachWeekOfInterval(
+        { start: monthStart, end: monthEnd },
+        { weekStartsOn: 1 }
+      );
+      
+      const currentWeekNumber = weeks.findIndex(w => {
+        const weekEnd = endOfWeek(w, { weekStartsOn: 1 });
+        return now >= w && now <= weekEnd;
+      }) + 1;
+      
+      return {
+        noBudget: true,
+        currentWeekNumber,
+        totalWeeks: weeks.length,
+        remainingDays: eachDayOfInterval({ start: now, end: monthEnd }).length
+      };
+    }
 
     const now = new Date();
     const monthStart = startOfMonth(now);
@@ -225,10 +249,8 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
     };
   }, [dailySales, activeBudget]);
 
-  if (!budgetData) return null;
-
-  const isOnTrack = budgetData.compliance >= 95;
-  const needsRecovery = budgetData.accumulatedGap > 0;
+  const isOnTrack = budgetData?.compliance >= 95;
+  const needsRecovery = budgetData?.accumulatedGap > 0;
 
   const toggleSection = (section) => {
     setExpandedSection(expandedSection === section ? null : section);
@@ -268,6 +290,28 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
         </CardHeader>
 
         <CardContent className="p-3 md:p-6 space-y-3 md:space-y-4">
+          {/* Sin Presupuesto - Mensaje */}
+          {budgetData?.noBudget ? (
+            <motion.div
+              whileHover={{ scale: 1.02, y: -2 }}
+              onClick={onConfigureBudget}
+              className="w-full bg-gradient-to-br from-amber-400/80 to-orange-400/80 rounded-xl md:rounded-2xl shadow-md p-4 md:p-6 border border-amber-300/40 relative overflow-hidden cursor-pointer"
+            >
+              <div className="relative z-10 text-center">
+                <Target className="w-10 h-10 md:w-12 md:h-12 text-white mx-auto mb-3 md:mb-4" />
+                <p className="text-lg md:text-2xl font-black text-white mb-2">
+                  Configura el Presupuesto
+                </p>
+                <p className="text-xs md:text-sm text-white/80 mb-4">
+                  Para ver el presupuesto del día y el calendario retail, primero configura el presupuesto mensual de esta tienda.
+                </p>
+                <div className="inline-block px-4 py-2 bg-white/20 rounded-lg text-white text-xs md:text-sm font-bold">
+                  👆 Haz clic aquí para configurar
+                </div>
+              </div>
+            </motion.div>
+          ) : (
+            <>
           {/* Presupuesto del Día - DESTACADO */}
           <motion.div
             whileHover={{ scale: 1.02, y: -2 }}
@@ -756,6 +800,8 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
             </>
             )}
           </AnimatePresence>
+          </>
+          )}
         </CardContent>
       </Card>
     </motion.div>
