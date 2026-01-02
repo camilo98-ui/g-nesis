@@ -1,21 +1,30 @@
-import React, { useMemo } from 'react';
-import { motion } from 'framer-motion';
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from 'recharts';
-import { format, parseISO, eachDayOfInterval, startOfMonth, endOfMonth } from 'date-fns';
+import React, { useMemo, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Cell } from 'recharts';
+import { format, eachDayOfInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { TrendingUp, Users, Eye, EyeOff } from 'lucide-react';
+import { Button } from "@/components/ui/button";
 
-const COLORS = [
-  '#ec4899', '#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', 
-  '#ef4444', '#06b6d4', '#84cc16', '#f97316', '#6366f1'
-];
+const CASHIER_COLORS = {
+  0: { gradient: 'from-pink-400 to-rose-500', solid: '#ec4899' },
+  1: { gradient: 'from-violet-400 to-purple-500', solid: '#8b5cf6' },
+  2: { gradient: 'from-blue-400 to-indigo-500', solid: '#3b82f6' },
+  3: { gradient: 'from-emerald-400 to-green-500', solid: '#10b981' },
+  4: { gradient: 'from-amber-400 to-orange-500', solid: '#f59e0b' },
+  5: { gradient: 'from-red-400 to-rose-500', solid: '#ef4444' },
+  6: { gradient: 'from-cyan-400 to-blue-500', solid: '#06b6d4' },
+  7: { gradient: 'from-lime-400 to-green-500', solid: '#84cc16' }
+};
 
 export default function TrendChart({ shiftRecords, cashiers, dateRange, metricType = 'sales' }) {
-  const chartData = useMemo(() => {
-    if (!dateRange?.from || !dateRange?.to || !shiftRecords.length) return [];
+  const [selectedCashiers, setSelectedCashiers] = useState([]);
+
+  const { chartData, topCashiers, cashierTotals } = useMemo(() => {
+    if (!dateRange?.from || !dateRange?.to || !shiftRecords.length) return { chartData: [], topCashiers: [], cashierTotals: {} };
 
     const days = eachDayOfInterval({ start: dateRange.from, end: dateRange.to });
     
-    // Agrupar por cajero y fecha
     const cashierDailyData = {};
     
     shiftRecords.forEach(record => {
@@ -39,40 +48,45 @@ export default function TrendChart({ shiftRecords, cashiers, dateRange, metricTy
       cashierDailyData[cashierId][dateStr].tickets += record.tickets || 0;
     });
 
-    // Crear datos para el gráfico
-    return days.map(day => {
+    // Calcular totales por cajero
+    const totals = {};
+    cashiers.forEach(c => {
+      totals[c.id] = Object.values(cashierDailyData[c.id] || {}).reduce((sum, d) => {
+        if (metricType === 'sales') return sum + d.sales;
+        if (metricType === 'transactions') return sum + d.transactions;
+        if (metricType === 'ticket') return sum + (d.transactions > 0 ? d.sales / d.transactions : 0);
+        return sum;
+      }, 0);
+    });
+
+    const topCashiers = cashiers
+      .filter(c => totals[c.id] > 0)
+      .sort((a, b) => totals[b.id] - totals[a.id])
+      .slice(0, 5);
+
+    const chartData = days.map(day => {
       const dateStr = format(day, 'yyyy-MM-dd');
       const dayData = {
         date: format(day, 'dd', { locale: es }),
-        fullDate: format(day, 'EEEE dd MMM', { locale: es }),
-        dayName: format(day, 'EEEE', { locale: es })
+        fullDate: format(day, 'EEE dd MMM', { locale: es })
       };
 
-      cashiers.forEach(cashier => {
+      topCashiers.forEach(cashier => {
         const data = cashierDailyData[cashier.id]?.[dateStr];
         if (metricType === 'sales') {
-          dayData[cashier.name] = data?.sales || 0;
+          dayData[cashier.id] = data?.sales || 0;
         } else if (metricType === 'transactions') {
-          dayData[cashier.name] = data?.transactions || 0;
+          dayData[cashier.id] = data?.transactions || 0;
         } else if (metricType === 'ticket') {
-          dayData[cashier.name] = data?.tickets > 0 ? data.sales / data.tickets : 0;
+          dayData[cashier.id] = data?.transactions > 0 ? data.sales / data.transactions : 0;
         }
       });
 
       return dayData;
     });
-  }, [shiftRecords, cashiers, dateRange, metricType]);
 
-  // Obtener top cajeros para mostrar en la leyenda
-  const topCashiers = useMemo(() => {
-    const totals = {};
-    cashiers.forEach(c => {
-      totals[c.name] = chartData.reduce((sum, d) => sum + (d[c.name] || 0), 0);
-    });
-    return cashiers
-      .sort((a, b) => (totals[b.name] || 0) - (totals[a.name] || 0))
-      .slice(0, 8);
-  }, [cashiers, chartData]);
+    return { chartData, topCashiers, cashierTotals: totals };
+  }, [shiftRecords, cashiers, dateRange, metricType]);
 
   const formatValue = (val) => {
     if (metricType === 'sales' || metricType === 'ticket') {
