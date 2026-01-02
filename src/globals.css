@@ -247,3 +247,52 @@ body {
 meta[name="robots"] {
   content: "noindex, nofollow";
 }
+
+/* Animated gradients */
+@keyframes gradient-shift-1 {
+  0%, 100% { 
+    background: radial-gradient(circle at center, rgba(244, 114, 182, 0.3), rgba(251, 113, 133, 0.25), transparent);
+  }
+  33% { 
+    background: radial-gradient(circle at center, rgba(167, 139, 250, 0.3), rgba(196, 181, 253, 0.25), transparent);
+  }
+  66% { 
+    background: radial-gradient(circle at center, rgba(96, 165, 250, 0.3), rgba(147, 197, 253, 0.25), transparent);
+  }
+}
+
+@keyframes gradient-shift-2 {
+  0%, 100% { 
+    background: radial-gradient(circle at center, rgba(192, 132, 252, 0.25), rgba(168, 85, 247, 0.2), transparent);
+  }
+  33% { 
+    background: radial-gradient(circle at center, rgba(244, 114, 182, 0.25), rgba(236, 72, 153, 0.2), transparent);
+  }
+  66% { 
+    background: radial-gradient(circle at center, rgba(34, 211, 238, 0.25), rgba(6, 182, 212, 0.2), transparent);
+  }
+}
+
+@keyframes gradient-shift-3 {
+  0%, 100% { 
+    background: radial-gradient(circle at center, rgba(59, 130, 246, 0.2), rgba(96, 165, 250, 0.15), transparent);
+  }
+  33% { 
+    background: radial-gradient(circle at center, rgba(168, 85, 247, 0.2), rgba(192, 132, 252, 0.15), transparent);
+  }
+  66% { 
+    background: radial-gradient(circle at center, rgba(251, 113, 133, 0.2), rgba(244, 114, 182, 0.15), transparent);
+  }
+}
+
+.animate-gradient-1 {
+  animation: gradient-shift-1 15s ease-in-out infinite;
+}
+
+.animate-gradient-2 {
+  animation: gradient-shift-2 18s ease-in-out infinite;
+}
+
+.animate-gradient-3 {
+  animation: gradient-shift-3 20s ease-in-out infinite;
+}

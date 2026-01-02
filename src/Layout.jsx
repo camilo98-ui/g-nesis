@@ -120,10 +120,10 @@ export default function Layout({ children, currentPageName }) {
             {/* Base gradient */}
             <div className="absolute inset-0 bg-gradient-to-br from-pink-100/60 via-purple-100/50 to-blue-100/60" />
 
-            {/* Animated orbs */}
-            <div className="absolute top-20 right-[10%] w-[600px] h-[600px] bg-gradient-to-br from-pink-400/30 via-rose-400/25 to-transparent rounded-full blur-3xl animate-pulse" />
-            <div className="absolute bottom-20 left-[15%] w-[700px] h-[700px] bg-gradient-to-br from-purple-400/25 via-indigo-400/20 to-transparent rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-            <div className="absolute top-1/3 left-1/3 w-[500px] h-[500px] bg-gradient-to-br from-blue-400/20 via-cyan-400/15 to-transparent rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+            {/* Animated color-shifting orbs */}
+            <div className="absolute top-20 right-[10%] w-[600px] h-[600px] rounded-full blur-3xl animate-gradient-1" />
+            <div className="absolute bottom-20 left-[15%] w-[700px] h-[700px] rounded-full blur-3xl animate-gradient-2" />
+            <div className="absolute top-1/3 left-1/3 w-[500px] h-[500px] rounded-full blur-3xl animate-gradient-3" />
 
             {/* Subtle grid overlay */}
             <div className="absolute inset-0 bg-[linear-gradient(to_right,#8881_1px,transparent_1px),linear-gradient(to_bottom,#8881_1px,transparent_1px)] bg-[size:64px_64px] opacity-30" />
