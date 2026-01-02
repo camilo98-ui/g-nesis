@@ -76,18 +76,29 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       }
     });
 
-    // Promedio histórico del día de la semana actual (ej: promedio de todos los jueves)
+    // Promedio histórico del día de la semana actual (ej: promedio de todos los viernes)
     const todayDayOfWeek = now.getDay();
-    const historicalAvgToday = countByDayOfWeek[todayDayOfWeek] > 0 
-      ? salesByDayOfWeek[todayDayOfWeek] / countByDayOfWeek[todayDayOfWeek]
+    
+    // Buscar TODOS los registros históricos del mismo día de la semana (ej: todos los viernes)
+    const historicalSalesForDay = dailySales.filter(s => {
+      try {
+        const saleDate = parseISO(s.date);
+        return saleDate.getDay() === todayDayOfWeek && s.total_sales > 0;
+      } catch {
+        return false;
+      }
+    });
+    
+    const historicalAvgToday = historicalSalesForDay.length > 0
+      ? historicalSalesForDay.reduce((sum, s) => sum + s.total_sales, 0) / historicalSalesForDay.length
       : 0;
     
     // Log para debug
     console.log('📊 Histórico día actual:', {
       dia: format(now, 'EEEE', { locale: es }),
       promedio: historicalAvgToday,
-      cantidadDias: countByDayOfWeek[todayDayOfWeek],
-      totalVentas: salesByDayOfWeek[todayDayOfWeek]
+      cantidadDias: historicalSalesForDay.length,
+      fechasEncontradas: historicalSalesForDay.map(s => s.date)
     });
 
     // Calcular promedio por día de semana
