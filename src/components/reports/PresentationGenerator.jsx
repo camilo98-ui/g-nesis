@@ -47,7 +47,7 @@ export default function PresentationGenerator({ storeId, storeName, storeCode })
           onClick={() => setIsOpen(true)}
           variant="outline"
           size="sm"
-          className="gap-2 border-purple-300 hover:border-purple-500 hover:bg-purple-50 text-purple-700"
+          className="gap-2 border-gray-200 hover:border-purple-300 hover:bg-purple-50 text-gray-700 hover:text-purple-600 transition-all"
         >
           <Presentation className="w-4 h-4" />
           Crear Presentación
