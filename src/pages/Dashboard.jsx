@@ -9,6 +9,9 @@ import DateFilter from '@/components/DateFilter';
 import WeekFilter from '@/components/dashboard/WeekFilter';
 import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
 import ComparableChartsGrid from '@/components/executive/ComparableChartsGrid';
+import LoadingSpinner from '@/components/LoadingSpinner';
+import { SkeletonCard, SkeletonChart } from '@/components/SkeletonLoader';
+import { animations } from '@/components/AnimationConfig';
 
 import DailyGoalsCard from '@/components/gamification/DailyGoalsCard';
 import RetailWeekBudgetCard from '@/components/budget/RetailWeekBudgetCard';
@@ -67,13 +70,11 @@ function MetricCard({ title, value, budget, icon: Icon, bgColor, iconBg, iconCol
 
   return (
     <motion.div
-      whileHover={{ y: -8, scale: 1.03, rotate: 1 }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -8, scale: 1.03, transition: { duration: 0.2 } }}
       whileTap={{ scale: 0.97 }}
       onClick={onClick}
-      animate={isActive ? {
-        boxShadow: ["0 10px 40px rgba(236,72,153,0.3)", "0 15px 50px rgba(236,72,153,0.4)", "0 10px 40px rgba(236,72,153,0.3)"]
-      } : {}}
-      transition={{ duration: 2, repeat: isActive ? Infinity : 0 }}
       className={`cursor-pointer rounded-2xl p-5 transition-all duration-300 border-2 ${
       isActive ? 'border-pink-400 shadow-xl shadow-pink-500/20' : 'border-transparent shadow-md hover:shadow-xl'} ${
       bgColor}`}>
@@ -923,8 +924,16 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {selectedStore ?
-        <div className="space-y-6">
+        {selectedStore ? (
+          dailySales === undefined || budgets === undefined ? (
+            <motion.div {...animations.fadeIn} className="space-y-6">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                {[1, 2, 3, 4].map(i => <SkeletonCard key={i} />)}
+              </div>
+              <SkeletonChart />
+            </motion.div>
+          ) : (
+        <motion.div {...animations.fadeIn} className="space-y-6">
             {/* Acciones rápidas */}
             <div className="flex justify-end gap-2 items-center">
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
@@ -1964,9 +1973,11 @@ export default function Dashboard() {
                 </motion.div>
               </div>
             </motion.div>
-          </div> :
+            </motion.div>
+            )
+            ) : (
 
-        <div className="text-center py-20">
+            <motion.div {...animations.fadeIn} className="text-center py-20">
             <motion.div
             animate={{ y: [0, -15, 0], rotate: [0, 5, -5, 0] }}
             transition={{ duration: 3, repeat: Infinity }}
@@ -1976,8 +1987,8 @@ export default function Dashboard() {
             </motion.div>
             <h2 className="text-xl font-bold text-gray-700 mb-2">Selecciona una tienda</h2>
             <p className="text-gray-400">Para ver el dashboard de estadísticas</p>
-          </div>
-        }
+          </motion.div>
+        )}
       </div>
     </div>);
 

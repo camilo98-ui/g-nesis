@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, Search, Lock, Eye, EyeOff, Settings, Save, X } from 'lucide-react';
 import { Input } from "@/components/ui/input";
+import { animations } from '@/components/AnimationConfig';
 import {
   Popover,
   PopoverContent,
@@ -267,6 +268,7 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-[340px] p-3" align="center" side="bottom" sideOffset={8}>
+          <motion.div {...animations.scale}>
           <div className="relative mb-3">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-pink-400" />
             <Input
