@@ -85,8 +85,8 @@ const PopsyCup = ({ color = "#C2185B" }) => (
   </svg>
 );
 
-const ICON_COMPONENTS = [PopsyCup];
-const COLORS = ["#C2185B", "#D81B60", "#EC407A"];
+const ICON_COMPONENTS = [IceCreamCone, CookieIcon, PopsyCup];
+const COLORS = ["#C2185B", "#D81B60", "#C2185B"];
 
 const RAIN_ITEMS = Array.from({ length: 45 }, (_, i) => ({
   id: i,
