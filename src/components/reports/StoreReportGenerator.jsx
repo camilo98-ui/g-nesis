@@ -307,6 +307,18 @@ Genera:
 
   return (
     <>
+      <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+        <Button
+          onClick={generateReport}
+          disabled={loading || !storeId}
+          variant="outline"
+          size="sm"
+          className="gap-2 border-gray-200 hover:border-pink-300 hover:bg-pink-50 text-gray-700 hover:text-pink-600 transition-all"
+        >
+          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />}
+          Generar Reporte
+        </Button>
+      </motion.div>
 
       {/* Preview Modal */}
       <AnimatePresence>
