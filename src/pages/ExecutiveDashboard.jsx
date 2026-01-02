@@ -9,7 +9,7 @@ import DateFilter from '@/components/DateFilter';
 import { ArrowLeft, Search, TrendingUp, TrendingDown, Eye, Zap, Award, Brain, ArrowUpDown, ArrowUp, ArrowDown, BarChart3, Settings, X, Download, Filter } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { format, startOfMonth, eachDayOfInterval, startOfWeek, endOfWeek, parseISO } from 'date-fns';
-import StoreDetailModal from '../components/executive/StoreDetailModal';
+import ExecutiveStoreDetailModal from '../components/executive/ExecutiveStoreDetailModal';
 import KPIDetailModal from '../components/executive/KPIDetailModal';
 import ExecutiveComparable from '../components/executive/ExecutiveComparable';
 import ZoneBudgetManager from '../components/executive/ZoneBudgetManager';
@@ -1162,11 +1162,10 @@ Genera:
       {/* Modal Detalle Tienda */}
       <AnimatePresence>
         {selectedStoreDetail && (
-          <StoreDetailModal
+          <ExecutiveStoreDetailModal
             store={selectedStoreDetail}
             onClose={() => setSelectedStoreDetail(null)}
             allDailySales={allDailySales}
-            dateRange={dateRange}
           />
         )}
       </AnimatePresence>
