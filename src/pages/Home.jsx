@@ -6,6 +6,7 @@ import StoreSelector, { STORES } from '@/components/StoreSelector';
 import PopsyRainingIcons from '@/components/PopsyRainingIcons';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
+import { animations } from '@/components/AnimationConfig';
 
 // Lazy load de componentes pesados
 const WelcomeToast = lazy(() => import('@/components/WelcomeToast'));
@@ -1034,7 +1035,10 @@ export default function Home() {
 
         {/* Menu Grid */}
         {(selectedStore || selectedRole === 'gerente') && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+        <motion.div 
+          {...animations.listContainer}
+          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4"
+        >
 
             {MENU_ITEMS.filter((item) => {
               // Restricciones: Panel Ejecutivo solo para gerente, otras opciones solo si hay tienda seleccionada
@@ -1053,7 +1057,7 @@ export default function Home() {
             const isLocked = selectedRole === 'embajador' && item.page === 'Budget';
 
             return (
-              <div key={item.name}>
+              <motion.div key={item.name} {...animations.listItem}>
 
                   {isLocked ?
                   <div className={`${item.bgColor} rounded-2xl p-4 h-full shadow-md transition-all duration-300 group relative overflow-hidden border border-white/50 backdrop-blur-sm opacity-60 cursor-not-allowed`}>
@@ -1175,9 +1179,9 @@ export default function Home() {
                 }
               </div>
             );
-          })}
-        </div>
-        )}
+            })}
+            </motion.div>
+            )}
       </div>
 
       {/* Modales con Lazy Loading */}

@@ -344,6 +344,7 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
             </motion.div>
             }
           </div>
+          </motion.div>
         </PopoverContent>
       </Popover>
       
