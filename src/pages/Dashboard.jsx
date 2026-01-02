@@ -919,13 +919,13 @@ export default function Dashboard() {
             <div className="flex justify-end gap-2 items-center">
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button
-                variant={!showComparison ? "default" : "outline"}
+                variant="outline"
                 size="sm"
                 onClick={() => {
                   setShowComparison(false);
                   setComparisonRange(null);
                 }}
-                className={`gap-1 ${!showComparison ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg' : 'border-gray-300 hover:border-blue-500'}`}>
+                className={`gap-1 transition-all ${!showComparison ? 'bg-pink-50 text-pink-600 border-pink-200' : 'border-gray-200 text-gray-700 hover:border-pink-300 hover:bg-pink-50 hover:text-pink-600'}`}>
 
                   <Activity className="w-4 h-4" />
                   Actual
@@ -933,7 +933,7 @@ export default function Dashboard() {
               </motion.div>
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button
-                variant={showComparison ? "default" : "outline"}
+                variant="outline"
                 size="sm"
                 onClick={() => {
                   if (!showComparison) {
@@ -946,7 +946,7 @@ export default function Dashboard() {
                     }
                   }
                 }}
-                className={`gap-1 ${showComparison ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg' : 'border-purple-300 hover:border-purple-500'}`}>
+                className={`gap-1 transition-all ${showComparison ? 'bg-pink-50 text-pink-600 border-pink-200' : 'border-gray-200 text-gray-700 hover:border-pink-300 hover:bg-pink-50 hover:text-pink-600'}`}>
 
                   <BarChart3 className="w-4 h-4" />
                   Comparable
