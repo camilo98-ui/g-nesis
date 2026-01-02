@@ -118,15 +118,15 @@ export default function Layout({ children, currentPageName }) {
           {/* Professional Gradient Background */}
           <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
             {/* Base gradient */}
-            <div className="absolute inset-0 bg-gradient-to-br from-pink-50/40 via-purple-50/30 to-blue-50/40" />
+            <div className="absolute inset-0 bg-gradient-to-br from-pink-100/60 via-purple-100/50 to-blue-100/60" />
 
             {/* Animated orbs */}
-            <div className="absolute top-20 right-[10%] w-[500px] h-[500px] bg-gradient-to-br from-pink-300/20 via-rose-300/15 to-transparent rounded-full blur-3xl animate-pulse" />
-            <div className="absolute bottom-20 left-[15%] w-[600px] h-[600px] bg-gradient-to-br from-purple-300/15 via-indigo-300/10 to-transparent rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-            <div className="absolute top-1/3 left-1/3 w-[400px] h-[400px] bg-gradient-to-br from-blue-300/10 via-cyan-300/8 to-transparent rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+            <div className="absolute top-20 right-[10%] w-[600px] h-[600px] bg-gradient-to-br from-pink-400/30 via-rose-400/25 to-transparent rounded-full blur-3xl animate-pulse" />
+            <div className="absolute bottom-20 left-[15%] w-[700px] h-[700px] bg-gradient-to-br from-purple-400/25 via-indigo-400/20 to-transparent rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+            <div className="absolute top-1/3 left-1/3 w-[500px] h-[500px] bg-gradient-to-br from-blue-400/20 via-cyan-400/15 to-transparent rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
 
             {/* Subtle grid overlay */}
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,#8882_1px,transparent_1px),linear-gradient(to_bottom,#8882_1px,transparent_1px)] bg-[size:64px_64px] opacity-20" />
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,#8881_1px,transparent_1px),linear-gradient(to_bottom,#8881_1px,transparent_1px)] bg-[size:64px_64px] opacity-30" />
           </div>
 
           <div className="container mx-auto px-2 sm:px-4 relative z-10">
