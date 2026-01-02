@@ -944,7 +944,7 @@ export default function Home() {
         </div>
 
         {/* Quick Actions */}
-        {(selectedStore || selectedRole === 'gerente') &&
+        {(selectedStore || selectedRole === 'gerente') && (
         <div className="mb-4 flex justify-center gap-2 flex-wrap">
 
 
@@ -1023,8 +1023,8 @@ export default function Home() {
               <FileText className="w-4 h-4 mr-1" />
               Informe
             </Button>
-            </div>
-        }
+          </div>
+        )}
 
         {/* Menu Grid */}
         {(selectedStore || selectedRole === 'gerente') && (
