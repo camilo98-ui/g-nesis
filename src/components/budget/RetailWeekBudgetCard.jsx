@@ -396,21 +396,21 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
 
               <div className="space-y-1.5 md:space-y-2 mb-3 md:mb-4">
                 <div className="flex items-center justify-between text-[10px] md:text-xs">
-                  <span className="text-white/70">Venta del día</span>
-                  <span className="font-bold text-white">{formatCurrency(budgetData.todayActualSales)}</span>
+                  <span className="text-white/70">Proyección Semanal</span>
+                  <span className="font-bold text-white">{budgetData.projectionCompliance.toFixed(0)}%</span>
                 </div>
                 <div className="relative h-2 md:h-3 bg-white/20 rounded-full overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
-                    animate={{ width: `${Math.min((budgetData.todayActualSales / Math.max(budgetData.historicalAvgToday, 1)) * 100, 100)}%` }}
+                    animate={{ width: `${Math.min(budgetData.projectionCompliance, 100)}%` }}
                     transition={{ duration: 1, ease: "easeOut" }}
                     className="h-full bg-white rounded-full"
                   />
                 </div>
                 <p className="text-[8px] md:text-[10px] text-white/50">
-                  {budgetData.todayActualSales > budgetData.historicalAvgToday 
-                    ? `✨ ${formatCurrency(budgetData.todayActualSales - budgetData.historicalAvgToday)} sobre el promedio`
-                    : `📊 Promedio histórico: ${formatCurrency(budgetData.historicalAvgToday)}`}
+                  {budgetData.projectionCompliance >= 100 
+                    ? `🚀 Superando meta en ${(budgetData.projectionCompliance - 100).toFixed(0)}%`
+                    : `📈 ${formatCurrency(budgetData.weeklyBudget - budgetData.weekProjection)} para alcanzar meta`}
                 </p>
               </div>
 
