@@ -8,7 +8,7 @@ import { STORES, getDisplayName } from '@/components/StoreSelector';
 import DateFilter from '@/components/DateFilter';
 import { ArrowLeft, Search, TrendingUp, TrendingDown, Eye, Zap, Award, Brain, ArrowUpDown, ArrowUp, ArrowDown, BarChart3, Settings, X } from 'lucide-react';
 import { Input } from "@/components/ui/input";
-import { format, startOfMonth, eachDayOfInterval } from 'date-fns';
+import { format, startOfMonth, eachDayOfInterval, startOfWeek, endOfWeek, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import StoreDetailModal from '../components/executive/StoreDetailModal';
 import KPIDetailModal from '../components/executive/KPIDetailModal';
@@ -63,70 +63,104 @@ export default function ExecutiveDashboard() {
   const isLoading = loadingSales || loadingBudgets;
 
   const storesAnalysis = useMemo(() => {
-    const prevMonth = currentMonth === 1 ? 12 : currentMonth - 1;
-    const prevYear = currentMonth === 1 ? currentYear - 1 : currentYear;
+    const now = new Date();
+    const currentWeekStart = startOfWeek(now, { weekStartsOn: 1 });
+    const currentWeekEnd = endOfWeek(now, { weekStartsOn: 1 });
+    const monthStart = startOfMonth(now);
+    const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    const daysInMonth = monthEnd.getDate();
 
     return STORES.map(store => {
-      const fromStr = format(dateRange.from, 'yyyy-MM-dd');
-      const toStr = format(dateRange.to, 'yyyy-MM-dd');
-      
-      const storeSales = allDailySales.filter(s => {
+      // VENTAS DE LA SEMANA ACTUAL (retail: lunes a domingo)
+      const weekSales = allDailySales.filter(s => {
         if (s.store_id !== store.code) return false;
-        const saleDateStr = s.date?.split('T')[0] || s.date;
-        return saleDateStr >= fromStr && saleDateStr <= toStr;
-      });
-
-      const totalSales = Math.max(0, storeSales.reduce((sum, s) => sum + (s.total_sales || 0), 0));
-      const totalTransactions = Math.max(0, storeSales.reduce((sum, s) => sum + (s.total_transactions || 0), 0));
-      const avgTicket = totalTransactions > 0 ? totalSales / totalTransactions : 0;
-
-      // Buscar primero el presupuesto activo de la tienda
-      const activeBudget = allBudgets.find(b => b.store_id === store.code && b.is_active === true);
-      const budget = activeBudget || allBudgets.find(b => b.store_id === store.code && b.month === currentMonth && b.year === currentYear);
-      const salesBudget = Math.max(0, budget?.sales_budget || 0);
-
-      const salesCompliance = salesBudget > 0 && totalSales > 0 ? (totalSales / salesBudget) * 100 : 0;
-      const hasData = storeSales.length > 0 && totalSales > 0;
-
-      // Calcular cumplimiento del mes anterior
-      const prevMonthSales = allDailySales.filter(s => {
-        if (s.store_id !== store.code) return false;
-        const saleDateStr = s.date?.split('T')[0] || s.date;
         try {
-          const d = new Date(saleDateStr);
-          return d.getMonth() + 1 === prevMonth && d.getFullYear() === prevYear;
+          const saleDate = parseISO(s.date);
+          return saleDate >= currentWeekStart && saleDate <= currentWeekEnd;
         } catch {
           return false;
         }
       });
-      const prevTotalSales = prevMonthSales.reduce((sum, s) => sum + (s.total_sales || 0), 0);
-      const prevBudget = allBudgets.find(b => b.store_id === store.code && b.month === prevMonth && b.year === prevYear);
-      const prevSalesBudget = prevBudget?.sales_budget || 0;
-      const prevCompliance = prevSalesBudget > 0 && prevTotalSales > 0 ? (prevTotalSales / prevSalesBudget) * 100 : 0;
-      const complianceTrend = prevCompliance > 0 ? salesCompliance - prevCompliance : 0;
 
-      const daysElapsed = Math.max(1, storeSales.length);
-      const daysInPeriod = Math.max(1, Math.ceil((dateRange.to - dateRange.from) / (1000 * 60 * 60 * 24)));
-      const dailyAvg = daysElapsed > 0 && totalSales > 0 ? totalSales / daysElapsed : 0;
-      const projection = dailyAvg > 0 ? dailyAvg * daysInPeriod : 0;
-      const avgDailyTransactions = daysElapsed > 0 && totalTransactions > 0 ? totalTransactions / daysElapsed : 0;
+      const weekTotalSales = weekSales.reduce((sum, s) => sum + (s.total_sales || 0), 0);
+      const weekTotalTransactions = weekSales.reduce((sum, s) => sum + (s.total_transactions || 0), 0);
+      const weekAvgTicket = weekTotalTransactions > 0 ? weekTotalSales / weekTotalTransactions : 0;
+
+      // VENTAS DEL MES (para cumplimiento mensual)
+      const monthSales = allDailySales.filter(s => {
+        if (s.store_id !== store.code) return false;
+        try {
+          const saleDate = parseISO(s.date);
+          return saleDate >= monthStart && saleDate <= now;
+        } catch {
+          return false;
+        }
+      });
+
+      const monthTotalSales = monthSales.reduce((sum, s) => sum + (s.total_sales || 0), 0);
+      const monthTotalTransactions = monthSales.reduce((sum, s) => sum + (s.total_transactions || 0), 0);
+
+      // Presupuesto mensual
+      const activeBudget = allBudgets.find(b => b.store_id === store.code && b.is_active === true);
+      const budget = activeBudget || allBudgets.find(b => b.store_id === store.code && b.month === currentMonth && b.year === currentYear);
+      const salesBudget = budget?.sales_budget || 0;
+
+      // PROYECCIONES
+      const daysElapsed = now.getDate();
+      const daysRemaining = daysInMonth - daysElapsed;
+      const dailyAvgMonth = daysElapsed > 0 ? monthTotalSales / daysElapsed : 0;
+      const monthProjection = monthTotalSales + (dailyAvgMonth * daysRemaining);
+
+      // Proyección de semana (días transcurridos vs días totales de la semana)
+      const daysPassedInWeek = Math.max(1, weekSales.length);
+      const avgDailySalesWeek = weekTotalSales / daysPassedInWeek;
+      const weekProjection = avgDailySalesWeek * 7;
+
+      // PROMEDIOS
+      const avgDailySales = dailyAvgMonth;
+      const avgDailyTransactions = daysElapsed > 0 ? monthTotalTransactions / daysElapsed : 0;
+
+      // CUMPLIMIENTO
+      const salesCompliance = salesBudget > 0 ? (monthTotalSales / salesBudget) * 100 : 0;
+      const hasData = weekTotalSales > 0 || monthTotalSales > 0;
 
       let status = 'positive';
       if (!hasData) status = 'no_data';
       else if (salesCompliance < 70) status = 'critical';
       else if (salesCompliance < 90) status = 'negative';
 
-      const gap = salesBudget - totalSales;
+      const gap = salesBudget - monthTotalSales;
 
       return {
         code: store.code,
         name: getDisplayName(store.code),
-        totalSales, totalTransactions, avgTicket,
-        salesBudget, salesCompliance, projection, status, gap,
-        hasData, dailyAvg, avgDailyTransactions, complianceTrend, prevCompliance
+        // Semana
+        weekTotalSales,
+        weekTotalTransactions,
+        weekAvgTicket,
+        weekProjection,
+        // Mes
+        monthTotalSales,
+        monthTotalTransactions,
+        monthProjection,
+        // Presupuesto y cumplimiento
+        salesBudget,
+        salesCompliance,
+        status,
+        gap,
+        hasData,
+        // Promedios
+        avgDailySales,
+        avgDailyTransactions,
+        // Legacy para compatibilidad
+        totalSales: monthTotalSales,
+        totalTransactions: monthTotalTransactions,
+        avgTicket: weekAvgTicket,
+        projection: monthProjection,
+        dailyAvg: avgDailySales
       };
     });
-  }, [allDailySales, allBudgets, dateRange, currentMonth, currentYear]);
+  }, [allDailySales, allBudgets, currentMonth, currentYear]);
 
   const zoneTotals = useMemo(() => {
     const storesWithData = storesAnalysis.filter(s => s.hasData);
@@ -599,187 +633,148 @@ Genera:
                       >
                         <div className="flex items-center gap-2">
                           Tienda
-                          {sortConfig.key === 'name' ? (
-                            sortConfig.direction === 'asc' ? 
-                              <ArrowUp className="w-3 h-3" /> : 
-                              <ArrowDown className="w-3 h-3" />
-                          ) : (
-                            <ArrowUpDown className="w-3 h-3 opacity-0 group-hover:opacity-50" />
-                          )}
+                          {sortConfig.key === 'name' && (sortConfig.direction === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />)}
                         </div>
+                      </th>
+                      <th className="text-right py-3 px-3 text-[10px] sm:text-xs font-bold text-purple-400 uppercase tracking-wider">
+                        Semana
+                      </th>
+                      <th className="text-right py-3 px-3 text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider hidden sm:table-cell">
+                        Proy. Semana
+                      </th>
+                      <th className="text-right py-3 px-3 text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider hidden lg:table-cell">
+                        Proy. Mes
                       </th>
                       <th 
                         onClick={() => handleSort('compliance')}
-                        className="text-right py-3 px-3 sm:py-4 sm:px-4 lg:py-5 lg:px-6 text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider cursor-pointer"
+                        className="text-right py-3 px-3 text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider cursor-pointer"
                       >
                         <div className="flex items-center justify-end gap-2">
-                          % Cumplimiento
-                          {sortConfig.key === 'compliance' ? (
-                            sortConfig.direction === 'asc' ? 
-                              <ArrowUp className="w-3 h-3" /> : 
-                              <ArrowDown className="w-3 h-3" />
-                          ) : (
-                            <ArrowUpDown className="w-3 h-3 opacity-0 group-hover:opacity-50" />
-                          )}
+                          % Mes
+                          {sortConfig.key === 'compliance' && (sortConfig.direction === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />)}
                         </div>
                       </th>
-                      <th 
-                        onClick={() => handleSort('sales')}
-                        className="text-right py-3 px-3 sm:py-4 sm:px-4 lg:py-5 lg:px-6 text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider cursor-pointer hidden sm:table-cell"
-                      >
-                        <div className="flex items-center justify-end gap-2">
-                          Venta vs Meta
-                          {sortConfig.key === 'sales' ? (
-                            sortConfig.direction === 'asc' ? 
-                              <ArrowUp className="w-3 h-3" /> : 
-                              <ArrowDown className="w-3 h-3" />
-                          ) : (
-                            <ArrowUpDown className="w-3 h-3 opacity-0 group-hover:opacity-50" />
-                          )}
-                        </div>
-                      </th>
-                      <th 
-                        onClick={() => handleSort('gap')}
-                        className="text-right py-3 px-3 sm:py-4 sm:px-4 lg:py-5 lg:px-6 text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider cursor-pointer hidden lg:table-cell"
-                      >
-                        <div className="flex items-center justify-end gap-2">
-                          Brecha $
-                          {sortConfig.key === 'gap' ? (
-                            sortConfig.direction === 'asc' ? 
-                              <ArrowUp className="w-3 h-3" /> : 
-                              <ArrowDown className="w-3 h-3" />
-                          ) : (
-                            <ArrowUpDown className="w-3 h-3 opacity-0 group-hover:opacity-50" />
-                          )}
-                        </div>
-                      </th>
-                      <th className="text-right py-3 px-3 sm:py-4 sm:px-4 lg:py-5 lg:px-6 text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider hidden lg:table-cell">
+                      <th className="text-right py-3 px-3 text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider hidden lg:table-cell">
                         Venta/Día
                       </th>
-                      <th className="text-right py-3 px-3 sm:py-4 sm:px-4 lg:py-5 lg:px-6 text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider hidden lg:table-cell">
+                      <th className="text-right py-3 px-3 text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider hidden lg:table-cell">
                         Trans/Día
                       </th>
                       <th 
                         onClick={() => handleSort('status')}
-                        className="text-center py-3 px-3 sm:py-4 sm:px-4 lg:py-5 lg:px-6 text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider cursor-pointer"
+                        className="text-center py-3 px-3 text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider cursor-pointer"
                       >
                         <div className="flex items-center justify-center gap-2">
                           Estado
-                          {sortConfig.key === 'status' ? (
-                            sortConfig.direction === 'asc' ? 
-                              <ArrowUp className="w-3 h-3" /> : 
-                              <ArrowDown className="w-3 h-3" />
-                          ) : (
-                            <ArrowUpDown className="w-3 h-3 opacity-0 group-hover:opacity-50" />
-                          )}
+                          {sortConfig.key === 'status' && (sortConfig.direction === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />)}
                         </div>
                       </th>
-                      <th className="text-left py-3 px-3 sm:py-4 sm:px-4 lg:py-5 lg:px-6 text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider hidden xl:table-cell">Acción</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {sortedStores
-                      .map((store, idx) => {
-                        const action = getExecutiveAction(store);
+                    {sortedStores.map((store) => (
+                      <tr
+                        key={store.code}
+                        onClick={() => store.hasData && setSelectedStoreDetail(store)}
+                        className={`border-b border-white/5 ${store.hasData ? 'cursor-pointer hover:bg-white/5' : ''}`}
+                      >
+                        {/* Tienda */}
+                        <td className="py-3 px-3 sm:py-4 sm:px-4">
+                          <p className={`font-bold text-sm ${!store.hasData ? 'text-slate-600' : 'text-white'}`}>
+                            {store.name}
+                          </p>
+                          <p className="text-[10px] text-slate-500 mt-0.5">{store.code}</p>
+                        </td>
 
-                        return (
-                          <tr
-                            key={store.code}
-                            onClick={() => store.hasData && setSelectedStoreDetail(store)}
-                            className={`border-b border-white/5 ${
-                              store.hasData ? 'cursor-pointer hover:bg-white/5' : ''
-                            }`}
-                          >
-                            <td className="py-3 px-3 sm:py-5 sm:px-4 lg:py-7 lg:px-6">
-                              <p className={`font-bold text-sm sm:text-base lg:text-lg ${
-                                !store.hasData ? 'text-slate-600' : 'text-white'
-                              }`}>
-                                {store.name}
+                        {/* Semana Actual */}
+                        <td className="py-3 px-3 text-right">
+                          {!store.hasData ? (
+                            <span className="text-xs text-slate-500">—</span>
+                          ) : (
+                            <div>
+                              <p className="font-black text-purple-400 text-sm tabular-nums">{formatShort(store.weekTotalSales)}</p>
+                              <p className="text-[9px] text-slate-500 mt-0.5">{store.weekTotalTransactions.toLocaleString()} trans</p>
+                              <p className="text-[9px] text-pink-400 mt-0.5">{formatCurrency(store.weekAvgTicket).slice(0, -3)}</p>
+                            </div>
+                          )}
+                        </td>
+
+                        {/* Proyección Semana */}
+                        <td className="py-3 px-3 text-right hidden sm:table-cell">
+                          {!store.hasData ? (
+                            <span className="text-xs text-slate-500">—</span>
+                          ) : (
+                            <p className="font-bold text-cyan-400 text-sm tabular-nums">{formatShort(store.weekProjection)}</p>
+                          )}
+                        </td>
+
+                        {/* Proyección Mes */}
+                        <td className="py-3 px-3 text-right hidden lg:table-cell">
+                          {!store.hasData ? (
+                            <span className="text-xs text-slate-500">—</span>
+                          ) : (
+                            <div>
+                              <p className="font-bold text-emerald-400 text-sm tabular-nums">{formatShort(store.monthProjection)}</p>
+                              <p className="text-[9px] text-slate-500 mt-0.5">
+                                {((store.monthProjection / store.salesBudget) * 100).toFixed(0)}% proyectado
                               </p>
-                              <p className="text-[10px] sm:text-xs text-slate-500 mt-0.5">{store.code}</p>
-                            </td>
+                            </div>
+                          )}
+                        </td>
 
-                            <td className="py-3 px-3 sm:py-5 sm:px-4 lg:py-7 lg:px-6">
-                              {!store.hasData ? (
-                                <span className="text-xs sm:text-sm text-slate-500 italic block text-right">Sin datos</span>
-                              ) : (
-                                <div className="flex items-center justify-end gap-2 sm:gap-4">
-                                  <div className="w-16 sm:w-24 lg:w-32 bg-white/10 rounded-full h-1 sm:h-1.5 overflow-hidden">
-                                    <div
-                                      style={{ width: `${Math.min(store.salesCompliance, 100)}%` }}
-                                      className={`h-full ${
-                                        store.salesCompliance >= 90 ? 'bg-emerald-500' :
-                                        store.salesCompliance >= 70 ? 'bg-amber-500' : 'bg-red-500'
-                                      }`}
-                                    />
-                                  </div>
-                                  <span className={`font-black text-lg sm:text-2xl lg:text-3xl tabular-nums ${
-                                    store.salesCompliance >= 90 ? 'text-emerald-400' :
-                                    store.salesCompliance >= 70 ? 'text-amber-400' : 'text-red-400'
-                                  }`}>
-                                    {store.salesCompliance.toFixed(0)}%
-                                  </span>
-                                </div>
-                              )}
-                            </td>
-
-                            <td className="py-3 px-3 sm:py-5 sm:px-4 lg:py-7 lg:px-6 text-right hidden sm:table-cell">
-                              {!store.hasData ? (
-                                <span className="text-xs sm:text-sm text-slate-500">—</span>
-                              ) : (
-                                <div>
-                                  <p className="font-bold text-white text-xs sm:text-sm lg:text-base tabular-nums">{formatShort(store.totalSales)}</p>
-                                  <p className="text-[10px] sm:text-xs text-slate-500 mt-0.5">de {formatShort(store.salesBudget)}</p>
-                                </div>
-                              )}
-                            </td>
-
-                            <td className="py-3 px-3 sm:py-5 sm:px-4 lg:py-7 lg:px-6 text-right hidden lg:table-cell">
-                              {!store.hasData ? (
-                                <span className="text-sm text-slate-500">—</span>
-                              ) : (
-                                <p className={`font-black text-base lg:text-xl tabular-nums ${
-                                  store.gap > 0 ? 'text-red-400' : 'text-emerald-400'
-                                }`}>
-                                  {formatShort(Math.abs(store.gap))}
-                                </p>
-                              )}
-                            </td>
-
-                            <td className="py-3 px-3 sm:py-5 sm:px-4 lg:py-7 lg:px-6 text-right hidden lg:table-cell">
-                              {!store.hasData ? (
-                                <span className="text-sm text-slate-500">—</span>
-                              ) : (
-                                <p className="font-bold text-white text-sm lg:text-base tabular-nums">{formatShort(store.dailyAvg)}</p>
-                              )}
-                            </td>
-
-                            <td className="py-3 px-3 sm:py-5 sm:px-4 lg:py-7 lg:px-6 text-right hidden lg:table-cell">
-                              {!store.hasData ? (
-                                <span className="text-sm text-slate-500">—</span>
-                              ) : (
-                                <p className="font-bold text-cyan-400 text-sm lg:text-base tabular-nums">{store.avgDailyTransactions.toFixed(0)}</p>
-                              )}
-                            </td>
-
-                            <td className="py-3 px-3 sm:py-5 sm:px-4 lg:py-7 lg:px-6 text-center">
-                              <span className={`inline-block w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full ${
-                                store.status === 'no_data' ? 'bg-slate-600' :
-                                store.status === 'positive' ? 'bg-emerald-500' : 
-                                store.status === 'negative' ? 'bg-amber-500' : 'bg-red-500'
-                              }`} />
-                            </td>
-
-                            <td className="py-3 px-3 sm:py-5 sm:px-4 lg:py-7 lg:px-6 hidden xl:table-cell">
-                              <p className={`text-xs sm:text-sm font-normal ${
-                                !store.hasData ? 'text-slate-500 italic' : 'text-slate-300'
+                        {/* % Cumplimiento Mes */}
+                        <td className="py-3 px-3 text-right">
+                          {!store.hasData ? (
+                            <span className="text-xs text-slate-500">—</span>
+                          ) : (
+                            <div className="flex items-center justify-end gap-2">
+                              <div className="w-12 sm:w-16 bg-white/10 rounded-full h-1 overflow-hidden">
+                                <div
+                                  style={{ width: `${Math.min(store.salesCompliance, 100)}%` }}
+                                  className={`h-full ${
+                                    store.salesCompliance >= 90 ? 'bg-emerald-500' :
+                                    store.salesCompliance >= 70 ? 'bg-amber-500' : 'bg-red-500'
+                                  }`}
+                                />
+                              </div>
+                              <span className={`font-black text-base sm:text-xl tabular-nums ${
+                                store.salesCompliance >= 90 ? 'text-emerald-400' :
+                                store.salesCompliance >= 70 ? 'text-amber-400' : 'text-red-400'
                               }`}>
-                                {action}
-                              </p>
-                            </td>
-                          </tr>
-                        );
-                      })}
+                                {store.salesCompliance.toFixed(0)}%
+                              </span>
+                            </div>
+                          )}
+                        </td>
+
+                        {/* Venta Promedio/Día */}
+                        <td className="py-3 px-3 text-right hidden lg:table-cell">
+                          {!store.hasData ? (
+                            <span className="text-xs text-slate-500">—</span>
+                          ) : (
+                            <p className="font-bold text-white text-sm tabular-nums">{formatShort(store.avgDailySales)}</p>
+                          )}
+                        </td>
+
+                        {/* Trans Promedio/Día */}
+                        <td className="py-3 px-3 text-right hidden lg:table-cell">
+                          {!store.hasData ? (
+                            <span className="text-xs text-slate-500">—</span>
+                          ) : (
+                            <p className="font-bold text-cyan-400 text-sm tabular-nums">{store.avgDailyTransactions.toFixed(0)}</p>
+                          )}
+                        </td>
+
+                        {/* Estado */}
+                        <td className="py-3 px-3 text-center">
+                          <span className={`inline-block w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full ${
+                            store.status === 'no_data' ? 'bg-slate-600' :
+                            store.status === 'positive' ? 'bg-emerald-500' : 
+                            store.status === 'negative' ? 'bg-amber-500' : 'bg-red-500'
+                          }`} />
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
