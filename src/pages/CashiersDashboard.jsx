@@ -27,12 +27,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { startOfMonth, format } from 'date-fns';
+import { startOfMonth, startOfWeek, format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 export default function CashiersDashboard() {
   const [selectedStore, setSelectedStore] = useState('');
-  const [dateRange, setDateRange] = useState({ from: startOfMonth(new Date()), to: new Date() });
+  const [dateRange, setDateRange] = useState({ 
+    from: startOfWeek(startOfMonth(new Date()), { weekStartsOn: 1 }), 
+    to: new Date() 
+  });
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCashier, setSelectedCashier] = useState(null);
   const [showBadgeConfig, setShowBadgeConfig] = useState(false);
