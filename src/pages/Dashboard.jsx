@@ -823,9 +823,9 @@ export default function Dashboard() {
     comparisonValue: comparisonTotals?.sales,
     budget: currentBudget.sales_budget,
     icon: DollarSign,
-    bgColor: 'bg-gradient-to-br from-emerald-50/80 to-green-50/60',
-    iconBg: 'bg-emerald-100/60',
-    iconColor: 'text-emerald-600',
+    bgColor: 'bg-gradient-to-br from-emerald-100 to-green-100',
+    iconBg: 'bg-emerald-200/70',
+    iconColor: 'text-emerald-700',
     format: 'currency'
   },
   {
@@ -835,9 +835,9 @@ export default function Dashboard() {
     comparisonValue: comparisonAvgTicket,
     budget: currentBudget.tickets_budget,
     icon: Receipt,
-    bgColor: 'bg-gradient-to-br from-sky-50/80 to-blue-50/60',
-    iconBg: 'bg-sky-100/60',
-    iconColor: 'text-sky-600',
+    bgColor: 'bg-gradient-to-br from-sky-100 to-blue-100',
+    iconBg: 'bg-sky-200/70',
+    iconColor: 'text-sky-700',
     format: 'currency'
   },
   {
@@ -847,9 +847,9 @@ export default function Dashboard() {
     comparisonValue: comparisonTotals?.transactions,
     budget: currentBudget.transactions_budget,
     icon: Zap,
-    bgColor: 'bg-gradient-to-br from-violet-50/80 to-purple-50/60',
-    iconBg: 'bg-violet-100/60',
-    iconColor: 'text-violet-600'
+    bgColor: 'bg-gradient-to-br from-violet-100 to-purple-100',
+    iconBg: 'bg-violet-200/70',
+    iconColor: 'text-violet-700'
   },
   {
     id: 'suggested',
@@ -858,9 +858,9 @@ export default function Dashboard() {
     comparisonValue: comparisonTotals?.suggested,
     budget: currentBudget.suggested_budget,
     icon: Gift,
-    bgColor: 'bg-gradient-to-br from-pink-50/80 to-rose-50/60',
-    iconBg: 'bg-pink-100/60',
-    iconColor: 'text-pink-600'
+    bgColor: 'bg-gradient-to-br from-pink-100 to-rose-100',
+    iconBg: 'bg-pink-200/70',
+    iconColor: 'text-pink-700'
   }];
 
 
