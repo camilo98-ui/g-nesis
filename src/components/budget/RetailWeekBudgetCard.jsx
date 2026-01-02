@@ -212,12 +212,23 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
     // Si la semana tiene menos de 7 días en el mes, ajustar proporcionalmente
     const weeklyBudget = daysInCurrentWeek.reduce((sum, day) => sum + getDailyBudget(day), 0);
 
-    // Calcular proyección de la semana basada en ritmo actual
+    // Calcular proyección de la semana - SUAVIZADA con histórico
     const daysPassedInWeek = eachDayOfInterval({ start: currentWeekStart, end: now })
       .filter(d => d <= now).length;
     const avgDailySales = daysPassedInWeek > 0 ? currentWeekSales / daysPassedInWeek : 0;
+
+    // Calcular proyección más realista combinando ritmo actual con histórico
     const totalDaysInWeek = eachDayOfInterval({ start: currentWeekStart, end: currentWeekEnd }).length;
-    const weekProjection = avgDailySales * totalDaysInWeek;
+
+    // Si solo han pasado 1-2 días, ponderar más el histórico (80% histórico, 20% actual)
+    // Si han pasado más días, ponderar más el actual (40% histórico, 60% actual)
+    const historicalWeight = daysPassedInWeek <= 2 ? 0.8 : 0.4;
+    const currentWeight = 1 - historicalWeight;
+
+    // Proyección ponderada
+    const historicalDailyAvg = totalWeeklyAvg > 0 ? totalWeeklyAvg / 7 : avgDailySales;
+    const blendedDailyAvg = (historicalDailyAvg * historicalWeight) + (avgDailySales * currentWeight);
+    const weekProjection = blendedDailyAvg * totalDaysInWeek;
     const projectionCompliance = weeklyBudget > 0 ? (weekProjection / weeklyBudget * 100) : 0;
 
     // Datos para gráficos - incluir TODOS los días de la semana retail actual (incluso del mes anterior)
