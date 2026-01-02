@@ -266,7 +266,7 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
             </svg>
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[280px] p-2" align="center" side="bottom" sideOffset={5}>
+        <PopoverContent className="w-[240px] p-2" align="center" side="bottom" sideOffset={5}>
           <div className="relative mb-2">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
             <Input
@@ -276,7 +276,7 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
               className="pl-8 h-9 text-sm bg-gray-50 placeholder:text-gray-600" />
 
           </div>
-          <div className="max-h-[240px] overflow-y-auto space-y-1">
+          <div className="max-h-[200px] overflow-y-auto space-y-1">
             {filteredStores.map((store) =>
             <motion.div
               key={store.code}
