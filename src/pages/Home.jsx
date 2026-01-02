@@ -739,7 +739,7 @@ export default function Home() {
                         <p className="text-slate-900 font-bold text-xl mb-1.5">{feature.title}</p>
                         <p className="text-slate-600 text-base leading-relaxed">{feature.text}</p>
                       </div>
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
               </div>
