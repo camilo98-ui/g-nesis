@@ -190,27 +190,13 @@ function CustomCalendar({ selected, onSelect, onClose, onApply, initialTab = 'we
 
   return (
     <div className={`select-none bg-white rounded-2xl overflow-hidden shadow-xl border border-pink-100 ${isMobile ? 'max-h-[90vh] flex flex-col w-[96vw] max-w-md' : ''}`}>
-      {/* Tabs: Semanas / Calendario */}
-      <div className="flex border-b border-pink-100 flex-shrink-0">
-        <button
-          onClick={() => setShowWeeks(true)}
-          className={`flex-1 ${isMobile ? 'py-2' : 'py-3'} text-xs font-medium transition-all ${showWeeks ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white' : 'bg-pink-50 text-pink-600 hover:bg-pink-100'}`}>
-
-          <Calendar className="w-4 h-4 inline mr-1" />
-          Semanas
-        </button>
-        <button
-          onClick={() => setShowWeeks(false)}
-          className={`flex-1 ${isMobile ? 'py-2' : 'py-3'} text-xs font-medium transition-all ${!showWeeks ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white' : 'bg-pink-50 text-pink-600 hover:bg-pink-100'}`}>
-
-          <CalendarRange className="w-4 h-4 inline mr-1" />
-          Calendario
-        </button>
+      {/* Tab único: Semanas */}
+      <div className="bg-gradient-to-r from-pink-500 to-rose-500 text-white py-3 text-center border-b border-pink-100 flex-shrink-0">
+        <Calendar className="w-4 h-4 inline mr-2" />
+        <span className="text-xs font-medium">Semanas del Año</span>
       </div>
 
-      {showWeeks ? (
-      <>
-        {/* Vista de semanas */}
+      {/* Vista de semanas */}
         <div className="p-3 overflow-y-auto" style={{ maxHeight: '400px' }}>
           <p className="text-xs text-pink-600 mb-3 text-center font-medium">Selecciona una o más semanas</p>
           <div className="space-y-2">
@@ -256,11 +242,6 @@ function CustomCalendar({ selected, onSelect, onClose, onApply, initialTab = 'we
             </motion.button>
           </div>
         )}
-      </>
-      ) :
-
-      <>
-          {/* Quick Options */}
           <div className={`${isMobile ? 'p-3' : 'p-3'} bg-gradient-to-r from-pink-50 to-rose-50 border-b border-pink-100 flex-shrink-0 ${isMobile ? 'overflow-x-auto' : ''}`}>
             <div className={`flex ${isMobile ? 'gap-2' : 'flex-wrap gap-1.5'}`}>
               {QUICK_OPTIONS.map((opt) =>
@@ -400,10 +381,6 @@ function CustomCalendar({ selected, onSelect, onClose, onApply, initialTab = 'we
                   <Check className={`${isMobile ? 'w-5 h-5' : 'w-4 h-4'}`} /> Aplicar
                 </motion.button>
             }
-            </div>
-          </div>
-        </>
-      }
     </div>);
 
 }
