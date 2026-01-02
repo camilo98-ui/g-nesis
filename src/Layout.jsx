@@ -5,10 +5,11 @@ import SmartSearch from '@/components/SmartSearch';
 import MotivationalHeader from '@/components/MotivationalHeader';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import PopsyRainingIcons from '@/components/PopsyRainingIcons';
+import ThemeSelector from '@/components/ThemeSelector';
 import { DateFilterProvider, useDateFilter } from '@/components/DateFilterContext';
 import { base44 } from '@/api/base44Client';
 import { 
-  Home, LayoutDashboard, Menu, Snowflake, CalendarDays, TrendingUp, Calendar
+  Home, LayoutDashboard, Menu, Snowflake, CalendarDays, TrendingUp, Calendar, Palette
 } from 'lucide-react';
 import { Link as RouterLink } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { motion } from 'framer-motion';
 
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/6a749247d_Capturadepantalla2025-11-251251441.png";
 
@@ -101,17 +103,37 @@ export default function Layout({ children, currentPageName }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [selectedStore, setSelectedStore] = useState('');
   const [userRole, setUserRole] = useState('lider');
+  const [showThemeSelector, setShowThemeSelector] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem('selectedStore');
     const savedRole = localStorage.getItem('userRole');
     if (saved) setSelectedStore(saved);
     if (savedRole) setUserRole(savedRole);
+    
+    // Load theme on mount
+    const savedTheme = localStorage.getItem('popsyTheme') || 'classic';
+    const root = document.documentElement;
+    root.classList.add(`theme-${savedTheme}`);
   }, []);
 
   return (
     <DateFilterProvider>
       <ErrorBoundary>
+        {/* Theme Selector Button - Fixed Bottom Right */}
+        <motion.button
+          onClick={() => setShowThemeSelector(true)}
+          whileHover={{ scale: 1.1, rotate: 180 }}
+          whileTap={{ scale: 0.9 }}
+          className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-gradient-to-br from-pink-500 to-rose-500 rounded-full shadow-2xl flex items-center justify-center text-white hover:shadow-pink-500/50 transition-all"
+          title="Cambiar tema"
+        >
+          <Palette className="w-6 h-6" />
+        </motion.button>
+
+        {/* Theme Selector Modal */}
+        <ThemeSelector isOpen={showThemeSelector} onClose={() => setShowThemeSelector(false)} />
+
         <div className="min-h-screen app-container">
           {/* Main Content */}
           <main className="pt-4 min-h-screen pb-4 relative">

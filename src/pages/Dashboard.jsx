@@ -523,15 +523,12 @@ export default function Dashboard() {
   const { data: dailySales = [] } = useQuery({
     queryKey: ['dailySales', selectedStore],
     queryFn: async () => {
-      // Obtener TODOS los datos históricos para cálculos de promedios
       const allSales = await base44.entities.DailySales.filter({ store_id: selectedStore });
       return allSales;
     },
     enabled: !!selectedStore,
-    staleTime: 0,
-    cacheTime: 0,
-    refetchOnMount: 'always',
-    refetchOnWindowFocus: true
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000
   });
 
   const { data: budgets = [] } = useQuery({
@@ -541,14 +538,11 @@ export default function Dashboard() {
       const currentMonth = now.getMonth() + 1;
       const currentYear = now.getFullYear();
       const allBudgets = await base44.entities.Budget.filter({ store_id: selectedStore });
-      // Filtrar solo presupuestos del mes/año actual
       return allBudgets.filter(b => b.month === currentMonth && b.year === currentYear);
     },
     enabled: !!selectedStore,
-    staleTime: 0,
-    cacheTime: 0,
-    refetchOnMount: 'always',
-    refetchOnWindowFocus: true
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 15 * 60 * 1000
   });
 
   const { data: shiftRecords = [] } = useQuery({
@@ -557,41 +551,42 @@ export default function Dashboard() {
       const monthStart = format(startOfMonth(new Date()), 'yyyy-MM-dd');
       const monthEnd = format(endOfMonth(new Date()), 'yyyy-MM-dd');
       const allRecords = await base44.entities.ShiftRecord.filter({ store_id: selectedStore });
-      // Filtrar solo registros del mes actual
       return allRecords.filter(record => {
         const recordDate = record.date?.split('T')[0] || record.date;
         return recordDate >= monthStart && recordDate <= monthEnd;
       });
     },
     enabled: !!selectedStore,
-    staleTime: 0,
-    cacheTime: 0,
-    refetchOnMount: 'always',
-    refetchOnWindowFocus: true
+    staleTime: 3 * 60 * 1000, // 3 minutes
+    gcTime: 10 * 60 * 1000
   });
 
   const { data: cashiers = [] } = useQuery({
     queryKey: ['cashiers', selectedStore],
     queryFn: () => base44.entities.Cashier.filter({ store_id: selectedStore }),
-    enabled: !!selectedStore
+    enabled: !!selectedStore,
+    staleTime: 15 * 60 * 1000 // 15 minutes
   });
 
   const { data: checklists = [] } = useQuery({
     queryKey: ['checklists', selectedStore],
     queryFn: () => base44.entities.CleaningChecklist.filter({ store_id: selectedStore }),
-    enabled: !!selectedStore
+    enabled: !!selectedStore,
+    staleTime: 10 * 60 * 1000
   });
 
   const { data: freezerSlots = [] } = useQuery({
     queryKey: ['freezerSlots', selectedStore],
     queryFn: () => base44.entities.FreezerSlot.filter({ store_id: selectedStore }),
-    enabled: !!selectedStore
+    enabled: !!selectedStore,
+    staleTime: 15 * 60 * 1000
   });
 
   const { data: inventoryAlerts = [] } = useQuery({
     queryKey: ['inventoryAlerts', selectedStore],
     queryFn: () => base44.entities.InventoryAlert.filter({ store_id: selectedStore }),
-    enabled: !!selectedStore
+    enabled: !!selectedStore,
+    staleTime: 10 * 60 * 1000
   });
 
 
