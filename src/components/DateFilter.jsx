@@ -190,13 +190,27 @@ function CustomCalendar({ selected, onSelect, onClose, onApply, initialTab = 'we
 
   return (
     <div className={`select-none bg-white rounded-2xl overflow-hidden shadow-xl border border-pink-100 ${isMobile ? 'max-h-[90vh] flex flex-col w-[96vw] max-w-md' : ''}`}>
-      {/* Tab único: Semanas */}
-      <div className="bg-gradient-to-r from-pink-500 to-rose-500 text-white py-3 text-center border-b border-pink-100 flex-shrink-0">
-        <Calendar className="w-4 h-4 inline mr-2" />
-        <span className="text-xs font-medium">Semanas del Año</span>
+      {/* Tabs: Semanas / Calendario */}
+      <div className="flex border-b border-pink-100 flex-shrink-0">
+        <button
+          onClick={() => setShowWeeks(true)}
+          className={`flex-1 ${isMobile ? 'py-2' : 'py-3'} text-xs font-medium transition-all ${showWeeks ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white' : 'bg-pink-50 text-pink-600 hover:bg-pink-100'}`}>
+
+          <Calendar className="w-4 h-4 inline mr-1" />
+          Semanas
+        </button>
+        <button
+          onClick={() => setShowWeeks(false)}
+          className={`flex-1 ${isMobile ? 'py-2' : 'py-3'} text-xs font-medium transition-all ${!showWeeks ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white' : 'bg-pink-50 text-pink-600 hover:bg-pink-100'}`}>
+
+          <CalendarRange className="w-4 h-4 inline mr-1" />
+          Calendario
+        </button>
       </div>
 
-      {/* Vista de semanas */}
+      {showWeeks ? (
+      <>
+        {/* Vista de semanas */}
         <div className="p-3 overflow-y-auto" style={{ maxHeight: '400px' }}>
           <p className="text-xs text-pink-600 mb-3 text-center font-medium">Selecciona una o más semanas</p>
           <div className="space-y-2">
@@ -242,6 +256,154 @@ function CustomCalendar({ selected, onSelect, onClose, onApply, initialTab = 'we
             </motion.button>
           </div>
         )}
+      </>
+      ) :
+
+      <>
+          {/* Quick Options */}
+          <div className={`${isMobile ? 'p-3' : 'p-3'} bg-gradient-to-r from-pink-50 to-rose-50 border-b border-pink-100 flex-shrink-0 ${isMobile ? 'overflow-x-auto' : ''}`}>
+            <div className={`flex ${isMobile ? 'gap-2' : 'flex-wrap gap-1.5'}`}>
+              {QUICK_OPTIONS.map((opt) =>
+            <motion.button
+              key={opt.label}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => handleQuickSelect(opt.getValue())}
+              className={`${isMobile ? 'px-3 py-2 text-xs whitespace-nowrap' : 'px-3 py-1.5 text-xs'} font-medium rounded-full bg-white border border-pink-200 text-pink-600 hover:bg-pink-500 hover:text-white hover:border-pink-500 transition-all shadow-sm`}>
+
+                  {opt.label}
+                </motion.button>
+            )}
+            </div>
+          </div>
+
+      {/* Navegación */}
+      <div className={`flex items-center justify-between ${isMobile ? 'px-4 py-3.5' : 'px-4 py-3'} border-b border-gray-100 flex-shrink-0`}>
+        <motion.button
+            whileHover={{ scale: 1.1, x: -2 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
+            className={`${isMobile ? 'p-2.5' : 'p-1.5'} rounded-full hover:bg-pink-50 text-pink-500`}>
+
+          <ChevronLeft className={`${isMobile ? 'h-6 w-6' : 'h-5 w-5'}`} />
+        </motion.button>
+        <div className={`flex ${isMobile ? 'gap-2' : 'gap-6'} items-center`}>
+          {months.map((m, i) =>
+            <button
+              key={i}
+              onClick={() => setShowYearSelector(!showYearSelector)}
+              className={`${isMobile ? 'text-base' : 'text-sm'} font-bold text-gray-700 capitalize hover:text-pink-600 transition-colors`}>
+
+              {format(m, isMobile ? 'MMMM yyyy' : 'MMMM', { locale: es })}
+              {!isMobile && i === 0 &&
+              <span className="ml-2 text-xs text-pink-600 cursor-pointer hover:underline">
+                  {format(m, 'yyyy')} ▾
+                </span>
+              }
+            </button>
+            )}
+        </div>
+        <motion.button
+            whileHover={{ scale: 1.1, x: 2 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
+            className={`${isMobile ? 'p-2.5' : 'p-1.5'} rounded-full hover:bg-pink-50 text-pink-500`}>
+
+          <ChevronRight className={`${isMobile ? 'h-6 w-6' : 'h-5 w-5'}`} />
+        </motion.button>
+      </div>
+
+      {/* Selector de año rápido */}
+      {showYearSelector &&
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          exit={{ opacity: 0, height: 0 }}
+          className="px-4 py-3 border-b border-gray-100 bg-pink-50">
+
+          <div className="flex gap-2 flex-wrap justify-center">
+            {[2024, 2025, 2026].map((year) =>
+            <motion.button
+              key={year}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => {
+                const newMonth = new Date(currentMonth);
+                newMonth.setFullYear(year);
+                setCurrentMonth(newMonth);
+                setShowYearSelector(false);
+              }}
+              className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
+              currentMonth.getFullYear() === year ?
+              'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-md' :
+              'bg-white text-gray-700 hover:bg-pink-100 border border-pink-200'}`
+              }>
+
+                {year}
+              </motion.button>
+            )}
+          </div>
+        </motion.div>
+        }
+      
+      {/* Meses */}
+      <div className={`flex ${isMobile ? 'overflow-y-auto flex-1' : 'divide-x divide-gray-100'}`}>
+        {months.map((month, i) =>
+          <div key={i} className={isMobile ? 'w-full' : ''}>{renderMonth(month)}</div>
+          )}
+      </div>
+      
+          <div className={`${isMobile ? 'px-4 py-4' : 'px-4 py-3'} border-t border-gray-100 bg-gray-50/50 ${isMobile ? 'flex-col space-y-3' : 'flex items-center justify-between'} flex-shrink-0`}>
+            <div className={`flex items-center ${isMobile ? 'gap-2 justify-center' : 'gap-2'}`}>
+              {tempSelection?.from ?
+            <motion.div
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={`flex items-center ${isMobile ? 'gap-2' : 'gap-2'} text-sm`}>
+
+                  <span className={`${isMobile ? 'px-3 py-1.5 text-xs' : 'px-2 py-1 text-xs'} bg-pink-100 text-pink-700 rounded-lg font-medium`}>
+                    {format(tempSelection.from, 'dd MMM', { locale: es })}
+                  </span>
+                  {tempSelection.to && !isSameDay(tempSelection.from, tempSelection.to) &&
+              <>
+                      <span className={`${isMobile ? 'text-sm' : ''} text-gray-400`}>→</span>
+                      <span className={`${isMobile ? 'px-3 py-1.5 text-xs' : 'px-2 py-1 text-xs'} bg-rose-100 text-rose-700 rounded-lg font-medium`}>
+                        {format(tempSelection.to, 'dd MMM', { locale: es })}
+                      </span>
+                    </>
+              }
+                </motion.div> :
+
+            <span className={`${isMobile ? 'text-sm' : 'text-xs'} text-gray-400`}>Selecciona una fecha</span>
+            }
+            </div>
+            <div className={`flex items-center gap-2 ${isMobile ? 'justify-center w-full' : ''}`}>
+              {selectingEnd && !isMobile &&
+            <motion.span
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-xs text-pink-500 font-medium flex items-center gap-1">
+
+                  <Sparkles className="w-3 h-3" />
+                  Selecciona fecha fin
+                </motion.span>
+            }
+              {tempSelection?.from && !selectingEnd &&
+            <motion.button
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleApply}
+              className={`${isMobile ? 'w-full py-3.5' : 'px-4 py-1.5'} rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white ${isMobile ? 'text-base' : 'text-sm'} font-bold shadow-lg flex items-center justify-center gap-2`}>
+
+                  <Check className={`${isMobile ? 'w-5 h-5' : 'w-4 h-4'}`} /> Aplicar
+                </motion.button>
+            }
+            </div>
+          </div>
+        </>
+      }
     </div>);
 
 }
