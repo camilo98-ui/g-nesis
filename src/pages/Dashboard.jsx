@@ -22,6 +22,7 @@ import CompraValeModal from '@/components/dashboard/CompraValeModal';
 import StoreSalesModal from '@/components/forms/StoreSalesModal';
 import MonthlyBudgetManager from '@/components/budget/MonthlyBudgetManager';
 import ChartInsight from '@/components/dashboard/ChartInsight';
+import SalesCoachingPanel from '@/components/ai/SalesCoachingPanel';
 
 import {
   DollarSign, Receipt, Zap, Gift, TrendingUp, TrendingDown, ArrowLeft,
@@ -1918,6 +1919,17 @@ export default function Dashboard() {
                 </div>
               </motion.div>
           }
+
+            {/* Sales Coaching IA */}
+            {!showComparison && (
+              <SalesCoachingPanel
+                dailySales={dailySales}
+                shiftRecords={shiftRecords}
+                currentBudget={currentBudget}
+                storeId={selectedStore}
+                formatCurrency={formatCurrency}
+              />
+            )}
 
             {/* Resumen Ejecutivo */}
             <motion.div
