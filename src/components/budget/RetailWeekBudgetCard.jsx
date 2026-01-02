@@ -388,7 +388,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
 
               <div className="grid grid-cols-2 gap-3 md:gap-6 mb-3 md:mb-4">
                 <div>
-                  <p className="text-[10px] md:text-xs text-white/60 mb-1 md:mb-2">Meta del Día (105%)</p>
+                  <p className="text-[10px] md:text-xs text-white/60 mb-1 md:mb-2">Meta del Día (115%)</p>
                   <motion.p
                     key={budgetData.adjustedDailyBudget}
                     initial={{ scale: 1.2, opacity: 0 }}
@@ -397,7 +397,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                   >
                     {formatCurrency(budgetData.adjustedDailyBudget)}
                   </motion.p>
-                  <p className="text-[8px] md:text-[10px] text-white/50 mt-0.5">Base: {formatCurrency(budgetData.adjustedDailyBudget / 1.05)}</p>
+                  <p className="text-[8px] md:text-[10px] text-white/50 mt-0.5">Base: {formatCurrency(budgetData.adjustedDailyBudget / 1.15)}</p>
                 </div>
                 <div>
                   <p className="text-[10px] md:text-xs text-white/60 mb-1 md:mb-2">Promedio Histórico - {format(new Date(), 'EEEE', { locale: es })}</p>
@@ -1355,7 +1355,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                           </ul>
                         </div>
                         <p className="text-xs text-slate-600 mt-3">
-                          ✅ Continúa con este ritmo constante para garantizar el cumplimiento de la meta ambiciosa del 105%: {formatCurrency(adjustedMonthlyBudget)}.
+                         ✅ Continúa con este ritmo constante para garantizar el cumplimiento de la meta ambiciosa del 115%: {formatCurrency(activeBudget?.sales_budget * 1.15)}.
                         </p>
                       </div>
                     )}
