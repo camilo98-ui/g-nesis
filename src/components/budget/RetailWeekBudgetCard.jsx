@@ -92,12 +92,18 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
     const getDailyBudget = (date) => {
       if (totalWeeklyAvg === 0) return dailyBaseBudget; // Sin histórico
       const dayOfWeek = date.getDay();
-      const weeklyBudgetAvg = dailyBaseBudget * 7;
-      const historicalBudget = weeklyBudgetAvg * weightByDayOfWeek[dayOfWeek];
-      
-      // Usar promedio entre histórico y presupuesto base
-      const historicalWeight = countByDayOfWeek[dayOfWeek] >= 4 ? 0.95 : 0.85;
-      return (historicalBudget * historicalWeight) + (dailyBaseBudget * (1 - historicalWeight));
+
+      // Si hay suficiente histórico, usar directamente el promedio histórico escalado al presupuesto mensual
+      if (countByDayOfWeek[dayOfWeek] >= 3) {
+        // Escalar el promedio histórico para que la suma semanal coincida con el presupuesto mensual
+        const totalHistoricalAvg = avgByDayOfWeek.reduce((a, b) => a + b, 0);
+        const monthlyHistoricalProjection = totalHistoricalAvg * (daysInMonth / 7);
+        const scaleFactor = activeBudget.sales_budget / monthlyHistoricalProjection;
+        return avgByDayOfWeek[dayOfWeek] * scaleFactor;
+      } else {
+        // Sin suficiente histórico, usar presupuesto base
+        return dailyBaseBudget;
+      }
     };
 
     // Ventas acumuladas hasta hoy
@@ -128,24 +134,30 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
     // Presupuesto restante a alcanzar
     const remainingBudget = activeBudget.sales_budget - salesUntilYesterday - todayActualSales;
 
-    // Presupuesto del día ajustado
+    // Presupuesto del día ajustado según patrón histórico
     let adjustedDailyBudget = getDailyBudget(now);
-    
-    // Si hay brecha acumulada, redistribuir
+
+    // Si hay brecha acumulada, redistribuir de forma conservadora
     if (remainingDays > 0 && accumulatedGap > 0) {
       const remainingDaysArray = eachDayOfInterval({ start: now, end: monthEnd });
-      const totalWeightRemaining = remainingDaysArray.reduce((sum, day) => {
-        const dayOfWeek = day.getDay();
-        return sum + (weightByDayOfWeek[dayOfWeek] || 1/7);
-      }, 0);
-      const todayWeight = weightByDayOfWeek[now.getDay()] || 1/7;
-      
-      // Redistribuir 85% de la brecha
-      const redistributionBudget = remainingBudget + (accumulatedGap * 0.85);
-      const redistributedBudget = (redistributionBudget / totalWeightRemaining) * todayWeight;
-      
-      // No limitar el presupuesto redistribuido
-      adjustedDailyBudget = Math.max(getDailyBudget(now), redistributedBudget);
+
+      // Calcular presupuesto base de días restantes según histórico
+      const remainingBaseBudget = remainingDaysArray.reduce((sum, day) => sum + getDailyBudget(day), 0);
+
+      // Redistribuir solo el 50% de la brecha para ser más conservador y realista
+      const gapToRedistribute = accumulatedGap * 0.5;
+
+      // Calcular peso del día actual vs total de días restantes
+      const todayBaseBudget = getDailyBudget(now);
+      const todayWeight = remainingBaseBudget > 0 ? todayBaseBudget / remainingBaseBudget : 1 / remainingDays;
+
+      // Agregar proporción de la brecha al presupuesto base del día
+      const additionalBudget = gapToRedistribute * todayWeight;
+      adjustedDailyBudget = todayBaseBudget + additionalBudget;
+
+      // Limitar incremento máximo al 40% del presupuesto base histórico para evitar metas irrealistas
+      const maxIncrease = todayBaseBudget * 1.4;
+      adjustedDailyBudget = Math.min(adjustedDailyBudget, maxIncrease);
     }
 
     // Calcular número de semana retail (considerando semanas que empiezan antes del mes)
