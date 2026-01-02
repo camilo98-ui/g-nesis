@@ -362,10 +362,11 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                   <p className="text-[8px] md:text-[10px] text-white/50 mt-0.5">Base: {formatCurrency(budgetData.adjustedDailyBudget / 1.05)}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] md:text-xs text-white/60 mb-1 md:mb-2">Promedio Histórico Hoy</p>
+                  <p className="text-[10px] md:text-xs text-white/60 mb-1 md:mb-2">Promedio Histórico - {format(new Date(), 'EEEE', { locale: es })}</p>
                   <p className="text-xl md:text-4xl font-black text-white leading-tight">
                     {formatCurrency(budgetData.historicalAvgToday)}
                   </p>
+                  <p className="text-[8px] md:text-[10px] text-white/50 mt-0.5">Promedio en {format(new Date(), 'EEEE', { locale: es })}s anteriores</p>
                 </div>
               </div>
 
