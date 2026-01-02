@@ -168,12 +168,6 @@ export default function PopsyPlanner() {
                       <span className="hidden sm:inline">Colaboradores</span>
                     </Button>
                   </motion.div>
-                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                    <Button onClick={() => setShowAISuggestion(true)} className="bg-gradient-to-r from-violet-500 to-purple-600 text-white gap-2 shadow-lg">
-                      <Sparkles className="w-4 h-4" />
-                      <span className="hidden sm:inline">Generar con IA</span>
-                    </Button>
-                  </motion.div>
                 </>
               )}
             </div>
