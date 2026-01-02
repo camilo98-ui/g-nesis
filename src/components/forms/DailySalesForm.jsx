@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -49,6 +49,16 @@ export default function DailySalesForm({ storeId, onSuccess }) {
     total_transactions: '',
     total_suggested: ''
   });
+
+  // Calcular ticket promedio automáticamente
+  const averageTicket = React.useMemo(() => {
+    const sales = parseFloat(formData.total_sales) || 0;
+    const transactions = parseInt(formData.total_transactions) || 0;
+    if (transactions > 0 && sales > 0) {
+      return Math.round(sales / transactions);
+    }
+    return '';
+  }, [formData.total_sales, formData.total_transactions]);
 
   const createMutation = useMutation({
     mutationFn: async (data) => {
@@ -317,13 +327,24 @@ export default function DailySalesForm({ storeId, onSuccess }) {
                 </div>
                 Ticket Promedio
               </Label>
-              <Input 
-                type="number"
-                placeholder="0"
-                value={formData.total_tickets}
-                onChange={(e) => setFormData({...formData, total_tickets: e.target.value})}
-                className="border-2 border-sky-200 focus:border-sky-400 bg-white rounded-xl text-lg font-bold h-12 focus:ring-2 focus:ring-sky-200 transition-all"
-              />
+              <div className="relative">
+                <Input 
+                  type="text"
+                  placeholder="Calculado automáticamente"
+                  value={averageTicket ? `$${averageTicket.toLocaleString('es-CO')}` : ''}
+                  readOnly
+                  className="border-2 border-sky-200 bg-sky-50/50 rounded-xl text-lg font-bold h-12 text-sky-700 cursor-default"
+                />
+                {averageTicket && (
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-sky-500 rounded-full flex items-center justify-center"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-white" />
+                  </motion.div>
+                )}
+              </div>
             </motion.div>
 
             {/* Transacciones */}
