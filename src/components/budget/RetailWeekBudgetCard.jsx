@@ -303,27 +303,27 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       animate={{ opacity: 1, y: 0 }}
       className="mb-6"
     >
-      <Card className="bg-gradient-to-br from-rose-50/30 via-pink-50/20 to-purple-50/20 border border-rose-200/40 shadow-lg overflow-hidden">
-        <CardHeader className="bg-gradient-to-r from-rose-100/20 to-pink-100/20 border-b border-rose-200/30 pb-3 md:pb-4">
+      <Card className="bg-white border-0 shadow-2xl overflow-hidden">
+        <CardHeader className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border-b-0 pb-4 md:pb-5">
           <div className="flex items-center justify-between gap-2">
-            <CardTitle className="text-base md:text-xl font-black text-slate-900 flex items-center gap-2 md:gap-3">
+            <CardTitle className="text-base md:text-xl font-black text-white flex items-center gap-2 md:gap-3">
               <motion.div
                 animate={{ rotate: [0, 360] }}
                 transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                className="w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-gradient-to-br from-rose-400/60 to-pink-400/60 flex items-center justify-center shadow-md flex-shrink-0"
+                className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-pink-500 to-violet-500 flex items-center justify-center shadow-lg flex-shrink-0"
               >
                 <Target className="w-5 h-5 md:w-7 md:h-7 text-white" />
               </motion.div>
               <div className="min-w-0">
-                <p className="text-base md:text-2xl truncate">Presupuesto del Día</p>
-                <p className="text-[10px] md:text-xs text-slate-600 font-normal mt-0.5">Calendario Retail - Semana {budgetData.currentWeekNumber} de {budgetData.totalWeeks}</p>
+                <p className="text-base md:text-2xl truncate">Meta del Día</p>
+                <p className="text-[10px] md:text-xs text-white/60 font-medium mt-0.5">Semana {budgetData.currentWeekNumber} de {budgetData.totalWeeks} • Calendario Retail</p>
               </div>
             </CardTitle>
             <div className="text-right flex-shrink-0">
-              <p className="text-xs md:text-sm text-slate-900 font-bold whitespace-nowrap">
+              <p className="text-xs md:text-sm text-white font-bold whitespace-nowrap">
                 {format(new Date(), 'dd MMM yyyy', { locale: es })}
               </p>
-              <p className="text-[10px] md:text-xs text-slate-600">
+              <p className="text-[10px] md:text-xs text-white/60 font-medium">
                 {budgetData.remainingDays} días restantes
               </p>
             </div>
@@ -336,7 +336,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
             <motion.div
               whileHover={{ scale: 1.02, y: -2 }}
               onClick={onConfigureBudget}
-              className="w-full bg-gradient-to-br from-amber-400/80 to-orange-400/80 rounded-xl md:rounded-2xl shadow-md p-4 md:p-6 border border-amber-300/40 relative overflow-hidden cursor-pointer"
+              className="w-full bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl shadow-xl p-6 md:p-8 border border-white/10 relative overflow-hidden cursor-pointer"
             >
               <div className="relative z-10 text-center">
                 <Target className="w-10 h-10 md:w-12 md:h-12 text-white mx-auto mb-3 md:mb-4" />
@@ -355,72 +355,82 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
             <>
           {/* Presupuesto del Día - DESTACADO */}
           <motion.div
-            whileHover={{ scale: 1.02, y: -2 }}
+            whileHover={{ scale: 1.01, y: -3 }}
             onClick={() => setIsExpanded(!isExpanded)}
-            className="w-full bg-gradient-to-br from-rose-400/80 to-pink-400/80 rounded-xl md:rounded-2xl shadow-md p-4 md:p-6 border border-rose-300/40 relative overflow-hidden cursor-pointer"
+            className="w-full bg-gradient-to-br from-pink-500 via-rose-500 to-violet-600 rounded-2xl shadow-2xl p-5 md:p-7 border-0 relative overflow-hidden cursor-pointer"
           >
             <div className="relative z-10">
-              <div className="flex items-center justify-between mb-3 md:mb-4">
-                <div className="flex items-center gap-1.5 md:gap-2">
-                  <Target className="w-4 h-4 md:w-6 md:h-6 text-white" />
-                  <p className="text-xs md:text-sm text-white/80 font-medium">Meta del Día</p>
+              <div className="flex items-center justify-between mb-4 md:mb-5">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center">
+                    <Target className="w-4 h-4 md:w-5 md:h-5 text-white" />
+                  </div>
+                  <p className="text-xs md:text-sm text-white font-bold uppercase tracking-wider">Meta del Día</p>
                 </div>
                 {needsRecovery && (
-                  <div className="px-1.5 md:px-2 py-0.5 md:py-1 bg-amber-100/60 rounded-full">
-                    <p className="text-[8px] md:text-[10px] font-black text-amber-700">AJUSTADO</p>
-                  </div>
+                  <motion.div 
+                    animate={{ scale: [1, 1.05, 1] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className="px-2 md:px-3 py-1 md:py-1.5 bg-amber-400 rounded-full shadow-lg"
+                  >
+                    <p className="text-[9px] md:text-[10px] font-black text-slate-900">AJUSTADO</p>
+                  </motion.div>
                 )}
               </div>
 
-              <div className="grid grid-cols-2 gap-3 md:gap-6 mb-3 md:mb-4">
-                <div>
-                  <p className="text-[10px] md:text-xs text-white/60 mb-1 md:mb-2">Meta del Día (105%)</p>
+              <div className="grid grid-cols-2 gap-4 md:gap-8 mb-4 md:mb-6">
+                <div className="bg-white/10 backdrop-blur-md rounded-xl p-3 md:p-4 border border-white/20">
+                  <p className="text-[10px] md:text-xs text-white/70 mb-2 font-semibold uppercase tracking-wide">Meta del Día (105%)</p>
                   <motion.p
                     key={budgetData.adjustedDailyBudget}
                     initial={{ scale: 1.2, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    className="text-xl md:text-4xl font-black text-white leading-tight"
+                    className="text-2xl md:text-4xl font-black text-white leading-tight mb-1"
                   >
                     {formatCurrency(budgetData.adjustedDailyBudget)}
                   </motion.p>
-                  <p className="text-[8px] md:text-[10px] text-white/50 mt-0.5">Base: {formatCurrency(budgetData.adjustedDailyBudget / 1.05)}</p>
+                  <p className="text-[9px] md:text-[10px] text-white/60 font-medium">Base: {formatCurrency(budgetData.adjustedDailyBudget / 1.05)}</p>
                 </div>
-                <div>
-                  <p className="text-[10px] md:text-xs text-white/60 mb-1 md:mb-2">Promedio Histórico - {format(new Date(), 'EEEE', { locale: es })}</p>
-                  <p className="text-xl md:text-4xl font-black text-white leading-tight">
+                <div className="bg-white/10 backdrop-blur-md rounded-xl p-3 md:p-4 border border-white/20">
+                  <p className="text-[10px] md:text-xs text-white/70 mb-2 font-semibold uppercase tracking-wide">Promedio Histórico - {format(new Date(), 'EEEE', { locale: es })}</p>
+                  <p className="text-2xl md:text-4xl font-black text-white leading-tight mb-1">
                     {formatCurrency(budgetData.historicalAvgToday)}
                   </p>
-                  <p className="text-[8px] md:text-[10px] text-white/50 mt-0.5">Promedio en {format(new Date(), 'EEEE', { locale: es })}s anteriores</p>
+                  <p className="text-[9px] md:text-[10px] text-white/60 font-medium">Promedio en {format(new Date(), 'EEEE', { locale: es })}s anteriores</p>
                 </div>
               </div>
 
-              <div className="space-y-1.5 md:space-y-2 mb-3 md:mb-4">
-                <div className="flex items-center justify-between text-[10px] md:text-xs">
-                  <span className="text-white/70">Cumplimiento del día</span>
-                  <span className="font-bold text-white">{budgetData.todayCompliance.toFixed(0)}%</span>
+              <div className="space-y-2 md:space-y-3 mb-4 md:mb-5">
+                <div className="flex items-center justify-between text-xs md:text-sm">
+                  <span className="text-white/80 font-semibold">Cumplimiento del día</span>
+                  <span className="font-black text-white text-lg md:text-xl">{budgetData.todayCompliance.toFixed(0)}%</span>
                 </div>
-                <div className="relative h-2 md:h-3 bg-white/20 rounded-full overflow-hidden">
+                <div className="relative h-3 md:h-4 bg-white/10 rounded-full overflow-hidden shadow-inner">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${Math.min(budgetData.todayCompliance, 100)}%` }}
-                    transition={{ duration: 1, ease: "easeOut" }}
-                    className="h-full bg-white rounded-full"
+                    transition={{ duration: 1.5, ease: "easeOut" }}
+                    className="h-full bg-gradient-to-r from-white via-pink-100 to-white rounded-full shadow-lg"
                   />
                 </div>
               </div>
 
               {needsRecovery && (
-                <div className="bg-white/10 rounded-lg p-2 md:p-3 mb-2 md:mb-3">
-                  <p className="text-[10px] md:text-xs text-white/70 flex items-center gap-1">
-                    <AlertTriangle className="w-3 h-3 flex-shrink-0" />
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-amber-400/20 backdrop-blur-sm rounded-xl p-3 md:p-4 mb-3 md:mb-4 border border-amber-300/30"
+                >
+                  <p className="text-[10px] md:text-xs text-white font-semibold flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4 flex-shrink-0" />
                     <span className="truncate">Incluye recuperación de {formatCurrency(budgetData.accumulatedGap)}</span>
                   </p>
-                </div>
+                </motion.div>
               )}
 
-              <div className="flex items-center justify-center gap-1.5 md:gap-2 text-white/80 pt-2 border-t border-white/20 w-full">
-                {isExpanded ? <ChevronUp className="w-3 h-3 md:w-4 md:h-4" /> : <ChevronDown className="w-3 h-3 md:w-4 md:h-4" />}
-                <span className="text-[10px] md:text-xs font-medium">{isExpanded ? 'Ver menos' : 'Ver más detalles'}</span>
+              <div className="flex items-center justify-center gap-2 text-white pt-3 border-t border-white/30 w-full">
+                {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                <span className="text-xs font-bold uppercase tracking-wider">{isExpanded ? 'Ocultar detalles' : 'Ver análisis completo'}</span>
               </div>
             </div>
           </motion.div>
@@ -434,11 +444,13 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
-                  className="bg-white rounded-xl p-3 md:p-4 border border-slate-200/60 shadow-sm"
+                  className="bg-gradient-to-br from-slate-50 to-white rounded-2xl p-4 md:p-6 border border-slate-200 shadow-xl"
                 >
-                  <div className="flex items-center justify-between mb-2 md:mb-3">
-                    <h4 className="text-sm md:text-base font-bold text-slate-900 flex items-center gap-1.5 md:gap-2">
-                      <LineChart className="w-4 h-4 md:w-5 md:h-5 text-rose-400/70" />
+                  <div className="flex items-center justify-between mb-3 md:mb-4">
+                    <h4 className="text-base md:text-lg font-black text-slate-900 flex items-center gap-2">
+                      <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-gradient-to-br from-pink-500 to-violet-500 flex items-center justify-center shadow-lg">
+                        <LineChart className="w-4 h-4 md:w-5 md:h-5 text-white" />
+                      </div>
                       Tendencia Diaria del Mes
                     </h4>
                   </div>
@@ -446,12 +458,12 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                     <BarChart data={budgetData.dailyTrendData}>
                       <defs>
                         <linearGradient id="barCumplido" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#a7f3d0" stopOpacity={0.9}/>
-                          <stop offset="100%" stopColor="#d1fae5" stopOpacity={0.6}/>
+                          <stop offset="0%" stopColor="#10b981" stopOpacity={1}/>
+                          <stop offset="100%" stopColor="#34d399" stopOpacity={0.7}/>
                         </linearGradient>
                         <linearGradient id="barNoCumplido" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#fda4af" stopOpacity={0.9}/>
-                          <stop offset="100%" stopColor="#fecdd3" stopOpacity={0.6}/>
+                          <stop offset="0%" stopColor="#f43f5e" stopOpacity={1}/>
+                          <stop offset="100%" stopColor="#fb7185" stopOpacity={0.7}/>
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.3} />
@@ -530,19 +542,19 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
-                  <ResponsiveContainer width="100%" height={280} className="hidden md:block">
+                  <ResponsiveContainer width="100%" height={300} className="hidden md:block">
                   <BarChart data={budgetData.dailyTrendData}>
                     <defs>
                       <linearGradient id="barCumplidoDesktop" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#a7f3d0" stopOpacity={0.9}/>
-                        <stop offset="100%" stopColor="#d1fae5" stopOpacity={0.6}/>
+                        <stop offset="0%" stopColor="#10b981" stopOpacity={1}/>
+                        <stop offset="100%" stopColor="#34d399" stopOpacity={0.8}/>
                       </linearGradient>
                       <linearGradient id="barNoCumplidoDesktop" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#fda4af" stopOpacity={0.9}/>
-                        <stop offset="100%" stopColor="#fecdd3" stopOpacity={0.6}/>
+                        <stop offset="0%" stopColor="#f43f5e" stopOpacity={1}/>
+                        <stop offset="100%" stopColor="#fb7185" stopOpacity={0.8}/>
                       </linearGradient>
                       <filter id="barShadow">
-                        <feDropShadow dx="0" dy="2" stdDeviation="2" floodOpacity="0.2"/>
+                        <feDropShadow dx="0" dy="4" stdDeviation="4" floodOpacity="0.25"/>
                       </filter>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.3} />
@@ -650,83 +662,85 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                className="w-full bg-gradient-to-r from-purple-50/40 to-pink-50/40 rounded-xl p-3 md:p-4 border border-purple-200/40"
+                className="w-full bg-gradient-to-br from-violet-50 via-purple-50 to-pink-50 rounded-2xl p-4 md:p-5 border border-violet-200 shadow-lg"
               >
-                <div className="flex flex-col md:flex-row md:items-center justify-between mb-3 gap-2">
-                  <div className="flex items-center gap-1.5 md:gap-2 min-w-0">
-                    <Calendar className="w-4 h-4 md:w-5 md:h-5 text-purple-400/70 flex-shrink-0" />
-                    <h4 className="text-xs md:text-sm font-bold text-purple-700/80 truncate">
+                <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="w-9 h-9 md:w-10 md:h-10 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg">
+                      <Calendar className="w-4 h-4 md:w-5 md:h-5 text-white" />
+                    </div>
+                    <h4 className="text-sm md:text-base font-black text-slate-900 truncate">
                       Semana {budgetData.currentWeekNumber} ({format(budgetData.currentWeekStart, 'dd MMM', { locale: es })} - {format(budgetData.currentWeekEnd, 'dd MMM', { locale: es })})
                     </h4>
                   </div>
-                  <div className={`px-2 md:px-3 py-0.5 md:py-1 rounded-full text-[10px] md:text-xs font-bold flex-shrink-0 self-start md:self-auto ${
+                  <div className={`px-3 md:px-4 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-black flex-shrink-0 self-start md:self-auto shadow-md ${
                     budgetData.weeklyCompliance >= 100 
-                      ? 'bg-emerald-100/60 text-emerald-600' 
-                      : 'bg-amber-100/60 text-amber-600'
+                      ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white' 
+                      : 'bg-gradient-to-r from-amber-500 to-orange-500 text-white'
                   }`}>
                     {budgetData.weeklyCompliance.toFixed(0)}%
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-2 md:gap-3">
               <motion.button
-                whileHover={{ scale: 1.03, y: -2 }}
+                whileHover={{ scale: 1.05, y: -3 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => {
                   setSelectedMetric('weekly-budget');
                   setIsModalOpen(true);
                 }}
-                className="bg-purple-50 rounded-lg p-2 md:p-3 border border-purple-200/40 transition-all text-left hover:border-purple-400"
+                className="bg-gradient-to-br from-violet-100 to-purple-100 rounded-xl p-3 md:p-4 border-0 transition-all text-left shadow-lg hover:shadow-xl"
               >
-                <p className="text-[10px] md:text-xs text-purple-500/70 mb-1">Meta Semanal</p>
-                <p className="text-sm md:text-lg font-black text-purple-600 leading-tight">
+                <p className="text-[10px] md:text-xs text-violet-600 mb-1 font-bold uppercase tracking-wide">Meta Semanal</p>
+                <p className="text-base md:text-xl font-black text-violet-900 leading-tight">
                   {formatCurrency(budgetData.weeklyBudget)}
                 </p>
               </motion.button>
               <motion.button
-                whileHover={{ scale: 1.03, y: -2 }}
+                whileHover={{ scale: 1.05, y: -3 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => {
                   setSelectedMetric('weekly-sales');
                   setIsModalOpen(true);
                 }}
-                className="bg-purple-50 rounded-lg p-2 md:p-3 border border-purple-200/40 transition-all text-left hover:border-purple-400"
+                className="bg-gradient-to-br from-pink-100 to-rose-100 rounded-xl p-3 md:p-4 border-0 transition-all text-left shadow-lg hover:shadow-xl"
               >
-                <p className="text-[10px] md:text-xs text-purple-500/70 mb-1">Venta Actual</p>
-                <p className="text-sm md:text-lg font-black text-purple-600 leading-tight">
+                <p className="text-[10px] md:text-xs text-pink-600 mb-1 font-bold uppercase tracking-wide">Venta Actual</p>
+                <p className="text-base md:text-xl font-black text-pink-900 leading-tight">
                   {formatCurrency(budgetData.currentWeekSales)}
                 </p>
               </motion.button>
               <motion.button
-                whileHover={{ scale: 1.03, y: -2 }}
+                whileHover={{ scale: 1.05, y: -3 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => {
                   setSelectedMetric('weekly-projection');
                   setIsModalOpen(true);
                 }}
-                className="bg-pink-50 rounded-lg p-2 md:p-3 border border-pink-200/40 transition-all text-left hover:border-pink-400"
+                className="bg-gradient-to-br from-emerald-100 to-green-100 rounded-xl p-3 md:p-4 border-0 transition-all text-left shadow-lg hover:shadow-xl"
               >
-                <p className="text-[10px] md:text-xs text-pink-500/70 mb-1">Proyección</p>
-                <p className="text-sm md:text-lg font-black text-pink-600 leading-tight">
+                <p className="text-[10px] md:text-xs text-emerald-600 mb-1 font-bold uppercase tracking-wide">Proyección</p>
+                <p className="text-base md:text-xl font-black text-emerald-900 leading-tight">
                   {formatCurrency(budgetData.weekProjection)}
                 </p>
               </motion.button>
                 </div>
-                <div className="mt-3 space-y-1.5">
+                <div className="mt-4 space-y-3 bg-white/40 backdrop-blur-sm rounded-xl p-3 border border-white/50">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-purple-500/60">Cumplimiento actual</span>
-                <span className="font-bold text-purple-600">{budgetData.weeklyCompliance.toFixed(0)}%</span>
+                <span className="text-slate-700 font-semibold">Cumplimiento actual</span>
+                <span className="font-black text-violet-600 text-base">{budgetData.weeklyCompliance.toFixed(0)}%</span>
               </div>
-              <div className="h-2 bg-white/50 rounded-full overflow-hidden">
+              <div className="h-3 bg-white/60 rounded-full overflow-hidden shadow-inner">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${Math.min(budgetData.weeklyCompliance, 100)}%` }}
-                  transition={{ duration: 1, delay: 0.2 }}
-                  className="h-full bg-gradient-to-r from-purple-400/60 to-pink-400/60 rounded-full"
+                  transition={{ duration: 1.5, delay: 0.2 }}
+                  className="h-full bg-gradient-to-r from-violet-500 to-purple-600 rounded-full shadow-lg"
                 />
               </div>
               <div className="flex items-center justify-between text-xs pt-1">
-                <span className="text-pink-500/60">Proyección de cierre</span>
-                <span className={`font-bold ${budgetData.projectionCompliance >= 100 ? 'text-emerald-500' : 'text-amber-500'}`}>
+                <span className="text-slate-700 font-semibold">Proyección de cierre</span>
+                <span className={`font-black text-base ${budgetData.projectionCompliance >= 100 ? 'text-emerald-600' : 'text-amber-600'}`}>
                   {budgetData.projectionCompliance.toFixed(0)}%
                 </span>
                   </div>
@@ -738,46 +752,43 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                className="bg-gradient-to-br from-rose-50/30 via-pink-50/20 to-purple-50/20 rounded-2xl p-4 border-2 border-rose-200/30 shadow-lg"
+                className="bg-white rounded-2xl p-5 border-0 shadow-2xl"
               >
-                <div className="flex items-center justify-between mb-4">
-                  <h4 className="font-black text-rose-900 flex items-center gap-2 text-base">
-                    <motion.div
-                      animate={{ rotate: [0, 5, -5, 0] }}
-                      transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
-                    >
-                      <BarChart3 className="w-5 h-5 text-rose-400" />
-                    </motion.div>
+                <div className="flex items-center justify-between mb-5">
+                  <h4 className="font-black text-slate-900 flex items-center gap-3 text-lg">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 to-violet-600 flex items-center justify-center shadow-lg">
+                      <BarChart3 className="w-5 h-5 text-white" />
+                    </div>
                     Comparativa Semanal
                   </h4>
                 </div>
-                <ResponsiveContainer width="100%" height={240}>
+                <ResponsiveContainer width="100%" height={260}>
                   <BarChart data={budgetData.weeklyData} margin={{ top: 10, right: 10, left: 0, bottom: 5 }}>
                     <defs>
                       <linearGradient id="barPresupuesto" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#a7f3d0" stopOpacity={0.7}/>
-                        <stop offset="100%" stopColor="#d1fae5" stopOpacity={0.4}/>
+                        <stop offset="0%" stopColor="#8b5cf6" stopOpacity={1}/>
+                        <stop offset="100%" stopColor="#a78bfa" stopOpacity={0.8}/>
                       </linearGradient>
                       <linearGradient id="barVentas" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#fda4af" stopOpacity={0.7}/>
-                        <stop offset="100%" stopColor="#fecdd3" stopOpacity={0.5}/>
+                        <stop offset="0%" stopColor="#ec4899" stopOpacity={1}/>
+                        <stop offset="100%" stopColor="#f472b6" stopOpacity={0.8}/>
                       </linearGradient>
                       <filter id="barShadow">
-                        <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.3"/>
+                        <feDropShadow dx="0" dy="3" stdDeviation="4" floodOpacity="0.3"/>
                       </filter>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#fecdd3" opacity={0.3} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.4} />
                     <XAxis 
                       dataKey="semana" 
-                      stroke="#9ca3af" 
-                      fontSize={11}
-                      fontWeight={600}
-                      tick={{ fill: '#9ca3af' }}
+                      stroke="#64748b" 
+                      fontSize={12}
+                      fontWeight={700}
+                      tick={{ fill: '#475569' }}
                     />
                     <YAxis 
-                      stroke="#9ca3af" 
-                      fontSize={11}
-                      fontWeight={500}
+                      stroke="#64748b" 
+                      fontSize={12}
+                      fontWeight={600}
                       tickFormatter={(value) => {
                         if (value >= 1000000) {
                           return `$${(value / 1000000).toFixed(1)}M`;
@@ -786,27 +797,29 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                         }
                         return `$${value.toLocaleString('es-CO')}`;
                       }}
-                      tick={{ fill: '#9ca3af' }}
+                      tick={{ fill: '#475569' }}
                     />
                     <Tooltip 
                       contentStyle={{ 
-                        backgroundColor: '#fff', 
-                        border: '2px solid #fda4af', 
-                        borderRadius: '12px', 
-                        color: '#0f172a',
-                        boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
-                        padding: '12px 16px'
+                        backgroundColor: '#1e293b', 
+                        border: 'none', 
+                        borderRadius: '16px', 
+                        color: '#fff',
+                        boxShadow: '0 20px 50px rgba(0,0,0,0.3)',
+                        padding: '16px 20px'
                       }}
                       labelStyle={{
-                        color: '#64748b',
-                        fontSize: '12px',
-                        fontWeight: '700',
-                        marginBottom: '8px'
+                        color: '#e2e8f0',
+                        fontSize: '13px',
+                        fontWeight: '800',
+                        marginBottom: '10px',
+                        letterSpacing: '0.05em'
                       }}
                       formatter={(value, name) => {
                         const label = name === 'presupuesto' ? '🎯 Meta' : '💰 Venta';
+                        const color = name === 'presupuesto' ? '#a78bfa' : '#f472b6';
                         return [
-                          <span key={name} style={{ fontSize: '13px', fontWeight: 'bold', color: '#0f172a' }}>
+                          <span key={name} style={{ fontSize: '15px', fontWeight: 'bold', color }}>
                             {formatCurrency(value)}
                           </span>,
                           label
@@ -814,16 +827,16 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                       }}
                     />
                     <Legend 
-                      wrapperStyle={{ paddingTop: '16px' }}
+                      wrapperStyle={{ paddingTop: '20px' }}
                       content={() => (
-                        <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', fontSize: '11px', fontWeight: '600' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <div style={{ width: '12px', height: '12px', background: 'linear-gradient(to bottom, #a7f3d0, #d1fae5)', borderRadius: '3px' }}></div>
-                            <span style={{ color: '#059669' }}>🎯 Meta</span>
+                        <div style={{ display: 'flex', justifyContent: 'center', gap: '24px', fontSize: '12px', fontWeight: '700' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <div style={{ width: '14px', height: '14px', background: 'linear-gradient(to bottom, #8b5cf6, #a78bfa)', borderRadius: '4px', boxShadow: '0 2px 8px rgba(139,92,246,0.4)' }}></div>
+                            <span style={{ color: '#7c3aed' }}>🎯 Meta</span>
                           </div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <div style={{ width: '12px', height: '12px', background: 'linear-gradient(to bottom, #fda4af, #fecdd3)', borderRadius: '3px' }}></div>
-                            <span style={{ color: '#dc2626' }}>💰 Venta</span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <div style={{ width: '14px', height: '14px', background: 'linear-gradient(to bottom, #ec4899, #f472b6)', borderRadius: '4px', boxShadow: '0 2px 8px rgba(236,72,153,0.4)' }}></div>
+                            <span style={{ color: '#db2777' }}>💰 Venta</span>
                           </div>
                         </div>
                       )}
@@ -851,67 +864,67 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
               {/* Grid de métricas resumidas */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
               <motion.button
-              whileHover={{ scale: 1.03, y: -2 }}
+              whileHover={{ scale: 1.05, y: -3 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => {
                 setSelectedMetric('base');
                 setIsModalOpen(true);
               }}
-              className="bg-gradient-to-br from-rose-50/40 to-pink-50/40 rounded-lg p-2 md:p-3 border border-rose-200/40 transition-all text-left hover:border-rose-400"
+              className="bg-gradient-to-br from-slate-100 to-gray-100 rounded-xl p-3 md:p-4 border-0 transition-all text-left shadow-lg hover:shadow-xl"
               >
-              <p className="text-[10px] md:text-xs text-rose-500/70 mb-1">Base Diaria</p>
-              <p className="text-sm md:text-lg font-bold text-rose-600 leading-tight">
+              <p className="text-[10px] md:text-xs text-slate-600 mb-1 font-bold uppercase tracking-wide">Base Diaria</p>
+              <p className="text-base md:text-xl font-black text-slate-900 leading-tight">
                 {formatCurrency(budgetData.dailyBaseBudget)}
               </p>
               </motion.button>
 
               <motion.button
-              whileHover={{ scale: 1.03, y: -2 }}
+              whileHover={{ scale: 1.05, y: -3 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => {
                 setSelectedMetric('remaining');
                 setIsModalOpen(true);
               }}
-              className="bg-gradient-to-br from-emerald-50/40 to-green-50/40 rounded-lg p-2 md:p-3 border border-emerald-200/40 transition-all text-left hover:border-emerald-400"
+              className="bg-gradient-to-br from-blue-100 to-cyan-100 rounded-xl p-3 md:p-4 border-0 transition-all text-left shadow-lg hover:shadow-xl"
               >
-              <p className="text-[10px] md:text-xs text-emerald-500/70 mb-1">Días Restantes</p>
-              <p className="text-sm md:text-lg font-bold text-emerald-600">
+              <p className="text-[10px] md:text-xs text-blue-600 mb-1 font-bold uppercase tracking-wide">Días Restantes</p>
+              <p className="text-base md:text-xl font-black text-blue-900">
                 {budgetData.remainingDays}
               </p>
               </motion.button>
 
               <motion.button
-              whileHover={{ scale: 1.03, y: -2 }}
+              whileHover={{ scale: 1.05, y: -3 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => {
                 setSelectedMetric('pending');
                 setIsModalOpen(true);
               }}
-              className="bg-gradient-to-br from-rose-50/40 to-pink-50/40 rounded-lg p-2 md:p-3 border border-rose-200/40 transition-all text-left hover:border-rose-400"
+              className="bg-gradient-to-br from-amber-100 to-yellow-100 rounded-xl p-3 md:p-4 border-0 transition-all text-left shadow-lg hover:shadow-xl"
               >
-              <p className="text-[10px] md:text-xs text-rose-500/70 mb-1">Por Vender</p>
-              <p className="text-sm md:text-lg font-bold text-rose-600 leading-tight">
+              <p className="text-[10px] md:text-xs text-amber-600 mb-1 font-bold uppercase tracking-wide">Por Vender</p>
+              <p className="text-base md:text-xl font-black text-amber-900 leading-tight">
                 {formatCurrency(budgetData.remainingBudget)}
               </p>
               </motion.button>
 
               <motion.button
-              whileHover={{ scale: 1.03, y: -2 }}
+              whileHover={{ scale: 1.05, y: -3 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => {
                 setSelectedMetric('compliance');
                 setIsModalOpen(true);
               }}
-              className={`rounded-lg p-2 md:p-3 border transition-all text-left ${
+              className={`rounded-xl p-3 md:p-4 border-0 transition-all text-left shadow-lg hover:shadow-xl ${
                 isOnTrack 
-                  ? 'bg-gradient-to-br from-emerald-50/40 to-green-50/40 border-emerald-200/40 hover:border-emerald-400' 
-                  : 'bg-gradient-to-br from-rose-50/40 to-pink-50/40 border-rose-200/40 hover:border-rose-400'
+                  ? 'bg-gradient-to-br from-emerald-100 to-green-100' 
+                  : 'bg-gradient-to-br from-orange-100 to-red-100'
               }`}
               >
-              <p className={`text-[10px] md:text-xs mb-1 ${isOnTrack ? 'text-emerald-500/70' : 'text-rose-500/70'}`}>
+              <p className={`text-[10px] md:text-xs mb-1 font-bold uppercase tracking-wide ${isOnTrack ? 'text-emerald-600' : 'text-orange-600'}`}>
                 Cumplimiento
               </p>
-              <p className={`text-sm md:text-lg font-bold ${isOnTrack ? 'text-emerald-600' : 'text-rose-600'}`}>
+              <p className={`text-base md:text-xl font-black ${isOnTrack ? 'text-emerald-900' : 'text-orange-900'}`}>
                 {budgetData.compliance.toFixed(1)}%
               </p>
                 </motion.button>
