@@ -63,6 +63,11 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
     const salesByDayOfWeek = [0, 0, 0, 0, 0, 0, 0]; // Sum
     const countByDayOfWeek = [0, 0, 0, 0, 0, 0, 0]; // Count
 
+    console.log('🔍 Analizando dailySales:', { 
+      totalRecords: dailySales.length,
+      sample: dailySales.slice(0, 3)
+    });
+
     dailySales.forEach(s => {
       try {
         const saleDate = parseISO(s.date);
@@ -74,6 +79,11 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       } catch (error) {
         console.error('Error parsing date:', s.date, error);
       }
+    });
+
+    console.log('📊 Resultados por día de semana:', {
+      salesByDay: salesByDayOfWeek,
+      countByDay: countByDayOfWeek
     });
 
     // Promedio histórico del día de la semana actual (ej: promedio de todos los jueves)
