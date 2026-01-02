@@ -5,11 +5,10 @@ import SmartSearch from '@/components/SmartSearch';
 import MotivationalHeader from '@/components/MotivationalHeader';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import PopsyRainingIcons from '@/components/PopsyRainingIcons';
-import ThemeSelector from '@/components/ThemeSelector';
 import { DateFilterProvider, useDateFilter } from '@/components/DateFilterContext';
 import { base44 } from '@/api/base44Client';
 import { 
-  Home, LayoutDashboard, Menu, Snowflake, CalendarDays, TrendingUp, Calendar, Palette
+  Home, LayoutDashboard, Menu, Snowflake, CalendarDays, TrendingUp, Calendar
 } from 'lucide-react';
 import { Link as RouterLink } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -103,7 +102,6 @@ export default function Layout({ children, currentPageName }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [selectedStore, setSelectedStore] = useState('');
   const [userRole, setUserRole] = useState('lider');
-  const [showThemeSelector, setShowThemeSelector] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem('selectedStore');
@@ -120,20 +118,6 @@ export default function Layout({ children, currentPageName }) {
   return (
     <DateFilterProvider>
       <ErrorBoundary>
-        {/* Theme Selector Button - Fixed Bottom Right */}
-        <motion.button
-          onClick={() => setShowThemeSelector(true)}
-          whileHover={{ scale: 1.1, rotate: 180 }}
-          whileTap={{ scale: 0.9 }}
-          className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-gradient-to-br from-pink-500 to-rose-500 rounded-full shadow-2xl flex items-center justify-center text-white hover:shadow-pink-500/50 transition-all"
-          title="Cambiar tema"
-        >
-          <Palette className="w-6 h-6" />
-        </motion.button>
-
-        {/* Theme Selector Modal */}
-        <ThemeSelector isOpen={showThemeSelector} onClose={() => setShowThemeSelector(false)} />
-
         <div className="min-h-screen app-container">
           {/* Main Content */}
           <main className="pt-4 min-h-screen pb-4 relative">
