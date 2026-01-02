@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Target, TrendingUp, TrendingDown, Calendar, AlertTriangle, CheckCircle2, ChevronDown, ChevronUp, BarChart3, LineChart } from 'lucide-react';
+import { Target, TrendingUp, TrendingDown, Calendar, AlertTriangle, CheckCircle2, ChevronDown, ChevronUp, BarChart3, LineChart, ChevronRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { format, startOfMonth, endOfMonth, eachWeekOfInterval, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, parseISO } from 'date-fns';
@@ -886,6 +886,8 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                       {selectedMetric === 'weekly-budget' && '🎯 Desglose de Meta Semanal'}
                       {selectedMetric === 'weekly-sales' && '💵 Ventas de la Semana'}
                       {selectedMetric === 'weekly-projection' && '🚀 Proyección de Cierre Semanal'}
+                      {selectedMetric === 'recovery-plan' && '⚠️ Plan de Recuperación'}
+                      {selectedMetric === 'on-track' && '✅ Rendimiento en Meta'}
                     </DialogTitle>
                   </DialogHeader>
                   <div className="mt-4">
@@ -1144,20 +1146,144 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                         </p>
                       </div>
                     )}
+
+                    {selectedMetric === 'recovery-plan' && (
+                      <div>
+                        <h4 className="text-sm md:text-base font-bold text-slate-900 mb-3">Plan de Recuperación de Brecha</h4>
+                        <div className="space-y-2 mb-3">
+                          <div className="flex justify-between items-center p-2 bg-rose-50 rounded-lg">
+                            <span className="text-xs text-rose-700">Brecha acumulada</span>
+                            <span className="font-bold text-rose-900">{formatCurrency(budgetData.accumulatedGap)}</span>
+                          </div>
+                          <div className="flex justify-between items-center p-2 bg-amber-50 rounded-lg">
+                            <span className="text-xs text-amber-700">Presupuesto base diario</span>
+                            <span className="font-bold text-amber-900">{formatCurrency(budgetData.dailyBaseBudget)}</span>
+                          </div>
+                          <div className="flex justify-between items-center p-2 bg-amber-50 rounded-lg">
+                            <span className="text-xs text-amber-700">Presupuesto ajustado (hoy)</span>
+                            <span className="font-bold text-amber-900">{formatCurrency(budgetData.adjustedDailyBudget)}</span>
+                          </div>
+                          <div className="flex justify-between items-center p-2 bg-emerald-50 rounded-lg">
+                            <span className="text-xs text-emerald-700">Días para recuperar</span>
+                            <span className="font-bold text-emerald-900">{budgetData.remainingDays} días</span>
+                          </div>
+                          <div className="flex justify-between items-center p-2 bg-purple-50 rounded-lg">
+                            <span className="text-xs text-purple-700">% de recuperación distribuida</span>
+                            <span className="font-bold text-purple-900">50%</span>
+                          </div>
+                        </div>
+                        <ResponsiveContainer width="100%" height={180}>
+                          <BarChart data={[
+                            { name: 'Brecha', value: budgetData.accumulatedGap, fill: '#fda4af' },
+                            { name: 'Redistribuido', value: budgetData.accumulatedGap * 0.5, fill: '#fbbf24' },
+                            { name: 'Días restantes', value: budgetData.remainingDays * budgetData.dailyBaseBudget, fill: '#a7f3d0' }
+                          ]}>
+                            <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                            <XAxis dataKey="name" fontSize={10} />
+                            <YAxis fontSize={10} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} />
+                            <Tooltip formatter={(v) => formatCurrency(v)} />
+                            <Bar dataKey="value" radius={[8, 8, 0, 0]}>
+                              {[
+                                { fill: '#fda4af' },
+                                { fill: '#fbbf24' },
+                                { fill: '#a7f3d0' }
+                              ].map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={entry.fill} />
+                              ))}
+                            </Bar>
+                          </BarChart>
+                        </ResponsiveContainer>
+                        <div className="mt-3 p-3 bg-amber-50 rounded-lg border border-amber-200">
+                          <p className="text-xs font-bold text-amber-900 mb-2">📊 Estrategia de recuperación:</p>
+                          <ul className="text-xs text-amber-800 space-y-1 ml-4">
+                            <li>• Se distribuye el 50% de la brecha ({formatCurrency(budgetData.accumulatedGap * 0.5)}) entre los días restantes</li>
+                            <li>• Cada día tiene un incremento proporcional a su peso histórico</li>
+                            <li>• El incremento máximo está limitado al 40% del presupuesto base</li>
+                            <li>• Esto hace la recuperación realista y alcanzable</li>
+                          </ul>
+                        </div>
+                        <p className="text-xs text-slate-600 mt-3">
+                          ⚡ Con este plan, necesitas vender {formatCurrency(budgetData.adjustedDailyBudget)} hoy en lugar de {formatCurrency(budgetData.dailyBaseBudget)} para recuperar el terreno perdido.
+                        </p>
+                      </div>
+                    )}
+
+                    {selectedMetric === 'on-track' && (
+                      <div>
+                        <h4 className="text-sm md:text-base font-bold text-slate-900 mb-3">Rendimiento en Meta</h4>
+                        <div className="space-y-2 mb-3">
+                          <div className="flex justify-between items-center p-2 bg-emerald-50 rounded-lg">
+                            <span className="text-xs text-emerald-700">Cumplimiento actual</span>
+                            <span className="font-bold text-emerald-900">{budgetData.compliance.toFixed(1)}%</span>
+                          </div>
+                          <div className="flex justify-between items-center p-2 bg-emerald-50 rounded-lg">
+                            <span className="text-xs text-emerald-700">Vendido hasta hoy</span>
+                            <span className="font-bold text-emerald-900">{formatCurrency(budgetData.salesUntilYesterday + budgetData.todayActualSales)}</span>
+                          </div>
+                          <div className="flex justify-between items-center p-2 bg-slate-50 rounded-lg">
+                            <span className="text-xs text-slate-700">Presupuesto hasta hoy</span>
+                            <span className="font-bold text-slate-900">{formatCurrency(budgetData.budgetUntilYesterday + budgetData.adjustedDailyBudget)}</span>
+                          </div>
+                          <div className="flex justify-between items-center p-2 bg-purple-50 rounded-lg">
+                            <span className="text-xs text-purple-700">Ritmo diario promedio</span>
+                            <span className="font-bold text-purple-900">{formatCurrency((budgetData.salesUntilYesterday + budgetData.todayActualSales) / (new Date().getDate()))}</span>
+                          </div>
+                        </div>
+                        <ResponsiveContainer width="100%" height={160}>
+                          <AreaChart data={budgetData.dailyTrendData}>
+                            <defs>
+                              <linearGradient id="onTrackGradient" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#10b981" stopOpacity={0.6}/>
+                                <stop offset="100%" stopColor="#10b981" stopOpacity={0.1}/>
+                              </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                            <XAxis dataKey="date" fontSize={9} angle={-45} textAnchor="end" height={50} />
+                            <YAxis fontSize={10} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} />
+                            <Tooltip 
+                              formatter={(v, name) => [
+                                formatCurrency(v),
+                                name === 'ventas' ? '💰 Venta' : '🎯 Meta'
+                              ]} 
+                            />
+                            <Area type="monotone" dataKey="ventas" stroke="#10b981" strokeWidth={2} fill="url(#onTrackGradient)" name="ventas" />
+                            <Area type="monotone" dataKey="presupuesto" stroke="#6366f1" strokeWidth={2} strokeDasharray="5 5" fill="none" name="presupuesto" />
+                          </AreaChart>
+                        </ResponsiveContainer>
+                        <div className="mt-3 p-3 bg-emerald-50 rounded-lg border border-emerald-200">
+                          <p className="text-xs font-bold text-emerald-900 mb-2">🎯 Indicadores positivos:</p>
+                          <ul className="text-xs text-emerald-800 space-y-1 ml-4">
+                            <li>• El ritmo de ventas es consistente con el presupuesto</li>
+                            <li>• No hay brecha acumulada que recuperar</li>
+                            <li>• El cumplimiento está por encima del 95%</li>
+                            <li>• Se proyecta alcanzar la meta mensual manteniendo este ritmo</li>
+                          </ul>
+                        </div>
+                        <p className="text-xs text-slate-600 mt-3">
+                          ✅ Continúa con este ritmo constante para garantizar el cumplimiento del presupuesto mensual de {formatCurrency(activeBudget.sales_budget)}.
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </DialogContent>
               </Dialog>
 
-              {/* Mensaje de estado */}
+              {/* Mensaje de estado - interactivo */}
               {needsRecovery ? (
-                <motion.div
+                <motion.button
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className="bg-amber-50/40 border-l-4 border-amber-400/50 rounded-r-lg p-3 md:p-4"
+                  whileHover={{ scale: 1.02, x: 4 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => {
+                    setSelectedMetric('recovery-plan');
+                    setIsModalOpen(true);
+                  }}
+                  className="w-full bg-amber-50/40 border-l-4 border-amber-400/50 rounded-r-lg p-3 md:p-4 text-left hover:bg-amber-100/50 transition-all cursor-pointer"
                 >
               <div className="flex items-start gap-2 md:gap-3">
                 <AlertTriangle className="w-4 h-4 md:w-5 md:h-5 text-amber-500/70 flex-shrink-0 mt-0.5" />
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <p className="font-bold text-amber-700/80 text-xs md:text-sm mb-1">
                     Presupuesto Redistribuido
                   </p>
@@ -1167,17 +1293,24 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                     para alcanzar la meta del mes en los {budgetData.remainingDays} días restantes.
                   </p>
                 </div>
+                <ChevronRight className="w-4 h-4 text-amber-500/70 flex-shrink-0 mt-0.5" />
                   </div>
-                </motion.div>
+                </motion.button>
               ) : (
-                <motion.div
+                <motion.button
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className="bg-emerald-50/40 border-l-4 border-emerald-400/50 rounded-r-lg p-3 md:p-4"
+                  whileHover={{ scale: 1.02, x: 4 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => {
+                    setSelectedMetric('on-track');
+                    setIsModalOpen(true);
+                  }}
+                  className="w-full bg-emerald-50/40 border-l-4 border-emerald-400/50 rounded-r-lg p-3 md:p-4 text-left hover:bg-emerald-100/50 transition-all cursor-pointer"
                 >
               <div className="flex items-start gap-2 md:gap-3">
                 <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5 text-emerald-500/70 flex-shrink-0 mt-0.5" />
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <p className="font-bold text-emerald-700/80 text-xs md:text-sm mb-1">
                     ¡En meta!
                   </p>
@@ -1186,8 +1319,9 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                     la meta del mes. Presupuesto diario: {formatCurrency(budgetData.adjustedDailyBudget)}
                   </p>
                 </div>
+                <ChevronRight className="w-4 h-4 text-emerald-500/70 flex-shrink-0 mt-0.5" />
                   </div>
-                </motion.div>
+                </motion.button>
               )}
             </>
             )}
