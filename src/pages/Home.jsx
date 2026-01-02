@@ -583,7 +583,7 @@ export default function Home() {
                           <div className="w-5 h-5">
                             <RoleIcon roleId={role.id} isSelected={isSelected} />
                           </div>
-                        </div>
+                        </motion.div>
                         <div className="flex-1 min-w-0">
                           <p className={`font-bold text-[15px] leading-tight ${isSelected ? 'text-white' : 'text-slate-900'}`}>{role.name}</p>
                           <p className={`text-[11px] leading-tight mt-0.5 ${isSelected ? 'text-white/90' : 'text-slate-600'}`}>{role.description}</p>
@@ -797,7 +797,7 @@ export default function Home() {
                           <div className="w-8 h-8">
                             <RoleIcon roleId={role.id} isSelected={isSelected} />
                           </div>
-                        </div>
+                        </motion.div>
                         <div className="flex-1 min-w-0">
                           <p className={`text-lg font-bold mb-1 ${isSelected ? 'text-white' : 'text-slate-900'}`}>{role.name}</p>
                           <p className={`text-sm leading-relaxed ${isSelected ? 'text-white/90' : 'text-slate-600'}`}>{role.description}</p>
