@@ -110,149 +110,97 @@ Deno.serve(async (req) => {
 
     const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
-    // Crear slides profesionales
-    const requests = [
+    // Crear slides con contenido
+    const allRequests = [
       // Eliminar slide por defecto
-      {
-        deleteObject: {
-          objectId: presentation.slides[0].objectId
-        }
-      },
-      // Slide 1 - Portada con diseño
-      {
-        createSlide: {
-          objectId: 'slide1',
-          slideLayoutReference: { predefinedLayout: 'BLANK' }
-        }
-      },
-      // Slide 2 - Resumen Ejecutivo
-      {
-        createSlide: {
-          objectId: 'slide2',
-          slideLayoutReference: { predefinedLayout: 'BLANK' }
-        }
-      },
-      // Slide 3 - Análisis de Ventas
-      {
-        createSlide: {
-          objectId: 'slide3',
-          slideLayoutReference: { predefinedLayout: 'BLANK' }
-        }
-      },
-      // Slide 4 - Top Performers
-      {
-        createSlide: {
-          objectId: 'slide4',
-          slideLayoutReference: { predefinedLayout: 'BLANK' }
-        }
-      },
-      // Slide 5 - Insights y Recomendaciones
-      {
-        createSlide: {
-          objectId: 'slide5',
-          slideLayoutReference: { predefinedLayout: 'BLANK' }
-        }
-      }
+      { deleteObject: { objectId: presentation.slides[0].objectId } },
     ];
 
-    // Crear slides
-    await fetch(`https://slides.googleapis.com/v1/presentations/${presentationId}:batchUpdate`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ requests })
-    });
+    // Crear los 5 slides
+    for (let i = 1; i <= 5; i++) {
+      allRequests.push({
+        createSlide: {
+          objectId: `slide${i}`,
+          slideLayoutReference: { predefinedLayout: 'BLANK' }
+        }
+      });
+    }
 
-    // Función auxiliar para crear cajas de texto
-    const createTextBox = (slideId, objectId, x, y, width, height, text, fontSize = 12, bold = false, color = { red: 0, green: 0, blue: 0 }) => [
-      {
+    // Función para crear shape con texto
+    const addTextBox = (slideId, id, x, y, w, h, text, size, bold, color) => {
+      allRequests.push({
         createShape: {
-          objectId,
+          objectId: id,
           shapeType: 'TEXT_BOX',
           elementProperties: {
             pageObjectId: slideId,
-            size: { height: { magnitude: height, unit: 'PT' }, width: { magnitude: width, unit: 'PT' } },
+            size: { height: { magnitude: h, unit: 'PT' }, width: { magnitude: w, unit: 'PT' } },
             transform: { scaleX: 1, scaleY: 1, translateX: x, translateY: y, unit: 'PT' }
           }
         }
-      },
-      {
-        insertText: {
-          objectId,
-          text
-        }
-      },
-      {
+      });
+      allRequests.push({ insertText: { objectId: id, text } });
+      allRequests.push({
         updateTextStyle: {
-          objectId,
-          style: { fontSize: { magnitude: fontSize, unit: 'PT' }, bold, foregroundColor: { opaqueColor: { rgbColor: color } } },
+          objectId: id,
+          style: { 
+            fontSize: { magnitude: size, unit: 'PT' }, 
+            bold, 
+            foregroundColor: { opaqueColor: { rgbColor: color } } 
+          },
           fields: 'fontSize,bold,foregroundColor'
         }
-      }
-    ];
+      });
+    };
 
-    // Crear fondo de colores para slides
-    const colorRequests = [
-      // Slide 1 - Portada con gradiente rosa
-      { updatePageProperties: { objectId: 'slide1', pageProperties: { pageBackgroundFill: { solidFill: { color: { rgbColor: { red: 0.95, green: 0.3, blue: 0.6 } } } } }, fields: 'pageBackgroundFill' } },
-      // Slides con fondo blanco
-      { updatePageProperties: { objectId: 'slide2', pageProperties: { pageBackgroundFill: { solidFill: { color: { rgbColor: { red: 1, green: 1, blue: 1 } } } } }, fields: 'pageBackgroundFill' } },
-      { updatePageProperties: { objectId: 'slide3', pageProperties: { pageBackgroundFill: { solidFill: { color: { rgbColor: { red: 1, green: 1, blue: 1 } } } } }, fields: 'pageBackgroundFill' } },
-      { updatePageProperties: { objectId: 'slide4', pageProperties: { pageBackgroundFill: { solidFill: { color: { rgbColor: { red: 1, green: 1, blue: 1 } } } } }, fields: 'pageBackgroundFill' } },
-      { updatePageProperties: { objectId: 'slide5', pageProperties: { pageBackgroundFill: { solidFill: { color: { rgbColor: { red: 0.98, green: 0.95, blue: 1 } } } } }, fields: 'pageBackgroundFill' } },
-    ];
+    // Fondos
+    allRequests.push({ updatePageProperties: { objectId: 'slide1', pageProperties: { pageBackgroundFill: { solidFill: { color: { rgbColor: { red: 0.95, green: 0.3, blue: 0.6 } } } } }, fields: 'pageBackgroundFill' } });
+    
+    // SLIDE 1 - Portada
+    addTextBox('slide1', 'txt1a', 50, 150, 620, 100, 'REPORTE EJECUTIVO DE VENTAS', 44, true, { red: 1, green: 1, blue: 1 });
+    addTextBox('slide1', 'txt1b', 50, 270, 620, 80, `${storeName}\n${monthNames[currentMonth - 1]} ${currentYear}`, 28, false, { red: 1, green: 1, blue: 1 });
+    addTextBox('slide1', 'txt1c', 50, 420, 620, 30, `Generado: ${new Date().toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' })}`, 14, false, { red: 0.9, green: 0.9, blue: 0.9 });
 
-    // Contenido profesional para cada slide
-    const contentRequests = [
-      ...colorRequests,
-      
-      // SLIDE 1 - Portada
-      ...createTextBox('slide1', 'title1', 50, 150, 620, 100, `REPORTE EJECUTIVO DE VENTAS`, 44, true, { red: 1, green: 1, blue: 1 }),
-      ...createTextBox('slide1', 'subtitle1', 50, 270, 620, 80, `${storeName}\n${monthNames[currentMonth - 1]} ${currentYear}`, 28, false, { red: 1, green: 1, blue: 1 }),
-      ...createTextBox('slide1', 'date1', 50, 420, 620, 30, `Generado: ${new Date().toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' })}`, 14, false, { red: 0.9, green: 0.9, blue: 0.9 }),
+    // SLIDE 2 - Resumen
+    addTextBox('slide2', 'txt2a', 50, 30, 620, 50, '📊 RESUMEN EJECUTIVO', 32, true, { red: 0.95, green: 0.3, blue: 0.6 });
+    addTextBox('slide2', 'txt2b', 50, 120, 300, 80, `💰 VENTAS TOTALES\n$${totalSales.toLocaleString('es-CO')}`, 18, false, { red: 0.2, green: 0.2, blue: 0.2 });
+    addTextBox('slide2', 'txt2c', 370, 120, 300, 80, `🎯 CUMPLIMIENTO\n${budgetCompliance}%`, 18, false, { red: parseFloat(budgetCompliance) >= 100 ? 0.1 : 0.8, green: parseFloat(budgetCompliance) >= 100 ? 0.6 : 0.3, blue: 0.2 });
+    addTextBox('slide2', 'txt2d', 50, 220, 300, 80, `🧾 TICKET PROMEDIO\n$${Math.round(avgTicket).toLocaleString('es-CO')}`, 18, false, { red: 0.2, green: 0.2, blue: 0.2 });
+    addTextBox('slide2', 'txt2e', 370, 220, 300, 80, `🔢 TRANSACCIONES\n${totalTransactions.toLocaleString('es-CO')}`, 18, false, { red: 0.2, green: 0.2, blue: 0.2 });
+    addTextBox('slide2', 'txt2f', 50, 320, 300, 80, `⭐ SUGERIDOS\n${totalSuggested.toLocaleString('es-CO')}`, 18, false, { red: 0.2, green: 0.2, blue: 0.2 });
+    addTextBox('slide2', 'txt2g', 370, 320, 300, 80, `📈 META DEL MES\n$${(currentBudget.sales_budget || 0).toLocaleString('es-CO')}`, 18, false, { red: 0.2, green: 0.2, blue: 0.2 });
 
-      // SLIDE 2 - Resumen Ejecutivo con métricas
-      ...createTextBox('slide2', 'title2', 50, 30, 620, 50, `📊 RESUMEN EJECUTIVO`, 32, true, { red: 0.95, green: 0.3, blue: 0.6 }),
-      ...createTextBox('slide2', 'metric1', 50, 120, 300, 80, `💰 VENTAS TOTALES\n$${totalSales.toLocaleString('es-CO')}`, 18, false, { red: 0.2, green: 0.2, blue: 0.2 }),
-      ...createTextBox('slide2', 'metric2', 370, 120, 300, 80, `🎯 CUMPLIMIENTO\n${budgetCompliance}%`, 18, false, { red: parseFloat(budgetCompliance) >= 100 ? 0.1 : 0.8, green: parseFloat(budgetCompliance) >= 100 ? 0.6 : 0.3, blue: 0.2 }),
-      ...createTextBox('slide2', 'metric3', 50, 220, 300, 80, `🧾 TICKET PROMEDIO\n$${Math.round(avgTicket).toLocaleString('es-CO')}`, 18, false, { red: 0.2, green: 0.2, blue: 0.2 }),
-      ...createTextBox('slide2', 'metric4', 370, 220, 300, 80, `🔢 TRANSACCIONES\n${totalTransactions.toLocaleString('es-CO')}`, 18, false, { red: 0.2, green: 0.2, blue: 0.2 }),
-      ...createTextBox('slide2', 'metric5', 50, 320, 300, 80, `⭐ SUGERIDOS\n${totalSuggested.toLocaleString('es-CO')}`, 18, false, { red: 0.2, green: 0.2, blue: 0.2 }),
-      ...createTextBox('slide2', 'metric6', 370, 320, 300, 80, `📈 META DEL MES\n$${(currentBudget.sales_budget || 0).toLocaleString('es-CO')}`, 18, false, { red: 0.2, green: 0.2, blue: 0.2 }),
+    // SLIDE 3 - Tendencia
+    addTextBox('slide3', 'txt3a', 50, 30, 620, 50, '📈 ANÁLISIS DE TENDENCIA', 32, true, { red: 0.95, green: 0.3, blue: 0.6 });
+    addTextBox('slide3', 'txt3b', 50, 120, 620, 100, `Tendencia del Período: ${trendPercentage > 0 ? '↗️ Crecimiento' : '↘️ Decrecimiento'} del ${Math.abs(trendPercentage)}%\n\nComparativa entre primera y segunda mitad del mes muestra ${trendPercentage > 0 ? 'una aceleración positiva' : 'necesidad de reactivación'}.`, 18, false, { red: 0.2, green: 0.2, blue: 0.2 });
+    addTextBox('slide3', 'txt3c', 50, 250, 300, 100, `🏆 MEJOR DÍA\n${bestDay ? new Date(bestDay.date).toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'short' }) : 'N/A'}\n$${(bestDay?.total_sales || 0).toLocaleString('es-CO')}`, 16, false, { red: 0.1, green: 0.6, blue: 0.2 });
+    addTextBox('slide3', 'txt3d', 370, 250, 300, 100, `⚠️ DÍA MÁS BAJO\n${worstDay ? new Date(worstDay.date).toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'short' }) : 'N/A'}\n$${(worstDay?.total_sales || 0).toLocaleString('es-CO')}`, 16, false, { red: 0.8, green: 0.3, blue: 0.2 });
+    addTextBox('slide3', 'txt3e', 50, 380, 620, 60, `📊 Por alcanzar: $${remainingBudget > 0 ? remainingBudget.toLocaleString('es-CO') : '0'} ${remainingBudget > 0 ? '(meta aún no alcanzada)' : '(¡Meta superada!)'}`, 16, false, { red: 0.3, green: 0.3, blue: 0.3 });
 
-      // SLIDE 3 - Análisis de Tendencia
-      ...createTextBox('slide3', 'title3', 50, 30, 620, 50, `📈 ANÁLISIS DE TENDENCIA`, 32, true, { red: 0.95, green: 0.3, blue: 0.6 }),
-      ...createTextBox('slide3', 'trend', 50, 120, 620, 100, `Tendencia del Período: ${trendPercentage > 0 ? '↗️ Crecimiento' : '↘️ Decrecimiento'} del ${Math.abs(trendPercentage)}%\n\nComparativa entre primera y segunda mitad del mes muestra ${trendPercentage > 0 ? 'una aceleración positiva' : 'necesidad de reactivación'}.`, 18, false, { red: 0.2, green: 0.2, blue: 0.2 }),
-      ...createTextBox('slide3', 'best', 50, 250, 300, 100, `🏆 MEJOR DÍA\n${bestDay ? new Date(bestDay.date).toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'short' }) : 'N/A'}\n$${(bestDay?.total_sales || 0).toLocaleString('es-CO')}`, 16, false, { red: 0.1, green: 0.6, blue: 0.2 }),
-      ...createTextBox('slide3', 'worst', 370, 250, 300, 100, `⚠️ DÍA MÁS BAJO\n${worstDay ? new Date(worstDay.date).toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'short' }) : 'N/A'}\n$${(worstDay?.total_sales || 0).toLocaleString('es-CO')}`, 16, false, { red: 0.8, green: 0.3, blue: 0.2 }),
-      ...createTextBox('slide3', 'remaining', 50, 380, 620, 60, `📊 Por alcanzar: $${remainingBudget > 0 ? remainingBudget.toLocaleString('es-CO') : '0'} ${remainingBudget > 0 ? '(meta aún no alcanzada)' : '(¡Meta superada!)'}`, 16, false, { red: 0.3, green: 0.3, blue: 0.3 }),
+    // SLIDE 4 - Top Performers
+    const performersText = topCashiers.length > 0 ? 
+      topCashiers.map((c, i) => {
+        const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`;
+        return `${medal} ${c.name}\n   💰 Ventas: $${c.sales.toLocaleString('es-CO')}\n   🧾 Ticket Promedio: $${Math.round(c.avgTicket).toLocaleString('es-CO')}\n   📅 Turnos: ${c.shifts}\n`;
+      }).join('\n')
+      : 'No hay datos de cajeros disponibles';
+    
+    addTextBox('slide4', 'txt4a', 50, 30, 620, 50, '🏆 TOP PERFORMERS DEL MES', 32, true, { red: 0.95, green: 0.3, blue: 0.6 });
+    addTextBox('slide4', 'txt4b', 50, 120, 620, 320, performersText, 16, false, { red: 0.2, green: 0.2, blue: 0.2 });
 
-      // SLIDE 4 - Top Performers
-      ...createTextBox('slide4', 'title4', 50, 30, 620, 50, `🏆 TOP PERFORMERS DEL MES`, 32, true, { red: 0.95, green: 0.3, blue: 0.6 }),
-      ...createTextBox('slide4', 'performers', 50, 120, 620, 320, 
-        topCashiers.length > 0 ? 
-          topCashiers.map((c, i) => {
-            const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`;
-            return `${medal} ${c.name}\n   💰 Ventas: $${c.sales.toLocaleString('es-CO')}\n   🧾 Ticket Promedio: $${Math.round(c.avgTicket).toLocaleString('es-CO')}\n   📅 Turnos: ${c.shifts}\n`;
-          }).join('\n')
-          : 'No hay datos de cajeros disponibles', 
-        16, false, { red: 0.2, green: 0.2, blue: 0.2 }),
+    // SLIDE 5 - Insights
+    allRequests.push({ updatePageProperties: { objectId: 'slide5', pageProperties: { pageBackgroundFill: { solidFill: { color: { rgbColor: { red: 0.98, green: 0.95, blue: 1 } } } } }, fields: 'pageBackgroundFill' } });
+    addTextBox('slide5', 'txt5a', 50, 30, 620, 50, '💡 INSIGHTS Y RECOMENDACIONES', 32, true, { red: 0.5, green: 0.2, blue: 0.8 });
+    addTextBox('slide5', 'txt5b', 50, 120, 620, 320, insights, 14, false, { red: 0.2, green: 0.2, blue: 0.2 });
 
-      // SLIDE 5 - Insights y Recomendaciones
-      ...createTextBox('slide5', 'title5', 50, 30, 620, 50, `💡 INSIGHTS Y RECOMENDACIONES`, 32, true, { red: 0.5, green: 0.2, blue: 0.8 }),
-      ...createTextBox('slide5', 'insights', 50, 120, 620, 320, `${insights}`, 14, false, { red: 0.2, green: 0.2, blue: 0.2 }),
-    ];
-
-    // Aplicar todo el contenido
+    // Ejecutar todo en un solo batch
     await fetch(`https://slides.googleapis.com/v1/presentations/${presentationId}:batchUpdate`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ requests: contentRequests })
+      body: JSON.stringify({ requests: allRequests })
     });
 
     // Retornar URL de la presentación
