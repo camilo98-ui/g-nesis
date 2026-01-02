@@ -525,7 +525,7 @@ export default function Home() {
                 <motion.img 
                   src={LOGO_URL} 
                   alt="Popsy" 
-                  className="h-32 object-contain mx-auto mb-6"
+                  className="h-48 object-contain mx-auto mb-6"
                   initial={{ opacity: 0, scale: 0.8, y: -20 }}
                   animate={{ 
                     opacity: 1, 
@@ -690,7 +690,7 @@ export default function Home() {
               <motion.img
                 src={LOGO_URL}
                 alt="Popsy Management"
-                className="h-24 xl:h-28 object-contain mb-20 drop-shadow-2xl"
+                className="h-36 xl:h-44 object-contain mb-20 drop-shadow-2xl"
                 animate={{ y: [0, -12, 0] }}
                 transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
               />
