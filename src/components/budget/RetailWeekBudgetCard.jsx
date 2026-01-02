@@ -785,6 +785,21 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                         ];
                       }}
                     />
+                    <Legend 
+                      wrapperStyle={{ paddingTop: '16px' }}
+                      content={() => (
+                        <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', fontSize: '11px', fontWeight: '600' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <div style={{ width: '12px', height: '12px', background: 'linear-gradient(to bottom, #a7f3d0, #d1fae5)', borderRadius: '3px' }}></div>
+                            <span style={{ color: '#059669' }}>🎯 Meta</span>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <div style={{ width: '12px', height: '12px', background: 'linear-gradient(to bottom, #fda4af, #fecdd3)', borderRadius: '3px' }}></div>
+                            <span style={{ color: '#dc2626' }}>💰 Venta</span>
+                          </div>
+                        </div>
+                      )}
+                    />
                     <Bar 
                       dataKey="presupuesto" 
                       fill="url(#barPresupuesto)" 
