@@ -20,6 +20,7 @@ import StoreReportGenerator from '@/components/reports/StoreReportGenerator';
 import CompraValeModal from '@/components/dashboard/CompraValeModal';
 import StoreSalesModal from '@/components/forms/StoreSalesModal';
 import MonthlyBudgetManager from '@/components/budget/MonthlyBudgetManager';
+import ChartInsight from '@/components/dashboard/ChartInsight';
 
 import {
   DollarSign, Receipt, Zap, Gift, TrendingUp, TrendingDown, ArrowLeft,
@@ -1467,15 +1468,12 @@ export default function Dashboard() {
                           Ventas Diarias {showComparison && '- Comparativo'}
                         </CardTitle>
                       </div>
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        whileHover={{ scale: 1.01, y: -2 }}
-                        className="mt-3 bg-gradient-to-br from-emerald-50 via-green-50 to-cyan-50 border-2 border-emerald-200/60 rounded-xl px-4 py-3 shadow-md">
-                        <p className="text-xs text-gray-700 leading-relaxed">
-                          <span className="font-bold text-emerald-700">💡 Insight:</span> Los picos muestran días exitosos a replicar. Las caídas requieren promociones. Analiza qué funciona mejor.
-                        </p>
-                      </motion.div>
+                      <ChartInsight 
+                        data={chartData} 
+                        metric="ventas"
+                        formatCurrency={formatCurrency}
+                        comparisonData={showComparison ? comparisonTotals : null}
+                      />
                     </CardHeader>
                     <CardContent>
                       <div className="h-64">
@@ -1531,15 +1529,12 @@ export default function Dashboard() {
                         <Zap className="w-4 h-4 text-purple-500" />
                         Transacciones vs Ventas {showComparison && '- Comparativo'}
                       </CardTitle>
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        whileHover={{ scale: 1.01, y: -2 }}
-                        className="mt-3 bg-gradient-to-br from-purple-50 via-violet-50 to-blue-50 border-2 border-purple-200/60 rounded-xl px-4 py-3 shadow-md">
-                        <p className="text-xs text-gray-700 leading-relaxed">
-                          <span className="font-bold text-purple-700">💡 Insight:</span> Más clientes pero pocas ventas indica problema de conversión. Capacita en cierre de ventas.
-                        </p>
-                      </motion.div>
+                      <ChartInsight 
+                        data={chartData} 
+                        metric="transactions"
+                        formatCurrency={(v) => v.toLocaleString()}
+                        comparisonData={showComparison ? comparisonTotals : null}
+                      />
                     </CardHeader>
                     <CardContent>
                       <div className="h-64">
@@ -1575,15 +1570,12 @@ export default function Dashboard() {
                         <Receipt className="w-4 h-4 text-blue-500" />
                         Ticket Promedio {showComparison && '- Comparativo'}
                       </CardTitle>
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        whileHover={{ scale: 1.01, y: -2 }}
-                        className="mt-3 bg-gradient-to-br from-blue-50 via-sky-50 to-cyan-50 border-2 border-blue-200/60 rounded-xl px-4 py-3 shadow-md">
-                        <p className="text-xs text-gray-700 leading-relaxed">
-                          <span className="font-bold text-blue-700">💡 Insight:</span> Aumenta ticket con combos y venta consultiva. Entrena al equipo en cross-selling.
-                        </p>
-                      </motion.div>
+                      <ChartInsight 
+                        data={chartData} 
+                        metric="ticketPromedio"
+                        formatCurrency={formatCurrency}
+                        comparisonData={showComparison ? comparisonTotals : null}
+                      />
                     </CardHeader>
                     <CardContent>
                       <div className="h-64">
