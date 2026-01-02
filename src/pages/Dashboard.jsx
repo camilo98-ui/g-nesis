@@ -227,21 +227,27 @@ function DetailPanel({ metric, data, onClose, chartData, formatCurrency, shiftDa
 
             {/* Stats Grid */}
             <div className="grid grid-cols-4 gap-3">
-              <motion.div whileHover={{ scale: 1.03 }} className="bg-gradient-to-br from-green-50 to-emerald-100 rounded-xl p-4 text-center">
+              <motion.div whileHover={{ scale: 1.03 }} className="bg-gradient-to-br from-green-50 to-emerald-100 rounded-xl p-4 text-center cursor-pointer">
                 <p className="text-xs text-gray-500 mb-1">🏆 Mejor día</p>
                 <p className="text-lg font-black text-green-600">{formatCurrency(stats.max)}</p>
+                <p className="text-[10px] text-gray-400 mt-1">
+                  {chartData.find(d => d[metric === 'sales' ? 'ventas' : metric] === stats.max)?.fullDate || 'N/A'}
+                </p>
               </motion.div>
-              <motion.div whileHover={{ scale: 1.03 }} className="bg-gradient-to-br from-amber-50 to-orange-100 rounded-xl p-4 text-center">
+              <motion.div whileHover={{ scale: 1.03 }} className="bg-gradient-to-br from-amber-50 to-orange-100 rounded-xl p-4 text-center cursor-pointer">
                 <p className="text-xs text-gray-500 mb-1">📊 Promedio</p>
                 <p className="text-lg font-black text-amber-600">{formatCurrency(stats.avg)}</p>
+                <p className="text-[10px] text-gray-400 mt-1">Diario en período</p>
               </motion.div>
-              <motion.div whileHover={{ scale: 1.03 }} className="bg-gradient-to-br from-blue-50 to-cyan-100 rounded-xl p-4 text-center">
-                <p className="text-xs text-gray-500 mb-1">📉 Mínimo</p>
-                <p className="text-lg font-black text-blue-600">{formatCurrency(stats.min)}</p>
+              <motion.div whileHover={{ scale: 1.03 }} className="bg-gradient-to-br from-blue-50 to-cyan-100 rounded-xl p-4 text-center cursor-pointer">
+                <p className="text-xs text-gray-500 mb-1">📊 Total</p>
+                <p className="text-lg font-black text-blue-600">{formatCurrency(stats.total)}</p>
+                <p className="text-[10px] text-gray-400 mt-1">Suma del período</p>
               </motion.div>
-              <motion.div whileHover={{ scale: 1.03 }} className={`rounded-xl p-4 text-center ${stats.trend >= 0 ? 'bg-gradient-to-br from-emerald-50 to-green-100' : 'bg-gradient-to-br from-red-50 to-rose-100'}`}>
-                <p className="text-xs text-gray-500 mb-1">{stats.trend >= 0 ? '📈' : '📉'} Tendencia</p>
-                <p className={`text-lg font-black ${stats.trend >= 0 ? 'text-green-600' : 'text-red-600'}`}>{stats.trend >= 0 ? '+' : ''}{stats.trend.toFixed(1)}%</p>
+              <motion.div whileHover={{ scale: 1.03 }} className={`rounded-xl p-4 text-center cursor-pointer ${stats.trend >= 0 ? 'bg-gradient-to-br from-emerald-50 to-green-100' : 'bg-gradient-to-br from-red-50 to-rose-100'}`}>
+                <p className="text-xs text-gray-500 mb-1">{stats.trend >= 0 ? '📈' : '📉'} Crecimiento</p>
+                <p className={`text-lg font-black ${stats.trend >= 0 ? 'text-green-600' : 'text-red-600'}`}>{stats.trend > 0 ? '+' : ''}{stats.trend.toFixed(1)}%</p>
+                <p className="text-[10px] text-gray-400 mt-1">vs inicio período</p>
               </motion.div>
             </div>
 
