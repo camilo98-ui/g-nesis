@@ -1,56 +1,42 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-// SVG Icons minimalistas estilo línea
-const CookieIcon = ({ color = "#C2185B" }) => (
-  <svg viewBox="0 0 50 50" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round">
-    <circle cx="25" cy="25" r="18"/>
-    <circle cx="18" cy="20" r="1.5" fill={color}/>
-    <circle cx="32" cy="20" r="1.5" fill={color}/>
-    <circle cx="25" cy="28" r="1.5" fill={color}/>
-    <circle cx="17" cy="30" r="1.5" fill={color}/>
-    <circle cx="33" cy="30" r="1.5" fill={color}/>
+// Nuevos iconos de helado, galleta y vasito
+const IceCreamCone = ({ color = "#C2185B" }) => (
+  <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M30 45 L50 85 L70 45 Z" stroke={color} strokeWidth="3.5" fill="none" strokeLinejoin="round"/>
+    <line x1="35" y1="52" x2="50" y2="77" stroke={color} strokeWidth="2.5"/>
+    <line x1="65" y1="52" x2="50" y2="77" stroke={color} strokeWidth="2.5"/>
+    <line x1="42" y1="55" x2="50" y2="70" stroke={color} strokeWidth="2"/>
+    <line x1="58" y1="55" x2="50" y2="70" stroke={color} strokeWidth="2"/>
+    <circle cx="50" cy="35" r="15" stroke={color} strokeWidth="3.5" fill="none"/>
   </svg>
 );
 
-const IceCreamCone = ({ color = "#C2185B" }) => (
-  <svg viewBox="0 0 50 50" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M20 22 L25 38 L30 22" fill="none"/>
-    <line x1="22.5" y1="26" x2="25" y2="35"/>
-    <line x1="27.5" y1="26" x2="25" y2="35"/>
-    <circle cx="25" cy="17" r="6.5"/>
+const CookieIcon = ({ color = "#C2185B" }) => (
+  <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="50" cy="50" r="35" stroke={color} strokeWidth="3.5" fill="none"/>
+    <path d="M 75 35 Q 80 25 85 30" stroke={color} strokeWidth="3.5" strokeLinecap="round" fill="none"/>
+    <circle cx="88" cy="22" r="3" fill={color}/>
+    <circle cx="92" cy="30" r="3" fill={color}/>
+    <circle cx="35" cy="45" r="4" fill={color}/>
+    <circle cx="55" cy="40" r="3.5" fill={color}/>
+    <circle cx="45" cy="58" r="4.5" fill={color}/>
+    <circle cx="65" cy="55" r="3" fill={color}/>
+    <circle cx="58" cy="68" r="4" fill={color}/>
   </svg>
 );
 
 const PopsyCup = ({ color = "#C2185B" }) => (
-  <svg viewBox="0 0 50 50" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round">
-    <rect x="17" y="20" width="16" height="20" rx="2"/>
-    <ellipse cx="25" cy="20" rx="8" ry="2"/>
-    <text x="25" y="32" fontSize="6" fill={color} textAnchor="middle" fontWeight="bold">Popsy</text>
+  <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M25 25 L22 75 Q22 85 50 85 Q78 85 78 75 L75 25 Z" stroke={color} strokeWidth="3.5" fill="none" strokeLinejoin="round"/>
+    <ellipse cx="50" cy="25" rx="25" ry="5" stroke={color} strokeWidth="3.5" fill="none"/>
+    <path d="M30 25 L27 65 Q27 70 50 70 Q73 70 73 65 L70 25" stroke={color} strokeWidth="2" opacity="0.3" fill="none"/>
+    <text x="50" y="55" fontSize="14" fill={color} textAnchor="middle" fontFamily="cursive" fontWeight="600" fontStyle="italic">Popsy</text>
   </svg>
 );
 
-const MilkshakeCup = ({ color = "#C2185B" }) => (
-  <svg viewBox="0 0 50 50" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M19 22 L17 38 C17 40 19 41 25 41 C31 41 33 40 33 38 L31 22 Z"/>
-    <ellipse cx="25" cy="22" rx="6.5" ry="2"/>
-    <line x1="25" y1="14" x2="25" y2="22"/>
-    <circle cx="25" cy="12" r="2"/>
-    <text x="25" y="32" fontSize="5" fill={color} textAnchor="middle" fontWeight="bold">Popsy</text>
-  </svg>
-);
-
-const IceCreamOutline = ({ color = "#C2185B" }) => (
-  <svg viewBox="0 0 50 50" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M20 22 L25 38 L30 22" fill="none"/>
-    <line x1="22.5" y1="26" x2="25" y2="35"/>
-    <line x1="27.5" y1="26" x2="25" y2="35"/>
-    <circle cx="22" cy="17" r="5"/>
-    <circle cx="28" cy="17" r="5"/>
-  </svg>
-);
-
-const ICON_COMPONENTS = [CookieIcon, IceCreamCone, PopsyCup, IceCreamOutline, MilkshakeCup];
+const ICON_COMPONENTS = [IceCreamCone, CookieIcon, PopsyCup];
 const COLORS = ["#C2185B", "#C2185B", "#C2185B", "#C2185B", "#C2185B"];
 
 const RAIN_ITEMS = Array.from({ length: 45 }, (_, i) => ({
