@@ -28,7 +28,7 @@ export default function ExecutiveDashboard() {
   const [showComparable, setShowComparable] = useState(false);
   const [showBudgetManager, setShowBudgetManager] = useState(false);
   const [showZoneCharts, setShowZoneCharts] = useState(false);
-  const [sortConfig, setSortConfig] = useState({ key: 'status', direction: 'asc' });
+  const [sortConfig, setSortConfig] = useState({ key: 'compliance', direction: 'desc' });
   const [columnFilters, setColumnFilters] = useState({});
 
   const ZONE_NAME = 'Bogotá Noroccidente';
@@ -303,7 +303,7 @@ export default function ExecutiveDashboard() {
   const handleSort = (key) => {
     setSortConfig(prevConfig => ({
       key,
-      direction: prevConfig.key === key && prevConfig.direction === 'asc' ? 'desc' : 'asc'
+      direction: prevConfig.key === key && prevConfig.direction === 'desc' ? 'asc' : 'desc'
     }));
   };
 
