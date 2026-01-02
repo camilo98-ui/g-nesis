@@ -17,6 +17,7 @@ import SalesByHourChart from '@/components/sales/SalesByHourChart';
 
 import GrowthVelocityChart from '@/components/management/GrowthVelocityChart';
 import StoreReportGenerator from '@/components/reports/StoreReportGenerator';
+import PresentationGenerator from '@/components/reports/PresentationGenerator';
 import CompraValeModal from '@/components/dashboard/CompraValeModal';
 import StoreSalesModal from '@/components/forms/StoreSalesModal';
 import MonthlyBudgetManager from '@/components/budget/MonthlyBudgetManager';
@@ -957,7 +958,12 @@ export default function Dashboard() {
               storeName={selectedStoreName}
               storeCode={selectedStore} />
 
-            </div>
+              <PresentationGenerator
+              storeId={selectedStore}
+              storeName={selectedStoreName}
+              storeCode={selectedStore} />
+
+              </div>
 
             {/* Retail Week Budget - PRESUPUESTO DEL DÍA (LO MÁS IMPORTANTE) */}
             {!showComparison &&
