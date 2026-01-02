@@ -103,7 +103,11 @@ export default function ExecutiveDashboard() {
       const activeBudget = allBudgets.find(b => b.store_id === store.code && b.is_active === true);
       const budget = activeBudget || allBudgets.find(b => b.store_id === store.code && b.month === currentMonth && b.year === currentYear);
       const salesBudget = budget?.sales_budget || 0;
-      const weeklyBudget = salesBudget / 4.33; // Promedio semanal del presupuesto mensual
+      
+      // Calcular presupuesto semanal correcto (solo días que caen en el mes actual)
+      const daysInCurrentWeek = eachDayOfInterval({ start: currentWeekStart, end: currentWeekEnd })
+        .filter(d => d >= monthStart && d <= monthEnd);
+      const weeklyBudget = (salesBudget / daysInMonth) * daysInCurrentWeek.length;
 
       // PROYECCIONES
       const daysElapsed = now.getDate();
