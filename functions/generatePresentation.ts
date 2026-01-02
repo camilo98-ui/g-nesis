@@ -72,52 +72,39 @@ Deno.serve(async (req) => {
 
     const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
-    // Crear slides con datos
+    // Eliminar slide por defecto y crear nuevos slides con contenido
     const requests = [
+      // Eliminar slide por defecto
+      {
+        deleteObject: {
+          objectId: presentation.slides[0].objectId
+        }
+      },
       // Slide 1 - Portada
       {
         createSlide: {
-          slideLayoutReference: { predefinedLayout: 'TITLE' },
-          placeholderIdMappings: [
-            {
-              layoutPlaceholder: { type: 'CENTERED_TITLE' },
-              objectId: 'titleId'
-            },
-            {
-              layoutPlaceholder: { type: 'SUBTITLE' },
-              objectId: 'subtitleId'
-            }
-          ]
+          objectId: 'slide1',
+          slideLayoutReference: { predefinedLayout: 'TITLE' }
         }
       },
-      {
-        insertText: {
-          objectId: 'titleId',
-          text: `Reporte de Ventas\n${storeName}`
-        }
-      },
-      {
-        insertText: {
-          objectId: 'subtitleId',
-          text: `${monthNames[currentMonth - 1]} ${currentYear}\nGenerado: ${new Date().toLocaleDateString('es-CO')}`
-        }
-      },
-      // Slide 2 - Resumen Ejecutivo
+      // Slide 2 - Resumen
       {
         createSlide: {
+          objectId: 'slide2',
           slideLayoutReference: { predefinedLayout: 'TITLE_AND_BODY' }
         }
       },
       // Slide 3 - Top Cajeros
       {
         createSlide: {
+          objectId: 'slide3',
           slideLayoutReference: { predefinedLayout: 'TITLE_AND_BODY' }
         }
       }
     ];
 
-    // Batch update con los slides
-    await fetch(`https://slides.googleapis.com/v1/presentations/${presentationId}:batchUpdate`, {
+    // Primera actualización - crear slides
+    const createSlidesResponse = await fetch(`https://slides.googleapis.com/v1/presentations/${presentationId}:batchUpdate`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
@@ -126,43 +113,73 @@ Deno.serve(async (req) => {
       body: JSON.stringify({ requests })
     });
 
-    // Segunda actualización para agregar contenido a los slides creados
+    await createSlidesResponse.json();
+
+    // Obtener presentación actualizada con los slides creados
+    const updatedPresentationResponse = await fetch(`https://slides.googleapis.com/v1/presentations/${presentationId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      }
+    });
+
+    const updatedPresentation = await updatedPresentationResponse.json();
+
+    // Preparar requests de contenido con los IDs reales
+    const slide1 = updatedPresentation.slides[0];
+    const slide2 = updatedPresentation.slides[1];
+    const slide3 = updatedPresentation.slides[2];
+
     const contentRequests = [
-      // Contenido Slide 2
+      // Contenido Slide 1 - Portada
       {
         insertText: {
-          objectId: presentation.slides[1].pageElements[0].objectId,
+          objectId: slide1.pageElements.find(e => e.shape?.placeholder?.type === 'CENTERED_TITLE')?.objectId,
+          text: `Reporte de Ventas\n${storeName}`
+        }
+      },
+      {
+        insertText: {
+          objectId: slide1.pageElements.find(e => e.shape?.placeholder?.type === 'SUBTITLE')?.objectId,
+          text: `${monthNames[currentMonth - 1]} ${currentYear}\nGenerado: ${new Date().toLocaleDateString('es-CO')}`
+        }
+      },
+      // Contenido Slide 2 - Resumen
+      {
+        insertText: {
+          objectId: slide2.pageElements.find(e => e.shape?.placeholder?.type === 'TITLE')?.objectId,
           text: '📊 Resumen Ejecutivo'
         }
       },
       {
         insertText: {
-          objectId: presentation.slides[1].pageElements[1].objectId,
-          text: `Ventas Totales: $${totalSales.toLocaleString('es-CO')}\n` +
-                `Cumplimiento: ${budgetCompliance}%\n` +
-                `Ticket Promedio: $${Math.round(avgTicket).toLocaleString('es-CO')}\n` +
-                `Total Transacciones: ${totalTransactions.toLocaleString('es-CO')}\n` +
-                `Sugeridos Vendidos: ${totalSuggested.toLocaleString('es-CO')}\n\n` +
-                `Meta del Mes: $${(currentBudget.sales_budget || 0).toLocaleString('es-CO')}`
+          objectId: slide2.pageElements.find(e => e.shape?.placeholder?.type === 'BODY')?.objectId,
+          text: `💰 Ventas Totales: $${totalSales.toLocaleString('es-CO')}\n\n` +
+                `🎯 Cumplimiento de Meta: ${budgetCompliance}%\n\n` +
+                `🧾 Ticket Promedio: $${Math.round(avgTicket).toLocaleString('es-CO')}\n\n` +
+                `🔢 Total Transacciones: ${totalTransactions.toLocaleString('es-CO')}\n\n` +
+                `⭐ Sugeridos Vendidos: ${totalSuggested.toLocaleString('es-CO')}\n\n` +
+                `📈 Meta del Mes: $${(currentBudget.sales_budget || 0).toLocaleString('es-CO')}`
         }
       },
-      // Contenido Slide 3
+      // Contenido Slide 3 - Top Cajeros
       {
         insertText: {
-          objectId: presentation.slides[2].pageElements[0].objectId,
+          objectId: slide3.pageElements.find(e => e.shape?.placeholder?.type === 'TITLE')?.objectId,
           text: '🏆 Top 5 Cajeros del Mes'
         }
       },
       {
         insertText: {
-          objectId: presentation.slides[2].pageElements[1].objectId,
-          text: topCashiers.map((c, i) => 
-            `${i + 1}. ${c.name}: $${c.sales.toLocaleString('es-CO')}`
-          ).join('\n')
+          objectId: slide3.pageElements.find(e => e.shape?.placeholder?.type === 'BODY')?.objectId,
+          text: topCashiers.length > 0 ? 
+            topCashiers.map((c, i) => `${i + 1}. ${c.name}: $${c.sales.toLocaleString('es-CO')}`).join('\n\n')
+            : 'No hay datos de cajeros disponibles'
         }
       }
     ];
 
+    // Segunda actualización - agregar contenido
     await fetch(`https://slides.googleapis.com/v1/presentations/${presentationId}:batchUpdate`, {
       method: 'POST',
       headers: {
