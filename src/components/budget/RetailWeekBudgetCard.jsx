@@ -245,14 +245,17 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       });
 
       const ventasDelDia = sale ? (sale.total_sales || 0) : 0;
-      const presupuestoDia = getDailyBudget(day); // Presupuesto ajustado por día de semana
+      
+      // CRÍTICO: usar presupuesto ajustado SOLO para el día de hoy
+      const isToday = isSameDay(day, now);
+      const presupuestoDia = isToday ? adjustedDailyBudget : getDailyBudget(day);
 
       return {
         date: format(day, 'dd MMM', { locale: es }),
         fullDate: format(day, 'EEEE dd MMM', { locale: es }),
         ventas: ventasDelDia,
         presupuesto: presupuestoDia,
-        cumplimiento: ventasDelDia > 0 ? (ventasDelDia / presupuestoDia * 100) : 0
+        cumplimiento: presupuestoDia > 0 ? (ventasDelDia / presupuestoDia * 100) : 0
       };
     });
 
