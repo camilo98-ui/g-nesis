@@ -88,31 +88,51 @@ export default function TrendChart({ shiftRecords, cashiers, dateRange, metricTy
     return { chartData, topCashiers, cashierTotals: totals };
   }, [shiftRecords, cashiers, dateRange, metricType]);
 
+  const toggleCashier = (cashierId) => {
+    setSelectedCashiers(prev => 
+      prev.includes(cashierId) ? prev.filter(id => id !== cashierId) : [...prev, cashierId]
+    );
+  };
+
+  const activeCashiers = selectedCashiers.length > 0 
+    ? topCashiers.filter(c => selectedCashiers.includes(c.id))
+    : topCashiers;
+
   const formatValue = (val) => {
-    if (metricType === 'sales' || metricType === 'ticket') {
-      return new Intl.NumberFormat('es-CO', { 
-        style: 'currency', 
-        currency: 'COP', 
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0
-      }).format(Math.round(val));
-    }
+    if (metricType === 'sales') return `$${(val/1000000).toFixed(1)}M`;
+    if (metricType === 'ticket') return `$${(val/1000).toFixed(0)}K`;
     return Math.round(val).toLocaleString();
   };
 
-  const getYAxisLabel = () => {
+  const getTitle = () => {
     switch (metricType) {
-      case 'sales': return 'Ventas';
-      case 'transactions': return 'Transacciones';
+      case 'sales': return 'Ventas Diarias';
+      case 'transactions': return 'Transacciones Diarias';
       case 'ticket': return 'Ticket Promedio';
-      default: return '';
+      default: return 'Tendencia';
+    }
+  };
+
+  const getIcon = () => {
+    switch (metricType) {
+      case 'sales': return '💰';
+      case 'transactions': return '📊';
+      case 'ticket': return '🎫';
+      default: return '📈';
     }
   };
 
   if (!chartData.length || !topCashiers.length) {
     return (
-      <div className="bg-white rounded-xl p-6 text-center text-gray-400">
-        No hay datos suficientes para mostrar la tendencia
+      <div className="bg-white rounded-2xl p-8 text-center border border-gray-100 shadow-lg">
+        <motion.div
+          animate={{ y: [0, -5, 0] }}
+          transition={{ duration: 2, repeat: Infinity }}
+          className="text-5xl mb-3"
+        >
+          📊
+        </motion.div>
+        <p className="text-gray-400 text-sm">No hay datos suficientes</p>
       </div>
     );
   }
@@ -121,63 +141,167 @@ export default function TrendChart({ shiftRecords, cashiers, dateRange, metricTy
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-2xl shadow-lg p-4 border border-gray-100"
+      className="bg-gradient-to-br from-white via-pink-50/20 to-purple-50/20 rounded-2xl shadow-xl p-6 border border-pink-100/50 backdrop-blur-sm"
     >
-      <motion.h4 
-        initial={{ opacity: 0, x: -10 }}
-        animate={{ opacity: 1, x: 0 }}
-        className="text-sm font-medium text-gray-600 mb-4 flex items-center gap-2"
-      >
-        <motion.span
-          animate={{ rotate: [0, 10, -10, 0] }}
-          transition={{ duration: 2, repeat: Infinity }}
-        >
-          📈
-        </motion.span>
-        Tendencia de {getYAxisLabel()} por Cajero
-      </motion.h4>
-      <div className="h-72">
+      {/* Header con selector de cajeros */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <h4 className="text-base font-black text-gray-800 flex items-center gap-2">
+            <motion.span
+              animate={{ scale: [1, 1.2, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              {getIcon()}
+            </motion.span>
+            {getTitle()}
+          </h4>
+          <div className="flex items-center gap-2">
+            <Users className="w-4 h-4 text-gray-400" />
+            <span className="text-xs font-medium text-gray-500">Top {topCashiers.length}</span>
+          </div>
+        </div>
+
+        {/* Selector de cajeros con toggle */}
+        <div className="flex flex-wrap gap-2">
+          {topCashiers.map((cashier, idx) => {
+            const isActive = selectedCashiers.length === 0 || selectedCashiers.includes(cashier.id);
+            const colorConfig = CASHIER_COLORS[idx] || CASHIER_COLORS[0];
+            
+            return (
+              <motion.button
+                key={cashier.id}
+                onClick={() => toggleCashier(cashier.id)}
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                className={`px-3 py-2 rounded-xl border-2 transition-all text-xs font-bold flex items-center gap-2 ${
+                  isActive 
+                    ? `bg-gradient-to-r ${colorConfig.gradient} text-white border-white shadow-lg`
+                    : 'bg-white/60 text-gray-400 border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                <div className={`w-6 h-6 rounded-full overflow-hidden border-2 ${isActive ? 'border-white' : 'border-gray-200'}`}>
+                  {cashier.photo_url ? (
+                    <img src={cashier.photo_url} alt={cashier.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className={`w-full h-full flex items-center justify-center text-xs font-black ${isActive ? 'bg-white/30' : 'bg-gray-100'}`}>
+                      {cashier.name?.charAt(0)}
+                    </div>
+                  )}
+                </div>
+                <span className="truncate max-w-[80px]">{cashier.name?.split(' ')[0]}</span>
+                {isActive ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+              </motion.button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Chart - Barras apiladas por día */}
+      <div className="h-80">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+          <BarChart data={chartData}>
+            <defs>
+              {activeCashiers.map((cashier, idx) => {
+                const colorConfig = CASHIER_COLORS[idx] || CASHIER_COLORS[0];
+                return (
+                  <linearGradient key={cashier.id} id={`grad-${cashier.id}`} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={colorConfig.solid} stopOpacity={0.9} />
+                    <stop offset="100%" stopColor={colorConfig.solid} stopOpacity={0.6} />
+                  </linearGradient>
+                );
+              })}
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
             <XAxis 
               dataKey="date" 
-              tick={{ fill: '#6b7280', fontSize: 10 }}
+              tick={{ fill: '#6b7280', fontSize: 11, fontWeight: 600 }}
+              axisLine={{ stroke: '#e5e7eb' }}
             />
             <YAxis 
-              tick={{ fill: '#6b7280', fontSize: 10 }}
-              tickFormatter={(v) => metricType === 'sales' ? `$${(v/1000000).toFixed(1)}M` : metricType === 'ticket' ? `$${(v/1000).toFixed(0)}K` : v}
+              tick={{ fill: '#6b7280', fontSize: 11, fontWeight: 600 }}
+              tickFormatter={(v) => {
+                if (metricType === 'sales') return `$${(v/1000000).toFixed(1)}M`;
+                if (metricType === 'ticket') return `$${(v/1000).toFixed(0)}K`;
+                return v;
+              }}
+              axisLine={{ stroke: '#e5e7eb' }}
             />
             <Tooltip
-              contentStyle={{ 
-                borderRadius: 12, 
-                border: 'none', 
-                boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-                fontSize: 11
+              content={({ active, payload, label }) => {
+                if (!active || !payload?.length) return null;
+                const data = payload[0].payload;
+                return (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="bg-white/95 backdrop-blur-xl p-4 rounded-2xl shadow-2xl border-2 border-pink-200"
+                  >
+                    <p className="font-black text-gray-800 mb-3 text-sm">{data.fullDate}</p>
+                    <div className="space-y-2">
+                      {activeCashiers.map((cashier, idx) => {
+                        const value = data[cashier.id] || 0;
+                        if (value === 0) return null;
+                        const colorConfig = CASHIER_COLORS[idx] || CASHIER_COLORS[0];
+                        return (
+                          <div key={cashier.id} className="flex items-center gap-3">
+                            <div className={`w-3 h-3 rounded-full bg-gradient-to-br ${colorConfig.gradient}`} />
+                            <div className="flex-1 flex items-center gap-2">
+                              {cashier.photo_url && (
+                                <img src={cashier.photo_url} alt={cashier.name} className="w-5 h-5 rounded-full object-cover" />
+                              )}
+                              <span className="text-xs font-medium text-gray-700 truncate">{cashier.name?.split(' ')[0]}</span>
+                            </div>
+                            <span className="text-xs font-black text-gray-900">{formatValue(value)}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </motion.div>
+                );
               }}
-              labelFormatter={(label, payload) => {
-                const data = payload?.[0]?.payload;
-                return data?.fullDate || label;
-              }}
-              formatter={(value, name) => [formatValue(value), name]}
             />
-            <Legend 
-              wrapperStyle={{ fontSize: 10 }}
-              iconSize={8}
-            />
-            {topCashiers.map((cashier, index) => (
-              <Line
+            {activeCashiers.map((cashier, idx) => (
+              <Bar
                 key={cashier.id}
-                type="monotone"
-                dataKey={cashier.name}
-                stroke={COLORS[index % COLORS.length]}
-                strokeWidth={2}
-                dot={{ r: 3, fill: COLORS[index % COLORS.length] }}
-                activeDot={{ r: 5, strokeWidth: 2 }}
+                dataKey={cashier.id}
+                stackId="a"
+                fill={`url(#grad-${cashier.id})`}
+                radius={idx === activeCashiers.length - 1 ? [8, 8, 0, 0] : [0, 0, 0, 0]}
               />
             ))}
-          </LineChart>
+          </BarChart>
         </ResponsiveContainer>
+      </div>
+
+      {/* Resumen de totales */}
+      <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
+        {activeCashiers.map((cashier, idx) => {
+          const colorConfig = CASHIER_COLORS[idx] || CASHIER_COLORS[0];
+          return (
+            <motion.div
+              key={cashier.id}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: idx * 0.05 }}
+              className={`bg-gradient-to-br ${colorConfig.gradient} rounded-xl p-3 text-white shadow-lg`}
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-6 h-6 rounded-full overflow-hidden border-2 border-white">
+                  {cashier.photo_url ? (
+                    <img src={cashier.photo_url} alt={cashier.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full bg-white/30 flex items-center justify-center text-xs font-black">
+                      {cashier.name?.charAt(0)}
+                    </div>
+                  )}
+                </div>
+                <span className="text-xs font-bold truncate">{cashier.name?.split(' ')[0]}</span>
+              </div>
+              <p className="text-lg font-black">{formatValue(cashierTotals[cashier.id])}</p>
+              <p className="text-[10px] text-white/80">Total período</p>
+            </motion.div>
+          );
+        })}
       </div>
     </motion.div>
   );
