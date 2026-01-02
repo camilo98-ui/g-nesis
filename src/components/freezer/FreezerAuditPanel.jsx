@@ -163,34 +163,12 @@ export default function FreezerAuditPanel({
           </div>
         )}
 
-        {/* Suggestions */}
-        {suggestions?.length > 0 && (
-          <div className="space-y-2">
-            <h4 className="font-semibold text-purple-700 text-sm">💡 Sugerencias IA</h4>
-            <div className="space-y-1 max-h-40 overflow-y-auto">
-              {suggestions.map((s, i) => (
-                <div key={i} className="text-xs p-2 bg-purple-50 rounded-lg">
-                  {s}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* Action Buttons */}
         <div className="space-y-2 pt-2 border-t">
           <Button
-            onClick={onApplySuggestions}
-            disabled={isLoading || !suggestions?.length}
-            className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white"
-          >
-            Aplicar Sugerencias
-          </Button>
-          <Button
             onClick={onAutoCorrect}
             disabled={isLoading}
-            variant="outline"
-            className="w-full border-pink-300 text-pink-600 hover:bg-pink-50"
+            className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white"
           >
             Corregir Automáticamente
           </Button>
