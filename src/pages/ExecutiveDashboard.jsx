@@ -103,6 +103,7 @@ export default function ExecutiveDashboard() {
       const activeBudget = allBudgets.find(b => b.store_id === store.code && b.is_active === true);
       const budget = activeBudget || allBudgets.find(b => b.store_id === store.code && b.month === currentMonth && b.year === currentYear);
       const salesBudget = budget?.sales_budget || 0;
+      const weeklyBudget = salesBudget / 4.33; // Promedio semanal del presupuesto mensual
 
       // PROYECCIONES
       const daysElapsed = now.getDate();
@@ -121,6 +122,9 @@ export default function ExecutiveDashboard() {
 
       // CUMPLIMIENTO
       const salesCompliance = salesBudget > 0 ? (monthTotalSales / salesBudget) * 100 : 0;
+      const weekCompliance = weeklyBudget > 0 ? (weekTotalSales / weeklyBudget) * 100 : 0;
+      const weekProjectionCompliance = weeklyBudget > 0 ? (weekProjection / weeklyBudget) * 100 : 0;
+      const monthProjectionCompliance = salesBudget > 0 ? (monthProjection / salesBudget) * 100 : 0;
       const hasData = weekTotalSales > 0 || monthTotalSales > 0;
 
       let status = 'positive';
@@ -138,10 +142,14 @@ export default function ExecutiveDashboard() {
         weekTotalTransactions,
         weekAvgTicket,
         weekProjection,
+        weeklyBudget,
+        weekCompliance,
+        weekProjectionCompliance,
         // Mes
         monthTotalSales,
         monthTotalTransactions,
         monthProjection,
+        monthProjectionCompliance,
         // Presupuesto y cumplimiento
         salesBudget,
         salesCompliance,
@@ -623,45 +631,42 @@ Genera:
             {/* Tabla - Responsive con scroll horizontal en móvil */}
             <div id="stores-table" className="mb-8 sm:mb-12 lg:mb-20">
               <div className="bg-white/5 backdrop-blur-2xl rounded-xl border border-white/10 overflow-x-auto">
-                <table className="w-full min-w-[800px]">
+                <table className="w-full min-w-[900px]">
                   <thead>
                     <tr className="border-b border-white/10">
                       <th 
                         onClick={() => handleSort('name')}
-                        className="text-left py-3 px-3 sm:py-4 sm:px-4 lg:py-5 lg:px-6 text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider cursor-pointer"
+                        className="sticky left-0 bg-slate-950/80 backdrop-blur-xl z-10 text-left py-3 px-3 text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider cursor-pointer border-r border-white/10"
                       >
                         <div className="flex items-center gap-2">
                           Tienda
                           {sortConfig.key === 'name' && (sortConfig.direction === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />)}
                         </div>
                       </th>
-                      <th className="text-right py-3 px-3 text-[10px] sm:text-xs font-bold text-purple-400 uppercase tracking-wider">
-                        Semana
+                      <th className="text-right py-3 px-3 text-[10px] font-bold text-cyan-400 uppercase tracking-wider">
+                        PPT Sem
                       </th>
-                      <th className="text-right py-3 px-3 text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider hidden sm:table-cell">
-                        Proy. Semana
+                      <th className="text-right py-3 px-3 text-[10px] font-bold text-purple-400 uppercase tracking-wider">
+                        Venta Sem
                       </th>
-                      <th className="text-right py-3 px-3 text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider hidden lg:table-cell">
-                        Proy. Mes
+                      <th className="text-right py-3 px-3 text-[10px] font-bold text-pink-400 uppercase tracking-wider">
+                        Proy Sem
+                      </th>
+                      <th className="text-right py-3 px-3 text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
+                        Proy Mes
                       </th>
                       <th 
                         onClick={() => handleSort('compliance')}
-                        className="text-right py-3 px-3 text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider cursor-pointer"
+                        className="text-right py-3 px-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider cursor-pointer"
                       >
                         <div className="flex items-center justify-end gap-2">
                           % Mes
                           {sortConfig.key === 'compliance' && (sortConfig.direction === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />)}
                         </div>
                       </th>
-                      <th className="text-right py-3 px-3 text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider hidden lg:table-cell">
-                        Venta/Día
-                      </th>
-                      <th className="text-right py-3 px-3 text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider hidden lg:table-cell">
-                        Trans/Día
-                      </th>
                       <th 
                         onClick={() => handleSort('status')}
-                        className="text-center py-3 px-3 text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider cursor-pointer"
+                        className="text-center py-3 px-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider cursor-pointer"
                       >
                         <div className="flex items-center justify-center gap-2">
                           Estado
@@ -678,44 +683,67 @@ Genera:
                         className={`border-b border-white/5 ${store.hasData ? 'cursor-pointer hover:bg-white/5' : ''}`}
                       >
                         {/* Tienda */}
-                        <td className="py-3 px-3 sm:py-4 sm:px-4">
-                          <p className={`font-bold text-sm ${!store.hasData ? 'text-slate-600' : 'text-white'}`}>
+                        <td className="sticky left-0 bg-slate-950/90 backdrop-blur-xl z-10 py-3 px-3 border-r border-white/10">
+                          <p className={`font-bold text-xs ${!store.hasData ? 'text-slate-600' : 'text-white'}`}>
                             {store.name}
                           </p>
-                          <p className="text-[10px] text-slate-500 mt-0.5">{store.code}</p>
+                          <p className="text-[9px] text-slate-500 mt-0.5">{store.code}</p>
                         </td>
 
-                        {/* Semana Actual */}
+                        {/* PPT Semana */}
+                        <td className="py-3 px-3 text-right">
+                          {!store.hasData ? (
+                            <span className="text-xs text-slate-500">—</span>
+                          ) : (
+                            <div>
+                              <p className="font-bold text-cyan-400 text-sm tabular-nums">{formatShort(store.weeklyBudget)}</p>
+                            </div>
+                          )}
+                        </td>
+
+                        {/* Venta Semana */}
                         <td className="py-3 px-3 text-right">
                           {!store.hasData ? (
                             <span className="text-xs text-slate-500">—</span>
                           ) : (
                             <div>
                               <p className="font-black text-purple-400 text-sm tabular-nums">{formatShort(store.weekTotalSales)}</p>
-                              <p className="text-[9px] text-slate-500 mt-0.5">{store.weekTotalTransactions.toLocaleString()} trans</p>
-                              <p className="text-[9px] text-pink-400 mt-0.5">{formatCurrency(store.weekAvgTicket).slice(0, -3)}</p>
+                              <p className="text-[9px] text-slate-500 mt-0.5">
+                                {store.weekCompliance.toFixed(0)}%
+                              </p>
                             </div>
                           )}
                         </td>
 
                         {/* Proyección Semana */}
-                        <td className="py-3 px-3 text-right hidden sm:table-cell">
+                        <td className="py-3 px-3 text-right">
                           {!store.hasData ? (
                             <span className="text-xs text-slate-500">—</span>
                           ) : (
-                            <p className="font-bold text-cyan-400 text-sm tabular-nums">{formatShort(store.weekProjection)}</p>
+                            <div>
+                              <p className="font-bold text-pink-400 text-sm tabular-nums">{formatShort(store.weekProjection)}</p>
+                              <p className={`text-[9px] mt-0.5 font-bold ${
+                                store.weekProjectionCompliance >= 100 ? 'text-emerald-400' :
+                                store.weekProjectionCompliance >= 85 ? 'text-amber-400' : 'text-red-400'
+                              }`}>
+                                {store.weekProjectionCompliance.toFixed(0)}%
+                              </p>
+                            </div>
                           )}
                         </td>
 
                         {/* Proyección Mes */}
-                        <td className="py-3 px-3 text-right hidden lg:table-cell">
+                        <td className="py-3 px-3 text-right">
                           {!store.hasData ? (
                             <span className="text-xs text-slate-500">—</span>
                           ) : (
                             <div>
                               <p className="font-bold text-emerald-400 text-sm tabular-nums">{formatShort(store.monthProjection)}</p>
-                              <p className="text-[9px] text-slate-500 mt-0.5">
-                                {((store.monthProjection / store.salesBudget) * 100).toFixed(0)}% proyectado
+                              <p className={`text-[9px] mt-0.5 font-bold ${
+                                store.monthProjectionCompliance >= 100 ? 'text-emerald-400' :
+                                store.monthProjectionCompliance >= 85 ? 'text-amber-400' : 'text-red-400'
+                              }`}>
+                                {store.monthProjectionCompliance.toFixed(0)}%
                               </p>
                             </div>
                           )}
@@ -726,8 +754,14 @@ Genera:
                           {!store.hasData ? (
                             <span className="text-xs text-slate-500">—</span>
                           ) : (
-                            <div className="flex items-center justify-end gap-2">
-                              <div className="w-12 sm:w-16 bg-white/10 rounded-full h-1 overflow-hidden">
+                            <div className="flex flex-col items-end gap-1">
+                              <span className={`font-black text-lg tabular-nums ${
+                                store.salesCompliance >= 90 ? 'text-emerald-400' :
+                                store.salesCompliance >= 70 ? 'text-amber-400' : 'text-red-400'
+                              }`}>
+                                {store.salesCompliance.toFixed(0)}%
+                              </span>
+                              <div className="w-16 bg-white/10 rounded-full h-1 overflow-hidden">
                                 <div
                                   style={{ width: `${Math.min(store.salesCompliance, 100)}%` }}
                                   className={`h-full ${
@@ -736,37 +770,13 @@ Genera:
                                   }`}
                                 />
                               </div>
-                              <span className={`font-black text-base sm:text-xl tabular-nums ${
-                                store.salesCompliance >= 90 ? 'text-emerald-400' :
-                                store.salesCompliance >= 70 ? 'text-amber-400' : 'text-red-400'
-                              }`}>
-                                {store.salesCompliance.toFixed(0)}%
-                              </span>
                             </div>
-                          )}
-                        </td>
-
-                        {/* Venta Promedio/Día */}
-                        <td className="py-3 px-3 text-right hidden lg:table-cell">
-                          {!store.hasData ? (
-                            <span className="text-xs text-slate-500">—</span>
-                          ) : (
-                            <p className="font-bold text-white text-sm tabular-nums">{formatShort(store.avgDailySales)}</p>
-                          )}
-                        </td>
-
-                        {/* Trans Promedio/Día */}
-                        <td className="py-3 px-3 text-right hidden lg:table-cell">
-                          {!store.hasData ? (
-                            <span className="text-xs text-slate-500">—</span>
-                          ) : (
-                            <p className="font-bold text-cyan-400 text-sm tabular-nums">{store.avgDailyTransactions.toFixed(0)}</p>
                           )}
                         </td>
 
                         {/* Estado */}
                         <td className="py-3 px-3 text-center">
-                          <span className={`inline-block w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full ${
+                          <span className={`inline-block w-3 h-3 rounded-full ${
                             store.status === 'no_data' ? 'bg-slate-600' :
                             store.status === 'positive' ? 'bg-emerald-500' : 
                             store.status === 'negative' ? 'bg-amber-500' : 'bg-red-500'
