@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Target, TrendingUp, TrendingDown, Calendar, AlertTriangle, CheckCircle2, ChevronDown, ChevronUp, BarChart3, LineChart } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { format, startOfMonth, endOfMonth, eachWeekOfInterval, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Legend, Cell } from 'recharts';
@@ -10,6 +11,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
   const [expandedSection, setExpandedSection] = useState(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedMetric, setSelectedMetric] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Calcular datos del presupuesto retail
   const budgetData = useMemo(() => {
@@ -641,10 +643,11 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
               <motion.button
                 whileHover={{ scale: 1.03, y: -2 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => setSelectedMetric(selectedMetric === 'weekly-budget' ? null : 'weekly-budget')}
-                className={`bg-purple-50 rounded-lg p-2 md:p-3 border transition-all text-left ${
-                  selectedMetric === 'weekly-budget' ? 'border-purple-400 ring-2 ring-purple-300' : 'border-purple-200/40'
-                }`}
+                onClick={() => {
+                  setSelectedMetric('weekly-budget');
+                  setIsModalOpen(true);
+                }}
+                className="bg-purple-50 rounded-lg p-2 md:p-3 border border-purple-200/40 transition-all text-left hover:border-purple-400"
               >
                 <p className="text-[10px] md:text-xs text-purple-500/70 mb-1">Meta Semanal</p>
                 <p className="text-sm md:text-lg font-black text-purple-600 leading-tight">
@@ -654,10 +657,11 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
               <motion.button
                 whileHover={{ scale: 1.03, y: -2 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => setSelectedMetric(selectedMetric === 'weekly-sales' ? null : 'weekly-sales')}
-                className={`bg-purple-50 rounded-lg p-2 md:p-3 border transition-all text-left ${
-                  selectedMetric === 'weekly-sales' ? 'border-purple-400 ring-2 ring-purple-300' : 'border-purple-200/40'
-                }`}
+                onClick={() => {
+                  setSelectedMetric('weekly-sales');
+                  setIsModalOpen(true);
+                }}
+                className="bg-purple-50 rounded-lg p-2 md:p-3 border border-purple-200/40 transition-all text-left hover:border-purple-400"
               >
                 <p className="text-[10px] md:text-xs text-purple-500/70 mb-1">Venta Actual</p>
                 <p className="text-sm md:text-lg font-black text-purple-600 leading-tight">
@@ -667,10 +671,11 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
               <motion.button
                 whileHover={{ scale: 1.03, y: -2 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => setSelectedMetric(selectedMetric === 'weekly-projection' ? null : 'weekly-projection')}
-                className={`bg-pink-50 rounded-lg p-2 md:p-3 border transition-all text-left ${
-                  selectedMetric === 'weekly-projection' ? 'border-pink-400 ring-2 ring-pink-300' : 'border-pink-200/40'
-                }`}
+                onClick={() => {
+                  setSelectedMetric('weekly-projection');
+                  setIsModalOpen(true);
+                }}
+                className="bg-pink-50 rounded-lg p-2 md:p-3 border border-pink-200/40 transition-all text-left hover:border-pink-400"
               >
                 <p className="text-[10px] md:text-xs text-pink-500/70 mb-1">Proyección</p>
                 <p className="text-sm md:text-lg font-black text-pink-600 leading-tight">
@@ -805,10 +810,11 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
               <motion.button
               whileHover={{ scale: 1.03, y: -2 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => setSelectedMetric(selectedMetric === 'base' ? null : 'base')}
-              className={`bg-gradient-to-br from-rose-50/40 to-pink-50/40 rounded-lg p-2 md:p-3 border transition-all text-left ${
-                selectedMetric === 'base' ? 'border-rose-400 ring-2 ring-rose-300' : 'border-rose-200/40'
-              }`}
+              onClick={() => {
+                setSelectedMetric('base');
+                setIsModalOpen(true);
+              }}
+              className="bg-gradient-to-br from-rose-50/40 to-pink-50/40 rounded-lg p-2 md:p-3 border border-rose-200/40 transition-all text-left hover:border-rose-400"
               >
               <p className="text-[10px] md:text-xs text-rose-500/70 mb-1">Base Diaria</p>
               <p className="text-sm md:text-lg font-bold text-rose-600 leading-tight">
@@ -819,10 +825,11 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
               <motion.button
               whileHover={{ scale: 1.03, y: -2 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => setSelectedMetric(selectedMetric === 'remaining' ? null : 'remaining')}
-              className={`bg-gradient-to-br from-emerald-50/40 to-green-50/40 rounded-lg p-2 md:p-3 border transition-all text-left ${
-                selectedMetric === 'remaining' ? 'border-emerald-400 ring-2 ring-emerald-300' : 'border-emerald-200/40'
-              }`}
+              onClick={() => {
+                setSelectedMetric('remaining');
+                setIsModalOpen(true);
+              }}
+              className="bg-gradient-to-br from-emerald-50/40 to-green-50/40 rounded-lg p-2 md:p-3 border border-emerald-200/40 transition-all text-left hover:border-emerald-400"
               >
               <p className="text-[10px] md:text-xs text-emerald-500/70 mb-1">Días Restantes</p>
               <p className="text-sm md:text-lg font-bold text-emerald-600">
@@ -833,10 +840,11 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
               <motion.button
               whileHover={{ scale: 1.03, y: -2 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => setSelectedMetric(selectedMetric === 'pending' ? null : 'pending')}
-              className={`bg-gradient-to-br from-rose-50/40 to-pink-50/40 rounded-lg p-2 md:p-3 border transition-all text-left ${
-                selectedMetric === 'pending' ? 'border-rose-400 ring-2 ring-rose-300' : 'border-rose-200/40'
-              }`}
+              onClick={() => {
+                setSelectedMetric('pending');
+                setIsModalOpen(true);
+              }}
+              className="bg-gradient-to-br from-rose-50/40 to-pink-50/40 rounded-lg p-2 md:p-3 border border-rose-200/40 transition-all text-left hover:border-rose-400"
               >
               <p className="text-[10px] md:text-xs text-rose-500/70 mb-1">Por Vender</p>
               <p className="text-sm md:text-lg font-bold text-rose-600 leading-tight">
@@ -847,15 +855,14 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
               <motion.button
               whileHover={{ scale: 1.03, y: -2 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => setSelectedMetric(selectedMetric === 'compliance' ? null : 'compliance')}
+              onClick={() => {
+                setSelectedMetric('compliance');
+                setIsModalOpen(true);
+              }}
               className={`rounded-lg p-2 md:p-3 border transition-all text-left ${
-                selectedMetric === 'compliance' 
-                  ? isOnTrack 
-                    ? 'border-emerald-400 ring-2 ring-emerald-300' 
-                    : 'border-rose-400 ring-2 ring-rose-300'
-                  : isOnTrack 
-                    ? 'bg-gradient-to-br from-emerald-50/40 to-green-50/40 border-emerald-200/40' 
-                    : 'bg-gradient-to-br from-rose-50/40 to-pink-50/40 border-rose-200/40'
+                isOnTrack 
+                  ? 'bg-gradient-to-br from-emerald-50/40 to-green-50/40 border-emerald-200/40 hover:border-emerald-400' 
+                  : 'bg-gradient-to-br from-rose-50/40 to-pink-50/40 border-rose-200/40 hover:border-rose-400'
               }`}
               >
               <p className={`text-[10px] md:text-xs mb-1 ${isOnTrack ? 'text-emerald-500/70' : 'text-rose-500/70'}`}>
@@ -867,17 +874,21 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                 </motion.button>
               </div>
 
-              {/* Detalle de métrica seleccionada */}
-              <AnimatePresence mode="wait">
-                {selectedMetric && (
-                  <motion.div
-                    key={selectedMetric}
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.2 }}
-                    className="bg-white rounded-xl p-3 md:p-4 border border-slate-200 shadow-sm overflow-hidden"
-                  >
+              {/* Modal de métricas */}
+              <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle className="text-xl font-bold text-slate-900">
+                      {selectedMetric === 'base' && '📊 Presupuesto Base vs Ajustado'}
+                      {selectedMetric === 'remaining' && '📅 Proyección de Días Restantes'}
+                      {selectedMetric === 'pending' && '💰 Análisis de Venta Pendiente'}
+                      {selectedMetric === 'compliance' && '📈 Evolución del Cumplimiento'}
+                      {selectedMetric === 'weekly-budget' && '🎯 Desglose de Meta Semanal'}
+                      {selectedMetric === 'weekly-sales' && '💵 Ventas de la Semana'}
+                      {selectedMetric === 'weekly-projection' && '🚀 Proyección de Cierre Semanal'}
+                    </DialogTitle>
+                  </DialogHeader>
+                  <div className="mt-4">
                     {selectedMetric === 'base' && (
                       <div>
                         <h4 className="text-sm md:text-base font-bold text-slate-900 mb-3">Presupuesto Base vs Ajustado</h4>
@@ -1133,9 +1144,9 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                         </p>
                       </div>
                     )}
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                  </div>
+                </DialogContent>
+              </Dialog>
 
               {/* Mensaje de estado */}
               {needsRecovery ? (
