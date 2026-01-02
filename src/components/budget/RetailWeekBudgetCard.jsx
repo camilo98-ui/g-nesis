@@ -684,25 +684,97 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                className="bg-white rounded-xl p-4 border border-slate-200/60 shadow-sm"
+                className="bg-gradient-to-br from-rose-50/30 via-pink-50/20 to-purple-50/20 rounded-2xl p-4 border-2 border-rose-200/30 shadow-lg"
               >
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-bold text-slate-900 flex items-center gap-2">
-                    <BarChart3 className="w-5 h-5 text-purple-400/70" />
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="font-black text-rose-900 flex items-center gap-2 text-base">
+                    <motion.div
+                      animate={{ rotate: [0, 5, -5, 0] }}
+                      transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
+                    >
+                      <BarChart3 className="w-5 h-5 text-rose-400" />
+                    </motion.div>
                     Comparativa Semanal
                   </h4>
                 </div>
-                <ResponsiveContainer width="100%" height={200}>
-                  <BarChart data={budgetData.weeklyData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                    <XAxis dataKey="semana" stroke="#64748b" fontSize={10} />
-                    <YAxis stroke="#64748b" fontSize={10} />
-                    <Tooltip 
-                      contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff' }}
-                      formatter={(value) => formatCurrency(value)}
+                <ResponsiveContainer width="100%" height={240}>
+                  <BarChart data={budgetData.weeklyData} margin={{ top: 10, right: 10, left: 0, bottom: 5 }}>
+                    <defs>
+                      <linearGradient id="barPresupuesto" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#f9a8d4" stopOpacity={0.8}/>
+                        <stop offset="100%" stopColor="#fda4af" stopOpacity={0.4}/>
+                      </linearGradient>
+                      <linearGradient id="barVentas" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#fb7185" stopOpacity={0.9}/>
+                        <stop offset="100%" stopColor="#fda4af" stopOpacity={0.7}/>
+                      </linearGradient>
+                      <filter id="barShadow">
+                        <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.3"/>
+                      </filter>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#fecdd3" opacity={0.3} />
+                    <XAxis 
+                      dataKey="semana" 
+                      stroke="#9ca3af" 
+                      fontSize={11}
+                      fontWeight={600}
+                      tick={{ fill: '#9ca3af' }}
                     />
-                    <Bar dataKey="presupuesto" fill="#e2e8f0" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="ventas" fill="#a78bfa" radius={[4, 4, 0, 0]} />
+                    <YAxis 
+                      stroke="#9ca3af" 
+                      fontSize={11}
+                      fontWeight={500}
+                      tickFormatter={(value) => {
+                        if (value >= 1000000) {
+                          return `$${(value / 1000000).toFixed(1)}M`;
+                        } else if (value >= 1000) {
+                          return `$${(value / 1000).toFixed(0)}K`;
+                        }
+                        return `$${value.toLocaleString('es-CO')}`;
+                      }}
+                      tick={{ fill: '#9ca3af' }}
+                    />
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: '#fff', 
+                        border: '2px solid #fda4af', 
+                        borderRadius: '12px', 
+                        color: '#0f172a',
+                        boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+                        padding: '12px 16px'
+                      }}
+                      labelStyle={{
+                        color: '#64748b',
+                        fontSize: '12px',
+                        fontWeight: '700',
+                        marginBottom: '8px'
+                      }}
+                      formatter={(value, name) => {
+                        const label = name === 'presupuesto' ? '🎯 Meta' : '💰 Venta';
+                        return [
+                          <span key={name} style={{ fontSize: '13px', fontWeight: 'bold', color: '#0f172a' }}>
+                            {formatCurrency(value)}
+                          </span>,
+                          label
+                        ];
+                      }}
+                    />
+                    <Bar 
+                      dataKey="presupuesto" 
+                      fill="url(#barPresupuesto)" 
+                      radius={[8, 8, 0, 0]}
+                      filter="url(#barShadow)"
+                      animationDuration={1200}
+                      animationEasing="ease-out"
+                    />
+                    <Bar 
+                      dataKey="ventas" 
+                      fill="url(#barVentas)" 
+                      radius={[8, 8, 0, 0]}
+                      filter="url(#barShadow)"
+                      animationDuration={1500}
+                      animationEasing="ease-out"
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </motion.div>
