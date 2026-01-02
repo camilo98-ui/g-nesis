@@ -119,16 +119,16 @@ export default function Layout({ children, currentPageName }) {
   return (
     <DateFilterProvider>
       <ErrorBoundary>
-        <div className="min-h-screen">
+        <div className="min-h-screen relative z-10">
           {/* Date Filter Bar */}
           {currentPageName !== 'Home' && <DateFilterBar />}
 
           {/* Main Content */}
           <main className="pt-4 min-h-screen pb-4">
-          <div className="container mx-auto px-2 sm:px-4">
-            {children}
-          </div>
-        </main>
+            <div className="container mx-auto px-2 sm:px-4">
+              {children}
+            </div>
+          </main>
         </div>
       </ErrorBoundary>
     </DateFilterProvider>
