@@ -1177,11 +1177,11 @@ export default function Home() {
                   </div>
                 </Link>
                 }
-              </div>
+              </motion.div>
             );
             })}
-            </motion.div>
-            )}
+        </motion.div>
+        )}
       </div>
 
       {/* Modales con Lazy Loading */}
