@@ -320,94 +320,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
         </CardHeader>
 
         <CardContent className="p-3 md:p-6 space-y-3 md:space-y-4">
-          {/* ALERTA URGENTE DE BRECHA */}
-          {!budgetData?.noBudget && budgetData?.accumulatedGap > 0 && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: -10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              className="relative overflow-hidden"
-            >
-              <motion.div
-                animate={{
-                  boxShadow: [
-                    '0 0 0 0 rgba(239, 68, 68, 0)',
-                    '0 0 0 8px rgba(239, 68, 68, 0.2)',
-                    '0 0 0 0 rgba(239, 68, 68, 0)'
-                  ]
-                }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="bg-gradient-to-r from-red-500 via-orange-500 to-red-500 rounded-xl p-4 md:p-5 relative"
-              >
-                {/* Efecto de pulsación en el fondo */}
-                <motion.div
-                  animate={{ opacity: [0.3, 0.6, 0.3] }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                  className="absolute inset-0 bg-white rounded-xl"
-                />
 
-                <div className="relative z-10 flex items-start gap-3">
-                  <motion.div
-                    animate={{ 
-                      scale: [1, 1.2, 1],
-                      rotate: [0, 10, -10, 0]
-                    }}
-                    transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 1 }}
-                    className="flex-shrink-0"
-                  >
-                    <AlertTriangle className="w-8 h-8 md:w-10 md:h-10 text-white drop-shadow-lg" />
-                  </motion.div>
-
-                  <div className="flex-1 min-w-0">
-                    <motion.h3
-                      animate={{ opacity: [1, 0.8, 1] }}
-                      transition={{ duration: 1, repeat: Infinity }}
-                      className="text-base md:text-xl font-black text-white mb-2 drop-shadow-md uppercase tracking-wide"
-                    >
-                      🚨 BRECHA CRÍTICA DETECTADA
-                    </motion.h3>
-
-                    <div className="bg-white/20 backdrop-blur-sm rounded-lg p-3 mb-3 border-2 border-white/40">
-                      <p className="text-xs md:text-sm text-white/90 font-medium mb-2">
-                        Venta faltante acumulada:
-                      </p>
-                      <motion.p
-                        animate={{ scale: [1, 1.05, 1] }}
-                        transition={{ duration: 1.5, repeat: Infinity }}
-                        className="text-3xl md:text-5xl font-black text-white drop-shadow-xl"
-                      >
-                        {formatCurrency(budgetData.accumulatedGap)}
-                      </motion.p>
-                    </div>
-
-                    <div className="space-y-2 text-xs md:text-sm text-white/95 font-medium">
-                      <div className="flex items-center gap-2">
-                        <span className="text-lg">⏰</span>
-                        <span>Días para recuperar: <strong className="text-white font-black">{budgetData.remainingDays} días</strong></span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-lg">📈</span>
-                        <span>Presupuesto ajustado hoy: <strong className="text-white font-black">{formatCurrency(budgetData.adjustedDailyBudget)}</strong></span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-lg">🎯</span>
-                        <span>Base normal: <strong className="text-white font-black line-through opacity-70">{formatCurrency(budgetData.dailyBaseBudget)}</strong></span>
-                      </div>
-                    </div>
-
-                    <motion.div
-                      animate={{ opacity: [1, 0.7, 1] }}
-                      transition={{ duration: 1.2, repeat: Infinity }}
-                      className="mt-3 bg-yellow-400/90 rounded-lg p-2 md:p-3 border-2 border-yellow-300"
-                    >
-                      <p className="text-xs md:text-sm font-black text-red-900 text-center">
-                        ⚡ ACCIÓN URGENTE: Se redistribuyó {formatCurrency(budgetData.accumulatedGap * 0.5)} entre los días restantes
-                      </p>
-                    </motion.div>
-                  </div>
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
 
           {/* Sin Presupuesto - Mensaje */}
           {budgetData?.noBudget ? (
@@ -444,9 +357,14 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                   <p className="text-xs md:text-sm text-white/80 font-medium">Meta del Día</p>
                 </div>
                 {needsRecovery && (
-                  <div className="px-1.5 md:px-2 py-0.5 md:py-1 bg-amber-100/60 rounded-full">
-                    <p className="text-[8px] md:text-[10px] font-black text-amber-700">AJUSTADO</p>
-                  </div>
+                  <motion.div
+                    animate={{ scale: [1, 1.05, 1] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                    className="flex items-center gap-1.5 px-2 md:px-3 py-1 bg-red-500/90 rounded-full border-2 border-white/50"
+                  >
+                    <AlertTriangle className="w-3 h-3 text-white" />
+                    <p className="text-[9px] md:text-[11px] font-black text-white">BRECHA: {formatCurrency(budgetData.accumulatedGap)}</p>
+                  </motion.div>
                 )}
               </div>
 
