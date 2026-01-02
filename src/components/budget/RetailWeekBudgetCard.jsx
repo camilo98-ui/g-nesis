@@ -404,7 +404,13 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                     initial={{ width: 0 }}
                     animate={{ width: `${Math.min(budgetData.projectionCompliance, 100)}%` }}
                     transition={{ duration: 1, ease: "easeOut" }}
-                    className="h-full bg-white rounded-full"
+                    className={`h-full rounded-full ${
+                      budgetData.projectionCompliance >= 100 
+                        ? 'bg-gradient-to-r from-emerald-400 to-green-300' 
+                        : budgetData.projectionCompliance >= 85
+                        ? 'bg-gradient-to-r from-amber-300 to-yellow-200'
+                        : 'bg-gradient-to-r from-orange-300 to-red-300'
+                    }`}
                   />
                 </div>
                 <p className="text-[8px] md:text-[10px] text-white/50">
