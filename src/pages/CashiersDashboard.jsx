@@ -282,7 +282,7 @@ export default function CashiersDashboard() {
               <Settings className="w-4 h-4" />
               Config Insignias
             </Button>
-            <PerformanceAnalyzer storeId={selectedStore} storeName={getDisplayName(selectedStore)} />
+            <PerformanceAnalyzer storeId={selectedStore} storeName={getDisplayName(selectedStore)} dateRange={dateRange} />
             <StoreSelector selectedStore={selectedStore} onStoreChange={handleStoreChange} />
             <DateFilter dateRange={dateRange} onDateChange={setDateRange} />
           </div>
@@ -480,7 +480,7 @@ export default function CashiersDashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Ranking visual con barras */}
               <div className="lg:col-span-1">
-                <CashierRanking storeId={selectedStore} onSelectCashier={setSelectedCashier} />
+                <CashierRanking storeId={selectedStore} onSelectCashier={setSelectedCashier} dateRange={dateRange} />
               </div>
 
               {/* Detalle del Cajero */}
@@ -499,6 +499,7 @@ export default function CashiersDashboard() {
                     cashier={selectedCashier}
                     storeCode={selectedStore}
                     shiftRecords={shiftRecords}
+                    dateRange={dateRange}
                     teamAvg={{
                       avgSales: teamTotals.avgSales,
                       avgTicket: teamTotals.avgTicket
@@ -509,7 +510,8 @@ export default function CashiersDashboard() {
                       <CashierAnalysis
                     cashierId={selectedCashier.id}
                     cashierName={selectedCashier.name}
-                    storeId={selectedStore} />
+                    storeId={selectedStore}
+                    dateRange={dateRange} />
 
 
                       {/* Stats adicionales - PROMEDIOS */}
@@ -559,7 +561,8 @@ export default function CashiersDashboard() {
                       cashierId={selectedCashier.id}
                       cashierName={selectedCashier.name}
                       storeId={selectedStore}
-                      shiftRecords={shiftRecords} />
+                      shiftRecords={shiftRecords}
+                      dateRange={dateRange} />
 
                       </div>
 
@@ -590,7 +593,8 @@ export default function CashiersDashboard() {
             <CashierAssignmentSuggestion
             storeId={selectedStore}
             cashiers={activeCashiers}
-            shiftRecords={shiftRecords} />
+            shiftRecords={shiftRecords}
+            dateRange={dateRange} />
 
 
             {/* Top 3 Highlight */}
