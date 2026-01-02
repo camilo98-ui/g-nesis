@@ -241,21 +241,36 @@ export default function FreezerMap() {
   const numRows = freezerDimensions[currentFreezer]?.rows || 7;
   const numCols = freezerDimensions[currentFreezer]?.cols || 5;
 
-  // Cargar sabores personalizados al inicio
+  // Cargar sabores personalizados al inicio y mantener sincronizado
   useEffect(() => {
     const saved = localStorage.getItem('selectedStore');
     if (saved) setSelectedStore(saved);
     
     // Cargar sabores personalizados del localStorage
-    const savedFlavors = localStorage.getItem('customFlavors');
-    if (savedFlavors) {
-      try {
-        const parsed = JSON.parse(savedFlavors);
-        setCustomFlavors(parsed);
-      } catch (e) {
-        console.error('Error cargando sabores personalizados:', e);
+    const loadCustomFlavors = () => {
+      const savedFlavors = localStorage.getItem('customFlavors');
+      if (savedFlavors) {
+        try {
+          const parsed = JSON.parse(savedFlavors);
+          setCustomFlavors(parsed);
+        } catch (e) {
+          console.error('Error cargando sabores personalizados:', e);
+          localStorage.removeItem('customFlavors');
+        }
       }
-    }
+    };
+    
+    loadCustomFlavors();
+    
+    // Listener para cambios en localStorage (para sincronizar entre pestañas)
+    const handleStorageChange = (e) => {
+      if (e.key === 'customFlavors') {
+        loadCustomFlavors();
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   const handleStoreChange = (store) => {
@@ -271,9 +286,11 @@ export default function FreezerMap() {
       return result;
     },
     enabled: !!selectedStore,
-    staleTime: 1000,
-    refetchOnMount: true,
-    refetchOnWindowFocus: false
+    staleTime: 0, // Sin caché para siempre tener datos frescos
+    cacheTime: 0, // No guardar en caché
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true, // Recargar cuando vuelve a la app en móvil
+    refetchOnReconnect: true // Recargar cuando se reconecta internet
   });
 
   // Fetch todas las neveras para análisis completo
@@ -374,12 +391,19 @@ export default function FreezerMap() {
       return await base44.entities.FreezerSlot.update(id, editableFields);
     },
     onSuccess: async (data, variables) => {
+      // Invalidar queries y esperar a que se actualicen
       await queryClient.invalidateQueries(['freezerSlots']);
       await queryClient.invalidateQueries(['allFreezersSlots']);
+      
+      // Forzar refetch inmediato para obtener datos actualizados
       await refetch();
+      
+      // Esperar un poco más en móvil para asegurar que se guardó
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       setSavingSlot({ row: variables.slotData.row, position: variables.slotData.position, success: true });
       setTimeout(() => setSavingSlot(null), 1000);
-      toast.success('✓ Guardado');
+      toast.success('✓ Sabor guardado');
     },
     onError: (error) => {
       console.error('Error al guardar slot:', error);
@@ -432,8 +456,8 @@ export default function FreezerMap() {
     setShowFlavorSelector(true);
   };
 
-  // Seleccionar sabor - CORREGIDO: mantener slot_type del slot clickeado
-  const handleFlavorSelect = (flavor) => {
+  // Seleccionar sabor - CORREGIDO: mantener slot_type y todos los datos
+  const handleFlavorSelect = async (flavor) => {
     if (!selectedSlot) return;
 
     // CRÍTICO: usar el slot_type del slot que fue clickeado
@@ -442,8 +466,15 @@ export default function FreezerMap() {
     setUndoStack((prev) => [...prev.slice(-9), { action: 'edit', slot: { ...selectedSlot } }]);
     setSavingSlot({ row: selectedSlot.row, position: selectedSlot.position, saving: true });
 
+    // Buscar el slot existente ANTES de crear slotData
+    const existing = slots.find((s) =>
+      s.store_id === `${selectedStore}_F${currentFreezer}` &&
+      s.row === selectedSlot.row &&
+      s.position === selectedSlot.position &&
+      s.slot_type === slotType
+    );
+
     const slotData = {
-      store_id: `${selectedStore}_F${currentFreezer}`,
       row: selectedSlot.row,
       position: selectedSlot.position,
       slot_type: slotType,
@@ -454,15 +485,16 @@ export default function FreezerMap() {
       stock_level: 'full'
     };
 
-    const existing = slots.find((s) =>
-      s.store_id === `${selectedStore}_F${currentFreezer}` &&
-      s.row === selectedSlot.row &&
-      s.position === selectedSlot.position &&
-      s.slot_type === slotType
-    );
+    // Si existe, agregar el ID pero NO store_id (se mantiene automáticamente)
+    // Si es nuevo, agregar store_id
+    if (existing?.id) {
+      slotData.id = existing.id;
+    } else {
+      slotData.store_id = `${selectedStore}_F${currentFreezer}`;
+    }
 
     updateSlotMutation.mutate({
-      slotData: existing ? { ...slotData, id: existing.id } : slotData,
+      slotData,
       isNew: !existing
     });
 
@@ -1279,10 +1311,19 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                         const updatedCustomFlavors = [...customFlavors, flavorToAdd];
                         setCustomFlavors(updatedCustomFlavors);
                         
-                        // Guardar en localStorage para persistencia
-                        localStorage.setItem('customFlavors', JSON.stringify(updatedCustomFlavors));
+                        // Guardar en localStorage con verificación
+                        try {
+                          localStorage.setItem('customFlavors', JSON.stringify(updatedCustomFlavors));
+                          // Verificar que se guardó correctamente
+                          const verification = localStorage.getItem('customFlavors');
+                          if (!verification) {
+                            throw new Error('No se pudo guardar en localStorage');
+                          }
+                          toast.success(`✓ Sabor "${newFlavor.name}" guardado permanentemente`);
+                        } catch (error) {
+                          toast.error('Error al guardar sabor: ' + error.message);
+                        }
                         
-                        toast.success(`Sabor "${newFlavor.name}" agregado y guardado`);
                         setNewFlavor({ name: '', color: '#FFB5C5', line: 'gourmet' });
                         setShowAddFlavor(false);
                       }
