@@ -101,7 +101,7 @@ export default function ExecutiveDashboard() {
       const budget = activeBudget || allBudgets.find(b => b.store_id === store.code && b.month === currentMonth && b.year === currentYear);
       const salesBudget = budget?.sales_budget || 0;
 
-      const TARGET_PERCENTAGE = 1.02;
+      const TARGET_PERCENTAGE = 1.15;
       const adjustedMonthlyBudget = salesBudget * TARGET_PERCENTAGE;
       const dailyBaseBudget = adjustedMonthlyBudget / daysInMonth;
 

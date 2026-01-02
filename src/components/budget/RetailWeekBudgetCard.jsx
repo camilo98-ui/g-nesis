@@ -112,8 +112,8 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       totalWeeklyAvg > 0 ? avg / totalWeeklyAvg : 1/7
     );
 
-    // Calcular presupuesto base usando el 102% del presupuesto mensual para cumplir meta alcanzable
-    const TARGET_PERCENTAGE = 1.02; // 102% del presupuesto
+    // Calcular presupuesto base usando el 115% del presupuesto mensual para cumplir meta alcanzable
+    const TARGET_PERCENTAGE = 1.15; // 115% del presupuesto
     const adjustedMonthlyBudget = activeBudget.sales_budget * TARGET_PERCENTAGE;
     const dailyBaseBudget = adjustedMonthlyBudget / daysInMonth;
 
