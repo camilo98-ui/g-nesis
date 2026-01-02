@@ -59,6 +59,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
     const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd }).length;
 
     // Analizar histórico de ventas por día de la semana (0=Domingo, 6=Sábado)
+    // INCLUYE TODOS LOS DATOS HISTÓRICOS, no solo del mes actual
     const salesByDayOfWeek = [0, 0, 0, 0, 0, 0, 0]; // Sum
     const countByDayOfWeek = [0, 0, 0, 0, 0, 0, 0]; // Count
 
@@ -66,16 +67,28 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       try {
         const saleDate = parseISO(s.date);
         const dayOfWeek = saleDate.getDay(); // 0=Dom, 1=Lun, ..., 6=Sáb
-        salesByDayOfWeek[dayOfWeek] += s.total_sales || 0;
-        countByDayOfWeek[dayOfWeek]++;
-      } catch {}
+        if (s.total_sales && s.total_sales > 0) { // Solo contar días con ventas reales
+          salesByDayOfWeek[dayOfWeek] += s.total_sales;
+          countByDayOfWeek[dayOfWeek]++;
+        }
+      } catch (error) {
+        console.error('Error parsing date:', s.date, error);
+      }
     });
 
-    // Promedio histórico del día de la semana actual
+    // Promedio histórico del día de la semana actual (ej: promedio de todos los jueves)
     const todayDayOfWeek = now.getDay();
     const historicalAvgToday = countByDayOfWeek[todayDayOfWeek] > 0 
       ? salesByDayOfWeek[todayDayOfWeek] / countByDayOfWeek[todayDayOfWeek]
       : 0;
+    
+    // Log para debug
+    console.log('📊 Histórico día actual:', {
+      dia: format(now, 'EEEE', { locale: es }),
+      promedio: historicalAvgToday,
+      cantidadDias: countByDayOfWeek[todayDayOfWeek],
+      totalVentas: salesByDayOfWeek[todayDayOfWeek]
+    });
 
     // Calcular promedio por día de semana
     const avgByDayOfWeek = salesByDayOfWeek.map((sum, idx) => 
