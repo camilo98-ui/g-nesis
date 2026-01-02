@@ -124,7 +124,9 @@ export default function ExecutiveDashboard() {
       // Presupuesto semanal - suma de presupuestos diarios de la semana que caen en el mes
       const daysInCurrentWeek = eachDayOfInterval({ start: currentWeekStart, end: currentWeekEnd })
         .filter(d => d >= monthStart && d <= monthEnd);
-      const weeklyBudget = daysInCurrentWeek.reduce((sum, day) => sum + getDailyBudget(day), 0);
+      // Meta semanal más agresiva: 120% del presupuesto base
+      const WEEKLY_TARGET = 1.20;
+      const weeklyBudget = daysInCurrentWeek.reduce((sum, day) => sum + getDailyBudget(day), 0) * WEEKLY_TARGET;
 
       // VENTAS DE LA SEMANA ACTUAL
       const weekSales = storeSales.filter(s => {
