@@ -146,7 +146,6 @@ const MENU_ITEMS = [
 
 
 
-
 export default function Home() {
   const [selectedStore, setSelectedStore] = useState('');
   const [showNotifications, setShowNotifications] = useState(false);
@@ -685,70 +684,6 @@ export default function Home() {
 
         {/* Desktop View */}
         <div className="hidden lg:flex min-h-screen relative z-10">
-          <div className="w-[45%] px-12 py-12 flex flex-col justify-center">
-            <div className="max-w-lg">
-              <motion.img
-                src={LOGO_URL}
-                alt="Popsy Management"
-                className="h-28 xl:h-32 object-contain mb-12 drop-shadow-2xl"
-                animate={{ y: [0, -8, 0] }}
-                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-              />
-
-              <div className="space-y-6">
-                <div>
-                  <motion.h1 
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-4xl xl:text-5xl font-black leading-tight mb-4"
-                  >
-                    <span className="text-slate-900">Bienvenido a</span><br />
-                    <span className="bg-gradient-to-r from-rose-400 to-purple-400 bg-clip-text text-transparent">
-                      Popsy Management
-                    </span>
-                  </motion.h1>
-                  <p className="text-lg text-slate-700 leading-relaxed font-medium">Gestión empresarial inteligente para equipos de alto impacto 🚀</p>
-                </div>
-
-                <div className="space-y-5 pt-4">
-                  {[
-                    { icon: TrendingUp, title: 'Métricas en tiempo real', text: 'Monitoreo continuo del desempeño', gradient: 'from-rose-300 to-pink-300' },
-                    { icon: Users, title: 'Gestión de equipos', text: 'Optimiza recursos y productividad', gradient: 'from-purple-300 to-indigo-300' },
-                    { icon: Target, title: 'Logro de objetivos', text: 'Cumple metas con análisis predictivo', gradient: 'from-blue-300 to-cyan-300' }
-                  ].map((feature, i) => (
-                    <motion.div 
-                      key={i} 
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.2 }}
-                      className="flex items-start gap-4"
-                    >
-                      <motion.div 
-                        whileHover={{ rotate: 5, scale: 1.1 }}
-                        className={`w-12 h-12 rounded-xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center flex-shrink-0 shadow-lg`}
-                      >
-                        <feature.icon className="w-6 h-6 text-white" />
-                      </motion.div>
-                      <div className="pt-2">
-                        <p className="text-slate-900 font-bold text-base mb-1">{feature.title}</p>
-                        <p className="text-slate-600 text-sm leading-relaxed">{feature.text}</p>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="w-[55%] flex items-center justify-center p-10">
-            <div className="w-full max-w-lg">
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="bg-white/90 backdrop-blur-2xl rounded-3xl shadow-2xl border-2 border-white/60 p-8 space-y-6"
-                style={{ boxShadow: '0 25px 80px -15px rgba(217, 70, 239, 0.3), 0 10px 30px -10px rgba(0, 0, 0, 0.15)' }}>
-        {/* Desktop View */}
-        <div className="hidden lg:flex min-h-screen relative z-10">
           <div className="w-[40%] px-10 xl:px-12 py-8 flex flex-col justify-center">
             <div className="max-w-lg">
               <motion.img
@@ -804,13 +739,164 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="w-[60%] flex items-center justify-center p-8 xl:p-12">
+          <div className="w-[60%] flex items-center justify-center p-8 xl:p-10">
             <div className="w-full max-w-lg">
               <motion.div 
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 className="bg-white/90 backdrop-blur-2xl rounded-3xl shadow-2xl border-2 border-white/60 p-7 xl:p-8 space-y-5"
                 style={{ boxShadow: '0 25px 80px -15px rgba(217, 70, 239, 0.3), 0 10px 30px -10px rgba(0, 0, 0, 0.15)' }}>
+                
+                <div className="text-center">
+                  <h2 className="text-3xl font-black bg-gradient-to-r from-rose-400 to-purple-400 bg-clip-text text-transparent mb-2">Iniciar sesión</h2>
+                  <p className="text-sm text-slate-700 font-medium">Selecciona tu rol y comienza</p>
+                </div>
+
+                <div className="space-y-3">
+                  {ROLES.map((role) => {
+                    const isSelected = selectedRole === role.id;
+                    const lastUsedRole = localStorage.getItem('lastSelectedRole');
+                    const isLastUsed = role.id === lastUsedRole && !isSelected;
+
+                    return (
+                      <button
+                        key={role.id}
+                        onClick={() => {
+                          setSelectedRole(role.id);
+                          setLoginError('');
+                          localStorage.setItem('lastSelectedRole', role.id);
+                        }}
+                        className={`relative w-full p-4 rounded-2xl border-2 transition-all duration-300 text-left flex items-center gap-3 ${
+                          isSelected
+                            ? 'border-rose-200 bg-gradient-to-r from-rose-100 to-purple-100 shadow-xl shadow-rose-200/40 scale-[1.01]'
+                            : 'border-slate-200 bg-white/70 backdrop-blur-sm hover:border-rose-200 hover:shadow-lg hover:scale-[1.01]'
+                        }`}
+                      >
+                        {isLastUsed && (
+                          <motion.div 
+                            animate={{ scale: [1, 1.05, 1] }}
+                            transition={{ duration: 2, repeat: Infinity }}
+                            className="absolute -top-2 right-3 px-2.5 py-0.5 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full text-[10px] font-bold text-white shadow-lg"
+                          >
+                            ✨ Reciente
+                          </motion.div>
+                        )}
+                        <motion.div 
+                          animate={isSelected ? { rotate: [0, 5, -5, 0] } : {}}
+                          transition={{ duration: 2, repeat: Infinity }}
+                          className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-all shadow-lg ${
+                          isSelected ? 'bg-white/60 backdrop-blur-sm' : 'bg-gradient-to-br from-rose-50 to-purple-50'
+                          }`}>
+                          <div className="w-6 h-6">
+                            <RoleIcon roleId={role.id} isSelected={isSelected} />
+                          </div>
+                        </motion.div>
+                        <div className="flex-1 min-w-0">
+                          <p className={`text-base font-bold mb-0.5 ${isSelected ? 'text-slate-800' : 'text-slate-900'}`}>{role.name}</p>
+                          <p className={`text-xs leading-snug ${isSelected ? 'text-slate-600' : 'text-slate-600'}`}>{role.description}</p>
+                        </div>
+                        {isSelected && (
+                          <motion.div 
+                            initial={{ scale: 0, rotate: -180 }}
+                            animate={{ scale: 1, rotate: 0 }}
+                            className="w-6 h-6 rounded-full bg-white flex items-center justify-center flex-shrink-0 shadow-lg"
+                          >
+                            <CheckCircle className="w-4 h-4 text-rose-500" strokeWidth={3} />
+                          </motion.div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {selectedRole === 'gerente' && (
+                  <div className="p-3 bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-xl">
+                    <p className="text-xs text-blue-700 flex items-center gap-2 font-medium">
+                      <Info className="w-4 h-4 flex-shrink-0" />
+                      Acceso a panel ejecutivo global
+                    </p>
+                  </div>
+                )}
+
+                {selectedRole && selectedRole !== 'gerente' && (
+                  <div>
+                    <label className="block text-sm font-bold text-slate-900 mb-2">Selecciona tu tienda</label>
+                    <StoreSelector selectedStore={pendingStore} onStoreChange={handleStoreSelect} />
+                  </div>
+                )}
+
+                {selectedRole && (
+                  <div>
+                    <label htmlFor="login-password-desktop" className="block text-sm font-bold text-slate-900 mb-2">
+                      Contraseña
+                    </label>
+                    <div className="relative">
+                      <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <input
+                        id="login-password-desktop"
+                        type={showLoginPassword ? "text" : "password"}
+                        placeholder="••••••"
+                        value={loginPassword}
+                        onChange={(e) => {setLoginPassword(e.target.value);setLoginError('');}}
+                        onKeyDown={(e) => e.key === 'Enter' && !isSubmitting && handleLogin()}
+                        disabled={isSubmitting}
+                        autoComplete="current-password"
+                        className="w-full pl-11 pr-11 py-3.5 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none text-sm text-slate-900 placeholder:text-slate-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowLoginPassword(!showLoginPassword)}
+                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                      >
+                        {showLoginPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                    <p className="text-[11px] text-slate-500 mt-1.5">Contraseña asignada por la empresa</p>
+                  </div>
+                )}
+
+                {loginError && (
+                  <div className="p-3 bg-gradient-to-r from-red-50 to-pink-50 border-2 border-red-200 rounded-xl">
+                    <p className="text-red-600 text-xs flex items-center gap-2 font-medium">
+                      <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                      {loginError}
+                    </p>
+                  </div>
+                )}
+
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Button
+                    onClick={handleLogin}
+                    disabled={(selectedRole !== 'gerente' && !pendingStore) || !selectedRole || isSubmitting}
+                    className="w-full bg-gradient-to-r from-rose-400 to-purple-400 hover:from-rose-500 hover:to-purple-500 text-white py-4 rounded-xl font-black text-base shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                  >
+                  {isSubmitting ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Entrando...
+                    </span>
+                  ) : (
+                    <span className="flex flex-col items-center">
+                      <span className="text-base font-black">Entrar 🚀</span>
+                      {selectedRole && (
+                        <span className="text-xs font-medium text-white/90 mt-0.5">
+                          Como {ROLES.find(r => r.id === selectedRole)?.name}
+                        </span>
+                      )}
+                    </span>
+                  )}
+                </Button>
+                </motion.div>
+
+                <div className="text-center">
+                  <Link to={createPageUrl('ExecutiveDashboard')} className="text-xs text-slate-400 hover:text-rose-400 transition-colors inline-block">
+                    Acceso administrativo
+                  </Link>
+                </div>
+              </motion.div>
+            </div>
+          </div>
+        </div>
 
         {/* Success Animation */}
         {loginSuccess && (
