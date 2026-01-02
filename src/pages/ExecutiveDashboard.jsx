@@ -328,6 +328,31 @@ export default function ExecutiveDashboard() {
         const comparison = a.salesCompliance - b.salesCompliance;
         return sortConfig.direction === 'asc' ? comparison : -comparison;
       });
+    } else if (sortConfig.key === 'dailyBudget') {
+      sorted.sort((a, b) => {
+        const comparison = a.dailyBudget - b.dailyBudget;
+        return sortConfig.direction === 'asc' ? comparison : -comparison;
+      });
+    } else if (sortConfig.key === 'weeklyBudget') {
+      sorted.sort((a, b) => {
+        const comparison = a.weeklyBudget - b.weeklyBudget;
+        return sortConfig.direction === 'asc' ? comparison : -comparison;
+      });
+    } else if (sortConfig.key === 'weekCompliance') {
+      sorted.sort((a, b) => {
+        const comparison = a.weekCompliance - b.weekCompliance;
+        return sortConfig.direction === 'asc' ? comparison : -comparison;
+      });
+    } else if (sortConfig.key === 'weekProjection') {
+      sorted.sort((a, b) => {
+        const comparison = a.weekProjection - b.weekProjection;
+        return sortConfig.direction === 'asc' ? comparison : -comparison;
+      });
+    } else if (sortConfig.key === 'monthProjection') {
+      sorted.sort((a, b) => {
+        const comparison = a.monthProjection - b.monthProjection;
+        return sortConfig.direction === 'asc' ? comparison : -comparison;
+      });
     } else if (sortConfig.key === 'sales') {
       sorted.sort((a, b) => {
         const comparison = a.totalSales - b.totalSales;
@@ -751,76 +776,58 @@ Genera:
                           {sortConfig.key === 'name' && (sortConfig.direction === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />)}
                         </div>
                       </th>
-                      <th className="text-right py-3 px-2 text-[10px] font-bold text-orange-400 uppercase tracking-wider">
-                        <div className="flex flex-col items-end gap-1">
-                          <span>PPT Hoy</span>
-                          <select
-                            onChange={(e) => setColumnFilters({...columnFilters, dailyBudget: e.target.value})}
-                            onClick={(e) => e.stopPropagation()}
-                            className="text-[9px] bg-white/5 border border-white/10 rounded px-1 py-0.5 text-slate-300 cursor-pointer"
-                          >
-                            <option value="">Todos</option>
-                            <option value="0-3">{'<'}3M</option>
-                            <option value="3-5">3-5M</option>
-                            <option value="5-100">{'>'}5M</option>
-                          </select>
+                      <th 
+                        onClick={() => handleSort('dailyBudget')}
+                        className="text-right py-3 px-2 text-[10px] font-bold text-orange-400 uppercase tracking-wider cursor-pointer"
+                      >
+                        <div className="flex items-center justify-end gap-2">
+                          PPT Hoy
+                          {sortConfig.key === 'dailyBudget' && (sortConfig.direction === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />)}
                         </div>
                       </th>
-                      <th className="text-right py-3 px-2 text-[10px] font-bold text-cyan-400 uppercase tracking-wider">
-                        <div className="flex flex-col items-end gap-1">
-                          <span>PPT Sem</span>
-                          <select
-                            onChange={(e) => setColumnFilters({...columnFilters, weeklyBudget: e.target.value})}
-                            onClick={(e) => e.stopPropagation()}
-                            className="text-[9px] bg-white/5 border border-white/10 rounded px-1 py-0.5 text-slate-300 cursor-pointer"
-                          >
-                            <option value="">Todos</option>
-                            <option value="0-15">{'<'}15M</option>
-                            <option value="15-25">15-25M</option>
-                            <option value="25-100">{'>'}25M</option>
-                          </select>
+                      <th 
+                        onClick={() => handleSort('weeklyBudget')}
+                        className="text-right py-3 px-2 text-[10px] font-bold text-cyan-400 uppercase tracking-wider cursor-pointer"
+                      >
+                        <div className="flex items-center justify-end gap-2">
+                          PPT Sem
+                          {sortConfig.key === 'weeklyBudget' && (sortConfig.direction === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />)}
                         </div>
                       </th>
-                      <th className="text-right py-3 px-2 text-[10px] font-bold text-purple-400 uppercase tracking-wider">
-                        <div className="flex flex-col items-end gap-1">
-                          <span>Venta Sem</span>
-                          <select
-                            onChange={(e) => setColumnFilters({...columnFilters, weekCompliance: e.target.value})}
-                            onClick={(e) => e.stopPropagation()}
-                            className="text-[9px] bg-white/5 border border-white/10 rounded px-1 py-0.5 text-slate-300 cursor-pointer"
-                          >
-                            <option value="">Todos</option>
-                            <option value="0-70">{'<'}70%</option>
-                            <option value="70-90">70-90%</option>
-                            <option value="90-200">{'>'}90%</option>
-                          </select>
+                      <th 
+                        onClick={() => handleSort('weekCompliance')}
+                        className="text-right py-3 px-2 text-[10px] font-bold text-purple-400 uppercase tracking-wider cursor-pointer"
+                      >
+                        <div className="flex items-center justify-end gap-2">
+                          Venta Sem
+                          {sortConfig.key === 'weekCompliance' && (sortConfig.direction === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />)}
                         </div>
                       </th>
-                      <th className="text-right py-3 px-2 text-[10px] font-bold text-pink-400 uppercase tracking-wider">
-                        Proy Sem
+                      <th 
+                        onClick={() => handleSort('weekProjection')}
+                        className="text-right py-3 px-2 text-[10px] font-bold text-pink-400 uppercase tracking-wider cursor-pointer"
+                      >
+                        <div className="flex items-center justify-end gap-2">
+                          Proy Sem
+                          {sortConfig.key === 'weekProjection' && (sortConfig.direction === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />)}
+                        </div>
                       </th>
-                      <th className="text-right py-3 px-2 text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
-                        Proy Mes
+                      <th 
+                        onClick={() => handleSort('monthProjection')}
+                        className="text-right py-3 px-2 text-[10px] font-bold text-emerald-400 uppercase tracking-wider cursor-pointer"
+                      >
+                        <div className="flex items-center justify-end gap-2">
+                          Proy Mes
+                          {sortConfig.key === 'monthProjection' && (sortConfig.direction === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />)}
+                        </div>
                       </th>
                       <th 
                         onClick={() => handleSort('compliance')}
                         className="text-right py-3 px-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider cursor-pointer"
                       >
-                        <div className="flex flex-col items-end gap-1">
-                          <div className="flex items-center gap-2">
-                            % Mes
-                            {sortConfig.key === 'compliance' && (sortConfig.direction === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />)}
-                          </div>
-                          <select
-                            onChange={(e) => setColumnFilters({...columnFilters, salesCompliance: e.target.value})}
-                            onClick={(e) => e.stopPropagation()}
-                            className="text-[9px] bg-white/5 border border-white/10 rounded px-1 py-0.5 text-slate-300 cursor-pointer"
-                          >
-                            <option value="">Todos</option>
-                            <option value="0-70">{'<'}70%</option>
-                            <option value="70-90">70-90%</option>
-                            <option value="90-200">{'>'}90%</option>
-                          </select>
+                        <div className="flex items-center justify-end gap-2">
+                          % Mes
+                          {sortConfig.key === 'compliance' && (sortConfig.direction === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />)}
                         </div>
                       </th>
                     </tr>
