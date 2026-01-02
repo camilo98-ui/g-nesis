@@ -16,7 +16,7 @@ import { toast } from 'sonner';
 export default function AIScheduleOptimizer({ storeId, currentWeek, shifts, cashiers, sales, budgets, onDayScheduleClick }) {
   const [analyzing, setAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState(null);
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(false);
   const [selectedDay, setSelectedDay] = useState(null);
 
   // Obtener datos históricos (últimas 4 semanas)
@@ -181,7 +181,7 @@ export default function AIScheduleOptimizer({ storeId, currentWeek, shifts, cash
         cashiers: cashiers.length
       };
 
-      const prompt = `Eres un experto en optimización de horarios para Popsy. Analiza los siguientes datos y proporciona recomendaciones:
+      const prompt = `Eres un experto en optimización de horarios para Popsy. Analiza los siguientes datos y proporciona recomendaciones INCLUYENDO PROPUESTA DE HORARIOS:
 
 **DATOS HISTÓRICOS (últimas 4 semanas):**
 - Total de turnos: ${historicalSummary.totalShifts}
@@ -205,6 +205,11 @@ ${historicalSummary.weatherImpact.map(w => `- ${w.condition}: ${w.count} días, 
 **Desglose por día de la semana actual:**
 ${weekStats?.days.map(d => `- ${d.day}: ${d.shifts} turnos, ${d.hours.toFixed(1)}h, ${d.staff} personas`).join('\n') || ''}
 
+**RESTRICCIONES LABORALES:**
+- Jornada máxima semanal: 44 horas
+- Incluir 1 día de descanso por semana
+- Horarios operativos típicos: 9:30 AM a 9:00 PM
+
 Proporciona tu análisis en el siguiente formato JSON (sin markdown, solo JSON puro):
 {
   "demand_forecast": [
@@ -212,7 +217,16 @@ Proporciona tu análisis en el siguiente formato JSON (sin markdown, solo JSON p
       "day": "lunes",
       "predicted_demand": "alta/media/baja",
       "recommended_staff": 5,
-      "reason": "Explicación breve"
+      "reason": "Explicación breve",
+      "proposed_schedules": [
+        {
+          "shift": "Turno 1",
+          "start_time": "09:30",
+          "end_time": "17:30",
+          "role": "caja",
+          "hours": 8
+        }
+      ]
     }
   ],
   "optimization_suggestions": [
@@ -245,7 +259,20 @@ Proporciona tu análisis en el siguiente formato JSON (sin markdown, solo JSON p
                   day: { type: 'string' },
                   predicted_demand: { type: 'string' },
                   recommended_staff: { type: 'number' },
-                  reason: { type: 'string' }
+                  reason: { type: 'string' },
+                  proposed_schedules: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        shift: { type: 'string' },
+                        start_time: { type: 'string' },
+                        end_time: { type: 'string' },
+                        role: { type: 'string' },
+                        hours: { type: 'number' }
+                      }
+                    }
+                  }
                 }
               }
             },
@@ -436,23 +463,46 @@ Proporciona tu análisis en el siguiente formato JSON (sin markdown, solo JSON p
                               className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-blue-50 cursor-pointer transition-all hover:shadow-md"
                             >
                               <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <Calendar className="w-4 h-4 text-gray-500" />
-                                  <span className="font-bold text-gray-800 capitalize">{forecast.day}</span>
-                                  <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${getDemandColor(forecast.predicted_demand)}`}>
-                                    {forecast.predicted_demand}
-                                  </span>
-                                  {selectedDay === forecast.day && (
-                                    <span className="text-xs bg-blue-500 text-white px-2 py-0.5 rounded-full animate-pulse">
-                                      Seleccionado
-                                    </span>
-                                  )}
-                                </div>
-                                <p className="text-xs text-gray-600">{forecast.reason}</p>
+                               <div className="flex items-center gap-2 mb-1">
+                                 <Calendar className="w-4 h-4 text-gray-500" />
+                                 <span className="font-bold text-gray-800 capitalize">{forecast.day}</span>
+                                 <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${getDemandColor(forecast.predicted_demand)}`}>
+                                   {forecast.predicted_demand}
+                                 </span>
+                                 {selectedDay === forecast.day && (
+                                   <span className="text-xs bg-blue-500 text-white px-2 py-0.5 rounded-full animate-pulse">
+                                     Seleccionado
+                                   </span>
+                                 )}
+                               </div>
+                               <p className="text-xs text-gray-600 mb-2">{forecast.reason}</p>
+
+                               {/* Horarios propuestos */}
+                               {forecast.proposed_schedules && forecast.proposed_schedules.length > 0 && (
+                                 <div className="mt-2 space-y-1">
+                                   <p className="text-xs font-bold text-gray-700">Horarios propuestos:</p>
+                                   {forecast.proposed_schedules.map((schedule, schedIdx) => (
+                                     <div key={schedIdx} className="flex items-center gap-2 text-xs bg-white rounded px-2 py-1">
+                                       <Clock className="w-3 h-3 text-blue-500" />
+                                       <span className="font-medium">{schedule.shift}:</span>
+                                       <span className="text-gray-600">{schedule.start_time} - {schedule.end_time}</span>
+                                       <span className="text-gray-500">({schedule.hours}h)</span>
+                                       <span className="text-purple-600 ml-auto">{schedule.role}</span>
+                                     </div>
+                                   ))}
+                                 </div>
+                               )}
                               </div>
-                              <div className="flex items-center gap-1 bg-blue-100 px-3 py-1 rounded-full">
-                                <Users className="w-4 h-4 text-blue-600" />
-                                <span className="font-bold text-blue-600">{forecast.recommended_staff}</span>
+                              <div className="flex flex-col items-center gap-1">
+                               <div className="flex items-center gap-1 bg-blue-100 px-3 py-1 rounded-full">
+                                 <Users className="w-4 h-4 text-blue-600" />
+                                 <span className="font-bold text-blue-600">{forecast.recommended_staff}</span>
+                               </div>
+                               {forecast.proposed_schedules && (
+                                 <span className="text-xs text-gray-500">
+                                   {forecast.proposed_schedules.reduce((sum, s) => sum + s.hours, 0)}h
+                                 </span>
+                               )}
                               </div>
                             </motion.div>
                           );
