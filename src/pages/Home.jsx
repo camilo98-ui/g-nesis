@@ -206,7 +206,7 @@ export default function Home() {
   // Iconos profesionales por rol con colores dinámicos
   const RoleIcon = ({ roleId, isSelected }) => {
     const role = ROLES.find((r) => r.id === roleId);
-    const iconColor = isSelected ? '#ffffff' : role?.iconBaseColor || '#6b7280';
+    const iconColor = role?.iconBaseColor || '#6b7280';
 
     if (roleId === 'gerente') {
       // Maletín ejecutivo con color
