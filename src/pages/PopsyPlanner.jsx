@@ -106,14 +106,12 @@ export default function PopsyPlanner() {
           className="mb-6 bg-white rounded-2xl shadow-lg p-4 border border-gray-100">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={handleBack}
-                className="text-pink-600 hover:text-pink-700 hover:bg-pink-50 transition-all"
+              <button 
+                onClick={() => window.history.back()}
+                className="text-pink-600 hover:text-pink-700 p-2 rounded-lg hover:bg-pink-50 transition-colors"
               >
                 <ArrowLeft className="w-6 h-6" />
-              </Button>
+              </button>
               <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 3, repeat: Infinity }}
                 className="w-12 h-12 bg-gradient-to-br from-rose-400 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
                 <CalendarIcon className="w-6 h-6 text-white" />
