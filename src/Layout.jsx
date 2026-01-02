@@ -119,19 +119,13 @@ export default function Layout({ children, currentPageName }) {
   return (
     <DateFilterProvider>
       <ErrorBoundary>
-        <div className="min-h-screen app-container">
+        <div className="min-h-screen">
           {/* Date Filter Bar */}
           {currentPageName !== 'Home' && <DateFilterBar />}
 
           {/* Main Content */}
-          <main className="pt-4 min-h-screen pb-4 relative">
-          {/* Simplified Static Background */}
-          <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none app-background">
-            <div className="absolute top-20 right-[10%] w-[500px] h-[500px] theme-orb-1 rounded-full blur-3xl opacity-40" />
-            <div className="absolute bottom-20 left-[15%] w-[600px] h-[600px] theme-orb-2 rounded-full blur-3xl opacity-30" />
-          </div>
-
-          <div className="container mx-auto px-2 sm:px-4 relative z-10">
+          <main className="pt-4 min-h-screen pb-4">
+          <div className="container mx-auto px-2 sm:px-4">
             {children}
           </div>
         </main>
