@@ -115,10 +115,18 @@ export default function Layout({ children, currentPageName }) {
         <div className="min-h-screen app-container">
           {/* Main Content */}
           <main className="pt-4 min-h-screen pb-4 relative">
-          {/* Simplified Static Background */}
-          <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none app-background">
-            <div className="absolute top-20 right-[10%] w-[500px] h-[500px] theme-orb-1 rounded-full blur-3xl opacity-40" />
-            <div className="absolute bottom-20 left-[15%] w-[600px] h-[600px] theme-orb-2 rounded-full blur-3xl opacity-30" />
+          {/* Professional Gradient Background */}
+          <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+            {/* Base gradient */}
+            <div className="absolute inset-0 bg-gradient-to-br from-pink-50/40 via-purple-50/30 to-blue-50/40" />
+
+            {/* Animated orbs */}
+            <div className="absolute top-20 right-[10%] w-[500px] h-[500px] bg-gradient-to-br from-pink-300/20 via-rose-300/15 to-transparent rounded-full blur-3xl animate-pulse" />
+            <div className="absolute bottom-20 left-[15%] w-[600px] h-[600px] bg-gradient-to-br from-purple-300/15 via-indigo-300/10 to-transparent rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+            <div className="absolute top-1/3 left-1/3 w-[400px] h-[400px] bg-gradient-to-br from-blue-300/10 via-cyan-300/8 to-transparent rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+
+            {/* Subtle grid overlay */}
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,#8882_1px,transparent_1px),linear-gradient(to_bottom,#8882_1px,transparent_1px)] bg-[size:64px_64px] opacity-20" />
           </div>
 
           <div className="container mx-auto px-2 sm:px-4 relative z-10">
