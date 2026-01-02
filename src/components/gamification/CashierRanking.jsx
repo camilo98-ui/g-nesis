@@ -353,32 +353,6 @@ export default function CashierRanking({ storeId, onSelectCashier }) {
               Ranking
             </motion.span>
           </CardTitle>
-          
-          {/* Filtros de fecha */}
-          <div className="flex items-center gap-2">
-            <WeekFilter onWeekChange={(range) => { setWeekFilter(range); }} />
-            <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
-              <PopoverTrigger asChild>
-                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    className="gap-2 border-pink-200 hover:border-pink-400 hover:bg-pink-50 rounded-full shadow-sm bg-white/80"
-                  >
-                    <CalendarRange className="w-4 h-4 text-pink-500" />
-                    <span className="font-medium text-pink-600">{getDateLabel()}</span>
-                  </Button>
-                </motion.div>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 border-0 shadow-none bg-transparent" align="center">
-                <RankingCalendar
-                  selected={dateRange}
-                  onSelect={(range) => { setDateRange(range); setWeekFilter(null); }}
-                  onApply={() => setIsCalendarOpen(false)}
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
         </div>
       </CardHeader>
       
