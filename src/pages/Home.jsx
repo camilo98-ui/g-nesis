@@ -519,7 +519,7 @@ export default function Home() {
         {/* Mobile/Tablet View */}
         <div className="lg:hidden min-h-screen flex flex-col justify-center">
           <div className="flex-1 flex flex-col justify-center px-4 py-8 max-h-screen overflow-y-auto">
-            <div className="max-w-md mx-auto w-full">
+            <div className="max-w-md mx-auto w-full bg-white/70 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/60 p-6">
               <div className="mb-8 text-center">
                 <motion.img 
                   src={LOGO_URL} 
@@ -541,7 +541,7 @@ export default function Home() {
                 <p className="text-slate-600 text-sm font-medium">Selecciona tu rol y comienza</p>
               </div>
 
-              <div className="space-y-2.5 mb-5">
+              <div className="space-y-3 mb-6">
                 {ROLES.map((role) => {
                   const isSelected = selectedRole === role.id;
                   const lastUsedRole = localStorage.getItem('lastSelectedRole');
@@ -555,10 +555,10 @@ export default function Home() {
                         setLoginError('');
                         localStorage.setItem('lastSelectedRole', role.id);
                       }}
-                      className={`relative w-full min-h-[60px] p-3.5 rounded-2xl border-2 transition-all duration-300 text-left ${
+                      className={`relative w-full min-h-[70px] p-4 rounded-2xl border-2 transition-all duration-300 text-left ${
                         isSelected
-                          ? 'border-rose-200 bg-gradient-to-r from-rose-100 to-purple-100 shadow-xl shadow-rose-200/50 scale-[1.02]'
-                          : 'border-slate-200 bg-white/80 backdrop-blur-sm active:border-rose-200 hover:scale-[1.01] hover:shadow-lg'
+                          ? 'border-rose-200/60 bg-gradient-to-r from-rose-50/80 via-pink-50/60 to-purple-50/80 shadow-xl shadow-rose-200/30 scale-[1.02]'
+                          : 'border-slate-200/50 bg-white/90 backdrop-blur-sm active:border-rose-200 hover:scale-[1.01] hover:shadow-lg'
                       }`}
                     >
                       {isLastUsed && (
@@ -603,17 +603,17 @@ export default function Home() {
               </div>
 
               {selectedRole === 'gerente' && (
-                <div className="mb-4 p-2.5 bg-blue-50 border border-blue-200 rounded-lg">
-                  <p className="text-[11px] text-blue-800 flex items-center gap-1.5">
-                    <Info className="w-3.5 h-3.5 flex-shrink-0" />
+                <div className="mb-5 p-3.5 bg-blue-50/60 backdrop-blur-sm border border-blue-200/40 rounded-xl">
+                  <p className="text-xs text-blue-700 flex items-center gap-2 font-medium">
+                    <Info className="w-4 h-4 flex-shrink-0" />
                     Acceso a panel ejecutivo global
                   </p>
                 </div>
               )}
 
               {selectedRole && selectedRole !== 'gerente' && (
-                <div className="mb-4">
-                  <label className="block text-sm font-semibold text-slate-900 mb-2 text-center">Selecciona tu tienda</label>
+                <div className="mb-5">
+                  <label className="block text-sm font-semibold text-slate-900 mb-3 text-center">Selecciona tu tienda</label>
                   <div className="max-w-sm mx-auto">
                     <StoreSelector selectedStore={pendingStore} onStoreChange={handleStoreSelect} />
                   </div>
@@ -621,8 +621,8 @@ export default function Home() {
               )}
 
               {selectedRole && (
-                <div className="mb-3">
-                  <label htmlFor="login-password" className="block text-sm font-semibold text-slate-900 mb-2">
+                <div className="mb-4">
+                  <label htmlFor="login-password" className="block text-sm font-semibold text-slate-900 mb-3">
                     Contraseña
                   </label>
                   <div className="relative">
@@ -635,7 +635,7 @@ export default function Home() {
                       onKeyDown={(e) => e.key === 'Enter' && !isSubmitting && handleLogin()}
                       disabled={isSubmitting}
                       autoComplete="current-password"
-                      className="w-full h-12 pl-4 pr-12 border-2 border-slate-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none text-base text-slate-900 placeholder:text-slate-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full h-14 pl-4 pr-12 border-2 border-slate-200/60 rounded-xl focus:ring-2 focus:ring-pink-400/50 focus:border-pink-400/50 outline-none text-base text-slate-900 placeholder:text-slate-400 disabled:opacity-50 disabled:cursor-not-allowed bg-white/80 backdrop-blur-sm"
                     />
                     <button
                       type="button"
@@ -650,9 +650,9 @@ export default function Home() {
               )}
 
               {loginError && (
-                <div className="mb-3 p-2.5 bg-red-50 border border-red-200 rounded-lg">
-                  <p className="text-[11px] text-red-700 flex items-center gap-1.5">
-                    <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
+                <div className="mb-4 p-3.5 bg-red-50/60 backdrop-blur-sm border border-red-200/40 rounded-xl">
+                  <p className="text-xs text-red-700 flex items-center gap-2 font-medium">
+                    <AlertTriangle className="w-4 h-4 flex-shrink-0" />
                     {loginError}
                   </p>
                 </div>
@@ -662,7 +662,7 @@ export default function Home() {
                 <Button
                   onClick={handleLogin}
                   disabled={(selectedRole !== 'gerente' && !pendingStore) || !selectedRole || isSubmitting}
-                  className="w-full h-12 bg-gradient-to-r from-rose-400 to-purple-400 hover:from-rose-500 hover:to-purple-500 text-white rounded-2xl font-bold text-base disabled:opacity-40 mt-4 shadow-xl"
+                  className="w-full h-14 bg-gradient-to-r from-rose-400/90 via-pink-400/90 to-purple-400/90 hover:from-rose-500 hover:to-purple-500 text-white rounded-2xl font-bold text-base disabled:opacity-40 mt-6 shadow-2xl shadow-rose-300/40"
                 >
                 {isSubmitting ? (
                   <span className="flex items-center justify-center gap-2">
