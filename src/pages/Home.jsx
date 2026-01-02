@@ -613,8 +613,10 @@ export default function Home() {
 
               {selectedRole && selectedRole !== 'gerente' && (
                 <div className="mb-4">
-                  <label className="block text-sm font-semibold text-slate-900 mb-2">Selecciona tu tienda</label>
-                  <StoreSelector selectedStore={pendingStore} onStoreChange={handleStoreSelect} />
+                  <label className="block text-sm font-semibold text-slate-900 mb-2 text-center">Selecciona tu tienda</label>
+                  <div className="max-w-sm mx-auto">
+                    <StoreSelector selectedStore={pendingStore} onStoreChange={handleStoreSelect} />
+                  </div>
                 </div>
               )}
 
@@ -820,8 +822,10 @@ export default function Home() {
 
                 {selectedRole && selectedRole !== 'gerente' && (
                   <div>
-                    <label className="block text-sm font-bold text-slate-900 mb-2">Selecciona tu tienda</label>
-                    <StoreSelector selectedStore={pendingStore} onStoreChange={handleStoreSelect} />
+                    <label className="block text-sm font-bold text-slate-900 mb-2 text-center">Selecciona tu tienda</label>
+                    <div className="max-w-md mx-auto">
+                      <StoreSelector selectedStore={pendingStore} onStoreChange={handleStoreSelect} />
+                    </div>
                   </div>
                 )}
 
