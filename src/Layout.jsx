@@ -113,9 +113,6 @@ export default function Layout({ children, currentPageName }) {
     <DateFilterProvider>
       <ErrorBoundary>
         <div className="min-h-screen app-container">
-          {/* Date Filter Bar */}
-          {currentPageName !== 'Home' && <DateFilterBar />}
-
           {/* Main Content */}
           <main className="pt-4 min-h-screen pb-4 relative">
           {/* Simplified Static Background */}
