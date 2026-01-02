@@ -42,10 +42,7 @@ export default function Layout({ children, currentPageName }) {
   return (
     <ErrorBoundary>
       <div className="min-h-screen app-container">
-        {/* Lluvia de iconos en todas las páginas */}
-        <PopsyRainingIcons />
-        
-        {/* Main Content */}
+            {/* Main Content */}
         <main className="pt-4 min-h-screen pb-4 relative">
           {/* Simplified Static Background */}
           <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none app-background">
