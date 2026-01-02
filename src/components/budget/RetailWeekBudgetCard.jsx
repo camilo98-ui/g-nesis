@@ -417,10 +417,10 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                     transition={{ duration: 1, ease: "easeOut" }}
                     className={`h-full rounded-full ${
                       budgetData.projectionCompliance >= 100 
-                        ? 'bg-gradient-to-r from-emerald-400 to-green-300' 
+                        ? 'bg-gradient-to-r from-emerald-300/80 to-green-200/80' 
                         : budgetData.projectionCompliance >= 85
-                        ? 'bg-gradient-to-r from-amber-300 to-yellow-200'
-                        : 'bg-gradient-to-r from-orange-300 to-red-300'
+                        ? 'bg-gradient-to-r from-amber-200/80 to-yellow-100/80'
+                        : 'bg-gradient-to-r from-orange-200/80 to-red-200/80'
                     }`}
                   />
                 </div>
