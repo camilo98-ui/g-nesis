@@ -940,10 +940,12 @@ export default function Home() {
           {/* Store Selector */}
           <div className="flex flex-col items-center gap-2">
             <p className="text-gray-600 font-medium text-sm">¿A qué tienda deseas ingresar?</p>
-            <StoreSelector
-              selectedStore={selectedStore}
-              onStoreChange={handleStoreChange}
-            />
+            <div className="w-full max-w-md mx-auto">
+              <StoreSelector
+                selectedStore={selectedStore}
+                onStoreChange={handleStoreChange}
+              />
+            </div>
           </div>
         </div>
 
