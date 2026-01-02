@@ -486,7 +486,7 @@ export default function Home() {
   // Si no está logueado, mostrar pantalla de login
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100 relative overflow-hidden">
+      <div className="min-h-screen bg-gradient-to-br from-rose-50/30 via-blue-50/20 to-purple-50/30 relative overflow-hidden">
         {/* Animated Background Effects */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <motion.div 
@@ -496,7 +496,7 @@ export default function Home() {
               scale: [1, 1.2, 1]
             }}
             transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute -top-48 -right-48 w-[800px] h-[800px] bg-gradient-to-br from-slate-200/20 via-gray-200/15 to-transparent rounded-full blur-3xl"
+            className="absolute -top-48 -right-48 w-[800px] h-[800px] bg-gradient-to-br from-pink-200/15 via-rose-200/10 to-transparent rounded-full blur-3xl"
           />
           <motion.div 
             animate={{ 
@@ -505,7 +505,7 @@ export default function Home() {
               scale: [1, 1.3, 1]
             }}
             transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute -bottom-48 -left-48 w-[900px] h-[900px] bg-gradient-to-br from-gray-300/15 via-slate-300/10 to-transparent rounded-full blur-3xl"
+            className="absolute -bottom-48 -left-48 w-[900px] h-[900px] bg-gradient-to-br from-blue-200/12 via-indigo-200/8 to-transparent rounded-full blur-3xl"
           />
           <motion.div 
             animate={{ 
@@ -513,7 +513,7 @@ export default function Home() {
               scale: [1, 1.1, 1]
             }}
             transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-slate-200/10 via-gray-200/10 to-transparent rounded-full blur-3xl"
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-purple-200/8 via-pink-200/8 to-transparent rounded-full blur-3xl"
           />
         </div>
 
@@ -538,7 +538,7 @@ export default function Home() {
                     y: { duration: 2.5, repeat: Infinity, ease: "easeInOut" }
                   }}
                 />
-                <h1 className="text-2xl font-black text-slate-800 mb-1">Iniciar sesión</h1>
+                <h1 className="text-2xl font-black bg-gradient-to-r from-rose-400 to-purple-400 bg-clip-text text-transparent mb-1">Iniciar sesión</h1>
                 <p className="text-slate-600 text-sm font-medium">Selecciona tu rol y comienza</p>
               </div>
 
@@ -558,15 +558,15 @@ export default function Home() {
                       }}
                       className={`relative w-full min-h-[60px] p-3.5 rounded-2xl border-2 transition-all duration-300 text-left ${
                         isSelected
-                          ? 'border-slate-400 bg-slate-700 shadow-xl shadow-slate-500/30 scale-[1.02]'
-                          : 'border-slate-200 bg-white/80 backdrop-blur-sm active:border-slate-300 hover:scale-[1.01] hover:shadow-lg'
+                          ? 'border-rose-200 bg-gradient-to-r from-rose-100 to-purple-100 shadow-xl shadow-rose-200/50 scale-[1.02]'
+                          : 'border-slate-200 bg-white/80 backdrop-blur-sm active:border-rose-200 hover:scale-[1.01] hover:shadow-lg'
                       }`}
                     >
                       {isLastUsed && (
                         <motion.div 
                           animate={{ scale: [1, 1.1, 1] }}
                           transition={{ duration: 2, repeat: Infinity }}
-                          className="absolute -top-2 right-2 px-2 py-0.5 bg-slate-600 rounded-full text-[9px] font-bold text-white shadow-lg"
+                          className="absolute -top-2 right-2 px-2 py-0.5 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full text-[9px] font-bold text-white shadow-lg"
                         >
                           ✨ Reciente
                         </motion.div>
@@ -577,9 +577,9 @@ export default function Home() {
                           transition={{ duration: 2, repeat: Infinity }}
                           className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg ${
                           isSelected 
-                            ? 'bg-white/20 backdrop-blur-sm' 
-                            : 'bg-gradient-to-br from-slate-100 to-slate-200'
-                        }`}>
+                            ? 'bg-white/60 backdrop-blur-sm' 
+                            : 'bg-gradient-to-br from-rose-50 to-purple-50'
+                          }`}>
                           <div className="w-5 h-5">
                             <RoleIcon roleId={role.id} isSelected={isSelected} />
                           </div>
@@ -594,7 +594,7 @@ export default function Home() {
                             animate={{ scale: 1 }}
                             className="w-5 h-5 rounded-full bg-white flex items-center justify-center flex-shrink-0 shadow-md"
                           >
-                            <CheckCircle className="w-3.5 h-3.5 text-slate-700" strokeWidth={3} />
+                            <CheckCircle className="w-3.5 h-3.5 text-rose-500" strokeWidth={3} />
                           </motion.div>
                         )}
                       </div>
@@ -661,7 +661,7 @@ export default function Home() {
                 <Button
                   onClick={handleLogin}
                   disabled={(selectedRole !== 'gerente' && !pendingStore) || !selectedRole || isSubmitting}
-                  className="w-full h-12 bg-slate-700 hover:bg-slate-800 text-white rounded-2xl font-bold text-base disabled:opacity-40 mt-4 shadow-xl"
+                  className="w-full h-12 bg-gradient-to-r from-rose-400 to-purple-400 hover:from-rose-500 hover:to-purple-500 text-white rounded-2xl font-bold text-base disabled:opacity-40 mt-4 shadow-xl"
                 >
                 {isSubmitting ? (
                   <span className="flex items-center justify-center gap-2">
@@ -703,7 +703,7 @@ export default function Home() {
                     className="text-6xl font-black leading-tight mb-6"
                   >
                     <span className="text-slate-900">Bienvenido a</span><br />
-                    <span className="text-slate-800">
+                    <span className="bg-gradient-to-r from-rose-400 to-purple-400 bg-clip-text text-transparent">
                       Popsy Management
                     </span>
                   </motion.h1>
@@ -712,9 +712,9 @@ export default function Home() {
 
                 <div className="space-y-7 pt-6">
                   {[
-                    { icon: TrendingUp, title: 'Métricas en tiempo real', text: 'Monitoreo continuo del desempeño', gradient: 'from-slate-600 to-slate-700' },
-                    { icon: Users, title: 'Gestión de equipos', text: 'Optimiza recursos y productividad', gradient: 'from-slate-600 to-slate-700' },
-                    { icon: Target, title: 'Logro de objetivos', text: 'Cumple metas con análisis predictivo', gradient: 'from-slate-600 to-slate-700' }
+                    { icon: TrendingUp, title: 'Métricas en tiempo real', text: 'Monitoreo continuo del desempeño', gradient: 'from-rose-300 to-pink-300' },
+                    { icon: Users, title: 'Gestión de equipos', text: 'Optimiza recursos y productividad', gradient: 'from-purple-300 to-indigo-300' },
+                    { icon: Target, title: 'Logro de objetivos', text: 'Cumple metas con análisis predictivo', gradient: 'from-blue-300 to-cyan-300' }
                   ].map((feature, i) => (
                     <motion.div 
                       key={i} 
@@ -749,8 +749,8 @@ export default function Home() {
                 style={{ boxShadow: '0 25px 80px -15px rgba(217, 70, 239, 0.3), 0 10px 30px -10px rgba(0, 0, 0, 0.15)' }}>
                 
                 <div className="text-center">
-                  <h2 className="text-4xl font-black text-slate-800 mb-3">Iniciar sesión</h2>
-                  <p className="text-base text-slate-600 font-medium">Selecciona tu rol y comienza</p>
+                  <h2 className="text-4xl font-black bg-gradient-to-r from-rose-400 to-purple-400 bg-clip-text text-transparent mb-3">Iniciar sesión</h2>
+                  <p className="text-base text-slate-700 font-medium">Selecciona tu rol y comienza</p>
                 </div>
 
                 <div className="space-y-4">
@@ -769,15 +769,15 @@ export default function Home() {
                         }}
                         className={`relative w-full p-5 rounded-3xl border-2 transition-all duration-300 text-left flex items-center gap-5 ${
                           isSelected
-                            ? 'border-slate-400 bg-slate-700 shadow-2xl shadow-slate-500/30 scale-[1.02]'
-                            : 'border-slate-200 bg-white/70 backdrop-blur-sm hover:border-slate-300 hover:shadow-lg hover:scale-[1.01]'
+                            ? 'border-rose-200 bg-gradient-to-r from-rose-100 to-purple-100 shadow-2xl shadow-rose-200/40 scale-[1.02]'
+                            : 'border-slate-200 bg-white/70 backdrop-blur-sm hover:border-rose-200 hover:shadow-lg hover:scale-[1.01]'
                         }`}
                       >
                         {isLastUsed && (
                           <motion.div 
                             animate={{ scale: [1, 1.05, 1] }}
                             transition={{ duration: 2, repeat: Infinity }}
-                            className="absolute -top-2.5 right-4 px-3 py-1 bg-slate-600 rounded-full text-[11px] font-bold text-white shadow-xl"
+                            className="absolute -top-2.5 right-4 px-3 py-1 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full text-[11px] font-bold text-white shadow-xl"
                           >
                             ✨ Reciente
                           </motion.div>
@@ -786,8 +786,8 @@ export default function Home() {
                           animate={isSelected ? { rotate: [0, 5, -5, 0] } : {}}
                           transition={{ duration: 2, repeat: Infinity }}
                           className={`w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0 transition-all shadow-xl ${
-                          isSelected ? 'bg-white/20 backdrop-blur-sm' : 'bg-gradient-to-br from-slate-100 to-slate-200'
-                        }`}>
+                          isSelected ? 'bg-white/60 backdrop-blur-sm' : 'bg-gradient-to-br from-rose-50 to-purple-50'
+                          }`}>
                           <div className="w-8 h-8">
                             <RoleIcon roleId={role.id} isSelected={isSelected} />
                           </div>
@@ -802,7 +802,7 @@ export default function Home() {
                             animate={{ scale: 1, rotate: 0 }}
                             className="w-7 h-7 rounded-full bg-white flex items-center justify-center flex-shrink-0 shadow-xl"
                           >
-                            <CheckCircle className="w-5 h-5 text-slate-700" strokeWidth={3} />
+                            <CheckCircle className="w-5 h-5 text-rose-500" strokeWidth={3} />
                           </motion.div>
                         )}
                       </button>
@@ -869,7 +869,7 @@ export default function Home() {
                   <Button
                     onClick={handleLogin}
                     disabled={(selectedRole !== 'gerente' && !pendingStore) || !selectedRole || isSubmitting}
-                    className="w-full bg-slate-700 hover:bg-slate-800 text-white py-5 rounded-2xl font-black text-lg shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                    className="w-full bg-gradient-to-r from-rose-400 to-purple-400 hover:from-rose-500 hover:to-purple-500 text-white py-5 rounded-2xl font-black text-lg shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
                   >
                   {isSubmitting ? (
                     <span className="flex items-center justify-center gap-3">
@@ -890,7 +890,7 @@ export default function Home() {
                 </motion.div>
 
                 <div className="text-center pt-1">
-                  <Link to={createPageUrl('ExecutiveDashboard')} className="text-xs text-slate-400 hover:text-slate-600 transition-colors inline-block">
+                  <Link to={createPageUrl('ExecutiveDashboard')} className="text-xs text-slate-400 hover:text-rose-400 transition-colors inline-block">
                     Acceso administrativo
                   </Link>
                 </div>
