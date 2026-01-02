@@ -4,7 +4,7 @@ import { Target, TrendingUp, TrendingDown, Calendar, AlertTriangle, CheckCircle2
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format, startOfMonth, endOfMonth, eachWeekOfInterval, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Legend } from 'recharts';
+import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Legend, Cell } from 'recharts';
 
 export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId, formatCurrency, onConfigureBudget }) {
   const [expandedSection, setExpandedSection] = useState(null);
@@ -400,19 +400,18 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                     </h4>
                   </div>
                   <ResponsiveContainer width="100%" height={200} className="md:hidden">
-                    <AreaChart data={budgetData.dailyTrendData}>
+                    <BarChart data={budgetData.dailyTrendData}>
                       <defs>
-                        <linearGradient id="colorVentas" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#fda4af" stopOpacity={0.5}/>
-                          <stop offset="50%" stopColor="#fecdd3" stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor="#ffe4e6" stopOpacity={0.1}/>
+                        <linearGradient id="barCumplido" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#a7f3d0" stopOpacity={0.9}/>
+                          <stop offset="100%" stopColor="#d1fae5" stopOpacity={0.6}/>
                         </linearGradient>
-                        <linearGradient id="colorPresupuesto" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#e9d5ff" stopOpacity={0.4}/>
-                          <stop offset="95%" stopColor="#f3e8ff" stopOpacity={0.1}/>
+                        <linearGradient id="barNoCumplido" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#fda4af" stopOpacity={0.9}/>
+                          <stop offset="100%" stopColor="#fecdd3" stopOpacity={0.6}/>
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#fecdd3" opacity={0.2} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.3} />
                       <XAxis 
                         dataKey="date" 
                         stroke="#9ca3af" 
@@ -431,94 +430,79 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                       <Tooltip 
                         contentStyle={{ 
                           background: '#ffffff', 
-                          border: '2px solid #fda4af', 
+                          border: '2px solid #e5e7eb', 
                           borderRadius: '12px', 
                           color: '#1e293b', 
-                          padding: '8px 12px',
+                          padding: '10px 14px',
                           boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
                           fontSize: '11px'
                         }}
                         labelStyle={{
                           color: '#64748b',
                           fontSize: '10px',
-                          fontWeight: '600',
-                          marginBottom: '4px'
+                          fontWeight: '700',
+                          marginBottom: '6px'
                         }}
                         labelFormatter={(label, payload) => {
                           const data = payload?.[0]?.payload;
                           return data?.fullDate || label;
                         }}
                         formatter={(value, name, props) => {
-                          const cumplimiento = props.payload.cumplimiento;
-                          if (name === 'ventas') {
-                            return [
-                              <div key="ventas" style={{ fontSize: '11px', fontWeight: 'bold', color: '#0f172a' }}>
-                                {formatCurrency(value)}
-                                {cumplimiento > 0 && (
-                                  <span style={{ 
-                                    marginLeft: '4px', 
-                                    color: cumplimiento >= 100 ? '#059669' : '#d97706',
-                                    fontSize: '10px',
-                                    fontWeight: '700'
-                                  }}>
-                                    ({cumplimiento.toFixed(0)}%)
-                                  </span>
-                                )}
-                              </div>,
-                              '💰 Venta'
-                            ];
-                          } else {
-                            return [
-                              <div key="ppto" style={{ fontSize: '11px', fontWeight: 'bold', color: '#0f172a' }}>
-                                {formatCurrency(value)}
-                              </div>,
-                              '🎯 Ppto'
-                            ];
-                          }
+                          const { ventas, presupuesto, cumplimiento } = props.payload;
+                          const diferencia = ventas - presupuesto;
+                          const cumplido = cumplimiento >= 100;
+
+                          return [
+                            <div key="info" style={{ fontSize: '11px' }}>
+                              <div style={{ fontWeight: 'bold', color: '#0f172a', marginBottom: '4px' }}>
+                                💰 Venta: {formatCurrency(ventas)}
+                              </div>
+                              <div style={{ fontWeight: 'bold', color: '#64748b', marginBottom: '4px' }}>
+                                🎯 Meta: {formatCurrency(presupuesto)}
+                              </div>
+                              <div style={{ 
+                                fontWeight: 'bold', 
+                                color: cumplido ? '#059669' : '#dc2626',
+                                borderTop: '1px solid #e5e7eb',
+                                paddingTop: '4px',
+                                marginTop: '4px'
+                              }}>
+                                {cumplido ? '✅' : '❌'} {cumplimiento.toFixed(0)}% ({diferencia >= 0 ? '+' : ''}{formatCurrency(diferencia)})
+                              </div>
+                            </div>,
+                            ''
+                          ];
                         }}
                       />
-                      <Area 
-                        type="monotone" 
-                        dataKey="presupuesto" 
-                        stroke="#d8b4fe" 
-                        strokeWidth={2}
-                        strokeDasharray="4 3"
-                        fillOpacity={1} 
-                        fill="url(#colorPresupuesto)"
-                        name="presupuesto"
-                      />
-                      <Area 
-                        type="monotone" 
-                        dataKey="ventas" 
-                        stroke="#fda4af" 
-                        strokeWidth={2}
-                        fillOpacity={1} 
-                        fill="url(#colorVentas)"
-                        name="ventas"
-                      />
-                    </AreaChart>
+                      <ReferenceLine y={0} stroke="#9ca3af" strokeDasharray="3 3" />
+                      <Bar 
+                        dataKey={(data) => data.ventas - data.presupuesto} 
+                        fill="url(#barCumplido)"
+                        radius={[4, 4, 0, 0]}
+                        animationDuration={1000}
+                      >
+                        {budgetData.dailyTrendData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.cumplimiento >= 100 ? 'url(#barCumplido)' : 'url(#barNoCumplido)'} />
+                        ))}
+                      </Bar>
+                    </BarChart>
                   </ResponsiveContainer>
                   <ResponsiveContainer width="100%" height={280} className="hidden md:block">
-                  <AreaChart data={budgetData.dailyTrendData}>
+                  <BarChart data={budgetData.dailyTrendData}>
                     <defs>
-                      <linearGradient id="colorVentas" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#fda4af" stopOpacity={0.5}/>
-                        <stop offset="50%" stopColor="#fecdd3" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#ffe4e6" stopOpacity={0.1}/>
+                      <linearGradient id="barCumplidoDesktop" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#a7f3d0" stopOpacity={0.9}/>
+                        <stop offset="100%" stopColor="#d1fae5" stopOpacity={0.6}/>
                       </linearGradient>
-                      <linearGradient id="colorPresupuesto" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#e9d5ff" stopOpacity={0.4}/>
-                        <stop offset="95%" stopColor="#f3e8ff" stopOpacity={0.1}/>
+                      <linearGradient id="barNoCumplidoDesktop" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#fda4af" stopOpacity={0.9}/>
+                        <stop offset="100%" stopColor="#fecdd3" stopOpacity={0.6}/>
                       </linearGradient>
-                      <filter id="glow">
-                        <feGaussianBlur stdDeviation="1" result="coloredBlur"/>
-                        <feMerge>
-                          <feMergeNode in="coloredBlur"/>
-                          <feMergeNode in="SourceGraphic"/>
-                        </feMerge>
+                      <filter id="barShadow">
+                        <feDropShadow dx="0" dy="2" stdDeviation="2" floodOpacity="0.2"/>
                       </filter>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#fecdd3" opacity={0.2} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.3} />
                     <XAxis 
                       dataKey="date" 
                       stroke="#9ca3af" 
@@ -526,7 +510,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                       angle={-35}
                       textAnchor="end"
                       height={65}
-                      tick={{ fontWeight: 400 }}
+                      tick={{ fontWeight: 500 }}
                     />
                     <YAxis 
                       stroke="#9ca3af" 
@@ -537,82 +521,85 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                     <Tooltip 
                       contentStyle={{ 
                         background: '#ffffff', 
-                        border: '2px solid #fda4af', 
-                        borderRadius: '12px', 
+                        border: '2px solid #e5e7eb', 
+                        borderRadius: '14px', 
                         color: '#1e293b', 
-                        padding: '12px 16px',
-                        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)'
+                        padding: '14px 18px',
+                        boxShadow: '0 10px 30px rgba(0, 0, 0, 0.12)',
+                        minWidth: '220px'
                       }}
                       labelStyle={{
                         color: '#64748b',
                         fontSize: '12px',
-                        fontWeight: '600',
-                        marginBottom: '8px'
+                        fontWeight: '700',
+                        marginBottom: '10px',
+                        paddingBottom: '8px',
+                        borderBottom: '1px solid #e5e7eb'
                       }}
                       labelFormatter={(label, payload) => {
                         const data = payload?.[0]?.payload;
                         return data?.fullDate || label;
                       }}
                       formatter={(value, name, props) => {
-                        const cumplimiento = props.payload.cumplimiento;
-                        if (name === 'ventas') {
-                          return [
-                            <div key="ventas" style={{ fontSize: '14px', fontWeight: 'bold', color: '#0f172a' }}>
-                              {formatCurrency(value)}
-                              {cumplimiento > 0 && (
-                                <span style={{ 
-                                  marginLeft: '8px', 
-                                  color: cumplimiento >= 100 ? '#059669' : '#d97706',
-                                  fontSize: '12px',
-                                  fontWeight: '700'
-                                }}>
-                                  ({cumplimiento.toFixed(0)}%)
-                                </span>
-                              )}
-                            </div>,
-                            '💰 Venta Real'
-                          ];
-                        } else {
-                          return [
-                            <div key="ppto" style={{ fontSize: '14px', fontWeight: 'bold', color: '#0f172a' }}>
-                              {formatCurrency(value)}
-                            </div>,
-                            '🎯 Presupuesto Diario'
-                          ];
-                        }
+                        const { ventas, presupuesto, cumplimiento } = props.payload;
+                        const diferencia = ventas - presupuesto;
+                        const cumplido = cumplimiento >= 100;
+
+                        return [
+                          <div key="info" style={{ fontSize: '13px' }}>
+                            <div style={{ fontWeight: 'bold', color: '#0f172a', marginBottom: '6px' }}>
+                              💰 Venta: {formatCurrency(ventas)}
+                            </div>
+                            <div style={{ fontWeight: 'bold', color: '#64748b', marginBottom: '8px' }}>
+                              🎯 Meta: {formatCurrency(presupuesto)}
+                            </div>
+                            <div style={{ 
+                              fontWeight: 'bold', 
+                              color: cumplido ? '#059669' : '#dc2626',
+                              borderTop: '2px solid #e5e7eb',
+                              paddingTop: '8px',
+                              marginTop: '4px',
+                              fontSize: '14px'
+                            }}>
+                              {cumplido ? '✅ Cumplido' : '❌ No cumplido'}: {cumplimiento.toFixed(0)}%
+                              <div style={{ fontSize: '12px', marginTop: '4px', color: cumplido ? '#10b981' : '#ef4444' }}>
+                                Diferencia: {diferencia >= 0 ? '+' : ''}{formatCurrency(diferencia)}
+                              </div>
+                            </div>
+                          </div>,
+                          ''
+                        ];
                       }}
                     />
                     <Legend 
-                      wrapperStyle={{ paddingTop: '12px' }}
-                      formatter={(value) => value === 'ventas' ? '💰 Venta Real' : '🎯 Presupuesto Diario'}
-                      iconType="circle"
+                      wrapperStyle={{ paddingTop: '16px' }}
+                      content={() => (
+                        <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', fontSize: '12px', fontWeight: '600' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <div style={{ width: '12px', height: '12px', background: 'linear-gradient(to bottom, #a7f3d0, #d1fae5)', borderRadius: '3px' }}></div>
+                            <span style={{ color: '#059669' }}>✅ Meta superada</span>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <div style={{ width: '12px', height: '12px', background: 'linear-gradient(to bottom, #fda4af, #fecdd3)', borderRadius: '3px' }}></div>
+                            <span style={{ color: '#dc2626' }}>❌ Meta no alcanzada</span>
+                          </div>
+                        </div>
+                      )}
                     />
-                    <Area 
-                      type="monotone" 
-                      dataKey="presupuesto" 
-                      stroke="#d8b4fe" 
-                      strokeWidth={2}
-                      strokeDasharray="6 4"
-                      fillOpacity={1} 
-                      fill="url(#colorPresupuesto)"
-                      name="presupuesto"
-                      animationDuration={1500}
+                    <ReferenceLine y={0} stroke="#9ca3af" strokeDasharray="3 3" strokeWidth={1} />
+                    <Bar 
+                      dataKey={(data) => data.ventas - data.presupuesto} 
+                      radius={[6, 6, 0, 0]}
+                      animationDuration={1200}
                       animationEasing="ease-out"
-                    />
-                    <Area 
-                      type="monotone" 
-                      dataKey="ventas" 
-                      stroke="#fda4af" 
-                      strokeWidth={3}
-                      fillOpacity={1} 
-                      fill="url(#colorVentas)"
-                      name="ventas"
-                      animationDuration={1800}
-                      animationEasing="ease-out"
-                      filter="url(#glow)"
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
+                      filter="url(#barShadow)"
+                    >
+                      {budgetData.dailyTrendData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.cumplimiento >= 100 ? 'url(#barCumplidoDesktop)' : 'url(#barNoCumplidoDesktop)'} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                  </ResponsiveContainer>
               </motion.div>
 
               {/* Semana Retail */}
