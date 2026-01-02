@@ -880,13 +880,8 @@ export default function Home() {
                       Entrando...
                     </span>
                   ) : (
-                    <span className="flex flex-col items-center">
+                    <span className="flex items-center justify-center gap-2">
                       <span className="text-base font-black">Entrar 🚀</span>
-                      {selectedRole && (
-                        <span className="text-xs font-medium text-white/90 mt-0.5">
-                          Como {ROLES.find(r => r.id === selectedRole)?.name}
-                        </span>
-                      )}
                     </span>
                   )}
                 </Button>
