@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { STORES, getDisplayName } from '@/components/StoreSelector';
 import DateFilter from '@/components/DateFilter';
-import { ArrowLeft, Search, TrendingUp, TrendingDown, Eye, Zap, Award, Brain, ArrowUpDown, ArrowUp, ArrowDown, BarChart3, Settings, X } from 'lucide-react';
+import { ArrowLeft, Search, TrendingUp, TrendingDown, Eye, Zap, Award, Brain, ArrowUpDown, ArrowUp, ArrowDown, BarChart3, Settings, X, Download, Filter } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { format, startOfMonth, eachDayOfInterval, startOfWeek, endOfWeek, parseISO } from 'date-fns';
 import StoreDetailModal from '../components/executive/StoreDetailModal';
@@ -29,6 +29,7 @@ export default function ExecutiveDashboard() {
   const [showBudgetManager, setShowBudgetManager] = useState(false);
   const [showZoneCharts, setShowZoneCharts] = useState(false);
   const [sortConfig, setSortConfig] = useState({ key: 'status', direction: 'asc' });
+  const [columnFilters, setColumnFilters] = useState({});
 
   const ZONE_NAME = 'Bogotá Noroccidente';
 
@@ -70,9 +71,63 @@ export default function ExecutiveDashboard() {
     const daysInMonth = monthEnd.getDate();
 
     return STORES.map(store => {
-      // VENTAS DE LA SEMANA ACTUAL (retail: lunes a domingo)
-      const weekSales = allDailySales.filter(s => {
-        if (s.store_id !== store.code) return false;
+      // Filtrar ventas de esta tienda
+      const storeSales = allDailySales.filter(s => s.store_id === store.code);
+
+      // Analizar histórico de ventas por día de la semana
+      const salesByDayOfWeek = [0, 0, 0, 0, 0, 0, 0];
+      const countByDayOfWeek = [0, 0, 0, 0, 0, 0, 0];
+
+      storeSales.forEach(s => {
+        try {
+          const saleDate = parseISO(s.date);
+          const dayOfWeek = saleDate.getDay();
+          if (s.total_sales && s.total_sales > 0) {
+            salesByDayOfWeek[dayOfWeek] += s.total_sales;
+            countByDayOfWeek[dayOfWeek]++;
+          }
+        } catch (error) {
+          console.error('Error parsing date:', s.date, error);
+        }
+      });
+
+      const avgByDayOfWeek = salesByDayOfWeek.map((sum, idx) => 
+        countByDayOfWeek[idx] > 0 ? sum / countByDayOfWeek[idx] : 0
+      );
+      const totalWeeklyAvg = avgByDayOfWeek.reduce((a, b) => a + b, 0);
+
+      // Presupuesto mensual
+      const activeBudget = allBudgets.find(b => b.store_id === store.code && b.is_active === true);
+      const budget = activeBudget || allBudgets.find(b => b.store_id === store.code && b.month === currentMonth && b.year === currentYear);
+      const salesBudget = budget?.sales_budget || 0;
+
+      const TARGET_PERCENTAGE = 1.02;
+      const adjustedMonthlyBudget = salesBudget * TARGET_PERCENTAGE;
+      const dailyBaseBudget = adjustedMonthlyBudget / daysInMonth;
+
+      // Función para obtener presupuesto diario ajustado
+      const getDailyBudget = (date) => {
+        if (totalWeeklyAvg === 0) return dailyBaseBudget;
+        const dayOfWeek = date.getDay();
+        if (countByDayOfWeek[dayOfWeek] >= 3) {
+          const totalHistoricalAvg = avgByDayOfWeek.reduce((a, b) => a + b, 0);
+          const monthlyHistoricalProjection = totalHistoricalAvg * (daysInMonth / 7);
+          const scaleFactor = adjustedMonthlyBudget / monthlyHistoricalProjection;
+          return avgByDayOfWeek[dayOfWeek] * scaleFactor;
+        }
+        return dailyBaseBudget;
+      };
+
+      // PPT del día de hoy
+      const adjustedDailyBudget = getDailyBudget(now);
+
+      // Presupuesto semanal - suma de presupuestos diarios de la semana que caen en el mes
+      const daysInCurrentWeek = eachDayOfInterval({ start: currentWeekStart, end: currentWeekEnd })
+        .filter(d => d >= monthStart && d <= monthEnd);
+      const weeklyBudget = daysInCurrentWeek.reduce((sum, day) => sum + getDailyBudget(day), 0);
+
+      // VENTAS DE LA SEMANA ACTUAL
+      const weekSales = storeSales.filter(s => {
         try {
           const saleDate = parseISO(s.date);
           return saleDate >= currentWeekStart && saleDate <= currentWeekEnd;
@@ -85,9 +140,8 @@ export default function ExecutiveDashboard() {
       const weekTotalTransactions = weekSales.reduce((sum, s) => sum + (s.total_transactions || 0), 0);
       const weekAvgTicket = weekTotalTransactions > 0 ? weekTotalSales / weekTotalTransactions : 0;
 
-      // VENTAS DEL MES (para cumplimiento mensual)
-      const monthSales = allDailySales.filter(s => {
-        if (s.store_id !== store.code) return false;
+      // VENTAS DEL MES
+      const monthSales = storeSales.filter(s => {
         try {
           const saleDate = parseISO(s.date);
           return saleDate >= monthStart && saleDate <= now;
@@ -99,30 +153,21 @@ export default function ExecutiveDashboard() {
       const monthTotalSales = monthSales.reduce((sum, s) => sum + (s.total_sales || 0), 0);
       const monthTotalTransactions = monthSales.reduce((sum, s) => sum + (s.total_transactions || 0), 0);
 
-      // Presupuesto mensual
-      const activeBudget = allBudgets.find(b => b.store_id === store.code && b.is_active === true);
-      const budget = activeBudget || allBudgets.find(b => b.store_id === store.code && b.month === currentMonth && b.year === currentYear);
-      const salesBudget = budget?.sales_budget || 0;
+      // PROYECCIONES con histórico
+      const daysPassedInWeek = eachDayOfInterval({ start: currentWeekStart, end: now }).filter(d => d <= now).length;
+      const avgDailySalesWeek = daysPassedInWeek > 0 ? weekTotalSales / daysPassedInWeek : 0;
+      const totalDaysInWeek = eachDayOfInterval({ start: currentWeekStart, end: currentWeekEnd }).length;
       
-      // Calcular presupuesto semanal correcto (solo días que caen en el mes actual)
-      const daysInCurrentWeek = eachDayOfInterval({ start: currentWeekStart, end: currentWeekEnd })
-        .filter(d => d >= monthStart && d <= monthEnd);
-      const weeklyBudget = (salesBudget / daysInMonth) * daysInCurrentWeek.length;
+      const historicalWeight = daysPassedInWeek <= 2 ? 0.8 : 0.4;
+      const currentWeight = 1 - historicalWeight;
+      const historicalDailyAvg = totalWeeklyAvg > 0 ? totalWeeklyAvg / 7 : avgDailySalesWeek;
+      const blendedDailyAvg = (historicalDailyAvg * historicalWeight) + (avgDailySalesWeek * currentWeight);
+      const weekProjection = blendedDailyAvg * totalDaysInWeek;
 
-      // PROYECCIONES
       const daysElapsed = now.getDate();
       const daysRemaining = daysInMonth - daysElapsed;
       const dailyAvgMonth = daysElapsed > 0 ? monthTotalSales / daysElapsed : 0;
       const monthProjection = monthTotalSales + (dailyAvgMonth * daysRemaining);
-
-      // Proyección de semana (días transcurridos vs días totales de la semana)
-      const daysPassedInWeek = Math.max(1, weekSales.length);
-      const avgDailySalesWeek = weekTotalSales / daysPassedInWeek;
-      const weekProjection = avgDailySalesWeek * 7;
-
-      // PROMEDIOS
-      const avgDailySales = dailyAvgMonth;
-      const avgDailyTransactions = daysElapsed > 0 ? monthTotalTransactions / daysElapsed : 0;
 
       // CUMPLIMIENTO
       const salesCompliance = salesBudget > 0 ? (monthTotalSales / salesBudget) * 100 : 0;
@@ -141,6 +186,8 @@ export default function ExecutiveDashboard() {
       return {
         code: store.code,
         name: getDisplayName(store.code),
+        // PPT Diario
+        dailyBudget: adjustedDailyBudget,
         // Semana
         weekTotalSales,
         weekTotalTransactions,
@@ -161,14 +208,14 @@ export default function ExecutiveDashboard() {
         gap,
         hasData,
         // Promedios
-        avgDailySales,
-        avgDailyTransactions,
-        // Legacy para compatibilidad
+        avgDailySales: dailyAvgMonth,
+        avgDailyTransactions: daysElapsed > 0 ? monthTotalTransactions / daysElapsed : 0,
+        // Legacy
         totalSales: monthTotalSales,
         totalTransactions: monthTotalTransactions,
         avgTicket: weekAvgTicket,
         projection: monthProjection,
-        dailyAvg: avgDailySales
+        dailyAvg: dailyAvgMonth
       };
     });
   }, [allDailySales, allBudgets, currentMonth, currentYear]);
@@ -188,6 +235,30 @@ export default function ExecutiveDashboard() {
 
   const formatShort = (v) => `$${(v / 1000000).toFixed(1)}M`;
 
+  const exportToExcel = () => {
+    const headers = ['Tienda', 'Código', 'PPT Día', 'PPT Semana', 'Venta Semana', '% Venta Sem', 'Proy Semana', '% Proy Sem', 'Proy Mes', '% Proy Mes', '% Cumplimiento Mes'];
+    const rows = sortedStores.map(s => [
+      s.name,
+      s.code,
+      s.dailyBudget.toFixed(0),
+      s.weeklyBudget.toFixed(0),
+      s.weekTotalSales.toFixed(0),
+      s.weekCompliance.toFixed(1) + '%',
+      s.weekProjection.toFixed(0),
+      s.weekProjectionCompliance.toFixed(1) + '%',
+      s.monthProjection.toFixed(0),
+      s.monthProjectionCompliance.toFixed(1) + '%',
+      s.salesCompliance.toFixed(1) + '%'
+    ]);
+
+    const csvContent = [headers, ...rows].map(row => row.join(',')).join('\n');
+    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `Reporte_Ejecutivo_${format(new Date(), 'yyyy-MM-dd')}.csv`;
+    link.click();
+  };
+
   const statusCounts = useMemo(() => ({
     positive: storesAnalysis.filter(s => s.status === 'positive').length,
     negative: storesAnalysis.filter(s => s.status === 'negative').length,
@@ -196,12 +267,38 @@ export default function ExecutiveDashboard() {
   }), [storesAnalysis]);
 
   const filteredStores = useMemo(() => {
-    if (!searchQuery) return storesAnalysis;
-    return storesAnalysis.filter(s => 
-      s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.code.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [storesAnalysis, searchQuery]);
+    let filtered = storesAnalysis;
+    
+    // Búsqueda
+    if (searchQuery) {
+      filtered = filtered.filter(s => 
+        s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        s.code.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Filtros por columna
+    Object.keys(columnFilters).forEach(key => {
+      const filterValue = columnFilters[key];
+      if (!filterValue) return;
+
+      if (key === 'dailyBudget') {
+        const [min, max] = filterValue.split('-').map(v => parseFloat(v) * 1000000);
+        filtered = filtered.filter(s => s.dailyBudget >= min && s.dailyBudget < max);
+      } else if (key === 'weeklyBudget') {
+        const [min, max] = filterValue.split('-').map(v => parseFloat(v) * 1000000);
+        filtered = filtered.filter(s => s.weeklyBudget >= min && s.weeklyBudget < max);
+      } else if (key === 'weekCompliance') {
+        const [min, max] = filterValue.split('-').map(Number);
+        filtered = filtered.filter(s => s.weekCompliance >= min && s.weekCompliance < max);
+      } else if (key === 'salesCompliance') {
+        const [min, max] = filterValue.split('-').map(Number);
+        filtered = filtered.filter(s => s.salesCompliance >= min && s.salesCompliance < max);
+      }
+    });
+
+    return filtered;
+  }, [storesAnalysis, searchQuery, columnFilters]);
 
   const handleSort = (key) => {
     setSortConfig(prevConfig => ({
@@ -432,6 +529,13 @@ Genera:
                   className="pl-10 h-10 text-sm bg-white/10 backdrop-blur-xl border-white/20 text-white placeholder:text-slate-400"
                 />
               </div>
+              <button
+                onClick={exportToExcel}
+                className="h-10 px-4 rounded-full bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30 flex items-center gap-2 text-white text-sm font-medium transition-all"
+              >
+                <Download className="w-4 h-4" />
+                Excel
+              </button>
               <DateFilter 
                 dateRange={dateRange} 
                 onDateChange={setDateRange} 
@@ -640,41 +744,83 @@ Genera:
                     <tr className="border-b border-white/10">
                       <th 
                         onClick={() => handleSort('name')}
-                        className="sticky left-0 bg-slate-950/80 backdrop-blur-xl z-10 text-left py-3 px-3 text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider cursor-pointer border-r border-white/10"
+                        className="sticky left-0 bg-slate-950/80 backdrop-blur-xl z-10 text-left py-3 px-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider cursor-pointer border-r border-white/10"
                       >
                         <div className="flex items-center gap-2">
                           Tienda
                           {sortConfig.key === 'name' && (sortConfig.direction === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />)}
                         </div>
                       </th>
-                      <th className="text-right py-3 px-3 text-[10px] font-bold text-cyan-400 uppercase tracking-wider">
-                        PPT Sem
+                      <th className="text-right py-3 px-2 text-[10px] font-bold text-orange-400 uppercase tracking-wider">
+                        <div className="flex flex-col items-end gap-1">
+                          <span>PPT Hoy</span>
+                          <select
+                            onChange={(e) => setColumnFilters({...columnFilters, dailyBudget: e.target.value})}
+                            onClick={(e) => e.stopPropagation()}
+                            className="text-[9px] bg-white/5 border border-white/10 rounded px-1 py-0.5 text-slate-300 cursor-pointer"
+                          >
+                            <option value="">Todos</option>
+                            <option value="0-3">{'<'}3M</option>
+                            <option value="3-5">3-5M</option>
+                            <option value="5-100">{'>'}5M</option>
+                          </select>
+                        </div>
                       </th>
-                      <th className="text-right py-3 px-3 text-[10px] font-bold text-purple-400 uppercase tracking-wider">
-                        Venta Sem
+                      <th className="text-right py-3 px-2 text-[10px] font-bold text-cyan-400 uppercase tracking-wider">
+                        <div className="flex flex-col items-end gap-1">
+                          <span>PPT Sem</span>
+                          <select
+                            onChange={(e) => setColumnFilters({...columnFilters, weeklyBudget: e.target.value})}
+                            onClick={(e) => e.stopPropagation()}
+                            className="text-[9px] bg-white/5 border border-white/10 rounded px-1 py-0.5 text-slate-300 cursor-pointer"
+                          >
+                            <option value="">Todos</option>
+                            <option value="0-15">{'<'}15M</option>
+                            <option value="15-25">15-25M</option>
+                            <option value="25-100">{'>'}25M</option>
+                          </select>
+                        </div>
                       </th>
-                      <th className="text-right py-3 px-3 text-[10px] font-bold text-pink-400 uppercase tracking-wider">
+                      <th className="text-right py-3 px-2 text-[10px] font-bold text-purple-400 uppercase tracking-wider">
+                        <div className="flex flex-col items-end gap-1">
+                          <span>Venta Sem</span>
+                          <select
+                            onChange={(e) => setColumnFilters({...columnFilters, weekCompliance: e.target.value})}
+                            onClick={(e) => e.stopPropagation()}
+                            className="text-[9px] bg-white/5 border border-white/10 rounded px-1 py-0.5 text-slate-300 cursor-pointer"
+                          >
+                            <option value="">Todos</option>
+                            <option value="0-70">{'<'}70%</option>
+                            <option value="70-90">70-90%</option>
+                            <option value="90-200">{'>'}90%</option>
+                          </select>
+                        </div>
+                      </th>
+                      <th className="text-right py-3 px-2 text-[10px] font-bold text-pink-400 uppercase tracking-wider">
                         Proy Sem
                       </th>
-                      <th className="text-right py-3 px-3 text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
+                      <th className="text-right py-3 px-2 text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
                         Proy Mes
                       </th>
                       <th 
                         onClick={() => handleSort('compliance')}
-                        className="text-right py-3 px-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider cursor-pointer"
+                        className="text-right py-3 px-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider cursor-pointer"
                       >
-                        <div className="flex items-center justify-end gap-2">
-                          % Mes
-                          {sortConfig.key === 'compliance' && (sortConfig.direction === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />)}
-                        </div>
-                      </th>
-                      <th 
-                        onClick={() => handleSort('status')}
-                        className="text-center py-3 px-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider cursor-pointer"
-                      >
-                        <div className="flex items-center justify-center gap-2">
-                          Estado
-                          {sortConfig.key === 'status' && (sortConfig.direction === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />)}
+                        <div className="flex flex-col items-end gap-1">
+                          <div className="flex items-center gap-2">
+                            % Mes
+                            {sortConfig.key === 'compliance' && (sortConfig.direction === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />)}
+                          </div>
+                          <select
+                            onChange={(e) => setColumnFilters({...columnFilters, salesCompliance: e.target.value})}
+                            onClick={(e) => e.stopPropagation()}
+                            className="text-[9px] bg-white/5 border border-white/10 rounded px-1 py-0.5 text-slate-300 cursor-pointer"
+                          >
+                            <option value="">Todos</option>
+                            <option value="0-70">{'<'}70%</option>
+                            <option value="70-90">70-90%</option>
+                            <option value="90-200">{'>'}90%</option>
+                          </select>
                         </div>
                       </th>
                     </tr>
@@ -694,25 +840,35 @@ Genera:
                           <p className="text-[9px] text-slate-500 mt-0.5">{store.code}</p>
                         </td>
 
-                        {/* PPT Semana */}
-                        <td className="py-3 px-3 text-right">
+                        {/* PPT Hoy */}
+                        <td className="py-3 px-2 text-right">
                           {!store.hasData ? (
                             <span className="text-xs text-slate-500">—</span>
                           ) : (
-                            <div>
-                              <p className="font-bold text-cyan-400 text-sm tabular-nums">{formatShort(store.weeklyBudget)}</p>
-                            </div>
+                            <p className="font-bold text-orange-400 text-sm tabular-nums">{formatShort(store.dailyBudget)}</p>
+                          )}
+                        </td>
+
+                        {/* PPT Semana */}
+                        <td className="py-3 px-2 text-right">
+                          {!store.hasData ? (
+                            <span className="text-xs text-slate-500">—</span>
+                          ) : (
+                            <p className="font-bold text-cyan-400 text-sm tabular-nums">{formatShort(store.weeklyBudget)}</p>
                           )}
                         </td>
 
                         {/* Venta Semana */}
-                        <td className="py-3 px-3 text-right">
+                        <td className="py-3 px-2 text-right">
                           {!store.hasData ? (
                             <span className="text-xs text-slate-500">—</span>
                           ) : (
                             <div>
                               <p className="font-black text-purple-400 text-sm tabular-nums">{formatShort(store.weekTotalSales)}</p>
-                              <p className="text-[9px] text-slate-500 mt-0.5">
+                              <p className={`text-[9px] mt-0.5 font-bold ${
+                                store.weekCompliance >= 100 ? 'text-emerald-400' :
+                                store.weekCompliance >= 70 ? 'text-amber-400' : 'text-red-400'
+                              }`}>
                                 {store.weekCompliance.toFixed(0)}%
                               </p>
                             </div>
@@ -720,7 +876,7 @@ Genera:
                         </td>
 
                         {/* Proyección Semana */}
-                        <td className="py-3 px-3 text-right">
+                        <td className="py-3 px-2 text-right">
                           {!store.hasData ? (
                             <span className="text-xs text-slate-500">—</span>
                           ) : (
@@ -737,7 +893,7 @@ Genera:
                         </td>
 
                         {/* Proyección Mes */}
-                        <td className="py-3 px-3 text-right">
+                        <td className="py-3 px-2 text-right">
                           {!store.hasData ? (
                             <span className="text-xs text-slate-500">—</span>
                           ) : (
@@ -754,7 +910,7 @@ Genera:
                         </td>
 
                         {/* % Cumplimiento Mes */}
-                        <td className="py-3 px-3 text-right">
+                        <td className="py-3 px-2 text-right">
                           {!store.hasData ? (
                             <span className="text-xs text-slate-500">—</span>
                           ) : (
@@ -765,26 +921,9 @@ Genera:
                               }`}>
                                 {store.salesCompliance.toFixed(0)}%
                               </span>
-                              <div className="w-16 bg-white/10 rounded-full h-1 overflow-hidden">
-                                <div
-                                  style={{ width: `${Math.min(store.salesCompliance, 100)}%` }}
-                                  className={`h-full ${
-                                    store.salesCompliance >= 90 ? 'bg-emerald-500' :
-                                    store.salesCompliance >= 70 ? 'bg-amber-500' : 'bg-red-500'
-                                  }`}
-                                />
-                              </div>
+                              <p className="text-[9px] text-slate-400 tabular-nums">{formatShort(store.monthTotalSales)}</p>
                             </div>
                           )}
-                        </td>
-
-                        {/* Estado */}
-                        <td className="py-3 px-3 text-center">
-                          <span className={`inline-block w-3 h-3 rounded-full ${
-                            store.status === 'no_data' ? 'bg-slate-600' :
-                            store.status === 'positive' ? 'bg-emerald-500' : 
-                            store.status === 'negative' ? 'bg-amber-500' : 'bg-red-500'
-                          }`} />
                         </td>
                       </tr>
                     ))}
