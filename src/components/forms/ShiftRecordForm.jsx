@@ -6,9 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Save, User, DollarSign, Receipt, Zap, Gift, Loader2, CheckCircle, Sun, Sunset, Moon, Calendar, Camera } from 'lucide-react';
+import { Save, User, DollarSign, Receipt, Zap, Gift, Loader2, CheckCircle, Sun, Sunset, Moon, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
-import FaceRecognitionCashierSelect from './FaceRecognitionCashierSelect';
 
 const SHIFTS = [
   { value: 'morning', label: 'Apertura', icon: Sun, color: 'text-yellow-500' },
@@ -19,7 +18,6 @@ const SHIFTS = [
 export default function ShiftRecordForm({ storeId, onSuccess }) {
     const queryClient = useQueryClient();
     const [showSuccess, setShowSuccess] = useState(false);
-    const [useFaceRecognition, setUseFaceRecognition] = useState(true);
     const [formData, setFormData] = useState({
       cashier_id: '',
       date: new Date().toISOString().split('T')[0],
@@ -282,44 +280,26 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
             transition={{ delay: 0.1 }}
             className="bg-gradient-to-br from-violet-50 to-purple-50 rounded-[20px] p-5 shadow-md border border-violet-100"
           >
-            <div className="flex items-center justify-between mb-4">
-              <Label className="text-violet-700 flex items-center gap-3 text-base font-bold">
-                <div className="w-10 h-10 bg-violet-200/60 rounded-xl flex items-center justify-center">
-                  <User className="w-6 h-6 text-violet-600" />
-                </div>
-                Identificación de Cajero
-              </Label>
-              <button
-                type="button"
-                onClick={() => setUseFaceRecognition(!useFaceRecognition)}
-                className="text-xs font-medium text-violet-600 hover:text-violet-700 flex items-center gap-1"
-              >
-                <Camera className="w-3 h-3" />
-                {useFaceRecognition ? 'Modo lista' : 'Reconocimiento'}
-              </button>
-            </div>
+            <Label className="text-violet-700 flex items-center gap-3 mb-4 text-base font-bold">
+              <div className="w-10 h-10 bg-violet-200/60 rounded-xl flex items-center justify-center">
+                <User className="w-6 h-6 text-violet-600" />
+              </div>
+              Identificación de Cajero
+            </Label>
 
-            {useFaceRecognition ? (
-              <FaceRecognitionCashierSelect
-                cashiers={cashiers}
-                selectedId={formData.cashier_id}
-                onSelect={(id) => setFormData({...formData, cashier_id: id})}
-              />
-            ) : (
-              <Select 
-                value={formData.cashier_id} 
-                onValueChange={(val) => setFormData({...formData, cashier_id: val})}
-              >
-                <SelectTrigger className="border-2 border-violet-200 focus:border-violet-400 bg-white rounded-xl h-12 text-base font-semibold focus:ring-2 focus:ring-violet-200 transition-all">
-                  <SelectValue placeholder="Selecciona" />
-                </SelectTrigger>
-                <SelectContent>
-                  {cashiers.map(c => (
-                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
+            <Select 
+              value={formData.cashier_id} 
+              onValueChange={(val) => setFormData({...formData, cashier_id: val})}
+            >
+              <SelectTrigger className="border-2 border-violet-200 focus:border-violet-400 bg-white rounded-xl h-12 text-base font-semibold focus:ring-2 focus:ring-violet-200 transition-all">
+                <SelectValue placeholder="Selecciona" />
+              </SelectTrigger>
+              <SelectContent>
+                {cashiers.map(c => (
+                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </motion.div>
 
           {/* Fecha */}
