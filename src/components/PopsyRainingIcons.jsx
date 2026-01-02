@@ -20,20 +20,19 @@ const IceCreamCone = ({ color = "#C2185B" }) => (
 
 const CookieIcon = ({ color = "#C2185B" }) => (
   <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-    {/* Círculo de la galleta */}
-    <circle cx="50" cy="55" r="38" stroke={color} strokeWidth="4" fill="none"/>
-    {/* Mordida en la esquina superior derecha */}
-    <path d="M 70 25 Q 85 20 88 30 Q 90 40 82 48 Q 75 52 68 45 Q 65 35 70 25 Z" fill="white" stroke="none"/>
-    <path d="M 70 25 Q 85 20 88 30 Q 90 40 82 48" stroke={color} strokeWidth="4" strokeLinecap="round" fill="none"/>
-    {/* Migajas volando */}
-    <circle cx="82" cy="18" r="4" stroke={color} strokeWidth="3" fill="none"/>
-    <circle cx="92" cy="25" r="3" stroke={color} strokeWidth="3" fill="none"/>
+    {/* Círculo principal de la galleta */}
+    <path d="M 20 50 A 30 30 0 1 1 80 50 A 30 30 0 0 1 73 68 Q 72 72 68 73 A 30 30 0 0 1 20 50" stroke={color} strokeWidth="4.5" fill="none"/>
+    {/* Mordida superior derecha */}
+    <path d="M 73 30 Q 85 25 87 35 Q 88 42 82 47 Q 76 50 73 45" stroke={color} strokeWidth="4.5" strokeLinecap="round" fill="none"/>
+    {/* Migajas cerca de la mordida */}
+    <circle cx="85" cy="20" r="3.5" stroke={color} strokeWidth="3.5" fill="none"/>
+    <circle cx="92" cy="28" r="2.5" stroke={color} strokeWidth="3" fill="none"/>
     {/* Chispas de chocolate */}
-    <circle cx="38" cy="48" r="5" stroke={color} strokeWidth="3" fill="none"/>
-    <circle cx="52" cy="60" r="4" stroke={color} strokeWidth="3" fill="none"/>
-    <circle cx="62" cy="52" r="5.5" stroke={color} strokeWidth="3" fill="none"/>
-    <circle cx="45" cy="68" r="4.5" stroke={color} strokeWidth="3" fill="none"/>
-    <circle cx="58" cy="72" r="6" stroke={color} strokeWidth="3" fill="none"/>
+    <circle cx="38" cy="50" r="5" stroke={color} strokeWidth="3.5" fill="none"/>
+    <circle cx="55" cy="45" r="4" stroke={color} strokeWidth="3" fill="none"/>
+    <circle cx="48" cy="62" r="4.5" stroke={color} strokeWidth="3.5" fill="none"/>
+    <circle cx="60" cy="58" r="5.5" stroke={color} strokeWidth="3.5" fill="none"/>
+    <circle cx="42" cy="72" r="4" stroke={color} strokeWidth="3" fill="none"/>
   </svg>
 );
 
