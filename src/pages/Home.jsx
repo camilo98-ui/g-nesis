@@ -486,11 +486,35 @@ export default function Home() {
   // Si no está logueado, mostrar pantalla de login
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-white via-slate-50/50 to-pink-50/40 relative overflow-hidden">
-        {/* Background Effects - Desktop only */}
-        <div className="hidden lg:block absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-48 -right-48 w-[600px] h-[600px] bg-gradient-to-br from-pink-400/15 via-rose-400/10 to-transparent rounded-full blur-3xl opacity-50" />
-          <div className="absolute -bottom-48 -left-48 w-[700px] h-[700px] bg-gradient-to-br from-purple-400/10 via-blue-400/8 to-transparent rounded-full blur-3xl opacity-40" />
+      <div className="min-h-screen bg-gradient-to-br from-violet-50 via-fuchsia-50 to-cyan-50 relative overflow-hidden">
+        {/* Animated Background Effects */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <motion.div 
+            animate={{ 
+              x: [0, 100, 0],
+              y: [0, -50, 0],
+              scale: [1, 1.2, 1]
+            }}
+            transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute -top-48 -right-48 w-[800px] h-[800px] bg-gradient-to-br from-fuchsia-400/20 via-pink-400/15 to-transparent rounded-full blur-3xl"
+          />
+          <motion.div 
+            animate={{ 
+              x: [0, -100, 0],
+              y: [0, 100, 0],
+              scale: [1, 1.3, 1]
+            }}
+            transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute -bottom-48 -left-48 w-[900px] h-[900px] bg-gradient-to-br from-cyan-400/15 via-violet-400/10 to-transparent rounded-full blur-3xl"
+          />
+          <motion.div 
+            animate={{ 
+              rotate: [0, 360],
+              scale: [1, 1.1, 1]
+            }}
+            transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-purple-300/10 via-pink-300/10 to-transparent rounded-full blur-3xl"
+          />
         </div>
 
         {/* Mobile/Tablet View */}
@@ -514,8 +538,8 @@ export default function Home() {
                     y: { duration: 2.5, repeat: Infinity, ease: "easeInOut" }
                   }}
                 />
-                <h1 className="text-2xl font-bold text-slate-900 mb-1">Iniciar sesión</h1>
-                <p className="text-slate-600 text-sm">Continúa con tu rol</p>
+                <h1 className="text-2xl font-black bg-gradient-to-r from-fuchsia-600 via-pink-500 to-violet-600 bg-clip-text text-transparent mb-1">Iniciar sesión</h1>
+                <p className="text-slate-600 text-sm font-medium">Selecciona tu rol y comienza</p>
               </div>
 
               <div className="space-y-2.5 mb-5">
@@ -532,35 +556,46 @@ export default function Home() {
                         setLoginError('');
                         localStorage.setItem('lastSelectedRole', role.id);
                       }}
-                      className={`relative w-full min-h-[60px] p-3.5 rounded-xl border-2 transition-all duration-150 text-left ${
+                      className={`relative w-full min-h-[60px] p-3.5 rounded-2xl border-2 transition-all duration-300 text-left ${
                         isSelected
-                          ? 'border-pink-500 bg-pink-50 shadow-md'
-                          : 'border-slate-200 bg-white active:border-pink-300'
+                          ? 'border-transparent bg-gradient-to-r from-fuchsia-500 via-pink-500 to-violet-500 shadow-xl shadow-pink-500/50 scale-[1.02]'
+                          : 'border-slate-200 bg-white/80 backdrop-blur-sm active:border-pink-300 hover:scale-[1.01] hover:shadow-lg'
                       }`}
                     >
                       {isLastUsed && (
-                        <div className="absolute -top-2 right-2 px-2 py-0.5 bg-pink-500 rounded-full text-[9px] font-bold text-white">
-                          Reciente
-                        </div>
+                        <motion.div 
+                          animate={{ scale: [1, 1.1, 1] }}
+                          transition={{ duration: 2, repeat: Infinity }}
+                          className="absolute -top-2 right-2 px-2 py-0.5 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full text-[9px] font-bold text-white shadow-lg"
+                        >
+                          ✨ Reciente
+                        </motion.div>
                       )}
                       <div className="flex items-center gap-2.5">
-                        <div className={`w-11 h-11 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                        <motion.div 
+                          animate={isSelected ? { rotate: [0, 5, -5, 0] } : {}}
+                          transition={{ duration: 2, repeat: Infinity }}
+                          className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg ${
                           isSelected 
-                            ? 'bg-gradient-to-br from-pink-500 to-rose-500' 
-                            : 'bg-slate-100'
+                            ? 'bg-white/20 backdrop-blur-sm' 
+                            : 'bg-gradient-to-br from-slate-100 to-slate-200'
                         }`}>
                           <div className="w-5 h-5">
                             <RoleIcon roleId={role.id} isSelected={isSelected} />
                           </div>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-bold text-slate-900 text-[15px] leading-tight">{role.name}</p>
-                          <p className="text-[11px] text-slate-600 leading-tight mt-0.5">{role.description}</p>
+                          <p className={`font-bold text-[15px] leading-tight ${isSelected ? 'text-white' : 'text-slate-900'}`}>{role.name}</p>
+                          <p className={`text-[11px] leading-tight mt-0.5 ${isSelected ? 'text-white/90' : 'text-slate-600'}`}>{role.description}</p>
                         </div>
                         {isSelected && (
-                          <div className="w-5 h-5 rounded-full bg-pink-500 flex items-center justify-center flex-shrink-0">
-                            <CheckCircle className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
-                          </div>
+                          <motion.div 
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            className="w-5 h-5 rounded-full bg-white flex items-center justify-center flex-shrink-0 shadow-md"
+                          >
+                            <CheckCircle className="w-3.5 h-3.5 text-fuchsia-600" strokeWidth={3} />
+                          </motion.div>
                         )}
                       </div>
                     </button>
@@ -622,20 +657,22 @@ export default function Home() {
                 </div>
               )}
 
-              <Button
-                onClick={handleLogin}
-                disabled={(selectedRole !== 'gerente' && !pendingStore) || !selectedRole || isSubmitting}
-                className="w-full h-12 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl font-bold text-base disabled:opacity-40 mt-4"
-              >
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Button
+                  onClick={handleLogin}
+                  disabled={(selectedRole !== 'gerente' && !pendingStore) || !selectedRole || isSubmitting}
+                  className="w-full h-12 bg-gradient-to-r from-fuchsia-600 via-pink-500 to-violet-600 hover:from-fuchsia-700 hover:via-pink-600 hover:to-violet-700 text-white rounded-2xl font-bold text-base disabled:opacity-40 mt-4 shadow-xl shadow-pink-500/50"
+                >
                 {isSubmitting ? (
                   <span className="flex items-center justify-center gap-2">
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     Entrando...
                   </span>
                 ) : (
-                  'Entrar'
+                  'Entrar 🚀'
                 )}
               </Button>
+              </motion.div>
 
               <div className="text-center mt-4">
                 <Link to={createPageUrl('ExecutiveDashboard')} className="text-xs text-slate-500">
@@ -660,23 +697,44 @@ export default function Home() {
 
               <div className="space-y-10">
                 <div>
-                  <h1 className="text-6xl font-bold leading-tight mb-6">
+                  <motion.h1 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-6xl font-black leading-tight mb-6"
+                  >
                     <span className="text-slate-900">Bienvenido a</span><br />
-                    <span className="bg-gradient-to-r from-pink-500 via-pink-600 to-rose-600 bg-clip-text text-transparent">Popsy Management</span>
-                  </h1>
-                  <p className="text-xl text-slate-600 leading-relaxed">Plataforma de gestión empresarial para equipos de alto rendimiento</p>
+                    <motion.span 
+                      animate={{ 
+                        backgroundPosition: ['0% 50%', '100% 50%', '0% 50%']
+                      }}
+                      transition={{ duration: 5, repeat: Infinity }}
+                      className="bg-gradient-to-r from-fuchsia-600 via-pink-500 to-violet-600 bg-clip-text text-transparent bg-[length:200%_auto]"
+                    >
+                      Popsy Management
+                    </motion.span>
+                  </motion.h1>
+                  <p className="text-xl text-slate-700 leading-relaxed font-medium">Gestión empresarial inteligente para equipos de alto impacto 🚀</p>
                 </div>
 
                 <div className="space-y-7 pt-6">
                   {[
-                    { icon: TrendingUp, title: 'Métricas y KPIs en tiempo real', text: 'Monitoreo continuo del desempeño empresarial' },
-                    { icon: Users, title: 'Gestión inteligente de equipos', text: 'Optimiza recursos y maximiza productividad' },
-                    { icon: Target, title: 'Seguimiento automático de objetivos', text: 'Cumple tus metas con análisis predictivo' }
+                    { icon: TrendingUp, title: 'Métricas en tiempo real', text: 'Monitoreo continuo del desempeño', gradient: 'from-fuchsia-500 to-pink-500' },
+                    { icon: Users, title: 'Gestión de equipos', text: 'Optimiza recursos y productividad', gradient: 'from-pink-500 to-violet-500' },
+                    { icon: Target, title: 'Logro de objetivos', text: 'Cumple metas con análisis predictivo', gradient: 'from-violet-500 to-cyan-500' }
                   ].map((feature, i) => (
-                    <div key={i} className="flex items-start gap-5">
-                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center flex-shrink-0 shadow-lg shadow-pink-500/25">
+                    <motion.div 
+                      key={i} 
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.2 }}
+                      className="flex items-start gap-5"
+                    >
+                      <motion.div 
+                        whileHover={{ rotate: 5, scale: 1.1 }}
+                        className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center flex-shrink-0 shadow-xl`}
+                      >
                         <feature.icon className="w-8 h-8 text-white" />
-                      </div>
+                      </motion.div>
                       <div className="pt-3">
                         <p className="text-slate-900 font-bold text-xl mb-1.5">{feature.title}</p>
                         <p className="text-slate-600 text-base leading-relaxed">{feature.text}</p>
@@ -690,12 +748,15 @@ export default function Home() {
 
           <div className="w-[45%] flex items-center justify-center p-16">
             <div className="w-full max-w-xl">
-              <div className="bg-white/95 backdrop-blur-xl rounded-[32px] shadow-2xl border border-slate-200/60 p-12 space-y-8"
-                   style={{ boxShadow: '0 25px 80px -15px rgba(236, 72, 153, 0.2), 0 10px 30px -10px rgba(0, 0, 0, 0.1)' }}>
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="bg-white/90 backdrop-blur-2xl rounded-[40px] shadow-2xl border-2 border-white/60 p-12 space-y-8"
+                style={{ boxShadow: '0 25px 80px -15px rgba(217, 70, 239, 0.3), 0 10px 30px -10px rgba(0, 0, 0, 0.15)' }}>
                 
                 <div className="text-center">
-                  <h2 className="text-4xl font-bold text-slate-900 mb-3">Iniciar sesión</h2>
-                  <p className="text-base text-slate-600">Continúa con tu rol</p>
+                  <h2 className="text-4xl font-black bg-gradient-to-r from-fuchsia-600 via-pink-500 to-violet-600 bg-clip-text text-transparent mb-3">Iniciar sesión</h2>
+                  <p className="text-base text-slate-700 font-medium">Selecciona tu rol y despega 🚀</p>
                 </div>
 
                 <div className="space-y-4">
@@ -714,32 +775,41 @@ export default function Home() {
                         }}
                         className={`relative w-full p-5 rounded-3xl border-2 transition-all duration-300 text-left flex items-center gap-5 ${
                           isSelected
-                            ? 'border-pink-500 bg-gradient-to-r from-pink-50 to-rose-50 shadow-lg shadow-pink-500/20'
-                            : 'border-slate-200 bg-white hover:border-pink-300 hover:shadow-md'
+                            ? 'border-transparent bg-gradient-to-r from-fuchsia-500 via-pink-500 to-violet-500 shadow-2xl shadow-fuchsia-500/40 scale-[1.02]'
+                            : 'border-slate-200 bg-white/70 backdrop-blur-sm hover:border-fuchsia-300 hover:shadow-lg hover:scale-[1.01]'
                         }`}
                       >
                         {isLastUsed && (
-                          <div className="absolute -top-2.5 right-4 px-3 py-1 bg-gradient-to-r from-pink-500 to-rose-500 rounded-full text-[11px] font-bold text-white shadow-md">
-                            Usado recientemente
-                          </div>
+                          <motion.div 
+                            animate={{ scale: [1, 1.05, 1] }}
+                            transition={{ duration: 2, repeat: Infinity }}
+                            className="absolute -top-2.5 right-4 px-3 py-1 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full text-[11px] font-bold text-white shadow-xl"
+                          >
+                            ✨ Reciente
+                          </motion.div>
                         )}
-                        <div className={`w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0 transition-all ${
-                          isSelected ? 'bg-gradient-to-br from-pink-500 to-rose-500 shadow-lg shadow-pink-500/30' : 'bg-slate-100'
+                        <motion.div 
+                          animate={isSelected ? { rotate: [0, 5, -5, 0] } : {}}
+                          transition={{ duration: 2, repeat: Infinity }}
+                          className={`w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0 transition-all shadow-xl ${
+                          isSelected ? 'bg-white/20 backdrop-blur-sm' : 'bg-gradient-to-br from-slate-100 to-slate-200'
                         }`}>
                           <div className="w-8 h-8">
                             <RoleIcon roleId={role.id} isSelected={isSelected} />
                           </div>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-lg font-bold text-slate-900 mb-1">{role.name}</p>
-                          <p className="text-sm text-slate-600 leading-relaxed">{role.description}</p>
+                          <p className={`text-lg font-bold mb-1 ${isSelected ? 'text-white' : 'text-slate-900'}`}>{role.name}</p>
+                          <p className={`text-sm leading-relaxed ${isSelected ? 'text-white/90' : 'text-slate-600'}`}>{role.description}</p>
                         </div>
                         {isSelected && (
-                          <div className="w-7 h-7 rounded-full bg-pink-500 flex items-center justify-center flex-shrink-0 shadow-md">
-                            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                            </svg>
-                          </div>
+                          <motion.div 
+                            initial={{ scale: 0, rotate: -180 }}
+                            animate={{ scale: 1, rotate: 0 }}
+                            className="w-7 h-7 rounded-full bg-white flex items-center justify-center flex-shrink-0 shadow-xl"
+                          >
+                            <CheckCircle className="w-5 h-5 text-fuchsia-600" strokeWidth={3} />
+                          </motion.div>
                         )}
                       </button>
                     );
@@ -801,11 +871,12 @@ export default function Home() {
                   </div>
                 )}
 
-                <Button
-                  onClick={handleLogin}
-                  disabled={(selectedRole !== 'gerente' && !pendingStore) || !selectedRole || isSubmitting}
-                  className="w-full bg-gradient-to-r from-pink-500 via-pink-600 to-rose-600 hover:from-pink-600 hover:via-pink-700 hover:to-rose-700 text-white py-5 rounded-2xl font-bold text-lg shadow-2xl shadow-pink-500/30 hover:shadow-2xl hover:shadow-pink-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 hover:-translate-y-0.5"
-                >
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Button
+                    onClick={handleLogin}
+                    disabled={(selectedRole !== 'gerente' && !pendingStore) || !selectedRole || isSubmitting}
+                    className="w-full bg-gradient-to-r from-fuchsia-600 via-pink-500 to-violet-600 hover:from-fuchsia-700 hover:via-pink-600 hover:to-violet-700 text-white py-5 rounded-2xl font-black text-lg shadow-2xl shadow-fuchsia-500/40 hover:shadow-2xl hover:shadow-fuchsia-500/60 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                  >
                   {isSubmitting ? (
                     <span className="flex items-center justify-center gap-3">
                       <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -813,15 +884,16 @@ export default function Home() {
                     </span>
                   ) : (
                     <span className="flex flex-col items-center">
-                      <span className="text-lg font-bold">Entrar</span>
+                      <span className="text-lg font-black">Entrar 🚀</span>
                       {selectedRole && (
-                        <span className="text-sm font-normal text-white/80 mt-0.5">
+                        <span className="text-sm font-medium text-white/90 mt-0.5">
                           Como {ROLES.find(r => r.id === selectedRole)?.name}
                         </span>
                       )}
                     </span>
                   )}
                 </Button>
+                </motion.div>
 
                 <div className="text-center pt-1">
                   <Link to={createPageUrl('ExecutiveDashboard')} className="text-xs text-slate-400 hover:text-pink-600 transition-colors inline-block">
@@ -1169,18 +1241,28 @@ export default function Home() {
       <Suspense fallback={null}>
         {showStoreSales && (
           <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowStoreSales(false)}>
-            <div onClick={(e) => e.stopPropagation()} className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden">
-              <div className="bg-gradient-to-r from-pink-400 to-rose-400 p-5 text-white text-center relative">
+            <motion.div 
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            onClick={(e) => e.stopPropagation()} 
+            className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden border-2 border-white/60"
+          >
+              <div className="bg-gradient-to-r from-fuchsia-500 via-pink-500 to-violet-500 p-5 text-white text-center relative">
                 <button onClick={() => setShowStoreSales(false)} className="absolute top-4 right-4 text-white/80 hover:text-white">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
-                <TrendingUp className="w-10 h-10 mx-auto mb-2" />
-                <h2 className="text-xl font-bold">Registrar Ventas</h2>
+                <motion.div
+                  animate={{ rotate: [0, 5, -5, 0] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  <TrendingUp className="w-10 h-10 mx-auto mb-2" />
+                </motion.div>
+                <h2 className="text-xl font-black">Registrar Ventas</h2>
               </div>
 
-              <div className="flex border-b border-pink-200 bg-white">
+              <div className="flex border-b-2 border-pink-200/50 bg-gradient-to-r from-pink-50/50 to-violet-50/50 backdrop-blur-sm">
                 <button
                   onClick={() => setSalesTab('tienda')}
                   className={`flex-1 py-4 px-6 font-bold text-sm transition-all relative ${
@@ -1189,7 +1271,10 @@ export default function Home() {
                 >
                   🏪 Venta de Tienda
                   {salesTab === 'tienda' && (
-                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-pink-500 rounded-t-full" />
+                    <motion.div 
+                      layoutId="activeTab"
+                      className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-pink-500 to-fuchsia-500 rounded-t-full" 
+                    />
                   )}
                 </button>
                 <button
@@ -1200,7 +1285,10 @@ export default function Home() {
                 >
                   👤 Venta de Cajero
                   {salesTab === 'cajero' && (
-                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-violet-500 rounded-t-full" />
+                    <motion.div 
+                      layoutId="activeTab"
+                      className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-violet-500 to-purple-500 rounded-t-full" 
+                    />
                   )}
                 </button>
               </div>
@@ -1212,7 +1300,7 @@ export default function Home() {
                   <ShiftRecordForm storeId={selectedStore} onSuccess={() => {}} />
                 )}
               </div>
-            </div>
+            </motion.div>
           </div>
         )}
 
@@ -1240,11 +1328,21 @@ export default function Home() {
       {/* Install App Modal */}
       {showInstall && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowInstall(false)}>
-          <div onClick={(e) => e.stopPropagation()} className="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden">
-            <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-5 text-white text-center">
-              <Download className="w-10 h-10 mx-auto mb-2" />
-              <h2 className="text-xl font-bold">Instalar Popsy App</h2>
-              <p className="text-white/80 text-sm">Accede más rápido</p>
+          <motion.div 
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            onClick={(e) => e.stopPropagation()} 
+            className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border-2 border-white/60"
+          >
+            <div className="bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500 p-5 text-white text-center">
+              <motion.div
+                animate={{ y: [0, -5, 0] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                <Download className="w-10 h-10 mx-auto mb-2" />
+              </motion.div>
+              <h2 className="text-xl font-black">Instalar Popsy App</h2>
+              <p className="text-white/90 text-sm font-medium">Accede más rápido 🚀</p>
             </div>
 
             <div className="p-5">
@@ -1261,7 +1359,7 @@ export default function Home() {
                     alert('Para instalar:\n\niPhone/iPad: Toca Compartir ⬆️ → "Añadir a inicio"\n\nAndroid: Menú ⋮ → "Instalar app"');
                   }
                 }}
-                className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-6"
+                className="w-full bg-gradient-to-r from-violet-600 via-purple-500 to-fuchsia-600 hover:from-violet-700 hover:via-purple-600 hover:to-fuchsia-700 text-white py-6 font-bold shadow-xl"
               >
                 <Download className="w-5 h-5 mr-2" />
                 {deferredPrompt ? 'Instalar ahora' : 'Ver instrucciones'}
@@ -1273,7 +1371,7 @@ export default function Home() {
                 Cerrar
               </Button>
             </div>
-          </div>
+          </motion.div>
         </div>
       )}
     </div>);
