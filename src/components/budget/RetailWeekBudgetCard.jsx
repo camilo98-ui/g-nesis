@@ -701,8 +701,8 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                   <BarChart data={budgetData.weeklyData} margin={{ top: 10, right: 10, left: 0, bottom: 5 }}>
                     <defs>
                       <linearGradient id="barPresupuesto" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#f9a8d4" stopOpacity={0.8}/>
-                        <stop offset="100%" stopColor="#fda4af" stopOpacity={0.4}/>
+                        <stop offset="0%" stopColor="#e9d5ff" stopOpacity={0.9}/>
+                        <stop offset="100%" stopColor="#f3e8ff" stopOpacity={0.5}/>
                       </linearGradient>
                       <linearGradient id="barVentas" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor="#fb7185" stopOpacity={0.9}/>
