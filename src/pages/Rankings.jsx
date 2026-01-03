@@ -967,10 +967,10 @@ export default function Rankings() {
                             <p className="font-bold text-gray-800 truncate">{item.cashier?.name}</p>
                             <p className="text-xs text-gray-500 truncate">📍 {item.storeName}</p>
                             <div className="flex gap-2 mt-1">
-                              <span className="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded">V:{item.salesScore?.toFixed(0)}</span>
-                              <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">T:{item.transactionsScore?.toFixed(0)}</span>
-                              <span className="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded">TK:{item.ticketScore?.toFixed(0)}</span>
-                              <span className="text-[10px] bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded">S:{item.suggestedScore?.toFixed(0)}</span>
+                              <span className="text-[10px] bg-pink-100 text-pink-700 px-1.5 py-0.5 rounded font-bold">V:{(item.totalSales / 1000000).toFixed(1)}M</span>
+                              <span className="text-[10px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded font-bold">TK:{(item.avgTicket / 1000).toFixed(0)}K</span>
+                              <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-bold">Trx:{item.totalTransactions}</span>
+                              <span className="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-bold">S:{item.totalSuggested}</span>
                             </div>
                           </div>
                           <div className="text-right">
