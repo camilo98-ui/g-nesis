@@ -978,7 +978,23 @@ Genera:
                         dataKey="budget" 
                         stroke="url(#lineShimmer)" 
                         strokeWidth={3} 
-                        dot={{ fill: '#6366f1', r: 5, strokeWidth: 2, stroke: '#1e293b' }} 
+                        dot={(props) => {
+                          const { cx, cy } = props;
+                          return (
+                            <g>
+                              <circle cx={cx} cy={cy} r={8} fill="#6366f1" opacity={0.2}>
+                                <animate attributeName="r" values="8;12;8" dur="2s" repeatCount="indefinite" />
+                                <animate attributeName="opacity" values="0.2;0.4;0.2" dur="2s" repeatCount="indefinite" />
+                              </circle>
+                              <circle cx={cx} cy={cy} r={5} fill="#6366f1" stroke="#1e293b" strokeWidth={2}>
+                                <animate attributeName="r" values="5;7;5" dur="1.5s" repeatCount="indefinite" />
+                              </circle>
+                              <circle cx={cx} cy={cy} r={3} fill="#818cf8">
+                                <animate attributeName="opacity" values="0.6;1;0.6" dur="1s" repeatCount="indefinite" />
+                              </circle>
+                            </g>
+                          );
+                        }}
                         name="Meta"
                         strokeDasharray="5 5"
                         isAnimationActive={true}
