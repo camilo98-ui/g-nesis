@@ -830,13 +830,13 @@ Genera:
                             <span className="text-xs text-slate-500">—</span>
                           ) : (
                             <div>
-                              <p className="font-black text-purple-400 text-sm tabular-nums">{formatShort(store.weekTotalSales)}</p>
-                              <p className={`text-[9px] mt-0.5 font-bold ${
+                              <p className={`text-lg font-black mb-0.5 tabular-nums ${
                                 store.weekCompliance >= 100 ? 'text-emerald-400' :
                                 store.weekCompliance >= 70 ? 'text-amber-400' : 'text-red-400'
                               }`}>
                                 {store.weekCompliance.toFixed(0)}%
                               </p>
+                              <p className="text-[10px] text-purple-400 font-semibold tabular-nums">{formatShort(store.weekTotalSales)}</p>
                             </div>
                           )}
                         </td>
@@ -847,13 +847,13 @@ Genera:
                             <span className="text-xs text-slate-500">—</span>
                           ) : (
                             <div>
-                              <p className="font-bold text-pink-400 text-sm tabular-nums">{formatShort(store.weekProjection)}</p>
-                              <p className={`text-[9px] mt-0.5 font-bold ${
+                              <p className={`text-lg font-black mb-0.5 tabular-nums ${
                                 store.weekProjectionCompliance >= 100 ? 'text-emerald-400' :
                                 store.weekProjectionCompliance >= 85 ? 'text-amber-400' : 'text-red-400'
                               }`}>
                                 {store.weekProjectionCompliance.toFixed(0)}%
                               </p>
+                              <p className="text-[10px] text-pink-400 font-semibold tabular-nums">{formatShort(store.weekProjection)}</p>
                             </div>
                           )}
                         </td>
@@ -864,13 +864,13 @@ Genera:
                             <span className="text-xs text-slate-500">—</span>
                           ) : (
                             <div>
-                              <p className="font-bold text-emerald-400 text-sm tabular-nums">{formatShort(store.monthProjection)}</p>
-                              <p className={`text-[9px] mt-0.5 font-bold ${
+                              <p className={`text-lg font-black mb-0.5 tabular-nums ${
                                 store.monthProjectionCompliance >= 100 ? 'text-emerald-400' :
                                 store.monthProjectionCompliance >= 85 ? 'text-amber-400' : 'text-red-400'
                               }`}>
                                 {store.monthProjectionCompliance.toFixed(0)}%
                               </p>
+                              <p className="text-[10px] text-emerald-400 font-semibold tabular-nums">{formatShort(store.monthProjection)}</p>
                             </div>
                           )}
                         </td>
@@ -880,14 +880,14 @@ Genera:
                           {!store.hasData ? (
                             <span className="text-xs text-slate-500">—</span>
                           ) : (
-                            <div className="flex flex-col items-end gap-1">
-                              <span className={`font-black text-lg tabular-nums ${
+                            <div className="flex flex-col items-end gap-0.5">
+                              <span className={`font-black text-2xl tabular-nums ${
                                 store.salesCompliance >= 90 ? 'text-emerald-400' :
                                 store.salesCompliance >= 70 ? 'text-amber-400' : 'text-red-400'
                               }`}>
                                 {store.salesCompliance.toFixed(0)}%
                               </span>
-                              <p className="text-[9px] text-slate-400 tabular-nums">{formatShort(store.monthTotalSales)}</p>
+                              <p className="text-[10px] text-slate-400 tabular-nums">{formatShort(store.monthTotalSales)}</p>
                             </div>
                           )}
                         </td>
