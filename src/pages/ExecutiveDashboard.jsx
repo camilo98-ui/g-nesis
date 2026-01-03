@@ -986,49 +986,89 @@ Genera:
                   </div>
                 </div>
 
-                {/* Top Performers Compacto */}
-                {topStoresTrend.length > 0 && (
-                  <div className="bg-gradient-to-br from-emerald-500/10 to-green-600/10 backdrop-blur-xl rounded-lg p-5 border border-emerald-500/20 shadow-xl">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-base font-black text-white">Top 5 Líderes</h3>
-                      <span className="text-xs px-2 py-1 rounded bg-emerald-500/20 text-emerald-300 font-bold">≥90%</span>
-                    </div>
-                    <ResponsiveContainer width="100%" height={140}>
-                      <BarChart data={topStoresTrend} layout="vertical">
-                        <defs>
-                          <linearGradient id="greenBarGradient" x1="0" y1="0" x2="1" y2="0">
-                            <stop offset="0%" stopColor="#10b981" stopOpacity={0.8}/>
-                            <stop offset="100%" stopColor="#059669" stopOpacity={1}/>
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.15} horizontal={false} />
-                        <XAxis 
-                          type="number" 
-                          domain={[90, 130]} 
-                          stroke="#9ca3af" 
-                          fontSize={10}
-                          tickLine={false}
-                          tickFormatter={(v) => `${v}%`}
-                        />
-                        <YAxis 
-                          type="category" 
-                          dataKey="name" 
-                          stroke="#9ca3af" 
-                          fontSize={10} 
-                          width={70}
-                          tickLine={false}
-                        />
-                        <Bar dataKey="value" fill="url(#greenBarGradient)" radius={[0, 6, 6, 0]} maxBarSize={20} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                    <div className="mt-3 pt-3 border-t border-emerald-500/20 flex justify-between">
-                      <span className="text-xs text-emerald-300">Promedio Top:</span>
-                      <span className="text-sm font-bold text-emerald-400">
-                        {(topStoresTrend.reduce((sum, s) => sum + s.value, 0) / topStoresTrend.length).toFixed(1)}%
-                      </span>
-                    </div>
+                {/* Top 5 Mejores Tiendas */}
+                <div className="bg-gradient-to-br from-emerald-500/10 to-green-600/10 backdrop-blur-xl rounded-lg p-5 border border-emerald-500/20 shadow-xl">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-base font-black text-white">Top 5 Mejores Tiendas</h3>
+                    <span className="text-xs px-2 py-1 rounded bg-emerald-500/20 text-emerald-300 font-bold">Score Global</span>
                   </div>
-                )}
+                  <ResponsiveContainer width="100%" height={140}>
+                    <BarChart 
+                      data={
+                        storesAnalysis
+                          .filter(s => s.hasData)
+                          .map(s => {
+                            const zoneAvgTicket = zoneTotals.totalSales / zoneTotals.totalTransactions || 1;
+                            const ticketScore = (s.weekAvgTicket / zoneAvgTicket) * 100;
+                            const complianceScore = s.weekCompliance;
+                            const transactionScore = s.weekTotalTransactions > 0 ? Math.min((s.weekTotalTransactions / 500) * 100, 100) : 0;
+                            const score = (complianceScore * 0.5) + (ticketScore * 0.3) + (transactionScore * 0.2);
+                            return {
+                              name: s.name.substring(0, 8),
+                              score: score,
+                              compliance: s.weekCompliance.toFixed(0),
+                              ticket: formatCurrency(s.weekAvgTicket),
+                              transactions: s.weekTotalTransactions
+                            };
+                          })
+                          .sort((a, b) => b.score - a.score)
+                          .slice(0, 5)
+                      } 
+                      layout="vertical"
+                    >
+                      <defs>
+                        <linearGradient id="topStoresGradient" x1="0" y1="0" x2="1" y2="0">
+                          <stop offset="0%" stopColor="#10b981" stopOpacity={0.8}/>
+                          <stop offset="100%" stopColor="#059669" stopOpacity={1}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.15} horizontal={false} />
+                      <XAxis 
+                        type="number" 
+                        domain={[0, 120]} 
+                        stroke="#9ca3af" 
+                        fontSize={10}
+                        tickLine={false}
+                        tickFormatter={(v) => `${v.toFixed(0)}`}
+                      />
+                      <YAxis 
+                        type="category" 
+                        dataKey="name" 
+                        stroke="#9ca3af" 
+                        fontSize={10} 
+                        width={70}
+                        tickLine={false}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: '#1e293b',
+                          border: '2px solid #059669',
+                          borderRadius: '8px',
+                          padding: '12px'
+                        }}
+                        formatter={(value, name, props) => {
+                          return [
+                            <div key="tooltip" className="text-white">
+                              <div className="font-bold text-emerald-400 mb-2">Score: {value.toFixed(1)}</div>
+                              <div className="text-xs space-y-1">
+                                <div>Cumplimiento: {props.payload.compliance}%</div>
+                                <div>Ticket: {props.payload.ticket}</div>
+                                <div>Transacciones: {props.payload.transactions}</div>
+                              </div>
+                            </div>,
+                            ''
+                          ];
+                        }}
+                      />
+                      <Bar dataKey="score" fill="url(#topStoresGradient)" radius={[0, 6, 6, 0]} maxBarSize={20} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                  <div className="mt-3 pt-3 border-t border-emerald-500/20">
+                    <p className="text-[10px] text-slate-400 text-center">
+                      Score = Cumplimiento (50%) + Ticket vs Zona (30%) + Transacciones (20%)
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
 
