@@ -728,20 +728,31 @@ Genera:
 
                 <div className="bg-gradient-to-br from-emerald-500/10 to-green-500/10 backdrop-blur-xl rounded-lg p-4 border border-emerald-500/20">
                   <p className="text-xs text-emerald-300 mb-1">Cumplimiento</p>
-                  <p className={`text-4xl font-black tabular-nums ${
-                    ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 100 ? 'text-emerald-400' : 
-                    ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 85 ? 'text-amber-400' : 'text-red-400'
-                  }`}>
+                  <motion.p 
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ duration: 0.5, type: "spring" }}
+                    className={`text-4xl font-black tabular-nums ${
+                      ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 100 ? 'text-emerald-400' : 
+                      ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 85 ? 'text-amber-400' : 'text-red-400'
+                    }`}>
                     {((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%
-                  </p>
-                  <div className="mt-2 bg-slate-800/50 rounded-full h-2 overflow-hidden">
-                    <div 
-                      className={`h-full rounded-full transition-all ${
+                  </motion.p>
+                  <div className="mt-2 bg-slate-800/50 rounded-full h-2 overflow-hidden relative">
+                    <motion.div 
+                      initial={{ width: 0 }}
+                      animate={{ width: `${Math.min(((zoneTotals.totalSales/zoneTotals.totalBudget)*100), 100)}%` }}
+                      transition={{ duration: 1.5, ease: "easeOut" }}
+                      className={`h-full rounded-full relative ${
                         ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 100 ? 'bg-emerald-500' : 
                         ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 85 ? 'bg-amber-500' : 'bg-red-500'
-                      }`}
-                      style={{ width: `${Math.min(((zoneTotals.totalSales/zoneTotals.totalBudget)*100), 100)}%` }}
-                    />
+                      }`}>
+                      <motion.div
+                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                        animate={{ x: ['-100%', '200%'] }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                      />
+                    </motion.div>
                   </div>
                 </div>
 
@@ -749,34 +760,69 @@ Genera:
                   <p className="text-xs text-slate-400 mb-2">Estado Semanal</p>
                   <div className="flex items-center justify-between mb-3">
                     <div>
-                      <p className="text-2xl font-black text-emerald-400 tabular-nums">
+                      <motion.p 
+                        initial={{ scale: 0.5, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ duration: 0.5, type: "spring", delay: 0.1 }}
+                        className="text-2xl font-black text-emerald-400 tabular-nums">
                         {storesAnalysis.filter(s => s.hasData && s.weekCompliance >= 90).length}
-                      </p>
+                      </motion.p>
                       <p className="text-[10px] text-emerald-300">En Meta</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-2xl font-black text-red-400 tabular-nums">
+                      <motion.p 
+                        initial={{ scale: 0.5, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ duration: 0.5, type: "spring", delay: 0.2 }}
+                        className="text-2xl font-black text-red-400 tabular-nums">
                         {storesAnalysis.filter(s => s.hasData && s.weekCompliance < 70).length}
-                      </p>
+                      </motion.p>
                       <p className="text-[10px] text-red-300">Críticas</p>
                     </div>
                   </div>
                   <div className="grid grid-cols-3 gap-1">
-                    <div className="bg-emerald-500/20 rounded py-1 text-center">
-                      <p className="text-xs font-bold text-emerald-400">
+                    <motion.div 
+                      initial={{ scaleY: 0, opacity: 0 }}
+                      animate={{ scaleY: 1, opacity: 1 }}
+                      transition={{ duration: 0.6, delay: 0.3 }}
+                      className="bg-emerald-500/20 rounded py-1 text-center relative overflow-hidden">
+                      <motion.div
+                        className="absolute inset-0 bg-gradient-to-t from-emerald-400/20 to-transparent"
+                        animate={{ opacity: [0.3, 0.6, 0.3] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                      />
+                      <p className="text-xs font-bold text-emerald-400 relative z-10">
                         {storesAnalysis.filter(s => s.hasData && s.weekCompliance >= 90).length}
                       </p>
-                    </div>
-                    <div className="bg-amber-500/20 rounded py-1 text-center">
-                      <p className="text-xs font-bold text-amber-400">
+                    </motion.div>
+                    <motion.div 
+                      initial={{ scaleY: 0, opacity: 0 }}
+                      animate={{ scaleY: 1, opacity: 1 }}
+                      transition={{ duration: 0.6, delay: 0.4 }}
+                      className="bg-amber-500/20 rounded py-1 text-center relative overflow-hidden">
+                      <motion.div
+                        className="absolute inset-0 bg-gradient-to-t from-amber-400/20 to-transparent"
+                        animate={{ opacity: [0.3, 0.6, 0.3] }}
+                        transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+                      />
+                      <p className="text-xs font-bold text-amber-400 relative z-10">
                         {storesAnalysis.filter(s => s.hasData && s.weekCompliance >= 70 && s.weekCompliance < 90).length}
                       </p>
-                    </div>
-                    <div className="bg-red-500/20 rounded py-1 text-center">
-                      <p className="text-xs font-bold text-red-400">
+                    </motion.div>
+                    <motion.div 
+                      initial={{ scaleY: 0, opacity: 0 }}
+                      animate={{ scaleY: 1, opacity: 1 }}
+                      transition={{ duration: 0.6, delay: 0.5 }}
+                      className="bg-red-500/20 rounded py-1 text-center relative overflow-hidden">
+                      <motion.div
+                        className="absolute inset-0 bg-gradient-to-t from-red-400/20 to-transparent"
+                        animate={{ opacity: [0.3, 0.6, 0.3] }}
+                        transition={{ duration: 2, repeat: Infinity, delay: 1 }}
+                      />
+                      <p className="text-xs font-bold text-red-400 relative z-10">
                         {storesAnalysis.filter(s => s.hasData && s.weekCompliance < 70).length}
                       </p>
-                    </div>
+                    </motion.div>
                   </div>
                 </div>
               </div>
