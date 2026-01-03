@@ -707,9 +707,9 @@ Genera:
                 </p>
               </div>
               <div className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 backdrop-blur-xl rounded-lg p-4 border border-amber-500/20">
-                <p className="text-xs text-amber-300 mb-2">Transacciones</p>
-                <p className="text-3xl font-black text-white mb-1">{zoneTotals.totalTransactions.toLocaleString()}</p>
-                <p className="text-xs text-slate-400">Ticket: {formatCurrency(zoneTotals.totalSales / zoneTotals.totalTransactions || 0)}</p>
+                <p className="text-xs text-amber-300 mb-2">Ticket Promedio</p>
+                <p className="text-3xl font-black text-white mb-1">{formatCurrency(zoneTotals.totalSales / zoneTotals.totalTransactions || 0)}</p>
+                <p className="text-xs text-slate-400">Trans: {zoneTotals.totalTransactions.toLocaleString()}</p>
               </div>
               <div className="bg-gradient-to-br from-rose-500/10 to-red-500/10 backdrop-blur-xl rounded-lg p-4 border border-rose-500/20">
                 <p className="text-xs text-rose-300 mb-2">Gap Semanal</p>
