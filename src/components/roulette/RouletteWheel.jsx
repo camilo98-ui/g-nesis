@@ -68,23 +68,32 @@ export default function RouletteWheel({ onResult, disabled, awardType = 'tienda'
   }, [configs]);
   
   const PRIZES = React.useMemo(() => {
-    console.log('🎯 RouletteWheel - Configs:', configs);
-    console.log('🎯 RouletteWheel - Award Type:', awardType);
-    console.log('🎯 RouletteWheel - Active Config:', activeConfig);
+    console.log('========== CARGANDO PREMIOS ==========');
+    console.log('🏪 Store ID:', storeId);
+    console.log('🎯 Award Type:', awardType);
+    console.log('📦 Total Configs recibidas:', configs.length);
+    console.log('📦 Configs completas:', JSON.stringify(configs, null, 2));
+    console.log('✅ Active Config seleccionada:', activeConfig);
     
     if (activeConfig?.prizes) {
+      console.log('📝 JSON String de premios:', activeConfig.prizes);
       try {
         const parsed = JSON.parse(activeConfig.prizes);
-        console.log('✅ RouletteWheel - Premios parseados:', parsed);
+        console.log('✅ PREMIOS PARSEADOS:', JSON.stringify(parsed, null, 2));
+        console.log('======================================');
         return parsed;
       } catch (e) {
         console.error('❌ Error parseando premios:', e);
+        console.log('⚠️ Usando defaults por error');
         return awardType === 'distrito' ? DEFAULT_PRIZES_DISTRITO : DEFAULT_PRIZES_TIENDA;
       }
     }
+    
     console.log('⚠️ No hay activeConfig.prizes, usando defaults');
+    console.log('📋 Defaults:', awardType === 'distrito' ? DEFAULT_PRIZES_DISTRITO : DEFAULT_PRIZES_TIENDA);
+    console.log('======================================');
     return awardType === 'distrito' ? DEFAULT_PRIZES_DISTRITO : DEFAULT_PRIZES_TIENDA;
-  }, [activeConfig, awardType, configs]);
+  }, [activeConfig, awardType, configs, storeId]);
   
   const SPIN_DURATION = activeConfig?.spin_duration || 6500;
 

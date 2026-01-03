@@ -86,7 +86,10 @@ export default function RouletteConfigManager({ storeId }) {
       return result;
     },
     onSuccess: async (data) => {
-      console.log('🎉 onSuccess ejecutado:', data);
+      console.log('========== GUARDADO EXITOSO ==========');
+      console.log('✅ Config guardada:', data);
+      console.log('📝 Premios guardados:', prizes);
+      console.log('📝 JSON guardado:', JSON.stringify(prizes));
 
       // Limpiar COMPLETAMENTE el caché
       await queryClient.cancelQueries({ queryKey: ['rouletteConfig'] });
@@ -101,7 +104,9 @@ export default function RouletteConfigManager({ storeId }) {
         award_type: awardType, 
         is_active: true 
       });
-      console.log('🔍 Verificación post-guardado:', verify);
+      console.log('🔍 Verificación - Configs activas:', verify.length);
+      console.log('🔍 Verificación - Config:', JSON.stringify(verify[0], null, 2));
+      console.log('======================================');
 
       toast.success('✅ Configuración guardada exitosamente');
       setShowSuccess(true);
