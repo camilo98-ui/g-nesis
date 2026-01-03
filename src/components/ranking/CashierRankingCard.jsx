@@ -388,8 +388,8 @@ export default function CashierRankingCard({
       )}
 
       {/* Modal de Detalle del Cajero */}
-      {showDetailModal && createPortal(
-        <AnimatePresence>
+      <AnimatePresence>
+        {showDetailModal && createPortal(
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -607,10 +607,10 @@ export default function CashierRankingCard({
                 </div>
               </div>
             </motion.div>
-          </motion.div>
-        </AnimatePresence>,
-        document.body
-      )}
+          </motion.div>,
+          document.body
+        )}
+      </AnimatePresence>
     </motion.div>
     </TooltipProvider>
   );
