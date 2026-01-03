@@ -1628,84 +1628,99 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                             </ul>
                           </div>
 
-                          {historicalSales.length > 0 && (
-                            <>
-                              <div className="mb-3">
-                                <p className="text-xs font-bold text-slate-700 mb-2">📈 Evolución Histórica</p>
-                                <ResponsiveContainer width="100%" height={180}>
-                                  <LineChart data={historicalSales.reverse().map(s => ({
-                                    fecha: format(parseISO(s.date), 'dd/MM', { locale: es }),
-                                    venta: s.total_sales,
-                                    promedio: dayData.avg
-                                  }))}>
-                                    <defs>
-                                      <linearGradient id="dayHistoryGradient" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stopColor="#818cf8" stopOpacity={0.6}/>
-                                        <stop offset="100%" stopColor="#818cf8" stopOpacity={0.1}/>
-                                      </linearGradient>
-                                    </defs>
-                                    <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
-                                    <XAxis dataKey="fecha" fontSize={9} angle={-45} textAnchor="end" height={50} />
-                                    <YAxis fontSize={10} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} />
-                                    <Tooltip 
-                                      formatter={(v, name) => [
-                                        formatCurrency(v),
-                                        name === 'venta' ? '💰 Venta' : '📊 Promedio'
-                                      ]}
-                                      contentStyle={{ 
-                                        background: '#fff', 
-                                        border: '2px solid #818cf8', 
-                                        borderRadius: '8px',
-                                        fontSize: '11px'
-                                      }}
-                                    />
-                                    <ReferenceLine y={dayData.avg} stroke="#a78bfa" strokeDasharray="5 5" strokeWidth={2} label={{ value: 'Promedio', fill: '#a78bfa', fontSize: 9 }} />
-                                    <Line type="monotone" dataKey="venta" stroke="#6366f1" strokeWidth={3} dot={{ fill: '#6366f1', r: 4 }} activeDot={{ r: 6 }} />
-                                  </LineChart>
-                                </ResponsiveContainer>
-                              </div>
+                          {historicalSales.length > 0 && (() => {
+                            // Comparar este día vs los demás días de la semana
+                            const allDaysComparison = budgetData.topDays
+                              .sort((a, b) => ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'].indexOf(a.dayFull) - 
+                                              ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'].indexOf(b.dayFull));
 
-                              <div className="mb-3">
-                                <p className="text-xs font-bold text-slate-700 mb-2">📊 Comparativa vs Promedio</p>
-                                <ResponsiveContainer width="100%" height={140}>
-                                  <BarChart data={historicalSales.slice(0, 6).reverse().map(s => ({
-                                    fecha: format(parseISO(s.date), 'dd/MM', { locale: es }),
-                                    diferencia: s.total_sales - dayData.avg,
-                                    venta: s.total_sales
-                                  }))}>
-                                    <defs>
-                                      <linearGradient id="barPositivo" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stopColor="#34d399" stopOpacity={0.8}/>
-                                        <stop offset="100%" stopColor="#6ee7b7" stopOpacity={0.4}/>
-                                      </linearGradient>
-                                      <linearGradient id="barNegativo" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stopColor="#f87171" stopOpacity={0.8}/>
-                                        <stop offset="100%" stopColor="#fca5a5" stopOpacity={0.4}/>
-                                      </linearGradient>
-                                    </defs>
-                                    <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
-                                    <XAxis dataKey="fecha" fontSize={9} />
-                                    <YAxis fontSize={10} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} />
-                                    <Tooltip 
-                                      formatter={(v) => formatCurrency(v)}
-                                      contentStyle={{ 
-                                        background: '#fff', 
-                                        border: '2px solid #e5e7eb', 
-                                        borderRadius: '8px',
-                                        fontSize: '11px'
-                                      }}
-                                    />
-                                    <ReferenceLine y={0} stroke="#9ca3af" strokeDasharray="3 3" />
-                                    <Bar dataKey="diferencia" radius={[6, 6, 0, 0]}>
-                                      {historicalSales.slice(0, 6).map((sale, index) => (
-                                        <Cell key={`cell-${index}`} fill={sale.total_sales >= dayData.avg ? 'url(#barPositivo)' : 'url(#barNegativo)'} />
-                                      ))}
-                                    </Bar>
-                                  </BarChart>
-                                </ResponsiveContainer>
-                              </div>
-                            </>
-                          )}
+                            return (
+                              <>
+                                <div className="mb-3">
+                                  <p className="text-xs font-bold text-slate-700 mb-2">📈 Comportamiento de {dayData.dayFull}s</p>
+                                  <ResponsiveContainer width="100%" height={200}>
+                                    <AreaChart data={historicalSales.reverse().map(s => ({
+                                      fecha: format(parseISO(s.date), 'dd/MM/yy', { locale: es }),
+                                      venta: s.total_sales,
+                                      promedio: dayData.avg
+                                    }))}>
+                                      <defs>
+                                        <linearGradient id="areaVenta" x1="0" y1="0" x2="0" y2="1">
+                                          <stop offset="0%" stopColor="#6366f1" stopOpacity={0.8}/>
+                                          <stop offset="100%" stopColor="#818cf8" stopOpacity={0.1}/>
+                                        </linearGradient>
+                                      </defs>
+                                      <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                                      <XAxis dataKey="fecha" fontSize={9} angle={-45} textAnchor="end" height={50} />
+                                      <YAxis fontSize={10} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} />
+                                      <Tooltip 
+                                        formatter={(v, name) => [
+                                          formatCurrency(v),
+                                          name === 'venta' ? `💰 ${dayData.dayFull}` : '📊 Promedio'
+                                        ]}
+                                        contentStyle={{ 
+                                          background: '#fff', 
+                                          border: '2px solid #6366f1', 
+                                          borderRadius: '12px',
+                                          fontSize: '11px',
+                                          padding: '8px 12px'
+                                        }}
+                                      />
+                                      <ReferenceLine y={dayData.avg} stroke="#a78bfa" strokeDasharray="5 5" strokeWidth={2} 
+                                        label={{ value: `Promedio: ${formatCurrency(dayData.avg)}`, fill: '#7c3aed', fontSize: 9, position: 'top' }} />
+                                      <Area type="monotone" dataKey="venta" stroke="#6366f1" strokeWidth={3} fill="url(#areaVenta)" />
+                                    </AreaChart>
+                                  </ResponsiveContainer>
+                                  <p className="text-[10px] text-slate-500 mt-1 text-center">
+                                    Últimos {historicalSales.length} {dayData.dayFull}s registrados
+                                  </p>
+                                </div>
+
+                                <div className="mb-3">
+                                  <p className="text-xs font-bold text-slate-700 mb-2">📊 {dayData.dayFull} vs Otros Días</p>
+                                  <ResponsiveContainer width="100%" height={180}>
+                                    <BarChart data={[...budgetData.topDays].sort((a, b) => 
+                                      ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'].indexOf(a.dayFull) - 
+                                      ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'].indexOf(b.dayFull)
+                                    ).map(d => ({
+                                      dia: d.day,
+                                      promedio: d.avg,
+                                      peso: d.weight * 100,
+                                      isSelected: d.dayFull === dayData.dayFull
+                                    }))}>
+                                      <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                                      <XAxis dataKey="dia" fontSize={10} />
+                                      <YAxis fontSize={10} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} />
+                                      <Tooltip 
+                                        formatter={(v, name) => {
+                                          if (name === 'promedio') return [formatCurrency(v), 'Promedio'];
+                                          if (name === 'peso') return [`${v.toFixed(1)}%`, 'Peso'];
+                                          return [v, name];
+                                        }}
+                                        contentStyle={{ 
+                                          background: '#fff', 
+                                          border: '2px solid #e5e7eb', 
+                                          borderRadius: '12px',
+                                          fontSize: '11px'
+                                        }}
+                                      />
+                                      <Bar dataKey="promedio" radius={[8, 8, 0, 0]}>
+                                        {budgetData.topDays.map((entry, index) => (
+                                          <Cell 
+                                            key={`cell-${index}`} 
+                                            fill={entry.dayFull === dayData.dayFull ? '#6366f1' : '#cbd5e1'} 
+                                          />
+                                        ))}
+                                      </Bar>
+                                    </BarChart>
+                                  </ResponsiveContainer>
+                                  <p className="text-[10px] text-slate-500 mt-1 text-center">
+                                    {dayData.dayFull} es el día #{dayIndex + 1} con mayor potencial de venta
+                                  </p>
+                                </div>
+                              </>
+                            );
+                          })()}
 
                           <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg p-3 border border-amber-200 mb-3">
                             <p className="text-xs font-bold text-amber-900 mb-2">💡 Estrategia recomendada:</p>
