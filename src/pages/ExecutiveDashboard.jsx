@@ -688,47 +688,72 @@ Genera:
 
             {/* Grid Principal Estilo Power BI */}
             <div className="grid grid-cols-12 gap-4 mb-6">
-              {/* Columna Izquierda - KPIs Compactos */}
-              <div className="col-span-12 lg:col-span-2 grid grid-cols-2 lg:grid-cols-1 gap-4">
-                {/* KPI Cards Compactos */}
-                <div
-                  onClick={() => setSelectedKPIDetail('sales')}
-                  className="bg-white/5 backdrop-blur-xl rounded-lg p-4 border border-white/10 cursor-pointer hover:bg-white/10 transition-all"
-                >
-                  <p className="text-xs text-slate-400 mb-2">Venta Total</p>
-                  <p className="text-3xl font-black text-white mb-1 tabular-nums">{formatShort(zoneTotals.totalSales)}</p>
-                  <p className="text-xs text-emerald-400 font-semibold">{formatShort(zoneTotals.totalBudget)}</p>
-                </div>
-
-                <div
-                  onClick={() => setSelectedKPIDetail('compliance')}
-                  className="bg-white/5 backdrop-blur-xl rounded-lg p-4 border border-white/10 cursor-pointer hover:bg-white/10 transition-all"
-                >
-                  <p className="text-xs text-slate-400 mb-2">Cumplimiento</p>
-                  <p className={`text-4xl font-black mb-1 tabular-nums ${
-                    ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 90 ? 'text-emerald-400' : 
-                    ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 70 ? 'text-amber-400' : 'text-red-400'
-                  }`}>
-                    {((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%
-                  </p>
-                </div>
-
-                <div
-                  onClick={() => setSelectedKPIDetail('critical')}
-                  className="bg-white/5 backdrop-blur-xl rounded-lg p-4 border border-white/10 cursor-pointer hover:bg-white/10 transition-all"
-                >
-                  <p className="text-xs text-slate-400 mb-2">Críticas</p>
-                  <p className="text-4xl font-black text-red-400 mb-1 tabular-nums">{statusCounts.critical}</p>
-                  <p className="text-xs text-red-300 font-semibold">{Math.round((statusCounts.critical/STORES.length)*100)}%</p>
-                </div>
-
-                <div
-                  onClick={() => setSelectedKPIDetail('meta')}
-                  className="bg-white/5 backdrop-blur-xl rounded-lg p-4 border border-white/10 cursor-pointer hover:bg-white/10 transition-all"
-                >
-                  <p className="text-xs text-slate-400 mb-2">En Meta</p>
-                  <p className="text-4xl font-black text-emerald-400 mb-1 tabular-nums">{statusCounts.positive}</p>
-                  <p className="text-xs text-emerald-300 font-semibold">{Math.round((statusCounts.positive/STORES.length)*100)}%</p>
+              {/* Columna Izquierda - Mini Gráfica de Cumplimiento */}
+              <div className="col-span-12 lg:col-span-2">
+                <div className="bg-white/5 backdrop-blur-xl rounded-lg p-4 border border-white/10 h-full">
+                  <h3 className="text-sm font-bold text-white mb-3">Cumplimiento Semanal</h3>
+                  <ResponsiveContainer width="100%" height={320}>
+                    <BarChart 
+                      data={storesAnalysis
+                        .filter(s => s.hasData)
+                        .sort((a, b) => b.weekCompliance - a.weekCompliance)
+                        .map(s => ({
+                          name: s.code.replace('BTA ', ''),
+                          cumplimiento: s.weekCompliance
+                        }))}
+                      layout="vertical"
+                      margin={{ left: 0, right: 10 }}
+                    >
+                      <XAxis 
+                        type="number" 
+                        stroke="#6b7280" 
+                        fontSize={9}
+                        tickLine={false}
+                        tickFormatter={(v) => `${v}%`}
+                      />
+                      <YAxis 
+                        type="category" 
+                        dataKey="name" 
+                        stroke="#9ca3af" 
+                        fontSize={9} 
+                        width={28}
+                        tickLine={false}
+                      />
+                      <Bar dataKey="cumplimiento" radius={[0, 4, 4, 0]} maxBarSize={14}>
+                        {storesAnalysis
+                          .filter(s => s.hasData)
+                          .sort((a, b) => b.weekCompliance - a.weekCompliance)
+                          .map((s, index) => (
+                            <Cell 
+                              key={`cell-${index}`} 
+                              fill={
+                                s.weekCompliance >= 100 ? '#10b981' :
+                                s.weekCompliance >= 90 ? '#3b82f6' :
+                                s.weekCompliance >= 70 ? '#f59e0b' : '#ef4444'
+                              }
+                            />
+                          ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                  <div className="grid grid-cols-4 gap-1 mt-3 pt-3 border-t border-white/10">
+                    <div className="text-center">
+                      <div className="w-2 h-2 rounded-full bg-emerald-500 mx-auto mb-1" />
+                      <p className="text-[8px] text-slate-400">≥100%</p>
+                    </div>
+                    <div className="text-center">
+                      <div className="w-2 h-2 rounded-full bg-blue-500 mx-auto mb-1" />
+                      <p className="text-[8px] text-slate-400">90-99%</p>
+                    </div>
+                    <div className="text-center">
+                      <div className="w-2 h-2 rounded-full bg-amber-500 mx-auto mb-1" />
+                      <p className="text-[8px] text-slate-400">70-89%</p>
+                    </div>
+                    <div className="text-center">
+                      <div className="w-2 h-2 rounded-full bg-red-500 mx-auto mb-1" />
+                      <p className="text-[8px] text-slate-400">&lt;70%</p>
+                    </div>
+                  </div>
                 </div>
               </div>
 
