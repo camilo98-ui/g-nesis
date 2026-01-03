@@ -158,25 +158,26 @@ export default function RouletteWheel({ onResult, disabled, awardType = 'tienda'
             return (
               <div
                 key={prize.id}
-                className="absolute w-full h-full"
+                className="absolute w-full h-full origin-center"
                 style={{
                   transform: `rotate(${rotation}deg)`,
                   clipPath: `polygon(50% 50%, 50% 0%, ${50 + Math.tan((Math.PI * 2) / (PRIZES.length * 2)) * 50}% 0%)`,
                 }}
               >
                 <div 
-                  className="w-full h-full flex flex-col items-center justify-start pt-10"
+                  className="w-full h-full relative"
                   style={{ background: prize.color }}
                 >
                   <div 
-                    className="flex flex-col items-center"
+                    className="absolute left-1/2 top-16"
                     style={{ 
-                      transform: `rotate(${segmentAngle / 2}deg)`,
-                      width: '100px'
+                      transform: `translateX(-50%) rotate(${segmentAngle / 2}deg)`,
+                      transformOrigin: 'center',
+                      width: '80px'
                     }}
                   >
-                    <div className="text-2xl mb-1">{prize.emoji}</div>
-                    <p className="text-[9px] font-bold text-gray-800 leading-[1.1] text-center break-words">
+                    <div className="text-2xl text-center mb-1">{prize.emoji}</div>
+                    <p className="text-[8px] font-extrabold text-gray-800 leading-tight text-center px-1">
                       {prize.name}
                     </p>
                   </div>
