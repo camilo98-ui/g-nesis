@@ -175,7 +175,8 @@ export default function RouletteWheel({ onResult, disabled, awardType = 'tienda'
               const textRadius = 35;
               const textX = 50 + textRadius * Math.cos(midAngle);
               const textY = 50 + textRadius * Math.sin(midAngle);
-              const textRotation = (midAngle * 180 / Math.PI) + 90;
+              // Texto siempre horizontal para máxima legibilidad
+              const textRotation = 0;
               
               // Calcular luminosidad del color para determinar si usar texto claro u oscuro
               const hexToRgb = (hex) => {
