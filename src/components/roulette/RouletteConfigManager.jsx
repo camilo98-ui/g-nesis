@@ -85,8 +85,8 @@ export default function RouletteConfigManager({ storeId }) {
     onSuccess: (data) => {
       console.log('🎉 onSuccess ejecutado:', data);
       toast.success('✅ Configuración guardada exitosamente');
-      queryClient.invalidateQueries(['rouletteConfig']);
-      queryClient.refetchQueries(['rouletteConfig']);
+      queryClient.invalidateQueries({ queryKey: ['rouletteConfig'] });
+      queryClient.refetchQueries({ queryKey: ['rouletteConfig'] });
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 3000);
     },

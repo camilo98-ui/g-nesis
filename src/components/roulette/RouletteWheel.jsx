@@ -30,12 +30,19 @@ export default function RouletteWheel({ onResult, disabled, awardType = 'tienda'
   const [showConfetti, setShowConfetti] = useState(false);
   const [suspensePhase, setSuspensePhase] = useState(0);
 
-  const { data: configs = [] } = useQuery({
+  const { data: configs = [], refetch } = useQuery({
     queryKey: ['rouletteConfig', storeId],
     queryFn: () => base44.entities.RouletteConfig.filter({ store_id: storeId }),
     enabled: !!storeId,
-    refetchOnMount: 'always'
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true
   });
+
+  React.useEffect(() => {
+    if (storeId) {
+      refetch();
+    }
+  }, [storeId, awardType, refetch]);
 
   const activeConfig = configs.find(c => c.is_active && c.award_type === awardType);
   
@@ -135,9 +142,35 @@ export default function RouletteWheel({ onResult, disabled, awardType = 'tienda'
           <div className="w-0 h-0 border-l-[20px] border-l-transparent border-r-[20px] border-r-transparent border-t-[35px] border-t-pink-500 filter drop-shadow-2xl" />
         </motion.div>
 
+        {/* Botón Central de Girar - ANTES del círculo para evitar conflictos */}
+        <motion.div 
+          className="absolute top-1/2 left-1/2 z-30"
+          style={{ transform: 'translate(-50%, -50%)' }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <Button
+            onClick={handleSpin}
+            disabled={spinning || disabled}
+            className="w-32 h-32 rounded-full bg-gradient-to-br from-pink-500 via-rose-500 to-pink-600 hover:from-pink-600 hover:via-rose-600 hover:to-pink-700 shadow-2xl border-8 border-white disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <div className="flex flex-col items-center gap-1">
+              <motion.div
+                animate={spinning ? { rotate: 360 } : {}}
+                transition={spinning ? { duration: 1, repeat: Infinity, ease: "linear" } : {}}
+              >
+                <Sparkles className="w-8 h-8 text-white" />
+              </motion.div>
+              <span className="text-xl font-black text-white">
+                {spinning ? 'Girando...' : 'GIRAR'}
+              </span>
+            </div>
+          </Button>
+        </motion.div>
+
         {/* Círculo de la ruleta - SVG */}
         <motion.div
-          className="w-full h-full rounded-full relative border-[12px] border-white overflow-hidden"
+          className="w-full h-full rounded-full relative border-[12px] border-white overflow-hidden pointer-events-none"
           animate={{
             boxShadow: spinning 
               ? ['0 25px 50px -12px rgba(0, 0, 0, 0.25)', '0 25px 50px -12px rgba(236, 72, 153, 0.5)', '0 25px 50px -12px rgba(0, 0, 0, 0.25)']
@@ -249,31 +282,6 @@ export default function RouletteWheel({ onResult, disabled, awardType = 'tienda'
           </svg>
 
 
-        </motion.div>
-
-        {/* Botón Central de Girar */}
-        <motion.div 
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <Button
-            onClick={handleSpin}
-            disabled={spinning || disabled}
-            className="w-32 h-32 rounded-full bg-gradient-to-br from-pink-500 via-rose-500 to-pink-600 hover:from-pink-600 hover:via-rose-600 hover:to-pink-700 shadow-2xl border-8 border-white disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <div className="flex flex-col items-center gap-1">
-              <motion.div
-                animate={spinning ? { rotate: 360 } : {}}
-                transition={spinning ? { duration: 1, repeat: Infinity, ease: "linear" } : {}}
-              >
-                <Sparkles className="w-8 h-8 text-white" />
-              </motion.div>
-              <span className="text-xl font-black text-white">
-                {spinning ? 'Girando...' : 'GIRAR'}
-              </span>
-            </div>
-          </Button>
         </motion.div>
       </div>
     </div>
