@@ -700,8 +700,28 @@ Genera:
                           <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.4}/>
                           <stop offset="100%" stopColor="#3b82f6" stopOpacity={0}/>
                         </linearGradient>
+                        <linearGradient id="shimmer" x1="0%" y1="0%" x2="100%" y2="0%">
+                          <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.3}>
+                            <animate attributeName="offset" values="0;1;0" dur="3s" repeatCount="indefinite" />
+                          </stop>
+                          <stop offset="50%" stopColor="#60a5fa" stopOpacity={0.8}>
+                            <animate attributeName="offset" values="0.5;1.5;0.5" dur="3s" repeatCount="indefinite" />
+                          </stop>
+                          <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.3}>
+                            <animate attributeName="offset" values="1;2;1" dur="3s" repeatCount="indefinite" />
+                          </stop>
+                        </linearGradient>
                       </defs>
-                      <Area type="monotone" dataKey="sales" stroke="#3b82f6" strokeWidth={2} fill="url(#miniArea)" />
+                      <Area 
+                        type="monotone" 
+                        dataKey="sales" 
+                        stroke="url(#shimmer)" 
+                        strokeWidth={2.5} 
+                        fill="url(#miniArea)"
+                        isAnimationActive={true}
+                        animationDuration={2000}
+                        animationEasing="ease-in-out"
+                      />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
