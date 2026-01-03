@@ -1684,53 +1684,273 @@ export default function Dashboard() {
             }
             </AnimatePresence>
 
-            {/* Proyección del Mes - Solo en modo ACTUAL */}
+            {/* Análisis Semanal Retail - Solo en modo ACTUAL */}
+            {projections && !showComparison && (() => {
+              const now = new Date();
+              const monthStart = startOfMonth(now);
+              const monthEnd = endOfMonth(now);
+              const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd }).length;
+              
+              const retailWeeks = [];
+              let weekStart = startOfWeek(monthStart, { weekStartsOn: 1 });
+              
+              while (weekStart <= monthEnd) {
+                const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
+                const weekDays = eachDayOfInterval({ start: weekStart, end: weekEnd })
+                  .filter(d => d >= monthStart && d <= monthEnd);
+                
+                if (weekDays.length > 0) {
+                  const weekSales = dailySales.filter(s => {
+                    const saleDate = new Date(s.date);
+                    return saleDate >= weekStart && saleDate <= weekEnd && saleDate >= monthStart && saleDate <= monthEnd;
+                  }).reduce((sum, s) => sum + (s.total_sales || 0), 0);
+                  
+                  const weekNumber = retailWeeks.length + 1;
+                  const isPast = weekEnd < now;
+                  const isCurrent = weekStart <= now && weekEnd >= now;
+                  
+                  const weekBudget = (currentBudget?.sales_budget || 0) * (weekDays.length / daysInMonth);
+                  const weekCompliance = weekBudget > 0 ? (weekSales / weekBudget * 100) : 0;
+                  
+                  const daysPassed = isCurrent 
+                    ? eachDayOfInterval({ start: weekStart, end: now }).filter(d => d <= now && d >= monthStart).length
+                    : weekDays.length;
+                  
+                  const avgDaily = daysPassed > 0 ? weekSales / daysPassed : 0;
+                  const weekProjection = avgDaily * weekDays.length;
+                  
+                  retailWeeks.push({
+                    number: weekNumber,
+                    start: weekStart,
+                    end: weekEnd,
+                    sales: weekSales,
+                    budget: weekBudget,
+                    compliance: weekCompliance,
+                    projection: weekProjection,
+                    daysPassed,
+                    totalDays: weekDays.length,
+                    isPast,
+                    isCurrent
+                  });
+                }
+                
+                weekStart = new Date(weekStart);
+                weekStart.setDate(weekStart.getDate() + 7);
+              }
+              
+              return (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800 rounded-3xl shadow-2xl overflow-hidden"
+                >
+                  <div className="bg-gradient-to-r from-pink-500/20 to-violet-500/20 p-4 md:p-6 border-b border-white/10">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                      <div>
+                        <h3 className="text-lg md:text-xl font-bold text-white flex items-center gap-2">
+                          <Target className="w-5 h-5 md:w-6 md:h-6 text-pink-400" />
+                          Semanas Retail del Mes
+                        </h3>
+                        <p className="text-white/60 text-xs md:text-sm mt-1">
+                          {retailWeeks.length} semanas • {format(monthStart, 'MMMM yyyy', { locale: es })}
+                        </p>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="text-center bg-white/5 rounded-xl p-3 border border-white/10">
+                          <p className="text-white/50 text-[10px] mb-1">Proyección Mes</p>
+                          <p className="text-base md:text-xl font-black text-white">
+                            {formatCurrency(projections.projectedSales)}
+                          </p>
+                          <p className={`text-[9px] font-bold ${projections.salesOnTrack ? 'text-emerald-400' : 'text-amber-400'}`}>
+                            {(projections.projectedSales / (currentBudget?.sales_budget || 1) * 100).toFixed(0)}% de meta
+                          </p>
+                        </div>
+                        <div className="text-center bg-white/5 rounded-xl p-3 border border-white/10">
+                          <p className="text-white/50 text-[10px] mb-1">Meta Mensual</p>
+                          <p className="text-base md:text-xl font-black text-white">
+                            {formatCurrency(currentBudget?.sales_budget || 0)}
+                          </p>
+                          <p className="text-[9px] text-white/50 font-bold">
+                            100% objetivo
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Grid de semanas */}
+                  <div className="p-4 md:p-6 grid grid-cols-1 md:grid-cols-5 gap-3 md:gap-4">
+                    {retailWeeks.map((week, idx) => (
+                      <motion.div
+                        key={idx}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: idx * 0.1 }}
+                        whileHover={{ scale: 1.03, y: -3 }}
+                        className={`rounded-2xl p-3 md:p-4 border-2 transition-all ${
+                          week.isCurrent 
+                            ? 'bg-gradient-to-br from-pink-500/20 to-violet-500/20 border-pink-400/50 shadow-lg' 
+                            : week.isPast
+                            ? 'bg-white/5 border-white/10 hover:border-white/20'
+                            : 'bg-white/5 border-white/10 opacity-60'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <div className={`text-[10px] md:text-xs font-bold px-2 py-1 rounded-full ${
+                            week.isCurrent 
+                              ? 'bg-pink-400/30 text-pink-200' 
+                              : 'bg-white/10 text-white/60'
+                          }`}>
+                            Semana {week.number}
+                          </div>
+                          {week.isCurrent && (
+                            <div className="flex items-center gap-1">
+                              <div className="w-1.5 h-1.5 rounded-full bg-pink-400 animate-pulse" />
+                              <span className="text-[8px] text-pink-300 hidden md:block">ACTIVA</span>
+                            </div>
+                          )}
+                          {week.isPast && week.compliance >= 100 && (
+                            <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                          )}
+                        </div>
+                        
+                        <p className="text-white/50 text-[9px] md:text-[10px] mb-3">
+                          {format(week.start, 'dd MMM', { locale: es })} - {format(week.end, 'dd MMM', { locale: es })}
+                        </p>
+                        
+                        <div className="space-y-2 mb-3">
+                          <div>
+                            <p className="text-[9px] text-white/40 mb-0.5">Venta Actual</p>
+                            <p className="text-sm md:text-base font-black text-white">
+                              {formatCurrency(week.sales)}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-[9px] text-white/40 mb-0.5">Meta Semana</p>
+                            <p className="text-xs md:text-sm font-bold text-white/70">
+                              {formatCurrency(week.budget)}
+                            </p>
+                          </div>
+                          {week.isCurrent && week.projection > 0 && (
+                            <div>
+                              <p className="text-[9px] text-violet-300 mb-0.5">Proyección</p>
+                              <p className="text-xs font-bold text-violet-300">
+                                {formatCurrency(week.projection)}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="mb-2">
+                          <div className="flex justify-between items-center mb-1">
+                            <span className="text-[8px] text-white/40">Cumplimiento</span>
+                            <span className={`text-[10px] font-bold ${
+                              week.compliance >= 100 ? 'text-emerald-400' : 
+                              week.compliance >= 80 ? 'text-amber-400' : 'text-rose-400'
+                            }`}>
+                              {week.compliance.toFixed(0)}%
+                            </span>
+                          </div>
+                          <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+                            <motion.div
+                              initial={{ width: 0 }}
+                              animate={{ width: `${Math.min(week.compliance, 100)}%` }}
+                              transition={{ delay: idx * 0.1, duration: 0.8 }}
+                              className={`h-full rounded-full ${
+                                week.compliance >= 100 ? 'bg-emerald-400' :
+                                week.compliance >= 80 ? 'bg-amber-400' : 'bg-rose-400'
+                              }`}
+                            />
+                          </div>
+                        </div>
+                        
+                        <p className="text-[9px] text-white/40">
+                          {week.isPast ? `${week.totalDays} días completos` : 
+                           week.isCurrent ? `${week.daysPassed} de ${week.totalDays} días` :
+                           `${week.totalDays} días futuros`}
+                        </p>
+                      </motion.div>
+                    ))}
+                  </div>
+
+                  {/* Resumen con proyección mensual */}
+                  <div className="px-4 md:px-6 pb-4 md:pb-6 space-y-3">
+                    <div className="bg-white/5 rounded-xl p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-white/70 text-sm font-bold">Progreso Mensual</span>
+                        <div className="flex items-center gap-3 text-right">
+                          <div>
+                            <p className="text-[10px] text-white/50">Vendido</p>
+                            <p className="text-xs md:text-sm font-bold text-white">{formatCurrency(totals.sales)}</p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] text-violet-300">Proyección</p>
+                            <p className="text-xs md:text-sm font-bold text-violet-300">{formatCurrency(projections.projectedSales)}</p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] text-white/50">Meta</p>
+                            <p className="text-xs md:text-sm font-bold text-white">{formatCurrency(currentBudget?.sales_budget)}</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="relative h-4 bg-white/10 rounded-full overflow-hidden">
+                        <motion.div
+                          className="absolute h-full bg-gradient-to-r from-pink-500 to-rose-500 rounded-full"
+                          initial={{ width: 0 }}
+                          animate={{ width: `${Math.min(totals.sales / (currentBudget?.sales_budget || 1) * 100, 100)}%` }}
+                          transition={{ duration: 1 }}
+                        />
+                        <motion.div
+                          className="absolute top-0 h-full w-1 bg-violet-400 shadow-lg"
+                          initial={{ left: 0 }}
+                          animate={{ left: `${Math.min(projections.projectedSales / (currentBudget?.sales_budget || 1) * 100, 100)}%` }}
+                          transition={{ duration: 1, delay: 0.5 }}
+                        />
+                        <div className="absolute right-0 top-0 h-full w-0.5 bg-white/50" />
+                      </div>
+                      <div className="flex justify-between mt-2 text-[10px] text-white/50">
+                        <span>Actual: {(totals.sales / (currentBudget?.sales_budget || 1) * 100).toFixed(0)}%</span>
+                        <span>Proyección: {(projections.projectedSales / (currentBudget?.sales_budget || 1) * 100).toFixed(0)}%</span>
+                        <span>Meta: 100%</span>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      <div className="bg-emerald-500/10 rounded-lg p-3 border border-emerald-400/20">
+                        <p className="text-[10px] text-emerald-200 mb-1">Promedio/Día</p>
+                        <p className="text-sm md:text-base font-bold text-emerald-400">
+                          {formatCurrency(projections.dailyAvgSales)}
+                        </p>
+                      </div>
+                      <div className="bg-amber-500/10 rounded-lg p-3 border border-amber-400/20">
+                        <p className="text-[10px] text-amber-200 mb-1">Necesitas/Día</p>
+                        <p className="text-sm md:text-base font-bold text-amber-400">
+                          {formatCurrency(projections.requiredDailySales)}
+                        </p>
+                      </div>
+                      <div className="bg-violet-500/10 rounded-lg p-3 border border-violet-400/20">
+                        <p className="text-[10px] text-violet-200 mb-1">Días Restantes</p>
+                        <p className="text-sm md:text-base font-bold text-violet-400">
+                          {projections.daysRemaining}
+                        </p>
+                      </div>
+                      <div className="bg-pink-500/10 rounded-lg p-3 border border-pink-400/20">
+                        <p className="text-[10px] text-pink-200 mb-1">Por Vender</p>
+                        <p className="text-sm md:text-base font-bold text-pink-400">
+                          {formatCurrency(projections.salesGap)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            })()}
+
             {projections && !showComparison &&
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800 rounded-3xl shadow-2xl overflow-hidden">
-
-                {/* Header con cumplimiento de VENTA ACTUAL */}
-                <div className="bg-gradient-to-r from-pink-500/20 to-violet-500/20 p-6 border-b border-white/10">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                        <Target className="w-6 h-6 text-pink-400" />
-                        Proyección del Mes
-                      </h3>
-                      <p className="text-white/60 text-sm mt-1">
-                        {projections.daysRemaining} días restantes para cerrar el mes
-                      </p>
-                    </div>
-                    {/* Cumplimiento circular - VENTA ACTUAL vs META */}
-                    <div className="relative">
-                      <svg className="w-24 h-24 transform -rotate-90">
-                        <circle cx="48" cy="48" r="42" stroke="rgba(255,255,255,0.1)" strokeWidth="8" fill="none" />
-                        <motion.circle
-                      cx="48" cy="48" r="42"
-                      stroke={totals.sales / (currentBudget?.sales_budget || 1) * 100 >= 70 ? '#10b981' : '#f59e0b'}
-                      strokeWidth="8"
-                      fill="none"
-                      strokeLinecap="round"
-                      initial={{ strokeDasharray: "0 264" }}
-                      animate={{ strokeDasharray: `${Math.min(totals.sales / (currentBudget?.sales_budget || 1) * 264, 264)} 264` }}
-                      transition={{ duration: 1.5 }} />
-
-                      </svg>
-                      <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <motion.span
-                      className="text-2xl font-black text-white"
-                      animate={{ scale: [1, 1.05, 1] }}
-                      transition={{ duration: 2, repeat: Infinity }}>
-
-                          {currentBudget?.sales_budget > 0 ? (totals.sales / currentBudget.sales_budget * 100).toFixed(0) : 0}%
-                        </motion.span>
-                        <span className="text-[10px] text-white/60">Venta Actual</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
 
                 {/* Grid de métricas CON GRÁFICAS - Botones interactivos */}
                 <div className="p-6 grid grid-cols-2 md:grid-cols-4 gap-4">
