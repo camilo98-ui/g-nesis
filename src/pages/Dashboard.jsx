@@ -1695,17 +1695,17 @@ export default function Dashboard() {
                 {/* Grid de métricas CON GRÁFICAS - Botones interactivos */}
                 <div className="p-6 grid grid-cols-2 md:grid-cols-4 gap-4">
                   {[
-              {
-                key: 'sales',
-                label: 'Venta Actual',
-                value: totals.sales,
-                icon: DollarSign,
-                iconBg: 'bg-emerald-500/20',
-                iconColor: 'text-emerald-400',
-                barColor: 'bg-emerald-400/60',
-                chartData: chartData.slice(-7).map((d) => d.ventas),
-                footer: `${(totals.sales / (currentBudget?.sales_budget || 1) * 100).toFixed(0)}% de meta`
-              },
+                  {
+                  key: 'sales',
+                  label: 'Venta Mes',
+                  value: projections.totals.sales,
+                  icon: DollarSign,
+                  iconBg: 'bg-emerald-500/20',
+                  iconColor: 'text-emerald-400',
+                  barColor: 'bg-emerald-400/60',
+                  chartData: chartData.slice(-7).map((d) => d.ventas),
+                  footer: `${(projections.totals.sales / (currentBudget?.sales_budget || 1) * 100).toFixed(0)}% de meta`
+                  },
               {
                 key: 'projection',
                 label: 'Proyección Cierre',
@@ -1861,27 +1861,27 @@ export default function Dashboard() {
               })}
                 </div>
 
-                {/* Barra de progreso visual - % VENTA ACTUAL */}
+                {/* Barra de progreso visual - % VENTA MES COMPLETO */}
                 <div className="px-6 pb-6">
                   <div className="bg-white/5 rounded-xl p-4">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-white/70 text-sm">Progreso de Venta</span>
+                      <span className="text-white/70 text-sm">Progreso Mensual</span>
                       <span className="text-white font-bold">
-                        {formatCurrency(currentBudget?.sales_budget - totals.sales)} por vender
+                        {formatCurrency(currentBudget?.sales_budget - projections.totals.sales)} por vender
                       </span>
                     </div>
                     <div className="relative h-4 bg-white/10 rounded-full overflow-hidden">
                       <motion.div
                     className="absolute h-full bg-gradient-to-r from-pink-500 to-violet-500 rounded-full"
                     initial={{ width: 0 }}
-                    animate={{ width: `${Math.min(totals.sales / (currentBudget?.sales_budget || 1) * 100, 100)}%` }}
+                    animate={{ width: `${Math.min(projections.totals.sales / (currentBudget?.sales_budget || 1) * 100, 100)}%` }}
                     transition={{ duration: 1 }} />
 
                       {/* Marcador del 100% */}
                       <div className="absolute right-0 top-0 h-full w-0.5 bg-white/50" />
                     </div>
                     <div className="flex justify-between mt-2 text-[10px] text-white/50">
-                      <span>Venta Actual: {(totals.sales / (currentBudget?.sales_budget || 1) * 100).toFixed(0)}%</span>
+                      <span>Vendido: {(projections.totals.sales / (currentBudget?.sales_budget || 1) * 100).toFixed(0)}%</span>
                       <span>Meta: 100%</span>
                     </div>
                   </div>
