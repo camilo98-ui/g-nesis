@@ -14,13 +14,13 @@ const DEFAULT_PRIZES_TIENDA = [
 ];
 
 const DEFAULT_PRIZES_DISTRITO = [
-  { id: 1, name: 'Pase Piscilago x4', value: 0, color: '#FFD4E5', emoji: '🏊' },
-  { id: 2, name: 'Domingo Pago', value: 0, color: '#E5D4FF', emoji: '☀️' },
-  { id: 3, name: 'Descanso Pago', value: 0, color: '#C7ECFF', emoji: '🏖️' },
-  { id: 4, name: 'Entradas Cine x2', value: 0, color: '#FFE7CC', emoji: '🎥' },
-  { id: 5, name: '1 Litro Helado', value: 0, color: '#D4F4DD', emoji: '🍦' },
-  { id: 6, name: 'Descuento Mitad', value: 0, color: '#FFDFD4', emoji: '🍹' },
-  { id: 7, name: 'Bono $80.000', value: 80000, color: '#E8E5FF', emoji: '💰' },
+  { id: 1, name: 'Bono $80.000 Olímpica', value: 80000, color: '#FFE4E8', emoji: '💰' },
+  { id: 2, name: 'Pase Piscilago 4 personas', value: 0, color: '#E8E4FF', emoji: '🏊' },
+  { id: 3, name: 'Domingo remunerado', value: 0, color: '#D4F1F4', emoji: '☀️' },
+  { id: 4, name: 'Descanso remunerado', value: 0, color: '#FFF4E4', emoji: '🏖️' },
+  { id: 5, name: 'Litro de helado', value: 0, color: '#E4F8E8', emoji: '🍦' },
+  { id: 6, name: 'Entradas Cine PREMIUM', value: 0, color: '#FFE8DC', emoji: '🎥' },
+  { id: 7, name: 'Descanso + Malteada', value: 0, color: '#F4E4FF', emoji: '🍹' },
 ];
 
 export default function RouletteWheel({ onResult, disabled, awardType = 'tienda', storeId }) {
@@ -155,8 +155,8 @@ export default function RouletteWheel({ onResult, disabled, awardType = 'tienda'
             <defs>
               <style>
                 {`
-                  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@600;700&display=swap');
-                  text { font-family: 'Inter', sans-serif; }
+                  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&display=swap');
+                  text { font-family: 'Poppins', sans-serif; }
                 `}
               </style>
             </defs>
@@ -194,19 +194,20 @@ export default function RouletteWheel({ onResult, disabled, awardType = 'tienda'
               
               // Ajustar tamaño del texto según longitud del nombre
               const nameLength = prize.name.length;
-              let fontSize = 4;
-              if (nameLength > 20) fontSize = 3;
-              else if (nameLength > 15) fontSize = 3.5;
-              else if (nameLength > 10) fontSize = 3.8;
+              let fontSize = 3.2;
+              if (nameLength > 25) fontSize = 2.6;
+              else if (nameLength > 20) fontSize = 2.8;
+              else if (nameLength > 15) fontSize = 3;
               
-              // Dividir texto en dos líneas si es muy largo
+              // Dividir texto en dos líneas de forma inteligente
               const words = prize.name.split(' ');
-              const shouldSplit = nameLength > 15 && words.length > 1;
+              const shouldSplit = nameLength > 18 && words.length > 2;
               let line1 = prize.name;
               let line2 = '';
               
               if (shouldSplit) {
-                const mid = Math.ceil(words.length / 2);
+                // Buscar punto de quiebre natural
+                const mid = Math.floor(words.length / 2);
                 line1 = words.slice(0, mid).join(' ');
                 line2 = words.slice(mid).join(' ');
               }
@@ -217,25 +218,23 @@ export default function RouletteWheel({ onResult, disabled, awardType = 'tienda'
                     d={`M 50 50 L ${x1} ${y1} A 50 50 0 ${largeArc} 1 ${x2} ${y2} Z`}
                     fill={prize.color}
                   />
-                  <g transform={`rotate(${textRotation} ${textX} ${textY})`}>
-                    <text
-                      x={textX}
-                      y={textY}
-                      textAnchor="middle"
-                      dominantBaseline="middle"
-                      fill={textColor}
-                    >
-                      <tspan x={textX} fontSize="5.5" dy="-4">{prize.emoji}</tspan>
-                      {shouldSplit ? (
-                        <>
-                          <tspan x={textX} fontSize={fontSize} fontWeight="700" dy="3.5">{line1}</tspan>
-                          <tspan x={textX} fontSize={fontSize} fontWeight="700" dy="3.2">{line2}</tspan>
-                        </>
-                      ) : (
-                        <tspan x={textX} fontSize={fontSize} fontWeight="700" dy="3.5">{line1}</tspan>
-                      )}
-                    </text>
-                  </g>
+                  <text
+                    x={textX}
+                    y={textY}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    fill={textColor}
+                  >
+                    <tspan x={textX} fontSize="4.5" dy="-3.5">{prize.emoji}</tspan>
+                    {shouldSplit ? (
+                      <>
+                        <tspan x={textX} fontSize={fontSize} fontWeight="600" dy="3.8">{line1}</tspan>
+                        <tspan x={textX} fontSize={fontSize} fontWeight="600" dy="3.4">{line2}</tspan>
+                      </>
+                    ) : (
+                      <tspan x={textX} fontSize={fontSize} fontWeight="600" dy="3.8">{line1}</tspan>
+                    )}
+                  </text>
                 </g>
               );
             })}
