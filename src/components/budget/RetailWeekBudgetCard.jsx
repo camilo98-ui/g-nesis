@@ -628,12 +628,18 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                   </div>
                   <div className="grid grid-cols-3 gap-2">
                     {budgetData.topDays.map((day, idx) => (
-                      <motion.div
+                      <motion.button
                         key={day.day}
                         initial={{ scale: 0, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         transition={{ delay: idx * 0.1 }}
-                        className="bg-white/80 backdrop-blur-sm rounded-lg p-2 md:p-3 border border-indigo-200/40 text-center"
+                        whileHover={{ scale: 1.05, y: -3 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => {
+                          setSelectedMetric(`top-day-${idx}`);
+                          setIsModalOpen(true);
+                        }}
+                        className="bg-white/80 backdrop-blur-sm rounded-lg p-2 md:p-3 border border-indigo-200/40 text-center hover:border-indigo-400 hover:shadow-lg transition-all cursor-pointer"
                       >
                         <p className="text-lg md:text-2xl font-black text-indigo-600 mb-1">
                           {idx === 0 ? '🥇' : idx === 1 ? '🥈' : '🥉'}
@@ -647,7 +653,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                         <p className="text-[8px] md:text-[10px] text-indigo-500 mt-1">
                           {(day.weight * 100).toFixed(0)}% del total
                         </p>
-                      </motion.div>
+                      </motion.button>
                     ))}
                   </div>
                   <p className="text-[10px] text-indigo-600 mt-3 text-center">
@@ -1158,6 +1164,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                       {selectedMetric === 'weekly-projection' && '🚀 Proyección de Cierre Semanal'}
                       {selectedMetric === 'recovery-plan' && '⚠️ Plan de Recuperación'}
                       {selectedMetric === 'on-track' && '✅ Rendimiento en Meta'}
+                      {selectedMetric?.startsWith('top-day-') && `${budgetData.topDays[parseInt(selectedMetric.split('-')[2])]?.dayFull} - Día Estratégico`}
                     </DialogTitle>
                   </DialogHeader>
                   <div className="mt-4">
@@ -1561,6 +1568,92 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                         </p>
                       </div>
                     )}
+
+                    {selectedMetric?.startsWith('top-day-') && (() => {
+                      const dayIndex = parseInt(selectedMetric.split('-')[2]);
+                      const dayData = budgetData.topDays[dayIndex];
+                      if (!dayData) return null;
+
+                      // Obtener todas las ventas históricas de este día de la semana
+                      const dayOfWeekIndex = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'].indexOf(dayData.dayFull);
+                      const historicalSales = dailySales
+                        .filter(s => {
+                          try {
+                            const saleDate = parseISO(s.date);
+                            return saleDate.getDay() === dayOfWeekIndex && s.total_sales > 0;
+                          } catch {
+                            return false;
+                          }
+                        })
+                        .sort((a, b) => new Date(b.date) - new Date(a.date))
+                        .slice(0, 10);
+
+                      const maxSale = Math.max(...historicalSales.map(s => s.total_sales));
+                      const minSale = Math.min(...historicalSales.map(s => s.total_sales));
+
+                      return (
+                        <div>
+                          <div className="text-center mb-4">
+                            <div className="text-5xl mb-2">{dayIndex === 0 ? '🥇' : dayIndex === 1 ? '🥈' : '🥉'}</div>
+                            <h4 className="text-xl font-black text-indigo-900 mb-1">{dayData.dayFull}</h4>
+                            <p className="text-sm text-indigo-600">Día #{dayIndex + 1} con mayor potencial</p>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-3 mb-4">
+                            <div className="bg-indigo-50 rounded-lg p-3 text-center">
+                              <p className="text-xs text-indigo-600 mb-1">Promedio Histórico</p>
+                              <p className="text-lg font-black text-indigo-900">{formatCurrency(dayData.avg)}</p>
+                            </div>
+                            <div className="bg-purple-50 rounded-lg p-3 text-center">
+                              <p className="text-xs text-purple-600 mb-1">Peso en Semana</p>
+                              <p className="text-lg font-black text-purple-900">{(dayData.weight * 100).toFixed(0)}%</p>
+                            </div>
+                            <div className="bg-emerald-50 rounded-lg p-3 text-center">
+                              <p className="text-xs text-emerald-600 mb-1">Venta Máxima</p>
+                              <p className="text-base font-bold text-emerald-900">{formatCurrency(maxSale)}</p>
+                            </div>
+                            <div className="bg-rose-50 rounded-lg p-3 text-center">
+                              <p className="text-xs text-rose-600 mb-1">Venta Mínima</p>
+                              <p className="text-base font-bold text-rose-900">{formatCurrency(minSale)}</p>
+                            </div>
+                          </div>
+
+                          <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-lg p-3 border border-indigo-200 mb-3">
+                            <p className="text-xs font-bold text-indigo-900 mb-2">📊 Análisis del {dayData.dayFull}:</p>
+                            <ul className="text-xs text-indigo-800 space-y-1 ml-4">
+                              <li>• Promedio basado en {dayData.count} registros históricos</li>
+                              <li>• Representa el {(dayData.weight * 100).toFixed(0)}% de las ventas semanales</li>
+                              <li>• Rango de ventas: {formatCurrency(minSale)} - {formatCurrency(maxSale)}</li>
+                              <li>• Variación: ±{formatCurrency(maxSale - minSale)}</li>
+                            </ul>
+                          </div>
+
+                          <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg p-3 border border-amber-200">
+                            <p className="text-xs font-bold text-amber-900 mb-2">💡 Estrategia recomendada:</p>
+                            <ul className="text-xs text-amber-800 space-y-1 ml-4">
+                              <li>• Reforzar personal en este día clave</li>
+                              <li>• Asegurar inventario completo de productos top</li>
+                              <li>• Activar promociones especiales de alto impacto</li>
+                              <li>• Monitorear cumplimiento hora a hora</li>
+                            </ul>
+                          </div>
+
+                          {historicalSales.length > 0 && (
+                            <div className="mt-3">
+                              <p className="text-xs font-bold text-slate-700 mb-2">📅 Últimos {dayData.dayFull}s:</p>
+                              <div className="space-y-1 max-h-32 overflow-y-auto">
+                                {historicalSales.slice(0, 5).map((sale, i) => (
+                                  <div key={i} className="flex justify-between items-center p-2 bg-slate-50 rounded text-[10px]">
+                                    <span className="text-slate-600">{format(parseISO(sale.date), 'dd MMM yyyy', { locale: es })}</span>
+                                    <span className="font-bold text-slate-900">{formatCurrency(sale.total_sales)}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
                 </DialogContent>
               </Dialog>
