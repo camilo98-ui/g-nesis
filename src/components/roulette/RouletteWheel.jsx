@@ -257,43 +257,7 @@ export default function RouletteWheel({ onResult, disabled, awardType = 'tienda'
         </motion.div>
       </div>
 
-      {/* Botón de girar */}
-      <motion.div className="mt-8 text-center">
-        <motion.div
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <Button
-            onClick={handleSpin}
-            disabled={spinning || disabled}
-            className="px-12 py-6 text-xl font-black bg-gradient-to-r from-pink-400 via-rose-400 to-pink-500 hover:from-pink-500 hover:via-rose-500 hover:to-pink-600 text-white rounded-full shadow-2xl disabled:opacity-50 relative overflow-hidden"
-          >
-            <motion.div
-              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-              animate={{ x: spinning ? ['-100%', '200%'] : '-100%' }}
-              transition={{ duration: 1, repeat: spinning ? Infinity : 0, ease: "linear" }}
-            />
-            <span className="relative z-10 flex items-center gap-2">
-              {spinning ? (
-                <>
-                  <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}>
-                    <Sparkles className="w-6 h-6" />
-                  </motion.div>
-                  Girando...
-                </>
-              ) : (
-                <>
-                  <Gift className="w-6 h-6" />
-                  GIRAR RULETA
-                </>
-              )}
-            </span>
-          </Button>
-        </motion.div>
-        {disabled && (
-          <p className="text-sm text-gray-500 mt-3">🎉 Giro utilizado</p>
-        )}
-      </motion.div>
+
     </div>
   );
 }
