@@ -491,18 +491,24 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                     {formatCurrency(budgetData.adjustedDailyBudget)}
                   </motion.p>
                   <p className="text-[8px] md:text-[10px] text-white/50 mt-0.5">Base: {formatCurrency(budgetData.adjustedDailyBudget / 1.15)}</p>
-                  {/* Sparkline */}
+                  {/* Sparkline Mejorado */}
                   {budgetData.last7DaysSales?.length > 0 && (
-                    <div className="mt-2 h-8">
+                    <div className="mt-3 h-12 bg-white/10 rounded-lg p-1.5 backdrop-blur-sm">
                       <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={budgetData.last7DaysSales}>
-                          <Line 
+                          <defs>
+                            <linearGradient id="sparklineGradient1" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="#fff" stopOpacity={0.4}/>
+                              <stop offset="100%" stopColor="#fff" stopOpacity={0.05}/>
+                            </linearGradient>
+                          </defs>
+                          <Area 
                             type="monotone" 
                             dataKey="value" 
                             stroke="#fff" 
-                            strokeWidth={2} 
+                            strokeWidth={2.5} 
+                            fill="url(#sparklineGradient1)"
                             dot={false}
-                            opacity={0.6}
                           />
                         </LineChart>
                       </ResponsiveContainer>
