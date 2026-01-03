@@ -86,15 +86,6 @@ export default function ExecutiveDashboard() {
     const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
     const daysInMonth = monthEnd.getDate();
 
-    // Debug de análisis
-    if (store.code === 'BTA 11') {
-      console.log('🔍 Análisis BTA 11:', {
-        weekRange: `${format(currentWeekStart, 'yyyy-MM-dd')} a ${format(currentWeekEnd, 'yyyy-MM-dd')}`,
-        storeSalesCount: storeSales.length,
-        sampleDates: storeSales.slice(0, 3).map(s => ({ date: s.date, sales: s.total_sales }))
-      });
-    }
-
     return STORES.map(store => {
       // Filtrar ventas de esta tienda
       const storeSales = allDailySales.filter(s => s.store_id === store.code);
@@ -157,20 +148,7 @@ export default function ExecutiveDashboard() {
       const weekSales = storeSales.filter(s => {
         try {
           const saleDate = parseISO(s.date);
-          const isInRange = isWithinInterval(saleDate, { start: currentWeekStart, end: currentWeekEnd });
-          
-          // Debug temporal
-          if (store.code === 'BTA 11' && isInRange) {
-            console.log('✅ Venta encontrada en semana:', {
-              store: store.code,
-              date: s.date,
-              sales: s.total_sales,
-              weekStart: currentWeekStart.toISOString(),
-              weekEnd: currentWeekEnd.toISOString()
-            });
-          }
-          
-          return isInRange;
+          return isWithinInterval(saleDate, { start: currentWeekStart, end: currentWeekEnd });
         } catch (error) {
           console.error('Error parseando fecha:', s.date, error);
           return false;
@@ -180,17 +158,6 @@ export default function ExecutiveDashboard() {
       const weekTotalSales = weekSales.reduce((sum, s) => sum + (s.total_sales || 0), 0);
       const weekTotalTransactions = weekSales.reduce((sum, s) => sum + (s.total_transactions || 0), 0);
       const weekAvgTicket = weekTotalTransactions > 0 ? weekTotalSales / weekTotalTransactions : 0;
-      
-      // Debug temporal para primera tienda
-      if (store.code === 'BTA 11') {
-        console.log('📊 Análisis BTA 11:', {
-          weekSalesCount: weekSales.length,
-          weekTotalSales,
-          weekTotalTransactions,
-          allSalesCount: storeSales.length,
-          dateRange: `${currentWeekStart.toISOString().split('T')[0]} a ${currentWeekEnd.toISOString().split('T')[0]}`
-        });
-      }
 
       // VENTAS DEL MES
       const monthSales = storeSales.filter(s => {
