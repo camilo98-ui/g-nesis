@@ -59,6 +59,14 @@ export default function RouletteConfigManager({ storeId }) {
     mutationFn: async () => {
       console.log('💾 Guardando configuración:', { storeId, awardType, prizes });
       
+      // Primero desactivar TODAS las configs de esta tienda con este award_type
+      const allConfigs = await base44.entities.RouletteConfig.filter({ store_id: storeId });
+      const toDeactivate = allConfigs.filter(c => c.award_type === awardType && c.is_active);
+      
+      for (const config of toDeactivate) {
+        await base44.entities.RouletteConfig.update(config.id, { is_active: false });
+      }
+
       const configData = {
         store_id: storeId,
         award_type: awardType,
@@ -70,14 +78,8 @@ export default function RouletteConfigManager({ storeId }) {
 
       console.log('📦 Config data:', configData);
 
-      let result;
-      if (activeConfig) {
-        console.log('✏️ Actualizando config existente:', activeConfig.id);
-        result = await base44.entities.RouletteConfig.update(activeConfig.id, configData);
-      } else {
-        console.log('➕ Creando nueva config');
-        result = await base44.entities.RouletteConfig.create(configData);
-      }
+      // Siempre crear una nueva configuración
+      const result = await base44.entities.RouletteConfig.create(configData);
       
       console.log('✅ Guardado exitoso:', result);
       return result;
