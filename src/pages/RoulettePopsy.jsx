@@ -55,7 +55,10 @@ export default function RoulettePopsy() {
   const { data: rouletteConfigs = [] } = useQuery({
     queryKey: ['rouletteConfig', selectedStore],
     queryFn: () => base44.entities.RouletteConfig.filter({ store_id: selectedStore }),
-    enabled: !!selectedStore
+    enabled: !!selectedStore,
+    staleTime: 0,
+    cacheTime: 0,
+    refetchOnMount: 'always'
   });
 
   const recordWinMutation = useMutation({

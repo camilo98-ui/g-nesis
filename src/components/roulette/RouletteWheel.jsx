@@ -43,7 +43,16 @@ export default function RouletteWheel({ onResult, disabled, awardType = 'tienda'
     refetchInterval: 2000
   });
 
-  const activeConfig = configs.find(c => c.is_active && c.award_type === awardType);
+  // Buscar la configuración más reciente que esté activa para este tipo de premio
+  const activeConfig = React.useMemo(() => {
+    const filtered = configs.filter(c => c.is_active && c.award_type === awardType);
+    console.log('🎯 Configs filtradas:', filtered);
+    // Ordenar por fecha de creación (más reciente primero)
+    filtered.sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+    const selected = filtered[0];
+    console.log('✅ Config seleccionada:', selected);
+    return selected;
+  }, [configs, awardType]);
   
   const PRIZES = React.useMemo(() => {
     console.log('🎯 RouletteWheel - Configs:', configs);
