@@ -5,6 +5,7 @@ import SmartSearch from '@/components/SmartSearch';
 import MotivationalHeader from '@/components/MotivationalHeader';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import PopsyRainingIcons from '@/components/PopsyRainingIcons';
+import Sidebar from '@/components/Sidebar';
 import { DateFilterProvider, useDateFilter } from '@/components/DateFilterContext';
 import { base44 } from '@/api/base44Client';
 import { 
@@ -102,6 +103,10 @@ export default function Layout({ children, currentPageName }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [selectedStore, setSelectedStore] = useState('');
   const [userRole, setUserRole] = useState('lider');
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    const saved = localStorage.getItem('sidebarCollapsed');
+    return saved === 'true';
+  });
 
   useEffect(() => {
     const saved = localStorage.getItem('selectedStore');
@@ -115,30 +120,47 @@ export default function Layout({ children, currentPageName }) {
     root.classList.add(`theme-${savedTheme}`);
   }, []);
 
+  const handleSidebarToggle = () => {
+    const newState = !sidebarCollapsed;
+    setSidebarCollapsed(newState);
+    localStorage.setItem('sidebarCollapsed', newState.toString());
+  };
+
   return (
     <DateFilterProvider>
       <ErrorBoundary>
         <div className="min-h-screen app-container">
+          {/* Sidebar - solo visible si NO es la página Home */}
+          {currentPageName !== 'Home' && (
+            <Sidebar collapsed={sidebarCollapsed} onToggle={handleSidebarToggle} />
+          )}
+
           {/* Main Content */}
-          <main className="pt-4 min-h-screen pb-4 relative">
-          {/* Professional Gradient Background */}
-          <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-            {/* Base gradient */}
-            <div className="absolute inset-0 bg-gradient-to-br from-pink-100/60 via-purple-100/50 to-blue-100/60" />
+          <main 
+            className="min-h-screen pb-4 relative transition-all duration-300"
+            style={{ 
+              marginLeft: currentPageName === 'Home' ? 0 : (sidebarCollapsed ? 80 : 280),
+              paddingTop: currentPageName === 'Home' ? 16 : 0
+            }}
+          >
+            {/* Professional Gradient Background */}
+            <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+              {/* Base gradient */}
+              <div className="absolute inset-0 bg-gradient-to-br from-pink-100/60 via-purple-100/50 to-blue-100/60" />
 
-            {/* Animated color-shifting orbs */}
-            <div className="absolute top-20 right-[10%] w-[600px] h-[600px] rounded-full blur-3xl animate-gradient-1" />
-            <div className="absolute bottom-20 left-[15%] w-[700px] h-[700px] rounded-full blur-3xl animate-gradient-2" />
-            <div className="absolute top-1/3 left-1/3 w-[500px] h-[500px] rounded-full blur-3xl animate-gradient-3" />
+              {/* Animated color-shifting orbs */}
+              <div className="absolute top-20 right-[10%] w-[600px] h-[600px] rounded-full blur-3xl animate-gradient-1" />
+              <div className="absolute bottom-20 left-[15%] w-[700px] h-[700px] rounded-full blur-3xl animate-gradient-2" />
+              <div className="absolute top-1/3 left-1/3 w-[500px] h-[500px] rounded-full blur-3xl animate-gradient-3" />
 
-            {/* Subtle grid overlay */}
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,#8881_1px,transparent_1px),linear-gradient(to_bottom,#8881_1px,transparent_1px)] bg-[size:64px_64px] opacity-30" />
-          </div>
+              {/* Subtle grid overlay */}
+              <div className="absolute inset-0 bg-[linear-gradient(to_right,#8881_1px,transparent_1px),linear-gradient(to_bottom,#8881_1px,transparent_1px)] bg-[size:64px_64px] opacity-30" />
+            </div>
 
-          <div className="container mx-auto px-2 sm:px-4 relative z-10">
-            {children}
-          </div>
-        </main>
+            <div className="container mx-auto px-2 sm:px-4 py-6 relative z-10">
+              {children}
+            </div>
+          </main>
         </div>
       </ErrorBoundary>
     </DateFilterProvider>
