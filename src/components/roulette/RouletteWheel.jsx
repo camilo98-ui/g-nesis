@@ -114,7 +114,7 @@ export default function RouletteWheel({ onResult, disabled, awardType = 'tienda'
       </AnimatePresence>
 
       {/* Ruleta */}
-      <div className="relative w-[700px] h-[700px] mx-auto max-w-full">
+      <div className="relative w-[500px] h-[500px] mx-auto max-w-full">
         {/* Indicador superior */}
         <motion.div 
           className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20"
