@@ -92,6 +92,41 @@ export default function KPIDetailModal({ kpiType, onClose, data, dateRange, stor
           icon: '🟢',
           color: 'emerald'
         };
+      case 'transactions':
+        return {
+          title: 'Transacciones de la Zona',
+          subtitle: `${zoneTotals.totalTransactions.toLocaleString()} transacciones en el periodo`,
+          icon: '🛒',
+          color: 'cyan'
+        };
+      case 'avgTicket':
+        return {
+          title: 'Ticket Promedio',
+          subtitle: `${formatCurrency(zoneTotals.totalSales / zoneTotals.totalTransactions)} por transacción`,
+          icon: '💳',
+          color: 'purple'
+        };
+      case 'avgSales':
+        return {
+          title: 'Venta Promedio por Tienda',
+          subtitle: `${formatCurrency(zoneTotals.totalSales / storesAnalysis.filter(s => s.hasData).length)} promedio`,
+          icon: '📈',
+          color: 'amber'
+        };
+      case 'gap':
+        return {
+          title: 'Gap vs Presupuesto',
+          subtitle: `${formatCurrency(Math.abs(zoneTotals.totalBudget - zoneTotals.totalSales))} ${zoneTotals.totalSales >= zoneTotals.totalBudget ? 'sobre' : 'por cerrar'}`,
+          icon: zoneTotals.totalSales >= zoneTotals.totalBudget ? '✅' : '⚠️',
+          color: zoneTotals.totalSales >= zoneTotals.totalBudget ? 'emerald' : 'rose'
+        };
+      case 'weeklyStatus':
+        return {
+          title: 'Estado Semanal',
+          subtitle: `${storesAnalysis.filter(s => s.hasData && s.weekCompliance >= 90).length} en meta, ${storesAnalysis.filter(s => s.hasData && s.weekCompliance < 70).length} críticas`,
+          icon: '📊',
+          color: 'slate'
+        };
       default:
         return { title: '', subtitle: '', icon: '', color: 'gray' };
     }
@@ -157,7 +192,7 @@ export default function KPIDetailModal({ kpiType, onClose, data, dateRange, stor
         <div className="p-8 overflow-y-auto max-h-[calc(90vh-140px)]">
           <div className="space-y-8">
             {/* Gráfica Principal de Tendencia */}
-            {(kpiType === 'sales' || kpiType === 'compliance') && (
+            {(kpiType === 'sales' || kpiType === 'compliance' || kpiType === 'transactions' || kpiType === 'avgTicket' || kpiType === 'avgSales' || kpiType === 'gap') && (
               <div className="bg-white/5 backdrop-blur-xl rounded-xl p-6 border border-white/10">
                 <h3 className="text-xl font-bold text-white mb-6">📈 Tendencia Diaria</h3>
                 <ResponsiveContainer width="100%" height={300}>
@@ -172,14 +207,34 @@ export default function KPIDetailModal({ kpiType, onClose, data, dateRange, stor
                     <XAxis dataKey="date" stroke="#94a3b8" style={{ fontSize: '12px' }} />
                     <YAxis stroke="#94a3b8" style={{ fontSize: '12px' }} />
                     <Tooltip content={<CustomTooltip />} />
-                    <Area 
-                      type="monotone" 
-                      dataKey="sales" 
-                      stroke="#3b82f6" 
-                      strokeWidth={3}
-                      fill="url(#salesGradientLarge)"
-                      name="Venta (M)"
-                    />
+                    {kpiType === 'transactions' ? (
+                      <Area 
+                        type="monotone" 
+                        dataKey="transactions" 
+                        stroke="#06b6d4" 
+                        strokeWidth={3}
+                        fill="url(#salesGradientLarge)"
+                        name="Transacciones"
+                      />
+                    ) : kpiType === 'avgTicket' ? (
+                      <Area 
+                        type="monotone" 
+                        dataKey="avgTicket" 
+                        stroke="#a855f7" 
+                        strokeWidth={3}
+                        fill="url(#salesGradientLarge)"
+                        name="Ticket Promedio"
+                      />
+                    ) : (
+                      <Area 
+                        type="monotone" 
+                        dataKey="sales" 
+                        stroke="#3b82f6" 
+                        strokeWidth={3}
+                        fill="url(#salesGradientLarge)"
+                        name="Venta (M)"
+                      />
+                    )}
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
@@ -202,14 +257,14 @@ export default function KPIDetailModal({ kpiType, onClose, data, dateRange, stor
             )}
 
             {/* Estado de Todas las Tiendas */}
-            {(kpiType === 'critical' || kpiType === 'meta') && (
+            {(kpiType === 'critical' || kpiType === 'meta' || kpiType === 'weeklyStatus') && (
               <div className="bg-white/5 backdrop-blur-xl rounded-xl p-6 border border-white/10">
                 <h3 className="text-xl font-bold text-white mb-6">
-                  {kpiType === 'critical' ? '⚠️ Tiendas en Riesgo' : '✅ Tiendas Destacadas'}
+                  {kpiType === 'critical' ? '⚠️ Tiendas en Riesgo' : kpiType === 'meta' ? '✅ Tiendas Destacadas' : '📊 Estado de Tiendas'}
                 </h3>
                 <ResponsiveContainer width="100%" height={500}>
                   <BarChart data={statusData.filter(s => 
-                    kpiType === 'critical' ? s.fill === '#ef4444' : s.fill === '#10b981'
+                    kpiType === 'critical' ? s.fill === '#ef4444' : kpiType === 'meta' ? s.fill === '#10b981' : true
                   )}>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
                     <XAxis dataKey="name" stroke="#94a3b8" angle={-45} textAnchor="end" height={100} style={{ fontSize: '11px' }} />

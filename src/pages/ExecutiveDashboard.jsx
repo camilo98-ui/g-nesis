@@ -664,33 +664,53 @@ Genera:
           <>
             {/* Nueva Sección: Métricas Semanales */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-xl rounded-lg p-4 border border-blue-500/20">
+              <motion.div 
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setSelectedKPIDetail('transactions')}
+                className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-xl rounded-lg p-4 border border-blue-500/20 cursor-pointer transition-all hover:border-blue-400/40 hover:shadow-lg hover:shadow-blue-500/20">
                 <p className="text-xs text-blue-300 mb-2">Transacciones</p>
                 <p className="text-3xl font-black text-white mb-1">{zoneTotals.totalTransactions.toLocaleString()}</p>
                 <p className="text-xs text-slate-400">Total semana</p>
-              </div>
-              <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-xl rounded-lg p-4 border border-purple-500/20">
+              </motion.div>
+              <motion.div 
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setSelectedKPIDetail('avgTicket')}
+                className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-xl rounded-lg p-4 border border-purple-500/20 cursor-pointer transition-all hover:border-purple-400/40 hover:shadow-lg hover:shadow-purple-500/20">
                 <p className="text-xs text-purple-300 mb-2">Ticket Promedio</p>
                 <p className="text-3xl font-black text-white mb-1">{formatCurrency(zoneTotals.totalSales / zoneTotals.totalTransactions || 0)}</p>
                 <p className="text-xs text-slate-400">Por transacción</p>
-              </div>
-              <div className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 backdrop-blur-xl rounded-lg p-4 border border-amber-500/20">
+              </motion.div>
+              <motion.div 
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setSelectedKPIDetail('avgSales')}
+                className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 backdrop-blur-xl rounded-lg p-4 border border-amber-500/20 cursor-pointer transition-all hover:border-amber-400/40 hover:shadow-lg hover:shadow-amber-500/20">
                 <p className="text-xs text-amber-300 mb-2">Venta Promedio</p>
                 <p className="text-3xl font-black text-white mb-1">{formatShort(zoneTotals.totalSales / STORES.length)}</p>
                 <p className="text-xs text-slate-400">Por tienda</p>
-              </div>
-              <div className="bg-gradient-to-br from-rose-500/10 to-red-500/10 backdrop-blur-xl rounded-lg p-4 border border-rose-500/20">
+              </motion.div>
+              <motion.div 
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setSelectedKPIDetail('gap')}
+                className="bg-gradient-to-br from-rose-500/10 to-red-500/10 backdrop-blur-xl rounded-lg p-4 border border-rose-500/20 cursor-pointer transition-all hover:border-rose-400/40 hover:shadow-lg hover:shadow-rose-500/20">
                 <p className="text-xs text-rose-300 mb-2">Gap Total</p>
                 <p className="text-3xl font-black text-white mb-1">{formatShort(Math.abs(zoneTotals.totalBudget - zoneTotals.totalSales))}</p>
                 <p className="text-xs text-slate-400">Por cerrar</p>
-              </div>
+              </motion.div>
             </div>
 
             {/* Grid Principal Estilo Power BI */}
             <div className="grid grid-cols-12 gap-4 mb-6">
               {/* Columna Izquierda - KPIs */}
               <div className="col-span-12 lg:col-span-2 grid grid-cols-2 lg:grid-cols-1 gap-4">
-                <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-xl rounded-lg p-4 border border-blue-500/20">
+                <motion.div 
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setSelectedKPIDetail('sales')}
+                  className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-xl rounded-lg p-4 border border-blue-500/20 cursor-pointer transition-all hover:border-blue-400/40 hover:shadow-lg hover:shadow-blue-500/20">
                   <p className="text-xs text-blue-300 mb-1">Venta Total</p>
                   <p className="text-3xl font-black text-white tabular-nums">{formatShort(zoneTotals.totalSales)}</p>
                   <ResponsiveContainer width="100%" height={30}>
@@ -723,10 +743,14 @@ Genera:
                         animationEasing="ease-in-out"
                       />
                     </AreaChart>
-                  </ResponsiveContainer>
-                </div>
+                    </ResponsiveContainer>
+                    </motion.div>
 
-                <div className="bg-gradient-to-br from-emerald-500/10 to-green-500/10 backdrop-blur-xl rounded-lg p-4 border border-emerald-500/20">
+                    <motion.div 
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setSelectedKPIDetail('compliance')}
+                    className="bg-gradient-to-br from-emerald-500/10 to-green-500/10 backdrop-blur-xl rounded-lg p-4 border border-emerald-500/20 cursor-pointer transition-all hover:border-emerald-400/40 hover:shadow-lg hover:shadow-emerald-500/20">
                   <p className="text-xs text-emerald-300 mb-1">Cumplimiento</p>
                   <motion.p 
                     initial={{ scale: 0.8, opacity: 0 }}
@@ -753,10 +777,14 @@ Genera:
                         transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                       />
                     </motion.div>
-                  </div>
-                </div>
+                    </div>
+                    </motion.div>
 
-                <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl rounded-lg p-4 border border-white/10">
+                    <motion.div 
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setSelectedKPIDetail('weeklyStatus')}
+                    className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl rounded-lg p-4 border border-white/10 cursor-pointer transition-all hover:border-white/20 hover:shadow-lg hover:shadow-white/10">
                   <p className="text-xs text-slate-400 mb-2">Estado Semanal</p>
                   <div className="flex items-center justify-between mb-3">
                     <div>
