@@ -286,23 +286,7 @@ export default function PlannerStatusPanel({ stores }) {
         </motion.div>
       )}
 
-      {/* Alerta si hay muchas horas extras */}
-      {stats.totalOvertime > 50 && (
-        <div className="bg-gradient-to-r from-red-500/20 to-rose-500/20 backdrop-blur-xl rounded-xl border border-red-500/30 p-3 md:p-6">
-          <div className="flex items-start gap-2 md:gap-3">
-            <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-red-500/20 flex items-center justify-center flex-shrink-0">
-              <AlertCircle className="w-4 h-4 md:w-5 md:h-5 text-red-400" />
-            </div>
-            <div className="min-w-0">
-              <p className="font-bold text-red-400 mb-1 text-xs md:text-base">Alerta: Alto volumen de horas extras</p>
-              <p className="text-xs md:text-sm text-slate-300 leading-relaxed">
-                La zona está generando <strong>{stats.totalOvertime.toFixed(1)} horas extras</strong> esta semana. 
-                Considera ajustar la programación para optimizar costos laborales y cumplir con la jornada legal máxima.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
+
 
       {/* Nota legal */}
       <div className="bg-amber-500/10 backdrop-blur-xl rounded-xl border border-amber-500/20 p-3 md:p-4">
