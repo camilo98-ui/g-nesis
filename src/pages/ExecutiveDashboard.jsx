@@ -846,64 +846,94 @@ Genera:
 
               {/* Columna Derecha - Mix de Gráficas */}
               <div className="col-span-12 lg:col-span-4 space-y-4">
-                {/* Distribución de Estado - Mejorado */}
+                {/* Tiendas vs Presupuesto Semanal */}
                 <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl rounded-lg p-5 border border-white/10 shadow-xl">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-base font-black text-white">Estado de Tiendas</h3>
-                    <span className="text-xs px-2 py-1 rounded bg-white/10 text-slate-300">{STORES.length} Total</span>
+                    <h3 className="text-base font-black text-white">Tiendas vs PPT Semanal</h3>
+                    <span className="text-xs px-2 py-1 rounded bg-white/10 text-slate-300">Top 8</span>
                   </div>
-                  <div className="relative">
-                    <ResponsiveContainer width="100%" height={200}>
-                      <PieChart>
-                        <defs>
-                          <linearGradient id="greenGradient" x1="0" y1="0" x2="1" y2="1">
-                            <stop offset="0%" stopColor="#10b981" />
-                            <stop offset="100%" stopColor="#059669" />
-                          </linearGradient>
-                          <linearGradient id="orangeGradient" x1="0" y1="0" x2="1" y2="1">
-                            <stop offset="0%" stopColor="#f59e0b" />
-                            <stop offset="100%" stopColor="#d97706" />
-                          </linearGradient>
-                          <linearGradient id="redGradient" x1="0" y1="0" x2="1" y2="1">
-                            <stop offset="0%" stopColor="#ef4444" />
-                            <stop offset="100%" stopColor="#dc2626" />
-                          </linearGradient>
-                        </defs>
-                        <Pie
-                          data={statusDistributionData}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={55}
-                          outerRadius={85}
-                          paddingAngle={4}
-                          dataKey="value"
-                        >
-                          {statusDistributionData.map((entry, index) => (
-                            <Cell 
-                              key={`cell-${index}`} 
-                              fill={index === 0 ? 'url(#greenGradient)' : index === 1 ? 'url(#orangeGradient)' : 'url(#redGradient)'} 
-                            />
-                          ))}
-                        </Pie>
-                      </PieChart>
-                    </ResponsiveContainer>
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <div className="text-center">
-                        <p className="text-3xl font-black text-white">{STORES.length}</p>
-                        <p className="text-xs text-slate-400">Tiendas</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-3 gap-3 mt-4">
-                    {statusDistributionData.map((item, i) => (
-                      <div key={i} className="bg-white/5 rounded-lg p-3 text-center border border-white/10">
-                        <div className="w-3 h-3 rounded-full mx-auto mb-2" style={{ backgroundColor: item.color }} />
-                        <p className="text-2xl font-black text-white mb-1">{item.value}</p>
-                        <p className="text-[10px] text-slate-400 font-semibold">{item.name}</p>
-                        <p className="text-xs text-slate-500 mt-1">{Math.round((item.value/STORES.length)*100)}%</p>
-                      </div>
-                    ))}
-                  </div>
+                  <ResponsiveContainer width="100%" height={340}>
+                    <BarChart 
+                      data={storesAnalysis
+                        .filter(s => s.hasData)
+                        .sort((a, b) => b.weekCompliance - a.weekCompliance)
+                        .slice(0, 8)
+                        .map(s => ({
+                          name: s.name.substring(0, 8),
+                          fullName: s.name,
+                          venta: s.weekTotalSales / 1000000,
+                          presupuesto: s.weeklyBudget / 1000000,
+                          cumplimiento: s.weekCompliance
+                        }))}
+                      layout="vertical"
+                      margin={{ left: 10, right: 10 }}
+                    >
+                      <defs>
+                        <linearGradient id="barSalesGradient" x1="0" y1="0" x2="1" y2="0">
+                          <stop offset="0%" stopColor="#10b981" stopOpacity={0.8}/>
+                          <stop offset="100%" stopColor="#059669" stopOpacity={1}/>
+                        </linearGradient>
+                        <linearGradient id="barBudgetGradient" x1="0" y1="0" x2="1" y2="0">
+                          <stop offset="0%" stopColor="#6366f1" stopOpacity={0.6}/>
+                          <stop offset="100%" stopColor="#4f46e5" stopOpacity={0.8}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.15} horizontal={false} />
+                      <XAxis 
+                        type="number" 
+                        stroke="#6b7280" 
+                        fontSize={10}
+                        tickLine={false}
+                        tickFormatter={(v) => `$${v.toFixed(1)}M`}
+                      />
+                      <YAxis 
+                        type="category" 
+                        dataKey="name" 
+                        stroke="#9ca3af" 
+                        fontSize={10} 
+                        width={60}
+                        tickLine={false}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: '#1e293b',
+                          border: '2px solid #475569',
+                          borderRadius: '12px',
+                          padding: '12px 16px',
+                          boxShadow: '0 10px 30px rgba(0,0,0,0.3)'
+                        }}
+                        labelStyle={{ color: '#cbd5e1', fontSize: '12px', fontWeight: 'bold', marginBottom: '8px' }}
+                        formatter={(value, name, props) => {
+                          const { venta, presupuesto, cumplimiento } = props.payload;
+                          if (name === 'Venta') {
+                            return [
+                              <div key="info" style={{ color: '#fff' }}>
+                                <div style={{ color: '#10b981', fontWeight: 'bold', marginBottom: '4px' }}>
+                                  💰 Venta: {formatCurrency(venta * 1000000)}
+                                </div>
+                                <div style={{ color: '#6366f1', fontWeight: 'bold', marginBottom: '4px' }}>
+                                  🎯 Meta: {formatCurrency(presupuesto * 1000000)}
+                                </div>
+                                <div style={{ 
+                                  color: cumplimiento >= 100 ? '#10b981' : cumplimiento >= 85 ? '#fbbf24' : '#ef4444',
+                                  fontWeight: 'bold',
+                                  borderTop: '1px solid #475569',
+                                  paddingTop: '6px',
+                                  marginTop: '6px'
+                                }}>
+                                  {cumplimiento >= 100 ? '✅' : cumplimiento >= 85 ? '⚠️' : '❌'} Cumplimiento: {cumplimiento.toFixed(1)}%
+                                </div>
+                              </div>,
+                              ''
+                            ];
+                          }
+                          return [formatCurrency(value * 1000000), name];
+                        }}
+                      />
+                      <Bar dataKey="presupuesto" fill="url(#barBudgetGradient)" radius={[0, 4, 4, 0]} maxBarSize={18} name="Meta" />
+                      <Bar dataKey="venta" fill="url(#barSalesGradient)" radius={[0, 4, 4, 0]} maxBarSize={18} name="Venta" />
+                    </BarChart>
+                  </ResponsiveContainer>
                 </div>
 
                 {/* Top Performers - Nueva Gráfica */}
