@@ -139,7 +139,7 @@ export default function ExecutiveDashboard() {
       const weekSales = storeSales.filter(s => {
         try {
           const saleDate = parseISO(s.date);
-          return saleDate >= currentWeekStart && saleDate <= currentWeekEnd;
+          return isWithinInterval(saleDate, { start: currentWeekStart, end: currentWeekEnd });
         } catch {
           return false;
         }
