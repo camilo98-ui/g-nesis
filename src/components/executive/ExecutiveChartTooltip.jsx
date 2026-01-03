@@ -202,14 +202,40 @@ export default function ExecutiveChartTooltip({ active, payload, chartType, zone
 
       {/* Valores principales */}
       <div className="space-y-1.5 mb-3 text-xs">
-        {payload.map((entry, idx) => (
+        {/* Mostrar venta y meta explícitamente si existen en el payload */}
+        {data.sales !== undefined && (
+          <div className="flex items-center justify-between">
+            <span className="text-slate-400">💰 Venta:</span>
+            <span className="font-bold text-emerald-400">
+              ${(data.sales).toFixed(1)}M
+            </span>
+          </div>
+        )}
+        {data.budget !== undefined && (
+          <div className="flex items-center justify-between">
+            <span className="text-slate-400">🎯 Meta:</span>
+            <span className="font-bold text-indigo-400">
+              ${(data.budget).toFixed(1)}M
+            </span>
+          </div>
+        )}
+        {data.compliance !== undefined && (
+          <div className="flex items-center justify-between">
+            <span className="text-slate-400">📊 Cumplimiento:</span>
+            <span className={`font-bold ${data.compliance >= 100 ? 'text-emerald-400' : data.compliance >= 85 ? 'text-amber-400' : 'text-red-400'}`}>
+              {data.compliance.toFixed(1)}%
+            </span>
+          </div>
+        )}
+        {/* Fallback para otros valores del payload */}
+        {payload.filter(entry => !['sales', 'budget', 'compliance'].includes(entry.dataKey)).map((entry, idx) => (
           <div key={idx} className="flex items-center justify-between">
             <span className="text-slate-400">{entry.name}:</span>
             <span className="font-bold text-white" style={{ color: entry.color }}>
               {typeof entry.value === 'number' 
-                ? entry.value > 1000 
-                  ? `$${(entry.value).toFixed(1)}M`
-                  : entry.value.toFixed(0)
+                ? entry.value > 100 
+                  ? `${entry.value.toFixed(0)}%`
+                  : entry.value.toFixed(1)
                 : entry.value}
             </span>
           </div>
