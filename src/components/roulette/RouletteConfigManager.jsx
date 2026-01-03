@@ -66,14 +66,18 @@ export default function RouletteConfigManager({ storeId }) {
       };
 
       if (activeConfig) {
-        await base44.entities.RouletteConfig.update(activeConfig.id, configData);
+        return await base44.entities.RouletteConfig.update(activeConfig.id, configData);
       } else {
-        await base44.entities.RouletteConfig.create(configData);
+        return await base44.entities.RouletteConfig.create(configData);
       }
     },
     onSuccess: () => {
-      toast.success('Configuración guardada');
+      toast.success('✅ Configuración guardada exitosamente');
       queryClient.invalidateQueries(['rouletteConfig']);
+    },
+    onError: (error) => {
+      console.error('Error al guardar configuración:', error);
+      toast.error(`❌ Error al guardar: ${error.message || 'Intenta de nuevo'}`);
     }
   });
 
