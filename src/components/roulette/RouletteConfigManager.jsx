@@ -59,7 +59,16 @@ export default function RouletteConfigManager({ storeId }) {
     mutationFn: async () => {
       console.log('💾 Guardando configuración:', { storeId, awardType, prizes });
       
-      // Crear la nueva configuración PRIMERO
+      // PRIMERO: Desactivar TODAS las configs anteriores de este tipo
+      const allConfigs = await base44.entities.RouletteConfig.filter({ store_id: storeId });
+      const toDeactivate = allConfigs.filter(c => c.award_type === awardType);
+      
+      console.log('🔄 Desactivando configs anteriores:', toDeactivate.length);
+      for (const config of toDeactivate) {
+        await base44.entities.RouletteConfig.update(config.id, { is_active: false });
+      }
+      
+      // SEGUNDO: Crear la nueva configuración activa
       const configData = {
         store_id: storeId,
         award_type: awardType,
@@ -69,22 +78,10 @@ export default function RouletteConfigManager({ storeId }) {
         is_active: true
       };
 
-      console.log('📦 Config data:', configData);
+      console.log('📦 Creando nueva config:', configData);
       const result = await base44.entities.RouletteConfig.create(configData);
-      console.log('✅ Nueva config creada:', result);
-      
-      // DESPUÉS desactivar las configs ANTERIORES (no la que acabamos de crear)
-      const allConfigs = await base44.entities.RouletteConfig.filter({ store_id: storeId });
-      const toDeactivate = allConfigs.filter(c => 
-        c.award_type === awardType && 
-        c.is_active && 
-        c.id !== result.id
-      );
-      
-      console.log('🔄 Desactivando configs anteriores:', toDeactivate.length);
-      for (const config of toDeactivate) {
-        await base44.entities.RouletteConfig.update(config.id, { is_active: false });
-      }
+      console.log('✅ Config creada:', result);
+      console.log('✅ Premios guardados:', prizes);
       
       return result;
     },

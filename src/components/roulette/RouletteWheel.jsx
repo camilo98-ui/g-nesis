@@ -49,16 +49,23 @@ export default function RouletteWheel({ onResult, disabled, awardType = 'tienda'
     refetchOnWindowFocus: true
   });
 
-  // Buscar la configuración más reciente que esté activa para este tipo de premio
+  // La config más reciente activa (debería ser solo una)
   const activeConfig = React.useMemo(() => {
-    const filtered = configs.filter(c => c.is_active && c.award_type === awardType);
-    console.log('🎯 Configs filtradas:', filtered);
+    if (!configs || configs.length === 0) {
+      console.log('⚠️ No hay configs disponibles');
+      return null;
+    }
+    
     // Ordenar por fecha de creación (más reciente primero)
-    filtered.sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
-    const selected = filtered[0];
-    console.log('✅ Config seleccionada:', selected);
+    const sorted = [...configs].sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+    const selected = sorted[0];
+    
+    console.log('🎯 Total configs:', configs.length);
+    console.log('✅ Config más reciente:', selected);
+    console.log('📝 Premios de la config:', selected?.prizes);
+    
     return selected;
-  }, [configs, awardType]);
+  }, [configs]);
   
   const PRIZES = React.useMemo(() => {
     console.log('🎯 RouletteWheel - Configs:', configs);
