@@ -84,11 +84,25 @@ export default function RouletteConfigManager({ storeId }) {
       console.log('✅ Guardado exitoso:', result);
       return result;
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       console.log('🎉 onSuccess ejecutado:', data);
-      toast.success('✅ Configuración guardada exitosamente');
+
+      // Limpiar COMPLETAMENTE el caché
+      await queryClient.cancelQueries({ queryKey: ['rouletteConfig'] });
       queryClient.removeQueries({ queryKey: ['rouletteConfig'] });
-      queryClient.invalidateQueries({ queryKey: ['rouletteConfig'] });
+
+      // Forzar refetch inmediato
+      await queryClient.invalidateQueries({ queryKey: ['rouletteConfig'] });
+
+      // Verificar que se guardó correctamente
+      const verify = await base44.entities.RouletteConfig.filter({ 
+        store_id: storeId, 
+        award_type: awardType, 
+        is_active: true 
+      });
+      console.log('🔍 Verificación post-guardado:', verify);
+
+      toast.success('✅ Configuración guardada exitosamente');
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 3000);
     },
