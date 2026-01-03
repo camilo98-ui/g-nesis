@@ -982,15 +982,28 @@ Genera:
                           const { cx, cy } = props;
                           return (
                             <g>
-                              <circle cx={cx} cy={cy} r={8} fill="#6366f1" opacity={0.2}>
-                                <animate attributeName="r" values="8;12;8" dur="2s" repeatCount="indefinite" />
-                                <animate attributeName="opacity" values="0.2;0.4;0.2" dur="2s" repeatCount="indefinite" />
+                              {/* Resplandor exterior más brillante */}
+                              <circle cx={cx} cy={cy} r={15} fill="#818cf8" opacity={0.1}>
+                                <animate attributeName="r" values="15;22;15" dur="2s" repeatCount="indefinite" />
+                                <animate attributeName="opacity" values="0.1;0.35;0.1" dur="2s" repeatCount="indefinite" />
                               </circle>
-                              <circle cx={cx} cy={cy} r={5} fill="#6366f1" stroke="#1e293b" strokeWidth={2}>
-                                <animate attributeName="r" values="5;7;5" dur="1.5s" repeatCount="indefinite" />
+                              {/* Resplandor medio */}
+                              <circle cx={cx} cy={cy} r={10} fill="#a5b4fc" opacity={0.3}>
+                                <animate attributeName="r" values="10;14;10" dur="1.5s" repeatCount="indefinite" />
+                                <animate attributeName="opacity" values="0.3;0.6;0.3" dur="1.5s" repeatCount="indefinite" />
                               </circle>
-                              <circle cx={cx} cy={cy} r={3} fill="#818cf8">
-                                <animate attributeName="opacity" values="0.6;1;0.6" dur="1s" repeatCount="indefinite" />
+                              {/* Anillo brillante */}
+                              <circle cx={cx} cy={cy} r={6} fill="none" stroke="#c7d2fe" strokeWidth={2} opacity={0.5}>
+                                <animate attributeName="r" values="6;9;6" dur="1.2s" repeatCount="indefinite" />
+                                <animate attributeName="opacity" values="0.5;0.9;0.5" dur="1.2s" repeatCount="indefinite" />
+                              </circle>
+                              {/* Punto central sólido */}
+                              <circle cx={cx} cy={cy} r={5} fill="#6366f1" stroke="#e0e7ff" strokeWidth={2}>
+                                <animate attributeName="r" values="5;6.5;5" dur="1s" repeatCount="indefinite" />
+                              </circle>
+                              {/* Núcleo brillante */}
+                              <circle cx={cx} cy={cy} r={2.5} fill="#e0e7ff">
+                                <animate attributeName="opacity" values="0.8;1;0.8" dur="0.8s" repeatCount="indefinite" />
                               </circle>
                             </g>
                           );
