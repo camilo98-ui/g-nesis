@@ -16,6 +16,7 @@ import ZoneBudgetManager from '../components/executive/ZoneBudgetManager';
 import ZoneChartsPanel from '../components/executive/ZoneChartsPanel';
 import PlannerStatusPanel from '../components/executive/PlannerStatusPanel';
 import StoreWeeklyChart from '../components/executive/StoreWeeklyChart';
+import { useExecutiveTooltip } from '../components/executive/ExecutiveChartTooltip';
 import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, ResponsiveContainer, CartesianGrid, XAxis, YAxis, ComposedChart, Tooltip, Legend, ReferenceLine } from 'recharts';
 
 export default function ExecutiveDashboard() {
@@ -577,6 +578,22 @@ Genera:
       }));
   }, [storesAnalysis]);
 
+  // Preparar datos para tooltips
+  const zoneDataForTooltips = useMemo(() => ({
+    zoneSales: zoneTotals.totalSales,
+    zoneBudget: zoneTotals.totalBudget,
+    zoneCompliance: (zoneTotals.totalSales / zoneTotals.totalBudget) * 100
+  }), [zoneTotals]);
+
+  const salesVsBudgetTooltip = useExecutiveTooltip('sales_vs_budget', zoneDataForTooltips);
+  const topPerformersTooltip = useExecutiveTooltip('top_performers', {
+    ...zoneDataForTooltips,
+    topStoresCount: topStoresTrend.length,
+    avgCompliance: topStoresTrend.length > 0 
+      ? topStoresTrend.reduce((sum, s) => sum + s.value, 0) / topStoresTrend.length 
+      : 0
+  });
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden">
       {/* Simplified Background - Static */}
@@ -912,42 +929,7 @@ Genera:
                         axisLine={{ stroke: '#374151' }}
                         tickFormatter={(value) => `$${value.toFixed(1)}M`}
                       />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: '#1e293b',
-                          border: '2px solid #475569',
-                          borderRadius: '12px',
-                          padding: '12px 16px',
-                          boxShadow: '0 10px 30px rgba(0,0,0,0.3)'
-                        }}
-                        labelStyle={{ color: '#cbd5e1', fontSize: '12px', fontWeight: 'bold', marginBottom: '8px' }}
-                        formatter={(value, name, props) => {
-                          const { sales, budget, compliance } = props.payload;
-                          if (name === 'Venta') {
-                            return [
-                              <div key="sales-info" style={{ color: '#fff' }}>
-                                <div style={{ color: '#10b981', fontWeight: 'bold', marginBottom: '4px' }}>
-                                  💰 Venta: {formatCurrency(sales * 1000000)}
-                                </div>
-                                <div style={{ color: '#6366f1', fontWeight: 'bold', marginBottom: '4px' }}>
-                                  🎯 Meta: {formatCurrency(budget * 1000000)}
-                                </div>
-                                <div style={{ 
-                                  color: compliance >= 100 ? '#10b981' : compliance >= 85 ? '#fbbf24' : '#ef4444',
-                                  fontWeight: 'bold',
-                                  borderTop: '1px solid #475569',
-                                  paddingTop: '6px',
-                                  marginTop: '6px'
-                                }}>
-                                  {compliance >= 100 ? '✅' : compliance >= 85 ? '⚠️' : '❌'} Cumplimiento: {compliance.toFixed(1)}%
-                                </div>
-                              </div>,
-                              ''
-                            ];
-                          }
-                          return [formatCurrency(value * 1000000), name];
-                        }}
-                      />
+                      <Tooltip {...salesVsBudgetTooltip} />
                       <Legend
                         wrapperStyle={{ paddingTop: '16px' }}
                         content={() => (
@@ -1070,6 +1052,7 @@ Genera:
                           width={70}
                           tickLine={false}
                         />
+                        <Tooltip {...topPerformersTooltip} />
                         <Bar dataKey="value" fill="url(#greenBarGradient)" radius={[0, 6, 6, 0]} maxBarSize={24} />
                       </BarChart>
                     </ResponsiveContainer>
