@@ -31,7 +31,7 @@ export default function RouletteWheel({ onResult, disabled, awardType = 'tienda'
   const [suspensePhase, setSuspensePhase] = useState(0);
 
   const { data: configs = [], refetch } = useQuery({
-    queryKey: ['rouletteConfig', storeId, awardType],
+    queryKey: ['rouletteConfig', storeId, awardType, Date.now()],
     queryFn: async () => {
       console.log('🔄 Fetching configs para store:', storeId, 'awardType:', awardType);
       const result = await base44.entities.RouletteConfig.filter({ 
@@ -44,9 +44,10 @@ export default function RouletteWheel({ onResult, disabled, awardType = 'tienda'
     },
     enabled: !!storeId && !!awardType,
     staleTime: 0,
-    gcTime: 0,
+    cacheTime: 0,
     refetchOnMount: 'always',
-    refetchOnWindowFocus: true
+    refetchOnWindowFocus: true,
+    refetchInterval: 3000
   });
 
   // La config más reciente activa (debería ser solo una)
