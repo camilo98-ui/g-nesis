@@ -1004,53 +1004,91 @@ Genera:
                   {/* Mini gráfica de proyección semanal */}
                   <div className="mt-4 pt-4 border-t border-white/10">
                     <div className="flex items-center justify-between mb-2">
-                      <h4 className="text-xs font-bold text-slate-400">📅 Distribución Presupuesto Semanal</h4>
-                      <span className="text-[9px] text-slate-500">
-                        {Math.ceil((new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0) - new Date()) / (7 * 24 * 60 * 60 * 1000))} semanas
-                      </span>
+                      <h4 className="text-xs font-bold text-slate-400">📅 Proyección Presupuesto Semanal</h4>
+                      <span className="text-[9px] text-slate-500">Tendencia del mes</span>
                     </div>
-                    <ResponsiveContainer width="100%" height={100}>
-                      <PieChart>
-                        <Pie
-                          data={(() => {
-                            const now = new Date();
-                            const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-                            const daysLeft = Math.ceil((monthEnd - now) / (1000 * 60 * 60 * 24));
-                            const weeksLeft = Math.ceil(daysLeft / 7);
-                            const weeklyAvg = zoneTotals.totalBudget / 4;
+                    <ResponsiveContainer width="100%" height={85}>
+                      <ComposedChart 
+                        data={(() => {
+                          const now = new Date();
+                          const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+                          const daysLeft = Math.ceil((monthEnd - now) / (1000 * 60 * 60 * 24));
+                          const weeksLeft = Math.ceil(daysLeft / 7);
+                          const weeklyAvg = zoneTotals.totalBudget / 4;
 
-                            return Array.from({ length: Math.min(weeksLeft, 4) }, (_, i) => ({
-                              name: `Semana ${i + 1}`,
-                              value: weeklyAvg / 1000000,
-                              fill: i === 0 ? '#10b981' : ['#6366f1', '#8b5cf6', '#ec4899'][i - 1] || '#6366f1'
-                            }));
-                          })()}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={25}
-                          outerRadius={40}
-                          paddingAngle={2}
-                          dataKey="value"
-                        >
-                          {Array(4).fill(0).map((_, index) => (
-                            <Cell key={`cell-${index}`} />
-                          ))}
-                        </Pie>
+                          return Array.from({ length: Math.min(weeksLeft + 1, 5) }, (_, i) => ({
+                            name: `S${i + 1}`,
+                            presupuesto: weeklyAvg / 1000000,
+                            tendencia: (weeklyAvg / 1000000) * (1 + (i * 0.05)),
+                            actual: i === 0 ? zoneTotals.totalSales / 1000000 : null
+                          }));
+                        })()}
+                        margin={{ top: 5, right: 5, left: 0, bottom: 5 }}
+                      >
+                        <defs>
+                          <linearGradient id="budgetBarGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#6366f1" stopOpacity={0.8}/>
+                            <stop offset="100%" stopColor="#6366f1" stopOpacity={0.4}/>
+                          </linearGradient>
+                          <linearGradient id="trendLineGrad" x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="0%" stopColor="#10b981" stopOpacity={0.8}/>
+                            <stop offset="100%" stopColor="#06b6d4" stopOpacity={1}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                        <XAxis 
+                          dataKey="name" 
+                          tick={{ fontSize: 9, fill: '#94a3b8' }}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+                        <YAxis hide domain={[0, 'dataMax + 10']} />
                         <Tooltip 
                           contentStyle={{ 
                             backgroundColor: 'rgba(15, 23, 42, 0.95)', 
                             border: '1px solid rgba(255,255,255,0.2)',
                             borderRadius: '8px',
-                            fontSize: '11px',
-                            color: '#fff'
+                            fontSize: '10px',
+                            color: '#fff',
+                            padding: '6px 10px'
                           }}
-                          formatter={(value) => `${value.toFixed(1)}M`}
+                          formatter={(value, name) => [
+                            `$${value?.toFixed(1)}M`, 
+                            name === 'presupuesto' ? 'Presupuesto' : name === 'tendencia' ? 'Tendencia' : 'Actual'
+                          ]}
                         />
-                      </PieChart>
+                        <Bar 
+                          dataKey="presupuesto" 
+                          fill="url(#budgetBarGrad)" 
+                          radius={[4, 4, 0, 0]} 
+                          maxBarSize={30}
+                          animationDuration={800}
+                        />
+                        <Line 
+                          type="monotone" 
+                          dataKey="tendencia" 
+                          stroke="url(#trendLineGrad)"
+                          strokeWidth={2.5}
+                          dot={{ r: 4, fill: '#10b981', strokeWidth: 2, stroke: '#fff' }}
+                          activeDot={{ r: 6, fill: '#06b6d4', strokeWidth: 2 }}
+                          animationDuration={1200}
+                          animationEasing="ease-in-out"
+                        />
+                        {zoneTotals.totalSales > 0 && (
+                          <Line 
+                            type="monotone" 
+                            dataKey="actual" 
+                            stroke="#10b981"
+                            strokeWidth={2}
+                            dot={{ r: 5, fill: '#10b981', strokeWidth: 2, stroke: '#fff' }}
+                            animationDuration={800}
+                          />
+                        )}
+                      </ComposedChart>
                     </ResponsiveContainer>
-                    <div className="flex flex-wrap items-center justify-center gap-2 mt-1">
-                      <span className="text-[9px] text-emerald-400">● Actual</span>
-                      <span className="text-[9px] text-indigo-400">● Futuras</span>
+                    <div className="flex items-center justify-center gap-3 mt-1">
+                      <span className="text-[9px] text-indigo-400">■ Presupuesto</span>
+                      <span className="text-[9px] text-cyan-400">━ Tendencia</span>
                     </div>
                   </div>
                 </div>
