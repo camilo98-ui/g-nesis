@@ -720,47 +720,78 @@ Genera:
 
             {/* Grid Principal Estilo Power BI */}
             <div className="grid grid-cols-12 gap-4 mb-6">
-              {/* Columna Izquierda - KPIs Compactos */}
-              <div className="col-span-12 lg:col-span-2 grid grid-cols-2 lg:grid-cols-1 gap-4">
-                {/* KPI Cards Compactos */}
-                <div
-                  onClick={() => setSelectedKPIDetail('sales')}
-                  className="bg-white/5 backdrop-blur-xl rounded-lg p-4 border border-white/10 cursor-pointer hover:bg-white/10 transition-all"
-                >
-                  <p className="text-xs text-slate-400 mb-2">Venta Total</p>
-                  <p className="text-3xl font-black text-white mb-1 tabular-nums">{formatShort(zoneTotals.totalSales)}</p>
-                  <p className="text-xs text-emerald-400 font-semibold">{formatShort(zoneTotals.totalBudget)}</p>
-                </div>
+              {/* Columna Izquierda - Mini Dashboard */}
+              <div className="col-span-12 lg:col-span-2">
+                <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl rounded-lg p-4 border border-white/10 h-full">
+                  <h3 className="text-sm font-black text-white mb-4">Resumen de Zona</h3>
+                  
+                  {/* Cumplimiento General */}
+                  <div className="mb-4 pb-4 border-b border-white/10">
+                    <p className="text-xs text-slate-400 mb-2">Cumplimiento</p>
+                    <p className={`text-5xl font-black mb-2 tabular-nums ${
+                      ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 90 ? 'text-emerald-400' : 
+                      ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 70 ? 'text-amber-400' : 'text-red-400'
+                    }`}>
+                      {((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%
+                    </p>
+                    <div className="w-full bg-slate-700/30 rounded-full h-2">
+                      <div 
+                        className={`h-2 rounded-full transition-all ${
+                          ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 90 ? 'bg-emerald-400' : 
+                          ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 70 ? 'bg-amber-400' : 'bg-red-400'
+                        }`}
+                        style={{ width: `${Math.min(((zoneTotals.totalSales/zoneTotals.totalBudget)*100), 100)}%` }}
+                      />
+                    </div>
+                  </div>
 
-                <div
-                  onClick={() => setSelectedKPIDetail('compliance')}
-                  className="bg-white/5 backdrop-blur-xl rounded-lg p-4 border border-white/10 cursor-pointer hover:bg-white/10 transition-all"
-                >
-                  <p className="text-xs text-slate-400 mb-2">Cumplimiento</p>
-                  <p className={`text-4xl font-black mb-1 tabular-nums ${
-                    ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 90 ? 'text-emerald-400' : 
-                    ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 70 ? 'text-amber-400' : 'text-red-400'
-                  }`}>
-                    {((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%
-                  </p>
-                </div>
+                  {/* Mini Gráfica de Tendencia */}
+                  <div className="mb-4">
+                    <p className="text-xs text-slate-400 mb-3">Tendencia Diaria</p>
+                    <ResponsiveContainer width="100%" height={120}>
+                      <AreaChart data={dailySalesData}>
+                        <defs>
+                          <linearGradient id="miniAreaGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#10b981" stopOpacity={0.6}/>
+                            <stop offset="100%" stopColor="#10b981" stopOpacity={0.1}/>
+                          </linearGradient>
+                        </defs>
+                        <Area 
+                          type="monotone" 
+                          dataKey="compliance" 
+                          stroke="#10b981" 
+                          strokeWidth={2}
+                          fill="url(#miniAreaGradient)" 
+                        />
+                        <ReferenceLine y={100} stroke="#6366f1" strokeDasharray="3 3" strokeWidth={1} />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
 
-                <div
-                  onClick={() => setSelectedKPIDetail('critical')}
-                  className="bg-white/5 backdrop-blur-xl rounded-lg p-4 border border-white/10 cursor-pointer hover:bg-white/10 transition-all"
-                >
-                  <p className="text-xs text-slate-400 mb-2">Críticas</p>
-                  <p className="text-4xl font-black text-red-400 mb-1 tabular-nums">{statusCounts.critical}</p>
-                  <p className="text-xs text-red-300 font-semibold">{Math.round((statusCounts.critical/STORES.length)*100)}%</p>
-                </div>
-
-                <div
-                  onClick={() => setSelectedKPIDetail('meta')}
-                  className="bg-white/5 backdrop-blur-xl rounded-lg p-4 border border-white/10 cursor-pointer hover:bg-white/10 transition-all"
-                >
-                  <p className="text-xs text-slate-400 mb-2">En Meta</p>
-                  <p className="text-4xl font-black text-emerald-400 mb-1 tabular-nums">{statusCounts.positive}</p>
-                  <p className="text-xs text-emerald-300 font-semibold">{Math.round((statusCounts.positive/STORES.length)*100)}%</p>
+                  {/* Estado de Tiendas */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-emerald-400" />
+                        <span className="text-xs text-slate-300">En Meta</span>
+                      </div>
+                      <span className="text-sm font-bold text-white">{statusCounts.positive}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-amber-400" />
+                        <span className="text-xs text-slate-300">Alerta</span>
+                      </div>
+                      <span className="text-sm font-bold text-white">{statusCounts.negative}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-red-400" />
+                        <span className="text-xs text-slate-300">Críticas</span>
+                      </div>
+                      <span className="text-sm font-bold text-white">{statusCounts.critical}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
