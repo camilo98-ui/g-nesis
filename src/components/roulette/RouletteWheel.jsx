@@ -250,32 +250,32 @@ export default function RouletteWheel({ onResult, disabled, awardType = 'tienda'
 
 
         </motion.div>
-      </div>
 
-      {/* Botón Central de Girar */}
-      <motion.div 
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30"
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-      >
-        <Button
-          onClick={handleSpin}
-          disabled={spinning || disabled}
-          className="w-32 h-32 rounded-full bg-gradient-to-br from-pink-500 via-rose-500 to-pink-600 hover:from-pink-600 hover:via-rose-600 hover:to-pink-700 shadow-2xl border-8 border-white disabled:opacity-50 disabled:cursor-not-allowed"
+        {/* Botón Central de Girar */}
+        <motion.div 
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
         >
-          <div className="flex flex-col items-center gap-1">
-            <motion.div
-              animate={spinning ? { rotate: 360 } : {}}
-              transition={spinning ? { duration: 1, repeat: Infinity, ease: "linear" } : {}}
-            >
-              <Sparkles className="w-8 h-8 text-white" />
-            </motion.div>
-            <span className="text-xl font-black text-white">
-              {spinning ? 'Girando...' : 'GIRAR'}
-            </span>
-          </div>
-        </Button>
-      </motion.div>
+          <Button
+            onClick={handleSpin}
+            disabled={spinning || disabled}
+            className="w-32 h-32 rounded-full bg-gradient-to-br from-pink-500 via-rose-500 to-pink-600 hover:from-pink-600 hover:via-rose-600 hover:to-pink-700 shadow-2xl border-8 border-white disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <div className="flex flex-col items-center gap-1">
+              <motion.div
+                animate={spinning ? { rotate: 360 } : {}}
+                transition={spinning ? { duration: 1, repeat: Infinity, ease: "linear" } : {}}
+              >
+                <Sparkles className="w-8 h-8 text-white" />
+              </motion.div>
+              <span className="text-xl font-black text-white">
+                {spinning ? 'Girando...' : 'GIRAR'}
+              </span>
+            </div>
+          </Button>
+        </motion.div>
+      </div>
     </div>
   );
 }
