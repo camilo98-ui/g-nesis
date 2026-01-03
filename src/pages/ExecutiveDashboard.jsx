@@ -629,26 +629,53 @@ Genera:
 
               {/* Columna Centro - Gráfica Grande */}
               <div className="col-span-12 lg:col-span-6">
-                <div className="bg-white/5 backdrop-blur-xl rounded-lg p-4 border border-white/10 h-full">
+                <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl rounded-lg p-5 border border-white/10 h-full shadow-xl">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-sm font-bold text-white">Ventas por Día</h3>
+                    <div>
+                      <h3 className="text-base font-black text-white mb-1">Ventas Diarias</h3>
+                      <p className="text-xs text-slate-400">
+                        Total: {formatCurrency(dailySalesData.reduce((sum, d) => sum + (d.sales * 1000000), 0))}
+                      </p>
+                    </div>
                     <button
                       onClick={() => setShowZoneCharts(true)}
-                      className="text-xs text-slate-400 hover:text-white"
+                      className="text-xs px-3 py-1.5 rounded-lg bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 border border-blue-500/30 transition-all"
                     >
-                      Ver más →
+                      Análisis Completo →
                     </button>
                   </div>
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={dailySalesData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.2} />
-                      <XAxis dataKey="date" stroke="#9ca3af" fontSize={10} />
-                      <YAxis stroke="#9ca3af" fontSize={10} />
-                      <Bar dataKey="sales" radius={[4, 4, 0, 0]}>
+                      <defs>
+                        <linearGradient id="barGradient1" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#f59e0b" stopOpacity={1}/>
+                          <stop offset="100%" stopColor="#d97706" stopOpacity={0.8}/>
+                        </linearGradient>
+                        <linearGradient id="barGradient2" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#10b981" stopOpacity={1}/>
+                          <stop offset="100%" stopColor="#059669" stopOpacity={0.8}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.15} vertical={false} />
+                      <XAxis 
+                        dataKey="date" 
+                        stroke="#6b7280" 
+                        fontSize={11} 
+                        tickLine={false}
+                        axisLine={{ stroke: '#374151' }}
+                      />
+                      <YAxis 
+                        stroke="#6b7280" 
+                        fontSize={11}
+                        tickLine={false}
+                        axisLine={{ stroke: '#374151' }}
+                        tickFormatter={(value) => `$${value.toFixed(1)}M`}
+                      />
+                      <Bar dataKey="sales" radius={[6, 6, 0, 0]} maxBarSize={50}>
                         {dailySalesData.map((entry, index) => (
                           <Cell 
                             key={`cell-${index}`} 
-                            fill={index % 2 === 0 ? '#f59e0b' : '#10b981'} 
+                            fill={index % 2 === 0 ? 'url(#barGradient1)' : 'url(#barGradient2)'} 
                           />
                         ))}
                       </Bar>
@@ -659,50 +686,109 @@ Genera:
 
               {/* Columna Derecha - Mix de Gráficas */}
               <div className="col-span-12 lg:col-span-4 space-y-4">
-                {/* Distribución de Estado */}
-                <div className="bg-white/5 backdrop-blur-xl rounded-lg p-4 border border-white/10">
-                  <h3 className="text-sm font-bold text-white mb-3">Estado Tiendas</h3>
-                  <ResponsiveContainer width="100%" height={180}>
-                    <PieChart>
-                      <Pie
-                        data={statusDistributionData}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={45}
-                        outerRadius={70}
-                        paddingAngle={3}
-                        dataKey="value"
-                      >
-                        {statusDistributionData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                    </PieChart>
-                  </ResponsiveContainer>
-                  <div className="flex justify-around mt-2">
+                {/* Distribución de Estado - Mejorado */}
+                <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl rounded-lg p-5 border border-white/10 shadow-xl">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-base font-black text-white">Estado de Tiendas</h3>
+                    <span className="text-xs px-2 py-1 rounded bg-white/10 text-slate-300">{STORES.length} Total</span>
+                  </div>
+                  <div className="relative">
+                    <ResponsiveContainer width="100%" height={200}>
+                      <PieChart>
+                        <defs>
+                          <linearGradient id="greenGradient" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stopColor="#10b981" />
+                            <stop offset="100%" stopColor="#059669" />
+                          </linearGradient>
+                          <linearGradient id="orangeGradient" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stopColor="#f59e0b" />
+                            <stop offset="100%" stopColor="#d97706" />
+                          </linearGradient>
+                          <linearGradient id="redGradient" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stopColor="#ef4444" />
+                            <stop offset="100%" stopColor="#dc2626" />
+                          </linearGradient>
+                        </defs>
+                        <Pie
+                          data={statusDistributionData}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={55}
+                          outerRadius={85}
+                          paddingAngle={4}
+                          dataKey="value"
+                        >
+                          {statusDistributionData.map((entry, index) => (
+                            <Cell 
+                              key={`cell-${index}`} 
+                              fill={index === 0 ? 'url(#greenGradient)' : index === 1 ? 'url(#orangeGradient)' : 'url(#redGradient)'} 
+                            />
+                          ))}
+                        </Pie>
+                      </PieChart>
+                    </ResponsiveContainer>
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div className="text-center">
+                        <p className="text-3xl font-black text-white">{STORES.length}</p>
+                        <p className="text-xs text-slate-400">Tiendas</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-3 mt-4">
                     {statusDistributionData.map((item, i) => (
-                      <div key={i} className="text-center">
-                        <div className="flex items-center gap-1 justify-center mb-1">
-                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
-                          <span className="text-xs text-slate-400">{item.name}</span>
-                        </div>
-                        <p className="text-lg font-bold text-white">{item.value}</p>
+                      <div key={i} className="bg-white/5 rounded-lg p-3 text-center border border-white/10">
+                        <div className="w-3 h-3 rounded-full mx-auto mb-2" style={{ backgroundColor: item.color }} />
+                        <p className="text-2xl font-black text-white mb-1">{item.value}</p>
+                        <p className="text-[10px] text-slate-400 font-semibold">{item.name}</p>
+                        <p className="text-xs text-slate-500 mt-1">{Math.round((item.value/STORES.length)*100)}%</p>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                {/* Críticas - Barras */}
+                {/* Críticas - Barras Mejoradas */}
                 {criticalStoresData.length > 0 && (
-                  <div className="bg-white/5 backdrop-blur-xl rounded-lg p-4 border border-white/10">
-                    <h3 className="text-sm font-bold text-white mb-3">Tiendas Críticas</h3>
-                    <ResponsiveContainer width="100%" height={150}>
+                  <div className="bg-gradient-to-br from-red-500/10 to-rose-600/10 backdrop-blur-xl rounded-lg p-5 border border-red-500/20 shadow-xl">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-base font-black text-white">Top Críticas</h3>
+                      <span className="text-xs px-2 py-1 rounded bg-red-500/20 text-red-300 font-bold">&lt;70%</span>
+                    </div>
+                    <ResponsiveContainer width="100%" height={180}>
                       <BarChart data={criticalStoresData} layout="vertical">
-                        <XAxis type="number" domain={[0, 100]} stroke="#9ca3af" fontSize={9} />
-                        <YAxis type="category" dataKey="name" stroke="#9ca3af" fontSize={9} width={60} />
-                        <Bar dataKey="value" fill="#ef4444" radius={[0, 4, 4, 0]} />
+                        <defs>
+                          <linearGradient id="redBarGradient" x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="0%" stopColor="#ef4444" stopOpacity={0.8}/>
+                            <stop offset="100%" stopColor="#dc2626" stopOpacity={1}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.15} horizontal={false} />
+                        <XAxis 
+                          type="number" 
+                          domain={[0, 100]} 
+                          stroke="#9ca3af" 
+                          fontSize={10}
+                          tickLine={false}
+                          tickFormatter={(v) => `${v}%`}
+                        />
+                        <YAxis 
+                          type="category" 
+                          dataKey="name" 
+                          stroke="#9ca3af" 
+                          fontSize={10} 
+                          width={70}
+                          tickLine={false}
+                        />
+                        <Bar dataKey="value" fill="url(#redBarGradient)" radius={[0, 6, 6, 0]} maxBarSize={24} />
                       </BarChart>
                     </ResponsiveContainer>
+                    <div className="mt-3 pt-3 border-t border-red-500/20">
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-red-300">Promedio Críticas:</span>
+                        <span className="text-sm font-bold text-red-400">
+                          {(criticalStoresData.reduce((sum, s) => sum + s.value, 0) / criticalStoresData.length).toFixed(1)}%
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
