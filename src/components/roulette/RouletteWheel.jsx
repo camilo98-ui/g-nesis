@@ -114,7 +114,7 @@ export default function RouletteWheel({ onResult, disabled, awardType = 'tienda'
       </AnimatePresence>
 
       {/* Ruleta */}
-      <div className="relative w-[500px] h-[500px] mx-auto max-w-full">
+      <div className="relative w-[700px] h-[700px] mx-auto max-w-full">
         {/* Indicador superior */}
         <motion.div 
           className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20"
@@ -193,10 +193,10 @@ export default function RouletteWheel({ onResult, disabled, awardType = 'tienda'
               
               // Ajustar tamaño del texto según longitud del nombre
               const nameLength = prize.name.length;
-              let fontSize = 3;
-              if (nameLength > 20) fontSize = 2.2;
-              else if (nameLength > 15) fontSize = 2.5;
-              else if (nameLength > 10) fontSize = 2.8;
+              let fontSize = 4;
+              if (nameLength > 20) fontSize = 3;
+              else if (nameLength > 15) fontSize = 3.5;
+              else if (nameLength > 10) fontSize = 3.8;
               
               // Dividir texto en dos líneas si es muy largo
               const words = prize.name.split(' ');
@@ -224,7 +224,7 @@ export default function RouletteWheel({ onResult, disabled, awardType = 'tienda'
                       dominantBaseline="middle"
                       fill={textColor}
                     >
-                      <tspan x={textX} fontSize="4" dy="-3.5">{prize.emoji}</tspan>
+                      <tspan x={textX} fontSize="5.5" dy="-4">{prize.emoji}</tspan>
                       {shouldSplit ? (
                         <>
                           <tspan x={textX} fontSize={fontSize} fontWeight="700" dy="3.5">{line1}</tspan>
