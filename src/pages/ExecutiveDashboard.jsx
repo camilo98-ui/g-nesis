@@ -1003,13 +1003,36 @@ Genera:
 
                   {/* Mini gráfica de cumplimiento por día */}
                   <div className="mt-4 pt-4 border-t border-white/10">
-                    <h4 className="text-xs font-bold text-slate-400 mb-2">% Cumplimiento Diario</h4>
-                    <ResponsiveContainer width="100%" height={50}>
-                      <BarChart data={dailySalesData}>
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-xs font-bold text-slate-400">% Cumplimiento Diario</h4>
+                      <div className="flex items-center gap-2 text-[9px]">
+                        <div className="flex items-center gap-1">
+                          <div className="w-2 h-2 rounded-sm bg-emerald-500"></div>
+                          <span className="text-slate-500">≥100%</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <div className="w-2 h-2 rounded-sm bg-amber-500"></div>
+                          <span className="text-slate-500">85-99%</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <div className="w-2 h-2 rounded-sm bg-red-500"></div>
+                          <span className="text-slate-500">&lt;85%</span>
+                        </div>
+                      </div>
+                    </div>
+                    <ResponsiveContainer width="100%" height={60}>
+                      <BarChart data={dailySalesData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+                        <XAxis 
+                          dataKey="date" 
+                          tick={{ fontSize: 9, fill: '#64748b' }}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+                        <YAxis hide domain={[0, 150]} />
                         <Bar 
                           dataKey="compliance" 
-                          radius={[2, 2, 0, 0]}
-                          maxBarSize={20}
+                          radius={[3, 3, 0, 0]}
+                          maxBarSize={30}
                         >
                           {dailySalesData.map((entry, index) => (
                             <Cell 
@@ -1018,7 +1041,6 @@ Genera:
                             />
                           ))}
                         </Bar>
-                        <XAxis dataKey="date" tick={false} axisLine={false} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
