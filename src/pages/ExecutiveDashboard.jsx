@@ -810,6 +810,17 @@ Genera:
                           <stop offset="0%" stopColor="#6366f1" stopOpacity={0.6}/>
                           <stop offset="100%" stopColor="#4f46e5" stopOpacity={0.4}/>
                         </linearGradient>
+                        <linearGradient id="lineShimmer" x1="0%" y1="0%" x2="100%" y2="0%">
+                          <stop offset="0%" stopColor="#6366f1" stopOpacity={0.4}>
+                            <animate attributeName="offset" values="0;1;0" dur="3s" repeatCount="indefinite" />
+                          </stop>
+                          <stop offset="50%" stopColor="#818cf8" stopOpacity={1}>
+                            <animate attributeName="offset" values="0.5;1.5;0.5" dur="3s" repeatCount="indefinite" />
+                          </stop>
+                          <stop offset="100%" stopColor="#6366f1" stopOpacity={0.4}>
+                            <animate attributeName="offset" values="1;2;1" dur="3s" repeatCount="indefinite" />
+                          </stop>
+                        </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.15} vertical={false} />
                       <XAxis 
@@ -882,11 +893,14 @@ Genera:
                       <Line 
                         type="monotone" 
                         dataKey="budget" 
-                        stroke="#6366f1" 
+                        stroke="url(#lineShimmer)" 
                         strokeWidth={3} 
                         dot={{ fill: '#6366f1', r: 5, strokeWidth: 2, stroke: '#1e293b' }} 
                         name="Meta"
                         strokeDasharray="5 5"
+                        isAnimationActive={true}
+                        animationDuration={2000}
+                        animationEasing="ease-in-out"
                       />
                     </ComposedChart>
                   </ResponsiveContainer>
