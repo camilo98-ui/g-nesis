@@ -18,8 +18,8 @@ import PlannerStatusPanel from '../components/executive/PlannerStatusPanel';
 import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, ResponsiveContainer, CartesianGrid, XAxis, YAxis, ComposedChart, Tooltip, Legend, ReferenceLine } from 'recharts';
 
 export default function ExecutiveDashboard() {
-  // Semana retail iniciando 29 de diciembre 2024
-  const RETAIL_WEEK_START = new Date(2024, 11, 29); // 29 dic 2024
+  // Semana retail iniciando 29 de diciembre 2025
+  const RETAIL_WEEK_START = new Date(2025, 11, 29); // 29 dic 2025
   
   const [dateRange, setDateRange] = useState({ 
     from: RETAIL_WEEK_START, 
