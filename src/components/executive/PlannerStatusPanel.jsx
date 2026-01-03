@@ -288,14 +288,7 @@ export default function PlannerStatusPanel({ stores }) {
 
 
 
-      {/* Nota legal */}
-      <div className="bg-amber-500/10 backdrop-blur-xl rounded-xl border border-amber-500/20 p-3 md:p-4">
-        <p className="text-[10px] md:text-xs text-amber-200 leading-relaxed">
-          <strong>⚠️ Nota:</strong> Cálculo basado en legislación colombiana vigente (máximo 44h semanales, 
-          extras después de 8h diarias). Las horas extras generan un recargo del 25%. 
-          Los dominicales y festivos tienen recargos adicionales.
-        </p>
-      </div>
+
     </div>
   );
 }
