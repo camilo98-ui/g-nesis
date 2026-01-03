@@ -582,8 +582,9 @@ Genera:
   const zoneDataForTooltips = useMemo(() => ({
     zoneSales: zoneTotals.totalSales,
     zoneBudget: zoneTotals.totalBudget,
-    zoneCompliance: (zoneTotals.totalSales / zoneTotals.totalBudget) * 100
-  }), [zoneTotals]);
+    zoneCompliance: (zoneTotals.totalSales / zoneTotals.totalBudget) * 100,
+    storesAnalysis: storesAnalysis
+  }), [zoneTotals, storesAnalysis]);
 
   const salesVsBudgetTooltip = useExecutiveTooltip('sales_vs_budget', zoneDataForTooltips);
   const topPerformersTooltip = useExecutiveTooltip('top_performers', {

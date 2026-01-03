@@ -4,7 +4,7 @@ import React from 'react';
  * Genera un insight contextual + recomendación ejecutiva para tooltips de gráficas
  * @param {string} chartType - Tipo de gráfica ('sales_vs_budget', 'stores_vs_ppt', 'top_performers', etc.)
  * @param {object} data - Datos del punto/contexto de la gráfica
- * @param {object} zoneData - Datos globales de la zona
+ * @param {object} zoneData - Datos globales de la zona (incluyendo storesAnalysis)
  * @returns {object} { insight, recommendation, priority }
  */
 export function generateChartInsight(chartType, data, zoneData) {
@@ -16,13 +16,15 @@ export function generateChartInsight(chartType, data, zoneData) {
     weekCompliance = 0,
     criticalStoresCount = 0,
     totalGap = 0,
-    trend = 'stable'
+    trend = 'stable',
+    date = ''
   } = data;
 
   const { 
     zoneSales = 0, 
     zoneBudget = 0, 
-    zoneCompliance = 0 
+    zoneCompliance = 0,
+    storesAnalysis = []
   } = zoneData || {};
 
   let insight = '';
@@ -36,77 +38,139 @@ export function generateChartInsight(chartType, data, zoneData) {
 
   switch (chartType) {
     case 'sales_vs_budget':
+      const gapValue = (budget - sales);
       const gapPercentage = budget > 0 ? ((budget - sales) / budget) * 100 : 0;
       const isAbove = sales >= budget;
       
+      // Analizar tiendas que afectan el resultado del día
+      const criticalStores = storesAnalysis.filter(s => s.hasData && s.weekCompliance < 80);
+      const topContributors = [...storesAnalysis]
+        .filter(s => s.hasData)
+        .sort((a, b) => b.weekTotalSales - a.weekTotalSales)
+        .slice(0, 3);
+      const bottomPerformers = [...storesAnalysis]
+        .filter(s => s.hasData && s.weekCompliance < 90)
+        .sort((a, b) => a.weekCompliance - b.weekCompliance)
+        .slice(0, 2);
+      
       if (isAbove) {
-        insight = `La zona supera la meta en ${((sales / budget - 1) * 100).toFixed(1)}%. Desempeño positivo y consistente en la semana.`;
-        recommendation = 'Sostener impulso comercial y reconocer equipos destacados';
+        const topStoresText = topContributors.map(s => `${s.name.split(' ')[1]} (${s.weekCompliance.toFixed(0)}%)`).join(', ');
+        insight = `✅ Meta superada por $${(sales - budget).toFixed(1)}M (+${((sales / budget - 1) * 100).toFixed(1)}%). Liderado por: ${topStoresText}. ${storesAnalysis.filter(s => s.weekCompliance >= 100).length} tiendas sobre el 100%.`;
+        recommendation = 'Sostener impulso y documentar prácticas ganadoras';
       } else if (compliance >= 85) {
-        insight = `La zona alcanza un ${compliance.toFixed(0)}% del presupuesto. Tendencia positiva, gap de ${gapPercentage.toFixed(0)}% por cerrar.`;
-        recommendation = 'Reforzar activaciones comerciales en días de menor tráfico';
+        const worstText = bottomPerformers.map(s => `${s.name.split(' ')[1]} (${s.weekCompliance.toFixed(0)}%)`).join(', ');
+        insight = `${compliance.toFixed(0)}% de cumplimiento. Gap: $${gapValue.toFixed(1)}M (${gapPercentage.toFixed(0)}%). ${bottomPerformers.length} tiendas lastre: ${worstText}. ${storesAnalysis.filter(s => s.weekCompliance >= 100).length} tiendas compensan.`;
+        recommendation = 'Reforzar tiendas bajo 90% con activaciones comerciales';
       } else {
-        insight = `⚠️ Cumplimiento del ${compliance.toFixed(0)}%. Gap significativo concentrado en días débiles.`;
-        recommendation = '⚠️ Acción prioritaria: activar plan de refuerzo inmediato en turnos críticos';
+        const criticalText = criticalStores.slice(0, 3).map(s => `${s.name.split(' ')[1]} (${s.weekCompliance.toFixed(0)}%, -$${(s.gap / 1000000).toFixed(1)}M)`).join(', ');
+        insight = `⚠️ ${compliance.toFixed(0)}% cumplimiento. Gap crítico: $${gapValue.toFixed(1)}M. ${criticalStores.length} tiendas rojas arrastran: ${criticalText}. Solo ${storesAnalysis.filter(s => s.weekCompliance >= 100).length} compensan.`;
+        recommendation = '⚠️ Intervención inmediata en tiendas <80% con refuerzo operativo';
         priority = true;
       }
       break;
 
     case 'stores_vs_ppt':
-      if (criticalStoresCount >= 4) {
-        insight = `⚠️ ${criticalStoresCount} tiendas por debajo del 80% de cumplimiento, concentrando ${totalGap}M del gap total.`;
-        recommendation = '⚠️ Acción prioritaria: intervenir tiendas críticas con metas diarias y seguimiento cercano';
+      const criticalList = storesAnalysis
+        .filter(s => s.hasData && s.weekCompliance < 80)
+        .sort((a, b) => a.weekCompliance - b.weekCompliance);
+      const alertList = storesAnalysis
+        .filter(s => s.hasData && s.weekCompliance >= 80 && s.weekCompliance < 90);
+      const metaList = storesAnalysis.filter(s => s.hasData && s.weekCompliance >= 100);
+      
+      if (criticalList.length >= 4) {
+        const worstStores = criticalList.slice(0, 3).map(s => 
+          `${s.name.split(' ')[1]} (${s.weekCompliance.toFixed(0)}%, -$${(s.gap / 1000000).toFixed(1)}M)`
+        ).join(', ');
+        const totalCriticalGap = criticalList.reduce((sum, s) => sum + Math.max(0, s.gap), 0) / 1000000;
+        insight = `⚠️ ${criticalList.length} tiendas críticas concentran $${totalCriticalGap.toFixed(1)}M del gap. Peores: ${worstStores}. ${metaList.length} en meta vs ${criticalList.length} en rojo.`;
+        recommendation = '⚠️ Plan de choque: supervisión diaria en tiendas rojas + refuerzo operativo';
         priority = true;
-      } else if (criticalStoresCount > 0) {
-        insight = `${criticalStoresCount} tiendas requieren atención. El resto de la zona mantiene desempeño estable.`;
-        recommendation = 'Priorizar acompañamiento en tiendas bajo 85% de cumplimiento';
+      } else if (criticalList.length > 0) {
+        const needAttention = [...criticalList, ...alertList].slice(0, 3).map(s => 
+          `${s.name.split(' ')[1]} (${s.weekCompliance.toFixed(0)}%)`
+        ).join(', ');
+        insight = `${criticalList.length} críticas + ${alertList.length} en alerta. Foco en: ${needAttention}. ${metaList.length} tiendas sostienen la zona (${(metaList.length / storesAnalysis.filter(s => s.hasData).length * 100).toFixed(0)}%).`;
+        recommendation = 'Acompañamiento semanal en tiendas <85% con metas progresivas';
       } else {
-        insight = 'Zona equilibrada. Todas las tiendas operan sobre el 80% de cumplimiento semanal.';
-        recommendation = 'Impulsar iniciativas de mejora continua en tiendas 85-95%';
+        const topThree = [...storesAnalysis].filter(s => s.hasData).sort((a, b) => b.weekCompliance - a.weekCompliance).slice(0, 3)
+          .map(s => `${s.name.split(' ')[1]} (${s.weekCompliance.toFixed(0)}%)`).join(', ');
+        insight = `✅ Zona balanceada. ${metaList.length} tiendas sobre meta (${(metaList.length / storesAnalysis.filter(s => s.hasData).length * 100).toFixed(0)}%). Líderes: ${topThree}.`;
+        recommendation = 'Escalar mejores prácticas desde top performers a tiendas 85-95%';
       }
       break;
 
     case 'top_performers':
-      insight = `${data.topStoresCount || 5} tiendas lideran con cumplimiento promedio de ${data.avgCompliance?.toFixed(1) || 0}%.`;
-      recommendation = 'Documentar y escalar mejores prácticas a tiendas en desarrollo';
+      const topStores = storesAnalysis
+        .filter(s => s.hasData && s.weekCompliance >= 90)
+        .sort((a, b) => b.weekCompliance - a.weekCompliance)
+        .slice(0, 5);
+      const topStoresText = topStores.map(s => 
+        `${s.name.split(' ')[1]} (${s.weekCompliance.toFixed(0)}%, $${(s.weekTotalSales / 1000000).toFixed(1)}M)`
+      ).join(', ');
+      const totalTopSales = topStores.reduce((sum, s) => sum + s.weekTotalSales, 0) / 1000000;
+      const avgTop = topStores.reduce((sum, s) => sum + s.weekCompliance, 0) / topStores.length;
+      
+      insight = `${topStores.length} líderes aportan $${totalTopSales.toFixed(1)}M con ${avgTop.toFixed(0)}% promedio. Detalle: ${topStoresText}.`;
+      recommendation = 'Documentar y replicar estrategias de tiendas top en zona';
       break;
 
     case 'store_detail':
+      const storeData = storesAnalysis.find(s => s.name === storeName);
       if (weekCompliance < 80) {
-        insight = `⚠️ ${storeName} con ${weekCompliance.toFixed(0)}% semanal. Desempeño crítico que requiere intervención.`;
-        recommendation = '⚠️ Acción prioritaria: revisión de turnos, dotación y estrategia comercial';
+        const gapAmount = storeData ? (storeData.gap / 1000000).toFixed(1) : 0;
+        const avgTicket = storeData ? storeData.weekAvgTicket.toFixed(0) : 0;
+        insight = `⚠️ ${storeName}: ${weekCompliance.toFixed(0)}% semanal, -$${gapAmount}M vs meta. Ticket: $${avgTicket}. ${storeData?.weekTotalTransactions || 0} transacciones. Necesita intervención urgente.`;
+        recommendation = '⚠️ Revisión de turnos, dotación, mix y estrategia comercial';
         priority = true;
       } else if (weekCompliance < 90) {
-        insight = `${storeName} alcanza ${weekCompliance.toFixed(0)}% semanal. A 10 puntos de la meta, con potencial de cierre.`;
+        const remaining = storeData ? ((storeData.weeklyBudget - storeData.weekTotalSales) / 1000000).toFixed(1) : 0;
+        insight = `${storeName}: ${weekCompliance.toFixed(0)}% semanal. Faltan $${remaining}M para meta (10 puntos). ${storeData?.weekTotalTransactions || 0} trx, ticket $${storeData?.weekAvgTicket.toFixed(0) || 0}.`;
         recommendation = 'Reforzar horas pico y activar incentivo de corto plazo';
       } else {
-        insight = `${storeName} supera la meta con ${weekCompliance.toFixed(0)}% de cumplimiento. Desempeño destacado.`;
-        recommendation = 'Reconocer al equipo y documentar factores de éxito';
+        const excess = storeData ? ((storeData.weekTotalSales - storeData.weeklyBudget) / 1000000).toFixed(1) : 0;
+        insight = `✅ ${storeName}: ${weekCompliance.toFixed(0)}% semanal, +$${excess}M sobre meta. ${storeData?.weekTotalTransactions || 0} trx, ticket $${storeData?.weekAvgTicket.toFixed(0) || 0}. Líder de zona.`;
+        recommendation = 'Reconocer equipo y documentar factores de éxito para replicar';
       }
       break;
 
     case 'daily_sales':
       const dayCompliance = budget > 0 ? (sales / budget) * 100 : 0;
+      const dayGap = (budget - sales) / 1000000;
+      
+      // Identificar tiendas que más contribuyeron ese día
+      const dayWorstStores = [...storesAnalysis]
+        .filter(s => s.hasData)
+        .sort((a, b) => a.weekCompliance - b.weekCompliance)
+        .slice(0, 3)
+        .map(s => `${s.name.split(' ')[1]} (${s.weekCompliance.toFixed(0)}%)`)
+        .join(', ');
+      
       if (dayCompliance < 85) {
-        insight = `⚠️ Venta del día en ${dayCompliance.toFixed(0)}%. Gap de ${((budget - sales) / 1000000).toFixed(1)}M vs presupuesto.`;
-        recommendation = '⚠️ Acción prioritaria: activar cobertura en horas valle y reforzar turno actual';
+        insight = `⚠️ Día en ${dayCompliance.toFixed(0)}%. Gap: $${dayGap.toFixed(1)}M (${((dayGap / budget) * 100).toFixed(0)}%). Tiendas que arrastran: ${dayWorstStores}.`;
+        recommendation = '⚠️ Activar cobertura en horas valle y reforzar turno actual';
         priority = true;
       } else if (dayCompliance < 100) {
-        insight = `Día en ${dayCompliance.toFixed(0)}% de cumplimiento. Cerca de meta con ${((budget - sales) / 1000000).toFixed(1)}M por cerrar.`;
+        insight = `Día ${dayCompliance.toFixed(0)}% de meta. Faltan $${dayGap.toFixed(1)}M. Tiendas críticas: ${dayWorstStores}. ${storesAnalysis.filter(s => s.weekCompliance >= 100).length} tiendas compensan.`;
         recommendation = 'Impulsar cierre fuerte en últimas horas del día';
       } else {
-        insight = `Día exitoso superando meta en ${((sales / budget - 1) * 100).toFixed(1)}%. Desempeño sobresaliente.`;
-        recommendation = 'Sostener operación y preparar mañana con el mismo impulso';
+        const dayExcess = ((sales - budget) / 1000000).toFixed(1);
+        insight = `✅ Día exitoso: ${dayCompliance.toFixed(0)}% (+$${dayExcess}M sobre meta). ${storesAnalysis.filter(s => s.weekCompliance >= 100).length} tiendas sobre el 100%.`;
+        recommendation = 'Sostener operación y replicar estrategia mañana';
       }
       break;
 
     case 'compliance_distribution':
-      insight = `Distribución: ${data.positiveCount || 0} en meta, ${data.alertCount || 0} en alerta, ${data.criticalCount || 0} críticas.`;
-      if (data.criticalCount >= 3) {
-        recommendation = '⚠️ Acción prioritaria: plan de recuperación para tiendas rojas con metas semanales';
+      const positiveStores = storesAnalysis.filter(s => s.hasData && s.weekCompliance >= 90);
+      const alertStores = storesAnalysis.filter(s => s.hasData && s.weekCompliance >= 70 && s.weekCompliance < 90);
+      const criticalStoresArr = storesAnalysis.filter(s => s.hasData && s.weekCompliance < 70);
+      
+      const criticalNames = criticalStoresArr.slice(0, 2).map(s => s.name.split(' ')[1]).join(', ');
+      insight = `${positiveStores.length} en meta (${(positiveStores.length / storesAnalysis.filter(s => s.hasData).length * 100).toFixed(0)}%), ${alertStores.length} en alerta, ${criticalStoresArr.length} críticas${criticalStoresArr.length > 0 ? ` (${criticalNames})` : ''}.`;
+      if (criticalStoresArr.length >= 3) {
+        recommendation = '⚠️ Plan de recuperación para tiendas rojas con metas semanales';
         priority = true;
       } else {
-        recommendation = 'Continuar seguimiento cercano y acelerar tiendas en alerta';
+        recommendation = 'Seguimiento cercano y acelerar tiendas en alerta';
       }
       break;
 
