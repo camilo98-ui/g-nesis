@@ -1,13 +1,14 @@
+
 import React, { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Target, TrendingUp, TrendingDown, Calendar, AlertTriangle, CheckCircle2, ChevronDown, ChevronUp, BarChart3, LineChart as LineChartIcon, ChevronRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { format, startOfMonth, endOfMonth, eachWeekOfInterval, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, parseISO } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachWeekOfInterval, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, parseISO, isWithinInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Legend, Cell, LineChart, Line } from 'recharts';
 
-export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId, formatCurrency, onConfigureBudget }) {
+export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId, formatCurrency, onConfigureBudget, currentDateRange }) {
   const [expandedSection, setExpandedSection] = useState(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedMetric, setSelectedMetric] = useState(null);
@@ -85,8 +86,8 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       const now = new Date();
       const monthStart = startOfMonth(now);
       const monthEnd = endOfMonth(now);
-      const currentWeekStart = startOfWeek(now, { weekStartsOn: 1 });
-      const currentWeekEnd = endOfWeek(now, { weekStartsOn: 1 });
+      const currentWeekStart = currentDateRange?.from || startOfWeek(now, { weekStartsOn: 1 });
+      const currentWeekEnd = currentDateRange?.to || endOfWeek(now, { weekStartsOn: 1 });
       
       const weeks = eachWeekOfInterval(
         { start: monthStart, end: monthEnd },
@@ -95,14 +96,16 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       
       const currentWeekNumber = weeks.findIndex(w => {
         const weekEnd = endOfWeek(w, { weekStartsOn: 1 });
-        return now >= w && now <= weekEnd;
+        return isWithinInterval(currentWeekStart, { start: w, end: weekEnd });
       }) + 1;
       
       return {
         noBudget: true,
         currentWeekNumber,
         totalWeeks: weeks.length,
-        remainingDays: eachDayOfInterval({ start: now, end: monthEnd }).length
+        remainingDays: eachDayOfInterval({ start: now, end: monthEnd }).length,
+        currentWeekStart,
+        currentWeekEnd
       };
     }
 
@@ -110,9 +113,9 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
     const monthStart = startOfMonth(now);
     const monthEnd = endOfMonth(now);
 
-    // Semana retail actual: de lunes a domingo (puede empezar en mes anterior)
-    const currentWeekStart = startOfWeek(now, { weekStartsOn: 1 });
-    const currentWeekEnd = endOfWeek(now, { weekStartsOn: 1 });
+    // Usar el rango de fechas del filtro si está disponible, de lo contrario, la semana retail actual
+    const currentWeekStart = currentDateRange?.from || startOfWeek(now, { weekStartsOn: 1 });
+    const currentWeekEnd = currentDateRange?.to || endOfWeek(now, { weekStartsOn: 1 });
 
     // Obtener todas las semanas retail que tocan el mes actual
     const weeks = eachWeekOfInterval(
@@ -122,6 +125,9 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
 
     // Calcular días del mes que efectivamente tienen venta (lunes a domingo del mes)
     const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd }).length;
+
+    // Días completos de la semana retail seleccionada (siempre 7 días)
+    const fullCurrentRetailWeekDays = eachDayOfInterval({ start: currentWeekStart, end: currentWeekEnd });
 
     // Analizar histórico de ventas por día de la semana (0=Domingo, 6=Sábado)
     // INCLUYE TODOS LOS DATOS HISTÓRICOS, no solo del mes actual
@@ -257,29 +263,25 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
     // Calcular número de semana retail (considerando semanas que empiezan antes del mes)
     const currentWeekNumber = weeks.findIndex(w => {
       const weekEnd = endOfWeek(w, { weekStartsOn: 1 });
-      return now >= w && now <= weekEnd;
+      return isWithinInterval(currentWeekStart, { start: w, end: weekEnd });
     }) + 1;
 
-    // Ventas de la semana actual - usar parseISO para parseo correcto
+    // Ventas de la semana SELECCIONADA (no necesariamente la actual)
     const currentWeekSales = dailySales.filter(s => {
       try {
         const saleDate = parseISO(s.date);
-        return saleDate >= currentWeekStart && saleDate <= currentWeekEnd;
+        return isWithinInterval(saleDate, { start: currentWeekStart, end: currentWeekEnd });
       } catch {
         return false;
       }
     }).reduce((sum, s) => sum + (s.total_sales || 0), 0);
 
-    // Presupuesto semanal - SOLO días que caen en el mes actual (calendario retail)
-    const daysInCurrentWeek = eachDayOfInterval({ start: currentWeekStart, end: currentWeekEnd })
-      .filter(d => d >= monthStart && d <= monthEnd);
-    
-    // Meta semanal = suma de presupuestos diarios ajustados (ya incluye el 102% del monthly budget)
-    const weeklyBudget = daysInCurrentWeek.reduce((sum, day) => sum + getDailyBudget(day), 0);
+    // Presupuesto de la semana SELECCIONADA - TODA la semana retail (7 días completos)
+    const weeklyBudget = fullCurrentRetailWeekDays.reduce((sum, day) => sum + getDailyBudget(day), 0);
 
     // Calcular proyección de la semana - SUAVIZADA con histórico
     const daysPassedInWeek = eachDayOfInterval({ start: currentWeekStart, end: now })
-      .filter(d => d <= now).length;
+      .filter(d => isWithinInterval(d, { start: currentWeekStart, end: currentWeekEnd }) && d <= now).length;
     const avgDailySales = daysPassedInWeek > 0 ? currentWeekSales / daysPassedInWeek : 0;
 
     // Calcular proyección más realista combinando ritmo actual con histórico
@@ -296,8 +298,8 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
     const weekProjection = blendedDailyAvg * totalDaysInWeek;
     const projectionCompliance = weeklyBudget > 0 ? (weekProjection / weeklyBudget * 100) : 0;
 
-    // Datos para gráficos - incluir TODOS los días de la semana retail actual (incluso del mes anterior)
-    const dailyTrendData = eachDayOfInterval({ start: currentWeekStart, end: now }).map(day => {
+    // Datos para gráficos - TODOS los días de la semana seleccionada
+    const dailyTrendData = fullCurrentRetailWeekDays.map(day => {
       // Buscar venta exacta del día usando parseISO
       const sale = dailySales.find(s => {
         try {
@@ -310,9 +312,9 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
 
       const ventasDelDia = sale ? (sale.total_sales || 0) : 0;
       
-      // CRÍTICO: usar presupuesto ajustado SOLO para el día de hoy
-      const isToday = isSameDay(day, now);
-      const presupuestoDia = isToday ? adjustedDailyBudget : getDailyBudget(day);
+      // CRÍTICO: usar presupuesto ajustado SOLO para el día de hoy (real 'now')
+      const isDayToday = isSameDay(day, now);
+      const presupuestoDia = isDayToday ? adjustedDailyBudget : getDailyBudget(day);
 
       return {
         date: format(day, 'dd MMM', { locale: es }),
@@ -325,8 +327,8 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
 
     const weeklyData = weeks.map((weekStart, idx) => {
       const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
-      const daysInWeek = eachDayOfInterval({ start: weekStart, end: weekEnd })
-        .filter(d => d >= monthStart && d <= monthEnd);
+      // Todos los días de la semana retail (7 días completos)
+      const daysInWeek = eachDayOfInterval({ start: weekStart, end: weekEnd });
       
       const weekSales = dailySales.filter(s => {
         const saleDate = new Date(s.date);
@@ -393,7 +395,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
         .sort((a, b) => b.avg - a.avg)
         .slice(0, 3)
     };
-  }, [dailySales, activeBudget]);
+  }, [dailySales, activeBudget, currentDateRange]);
 
   const smartRecommendation = getSmartRecommendation(budgetData);
 
@@ -641,7 +643,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                   <div className="flex items-center justify-between mb-2 md:mb-3">
                     <h4 className="text-sm md:text-base font-bold text-slate-900 flex items-center gap-1.5 md:gap-2">
                       <LineChartIcon className="w-4 h-4 md:w-5 md:h-5 text-rose-400/70" />
-                      Tendencia Diaria del Mes
+                      Tendencia Diaria de la Semana
                     </h4>
                   </div>
                   <ResponsiveContainer width="100%" height={200} className="md:hidden">
@@ -962,7 +964,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                       </linearGradient>
                       <linearGradient id="barVentas" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor="#fda4af" stopOpacity={0.7}/>
-                        <stop offset="100%" stopColor="#fecdd3" stopOpacity={0.5}/>
+                        <stop offset="100%" stopColor="#fecdd3" stopOpacity={0.4}/>
                       </linearGradient>
                       <filter id="barShadow">
                         <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.3"/>
@@ -1413,7 +1415,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                           </div>
                           <div className="flex justify-between items-center p-2 bg-slate-50 rounded-lg">
                             <span className="text-xs text-slate-700">Días en la semana (en mes)</span>
-                            <span className="font-bold text-slate-900">{eachDayOfInterval({ start: budgetData.currentWeekStart, end: budgetData.currentWeekEnd }).filter(d => d >= startOfMonth(new Date()) && d <= endOfMonth(new Date())).length} días</span>
+                            <span className="font-bold text-slate-900">{eachDayOfInterval({ start: budgetData.currentWeekStart, end: budgetData.currentWeekEnd }).filter(d => isWithinInterval(d, { start: startOfMonth(new Date()), end: endOfMonth(new Date()) })).length} días</span>
                           </div>
                           <div className="flex justify-between items-center p-2 bg-purple-50 rounded-lg">
                             <span className="text-xs text-purple-700">Promedio diario requerido</span>
