@@ -1628,7 +1628,86 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                             </ul>
                           </div>
 
-                          <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg p-3 border border-amber-200">
+                          {historicalSales.length > 0 && (
+                            <>
+                              <div className="mb-3">
+                                <p className="text-xs font-bold text-slate-700 mb-2">📈 Evolución Histórica</p>
+                                <ResponsiveContainer width="100%" height={180}>
+                                  <LineChart data={historicalSales.reverse().map(s => ({
+                                    fecha: format(parseISO(s.date), 'dd/MM', { locale: es }),
+                                    venta: s.total_sales,
+                                    promedio: dayData.avg
+                                  }))}>
+                                    <defs>
+                                      <linearGradient id="dayHistoryGradient" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stopColor="#818cf8" stopOpacity={0.6}/>
+                                        <stop offset="100%" stopColor="#818cf8" stopOpacity={0.1}/>
+                                      </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                                    <XAxis dataKey="fecha" fontSize={9} angle={-45} textAnchor="end" height={50} />
+                                    <YAxis fontSize={10} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} />
+                                    <Tooltip 
+                                      formatter={(v, name) => [
+                                        formatCurrency(v),
+                                        name === 'venta' ? '💰 Venta' : '📊 Promedio'
+                                      ]}
+                                      contentStyle={{ 
+                                        background: '#fff', 
+                                        border: '2px solid #818cf8', 
+                                        borderRadius: '8px',
+                                        fontSize: '11px'
+                                      }}
+                                    />
+                                    <ReferenceLine y={dayData.avg} stroke="#a78bfa" strokeDasharray="5 5" strokeWidth={2} label={{ value: 'Promedio', fill: '#a78bfa', fontSize: 9 }} />
+                                    <Line type="monotone" dataKey="venta" stroke="#6366f1" strokeWidth={3} dot={{ fill: '#6366f1', r: 4 }} activeDot={{ r: 6 }} />
+                                  </LineChart>
+                                </ResponsiveContainer>
+                              </div>
+
+                              <div className="mb-3">
+                                <p className="text-xs font-bold text-slate-700 mb-2">📊 Comparativa vs Promedio</p>
+                                <ResponsiveContainer width="100%" height={140}>
+                                  <BarChart data={historicalSales.slice(0, 6).reverse().map(s => ({
+                                    fecha: format(parseISO(s.date), 'dd/MM', { locale: es }),
+                                    diferencia: s.total_sales - dayData.avg,
+                                    venta: s.total_sales
+                                  }))}>
+                                    <defs>
+                                      <linearGradient id="barPositivo" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stopColor="#34d399" stopOpacity={0.8}/>
+                                        <stop offset="100%" stopColor="#6ee7b7" stopOpacity={0.4}/>
+                                      </linearGradient>
+                                      <linearGradient id="barNegativo" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stopColor="#f87171" stopOpacity={0.8}/>
+                                        <stop offset="100%" stopColor="#fca5a5" stopOpacity={0.4}/>
+                                      </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                                    <XAxis dataKey="fecha" fontSize={9} />
+                                    <YAxis fontSize={10} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} />
+                                    <Tooltip 
+                                      formatter={(v) => formatCurrency(v)}
+                                      contentStyle={{ 
+                                        background: '#fff', 
+                                        border: '2px solid #e5e7eb', 
+                                        borderRadius: '8px',
+                                        fontSize: '11px'
+                                      }}
+                                    />
+                                    <ReferenceLine y={0} stroke="#9ca3af" strokeDasharray="3 3" />
+                                    <Bar dataKey="diferencia" radius={[6, 6, 0, 0]}>
+                                      {historicalSales.slice(0, 6).map((sale, index) => (
+                                        <Cell key={`cell-${index}`} fill={sale.total_sales >= dayData.avg ? 'url(#barPositivo)' : 'url(#barNegativo)'} />
+                                      ))}
+                                    </Bar>
+                                  </BarChart>
+                                </ResponsiveContainer>
+                              </div>
+                            </>
+                          )}
+
+                          <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg p-3 border border-amber-200 mb-3">
                             <p className="text-xs font-bold text-amber-900 mb-2">💡 Estrategia recomendada:</p>
                             <ul className="text-xs text-amber-800 space-y-1 ml-4">
                               <li>• Reforzar personal en este día clave</li>
@@ -1640,12 +1719,17 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
 
                           {historicalSales.length > 0 && (
                             <div className="mt-3">
-                              <p className="text-xs font-bold text-slate-700 mb-2">📅 Últimos {dayData.dayFull}s:</p>
+                              <p className="text-xs font-bold text-slate-700 mb-2">📅 Últimos {dayData.dayFull}s registrados:</p>
                               <div className="space-y-1 max-h-32 overflow-y-auto">
                                 {historicalSales.slice(0, 5).map((sale, i) => (
                                   <div key={i} className="flex justify-between items-center p-2 bg-slate-50 rounded text-[10px]">
                                     <span className="text-slate-600">{format(parseISO(sale.date), 'dd MMM yyyy', { locale: es })}</span>
-                                    <span className="font-bold text-slate-900">{formatCurrency(sale.total_sales)}</span>
+                                    <span className={`font-bold ${sale.total_sales >= dayData.avg ? 'text-emerald-600' : 'text-rose-600'}`}>
+                                      {formatCurrency(sale.total_sales)}
+                                      <span className="text-[8px] ml-1">
+                                        {sale.total_sales >= dayData.avg ? '↑' : '↓'}{Math.abs(((sale.total_sales / dayData.avg - 1) * 100)).toFixed(0)}%
+                                      </span>
+                                    </span>
                                   </div>
                                 ))}
                               </div>
