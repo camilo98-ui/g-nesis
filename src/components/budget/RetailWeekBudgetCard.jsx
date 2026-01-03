@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Target, TrendingUp, TrendingDown, Calendar, AlertTriangle, CheckCircle2, ChevronDown, ChevronUp, BarChart3, LineChart, ChevronRight } from 'lucide-react';
+import { Target, TrendingUp, TrendingDown, Calendar, AlertTriangle, CheckCircle2, ChevronDown, ChevronUp, BarChart3, LineChart as LineChartIcon, ChevronRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { format, startOfMonth, endOfMonth, eachWeekOfInterval, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, parseISO } from 'date-fns';
@@ -665,7 +665,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                 >
                   <div className="flex items-center justify-between mb-2 md:mb-3">
                     <h4 className="text-sm md:text-base font-bold text-slate-900 flex items-center gap-1.5 md:gap-2">
-                      <LineChart className="w-4 h-4 md:w-5 md:h-5 text-rose-400/70" />
+                      <LineChartIcon className="w-4 h-4 md:w-5 md:h-5 text-rose-400/70" />
                       Tendencia Diaria del Mes
                     </h4>
                   </div>
