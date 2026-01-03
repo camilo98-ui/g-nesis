@@ -721,37 +721,7 @@ Genera:
               </div>
             </div>
 
-            {/* Alerta Crítica */}
-            {statusCounts.critical > 0 && (
-              <div className="mb-6 sm:mb-10 lg:mb-16">
-                <div className={`relative rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-10 overflow-hidden ${
-                  statusCounts.critical >= STORES.length * 0.7 
-                    ? 'bg-gradient-to-r from-red-500/90 to-rose-600/90' 
-                    : 'bg-gradient-to-r from-amber-500/90 to-orange-600/90'
-                } backdrop-blur-xl border border-white/20`}>
-                  <div className="relative z-10">
-                    <p className="text-base sm:text-2xl lg:text-3xl font-black text-white mb-2 sm:mb-4 leading-tight">
-                      {statusCounts.critical} de {STORES.length} tiendas críticas ({'<'}70%)
-                    </p>
-                    <p className="text-sm sm:text-base lg:text-lg text-white/90 mb-3 sm:mb-6 font-medium">
-                      {statusCounts.critical >= STORES.length * 0.7 
-                        ? 'Acción inmediata requerida'
-                        : 'Requiere atención urgente'
-                      }
-                    </p>
-                    <button
-                      onClick={() => {
-                        const el = document.getElementById('stores-table');
-                        el?.scrollIntoView({ behavior: 'smooth' });
-                      }}
-                      className="text-xs sm:text-sm font-bold text-white underline"
-                    >
-                      Ver tiendas →
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
+
 
             {/* Panel de Estado del Planner */}
             <div className="mb-8 sm:mb-12 lg:mb-20">
