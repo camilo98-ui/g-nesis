@@ -1,8 +1,11 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, Medal, Award, Crown, Receipt, Zap, Star, Flame, Sparkles, Calendar, ChevronRight, X, TrendingUp, Target, Gift, BarChart3 } from 'lucide-react';
+import { Trophy, Medal, Award, Crown, Receipt, Zap, Star, Flame, Sparkles, Calendar, ChevronRight, X, TrendingUp, Target, Gift, BarChart3, Search } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Input } from "@/components/ui/input";
+import { base44 } from '@/api/base44Client';
+import { useQuery } from '@tanstack/react-query';
 import ScoreBreakdown from './ScoreBreakdown';
 import LevelBadge from './LevelBadge';
 import TrafficLight from './TrafficLight';
@@ -49,12 +52,36 @@ export default function CashierRankingCard({
   level = 'Rookie',
   levelColor = 'gray',
   expanded = false,
-  onToggle = null
+  onToggle = null,
+  storeId = ''
 }) {
   const [isExpanded, setIsExpanded] = React.useState(expanded);
   const [showDetailModal, setShowDetailModal] = React.useState(false);
+  const [searchQuery, setSearchQuery] = React.useState('');
   const isTopThree = rank <= 3;
   const rankStyle = RANK_STYLES[rank];
+
+  // Obtener todos los cajeros de la tienda
+  const { data: allStoreCashiers = [] } = useQuery({
+    queryKey: ['cashiers', storeId],
+    queryFn: () => base44.entities.Cashier.filter({ store_id: storeId }),
+    enabled: showDetailModal && !!storeId
+  });
+
+  // Obtener todos los registros de la tienda
+  const { data: allStoreRecords = [] } = useQuery({
+    queryKey: ['shiftRecords', storeId],
+    queryFn: () => base44.entities.ShiftRecord.filter({ store_id: storeId }),
+    enabled: showDetailModal && !!storeId
+  });
+
+  // Filtrar cajeros por búsqueda
+  const filteredCashiers = React.useMemo(() => {
+    if (!searchQuery) return allStoreCashiers;
+    return allStoreCashiers.filter(c => 
+      c.name?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [allStoreCashiers, searchQuery]);
   
   const formatCurrency = (val) => {
     return new Intl.NumberFormat('es-CO', { 
@@ -460,6 +487,67 @@ export default function CashierRankingCard({
               {/* Content */}
               <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
                 <div className="space-y-6">
+                  {/* Buscador de Cajeros */}
+                  <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <Input
+                        placeholder="Buscar cajero..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-10 bg-slate-800/50 border-slate-600 text-white placeholder:text-slate-400"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Listado de Cajeros Filtrados */}
+                  <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                    <h4 className="text-lg font-bold text-white mb-4">Cajeros de la Tienda ({filteredCashiers.length})</h4>
+                    <div className="space-y-2 max-h-60 overflow-y-auto">
+                      {filteredCashiers.map((c, idx) => {
+                        // Calcular stats de este cajero
+                        const cashierRecords = allStoreRecords.filter(r => r.cashier_id === c.id);
+                        const totalSales = cashierRecords.reduce((sum, r) => sum + (r.sales || 0), 0);
+                        const totalTransactions = cashierRecords.reduce((sum, r) => sum + (r.transactions || 0), 0);
+                        const avgTicketCashier = totalTransactions > 0 ? totalSales / totalTransactions : 0;
+                        
+                        return (
+                          <motion.div
+                            key={c.id}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: idx * 0.05 }}
+                            className="flex items-center gap-3 p-3 bg-slate-800/50 rounded-lg border border-slate-700/50 hover:border-pink-500/30 transition-all"
+                          >
+                            <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-pink-100 to-rose-200 flex-shrink-0">
+                              {c.photo_url ? (
+                                <img src={c.photo_url} alt={c.name} className="w-full h-full object-cover" />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-fuchsia-600 font-bold text-lg">
+                                  {c.name?.charAt(0)}
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-bold text-white text-sm truncate">{c.name}</p>
+                              <p className="text-xs text-slate-400">{c.position || 'Cajero'}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-sm font-bold text-emerald-400">{formatCurrency(totalSales)}</p>
+                              <p className="text-xs text-slate-400">{totalTransactions} trx</p>
+                            </div>
+                          </motion.div>
+                        );
+                      })}
+                      {filteredCashiers.length === 0 && (
+                        <div className="text-center py-8 text-slate-400">
+                          <Search className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                          <p className="text-sm">No se encontraron cajeros</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
                   {/* Score General y Nivel */}
                   {rankType === 'best' && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

@@ -595,6 +595,7 @@ export default function Rankings() {
                       levelColor={item.levelColor}
                       rankType="best"
                       delay={index * 0.05}
+                      storeId={selectedStore}
                     />
                   ))
                 ) : (
@@ -712,6 +713,7 @@ export default function Rankings() {
                       suggestedSales={item.totalSuggested}
                       rankType="sales"
                       delay={index * 0.05}
+                      storeId={selectedStore}
                     />
                   ))
                 ) : (
@@ -766,6 +768,7 @@ export default function Rankings() {
                       avgTicket={item.avgTicket}
                       rankType="ticket"
                       delay={index * 0.05}
+                      storeId={selectedStore}
                     />
                   ))
                 ) : (
@@ -819,6 +822,7 @@ export default function Rankings() {
                       suggestedSales={item.totalSuggested}
                       rankType="suggested"
                       delay={index * 0.05}
+                      storeId={selectedStore}
                     />
                   ))
                 ) : (
