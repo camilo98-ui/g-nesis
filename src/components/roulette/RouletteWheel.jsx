@@ -152,6 +152,14 @@ export default function RouletteWheel({ onResult, disabled, awardType = 'tienda'
           }}
         >
           <svg viewBox="0 0 100 100" className="w-full h-full">
+            <defs>
+              <style>
+                {`
+                  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@600;700&display=swap');
+                  text { font-family: 'Inter', sans-serif; }
+                `}
+              </style>
+            </defs>
             {PRIZES.map((prize, index) => {
               const segmentAngle = 360 / PRIZES.length;
               const startAngle = (index * segmentAngle - 90) * (Math.PI / 180);
@@ -162,9 +170,45 @@ export default function RouletteWheel({ onResult, disabled, awardType = 'tienda'
               const y2 = 50 + 50 * Math.sin(endAngle);
               const largeArc = segmentAngle > 180 ? 1 : 0;
               const midAngle = (startAngle + endAngle) / 2;
-              const textX = 50 + 30 * Math.cos(midAngle);
-              const textY = 50 + 30 * Math.sin(midAngle);
+              
+              // Posición más cerca del borde exterior para mejor legibilidad
+              const textRadius = 35;
+              const textX = 50 + textRadius * Math.cos(midAngle);
+              const textY = 50 + textRadius * Math.sin(midAngle);
               const textRotation = (midAngle * 180 / Math.PI) + 90;
+              
+              // Calcular luminosidad del color para determinar si usar texto claro u oscuro
+              const hexToRgb = (hex) => {
+                const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                return result ? {
+                  r: parseInt(result[1], 16),
+                  g: parseInt(result[2], 16),
+                  b: parseInt(result[3], 16)
+                } : null;
+              };
+              
+              const rgb = hexToRgb(prize.color);
+              const luminance = rgb ? (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b) / 255 : 0.5;
+              const textColor = luminance > 0.6 ? '#1f2937' : '#ffffff';
+              
+              // Ajustar tamaño del texto según longitud del nombre
+              const nameLength = prize.name.length;
+              let fontSize = 3;
+              if (nameLength > 20) fontSize = 2.2;
+              else if (nameLength > 15) fontSize = 2.5;
+              else if (nameLength > 10) fontSize = 2.8;
+              
+              // Dividir texto en dos líneas si es muy largo
+              const words = prize.name.split(' ');
+              const shouldSplit = nameLength > 15 && words.length > 1;
+              let line1 = prize.name;
+              let line2 = '';
+              
+              if (shouldSplit) {
+                const mid = Math.ceil(words.length / 2);
+                line1 = words.slice(0, mid).join(' ');
+                line2 = words.slice(mid).join(' ');
+              }
 
               return (
                 <g key={prize.id}>
@@ -172,17 +216,25 @@ export default function RouletteWheel({ onResult, disabled, awardType = 'tienda'
                     d={`M 50 50 L ${x1} ${y1} A 50 50 0 ${largeArc} 1 ${x2} ${y2} Z`}
                     fill={prize.color}
                   />
-                  <text
-                    x={textX}
-                    y={textY}
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                    transform={`rotate(${textRotation} ${textX} ${textY})`}
-                    fill="#1f2937"
-                  >
-                    <tspan x={textX} fontSize="5" dy="-2">{prize.emoji}</tspan>
-                    <tspan x={textX} fontSize="2" fontWeight="900" dy="3">{prize.name}</tspan>
-                  </text>
+                  <g transform={`rotate(${textRotation} ${textX} ${textY})`}>
+                    <text
+                      x={textX}
+                      y={textY}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      fill={textColor}
+                    >
+                      <tspan x={textX} fontSize="4" dy="-3.5">{prize.emoji}</tspan>
+                      {shouldSplit ? (
+                        <>
+                          <tspan x={textX} fontSize={fontSize} fontWeight="700" dy="3.5">{line1}</tspan>
+                          <tspan x={textX} fontSize={fontSize} fontWeight="700" dy="3.2">{line2}</tspan>
+                        </>
+                      ) : (
+                        <tspan x={textX} fontSize={fontSize} fontWeight="700" dy="3.5">{line1}</tspan>
+                      )}
+                    </text>
+                  </g>
                 </g>
               );
             })}
