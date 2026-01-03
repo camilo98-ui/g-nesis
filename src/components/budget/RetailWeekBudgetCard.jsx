@@ -1380,7 +1380,54 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                       </div>
                     )}
 
-                    {selectedMetric === 'weekly-projection' && (
+                    {selectedMetric === 'weekly-projection' && (() => {
+                      const now = new Date();
+                      const monthStart = startOfMonth(now);
+                      const monthEnd = endOfMonth(now);
+                      const weeks = eachWeekOfInterval({ start: monthStart, end: monthEnd }, { weekStartsOn: 1 });
+                      
+                      // Proyectar presupuestos de semanas futuras basado en el ritmo actual
+                      const futureWeeks = weeks
+                        .map((weekStart, idx) => {
+                          const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
+                          const daysInWeek = eachDayOfInterval({ start: weekStart, end: weekEnd })
+                            .filter(d => d >= monthStart && d <= monthEnd);
+                          
+                          const weekBudget = daysInWeek.reduce((sum, day) => {
+                            const dayOfWeek = day.getDay();
+                            const avgByDayOfWeek = [0,0,0,0,0,0,0].map((_, i) => {
+                              const historicalForDay = dailySales.filter(s => {
+                                try {
+                                  const saleDate = parseISO(s.date);
+                                  return saleDate.getDay() === i && s.total_sales > 0;
+                                } catch {
+                                  return false;
+                                }
+                              });
+                              return historicalForDay.length > 0
+                                ? historicalForDay.reduce((s, sale) => s + sale.total_sales, 0) / historicalForDay.length
+                                : 0;
+                            });
+                            
+                            const totalWeeklyAvg = avgByDayOfWeek.reduce((a, b) => a + b, 0);
+                            if (totalWeeklyAvg === 0) return sum + (activeBudget.sales_budget * 1.15 / 30);
+                            
+                            const scaleFactor = (activeBudget.sales_budget * 1.15) / (totalWeeklyAvg * (30 / 7));
+                            return sum + (avgByDayOfWeek[dayOfWeek] * scaleFactor);
+                          }, 0);
+                          
+                          return {
+                            semana: `S${idx + 1}`,
+                            weekStart,
+                            weekEnd,
+                            presupuesto: weekBudget,
+                            isCurrent: idx + 1 === budgetData.currentWeekNumber,
+                            isFuture: idx + 1 > budgetData.currentWeekNumber
+                          };
+                        })
+                        .filter(w => w.isFuture);
+                      
+                      return (
                       <div>
                         <h4 className="text-sm md:text-base font-bold text-slate-900 mb-3">Proyección de Cierre Semanal</h4>
                         <div className="space-y-2 mb-3">
@@ -1417,8 +1464,44 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                             ? `🚀 Al ritmo actual, superarás la meta semanal en ${(budgetData.projectionCompliance - 100).toFixed(1)}%` 
                             : `⚠️ Necesitas acelerar el ritmo para alcanzar la meta semanal`}
                         </p>
+
+                        {/* Proyección de Semanas Futuras */}
+                        {futureWeeks.length > 0 && (
+                          <div className="mt-4 pt-4 border-t border-slate-200">
+                            <h5 className="text-sm font-bold text-slate-900 mb-2 flex items-center gap-2">
+                              <Calendar className="w-4 h-4 text-purple-500" />
+                              Presupuesto Proyectado Semanas Restantes
+                            </h5>
+                            <p className="text-xs text-slate-600 mb-3">
+                              Estimación basada en patrones históricos de cada día de la semana
+                            </p>
+                            <div className="space-y-2">
+                              {futureWeeks.map((week, idx) => (
+                                <motion.div
+                                  key={idx}
+                                  initial={{ opacity: 0, x: -10 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  transition={{ delay: idx * 0.1 }}
+                                  className="flex justify-between items-center p-2 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border border-purple-200/40"
+                                >
+                                  <div>
+                                    <span className="text-xs font-bold text-purple-700">{week.semana}</span>
+                                    <span className="text-[10px] text-purple-600 ml-2">
+                                      ({format(week.weekStart, 'dd MMM', { locale: es })} - {format(week.weekEnd, 'dd MMM', { locale: es })})
+                                    </span>
+                                  </div>
+                                  <span className="font-bold text-purple-900">{formatCurrency(week.presupuesto)}</span>
+                                </motion.div>
+                              ))}
+                            </div>
+                            <p className="text-[10px] text-slate-500 mt-2 text-center">
+                              💡 Estas son proyecciones estimadas basadas en histórico. Ajusta según estrategia comercial.
+                            </p>
+                          </div>
+                        )}
                       </div>
-                    )}
+                      );
+                    })()}
 
                     {selectedMetric === 'recovery-plan' && (
                       <div>
