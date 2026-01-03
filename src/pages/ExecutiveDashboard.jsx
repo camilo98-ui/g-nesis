@@ -889,7 +889,16 @@ Genera:
                         )}
                       />
                       <ReferenceLine y={0} stroke="#475569" strokeDasharray="3 3" />
-                      <Bar dataKey="sales" fill="url(#salesGradient)" radius={[6, 6, 0, 0]} maxBarSize={40} name="Venta" />
+                      <Bar 
+                        dataKey="sales" 
+                        fill="url(#salesGradient)" 
+                        radius={[6, 6, 0, 0]} 
+                        maxBarSize={40} 
+                        name="Venta"
+                        isAnimationActive={true}
+                        animationDuration={1500}
+                        animationEasing="ease-in-out"
+                      />
                       <Line 
                         type="monotone" 
                         dataKey="budget" 
@@ -933,12 +942,26 @@ Genera:
                     >
                       <defs>
                         <linearGradient id="barSalesGradient" x1="0" y1="0" x2="1" y2="0">
-                          <stop offset="0%" stopColor="#10b981" stopOpacity={0.8}/>
-                          <stop offset="100%" stopColor="#059669" stopOpacity={1}/>
+                          <stop offset="0%" stopColor="#10b981" stopOpacity={0.8}>
+                            <animate attributeName="stopOpacity" values="0.8;1;0.8" dur="2s" repeatCount="indefinite" />
+                          </stop>
+                          <stop offset="50%" stopColor="#34d399" stopOpacity={1}>
+                            <animate attributeName="offset" values="0.3;0.7;0.3" dur="2s" repeatCount="indefinite" />
+                          </stop>
+                          <stop offset="100%" stopColor="#059669" stopOpacity={1}>
+                            <animate attributeName="stopOpacity" values="1;0.8;1" dur="2s" repeatCount="indefinite" />
+                          </stop>
                         </linearGradient>
                         <linearGradient id="barBudgetGradient" x1="0" y1="0" x2="1" y2="0">
-                          <stop offset="0%" stopColor="#6366f1" stopOpacity={0.6}/>
-                          <stop offset="100%" stopColor="#4f46e5" stopOpacity={0.8}/>
+                          <stop offset="0%" stopColor="#6366f1" stopOpacity={0.6}>
+                            <animate attributeName="stopOpacity" values="0.6;0.8;0.6" dur="2s" repeatCount="indefinite" />
+                          </stop>
+                          <stop offset="50%" stopColor="#818cf8" stopOpacity={0.9}>
+                            <animate attributeName="offset" values="0.3;0.7;0.3" dur="2s" repeatCount="indefinite" />
+                          </stop>
+                          <stop offset="100%" stopColor="#4f46e5" stopOpacity={0.8}>
+                            <animate attributeName="stopOpacity" values="0.8;0.6;0.8" dur="2s" repeatCount="indefinite" />
+                          </stop>
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.15} horizontal={false} />
@@ -1010,8 +1033,15 @@ Genera:
                       <BarChart data={topStoresTrend} layout="vertical">
                         <defs>
                           <linearGradient id="greenBarGradient" x1="0" y1="0" x2="1" y2="0">
-                            <stop offset="0%" stopColor="#10b981" stopOpacity={0.8}/>
-                            <stop offset="100%" stopColor="#059669" stopOpacity={1}/>
+                            <stop offset="0%" stopColor="#10b981" stopOpacity={0.8}>
+                              <animate attributeName="stopOpacity" values="0.8;1;0.8" dur="2s" repeatCount="indefinite" />
+                            </stop>
+                            <stop offset="50%" stopColor="#34d399" stopOpacity={1}>
+                              <animate attributeName="offset" values="0.3;0.7;0.3" dur="2s" repeatCount="indefinite" />
+                            </stop>
+                            <stop offset="100%" stopColor="#059669" stopOpacity={1}>
+                              <animate attributeName="stopOpacity" values="1;0.8;1" dur="2s" repeatCount="indefinite" />
+                            </stop>
                           </linearGradient>
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.15} horizontal={false} />
