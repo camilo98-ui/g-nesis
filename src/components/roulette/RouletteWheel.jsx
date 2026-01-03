@@ -162,8 +162,8 @@ export default function RouletteWheel({ onResult, disabled, awardType = 'tienda'
               const y2 = 50 + 50 * Math.sin(endAngle);
               const largeArc = segmentAngle > 180 ? 1 : 0;
               const midAngle = (startAngle + endAngle) / 2;
-              const textX = 50 + 32 * Math.cos(midAngle);
-              const textY = 50 + 32 * Math.sin(midAngle);
+              const textX = 50 + 30 * Math.cos(midAngle);
+              const textY = 50 + 30 * Math.sin(midAngle);
               const textRotation = (midAngle * 180 / Math.PI) + 90;
 
               return (
@@ -178,12 +178,10 @@ export default function RouletteWheel({ onResult, disabled, awardType = 'tienda'
                     textAnchor="middle"
                     dominantBaseline="middle"
                     transform={`rotate(${textRotation} ${textX} ${textY})`}
-                    fontSize="8"
-                    fontWeight="bold"
                     fill="#1f2937"
                   >
-                    <tspan x={textX} dy="-3" fontSize="6">{prize.emoji}</tspan>
-                    <tspan x={textX} dy="4" fontSize="2.5" fontWeight="900">{prize.name}</tspan>
+                    <tspan x={textX} fontSize="5" dy="-2">{prize.emoji}</tspan>
+                    <tspan x={textX} fontSize="2" fontWeight="900" dy="3">{prize.name}</tspan>
                   </text>
                 </g>
               );
