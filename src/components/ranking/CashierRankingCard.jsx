@@ -1,6 +1,7 @@
 import React from 'react';
-import { motion } from 'framer-motion';
-import { Trophy, Medal, Award, Crown, Receipt, Zap, Star, Flame, Sparkles, Calendar, ChevronRight } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Trophy, Medal, Award, Crown, Receipt, Zap, Star, Flame, Sparkles, Calendar, ChevronRight, X, TrendingUp, Target, Gift, BarChart3 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import ScoreBreakdown from './ScoreBreakdown';
 import LevelBadge from './LevelBadge';
@@ -51,6 +52,7 @@ export default function CashierRankingCard({
   onToggle = null
 }) {
   const [isExpanded, setIsExpanded] = React.useState(expanded);
+  const [showDetailModal, setShowDetailModal] = React.useState(false);
   const isTopThree = rank <= 3;
   const rankStyle = RANK_STYLES[rank];
   
@@ -248,14 +250,23 @@ export default function CashierRankingCard({
               </motion.div>
             )}
             
-            {/* Botón expandir */}
-            <motion.div
-              animate={{ rotate: isExpanded ? 90 : 0 }}
-              transition={{ duration: 0.3 }}
-              className="ml-2"
+            {/* Botón ver detalle */}
+            <motion.button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowDetailModal(true);
+              }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className={`ml-2 px-3 py-2 rounded-lg flex items-center gap-1 text-xs font-bold transition-all ${
+                isTopThree 
+                  ? 'bg-white/60 hover:bg-white/80 text-gray-800' 
+                  : 'bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white shadow-lg'
+              }`}
             >
-              <ChevronRight className={`w-5 h-5 ${isTopThree ? 'text-gray-700' : 'text-gray-400'}`} />
-            </motion.div>
+              <BarChart3 className="w-4 h-4" />
+              Detalle
+            </motion.button>
           </div>
         </div>
 
@@ -374,6 +385,231 @@ export default function CashierRankingCard({
         >
           <Sparkles className="w-4 h-4 text-pink-400" />
         </motion.div>
+      )}
+
+      {/* Modal de Detalle del Cajero */}
+      {showDetailModal && createPortal(
+        <AnimatePresence>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[9999] flex items-center justify-center p-6"
+            onClick={() => setShowDetailModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-gradient-to-br from-slate-900 to-slate-950 rounded-2xl border border-white/20 max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl"
+            >
+              {/* Header */}
+              <div className={`p-6 border-b border-white/10 ${
+                isTopThree 
+                  ? `bg-gradient-to-r ${rankStyle.bg}` 
+                  : 'bg-gradient-to-r from-pink-500/20 to-rose-500/20'
+              }`}>
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-4">
+                    {/* Photo */}
+                    <div className={`w-16 h-16 rounded-2xl overflow-hidden flex items-center justify-center ${
+                      isTopThree 
+                        ? 'bg-white/40 backdrop-blur-sm ring-4 ring-white/60' 
+                        : 'bg-gradient-to-br from-pink-100 to-rose-200'
+                    }`}>
+                      {cashier.photo_url ? (
+                        <img src={cashier.photo_url} alt={cashier.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className={`text-3xl font-black ${isTopThree ? 'text-white' : 'text-fuchsia-600'}`}>
+                          {cashier.name?.charAt(0) || '?'}
+                        </span>
+                      )}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-3 mb-1">
+                        <h3 className={`text-2xl font-black ${isTopThree ? 'text-gray-900' : 'text-white'}`}>
+                          {cashier.name}
+                        </h3>
+                        <span className={`px-3 py-1 rounded-full text-sm font-bold ${
+                          isTopThree 
+                            ? 'bg-white/60 text-gray-900' 
+                            : 'bg-white/10 text-white'
+                        }`}>
+                          {isTopThree ? rankStyle.badge : `#${rank}`}
+                        </span>
+                      </div>
+                      <p className={`text-sm ${isTopThree ? 'text-gray-700' : 'text-slate-300'}`}>
+                        Posición {rank} en {rankType === 'sales' ? 'Ventas' : rankType === 'ticket' ? 'Ticket Promedio' : rankType === 'suggested' ? 'Sugeridos' : 'Ranking General'}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowDetailModal(false)}
+                    className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+                      isTopThree 
+                        ? 'bg-white/40 hover:bg-white/60' 
+                        : 'bg-white/10 hover:bg-white/20'
+                    }`}
+                  >
+                    <X className={`w-5 h-5 ${isTopThree ? 'text-gray-900' : 'text-white'}`} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
+                <div className="space-y-6">
+                  {/* Score General y Nivel */}
+                  {rankType === 'best' && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-xl p-6 border border-purple-500/20">
+                        <div className="flex items-center gap-2 mb-4">
+                          <Trophy className="w-5 h-5 text-purple-400" />
+                          <h4 className="text-lg font-bold text-white">Puntuación General</h4>
+                        </div>
+                        <p className="text-5xl font-black text-purple-400 mb-2">{overallScore.toFixed(0)}</p>
+                        <p className="text-sm text-slate-400">Puntos totales acumulados</p>
+                      </div>
+                      
+                      <div className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 rounded-xl p-6 border border-amber-500/20">
+                        <LevelBadge level={level} score={overallScore} />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Distribución de Puntos por Indicador */}
+                  <div className="bg-white/5 rounded-xl p-6 border border-white/10">
+                    <div className="flex items-center gap-2 mb-6">
+                      <BarChart3 className="w-5 h-5 text-blue-400" />
+                      <h4 className="text-lg font-bold text-white">Distribución de Puntos</h4>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      {/* Ventas */}
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <TrendingUp className="w-4 h-4 text-emerald-400" />
+                            <span className="text-sm font-bold text-white">Ventas</span>
+                          </div>
+                          <span className="text-lg font-black text-emerald-400">{salesScore.toFixed(0)} pts</span>
+                        </div>
+                        <div className="relative h-3 bg-slate-800/50 rounded-full overflow-hidden">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${(salesScore / overallScore) * 100}%` }}
+                            transition={{ duration: 1, ease: "easeOut" }}
+                            className="absolute inset-y-0 left-0 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-full"
+                          />
+                        </div>
+                        <div className="flex items-center justify-between mt-1">
+                          <span className="text-xs text-slate-400">{formatCurrency(sales)} en ventas</span>
+                          <span className="text-xs text-emerald-400">{((salesScore / overallScore) * 100).toFixed(1)}%</span>
+                        </div>
+                      </div>
+
+                      {/* Ticket Promedio */}
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <Target className="w-4 h-4 text-blue-400" />
+                            <span className="text-sm font-bold text-white">Ticket Promedio</span>
+                          </div>
+                          <span className="text-lg font-black text-blue-400">{ticketScore.toFixed(0)} pts</span>
+                        </div>
+                        <div className="relative h-3 bg-slate-800/50 rounded-full overflow-hidden">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${(ticketScore / overallScore) * 100}%` }}
+                            transition={{ duration: 1, ease: "easeOut", delay: 0.1 }}
+                            className="absolute inset-y-0 left-0 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full"
+                          />
+                        </div>
+                        <div className="flex items-center justify-between mt-1">
+                          <span className="text-xs text-slate-400">{formatCurrency(calculatedAvgTicket)} promedio</span>
+                          <span className="text-xs text-blue-400">{((ticketScore / overallScore) * 100).toFixed(1)}%</span>
+                        </div>
+                      </div>
+
+                      {/* Sugeridos */}
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <Gift className="w-4 h-4 text-pink-400" />
+                            <span className="text-sm font-bold text-white">Sugeridos</span>
+                          </div>
+                          <span className="text-lg font-black text-pink-400">{suggestedScore.toFixed(0)} pts</span>
+                        </div>
+                        <div className="relative h-3 bg-slate-800/50 rounded-full overflow-hidden">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${(suggestedScore / overallScore) * 100}%` }}
+                            transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
+                            className="absolute inset-y-0 left-0 bg-gradient-to-r from-pink-500 to-pink-600 rounded-full"
+                          />
+                        </div>
+                        <div className="flex items-center justify-between mt-1">
+                          <span className="text-xs text-slate-400">{suggestedSales} productos sugeridos</span>
+                          <span className="text-xs text-pink-400">{((suggestedScore / overallScore) * 100).toFixed(1)}%</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Métricas de Gestión */}
+                  <div className="bg-white/5 rounded-xl p-6 border border-white/10">
+                    <h4 className="text-lg font-bold text-white mb-4">Métricas de Gestión</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="bg-gradient-to-br from-emerald-500/10 to-green-500/10 rounded-lg p-4 border border-emerald-500/20">
+                        <p className="text-xs text-emerald-300 mb-1">Ventas Totales</p>
+                        <p className="text-xl font-black text-white">{formatCurrency(sales)}</p>
+                      </div>
+                      <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-lg p-4 border border-blue-500/20">
+                        <p className="text-xs text-blue-300 mb-1">Transacciones</p>
+                        <p className="text-xl font-black text-white">{transactions}</p>
+                      </div>
+                      <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-lg p-4 border border-purple-500/20">
+                        <p className="text-xs text-purple-300 mb-1">Tickets</p>
+                        <p className="text-xl font-black text-white">{tickets}</p>
+                      </div>
+                      <div className="bg-gradient-to-br from-pink-500/10 to-rose-500/10 rounded-lg p-4 border border-pink-500/20">
+                        <p className="text-xs text-pink-300 mb-1">Sugeridos</p>
+                        <p className="text-xl font-black text-white">{suggestedSales}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Semáforos de Desempeño */}
+                  <div className="bg-white/5 rounded-xl p-6 border border-white/10">
+                    <h4 className="text-lg font-bold text-white mb-4">Semáforo de Desempeño</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <TrafficLight
+                        value={sales}
+                        target={sales * 0.9}
+                        label="Ventas"
+                        type="sales"
+                      />
+                      <TrafficLight
+                        value={calculatedAvgTicket}
+                        target={calculatedAvgTicket * 0.85}
+                        label="Ticket"
+                        type="ticket"
+                      />
+                      <TrafficLight
+                        value={suggestedSales}
+                        target={suggestedSales * 0.8}
+                        label="Sugeridos"
+                        type="suggested"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        </AnimatePresence>,
+        document.body
       )}
     </motion.div>
     </TooltipProvider>
