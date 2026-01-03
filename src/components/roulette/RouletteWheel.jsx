@@ -31,17 +31,20 @@ export default function RouletteWheel({ onResult, disabled, awardType = 'tienda'
   const [suspensePhase, setSuspensePhase] = useState(0);
 
   const { data: configs = [], refetch } = useQuery({
-    queryKey: ['rouletteConfig', storeId],
+    queryKey: ['rouletteConfig', storeId, awardType],
     queryFn: async () => {
-      console.log('🔄 Fetching configs para store:', storeId);
-      const result = await base44.entities.RouletteConfig.filter({ store_id: storeId });
-      console.log('✅ Configs recibidas:', result);
+      console.log('🔄 Fetching configs para store:', storeId, 'awardType:', awardType);
+      const result = await base44.entities.RouletteConfig.filter({ 
+        store_id: storeId,
+        award_type: awardType,
+        is_active: true
+      });
+      console.log('✅ Configs activas recibidas:', result);
       return result;
     },
-    enabled: !!storeId,
+    enabled: !!storeId && !!awardType,
     staleTime: 0,
     gcTime: 0,
-    refetchInterval: 3000,
     refetchOnMount: 'always',
     refetchOnWindowFocus: true
   });
