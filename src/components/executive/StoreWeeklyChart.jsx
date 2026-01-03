@@ -136,45 +136,72 @@ export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRa
             tickLine={false}
           />
           <Tooltip
-            contentStyle={{
-              backgroundColor: '#1e293b',
-              border: '2px solid #475569',
-              borderRadius: '12px',
-              padding: '12px 16px',
-              boxShadow: '0 10px 30px rgba(0,0,0,0.3)'
-            }}
-            labelStyle={{ color: '#cbd5e1', fontSize: '12px', fontWeight: 'bold', marginBottom: '8px' }}
             content={({ active, payload }) => {
-              if (active && payload && payload.length) {
-                const data = payload[0].payload;
-                return (
-                  <div style={{ color: '#fff' }}>
-                    <div style={{ fontWeight: 'bold', marginBottom: '8px', color: '#cbd5e1' }}>
+              if (!active || !payload || payload.length === 0) return null;
+              
+              const data = payload[0].payload;
+              const gap = (data.presupuesto - data.venta) * 1000000;
+              
+              return (
+                <div className="bg-slate-900/98 backdrop-blur-xl border-2 border-white/20 rounded-xl p-4 shadow-2xl max-w-xs">
+                  {/* Título */}
+                  <div className="border-b border-white/10 pb-2 mb-3">
+                    <p className="text-xs font-bold text-slate-300 uppercase tracking-wider">
                       {data.fullName}
-                    </div>
-                    <div style={{ color: data.colors.main, fontWeight: 'bold', marginBottom: '4px' }}>
-                      💰 Venta: {formatCurrency(data.venta * 1000000)}
-                    </div>
-                    <div style={{ color: '#6366f1', fontWeight: 'bold', marginBottom: '4px' }}>
-                      🎯 Meta: {formatCurrency(data.presupuesto * 1000000)}
-                    </div>
-                    <div style={{ 
-                      color: data.colors.main,
-                      fontWeight: 'bold',
-                      borderTop: '1px solid #475569',
-                      paddingTop: '6px',
-                      marginTop: '6px'
-                    }}>
-                      {data.cumplimiento >= 100 ? '✅' : data.cumplimiento >= 85 ? '🎯' : data.cumplimiento >= 70 ? '⚠️' : '❌'} Cumplimiento: {data.cumplimiento.toFixed(1)}%
-                    </div>
-                    <div style={{ fontSize: '10px', color: '#94a3b8', marginTop: '6px', fontStyle: 'italic' }}>
-                      Click para ver días de la semana
-                    </div>
+                    </p>
                   </div>
-                );
-              }
-              return null;
+
+                  {/* Valores principales */}
+                  <div className="space-y-1.5 mb-3 text-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-400">💰 Venta:</span>
+                      <span className="font-bold text-emerald-400">
+                        {formatCurrency(data.venta * 1000000)}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-400">🎯 Meta:</span>
+                      <span className="font-bold text-indigo-400">
+                        {formatCurrency(data.presupuesto * 1000000)}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-400">📊 Cumplimiento:</span>
+                      <span className={`font-bold ${
+                        data.cumplimiento >= 100 ? 'text-emerald-400' : 
+                        data.cumplimiento >= 85 ? 'text-amber-400' : 'text-red-400'
+                      }`}>
+                        {data.cumplimiento.toFixed(1)}%
+                      </span>
+                    </div>
+                    {gap !== 0 && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-400">{gap > 0 ? '⚠️ Gap:' : '✅ Exceso:'}</span>
+                        <span className={`font-bold ${gap > 0 ? 'text-red-400' : 'text-emerald-400'}`}>
+                          {formatCurrency(Math.abs(gap))}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Insight contextual */}
+                  <div className="border-t border-white/10 pt-3">
+                    <p className="text-[10px] font-bold text-blue-300 uppercase tracking-wider mb-1.5">
+                      💡 Acción
+                    </p>
+                    <p className="text-xs text-slate-200 leading-relaxed">
+                      {data.cumplimiento >= 100 
+                        ? 'Excelente desempeño. Click para ver detalle diario.' 
+                        : data.cumplimiento >= 85 
+                        ? 'Cerca de la meta. Click para analizar días críticos.'
+                        : 'Requiere atención. Click para plan de acción diario.'}
+                    </p>
+                  </div>
+                </div>
+              );
             }}
+            cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+            wrapperStyle={{ outline: 'none' }}
           />
           <Bar 
             dataKey="venta" 
