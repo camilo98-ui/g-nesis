@@ -782,42 +782,42 @@ Genera:
                   </div>
                   <div className="grid grid-cols-3 gap-1">
                     <motion.div 
-                      initial={{ scaleY: 0, opacity: 0 }}
-                      animate={{ scaleY: 1, opacity: 1 }}
-                      transition={{ duration: 0.6, delay: 0.3 }}
+                      initial={{ scaleX: 0, opacity: 0 }}
+                      animate={{ scaleX: 1, opacity: 1 }}
+                      transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
                       className="bg-emerald-500/20 rounded py-1 text-center relative overflow-hidden">
                       <motion.div
-                        className="absolute inset-0 bg-gradient-to-t from-emerald-400/20 to-transparent"
-                        animate={{ opacity: [0.3, 0.6, 0.3] }}
-                        transition={{ duration: 2, repeat: Infinity }}
+                        className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-400/40 to-transparent"
+                        animate={{ x: ['-100%', '200%'] }}
+                        transition={{ duration: 2.5, repeat: Infinity, ease: "linear" }}
                       />
                       <p className="text-xs font-bold text-emerald-400 relative z-10">
                         {storesAnalysis.filter(s => s.hasData && s.weekCompliance >= 90).length}
                       </p>
                     </motion.div>
                     <motion.div 
-                      initial={{ scaleY: 0, opacity: 0 }}
-                      animate={{ scaleY: 1, opacity: 1 }}
-                      transition={{ duration: 0.6, delay: 0.4 }}
+                      initial={{ scaleX: 0, opacity: 0 }}
+                      animate={{ scaleX: 1, opacity: 1 }}
+                      transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
                       className="bg-amber-500/20 rounded py-1 text-center relative overflow-hidden">
                       <motion.div
-                        className="absolute inset-0 bg-gradient-to-t from-amber-400/20 to-transparent"
-                        animate={{ opacity: [0.3, 0.6, 0.3] }}
-                        transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+                        className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-400/40 to-transparent"
+                        animate={{ x: ['-100%', '200%'] }}
+                        transition={{ duration: 2.5, repeat: Infinity, ease: "linear", delay: 0.5 }}
                       />
                       <p className="text-xs font-bold text-amber-400 relative z-10">
                         {storesAnalysis.filter(s => s.hasData && s.weekCompliance >= 70 && s.weekCompliance < 90).length}
                       </p>
                     </motion.div>
                     <motion.div 
-                      initial={{ scaleY: 0, opacity: 0 }}
-                      animate={{ scaleY: 1, opacity: 1 }}
-                      transition={{ duration: 0.6, delay: 0.5 }}
+                      initial={{ scaleX: 0, opacity: 0 }}
+                      animate={{ scaleX: 1, opacity: 1 }}
+                      transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
                       className="bg-red-500/20 rounded py-1 text-center relative overflow-hidden">
                       <motion.div
-                        className="absolute inset-0 bg-gradient-to-t from-red-400/20 to-transparent"
-                        animate={{ opacity: [0.3, 0.6, 0.3] }}
-                        transition={{ duration: 2, repeat: Infinity, delay: 1 }}
+                        className="absolute inset-0 bg-gradient-to-r from-transparent via-red-400/40 to-transparent"
+                        animate={{ x: ['-100%', '200%'] }}
+                        transition={{ duration: 2.5, repeat: Infinity, ease: "linear", delay: 1 }}
                       />
                       <p className="text-xs font-bold text-red-400 relative z-10">
                         {storesAnalysis.filter(s => s.hasData && s.weekCompliance < 70).length}
