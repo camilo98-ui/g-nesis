@@ -795,114 +795,98 @@ Genera:
                 </div>
               </div>
 
-              {/* Columna Centro - Gráfica Grande */}
+              {/* Columna Centro - Distribución de Ventas por Tienda */}
               <div className="col-span-12 lg:col-span-6">
                 <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl rounded-lg p-5 border border-white/10 h-full shadow-xl">
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <h3 className="text-base font-black text-white mb-1">Ventas vs Presupuesto Diario</h3>
-                      <p className="text-xs text-slate-400">
-                        Venta: {formatCurrency(dailySalesData.reduce((sum, d) => sum + (d.sales * 1000000), 0))} · 
-                        Meta: {formatCurrency(dailySalesData.reduce((sum, d) => sum + (d.budget * 1000000), 0))}
-                      </p>
+                      <h3 className="text-base font-black text-white mb-1">Distribución de Ventas por Tienda</h3>
+                      <p className="text-xs text-slate-400">Top tiendas por volumen de venta semanal</p>
                     </div>
-                    <button
-                      onClick={() => setShowZoneCharts(true)}
-                      className="text-xs px-3 py-1.5 rounded-lg bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 border border-blue-500/30 transition-all"
-                    >
-                      Análisis Completo →
-                    </button>
                   </div>
                   <ResponsiveContainer width="100%" height={300}>
-                    <ComposedChart data={dailySalesData}>
+                    <BarChart 
+                      data={
+                        storesAnalysis
+                          .filter(s => s.hasData)
+                          .sort((a, b) => b.weekTotalSales - a.weekTotalSales)
+                          .slice(0, 8)
+                          .map(s => ({
+                            name: s.name.substring(0, 10),
+                            venta: s.weekTotalSales / 1000000,
+                            meta: s.weeklyBudget / 1000000,
+                            participacion: ((s.weekTotalSales / zoneTotals.totalSales) * 100).toFixed(1),
+                            status: s.weekCompliance >= 90 ? 'positive' : s.weekCompliance >= 70 ? 'alert' : 'critical'
+                          }))
+                      }
+                    >
                       <defs>
-                        <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#10b981" stopOpacity={0.8}/>
-                          <stop offset="100%" stopColor="#059669" stopOpacity={0.6}/>
-                        </linearGradient>
-                        <linearGradient id="budgetGradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#6366f1" stopOpacity={0.6}/>
-                          <stop offset="100%" stopColor="#4f46e5" stopOpacity={0.4}/>
+                        <linearGradient id="ventaStoreGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#10b981" stopOpacity={0.9}/>
+                          <stop offset="100%" stopColor="#059669" stopOpacity={0.7}/>
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.15} vertical={false} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.2} vertical={false} />
                       <XAxis 
-                        dataKey="date" 
-                        stroke="#6b7280" 
-                        fontSize={11} 
+                        dataKey="name" 
+                        stroke="#9ca3af" 
+                        fontSize={10}
+                        angle={-35}
+                        textAnchor="end"
+                        height={70}
                         tickLine={false}
-                        axisLine={{ stroke: '#374151' }}
                       />
                       <YAxis 
-                        stroke="#6b7280" 
+                        stroke="#9ca3af" 
                         fontSize={11}
                         tickLine={false}
-                        axisLine={{ stroke: '#374151' }}
-                        tickFormatter={(value) => `$${value.toFixed(1)}M`}
+                        tickFormatter={(v) => `$${v.toFixed(0)}M`}
                       />
                       <Tooltip
                         contentStyle={{
                           backgroundColor: '#1e293b',
                           border: '2px solid #475569',
                           borderRadius: '12px',
-                          padding: '12px 16px',
-                          boxShadow: '0 10px 30px rgba(0,0,0,0.3)'
+                          padding: '12px'
                         }}
-                        labelStyle={{ color: '#cbd5e1', fontSize: '12px', fontWeight: 'bold', marginBottom: '8px' }}
                         formatter={(value, name, props) => {
-                          const { sales, budget, compliance } = props.payload;
-                          if (name === 'Venta') {
-                            return [
-                              <div key="sales-info" style={{ color: '#fff' }}>
-                                <div style={{ color: '#10b981', fontWeight: 'bold', marginBottom: '4px' }}>
-                                  💰 Venta: {formatCurrency(sales * 1000000)}
-                                </div>
-                                <div style={{ color: '#6366f1', fontWeight: 'bold', marginBottom: '4px' }}>
-                                  🎯 Meta: {formatCurrency(budget * 1000000)}
-                                </div>
-                                <div style={{ 
-                                  color: compliance >= 100 ? '#10b981' : compliance >= 85 ? '#fbbf24' : '#ef4444',
-                                  fontWeight: 'bold',
-                                  borderTop: '1px solid #475569',
-                                  paddingTop: '6px',
-                                  marginTop: '6px'
-                                }}>
-                                  {compliance >= 100 ? '✅' : compliance >= 85 ? '⚠️' : '❌'} Cumplimiento: {compliance.toFixed(1)}%
-                                </div>
-                              </div>,
-                              ''
-                            ];
-                          }
-                          return [formatCurrency(value * 1000000), name];
+                          return [
+                            <div key="store-tooltip" className="text-white">
+                              <div className="font-bold text-emerald-400 mb-2">{formatCurrency(value * 1000000)}</div>
+                              <div className="text-xs space-y-1">
+                                <div>Meta: {formatCurrency(props.payload.meta * 1000000)}</div>
+                                <div>Participación: {props.payload.participacion}% de la zona</div>
+                              </div>
+                            </div>,
+                            ''
+                          ];
                         }}
                       />
-                      <Legend
-                        wrapperStyle={{ paddingTop: '16px' }}
-                        content={() => (
-                          <div style={{ display: 'flex', justifyContent: 'center', gap: '24px', fontSize: '12px', fontWeight: '600' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              <div style={{ width: '14px', height: '14px', background: 'linear-gradient(to bottom, #10b981, #059669)', borderRadius: '3px' }}></div>
-                              <span style={{ color: '#10b981' }}>💰 Venta</span>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              <div style={{ width: '14px', height: '14px', background: 'linear-gradient(to bottom, #6366f1, #4f46e5)', borderRadius: '3px', opacity: 0.6 }}></div>
-                              <span style={{ color: '#6366f1' }}>🎯 Meta</span>
-                            </div>
-                          </div>
-                        )}
-                      />
-                      <ReferenceLine y={0} stroke="#475569" strokeDasharray="3 3" />
-                      <Bar dataKey="sales" fill="url(#salesGradient)" radius={[6, 6, 0, 0]} maxBarSize={40} name="Venta" />
+                      <Bar dataKey="venta" fill="url(#ventaStoreGradient)" radius={[6, 6, 0, 0]} maxBarSize={50}>
+                        {storesAnalysis
+                          .filter(s => s.hasData)
+                          .sort((a, b) => b.weekTotalSales - a.weekTotalSales)
+                          .slice(0, 8)
+                          .map((entry, index) => (
+                            <Cell 
+                              key={`cell-${index}`} 
+                              fill={
+                                entry.weekCompliance >= 100 ? '#10b981' :
+                                entry.weekCompliance >= 90 ? '#3b82f6' :
+                                entry.weekCompliance >= 70 ? '#f59e0b' : '#ef4444'
+                              }
+                            />
+                          ))}
+                      </Bar>
                       <Line 
                         type="monotone" 
-                        dataKey="budget" 
+                        dataKey="meta" 
                         stroke="#6366f1" 
-                        strokeWidth={3} 
-                        dot={{ fill: '#6366f1', r: 5, strokeWidth: 2, stroke: '#1e293b' }} 
-                        name="Meta"
-                        strokeDasharray="5 5"
+                        strokeWidth={2} 
+                        dot={{ fill: '#6366f1', r: 4 }} 
+                        strokeDasharray="4 4"
                       />
-                    </ComposedChart>
+                    </BarChart>
                   </ResponsiveContainer>
                 </div>
               </div>
