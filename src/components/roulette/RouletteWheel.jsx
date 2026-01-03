@@ -127,9 +127,9 @@ export default function RouletteWheel({ onResult, disabled, awardType = 'tienda'
           <div className="w-0 h-0 border-l-[20px] border-l-transparent border-r-[20px] border-r-transparent border-t-[35px] border-t-pink-500 filter drop-shadow-2xl" />
         </motion.div>
 
-        {/* Círculo de la ruleta */}
+        {/* Círculo de la ruleta - SVG */}
         <motion.div
-          className="w-full h-full rounded-full relative overflow-hidden border-[12px] border-white"
+          className="w-full h-full rounded-full relative border-[12px] border-white overflow-hidden"
           animate={{
             boxShadow: spinning 
               ? ['0 25px 50px -12px rgba(0, 0, 0, 0.25)', '0 25px 50px -12px rgba(236, 72, 153, 0.5)', '0 25px 50px -12px rgba(0, 0, 0, 0.25)']
@@ -142,49 +142,53 @@ export default function RouletteWheel({ onResult, disabled, awardType = 'tienda'
             transform: `rotate(${rotation}deg)`,
             transition: spinning 
               ? suspensePhase === 0 
-                ? 'transform 3s cubic-bezier(0.25, 0.46, 0.45, 0.94)' // Rápido inicial
+                ? 'transform 3s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
                 : suspensePhase === 1 
-                  ? 'transform 2.5s cubic-bezier(0.4, 0.0, 0.6, 1)' // Desaceleración
+                  ? 'transform 2.5s cubic-bezier(0.4, 0.0, 0.6, 1)'
                   : suspensePhase === 2
-                    ? 'transform 1s cubic-bezier(0.5, 0.0, 0.75, 0.0)' // Casi detiene
-                    : 'transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55)' // Rebote final
+                    ? 'transform 1s cubic-bezier(0.5, 0.0, 0.75, 0.0)'
+                    : 'transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55)'
               : 'none'
           }}
         >
-          {/* Segmentos */}
-          {PRIZES.map((prize, index) => {
-            const rotation = (360 / PRIZES.length) * index;
-            const segmentAngle = 360 / PRIZES.length;
-            return (
-              <div
-                key={prize.id}
-                className="absolute w-full h-full origin-center"
-                style={{
-                  transform: `rotate(${rotation}deg)`,
-                  clipPath: `polygon(50% 50%, 50% 0%, ${50 + Math.tan((Math.PI * 2) / (PRIZES.length * 2)) * 50}% 0%)`,
-                }}
-              >
-                <div 
-                  className="w-full h-full relative"
-                  style={{ background: prize.color }}
-                >
-                  <div 
-                    className="absolute left-1/2 top-16"
-                    style={{ 
-                      transform: `translateX(-50%) rotate(${segmentAngle / 2}deg)`,
-                      transformOrigin: 'center',
-                      width: '80px'
-                    }}
+          <svg viewBox="0 0 100 100" className="w-full h-full">
+            {PRIZES.map((prize, index) => {
+              const segmentAngle = 360 / PRIZES.length;
+              const startAngle = (index * segmentAngle - 90) * (Math.PI / 180);
+              const endAngle = ((index + 1) * segmentAngle - 90) * (Math.PI / 180);
+              const x1 = 50 + 50 * Math.cos(startAngle);
+              const y1 = 50 + 50 * Math.sin(startAngle);
+              const x2 = 50 + 50 * Math.cos(endAngle);
+              const y2 = 50 + 50 * Math.sin(endAngle);
+              const largeArc = segmentAngle > 180 ? 1 : 0;
+              const midAngle = (startAngle + endAngle) / 2;
+              const textX = 50 + 32 * Math.cos(midAngle);
+              const textY = 50 + 32 * Math.sin(midAngle);
+              const textRotation = (midAngle * 180 / Math.PI) + 90;
+
+              return (
+                <g key={prize.id}>
+                  <path
+                    d={`M 50 50 L ${x1} ${y1} A 50 50 0 ${largeArc} 1 ${x2} ${y2} Z`}
+                    fill={prize.color}
+                  />
+                  <text
+                    x={textX}
+                    y={textY}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    transform={`rotate(${textRotation} ${textX} ${textY})`}
+                    fontSize="8"
+                    fontWeight="bold"
+                    fill="#1f2937"
                   >
-                    <div className="text-2xl text-center mb-1">{prize.emoji}</div>
-                    <p className="text-[8px] font-extrabold text-gray-800 leading-tight text-center px-1">
-                      {prize.name}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+                    <tspan x={textX} dy="-3" fontSize="6">{prize.emoji}</tspan>
+                    <tspan x={textX} dy="4" fontSize="2.5" fontWeight="900">{prize.name}</tspan>
+                  </text>
+                </g>
+              );
+            })}
+          </svg>
 
           {/* Centro de la ruleta */}
           <motion.div 
