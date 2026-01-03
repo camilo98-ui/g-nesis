@@ -4,7 +4,14 @@ import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, Lightbulb } from
 
 export default function ChartInsight({ data, metric, formatCurrency, comparisonData = null }) {
   const insight = useMemo(() => {
-    if (!data || data.length === 0) return null;
+    if (!data || data.length === 0) {
+      return {
+        keyData: 'Sin datos disponibles',
+        behavior: 'No hay información para analizar en el período seleccionado.',
+        action: 'Verificar que existan registros de ventas para este período.',
+        status: 'critical'
+      };
+    }
 
     // Filtrar datos válidos (mayores a 0)
     const validData = data.filter(d => {
@@ -12,7 +19,14 @@ export default function ChartInsight({ data, metric, formatCurrency, comparisonD
       return value > 0;
     });
 
-    if (validData.length === 0) return null;
+    if (validData.length === 0) {
+      return {
+        keyData: 'No hay ventas registradas',
+        behavior: 'Todos los días del período muestran cero ventas, lo que indica ausencia total de operación o falla en carga de datos.',
+        action: 'URGENTE: Validar operación de la tienda y sistema de registro de ventas.',
+        status: 'critical'
+      };
+    }
 
     // Calcular promedio
     const values = validData.map(d => d[metric] || d.ventas || d.sales || 0);
