@@ -533,191 +533,178 @@ Genera:
         </div>
       </Link>
 
-      <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-12 py-6 sm:py-12 lg:py-16 relative z-10">
-        {/* Header - Responsive */}
-        <div className="mb-6 sm:mb-12 lg:mb-16">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="text-center sm:text-left w-full sm:w-auto">
-              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white mb-2 tracking-tight">
-                Bogotá Noroccidente
+      <div className="max-w-[1920px] mx-auto px-4 py-6 relative z-10">
+        {/* Header Compacto */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div>
+              <h1 className="text-2xl font-bold text-white mb-1">
+                {ZONE_NAME}
               </h1>
-              <p className="text-sm sm:text-base lg:text-lg text-slate-400 font-normal">
-                {format(new Date(), 'EEEE dd \'de\' MMMM')}
+              <p className="text-sm text-slate-400">
+                {format(new Date(), 'dd MMM yyyy')}
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
-              <div className="relative w-full sm:w-64">
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className="relative w-48">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <Input
                   placeholder="Buscar..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 h-10 text-sm bg-white/10 backdrop-blur-xl border-white/20 text-white placeholder:text-slate-400"
+                  className="pl-9 h-9 text-sm bg-white/10 backdrop-blur-xl border-white/20 text-white placeholder:text-slate-400"
                 />
               </div>
               <button
                 onClick={exportToExcel}
-                className="h-10 px-4 rounded-full bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30 flex items-center gap-2 text-white text-sm font-medium transition-all"
+                className="h-9 px-3 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30 flex items-center gap-2 text-white text-sm font-medium transition-all"
               >
                 <Download className="w-4 h-4" />
-                Excel
+                <span className="hidden sm:inline">Excel</span>
               </button>
-              <DateFilter 
-                dateRange={dateRange} 
-                onDateChange={setDateRange} 
-              />
               <button
                 onClick={() => setShowBudgetManager(true)}
-                className="h-10 px-4 rounded-full bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 flex items-center gap-2 text-white text-sm font-medium transition-all"
+                className="h-9 px-3 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 flex items-center gap-2 text-white text-sm font-medium transition-all"
               >
                 <Settings className="w-4 h-4" />
-                Presupuesto
               </button>
             </div>
           </div>
         </div>
 
         {isLoading ? (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-8">
-            {[1,2,3,4].map(i => (
-              <div key={i} className="bg-white/5 backdrop-blur-xl rounded-xl h-32 sm:h-48 animate-pulse" />
+          <div className="grid grid-cols-6 gap-4 mb-6">
+            {[1,2,3,4,5,6].map(i => (
+              <div key={i} className="bg-white/5 backdrop-blur-xl rounded-lg h-24 animate-pulse" />
             ))}
           </div>
         ) : (
           <>
-            {/* Botones de Análisis */}
-            <div className="mb-6 sm:mb-10 grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <button
-                onClick={() => setShowComparable(true)}
-                className="w-full rounded-xl p-4 sm:p-6 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-purple-500/20 backdrop-blur-xl border border-purple-500/40 hover:border-purple-400/60 transition-all"
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3 sm:gap-4">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
-                      <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                    </div>
-                    <div className="text-left">
-                      <h3 className="text-base sm:text-xl font-black text-white mb-0.5">Análisis Comparable</h3>
-                      <p className="text-slate-300 text-xs hidden sm:block">Compara periodos y tendencias</p>
-                    </div>
-                  </div>
-                  <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center border border-white/20">
-                    <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </div>
+            {/* Grid Principal Estilo Power BI */}
+            <div className="grid grid-cols-12 gap-4 mb-6">
+              {/* Columna Izquierda - KPIs Compactos */}
+              <div className="col-span-12 lg:col-span-2 grid grid-cols-2 lg:grid-cols-1 gap-4">
+                {/* KPI Cards Compactos */}
+                <div
+                  onClick={() => setSelectedKPIDetail('sales')}
+                  className="bg-white/5 backdrop-blur-xl rounded-lg p-4 border border-white/10 cursor-pointer hover:bg-white/10 transition-all"
+                >
+                  <p className="text-xs text-slate-400 mb-2">Venta Total</p>
+                  <p className="text-3xl font-black text-white mb-1 tabular-nums">{formatShort(zoneTotals.totalSales)}</p>
+                  <p className="text-xs text-emerald-400 font-semibold">{formatShort(zoneTotals.totalBudget)}</p>
                 </div>
-              </button>
 
-              <button
-                onClick={() => setShowZoneCharts(true)}
-                className="w-full rounded-xl p-4 sm:p-6 bg-gradient-to-r from-blue-500/20 via-cyan-500/20 to-blue-500/20 backdrop-blur-xl border border-blue-500/40 hover:border-blue-400/60 transition-all"
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3 sm:gap-4">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg">
-                      <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                    </div>
-                    <div className="text-left">
-                      <h3 className="text-base sm:text-xl font-black text-white mb-0.5">Gráficas de Zona</h3>
-                      <p className="text-slate-300 text-xs hidden sm:block">Análisis visual detallado</p>
-                    </div>
-                  </div>
-                  <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center border border-white/20">
-                    <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </div>
-                </div>
-              </button>
-            </div>
-
-            {/* KPIs - Grid Responsive */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 lg:gap-8 mb-8 sm:mb-12 lg:mb-20">
-              {/* Venta Total */}
-              <div
-                onClick={() => setSelectedKPIDetail('sales')}
-                className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 border border-white/20 cursor-pointer"
-              >
-                <div className="relative z-10">
-                  <p className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 sm:mb-4">💰 Venta Total</p>
-                  <p className="text-2xl sm:text-4xl lg:text-5xl font-black text-white mb-2 sm:mb-3 tracking-tight tabular-nums">
-                    {formatShort(zoneTotals.totalSales)}
-                  </p>
-                  <p className="text-[10px] sm:text-xs text-blue-300 font-semibold">Meta: {formatShort(zoneTotals.totalBudget)}</p>
-                </div>
-              </div>
-
-              {/* % Cumplimiento */}
-              <div
-                onClick={() => setSelectedKPIDetail('compliance')}
-                className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 border border-white/20 cursor-pointer"
-              >
-                <div className="relative z-10">
-                  <p className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 sm:mb-4">
-                    📊 Cumplimiento {currentZoneBudget ? 'vs Zona' : 'vs Tiendas'}
-                  </p>
-                  <p className={`text-3xl sm:text-5xl lg:text-7xl font-black mb-2 sm:mb-3 tracking-tight tabular-nums ${
-                    currentZoneBudget ? 
-                      ((zoneTotals.totalSales/currentZoneBudget.sales_budget)*100) >= 90 ? 'text-emerald-400' :
-                      ((zoneTotals.totalSales/currentZoneBudget.sales_budget)*100) >= 70 ? 'text-amber-400' : 'text-red-400'
-                    :
-                      ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 90 ? 'text-emerald-400' :
-                      ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 70 ? 'text-amber-400' : 'text-red-400'
+                <div
+                  onClick={() => setSelectedKPIDetail('compliance')}
+                  className="bg-white/5 backdrop-blur-xl rounded-lg p-4 border border-white/10 cursor-pointer hover:bg-white/10 transition-all"
+                >
+                  <p className="text-xs text-slate-400 mb-2">Cumplimiento</p>
+                  <p className={`text-4xl font-black mb-1 tabular-nums ${
+                    ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 90 ? 'text-emerald-400' : 
+                    ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 70 ? 'text-amber-400' : 'text-red-400'
                   }`}>
-                    {currentZoneBudget ? 
-                      ((zoneTotals.totalSales/currentZoneBudget.sales_budget)*100).toFixed(0) :
-                      ((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)
-                    }%
+                    {((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%
                   </p>
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-[10px] sm:text-xs">
-                      <span className="text-slate-400">Meta</span>
-                      <span className="text-emerald-400 font-bold">{statusCounts.positive}</span>
-                    </div>
-                    <div className="flex justify-between text-[10px] sm:text-xs">
-                      <span className="text-slate-400">Críticas</span>
-                      <span className="text-red-400 font-bold">{statusCounts.critical}</span>
-                    </div>
+                </div>
+
+                <div
+                  onClick={() => setSelectedKPIDetail('critical')}
+                  className="bg-white/5 backdrop-blur-xl rounded-lg p-4 border border-white/10 cursor-pointer hover:bg-white/10 transition-all"
+                >
+                  <p className="text-xs text-slate-400 mb-2">Críticas</p>
+                  <p className="text-4xl font-black text-red-400 mb-1 tabular-nums">{statusCounts.critical}</p>
+                  <p className="text-xs text-red-300 font-semibold">{Math.round((statusCounts.critical/STORES.length)*100)}%</p>
+                </div>
+
+                <div
+                  onClick={() => setSelectedKPIDetail('meta')}
+                  className="bg-white/5 backdrop-blur-xl rounded-lg p-4 border border-white/10 cursor-pointer hover:bg-white/10 transition-all"
+                >
+                  <p className="text-xs text-slate-400 mb-2">En Meta</p>
+                  <p className="text-4xl font-black text-emerald-400 mb-1 tabular-nums">{statusCounts.positive}</p>
+                  <p className="text-xs text-emerald-300 font-semibold">{Math.round((statusCounts.positive/STORES.length)*100)}%</p>
+                </div>
+              </div>
+
+              {/* Columna Centro - Gráfica Grande */}
+              <div className="col-span-12 lg:col-span-6">
+                <div className="bg-white/5 backdrop-blur-xl rounded-lg p-4 border border-white/10 h-full">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-sm font-bold text-white">Ventas por Día</h3>
+                    <button
+                      onClick={() => setShowZoneCharts(true)}
+                      className="text-xs text-slate-400 hover:text-white"
+                    >
+                      Ver más →
+                    </button>
+                  </div>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={dailySalesData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.2} />
+                      <XAxis dataKey="date" stroke="#9ca3af" fontSize={10} />
+                      <YAxis stroke="#9ca3af" fontSize={10} />
+                      <Bar dataKey="sales" radius={[4, 4, 0, 0]}>
+                        {dailySalesData.map((entry, index) => (
+                          <Cell 
+                            key={`cell-${index}`} 
+                            fill={index % 2 === 0 ? '#f59e0b' : '#10b981'} 
+                          />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              {/* Columna Derecha - Mix de Gráficas */}
+              <div className="col-span-12 lg:col-span-4 space-y-4">
+                {/* Distribución de Estado */}
+                <div className="bg-white/5 backdrop-blur-xl rounded-lg p-4 border border-white/10">
+                  <h3 className="text-sm font-bold text-white mb-3">Estado Tiendas</h3>
+                  <ResponsiveContainer width="100%" height={180}>
+                    <PieChart>
+                      <Pie
+                        data={statusDistributionData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={45}
+                        outerRadius={70}
+                        paddingAngle={3}
+                        dataKey="value"
+                      >
+                        {statusDistributionData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="flex justify-around mt-2">
+                    {statusDistributionData.map((item, i) => (
+                      <div key={i} className="text-center">
+                        <div className="flex items-center gap-1 justify-center mb-1">
+                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
+                          <span className="text-xs text-slate-400">{item.name}</span>
+                        </div>
+                        <p className="text-lg font-bold text-white">{item.value}</p>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              </div>
 
-              {/* Críticas */}
-              <div
-                onClick={() => setSelectedKPIDetail('critical')}
-                className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 border border-white/20 cursor-pointer"
-              >
-                <div className="relative z-10">
-                  <p className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 sm:mb-4">🔴 Críticas</p>
-                  <p className={`text-3xl sm:text-5xl lg:text-7xl font-black mb-2 sm:mb-3 tracking-tight tabular-nums ${
-                    statusCounts.critical > 0 ? 'text-red-400' : 'text-slate-600'
-                  }`}>
-                    {statusCounts.critical}
-                  </p>
-                  {statusCounts.critical > 0 && (
-                    <p className="text-[10px] sm:text-xs text-red-300 font-semibold">
-                      {Math.round((statusCounts.critical/STORES.length)*100)}% del total
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              {/* En Meta */}
-              <div
-                onClick={() => setSelectedKPIDetail('meta')}
-                className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 border border-white/20 cursor-pointer"
-              >
-                <div className="relative z-10">
-                  <p className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 sm:mb-4">🟢 En Meta</p>
-                  <p className="text-3xl sm:text-5xl lg:text-7xl font-black text-emerald-400 mb-2 sm:mb-3 tracking-tight tabular-nums">
-                    {statusCounts.positive}
-                  </p>
-                  <p className="text-[10px] sm:text-xs text-emerald-300 font-semibold">
-                    {Math.round((statusCounts.positive/STORES.length)*100)}% del total
-                  </p>
-                </div>
+                {/* Críticas - Barras */}
+                {criticalStoresData.length > 0 && (
+                  <div className="bg-white/5 backdrop-blur-xl rounded-lg p-4 border border-white/10">
+                    <h3 className="text-sm font-bold text-white mb-3">Tiendas Críticas</h3>
+                    <ResponsiveContainer width="100%" height={150}>
+                      <BarChart data={criticalStoresData} layout="vertical">
+                        <XAxis type="number" domain={[0, 100]} stroke="#9ca3af" fontSize={9} />
+                        <YAxis type="category" dataKey="name" stroke="#9ca3af" fontSize={9} width={60} />
+                        <Bar dataKey="value" fill="#ef4444" radius={[0, 4, 4, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
               </div>
             </div>
 
