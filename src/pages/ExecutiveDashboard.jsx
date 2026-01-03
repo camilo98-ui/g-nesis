@@ -6,12 +6,9 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { STORES, getDisplayName } from '@/components/StoreSelector';
 import DateFilter from '@/components/DateFilter';
-import { ArrowLeft, Search, TrendingUp, TrendingDown, Eye, Zap, Award, Brain, ArrowUpDown, ArrowUp, ArrowDown, BarChart3, Settings, X, Download, Filter, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Search, TrendingUp, TrendingDown, Eye, Zap, Award, Brain, ArrowUpDown, ArrowUp, ArrowDown, BarChart3, Settings, X, Download, Filter } from 'lucide-react';
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format, startOfMonth, eachDayOfInterval, startOfWeek, endOfWeek, parseISO, eachWeekOfInterval, addDays, isSameDay, isWithinInterval } from 'date-fns';
-import { es } from 'date-fns/locale';
 import ExecutiveStoreDetailModal from '../components/executive/ExecutiveStoreDetailModal';
 import KPIDetailModal from '../components/executive/KPIDetailModal';
 import ExecutiveComparable from '../components/executive/ExecutiveComparable';
@@ -24,19 +21,10 @@ export default function ExecutiveDashboard() {
   // Semana retail iniciando 29 de diciembre 2025
   const RETAIL_WEEK_START = new Date(2025, 11, 29); // 29 dic 2025
   
-  const [selectedWeeks, setSelectedWeeks] = useState([0]); // Array de índices de semanas
-
-  const dateRange = useMemo(() => {
-    if (selectedWeeks.length === 0) {
-      return { from: RETAIL_WEEK_START, to: addDays(RETAIL_WEEK_START, 6) };
-    }
-    const minWeek = Math.min(...selectedWeeks);
-    const maxWeek = Math.max(...selectedWeeks);
-    return {
-      from: addDays(RETAIL_WEEK_START, minWeek * 7),
-      to: addDays(RETAIL_WEEK_START, (maxWeek + 1) * 7 - 1)
-    };
-  }, [selectedWeeks]);
+  const [dateRange, setDateRange] = useState({ 
+    from: RETAIL_WEEK_START, 
+    to: addDays(RETAIL_WEEK_START, 6) // Primera semana
+  });
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStoreDetail, setSelectedStoreDetail] = useState(null);
   const [aiInsights, setAiInsights] = useState(null);
@@ -88,6 +76,13 @@ export default function ExecutiveDashboard() {
     const monthStart = startOfMonth(now);
     const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
     const daysInMonth = monthEnd.getDate();
+
+    // Debug inicial
+    console.log('🔍 INICIO ANÁLISIS:', {
+      weekRange: `${format(currentWeekStart, 'yyyy-MM-dd')} a ${format(currentWeekEnd, 'yyyy-MM-dd')}`,
+      totalSalesRecords: allDailySales.length,
+      sampleDates: allDailySales.slice(0, 3).map(s => ({ store: s.store_id, date: s.date, sales: s.total_sales }))
+    });
 
     return STORES.map(store => {
       // Filtrar ventas de esta tienda
@@ -151,7 +146,20 @@ export default function ExecutiveDashboard() {
       const weekSales = storeSales.filter(s => {
         try {
           const saleDate = parseISO(s.date);
-          return isWithinInterval(saleDate, { start: currentWeekStart, end: currentWeekEnd });
+          const isInRange = isWithinInterval(saleDate, { start: currentWeekStart, end: currentWeekEnd });
+          
+          // Debug temporal
+          if (store.code === 'BTA 11' && isInRange) {
+            console.log('✅ Venta encontrada en semana:', {
+              store: store.code,
+              date: s.date,
+              sales: s.total_sales,
+              weekStart: currentWeekStart.toISOString(),
+              weekEnd: currentWeekEnd.toISOString()
+            });
+          }
+          
+          return isInRange;
         } catch (error) {
           console.error('Error parseando fecha:', s.date, error);
           return false;
@@ -161,6 +169,17 @@ export default function ExecutiveDashboard() {
       const weekTotalSales = weekSales.reduce((sum, s) => sum + (s.total_sales || 0), 0);
       const weekTotalTransactions = weekSales.reduce((sum, s) => sum + (s.total_transactions || 0), 0);
       const weekAvgTicket = weekTotalTransactions > 0 ? weekTotalSales / weekTotalTransactions : 0;
+      
+      // Debug temporal para primera tienda
+      if (store.code === 'BTA 11') {
+        console.log('📊 Análisis BTA 11:', {
+          weekSalesCount: weekSales.length,
+          weekTotalSales,
+          weekTotalTransactions,
+          allSalesCount: storeSales.length,
+          dateRange: `${currentWeekStart.toISOString().split('T')[0]} a ${currentWeekEnd.toISOString().split('T')[0]}`
+        });
+      }
 
       // VENTAS DEL MES
       const monthSales = storeSales.filter(s => {
@@ -587,68 +606,27 @@ Genera:
             </div>
 
             <div className="flex items-center gap-2 flex-wrap">
-              {/* Filtro de Semanas Retail - Multi Select */}
+              {/* Filtro de Semanas Retail */}
               <div className="flex items-center gap-2 bg-white/10 backdrop-blur-xl rounded-lg px-3 py-2 border border-white/20">
                 <Filter className="w-4 h-4 text-blue-400" />
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <button className="bg-transparent text-white text-sm font-medium outline-none cursor-pointer hover:text-blue-300 transition-colors">
-                      {selectedWeeks.length === 1 
-                        ? `Semana ${selectedWeeks[0] + 1}` 
-                        : `${selectedWeeks.length} semanas`} ({format(dateRange.from, 'dd MMM')} - {format(dateRange.to, 'dd MMM')})
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-80 bg-slate-900 border-slate-700">
-                    <div className="space-y-2">
-                      <p className="text-xs text-slate-400 font-semibold mb-2">Selecciona semanas (múltiples)</p>
-                      {Array.from({ length: 8 }, (_, i) => {
-                        const weekStart = addDays(RETAIL_WEEK_START, i * 7);
-                        const weekEnd = addDays(weekStart, 6);
-                        const isSelected = selectedWeeks.includes(i);
-                        return (
-                          <button
-                            key={i}
-                            onClick={() => {
-                              if (isSelected) {
-                                setSelectedWeeks(prev => prev.filter(w => w !== i));
-                              } else {
-                                setSelectedWeeks(prev => [...prev, i].sort((a, b) => a - b));
-                              }
-                            }}
-                            className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                              isSelected 
-                                ? 'bg-blue-500/20 text-blue-300 border border-blue-500/40' 
-                                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-                            }`}
-                          >
-                            <span className="flex items-center gap-2">
-                              {isSelected && <CheckCircle className="w-4 h-4" />}
-                              Semana {i + 1}: {format(weekStart, 'dd MMM')} - {format(weekEnd, 'dd MMM')}
-                            </span>
-                          </button>
-                        );
-                      })}
-                      <div className="pt-2 border-t border-slate-700 flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => setSelectedWeeks([0, 1, 2, 3])}
-                          className="flex-1 text-xs"
-                        >
-                          Primeras 4
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => setSelectedWeeks([0])}
-                          className="flex-1 text-xs"
-                        >
-                          Limpiar
-                        </Button>
-                      </div>
-                    </div>
-                  </PopoverContent>
-                </Popover>
+                <select
+                  value={`${format(dateRange.from, 'yyyy-MM-dd')}`}
+                  onChange={(e) => {
+                    const startDate = new Date(e.target.value);
+                    setDateRange({ from: startDate, to: addDays(startDate, 6) });
+                  }}
+                  className="bg-transparent text-white text-sm font-medium outline-none cursor-pointer"
+                >
+                  {Array.from({ length: 8 }, (_, i) => {
+                    const weekStart = addDays(RETAIL_WEEK_START, i * 7);
+                    const weekEnd = addDays(weekStart, 6);
+                    return (
+                      <option key={i} value={format(weekStart, 'yyyy-MM-dd')} className="bg-slate-900">
+                        Semana {i + 1} ({format(weekStart, 'dd MMM')} - {format(weekEnd, 'dd MMM')})
+                      </option>
+                    );
+                  })}
+                </select>
               </div>
 
               <div className="relative w-48">
@@ -685,119 +663,78 @@ Genera:
           </div>
         ) : (
           <>
-            {/* Métricas de la Semana Seleccionada */}
+            {/* Nueva Sección: Métricas Semanales */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
               <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-xl rounded-lg p-4 border border-blue-500/20">
-                <p className="text-xs text-blue-300 mb-2">Venta Semana</p>
-                <p className="text-3xl font-black text-white mb-1">{formatShort(zoneTotals.totalSales)}</p>
-                <p className={`text-xs font-semibold ${
-                  ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 100 ? 'text-emerald-400' :
-                  ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 70 ? 'text-amber-400' : 'text-red-400'
-                }`}>
-                  {((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}% del PPT
-                </p>
+                <p className="text-xs text-blue-300 mb-2">Transacciones</p>
+                <p className="text-3xl font-black text-white mb-1">{zoneTotals.totalTransactions.toLocaleString()}</p>
+                <p className="text-xs text-slate-400">Total semana</p>
               </div>
               <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-xl rounded-lg p-4 border border-purple-500/20">
-                <p className="text-xs text-purple-300 mb-2">Proyección Semana</p>
-                <p className="text-3xl font-black text-white mb-1">{formatShort(zoneTotals.totalProjection)}</p>
-                <p className={`text-xs font-semibold ${
-                  ((zoneTotals.totalProjection/zoneTotals.totalBudget)*100) >= 100 ? 'text-emerald-400' :
-                  ((zoneTotals.totalProjection/zoneTotals.totalBudget)*100) >= 85 ? 'text-amber-400' : 'text-red-400'
-                }`}>
-                  {((zoneTotals.totalProjection/zoneTotals.totalBudget)*100).toFixed(0)}% proyectado
-                </p>
+                <p className="text-xs text-purple-300 mb-2">Ticket Promedio</p>
+                <p className="text-3xl font-black text-white mb-1">{formatCurrency(zoneTotals.totalSales / zoneTotals.totalTransactions || 0)}</p>
+                <p className="text-xs text-slate-400">Por transacción</p>
               </div>
               <div className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 backdrop-blur-xl rounded-lg p-4 border border-amber-500/20">
-                <p className="text-xs text-amber-300 mb-2">Ticket Promedio</p>
-                <p className="text-3xl font-black text-white mb-1">{formatCurrency(zoneTotals.totalSales / zoneTotals.totalTransactions || 0)}</p>
-                <p className="text-xs text-slate-400">Trans: {zoneTotals.totalTransactions.toLocaleString()}</p>
+                <p className="text-xs text-amber-300 mb-2">Venta Promedio</p>
+                <p className="text-3xl font-black text-white mb-1">{formatShort(zoneTotals.totalSales / STORES.length)}</p>
+                <p className="text-xs text-slate-400">Por tienda</p>
               </div>
               <div className="bg-gradient-to-br from-rose-500/10 to-red-500/10 backdrop-blur-xl rounded-lg p-4 border border-rose-500/20">
-                <p className="text-xs text-rose-300 mb-2">Gap Semanal</p>
+                <p className="text-xs text-rose-300 mb-2">Gap Total</p>
                 <p className="text-3xl font-black text-white mb-1">{formatShort(Math.abs(zoneTotals.totalBudget - zoneTotals.totalSales))}</p>
-                <p className="text-xs text-slate-400">PPT: {formatShort(zoneTotals.totalBudget)}</p>
+                <p className="text-xs text-slate-400">Por cerrar</p>
               </div>
             </div>
 
             {/* Grid Principal Estilo Power BI */}
             <div className="grid grid-cols-12 gap-4 mb-6">
-              {/* Columna Izquierda - Mini Dashboard */}
-              <div className="col-span-12 lg:col-span-2">
-                <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl rounded-lg p-4 border border-white/10 h-full">
-                  <h3 className="text-sm font-black text-white mb-4">Resumen de Zona</h3>
-                  
-                  {/* Cumplimiento General */}
-                  <div className="mb-4 pb-4 border-b border-white/10">
-                    <p className="text-xs text-slate-400 mb-2">Cumplimiento</p>
-                    <p className={`text-5xl font-black mb-2 tabular-nums ${
-                      ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 90 ? 'text-emerald-400' : 
-                      ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 70 ? 'text-amber-400' : 'text-red-400'
-                    }`}>
-                      {((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%
-                    </p>
-                    <div className="w-full bg-slate-700/30 rounded-full h-2">
-                      <div 
-                        className={`h-2 rounded-full transition-all ${
-                          ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 90 ? 'bg-emerald-400' : 
-                          ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 70 ? 'bg-amber-400' : 'bg-red-400'
-                        }`}
-                        style={{ width: `${Math.min(((zoneTotals.totalSales/zoneTotals.totalBudget)*100), 100)}%` }}
-                      />
-                    </div>
-                  </div>
+              {/* Columna Izquierda - KPIs Compactos */}
+              <div className="col-span-12 lg:col-span-2 grid grid-cols-2 lg:grid-cols-1 gap-4">
+                {/* KPI Cards Compactos */}
+                <div
+                  onClick={() => setSelectedKPIDetail('sales')}
+                  className="bg-white/5 backdrop-blur-xl rounded-lg p-4 border border-white/10 cursor-pointer hover:bg-white/10 transition-all"
+                >
+                  <p className="text-xs text-slate-400 mb-2">Venta Total</p>
+                  <p className="text-3xl font-black text-white mb-1 tabular-nums">{formatShort(zoneTotals.totalSales)}</p>
+                  <p className="text-xs text-emerald-400 font-semibold">{formatShort(zoneTotals.totalBudget)}</p>
+                </div>
 
-                  {/* Mini Gráfica de Tendencia */}
-                  <div className="mb-4">
-                    <p className="text-xs text-slate-400 mb-3">Tendencia Diaria</p>
-                    <ResponsiveContainer width="100%" height={120}>
-                      <AreaChart data={dailySalesData}>
-                        <defs>
-                          <linearGradient id="miniAreaGradient" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#10b981" stopOpacity={0.6}/>
-                            <stop offset="100%" stopColor="#10b981" stopOpacity={0.1}/>
-                          </linearGradient>
-                        </defs>
-                        <Area 
-                          type="monotone" 
-                          dataKey="compliance" 
-                          stroke="#10b981" 
-                          strokeWidth={2}
-                          fill="url(#miniAreaGradient)" 
-                        />
-                        <ReferenceLine y={100} stroke="#6366f1" strokeDasharray="3 3" strokeWidth={1} />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  </div>
+                <div
+                  onClick={() => setSelectedKPIDetail('compliance')}
+                  className="bg-white/5 backdrop-blur-xl rounded-lg p-4 border border-white/10 cursor-pointer hover:bg-white/10 transition-all"
+                >
+                  <p className="text-xs text-slate-400 mb-2">Cumplimiento</p>
+                  <p className={`text-4xl font-black mb-1 tabular-nums ${
+                    ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 90 ? 'text-emerald-400' : 
+                    ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 70 ? 'text-amber-400' : 'text-red-400'
+                  }`}>
+                    {((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%
+                  </p>
+                </div>
 
-                  {/* Estado de Tiendas */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-emerald-400" />
-                        <span className="text-xs text-slate-300">En Meta</span>
-                      </div>
-                      <span className="text-sm font-bold text-white">{statusCounts.positive}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-amber-400" />
-                        <span className="text-xs text-slate-300">Alerta</span>
-                      </div>
-                      <span className="text-sm font-bold text-white">{statusCounts.negative}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-red-400" />
-                        <span className="text-xs text-slate-300">Críticas</span>
-                      </div>
-                      <span className="text-sm font-bold text-white">{statusCounts.critical}</span>
-                    </div>
-                  </div>
+                <div
+                  onClick={() => setSelectedKPIDetail('critical')}
+                  className="bg-white/5 backdrop-blur-xl rounded-lg p-4 border border-white/10 cursor-pointer hover:bg-white/10 transition-all"
+                >
+                  <p className="text-xs text-slate-400 mb-2">Críticas</p>
+                  <p className="text-4xl font-black text-red-400 mb-1 tabular-nums">{statusCounts.critical}</p>
+                  <p className="text-xs text-red-300 font-semibold">{Math.round((statusCounts.critical/STORES.length)*100)}%</p>
+                </div>
+
+                <div
+                  onClick={() => setSelectedKPIDetail('meta')}
+                  className="bg-white/5 backdrop-blur-xl rounded-lg p-4 border border-white/10 cursor-pointer hover:bg-white/10 transition-all"
+                >
+                  <p className="text-xs text-slate-400 mb-2">En Meta</p>
+                  <p className="text-4xl font-black text-emerald-400 mb-1 tabular-nums">{statusCounts.positive}</p>
+                  <p className="text-xs text-emerald-300 font-semibold">{Math.round((statusCounts.positive/STORES.length)*100)}%</p>
                 </div>
               </div>
 
-              {/* Columna Centro - Ventas Diarias */}
-              <div className="col-span-12 lg:col-span-5">
+              {/* Columna Centro - Gráfica Grande */}
+              <div className="col-span-12 lg:col-span-6">
                 <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl rounded-lg p-5 border border-white/10 h-full shadow-xl">
                   <div className="flex items-center justify-between mb-4">
                     <div>
@@ -908,350 +845,113 @@ Genera:
                 </div>
               </div>
 
-              {/* Columna Derecha - Proyecciones */}
-              <div className="col-span-12 lg:col-span-5 space-y-4">
-                {/* Proyección Mensual vs PPT */}
-                <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-xl rounded-lg p-5 border border-blue-500/20 shadow-xl">
+              {/* Columna Derecha - Mix de Gráficas */}
+              <div className="col-span-12 lg:col-span-4 space-y-4">
+                {/* Distribución de Estado - Mejorado */}
+                <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl rounded-lg p-5 border border-white/10 shadow-xl">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-base font-black text-white">Proyección Mensual vs PPT</h3>
-                    <span className="text-xs px-2 py-1 rounded bg-blue-500/20 text-blue-300 font-bold">
-                      {format(new Date(), 'MMM yyyy', { locale: es })}
-                    </span>
+                    <h3 className="text-base font-black text-white">Estado de Tiendas</h3>
+                    <span className="text-xs px-2 py-1 rounded bg-white/10 text-slate-300">{STORES.length} Total</span>
                   </div>
-                  
-                  <ResponsiveContainer width="100%" height={180}>
-                    <ComposedChart 
-                      data={[
-                        { 
-                          name: 'Presupuesto',
-                          value: storesAnalysis.filter(s => s.hasData).reduce((sum, s) => sum + s.salesBudget, 0) / 1000000,
-                          fill: '#6366f1'
-                        },
-                        { 
-                          name: 'Venta Actual',
-                          value: storesAnalysis.filter(s => s.hasData).reduce((sum, s) => sum + s.monthTotalSales, 0) / 1000000,
-                          fill: '#10b981'
-                        },
-                        { 
-                          name: 'Proyección',
-                          value: storesAnalysis.filter(s => s.hasData).reduce((sum, s) => sum + s.monthProjection, 0) / 1000000,
-                          fill: '#a855f7'
-                        }
-                      ]}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.15} vertical={false} />
-                      <XAxis 
-                        dataKey="name" 
-                        stroke="#9ca3af" 
-                        fontSize={10}
-                        tickLine={false}
-                      />
-                      <YAxis 
-                        stroke="#9ca3af" 
-                        fontSize={10}
-                        tickLine={false}
-                        tickFormatter={(v) => `$${v.toFixed(0)}M`}
-                      />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: '#1e293b',
-                          border: '2px solid #475569',
-                          borderRadius: '8px',
-                          padding: '12px'
-                        }}
-                        formatter={(value) => [`${formatCurrency(value * 1000000)}`, '']}
-                      />
-                      <Bar dataKey="value" radius={[6, 6, 0, 0]} maxBarSize={80}>
-                        {[0, 1, 2].map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={index === 0 ? '#6366f1' : index === 1 ? '#10b981' : '#a855f7'} />
-                        ))}
-                      </Bar>
-                    </ComposedChart>
-                  </ResponsiveContainer>
-
-                  <div className="grid grid-cols-3 gap-3 mt-4">
-                    <div className="bg-white/5 rounded-lg p-3 border border-white/10">
-                      <p className="text-xs text-slate-400 mb-1">PPT</p>
-                      <p className="text-lg font-black text-blue-400">{formatShort(storesAnalysis.filter(s => s.hasData).reduce((sum, s) => sum + s.salesBudget, 0))}</p>
-                    </div>
-                    <div className="bg-white/5 rounded-lg p-3 border border-white/10">
-                      <p className="text-xs text-slate-400 mb-1">Actual</p>
-                      <p className="text-lg font-black text-emerald-400">{formatShort(storesAnalysis.filter(s => s.hasData).reduce((sum, s) => sum + s.monthTotalSales, 0))}</p>
-                    </div>
-                    <div className="bg-white/5 rounded-lg p-3 border border-white/10">
-                      <p className="text-xs text-slate-400 mb-1">% Proy</p>
-                      <p className={`text-lg font-black ${
-                        ((storesAnalysis.filter(s => s.hasData).reduce((sum, s) => sum + s.monthProjection, 0) / storesAnalysis.filter(s => s.hasData).reduce((sum, s) => sum + s.salesBudget, 0)) * 100) >= 100 
-                          ? 'text-emerald-400' 
-                          : ((storesAnalysis.filter(s => s.hasData).reduce((sum, s) => sum + s.monthProjection, 0) / storesAnalysis.filter(s => s.hasData).reduce((sum, s) => sum + s.salesBudget, 0)) * 100) >= 85 
-                            ? 'text-amber-400' 
-                            : 'text-red-400'
-                      }`}>
-                        {((storesAnalysis.filter(s => s.hasData).reduce((sum, s) => sum + s.monthProjection, 0) / storesAnalysis.filter(s => s.hasData).reduce((sum, s) => sum + s.salesBudget, 0)) * 100).toFixed(0)}%
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Tiendas Críticas - Impactante */}
-                <div className="bg-gradient-to-br from-red-500/10 to-rose-600/10 backdrop-blur-xl rounded-lg p-5 border border-red-500/20 shadow-xl">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-base font-black text-white">🚨 Alerta: Tiendas Críticas</h3>
-                    <span className="text-xs px-2 py-1 rounded bg-red-500/20 text-red-300 font-bold">
-                      {storesAnalysis.filter(s => s.status === 'critical').length} Críticas
-                    </span>
-                  </div>
-                  
-                  {storesAnalysis.filter(s => s.status === 'critical').length > 0 ? (
-                    <>
-                      <ResponsiveContainer width="100%" height={160}>
-                        <BarChart 
-                          data={
-                            storesAnalysis
-                              .filter(s => s.status === 'critical')
-                              .sort((a, b) => a.salesCompliance - b.salesCompliance)
-                              .slice(0, 5)
-                              .map(s => ({
-                                name: s.name.substring(0, 10),
-                                compliance: s.salesCompliance,
-                                gap: s.gap / 1000000
-                              }))
-                          } 
-                          layout="vertical"
+                  <div className="relative">
+                    <ResponsiveContainer width="100%" height={200}>
+                      <PieChart>
+                        <defs>
+                          <linearGradient id="greenGradient" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stopColor="#10b981" />
+                            <stop offset="100%" stopColor="#059669" />
+                          </linearGradient>
+                          <linearGradient id="orangeGradient" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stopColor="#f59e0b" />
+                            <stop offset="100%" stopColor="#d97706" />
+                          </linearGradient>
+                          <linearGradient id="redGradient" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stopColor="#ef4444" />
+                            <stop offset="100%" stopColor="#dc2626" />
+                          </linearGradient>
+                        </defs>
+                        <Pie
+                          data={statusDistributionData}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={55}
+                          outerRadius={85}
+                          paddingAngle={4}
+                          dataKey="value"
                         >
-                          <defs>
-                            <linearGradient id="criticalGradient" x1="0" y1="0" x2="1" y2="0">
-                              <stop offset="0%" stopColor="#ef4444" stopOpacity={0.8}/>
-                              <stop offset="100%" stopColor="#dc2626" stopOpacity={1}/>
-                            </linearGradient>
-                          </defs>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.15} horizontal={false} />
-                          <XAxis 
-                            type="number" 
-                            domain={[0, 100]} 
-                            stroke="#9ca3af" 
-                            fontSize={10}
-                            tickLine={false}
-                            tickFormatter={(v) => `${v}%`}
-                          />
-                          <YAxis 
-                            type="category" 
-                            dataKey="name" 
-                            stroke="#9ca3af" 
-                            fontSize={10} 
-                            width={70}
-                            tickLine={false}
-                          />
-                          <Tooltip
-                            contentStyle={{
-                              backgroundColor: '#1e293b',
-                              border: '2px solid #dc2626',
-                              borderRadius: '8px',
-                              padding: '12px'
-                            }}
-                            formatter={(value, name, props) => {
-                              return [
-                                <div key="tooltip" className="text-white">
-                                  <div className="font-bold text-red-400 mb-2">{value.toFixed(1)}% Cumplimiento</div>
-                                  <div className="text-xs text-slate-300">
-                                    Brecha: {formatCurrency(props.payload.gap * 1000000)}
-                                  </div>
-                                </div>,
-                                ''
-                              ];
-                            }}
-                          />
-                          <Bar dataKey="compliance" fill="url(#criticalGradient)" radius={[0, 6, 6, 0]} maxBarSize={20} />
-                          <ReferenceLine x={70} stroke="#fbbf24" strokeDasharray="3 3" strokeWidth={2} />
-                        </BarChart>
-                      </ResponsiveContainer>
-                      <div className="mt-4 pt-4 border-t border-red-500/20">
-                        <div className="flex justify-between items-center">
-                          <span className="text-xs text-red-300">Brecha Total:</span>
-                          <span className="text-lg font-black text-red-400">
-                            {formatShort(storesAnalysis.filter(s => s.status === 'critical').reduce((sum, s) => sum + Math.max(0, s.gap), 0))}
-                          </span>
-                        </div>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="h-[160px] flex items-center justify-center">
+                          {statusDistributionData.map((entry, index) => (
+                            <Cell 
+                              key={`cell-${index}`} 
+                              fill={index === 0 ? 'url(#greenGradient)' : index === 1 ? 'url(#orangeGradient)' : 'url(#redGradient)'} 
+                            />
+                          ))}
+                        </Pie>
+                      </PieChart>
+                    </ResponsiveContainer>
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                       <div className="text-center">
-                        <div className="text-5xl mb-3">✅</div>
-                        <p className="text-emerald-400 font-bold">¡Sin tiendas críticas!</p>
-                        <p className="text-xs text-slate-400 mt-2">Todas las tiendas están por encima del 70%</p>
+                        <p className="text-3xl font-black text-white">{STORES.length}</p>
+                        <p className="text-xs text-slate-400">Tiendas</p>
                       </div>
                     </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Segunda Fila - Top y Proyección Semanal */}
-            <div className="grid grid-cols-12 gap-4 mb-6">
-              {/* Top 5 Mejores Tiendas */}
-              <div className="col-span-12 lg:col-span-6">
-                <div className="bg-gradient-to-br from-emerald-500/10 to-green-600/10 backdrop-blur-xl rounded-lg p-5 border border-emerald-500/20 shadow-xl">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-base font-black text-white">Top 5 Mejores Tiendas</h3>
-                    <span className="text-xs px-2 py-1 rounded bg-emerald-500/20 text-emerald-300 font-bold">Score Global</span>
                   </div>
-                  <ResponsiveContainer width="100%" height={140}>
-                    <BarChart 
-                      data={
-                        storesAnalysis
-                          .filter(s => s.hasData)
-                          .map(s => {
-                            const zoneAvgTicket = zoneTotals.totalSales / zoneTotals.totalTransactions || 1;
-                            const ticketScore = (s.weekAvgTicket / zoneAvgTicket) * 100;
-                            const complianceScore = s.weekCompliance;
-                            const transactionScore = s.weekTotalTransactions > 0 ? Math.min((s.weekTotalTransactions / 500) * 100, 100) : 0;
-                            const score = (complianceScore * 0.5) + (ticketScore * 0.3) + (transactionScore * 0.2);
-                            return {
-                              name: s.name.substring(0, 8),
-                              score: score,
-                              compliance: s.weekCompliance.toFixed(0),
-                              ticket: formatCurrency(s.weekAvgTicket),
-                              transactions: s.weekTotalTransactions
-                            };
-                          })
-                          .sort((a, b) => b.score - a.score)
-                          .slice(0, 5)
-                      } 
-                      layout="vertical"
-                    >
-                      <defs>
-                        <linearGradient id="topStoresGradient" x1="0" y1="0" x2="1" y2="0">
-                          <stop offset="0%" stopColor="#10b981" stopOpacity={0.8}/>
-                          <stop offset="100%" stopColor="#059669" stopOpacity={1}/>
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.15} horizontal={false} />
-                      <XAxis 
-                        type="number" 
-                        domain={[0, 120]} 
-                        stroke="#9ca3af" 
-                        fontSize={10}
-                        tickLine={false}
-                        tickFormatter={(v) => `${v.toFixed(0)}`}
-                      />
-                      <YAxis 
-                        type="category" 
-                        dataKey="name" 
-                        stroke="#9ca3af" 
-                        fontSize={10} 
-                        width={70}
-                        tickLine={false}
-                      />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: '#1e293b',
-                          border: '2px solid #059669',
-                          borderRadius: '8px',
-                          padding: '12px'
-                        }}
-                        formatter={(value, name, props) => {
-                          return [
-                            <div key="tooltip" className="text-white">
-                              <div className="font-bold text-emerald-400 mb-2">Score: {value.toFixed(1)}</div>
-                              <div className="text-xs space-y-1">
-                                <div>Cumplimiento: {props.payload.compliance}%</div>
-                                <div>Ticket: {props.payload.ticket}</div>
-                                <div>Transacciones: {props.payload.transactions}</div>
-                              </div>
-                            </div>,
-                            ''
-                          ];
-                        }}
-                      />
-                      <Bar dataKey="score" fill="url(#topStoresGradient)" radius={[0, 6, 6, 0]} maxBarSize={20} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                  <div className="mt-3 pt-3 border-t border-emerald-500/20">
-                    <p className="text-[10px] text-slate-400 text-center">
-                      Score = Cumplimiento (50%) + Ticket vs Zona (30%) + Transacciones (20%)
-                    </p>
+                  <div className="grid grid-cols-3 gap-3 mt-4">
+                    {statusDistributionData.map((item, i) => (
+                      <div key={i} className="bg-white/5 rounded-lg p-3 text-center border border-white/10">
+                        <div className="w-3 h-3 rounded-full mx-auto mb-2" style={{ backgroundColor: item.color }} />
+                        <p className="text-2xl font-black text-white mb-1">{item.value}</p>
+                        <p className="text-[10px] text-slate-400 font-semibold">{item.name}</p>
+                        <p className="text-xs text-slate-500 mt-1">{Math.round((item.value/STORES.length)*100)}%</p>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              </div>
 
-              {/* Proyección Semanal */}
-              <div className="col-span-12 lg:col-span-6">
-                <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-xl rounded-lg p-5 border border-purple-500/20 shadow-xl">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-base font-black text-white">Proyección Semanal</h3>
-                    <span className="text-xs px-2 py-1 rounded bg-purple-500/20 text-purple-300 font-bold">
-                      {selectedWeeks.length === 1 ? `Sem ${selectedWeeks[0] + 1}` : `${selectedWeeks.length} sem`}
-                    </span>
-                  </div>
-                  
-                  {/* KPIs de Proyección */}
-                  <div className="grid grid-cols-2 gap-3 mb-4">
-                    <div className="bg-white/5 rounded-lg p-3 border border-white/10">
-                      <p className="text-xs text-slate-400 mb-1">Venta Real</p>
-                      <p className="text-xl font-black text-white">{formatShort(zoneTotals.totalSales)}</p>
+                {/* Top Performers - Nueva Gráfica */}
+                {topStoresTrend.length > 0 && (
+                  <div className="bg-gradient-to-br from-emerald-500/10 to-green-600/10 backdrop-blur-xl rounded-lg p-5 border border-emerald-500/20 shadow-xl">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-base font-black text-white">Top 5 Líderes</h3>
+                      <span className="text-xs px-2 py-1 rounded bg-emerald-500/20 text-emerald-300 font-bold">≥90%</span>
                     </div>
-                    <div className="bg-white/5 rounded-lg p-3 border border-white/10">
-                      <p className="text-xs text-slate-400 mb-1">Proyección</p>
-                      <p className="text-xl font-black text-emerald-400">{formatShort(zoneTotals.totalProjection)}</p>
-                    </div>
-                  </div>
-
-                  {/* Gráfica de Proyección */}
-                  <ResponsiveContainer width="100%" height={160}>
-                    <BarChart data={[
-                      { name: 'Meta', value: zoneTotals.totalBudget / 1000000, fill: '#6366f1' },
-                      { name: 'Real', value: zoneTotals.totalSales / 1000000, fill: '#10b981' },
-                      { name: 'Proy', value: zoneTotals.totalProjection / 1000000, fill: '#a855f7' }
-                    ]}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.15} vertical={false} />
-                      <XAxis 
-                        dataKey="name" 
-                        stroke="#9ca3af" 
-                        fontSize={10}
-                        tickLine={false}
-                      />
-                      <YAxis 
-                        stroke="#9ca3af" 
-                        fontSize={10}
-                        tickLine={false}
-                        tickFormatter={(v) => `$${v.toFixed(0)}M`}
-                      />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: '#1e293b',
-                          border: '2px solid #475569',
-                          borderRadius: '8px',
-                          padding: '8px'
-                        }}
-                        formatter={(value) => [`${formatCurrency(value * 1000000)}`, '']}
-                      />
-                      <Bar dataKey="value" radius={[6, 6, 0, 0]} maxBarSize={60}>
-                        {[0, 1, 2].map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={index === 0 ? '#6366f1' : index === 1 ? '#10b981' : '#a855f7'} />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-
-                  {/* Gap y Velocidad */}
-                  <div className="mt-4 pt-4 border-t border-purple-500/20 grid grid-cols-2 gap-3">
-                    <div>
-                      <p className="text-xs text-slate-400 mb-1">Gap vs Meta</p>
-                      <p className={`text-lg font-black ${
-                        zoneTotals.totalProjection >= zoneTotals.totalBudget ? 'text-emerald-400' : 'text-red-400'
-                      }`}>
-                        {formatShort(Math.abs(zoneTotals.totalBudget - zoneTotals.totalProjection))}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-slate-400 mb-1">Velocidad</p>
-                      <p className="text-lg font-black text-white">
-                        {formatShort(zoneTotals.totalSales / selectedWeeks.length)}/sem
-                      </p>
+                    <ResponsiveContainer width="100%" height={180}>
+                      <BarChart data={topStoresTrend} layout="vertical">
+                        <defs>
+                          <linearGradient id="greenBarGradient" x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="0%" stopColor="#10b981" stopOpacity={0.8}/>
+                            <stop offset="100%" stopColor="#059669" stopOpacity={1}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.15} horizontal={false} />
+                        <XAxis 
+                          type="number" 
+                          domain={[90, 130]} 
+                          stroke="#9ca3af" 
+                          fontSize={10}
+                          tickLine={false}
+                          tickFormatter={(v) => `${v}%`}
+                        />
+                        <YAxis 
+                          type="category" 
+                          dataKey="name" 
+                          stroke="#9ca3af" 
+                          fontSize={10} 
+                          width={70}
+                          tickLine={false}
+                        />
+                        <Bar dataKey="value" fill="url(#greenBarGradient)" radius={[0, 6, 6, 0]} maxBarSize={24} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                    <div className="mt-3 pt-3 border-t border-emerald-500/20">
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-emerald-300">Promedio Top:</span>
+                        <span className="text-sm font-bold text-emerald-400">
+                          {(topStoresTrend.reduce((sum, s) => sum + s.value, 0) / topStoresTrend.length).toFixed(1)}%
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
 
