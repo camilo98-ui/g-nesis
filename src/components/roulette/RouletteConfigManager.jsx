@@ -57,6 +57,8 @@ export default function RouletteConfigManager({ storeId }) {
 
   const saveMutation = useMutation({
     mutationFn: async () => {
+      console.log('💾 Guardando configuración:', { storeId, awardType, prizes });
+      
       const configData = {
         store_id: storeId,
         award_type: awardType,
@@ -66,20 +68,30 @@ export default function RouletteConfigManager({ storeId }) {
         is_active: true
       };
 
+      console.log('📦 Config data:', configData);
+
+      let result;
       if (activeConfig) {
-        return await base44.entities.RouletteConfig.update(activeConfig.id, configData);
+        console.log('✏️ Actualizando config existente:', activeConfig.id);
+        result = await base44.entities.RouletteConfig.update(activeConfig.id, configData);
       } else {
-        return await base44.entities.RouletteConfig.create(configData);
+        console.log('➕ Creando nueva config');
+        result = await base44.entities.RouletteConfig.create(configData);
       }
+      
+      console.log('✅ Guardado exitoso:', result);
+      return result;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('🎉 onSuccess ejecutado:', data);
       toast.success('✅ Configuración guardada exitosamente');
       queryClient.invalidateQueries(['rouletteConfig']);
+      queryClient.refetchQueries(['rouletteConfig']);
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 3000);
     },
     onError: (error) => {
-      console.error('Error al guardar configuración:', error);
+      console.error('❌ Error al guardar configuración:', error);
       toast.error(`❌ Error al guardar: ${error.message || 'Intenta de nuevo'}`);
     }
   });
