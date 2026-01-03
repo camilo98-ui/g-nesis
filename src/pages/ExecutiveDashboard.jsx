@@ -232,10 +232,10 @@ export default function ExecutiveDashboard() {
 
   const zoneTotals = useMemo(() => {
     const storesWithData = storesAnalysis.filter(s => s.hasData);
-    const totalSales = storesWithData.reduce((sum, s) => sum + s.totalSales, 0);
-    const totalBudget = storesWithData.reduce((sum, s) => sum + s.salesBudget, 0);
-    const totalProjection = storesWithData.reduce((sum, s) => sum + s.projection, 0);
-    const totalTransactions = storesWithData.reduce((sum, s) => sum + s.totalTransactions, 0);
+    const totalSales = storesWithData.reduce((sum, s) => sum + s.weekTotalSales, 0);
+    const totalBudget = storesWithData.reduce((sum, s) => sum + s.weeklyBudget, 0);
+    const totalProjection = storesWithData.reduce((sum, s) => sum + s.weekProjection, 0);
+    const totalTransactions = storesWithData.reduce((sum, s) => sum + s.weekTotalTransactions, 0);
     return { totalSales, totalBudget, totalProjection, totalTransactions };
   }, [storesAnalysis]);
 
