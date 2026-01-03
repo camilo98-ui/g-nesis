@@ -55,15 +55,23 @@ export default function RouletteWheel({ onResult, disabled, awardType = 'tienda'
   const activeConfig = configs.find(c => c.is_active && c.award_type === awardType);
   
   const PRIZES = React.useMemo(() => {
+    console.log('🎯 RouletteWheel - Configs:', configs);
+    console.log('🎯 RouletteWheel - Award Type:', awardType);
+    console.log('🎯 RouletteWheel - Active Config:', activeConfig);
+    
     if (activeConfig?.prizes) {
       try {
-        return JSON.parse(activeConfig.prizes);
-      } catch {
+        const parsed = JSON.parse(activeConfig.prizes);
+        console.log('✅ RouletteWheel - Premios parseados:', parsed);
+        return parsed;
+      } catch (e) {
+        console.error('❌ Error parseando premios:', e);
         return awardType === 'distrito' ? DEFAULT_PRIZES_DISTRITO : DEFAULT_PRIZES_TIENDA;
       }
     }
+    console.log('⚠️ No hay activeConfig.prizes, usando defaults');
     return awardType === 'distrito' ? DEFAULT_PRIZES_DISTRITO : DEFAULT_PRIZES_TIENDA;
-  }, [activeConfig, awardType]);
+  }, [activeConfig, awardType, configs]);
   
   const SPIN_DURATION = activeConfig?.spin_duration || 6500;
 
