@@ -154,6 +154,7 @@ export default function RouletteWheel({ onResult, disabled, awardType = 'tienda'
           {/* Segmentos */}
           {PRIZES.map((prize, index) => {
             const rotation = (360 / PRIZES.length) * index;
+            const segmentAngle = 360 / PRIZES.length;
             return (
               <div
                 key={prize.id}
@@ -164,15 +165,18 @@ export default function RouletteWheel({ onResult, disabled, awardType = 'tienda'
                 }}
               >
                 <div 
-                  className="w-full h-full flex items-start justify-center pt-8"
+                  className="w-full h-full flex flex-col items-center justify-start pt-10"
                   style={{ background: prize.color }}
                 >
                   <div 
-                    className="text-center max-w-[120px]"
-                    style={{ transform: `rotate(${360 / (PRIZES.length * 2)}deg)` }}
+                    className="flex flex-col items-center"
+                    style={{ 
+                      transform: `rotate(${segmentAngle / 2}deg)`,
+                      width: '100px'
+                    }}
                   >
-                    <div className="text-3xl mb-1">{prize.emoji}</div>
-                    <p className="text-[10px] font-bold text-gray-800 leading-tight px-1 break-words line-clamp-3">
+                    <div className="text-2xl mb-1">{prize.emoji}</div>
+                    <p className="text-[9px] font-bold text-gray-800 leading-[1.1] text-center break-words">
                       {prize.name}
                     </p>
                   </div>
