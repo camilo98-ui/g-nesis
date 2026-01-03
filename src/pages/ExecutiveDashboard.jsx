@@ -795,8 +795,8 @@ Genera:
                 </div>
               </div>
 
-              {/* Columna Centro - Gráfica Grande */}
-              <div className="col-span-12 lg:col-span-6">
+              {/* Columna Centro - Ventas Diarias */}
+              <div className="col-span-12 lg:col-span-5">
                 <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl rounded-lg p-5 border border-white/10 h-full shadow-xl">
                   <div className="flex items-center justify-between mb-4">
                     <div>
@@ -907,36 +907,37 @@ Genera:
                 </div>
               </div>
 
-              {/* Columna Derecha - Proyecciones y Análisis */}
-              <div className="col-span-12 lg:col-span-4 space-y-4">
-                {/* Proyección Semanal */}
-                <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-xl rounded-lg p-5 border border-purple-500/20 shadow-xl">
+              {/* Columna Derecha - Proyecciones */}
+              <div className="col-span-12 lg:col-span-5 space-y-4">
+                {/* Proyección Mensual vs PPT */}
+                <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-xl rounded-lg p-5 border border-blue-500/20 shadow-xl">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-base font-black text-white">Proyección Semanal</h3>
-                    <span className="text-xs px-2 py-1 rounded bg-purple-500/20 text-purple-300 font-bold">
-                      {selectedWeeks.length === 1 ? `Sem ${selectedWeeks[0] + 1}` : `${selectedWeeks.length} sem`}
+                    <h3 className="text-base font-black text-white">Proyección Mensual vs PPT</h3>
+                    <span className="text-xs px-2 py-1 rounded bg-blue-500/20 text-blue-300 font-bold">
+                      {format(new Date(), 'MMM yyyy', { locale: es })}
                     </span>
                   </div>
                   
-                  {/* KPIs de Proyección */}
-                  <div className="grid grid-cols-2 gap-3 mb-4">
-                    <div className="bg-white/5 rounded-lg p-3 border border-white/10">
-                      <p className="text-xs text-slate-400 mb-1">Venta Real</p>
-                      <p className="text-xl font-black text-white">{formatShort(zoneTotals.totalSales)}</p>
-                    </div>
-                    <div className="bg-white/5 rounded-lg p-3 border border-white/10">
-                      <p className="text-xs text-slate-400 mb-1">Proyección</p>
-                      <p className="text-xl font-black text-emerald-400">{formatShort(zoneTotals.totalProjection)}</p>
-                    </div>
-                  </div>
-
-                  {/* Gráfica de Proyección */}
-                  <ResponsiveContainer width="100%" height={160}>
-                    <BarChart data={[
-                      { name: 'Meta', value: zoneTotals.totalBudget / 1000000, fill: '#6366f1' },
-                      { name: 'Real', value: zoneTotals.totalSales / 1000000, fill: '#10b981' },
-                      { name: 'Proy', value: zoneTotals.totalProjection / 1000000, fill: '#a855f7' }
-                    ]}>
+                  <ResponsiveContainer width="100%" height={180}>
+                    <ComposedChart 
+                      data={[
+                        { 
+                          name: 'Presupuesto',
+                          value: storesAnalysis.filter(s => s.hasData).reduce((sum, s) => sum + s.salesBudget, 0) / 1000000,
+                          fill: '#6366f1'
+                        },
+                        { 
+                          name: 'Venta Actual',
+                          value: storesAnalysis.filter(s => s.hasData).reduce((sum, s) => sum + s.monthTotalSales, 0) / 1000000,
+                          fill: '#10b981'
+                        },
+                        { 
+                          name: 'Proyección',
+                          value: storesAnalysis.filter(s => s.hasData).reduce((sum, s) => sum + s.monthProjection, 0) / 1000000,
+                          fill: '#a855f7'
+                        }
+                      ]}
+                    >
                       <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.15} vertical={false} />
                       <XAxis 
                         dataKey="name" 
@@ -955,38 +956,140 @@ Genera:
                           backgroundColor: '#1e293b',
                           border: '2px solid #475569',
                           borderRadius: '8px',
-                          padding: '8px'
+                          padding: '12px'
                         }}
                         formatter={(value) => [`${formatCurrency(value * 1000000)}`, '']}
                       />
-                      <Bar dataKey="value" radius={[6, 6, 0, 0]} maxBarSize={60}>
+                      <Bar dataKey="value" radius={[6, 6, 0, 0]} maxBarSize={80}>
                         {[0, 1, 2].map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={index === 0 ? '#6366f1' : index === 1 ? '#10b981' : '#a855f7'} />
                         ))}
                       </Bar>
-                    </BarChart>
+                    </ComposedChart>
                   </ResponsiveContainer>
 
-                  {/* Gap y Velocidad */}
-                  <div className="mt-4 pt-4 border-t border-purple-500/20 grid grid-cols-2 gap-3">
-                    <div>
-                      <p className="text-xs text-slate-400 mb-1">Gap vs Meta</p>
-                      <p className={`text-lg font-black ${
-                        zoneTotals.totalProjection >= zoneTotals.totalBudget ? 'text-emerald-400' : 'text-red-400'
-                      }`}>
-                        {formatShort(Math.abs(zoneTotals.totalBudget - zoneTotals.totalProjection))}
-                      </p>
+                  <div className="grid grid-cols-3 gap-3 mt-4">
+                    <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+                      <p className="text-xs text-slate-400 mb-1">PPT</p>
+                      <p className="text-lg font-black text-blue-400">{formatShort(storesAnalysis.filter(s => s.hasData).reduce((sum, s) => sum + s.salesBudget, 0))}</p>
                     </div>
-                    <div>
-                      <p className="text-xs text-slate-400 mb-1">Velocidad</p>
-                      <p className="text-lg font-black text-white">
-                        {formatShort(zoneTotals.totalSales / selectedWeeks.length)}/sem
+                    <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+                      <p className="text-xs text-slate-400 mb-1">Actual</p>
+                      <p className="text-lg font-black text-emerald-400">{formatShort(storesAnalysis.filter(s => s.hasData).reduce((sum, s) => sum + s.monthTotalSales, 0))}</p>
+                    </div>
+                    <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+                      <p className="text-xs text-slate-400 mb-1">% Proy</p>
+                      <p className={`text-lg font-black ${
+                        ((storesAnalysis.filter(s => s.hasData).reduce((sum, s) => sum + s.monthProjection, 0) / storesAnalysis.filter(s => s.hasData).reduce((sum, s) => sum + s.salesBudget, 0)) * 100) >= 100 
+                          ? 'text-emerald-400' 
+                          : ((storesAnalysis.filter(s => s.hasData).reduce((sum, s) => sum + s.monthProjection, 0) / storesAnalysis.filter(s => s.hasData).reduce((sum, s) => sum + s.salesBudget, 0)) * 100) >= 85 
+                            ? 'text-amber-400' 
+                            : 'text-red-400'
+                      }`}>
+                        {((storesAnalysis.filter(s => s.hasData).reduce((sum, s) => sum + s.monthProjection, 0) / storesAnalysis.filter(s => s.hasData).reduce((sum, s) => sum + s.salesBudget, 0)) * 100).toFixed(0)}%
                       </p>
                     </div>
                   </div>
                 </div>
 
-                {/* Top 5 Mejores Tiendas */}
+                {/* Tiendas Críticas - Impactante */}
+                <div className="bg-gradient-to-br from-red-500/10 to-rose-600/10 backdrop-blur-xl rounded-lg p-5 border border-red-500/20 shadow-xl">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-base font-black text-white">🚨 Alerta: Tiendas Críticas</h3>
+                    <span className="text-xs px-2 py-1 rounded bg-red-500/20 text-red-300 font-bold">
+                      {storesAnalysis.filter(s => s.status === 'critical').length} Críticas
+                    </span>
+                  </div>
+                  
+                  {storesAnalysis.filter(s => s.status === 'critical').length > 0 ? (
+                    <>
+                      <ResponsiveContainer width="100%" height={160}>
+                        <BarChart 
+                          data={
+                            storesAnalysis
+                              .filter(s => s.status === 'critical')
+                              .sort((a, b) => a.salesCompliance - b.salesCompliance)
+                              .slice(0, 5)
+                              .map(s => ({
+                                name: s.name.substring(0, 10),
+                                compliance: s.salesCompliance,
+                                gap: s.gap / 1000000
+                              }))
+                          } 
+                          layout="vertical"
+                        >
+                          <defs>
+                            <linearGradient id="criticalGradient" x1="0" y1="0" x2="1" y2="0">
+                              <stop offset="0%" stopColor="#ef4444" stopOpacity={0.8}/>
+                              <stop offset="100%" stopColor="#dc2626" stopOpacity={1}/>
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.15} horizontal={false} />
+                          <XAxis 
+                            type="number" 
+                            domain={[0, 100]} 
+                            stroke="#9ca3af" 
+                            fontSize={10}
+                            tickLine={false}
+                            tickFormatter={(v) => `${v}%`}
+                          />
+                          <YAxis 
+                            type="category" 
+                            dataKey="name" 
+                            stroke="#9ca3af" 
+                            fontSize={10} 
+                            width={70}
+                            tickLine={false}
+                          />
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: '#1e293b',
+                              border: '2px solid #dc2626',
+                              borderRadius: '8px',
+                              padding: '12px'
+                            }}
+                            formatter={(value, name, props) => {
+                              return [
+                                <div key="tooltip" className="text-white">
+                                  <div className="font-bold text-red-400 mb-2">{value.toFixed(1)}% Cumplimiento</div>
+                                  <div className="text-xs text-slate-300">
+                                    Brecha: {formatCurrency(props.payload.gap * 1000000)}
+                                  </div>
+                                </div>,
+                                ''
+                              ];
+                            }}
+                          />
+                          <Bar dataKey="compliance" fill="url(#criticalGradient)" radius={[0, 6, 6, 0]} maxBarSize={20} />
+                          <ReferenceLine x={70} stroke="#fbbf24" strokeDasharray="3 3" strokeWidth={2} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                      <div className="mt-4 pt-4 border-t border-red-500/20">
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-red-300">Brecha Total:</span>
+                          <span className="text-lg font-black text-red-400">
+                            {formatShort(storesAnalysis.filter(s => s.status === 'critical').reduce((sum, s) => sum + Math.max(0, s.gap), 0))}
+                          </span>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="h-[160px] flex items-center justify-center">
+                      <div className="text-center">
+                        <div className="text-5xl mb-3">✅</div>
+                        <p className="text-emerald-400 font-bold">¡Sin tiendas críticas!</p>
+                        <p className="text-xs text-slate-400 mt-2">Todas las tiendas están por encima del 70%</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Segunda Fila - Top y Proyección Semanal */}
+            <div className="grid grid-cols-12 gap-4 mb-6">
+              {/* Top 5 Mejores Tiendas */}
+              <div className="col-span-12 lg:col-span-6">
                 <div className="bg-gradient-to-br from-emerald-500/10 to-green-600/10 backdrop-blur-xl rounded-lg p-5 border border-emerald-500/20 shadow-xl">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-base font-black text-white">Top 5 Mejores Tiendas</h3>
@@ -1067,6 +1170,85 @@ Genera:
                     <p className="text-[10px] text-slate-400 text-center">
                       Score = Cumplimiento (50%) + Ticket vs Zona (30%) + Transacciones (20%)
                     </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Proyección Semanal */}
+              <div className="col-span-12 lg:col-span-6">
+                <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-xl rounded-lg p-5 border border-purple-500/20 shadow-xl">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-base font-black text-white">Proyección Semanal</h3>
+                    <span className="text-xs px-2 py-1 rounded bg-purple-500/20 text-purple-300 font-bold">
+                      {selectedWeeks.length === 1 ? `Sem ${selectedWeeks[0] + 1}` : `${selectedWeeks.length} sem`}
+                    </span>
+                  </div>
+                  
+                  {/* KPIs de Proyección */}
+                  <div className="grid grid-cols-2 gap-3 mb-4">
+                    <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+                      <p className="text-xs text-slate-400 mb-1">Venta Real</p>
+                      <p className="text-xl font-black text-white">{formatShort(zoneTotals.totalSales)}</p>
+                    </div>
+                    <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+                      <p className="text-xs text-slate-400 mb-1">Proyección</p>
+                      <p className="text-xl font-black text-emerald-400">{formatShort(zoneTotals.totalProjection)}</p>
+                    </div>
+                  </div>
+
+                  {/* Gráfica de Proyección */}
+                  <ResponsiveContainer width="100%" height={160}>
+                    <BarChart data={[
+                      { name: 'Meta', value: zoneTotals.totalBudget / 1000000, fill: '#6366f1' },
+                      { name: 'Real', value: zoneTotals.totalSales / 1000000, fill: '#10b981' },
+                      { name: 'Proy', value: zoneTotals.totalProjection / 1000000, fill: '#a855f7' }
+                    ]}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.15} vertical={false} />
+                      <XAxis 
+                        dataKey="name" 
+                        stroke="#9ca3af" 
+                        fontSize={10}
+                        tickLine={false}
+                      />
+                      <YAxis 
+                        stroke="#9ca3af" 
+                        fontSize={10}
+                        tickLine={false}
+                        tickFormatter={(v) => `$${v.toFixed(0)}M`}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: '#1e293b',
+                          border: '2px solid #475569',
+                          borderRadius: '8px',
+                          padding: '8px'
+                        }}
+                        formatter={(value) => [`${formatCurrency(value * 1000000)}`, '']}
+                      />
+                      <Bar dataKey="value" radius={[6, 6, 0, 0]} maxBarSize={60}>
+                        {[0, 1, 2].map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={index === 0 ? '#6366f1' : index === 1 ? '#10b981' : '#a855f7'} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+
+                  {/* Gap y Velocidad */}
+                  <div className="mt-4 pt-4 border-t border-purple-500/20 grid grid-cols-2 gap-3">
+                    <div>
+                      <p className="text-xs text-slate-400 mb-1">Gap vs Meta</p>
+                      <p className={`text-lg font-black ${
+                        zoneTotals.totalProjection >= zoneTotals.totalBudget ? 'text-emerald-400' : 'text-red-400'
+                      }`}>
+                        {formatShort(Math.abs(zoneTotals.totalBudget - zoneTotals.totalProjection))}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-400 mb-1">Velocidad</p>
+                      <p className="text-lg font-black text-white">
+                        {formatShort(zoneTotals.totalSales / selectedWeeks.length)}/sem
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
