@@ -1004,45 +1004,53 @@ Genera:
                   {/* Mini gráfica de proyección semanal */}
                   <div className="mt-4 pt-4 border-t border-white/10">
                     <div className="flex items-center justify-between mb-2">
-                      <h4 className="text-xs font-bold text-slate-400">📅 Proyección Semanas Restantes</h4>
+                      <h4 className="text-xs font-bold text-slate-400">📅 Distribución Presupuesto Semanal</h4>
                       <span className="text-[9px] text-slate-500">
                         {Math.ceil((new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0) - new Date()) / (7 * 24 * 60 * 60 * 1000))} semanas
                       </span>
                     </div>
-                    <ResponsiveContainer width="100%" height={70}>
-                      <BarChart 
-                        data={(() => {
-                          const now = new Date();
-                          const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-                          const daysLeft = Math.ceil((monthEnd - now) / (1000 * 60 * 60 * 24));
-                          const weeksLeft = Math.ceil(daysLeft / 7);
-                          const weeklyAvg = zoneTotals.totalBudget / 4; // Promedio semanal
+                    <ResponsiveContainer width="100%" height={100}>
+                      <PieChart>
+                        <Pie
+                          data={(() => {
+                            const now = new Date();
+                            const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+                            const daysLeft = Math.ceil((monthEnd - now) / (1000 * 60 * 60 * 24));
+                            const weeksLeft = Math.ceil(daysLeft / 7);
+                            const weeklyAvg = zoneTotals.totalBudget / 4;
 
-                          return Array.from({ length: Math.min(weeksLeft, 4) }, (_, i) => ({
-                            week: `S${i + 1}`,
-                            budget: weeklyAvg / 1000000,
-                            current: i === 0 ? zoneTotals.totalSales / 1000000 : 0
-                          }));
-                        })()}
-                        margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
-                      >
-                        <XAxis 
-                          dataKey="week" 
-                          tick={{ fontSize: 10, fill: '#94a3b8' }}
-                          axisLine={false}
-                          tickLine={false}
-                        />
-                        <YAxis hide />
-                        <Bar dataKey="budget" fill="#6366f1" radius={[4, 4, 0, 0]} maxBarSize={35}>
+                            return Array.from({ length: Math.min(weeksLeft, 4) }, (_, i) => ({
+                              name: `Semana ${i + 1}`,
+                              value: weeklyAvg / 1000000,
+                              fill: i === 0 ? '#10b981' : ['#6366f1', '#8b5cf6', '#ec4899'][i - 1] || '#6366f1'
+                            }));
+                          })()}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={25}
+                          outerRadius={40}
+                          paddingAngle={2}
+                          dataKey="value"
+                        >
                           {Array(4).fill(0).map((_, index) => (
-                            <Cell key={`cell-${index}`} fill={index === 0 ? '#10b981' : '#6366f1'} opacity={index === 0 ? 0.8 : 0.5} />
+                            <Cell key={`cell-${index}`} />
                           ))}
-                        </Bar>
-                      </BarChart>
+                        </Pie>
+                        <Tooltip 
+                          contentStyle={{ 
+                            backgroundColor: 'rgba(15, 23, 42, 0.95)', 
+                            border: '1px solid rgba(255,255,255,0.2)',
+                            borderRadius: '8px',
+                            fontSize: '11px',
+                            color: '#fff'
+                          }}
+                          formatter={(value) => `${value.toFixed(1)}M`}
+                        />
+                      </PieChart>
                     </ResponsiveContainer>
-                    <div className="flex items-center justify-between mt-1">
-                      <span className="text-[9px] text-emerald-400">■ Semana actual</span>
-                      <span className="text-[9px] text-indigo-400">■ Semanas restantes</span>
+                    <div className="flex flex-wrap items-center justify-center gap-2 mt-1">
+                      <span className="text-[9px] text-emerald-400">● Actual</span>
+                      <span className="text-[9px] text-indigo-400">● Futuras</span>
                     </div>
                   </div>
                 </div>
