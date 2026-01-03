@@ -200,11 +200,11 @@ export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRa
             onClick={() => setSelectedStore(null)}
           >
             <motion.div
-              initial={{ scale: 0.9, y: 20 }}
+              initial={{ scale: 0.95, y: 20 }}
               animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 20 }}
+              exit={{ scale: 0.95, y: 20 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-gradient-to-br from-slate-900 to-slate-950 rounded-2xl border border-white/20 max-w-6xl w-full max-h-[90vh] overflow-hidden shadow-2xl"
+              className="bg-gradient-to-br from-slate-900 to-slate-950 rounded-2xl border border-white/20 w-[95vw] h-[95vh] overflow-hidden shadow-2xl"
             >
               {/* Header */}
               <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 border-b border-white/10 p-6">
@@ -235,15 +235,15 @@ export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRa
               </div>
 
               {/* Content - Scrollable */}
-              <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="p-8 overflow-y-auto h-[calc(95vh-120px)]">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   {/* Gráfica Comparativa Venta vs PPT */}
                   <div className="bg-white/5 rounded-xl p-5 border border-white/10">
                     <div className="flex items-center gap-2 mb-4">
                       <TrendingUp className="w-5 h-5 text-blue-400" />
                       <h4 className="text-lg font-bold text-white">Venta vs PPT Diario</h4>
                     </div>
-                    <ResponsiveContainer width="100%" height={300}>
+                    <ResponsiveContainer width="100%" height={400}>
                       <BarChart 
                         data={weekDaysData.map(day => ({
                           ...day,
@@ -303,7 +303,7 @@ export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRa
                       <TrendingUp className="w-5 h-5 text-purple-400" />
                       <h4 className="text-lg font-bold text-white">% Cumplimiento Diario</h4>
                     </div>
-                    <ResponsiveContainer width="100%" height={300}>
+                    <ResponsiveContainer width="100%" height={400}>
                       <BarChart 
                         data={weekDaysData.map(day => {
                           const ppt = selectedStore.getDailyBudget ? 
