@@ -7,9 +7,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import RouletteWheel from '@/components/roulette/RouletteWheel';
 import EmployeeOfMonthPanel from '@/components/roulette/EmployeeOfMonthPanel';
 import RouletteHistory from '@/components/roulette/RouletteHistory';
+import RouletteConfigManager from '@/components/roulette/RouletteConfigManager';
 import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Crown, Gift, Sparkles, X } from 'lucide-react';
+import { Input } from "@/components/ui/input";
+import { ArrowLeft, Crown, Gift, Sparkles, X, Settings, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function RoulettePopsy() {
@@ -18,6 +20,9 @@ export default function RoulettePopsy() {
   const [currentCashier, setCurrentCashier] = useState(null);
   const [showResult, setShowResult] = useState(false);
   const [wonPrize, setWonPrize] = useState(null);
+  const [showConfig, setShowConfig] = useState(false);
+  const [cedulaInput, setCedulaInput] = useState('');
+  const [cedulaValidated, setCedulaValidated] = useState(false);
   const queryClient = useQueryClient();
 
   const currentMonth = new Date().getMonth() + 1;
@@ -44,6 +49,12 @@ export default function RoulettePopsy() {
       year: currentYear,
       is_active: true
     }),
+    enabled: !!selectedStore
+  });
+
+  const { data: rouletteConfigs = [] } = useQuery({
+    queryKey: ['rouletteConfig', selectedStore],
+    queryFn: () => base44.entities.RouletteConfig.filter({ store_id: selectedStore }),
     enabled: !!selectedStore
   });
 
@@ -80,12 +91,17 @@ export default function RoulettePopsy() {
   };
 
   const activeEmployee = employeeOfMonth.find(e => e.is_active);
+  const activeConfig = rouletteConfigs.find(c => c.is_active && c.award_type === activeEmployee?.award_type);
   const isGerente = userRole === 'gerente';
   const isLider = userRole === 'lider';
   const isEmbajador = userRole === 'embajador';
   
+  // Validar cédula para embajador
+  const requiresCedulaValidation = isEmbajador && activeConfig?.validation_cedula;
+  const validCedula = !requiresCedulaValidation || cedulaValidated;
+  
   // Permitir girar a gerente, o a líderes/embajadores si el gerente ya habilitó al empleado del mes
-  const canSpin = isGerente || ((isLider || isEmbajador) && activeEmployee && !activeEmployee.has_spun);
+  const canSpin = isGerente || ((isLider || isEmbajador) && activeEmployee && !activeEmployee.has_spun && validCedula);
 
   // Si es gerente, mostrar panel de administración completo
   if (isGerente) {
@@ -94,24 +110,37 @@ export default function RoulettePopsy() {
         <FloatingIceCreamsBg />
         
         <div className="max-w-6xl mx-auto px-4 py-6 relative z-10">
-          <div className="flex items-center gap-4 mb-6">
-            <Link to={createPageUrl('Home')}>
-              <Button variant="ghost" size="icon" className="rounded-full hover:bg-pink-50">
-                <ArrowLeft className="w-5 h-5 text-pink-600" />
-              </Button>
-            </Link>
-            <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent">
-                Ruleta Popsy 🎡
-              </h1>
-              <p className="text-sm text-gray-500">Panel de Administración</p>
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-4">
+              <Link to={createPageUrl('Home')}>
+                <Button variant="ghost" size="icon" className="rounded-full hover:bg-pink-50">
+                  <ArrowLeft className="w-5 h-5 text-pink-600" />
+                </Button>
+              </Link>
+              <div>
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent">
+                  Ruleta Popsy 🎡
+                </h1>
+                <p className="text-sm text-gray-500">Panel de Administración</p>
+              </div>
             </div>
+            <Button
+              onClick={() => setShowConfig(!showConfig)}
+              className={`${showConfig ? 'bg-purple-500 hover:bg-purple-600' : 'bg-pink-500 hover:bg-pink-600'}`}
+            >
+              <Settings className="w-4 h-4 mr-2" />
+              {showConfig ? 'Ver Gestión' : 'Configurar Ruleta'}
+            </Button>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <EmployeeOfMonthPanel storeId={selectedStore} />
-            <RouletteHistory storeId={selectedStore} />
-          </div>
+          {showConfig ? (
+            <RouletteConfigManager storeId={selectedStore} />
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <EmployeeOfMonthPanel storeId={selectedStore} />
+              <RouletteHistory storeId={selectedStore} />
+            </div>
+          )}
         </div>
       </div>
     );
@@ -147,6 +176,16 @@ export default function RoulettePopsy() {
     );
   }
 
+  // Validación de cédula para embajador
+  const handleCedulaValidation = () => {
+    if (cedulaInput === activeConfig?.validation_cedula) {
+      setCedulaValidated(true);
+      toast.success('Cédula validada correctamente');
+    } else {
+      toast.error('Cédula incorrecta');
+    }
+  };
+
   // Pantalla del empleado del mes
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-amber-50 relative">
@@ -160,6 +199,41 @@ export default function RoulettePopsy() {
             </Button>
           </Link>
         </div>
+
+        {/* Validación de Cédula para Embajador */}
+        {requiresCedulaValidation && !cedulaValidated && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 bg-gradient-to-br from-blue-100 to-cyan-100 border-2 border-blue-300 rounded-2xl p-6 text-center"
+          >
+            <div className="flex flex-col items-center gap-4">
+              <div className="w-16 h-16 rounded-full bg-blue-500 flex items-center justify-center">
+                <Lock className="w-8 h-8 text-white" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-gray-800 mb-2">Validación Requerida</h3>
+                <p className="text-sm text-gray-600 mb-4">Ingresa la cédula del empleado del mes para continuar</p>
+              </div>
+              <div className="flex gap-3 w-full max-w-sm">
+                <Input
+                  type="text"
+                  placeholder="Número de cédula"
+                  value={cedulaInput}
+                  onChange={(e) => setCedulaInput(e.target.value)}
+                  className="bg-white"
+                  onKeyPress={(e) => e.key === 'Enter' && handleCedulaValidation()}
+                />
+                <Button
+                  onClick={handleCedulaValidation}
+                  className="bg-blue-500 hover:bg-blue-600"
+                >
+                  Validar
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        )}
 
         {/* Header */}
         <motion.div
@@ -234,6 +308,7 @@ export default function RoulettePopsy() {
             onResult={handleRouletteResult}
             disabled={activeEmployee.has_spun || !canSpin}
             awardType={activeEmployee.award_type}
+            storeId={selectedStore}
           />
         </motion.div>
 

@@ -2,8 +2,10 @@ import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Gift } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import { base44 } from '@/api/base44Client';
+import { useQuery } from '@tanstack/react-query';
 
-const PRIZES_TIENDA = [
+const DEFAULT_PRIZES_TIENDA = [
   { id: 1, name: 'Descanso remunerado', value: 0, color: '#FFB5C5', emoji: '🏖️' },
   { id: 2, name: 'Bono $30.000 Olímpica', value: 30000, color: '#D4A5D8', emoji: '💳' },
   { id: 3, name: 'Malteada chocolate', value: 0, color: '#A5D8FF', emoji: '🍫' },
@@ -11,7 +13,7 @@ const PRIZES_TIENDA = [
   { id: 5, name: 'Domingo remunerado', value: 0, color: '#C9FFD4', emoji: '☀️' },
 ];
 
-const PRIZES_DISTRITO = [
+const DEFAULT_PRIZES_DISTRITO = [
   { id: 1, name: 'Pase Piscilago 4 personas', value: 0, color: '#FFB5C5', emoji: '🏊' },
   { id: 2, name: 'Domingo remunerado', value: 0, color: '#D4A5D8', emoji: '☀️' },
   { id: 3, name: 'Descanso remunerado', value: 0, color: '#A5D8FF', emoji: '🏖️' },
@@ -21,14 +23,26 @@ const PRIZES_DISTRITO = [
   { id: 7, name: 'Bono $80.000 Olímpica', value: 80000, color: '#FFD0E5', emoji: '💰' },
 ];
 
-export default function RouletteWheel({ onResult, disabled, awardType = 'tienda' }) {
+export default function RouletteWheel({ onResult, disabled, awardType = 'tienda', storeId }) {
   const [spinning, setSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [winner, setWinner] = useState(null);
   const [showConfetti, setShowConfetti] = useState(false);
   const [suspensePhase, setSuspensePhase] = useState(0);
 
-  const PRIZES = awardType === 'distrito' ? PRIZES_DISTRITO : PRIZES_TIENDA;
+  const { data: configs = [] } = useQuery({
+    queryKey: ['rouletteConfig', storeId],
+    queryFn: () => base44.entities.RouletteConfig.filter({ store_id: storeId }),
+    enabled: !!storeId
+  });
+
+  const activeConfig = configs.find(c => c.is_active && c.award_type === awardType);
+  
+  const PRIZES = activeConfig?.prizes 
+    ? JSON.parse(activeConfig.prizes) 
+    : (awardType === 'distrito' ? DEFAULT_PRIZES_DISTRITO : DEFAULT_PRIZES_TIENDA);
+  
+  const SPIN_DURATION = activeConfig?.spin_duration || 6500;
 
   const handleSpin = () => {
     if (spinning || disabled) return;
@@ -62,7 +76,7 @@ export default function RouletteWheel({ onResult, disabled, awardType = 'tienda'
       onResult(randomPrize);
       
       setTimeout(() => setShowConfetti(false), 4000);
-    }, 6500);
+    }, SPIN_DURATION);
   };
 
   return (
