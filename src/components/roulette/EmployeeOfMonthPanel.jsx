@@ -5,13 +5,14 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Crown, Star, Trophy, Search } from 'lucide-react';
+import { Crown, Star, Trophy, Search, CreditCard } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function EmployeeOfMonthPanel({ storeId }) {
   const [selectedCashier, setSelectedCashier] = useState('');
   const [awardType, setAwardType] = useState('tienda');
   const [searchQuery, setSearchQuery] = useState('');
+  const [cedula, setCedula] = useState('');
   const queryClient = useQueryClient();
   const currentMonth = new Date().getMonth() + 1;
   const currentYear = new Date().getFullYear();
@@ -44,17 +45,51 @@ export default function EmployeeOfMonthPanel({ storeId }) {
   const activateEmployeeMutation = useMutation({
     mutationFn: async (cashierId) => {
       const cashier = cashiers.find(c => c.id === cashierId);
+      const cashierStoreId = cashier.store_id;
       
       // Desactivar cualquier empleado del mes anterior
       for (const emp of currentEmployeeOfMonth) {
         await base44.entities.EmployeeOfMonth.update(emp.id, { is_active: false });
       }
       
+      // Crear/actualizar configuración de ruleta para la tienda del cajero
+      const existingConfigs = await base44.entities.RouletteConfig.filter({ store_id: cashierStoreId });
+      const activeConfig = existingConfigs.find(c => c.is_active);
+      
+      const rouletteConfig = {
+        store_id: cashierStoreId,
+        award_type: awardType,
+        validation_cedula: cedula,
+        is_active: true,
+        prizes: activeConfig?.prizes || JSON.stringify(awardType === 'distrito' ? [
+          { id: 1, name: 'Pase Piscilago 4 personas', value: 0, color: '#FFB5C5', emoji: '🏊' },
+          { id: 2, name: 'Domingo remunerado', value: 0, color: '#D4A5D8', emoji: '☀️' },
+          { id: 3, name: 'Descanso remunerado', value: 0, color: '#A5D8FF', emoji: '🏖️' },
+          { id: 4, name: 'Entradas Cine PREMIUM', value: 0, color: '#FFD9A5', emoji: '🎥' },
+          { id: 5, name: 'Litro de helado', value: 0, color: '#C9FFD4', emoji: '🍦' },
+          { id: 6, name: 'Descanso + Malteada', value: 0, color: '#FFE5CC', emoji: '🍹' },
+          { id: 7, name: 'Bono $80.000 Olímpica', value: 80000, color: '#FFD0E5', emoji: '💰' }
+        ] : [
+          { id: 1, name: 'Descanso remunerado', value: 0, color: '#FFB5C5', emoji: '🏖️' },
+          { id: 2, name: 'Bono $30.000 Olímpica', value: 30000, color: '#D4A5D8', emoji: '💳' },
+          { id: 3, name: 'Malteada chocolate', value: 0, color: '#A5D8FF', emoji: '🍫' },
+          { id: 4, name: 'Entradas Cinecolombia', value: 0, color: '#FFD9A5', emoji: '🎬' },
+          { id: 5, name: 'Domingo remunerado', value: 0, color: '#C9FFD4', emoji: '☀️' }
+        ]),
+        spin_duration: activeConfig?.spin_duration || 6500
+      };
+
+      if (activeConfig) {
+        await base44.entities.RouletteConfig.update(activeConfig.id, rouletteConfig);
+      } else {
+        await base44.entities.RouletteConfig.create(rouletteConfig);
+      }
+      
       // Crear nuevo empleado del mes
       return base44.entities.EmployeeOfMonth.create({
         cashier_id: cashierId,
         cashier_name: cashier.name,
-        store_id: storeId,
+        store_id: cashierStoreId,
         award_type: awardType,
         month: currentMonth,
         year: currentYear,
@@ -65,8 +100,10 @@ export default function EmployeeOfMonthPanel({ storeId }) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['employeeOfMonth']);
-      toast.success('¡Empleado del Mes activado! 🎉');
+      queryClient.invalidateQueries(['rouletteConfig']);
+      toast.success('¡Empleado del Mes activado y ruleta configurada! 🎉');
       setSelectedCashier('');
+      setCedula('');
     }
   });
 
@@ -139,6 +176,22 @@ export default function EmployeeOfMonthPanel({ storeId }) {
               </Button>
             </div>
 
+            {/* Cédula de Validación */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <CreditCard className="w-4 h-4 text-blue-600" />
+                <label className="text-sm font-bold text-gray-800">Cédula del Empleado</label>
+              </div>
+              <p className="text-xs text-gray-600 mb-3">El empleado deberá ingresar esta cédula para girar la ruleta</p>
+              <Input
+                placeholder="Ej: 1234567890"
+                value={cedula}
+                onChange={(e) => setCedula(e.target.value)}
+                className="bg-white"
+                type="number"
+              />
+            </div>
+
             {/* Buscador */}
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -200,12 +253,15 @@ export default function EmployeeOfMonthPanel({ storeId }) {
 
             <Button
               onClick={() => activateEmployeeMutation.mutate(selectedCashier)}
-              disabled={!selectedCashier || activateEmployeeMutation.isPending}
+              disabled={!selectedCashier || !cedula || activateEmployeeMutation.isPending}
               className="w-full bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-white font-bold py-6"
             >
               <Star className="w-5 h-5 mr-2" />
               Activar como Empleado del Mes
             </Button>
+            {!cedula && selectedCashier && (
+              <p className="text-xs text-red-500 text-center">⚠️ Debes ingresar la cédula del empleado</p>
+            )}
           </div>
         )}
       </CardContent>
