@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BarChart, Bar, ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip, Cell, LineChart, Line } from 'recharts';
 import { ArrowUpDown, X, TrendingUp } from 'lucide-react';
@@ -189,14 +190,15 @@ export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRa
         </BarChart>
       </ResponsiveContainer>
 
-      {/* Modal de días de la semana - Pantalla Completa */}
-      <AnimatePresence>
-        {selectedStore && weekDaysData && (
+      {/* Modal de días de la semana - Pantalla Completa con Portal */}
+      {selectedStore && weekDaysData && createPortal(
+        <AnimatePresence>
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 z-[100] overflow-y-auto"
+            className="fixed inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 z-[9999] overflow-y-auto"
+            style={{ margin: 0, padding: 0 }}
           >
             <div className="min-h-screen w-full">
               {/* Header Flotante */}
@@ -467,8 +469,9 @@ export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRa
               </div>
             </div>
           </motion.div>
-        )}
-      </AnimatePresence>
+        </AnimatePresence>,
+        document.body
+      )}
     </div>
   );
 }
