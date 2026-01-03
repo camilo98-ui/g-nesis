@@ -1,0 +1,308 @@
+import React, { useState, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { BarChart, Bar, ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip, Cell } from 'recharts';
+import { ArrowUpDown, X, TrendingUp } from 'lucide-react';
+import { format, parseISO, eachDayOfInterval, isWithinInterval } from 'date-fns';
+import { es } from 'date-fns/locale';
+
+export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRange, formatCurrency, formatShort }) {
+  const [sortOrder, setSortOrder] = useState('desc');
+  const [selectedStore, setSelectedStore] = useState(null);
+
+  // Obtener colores profesionales según cumplimiento
+  const getBarColor = (compliance) => {
+    if (compliance >= 100) return { main: '#10b981', light: '#34d399', dark: '#059669' }; // Verde éxito
+    if (compliance >= 85) return { main: '#3b82f6', light: '#60a5fa', dark: '#2563eb' }; // Azul en meta
+    if (compliance >= 70) return { main: '#f59e0b', light: '#fbbf24', dark: '#d97706' }; // Ámbar alerta
+    return { main: '#ef4444', light: '#f87171', dark: '#dc2626' }; // Rojo crítico
+  };
+
+  // Ordenar tiendas
+  const chartData = useMemo(() => {
+    const data = storesAnalysis
+      .filter(s => s.hasData)
+      .map(s => ({
+        name: s.name.substring(0, 10),
+        fullName: s.name,
+        code: s.code,
+        venta: s.weekTotalSales / 1000000,
+        presupuesto: s.weeklyBudget / 1000000,
+        cumplimiento: s.weekCompliance,
+        colors: getBarColor(s.weekCompliance)
+      }));
+    
+    return data.sort((a, b) => 
+      sortOrder === 'desc' ? b.cumplimiento - a.cumplimiento : a.cumplimiento - b.cumplimiento
+    );
+  }, [storesAnalysis, sortOrder]);
+
+  // Datos por día de la semana para la tienda seleccionada
+  const weekDaysData = useMemo(() => {
+    if (!selectedStore) return null;
+
+    const days = eachDayOfInterval({ start: dateRange.from, end: dateRange.to });
+    const storeSales = allDailySales.filter(s => s.store_id === selectedStore.code);
+
+    return days.map(day => {
+      const daySale = storeSales.find(s => {
+        try {
+          const saleDate = parseISO(s.date);
+          return saleDate.toDateString() === day.toDateString();
+        } catch {
+          return false;
+        }
+      });
+
+      return {
+        day: format(day, 'EEEE', { locale: es }),
+        date: format(day, 'dd MMM'),
+        sales: daySale ? daySale.total_sales / 1000000 : 0,
+        transactions: daySale ? daySale.total_transactions : 0
+      };
+    });
+  }, [selectedStore, allDailySales, dateRange]);
+
+  const handleBarClick = (data) => {
+    const store = storesAnalysis.find(s => s.code === data.code);
+    setSelectedStore(store);
+  };
+
+  return (
+    <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl rounded-lg p-5 border border-white/10 shadow-xl">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-base font-black text-white">Tiendas vs PPT Semanal</h3>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc')}
+            className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-xs transition-all"
+          >
+            <ArrowUpDown className="w-3 h-3" />
+            {sortOrder === 'desc' ? 'Mayor → Menor' : 'Menor → Mayor'}
+          </button>
+          <span className="text-xs px-2 py-1 rounded bg-white/10 text-slate-300">Top 8</span>
+        </div>
+      </div>
+
+      {/* Leyenda de colores */}
+      <div className="flex flex-wrap items-center gap-3 mb-4 pb-3 border-b border-white/10">
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
+          <span className="text-xs text-slate-300">≥100% Excelente</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+          <span className="text-xs text-slate-300">85-99% En Meta</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-3 rounded-full bg-amber-500"></div>
+          <span className="text-xs text-slate-300">70-84% Alerta</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-3 rounded-full bg-red-500"></div>
+          <span className="text-xs text-slate-300">&lt;70% Crítico</span>
+        </div>
+      </div>
+
+      <ResponsiveContainer width="100%" height={340}>
+        <BarChart 
+          data={chartData.slice(0, 8)}
+          layout="vertical"
+          margin={{ left: 10, right: 10 }}
+        >
+          <defs>
+            {chartData.slice(0, 8).map((item, idx) => (
+              <linearGradient key={idx} id={`gradient-${idx}`} x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor={item.colors.main} stopOpacity={0.8} />
+                <stop offset="50%" stopColor={item.colors.light} stopOpacity={1} />
+                <stop offset="100%" stopColor={item.colors.dark} stopOpacity={1} />
+              </linearGradient>
+            ))}
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.15} horizontal={false} />
+          <XAxis 
+            type="number" 
+            stroke="#6b7280" 
+            fontSize={10}
+            tickLine={false}
+            tickFormatter={(v) => `$${v.toFixed(1)}M`}
+          />
+          <YAxis 
+            type="category" 
+            dataKey="name" 
+            stroke="#9ca3af" 
+            fontSize={10} 
+            width={70}
+            tickLine={false}
+          />
+          <Tooltip
+            contentStyle={{
+              backgroundColor: '#1e293b',
+              border: '2px solid #475569',
+              borderRadius: '12px',
+              padding: '12px 16px',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.3)'
+            }}
+            labelStyle={{ color: '#cbd5e1', fontSize: '12px', fontWeight: 'bold', marginBottom: '8px' }}
+            content={({ active, payload }) => {
+              if (active && payload && payload.length) {
+                const data = payload[0].payload;
+                return (
+                  <div style={{ color: '#fff' }}>
+                    <div style={{ fontWeight: 'bold', marginBottom: '8px', color: '#cbd5e1' }}>
+                      {data.fullName}
+                    </div>
+                    <div style={{ color: data.colors.main, fontWeight: 'bold', marginBottom: '4px' }}>
+                      💰 Venta: {formatCurrency(data.venta * 1000000)}
+                    </div>
+                    <div style={{ color: '#6366f1', fontWeight: 'bold', marginBottom: '4px' }}>
+                      🎯 Meta: {formatCurrency(data.presupuesto * 1000000)}
+                    </div>
+                    <div style={{ 
+                      color: data.colors.main,
+                      fontWeight: 'bold',
+                      borderTop: '1px solid #475569',
+                      paddingTop: '6px',
+                      marginTop: '6px'
+                    }}>
+                      {data.cumplimiento >= 100 ? '✅' : data.cumplimiento >= 85 ? '🎯' : data.cumplimiento >= 70 ? '⚠️' : '❌'} Cumplimiento: {data.cumplimiento.toFixed(1)}%
+                    </div>
+                    <div style={{ fontSize: '10px', color: '#94a3b8', marginTop: '6px', fontStyle: 'italic' }}>
+                      Click para ver días de la semana
+                    </div>
+                  </div>
+                );
+              }
+              return null;
+            }}
+          />
+          <Bar 
+            dataKey="venta" 
+            radius={[0, 8, 8, 0]} 
+            maxBarSize={22}
+            onClick={handleBarClick}
+            cursor="pointer"
+          >
+            {chartData.slice(0, 8).map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={`url(#gradient-${index})`} />
+            ))}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
+
+      {/* Modal de días de la semana */}
+      <AnimatePresence>
+        {selectedStore && weekDaysData && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4"
+            onClick={() => setSelectedStore(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-gradient-to-br from-slate-900 to-slate-950 rounded-2xl border border-white/20 max-w-2xl w-full overflow-hidden shadow-2xl"
+            >
+              {/* Header */}
+              <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 border-b border-white/10 p-6">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="text-2xl font-black text-white mb-2">{selectedStore.name}</h3>
+                    <div className="flex items-center gap-3">
+                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                        selectedStore.weekCompliance >= 100 ? 'bg-emerald-500/20 text-emerald-300' :
+                        selectedStore.weekCompliance >= 85 ? 'bg-blue-500/20 text-blue-300' :
+                        selectedStore.weekCompliance >= 70 ? 'bg-amber-500/20 text-amber-300' :
+                        'bg-red-500/20 text-red-300'
+                      }`}>
+                        {selectedStore.weekCompliance.toFixed(1)}% Cumplimiento
+                      </span>
+                      <span className="text-sm text-slate-400">
+                        {formatShort(selectedStore.weekTotalSales)} / {formatShort(selectedStore.weeklyBudget)}
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setSelectedStore(null)}
+                    className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+                  >
+                    <X className="w-4 h-4 text-white" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="p-6">
+                <div className="flex items-center gap-2 mb-6">
+                  <TrendingUp className="w-5 h-5 text-blue-400" />
+                  <h4 className="text-lg font-bold text-white">Desglose por Día de la Semana</h4>
+                </div>
+
+                <div className="space-y-3">
+                  {weekDaysData.map((day, idx) => {
+                    const maxSales = Math.max(...weekDaysData.map(d => d.sales));
+                    const percentage = maxSales > 0 ? (day.sales / maxSales) * 100 : 0;
+                    
+                    return (
+                      <motion.div
+                        key={idx}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: idx * 0.05 }}
+                        className="bg-white/5 rounded-xl p-4 border border-white/10 hover:border-white/20 transition-all"
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <div>
+                            <p className="text-sm font-bold text-white capitalize">{day.day}</p>
+                            <p className="text-xs text-slate-400">{day.date}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-lg font-black text-blue-400">{formatShort(day.sales * 1000000)}</p>
+                            <p className="text-xs text-slate-400">{day.transactions} tickets</p>
+                          </div>
+                        </div>
+                        <div className="relative h-2 bg-slate-800/50 rounded-full overflow-hidden">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${percentage}%` }}
+                            transition={{ duration: 0.6, delay: idx * 0.05 }}
+                            className="absolute inset-y-0 left-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"
+                          />
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+
+                {/* Stats */}
+                <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-white/10">
+                  <div className="text-center">
+                    <p className="text-xs text-slate-400 mb-1">Promedio Diario</p>
+                    <p className="text-xl font-black text-white">
+                      {formatShort((selectedStore.weekTotalSales / weekDaysData.length))}
+                    </p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xs text-slate-400 mb-1">Mejor Día</p>
+                    <p className="text-xl font-black text-emerald-400">
+                      {formatShort(Math.max(...weekDaysData.map(d => d.sales)) * 1000000)}
+                    </p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xs text-slate-400 mb-1">Total Tickets</p>
+                    <p className="text-xl font-black text-purple-400">
+                      {weekDaysData.reduce((sum, d) => sum + d.transactions, 0)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
