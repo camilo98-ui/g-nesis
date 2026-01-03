@@ -16,19 +16,19 @@ export default function EmployeeOfMonthPanel({ storeId }) {
   const currentMonth = new Date().getMonth() + 1;
   const currentYear = new Date().getFullYear();
 
-  const { data: storeCashiers = [] } = useQuery({
-    queryKey: ['cashiers', storeId],
-    queryFn: () => base44.entities.Cashier.filter({ store_id: storeId }),
-    enabled: !!storeId && awardType === 'tienda'
-  });
-
-  const { data: allDistrictCashiers = [] } = useQuery({
+  // Cargar TODOS los cajeros siempre
+  const { data: allCashiers = [] } = useQuery({
     queryKey: ['allCashiers'],
-    queryFn: () => base44.entities.Cashier.list(),
-    enabled: awardType === 'distrito'
+    queryFn: () => base44.entities.Cashier.list()
   });
 
-  const cashiers = awardType === 'distrito' ? allDistrictCashiers : storeCashiers;
+  // Filtrar según el tipo de award
+  const cashiers = useMemo(() => {
+    if (awardType === 'distrito') {
+      return allCashiers;
+    }
+    return allCashiers.filter(c => c.store_id === storeId);
+  }, [allCashiers, awardType, storeId]);
 
   const { data: currentEmployeeOfMonth = [] } = useQuery({
     queryKey: ['employeeOfMonth', storeId, currentMonth, currentYear],
