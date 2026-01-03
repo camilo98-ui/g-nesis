@@ -776,15 +776,15 @@ Genera:
                         animate={{ x: ['-100%', '200%'] }}
                         transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                       />
-                    </motion.div>
-                    </div>
-                    </motion.div>
+                  </motion.div>
+                </div>
+                </motion.div>
 
-                    <motion.div 
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => setSelectedKPIDetail('weeklyStatus')}
-                    className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl rounded-lg p-4 border border-white/10 cursor-pointer transition-all hover:border-white/20 hover:shadow-lg hover:shadow-white/10">
+                <motion.div 
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setSelectedKPIDetail('weeklyStatus')}
+                  className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl rounded-lg p-4 border border-white/10 cursor-pointer transition-all hover:border-white/20 hover:shadow-lg hover:shadow-white/10">
                   <p className="text-xs text-slate-400 mb-2">Estado Semanal</p>
                   <div className="flex items-center justify-between mb-3">
                     <div>
@@ -851,11 +851,11 @@ Genera:
                         {storesAnalysis.filter(s => s.hasData && s.weekCompliance < 70).length}
                       </p>
                     </motion.div>
-                  </div>
-                </div>
-              </div>
+                    </div>
+                    </motion.div>
+                    </div>
 
-              {/* Columna Centro - Gráfica Grande */}
+                    {/* Columna Centro - Gráfica Grande */}
               <div className="col-span-12 lg:col-span-6">
                 <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl rounded-lg p-5 border border-white/10 h-full shadow-xl">
                   <div className="flex items-center justify-between mb-4">
