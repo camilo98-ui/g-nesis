@@ -876,20 +876,31 @@ export default function Dashboard() {
 
 
   return (
-    <div className="min-h-screen bg-transparent relative">
+    <div className="min-h-screen bg-white relative">
       <FloatingIceCreamsBg />
       
-      <div className="max-w-screen-2xl mx-auto relative z-10">
-        {/* Header - más compacto */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-md border border-white/60">
-          <div className="flex items-center gap-3">
+      <div className="max-w-screen-2xl mx-auto px-2 py-6 relative z-10">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-4">
+            <Link to={createPageUrl('Home')}>
+              <Button variant="ghost" size="icon" className="rounded-full hover:bg-pink-50">
+                <ArrowLeft className="w-5 h-5 text-pink-600" />
+              </Button>
+            </Link>
             <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-pink-600 to-violet-600 bg-clip-text text-transparent">
-                Dashboard de Tienda
-              </h1>
-              {selectedStore && (
-                <p className="text-pink-700 text-sm font-medium mt-0.5">{getDisplayName(selectedStore)}</p>
-              )}
+              <motion.h1
+                animate={{
+                  backgroundPosition: ['0% 50%', '100% 50%', '0% 50%']
+                }}
+                transition={{ duration: 5, repeat: Infinity }} className="bg-clip-text text-pink-700 text-2xl font-bold md:text-3xl from-violet-600 via-pink-500 to-violet-600">Tienda
+
+
+
+              </motion.h1>
+              {selectedStore &&
+              <p className="text-pink-700 text-sm font-medium">{getDisplayName(selectedStore)}</p>
+              }
             </div>
           </div>
           <div className="flex flex-col md:flex-row gap-3 items-center">
