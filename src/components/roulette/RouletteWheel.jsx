@@ -142,17 +142,20 @@ export default function RouletteWheel({ onResult, disabled, awardType = 'tienda'
           <div className="w-0 h-0 border-l-[20px] border-l-transparent border-r-[20px] border-r-transparent border-t-[35px] border-t-pink-500 filter drop-shadow-2xl" />
         </motion.div>
 
-        {/* Botón Central de Girar - ANTES del círculo para evitar conflictos */}
-        <motion.div 
-          className="absolute top-1/2 left-1/2 z-30"
-          style={{ transform: 'translate(-50%, -50%)' }}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+        {/* Botón Central de Girar */}
+        <div 
+          className="absolute z-30"
+          style={{ 
+            top: '50%', 
+            left: '50%', 
+            transform: 'translate(-50%, -50%)',
+            pointerEvents: 'auto'
+          }}
         >
           <Button
             onClick={handleSpin}
             disabled={spinning || disabled}
-            className="w-32 h-32 rounded-full bg-gradient-to-br from-pink-500 via-rose-500 to-pink-600 hover:from-pink-600 hover:via-rose-600 hover:to-pink-700 shadow-2xl border-8 border-white disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-32 h-32 rounded-full bg-gradient-to-br from-pink-500 via-rose-500 to-pink-600 hover:from-pink-600 hover:via-rose-600 hover:to-pink-700 shadow-2xl border-8 border-white disabled:opacity-50 disabled:cursor-not-allowed transition-transform hover:scale-105 active:scale-95"
           >
             <div className="flex flex-col items-center gap-1">
               <motion.div
@@ -166,7 +169,7 @@ export default function RouletteWheel({ onResult, disabled, awardType = 'tienda'
               </span>
             </div>
           </Button>
-        </motion.div>
+        </div>
 
         {/* Círculo de la ruleta - SVG */}
         <motion.div
