@@ -31,18 +31,26 @@ export default function RouletteWheel({ onResult, disabled, awardType = 'tienda'
   const [suspensePhase, setSuspensePhase] = useState(0);
 
   const { data: configs = [], refetch } = useQuery({
-    queryKey: ['rouletteConfig', storeId],
-    queryFn: () => base44.entities.RouletteConfig.filter({ store_id: storeId }),
+    queryKey: ['rouletteConfig', storeId, awardType],
+    queryFn: async () => {
+      const result = await base44.entities.RouletteConfig.filter({ store_id: storeId });
+      return result;
+    },
     enabled: !!storeId,
     refetchOnMount: 'always',
-    refetchOnWindowFocus: true
+    refetchOnWindowFocus: true,
+    staleTime: 0,
+    cacheTime: 0
   });
 
   React.useEffect(() => {
     if (storeId) {
-      refetch();
+      const interval = setInterval(() => {
+        refetch();
+      }, 3000);
+      return () => clearInterval(interval);
     }
-  }, [storeId, awardType, refetch]);
+  }, [storeId, refetch]);
 
   const activeConfig = configs.find(c => c.is_active && c.award_type === awardType);
   
