@@ -217,10 +217,11 @@ export default function ExecutiveDashboard() {
       const monthProjectionCompliance = salesBudget > 0 ? (monthProjection / salesBudget) * 100 : 0;
       const hasData = weekTotalSales > 0 || monthTotalSales > 0;
 
+      // Usar cumplimiento semanal para determinar status (más relevante que el mensual en primeras semanas)
       let status = 'positive';
       if (!hasData) status = 'no_data';
-      else if (salesCompliance < 70) status = 'critical';
-      else if (salesCompliance < 90) status = 'negative';
+      else if (weekCompliance < 70) status = 'critical';
+      else if (weekCompliance < 90) status = 'negative';
 
       const gap = salesBudget - monthTotalSales;
 
