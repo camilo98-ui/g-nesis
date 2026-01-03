@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BarChart, Bar, ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip, Cell } from 'recharts';
+import { BarChart, Bar, ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip, Cell, LineChart, Line } from 'recharts';
 import { ArrowUpDown, X, TrendingUp } from 'lucide-react';
 import { format, parseISO, eachDayOfInterval, isWithinInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -189,7 +189,7 @@ export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRa
         </BarChart>
       </ResponsiveContainer>
 
-      {/* Modal de días de la semana */}
+      {/* Modal de días de la semana - Ampliado */}
       <AnimatePresence>
         {selectedStore && weekDaysData && (
           <motion.div
@@ -204,7 +204,7 @@ export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRa
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-gradient-to-br from-slate-900 to-slate-950 rounded-2xl border border-white/20 max-w-2xl w-full overflow-hidden shadow-2xl"
+              className="bg-gradient-to-br from-slate-900 to-slate-950 rounded-2xl border border-white/20 max-w-6xl w-full max-h-[90vh] overflow-hidden shadow-2xl"
             >
               {/* Header */}
               <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 border-b border-white/10 p-6">
@@ -234,67 +234,240 @@ export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRa
                 </div>
               </div>
 
-              {/* Content */}
-              <div className="p-6">
-                <div className="flex items-center gap-2 mb-6">
-                  <TrendingUp className="w-5 h-5 text-blue-400" />
-                  <h4 className="text-lg font-bold text-white">Desglose por Día de la Semana</h4>
-                </div>
-
-                <div className="space-y-3">
-                  {weekDaysData.map((day, idx) => {
-                    const maxSales = Math.max(...weekDaysData.map(d => d.sales));
-                    const percentage = maxSales > 0 ? (day.sales / maxSales) * 100 : 0;
-                    
-                    return (
-                      <motion.div
-                        key={idx}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: idx * 0.05 }}
-                        className="bg-white/5 rounded-xl p-4 border border-white/10 hover:border-white/20 transition-all"
+              {/* Content - Scrollable */}
+              <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Gráfica Comparativa Venta vs PPT */}
+                  <div className="bg-white/5 rounded-xl p-5 border border-white/10">
+                    <div className="flex items-center gap-2 mb-4">
+                      <TrendingUp className="w-5 h-5 text-blue-400" />
+                      <h4 className="text-lg font-bold text-white">Venta vs PPT Diario</h4>
+                    </div>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart 
+                        data={weekDaysData.map(day => ({
+                          ...day,
+                          ppt: selectedStore.getDailyBudget ? 
+                            selectedStore.getDailyBudget(parseISO(day.date.split(' ')[0] + '-2025')) / 1000000 : 
+                            (selectedStore.weeklyBudget / weekDaysData.length) / 1000000
+                        }))}
                       >
-                        <div className="flex items-center justify-between mb-2">
-                          <div>
-                            <p className="text-sm font-bold text-white capitalize">{day.day}</p>
-                            <p className="text-xs text-slate-400">{day.date}</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-lg font-black text-blue-400">{formatShort(day.sales * 1000000)}</p>
-                            <p className="text-xs text-slate-400">{day.transactions} tickets</p>
-                          </div>
-                        </div>
-                        <div className="relative h-2 bg-slate-800/50 rounded-full overflow-hidden">
-                          <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${percentage}%` }}
-                            transition={{ duration: 0.6, delay: idx * 0.05 }}
-                            className="absolute inset-y-0 left-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"
-                          />
-                        </div>
-                      </motion.div>
-                    );
-                  })}
+                        <defs>
+                          <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#10b981" stopOpacity={0.8}/>
+                            <stop offset="100%" stopColor="#059669" stopOpacity={0.6}/>
+                          </linearGradient>
+                          <linearGradient id="budgetGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#6366f1" stopOpacity={0.6}/>
+                            <stop offset="100%" stopColor="#4f46e5" stopOpacity={0.4}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.15} />
+                        <XAxis 
+                          dataKey="day" 
+                          stroke="#9ca3af" 
+                          fontSize={10}
+                          tickLine={false}
+                          angle={-20}
+                          textAnchor="end"
+                          height={60}
+                        />
+                        <YAxis 
+                          stroke="#9ca3af" 
+                          fontSize={10}
+                          tickLine={false}
+                          tickFormatter={(v) => `$${v.toFixed(1)}M`}
+                        />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: '#1e293b',
+                            border: '2px solid #475569',
+                            borderRadius: '12px',
+                            padding: '12px 16px',
+                            boxShadow: '0 10px 30px rgba(0,0,0,0.3)'
+                          }}
+                          formatter={(value, name) => {
+                            const label = name === 'sales' ? 'Venta' : name === 'ppt' ? 'PPT' : name;
+                            return [formatCurrency(value * 1000000), label];
+                          }}
+                        />
+                        <Bar dataKey="ppt" fill="url(#budgetGrad)" radius={[4, 4, 0, 0]} maxBarSize={40} name="PPT" />
+                        <Bar dataKey="sales" fill="url(#salesGrad)" radius={[4, 4, 0, 0]} maxBarSize={40} name="Venta" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  {/* Cumplimiento por Día */}
+                  <div className="bg-white/5 rounded-xl p-5 border border-white/10">
+                    <div className="flex items-center gap-2 mb-4">
+                      <TrendingUp className="w-5 h-5 text-purple-400" />
+                      <h4 className="text-lg font-bold text-white">% Cumplimiento Diario</h4>
+                    </div>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart 
+                        data={weekDaysData.map(day => {
+                          const ppt = selectedStore.getDailyBudget ? 
+                            selectedStore.getDailyBudget(parseISO(day.date.split(' ')[0] + '-2025')) / 1000000 : 
+                            (selectedStore.weeklyBudget / weekDaysData.length) / 1000000;
+                          const compliance = ppt > 0 ? (day.sales / ppt) * 100 : 0;
+                          return { ...day, compliance, ppt };
+                        })}
+                      >
+                        <defs>
+                          <linearGradient id="complianceGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#a855f7" stopOpacity={0.8}/>
+                            <stop offset="100%" stopColor="#7c3aed" stopOpacity={0.6}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.15} />
+                        <XAxis 
+                          dataKey="day" 
+                          stroke="#9ca3af" 
+                          fontSize={10}
+                          tickLine={false}
+                          angle={-20}
+                          textAnchor="end"
+                          height={60}
+                        />
+                        <YAxis 
+                          stroke="#9ca3af" 
+                          fontSize={10}
+                          tickLine={false}
+                          tickFormatter={(v) => `${v.toFixed(0)}%`}
+                        />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: '#1e293b',
+                            border: '2px solid #475569',
+                            borderRadius: '12px',
+                            padding: '12px 16px',
+                            boxShadow: '0 10px 30px rgba(0,0,0,0.3)'
+                          }}
+                          formatter={(value) => [`${value.toFixed(1)}%`, 'Cumplimiento']}
+                        />
+                        <Bar dataKey="compliance" fill="url(#complianceGrad)" radius={[4, 4, 0, 0]} maxBarSize={40}>
+                          {weekDaysData.map((entry, index) => {
+                            const ppt = selectedStore.getDailyBudget ? 
+                              selectedStore.getDailyBudget(parseISO(entry.date.split(' ')[0] + '-2025')) / 1000000 : 
+                              (selectedStore.weeklyBudget / weekDaysData.length) / 1000000;
+                            const compliance = ppt > 0 ? (entry.sales / ppt) * 100 : 0;
+                            const color = compliance >= 100 ? '#10b981' : compliance >= 85 ? '#3b82f6' : compliance >= 70 ? '#f59e0b' : '#ef4444';
+                            return <Cell key={`cell-${index}`} fill={color} />;
+                          })}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
                 </div>
 
-                {/* Stats */}
-                <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-white/10">
-                  <div className="text-center">
-                    <p className="text-xs text-slate-400 mb-1">Promedio Diario</p>
+                {/* Desglose Detallado */}
+                <div className="mt-6 bg-white/5 rounded-xl p-5 border border-white/10">
+                  <h4 className="text-lg font-bold text-white mb-4">Desglose Detallado</h4>
+                  <div className="space-y-3">
+                    {weekDaysData.map((day, idx) => {
+                      const ppt = selectedStore.getDailyBudget ? 
+                        selectedStore.getDailyBudget(parseISO(day.date.split(' ')[0] + '-2025')) / 1000000 : 
+                        (selectedStore.weeklyBudget / weekDaysData.length) / 1000000;
+                      const compliance = ppt > 0 ? (day.sales / ppt) * 100 : 0;
+                      const avgTicket = day.transactions > 0 ? (day.sales * 1000000) / day.transactions : 0;
+                      
+                      return (
+                        <motion.div
+                          key={idx}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: idx * 0.05 }}
+                          className="bg-white/5 rounded-xl p-4 border border-white/10 hover:border-white/20 transition-all"
+                        >
+                          <div className="flex items-center justify-between mb-3">
+                            <div>
+                              <p className="text-sm font-bold text-white capitalize">{day.day}</p>
+                              <p className="text-xs text-slate-400">{day.date}</p>
+                            </div>
+                            <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                              compliance >= 100 ? 'bg-emerald-500/20 text-emerald-300' :
+                              compliance >= 85 ? 'bg-blue-500/20 text-blue-300' :
+                              compliance >= 70 ? 'bg-amber-500/20 text-amber-300' :
+                              'bg-red-500/20 text-red-300'
+                            }`}>
+                              {compliance.toFixed(1)}%
+                            </span>
+                          </div>
+                          <div className="grid grid-cols-4 gap-3">
+                            <div>
+                              <p className="text-xs text-slate-400 mb-1">Venta</p>
+                              <p className="text-sm font-bold text-emerald-400">{formatShort(day.sales * 1000000)}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-slate-400 mb-1">PPT</p>
+                              <p className="text-sm font-bold text-indigo-400">{formatShort(ppt * 1000000)}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-slate-400 mb-1">Tickets</p>
+                              <p className="text-sm font-bold text-purple-400">{day.transactions}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-slate-400 mb-1">Ticket Prom</p>
+                              <p className="text-sm font-bold text-pink-400">{formatCurrency(avgTicket)}</p>
+                            </div>
+                          </div>
+                          <div className="relative h-2 bg-slate-800/50 rounded-full overflow-hidden mt-3">
+                            <motion.div
+                              initial={{ width: 0 }}
+                              animate={{ width: `${Math.min(compliance, 100)}%` }}
+                              transition={{ duration: 0.6, delay: idx * 0.05 }}
+                              className={`absolute inset-y-0 left-0 rounded-full ${
+                                compliance >= 100 ? 'bg-gradient-to-r from-emerald-500 to-emerald-600' :
+                                compliance >= 85 ? 'bg-gradient-to-r from-blue-500 to-blue-600' :
+                                compliance >= 70 ? 'bg-gradient-to-r from-amber-500 to-amber-600' :
+                                'bg-gradient-to-r from-red-500 to-red-600'
+                              }`}
+                            />
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Stats Resumen */}
+                <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mt-6">
+                  <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-xl p-4 border border-blue-500/20">
+                    <p className="text-xs text-blue-300 mb-1">Promedio Diario</p>
                     <p className="text-xl font-black text-white">
                       {formatShort((selectedStore.weekTotalSales / weekDaysData.length))}
                     </p>
                   </div>
-                  <div className="text-center">
-                    <p className="text-xs text-slate-400 mb-1">Mejor Día</p>
-                    <p className="text-xl font-black text-emerald-400">
+                  <div className="bg-gradient-to-br from-emerald-500/10 to-green-500/10 rounded-xl p-4 border border-emerald-500/20">
+                    <p className="text-xs text-emerald-300 mb-1">Mejor Día</p>
+                    <p className="text-xl font-black text-white">
                       {formatShort(Math.max(...weekDaysData.map(d => d.sales)) * 1000000)}
                     </p>
                   </div>
-                  <div className="text-center">
-                    <p className="text-xs text-slate-400 mb-1">Total Tickets</p>
-                    <p className="text-xl font-black text-purple-400">
+                  <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-xl p-4 border border-purple-500/20">
+                    <p className="text-xs text-purple-300 mb-1">Total Tickets</p>
+                    <p className="text-xl font-black text-white">
                       {weekDaysData.reduce((sum, d) => sum + d.transactions, 0)}
+                    </p>
+                  </div>
+                  <div className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 rounded-xl p-4 border border-amber-500/20">
+                    <p className="text-xs text-amber-300 mb-1">Ticket Promedio</p>
+                    <p className="text-xl font-black text-white">
+                      {formatCurrency(
+                        weekDaysData.reduce((sum, d) => sum + d.sales, 0) * 1000000 / 
+                        weekDaysData.reduce((sum, d) => sum + d.transactions, 0)
+                      )}
+                    </p>
+                  </div>
+                  <div className="bg-gradient-to-br from-rose-500/10 to-red-500/10 rounded-xl p-4 border border-rose-500/20">
+                    <p className="text-xs text-rose-300 mb-1">Días en Meta</p>
+                    <p className="text-xl font-black text-white">
+                      {weekDaysData.filter(d => {
+                        const ppt = selectedStore.getDailyBudget ? 
+                          selectedStore.getDailyBudget(parseISO(d.date.split(' ')[0] + '-2025')) / 1000000 : 
+                          (selectedStore.weeklyBudget / weekDaysData.length) / 1000000;
+                        return (d.sales / ppt) * 100 >= 100;
+                      }).length} / {weekDaysData.length}
                     </p>
                   </div>
                 </div>
