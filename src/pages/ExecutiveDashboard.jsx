@@ -892,7 +892,7 @@ Genera:
                       Análisis Completo →
                     </button>
                   </div>
-                  <ResponsiveContainer width="100%" height={300}>
+                  <ResponsiveContainer width="100%" height={240}>
                     <ComposedChart data={dailySalesData}>
                       <defs>
                         <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
@@ -1000,6 +1000,28 @@ Genera:
                       />
                     </ComposedChart>
                   </ResponsiveContainer>
+
+                  {/* Mini gráfica de cumplimiento por día */}
+                  <div className="mt-4 pt-4 border-t border-white/10">
+                    <h4 className="text-xs font-bold text-slate-400 mb-2">% Cumplimiento Diario</h4>
+                    <ResponsiveContainer width="100%" height={50}>
+                      <BarChart data={dailySalesData}>
+                        <Bar 
+                          dataKey="compliance" 
+                          radius={[2, 2, 0, 0]}
+                          maxBarSize={20}
+                        >
+                          {dailySalesData.map((entry, index) => (
+                            <Cell 
+                              key={`cell-${index}`} 
+                              fill={entry.compliance >= 100 ? '#10b981' : entry.compliance >= 85 ? '#f59e0b' : '#ef4444'}
+                            />
+                          ))}
+                        </Bar>
+                        <XAxis dataKey="date" tick={false} axisLine={false} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
                 </div>
               </div>
 
