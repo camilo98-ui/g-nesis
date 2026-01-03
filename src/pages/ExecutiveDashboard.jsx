@@ -21,10 +21,19 @@ export default function ExecutiveDashboard() {
   // Semana retail iniciando 29 de diciembre 2025
   const RETAIL_WEEK_START = new Date(2025, 11, 29); // 29 dic 2025
   
-  const [dateRange, setDateRange] = useState({ 
-    from: RETAIL_WEEK_START, 
-    to: addDays(RETAIL_WEEK_START, 6) // Primera semana
-  });
+  const [selectedWeeks, setSelectedWeeks] = useState([0]); // Array de índices de semanas
+
+  const dateRange = useMemo(() => {
+    if (selectedWeeks.length === 0) {
+      return { from: RETAIL_WEEK_START, to: addDays(RETAIL_WEEK_START, 6) };
+    }
+    const minWeek = Math.min(...selectedWeeks);
+    const maxWeek = Math.max(...selectedWeeks);
+    return {
+      from: addDays(RETAIL_WEEK_START, minWeek * 7),
+      to: addDays(RETAIL_WEEK_START, (maxWeek + 1) * 7 - 1)
+    };
+  }, [selectedWeeks]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStoreDetail, setSelectedStoreDetail] = useState(null);
   const [aiInsights, setAiInsights] = useState(null);
@@ -77,12 +86,14 @@ export default function ExecutiveDashboard() {
     const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
     const daysInMonth = monthEnd.getDate();
 
-    // Debug inicial
-    console.log('🔍 INICIO ANÁLISIS:', {
-      weekRange: `${format(currentWeekStart, 'yyyy-MM-dd')} a ${format(currentWeekEnd, 'yyyy-MM-dd')}`,
-      totalSalesRecords: allDailySales.length,
-      sampleDates: allDailySales.slice(0, 3).map(s => ({ store: s.store_id, date: s.date, sales: s.total_sales }))
-    });
+    // Debug de análisis
+    if (store.code === 'BTA 11') {
+      console.log('🔍 Análisis BTA 11:', {
+        weekRange: `${format(currentWeekStart, 'yyyy-MM-dd')} a ${format(currentWeekEnd, 'yyyy-MM-dd')}`,
+        storeSalesCount: storeSales.length,
+        sampleDates: storeSales.slice(0, 3).map(s => ({ date: s.date, sales: s.total_sales }))
+      });
+    }
 
     return STORES.map(store => {
       // Filtrar ventas de esta tienda
@@ -606,27 +617,68 @@ Genera:
             </div>
 
             <div className="flex items-center gap-2 flex-wrap">
-              {/* Filtro de Semanas Retail */}
+              {/* Filtro de Semanas Retail - Multi Select */}
               <div className="flex items-center gap-2 bg-white/10 backdrop-blur-xl rounded-lg px-3 py-2 border border-white/20">
                 <Filter className="w-4 h-4 text-blue-400" />
-                <select
-                  value={`${format(dateRange.from, 'yyyy-MM-dd')}`}
-                  onChange={(e) => {
-                    const startDate = new Date(e.target.value);
-                    setDateRange({ from: startDate, to: addDays(startDate, 6) });
-                  }}
-                  className="bg-transparent text-white text-sm font-medium outline-none cursor-pointer"
-                >
-                  {Array.from({ length: 8 }, (_, i) => {
-                    const weekStart = addDays(RETAIL_WEEK_START, i * 7);
-                    const weekEnd = addDays(weekStart, 6);
-                    return (
-                      <option key={i} value={format(weekStart, 'yyyy-MM-dd')} className="bg-slate-900">
-                        Semana {i + 1} ({format(weekStart, 'dd MMM')} - {format(weekEnd, 'dd MMM')})
-                      </option>
-                    );
-                  })}
-                </select>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button className="bg-transparent text-white text-sm font-medium outline-none cursor-pointer hover:text-blue-300 transition-colors">
+                      {selectedWeeks.length === 1 
+                        ? `Semana ${selectedWeeks[0] + 1}` 
+                        : `${selectedWeeks.length} semanas`} ({format(dateRange.from, 'dd MMM')} - {format(dateRange.to, 'dd MMM')})
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80 bg-slate-900 border-slate-700">
+                    <div className="space-y-2">
+                      <p className="text-xs text-slate-400 font-semibold mb-2">Selecciona semanas (múltiples)</p>
+                      {Array.from({ length: 8 }, (_, i) => {
+                        const weekStart = addDays(RETAIL_WEEK_START, i * 7);
+                        const weekEnd = addDays(weekStart, 6);
+                        const isSelected = selectedWeeks.includes(i);
+                        return (
+                          <button
+                            key={i}
+                            onClick={() => {
+                              if (isSelected) {
+                                setSelectedWeeks(prev => prev.filter(w => w !== i));
+                              } else {
+                                setSelectedWeeks(prev => [...prev, i].sort((a, b) => a - b));
+                              }
+                            }}
+                            className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                              isSelected 
+                                ? 'bg-blue-500/20 text-blue-300 border border-blue-500/40' 
+                                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                            }`}
+                          >
+                            <span className="flex items-center gap-2">
+                              {isSelected && <CheckCircle className="w-4 h-4" />}
+                              Semana {i + 1}: {format(weekStart, 'dd MMM')} - {format(weekEnd, 'dd MMM')}
+                            </span>
+                          </button>
+                        );
+                      })}
+                      <div className="pt-2 border-t border-slate-700 flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setSelectedWeeks([0, 1, 2, 3])}
+                          className="flex-1 text-xs"
+                        >
+                          Primeras 4
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setSelectedWeeks([0])}
+                          className="flex-1 text-xs"
+                        >
+                          Limpiar
+                        </Button>
+                      </div>
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
 
               <div className="relative w-48">
