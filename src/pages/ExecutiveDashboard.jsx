@@ -77,6 +77,13 @@ export default function ExecutiveDashboard() {
     const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
     const daysInMonth = monthEnd.getDate();
 
+    // Debug inicial
+    console.log('🔍 INICIO ANÁLISIS:', {
+      weekRange: `${format(currentWeekStart, 'yyyy-MM-dd')} a ${format(currentWeekEnd, 'yyyy-MM-dd')}`,
+      totalSalesRecords: allDailySales.length,
+      sampleDates: allDailySales.slice(0, 3).map(s => ({ store: s.store_id, date: s.date, sales: s.total_sales }))
+    });
+
     return STORES.map(store => {
       // Filtrar ventas de esta tienda
       const storeSales = allDailySales.filter(s => s.store_id === store.code);
