@@ -1873,75 +1873,7 @@ export default function Dashboard() {
                     ))}
                   </div>
 
-                  {/* Resumen con proyección mensual */}
-                  <div className="px-4 md:px-6 pb-4 md:pb-6 space-y-3">
-                    <div className="bg-white/5 rounded-xl p-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-white/70 text-sm font-bold">Progreso Mensual</span>
-                        <div className="flex items-center gap-3 text-right">
-                          <div>
-                            <p className="text-[10px] text-white/50">Vendido</p>
-                            <p className="text-xs md:text-sm font-bold text-white">{formatCurrency(totals.sales)}</p>
-                          </div>
-                          <div>
-                            <p className="text-[10px] text-violet-300">Proyección</p>
-                            <p className="text-xs md:text-sm font-bold text-violet-300">{formatCurrency(projections.projectedSales)}</p>
-                          </div>
-                          <div>
-                            <p className="text-[10px] text-white/50">Meta</p>
-                            <p className="text-xs md:text-sm font-bold text-white">{formatCurrency(currentBudget?.sales_budget)}</p>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="relative h-4 bg-white/10 rounded-full overflow-hidden">
-                        <motion.div
-                          className="absolute h-full bg-gradient-to-r from-pink-500 to-rose-500 rounded-full"
-                          initial={{ width: 0 }}
-                          animate={{ width: `${Math.min(totals.sales / (currentBudget?.sales_budget || 1) * 100, 100)}%` }}
-                          transition={{ duration: 1 }}
-                        />
-                        <motion.div
-                          className="absolute top-0 h-full w-1 bg-violet-400 shadow-lg"
-                          initial={{ left: 0 }}
-                          animate={{ left: `${Math.min(projections.projectedSales / (currentBudget?.sales_budget || 1) * 100, 100)}%` }}
-                          transition={{ duration: 1, delay: 0.5 }}
-                        />
-                        <div className="absolute right-0 top-0 h-full w-0.5 bg-white/50" />
-                      </div>
-                      <div className="flex justify-between mt-2 text-[10px] text-white/50">
-                        <span>Actual: {(totals.sales / (currentBudget?.sales_budget || 1) * 100).toFixed(0)}%</span>
-                        <span>Proyección: {(projections.projectedSales / (currentBudget?.sales_budget || 1) * 100).toFixed(0)}%</span>
-                        <span>Meta: 100%</span>
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                      <div className="bg-emerald-500/10 rounded-lg p-3 border border-emerald-400/20">
-                        <p className="text-[10px] text-emerald-200 mb-1">Promedio/Día</p>
-                        <p className="text-sm md:text-base font-bold text-emerald-400">
-                          {formatCurrency(projections.dailyAvgSales)}
-                        </p>
-                      </div>
-                      <div className="bg-amber-500/10 rounded-lg p-3 border border-amber-400/20">
-                        <p className="text-[10px] text-amber-200 mb-1">Necesitas/Día</p>
-                        <p className="text-sm md:text-base font-bold text-amber-400">
-                          {formatCurrency(projections.requiredDailySales)}
-                        </p>
-                      </div>
-                      <div className="bg-violet-500/10 rounded-lg p-3 border border-violet-400/20">
-                        <p className="text-[10px] text-violet-200 mb-1">Días Restantes</p>
-                        <p className="text-sm md:text-base font-bold text-violet-400">
-                          {projections.daysRemaining}
-                        </p>
-                      </div>
-                      <div className="bg-pink-500/10 rounded-lg p-3 border border-pink-400/20">
-                        <p className="text-[10px] text-pink-200 mb-1">Por Vender</p>
-                        <p className="text-sm md:text-base font-bold text-pink-400">
-                          {formatCurrency(projections.salesGap)}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+
                 </motion.div>
               );
             })()}
