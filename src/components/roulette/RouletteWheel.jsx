@@ -240,20 +240,7 @@ export default function RouletteWheel({ onResult, disabled, awardType = 'tienda'
             })}
           </svg>
 
-          {/* Centro de la ruleta */}
-          <motion.div 
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-28 rounded-full bg-gradient-to-br from-pink-400 to-rose-500 flex items-center justify-center shadow-2xl border-6 border-white z-10"
-            animate={{
-              scale: spinning ? [1, 1.1, 1] : 1,
-              rotate: spinning ? 360 : 0
-            }}
-            transition={{
-              scale: { duration: 0.5, repeat: spinning ? Infinity : 0 },
-              rotate: { duration: 2, repeat: spinning ? Infinity : 0, ease: "linear" }
-            }}
-          >
-            <Sparkles className="w-12 h-12 text-white" />
-          </motion.div>
+
         </motion.div>
       </div>
 
