@@ -688,70 +688,76 @@ Genera:
 
             {/* Grid Principal Estilo Power BI */}
             <div className="grid grid-cols-12 gap-4 mb-6">
-              {/* Columna Izquierda - Mini Gráfica de Cumplimiento */}
-              <div className="col-span-12 lg:col-span-2">
-                <div className="bg-white/5 backdrop-blur-xl rounded-lg p-4 border border-white/10 h-full">
-                  <h3 className="text-sm font-bold text-white mb-3">Cumplimiento Semanal</h3>
-                  <ResponsiveContainer width="100%" height={320}>
-                    <BarChart 
-                      data={storesAnalysis
-                        .filter(s => s.hasData)
-                        .sort((a, b) => b.weekCompliance - a.weekCompliance)
-                        .map(s => ({
-                          name: s.code.replace('BTA ', ''),
-                          cumplimiento: s.weekCompliance
-                        }))}
-                      layout="vertical"
-                      margin={{ left: 0, right: 10 }}
-                    >
-                      <XAxis 
-                        type="number" 
-                        stroke="#6b7280" 
-                        fontSize={9}
-                        tickLine={false}
-                        tickFormatter={(v) => `${v}%`}
-                      />
-                      <YAxis 
-                        type="category" 
-                        dataKey="name" 
-                        stroke="#9ca3af" 
-                        fontSize={9} 
-                        width={28}
-                        tickLine={false}
-                      />
-                      <Bar dataKey="cumplimiento" radius={[0, 4, 4, 0]} maxBarSize={14}>
-                        {storesAnalysis
-                          .filter(s => s.hasData)
-                          .sort((a, b) => b.weekCompliance - a.weekCompliance)
-                          .map((s, index) => (
-                            <Cell 
-                              key={`cell-${index}`} 
-                              fill={
-                                s.weekCompliance >= 100 ? '#10b981' :
-                                s.weekCompliance >= 90 ? '#3b82f6' :
-                                s.weekCompliance >= 70 ? '#f59e0b' : '#ef4444'
-                              }
-                            />
+              {/* Columna Izquierda - KPIs Visuales */}
+              <div className="col-span-12 lg:col-span-2 space-y-4">
+                {/* Venta Total */}
+                <div 
+                  onClick={() => setSelectedKPIDetail('sales')}
+                  className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-xl rounded-lg p-4 border border-blue-500/20 cursor-pointer hover:border-blue-500/40 transition-all"
+                >
+                  <p className="text-xs text-blue-300 mb-2">Venta Total</p>
+                  <p className="text-2xl font-black text-white mb-1 tabular-nums">{formatShort(zoneTotals.totalSales)}</p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-slate-400">Meta: {formatShort(zoneTotals.totalBudget)}</p>
+                    <p className={`text-xs font-bold ${
+                      ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 100 ? 'text-emerald-400' : 'text-amber-400'
+                    }`}>
+                      {((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%
+                    </p>
+                  </div>
+                </div>
+
+                {/* Estado de Tiendas - Mini Pie */}
+                <div 
+                  onClick={() => setSelectedKPIDetail('compliance')}
+                  className="bg-white/5 backdrop-blur-xl rounded-lg p-4 border border-white/10 cursor-pointer hover:bg-white/10 transition-all"
+                >
+                  <p className="text-xs text-slate-400 mb-3">Estado Tiendas</p>
+                  <div className="relative">
+                    <ResponsiveContainer width="100%" height={140}>
+                      <PieChart>
+                        <Pie
+                          data={[
+                            { name: 'Meta', value: statusCounts.positive, color: '#10b981' },
+                            { name: 'Alerta', value: statusCounts.negative, color: '#f59e0b' },
+                            { name: 'Crítico', value: statusCounts.critical, color: '#ef4444' }
+                          ]}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={35}
+                          outerRadius={55}
+                          paddingAngle={3}
+                          dataKey="value"
+                        >
+                          {[
+                            { name: 'Meta', value: statusCounts.positive, color: '#10b981' },
+                            { name: 'Alerta', value: statusCounts.negative, color: '#f59e0b' },
+                            { name: 'Crítico', value: statusCounts.critical, color: '#ef4444' }
+                          ].map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
                           ))}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                  <div className="grid grid-cols-4 gap-1 mt-3 pt-3 border-t border-white/10">
+                        </Pie>
+                      </PieChart>
+                    </ResponsiveContainer>
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div className="text-center">
+                        <p className="text-xl font-black text-white">{STORES.length}</p>
+                        <p className="text-[8px] text-slate-400">Total</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 mt-3">
                     <div className="text-center">
-                      <div className="w-2 h-2 rounded-full bg-emerald-500 mx-auto mb-1" />
-                      <p className="text-[8px] text-slate-400">≥100%</p>
+                      <p className="text-lg font-black text-emerald-400">{statusCounts.positive}</p>
+                      <p className="text-[9px] text-slate-400">Meta</p>
                     </div>
                     <div className="text-center">
-                      <div className="w-2 h-2 rounded-full bg-blue-500 mx-auto mb-1" />
-                      <p className="text-[8px] text-slate-400">90-99%</p>
+                      <p className="text-lg font-black text-amber-400">{statusCounts.negative}</p>
+                      <p className="text-[9px] text-slate-400">Alerta</p>
                     </div>
                     <div className="text-center">
-                      <div className="w-2 h-2 rounded-full bg-amber-500 mx-auto mb-1" />
-                      <p className="text-[8px] text-slate-400">70-89%</p>
-                    </div>
-                    <div className="text-center">
-                      <div className="w-2 h-2 rounded-full bg-red-500 mx-auto mb-1" />
-                      <p className="text-[8px] text-slate-400">&lt;70%</p>
+                      <p className="text-lg font-black text-red-400">{statusCounts.critical}</p>
+                      <p className="text-[9px] text-slate-400">Crítico</p>
                     </div>
                   </div>
                 </div>
