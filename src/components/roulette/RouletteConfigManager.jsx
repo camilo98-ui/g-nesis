@@ -34,6 +34,7 @@ export default function RouletteConfigManager({ storeId }) {
   const [prizes, setPrizes] = useState([]);
   const [spinDuration, setSpinDuration] = useState(6500);
   const [validationCedula, setValidationCedula] = useState('');
+  const [showSuccess, setShowSuccess] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: configs = [], isLoading } = useQuery({
@@ -74,6 +75,8 @@ export default function RouletteConfigManager({ storeId }) {
     onSuccess: () => {
       toast.success('✅ Configuración guardada exitosamente');
       queryClient.invalidateQueries(['rouletteConfig']);
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000);
     },
     onError: (error) => {
       console.error('Error al guardar configuración:', error);
@@ -262,6 +265,24 @@ export default function RouletteConfigManager({ storeId }) {
         <Save className="w-5 h-5 mr-2" />
         {saveMutation.isPending ? 'Guardando...' : 'Guardar Configuración'}
       </Button>
+
+      {/* Mensaje de éxito */}
+      {showSuccess && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0 }}
+          className="fixed bottom-8 right-8 bg-green-500 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 z-50"
+        >
+          <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+            <span className="text-2xl">✅</span>
+          </div>
+          <div>
+            <p className="font-bold text-lg">¡Guardado!</p>
+            <p className="text-sm opacity-90">Configuración actualizada correctamente</p>
+          </div>
+        </motion.div>
+      )}
     </div>
   );
 }
