@@ -21,7 +21,7 @@ const MonthlyBudgetDashboard = lazy(() => import('@/components/budget/MonthlyBud
 import {
   LayoutDashboard, Users, TrendingUp,
   Award, Target, Bell, Phone, Download, FileText,
-  Lock, Eye, EyeOff, Receipt, Snowflake, Settings as SettingsIcon, AlertTriangle, CheckCircle, Info, CalendarDays, LogOut, Sparkles, Palette } from
+  Lock, Eye, EyeOff, Receipt, Snowflake, Settings as SettingsIcon, AlertTriangle, CheckCircle, Info, CalendarDays, LogOut, Sparkles, Palette, Trophy } from
 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { toast } from 'sonner';
@@ -115,6 +115,17 @@ const MENU_ITEMS = [
   iconBg: 'bg-amber-200/60',
   iconColor: 'text-amber-500',
   textColor: 'text-amber-700'
+},
+{
+  name: 'Ruleta Popsy',
+  page: 'RoulettePopsy',
+  icon: Trophy,
+  description: 'Premios del mes',
+  bgColor: 'bg-gradient-to-br from-yellow-100/90 to-amber-100/80',
+  iconBg: 'bg-yellow-200/60',
+  iconColor: 'text-yellow-600',
+  textColor: 'text-yellow-700',
+  requiredRole: 'gerente'
 },
 
 {
