@@ -32,7 +32,6 @@ const STORE_ORDER_CONFIG = {
 };
 
 export default function SmartOrderPrediction({ allFreezersSlots = [], currentFreezer, storeCode }) {
-  const [activeTab, setActiveTab] = useState('semanal'); // semanal o adicional
 
   // Obtener configuración de la tienda
   const storeConfig = useMemo(() => {
@@ -267,7 +266,145 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
     };
   }, [urgent, mediumRotation, storeConfig]);
 
-  const currentOrder = activeTab === 'semanal' ? weeklyOrder : additionalOrder;
+  const renderOrderSection = (order, type, title, titleColor, bgGradient, borderColor) => (
+    <div className="space-y-3">
+      {/* Header del tipo de pedido */}
+      <div className={`p-3 rounded-xl border-2 ${bgGradient} ${borderColor}`}>
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-xs font-black flex items-center gap-1">
+            <BarChart3 className="w-3.5 h-3.5" />
+            {title}
+          </p>
+          <div className="text-right">
+            <p className="text-lg font-black">{order.total}</p>
+            <p className="text-[9px] font-medium opacity-70">Cubetas</p>
+          </div>
+        </div>
+        <div className="bg-white/50 rounded-lg p-2 text-[10px]">
+          <div className="flex items-center justify-between">
+            <span className="font-bold">📅 Montaje: {order.config?.[type === 'semanal' ? 'semanal' : 'adicional1']}</span>
+            <span className="font-bold">🚚 Entrega: {order.config?.[type === 'semanal' ? 'entregaSemanal' : 'entregaAdicional1']}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Sabores Gourmet */}
+      {order.gourmet.length > 0 &&
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <h4 className="text-sm font-bold text-blue-700 flex items-center gap-1">
+              🍦 Gourmet ({order.gourmet.length})
+            </h4>
+            <Progress value={order.gourmet.length / GOURMET_FLAVORS.length * 100} className="h-1.5 w-24" />
+          </div>
+          <div className="space-y-1.5 max-h-48 overflow-y-auto">
+            {order.gourmet.map((flavor, i) =>
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.03 }}
+                className="p-2 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border border-blue-200 hover:shadow-md transition-shadow">
+
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-bold text-blue-800 text-xs">{flavor.name}</span>
+                      <div className="flex items-center gap-1.5">
+                        {flavor.priority === 'CRÍTICO' &&
+                          <span className="px-1.5 py-0.5 bg-red-500 text-white text-[8px] font-bold rounded-full">
+                            CRÍTICO
+                          </span>
+                        }
+                        {flavor.priority === 'URGENTE' &&
+                          <span className="px-1.5 py-0.5 bg-orange-500 text-white text-[8px] font-bold rounded-full">
+                            URGENTE
+                          </span>
+                        }
+                        {flavor.priority === 'ALTA' &&
+                          <span className="px-1.5 py-0.5 bg-amber-500 text-white text-[8px] font-bold rounded-full">
+                            ALTA
+                          </span>
+                        }
+                        <span className="font-black text-blue-600 text-sm">{flavor.needed || flavor.totalCount}x</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between text-[8px] text-gray-600">
+                      <span>🏪 {flavor.freezers.size} nevera{flavor.freezers.size > 1 ? 's' : ''} • 📊 {flavor.coverageDays}d</span>
+                      <span className={`font-medium ${flavor.rotationSpeed > 50 ? 'text-red-600' : flavor.rotationSpeed > 30 ? 'text-amber-600' : 'text-green-600'}`}>
+                        ⚡ {flavor.rotationSpeed.toFixed(0)}%
+                      </span>
+                    </div>
+                    {flavor.reason &&
+                      <p className="text-[8px] text-gray-500 mt-0.5 italic">💡 {flavor.reason}</p>
+                    }
+              </motion.div>
+            )}
+          </div>
+        </div>
+      }
+
+      {/* Sabores Exclusivo */}
+      {order.exclusivo.length > 0 &&
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <h4 className="text-sm font-bold text-pink-700 flex items-center gap-1">
+              ✨ Exclusivo ({order.exclusivo.length})
+            </h4>
+            <Progress value={order.exclusivo.length / EXCLUSIVO_FLAVORS.length * 100} className="h-1.5 w-24" />
+          </div>
+          <div className="space-y-1.5 max-h-48 overflow-y-auto">
+            {order.exclusivo.map((flavor, i) =>
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.03 }}
+                className="p-2 bg-gradient-to-r from-pink-50 to-rose-50 rounded-lg border border-pink-200 hover:shadow-md transition-shadow">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-bold text-pink-800 text-xs">{flavor.name}</span>
+                      <div className="flex items-center gap-1.5">
+                        {flavor.priority === 'CRÍTICO' &&
+                          <span className="px-1.5 py-0.5 bg-red-500 text-white text-[8px] font-bold rounded-full">
+                            CRÍTICO
+                          </span>
+                        }
+                        {flavor.priority === 'URGENTE' &&
+                          <span className="px-1.5 py-0.5 bg-orange-500 text-white text-[8px] font-bold rounded-full">
+                            URGENTE
+                          </span>
+                        }
+                        {flavor.priority === 'ALTA' &&
+                          <span className="px-1.5 py-0.5 bg-amber-500 text-white text-[8px] font-bold rounded-full">
+                            ALTA
+                          </span>
+                        }
+                        <span className="font-black text-pink-600 text-sm">{flavor.needed || flavor.totalCount}x</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between text-[8px] text-gray-600">
+                      <span>🏪 {flavor.freezers.size} nevera{flavor.freezers.size > 1 ? 's' : ''} • 📊 {flavor.coverageDays}d</span>
+                      <span className={`font-medium ${flavor.rotationSpeed > 50 ? 'text-red-600' : flavor.rotationSpeed > 30 ? 'text-amber-600' : 'text-green-600'}`}>
+                        ⚡ {flavor.rotationSpeed.toFixed(0)}%
+                      </span>
+                    </div>
+                    {flavor.reason &&
+                      <p className="text-[8px] text-gray-500 mt-0.5 italic">💡 {flavor.reason}</p>
+                    }
+              </motion.div>
+            )}
+          </div>
+        </div>
+      }
+
+      {order.total === 0 &&
+        <div className="text-center py-4 text-gray-400">
+          <CheckCircle className="w-6 h-6 mx-auto mb-1 text-green-500" />
+          <p className="text-xs font-medium text-green-600">
+            {type === 'semanal' ? 'Stock completo' : 'No se requiere pedido adicional'}
+          </p>
+        </div>
+      }
+    </div>
+  );
 
   return (
     <motion.div
@@ -275,10 +412,10 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
       animate={{ opacity: 1, y: 0 }}
       className="space-y-4">
 
-      {/* Header con pestañas */}
+      {/* Header */}
       <Card className="border-2 border-purple-200 shadow-lg overflow-hidden">
-        <div className="bg-pink-700 p-4 from-purple-500 to-pink-500">
-          <div className="flex items-center justify-between mb-3">
+        <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-4">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
                 <Package className="w-5 h-5 text-white" />
@@ -287,8 +424,7 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
                 <h3 className="text-lg font-black text-white">📦 Pronóstico de Pedido</h3>
                 <p className="text-xs text-white/80">
                   {storeCode ? `${storeCode} • ` : ''}
-                  {fullAnalysis.flavors.length} sabores • 
-                  Cobertura: {fullAnalysis.coverageDays} días
+                  {fullAnalysis.flavors.length} sabores • Cobertura: {fullAnalysis.coverageDays} días
                 </p>
               </div>
             </div>
@@ -296,59 +432,14 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
               animate={{ rotate: [0, 5, -5, 0] }}
               transition={{ duration: 2, repeat: Infinity }}
               className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
-
               <Sparkles className="w-6 h-6 text-white" />
             </motion.div>
-          </div>
-
-          {/* Tabs */}
-          <div className="flex gap-2">
-            <button
-              onClick={() => setActiveTab('semanal')}
-              className={`flex-1 py-2 px-3 rounded-lg text-sm font-bold transition-all ${
-              activeTab === 'semanal' ?
-              'bg-white text-purple-600 shadow-lg' :
-              'bg-white/20 text-white hover:bg-white/30'}`
-              }>
-
-              <Calendar className="w-4 h-4 inline mr-1" />
-              Pedido Semanal
-            </button>
-            <button
-              onClick={() => setActiveTab('adicional')}
-              className={`flex-1 py-2 px-3 rounded-lg text-sm font-bold transition-all ${
-              activeTab === 'adicional' ?
-              'bg-white text-pink-600 shadow-lg' :
-              'bg-white/20 text-white hover:bg-white/30'}`
-              }>
-
-              <Zap className="w-4 h-4 inline mr-1" />
-              Adicional
-            </button>
           </div>
         </div>
 
         <CardContent className="p-4 space-y-4">
-          {/* Info de pedido y entrega */}
-          <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-3 border border-indigo-200 mb-3">
-            <div className="flex items-center justify-between text-xs">
-              <div>
-                <p className="text-indigo-600 font-bold mb-0.5">
-                  📅 Montaje: {currentOrder.config?.[activeTab === 'semanal' ? 'semanal' : 'adicional1']}
-                </p>
-                <p className="text-indigo-500 text-[10px]">
-                  🚚 Entrega: {currentOrder.config?.[activeTab === 'semanal' ? 'entregaSemanal' : 'entregaAdicional1']}
-                </p>
-              </div>
-              <div className="text-right">
-                <p className="text-indigo-900 font-black text-lg">{currentOrder.total}</p>
-                <p className="text-indigo-600 text-[10px] font-medium">Cubetas totales</p>
-              </div>
-            </div>
-          </div>
-
           {/* Métricas clave */}
-          <div className="grid grid-cols-4 gap-2 mb-3">
+          <div className="grid grid-cols-4 gap-2">
             <div className="p-2 rounded-lg bg-red-50 border border-red-200 text-center">
               <p className="text-xs font-black text-red-700">{fullAnalysis.critical}</p>
               <p className="text-[9px] text-red-600">Críticos</p>
@@ -367,160 +458,25 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
             </div>
           </div>
 
-          {/* Descripción analítica del pedido */}
-          <div className={`p-3 rounded-xl border-2 ${
-          activeTab === 'semanal' ?
-          'bg-gradient-to-r from-purple-50 to-indigo-50 border-purple-300' :
-          'bg-gradient-to-r from-pink-50 to-rose-50 border-pink-300'}`
-          }>
-            <p className="text-xs font-bold mb-1.5 flex items-center gap-1">
-              <BarChart3 className="w-3 h-3" />
-              {activeTab === 'semanal' ? '🎯 Pedido Semanal - Cobertura 7 días' : '⚡ Pedido Adicional - Reposición Táctica'}
-            </p>
-            <p className="text-[10px] text-gray-700 leading-relaxed mb-2">
-              {activeTab === 'semanal' ?
-              `Pedido estratégico para ${storeConfig.entregaSemanal}. Incluye ${critical.length} críticos, ${urgent.length} urgentes y sabores de alta rotación. Calculado para mantener operación hasta próximo pedido.` :
-              `Reposición mid-week para ${storeConfig.entregaAdicional1}. Enfocado en sabores con cobertura < 4 días. Evita quiebre de stock entre entregas principales.`}
-            </p>
-            <div className="flex items-center gap-2 text-[9px] text-gray-500">
-              <span className="flex items-center gap-1">
-                <Calendar className="w-2.5 h-2.5" />
-                Monta: {activeTab === 'semanal' ? storeConfig.semanal : storeConfig.adicional1}
-              </span>
-              <span>•</span>
-              <span className="flex items-center gap-1">
-                <TrendingUp className="w-2.5 h-2.5" />
-                Llega: {activeTab === 'semanal' ? storeConfig.entregaSemanal : storeConfig.entregaAdicional1}
-              </span>
-            </div>
-          </div>
+          {/* Pedido Semanal */}
+          {renderOrderSection(
+            weeklyOrder, 
+            'semanal', 
+            '🎯 Pedido Semanal - Cobertura 7 días', 
+            'text-purple-900',
+            'bg-gradient-to-r from-purple-50 to-indigo-50',
+            'border-purple-300'
+          )}
 
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeTab}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="space-y-3">
-
-              {/* Sabores Gourmet */}
-              {currentOrder.gourmet.length > 0 &&
-              <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="text-sm font-bold text-blue-700 flex items-center gap-1">
-                      🍦 Gourmet ({currentOrder.gourmet.length})
-                    </h4>
-                    <Progress value={currentOrder.gourmet.length / GOURMET_FLAVORS.length * 100} className="h-1.5 w-24" />
-                  </div>
-                  <div className="space-y-1.5 max-h-64 overflow-y-auto">
-                    {currentOrder.gourmet.map((flavor, i) =>
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.03 }}
-                    className="p-2.5 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border border-blue-200 hover:shadow-md transition-shadow">
-
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-bold text-blue-800 text-sm">{flavor.name}</span>
-                          <div className="flex items-center gap-2">
-                            {flavor.priority === 'CRÍTICO' &&
-                        <span className="px-2 py-0.5 bg-red-500 text-white text-[9px] font-bold rounded-full">
-                                CRÍTICO
-                              </span>
-                        }
-                            {flavor.priority === 'URGENTE' &&
-                        <span className="px-2 py-0.5 bg-orange-500 text-white text-[9px] font-bold rounded-full">
-                                URGENTE
-                              </span>
-                        }
-                            {flavor.priority === 'ALTA' &&
-                        <span className="px-2 py-0.5 bg-amber-500 text-white text-[9px] font-bold rounded-full">
-                                ALTA
-                              </span>
-                        }
-                            <span className="font-black text-blue-600 text-base">{flavor.needed || flavor.totalCount}x</span>
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between text-[9px] text-gray-600">
-                          <span>🏪 {flavor.freezers.size} nevera{flavor.freezers.size > 1 ? 's' : ''} • 📊 {flavor.coverageDays}d cobertura</span>
-                          <span className={`font-medium ${flavor.rotationSpeed > 50 ? 'text-red-600' : flavor.rotationSpeed > 30 ? 'text-amber-600' : 'text-green-600'}`}>
-                              ⚡ {flavor.rotationSpeed.toFixed(0)}% rot
-                            </span>
-                        </div>
-                        {flavor.reason &&
-                      <p className="text-[9px] text-gray-500 mt-1 italic">💡 {flavor.reason}</p>
-                      }
-                      </motion.div>
-                  )}
-                  </div>
-                </div>
-              }
-
-              {/* Sabores Exclusivo */}
-              {currentOrder.exclusivo.length > 0 &&
-              <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="text-sm font-bold text-pink-700 flex items-center gap-1">
-                      ✨ Exclusivo ({currentOrder.exclusivo.length})
-                    </h4>
-                    <Progress value={currentOrder.exclusivo.length / EXCLUSIVO_FLAVORS.length * 100} className="h-1.5 w-24" />
-                  </div>
-                  <div className="space-y-1.5 max-h-64 overflow-y-auto">
-                    {currentOrder.exclusivo.map((flavor, i) =>
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.03 }}
-                    className="p-2.5 bg-gradient-to-r from-pink-50 to-rose-50 rounded-lg border border-pink-200 hover:shadow-md transition-shadow">
-
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-bold text-pink-800 text-sm">{flavor.name}</span>
-                          <div className="flex items-center gap-2">
-                            {flavor.priority === 'CRÍTICO' &&
-                        <span className="px-2 py-0.5 bg-red-500 text-white text-[9px] font-bold rounded-full">
-                                CRÍTICO
-                              </span>
-                        }
-                            {flavor.priority === 'URGENTE' &&
-                        <span className="px-2 py-0.5 bg-orange-500 text-white text-[9px] font-bold rounded-full">
-                                URGENTE
-                              </span>
-                        }
-                            {flavor.priority === 'ALTA' &&
-                        <span className="px-2 py-0.5 bg-amber-500 text-white text-[9px] font-bold rounded-full">
-                                ALTA
-                              </span>
-                        }
-                            <span className="font-black text-pink-600 text-base">{flavor.needed || flavor.totalCount}x</span>
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between text-[9px] text-gray-600">
-                          <span>🏪 {flavor.freezers.size} nevera{flavor.freezers.size > 1 ? 's' : ''} • 📊 {flavor.coverageDays}d cobertura</span>
-                          <span className={`font-medium ${flavor.rotationSpeed > 50 ? 'text-red-600' : flavor.rotationSpeed > 30 ? 'text-amber-600' : 'text-green-600'}`}>
-                              ⚡ {flavor.rotationSpeed.toFixed(0)}% rot
-                            </span>
-                        </div>
-                        {flavor.reason &&
-                      <p className="text-[9px] text-gray-500 mt-1 italic">💡 {flavor.reason}</p>
-                      }
-                      </motion.div>
-                  )}
-                  </div>
-                </div>
-              }
-
-              {currentOrder.total === 0 &&
-              <div className="text-center py-6 text-gray-400">
-                  <CheckCircle className="w-8 h-8 mx-auto mb-2 text-green-500" />
-                  <p className="text-sm font-medium text-green-600">
-                    {activeTab === 'semanal' ? 'Stock completo' : 'No se requiere pedido adicional'}
-                  </p>
-                </div>
-              }
-            </motion.div>
-          </AnimatePresence>
+          {/* Pedido Adicional */}
+          {renderOrderSection(
+            additionalOrder, 
+            'adicional', 
+            '⚡ Pedido Adicional - Reposición Táctica', 
+            'text-pink-900',
+            'bg-gradient-to-r from-pink-50 to-rose-50',
+            'border-pink-300'
+          )}
 
           {/* Análisis de planeación de demanda */}
           <div className="pt-3 border-t border-gray-200 space-y-2">
@@ -544,19 +500,9 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
                 </div>
               </div>
             </div>
-            
-            <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg p-2.5 border border-blue-200">
-              <p className="text-[9px] text-blue-900 leading-relaxed">
-                <span className="font-bold">💡 Recomendación:</span>{' '}
-                {activeTab === 'semanal' 
-                  ? `Monta este pedido el ${storeConfig.semanal} para recibir ${storeConfig.entregaSemanal}. Prioriza sabores críticos y urgentes para evitar quiebres.`
-                  : `Complementa mid-week el ${storeConfig.adicional1} para llegar ${storeConfig.entregaAdicional1}. Enfócate solo en sabores con cobertura crítica.`
-                }
-              </p>
-            </div>
           </div>
         </CardContent>
       </Card>
-    </motion.div>);
-
+    </motion.div>
+  );
 }
