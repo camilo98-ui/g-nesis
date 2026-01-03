@@ -1684,250 +1684,177 @@ export default function Dashboard() {
             }
             </AnimatePresence>
 
-            {/* Proyección del Mes - Solo en modo ACTUAL */}
-            {projections && !showComparison &&
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800 rounded-3xl shadow-2xl overflow-hidden">
-
-                {/* Header con cumplimiento de VENTA ACTUAL */}
-                <div className="bg-gradient-to-r from-pink-500/20 to-violet-500/20 p-6 border-b border-white/10">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                        <Target className="w-6 h-6 text-pink-400" />
-                        Proyección del Mes
-                      </h3>
-                      <p className="text-white/60 text-sm mt-1">
-                        {projections.daysRemaining} días restantes para cerrar el mes
-                      </p>
-                    </div>
-                    {/* Cumplimiento circular - VENTA ACTUAL vs META */}
-                    <div className="relative">
-                      <svg className="w-24 h-24 transform -rotate-90">
-                        <circle cx="48" cy="48" r="42" stroke="rgba(255,255,255,0.1)" strokeWidth="8" fill="none" />
-                        <motion.circle
-                      cx="48" cy="48" r="42"
-                      stroke={totals.sales / (currentBudget?.sales_budget || 1) * 100 >= 70 ? '#10b981' : '#f59e0b'}
-                      strokeWidth="8"
-                      fill="none"
-                      strokeLinecap="round"
-                      initial={{ strokeDasharray: "0 264" }}
-                      animate={{ strokeDasharray: `${Math.min(totals.sales / (currentBudget?.sales_budget || 1) * 264, 264)} 264` }}
-                      transition={{ duration: 1.5 }} />
-
-                      </svg>
-                      <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <motion.span
-                      className="text-2xl font-black text-white"
-                      animate={{ scale: [1, 1.05, 1] }}
-                      transition={{ duration: 2, repeat: Infinity }}>
-
-                          {currentBudget?.sales_budget > 0 ? (totals.sales / currentBudget.sales_budget * 100).toFixed(0) : 0}%
-                        </motion.span>
-                        <span className="text-[10px] text-white/60">Venta Actual</span>
+            {/* Análisis Semanal Retail - Solo en modo ACTUAL */}
+            {projections && !showComparison && (() => {
+              const now = new Date();
+              const monthStart = startOfMonth(now);
+              const monthEnd = endOfMonth(now);
+              
+              // Obtener todas las semanas retail del mes
+              const retailWeeks = [];
+              let weekStart = startOfWeek(monthStart, { weekStartsOn: 1 });
+              
+              while (weekStart <= monthEnd) {
+                const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
+                const weekDays = eachDayOfInterval({ start: weekStart, end: weekEnd })
+                  .filter(d => d >= monthStart && d <= monthEnd);
+                
+                if (weekDays.length > 0) {
+                  const weekSales = dailySales.filter(s => {
+                    const saleDate = new Date(s.date);
+                    return saleDate >= weekStart && saleDate <= weekEnd && saleDate >= monthStart && saleDate <= monthEnd;
+                  }).reduce((sum, s) => sum + (s.total_sales || 0), 0);
+                  
+                  const weekNumber = retailWeeks.length + 1;
+                  const isPast = weekEnd < now;
+                  const isCurrent = weekStart <= now && weekEnd >= now;
+                  
+                  retailWeeks.push({
+                    number: weekNumber,
+                    start: weekStart,
+                    end: weekEnd,
+                    sales: weekSales,
+                    isPast,
+                    isCurrent,
+                    daysInMonth: weekDays.length
+                  });
+                }
+                
+                weekStart = new Date(weekStart);
+                weekStart.setDate(weekStart.getDate() + 7);
+              }
+              
+              return (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800 rounded-3xl shadow-2xl overflow-hidden"
+                >
+                  <div className="bg-gradient-to-r from-pink-500/20 to-violet-500/20 p-6 border-b border-white/10">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                          <Target className="w-6 h-6 text-pink-400" />
+                          Análisis por Semanas Retail
+                        </h3>
+                        <p className="text-white/60 text-sm mt-1">
+                          {retailWeeks.length} semanas retail en {format(monthStart, 'MMMM yyyy', { locale: es })}
+                        </p>
+                      </div>
+                      <div className="relative">
+                        <svg className="w-24 h-24 transform -rotate-90">
+                          <circle cx="48" cy="48" r="42" stroke="rgba(255,255,255,0.1)" strokeWidth="8" fill="none" />
+                          <motion.circle
+                            cx="48" cy="48" r="42"
+                            stroke={totals.sales / (currentBudget?.sales_budget || 1) * 100 >= 70 ? '#10b981' : '#f59e0b'}
+                            strokeWidth="8"
+                            fill="none"
+                            strokeLinecap="round"
+                            initial={{ strokeDasharray: "0 264" }}
+                            animate={{ strokeDasharray: `${Math.min(totals.sales / (currentBudget?.sales_budget || 1) * 264, 264)} 264` }}
+                            transition={{ duration: 1.5 }}
+                          />
+                        </svg>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                          <motion.span
+                            className="text-2xl font-black text-white"
+                            animate={{ scale: [1, 1.05, 1] }}
+                            transition={{ duration: 2, repeat: Infinity }}
+                          >
+                            {currentBudget?.sales_budget > 0 ? (totals.sales / currentBudget.sales_budget * 100).toFixed(0) : 0}%
+                          </motion.span>
+                          <span className="text-[10px] text-white/60">Del Mes</span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Grid de métricas CON GRÁFICAS - Botones interactivos */}
-                <div className="p-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {[
-              {
-                key: 'sales',
-                label: 'Venta Actual',
-                value: totals.sales,
-                icon: DollarSign,
-                iconBg: 'bg-emerald-500/20',
-                iconColor: 'text-emerald-400',
-                barColor: 'bg-emerald-400/60',
-                chartData: chartData.slice(-7).map((d) => d.ventas),
-                footer: `${(totals.sales / (currentBudget?.sales_budget || 1) * 100).toFixed(0)}% de meta`
-              },
-              {
-                key: 'projection',
-                label: 'Proyección Cierre',
-                value: projections.projectedSales,
-                icon: TrendingUp,
-                iconBg: 'bg-violet-500/20',
-                iconColor: 'text-violet-400',
-                isGauge: true,
-                gaugePercent: projections.projectedSales / (currentBudget?.sales_budget || 1) * 100,
-                footer: `${(projections.projectedSales / (currentBudget?.sales_budget || 1) * 100).toFixed(0)}% proyectado`,
-                footerColor: projections.salesOnTrack ? 'text-emerald-400' : 'text-amber-400'
-              },
-              {
-                key: 'required',
-                label: 'Necesitas/Día',
-                value: projections.requiredDailySales,
-                icon: Zap,
-                iconBg: 'bg-amber-500/20',
-                iconColor: 'text-amber-400',
-                isTrend: true,
-                footer: `${formatCurrency(projections.salesGap)} restantes`
-              },
-              {
-                key: 'ticket',
-                label: 'Ticket Promedio',
-                value: projections.avgTicket,
-                icon: Receipt,
-                iconBg: 'bg-sky-500/20',
-                iconColor: 'text-sky-400',
-                isComparative: true,
-                comparePercent: projections.avgTicket / (projections.budgetTicket || 1) * 100,
-                footer: `Meta: ${formatCurrency(projections.budgetTicket)}`
-              }].
-              map((item, idx) => {
-                const Icon = item.icon;
-                return (
-                  <motion.button
-                    key={item.key}
-                    whileHover={{ scale: 1.05, y: -5 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => setProjectionMetric(item.key)}
-                    className="bg-white/5 rounded-2xl p-4 border border-white/10 text-left transition-all hover:bg-white/10 hover:border-white/20 cursor-pointer">
-
-                        <div className="flex items-center gap-2 mb-2">
-                          <div className={`w-8 h-8 rounded-lg ${item.iconBg} flex items-center justify-center`}>
-                            <Icon className={`w-4 h-4 ${item.iconColor}`} />
+                  {/* Grid de semanas */}
+                  <div className="p-6 grid grid-cols-1 md:grid-cols-5 gap-4">
+                    {retailWeeks.map((week, idx) => (
+                      <motion.div
+                        key={idx}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: idx * 0.1 }}
+                        whileHover={{ scale: 1.05, y: -5 }}
+                        className={`rounded-2xl p-4 border-2 transition-all ${
+                          week.isCurrent 
+                            ? 'bg-gradient-to-br from-pink-500/20 to-violet-500/20 border-pink-400/50' 
+                            : week.isPast
+                            ? 'bg-white/5 border-white/10 hover:border-white/20'
+                            : 'bg-white/5 border-white/10 opacity-50'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-3">
+                          <div className={`text-xs font-bold px-2 py-1 rounded-full ${
+                            week.isCurrent 
+                              ? 'bg-pink-400/30 text-pink-200' 
+                              : 'bg-white/10 text-white/60'
+                          }`}>
+                            Semana {week.number}
                           </div>
-                          <span className="text-white/70 text-xs">{item.label}</span>
+                          {week.isCurrent && (
+                            <div className="w-2 h-2 rounded-full bg-pink-400 animate-pulse" />
+                          )}
                         </div>
-                        <p className="text-xl font-bold text-white mb-2">{formatCurrency(item.value)}</p>
                         
-                        {/* Visualización según tipo */}
-                        {item.chartData &&
-                    <div className="flex items-end gap-0.5 h-10">
-                            {item.chartData.map((val, i) =>
-                      <motion.div
-                        key={i}
-                        className={`flex-1 ${item.barColor} rounded-t-lg shadow-sm`}
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{
-                          height: `${Math.max(15, val / Math.max(...item.chartData, 1) * 100)}%`,
-                          opacity: 1,
-                          y: [0, -2, 0]
-                        }}
-                        transition={{
-                          delay: idx * 0.1 + i * 0.05,
-                          y: { duration: 1, repeat: Infinity, repeatDelay: 2, delay: i * 0.1 }
-                        }}
-                        whileHover={{ scaleY: 1.1, y: -3 }} />
-
-                      )}
-                          </div>
-                    }
+                        <p className="text-white/50 text-[10px] mb-2">
+                          {format(week.start, 'dd MMM', { locale: es })} - {format(week.end, 'dd MMM', { locale: es })}
+                        </p>
                         
-                        {item.isGauge &&
-                    <div className="flex justify-center">
-                            <svg className="w-12 h-12 transform -rotate-90">
-                              <circle cx="24" cy="24" r="20" stroke="rgba(255,255,255,0.1)" strokeWidth="4" fill="none" />
-                              <motion.circle
-                          cx="24" cy="24" r="20"
-                          stroke="#8b5cf6"
-                          strokeWidth="4"
-                          fill="none"
-                          strokeLinecap="round"
-                          initial={{ strokeDasharray: "0 126" }}
-                          animate={{ strokeDasharray: `${Math.min(item.gaugePercent * 1.26, 126)} 126` }}
-                          transition={{ delay: idx * 0.1, duration: 1 }} />
-
-                            </svg>
-                          </div>
-                    }
+                        <p className="text-lg font-black text-white mb-2">
+                          {formatCurrency(week.sales)}
+                        </p>
                         
-                        {item.isTrend &&
-                    <div className="h-10 flex items-center relative">
-                            <svg className="w-full h-full" viewBox="0 0 100 30">
-                              <defs>
-                                <linearGradient id="trendGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                                  <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.3" />
-                                  <stop offset="100%" stopColor="#f59e0b" stopOpacity="1" />
-                                </linearGradient>
-                              </defs>
-                              <motion.path
-                          d="M 0 25 Q 25 20 50 15 T 100 5"
-                          fill="none"
-                          stroke="url(#trendGradient)"
-                          strokeWidth="3"
-                          initial={{ pathLength: 0 }}
-                          animate={{ pathLength: 1 }}
-                          transition={{ delay: idx * 0.1, duration: 1.5, ease: "easeInOut" }} />
-
-                              <motion.circle
-                          cx="50"
-                          cy="15"
-                          r="3"
-                          fill="#f59e0b"
-                          initial={{ opacity: 0 }}
-                          animate={{
-                            cx: [0, 50, 100],
-                            cy: [25, 15, 5],
-                            opacity: [0, 1, 1, 0]
-                          }}
-                          transition={{ duration: 2, delay: idx * 0.1 + 1, repeat: Infinity, repeatDelay: 1, ease: "easeInOut" }} />
-
-                            </svg>
-                          </div>
-                    }
+                        <div className="h-8 bg-white/5 rounded-lg flex items-end gap-0.5 p-1 overflow-hidden">
+                          {Array(week.daysInMonth).fill(0).map((_, i) => (
+                            <motion.div
+                              key={i}
+                              className={`flex-1 rounded-t ${
+                                week.isCurrent ? 'bg-pink-400/60' : 'bg-white/40'
+                              }`}
+                              initial={{ height: 0 }}
+                              animate={{ height: `${30 + Math.random() * 70}%` }}
+                              transition={{ delay: idx * 0.1 + i * 0.05, duration: 0.5 }}
+                            />
+                          ))}
+                        </div>
                         
-                        {item.isComparative &&
-                    <div className="space-y-1">
-                            <div className="flex items-center gap-2">
-                              <span className="text-[8px] text-white/50 w-10">Actual</span>
-                              <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
-                                <motion.div
-                            className="h-full bg-sky-400 rounded-full"
-                            initial={{ width: 0 }}
-                            animate={{ width: `${Math.min(item.comparePercent, 100)}%` }}
-                            transition={{ delay: idx * 0.1 }} />
+                        <p className="text-[10px] text-white/40 mt-2">
+                          {week.daysInMonth} días en mes
+                        </p>
+                      </motion.div>
+                    ))}
+                  </div>
 
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-[8px] text-white/50 w-10">Meta</span>
-                              <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
-                                <div className="h-full bg-white/30 rounded-full w-full" />
-                              </div>
-                            </div>
-                          </div>
-                    }
-                        
-                        <p className={`text-[10px] mt-1 ${item.footerColor || 'text-white/50'}`}>{item.footer}</p>
-                      </motion.button>);
-
-              })}
-                </div>
-
-                {/* Barra de progreso visual - % VENTA ACTUAL */}
-                <div className="px-6 pb-6">
-                  <div className="bg-white/5 rounded-xl p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-white/70 text-sm">Progreso de Venta</span>
-                      <span className="text-white font-bold">
-                        {formatCurrency(currentBudget?.sales_budget - totals.sales)} por vender
-                      </span>
-                    </div>
-                    <div className="relative h-4 bg-white/10 rounded-full overflow-hidden">
-                      <motion.div
-                    className="absolute h-full bg-gradient-to-r from-pink-500 to-violet-500 rounded-full"
-                    initial={{ width: 0 }}
-                    animate={{ width: `${Math.min(totals.sales / (currentBudget?.sales_budget || 1) * 100, 100)}%` }}
-                    transition={{ duration: 1 }} />
-
-                      {/* Marcador del 100% */}
-                      <div className="absolute right-0 top-0 h-full w-0.5 bg-white/50" />
-                    </div>
-                    <div className="flex justify-between mt-2 text-[10px] text-white/50">
-                      <span>Venta Actual: {(totals.sales / (currentBudget?.sales_budget || 1) * 100).toFixed(0)}%</span>
-                      <span>Meta: 100%</span>
+                  {/* Resumen del progreso */}
+                  <div className="px-6 pb-6">
+                    <div className="bg-white/5 rounded-xl p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-white/70 text-sm">Progreso Mensual</span>
+                        <span className="text-white font-bold">
+                          {formatCurrency(currentBudget?.sales_budget - totals.sales)} por vender
+                        </span>
+                      </div>
+                      <div className="relative h-4 bg-white/10 rounded-full overflow-hidden">
+                        <motion.div
+                          className="absolute h-full bg-gradient-to-r from-pink-500 to-violet-500 rounded-full"
+                          initial={{ width: 0 }}
+                          animate={{ width: `${Math.min(totals.sales / (currentBudget?.sales_budget || 1) * 100, 100)}%` }}
+                          transition={{ duration: 1 }}
+                        />
+                        <div className="absolute right-0 top-0 h-full w-0.5 bg-white/50" />
+                      </div>
+                      <div className="flex justify-between mt-2 text-[10px] text-white/50">
+                        <span>Actual: {(totals.sales / (currentBudget?.sales_budget || 1) * 100).toFixed(0)}%</span>
+                        <span>Meta: 100%</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </motion.div>
-          }
+                </motion.div>
+              );
+            })()}
 
             {/* Resumen Ejecutivo */}
             <motion.div
