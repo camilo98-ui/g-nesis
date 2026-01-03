@@ -907,76 +907,93 @@ Genera:
                 </div>
               </div>
 
-              {/* Columna Derecha - Mix de Gráficas */}
+              {/* Columna Derecha - Proyecciones y Análisis */}
               <div className="col-span-12 lg:col-span-4 space-y-4">
-                {/* Distribución de Estado - Mejorado */}
-                <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl rounded-lg p-5 border border-white/10 shadow-xl">
+                {/* Proyección Semanal */}
+                <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-xl rounded-lg p-5 border border-purple-500/20 shadow-xl">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-base font-black text-white">Estado de Tiendas</h3>
-                    <span className="text-xs px-2 py-1 rounded bg-white/10 text-slate-300">{STORES.length} Total</span>
+                    <h3 className="text-base font-black text-white">Proyección Semanal</h3>
+                    <span className="text-xs px-2 py-1 rounded bg-purple-500/20 text-purple-300 font-bold">
+                      {selectedWeeks.length === 1 ? `Sem ${selectedWeeks[0] + 1}` : `${selectedWeeks.length} sem`}
+                    </span>
                   </div>
-                  <div className="relative">
-                    <ResponsiveContainer width="100%" height={200}>
-                      <PieChart>
-                        <defs>
-                          <linearGradient id="greenGradient" x1="0" y1="0" x2="1" y2="1">
-                            <stop offset="0%" stopColor="#10b981" />
-                            <stop offset="100%" stopColor="#059669" />
-                          </linearGradient>
-                          <linearGradient id="orangeGradient" x1="0" y1="0" x2="1" y2="1">
-                            <stop offset="0%" stopColor="#f59e0b" />
-                            <stop offset="100%" stopColor="#d97706" />
-                          </linearGradient>
-                          <linearGradient id="redGradient" x1="0" y1="0" x2="1" y2="1">
-                            <stop offset="0%" stopColor="#ef4444" />
-                            <stop offset="100%" stopColor="#dc2626" />
-                          </linearGradient>
-                        </defs>
-                        <Pie
-                          data={statusDistributionData}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={55}
-                          outerRadius={85}
-                          paddingAngle={4}
-                          dataKey="value"
-                        >
-                          {statusDistributionData.map((entry, index) => (
-                            <Cell 
-                              key={`cell-${index}`} 
-                              fill={index === 0 ? 'url(#greenGradient)' : index === 1 ? 'url(#orangeGradient)' : 'url(#redGradient)'} 
-                            />
-                          ))}
-                        </Pie>
-                      </PieChart>
-                    </ResponsiveContainer>
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <div className="text-center">
-                        <p className="text-3xl font-black text-white">{STORES.length}</p>
-                        <p className="text-xs text-slate-400">Tiendas</p>
-                      </div>
+                  
+                  {/* KPIs de Proyección */}
+                  <div className="grid grid-cols-2 gap-3 mb-4">
+                    <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+                      <p className="text-xs text-slate-400 mb-1">Venta Real</p>
+                      <p className="text-xl font-black text-white">{formatShort(zoneTotals.totalSales)}</p>
+                    </div>
+                    <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+                      <p className="text-xs text-slate-400 mb-1">Proyección</p>
+                      <p className="text-xl font-black text-emerald-400">{formatShort(zoneTotals.totalProjection)}</p>
                     </div>
                   </div>
-                  <div className="grid grid-cols-3 gap-3 mt-4">
-                    {statusDistributionData.map((item, i) => (
-                      <div key={i} className="bg-white/5 rounded-lg p-3 text-center border border-white/10">
-                        <div className="w-3 h-3 rounded-full mx-auto mb-2" style={{ backgroundColor: item.color }} />
-                        <p className="text-2xl font-black text-white mb-1">{item.value}</p>
-                        <p className="text-[10px] text-slate-400 font-semibold">{item.name}</p>
-                        <p className="text-xs text-slate-500 mt-1">{Math.round((item.value/STORES.length)*100)}%</p>
-                      </div>
-                    ))}
+
+                  {/* Gráfica de Proyección */}
+                  <ResponsiveContainer width="100%" height={160}>
+                    <BarChart data={[
+                      { name: 'Meta', value: zoneTotals.totalBudget / 1000000, fill: '#6366f1' },
+                      { name: 'Real', value: zoneTotals.totalSales / 1000000, fill: '#10b981' },
+                      { name: 'Proy', value: zoneTotals.totalProjection / 1000000, fill: '#a855f7' }
+                    ]}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.15} vertical={false} />
+                      <XAxis 
+                        dataKey="name" 
+                        stroke="#9ca3af" 
+                        fontSize={10}
+                        tickLine={false}
+                      />
+                      <YAxis 
+                        stroke="#9ca3af" 
+                        fontSize={10}
+                        tickLine={false}
+                        tickFormatter={(v) => `$${v.toFixed(0)}M`}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: '#1e293b',
+                          border: '2px solid #475569',
+                          borderRadius: '8px',
+                          padding: '8px'
+                        }}
+                        formatter={(value) => [`${formatCurrency(value * 1000000)}`, '']}
+                      />
+                      <Bar dataKey="value" radius={[6, 6, 0, 0]} maxBarSize={60}>
+                        {[0, 1, 2].map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={index === 0 ? '#6366f1' : index === 1 ? '#10b981' : '#a855f7'} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+
+                  {/* Gap y Velocidad */}
+                  <div className="mt-4 pt-4 border-t border-purple-500/20 grid grid-cols-2 gap-3">
+                    <div>
+                      <p className="text-xs text-slate-400 mb-1">Gap vs Meta</p>
+                      <p className={`text-lg font-black ${
+                        zoneTotals.totalProjection >= zoneTotals.totalBudget ? 'text-emerald-400' : 'text-red-400'
+                      }`}>
+                        {formatShort(Math.abs(zoneTotals.totalBudget - zoneTotals.totalProjection))}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-400 mb-1">Velocidad</p>
+                      <p className="text-lg font-black text-white">
+                        {formatShort(zoneTotals.totalSales / selectedWeeks.length)}/sem
+                      </p>
+                    </div>
                   </div>
                 </div>
 
-                {/* Top Performers - Nueva Gráfica */}
+                {/* Top Performers Compacto */}
                 {topStoresTrend.length > 0 && (
                   <div className="bg-gradient-to-br from-emerald-500/10 to-green-600/10 backdrop-blur-xl rounded-lg p-5 border border-emerald-500/20 shadow-xl">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-base font-black text-white">Top 5 Líderes</h3>
                       <span className="text-xs px-2 py-1 rounded bg-emerald-500/20 text-emerald-300 font-bold">≥90%</span>
                     </div>
-                    <ResponsiveContainer width="100%" height={180}>
+                    <ResponsiveContainer width="100%" height={140}>
                       <BarChart data={topStoresTrend} layout="vertical">
                         <defs>
                           <linearGradient id="greenBarGradient" x1="0" y1="0" x2="1" y2="0">
@@ -1001,16 +1018,14 @@ Genera:
                           width={70}
                           tickLine={false}
                         />
-                        <Bar dataKey="value" fill="url(#greenBarGradient)" radius={[0, 6, 6, 0]} maxBarSize={24} />
+                        <Bar dataKey="value" fill="url(#greenBarGradient)" radius={[0, 6, 6, 0]} maxBarSize={20} />
                       </BarChart>
                     </ResponsiveContainer>
-                    <div className="mt-3 pt-3 border-t border-emerald-500/20">
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs text-emerald-300">Promedio Top:</span>
-                        <span className="text-sm font-bold text-emerald-400">
-                          {(topStoresTrend.reduce((sum, s) => sum + s.value, 0) / topStoresTrend.length).toFixed(1)}%
-                        </span>
-                      </div>
+                    <div className="mt-3 pt-3 border-t border-emerald-500/20 flex justify-between">
+                      <span className="text-xs text-emerald-300">Promedio Top:</span>
+                      <span className="text-sm font-bold text-emerald-400">
+                        {(topStoresTrend.reduce((sum, s) => sum + s.value, 0) / topStoresTrend.length).toFixed(1)}%
+                      </span>
                     </div>
                   </div>
                 )}
