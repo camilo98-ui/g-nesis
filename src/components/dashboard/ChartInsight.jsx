@@ -28,12 +28,9 @@ export default function ChartInsight({ data, metric, formatCurrency, comparisonD
       };
     }
 
-    // Calcular promedio y total
+    // Calcular promedio
     const values = validData.map(d => d[metric] || d.ventas || d.sales || 0);
     const average = values.reduce((a, b) => a + b, 0) / values.length;
-    const total = values.reduce((a, b) => a + b, 0);
-    const maxValue = Math.max(...values);
-    const minValue = Math.min(...values);
     
     // Último valor
     const lastValue = values[values.length - 1];
@@ -53,9 +50,9 @@ export default function ChartInsight({ data, metric, formatCurrency, comparisonD
       return value < average * 0.7 && value > 0;
     });
 
-    // Detectar tendencia general
-    const firstThree = values.slice(0, Math.min(3, values.length));
-    const lastThree = values.slice(-Math.min(3, values.length));
+    // Detectar tendencia general (últimos 3 días vs primeros 3 días)
+    const firstThree = values.slice(0, 3);
+    const lastThree = values.slice(-3);
     const firstAvg = firstThree.reduce((a, b) => a + b, 0) / firstThree.length;
     const lastAvg = lastThree.reduce((a, b) => a + b, 0) / lastThree.length;
     const trendPct = firstAvg > 0 ? ((lastAvg - firstAvg) / firstAvg * 100) : 0;
@@ -72,37 +69,37 @@ export default function ChartInsight({ data, metric, formatCurrency, comparisonD
     let action = '';
     let status = 'neutral'; // neutral, positive, warning, critical
 
-    // Determinar estado y mensaje - SIEMPRE mostrar datos útiles
+    // Determinar estado y mensaje
     if (hasMissingRecent && missingDays > 0) {
       status = 'critical';
-      keyData = `Total período: ${formatCurrency(total)} • Faltan ${missingDays} día${missingDays > 1 ? 's' : ''}`;
-      behavior = `Promedio diario: ${formatCurrency(average)}. Se detecta ausencia de información en días recientes, lo que puede indicar falla en carga de datos.`;
-      action = 'Validar operación y asegurar carga de datos diaria.';
+      keyData = `Faltan datos de ${missingDays} día${missingDays > 1 ? 's' : ''}`;
+      behavior = 'Se detecta ausencia de información en días recientes, lo que impide análisis completo y puede indicar falla en carga de datos o cierre operativo.';
+      action = 'Validar operación inmediatamente y asegurar carga de datos diaria.';
     } else if (trendPct > 10) {
       status = 'positive';
-      keyData = `Total: ${formatCurrency(total)} • Promedio: ${formatCurrency(average)}/día`;
-      behavior = `Crecimiento del ${trendPct.toFixed(1)}% en últimos días. Mejor día: ${formatCurrency(maxValue)}. ${peaks.length > 0 ? `${peaks.length} día${peaks.length > 1 ? 's' : ''} excepcional${peaks.length > 1 ? 'es' : ''}.` : ''}`;
-      action = 'Replicar estrategias exitosas del mejor día.';
+      keyData = `Promedio del período: ${formatCurrency(average)}`;
+      behavior = `Tendencia creciente del ${trendPct.toFixed(1)}% en los últimos días. ${peaks.length > 0 ? `Detectados ${peaks.length} pico${peaks.length > 1 ? 's' : ''} por encima del promedio.` : ''}`;
+      action = 'Documentar qué estrategias generaron el crecimiento y replicarlas consistentemente.';
     } else if (trendPct < -10) {
       status = 'warning';
-      keyData = `Total: ${formatCurrency(total)} • Promedio: ${formatCurrency(average)}/día`;
-      behavior = `Caída del ${Math.abs(trendPct).toFixed(1)}%. Mejor día: ${formatCurrency(maxValue)}, peor: ${formatCurrency(minValue)}. ${drops.length > 0 ? `${drops.length} día${drops.length > 1 ? 's' : ''} crítico${drops.length > 1 ? 's' : ''}.` : ''}`;
-      action = 'Plan de reactivación urgente: analizar causas y corregir.';
+      keyData = `Promedio del período: ${formatCurrency(average)}`;
+      behavior = `Tendencia a la baja del ${Math.abs(trendPct).toFixed(1)}%. ${drops.length > 0 ? `${drops.length} día${drops.length > 1 ? 's' : ''} con caídas significativas detectadas.` : ''}`;
+      action = 'Analizar causas de la caída y activar plan de reactivación urgente.';
     } else if (lastVsAvgPct > 15) {
       status = 'positive';
-      keyData = `Total: ${formatCurrency(total)} • Promedio: ${formatCurrency(average)}/día`;
-      behavior = `Último día excepcional: ${formatCurrency(lastValue)} (${lastVsAvgPct.toFixed(0)}% sobre promedio). Rango: ${formatCurrency(minValue)} - ${formatCurrency(maxValue)}.`;
-      action = 'Documentar qué se hizo diferente ayer y replicarlo.';
+      keyData = `Promedio del período: ${formatCurrency(average)}`;
+      behavior = `El último día registró ${formatCurrency(lastValue)}, superando el promedio en ${lastVsAvgPct.toFixed(0)}%. Desempeño destacado.`;
+      action = 'Identificar factores de éxito del día para replicarlos.';
     } else if (lastVsAvgPct < -15) {
       status = 'warning';
-      keyData = `Total: ${formatCurrency(total)} • Promedio: ${formatCurrency(average)}/día`;
-      behavior = `Último día bajo: ${formatCurrency(lastValue)} (${Math.abs(lastVsAvgPct).toFixed(0)}% bajo promedio). Máximo alcanzado: ${formatCurrency(maxValue)}.`;
-      action = 'Revisar causas del bajo rendimiento de ayer y corregir hoy.';
+      keyData = `Promedio del período: ${formatCurrency(average)}`;
+      behavior = `El último día está ${Math.abs(lastVsAvgPct).toFixed(0)}% por debajo del promedio (${formatCurrency(lastValue)} vs ${formatCurrency(average)}).`;
+      action = 'Revisar operación del día, identificar problemas y corregir para mañana.';
     } else {
       status = 'neutral';
-      keyData = `Total: ${formatCurrency(total)} • Promedio: ${formatCurrency(average)}/día`;
-      behavior = `Desempeño estable. Rango: ${formatCurrency(minValue)} - ${formatCurrency(maxValue)}. ${peaks.length > 0 ? `${peaks.length} día${peaks.length > 1 ? 's' : ''} destacado${peaks.length > 1 ? 's' : ''}.` : ''} ${drops.length > 0 ? `${drops.length} día${drops.length > 1 ? 's' : ''} bajo.` : ''}`;
-      action = 'Buscar incremento del 10-15% replicando mejores prácticas.';
+      keyData = `Promedio del período: ${formatCurrency(average)}`;
+      behavior = `Comportamiento estable. ${peaks.length > 0 ? `${peaks.length} día${peaks.length > 1 ? 's' : ''} destacado${peaks.length > 1 ? 's' : ''}.` : 'Sin variaciones significativas.'} ${drops.length > 0 ? `${drops.length} día${drops.length > 1 ? 's' : ''} con bajo rendimiento.` : ''}`;
+      action = 'Mantener consistencia y buscar oportunidades de mejora incremental.';
     }
 
     return {
