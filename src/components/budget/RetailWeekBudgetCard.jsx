@@ -581,37 +581,6 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
           <AnimatePresence>
             {isExpanded && (
               <>
-                {/* Recomendación Inteligente */}
-              {smartRecommendation && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className={`bg-gradient-to-br from-${smartRecommendation.color}-50/60 to-${smartRecommendation.color}-100/40 rounded-xl p-3 md:p-4 border-2 border-${smartRecommendation.color}-200/50 shadow-md`}
-                >
-                  <div className="flex items-start gap-3">
-                    <motion.div
-                      animate={{ rotate: [0, 10, -10, 0] }}
-                      transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                      className="text-3xl"
-                    >
-                      {smartRecommendation.icon}
-                    </motion.div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className={`text-sm md:text-base font-black text-${smartRecommendation.color}-900 mb-1`}>
-                        {smartRecommendation.title}
-                      </h4>
-                      <p className={`text-[10px] md:text-xs text-${smartRecommendation.color}-700 leading-relaxed mb-2`}>
-                        {smartRecommendation.message}
-                      </p>
-                      <div className={`inline-block px-2 py-1 bg-${smartRecommendation.color}-200/50 rounded-lg text-[10px] font-bold text-${smartRecommendation.color}-800`}>
-                        💡 {smartRecommendation.action}
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-
               {/* Días de Mayor Oportunidad */}
               {budgetData.topDays?.length > 0 && (
                 <motion.div
