@@ -153,25 +153,13 @@ export default function ExecutiveChartTooltip({ active, payload, chartType, zone
       </div>
 
       {/* Insight contextual */}
-      <div className="border-t border-white/10 pt-3 space-y-3">
-        <div>
-          <p className="text-[10px] font-bold text-blue-300 uppercase tracking-wider mb-1">
-            📊 Insight
-          </p>
-          <p className="text-xs text-slate-200 leading-relaxed">
-            {insight}
-          </p>
-        </div>
-
-        {/* Recomendación ejecutiva */}
-        <div className={`rounded-lg p-2.5 ${priority ? 'bg-red-500/10 border border-red-500/30' : 'bg-emerald-500/10 border border-emerald-500/30'}`}>
-          <p className={`text-[10px] font-black uppercase tracking-wider mb-1 ${priority ? 'text-red-300' : 'text-emerald-300'}`}>
-            🧠 Qué haría yo
-          </p>
-          <p className={`text-xs font-medium leading-relaxed ${priority ? 'text-red-100' : 'text-emerald-100'}`}>
-            {recommendation}
-          </p>
-        </div>
+      <div className="border-t border-white/10 pt-3">
+        <p className="text-[10px] font-bold text-blue-300 uppercase tracking-wider mb-1.5">
+          📊 Insight
+        </p>
+        <p className="text-xs text-slate-200 leading-relaxed">
+          {insight}
+        </p>
       </div>
     </div>
   );
