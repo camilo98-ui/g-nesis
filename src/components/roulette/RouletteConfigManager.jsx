@@ -93,9 +93,6 @@ export default function RouletteConfigManager({ storeId }) {
 
       // Limpiar COMPLETAMENTE el caché
       await queryClient.cancelQueries({ queryKey: ['rouletteConfig'] });
-      queryClient.removeQueries({ queryKey: ['rouletteConfig'] });
-
-      // Forzar refetch inmediato
       await queryClient.invalidateQueries({ queryKey: ['rouletteConfig'] });
 
       // Verificar que se guardó correctamente

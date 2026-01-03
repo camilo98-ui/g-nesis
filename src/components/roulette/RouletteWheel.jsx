@@ -46,8 +46,7 @@ export default function RouletteWheel({ onResult, disabled, awardType = 'tienda'
     staleTime: 0,
     cacheTime: 0,
     refetchOnMount: 'always',
-    refetchOnWindowFocus: true,
-    refetchInterval: 3000
+    refetchInterval: 2000
   });
 
   // La config más reciente activa (debería ser solo una)
