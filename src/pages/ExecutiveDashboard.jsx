@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
@@ -15,7 +16,7 @@ import ExecutiveComparable from '../components/executive/ExecutiveComparable';
 import ZoneBudgetManager from '../components/executive/ZoneBudgetManager';
 import ZoneChartsPanel from '../components/executive/ZoneChartsPanel';
 import PlannerStatusPanel from '../components/executive/PlannerStatusPanel';
-import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, ResponsiveContainer, CartesianGrid, XAxis, YAxis } from 'recharts';
+import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, ResponsiveContainer, CartesianGrid, XAxis, YAxis, ComposedChart, Tooltip, Legend, ReferenceLine } from 'recharts';
 
 export default function ExecutiveDashboard() {
   // Semana retail iniciando 29 de diciembre 2024
@@ -197,6 +198,7 @@ export default function ExecutiveDashboard() {
         name: getDisplayName(store.code),
         // PPT Diario
         dailyBudget: adjustedDailyBudget,
+        getDailyBudget, // Exportar la función para uso externo
         // Semana
         weekTotalSales,
         weekTotalTransactions,
@@ -478,11 +480,13 @@ Genera:
     return `${criticalStores.length} tiendas críticas · Brecha total ${formatCurrency(totalGap)}`;
   }, [filteredStores]);
 
-  // Datos para gráficas de KPIs
+  // Datos para gráficas de KPIs - MEJORADO con presupuesto
   const dailySalesData = useMemo(() => {
     const days = eachDayOfInterval({ start: dateRange.from, end: dateRange.to });
     return days.map(day => {
       const dayStr = format(day, 'yyyy-MM-dd');
+      
+      // Sumar ventas de todas las tiendas para este día
       const daySales = allDailySales
         .filter(s => {
           const saleDateStr = s.date?.split('T')[0] || s.date;
@@ -490,12 +494,26 @@ Genera:
         })
         .reduce((sum, s) => sum + (s.total_sales || 0), 0);
       
+      // Sumar presupuesto de todas las tiendas para este día
+      const dayBudget = storesAnalysis
+        .filter(s => s.hasData && s.getDailyBudget)
+        .reduce((sum, store) => {
+          try {
+            return sum + store.getDailyBudget(day);
+          } catch {
+            return sum;
+          }
+        }, 0);
+      
       return {
         date: format(day, 'dd/MM'),
-        sales: daySales / 1000000
+        fullDate: format(day, 'dd MMM'),
+        sales: daySales / 1000000,
+        budget: dayBudget / 1000000,
+        compliance: dayBudget > 0 ? (daySales / dayBudget) * 100 : 0
       };
     });
-  }, [allDailySales, dateRange]);
+  }, [allDailySales, dateRange, storesAnalysis]);
 
   const statusDistributionData = useMemo(() => [
     { name: 'En Meta', value: statusCounts.positive, color: '#10b981' },
@@ -686,9 +704,10 @@ Genera:
                 <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl rounded-lg p-5 border border-white/10 h-full shadow-xl">
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <h3 className="text-base font-black text-white mb-1">Ventas Diarias</h3>
+                      <h3 className="text-base font-black text-white mb-1">Ventas vs Presupuesto Diario</h3>
                       <p className="text-xs text-slate-400">
-                        Total: {formatCurrency(dailySalesData.reduce((sum, d) => sum + (d.sales * 1000000), 0))}
+                        Venta: {formatCurrency(dailySalesData.reduce((sum, d) => sum + (d.sales * 1000000), 0))} · 
+                        Meta: {formatCurrency(dailySalesData.reduce((sum, d) => sum + (d.budget * 1000000), 0))}
                       </p>
                     </div>
                     <button
@@ -699,15 +718,15 @@ Genera:
                     </button>
                   </div>
                   <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={dailySalesData}>
+                    <ComposedChart data={dailySalesData}>
                       <defs>
-                        <linearGradient id="barGradient1" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#f59e0b" stopOpacity={1}/>
-                          <stop offset="100%" stopColor="#d97706" stopOpacity={0.8}/>
+                        <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#10b981" stopOpacity={0.8}/>
+                          <stop offset="100%" stopColor="#059669" stopOpacity={0.6}/>
                         </linearGradient>
-                        <linearGradient id="barGradient2" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#10b981" stopOpacity={1}/>
-                          <stop offset="100%" stopColor="#059669" stopOpacity={0.8}/>
+                        <linearGradient id="budgetGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#6366f1" stopOpacity={0.6}/>
+                          <stop offset="100%" stopColor="#4f46e5" stopOpacity={0.4}/>
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.15} vertical={false} />
@@ -725,15 +744,69 @@ Genera:
                         axisLine={{ stroke: '#374151' }}
                         tickFormatter={(value) => `$${value.toFixed(1)}M`}
                       />
-                      <Bar dataKey="sales" radius={[6, 6, 0, 0]} maxBarSize={50}>
-                        {dailySalesData.map((entry, index) => (
-                          <Cell 
-                            key={`cell-${index}`} 
-                            fill={index % 2 === 0 ? 'url(#barGradient1)' : 'url(#barGradient2)'} 
-                          />
-                        ))}
-                      </Bar>
-                    </BarChart>
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: '#1e293b',
+                          border: '2px solid #475569',
+                          borderRadius: '12px',
+                          padding: '12px 16px',
+                          boxShadow: '0 10px 30px rgba(0,0,0,0.3)'
+                        }}
+                        labelStyle={{ color: '#cbd5e1', fontSize: '12px', fontWeight: 'bold', marginBottom: '8px' }}
+                        formatter={(value, name, props) => {
+                          const { sales, budget, compliance } = props.payload;
+                          if (name === 'Venta') {
+                            return [
+                              <div key="sales-info" style={{ color: '#fff' }}>
+                                <div style={{ color: '#10b981', fontWeight: 'bold', marginBottom: '4px' }}>
+                                  💰 Venta: {formatCurrency(sales * 1000000)}
+                                </div>
+                                <div style={{ color: '#6366f1', fontWeight: 'bold', marginBottom: '4px' }}>
+                                  🎯 Meta: {formatCurrency(budget * 1000000)}
+                                </div>
+                                <div style={{ 
+                                  color: compliance >= 100 ? '#10b981' : compliance >= 85 ? '#fbbf24' : '#ef4444',
+                                  fontWeight: 'bold',
+                                  borderTop: '1px solid #475569',
+                                  paddingTop: '6px',
+                                  marginTop: '6px'
+                                }}>
+                                  {compliance >= 100 ? '✅' : compliance >= 85 ? '⚠️' : '❌'} Cumplimiento: {compliance.toFixed(1)}%
+                                </div>
+                              </div>,
+                              ''
+                            ];
+                          }
+                          return [formatCurrency(value * 1000000), name];
+                        }}
+                      />
+                      <Legend
+                        wrapperStyle={{ paddingTop: '16px' }}
+                        content={() => (
+                          <div style={{ display: 'flex', justifyContent: 'center', gap: '24px', fontSize: '12px', fontWeight: '600' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <div style={{ width: '14px', height: '14px', background: 'linear-gradient(to bottom, #10b981, #059669)', borderRadius: '3px' }}></div>
+                              <span style={{ color: '#10b981' }}>💰 Venta</span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <div style={{ width: '14px', height: '14px', background: 'linear-gradient(to bottom, #6366f1, #4f46e5)', borderRadius: '3px', opacity: 0.6 }}></div>
+                              <span style={{ color: '#6366f1' }}>🎯 Meta</span>
+                            </div>
+                          </div>
+                        )}
+                      />
+                      <ReferenceLine y={0} stroke="#475569" strokeDasharray="3 3" />
+                      <Bar dataKey="sales" fill="url(#salesGradient)" radius={[6, 6, 0, 0]} maxBarSize={40} name="Venta" />
+                      <Line 
+                        type="monotone" 
+                        dataKey="budget" 
+                        stroke="#6366f1" 
+                        strokeWidth={3} 
+                        dot={{ fill: '#6366f1', r: 5, strokeWidth: 2, stroke: '#1e293b' }} 
+                        name="Meta"
+                        strokeDasharray="5 5"
+                      />
+                    </ComposedChart>
                   </ResponsiveContainer>
                 </div>
               </div>
