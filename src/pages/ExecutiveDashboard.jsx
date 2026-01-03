@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
@@ -484,13 +483,15 @@ Genera:
   const dailySalesData = useMemo(() => {
     const days = eachDayOfInterval({ start: dateRange.from, end: dateRange.to });
     return days.map(day => {
-      const dayStr = format(day, 'yyyy-MM-dd');
-      
       // Sumar ventas de todas las tiendas para este día
       const daySales = allDailySales
         .filter(s => {
-          const saleDateStr = s.date?.split('T')[0] || s.date;
-          return saleDateStr === dayStr;
+          try {
+            const saleDate = parseISO(s.date);
+            return isSameDay(saleDate, day);
+          } catch {
+            return false;
+          }
         })
         .reduce((sum, s) => sum + (s.total_sales || 0), 0);
       
