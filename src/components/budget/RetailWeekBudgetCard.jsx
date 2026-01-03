@@ -5,13 +5,78 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { format, startOfMonth, endOfMonth, eachWeekOfInterval, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Legend, Cell } from 'recharts';
+import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Legend, Cell, LineChart, Line } from 'recharts';
 
 export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId, formatCurrency, onConfigureBudget }) {
   const [expandedSection, setExpandedSection] = useState(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedMetric, setSelectedMetric] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Generar recomendaciones dinámicas
+  const getSmartRecommendation = (data) => {
+    if (!data || data.noBudget) return null;
+    
+    const { compliance, weeklyCompliance, projectionCompliance, accumulatedGap, todayCompliance } = data;
+    
+    if (projectionCompliance >= 110) {
+      return {
+        icon: '🚀',
+        title: 'Ritmo Excepcional',
+        message: 'Superando proyecciones. Considera potenciar productos premium para maximizar margen.',
+        color: 'emerald',
+        action: 'Optimizar Mix de Productos'
+      };
+    }
+    
+    if (compliance >= 100 && weeklyCompliance >= 95) {
+      return {
+        icon: '🎯',
+        title: 'En Meta Perfecta',
+        message: 'Cumplimiento sólido. Mantén el enfoque en experiencia de cliente y upselling.',
+        color: 'emerald',
+        action: 'Mantener Estrategia Actual'
+      };
+    }
+    
+    if (projectionCompliance >= 85 && projectionCompliance < 100) {
+      return {
+        icon: '📈',
+        title: 'Cerca de la Meta',
+        message: 'A punto de alcanzar objetivo. Enfoca en ticket promedio y productos sugeridos.',
+        color: 'amber',
+        action: 'Potenciar Ticket Promedio'
+      };
+    }
+    
+    if (accumulatedGap > 0 && todayCompliance < 80) {
+      return {
+        icon: '⚡',
+        title: 'Acción Requerida',
+        message: 'Brecha acumulada detectada. Revisa inventario de productos top y activa promociones.',
+        color: 'rose',
+        action: 'Activar Plan de Recuperación'
+      };
+    }
+    
+    if (weeklyCompliance < 70) {
+      return {
+        icon: '🎪',
+        title: 'Impulso Necesario',
+        message: 'Considera activar campañas de tráfico y revisar horarios de mayor venta.',
+        color: 'orange',
+        action: 'Revisar Estrategia Comercial'
+      };
+    }
+    
+    return {
+      icon: '💡',
+      title: 'Análisis Continuo',
+      message: 'Monitorea tendencias de venta por hora para optimizar personal y stock.',
+      color: 'blue',
+      action: 'Optimizar Operaciones'
+    };
+  };
 
   // Calcular datos del presupuesto retail
   const budgetData = useMemo(() => {
@@ -300,9 +365,37 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       dailyTrendData,
       weeklyData,
       currentWeekStart,
-      currentWeekEnd
+      currentWeekEnd,
+      // Datos para sparklines (últimos 7 días)
+      last7DaysSales: dailySales
+        .filter(s => {
+          try {
+            const saleDate = parseISO(s.date);
+            const sevenDaysAgo = new Date(now);
+            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+            return saleDate >= sevenDaysAgo && saleDate <= now && s.total_sales > 0;
+          } catch {
+            return false;
+          }
+        })
+        .sort((a, b) => new Date(a.date) - new Date(b.date))
+        .map(s => ({ value: s.total_sales })),
+      // Días de mayor oportunidad (por peso histórico)
+      topDays: avgByDayOfWeek
+        .map((avg, idx) => ({
+          day: ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'][idx],
+          dayFull: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'][idx],
+          avg,
+          weight: weightByDayOfWeek[idx],
+          count: countByDayOfWeek[idx]
+        }))
+        .filter(d => d.count >= 2)
+        .sort((a, b) => b.avg - a.avg)
+        .slice(0, 3)
     };
   }, [dailySales, activeBudget]);
+
+  const smartRecommendation = getSmartRecommendation(budgetData);
 
   const isOnTrack = budgetData?.compliance >= 95;
   const needsRecovery = budgetData?.accumulatedGap > 0;
@@ -398,6 +491,23 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                     {formatCurrency(budgetData.adjustedDailyBudget)}
                   </motion.p>
                   <p className="text-[8px] md:text-[10px] text-white/50 mt-0.5">Base: {formatCurrency(budgetData.adjustedDailyBudget / 1.15)}</p>
+                  {/* Sparkline */}
+                  {budgetData.last7DaysSales?.length > 0 && (
+                    <div className="mt-2 h-8">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={budgetData.last7DaysSales}>
+                          <Line 
+                            type="monotone" 
+                            dataKey="value" 
+                            stroke="#fff" 
+                            strokeWidth={2} 
+                            dot={false}
+                            opacity={0.6}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  )}
                 </div>
                 <div>
                   <p className="text-[10px] md:text-xs text-white/60 mb-1 md:mb-2">Promedio Histórico - {format(new Date(), 'EEEE', { locale: es })}</p>
@@ -405,6 +515,23 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                     {formatCurrency(budgetData.historicalAvgToday)}
                   </p>
                   <p className="text-[8px] md:text-[10px] text-white/50 mt-0.5">Promedio en {format(new Date(), 'EEEE', { locale: es })}s anteriores</p>
+                  {/* Sparkline */}
+                  {budgetData.last7DaysSales?.length > 0 && (
+                    <div className="mt-2 h-8">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={budgetData.last7DaysSales}>
+                          <Line 
+                            type="monotone" 
+                            dataKey="value" 
+                            stroke="#fff" 
+                            strokeWidth={2} 
+                            dot={false}
+                            opacity={0.6}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -454,7 +581,82 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
           <AnimatePresence>
             {isExpanded && (
               <>
-                {/* Gráfico de Tendencia Diaria */}
+                {/* Recomendación Inteligente */}
+              {smartRecommendation && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className={`bg-gradient-to-br from-${smartRecommendation.color}-50/60 to-${smartRecommendation.color}-100/40 rounded-xl p-3 md:p-4 border-2 border-${smartRecommendation.color}-200/50 shadow-md`}
+                >
+                  <div className="flex items-start gap-3">
+                    <motion.div
+                      animate={{ rotate: [0, 10, -10, 0] }}
+                      transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                      className="text-3xl"
+                    >
+                      {smartRecommendation.icon}
+                    </motion.div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className={`text-sm md:text-base font-black text-${smartRecommendation.color}-900 mb-1`}>
+                        {smartRecommendation.title}
+                      </h4>
+                      <p className={`text-[10px] md:text-xs text-${smartRecommendation.color}-700 leading-relaxed mb-2`}>
+                        {smartRecommendation.message}
+                      </p>
+                      <div className={`inline-block px-2 py-1 bg-${smartRecommendation.color}-200/50 rounded-lg text-[10px] font-bold text-${smartRecommendation.color}-800`}>
+                        💡 {smartRecommendation.action}
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Días de Mayor Oportunidad */}
+              {budgetData.topDays?.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="bg-gradient-to-br from-indigo-50/60 to-purple-50/60 rounded-xl p-3 md:p-4 border-2 border-indigo-200/50 shadow-md"
+                >
+                  <div className="flex items-center gap-2 mb-3">
+                    <Calendar className="w-5 h-5 text-indigo-500" />
+                    <h4 className="text-sm md:text-base font-black text-indigo-900">
+                      Días Clave para Empuje de Ventas
+                    </h4>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {budgetData.topDays.map((day, idx) => (
+                      <motion.div
+                        key={day.day}
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: idx * 0.1 }}
+                        className="bg-white/80 backdrop-blur-sm rounded-lg p-2 md:p-3 border border-indigo-200/40 text-center"
+                      >
+                        <p className="text-lg md:text-2xl font-black text-indigo-600 mb-1">
+                          {idx === 0 ? '🥇' : idx === 1 ? '🥈' : '🥉'}
+                        </p>
+                        <p className="text-xs md:text-sm font-bold text-indigo-900 mb-1">
+                          {day.dayFull}
+                        </p>
+                        <p className="text-[10px] md:text-xs text-indigo-600 font-semibold">
+                          ~{formatCurrency(day.avg)}
+                        </p>
+                        <p className="text-[8px] md:text-[10px] text-indigo-500 mt-1">
+                          {(day.weight * 100).toFixed(0)}% del total
+                        </p>
+                      </motion.div>
+                    ))}
+                  </div>
+                  <p className="text-[10px] text-indigo-600 mt-3 text-center">
+                    📊 Basado en {budgetData.topDays[0]?.count || 0}+ registros históricos por día
+                  </p>
+                </motion.div>
+              )}
+
+              {/* Gráfico de Tendencia Diaria */}
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
