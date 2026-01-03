@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format, startOfMonth, eachDayOfInterval, startOfWeek, endOfWeek, parseISO, eachWeekOfInterval, addDays, isSameDay, isWithinInterval } from 'date-fns';
+import { es } from 'date-fns/locale';
 import ExecutiveStoreDetailModal from '../components/executive/ExecutiveStoreDetailModal';
 import KPIDetailModal from '../components/executive/KPIDetailModal';
 import ExecutiveComparable from '../components/executive/ExecutiveComparable';
