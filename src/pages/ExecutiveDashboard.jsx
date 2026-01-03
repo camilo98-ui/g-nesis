@@ -663,27 +663,37 @@ Genera:
           </div>
         ) : (
           <>
-            {/* Nueva Sección: Métricas Semanales */}
+            {/* Métricas de la Semana Seleccionada */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
               <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-xl rounded-lg p-4 border border-blue-500/20">
-                <p className="text-xs text-blue-300 mb-2">Transacciones</p>
-                <p className="text-3xl font-black text-white mb-1">{zoneTotals.totalTransactions.toLocaleString()}</p>
-                <p className="text-xs text-slate-400">Total semana</p>
+                <p className="text-xs text-blue-300 mb-2">Venta Semana</p>
+                <p className="text-3xl font-black text-white mb-1">{formatShort(zoneTotals.totalSales)}</p>
+                <p className={`text-xs font-semibold ${
+                  ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 100 ? 'text-emerald-400' :
+                  ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 70 ? 'text-amber-400' : 'text-red-400'
+                }`}>
+                  {((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}% del PPT
+                </p>
               </div>
               <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-xl rounded-lg p-4 border border-purple-500/20">
-                <p className="text-xs text-purple-300 mb-2">Ticket Promedio</p>
-                <p className="text-3xl font-black text-white mb-1">{formatCurrency(zoneTotals.totalSales / zoneTotals.totalTransactions || 0)}</p>
-                <p className="text-xs text-slate-400">Por transacción</p>
+                <p className="text-xs text-purple-300 mb-2">Proyección Semana</p>
+                <p className="text-3xl font-black text-white mb-1">{formatShort(zoneTotals.totalProjection)}</p>
+                <p className={`text-xs font-semibold ${
+                  ((zoneTotals.totalProjection/zoneTotals.totalBudget)*100) >= 100 ? 'text-emerald-400' :
+                  ((zoneTotals.totalProjection/zoneTotals.totalBudget)*100) >= 85 ? 'text-amber-400' : 'text-red-400'
+                }`}>
+                  {((zoneTotals.totalProjection/zoneTotals.totalBudget)*100).toFixed(0)}% proyectado
+                </p>
               </div>
               <div className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 backdrop-blur-xl rounded-lg p-4 border border-amber-500/20">
-                <p className="text-xs text-amber-300 mb-2">Venta Promedio</p>
-                <p className="text-3xl font-black text-white mb-1">{formatShort(zoneTotals.totalSales / STORES.length)}</p>
-                <p className="text-xs text-slate-400">Por tienda</p>
+                <p className="text-xs text-amber-300 mb-2">Transacciones</p>
+                <p className="text-3xl font-black text-white mb-1">{zoneTotals.totalTransactions.toLocaleString()}</p>
+                <p className="text-xs text-slate-400">Ticket: {formatCurrency(zoneTotals.totalSales / zoneTotals.totalTransactions || 0)}</p>
               </div>
               <div className="bg-gradient-to-br from-rose-500/10 to-red-500/10 backdrop-blur-xl rounded-lg p-4 border border-rose-500/20">
-                <p className="text-xs text-rose-300 mb-2">Gap Total</p>
+                <p className="text-xs text-rose-300 mb-2">Gap Semanal</p>
                 <p className="text-3xl font-black text-white mb-1">{formatShort(Math.abs(zoneTotals.totalBudget - zoneTotals.totalSales))}</p>
-                <p className="text-xs text-slate-400">Por cerrar</p>
+                <p className="text-xs text-slate-400">PPT: {formatShort(zoneTotals.totalBudget)}</p>
               </div>
             </div>
 
