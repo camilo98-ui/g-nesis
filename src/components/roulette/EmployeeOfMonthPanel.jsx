@@ -18,13 +18,13 @@ export default function EmployeeOfMonthPanel({ storeId }) {
 
   const { data: storeCashiers = [] } = useQuery({
     queryKey: ['cashiers', storeId],
-    queryFn: () => base44.entities.Cashier.filter({ store_id: storeId, is_active: true }),
-    enabled: !!storeId
+    queryFn: () => base44.entities.Cashier.filter({ store_id: storeId }),
+    enabled: !!storeId && awardType === 'tienda'
   });
 
   const { data: allDistrictCashiers = [] } = useQuery({
     queryKey: ['allCashiers'],
-    queryFn: () => base44.entities.Cashier.filter({ is_active: true }),
+    queryFn: () => base44.entities.Cashier.list(),
     enabled: awardType === 'distrito'
   });
 
