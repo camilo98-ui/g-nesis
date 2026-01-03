@@ -1001,132 +1001,56 @@ Genera:
                     </ComposedChart>
                   </ResponsiveContainer>
 
-                  {/* Grid de gráficas de torta sofisticadas */}
+                  {/* Mini gráfica de proyección semanal */}
                   <div className="mt-4 pt-4 border-t border-white/10">
-                    <h4 className="text-xs font-bold text-slate-300 mb-3">📊 Análisis Ejecutivo</h4>
-                    <div className="grid grid-cols-2 gap-3">
-                      {/* Torta 1: Estado de Tiendas */}
-                      <div className="bg-slate-800/30 rounded-lg p-2.5">
-                        <p className="text-[9px] text-slate-400 mb-1.5 text-center font-semibold">Estado Tiendas</p>
-                        <ResponsiveContainer width="100%" height={90}>
-                          <PieChart>
-                            <Pie
-                              data={[
-                                { name: 'En Meta', value: storesAnalysis.filter(s => s.hasData && s.salesCompliance >= 90).length, fill: '#10b981' },
-                                { name: 'Alerta', value: storesAnalysis.filter(s => s.hasData && s.salesCompliance >= 70 && s.salesCompliance < 90).length, fill: '#f59e0b' },
-                                { name: 'Críticas', value: storesAnalysis.filter(s => s.hasData && s.salesCompliance < 70).length, fill: '#ef4444' }
-                              ]}
-                              cx="50%"
-                              cy="50%"
-                              innerRadius={20}
-                              outerRadius={35}
-                              paddingAngle={4}
-                              dataKey="value"
-                            >
-                              <Cell key="cell-0" fill="#10b981" />
-                              <Cell key="cell-1" fill="#f59e0b" />
-                              <Cell key="cell-2" fill="#ef4444" />
-                            </Pie>
-                            <Tooltip 
-                              contentStyle={{ backgroundColor: 'rgba(15, 23, 42, 0.95)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '6px', fontSize: '10px', color: '#fff' }}
-                            />
-                          </PieChart>
-                        </ResponsiveContainer>
-                        <div className="flex justify-center gap-2 text-[8px] mt-1">
-                          <span className="text-emerald-400">● Meta</span>
-                          <span className="text-amber-400">● Alerta</span>
-                          <span className="text-red-400">● Crítica</span>
-                        </div>
-                      </div>
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-xs font-bold text-slate-400">📅 Distribución Presupuesto Semanal</h4>
+                      <span className="text-[9px] text-slate-500">
+                        {Math.ceil((new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0) - new Date()) / (7 * 24 * 60 * 60 * 1000))} semanas
+                      </span>
+                    </div>
+                    <ResponsiveContainer width="100%" height={100}>
+                      <PieChart>
+                        <Pie
+                          data={(() => {
+                            const now = new Date();
+                            const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+                            const daysLeft = Math.ceil((monthEnd - now) / (1000 * 60 * 60 * 24));
+                            const weeksLeft = Math.ceil(daysLeft / 7);
+                            const weeklyAvg = zoneTotals.totalBudget / 4;
 
-                      {/* Torta 2: Top 5 Ventas */}
-                      <div className="bg-slate-800/30 rounded-lg p-2.5">
-                        <p className="text-[9px] text-slate-400 mb-1.5 text-center font-semibold">Top 5 Ventas</p>
-                        <ResponsiveContainer width="100%" height={90}>
-                          <PieChart>
-                            <Pie
-                              data={storesAnalysis
-                                .filter(s => s.hasData)
-                                .sort((a, b) => b.weekTotalSales - a.weekTotalSales)
-                                .slice(0, 5)
-                                .map((s, i) => ({
-                                  name: s.name.substring(0, 8),
-                                  value: s.weekTotalSales / 1000000,
-                                  fill: ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'][i]
-                                }))
-                              }
-                              cx="50%"
-                              cy="50%"
-                              outerRadius={35}
-                              paddingAngle={3}
-                              dataKey="value"
-                            />
-                            <Tooltip 
-                              contentStyle={{ backgroundColor: 'rgba(15, 23, 42, 0.95)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '6px', fontSize: '10px', color: '#fff' }}
-                              formatter={(value) => `$${value.toFixed(1)}M`}
-                            />
-                          </PieChart>
-                        </ResponsiveContainer>
-                      </div>
-
-                      {/* Torta 3: Cumplimiento Semanal */}
-                      <div className="bg-slate-800/30 rounded-lg p-2.5">
-                        <p className="text-[9px] text-slate-400 mb-1.5 text-center font-semibold">Cumplimiento Semanal</p>
-                        <ResponsiveContainer width="100%" height={90}>
-                          <PieChart>
-                            <Pie
-                              data={[
-                                { name: '≥100%', value: storesAnalysis.filter(s => s.hasData && s.weekCompliance >= 100).length, fill: '#10b981' },
-                                { name: '85-99%', value: storesAnalysis.filter(s => s.hasData && s.weekCompliance >= 85 && s.weekCompliance < 100).length, fill: '#3b82f6' },
-                                { name: '70-84%', value: storesAnalysis.filter(s => s.hasData && s.weekCompliance >= 70 && s.weekCompliance < 85).length, fill: '#f59e0b' },
-                                { name: '<70%', value: storesAnalysis.filter(s => s.hasData && s.weekCompliance < 70).length, fill: '#ef4444' }
-                              ]}
-                              cx="50%"
-                              cy="50%"
-                              innerRadius={20}
-                              outerRadius={35}
-                              paddingAngle={3}
-                              dataKey="value"
-                            />
-                            <Tooltip 
-                              contentStyle={{ backgroundColor: 'rgba(15, 23, 42, 0.95)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '6px', fontSize: '10px', color: '#fff' }}
-                            />
-                          </PieChart>
-                        </ResponsiveContainer>
-                        <div className="flex justify-center gap-2 text-[8px] mt-1">
-                          <span className="text-emerald-400">● ≥100%</span>
-                          <span className="text-red-400">● &lt;70%</span>
-                        </div>
-                      </div>
-
-                      {/* Torta 4: Distribución Transacciones */}
-                      <div className="bg-slate-800/30 rounded-lg p-2.5">
-                        <p className="text-[9px] text-slate-400 mb-1.5 text-center font-semibold">Top Transacciones</p>
-                        <ResponsiveContainer width="100%" height={90}>
-                          <PieChart>
-                            <Pie
-                              data={storesAnalysis
-                                .filter(s => s.hasData)
-                                .sort((a, b) => b.weekTotalTransactions - a.weekTotalTransactions)
-                                .slice(0, 5)
-                                .map((s, i) => ({
-                                  name: s.name.substring(0, 8),
-                                  value: s.weekTotalTransactions,
-                                  fill: ['#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b'][i]
-                                }))
-                              }
-                              cx="50%"
-                              cy="50%"
-                              outerRadius={35}
-                              paddingAngle={3}
-                              dataKey="value"
-                            />
-                            <Tooltip 
-                              contentStyle={{ backgroundColor: 'rgba(15, 23, 42, 0.95)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '6px', fontSize: '10px', color: '#fff' }}
-                            />
-                          </PieChart>
-                        </ResponsiveContainer>
-                      </div>
+                            return Array.from({ length: Math.min(weeksLeft, 4) }, (_, i) => ({
+                              name: `Semana ${i + 1}`,
+                              value: weeklyAvg / 1000000,
+                              fill: i === 0 ? '#10b981' : ['#6366f1', '#8b5cf6', '#ec4899'][i - 1] || '#6366f1'
+                            }));
+                          })()}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={25}
+                          outerRadius={40}
+                          paddingAngle={2}
+                          dataKey="value"
+                        >
+                          {Array(4).fill(0).map((_, index) => (
+                            <Cell key={`cell-${index}`} />
+                          ))}
+                        </Pie>
+                        <Tooltip 
+                          contentStyle={{ 
+                            backgroundColor: 'rgba(15, 23, 42, 0.95)', 
+                            border: '1px solid rgba(255,255,255,0.2)',
+                            borderRadius: '8px',
+                            fontSize: '11px',
+                            color: '#fff'
+                          }}
+                          formatter={(value) => `${value.toFixed(1)}M`}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                    <div className="flex flex-wrap items-center justify-center gap-2 mt-1">
+                      <span className="text-[9px] text-emerald-400">● Actual</span>
+                      <span className="text-[9px] text-indigo-400">● Futuras</span>
                     </div>
                   </div>
                 </div>
