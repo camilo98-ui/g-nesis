@@ -8,7 +8,7 @@ import { STORES, getDisplayName } from '@/components/StoreSelector';
 import DateFilter from '@/components/DateFilter';
 import { ArrowLeft, Search, TrendingUp, TrendingDown, Eye, Zap, Award, Brain, ArrowUpDown, ArrowUp, ArrowDown, BarChart3, Settings, X, Download, Filter } from 'lucide-react';
 import { Input } from "@/components/ui/input";
-import { format, startOfMonth, eachDayOfInterval, startOfWeek, endOfWeek, parseISO } from 'date-fns';
+import { format, startOfMonth, eachDayOfInterval, startOfWeek, endOfWeek, parseISO, eachWeekOfInterval, addDays, isSameDay, isWithinInterval } from 'date-fns';
 import ExecutiveStoreDetailModal from '../components/executive/ExecutiveStoreDetailModal';
 import KPIDetailModal from '../components/executive/KPIDetailModal';
 import ExecutiveComparable from '../components/executive/ExecutiveComparable';
@@ -18,7 +18,13 @@ import PlannerStatusPanel from '../components/executive/PlannerStatusPanel';
 import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, ResponsiveContainer, CartesianGrid, XAxis, YAxis } from 'recharts';
 
 export default function ExecutiveDashboard() {
-  const [dateRange, setDateRange] = useState({ from: startOfMonth(new Date()), to: new Date() });
+  // Semana retail iniciando 29 de diciembre 2024
+  const RETAIL_WEEK_START = new Date(2024, 11, 29); // 29 dic 2024
+  
+  const [dateRange, setDateRange] = useState({ 
+    from: RETAIL_WEEK_START, 
+    to: addDays(RETAIL_WEEK_START, 6) // Primera semana
+  });
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStoreDetail, setSelectedStoreDetail] = useState(null);
   const [aiInsights, setAiInsights] = useState(null);
@@ -64,8 +70,9 @@ export default function ExecutiveDashboard() {
 
   const storesAnalysis = useMemo(() => {
     const now = new Date();
-    const currentWeekStart = startOfWeek(now, { weekStartsOn: 1 });
-    const currentWeekEnd = endOfWeek(now, { weekStartsOn: 1 });
+    // Usar el rango de fechas seleccionado
+    const currentWeekStart = dateRange.from;
+    const currentWeekEnd = dateRange.to;
     const monthStart = startOfMonth(now);
     const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
     const daysInMonth = monthEnd.getDate();
@@ -220,7 +227,7 @@ export default function ExecutiveDashboard() {
         dailyAvg: dailyAvgMonth
       };
     });
-  }, [allDailySales, allBudgets, currentMonth, currentYear]);
+  }, [allDailySales, allBudgets, currentMonth, currentYear, dateRange]);
 
   const zoneTotals = useMemo(() => {
     const storesWithData = storesAnalysis.filter(s => s.hasData);
@@ -534,7 +541,7 @@ Genera:
       </Link>
 
       <div className="max-w-[1920px] mx-auto px-4 py-6 relative z-10">
-        {/* Header Compacto */}
+        {/* Header Compacto con Filtro de Semanas */}
         <div className="mb-6">
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div>
@@ -542,11 +549,34 @@ Genera:
                 {ZONE_NAME}
               </h1>
               <p className="text-sm text-slate-400">
-                {format(new Date(), 'dd MMM yyyy')}
+                Semana {Math.ceil((dateRange.from - RETAIL_WEEK_START) / (7 * 24 * 60 * 60 * 1000)) + 1} · {format(dateRange.from, 'dd MMM')} - {format(dateRange.to, 'dd MMM yyyy')}
               </p>
             </div>
 
             <div className="flex items-center gap-2 flex-wrap">
+              {/* Filtro de Semanas Retail */}
+              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-xl rounded-lg px-3 py-2 border border-white/20">
+                <Filter className="w-4 h-4 text-blue-400" />
+                <select
+                  value={`${format(dateRange.from, 'yyyy-MM-dd')}`}
+                  onChange={(e) => {
+                    const startDate = new Date(e.target.value);
+                    setDateRange({ from: startDate, to: addDays(startDate, 6) });
+                  }}
+                  className="bg-transparent text-white text-sm font-medium outline-none cursor-pointer"
+                >
+                  {Array.from({ length: 8 }, (_, i) => {
+                    const weekStart = addDays(RETAIL_WEEK_START, i * 7);
+                    const weekEnd = addDays(weekStart, 6);
+                    return (
+                      <option key={i} value={format(weekStart, 'yyyy-MM-dd')} className="bg-slate-900">
+                        Semana {i + 1} ({format(weekStart, 'dd MMM')} - {format(weekEnd, 'dd MMM')})
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+
               <div className="relative w-48">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <Input
@@ -581,6 +611,30 @@ Genera:
           </div>
         ) : (
           <>
+            {/* Nueva Sección: Métricas Semanales */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-xl rounded-lg p-4 border border-blue-500/20">
+                <p className="text-xs text-blue-300 mb-2">Transacciones</p>
+                <p className="text-3xl font-black text-white mb-1">{zoneTotals.totalTransactions.toLocaleString()}</p>
+                <p className="text-xs text-slate-400">Total semana</p>
+              </div>
+              <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-xl rounded-lg p-4 border border-purple-500/20">
+                <p className="text-xs text-purple-300 mb-2">Ticket Promedio</p>
+                <p className="text-3xl font-black text-white mb-1">{formatCurrency(zoneTotals.totalSales / zoneTotals.totalTransactions || 0)}</p>
+                <p className="text-xs text-slate-400">Por transacción</p>
+              </div>
+              <div className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 backdrop-blur-xl rounded-lg p-4 border border-amber-500/20">
+                <p className="text-xs text-amber-300 mb-2">Venta Promedio</p>
+                <p className="text-3xl font-black text-white mb-1">{formatShort(zoneTotals.totalSales / STORES.length)}</p>
+                <p className="text-xs text-slate-400">Por tienda</p>
+              </div>
+              <div className="bg-gradient-to-br from-rose-500/10 to-red-500/10 backdrop-blur-xl rounded-lg p-4 border border-rose-500/20">
+                <p className="text-xs text-rose-300 mb-2">Gap Total</p>
+                <p className="text-3xl font-black text-white mb-1">{formatShort(Math.abs(zoneTotals.totalBudget - zoneTotals.totalSales))}</p>
+                <p className="text-xs text-slate-400">Por cerrar</p>
+              </div>
+            </div>
+
             {/* Grid Principal Estilo Power BI */}
             <div className="grid grid-cols-12 gap-4 mb-6">
               {/* Columna Izquierda - KPIs Compactos */}
@@ -746,25 +800,25 @@ Genera:
                   </div>
                 </div>
 
-                {/* Críticas - Barras Mejoradas */}
-                {criticalStoresData.length > 0 && (
-                  <div className="bg-gradient-to-br from-red-500/10 to-rose-600/10 backdrop-blur-xl rounded-lg p-5 border border-red-500/20 shadow-xl">
+                {/* Top Performers - Nueva Gráfica */}
+                {topStoresTrend.length > 0 && (
+                  <div className="bg-gradient-to-br from-emerald-500/10 to-green-600/10 backdrop-blur-xl rounded-lg p-5 border border-emerald-500/20 shadow-xl">
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-base font-black text-white">Top Críticas</h3>
-                      <span className="text-xs px-2 py-1 rounded bg-red-500/20 text-red-300 font-bold">&lt;70%</span>
+                      <h3 className="text-base font-black text-white">Top 5 Líderes</h3>
+                      <span className="text-xs px-2 py-1 rounded bg-emerald-500/20 text-emerald-300 font-bold">≥90%</span>
                     </div>
                     <ResponsiveContainer width="100%" height={180}>
-                      <BarChart data={criticalStoresData} layout="vertical">
+                      <BarChart data={topStoresTrend} layout="vertical">
                         <defs>
-                          <linearGradient id="redBarGradient" x1="0" y1="0" x2="1" y2="0">
-                            <stop offset="0%" stopColor="#ef4444" stopOpacity={0.8}/>
-                            <stop offset="100%" stopColor="#dc2626" stopOpacity={1}/>
+                          <linearGradient id="greenBarGradient" x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="0%" stopColor="#10b981" stopOpacity={0.8}/>
+                            <stop offset="100%" stopColor="#059669" stopOpacity={1}/>
                           </linearGradient>
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.15} horizontal={false} />
                         <XAxis 
                           type="number" 
-                          domain={[0, 100]} 
+                          domain={[90, 130]} 
                           stroke="#9ca3af" 
                           fontSize={10}
                           tickLine={false}
@@ -778,14 +832,14 @@ Genera:
                           width={70}
                           tickLine={false}
                         />
-                        <Bar dataKey="value" fill="url(#redBarGradient)" radius={[0, 6, 6, 0]} maxBarSize={24} />
+                        <Bar dataKey="value" fill="url(#greenBarGradient)" radius={[0, 6, 6, 0]} maxBarSize={24} />
                       </BarChart>
                     </ResponsiveContainer>
-                    <div className="mt-3 pt-3 border-t border-red-500/20">
+                    <div className="mt-3 pt-3 border-t border-emerald-500/20">
                       <div className="flex justify-between items-center">
-                        <span className="text-xs text-red-300">Promedio Críticas:</span>
-                        <span className="text-sm font-bold text-red-400">
-                          {(criticalStoresData.reduce((sum, s) => sum + s.value, 0) / criticalStoresData.length).toFixed(1)}%
+                        <span className="text-xs text-emerald-300">Promedio Top:</span>
+                        <span className="text-sm font-bold text-emerald-400">
+                          {(topStoresTrend.reduce((sum, s) => sum + s.value, 0) / topStoresTrend.length).toFixed(1)}%
                         </span>
                       </div>
                     </div>
