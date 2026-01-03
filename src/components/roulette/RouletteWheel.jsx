@@ -240,7 +240,29 @@ export default function RouletteWheel({ onResult, disabled, awardType = 'tienda'
             })}
           </svg>
 
-
+          {/* Botón central decorativo */}
+          <motion.div
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30"
+            animate={{
+              scale: spinning ? [1, 1.1, 1] : 1,
+              rotate: spinning ? 360 : 0
+            }}
+            transition={{
+              scale: { duration: 0.8, repeat: spinning ? Infinity : 0 },
+              rotate: { duration: 2, repeat: spinning ? Infinity : 0, ease: "linear" }
+            }}
+          >
+            <div className="relative">
+              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-pink-500 via-rose-500 to-pink-600 shadow-2xl flex items-center justify-center border-4 border-white">
+                <Gift className="w-10 h-10 text-white" />
+              </div>
+              <motion.div
+                className="absolute inset-0 rounded-full bg-gradient-to-br from-pink-400 to-rose-400 opacity-50"
+                animate={{ scale: [1, 1.4, 1], opacity: [0.5, 0, 0.5] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              />
+            </div>
+          </motion.div>
         </motion.div>
       </div>
 
