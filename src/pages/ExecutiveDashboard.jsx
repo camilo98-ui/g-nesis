@@ -15,7 +15,7 @@ import ExecutiveComparable from '../components/executive/ExecutiveComparable';
 import ZoneBudgetManager from '../components/executive/ZoneBudgetManager';
 import ZoneChartsPanel from '../components/executive/ZoneChartsPanel';
 import PlannerStatusPanel from '../components/executive/PlannerStatusPanel';
-import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, ResponsiveContainer, CartesianGrid, XAxis, YAxis } from 'recharts';
 
 export default function ExecutiveDashboard() {
   const [dateRange, setDateRange] = useState({ from: startOfMonth(new Date()), to: new Date() });
