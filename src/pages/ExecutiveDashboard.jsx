@@ -1001,48 +1001,49 @@ Genera:
                     </ComposedChart>
                   </ResponsiveContainer>
 
-                  {/* Mini gráfica de cumplimiento por día */}
+                  {/* Mini gráfica de proyección semanal */}
                   <div className="mt-4 pt-4 border-t border-white/10">
                     <div className="flex items-center justify-between mb-2">
-                      <h4 className="text-xs font-bold text-slate-400">% Cumplimiento Diario</h4>
-                      <div className="flex items-center gap-2 text-[9px]">
-                        <div className="flex items-center gap-1">
-                          <div className="w-2 h-2 rounded-sm bg-emerald-500"></div>
-                          <span className="text-slate-500">≥100%</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <div className="w-2 h-2 rounded-sm bg-amber-500"></div>
-                          <span className="text-slate-500">85-99%</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <div className="w-2 h-2 rounded-sm bg-red-500"></div>
-                          <span className="text-slate-500">&lt;85%</span>
-                        </div>
-                      </div>
+                      <h4 className="text-xs font-bold text-slate-400">📅 Proyección Semanas Restantes</h4>
+                      <span className="text-[9px] text-slate-500">
+                        {Math.ceil((new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0) - new Date()) / (7 * 24 * 60 * 60 * 1000))} semanas
+                      </span>
                     </div>
-                    <ResponsiveContainer width="100%" height={60}>
-                      <BarChart data={dailySalesData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+                    <ResponsiveContainer width="100%" height={70}>
+                      <BarChart 
+                        data={(() => {
+                          const now = new Date();
+                          const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+                          const daysLeft = Math.ceil((monthEnd - now) / (1000 * 60 * 60 * 24));
+                          const weeksLeft = Math.ceil(daysLeft / 7);
+                          const weeklyAvg = zoneTotals.totalBudget / 4; // Promedio semanal
+
+                          return Array.from({ length: Math.min(weeksLeft, 4) }, (_, i) => ({
+                            week: `S${i + 1}`,
+                            budget: weeklyAvg / 1000000,
+                            current: i === 0 ? zoneTotals.totalSales / 1000000 : 0
+                          }));
+                        })()}
+                        margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
+                      >
                         <XAxis 
-                          dataKey="date" 
-                          tick={{ fontSize: 9, fill: '#64748b' }}
+                          dataKey="week" 
+                          tick={{ fontSize: 10, fill: '#94a3b8' }}
                           axisLine={false}
                           tickLine={false}
                         />
-                        <YAxis hide domain={[0, 150]} />
-                        <Bar 
-                          dataKey="compliance" 
-                          radius={[3, 3, 0, 0]}
-                          maxBarSize={30}
-                        >
-                          {dailySalesData.map((entry, index) => (
-                            <Cell 
-                              key={`cell-${index}`} 
-                              fill={entry.compliance >= 100 ? '#10b981' : entry.compliance >= 85 ? '#f59e0b' : '#ef4444'}
-                            />
+                        <YAxis hide />
+                        <Bar dataKey="budget" fill="#6366f1" radius={[4, 4, 0, 0]} maxBarSize={35}>
+                          {Array(4).fill(0).map((_, index) => (
+                            <Cell key={`cell-${index}`} fill={index === 0 ? '#10b981' : '#6366f1'} opacity={index === 0 ? 0.8 : 0.5} />
                           ))}
                         </Bar>
                       </BarChart>
                     </ResponsiveContainer>
+                    <div className="flex items-center justify-between mt-1">
+                      <span className="text-[9px] text-emerald-400">■ Semana actual</span>
+                      <span className="text-[9px] text-indigo-400">■ Semanas restantes</span>
+                    </div>
                   </div>
                 </div>
               </div>
