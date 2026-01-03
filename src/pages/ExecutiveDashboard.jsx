@@ -725,16 +725,39 @@ Genera:
                   </div>
                 </div>
 
-                <div className="bg-gradient-to-br from-red-500/10 to-rose-500/10 backdrop-blur-xl rounded-lg p-4 border border-red-500/20">
-                  <p className="text-xs text-red-300 mb-1">Críticas</p>
-                  <p className="text-4xl font-black text-red-400 tabular-nums">{statusCounts.critical}</p>
-                  <p className="text-xs text-slate-400 mt-1">{Math.round((statusCounts.critical/STORES.length)*100)}% del total</p>
-                </div>
-
-                <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-xl rounded-lg p-4 border border-purple-500/20">
-                  <p className="text-xs text-purple-300 mb-1">En Meta</p>
-                  <p className="text-4xl font-black text-emerald-400 tabular-nums">{statusCounts.positive}</p>
-                  <p className="text-xs text-slate-400 mt-1">{Math.round((statusCounts.positive/STORES.length)*100)}% del total</p>
+                <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl rounded-lg p-4 border border-white/10">
+                  <p className="text-xs text-slate-400 mb-2">Estado Semanal</p>
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <p className="text-2xl font-black text-emerald-400 tabular-nums">
+                        {storesAnalysis.filter(s => s.hasData && s.weekCompliance >= 90).length}
+                      </p>
+                      <p className="text-[10px] text-emerald-300">En Meta</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-2xl font-black text-red-400 tabular-nums">
+                        {storesAnalysis.filter(s => s.hasData && s.weekCompliance < 70).length}
+                      </p>
+                      <p className="text-[10px] text-red-300">Críticas</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-1">
+                    <div className="bg-emerald-500/20 rounded py-1 text-center">
+                      <p className="text-xs font-bold text-emerald-400">
+                        {storesAnalysis.filter(s => s.hasData && s.weekCompliance >= 90).length}
+                      </p>
+                    </div>
+                    <div className="bg-amber-500/20 rounded py-1 text-center">
+                      <p className="text-xs font-bold text-amber-400">
+                        {storesAnalysis.filter(s => s.hasData && s.weekCompliance >= 70 && s.weekCompliance < 90).length}
+                      </p>
+                    </div>
+                    <div className="bg-red-500/20 rounded py-1 text-center">
+                      <p className="text-xs font-bold text-red-400">
+                        {storesAnalysis.filter(s => s.hasData && s.weekCompliance < 70).length}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
 
