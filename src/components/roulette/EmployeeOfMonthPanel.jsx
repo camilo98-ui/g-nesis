@@ -1,16 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Crown, Star, Trophy } from 'lucide-react';
+import { Input } from "@/components/ui/input";
+import { Crown, Star, Trophy, Search } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function EmployeeOfMonthPanel({ storeId }) {
   const [selectedCashier, setSelectedCashier] = useState('');
   const [awardType, setAwardType] = useState('tienda');
+  const [searchQuery, setSearchQuery] = useState('');
   const queryClient = useQueryClient();
   const currentMonth = new Date().getMonth() + 1;
   const currentYear = new Date().getFullYear();
@@ -63,6 +64,14 @@ export default function EmployeeOfMonthPanel({ storeId }) {
 
   const currentEmployee = currentEmployeeOfMonth.find(e => e.is_active);
 
+  // Filtrar cajeros por búsqueda
+  const filteredCashiers = useMemo(() => {
+    if (!searchQuery) return cashiers;
+    return cashiers.filter(c => 
+      c.name?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [cashiers, searchQuery]);
+
   return (
     <Card className="bg-gradient-to-br from-amber-50 to-yellow-100 border-0 shadow-xl">
       <CardHeader>
@@ -102,10 +111,10 @@ export default function EmployeeOfMonthPanel({ storeId }) {
             </Button>
           </motion.div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-4">
             <p className="text-sm text-gray-600">Selecciona al Popsy Star del mes:</p>
             
-            <div className="grid grid-cols-2 gap-2 mb-3">
+            <div className="grid grid-cols-2 gap-2">
               <Button
                 onClick={() => setAwardType('tienda')}
                 variant={awardType === 'tienda' ? 'default' : 'outline'}
@@ -122,18 +131,65 @@ export default function EmployeeOfMonthPanel({ storeId }) {
               </Button>
             </div>
 
-            <Select value={selectedCashier} onValueChange={setSelectedCashier}>
-              <SelectTrigger className="bg-white">
-                <SelectValue placeholder="Selecciona un cajero" />
-              </SelectTrigger>
-              <SelectContent>
-                {cashiers.map(c => (
-                  <SelectItem key={c.id} value={c.id}>
-                    {c.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {/* Buscador */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Input
+                placeholder="Buscar cajero..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 bg-white border-gray-200"
+              />
+            </div>
+
+            {/* Listado de Cajeros */}
+            <div className="space-y-2 max-h-60 overflow-y-auto bg-white rounded-lg p-3 border border-gray-200">
+              {filteredCashiers.length > 0 ? (
+                filteredCashiers.map((c, idx) => (
+                  <motion.div
+                    key={c.id}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: idx * 0.05 }}
+                    onClick={() => setSelectedCashier(c.id)}
+                    className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all ${
+                      selectedCashier === c.id
+                        ? 'bg-gradient-to-r from-pink-100 to-rose-100 border-2 border-pink-400'
+                        : 'bg-gray-50 hover:bg-gray-100 border-2 border-transparent'
+                    }`}
+                  >
+                    <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-pink-100 to-rose-200 flex-shrink-0">
+                      {c.photo_url ? (
+                        <img src={c.photo_url} alt={c.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-pink-600 font-bold text-lg">
+                          {c.name?.charAt(0)}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-gray-800 text-sm truncate">{c.name}</p>
+                      <p className="text-xs text-gray-500">{c.position || 'Cajero'}</p>
+                    </div>
+                    {selectedCashier === c.id && (
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        className="w-6 h-6 rounded-full bg-pink-500 flex items-center justify-center flex-shrink-0"
+                      >
+                        <Star className="w-4 h-4 text-white fill-white" />
+                      </motion.div>
+                    )}
+                  </motion.div>
+                ))
+              ) : (
+                <div className="text-center py-8 text-gray-400">
+                  <Search className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">No se encontraron cajeros</p>
+                </div>
+              )}
+            </div>
+
             <Button
               onClick={() => activateEmployeeMutation.mutate(selectedCashier)}
               disabled={!selectedCashier || activateEmployeeMutation.isPending}
