@@ -6,21 +6,21 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 
 const DEFAULT_PRIZES_TIENDA = [
-  { id: 1, name: 'Descanso remunerado', value: 0, color: '#FFB5C5', emoji: '🏖️' },
-  { id: 2, name: 'Bono $30.000 Olímpica', value: 30000, color: '#D4A5D8', emoji: '💳' },
-  { id: 3, name: 'Malteada chocolate', value: 0, color: '#A5D8FF', emoji: '🍫' },
-  { id: 4, name: 'Entradas Cinecolombia', value: 0, color: '#FFD9A5', emoji: '🎬' },
-  { id: 5, name: 'Domingo remunerado', value: 0, color: '#C9FFD4', emoji: '☀️' },
+  { id: 1, name: 'Descanso Pago', value: 0, color: '#FFD4E5', emoji: '🏖️' },
+  { id: 2, name: 'Bono $30.000', value: 30000, color: '#E5D4FF', emoji: '💳' },
+  { id: 3, name: 'Malteada Gratis', value: 0, color: '#C7ECFF', emoji: '🍫' },
+  { id: 4, name: 'Entradas Cine x2', value: 0, color: '#FFE7CC', emoji: '🎬' },
+  { id: 5, name: 'Domingo Pago', value: 0, color: '#D4F4DD', emoji: '☀️' },
 ];
 
 const DEFAULT_PRIZES_DISTRITO = [
-  { id: 1, name: 'Pase Piscilago 4 personas', value: 0, color: '#FFB5C5', emoji: '🏊' },
-  { id: 2, name: 'Domingo remunerado', value: 0, color: '#D4A5D8', emoji: '☀️' },
-  { id: 3, name: 'Descanso remunerado', value: 0, color: '#A5D8FF', emoji: '🏖️' },
-  { id: 4, name: 'Entradas Cine PREMIUM', value: 0, color: '#FFD9A5', emoji: '🎥' },
-  { id: 5, name: 'Litro de helado', value: 0, color: '#C9FFD4', emoji: '🍦' },
-  { id: 6, name: 'Descanso + Malteada', value: 0, color: '#FFE5CC', emoji: '🍹' },
-  { id: 7, name: 'Bono $80.000 Olímpica', value: 80000, color: '#FFD0E5', emoji: '💰' },
+  { id: 1, name: 'Pase Piscilago x4', value: 0, color: '#FFD4E5', emoji: '🏊' },
+  { id: 2, name: 'Domingo Pago', value: 0, color: '#E5D4FF', emoji: '☀️' },
+  { id: 3, name: 'Descanso Pago', value: 0, color: '#C7ECFF', emoji: '🏖️' },
+  { id: 4, name: 'Entradas Cine x2', value: 0, color: '#FFE7CC', emoji: '🎥' },
+  { id: 5, name: '1 Litro Helado', value: 0, color: '#D4F4DD', emoji: '🍦' },
+  { id: 6, name: 'Descuento Mitad', value: 0, color: '#FFDFD4', emoji: '🍹' },
+  { id: 7, name: 'Bono $80.000', value: 80000, color: '#E8E5FF', emoji: '💰' },
 ];
 
 export default function RouletteWheel({ onResult, disabled, awardType = 'tienda', storeId }) {
@@ -142,12 +142,12 @@ export default function RouletteWheel({ onResult, disabled, awardType = 'tienda'
             transform: `rotate(${rotation}deg)`,
             transition: spinning 
               ? suspensePhase === 0 
-                ? 'transform 3s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+                ? 'transform 3s cubic-bezier(0.33, 0.0, 0.2, 1)'
                 : suspensePhase === 1 
-                  ? 'transform 2.5s cubic-bezier(0.4, 0.0, 0.6, 1)'
+                  ? 'transform 2.2s cubic-bezier(0.45, 0.0, 0.55, 1)'
                   : suspensePhase === 2
-                    ? 'transform 1s cubic-bezier(0.5, 0.0, 0.75, 0.0)'
-                    : 'transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55)'
+                    ? 'transform 1.2s cubic-bezier(0.6, 0.0, 0.4, 1)'
+                    : 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)'
               : 'none'
           }}
         >
