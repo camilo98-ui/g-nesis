@@ -1,42 +1,42 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// Saludos según hora del día
+// Mensajes premium según hora del día
 const getTimeBasedGreetings = () => {
   const hour = new Date().getHours();
   if (hour < 12) {
     return [
-      { text: "¡Buenos días,", emoji: "☀️", suffix: "! A brillar hoy", bg: "from-amber-400 to-orange-400" },
-      { text: "¡Feliz mañana en", emoji: "🌅", suffix: "! Empieza fuerte", bg: "from-rose-400 to-pink-400" },
-      { text: "¡Arrancamos el día en", emoji: "🚀", suffix: "!", bg: "from-violet-400 to-purple-400" },
-      { text: "¡El sol salió para", emoji: "🌞", suffix: "! Vamos por todo", bg: "from-yellow-400 to-amber-400" },
+      { text: "Gestión Premium", emoji: "💎", subtitle: "Control total de tu punto de venta", bg: "from-slate-800 to-slate-900" },
+      { text: "Comando Central", emoji: "🎯", subtitle: "Optimiza tu operación en tiempo real", bg: "from-indigo-800 to-purple-900" },
+      { text: "Dashboard Elite", emoji: "📊", subtitle: "Métricas y decisiones inteligentes", bg: "from-blue-800 to-cyan-900" },
+      { text: "Plataforma Pro", emoji: "⚡", subtitle: "Tu negocio bajo control absoluto", bg: "from-violet-800 to-fuchsia-900" },
     ];
   } else if (hour < 18) {
     return [
-      { text: "¡Buenas tardes,", emoji: "🍦", suffix: "! La dulzura continúa", bg: "from-pink-400 to-rose-400" },
-      { text: "¡Sigue brillando en", emoji: "⭐", suffix: "!", bg: "from-cyan-400 to-blue-400" },
-      { text: "¡La tarde es tuya en", emoji: "💫", suffix: "! A dar lo mejor", bg: "from-emerald-400 to-teal-400" },
-      { text: "¡Qué flow en", emoji: "🔥", suffix: "! Sigue así", bg: "from-orange-400 to-red-400" },
+      { text: "Sistema Premium", emoji: "🏆", subtitle: "Gestión avanzada en tiempo real", bg: "from-slate-800 to-gray-900" },
+      { text: "Control Total", emoji: "🎯", subtitle: "Cada métrica cuenta para el éxito", bg: "from-emerald-800 to-teal-900" },
+      { text: "Panel Ejecutivo", emoji: "📈", subtitle: "Análisis y estrategia en un solo lugar", bg: "from-blue-800 to-indigo-900" },
+      { text: "Gestión Elite", emoji: "💼", subtitle: "Herramientas profesionales para líderes", bg: "from-purple-800 to-violet-900" },
     ];
   } else {
     return [
-      { text: "¡Buenas noches,", emoji: "🌙", suffix: "! Último empujón", bg: "from-indigo-400 to-purple-400" },
-      { text: "¡Terminamos fuerte en", emoji: "💪", suffix: "!", bg: "from-violet-400 to-fuchsia-400" },
-      { text: "¡La noche es joven en", emoji: "✨", suffix: "! Vamos", bg: "from-blue-400 to-indigo-400" },
-      { text: "¡Cierre épico en", emoji: "🎯", suffix: "!", bg: "from-purple-400 to-pink-400" },
+      { text: "Cierre Premium", emoji: "✨", subtitle: "Controla cada detalle hasta el final", bg: "from-slate-800 to-slate-900" },
+      { text: "Modo Nocturno Pro", emoji: "🌙", subtitle: "Gestión 24/7 sin interrupciones", bg: "from-indigo-800 to-purple-900" },
+      { text: "Dashboard Night", emoji: "🌃", subtitle: "Tu negocio nunca duerme", bg: "from-blue-800 to-slate-900" },
+      { text: "Control Elite", emoji: "⭐", subtitle: "Excelencia operativa constante", bg: "from-violet-800 to-indigo-900" },
     ];
   }
 };
 
 const MOTIVATIONAL_PHRASES = [
-  "¡Hoy vendes más que ayer! 📈",
-  "¡Cada helado es una sonrisa! 😊",
-  "¡Eres parte del mejor equipo! 🏆",
-  "¡La meta está cerca! 🎯",
-  "¡Tú haces la diferencia! ⭐",
-  "¡Que fluya la dulzura! 🍨",
-  "¡Éxito asegurado! 🚀",
-  "¡A conquistar el día! 💪",
+  "Análisis en tiempo real",
+  "Decisiones basadas en datos",
+  "Optimización continua",
+  "Excelencia operativa",
+  "Gestión inteligente",
+  "Rendimiento máximo",
+  "Control absoluto",
+  "Estrategia profesional",
 ];
 
 const CONFETTI_COLORS = ['#FFB5C5', '#E0BBE4', '#C5E8FF', '#FFEFD5', '#D4F0F0', '#fbbf24', '#a78bfa'];
@@ -150,34 +150,42 @@ export default function WelcomeToast({ storeName, storeCode, onClose }) {
             
             <div className="flex-1">
               <motion.p 
-                className="text-white font-bold text-lg drop-shadow-md"
+                className="text-white font-black text-lg drop-shadow-md mb-0.5"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.3 }}
               >
-                {greeting.text}{" "}
-                <motion.span 
-                  className="text-yellow-200 font-black"
-                  animate={{ scale: [1, 1.1, 1] }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                >
-                  {storeCode}
-                </motion.span>
-                {greeting.suffix}
+                {greeting.text}
               </motion.p>
               <motion.p 
-                className="text-white/80 text-sm"
+                className="text-white/70 text-xs mb-2 leading-tight"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.5 }}
               >
-                {storeName}
+                {greeting.subtitle}
               </motion.p>
-              <motion.p 
-                className="text-yellow-200 text-xs font-medium mt-1"
+              <motion.div
+                className="flex items-center gap-2"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.8 }}
+                transition={{ delay: 0.7 }}
+              >
+                <div className="h-px flex-1 bg-white/20" />
+                <motion.span 
+                  className="text-white/90 font-bold text-xs px-2 py-0.5 bg-white/10 rounded-full border border-white/20"
+                  animate={{ scale: [1, 1.05, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  {storeCode}
+                </motion.span>
+                <div className="h-px flex-1 bg-white/20" />
+              </motion.div>
+              <motion.p 
+                className="text-white/60 text-[10px] font-medium mt-2 tracking-wide uppercase"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.9 }}
               >
                 {motivational}
               </motion.p>
