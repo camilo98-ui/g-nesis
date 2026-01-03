@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
@@ -498,7 +499,7 @@ export default function Dashboard() {
 
       try {
         const response = await fetch(
-          `https://archive-api.open-meteo.com/v1/archive?latitude=4.6097&longitude=-74.0817&start_date=${format(start, 'yyyy-MM-dd')}&end_date=${format(end, 'yyyy-MM-dd')}&daily=weathercode,temperature_2m_max,temperature_2m_min,temperature_2m_mean,precipitation_sum&timezone=America%2FBogota`
+          `https://archive-api.open-meteo.com/v1/archive?latitude=4.6097&longitude=-74.0817&start_date=${format(start, 'yyyy-MM-dd')}&end_date=${format(end, 'yyyy-MM-dd')}&daily=weathercode,temperature_2m_max,temperature_2m_min,temperature_2m_mean,precipitation_sum&timezone=America%2FBogota}`
         );
         const data = await response.json();
         setWeatherData({ history: data.daily });
@@ -638,7 +639,7 @@ export default function Dashboard() {
     }), { sales: 0, tickets: 0, transactions: 0, suggested: 0 });
   }, [filteredSales]);
 
-  // Totales del período de comparación
+  // Totals del período de comparación
   const comparisonTotals = useMemo(() => {
     if (!showComparison || !comparisonSales.length) return null;
     return comparisonSales.reduce((acc, s) => ({
@@ -972,6 +973,7 @@ export default function Dashboard() {
             activeBudget={currentBudget}
             storeId={selectedStore}
             formatCurrency={formatCurrency}
+            currentDateRange={weekFilter || dateRange}
             onConfigureBudget={() => setShowMonthlyBudget(true)} />
 
           }
@@ -1823,7 +1825,7 @@ export default function Dashboard() {
                           strokeWidth="3"
                           initial={{ pathLength: 0 }}
                           animate={{ pathLength: 1 }}
-                          transition={{ delay: idx * 0.1, duration: 1.5, ease: "easeInOut" }} />
+                          transition={{ delay: idx * 0.1 + 1, duration: 1.5, ease: "easeInOut" }} />
 
                               <motion.circle
                           cx="50"
