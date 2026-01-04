@@ -344,6 +344,13 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       };
     });
 
+    // Calcular proyección de cierre mensual basada en el ritmo acumulado
+    const totalMonthSales = salesUntilYesterday + todayActualSales;
+    const daysElapsed = now.getDate();
+    const avgDailySales = daysElapsed > 0 ? totalMonthSales / daysElapsed : 0;
+    const monthProjection = totalMonthSales + (avgDailySales * (remainingDays - 1));
+    const monthProjectionCompliance = adjustedMonthlyBudget > 0 ? (monthProjection / adjustedMonthlyBudget * 100) : 0;
+
     return {
       dailyBaseBudget,
       adjustedDailyBudget,
@@ -367,6 +374,13 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       weeklyData,
       currentWeekStart,
       currentWeekEnd,
+      // Proyección mensual
+      totalMonthSales,
+      daysElapsed,
+      avgDailySales,
+      monthProjection,
+      monthProjectionCompliance,
+      monthlyBudget: adjustedMonthlyBudget,
       // Datos para sparklines (últimos 7 días)
       last7DaysSales: dailySales
         .filter(s => {
@@ -1348,6 +1362,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                       {selectedMetric === 'weekly-budget' && '🎯 Desglose de Meta Semanal'}
                       {selectedMetric === 'weekly-sales' && '💵 Ventas de la Semana'}
                       {selectedMetric === 'weekly-projection' && '🚀 Proyección de Cierre Semanal'}
+                      {selectedMetric === 'month-projection' && '📊 Proyección de Cierre Mensual'}
                       {selectedMetric === 'recovery-plan' && '⚠️ Plan de Recuperación'}
                       {selectedMetric === 'on-track' && '✅ Rendimiento en Meta'}
                       {selectedMetric?.startsWith('top-day-') && `${budgetData.topDays[parseInt(selectedMetric.split('-')[2])]?.dayFull} - Día Estratégico`}
@@ -1720,6 +1735,132 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                       );
                     })()}
 
+                    {selectedMetric === 'month-projection' && (
+                      <div>
+                        <h4 className="text-sm md:text-base font-bold text-slate-900 mb-3">Proyección de Cierre Mensual</h4>
+                        
+                        <div className="grid grid-cols-2 gap-3 mb-4">
+                          <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-lg p-3 text-center border border-indigo-200/50">
+                            <p className="text-xs text-indigo-600 mb-1">Proyección de Cierre</p>
+                            <p className="text-xl font-black text-indigo-900">{formatCurrency(budgetData.monthProjection)}</p>
+                          </div>
+                          <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg p-3 text-center border border-purple-200/50">
+                            <p className="text-xs text-purple-600 mb-1">Meta Mensual (105%)</p>
+                            <p className="text-xl font-black text-purple-900">{formatCurrency(budgetData.monthlyBudget)}</p>
+                          </div>
+                          <div className="bg-emerald-50 rounded-lg p-3">
+                            <p className="text-xs text-emerald-600 mb-1">Vendido Hasta Hoy</p>
+                            <p className="text-lg font-bold text-emerald-900">{formatCurrency(budgetData.totalMonthSales)}</p>
+                            <p className="text-[10px] text-emerald-600 mt-1">{budgetData.daysElapsed} días</p>
+                          </div>
+                          <div className="bg-amber-50 rounded-lg p-3">
+                            <p className="text-xs text-amber-600 mb-1">Promedio Diario</p>
+                            <p className="text-lg font-bold text-amber-900">{formatCurrency(budgetData.avgDailySales)}</p>
+                            <p className="text-[10px] text-amber-600 mt-1">Ritmo actual</p>
+                          </div>
+                        </div>
+
+                        <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-4 mb-4 border-2 border-indigo-200/50">
+                          <div className="flex items-center justify-between mb-3">
+                            <span className="text-sm font-bold text-indigo-900">Cumplimiento Proyectado</span>
+                            <span className={`text-3xl font-black ${
+                              budgetData.monthProjectionCompliance >= 100 
+                                ? 'text-emerald-600' 
+                                : budgetData.monthProjectionCompliance >= 90
+                                ? 'text-amber-600'
+                                : 'text-rose-600'
+                            }`}>
+                              {budgetData.monthProjectionCompliance.toFixed(1)}%
+                            </span>
+                          </div>
+                          <div className="h-4 bg-white rounded-full overflow-hidden shadow-inner">
+                            <motion.div
+                              initial={{ width: 0 }}
+                              animate={{ width: `${Math.min(budgetData.monthProjectionCompliance, 100)}%` }}
+                              transition={{ duration: 1.5 }}
+                              className={`h-full rounded-full ${
+                                budgetData.monthProjectionCompliance >= 100 
+                                  ? 'bg-gradient-to-r from-emerald-400 to-green-500' 
+                                  : budgetData.monthProjectionCompliance >= 90
+                                  ? 'bg-gradient-to-r from-amber-400 to-orange-500'
+                                  : 'bg-gradient-to-r from-rose-400 to-pink-500'
+                              }`}
+                            />
+                          </div>
+                        </div>
+
+                        <ResponsiveContainer width="100%" height={200}>
+                          <AreaChart data={[
+                            { name: 'Vendido', value: budgetData.totalMonthSales },
+                            { name: 'Proyección', value: budgetData.monthProjection },
+                            { name: 'Meta', value: budgetData.monthlyBudget }
+                          ]}>
+                            <defs>
+                              <linearGradient id="monthProjGradient" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#6366f1" stopOpacity={0.6}/>
+                                <stop offset="100%" stopColor="#a78bfa" stopOpacity={0.1}/>
+                              </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                            <XAxis dataKey="name" fontSize={11} />
+                            <YAxis fontSize={10} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} />
+                            <Tooltip formatter={(v) => formatCurrency(v)} />
+                            <Area type="monotone" dataKey="value" stroke="#6366f1" strokeWidth={3} fill="url(#monthProjGradient)" />
+                          </AreaChart>
+                        </ResponsiveContainer>
+
+                        <div className={`mt-4 p-4 rounded-xl border-2 ${
+                          budgetData.monthProjectionCompliance >= 100 
+                            ? 'bg-emerald-50 border-emerald-200' 
+                            : budgetData.monthProjectionCompliance >= 90
+                            ? 'bg-amber-50 border-amber-200'
+                            : 'bg-rose-50 border-rose-200'
+                        }`}>
+                          <p className="text-xs font-bold mb-2 ${
+                            budgetData.monthProjectionCompliance >= 100 
+                              ? 'text-emerald-900' 
+                              : budgetData.monthProjectionCompliance >= 90
+                              ? 'text-amber-900'
+                              : 'text-rose-900'
+                          }">
+                            {budgetData.monthProjectionCompliance >= 100 
+                              ? '🎉 Análisis: En Camino al Éxito' 
+                              : budgetData.monthProjectionCompliance >= 90
+                              ? '⚠️ Análisis: Atención Requerida'
+                              : '🚨 Análisis: Acción Urgente Necesaria'}
+                          </p>
+                          <ul className={`text-xs space-y-1 ml-4 ${
+                            budgetData.monthProjectionCompliance >= 100 
+                              ? 'text-emerald-800' 
+                              : budgetData.monthProjectionCompliance >= 90
+                              ? 'text-amber-800'
+                              : 'text-rose-800'
+                          }`}>
+                            <li>• Ventas acumuladas: {formatCurrency(budgetData.totalMonthSales)} ({(budgetData.totalMonthSales / budgetData.monthlyBudget * 100).toFixed(1)}%)</li>
+                            <li>• Ritmo diario actual: {formatCurrency(budgetData.avgDailySales)} (basado en {budgetData.daysElapsed} días)</li>
+                            <li>• Días restantes: {budgetData.remainingDays} días</li>
+                            <li>• {budgetData.monthProjectionCompliance >= 100 
+                              ? `Proyectas superar la meta en ${formatCurrency(budgetData.monthProjection - budgetData.monthlyBudget)}` 
+                              : `Necesitas ${formatCurrency(budgetData.monthlyBudget - budgetData.monthProjection)} adicionales al ritmo actual`}
+                            </li>
+                            <li>• Promedio requerido/día: {formatCurrency(budgetData.remainingBudget / budgetData.remainingDays)} vs actual {formatCurrency(budgetData.avgDailySales)}</li>
+                          </ul>
+                        </div>
+
+                        {budgetData.monthProjectionCompliance < 100 && (
+                          <div className="mt-3 p-3 bg-gradient-to-r from-orange-50 to-red-50 rounded-lg border border-orange-200">
+                            <p className="text-xs font-bold text-orange-900 mb-2">💡 Plan de Acción Inmediato:</p>
+                            <ul className="text-xs text-orange-800 space-y-1 ml-4">
+                              <li>• Necesitas incrementar {formatCurrency((budgetData.remainingBudget / budgetData.remainingDays) - budgetData.avgDailySales)} por día</li>
+                              <li>• Prioriza días de alto tráfico histórico para recuperación</li>
+                              <li>• Revisa inventario de productos de mayor margen</li>
+                              <li>• Activa promociones agresivas en próximos 3-5 días</li>
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                     {selectedMetric === 'recovery-plan' && (
                       <div>
                         <h4 className="text-sm md:text-base font-bold text-slate-900 mb-3">Plan de Recuperación de Brecha</h4>
@@ -2025,6 +2166,83 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                   </div>
                 </DialogContent>
               </Dialog>
+
+              {/* Barra de Proyección Mensual - NUEVA */}
+              <motion.button
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                whileHover={{ scale: 1.02, y: -3 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => {
+                  setSelectedMetric('month-projection');
+                  setIsModalOpen(true);
+                }}
+                className="w-full bg-gradient-to-br from-indigo-100/60 via-purple-100/50 to-pink-100/60 rounded-2xl p-4 md:p-5 border-2 border-indigo-200/50 shadow-lg hover:shadow-xl transition-all cursor-pointer"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-10 h-10 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-xl flex items-center justify-center shadow-md">
+                      <TrendingUp className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="text-left">
+                      <p className="text-xs text-indigo-700/70 font-semibold">Proyección Cierre Mes</p>
+                      <p className="text-lg md:text-2xl font-black text-indigo-900 leading-tight">
+                        {formatCurrency(budgetData.monthProjection)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className={`px-3 py-1.5 rounded-full ${
+                    budgetData.monthProjectionCompliance >= 100 
+                      ? 'bg-emerald-100 text-emerald-700' 
+                      : budgetData.monthProjectionCompliance >= 90
+                      ? 'bg-amber-100 text-amber-700'
+                      : 'bg-rose-100 text-rose-700'
+                  }`}>
+                    <p className="text-xs font-black">
+                      {budgetData.monthProjectionCompliance.toFixed(0)}%
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-indigo-600/70">Al ritmo actual proyectas cerrar en</span>
+                    <span className="font-bold text-indigo-900">{formatCurrency(budgetData.monthProjection)}</span>
+                  </div>
+                  <div className="relative h-3 bg-white/50 rounded-full overflow-hidden shadow-inner">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${Math.min(budgetData.monthProjectionCompliance, 100)}%` }}
+                      transition={{ duration: 1.5, delay: 0.3 }}
+                      className={`h-full rounded-full relative ${
+                        budgetData.monthProjectionCompliance >= 100 
+                          ? 'bg-gradient-to-r from-emerald-400 to-green-400' 
+                          : budgetData.monthProjectionCompliance >= 90
+                          ? 'bg-gradient-to-r from-amber-400 to-orange-400'
+                          : 'bg-gradient-to-r from-rose-400 to-pink-400'
+                      }`}
+                    >
+                      <div 
+                        className="absolute inset-0"
+                        style={{
+                          background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.6) 50%, transparent 100%)',
+                          width: '30%',
+                          animation: 'slideRight 2s linear infinite'
+                        }}
+                      />
+                    </motion.div>
+                  </div>
+                  <div className="flex items-center justify-between text-[10px]">
+                    <span className="text-indigo-500/60">Vendido: {formatCurrency(budgetData.totalMonthSales)} • Promedio/día: {formatCurrency(budgetData.avgDailySales)}</span>
+                    <span className="text-indigo-700 font-bold">{budgetData.daysElapsed} días transcurridos</span>
+                  </div>
+                </div>
+
+                <div className="mt-3 pt-3 border-t border-indigo-200/30 flex items-center justify-center gap-2 text-indigo-600">
+                  <ChevronRight className="w-3 h-3" />
+                  <span className="text-xs font-semibold">Toca para ver detalles de proyección</span>
+                </div>
+              </motion.button>
 
               {/* Mensaje de estado - interactivo */}
               {needsRecovery ? (
