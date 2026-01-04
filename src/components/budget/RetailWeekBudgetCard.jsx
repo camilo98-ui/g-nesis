@@ -613,11 +613,8 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                   <span className="font-bold text-white">{budgetData.projectionCompliance.toFixed(0)}%</span>
                 </div>
                 <div className="relative h-3 bg-white/20 rounded-full overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${Math.min(budgetData.projectionCompliance, 100)}%` }}
-                    transition={{ duration: 1, ease: "easeOut" }}
-                    className={`h-full rounded-full relative ${
+                  <div
+                    className={`h-full rounded-full relative overflow-hidden ${
                       budgetData.projectionCompliance >= 100 
                         ? 'bg-gradient-to-r from-emerald-300/80 to-green-200/80' 
                         : budgetData.projectionCompliance >= 85
@@ -625,7 +622,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                         : 'bg-gradient-to-r from-orange-200/80 to-red-200/80'
                     }`}
                     style={{
-                      overflow: 'hidden'
+                      width: `${Math.min(budgetData.projectionCompliance, 100)}%`
                     }}
                   >
                     <div 
@@ -635,7 +632,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                         width: '50%'
                       }}
                     />
-                  </motion.div>
+                  </div>
                 </div>
                 <p className="text-[10px] text-white/50">
                   {budgetData.projectionCompliance >= 100 
