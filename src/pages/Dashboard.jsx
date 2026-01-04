@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
@@ -227,28 +226,28 @@ function DetailPanel({ metric, data, onClose, chartData, formatCurrency, shiftDa
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-4 gap-3">
-              <motion.div whileHover={{ scale: 1.03 }} className="bg-gradient-to-br from-green-50 to-emerald-100 rounded-xl p-4 text-center cursor-pointer">
-                <p className="text-xs text-gray-500 mb-1">🏆 Mejor día</p>
-                <p className="text-lg font-black text-green-600">{formatCurrency(stats.max)}</p>
-                <p className="text-[10px] text-gray-400 mt-1">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <motion.div whileHover={{ scale: 1.03 }} className="bg-gradient-to-br from-green-50 to-emerald-100 rounded-xl p-5 text-center cursor-pointer">
+                <p className="text-sm text-gray-600 mb-2 font-semibold">🏆 Mejor día</p>
+                <p className="text-xl md:text-2xl font-black text-green-600 mb-1">{formatCurrency(stats.max)}</p>
+                <p className="text-xs text-gray-500 mt-2">
                   {chartData.find(d => d[metric === 'sales' ? 'ventas' : metric] === stats.max)?.fullDate || 'N/A'}
                 </p>
               </motion.div>
-              <motion.div whileHover={{ scale: 1.03 }} className="bg-gradient-to-br from-amber-50 to-orange-100 rounded-xl p-4 text-center cursor-pointer">
-                <p className="text-xs text-gray-500 mb-1">📊 Promedio</p>
-                <p className="text-lg font-black text-amber-600">{formatCurrency(stats.avg)}</p>
-                <p className="text-[10px] text-gray-400 mt-1">Diario en período</p>
+              <motion.div whileHover={{ scale: 1.03 }} className="bg-gradient-to-br from-amber-50 to-orange-100 rounded-xl p-5 text-center cursor-pointer">
+                <p className="text-sm text-gray-600 mb-2 font-semibold">📊 Promedio</p>
+                <p className="text-xl md:text-2xl font-black text-amber-600 mb-1">{formatCurrency(stats.avg)}</p>
+                <p className="text-xs text-gray-500 mt-2">Diario en período</p>
               </motion.div>
-              <motion.div whileHover={{ scale: 1.03 }} className="bg-gradient-to-br from-blue-50 to-cyan-100 rounded-xl p-4 text-center cursor-pointer">
-                <p className="text-xs text-gray-500 mb-1">📊 Total</p>
-                <p className="text-lg font-black text-blue-600">{formatCurrency(stats.total)}</p>
-                <p className="text-[10px] text-gray-400 mt-1">Suma del período</p>
+              <motion.div whileHover={{ scale: 1.03 }} className="bg-gradient-to-br from-blue-50 to-cyan-100 rounded-xl p-5 text-center cursor-pointer">
+                <p className="text-sm text-gray-600 mb-2 font-semibold">📊 Total</p>
+                <p className="text-xl md:text-2xl font-black text-blue-600 mb-1">{formatCurrency(stats.total)}</p>
+                <p className="text-xs text-gray-500 mt-2">Suma del período</p>
               </motion.div>
-              <motion.div whileHover={{ scale: 1.03 }} className={`rounded-xl p-4 text-center cursor-pointer ${stats.trend >= 0 ? 'bg-gradient-to-br from-emerald-50 to-green-100' : 'bg-gradient-to-br from-red-50 to-rose-100'}`}>
-                <p className="text-xs text-gray-500 mb-1">{stats.trend >= 0 ? '📈' : '📉'} Crecimiento</p>
-                <p className={`text-lg font-black ${stats.trend >= 0 ? 'text-green-600' : 'text-red-600'}`}>{stats.trend > 0 ? '+' : ''}{stats.trend.toFixed(1)}%</p>
-                <p className="text-[10px] text-gray-400 mt-1">vs inicio período</p>
+              <motion.div whileHover={{ scale: 1.03 }} className={`rounded-xl p-5 text-center cursor-pointer ${stats.trend >= 0 ? 'bg-gradient-to-br from-emerald-50 to-green-100' : 'bg-gradient-to-br from-red-50 to-rose-100'}`}>
+                <p className="text-sm text-gray-600 mb-2 font-semibold">{stats.trend >= 0 ? '📈' : '📉'} Crecimiento</p>
+                <p className={`text-xl md:text-2xl font-black ${stats.trend >= 0 ? 'text-green-600' : 'text-red-600'} mb-1`}>{stats.trend > 0 ? '+' : ''}{stats.trend.toFixed(1)}%</p>
+                <p className="text-xs text-gray-500 mt-2">vs inicio período</p>
               </motion.div>
             </div>
 
