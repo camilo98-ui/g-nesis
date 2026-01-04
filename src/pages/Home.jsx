@@ -1275,7 +1275,7 @@ export default function Home() {
               <div key={item.name}>
 
                   {isLocked ?
-                  <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 h-full shadow-lg transition-all duration-300 group relative overflow-hidden border border-white/20 opacity-60 cursor-not-allowed"
+                  <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 h-full shadow-lg transition-all duration-300 group relative overflow-hidden border border-white/20 opacity-60 cursor-not-allowed">
 
                       {/* Lock overlay */}
                       <div className="absolute inset-0 bg-gray-900/10 rounded-2xl flex items-center justify-center z-20">
@@ -1294,7 +1294,7 @@ export default function Home() {
                       </div> :
                 item.isSpecialAction && item.specialAction === 'comparable' ?
                 <Link to={createPageUrl('ExecutiveDashboard') + '?comparison=true'}>
-                  <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 h-full shadow-lg hover:shadow-2xl hover:bg-white/15 transition-all duration-300 group relative overflow-hidden border border-white/20 cursor-pointer"
+                  <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 h-full shadow-lg hover:shadow-2xl hover:bg-white/15 transition-all duration-300 group relative overflow-hidden border border-white/20 cursor-pointer">
                     
                     {/* Icon centered */}
                     <div className="flex flex-col items-center justify-center text-center relative z-10">
@@ -1362,6 +1362,7 @@ export default function Home() {
                   className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 h-full shadow-lg hover:shadow-2xl hover:bg-white/15 transition-all duration-300 group relative overflow-hidden border border-white/20 cursor-pointer"
                   >
                   {/* Icon centered */}
+                  {/* Icon centered */}
                   <div className="flex flex-col items-center justify-center text-center relative z-10">
                     <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mb-2 shadow-sm">
                       {item.icon ? (
@@ -1378,7 +1379,7 @@ export default function Home() {
                   </div> :
 
                 <Link to={createPageUrl(item.page)}>
-                  <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 h-full shadow-lg hover:shadow-2xl hover:bg-white/15 transition-all duration-300 group relative overflow-hidden border border-white/20"
+                  <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 h-full shadow-lg hover:shadow-2xl hover:bg-white/15 transition-all duration-300 group relative overflow-hidden border border-white/20">
                     {/* Icon centered */}
                     <div className="flex flex-col items-center justify-center text-center relative z-10">
                       <div className={`w-12 h-12 ${item.iconBg} backdrop-blur-sm rounded-xl flex items-center justify-center mb-2`}>
