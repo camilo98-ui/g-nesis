@@ -471,10 +471,10 @@ export default function WeeklyCalendar({
                           <motion.button 
                             whileTap={{ scale: 0.97 }}
                             onClick={() => { setSelectedDay(day); setEditingShift(null); resetForm(); setShowAddShift(true); }}
-                            className={`w-full py-3 sm:py-2 border-2 border-dashed rounded-xl text-xs sm:text-xs font-bold transition-all flex items-center justify-center gap-1.5 touch-manipulation ${isHovered ? 'border-pink-400 text-pink-500 bg-pink-50/50' : 'border-gray-300 text-gray-500 active:border-pink-300 active:bg-pink-50/30'}`}
+                            className={`w-full py-4 sm:py-2 border-2 border-dashed rounded-xl text-[13px] sm:text-xs font-bold transition-all flex items-center justify-center gap-2 touch-manipulation ${isHovered ? 'border-pink-400 text-pink-500 bg-pink-50/50' : 'border-gray-300 text-gray-500 active:border-pink-300 active:bg-pink-50/30'}`}
                           >
                             <Plus className="w-5 h-5 sm:w-4 sm:h-4" /> 
-                            <span>Agregar turno</span>
+                            <span>Agregar</span>
                           </motion.button>
                         )}
                       </div>
