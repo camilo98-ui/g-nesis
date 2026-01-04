@@ -126,16 +126,23 @@ export default function Layout({ children, currentPageName }) {
           <main className="pt-4 min-h-screen pb-4 relative">
           {/* Professional Gradient Background */}
           <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-            {/* Base gradient */}
-            <div className="absolute inset-0 bg-gradient-to-br from-pink-100/60 via-purple-100/50 to-blue-100/60" />
+            {/* Base gradient mejorado */}
+            <div className="absolute inset-0 bg-gradient-to-br from-pink-100/70 via-purple-100/60 to-blue-100/70" />
 
-            {/* Animated color-shifting orbs */}
-            <div className="absolute top-20 right-[10%] w-[600px] h-[600px] rounded-full blur-3xl animate-gradient-1" />
-            <div className="absolute bottom-20 left-[15%] w-[700px] h-[700px] rounded-full blur-3xl animate-gradient-2" />
-            <div className="absolute top-1/3 left-1/3 w-[500px] h-[500px] rounded-full blur-3xl animate-gradient-3" />
+            {/* Animated color-shifting orbs mejorados */}
+            <div className="absolute top-20 right-[10%] w-[600px] h-[600px] rounded-full blur-3xl animate-gradient-1 opacity-80" />
+            <div className="absolute bottom-20 left-[15%] w-[700px] h-[700px] rounded-full blur-3xl animate-gradient-2 opacity-70" />
+            <div className="absolute top-1/3 left-1/3 w-[500px] h-[500px] rounded-full blur-3xl animate-gradient-3 opacity-75" />
 
-            {/* Subtle grid overlay */}
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,#8881_1px,transparent_1px),linear-gradient(to_bottom,#8881_1px,transparent_1px)] bg-[size:64px_64px] opacity-30" />
+            {/* Orbs adicionales para más profundidad */}
+            <div className="absolute top-1/2 right-[25%] w-[400px] h-[400px] rounded-full blur-3xl opacity-40" style={{ background: 'radial-gradient(circle, rgba(251, 113, 133, 0.4), transparent)' }} />
+            <div className="absolute bottom-1/3 right-[10%] w-[350px] h-[350px] rounded-full blur-3xl opacity-35" style={{ background: 'radial-gradient(circle, rgba(168, 85, 247, 0.35), transparent)', animation: 'gradient-shift-1 20s ease-in-out infinite reverse' }} />
+
+            {/* Subtle grid overlay mejorado */}
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,#8883_1px,transparent_1px),linear-gradient(to_bottom,#8883_1px,transparent_1px)] bg-[size:64px_64px] opacity-20" />
+
+            {/* Luz ambiental sutil */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1),transparent_70%)]" />
           </div>
 
           <div className="container mx-auto px-2 sm:px-4 relative z-10">
