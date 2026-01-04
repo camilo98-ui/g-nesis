@@ -229,9 +229,9 @@ INSTRUCCIONES:
     }));
   }, [trendData]);
 
-  // Comparación con otros cajeros
+  // Comparación con otros cajeros (usando mes retail)
   const cashierComparison = useMemo(() => {
-    const monthStart = startOfMonth(new Date());
+    const monthStart = getRetailMonthStart();
     const allRecords = shiftRecords.filter(r => {
       try {
         const date = new Date(r.date);
