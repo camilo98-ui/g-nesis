@@ -1419,15 +1419,7 @@ export default function Home() {
           {showDirectory && <DirectoryModal onClose={() => setShowDirectory(false)} />}
         </AnimatePresence>
 
-        <AnimatePresence>
-          {showWelcome && selectedStore && (
-            <WelcomeToast
-              storeName={selectedStoreName}
-              storeCode={selectedStore}
-              onClose={() => setShowWelcome(false)}
-            />
-          )}
-        </AnimatePresence>
+
 
         <AnimatePresence>
           {showReport && (
