@@ -506,20 +506,20 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                               </feMerge>
                             </filter>
                             <linearGradient id="lineGradient1" x1="0%" y1="0%" x2="100%" y2="0%">
-                              <stop offset="0%" stopColor="#fff" stopOpacity="0">
-                                <animate attributeName="offset" values="0;1" dur="2s" repeatCount="indefinite"/>
+                              <stop offset="-20%" stopColor="#fff" stopOpacity="0">
+                                <animate attributeName="offset" values="-0.2;1.2" dur="2.5s" repeatCount="indefinite"/>
                               </stop>
-                              <stop offset="25%" stopColor="#fff" stopOpacity="0.3">
-                                <animate attributeName="offset" values="0.25;1.25" dur="2s" repeatCount="indefinite"/>
+                              <stop offset="-10%" stopColor="#fff" stopOpacity="0.5">
+                                <animate attributeName="offset" values="-0.1;1.3" dur="2.5s" repeatCount="indefinite"/>
                               </stop>
-                              <stop offset="50%" stopColor="#fff" stopOpacity="1">
-                                <animate attributeName="offset" values="0.5;1.5" dur="2s" repeatCount="indefinite"/>
+                              <stop offset="0%" stopColor="#fff" stopOpacity="1">
+                                <animate attributeName="offset" values="0;1.4" dur="2.5s" repeatCount="indefinite"/>
                               </stop>
-                              <stop offset="75%" stopColor="#fff" stopOpacity="0.3">
-                                <animate attributeName="offset" values="0.75;1.75" dur="2s" repeatCount="indefinite"/>
+                              <stop offset="10%" stopColor="#fff" stopOpacity="0.5">
+                                <animate attributeName="offset" values="0.1;1.5" dur="2.5s" repeatCount="indefinite"/>
                               </stop>
-                              <stop offset="100%" stopColor="#fff" stopOpacity="0">
-                                <animate attributeName="offset" values="1;2" dur="2s" repeatCount="indefinite"/>
+                              <stop offset="20%" stopColor="#fff" stopOpacity="0">
+                                <animate attributeName="offset" values="0.2;1.6" dur="2.5s" repeatCount="indefinite"/>
                               </stop>
                             </linearGradient>
                           </defs>
@@ -559,20 +559,20 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                               </feMerge>
                             </filter>
                             <linearGradient id="lineGradient2" x1="0%" y1="0%" x2="100%" y2="0%">
-                              <stop offset="0%" stopColor="#fff" stopOpacity="0">
-                                <animate attributeName="offset" values="0;1" dur="2s" repeatCount="indefinite"/>
+                              <stop offset="-20%" stopColor="#fff" stopOpacity="0">
+                                <animate attributeName="offset" values="-0.2;1.2" dur="2.5s" repeatCount="indefinite"/>
                               </stop>
-                              <stop offset="25%" stopColor="#fff" stopOpacity="0.3">
-                                <animate attributeName="offset" values="0.25;1.25" dur="2s" repeatCount="indefinite"/>
+                              <stop offset="-10%" stopColor="#fff" stopOpacity="0.5">
+                                <animate attributeName="offset" values="-0.1;1.3" dur="2.5s" repeatCount="indefinite"/>
                               </stop>
-                              <stop offset="50%" stopColor="#fff" stopOpacity="1">
-                                <animate attributeName="offset" values="0.5;1.5" dur="2s" repeatCount="indefinite"/>
+                              <stop offset="0%" stopColor="#fff" stopOpacity="1">
+                                <animate attributeName="offset" values="0;1.4" dur="2.5s" repeatCount="indefinite"/>
                               </stop>
-                              <stop offset="75%" stopColor="#fff" stopOpacity="0.3">
-                                <animate attributeName="offset" values="0.75;1.75" dur="2s" repeatCount="indefinite"/>
+                              <stop offset="10%" stopColor="#fff" stopOpacity="0.5">
+                                <animate attributeName="offset" values="0.1;1.5" dur="2.5s" repeatCount="indefinite"/>
                               </stop>
-                              <stop offset="100%" stopColor="#fff" stopOpacity="0">
-                                <animate attributeName="offset" values="1;2" dur="2s" repeatCount="indefinite"/>
+                              <stop offset="20%" stopColor="#fff" stopOpacity="0">
+                                <animate attributeName="offset" values="0.2;1.6" dur="2.5s" repeatCount="indefinite"/>
                               </stop>
                             </linearGradient>
                           </defs>
