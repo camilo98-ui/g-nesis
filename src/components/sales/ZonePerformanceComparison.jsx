@@ -300,7 +300,7 @@ export default function ZonePerformanceComparison({ storeId, formatCurrency }) {
 
         {/* Top 3 Tiendas */}
         <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-4 lg:p-5 border border-rose-200/40 shadow-lg">
-          <h4 className="text-xs lg:text-sm font-black text-pink-900 mb-3 lg:mb-4 flex items-center gap-2">
+          <h4 className="text-xs lg:text-sm font-black text-rose-900 mb-3 lg:mb-4 flex items-center gap-2">
             <Award className="w-4 h-4 lg:w-5 lg:h-5 text-amber-500" />
             Top 3 Tiendas de {zone}
           </h4>
@@ -317,14 +317,14 @@ export default function ZonePerformanceComparison({ storeId, formatCurrency }) {
                   whileHover={{ scale: 1.03, x: 5 }}
                   className={`flex items-center justify-between p-3 rounded-xl border-2 transition-all ${
                     isCurrentStore 
-                      ? 'bg-gradient-to-r from-indigo-100 to-purple-100 border-indigo-400 shadow-lg' 
+                      ? 'bg-gradient-to-r from-rose-100 to-pink-100 border-rose-400 shadow-lg' 
                       : 'bg-white/50 border-slate-200'
                   }`}
                 >
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     <span className="text-2xl flex-shrink-0">{medals[idx]}</span>
                     <div className="min-w-0 flex-1">
-                      <p className={`text-sm font-bold truncate ${isCurrentStore ? 'text-indigo-900' : 'text-slate-800'}`}>
+                      <p className={`text-sm font-bold truncate ${isCurrentStore ? 'text-rose-900' : 'text-slate-800'}`}>
                         {store.storeName}
                       </p>
                       <p className="text-xs text-slate-600">{formatCurrency(store.sales)}</p>
@@ -334,7 +334,7 @@ export default function ZonePerformanceComparison({ storeId, formatCurrency }) {
                     <motion.div 
                       animate={{ scale: [1, 1.2, 1] }}
                       transition={{ duration: 2, repeat: Infinity }}
-                      className="flex-shrink-0 w-6 h-6 bg-indigo-500 rounded-full flex items-center justify-center"
+                      className="flex-shrink-0 w-6 h-6 bg-rose-500 rounded-full flex items-center justify-center"
                     >
                       <span className="text-white text-xs font-bold">✓</span>
                     </motion.div>
@@ -349,11 +349,16 @@ export default function ZonePerformanceComparison({ storeId, formatCurrency }) {
               : `A ${formatCurrency(top3[2].sales - currentStoreData.sales)} de entrar al Top 3`}
           </p>
         </div>
-      </div>
+      </motion.div>
 
       {/* Ranking completo de tiendas */}
-      <div className="px-4 lg:px-6 pb-4 lg:pb-6">
-        <div className="bg-gradient-to-br from-slate-50/70 to-gray-50/70 rounded-2xl p-4 lg:p-5 border-2 border-slate-200/40 shadow-lg">
+      <motion.div
+        initial={{ opacity: 0, height: 0 }}
+        animate={{ opacity: 1, height: 'auto' }}
+        exit={{ opacity: 0, height: 0 }}
+        className="px-4 lg:px-6 pb-4 lg:pb-6"
+      >
+        <div className="bg-gradient-to-br from-rose-50/70 to-pink-50/70 rounded-2xl p-4 lg:p-5 border-2 border-rose-200/40 shadow-lg">
           <h4 className="text-xs lg:text-sm font-black text-slate-900 mb-3 lg:mb-4">
             📊 Ranking Completo - Ventas del Mes
           </h4>
