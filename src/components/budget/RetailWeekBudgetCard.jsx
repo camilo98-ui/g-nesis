@@ -557,19 +557,19 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                             </filter>
                             <linearGradient id="lineGradientSecond" x1="0%" y1="0%" x2="100%" y2="0%">
                               <stop offset="-20%" stopColor="#fff" stopOpacity="0">
-                                <animate attributeName="offset" values="-0.2;1.2" dur="2s" begin="2s" repeatCount="indefinite"/>
+                                <animate attributeName="offset" values="-0.2;1.2" dur="4s" begin="2s" repeatCount="indefinite"/>
                               </stop>
                               <stop offset="-10%" stopColor="#fff" stopOpacity="0.5">
-                                <animate attributeName="offset" values="-0.1;1.3" dur="2s" begin="2s" repeatCount="indefinite"/>
+                                <animate attributeName="offset" values="-0.1;1.3" dur="4s" begin="2s" repeatCount="indefinite"/>
                               </stop>
                               <stop offset="0%" stopColor="#fff" stopOpacity="1">
-                                <animate attributeName="offset" values="0;1.4" dur="2s" begin="2s" repeatCount="indefinite"/>
+                                <animate attributeName="offset" values="0;1.4" dur="4s" begin="2s" repeatCount="indefinite"/>
                               </stop>
                               <stop offset="10%" stopColor="#fff" stopOpacity="0.5">
-                                <animate attributeName="offset" values="0.1;1.5" dur="2s" begin="2s" repeatCount="indefinite"/>
+                                <animate attributeName="offset" values="0.1;1.5" dur="4s" begin="2s" repeatCount="indefinite"/>
                               </stop>
                               <stop offset="20%" stopColor="#fff" stopOpacity="0">
-                                <animate attributeName="offset" values="0.2;1.6" dur="2s" begin="2s" repeatCount="indefinite"/>
+                                <animate attributeName="offset" values="0.2;1.6" dur="4s" begin="2s" repeatCount="indefinite"/>
                               </stop>
                             </linearGradient>
                           </defs>
