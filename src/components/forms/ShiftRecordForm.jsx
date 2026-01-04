@@ -385,13 +385,12 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
               />
             </motion.div>
 
-            {/* Tickets */}
+            {/* Ticket Promedio - Calculado automáticamente */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
               whileHover={{ scale: 1.02, y: -2 }}
-              whileTap={{ scale: 0.98 }}
               className="bg-gradient-to-br from-sky-50 to-blue-50 rounded-[20px] p-5 shadow-md border border-sky-100 hover:shadow-lg transition-all"
             >
               <Label className="flex items-center gap-3 mb-3 text-base font-bold text-sky-700">
@@ -400,13 +399,15 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
                 </div>
                 Ticket Promedio
               </Label>
-              <Input 
-                type="number"
-                placeholder="0"
-                value={formData.tickets}
-                onChange={(e) => setFormData({...formData, tickets: e.target.value})}
-                className="border-2 border-sky-200 focus:border-sky-400 bg-white rounded-xl text-lg font-bold h-12 focus:ring-2 focus:ring-sky-200 transition-all"
-              />
+              <div className="border-2 border-sky-200 bg-sky-50/50 rounded-xl text-lg font-bold h-12 flex items-center px-3 text-sky-700">
+                {(() => {
+                  const sales = parseFloat(formData.sales) || 0;
+                  const transactions = parseInt(formData.transactions) || 0;
+                  const avgTicket = transactions > 0 ? sales / transactions : 0;
+                  return `$${avgTicket.toLocaleString('es-CO', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+                })()}
+              </div>
+              <p className="text-xs text-sky-600 mt-2">Calculado: Ventas ÷ Transacciones</p>
             </motion.div>
 
             {/* Transacciones */}
