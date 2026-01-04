@@ -480,18 +480,18 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                 )}
               </div>
 
-              <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="text-center">
-                  <p className="text-xs text-white/80 mb-3 font-medium">Meta del Día (105%)</p>
+              <div className="grid grid-cols-2 gap-6 mb-6">
+                <div className="text-left">
+                  <p className="text-sm text-white/90 mb-3 font-semibold">Meta del Día (105%)</p>
                   <motion.p
                     key={budgetData.adjustedDailyBudget}
                     initial={{ scale: 1.2, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    className="text-2xl md:text-3xl font-black text-white leading-none mb-2"
+                    className="text-3xl md:text-4xl font-black text-white leading-none mb-2"
                   >
                     {formatCurrency(budgetData.adjustedDailyBudget)}
                   </motion.p>
-                  <p className="text-[10px] text-white/70">Base: {formatCurrency(budgetData.adjustedDailyBudget / 1.05)}</p>
+                  <p className="text-xs text-white/70">Base: {formatCurrency(budgetData.adjustedDailyBudget / 1.05)}</p>
                   
                   {/* Sparkline debajo del número */}
                   {budgetData.last7DaysSales?.length > 0 && (
@@ -540,12 +540,12 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                   )}
                 </div>
                 
-                <div className="text-center">
-                  <p className="text-xs text-white/80 mb-3 font-medium">Promedio Histórico</p>
-                  <p className="text-2xl md:text-3xl font-black text-white leading-none mb-2">
+                <div className="text-left">
+                  <p className="text-sm text-white/90 mb-3 font-semibold">Promedio Histórico</p>
+                  <p className="text-3xl md:text-4xl font-black text-white leading-none mb-2">
                     {formatCurrency(budgetData.historicalAvgToday)}
                   </p>
-                  <p className="text-[10px] text-white/70">{format(new Date(), 'EEEE', { locale: es })}s anteriores</p>
+                  <p className="text-xs text-white/70">{format(new Date(), 'EEEE', { locale: es })}s anteriores</p>
                   
                   {/* Sparkline debajo del número */}
                   {budgetData.last7DaysSales?.length > 0 && (
