@@ -357,7 +357,10 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
 
     // Calcular proyección de cierre mensual basada en el ritmo acumulado
     const totalMonthSales = salesUntilYesterday + todayActualSales;
-    const daysElapsed = now.getDate();
+    
+    // CRÍTICO: Días transcurridos en el mes RETAIL (desde el 29 del mes anterior)
+    const daysElapsed = eachDayOfInterval({ start: monthStart, end: now }).length;
+    
     const monthAvgDailySales = daysElapsed > 0 ? totalMonthSales / daysElapsed : 0;
     const monthProjection = totalMonthSales + (monthAvgDailySales * (remainingDays - 1));
     const monthProjectionCompliance = adjustedMonthlyBudget > 0 ? (monthProjection / adjustedMonthlyBudget * 100) : 0;
