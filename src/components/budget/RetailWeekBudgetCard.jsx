@@ -465,10 +465,10 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
           <motion.div
             whileHover={{ scale: 1.02, y: -2 }}
             onClick={() => setIsExpanded(!isExpanded)}
-            className="w-full bg-gradient-to-br from-rose-400/80 to-pink-400/80 rounded-2xl shadow-md p-6 md:p-8 border border-rose-300/40 relative overflow-hidden cursor-pointer"
+            className="w-full bg-gradient-to-br from-rose-400/80 to-pink-400/80 rounded-2xl shadow-md p-7 md:p-9 border border-rose-300/40 relative overflow-hidden cursor-pointer"
           >
             <div className="relative z-10">
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between mb-7">
                 <div className="flex items-center gap-2">
                   <Target className="w-6 h-6 text-white" />
                   <p className="text-sm text-white/90 font-semibold">Meta del Día</p>
@@ -480,25 +480,23 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                 )}
               </div>
 
-              <div className="space-y-6 mb-6">
+              <div className="grid grid-cols-2 gap-6 mb-7">
                 <div className="text-center">
                   <p className="text-xs text-white/80 mb-3 font-semibold">Meta del Día (105%)</p>
                   <motion.p
                     key={budgetData.adjustedDailyBudget}
                     initial={{ scale: 1.2, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    className="text-4xl md:text-5xl font-black text-white leading-tight mb-2"
+                    className="text-3xl md:text-4xl font-black text-white leading-tight mb-2"
                   >
                     {formatCurrency(budgetData.adjustedDailyBudget)}
                   </motion.p>
                   <p className="text-xs text-white/70">Base: {formatCurrency(budgetData.adjustedDailyBudget / 1.05)}</p>
                 </div>
                 
-                <div className="h-px bg-white/30" />
-                
-                <div className="text-center">
-                  <p className="text-xs text-white/80 mb-3 font-semibold">Promedio Histórico - {format(new Date(), 'EEEE', { locale: es })}</p>
-                  <p className="text-4xl md:text-5xl font-black text-white leading-tight mb-2">
+                <div className="text-center border-l border-white/30">
+                  <p className="text-xs text-white/80 mb-3 font-semibold">Promedio Histórico</p>
+                  <p className="text-3xl md:text-4xl font-black text-white leading-tight mb-2">
                     {formatCurrency(budgetData.historicalAvgToday)}
                   </p>
                   <p className="text-xs text-white/70">{format(new Date(), 'EEEE', { locale: es })}s anteriores</p>
