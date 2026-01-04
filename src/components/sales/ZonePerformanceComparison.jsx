@@ -28,7 +28,7 @@ export default function ZonePerformanceComparison({ storeId, formatCurrency, cur
 
   // Fetch ventas de todas las tiendas de la zona
   const { data: allZoneSales = [], isLoading } = useQuery({
-    queryKey: ['zoneSales', zone, monthStart, monthEnd],
+    queryKey: ['zoneSales', zone, dateStart, dateEnd],
     queryFn: async () => {
       const sales = [];
       for (const store of zoneStores) {
@@ -36,10 +36,10 @@ export default function ZonePerformanceComparison({ storeId, formatCurrency, cur
           store_id: store.code 
         });
         
-        // Filtrar solo ventas del mes retail actual
-        const monthSales = storeSales.filter(s => {
+        // Filtrar solo ventas del rango de fechas seleccionado
+        const periodSales = storeSales.filter(s => {
           const saleDate = s.date?.split('T')[0] || s.date;
-          return saleDate >= monthStart && saleDate <= monthEnd;
+          return saleDate >= dateStart && saleDate <= dateEnd;
         });
         
         if (monthSales.length > 0) {
