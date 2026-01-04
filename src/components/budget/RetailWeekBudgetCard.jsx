@@ -630,13 +630,15 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                     <motion.div
                       className="absolute inset-0"
                       style={{
-                        background: 'radial-gradient(ellipse, rgba(255,255,255,0.8) 0%, transparent 70%)'
+                        background: 'radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(255,255,255,0.5) 40%, transparent 70%)',
+                        filter: 'blur(8px)'
                       }}
                       animate={{
-                        opacity: [0.3, 1, 0.3]
+                        opacity: [0, 1, 0],
+                        scale: [0.8, 1.1, 0.8]
                       }}
                       transition={{
-                        duration: 2,
+                        duration: 1.5,
                         repeat: Infinity,
                         ease: 'easeInOut'
                       }}
@@ -675,13 +677,15 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                       <motion.div
                         className="absolute inset-0"
                         style={{
-                          background: 'radial-gradient(ellipse, rgba(255,255,255,0.8) 0%, transparent 70%)'
+                          background: 'radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(255,255,255,0.5) 40%, transparent 70%)',
+                          filter: 'blur(8px)'
                         }}
                         animate={{
-                          opacity: [0.3, 1, 0.3]
+                          opacity: [0, 1, 0],
+                          scale: [0.8, 1.1, 0.8]
                         }}
                         transition={{
-                          duration: 2,
+                          duration: 1.5,
                           repeat: Infinity,
                           ease: 'easeInOut'
                         }}
