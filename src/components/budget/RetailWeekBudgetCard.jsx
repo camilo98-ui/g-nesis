@@ -480,7 +480,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                 )}
               </div>
 
-              <div className="grid grid-cols-2 gap-6 mb-6">
+              <div className="grid grid-cols-2 gap-6 mb-6 pl-0">
                 <div className="text-left">
                   <p className="text-sm text-white/90 mb-3 font-semibold">Meta del Día (105%)</p>
                   <motion.p
@@ -595,7 +595,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                 </div>
               </div>
 
-              <div className="space-y-2 mb-4">
+              <div className="space-y-2 mb-4 pl-0">
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-white/70">Proyección Semanal</span>
                   <span className="font-bold text-white">{budgetData.projectionCompliance.toFixed(0)}%</span>
