@@ -10,8 +10,15 @@ import { es } from 'date-fns/locale';
 
 export default function ZonePerformanceComparison({ storeId, formatCurrency }) {
   const now = new Date();
-  const monthStart = format(startOfMonth(now), 'yyyy-MM-dd');
-  const monthEnd = format(endOfMonth(now), 'yyyy-MM-dd');
+  
+  // CALENDARIO RETAIL: del 29 del mes anterior al 28 del mes actual
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth();
+  const retailMonthStart = new Date(currentYear, currentMonth - 1, 29);
+  const retailMonthEnd = new Date(currentYear, currentMonth, 28);
+  
+  const monthStart = format(retailMonthStart, 'yyyy-MM-dd');
+  const monthEnd = format(retailMonthEnd, 'yyyy-MM-dd');
 
   // Determinar zona basada en código de tienda
   const currentStore = STORES.find(s => s.code === storeId);
