@@ -101,37 +101,37 @@ export default function SalesByHourChart({ shiftRecords = [], dailySales = [], f
       </div>
 
       {/* KPIs principales */}
-      <div className="grid grid-cols-4 gap-3 p-6 bg-white/50 backdrop-blur-sm border-b border-violet-200/20">
-        <motion.div whileHover={{ scale: 1.05, y: -3 }} className="text-center bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl p-4 border-2 border-emerald-300/50 shadow-md">
-          <Zap className="w-6 h-6 text-emerald-600 mx-auto mb-2" />
-          <p className="text-[10px] text-emerald-600 mb-1 font-semibold">Ticket Promedio</p>
-          <p className="text-2xl font-black text-emerald-900">{formatCurrency ? formatCurrency(performanceData.avgTicket).replace(/\.\d+/, '') : '-'}</p>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 p-4 lg:p-6 bg-white/50 backdrop-blur-sm border-b border-violet-200/20">
+        <motion.div whileHover={{ scale: 1.05, y: -3 }} className="text-center bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl p-3 lg:p-4 border-2 border-emerald-300/50 shadow-md">
+          <Zap className="w-5 h-5 lg:w-6 lg:h-6 text-emerald-600 mx-auto mb-1 lg:mb-2" />
+          <p className="text-[9px] lg:text-[10px] text-emerald-600 mb-1 font-semibold">Ticket Promedio</p>
+          <p className="text-lg lg:text-2xl font-black text-emerald-900">{formatCurrency ? formatCurrency(performanceData.avgTicket).replace(/\.\d+/, '') : '-'}</p>
         </motion.div>
-        <motion.div whileHover={{ scale: 1.05, y: -3 }} className="text-center bg-gradient-to-br from-pink-50 to-rose-50 rounded-xl p-4 border-2 border-pink-300/50 shadow-md">
-          <Gift className="w-6 h-6 text-pink-600 mx-auto mb-2" />
-          <p className="text-[10px] text-pink-600 mb-1 font-semibold">Tasa Sugeridos</p>
-          <p className="text-2xl font-black text-pink-900">{performanceData.suggestedRate.toFixed(0)}%</p>
+        <motion.div whileHover={{ scale: 1.05, y: -3 }} className="text-center bg-gradient-to-br from-pink-50 to-rose-50 rounded-xl p-3 lg:p-4 border-2 border-pink-300/50 shadow-md">
+          <Gift className="w-5 h-5 lg:w-6 lg:h-6 text-pink-600 mx-auto mb-1 lg:mb-2" />
+          <p className="text-[9px] lg:text-[10px] text-pink-600 mb-1 font-semibold">Tasa Sugeridos</p>
+          <p className="text-lg lg:text-2xl font-black text-pink-900">{performanceData.suggestedRate.toFixed(0)}%</p>
         </motion.div>
-        <motion.div whileHover={{ scale: 1.05, y: -3 }} className="text-center bg-gradient-to-br from-violet-50 to-purple-50 rounded-xl p-4 border-2 border-violet-300/50 shadow-md">
-          <Users className="w-6 h-6 text-violet-600 mx-auto mb-2" />
-          <p className="text-[10px] text-violet-600 mb-1 font-semibold">Transacciones</p>
-          <p className="text-2xl font-black text-violet-900">{performanceData.totalTransactions}</p>
+        <motion.div whileHover={{ scale: 1.05, y: -3 }} className="text-center bg-gradient-to-br from-violet-50 to-purple-50 rounded-xl p-3 lg:p-4 border-2 border-violet-300/50 shadow-md">
+          <Users className="w-5 h-5 lg:w-6 lg:h-6 text-violet-600 mx-auto mb-1 lg:mb-2" />
+          <p className="text-[9px] lg:text-[10px] text-violet-600 mb-1 font-semibold">Transacciones</p>
+          <p className="text-lg lg:text-2xl font-black text-violet-900">{performanceData.totalTransactions}</p>
         </motion.div>
-        <motion.div whileHover={{ scale: 1.05, y: -3 }} className="text-center bg-gradient-to-br from-amber-50 to-yellow-50 rounded-xl p-4 border-2 border-amber-300/50 shadow-md">
-          <Target className="w-6 h-6 text-amber-600 mx-auto mb-2" />
-          <p className="text-[10px] text-amber-600 mb-1 font-semibold">Conversión</p>
-          <p className="text-2xl font-black text-amber-900">{performanceData.conversionRate.toFixed(0)}%</p>
+        <motion.div whileHover={{ scale: 1.05, y: -3 }} className="text-center bg-gradient-to-br from-amber-50 to-yellow-50 rounded-xl p-3 lg:p-4 border-2 border-amber-300/50 shadow-md">
+          <Target className="w-5 h-5 lg:w-6 lg:h-6 text-amber-600 mx-auto mb-1 lg:mb-2" />
+          <p className="text-[9px] lg:text-[10px] text-amber-600 mb-1 font-semibold">Conversión</p>
+          <p className="text-lg lg:text-2xl font-black text-amber-900">{performanceData.conversionRate.toFixed(0)}%</p>
         </motion.div>
       </div>
 
-      <div className="p-6 grid grid-cols-2 gap-6">
+      <div className="p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
         {/* Gráfico radar de eficiencia */}
-        <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-5 border border-violet-200/40 shadow-lg">
-          <h4 className="text-sm font-black text-violet-900 mb-4 flex items-center gap-2">
-            <Award className="w-5 h-5 text-violet-500" />
+        <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-4 lg:p-5 border border-violet-200/40 shadow-lg">
+          <h4 className="text-xs lg:text-sm font-black text-violet-900 mb-3 lg:mb-4 flex items-center gap-2">
+            <Award className="w-4 h-4 lg:w-5 lg:h-5 text-violet-500" />
             Radar de Eficiencia
           </h4>
-          <ResponsiveContainer width="100%" height={240}>
+          <ResponsiveContainer width="100%" height={200}>
             <RadarChart data={performanceData.radarData}>
               <defs>
                 <linearGradient id="radarGrad" x1="0" y1="0" x2="0" y2="1">
@@ -140,8 +140,8 @@ export default function SalesByHourChart({ shiftRecords = [], dailySales = [], f
                 </linearGradient>
               </defs>
               <PolarGrid stroke="#e5e7eb" strokeWidth={1.5} />
-              <PolarAngleAxis dataKey="metric" tick={{ fill: '#64748b', fontSize: 11, fontWeight: 600 }} />
-              <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fill: '#94a3b8', fontSize: 10 }} />
+              <PolarAngleAxis dataKey="metric" tick={{ fill: '#64748b', fontSize: 9, fontWeight: 600 }} />
+              <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fill: '#94a3b8', fontSize: 8 }} />
               <Radar name="Eficiencia" dataKey="value" stroke="#a855f7" strokeWidth={3} fill="url(#radarGrad)" />
             </RadarChart>
           </ResponsiveContainer>
@@ -149,9 +149,9 @@ export default function SalesByHourChart({ shiftRecords = [], dailySales = [], f
         </div>
 
         {/* Performance por turno */}
-        <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-5 border border-pink-200/40 shadow-lg">
-          <h4 className="text-sm font-black text-pink-900 mb-4">Análisis por Turno</h4>
-          <ResponsiveContainer width="100%" height={240}>
+        <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-4 lg:p-5 border border-pink-200/40 shadow-lg">
+          <h4 className="text-xs lg:text-sm font-black text-pink-900 mb-3 lg:mb-4">Análisis por Turno</h4>
+          <ResponsiveContainer width="100%" height={200}>
             <BarChart data={performanceData.shiftAnalysis} layout="horizontal">
               <defs>
                 <linearGradient id="barShift" x1="0" y1="0" x2="0" y2="1">
@@ -160,8 +160,8 @@ export default function SalesByHourChart({ shiftRecords = [], dailySales = [], f
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
-              <XAxis type="category" dataKey="turno" fontSize={11} fontWeight={600} tick={{ fill: '#475569' }} />
-              <YAxis type="number" fontSize={11} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} tick={{ fill: '#64748b' }} />
+              <XAxis type="category" dataKey="turno" fontSize={10} fontWeight={600} tick={{ fill: '#475569' }} />
+              <YAxis type="number" fontSize={9} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} tick={{ fill: '#64748b' }} />
               <Tooltip 
                 contentStyle={{ borderRadius: 14, border: '2px solid #ec4899', background: '#fff', padding: '10px 14px' }}
                 formatter={(v, name) => {
@@ -173,21 +173,21 @@ export default function SalesByHourChart({ shiftRecords = [], dailySales = [], f
               <Bar dataKey="ventas" fill="url(#barShift)" radius={[0, 8, 8, 0]} />
             </BarChart>
           </ResponsiveContainer>
-          <div className="mt-3 flex items-center justify-between text-xs">
-            <span className="text-slate-600">Mejor turno: <span className="font-black text-pink-700">{topShift.turno}</span></span>
+          <div className="mt-2 lg:mt-3 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-1 lg:gap-0 text-[10px] lg:text-xs">
+            <span className="text-slate-600">Mejor: <span className="font-black text-pink-700">{topShift.turno}</span></span>
             <span className="text-slate-600">Top sugeridos: <span className="font-black text-violet-700">{bestSuggestedShift.turno}</span></span>
           </div>
         </div>
       </div>
 
       {/* Evolución de ticket promedio */}
-      <div className="px-6 pb-6">
-        <div className="bg-gradient-to-br from-rose-50/70 to-pink-50/70 rounded-2xl p-5 border-2 border-rose-200/40 shadow-lg">
-          <h4 className="text-sm font-black text-rose-900 mb-4 flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-rose-500" />
+      <div className="px-4 lg:px-6 pb-4 lg:pb-6">
+        <div className="bg-gradient-to-br from-rose-50/70 to-pink-50/70 rounded-2xl p-4 lg:p-5 border-2 border-rose-200/40 shadow-lg">
+          <h4 className="text-xs lg:text-sm font-black text-rose-900 mb-3 lg:mb-4 flex items-center gap-2">
+            <TrendingUp className="w-4 h-4 lg:w-5 lg:h-5 text-rose-500" />
             Evolución Ticket Promedio y Sugeridos
           </h4>
-          <ResponsiveContainer width="100%" height={200}>
+          <ResponsiveContainer width="100%" height={180}>
             <ComposedChart data={performanceData.dailyEvolution}>
               <defs>
                 <linearGradient id="ticketGrad" x1="0" y1="0" x2="0" y2="1">
@@ -196,9 +196,9 @@ export default function SalesByHourChart({ shiftRecords = [], dailySales = [], f
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
-              <XAxis dataKey="fecha" fontSize={10} fontWeight={600} tick={{ fill: '#475569' }} />
-              <YAxis yAxisId="left" fontSize={10} tickFormatter={(v) => `$${(v/1000).toFixed(0)}K`} tick={{ fill: '#f43f5e' }} />
-              <YAxis yAxisId="right" orientation="right" fontSize={10} tick={{ fill: '#8b5cf6' }} />
+              <XAxis dataKey="fecha" fontSize={9} fontWeight={600} tick={{ fill: '#475569' }} />
+              <YAxis yAxisId="left" fontSize={9} tickFormatter={(v) => `$${(v/1000).toFixed(0)}K`} tick={{ fill: '#f43f5e' }} />
+              <YAxis yAxisId="right" orientation="right" fontSize={9} tick={{ fill: '#8b5cf6' }} />
               <Tooltip 
                 contentStyle={{ borderRadius: 12, border: '2px solid #f43f5e', background: '#fff', fontSize: 11 }}
                 formatter={(v, name) => {
@@ -211,7 +211,7 @@ export default function SalesByHourChart({ shiftRecords = [], dailySales = [], f
               <Line yAxisId="right" type="monotone" dataKey="sugeridos" stroke="#8b5cf6" strokeWidth={2} dot={{ r: 4 }} name="sugeridos" />
             </ComposedChart>
           </ResponsiveContainer>
-          <p className="text-[10px] text-rose-600 mt-3 text-center">📊 Últimos 7 registros • Enfoque en maximizar ticket y sugeridos</p>
+          <p className="text-[9px] lg:text-[10px] text-rose-600 mt-2 lg:mt-3 text-center">📊 Últimos 7 registros • Enfoque en maximizar ticket y sugeridos</p>
         </div>
       </div>
     </div>
