@@ -13,7 +13,7 @@ import ComparableChartsGrid from '@/components/executive/ComparableChartsGrid';
 import DailyGoalsCard from '@/components/gamification/DailyGoalsCard';
 import RetailWeekBudgetCard from '@/components/budget/RetailWeekBudgetCard';
 import ProjectionDetailModal from '@/components/dashboard/ProjectionDetailModal';
-import SalesByHourChart from '@/components/sales/SalesByHourChart';
+import ZonePerformanceComparison from '@/components/sales/ZonePerformanceComparison';
 
 import GrowthVelocityChart from '@/components/management/GrowthVelocityChart';
 import StoreReportGenerator from '@/components/reports/StoreReportGenerator';
