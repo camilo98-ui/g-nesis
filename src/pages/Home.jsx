@@ -591,57 +591,39 @@ export default function Home() {
         </div>
 
         {/* Mobile/Tablet View */}
-        <div className="lg:hidden min-h-screen flex items-center justify-center relative z-10 px-4">
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            layout
-            transition={{ layout: { duration: 0.6, type: "spring", bounce: 0.15 } }}
-            className="w-full max-w-md bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border-2 border-rose-200/40" 
-            style={{ boxShadow: '0 0 12px rgba(251, 113, 133, 0.25), 0 0 20px rgba(251, 113, 133, 0.15)' }}
-          >
-            <motion.div layout className="p-5">
-              {/* Logo y título - siempre visibles */}
-              <motion.div layout="position" className="mb-5 text-center">
+        <div className="lg:hidden min-h-screen flex flex-col justify-center relative z-10">
+          <div className="flex-1 flex flex-col justify-center px-4 py-4 max-h-screen overflow-y-auto">
+            <div className="max-w-md mx-auto w-full bg-white/0 backdrop-blur-sm rounded-3xl shadow-2xl border-2 border-rose-200/40 p-5" style={{ boxShadow: '0 0 12px rgba(251, 113, 133, 0.25), 0 0 20px rgba(251, 113, 133, 0.15)' }}>
+              <div className="mb-5 text-center">
                 <motion.img 
                   src={LOGO_URL} 
                   alt="Popsy" 
-                  className="h-24 object-contain mx-auto mb-3"
+                  className="h-20 object-contain mx-auto mb-3"
+                  initial={{ opacity: 0, scale: 0.8, y: -20 }}
                   animate={{ 
+                    opacity: 1, 
+                    scale: 1,
                     y: [0, -8, 0]
                   }}
                   transition={{
+                    opacity: { duration: 0.6 },
+                    scale: { duration: 0.6 },
                     y: { duration: 2.5, repeat: Infinity, ease: "easeInOut" }
                   }}
                 />
-                <motion.h1 
-                  layout="position"
-                  className="text-xl font-black bg-gradient-to-r from-rose-400 to-purple-400 bg-clip-text text-transparent mb-1"
-                >
-                  Iniciar sesión
-                </motion.h1>
-                <motion.p layout="position" className="text-slate-600 text-xs font-medium">
-                  Selecciona tu rol y comienza
-                </motion.p>
-              </motion.div>
+                <h1 className="text-xl font-black bg-gradient-to-r from-rose-400 to-purple-400 bg-clip-text text-transparent mb-1">Iniciar sesión</h1>
+                <p className="text-slate-600 text-xs font-medium">Selecciona tu rol y comienza</p>
+              </div>
 
-              {/* Roles - siempre visibles */}
-              <motion.div layout="position" className="space-y-2">
-                {ROLES.map((role, idx) => {
+              <div className="space-y-2 mb-4">
+                {ROLES.map((role) => {
                   const isSelected = selectedRole === role.id;
                   const lastUsedRole = localStorage.getItem('lastSelectedRole');
                   const isLastUsed = role.id === lastUsedRole && !isSelected;
                   
                   return (
-                    <motion.button
-                      layout
+                    <button
                       key={role.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ 
-                        delay: idx * 0.1,
-                        layout: { duration: 0.3 }
-                      }}
                       onClick={() => {
                         setSelectedRole(role.id);
                         setLoginError('');
@@ -650,7 +632,7 @@ export default function Home() {
                       className={`relative w-full min-h-[60px] p-3 rounded-xl border-2 transition-all duration-300 text-left ${
                        isSelected
                          ? 'border-rose-300 bg-gradient-to-r from-rose-100/30 via-pink-100/20 to-purple-100/30 shadow-xl shadow-rose-200/40 scale-[1.02]'
-                         : 'border-slate-300/60 bg-white/50 backdrop-blur-md active:border-rose-200 hover:scale-[1.01] hover:shadow-lg'
+                         : 'border-slate-300/60 bg-white/8 backdrop-blur-md active:border-rose-200 hover:scale-[1.01] hover:shadow-lg'
                       }`}
                     >
                       {isLastUsed && (
@@ -666,12 +648,12 @@ export default function Home() {
                         <motion.div 
                           animate={isSelected ? { rotate: [0, 5, -5, 0] } : {}}
                           transition={{ duration: 2, repeat: Infinity }}
-                          className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 shadow-md ${
+                          className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 shadow-md ${
                           isSelected 
-                            ? 'bg-white/70 backdrop-blur-sm' 
+                            ? 'bg-white/60 backdrop-blur-sm' 
                             : 'bg-gradient-to-br from-rose-50 to-purple-50'
                           }`}>
-                          <div className="w-5 h-5">
+                          <div className="w-4 h-4">
                             <RoleIcon roleId={role.id} isSelected={isSelected} />
                           </div>
                         </motion.div>
@@ -681,191 +663,99 @@ export default function Home() {
                         </div>
                         {isSelected && (
                           <motion.div 
-                            initial={{ scale: 0, rotate: 180 }}
-                            animate={{ scale: 1, rotate: 0 }}
-                            transition={{ type: "spring", stiffness: 500, damping: 25 }}
-                            className="w-5 h-5 rounded-full bg-white flex items-center justify-center flex-shrink-0 shadow-md"
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            className="w-4 h-4 rounded-full bg-white flex items-center justify-center flex-shrink-0 shadow-md"
                           >
-                            <CheckCircle className="w-3.5 h-3.5 text-rose-500" strokeWidth={3} />
+                            <CheckCircle className="w-3 h-3 text-rose-500" strokeWidth={3} />
                           </motion.div>
                         )}
                       </div>
-                    </motion.button>
+                    </button>
                   );
                 })}
+              </div>
+
+              {selectedRole === 'gerente' && (
+                <div className="mb-3 p-2.5 bg-blue-50/60 backdrop-blur-sm border border-blue-200/40 rounded-lg">
+                  <p className="text-[10px] text-blue-700 flex items-center gap-1.5 font-medium">
+                    <Info className="w-3 h-3 flex-shrink-0" />
+                    Acceso a panel ejecutivo global
+                  </p>
+                </div>
+              )}
+
+              {selectedRole && selectedRole !== 'gerente' && (
+                <div className="mb-3">
+                  <label className="block text-xs font-semibold text-slate-900 mb-2 text-center">Selecciona tu tienda</label>
+                  <div className="max-w-sm mx-auto">
+                    <StoreSelector selectedStore={pendingStore} onStoreChange={handleStoreSelect} />
+                  </div>
+                </div>
+              )}
+
+              {selectedRole && (
+                <div className="mb-3">
+                  <label htmlFor="login-password" className="block text-xs font-semibold text-slate-900 mb-2">
+                    Contraseña
+                  </label>
+                  <div className="relative">
+                    <input
+                      id="login-password"
+                      type={showLoginPassword ? "text" : "password"}
+                      placeholder="••••••"
+                      value={loginPassword}
+                      onChange={(e) => {setLoginPassword(e.target.value);setLoginError('');}}
+                      onKeyDown={(e) => e.key === 'Enter' && !isSubmitting && handleLogin()}
+                      disabled={isSubmitting}
+                      autoComplete="current-password"
+                      className="w-full h-11 pl-4 pr-12 border-2 border-rose-200/60 rounded-xl focus:ring-2 focus:ring-pink-400/50 focus:border-pink-400/50 outline-none text-sm text-slate-900 placeholder:text-slate-400 disabled:opacity-50 disabled:cursor-not-allowed bg-white/80 backdrop-blur-sm"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowLoginPassword(!showLoginPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 active:text-slate-600"
+                    >
+                      {showLoginPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  <p className="text-[10px] text-slate-500 mt-1">Contraseña asignada por la empresa</p>
+                </div>
+              )}
+
+              {loginError && (
+                <div className="mb-3 p-2.5 bg-red-50/60 backdrop-blur-sm border border-red-200/40 rounded-lg">
+                  <p className="text-[10px] text-red-700 flex items-center gap-1.5 font-medium">
+                    <AlertTriangle className="w-3 h-3 flex-shrink-0" />
+                    {loginError}
+                  </p>
+                </div>
+              )}
+
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Button
+                  onClick={handleLogin}
+                  disabled={(selectedRole !== 'gerente' && !pendingStore) || !selectedRole || isSubmitting}
+                  className="w-full h-12 bg-gradient-to-r from-rose-300 to-pink-300 hover:from-rose-400 hover:to-pink-400 text-white rounded-xl font-bold text-sm disabled:opacity-40 mt-4 shadow-xl shadow-rose-200/30"
+                >
+                {isSubmitting ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Entrando...
+                  </span>
+                ) : (
+                  'Entrar 🚀'
+                )}
+              </Button>
               </motion.div>
 
-              {/* Campos expandibles con animación profesional */}
-              <AnimatePresence mode="wait">
-                {selectedRole && (
-                  <motion.div
-                    key="expanded-fields"
-                    layout
-                    initial={{ opacity: 0, height: 0, scale: 0.95 }}
-                    animate={{ 
-                      opacity: 1, 
-                      height: 'auto', 
-                      scale: 1,
-                      transition: {
-                        height: { duration: 0.4, ease: [0.4, 0, 0.2, 1] },
-                        opacity: { duration: 0.3, delay: 0.15 },
-                        scale: { duration: 0.4, ease: [0.4, 0, 0.2, 1] }
-                      }
-                    }}
-                    exit={{ 
-                      opacity: 0, 
-                      height: 0, 
-                      scale: 0.95,
-                      transition: {
-                        duration: 0.3,
-                        ease: [0.4, 0, 0.2, 1]
-                      }
-                    }}
-                    className="overflow-hidden"
-                  >
-                    <motion.div
-                      initial={{ y: -10 }}
-                      animate={{ y: 0 }}
-                      transition={{ delay: 0.2, duration: 0.3 }}
-                      className="pt-3 border-t-2 border-rose-100/50 mt-4"
-                    >
-                      {selectedRole === 'gerente' && (
-                        <motion.div 
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.3, type: "spring", stiffness: 300, damping: 25 }}
-                          className="mb-3 p-3 bg-gradient-to-br from-blue-50 to-cyan-50 backdrop-blur-sm border-2 border-blue-200/60 rounded-xl shadow-sm"
-                        >
-                          <p className="text-xs text-blue-700 flex items-center gap-2 font-semibold">
-                            <motion.div
-                              animate={{ rotate: [0, 360] }}
-                              transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                            >
-                              <Info className="w-4 h-4 flex-shrink-0" />
-                            </motion.div>
-                            Acceso a panel ejecutivo global
-                          </p>
-                        </motion.div>
-                      )}
-
-                      {selectedRole !== 'gerente' && (
-                        <motion.div 
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.3, type: "spring", stiffness: 300, damping: 25 }}
-                          className="mb-3"
-                        >
-                          <label className="block text-sm font-bold text-slate-900 mb-2 text-center">Selecciona tu tienda</label>
-                          <div className="max-w-sm mx-auto">
-                            <StoreSelector selectedStore={pendingStore} onStoreChange={handleStoreSelect} />
-                          </div>
-                        </motion.div>
-                      )}
-
-                      <motion.div 
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.4, type: "spring", stiffness: 300, damping: 25 }}
-                        className="mb-3"
-                      >
-                        <label htmlFor="login-password" className="block text-sm font-bold text-slate-900 mb-2">
-                          Contraseña
-                        </label>
-                        <div className="relative">
-                          <motion.input
-                            initial={{ borderColor: 'rgba(251, 113, 133, 0.4)' }}
-                            animate={{ 
-                              borderColor: ['rgba(251, 113, 133, 0.4)', 'rgba(236, 72, 153, 0.6)', 'rgba(251, 113, 133, 0.4)']
-                            }}
-                            transition={{ duration: 2, repeat: Infinity }}
-                            id="login-password"
-                            type={showLoginPassword ? "text" : "password"}
-                            placeholder="••••••"
-                            value={loginPassword}
-                            onChange={(e) => {setLoginPassword(e.target.value);setLoginError('');}}
-                            onKeyDown={(e) => e.key === 'Enter' && !isSubmitting && handleLogin()}
-                            disabled={isSubmitting}
-                            autoComplete="current-password"
-                            className="w-full h-12 pl-4 pr-12 border-2 rounded-xl focus:ring-2 focus:ring-pink-400/50 focus:border-pink-400 outline-none text-sm text-slate-900 placeholder:text-slate-400 disabled:opacity-50 disabled:cursor-not-allowed bg-white shadow-sm"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setShowLoginPassword(!showLoginPassword)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 active:text-slate-600"
-                          >
-                            {showLoginPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                          </button>
-                        </div>
-                        <p className="text-[10px] text-slate-500 mt-1.5">Contraseña asignada por la empresa</p>
-                      </motion.div>
-
-                      {loginError && (
-                        <motion.div 
-                          initial={{ opacity: 0, scale: 0.9, y: -5 }}
-                          animate={{ opacity: 1, scale: 1, y: 0 }}
-                          transition={{ type: "spring", stiffness: 400, damping: 20 }}
-                          className="mb-3 p-3 bg-gradient-to-br from-red-50 to-pink-50 backdrop-blur-sm border-2 border-red-200/60 rounded-xl shadow-sm"
-                        >
-                          <p className="text-xs text-red-700 flex items-center gap-2 font-semibold">
-                            <motion.div
-                              animate={{ rotate: [0, 10, -10, 0] }}
-                              transition={{ duration: 0.5, repeat: 3 }}
-                            >
-                              <AlertTriangle className="w-4 h-4 flex-shrink-0" />
-                            </motion.div>
-                            {loginError}
-                          </p>
-                        </motion.div>
-                      )}
-
-                      <motion.div 
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.5, type: "spring", stiffness: 300, damping: 25 }}
-                        whileHover={{ scale: 1.02 }} 
-                        whileTap={{ scale: 0.98 }}
-                      >
-                        <Button
-                          onClick={handleLogin}
-                          disabled={(selectedRole !== 'gerente' && !pendingStore) || !selectedRole || isSubmitting}
-                          className="w-full h-13 bg-gradient-to-r from-rose-400 to-pink-400 hover:from-rose-500 hover:to-pink-500 text-white rounded-xl font-black text-base disabled:opacity-40 shadow-xl shadow-rose-300/40"
-                        >
-                          {isSubmitting ? (
-                            <span className="flex items-center justify-center gap-2">
-                              <motion.div 
-                                animate={{ rotate: 360 }}
-                                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                                className="w-5 h-5 border-3 border-white border-t-transparent rounded-full"
-                              />
-                              Entrando...
-                            </span>
-                          ) : (
-                            <motion.span
-                              animate={{ scale: [1, 1.05, 1] }}
-                              transition={{ duration: 2, repeat: Infinity }}
-                            >
-                              Entrar 🚀
-                            </motion.span>
-                          )}
-                        </Button>
-                      </motion.div>
-
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.6 }}
-                        className="text-center mt-3"
-                      >
-                        <Link to={createPageUrl('ExecutiveDashboard')} className="text-[10px] text-slate-500">
-                          ¿Eres administrador?
-                        </Link>
-                      </motion.div>
-                    </motion.div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
-          </motion.div>
+              <div className="text-center mt-3">
+                <Link to={createPageUrl('ExecutiveDashboard')} className="text-[10px] text-slate-500">
+                  ¿Eres administrador?
+                </Link>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Desktop View */}
