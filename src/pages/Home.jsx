@@ -593,7 +593,7 @@ export default function Home() {
         {/* Mobile/Tablet View */}
         <div className="lg:hidden min-h-screen flex flex-col justify-center relative z-10">
           <div className="flex-1 flex flex-col justify-center px-4 py-8 max-h-screen overflow-y-auto">
-            <div className="max-w-md mx-auto w-full bg-white/0 backdrop-blur-sm rounded-3xl shadow-2xl border-2 border-pink-300/50 p-6" style={{ boxShadow: '0 0 40px rgba(236, 72, 153, 0.3), 0 0 80px rgba(236, 72, 153, 0.15)' }}>
+            <div className="max-w-md mx-auto w-full bg-white/0 backdrop-blur-sm rounded-3xl shadow-2xl border-2 border-pink-300/50 p-6" style={{ boxShadow: '0 0 12px rgba(236, 72, 153, 0.4), 0 0 20px rgba(236, 72, 153, 0.2)' }}>
               <div className="mb-8 text-center">
                 <motion.img 
                   src={LOGO_URL} 
@@ -821,7 +821,7 @@ export default function Home() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 className="bg-white/0 backdrop-blur-md rounded-3xl shadow-2xl border-2 border-pink-300/50 p-7 xl:p-8 space-y-5"
-                style={{ boxShadow: '0 0 40px rgba(236, 72, 153, 0.3), 0 0 80px rgba(236, 72, 153, 0.15), 0 25px 80px -15px rgba(217, 70, 239, 0.3)' }}>
+                style={{ boxShadow: '0 0 12px rgba(236, 72, 153, 0.4), 0 0 20px rgba(236, 72, 153, 0.2), 0 25px 80px -15px rgba(217, 70, 239, 0.3)' }}>
                 
                 <div className="text-center">
                   <h2 className="text-3xl font-black bg-gradient-to-r from-rose-400 to-purple-400 bg-clip-text text-transparent mb-2">Iniciar sesión</h2>
