@@ -113,6 +113,9 @@ export default function Layout({ children, currentPageName }) {
     const savedTheme = localStorage.getItem('popsyTheme') || 'classic';
     const root = document.documentElement;
     root.classList.add(`theme-${savedTheme}`);
+    
+    // Set language to Spanish to prevent translation prompts
+    document.documentElement.lang = 'es';
   }, []);
 
   return (
