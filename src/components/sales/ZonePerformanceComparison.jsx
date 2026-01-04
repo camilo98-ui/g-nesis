@@ -138,9 +138,9 @@ export default function ZonePerformanceComparison({ storeId, formatCurrency }) {
 
   if (isLoading) {
     return (
-      <div className="bg-gradient-to-br from-indigo-50/40 via-purple-50/30 to-pink-50/40 rounded-3xl border-2 border-indigo-200/30 shadow-2xl p-8">
+      <div className="bg-gradient-to-br from-rose-50/40 via-pink-50/30 to-rose-50/40 rounded-3xl border-2 border-rose-200/30 shadow-2xl p-8">
         <div className="flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600" />
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-400" />
         </div>
       </div>
     );
@@ -159,12 +159,16 @@ export default function ZonePerformanceComparison({ storeId, formatCurrency }) {
   const isTop3 = position <= 3;
 
   return (
-    <div className="bg-gradient-to-br from-indigo-50/40 via-purple-50/30 to-pink-50/40 rounded-3xl border-2 border-indigo-200/30 shadow-2xl overflow-hidden">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-indigo-600/95 via-purple-600/95 to-pink-600/95 px-6 py-5 relative overflow-hidden">
+    <div className="bg-gradient-to-br from-rose-50/40 via-pink-50/30 to-rose-50/40 rounded-3xl border-2 border-rose-200/30 shadow-2xl overflow-hidden">
+      {/* Header clickeable */}
+      <motion.div
+        onClick={() => setIsExpanded(!isExpanded)}
+        whileHover={{ scale: 1.01 }}
+        className="bg-gradient-to-r from-rose-400/95 via-pink-400/95 to-rose-400/95 px-6 py-5 relative overflow-hidden cursor-pointer"
+      >
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.25),transparent_60%)]" />
         <div className="relative z-10">
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <motion.div
                 animate={{ rotate: [0, 360] }}
@@ -178,19 +182,38 @@ export default function ZonePerformanceComparison({ storeId, formatCurrency }) {
                 <p className="text-xs text-white/80 font-medium">Zona {zone} • {totalStores} tiendas</p>
               </div>
             </div>
-            <motion.div
-              animate={{ scale: [1, 1.1, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className={`px-4 py-2 rounded-full ${isTop3 ? 'bg-amber-400/90' : 'bg-white/20'} backdrop-blur-sm`}
-            >
-              <p className="text-2xl font-black text-white">#{position}</p>
-            </motion.div>
+            <div className="flex items-center gap-3">
+              <motion.div
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className={`px-4 py-2 rounded-full ${isTop3 ? 'bg-amber-400/90' : 'bg-white/20'} backdrop-blur-sm`}
+              >
+                <p className="text-2xl font-black text-white">#{position}</p>
+              </motion.div>
+              <motion.div
+                animate={{ rotate: isExpanded ? 180 : 0 }}
+                className="text-white"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </motion.div>
+            </div>
           </div>
         </div>
-      </div>
+      </motion.div>
 
+      {/* Contenido expandible */}
+      <AnimatePresence>
+        {isExpanded && (
+          <>
       {/* Comparación vs Promedio de Zona */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 p-4 lg:p-6 bg-white/50 backdrop-blur-sm border-b border-indigo-200/20">
+      <motion.div
+        initial={{ opacity: 0, height: 0 }}
+        animate={{ opacity: 1, height: 'auto' }}
+        exit={{ opacity: 0, height: 0 }}
+        className="grid grid-cols-2 lg:grid-cols-4 gap-3 p-4 lg:p-6 bg-white/50 backdrop-blur-sm border-b border-rose-200/20"
+      >
         <motion.div whileHover={{ scale: 1.05, y: -3 }} className={`text-center rounded-xl p-3 lg:p-4 border-2 shadow-md ${
           parseFloat(vsAvg.sales) >= 0 
             ? 'bg-gradient-to-br from-emerald-50 to-green-50 border-emerald-300/50' 
