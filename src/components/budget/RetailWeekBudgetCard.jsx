@@ -629,11 +629,10 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                     }}
                   >
                     <div 
-                      className="absolute inset-0"
+                      className="absolute inset-0 animate-slide-right"
                       style={{
                         background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.7) 50%, transparent 100%)',
-                        width: '50%',
-                        animation: 'slideRight 2s linear infinite'
+                        width: '50%'
                       }}
                     />
                   </motion.div>

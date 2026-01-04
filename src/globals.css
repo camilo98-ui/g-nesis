@@ -307,6 +307,10 @@ meta[name="robots"] {
   }
 }
 
+.animate-slide-right {
+  animation: slideRight 2s linear infinite;
+}
+
 .animate-gradient-1 {
   animation: gradient-shift-1 15s ease-in-out infinite;
 }
