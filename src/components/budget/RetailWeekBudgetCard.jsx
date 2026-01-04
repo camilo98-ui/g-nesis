@@ -297,8 +297,8 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
     const weekProjection = blendedDailyAvg * totalDaysInWeek;
     const projectionCompliance = weeklyBudget > 0 ? (weekProjection / weeklyBudget * 100) : 0;
 
-    // Datos para gráficos - TODOS los días de la semana seleccionada
-    const dailyTrendData = fullCurrentRetailWeekDays.map(day => {
+    // Datos para gráficos - Solo los días que ya pasaron de la semana seleccionada
+    const dailyTrendData = fullCurrentRetailWeekDays.filter(day => day <= now).map(day => {
       // Buscar venta exacta del día usando parseISO
       const sale = dailySales.find(s => {
         try {
