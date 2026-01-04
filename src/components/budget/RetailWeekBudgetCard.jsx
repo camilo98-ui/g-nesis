@@ -815,6 +815,42 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                   </p>
                 </div>
                 )}
+                
+                {/* Indicador de nivel de desempeño */}
+                <div className={`rounded-lg p-3 mb-3 ${
+                  budgetData.performanceLevel === 'excelente' 
+                    ? 'bg-emerald-100/20' 
+                    : budgetData.performanceLevel === 'bajo'
+                    ? 'bg-red-100/20'
+                    : 'bg-white/10'
+                }`}>
+                  <p className="text-xs text-white/90 flex items-center gap-2">
+                    {budgetData.performanceLevel === 'excelente' && (
+                      <>
+                        <span className="text-lg">🚀</span>
+                        <span className="flex-1">
+                          <strong>Excelente desempeño:</strong> Meta ajustada a {(budgetData.targetPercentage * 100).toFixed(0)}% para impulsar aún más
+                        </span>
+                      </>
+                    )}
+                    {budgetData.performanceLevel === 'regular' && (
+                      <>
+                        <span className="text-lg">📈</span>
+                        <span className="flex-1">
+                          <strong>Buen ritmo:</strong> Meta al {(budgetData.targetPercentage * 100).toFixed(0)}% para mantener crecimiento
+                        </span>
+                      </>
+                    )}
+                    {budgetData.performanceLevel === 'bajo' && (
+                      <>
+                        <span className="text-lg">⚠️</span>
+                        <span className="flex-1">
+                          <strong>Requiere atención:</strong> Meta al {(budgetData.targetPercentage * 100).toFixed(0)}% (base) para recuperación
+                        </span>
+                      </>
+                    )}
+                  </p>
+                </div>
 
                 <div className="flex items-center justify-center gap-2 text-white/80 pt-2 border-t border-white/20 w-full">
                 {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
