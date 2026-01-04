@@ -8,19 +8,12 @@ import { STORES } from '@/components/StoreSelector';
 import { startOfMonth, endOfMonth, format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
-export default function ZonePerformanceComparison({ storeId, formatCurrency }) {
+export default function ZonePerformanceComparison({ storeId, formatCurrency, currentDateRange }) {
   const [isExpanded, setIsExpanded] = React.useState(false);
   
-  const now = new Date();
-  
-  // CALENDARIO RETAIL: del 29 del mes anterior al 28 del mes actual
-  const currentYear = now.getFullYear();
-  const currentMonth = now.getMonth();
-  const retailMonthStart = new Date(currentYear, currentMonth - 1, 29);
-  const retailMonthEnd = new Date(currentYear, currentMonth, 28);
-  
-  const monthStart = format(retailMonthStart, 'yyyy-MM-dd');
-  const monthEnd = format(retailMonthEnd, 'yyyy-MM-dd');
+  // Usar el rango de fechas del filtro activo
+  const dateStart = currentDateRange?.from ? format(currentDateRange.from, 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd');
+  const dateEnd = currentDateRange?.to ? format(currentDateRange.to, 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd');
 
   // Determinar zona basada en código de tienda
   const currentStore = STORES.find(s => s.code === storeId);
