@@ -611,7 +611,7 @@ export default function Home() {
                     y: { duration: 2.5, repeat: Infinity, ease: "easeInOut" }
                   }}
                 />
-                <h1 className="text-xl font-black bg-gradient-to-r from-rose-400 to-purple-400 bg-clip-text text-transparent mb-1">Iniciar sesión</h1>
+                <h1 className="text-xl font-black text-rose-300 mb-1">Iniciar sesión</h1>
                 <p className="text-slate-600 text-xs font-medium">Selecciona tu rol y comienza</p>
               </div>
 
@@ -824,7 +824,7 @@ export default function Home() {
                 style={{ boxShadow: '0 0 12px rgba(251, 113, 133, 0.25), 0 0 20px rgba(251, 113, 133, 0.15), 0 25px 80px -15px rgba(217, 70, 239, 0.3)' }}>
                 
                 <div className="text-center">
-                  <h2 className="text-3xl font-black bg-gradient-to-r from-rose-400 to-purple-400 bg-clip-text text-transparent mb-2">Iniciar sesión</h2>
+                  <h2 className="text-3xl font-black text-rose-300 mb-2">Iniciar sesión</h2>
                   <p className="text-sm text-slate-700 font-medium">Selecciona tu rol y comienza</p>
                 </div>
 
