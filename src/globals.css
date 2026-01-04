@@ -376,57 +376,71 @@ meta[name="robots"] {
 
 /* Animaciones de intercambio vertical */
 @keyframes vertical-swap-1 {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(calc(100vh - 120px)); }
+  0% { transform: translateY(0); }
+  45% { transform: translateY(calc(100vh - 120px)); }
+  55% { transform: translateY(calc(100vh - 120px)); }
+  100% { transform: translateY(0); }
 }
 
 @keyframes vertical-swap-2 {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(calc(-100vh + 120px)); }
+  0% { transform: translateY(0); }
+  45% { transform: translateY(calc(-100vh + 120px)); }
+  55% { transform: translateY(calc(-100vh + 120px)); }
+  100% { transform: translateY(0); }
 }
 
 @keyframes vertical-swap-3 {
-  0%, 100% { transform: translateY(0) translateX(0); }
-  25% { transform: translateY(40vh) translateX(20px); }
-  50% { transform: translateY(-45vh) translateX(-30px); }
-  75% { transform: translateY(35vh) translateX(15px); }
+  0% { transform: translateY(0) translateX(0); }
+  22% { transform: translateY(40vh) translateX(20px); }
+  28% { transform: translateY(40vh) translateX(20px); }
+  47% { transform: translateY(-45vh) translateX(-30px); }
+  53% { transform: translateY(-45vh) translateX(-30px); }
+  72% { transform: translateY(35vh) translateX(15px); }
+  78% { transform: translateY(35vh) translateX(15px); }
+  100% { transform: translateY(0) translateX(0); }
 }
 
 @keyframes vertical-swap-4 {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-55vh); }
+  0% { transform: translateY(0); }
+  45% { transform: translateY(-55vh); }
+  55% { transform: translateY(-55vh); }
+  100% { transform: translateY(0); }
 }
 
 @keyframes vertical-swap-5 {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(60vh); }
+  0% { transform: translateY(0); }
+  45% { transform: translateY(60vh); }
+  55% { transform: translateY(60vh); }
+  100% { transform: translateY(0); }
 }
 
 @keyframes vertical-swap-6 {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(70vh); }
+  0% { transform: translateY(0); }
+  45% { transform: translateY(70vh); }
+  55% { transform: translateY(70vh); }
+  100% { transform: translateY(0); }
 }
 
 .animate-vertical-swap-1 {
-  animation: vertical-swap-1 20s ease-in-out infinite;
+  animation: vertical-swap-1 16s ease-in-out infinite;
 }
 
 .animate-vertical-swap-2 {
-  animation: vertical-swap-2 22s ease-in-out infinite;
+  animation: vertical-swap-2 18s ease-in-out infinite;
 }
 
 .animate-vertical-swap-3 {
-  animation: vertical-swap-3 25s ease-in-out infinite;
+  animation: vertical-swap-3 20s ease-in-out infinite;
 }
 
 .animate-vertical-swap-4 {
-  animation: vertical-swap-4 18s ease-in-out infinite;
+  animation: vertical-swap-4 14s ease-in-out infinite;
 }
 
 .animate-vertical-swap-5 {
-  animation: vertical-swap-5 24s ease-in-out infinite;
+  animation: vertical-swap-5 19s ease-in-out infinite;
 }
 
 .animate-vertical-swap-6 {
-  animation: vertical-swap-6 21s ease-in-out infinite;
+  animation: vertical-swap-6 17s ease-in-out infinite;
 }
