@@ -370,8 +370,14 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
     // CRÍTICO: Días transcurridos en el mes RETAIL (desde el 29 del mes anterior)
     const daysElapsed = eachDayOfInterval({ start: monthStart, end: now }).length;
     
+    // Total de días en el mes retail (29 anterior a 28 actual = 30 días)
+    const totalDaysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd }).length;
+    
     const monthAvgDailySales = daysElapsed > 0 ? totalMonthSales / daysElapsed : 0;
-    const monthProjection = totalMonthSales + (monthAvgDailySales * (remainingDays - 1));
+    
+    // Proyección = promedio diario actual * total de días del mes
+    const monthProjection = monthAvgDailySales * totalDaysInMonth;
+    
     const monthProjectionCompliance = adjustedMonthlyBudget > 0 ? (monthProjection / adjustedMonthlyBudget * 100) : 0;
 
     return {
