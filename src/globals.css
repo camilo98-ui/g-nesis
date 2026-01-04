@@ -285,6 +285,15 @@ meta[name="robots"] {
   }
 }
 
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
 .animate-gradient-1 {
   animation: gradient-shift-1 15s ease-in-out infinite;
 }
