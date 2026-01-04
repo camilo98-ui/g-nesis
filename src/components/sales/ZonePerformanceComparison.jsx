@@ -9,6 +9,8 @@ import { startOfMonth, endOfMonth, format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 export default function ZonePerformanceComparison({ storeId, formatCurrency }) {
+  const [isExpanded, setIsExpanded] = React.useState(false);
+  
   const now = new Date();
   
   // CALENDARIO RETAIL: del 29 del mes anterior al 28 del mes actual
