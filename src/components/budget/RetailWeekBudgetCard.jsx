@@ -409,9 +409,9 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="mb-6 max-w-full"
+      className="mb-6 -mx-2 md:-mx-4"
     >
-      <Card className="bg-gradient-to-br from-rose-50/30 via-pink-50/20 to-purple-50/20 border border-rose-200/40 shadow-lg overflow-hidden w-full">
+      <Card className="bg-gradient-to-br from-rose-50/30 via-pink-50/20 to-purple-50/20 border border-rose-200/40 shadow-lg overflow-hidden w-[calc(100%+1rem)] md:w-[calc(100%+2rem)]">
         <CardHeader className="bg-gradient-to-r from-rose-100/20 to-pink-100/20 border-b border-rose-200/30 pb-4 px-4 md:px-6">
           <div className="flex items-center justify-between gap-4 md:gap-6">
             <CardTitle className="text-xl font-black text-slate-900 flex items-center gap-4 flex-1 min-w-0">
@@ -465,7 +465,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
           <motion.div
             whileHover={{ scale: 1.02, y: -2 }}
             onClick={() => setIsExpanded(!isExpanded)}
-            className="w-full bg-gradient-to-br from-rose-400/80 to-pink-400/80 rounded-2xl shadow-md p-8 md:p-12 border border-rose-300/40 relative overflow-hidden cursor-pointer"
+            className="w-full bg-gradient-to-br from-rose-400/80 to-pink-400/80 rounded-2xl shadow-md p-6 md:p-10 border border-rose-300/40 relative overflow-hidden cursor-pointer"
           >
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-7">
