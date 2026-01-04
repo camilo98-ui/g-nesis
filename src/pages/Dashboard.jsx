@@ -629,22 +629,6 @@ export default function Dashboard() {
     });
   }, [dailySales, comparisonRange, showComparison]);
 
-  // Totales acumulados del MES COMPLETO (no filtrados)
-  const monthlyTotals = useMemo(() => {
-    const now = new Date();
-    const monthSales = dailySales.filter(s => {
-      const saleDate = new Date(s.date?.split('T')[0] || s.date);
-      return saleDate.getMonth() === now.getMonth() && saleDate.getFullYear() === now.getFullYear();
-    });
-    
-    return monthSales.reduce((acc, s) => ({
-      sales: acc.sales + (s.total_sales || 0),
-      tickets: acc.tickets + (s.total_tickets || 0),
-      transactions: acc.transactions + (s.total_transactions || 0),
-      suggested: acc.suggested + (s.total_suggested || 0)
-    }), { sales: 0, tickets: 0, transactions: 0, suggested: 0 });
-  }, [dailySales]);
-
   const totals = useMemo(() => {
     return filteredSales.reduce((acc, s) => ({
       sales: acc.sales + (s.total_sales || 0),
@@ -804,25 +788,6 @@ export default function Dashboard() {
       projectionData.push({ day: `Día ${daysElapsed + i}`, real: null, proyectado: accumulated });
     }
 
-    // Datos diarios del mes para gráficas
-    const monthDailySales = dailySales
-      .filter(s => {
-        const saleDate = new Date(s.date?.split('T')[0] || s.date);
-        return saleDate.getMonth() === now.getMonth() && saleDate.getFullYear() === now.getFullYear();
-      })
-      .map(s => {
-        const saleDate = new Date(s.date?.split('T')[0] || s.date);
-        const trans = s.total_transactions || 0;
-        return {
-          date: format(saleDate, 'dd MMM', { locale: es }),
-          fullDate: format(saleDate, 'EEEE dd MMMM yyyy', { locale: es }),
-          ventas: s.total_sales || 0,
-          ticketPromedio: trans > 0 ? s.total_sales / trans : 0,
-          transactions: trans
-        };
-      })
-      .sort((a, b) => new Date(a.fullDate) - new Date(b.fullDate));
-
     return {
       projectedSales,
       salesGap,
@@ -836,8 +801,7 @@ export default function Dashboard() {
       projectionData,
       totals: monthTotals,
       budget: currentBudget.sales_budget,
-      dailyAvgSales,
-      chartData: monthDailySales
+      dailyAvgSales
     };
   }, [currentBudget, dailySales]);
 
@@ -854,8 +818,8 @@ export default function Dashboard() {
     return null;
   };
 
-  // Calcular ticket promedio del MES COMPLETO
-  const avgTicketMonth = monthlyTotals.transactions > 0 ? monthlyTotals.sales / monthlyTotals.transactions : 0;
+  // Calcular ticket promedio correctamente
+  const avgTicket = totals.transactions > 0 ? totals.sales / totals.transactions : 0;
   const comparisonAvgTicket = comparisonTotals && comparisonTotals.transactions > 0 ?
   comparisonTotals.sales / comparisonTotals.transactions :
   0;
@@ -863,8 +827,8 @@ export default function Dashboard() {
   const metrics = [
   {
     id: 'sales',
-    title: 'Ventas Totales (Mes)',
-    value: monthlyTotals.sales,
+    title: 'Ventas Totales',
+    value: totals.sales,
     comparisonValue: comparisonTotals?.sales,
     budget: currentBudget.sales_budget,
     icon: DollarSign,
@@ -875,8 +839,8 @@ export default function Dashboard() {
   },
   {
     id: 'tickets',
-    title: 'Ticket Promedio (Mes)',
-    value: avgTicketMonth,
+    title: 'Ticket Promedio',
+    value: avgTicket,
     comparisonValue: comparisonAvgTicket,
     budget: currentBudget.tickets_budget,
     icon: Receipt,
@@ -887,8 +851,8 @@ export default function Dashboard() {
   },
   {
     id: 'transactions',
-    title: 'Transacciones (Mes)',
-    value: monthlyTotals.transactions,
+    title: 'Transacciones',
+    value: totals.transactions,
     comparisonValue: comparisonTotals?.transactions,
     budget: currentBudget.transactions_budget,
     icon: Zap,
@@ -898,8 +862,8 @@ export default function Dashboard() {
   },
   {
     id: 'suggested',
-    title: 'Sugeridos (Mes)',
-    value: monthlyTotals.suggested,
+    title: 'Sugeridos',
+    value: totals.suggested,
     comparisonValue: comparisonTotals?.suggested,
     budget: currentBudget.suggested_budget,
     icon: Gift,
