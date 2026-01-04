@@ -91,9 +91,9 @@ export default function CashierAnalysis({ cashierId, cashierName, storeId }) {
     return result;
   }, [shiftRecords, cashierId]);
 
-  // Estadísticas del cajero vs equipo
+  // Estadísticas del cajero vs equipo (usando mes retail)
   const stats = useMemo(() => {
-    const monthStart = startOfMonth(new Date());
+    const monthStart = getRetailMonthStart();
     const cashierRecords = shiftRecords.filter(r => {
       try {
         const date = new Date(r.date);
