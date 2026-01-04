@@ -133,7 +133,7 @@ export default function CashierRankingCard({
           <motion.div 
             whileHover={{ rotate: [0, -10, 10, 0], scale: 1.15 }}
             transition={{ duration: 0.5 }}
-            className={`w-16 h-16 rounded-2xl overflow-hidden flex items-center justify-center ${
+            className={`w-20 h-20 sm:w-16 sm:h-16 rounded-2xl overflow-hidden flex items-center justify-center ${
               isTopThree 
                 ? 'bg-white/40 backdrop-blur-sm ring-4 ring-white/60 shadow-xl' 
                 : 'bg-gradient-to-br from-pink-100 to-rose-200 shadow-lg'
@@ -142,7 +142,7 @@ export default function CashierRankingCard({
             {cashier.photo_url ? (
               <img src={cashier.photo_url} alt={cashier.name} className="w-full h-full object-cover" />
             ) : (
-              <span className={`text-2xl font-black ${isTopThree ? 'text-white drop-shadow-lg' : rank <= 5 ? 'text-fuchsia-600' : 'text-gray-600'}`}>
+              <span className={`text-3xl sm:text-2xl font-black ${isTopThree ? 'text-white drop-shadow-lg' : rank <= 5 ? 'text-fuchsia-600' : 'text-gray-600'}`}>
                 {cashier.name?.charAt(0) || '?'}
               </span>
             )}
@@ -151,7 +151,7 @@ export default function CashierRankingCard({
           <motion.div 
             animate={isTopThree ? { scale: [1, 1.15, 1], rotate: [0, 5, -5, 0] } : {}}
             transition={{ duration: 2, repeat: Infinity }}
-            className={`absolute -bottom-2 -right-2 w-8 h-8 rounded-full flex items-center justify-center text-base font-black shadow-lg ${
+            className={`absolute -bottom-2 -right-2 w-10 h-10 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-lg sm:text-base font-black shadow-lg ${
               isTopThree 
                 ? 'bg-white text-gray-800 ring-2 ring-white/50' 
                 : 'bg-gradient-to-r from-pink-500 to-rose-500 text-white'
@@ -167,7 +167,7 @@ export default function CashierRankingCard({
               animate={{ opacity: 1, scale: 1 }}
               className="absolute -top-2 left-1/2 -translate-x-1/2 whitespace-nowrap"
             >
-              <span className="text-[10px] font-black bg-white/90 px-2 py-1 rounded-full shadow-md">
+              <span className="text-[11px] sm:text-[10px] font-black bg-white/90 px-2.5 py-1 sm:px-2 sm:py-1 rounded-full shadow-md">
                 {randomPhrase(rank)}
               </span>
             </motion.div>
@@ -176,15 +176,15 @@ export default function CashierRankingCard({
 
         {/* Cashier info - MÁS VISUAL */}
         <div className="flex-grow min-w-0">
-          <div className="flex items-center gap-2 mb-2">
-            <h4 className={`font-black text-lg truncate ${isTopThree ? 'text-gray-900' : 'text-gray-800'}`}>
+          <div className="flex items-center gap-2 mb-2.5 sm:mb-2">
+            <h4 className={`font-black text-xl sm:text-lg truncate ${isTopThree ? 'text-gray-900' : 'text-gray-800'}`}>
               {cashier.name}
             </h4>
             {rankType === 'best' && <LevelBadge level={level} score={overallScore} compact />}
           </div>
           
           {rankType === 'best' && overallScore > 0 && (
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-2 mb-2.5 sm:mb-2">
               <ScoreBreakdown 
                 salesScore={salesScore}
                 ticketScore={ticketScore}
@@ -195,11 +195,11 @@ export default function CashierRankingCard({
             </div>
           )}
 
-          <div className={`flex flex-wrap gap-2 ${isTopThree ? 'text-gray-700' : 'text-gray-600'}`}>
+          <div className={`flex flex-wrap gap-2.5 sm:gap-2 ${isTopThree ? 'text-gray-700' : 'text-gray-600'}`}>
             <Tooltip delayDuration={100}>
               <TooltipTrigger asChild>
-                <span className="flex items-center gap-1 bg-white/60 px-2 py-1 rounded-lg text-xs font-bold cursor-pointer hover:bg-white/80 transition-colors">
-                  <Calendar className="w-3.5 h-3.5 text-gray-500" />
+                <span className="flex items-center gap-1.5 bg-white/60 px-3 py-1.5 sm:px-2 sm:py-1 rounded-lg text-sm sm:text-xs font-bold cursor-pointer hover:bg-white/80 transition-colors">
+                  <Calendar className="w-4 h-4 sm:w-3.5 sm:h-3.5 text-gray-500" />
                   {transactions || 0}
                 </span>
               </TooltipTrigger>
@@ -210,8 +210,8 @@ export default function CashierRankingCard({
             
             <Tooltip delayDuration={100}>
               <TooltipTrigger asChild>
-                <span className="flex items-center gap-1 bg-white/60 px-2 py-1 rounded-lg text-xs font-bold cursor-pointer hover:bg-white/80 transition-colors">
-                  <Receipt className="w-3.5 h-3.5 text-blue-500" />
+                <span className="flex items-center gap-1.5 bg-white/60 px-3 py-1.5 sm:px-2 sm:py-1 rounded-lg text-sm sm:text-xs font-bold cursor-pointer hover:bg-white/80 transition-colors">
+                  <Receipt className="w-4 h-4 sm:w-3.5 sm:h-3.5 text-blue-500" />
                   {formatCurrency(calculatedAvgTicket)}
                 </span>
               </TooltipTrigger>
@@ -223,7 +223,7 @@ export default function CashierRankingCard({
         </div>
 
         {/* Main metric - MÁS DESTACADO */}
-        <div className="flex-shrink-0 text-right flex items-center gap-2">
+        <div className="flex-shrink-0 text-right flex items-center gap-2.5 sm:gap-2">
             {rankType === "sales" && (
               <motion.div
                 whileHover={{ scale: 1.1 }}
