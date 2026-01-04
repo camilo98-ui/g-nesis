@@ -1,4 +1,3 @@
-
 import React, { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Target, TrendingUp, TrendingDown, Calendar, AlertTriangle, CheckCircle2, ChevronDown, ChevronUp, BarChart3, LineChart as LineChartIcon, ChevronRight } from 'lucide-react';
@@ -498,13 +497,30 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                     <div className="mt-2 h-8">
                       <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={budgetData.last7DaysSales}>
+                          <defs>
+                            <filter id="glow1">
+                              <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                              <feMerge>
+                                <feMergeNode in="coloredBlur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                              </feMerge>
+                            </filter>
+                            <linearGradient id="lineGradient1" x1="0" y1="0" x2="1" y2="0">
+                              <stop offset="0%" stopColor="#fff" stopOpacity={0.4}/>
+                              <stop offset="50%" stopColor="#fff" stopOpacity={1}/>
+                              <stop offset="100%" stopColor="#fff" stopOpacity={0.4}/>
+                            </linearGradient>
+                          </defs>
                           <Line 
                             type="monotone" 
                             dataKey="value" 
-                            stroke="#fff" 
-                            strokeWidth={2} 
+                            stroke="url(#lineGradient1)" 
+                            strokeWidth={3} 
                             dot={false}
-                            opacity={0.6}
+                            filter="url(#glow1)"
+                            isAnimationActive={true}
+                            animationDuration={2000}
+                            animationEasing="ease-in-out"
                           />
                         </LineChart>
                       </ResponsiveContainer>
@@ -522,13 +538,30 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                     <div className="mt-2 h-8">
                       <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={budgetData.last7DaysSales}>
+                          <defs>
+                            <filter id="glow2">
+                              <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                              <feMerge>
+                                <feMergeNode in="coloredBlur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                              </feMerge>
+                            </filter>
+                            <linearGradient id="lineGradient2" x1="0" y1="0" x2="1" y2="0">
+                              <stop offset="0%" stopColor="#fff" stopOpacity={0.4}/>
+                              <stop offset="50%" stopColor="#fff" stopOpacity={1}/>
+                              <stop offset="100%" stopColor="#fff" stopOpacity={0.4}/>
+                            </linearGradient>
+                          </defs>
                           <Line 
                             type="monotone" 
                             dataKey="value" 
-                            stroke="#fff" 
-                            strokeWidth={2} 
+                            stroke="url(#lineGradient2)" 
+                            strokeWidth={3} 
                             dot={false}
-                            opacity={0.6}
+                            filter="url(#glow2)"
+                            isAnimationActive={true}
+                            animationDuration={2000}
+                            animationEasing="ease-in-out"
                           />
                         </LineChart>
                       </ResponsiveContainer>
