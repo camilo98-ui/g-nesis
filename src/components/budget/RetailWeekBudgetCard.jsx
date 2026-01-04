@@ -139,6 +139,27 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
     // Días completos de la semana retail seleccionada (siempre 7 días)
     const fullCurrentRetailWeekDays = eachDayOfInterval({ start: currentWeekStart, end: currentWeekEnd });
 
+    const now = new Date();
+    
+    // CALENDARIO RETAIL: Mes empieza el 29 del mes anterior
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth(); // 0-11
+    
+    // Determinar el inicio del mes retail (29 del mes anterior)
+    const retailMonthStart = new Date(currentYear, currentMonth - 1, 29);
+    
+    // Determinar el fin del mes retail (28 del mes actual)
+    const retailMonthEnd = new Date(currentYear, currentMonth, 28);
+    
+    const monthStart = retailMonthStart;
+    const monthEnd = retailMonthEnd;
+
+    // Calcular días del mes que efectivamente tienen venta (lunes a domingo del mes)
+    const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd }).length;
+
+    // Días completos de la semana retail seleccionada (siempre 7 días)
+    const fullCurrentRetailWeekDays = eachDayOfInterval({ start: currentWeekStart, end: currentWeekEnd });
+
     // Analizar histórico de ventas por día de la semana (0=Domingo, 6=Sábado)
     // INCLUYE TODOS LOS DATOS HISTÓRICOS, no solo del mes actual
     const salesByDayOfWeek = [0, 0, 0, 0, 0, 0, 0]; // Sum
@@ -173,14 +194,6 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
     const historicalAvgToday = historicalSalesForDay.length > 0
       ? historicalSalesForDay.reduce((sum, s) => sum + s.total_sales, 0) / historicalSalesForDay.length
       : 0;
-    
-    // Log para debug
-    console.log('📊 Histórico día actual:', {
-      dia: format(now, 'EEEE', { locale: es }),
-      promedio: historicalAvgToday,
-      cantidadDias: historicalSalesForDay.length,
-      fechasEncontradas: historicalSalesForDay.map(s => s.date)
-    });
 
     // Calcular promedio por día de semana
     const avgByDayOfWeek = salesByDayOfWeek.map((sum, idx) => 
@@ -192,24 +205,6 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
     const weightByDayOfWeek = avgByDayOfWeek.map(avg => 
       totalWeeklyAvg > 0 ? avg / totalWeeklyAvg : 1/7
     );
-
-    const now = new Date();
-    
-    // CALENDARIO RETAIL: Mes empieza el 29 del mes anterior
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth(); // 0-11
-    
-    // Determinar el inicio del mes retail (29 del mes anterior)
-    const retailMonthStart = new Date(currentYear, currentMonth - 1, 29);
-    
-    // Determinar el fin del mes retail (28 del mes actual)
-    const retailMonthEnd = new Date(currentYear, currentMonth, 28);
-    
-    const monthStart = retailMonthStart;
-    const monthEnd = retailMonthEnd;
-
-    // Calcular días del mes que efectivamente tienen venta (lunes a domingo del mes)
-    const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd }).length;
 
     // AJUSTE INTELIGENTE DE PRESUPUESTO según desempeño de la tienda
     // Primero calculamos métricas preliminares para evaluar desempeño
