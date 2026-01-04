@@ -127,6 +127,11 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
 
     // Días completos de la semana retail seleccionada (siempre 7 días)
     const fullCurrentRetailWeekDays = eachDayOfInterval({ start: currentWeekStart, end: currentWeekEnd });
+    
+    // CRÍTICO: Filtrar solo días que están dentro del mes actual
+    const currentMonthWeekDays = fullCurrentRetailWeekDays.filter(day => 
+      day >= monthStart && day <= monthEnd
+    );
 
     // Analizar histórico de ventas por día de la semana (0=Domingo, 6=Sábado)
     // INCLUYE TODOS LOS DATOS HISTÓRICOS, no solo del mes actual
@@ -265,18 +270,19 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       return isWithinInterval(currentWeekStart, { start: w, end: weekEnd });
     }) + 1;
 
-    // Ventas de la semana SELECCIONADA (no necesariamente la actual)
+    // Ventas de la semana SELECCIONADA (solo días del mes actual)
     const currentWeekSales = dailySales.filter(s => {
       try {
         const saleDate = parseISO(s.date);
-        return isWithinInterval(saleDate, { start: currentWeekStart, end: currentWeekEnd });
+        return isWithinInterval(saleDate, { start: currentWeekStart, end: currentWeekEnd }) &&
+               saleDate >= monthStart && saleDate <= monthEnd;
       } catch {
         return false;
       }
     }).reduce((sum, s) => sum + (s.total_sales || 0), 0);
 
-    // Presupuesto de la semana SELECCIONADA - TODA la semana retail (7 días completos)
-    const weeklyBudget = fullCurrentRetailWeekDays.reduce((sum, day) => sum + getDailyBudget(day), 0);
+    // Presupuesto de la semana SELECCIONADA - SOLO días que están en el mes actual
+    const weeklyBudget = currentMonthWeekDays.reduce((sum, day) => sum + getDailyBudget(day), 0);
 
     // Calcular proyección de la semana - SUAVIZADA con histórico
     const daysPassedInWeek = eachDayOfInterval({ start: currentWeekStart, end: now })
@@ -297,8 +303,8 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
     const weekProjection = blendedDailyAvg * totalDaysInWeek;
     const projectionCompliance = weeklyBudget > 0 ? (weekProjection / weeklyBudget * 100) : 0;
 
-    // Datos para gráficos - TODOS los días de la semana seleccionada
-    const dailyTrendData = fullCurrentRetailWeekDays.map(day => {
+    // Datos para gráficos - SOLO días de la semana que están en el mes actual
+    const dailyTrendData = currentMonthWeekDays.map(day => {
       // Buscar venta exacta del día usando parseISO
       const sale = dailySales.find(s => {
         try {
@@ -329,12 +335,16 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       // Todos los días de la semana retail (7 días completos)
       const daysInWeek = eachDayOfInterval({ start: weekStart, end: weekEnd });
       
+      // CRÍTICO: Filtrar solo días que están en el mes actual
+      const daysInMonth = daysInWeek.filter(day => day >= monthStart && day <= monthEnd);
+      
       const weekSales = dailySales.filter(s => {
         const saleDate = new Date(s.date);
-        return saleDate >= weekStart && saleDate <= weekEnd;
+        return saleDate >= weekStart && saleDate <= weekEnd && 
+               saleDate >= monthStart && saleDate <= monthEnd;
       }).reduce((sum, s) => sum + (s.total_sales || 0), 0);
 
-      const weekBudget = daysInWeek.reduce((sum, day) => sum + getDailyBudget(day), 0);
+      const weekBudget = daysInMonth.reduce((sum, day) => sum + getDailyBudget(day), 0);
 
       return {
         semana: `S${idx + 1}`,
@@ -966,19 +976,19 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                 className="w-full bg-gradient-to-r from-purple-50/40 to-pink-50/40 rounded-xl p-3 md:p-4 border border-purple-200/40"
               >
                 <div className="flex flex-col md:flex-row md:items-center justify-between mb-3 gap-2">
-                  <div className="flex items-center gap-1.5 md:gap-2 min-w-0">
-                    <Calendar className="w-4 h-4 md:w-5 md:h-5 text-purple-400/70 flex-shrink-0" />
-                    <h4 className="text-xs md:text-sm font-bold text-purple-700/80 truncate">
-                      Semana {budgetData.currentWeekNumber} ({format(budgetData.currentWeekStart, 'dd MMM', { locale: es })} - {format(budgetData.currentWeekEnd, 'dd MMM', { locale: es })})
-                    </h4>
-                  </div>
-                  <div className={`px-2 md:px-3 py-0.5 md:py-1 rounded-full text-[10px] md:text-xs font-bold flex-shrink-0 self-start md:self-auto ${
-                    budgetData.weeklyCompliance >= 100 
-                      ? 'bg-emerald-100/60 text-emerald-600' 
-                      : 'bg-amber-100/60 text-amber-600'
-                  }`}>
-                    {budgetData.weeklyCompliance.toFixed(0)}%
-                  </div>
+                <div className="flex items-center gap-1.5 md:gap-2 lg:gap-3 min-w-0">
+                  <Calendar className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 text-purple-400/70 flex-shrink-0" />
+                  <h4 className="text-xs md:text-sm lg:text-base font-bold text-purple-700/80 truncate">
+                    Semana {budgetData.currentWeekNumber} ({format(budgetData.currentWeekStart, 'dd MMM', { locale: es })} - {format(budgetData.currentWeekEnd, 'dd MMM', { locale: es })})
+                  </h4>
+                </div>
+                <div className={`px-2 md:px-3 lg:px-4 py-0.5 md:py-1 lg:py-1.5 rounded-full text-[10px] md:text-xs lg:text-sm font-bold lg:font-black flex-shrink-0 self-start md:self-auto ${
+                  budgetData.weeklyCompliance >= 100 
+                    ? 'bg-emerald-100/60 text-emerald-600' 
+                    : 'bg-amber-100/60 text-amber-600'
+                }`}>
+                  {budgetData.weeklyCompliance.toFixed(0)}%
+                </div>
                 </div>
                 <div className="grid grid-cols-3 gap-2 md:gap-3">
               <motion.button
@@ -990,8 +1000,8 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                 }}
                 className="bg-purple-50 rounded-lg p-2 md:p-3 border border-purple-200/40 transition-all text-left hover:border-purple-400"
               >
-                <p className="text-[10px] md:text-xs text-purple-500/70 mb-1">Meta Semanal</p>
-                <p className="text-sm md:text-lg font-black text-purple-600 leading-tight">
+                <p className="text-[10px] md:text-xs lg:text-sm text-purple-500/70 mb-1">Meta Semanal</p>
+                <p className="text-sm md:text-lg lg:text-2xl font-black text-purple-600 leading-tight">
                   {formatCurrency(budgetData.weeklyBudget)}
                 </p>
               </motion.button>
@@ -1002,10 +1012,10 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                   setSelectedMetric('weekly-sales');
                   setIsModalOpen(true);
                 }}
-                className="bg-purple-50 rounded-lg p-2 md:p-3 border border-purple-200/40 transition-all text-left hover:border-purple-400"
+                className="bg-purple-50 rounded-lg p-2 md:p-3 lg:p-4 border border-purple-200/40 transition-all text-left hover:border-purple-400"
               >
-                <p className="text-[10px] md:text-xs text-purple-500/70 mb-1">Venta Actual</p>
-                <p className="text-sm md:text-lg font-black text-purple-600 leading-tight">
+                <p className="text-[10px] md:text-xs lg:text-sm text-purple-500/70 mb-1">Venta Actual</p>
+                <p className="text-sm md:text-lg lg:text-2xl font-black text-purple-600 leading-tight">
                   {formatCurrency(budgetData.currentWeekSales)}
                 </p>
               </motion.button>
@@ -1016,18 +1026,18 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                   setSelectedMetric('weekly-projection');
                   setIsModalOpen(true);
                 }}
-                className="bg-pink-50 rounded-lg p-2 md:p-3 border border-pink-200/40 transition-all text-left hover:border-pink-400"
+                className="bg-pink-50 rounded-lg p-2 md:p-3 lg:p-4 border border-pink-200/40 transition-all text-left hover:border-pink-400"
               >
-                <p className="text-[10px] md:text-xs text-pink-500/70 mb-1">Proyección</p>
-                <p className="text-sm md:text-lg font-black text-pink-600 leading-tight">
+                <p className="text-[10px] md:text-xs lg:text-sm text-pink-500/70 mb-1">Proyección</p>
+                <p className="text-sm md:text-lg lg:text-2xl font-black text-pink-600 leading-tight">
                   {formatCurrency(budgetData.weekProjection)}
                 </p>
               </motion.button>
                 </div>
                 <div className="mt-3 space-y-1.5">
-              <div className="flex items-center justify-between text-xs">
+              <div className="flex items-center justify-between text-xs lg:text-sm">
                 <span className="text-purple-500/60">Cumplimiento actual</span>
-                <span className="font-bold text-purple-600">{budgetData.weeklyCompliance.toFixed(0)}%</span>
+                <span className="font-bold lg:font-black text-purple-600 lg:text-lg">{budgetData.weeklyCompliance.toFixed(0)}%</span>
               </div>
               <div className="h-2 bg-white/50 rounded-full overflow-hidden">
                 <motion.div
@@ -1037,9 +1047,9 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                   className="h-full bg-gradient-to-r from-purple-400/60 to-pink-400/60 rounded-full"
                 />
               </div>
-              <div className="flex items-center justify-between text-xs pt-1">
+              <div className="flex items-center justify-between text-xs lg:text-sm pt-1">
                 <span className="text-pink-500/60">Proyección de cierre</span>
-                <span className={`font-bold ${budgetData.projectionCompliance >= 100 ? 'text-emerald-500' : 'text-amber-500'}`}>
+                <span className={`font-bold lg:font-black lg:text-lg ${budgetData.projectionCompliance >= 100 ? 'text-emerald-500' : 'text-amber-500'}`}>
                   {budgetData.projectionCompliance.toFixed(0)}%
                 </span>
                   </div>
