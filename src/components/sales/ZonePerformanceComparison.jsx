@@ -42,8 +42,8 @@ export default function ZonePerformanceComparison({ storeId, formatCurrency, cur
           return saleDate >= dateStart && saleDate <= dateEnd;
         });
         
-        if (monthSales.length > 0) {
-          const total = monthSales.reduce((sum, s) => ({
+        if (periodSales.length > 0) {
+          const total = periodSales.reduce((sum, s) => ({
             sales: sum.sales + (s.total_sales || 0),
             transactions: sum.transactions + (s.total_transactions || 0),
             tickets: sum.tickets + (s.total_tickets || 0),
