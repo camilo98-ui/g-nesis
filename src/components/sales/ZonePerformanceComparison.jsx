@@ -366,19 +366,19 @@ export default function ZonePerformanceComparison({ storeId, formatCurrency }) {
             <BarChart data={allStores} layout="vertical">
               <defs>
                 <linearGradient id="barCurrent" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stopColor="#6366f1" stopOpacity={0.9} />
-                  <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0.6} />
+                  <stop offset="0%" stopColor="#fb7185" stopOpacity={0.9} />
+                  <stop offset="100%" stopColor="#fda4af" stopOpacity={0.6} />
                 </linearGradient>
                 <linearGradient id="barOther" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stopColor="#cbd5e1" stopOpacity={0.7} />
-                  <stop offset="100%" stopColor="#e2e8f0" stopOpacity={0.4} />
+                  <stop offset="0%" stopColor="#fecdd3" stopOpacity={0.7} />
+                  <stop offset="100%" stopColor="#ffe4e6" stopOpacity={0.4} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
               <XAxis type="number" fontSize={9} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} />
               <YAxis type="category" dataKey="storeName" fontSize={10} fontWeight={600} width={100} />
               <Tooltip 
-                contentStyle={{ borderRadius: 12, border: '2px solid #6366f1', background: '#fff', fontSize: 11 }}
+                contentStyle={{ borderRadius: 12, border: '2px solid #fb7185', background: '#fff', fontSize: 11 }}
                 formatter={(v) => [formatCurrency(v), 'Ventas']}
               />
               <Bar dataKey="sales" radius={[0, 8, 8, 0]}>
@@ -392,32 +392,40 @@ export default function ZonePerformanceComparison({ storeId, formatCurrency }) {
             </BarChart>
           </ResponsiveContainer>
         </div>
-      </div>
+      </motion.div>
 
       {/* Insights zonales */}
-      <div className="px-4 lg:px-6 pb-4 lg:pb-6">
+      <motion.div
+        initial={{ opacity: 0, height: 0 }}
+        animate={{ opacity: 1, height: 'auto' }}
+        exit={{ opacity: 0, height: 0 }}
+        className="px-4 lg:px-6 pb-4 lg:pb-6"
+      >
         <div className={`rounded-2xl p-4 border-2 ${
           isTop3 
-            ? 'bg-gradient-to-r from-emerald-50 to-green-50 border-emerald-300' 
+            ? 'bg-gradient-to-r from-rose-50 to-pink-50 border-rose-300' 
             : position <= totalStores / 2
-            ? 'bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-300'
-            : 'bg-gradient-to-r from-rose-50 to-red-50 border-rose-300'
+            ? 'bg-gradient-to-r from-orange-50 to-rose-50 border-orange-300'
+            : 'bg-gradient-to-r from-red-50 to-rose-50 border-red-300'
         }`}>
           <p className="text-xs font-bold mb-2 flex items-center gap-2">
             {isTop3 ? '🎯' : position <= totalStores / 2 ? '⚠️' : '🚨'}
-            <span className={isTop3 ? 'text-emerald-900' : position <= totalStores / 2 ? 'text-amber-900' : 'text-rose-900'}>
+            <span className={isTop3 ? 'text-rose-900' : position <= totalStores / 2 ? 'text-orange-900' : 'text-red-900'}>
               Análisis de Posición
             </span>
           </p>
-          <p className={`text-xs leading-relaxed ${isTop3 ? 'text-emerald-800' : position <= totalStores / 2 ? 'text-amber-800' : 'text-rose-800'}`}>
+          <p className={`text-xs leading-relaxed ${isTop3 ? 'text-rose-800' : position <= totalStores / 2 ? 'text-orange-800' : 'text-red-800'}`}>
             {isTop3 
               ? `Tu tienda está en el Top 3 de ${zone} con ${formatCurrency(currentStoreData.sales)}. Mantén el enfoque en ticket promedio (${parseFloat(vsAvg.avgTicket) >= 0 ? 'por encima' : 'por debajo'} del promedio en ${Math.abs(vsAvg.avgTicket)}%) y sugeridos para consolidar liderazgo.`
               : position <= totalStores / 2
               ? `Posición media-alta (#${position}/${totalStores}). Para subir al Top 3, necesitas ${formatCurrency(top3[2].sales - currentStoreData.sales)} más en ventas. Enfoca en ${parseFloat(vsAvg.avgTicket) < 0 ? 'mejorar ticket promedio' : 'aumentar tráfico'} para cerrar brecha.`
-              : `Posición ${position}/${totalStores} requiere acción urgente. Estás ${formatCurrency(currentStoreData.sales - zoneAvg.sales)} ${parseFloat(vsAvg.sales) >= 0 ? 'por encima' : 'por debajo'} del promedio. Prioriza ${parseFloat(vsAvg.transactions) < 0 ? 'recuperar tráfico con promociones' : 'mejorar conversión y ticket'}.`}
+              : `Posición ${position}/${totalStores} requiere acción urgente. Estás ${formatCurrency(Math.abs(currentStoreData.sales - zoneAvg.sales))} ${parseFloat(vsAvg.sales) >= 0 ? 'por encima' : 'por debajo'} del promedio. Prioriza ${parseFloat(vsAvg.transactions) < 0 ? 'recuperar tráfico con promociones' : 'mejorar conversión y ticket'}.`}
           </p>
         </div>
-      </div>
+      </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
