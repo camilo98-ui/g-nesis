@@ -193,8 +193,69 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       totalWeeklyAvg > 0 ? avg / totalWeeklyAvg : 1/7
     );
 
-    // Calcular presupuesto base usando el 105% del presupuesto mensual para cumplir meta alcanzable
-    const TARGET_PERCENTAGE = 1.05; // 105% del presupuesto
+    // AJUSTE INTELIGENTE DE PRESUPUESTO según desempeño de la tienda
+    // Primero calculamos métricas preliminares para evaluar desempeño
+    const preliminaryMonthlyBudget = activeBudget.sales_budget * 1.05;
+    const preliminaryDailyBudget = preliminaryMonthlyBudget / daysInMonth;
+    
+    // Calcular ventas hasta ahora para evaluar desempeño
+    const salesSoFar = dailySales.filter(s => {
+      try {
+        const saleDate = parseISO(s.date);
+        return saleDate >= monthStart && saleDate < now;
+      } catch {
+        return false;
+      }
+    }).reduce((sum, s) => sum + (s.total_sales || 0), 0);
+    
+    const daysElapsedSoFar = eachDayOfInterval({ start: monthStart, end: new Date(now.getTime() - 86400000) }).length; // hasta ayer
+    const budgetSoFar = daysElapsedSoFar * preliminaryDailyBudget;
+    const preliminaryCompliance = budgetSoFar > 0 ? (salesSoFar / budgetSoFar * 100) : 0;
+    
+    // Calcular cumplimiento de la semana actual
+    const currentWeekStartPrelim = currentDateRange?.from || startOfWeek(now, { weekStartsOn: 1 });
+    const currentWeekEndPrelim = currentDateRange?.to || endOfWeek(now, { weekStartsOn: 1 });
+    const currentWeekSalesPrelim = dailySales.filter(s => {
+      try {
+        const saleDate = parseISO(s.date);
+        return isWithinInterval(saleDate, { start: currentWeekStartPrelim, end: currentWeekEndPrelim });
+      } catch {
+        return false;
+      }
+    }).reduce((sum, s) => sum + (s.total_sales || 0), 0);
+    
+    const fullWeekDaysPrelim = eachDayOfInterval({ start: currentWeekStartPrelim, end: currentWeekEndPrelim });
+    const weeklyBudgetPrelim = fullWeekDaysPrelim.reduce((sum, day) => {
+      const dayOfWeek = day.getDay();
+      if (totalWeeklyAvg === 0) return sum + preliminaryDailyBudget;
+      const totalHistoricalAvg = avgByDayOfWeek.reduce((a, b) => a + b, 0);
+      const monthlyHistoricalProjection = totalHistoricalAvg * (daysInMonth / 7);
+      const scaleFactor = preliminaryMonthlyBudget / monthlyHistoricalProjection;
+      return sum + (avgByDayOfWeek[dayOfWeek] * scaleFactor);
+    }, 0);
+    
+    const weeklyCompliancePrelim = weeklyBudgetPrelim > 0 ? (currentWeekSalesPrelim / weeklyBudgetPrelim * 100) : 0;
+    
+    // LÓGICA INTELIGENTE: determinar porcentaje objetivo según desempeño
+    let TARGET_PERCENTAGE = 1.05; // Por defecto 105%
+    let performanceLevel = 'regular';
+    
+    // Tienda va MUY BIEN: cumplimiento >= 110% o proyección semanal >= 105%
+    if (preliminaryCompliance >= 110 || weeklyCompliancePrelim >= 105) {
+      TARGET_PERCENTAGE = 1.15; // 115%
+      performanceLevel = 'excelente';
+    }
+    // Tienda va REGULAR con potencial: cumplimiento >= 95% y < 110%
+    else if (preliminaryCompliance >= 95 && preliminaryCompliance < 110) {
+      TARGET_PERCENTAGE = 1.05; // 105%
+      performanceLevel = 'regular';
+    }
+    // Tienda va MAL: cumplimiento < 95%
+    else if (preliminaryCompliance < 95) {
+      TARGET_PERCENTAGE = 1.00; // 100%
+      performanceLevel = 'bajo';
+    }
+    
     const adjustedMonthlyBudget = activeBudget.sales_budget * TARGET_PERCENTAGE;
     const dailyBaseBudget = adjustedMonthlyBudget / daysInMonth;
 
