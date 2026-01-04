@@ -1520,8 +1520,8 @@ export default function Dashboard() {
                     </CardContent>
                   </Card>
 
-                  {/* Ventas por Hora */}
-                  <SalesByHourChart shiftRecords={shiftRecords} formatCurrency={formatCurrency} />
+                  {/* Rendimiento vs Zona */}
+                  <ZonePerformanceComparison storeId={selectedStore} formatCurrency={formatCurrency} />
                 </div>
 
                 {/* Second Row */}
