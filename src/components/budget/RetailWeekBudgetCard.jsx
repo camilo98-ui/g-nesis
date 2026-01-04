@@ -613,25 +613,6 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                   <span className="font-bold text-white">{budgetData.projectionCompliance.toFixed(0)}%</span>
                 </div>
                 <div className="relative h-3 bg-white/20 rounded-full overflow-hidden">
-                  <defs>
-                    <linearGradient id="barShineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="-30%" stopColor="#fff" stopOpacity="0">
-                        <animate attributeName="offset" values="-0.3;1.3;1.3" dur="3s" repeatCount="indefinite"/>
-                      </stop>
-                      <stop offset="-15%" stopColor="#fff" stopOpacity="0.6">
-                        <animate attributeName="offset" values="-0.15;1.45;1.45" dur="3s" repeatCount="indefinite"/>
-                      </stop>
-                      <stop offset="0%" stopColor="#fff" stopOpacity="1">
-                        <animate attributeName="offset" values="0;1.6;1.6" dur="3s" repeatCount="indefinite"/>
-                      </stop>
-                      <stop offset="15%" stopColor="#fff" stopOpacity="0.6">
-                        <animate attributeName="offset" values="0.15;1.75;1.75" dur="3s" repeatCount="indefinite"/>
-                      </stop>
-                      <stop offset="30%" stopColor="#fff" stopOpacity="0">
-                        <animate attributeName="offset" values="0.3;1.9;1.9" dur="3s" repeatCount="indefinite"/>
-                      </stop>
-                    </linearGradient>
-                  </defs>
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${Math.min(budgetData.projectionCompliance, 100)}%` }}
@@ -644,12 +625,13 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                         : 'bg-gradient-to-r from-orange-200/80 to-red-200/80'
                     }`}
                   >
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent" 
-                         style={{ 
-                           backgroundImage: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)',
-                           animation: 'shimmer 3s infinite',
-                           backgroundSize: '200% 100%'
-                         }} />
+                    <div 
+                      className="absolute inset-0 animate-shimmer"
+                      style={{
+                        background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.5) 50%, transparent 100%)',
+                        backgroundSize: '200% 100%'
+                      }}
+                    />
                   </motion.div>
                 </div>
                 <p className="text-[10px] text-white/50">

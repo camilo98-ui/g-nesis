@@ -294,6 +294,10 @@ meta[name="robots"] {
   }
 }
 
+.animate-shimmer {
+  animation: shimmer 2.5s ease-in-out infinite;
+}
+
 .animate-gradient-1 {
   animation: gradient-shift-1 15s ease-in-out infinite;
 }
