@@ -617,27 +617,23 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                     initial={{ width: 0 }}
                     animate={{ width: `${Math.min(budgetData.projectionCompliance, 100)}%` }}
                     transition={{ duration: 1, ease: "easeOut" }}
-                    className={`h-full rounded-full relative overflow-hidden ${
+                    className={`h-full rounded-full relative ${
                       budgetData.projectionCompliance >= 100 
                         ? 'bg-gradient-to-r from-emerald-300/80 to-green-200/80' 
                         : budgetData.projectionCompliance >= 85
                         ? 'bg-gradient-to-r from-amber-200/80 to-yellow-100/80'
                         : 'bg-gradient-to-r from-orange-200/80 to-red-200/80'
                     }`}
+                    style={{
+                      overflow: 'hidden'
+                    }}
                   >
-                    <motion.div 
+                    <div 
                       className="absolute inset-0"
                       style={{
-                        background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.6) 50%, transparent 100%)',
-                        width: '200%'
-                      }}
-                      animate={{
-                        x: ['-100%', '100%']
-                      }}
-                      transition={{
-                        duration: 2.5,
-                        repeat: Infinity,
-                        ease: "linear"
+                        background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.7) 50%, transparent 100%)',
+                        width: '50%',
+                        animation: 'slideRight 2s linear infinite'
                       }}
                     />
                   </motion.div>
