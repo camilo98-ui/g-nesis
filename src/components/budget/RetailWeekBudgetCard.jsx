@@ -526,6 +526,15 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                           <Line 
                             type="monotone" 
                             dataKey="value" 
+                            stroke="#fff" 
+                            strokeWidth={2} 
+                            dot={false}
+                            strokeOpacity={0.4}
+                            isAnimationActive={false}
+                          />
+                          <Line 
+                            type="monotone" 
+                            dataKey="value" 
                             stroke="url(#lineGradient1)" 
                             strokeWidth={3} 
                             dot={false}
@@ -576,6 +585,15 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                               </stop>
                             </linearGradient>
                           </defs>
+                          <Line 
+                            type="monotone" 
+                            dataKey="value" 
+                            stroke="#fff" 
+                            strokeWidth={2} 
+                            dot={false}
+                            strokeOpacity={0.4}
+                            isAnimationActive={false}
+                          />
                           <Line 
                             type="monotone" 
                             dataKey="value" 
