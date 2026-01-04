@@ -804,6 +804,25 @@ export default function Dashboard() {
       projectionData.push({ day: `Día ${daysElapsed + i}`, real: null, proyectado: accumulated });
     }
 
+    // Datos diarios del mes para gráficas
+    const monthDailySales = dailySales
+      .filter(s => {
+        const saleDate = new Date(s.date?.split('T')[0] || s.date);
+        return saleDate.getMonth() === now.getMonth() && saleDate.getFullYear() === now.getFullYear();
+      })
+      .map(s => {
+        const saleDate = new Date(s.date?.split('T')[0] || s.date);
+        const trans = s.total_transactions || 0;
+        return {
+          date: format(saleDate, 'dd MMM', { locale: es }),
+          fullDate: format(saleDate, 'EEEE dd MMMM yyyy', { locale: es }),
+          ventas: s.total_sales || 0,
+          ticketPromedio: trans > 0 ? s.total_sales / trans : 0,
+          transactions: trans
+        };
+      })
+      .sort((a, b) => new Date(a.fullDate) - new Date(b.fullDate));
+
     return {
       projectedSales,
       salesGap,
@@ -817,7 +836,8 @@ export default function Dashboard() {
       projectionData,
       totals: monthTotals,
       budget: currentBudget.sales_budget,
-      dailyAvgSales
+      dailyAvgSales,
+      chartData: monthDailySales
     };
   }, [currentBudget, dailySales]);
 
