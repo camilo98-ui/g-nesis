@@ -423,7 +423,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                 <Target className="w-7 h-7 text-white" />
               </motion.div>
               <div className="min-w-0">
-                <p className="text-xl md:text-2xl truncate">Presupuesto del Día</p>
+                <p className="text-2xl truncate">Presupuesto del Día</p>
                 <p className="text-xs text-slate-600 font-normal mt-0.5">Calendario Retail - Semana {budgetData.currentWeekNumber} de {budgetData.totalWeeks}</p>
               </div>
             </CardTitle>
@@ -438,7 +438,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
           </div>
         </CardHeader>
 
-        <CardContent className="p-4 md:p-6 space-y-4">
+        <CardContent className="p-6 space-y-4">
           {/* Sin Presupuesto - Mensaje */}
           {budgetData?.noBudget ? (
             <motion.div
@@ -487,7 +487,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                     key={budgetData.adjustedDailyBudget}
                     initial={{ scale: 1.2, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    className="text-3xl md:text-4xl font-black text-white leading-tight"
+                    className="text-4xl font-black text-white leading-tight"
                   >
                     {formatCurrency(budgetData.adjustedDailyBudget)}
                   </motion.p>
@@ -550,7 +550,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                 </div>
                 <div>
                   <p className="text-xs text-white/60 mb-2">Promedio Histórico - {format(new Date(), 'EEEE', { locale: es })}</p>
-                  <p className="text-3xl md:text-4xl font-black text-white leading-tight">
+                  <p className="text-4xl font-black text-white leading-tight">
                     {formatCurrency(budgetData.historicalAvgToday)}
                   </p>
                   <p className="text-[10px] text-white/50 mt-0.5">Promedio en {format(new Date(), 'EEEE', { locale: es })}s anteriores</p>
@@ -1276,7 +1276,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
               })()}
 
               {/* Grid de métricas resumidas */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 gap-3">
               <motion.button
               whileHover={{ scale: 1.03, y: -2 }}
               whileTap={{ scale: 0.98 }}
@@ -1287,7 +1287,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
               className="bg-gradient-to-br from-rose-50/40 to-pink-50/40 rounded-lg p-3 border border-rose-200/40 transition-all text-left hover:border-rose-400"
               >
               <p className="text-xs text-rose-500/70 mb-1">Base Diaria</p>
-              <p className="text-base md:text-lg font-bold text-rose-600 leading-tight">
+              <p className="text-lg font-bold text-rose-600 leading-tight">
                 {formatCurrency(budgetData.dailyBaseBudget)}
               </p>
               </motion.button>
@@ -1302,7 +1302,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
               className="bg-gradient-to-br from-emerald-50/40 to-green-50/40 rounded-lg p-3 border border-emerald-200/40 transition-all text-left hover:border-emerald-400"
               >
               <p className="text-xs text-emerald-500/70 mb-1">Días Restantes</p>
-              <p className="text-base md:text-lg font-bold text-emerald-600">
+              <p className="text-lg font-bold text-emerald-600">
                 {budgetData.remainingDays}
               </p>
               </motion.button>
@@ -1317,7 +1317,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
               className="bg-gradient-to-br from-rose-50/40 to-pink-50/40 rounded-lg p-3 border border-rose-200/40 transition-all text-left hover:border-rose-400"
               >
               <p className="text-xs text-rose-500/70 mb-1">Por Vender</p>
-              <p className="text-base md:text-lg font-bold text-rose-600 leading-tight">
+              <p className="text-lg font-bold text-rose-600 leading-tight">
                 {formatCurrency(budgetData.remainingBudget)}
               </p>
               </motion.button>
@@ -1338,7 +1338,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
               <p className={`text-xs mb-1 ${isOnTrack ? 'text-emerald-500/70' : 'text-rose-500/70'}`}>
                 Cumplimiento
               </p>
-              <p className={`text-base md:text-lg font-bold ${isOnTrack ? 'text-emerald-600' : 'text-rose-600'}`}>
+              <p className={`text-lg font-bold ${isOnTrack ? 'text-emerald-600' : 'text-rose-600'}`}>
                 {budgetData.compliance.toFixed(1)}%
               </p>
                 </motion.button>
