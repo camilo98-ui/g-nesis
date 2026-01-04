@@ -43,14 +43,29 @@ export default function CashierAnalysis({ cashierId, cashierName, storeId }) {
     refetchOnMount: 'always'
   });
 
-  // Datos del cajero en los últimos 30 días
+  // Calcular el inicio del mes retail (calendario ferial)
+  const getRetailMonthStart = () => {
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    const currentMonth = today.getMonth() + 1; // 1-12
+    
+    // Para enero, la semana 1 empieza el 29 de diciembre del año anterior
+    if (currentMonth === 1) {
+      return new Date(currentYear - 1, 11, 29); // 29 de diciembre del año anterior
+    }
+    
+    // Para otros meses, comenzar desde el primer día del mes
+    return new Date(currentYear, currentMonth - 1, 1);
+  };
+
+  // Datos del cajero desde el inicio del mes retail hasta hoy
   const trendData = useMemo(() => {
     const endDate = new Date();
-    const startDate = subDays(endDate, 30);
+    const startDate = getRetailMonthStart();
     const days = eachDayOfInterval({ start: startDate, end: endDate });
     
     const cashierRecords = shiftRecords.filter(r => r.cashier_id === cashierId);
-    console.log('📈 Calculando trendData para cashier:', cashierId, 'registros encontrados:', cashierRecords.length);
+    console.log('📈 Calculando trendData para cashier:', cashierId, 'desde mes retail:', format(startDate, 'yyyy-MM-dd'), 'registros encontrados:', cashierRecords.length);
     
     const result = days.map(day => {
       const dayStr = format(day, 'yyyy-MM-dd');
@@ -72,7 +87,7 @@ export default function CashierAnalysis({ cashierId, cashierName, storeId }) {
       };
     }).filter(d => d.ventas > 0 || d.transacciones > 0);
     
-    console.log('✅ trendData final tiene', result.length, 'días con datos');
+    console.log('✅ trendData final tiene', result.length, 'días con datos del mes retail');
     return result;
   }, [shiftRecords, cashierId]);
 
