@@ -707,12 +707,38 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                     <BarChart data={budgetData.dailyTrendData}>
                       <defs>
                         <linearGradient id="barCumplido" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#a7f3d0" stopOpacity={0.9}/>
-                          <stop offset="100%" stopColor="#d1fae5" stopOpacity={0.6}/>
+                          <stop offset="0%" stopColor="#a7f3d0" stopOpacity={0.9}>
+                            <animate attributeName="stopOpacity" values="0.9;1;0.9" dur="2s" repeatCount="indefinite"/>
+                          </stop>
+                          <stop offset="100%" stopColor="#d1fae5" stopOpacity={0.6}>
+                            <animate attributeName="stopOpacity" values="0.6;0.8;0.6" dur="2s" repeatCount="indefinite"/>
+                          </stop>
                         </linearGradient>
                         <linearGradient id="barNoCumplido" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#fda4af" stopOpacity={0.9}/>
-                          <stop offset="100%" stopColor="#fecdd3" stopOpacity={0.6}/>
+                          <stop offset="0%" stopColor="#fda4af" stopOpacity={0.9}>
+                            <animate attributeName="stopOpacity" values="0.9;1;0.9" dur="2s" repeatCount="indefinite"/>
+                          </stop>
+                          <stop offset="100%" stopColor="#fecdd3" stopOpacity={0.6}>
+                            <animate attributeName="stopOpacity" values="0.6;0.8;0.6" dur="2s" repeatCount="indefinite"/>
+                          </stop>
+                        </linearGradient>
+                        <filter id="barGlow">
+                          <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                          <feMerge>
+                            <feMergeNode in="coloredBlur"/>
+                            <feMergeNode in="SourceGraphic"/>
+                          </feMerge>
+                        </filter>
+                        <linearGradient id="barShimmer" x1="0%" y1="0%" x2="100%" y2="0%">
+                          <stop offset="-50%" stopColor="#ffffff" stopOpacity="0">
+                            <animate attributeName="offset" values="-0.5;1.5" dur="3s" repeatCount="indefinite"/>
+                          </stop>
+                          <stop offset="-25%" stopColor="#ffffff" stopOpacity="0.4">
+                            <animate attributeName="offset" values="-0.25;1.75" dur="3s" repeatCount="indefinite"/>
+                          </stop>
+                          <stop offset="0%" stopColor="#ffffff" stopOpacity="0">
+                            <animate attributeName="offset" values="0;2" dur="3s" repeatCount="indefinite"/>
+                          </stop>
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.3} />
@@ -784,6 +810,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                         fill="url(#barCumplido)"
                         radius={[4, 4, 0, 0]}
                         animationDuration={1000}
+                        filter="url(#barGlow)"
                       >
                         {budgetData.dailyTrendData.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={entry.cumplimiento >= 100 ? 'url(#barCumplido)' : 'url(#barNoCumplido)'} />
@@ -795,15 +822,30 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                   <BarChart data={budgetData.dailyTrendData}>
                     <defs>
                       <linearGradient id="barCumplidoDesktop" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#a7f3d0" stopOpacity={0.9}/>
-                        <stop offset="100%" stopColor="#d1fae5" stopOpacity={0.6}/>
+                        <stop offset="0%" stopColor="#a7f3d0" stopOpacity={0.9}>
+                          <animate attributeName="stopOpacity" values="0.9;1;0.9" dur="2s" repeatCount="indefinite"/>
+                        </stop>
+                        <stop offset="100%" stopColor="#d1fae5" stopOpacity={0.6}>
+                          <animate attributeName="stopOpacity" values="0.6;0.8;0.6" dur="2s" repeatCount="indefinite"/>
+                        </stop>
                       </linearGradient>
                       <linearGradient id="barNoCumplidoDesktop" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#fda4af" stopOpacity={0.9}/>
-                        <stop offset="100%" stopColor="#fecdd3" stopOpacity={0.6}/>
+                        <stop offset="0%" stopColor="#fda4af" stopOpacity={0.9}>
+                          <animate attributeName="stopOpacity" values="0.9;1;0.9" dur="2s" repeatCount="indefinite"/>
+                        </stop>
+                        <stop offset="100%" stopColor="#fecdd3" stopOpacity={0.6}>
+                          <animate attributeName="stopOpacity" values="0.6;0.8;0.6" dur="2s" repeatCount="indefinite"/>
+                        </stop>
                       </linearGradient>
                       <filter id="barShadow">
                         <feDropShadow dx="0" dy="2" stdDeviation="2" floodOpacity="0.2"/>
+                      </filter>
+                      <filter id="barGlowDesktop">
+                        <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                        <feMerge>
+                          <feMergeNode in="coloredBlur"/>
+                          <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
                       </filter>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.3} />
@@ -896,7 +938,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                       radius={[6, 6, 0, 0]}
                       animationDuration={1200}
                       animationEasing="ease-out"
-                      filter="url(#barShadow)"
+                      filter="url(#barGlowDesktop)"
                     >
                       {budgetData.dailyTrendData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.cumplimiento >= 100 ? 'url(#barCumplidoDesktop)' : 'url(#barNoCumplidoDesktop)'} />
@@ -1016,15 +1058,30 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                   <BarChart data={budgetData.weeklyData} margin={{ top: 10, right: 10, left: 0, bottom: 5 }}>
                     <defs>
                       <linearGradient id="barPresupuesto" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#a7f3d0" stopOpacity={0.7}/>
-                        <stop offset="100%" stopColor="#d1fae5" stopOpacity={0.4}/>
+                        <stop offset="0%" stopColor="#a7f3d0" stopOpacity={0.7}>
+                          <animate attributeName="stopOpacity" values="0.7;1;0.7" dur="2.5s" repeatCount="indefinite"/>
+                        </stop>
+                        <stop offset="100%" stopColor="#d1fae5" stopOpacity={0.4}>
+                          <animate attributeName="stopOpacity" values="0.4;0.6;0.4" dur="2.5s" repeatCount="indefinite"/>
+                        </stop>
                       </linearGradient>
                       <linearGradient id="barVentas" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#fda4af" stopOpacity={0.7}/>
-                        <stop offset="100%" stopColor="#fecdd3" stopOpacity={0.4}/>
+                        <stop offset="0%" stopColor="#fda4af" stopOpacity={0.7}>
+                          <animate attributeName="stopOpacity" values="0.7;1;0.7" dur="2.5s" repeatCount="indefinite"/>
+                        </stop>
+                        <stop offset="100%" stopColor="#fecdd3" stopOpacity={0.4}>
+                          <animate attributeName="stopOpacity" values="0.4;0.6;0.4" dur="2.5s" repeatCount="indefinite"/>
+                        </stop>
                       </linearGradient>
                       <filter id="barShadow">
                         <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.3"/>
+                      </filter>
+                      <filter id="barGlowWeekly">
+                        <feGaussianBlur stdDeviation="5" result="coloredBlur"/>
+                        <feMerge>
+                          <feMergeNode in="coloredBlur"/>
+                          <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
                       </filter>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#fecdd3" opacity={0.3} />
@@ -1093,7 +1150,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                       dataKey="presupuesto" 
                       fill="url(#barPresupuesto)" 
                       radius={[8, 8, 0, 0]}
-                      filter="url(#barShadow)"
+                      filter="url(#barGlowWeekly)"
                       animationDuration={1200}
                       animationEasing="ease-out"
                     />
@@ -1101,7 +1158,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                       dataKey="ventas" 
                       fill="url(#barVentas)" 
                       radius={[8, 8, 0, 0]}
-                      filter="url(#barShadow)"
+                      filter="url(#barGlowWeekly)"
                       animationDuration={1500}
                       animationEasing="ease-out"
                     />
