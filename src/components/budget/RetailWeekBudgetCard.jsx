@@ -588,7 +588,23 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
 
               <div className="grid grid-cols-2 gap-6 lg:gap-10 mb-6 lg:mb-5">
                 <div className="text-left">
-                  <p className="text-sm lg:text-base text-white/90 mb-3 lg:mb-2 font-semibold">Meta del Día (105%)</p>
+                  <div className="flex items-center gap-2 mb-3 lg:mb-2">
+                    <p className="text-sm lg:text-base text-white/90 font-semibold">Meta del Día ({(budgetData.targetPercentage * 100).toFixed(0)}%)</p>
+                    {budgetData.performanceLevel === 'excelente' && (
+                      <motion.span 
+                        animate={{ scale: [1, 1.2, 1] }}
+                        transition={{ duration: 1.5, repeat: Infinity }}
+                        className="px-2 py-0.5 bg-emerald-100/90 rounded-full text-[10px] font-black text-emerald-700"
+                      >
+                        🚀 ALTO
+                      </motion.span>
+                    )}
+                    {budgetData.performanceLevel === 'bajo' && (
+                      <span className="px-2 py-0.5 bg-red-100/90 rounded-full text-[10px] font-black text-red-700">
+                        ⚠️ BAJO
+                      </span>
+                    )}
+                  </div>
                   <motion.p
                     key={budgetData.adjustedDailyBudget}
                     initial={{ scale: 1.2, opacity: 0 }}
@@ -597,7 +613,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                   >
                     {formatCurrency(budgetData.adjustedDailyBudget)}
                   </motion.p>
-                  <p className="text-xs lg:text-sm text-white/70">Base: {formatCurrency(budgetData.adjustedDailyBudget / 1.05)}</p>
+                  <p className="text-xs lg:text-sm text-white/70">Base 100%: {formatCurrency(activeBudget.sales_budget / daysInMonth)}</p>
                   
                   {/* Sparkline debajo del número */}
                   {budgetData.last7DaysSales?.length > 0 && (
