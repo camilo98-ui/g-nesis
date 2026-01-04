@@ -216,52 +216,52 @@ export default function ZonePerformanceComparison({ storeId, formatCurrency }) {
       >
         <motion.div whileHover={{ scale: 1.05, y: -3 }} className={`text-center rounded-xl p-3 lg:p-4 border-2 shadow-md ${
           parseFloat(vsAvg.sales) >= 0 
-            ? 'bg-gradient-to-br from-emerald-50 to-green-50 border-emerald-300/50' 
-            : 'bg-gradient-to-br from-rose-50 to-red-50 border-rose-300/50'
+            ? 'bg-gradient-to-br from-rose-50 to-pink-50 border-rose-300/50' 
+            : 'bg-gradient-to-br from-red-50 to-rose-50 border-red-300/50'
         }`}>
-          {parseFloat(vsAvg.sales) >= 0 ? <TrendingUp className="w-5 h-5 lg:w-6 lg:h-6 text-emerald-600 mx-auto mb-1 lg:mb-2" /> : <TrendingDown className="w-5 h-5 lg:w-6 lg:h-6 text-rose-600 mx-auto mb-1 lg:mb-2" />}
-          <p className="text-[9px] lg:text-[10px] text-slate-600 mb-1 font-semibold">Ventas vs Zona</p>
-          <p className={`text-lg lg:text-2xl font-black ${parseFloat(vsAvg.sales) >= 0 ? 'text-emerald-900' : 'text-rose-900'}`}>
+          {parseFloat(vsAvg.sales) >= 0 ? <TrendingUp className="w-5 h-5 lg:w-6 lg:h-6 text-rose-600 mx-auto mb-1 lg:mb-2" /> : <TrendingDown className="w-5 h-5 lg:w-6 lg:h-6 text-red-600 mx-auto mb-1 lg:mb-2" />}
+          <p className="text-[9px] lg:text-[10px] text-rose-700 mb-1 font-semibold">Ventas vs Zona</p>
+          <p className={`text-lg lg:text-2xl font-black ${parseFloat(vsAvg.sales) >= 0 ? 'text-rose-900' : 'text-red-900'}`}>
             {parseFloat(vsAvg.sales) >= 0 ? '+' : ''}{vsAvg.sales}%
           </p>
         </motion.div>
 
         <motion.div whileHover={{ scale: 1.05, y: -3 }} className={`text-center rounded-xl p-3 lg:p-4 border-2 shadow-md ${
           parseFloat(vsAvg.transactions) >= 0 
-            ? 'bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-300/50' 
-            : 'bg-gradient-to-br from-orange-50 to-amber-50 border-orange-300/50'
+            ? 'bg-gradient-to-br from-rose-50 to-pink-50 border-rose-300/50' 
+            : 'bg-gradient-to-br from-orange-50 to-red-50 border-orange-300/50'
         }`}>
-          {parseFloat(vsAvg.transactions) >= 0 ? <TrendingUp className="w-5 h-5 lg:w-6 lg:h-6 text-blue-600 mx-auto mb-1 lg:mb-2" /> : <TrendingDown className="w-5 h-5 lg:w-6 lg:h-6 text-orange-600 mx-auto mb-1 lg:mb-2" />}
-          <p className="text-[9px] lg:text-[10px] text-slate-600 mb-1 font-semibold">Tráfico vs Zona</p>
-          <p className={`text-lg lg:text-2xl font-black ${parseFloat(vsAvg.transactions) >= 0 ? 'text-blue-900' : 'text-orange-900'}`}>
+          {parseFloat(vsAvg.transactions) >= 0 ? <TrendingUp className="w-5 h-5 lg:w-6 lg:h-6 text-rose-600 mx-auto mb-1 lg:mb-2" /> : <TrendingDown className="w-5 h-5 lg:w-6 lg:h-6 text-orange-600 mx-auto mb-1 lg:mb-2" />}
+          <p className="text-[9px] lg:text-[10px] text-rose-700 mb-1 font-semibold">Tráfico vs Zona</p>
+          <p className={`text-lg lg:text-2xl font-black ${parseFloat(vsAvg.transactions) >= 0 ? 'text-rose-900' : 'text-orange-900'}`}>
             {parseFloat(vsAvg.transactions) >= 0 ? '+' : ''}{vsAvg.transactions}%
           </p>
         </motion.div>
 
         <motion.div whileHover={{ scale: 1.05, y: -3 }} className={`text-center rounded-xl p-3 lg:p-4 border-2 shadow-md ${
           parseFloat(vsAvg.avgTicket) >= 0 
-            ? 'bg-gradient-to-br from-violet-50 to-purple-50 border-violet-300/50' 
-            : 'bg-gradient-to-br from-amber-50 to-yellow-50 border-amber-300/50'
+            ? 'bg-gradient-to-br from-rose-50 to-pink-50 border-rose-300/50' 
+            : 'bg-gradient-to-br from-red-50 to-rose-50 border-red-300/50'
         }`}>
-          {parseFloat(vsAvg.avgTicket) >= 0 ? <TrendingUp className="w-5 h-5 lg:w-6 lg:h-6 text-violet-600 mx-auto mb-1 lg:mb-2" /> : <TrendingDown className="w-5 h-5 lg:w-6 lg:h-6 text-amber-600 mx-auto mb-1 lg:mb-2" />}
-          <p className="text-[9px] lg:text-[10px] text-slate-600 mb-1 font-semibold">Ticket vs Zona</p>
-          <p className={`text-lg lg:text-2xl font-black ${parseFloat(vsAvg.avgTicket) >= 0 ? 'text-violet-900' : 'text-amber-900'}`}>
+          {parseFloat(vsAvg.avgTicket) >= 0 ? <TrendingUp className="w-5 h-5 lg:w-6 lg:h-6 text-rose-600 mx-auto mb-1 lg:mb-2" /> : <TrendingDown className="w-5 h-5 lg:w-6 lg:h-6 text-red-600 mx-auto mb-1 lg:mb-2" />}
+          <p className="text-[9px] lg:text-[10px] text-rose-700 mb-1 font-semibold">Ticket vs Zona</p>
+          <p className={`text-lg lg:text-2xl font-black ${parseFloat(vsAvg.avgTicket) >= 0 ? 'text-rose-900' : 'text-red-900'}`}>
             {parseFloat(vsAvg.avgTicket) >= 0 ? '+' : ''}{vsAvg.avgTicket}%
           </p>
         </motion.div>
 
         <motion.div whileHover={{ scale: 1.05, y: -3 }} className={`text-center rounded-xl p-3 lg:p-4 border-2 shadow-md ${
           parseFloat(vsAvg.suggested) >= 0 
-            ? 'bg-gradient-to-br from-pink-50 to-rose-50 border-pink-300/50' 
-            : 'bg-gradient-to-br from-red-50 to-rose-50 border-red-300/50'
+            ? 'bg-gradient-to-br from-rose-50 to-pink-50 border-rose-300/50' 
+            : 'bg-gradient-to-br from-red-50 to-orange-50 border-red-300/50'
         }`}>
-          {parseFloat(vsAvg.suggested) >= 0 ? <TrendingUp className="w-5 h-5 lg:w-6 lg:h-6 text-pink-600 mx-auto mb-1 lg:mb-2" /> : <TrendingDown className="w-5 h-5 lg:w-6 lg:h-6 text-red-600 mx-auto mb-1 lg:mb-2" />}
-          <p className="text-[9px] lg:text-[10px] text-slate-600 mb-1 font-semibold">Sugeridos vs Zona</p>
-          <p className={`text-lg lg:text-2xl font-black ${parseFloat(vsAvg.suggested) >= 0 ? 'text-pink-900' : 'text-red-900'}`}>
+          {parseFloat(vsAvg.suggested) >= 0 ? <TrendingUp className="w-5 h-5 lg:w-6 lg:h-6 text-rose-600 mx-auto mb-1 lg:mb-2" /> : <TrendingDown className="w-5 h-5 lg:w-6 lg:h-6 text-red-600 mx-auto mb-1 lg:mb-2" />}
+          <p className="text-[9px] lg:text-[10px] text-rose-700 mb-1 font-semibold">Sugeridos vs Zona</p>
+          <p className={`text-lg lg:text-2xl font-black ${parseFloat(vsAvg.suggested) >= 0 ? 'text-rose-900' : 'text-red-900'}`}>
             {parseFloat(vsAvg.suggested) >= 0 ? '+' : ''}{vsAvg.suggested}%
           </p>
         </motion.div>
-      </div>
+      </motion.div>
 
       <div className="p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
         {/* Radar comparativo */}
