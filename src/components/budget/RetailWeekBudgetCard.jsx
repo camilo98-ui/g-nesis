@@ -109,8 +109,19 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
     }
 
     const now = new Date();
-    const monthStart = startOfMonth(now);
-    const monthEnd = endOfMonth(now);
+    
+    // CALENDARIO RETAIL: Mes empieza el 29 del mes anterior
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth(); // 0-11
+    
+    // Determinar el inicio del mes retail (29 del mes anterior)
+    const retailMonthStart = new Date(currentYear, currentMonth - 1, 29);
+    
+    // Determinar el fin del mes retail (28 del mes actual)
+    const retailMonthEnd = new Date(currentYear, currentMonth, 28);
+    
+    const monthStart = retailMonthStart;
+    const monthEnd = retailMonthEnd;
 
     // Usar el rango de fechas del filtro si está disponible, de lo contrario, la semana retail actual
     const currentWeekStart = currentDateRange?.from || startOfWeek(now, { weekStartsOn: 1 });
