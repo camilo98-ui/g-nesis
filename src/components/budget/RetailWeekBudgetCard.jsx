@@ -465,7 +465,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
           <motion.div
             whileHover={{ scale: 1.02, y: -2 }}
             onClick={() => setIsExpanded(!isExpanded)}
-            className="w-full bg-gradient-to-br from-rose-400/80 to-pink-400/80 rounded-2xl shadow-md p-7 md:p-9 border border-rose-300/40 relative overflow-hidden cursor-pointer"
+            className="w-full bg-gradient-to-br from-rose-400/80 to-pink-400/80 rounded-2xl shadow-md p-8 md:p-12 border border-rose-300/40 relative overflow-hidden cursor-pointer"
           >
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-7">
