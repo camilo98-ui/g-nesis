@@ -218,15 +218,24 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
 
     // Ventas acumuladas hasta hoy
     const todaySales = dailySales.find(s => {
-      const saleDate = new Date(s.date);
-      return isSameDay(saleDate, now);
+      try {
+        const saleDate = parseISO(s.date);
+        return isSameDay(saleDate, now);
+      } catch {
+        return false;
+      }
     });
     const todayActualSales = todaySales?.total_sales || 0;
 
-    // Calcular ventas realizadas hasta ayer
+    // Calcular ventas realizadas hasta ayer SOLO en el período retail (29 anterior al 28 actual)
     const salesUntilYesterday = dailySales.filter(s => {
-      const saleDate = new Date(s.date);
-      return saleDate < now && saleDate >= monthStart;
+      try {
+        const saleDate = parseISO(s.date);
+        // CRÍTICO: Solo incluir ventas dentro del mes retail (29 anterior a 28 actual)
+        return saleDate < now && saleDate >= monthStart && saleDate <= monthEnd;
+      } catch {
+        return false;
+      }
     }).reduce((sum, s) => sum + (s.total_sales || 0), 0);
 
     // Presupuesto acumulado hasta ayer - suma de presupuestos ajustados
