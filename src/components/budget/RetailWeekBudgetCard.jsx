@@ -625,11 +625,19 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                         : 'bg-gradient-to-r from-orange-200/80 to-red-200/80'
                     }`}
                   >
-                    <div 
-                      className="absolute inset-0 animate-shimmer"
+                    <motion.div 
+                      className="absolute inset-0"
                       style={{
-                        background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.5) 50%, transparent 100%)',
-                        backgroundSize: '200% 100%'
+                        background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.6) 50%, transparent 100%)',
+                        width: '200%'
+                      }}
+                      animate={{
+                        x: ['-100%', '100%']
+                      }}
+                      transition={{
+                        duration: 2.5,
+                        repeat: Infinity,
+                        ease: "linear"
                       }}
                     />
                   </motion.div>
