@@ -1,3 +1,4 @@
+
 import React, { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Target, TrendingUp, TrendingDown, Calendar, AlertTriangle, CheckCircle2, ChevronDown, ChevronUp, BarChart3, LineChart as LineChartIcon, ChevronRight } from 'lucide-react';
@@ -139,27 +140,6 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
     // Días completos de la semana retail seleccionada (siempre 7 días)
     const fullCurrentRetailWeekDays = eachDayOfInterval({ start: currentWeekStart, end: currentWeekEnd });
 
-    const now = new Date();
-    
-    // CALENDARIO RETAIL: Mes empieza el 29 del mes anterior
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth(); // 0-11
-    
-    // Determinar el inicio del mes retail (29 del mes anterior)
-    const retailMonthStart = new Date(currentYear, currentMonth - 1, 29);
-    
-    // Determinar el fin del mes retail (28 del mes actual)
-    const retailMonthEnd = new Date(currentYear, currentMonth, 28);
-    
-    const monthStart = retailMonthStart;
-    const monthEnd = retailMonthEnd;
-
-    // Calcular días del mes que efectivamente tienen venta (lunes a domingo del mes)
-    const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd }).length;
-
-    // Días completos de la semana retail seleccionada (siempre 7 días)
-    const fullCurrentRetailWeekDays = eachDayOfInterval({ start: currentWeekStart, end: currentWeekEnd });
-
     // Analizar histórico de ventas por día de la semana (0=Domingo, 6=Sábado)
     // INCLUYE TODOS LOS DATOS HISTÓRICOS, no solo del mes actual
     const salesByDayOfWeek = [0, 0, 0, 0, 0, 0, 0]; // Sum
@@ -226,19 +206,16 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
     const preliminaryCompliance = budgetSoFar > 0 ? (salesSoFar / budgetSoFar * 100) : 0;
     
     // Calcular cumplimiento de la semana actual
-    const currentWeekStartPrelim = currentDateRange?.from || startOfWeek(now, { weekStartsOn: 1 });
-    const currentWeekEndPrelim = currentDateRange?.to || endOfWeek(now, { weekStartsOn: 1 });
     const currentWeekSalesPrelim = dailySales.filter(s => {
       try {
         const saleDate = parseISO(s.date);
-        return isWithinInterval(saleDate, { start: currentWeekStartPrelim, end: currentWeekEndPrelim });
+        return isWithinInterval(saleDate, { start: currentWeekStart, end: currentWeekEnd });
       } catch {
         return false;
       }
     }).reduce((sum, s) => sum + (s.total_sales || 0), 0);
     
-    const fullWeekDaysPrelim = eachDayOfInterval({ start: currentWeekStartPrelim, end: currentWeekEndPrelim });
-    const weeklyBudgetPrelim = fullWeekDaysPrelim.reduce((sum, day) => {
+    const weeklyBudgetPrelim = fullCurrentRetailWeekDays.reduce((sum, day) => {
       const dayOfWeek = day.getDay();
       if (totalWeeklyAvg === 0) return sum + preliminaryDailyBudget;
       const totalHistoricalAvg = avgByDayOfWeek.reduce((a, b) => a + b, 0);
@@ -279,7 +256,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
 
       // Si hay suficiente histórico, usar directamente el promedio histórico escalado al presupuesto mensual
       if (countByDayOfWeek[dayOfWeek] >= 3) {
-        // Escalar el promedio histórico para que la suma semanal coincida con el presupuesto mensual ajustado al 105%
+        // Escalar el promedio histórico para que la suma semanal coincida con el presupuesto mensual ajustado
         const totalHistoricalAvg = avgByDayOfWeek.reduce((a, b) => a + b, 0);
         const monthlyHistoricalProjection = totalHistoricalAvg * (daysInMonth / 7);
         const scaleFactor = adjustedMonthlyBudget / monthlyHistoricalProjection;
@@ -324,7 +301,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
     // Días restantes del mes (incluyendo hoy)
     const remainingDays = eachDayOfInterval({ start: now, end: monthEnd }).length;
 
-    // Presupuesto restante a alcanzar (meta del 105%)
+    // Presupuesto restante a alcanzar
     const remainingBudget = adjustedMonthlyBudget - salesUntilYesterday - todayActualSales;
 
     // Presupuesto del día ajustado según patrón histórico
@@ -626,7 +603,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                   >
                     {formatCurrency(budgetData.adjustedDailyBudget)}
                   </motion.p>
-                  <p className="text-xs lg:text-sm text-white/70">Base 100%: {formatCurrency(activeBudget.sales_budget / daysInMonth)}</p>
+                  <p className="text-xs lg:text-sm text-white/70">Base 100%: {formatCurrency(activeBudget.sales_budget / (eachDayOfInterval({ start: new Date(new Date().getFullYear(), new Date().getMonth() - 1, 29), end: new Date(new Date().getFullYear(), new Date().getMonth(), 28) }).length))}</p>
                   
                   {/* Sparkline debajo del número */}
                   {budgetData.last7DaysSales?.length > 0 && (
@@ -1071,7 +1048,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                         </stop>
                         <stop offset="100%" stopColor="#fecdd3" stopOpacity={0.6}>
                           <animate attributeName="stopOpacity" values="0.6;0.8;0.6" dur="2s" repeatCount="indefinite"/>
-                        </stop>
+                          </stop>
                       </linearGradient>
                       <filter id="barShadow">
                         <feDropShadow dx="0" dy="2" stdDeviation="2" floodOpacity="0.2"/>
@@ -1748,7 +1725,10 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                             <YAxis type="category" dataKey="name" fontSize={11} width={70} />
                             <Tooltip formatter={(v) => formatCurrency(v)} />
                             <Bar dataKey="value" radius={[0, 8, 8, 0]}>
-                              {[{ fill: '#10b981' }, { fill: '#fda4af' }].map((entry, index) => (
+                              {[
+                                { fill: '#10b981' },
+                                { fill: '#fda4af' }
+                              ].map((entry, index) => (
                                 <Cell key={`cell-${index}`} fill={entry.fill} />
                               ))}
                             </Bar>
@@ -2486,8 +2466,6 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
             </>
             )}
           </AnimatePresence>
-          </>
-          )}
         </CardContent>
       </Card>
     </motion.div>
