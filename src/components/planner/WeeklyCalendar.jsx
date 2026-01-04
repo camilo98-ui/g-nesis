@@ -369,7 +369,7 @@ export default function WeeklyCalendar({
                       {...provided.droppableProps}
                       onMouseEnter={() => setHoveredDay(idx)}
                       onMouseLeave={() => setHoveredDay(null)}
-                      className={`min-h-[400px] sm:min-h-[380px] min-w-[110px] sm:min-w-[140px] transition-all relative ${snapshot.isDraggingOver ? 'bg-pink-50/50' : ''} ${isCurrentDay ? 'bg-rose-50/30' : isHovered ? 'bg-gray-50/30' : 'bg-white'} ${holiday ? 'bg-gradient-to-b from-amber-50/50 to-orange-50/30' : ''}`}
+                      className={`min-h-[500px] sm:min-h-[380px] min-w-[130px] sm:min-w-[140px] transition-all relative ${snapshot.isDraggingOver ? 'bg-pink-50/50' : ''} ${isCurrentDay ? 'bg-rose-50/30' : isHovered ? 'bg-gray-50/30' : 'bg-white'} ${holiday ? 'bg-gradient-to-b from-amber-50/50 to-orange-50/30' : ''}`}
                     >
                       {/* Day Header - Mejorado para móvil */}
                       <div className={`p-3 sm:p-2 text-center border-b sticky top-0 z-10 ${isCurrentDay ? 'bg-gradient-to-r from-rose-300 to-pink-300 text-white shadow-md' : holiday ? 'bg-gradient-to-r from-amber-300 to-orange-300 text-white' : 'bg-gray-50'}`}>
