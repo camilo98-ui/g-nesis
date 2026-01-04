@@ -229,10 +229,10 @@ export default function CashierRankingCard({
                 whileHover={{ scale: 1.1 }}
                 className="space-y-1"
               >
-                <p className={`text-2xl font-black ${isTopThree ? 'text-gray-900 drop-shadow-md' : 'text-fuchsia-600'}`}>
+                <p className={`text-3xl sm:text-2xl font-black ${isTopThree ? 'text-gray-900 drop-shadow-md' : 'text-fuchsia-600'}`}>
                   {formatCurrency(sales)}
                 </p>
-                <p className={`text-xs font-medium ${isTopThree ? 'text-gray-700' : 'text-gray-500'}`}>
+                <p className={`text-sm sm:text-xs font-medium ${isTopThree ? 'text-gray-700' : 'text-gray-500'}`}>
                   ventas
                 </p>
               </motion.div>
@@ -240,11 +240,12 @@ export default function CashierRankingCard({
             {rankType === "ticket" && (
               <motion.div
                 whileHover={{ scale: 1.1 }}
+                className="space-y-1"
               >
-                <p className={`text-2xl font-black ${isTopThree ? 'text-gray-900 drop-shadow-md' : 'text-sky-600'}`}>
+                <p className={`text-3xl sm:text-2xl font-black ${isTopThree ? 'text-gray-900 drop-shadow-md' : 'text-sky-600'}`}>
                   {formatCurrency(calculatedAvgTicket)}
                 </p>
-                <p className={`text-xs font-medium ${isTopThree ? 'text-gray-700' : 'text-gray-500'}`}>
+                <p className={`text-sm sm:text-xs font-medium ${isTopThree ? 'text-gray-700' : 'text-gray-500'}`}>
                   promedio
                 </p>
               </motion.div>
@@ -254,10 +255,10 @@ export default function CashierRankingCard({
                 whileHover={{ scale: 1.1 }}
                 className="space-y-1"
               >
-                <p className={`text-2xl font-black ${isTopThree ? 'text-gray-900 drop-shadow-md' : 'text-pink-600'}`}>
+                <p className={`text-3xl sm:text-2xl font-black ${isTopThree ? 'text-gray-900 drop-shadow-md' : 'text-pink-600'}`}>
                   {suggestedSales} 🎁
                 </p>
-                <p className={`text-xs font-medium ${isTopThree ? 'text-gray-700' : 'text-gray-500'}`}>
+                <p className={`text-sm sm:text-xs font-medium ${isTopThree ? 'text-gray-700' : 'text-gray-500'}`}>
                   sugeridos
                 </p>
               </motion.div>
@@ -267,10 +268,10 @@ export default function CashierRankingCard({
                 whileHover={{ scale: 1.1 }}
                 className="space-y-1"
               >
-                <p className={`text-3xl font-black ${isTopThree ? 'text-gray-900 drop-shadow-md' : 'text-purple-600'}`}>
+                <p className={`text-4xl sm:text-3xl font-black ${isTopThree ? 'text-gray-900 drop-shadow-md' : 'text-purple-600'}`}>
                   {overallScore.toFixed(0)}
                 </p>
-                <p className={`text-xs font-medium ${isTopThree ? 'text-gray-700' : 'text-gray-500'}`}>
+                <p className={`text-sm sm:text-xs font-medium ${isTopThree ? 'text-gray-700' : 'text-gray-500'}`}>
                   puntos
                 </p>
               </motion.div>
