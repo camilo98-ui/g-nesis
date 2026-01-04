@@ -43,7 +43,7 @@ export default function ZonePerformanceComparison({ storeId, formatCurrency }) {
           store_id: store.code 
         });
         
-        // Filtrar solo ventas del mes actual
+        // Filtrar solo ventas del mes retail actual
         const monthSales = storeSales.filter(s => {
           const saleDate = s.date?.split('T')[0] || s.date;
           return saleDate >= monthStart && saleDate <= monthEnd;
@@ -207,222 +207,222 @@ export default function ZonePerformanceComparison({ storeId, formatCurrency }) {
       <AnimatePresence>
         {isExpanded && (
           <>
-      {/* Comparación vs Promedio de Zona */}
-      <motion.div
-        initial={{ opacity: 0, height: 0 }}
-        animate={{ opacity: 1, height: 'auto' }}
-        exit={{ opacity: 0, height: 0 }}
-        className="grid grid-cols-2 lg:grid-cols-4 gap-3 p-4 lg:p-6 bg-white/50 backdrop-blur-sm border-b border-rose-200/20"
-      >
-        <motion.div whileHover={{ scale: 1.05, y: -3 }} className={`text-center rounded-xl p-3 lg:p-4 border-2 shadow-md ${
-          parseFloat(vsAvg.sales) >= 0 
-            ? 'bg-gradient-to-br from-rose-50 to-pink-50 border-rose-300/50' 
-            : 'bg-gradient-to-br from-red-50 to-rose-50 border-red-300/50'
-        }`}>
-          {parseFloat(vsAvg.sales) >= 0 ? <TrendingUp className="w-5 h-5 lg:w-6 lg:h-6 text-rose-600 mx-auto mb-1 lg:mb-2" /> : <TrendingDown className="w-5 h-5 lg:w-6 lg:h-6 text-red-600 mx-auto mb-1 lg:mb-2" />}
-          <p className="text-[9px] lg:text-[10px] text-rose-700 mb-1 font-semibold">Ventas vs Zona</p>
-          <p className={`text-lg lg:text-2xl font-black ${parseFloat(vsAvg.sales) >= 0 ? 'text-rose-900' : 'text-red-900'}`}>
-            {parseFloat(vsAvg.sales) >= 0 ? '+' : ''}{vsAvg.sales}%
-          </p>
-        </motion.div>
+            {/* Comparación vs Promedio de Zona */}
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="grid grid-cols-2 lg:grid-cols-4 gap-3 p-4 lg:p-6 bg-white/50 backdrop-blur-sm border-b border-rose-200/20"
+            >
+              <motion.div whileHover={{ scale: 1.05, y: -3 }} className={`text-center rounded-xl p-3 lg:p-4 border-2 shadow-md ${
+                parseFloat(vsAvg.sales) >= 0 
+                  ? 'bg-gradient-to-br from-rose-50 to-pink-50 border-rose-300/50' 
+                  : 'bg-gradient-to-br from-red-50 to-rose-50 border-red-300/50'
+              }`}>
+                {parseFloat(vsAvg.sales) >= 0 ? <TrendingUp className="w-5 h-5 lg:w-6 lg:h-6 text-rose-600 mx-auto mb-1 lg:mb-2" /> : <TrendingDown className="w-5 h-5 lg:w-6 lg:h-6 text-red-600 mx-auto mb-1 lg:mb-2" />}
+                <p className="text-[9px] lg:text-[10px] text-rose-700 mb-1 font-semibold">Ventas vs Zona</p>
+                <p className={`text-lg lg:text-2xl font-black ${parseFloat(vsAvg.sales) >= 0 ? 'text-rose-900' : 'text-red-900'}`}>
+                  {parseFloat(vsAvg.sales) >= 0 ? '+' : ''}{vsAvg.sales}%
+                </p>
+              </motion.div>
 
-        <motion.div whileHover={{ scale: 1.05, y: -3 }} className={`text-center rounded-xl p-3 lg:p-4 border-2 shadow-md ${
-          parseFloat(vsAvg.transactions) >= 0 
-            ? 'bg-gradient-to-br from-rose-50 to-pink-50 border-rose-300/50' 
-            : 'bg-gradient-to-br from-orange-50 to-red-50 border-orange-300/50'
-        }`}>
-          {parseFloat(vsAvg.transactions) >= 0 ? <TrendingUp className="w-5 h-5 lg:w-6 lg:h-6 text-rose-600 mx-auto mb-1 lg:mb-2" /> : <TrendingDown className="w-5 h-5 lg:w-6 lg:h-6 text-orange-600 mx-auto mb-1 lg:mb-2" />}
-          <p className="text-[9px] lg:text-[10px] text-rose-700 mb-1 font-semibold">Tráfico vs Zona</p>
-          <p className={`text-lg lg:text-2xl font-black ${parseFloat(vsAvg.transactions) >= 0 ? 'text-rose-900' : 'text-orange-900'}`}>
-            {parseFloat(vsAvg.transactions) >= 0 ? '+' : ''}{vsAvg.transactions}%
-          </p>
-        </motion.div>
+              <motion.div whileHover={{ scale: 1.05, y: -3 }} className={`text-center rounded-xl p-3 lg:p-4 border-2 shadow-md ${
+                parseFloat(vsAvg.transactions) >= 0 
+                  ? 'bg-gradient-to-br from-rose-50 to-pink-50 border-rose-300/50' 
+                  : 'bg-gradient-to-br from-orange-50 to-red-50 border-orange-300/50'
+              }`}>
+                {parseFloat(vsAvg.transactions) >= 0 ? <TrendingUp className="w-5 h-5 lg:w-6 lg:h-6 text-rose-600 mx-auto mb-1 lg:mb-2" /> : <TrendingDown className="w-5 h-5 lg:w-6 lg:h-6 text-orange-600 mx-auto mb-1 lg:mb-2" />}
+                <p className="text-[9px] lg:text-[10px] text-rose-700 mb-1 font-semibold">Tráfico vs Zona</p>
+                <p className={`text-lg lg:text-2xl font-black ${parseFloat(vsAvg.transactions) >= 0 ? 'text-rose-900' : 'text-orange-900'}`}>
+                  {parseFloat(vsAvg.transactions) >= 0 ? '+' : ''}{vsAvg.transactions}%
+                </p>
+              </motion.div>
 
-        <motion.div whileHover={{ scale: 1.05, y: -3 }} className={`text-center rounded-xl p-3 lg:p-4 border-2 shadow-md ${
-          parseFloat(vsAvg.avgTicket) >= 0 
-            ? 'bg-gradient-to-br from-rose-50 to-pink-50 border-rose-300/50' 
-            : 'bg-gradient-to-br from-red-50 to-rose-50 border-red-300/50'
-        }`}>
-          {parseFloat(vsAvg.avgTicket) >= 0 ? <TrendingUp className="w-5 h-5 lg:w-6 lg:h-6 text-rose-600 mx-auto mb-1 lg:mb-2" /> : <TrendingDown className="w-5 h-5 lg:w-6 lg:h-6 text-red-600 mx-auto mb-1 lg:mb-2" />}
-          <p className="text-[9px] lg:text-[10px] text-rose-700 mb-1 font-semibold">Ticket vs Zona</p>
-          <p className={`text-lg lg:text-2xl font-black ${parseFloat(vsAvg.avgTicket) >= 0 ? 'text-rose-900' : 'text-red-900'}`}>
-            {parseFloat(vsAvg.avgTicket) >= 0 ? '+' : ''}{vsAvg.avgTicket}%
-          </p>
-        </motion.div>
+              <motion.div whileHover={{ scale: 1.05, y: -3 }} className={`text-center rounded-xl p-3 lg:p-4 border-2 shadow-md ${
+                parseFloat(vsAvg.avgTicket) >= 0 
+                  ? 'bg-gradient-to-br from-rose-50 to-pink-50 border-rose-300/50' 
+                  : 'bg-gradient-to-br from-red-50 to-rose-50 border-red-300/50'
+              }`}>
+                {parseFloat(vsAvg.avgTicket) >= 0 ? <TrendingUp className="w-5 h-5 lg:w-6 lg:h-6 text-rose-600 mx-auto mb-1 lg:mb-2" /> : <TrendingDown className="w-5 h-5 lg:w-6 lg:h-6 text-red-600 mx-auto mb-1 lg:mb-2" />}
+                <p className="text-[9px] lg:text-[10px] text-rose-700 mb-1 font-semibold">Ticket vs Zona</p>
+                <p className={`text-lg lg:text-2xl font-black ${parseFloat(vsAvg.avgTicket) >= 0 ? 'text-rose-900' : 'text-red-900'}`}>
+                  {parseFloat(vsAvg.avgTicket) >= 0 ? '+' : ''}{vsAvg.avgTicket}%
+                </p>
+              </motion.div>
 
-        <motion.div whileHover={{ scale: 1.05, y: -3 }} className={`text-center rounded-xl p-3 lg:p-4 border-2 shadow-md ${
-          parseFloat(vsAvg.suggested) >= 0 
-            ? 'bg-gradient-to-br from-rose-50 to-pink-50 border-rose-300/50' 
-            : 'bg-gradient-to-br from-red-50 to-orange-50 border-red-300/50'
-        }`}>
-          {parseFloat(vsAvg.suggested) >= 0 ? <TrendingUp className="w-5 h-5 lg:w-6 lg:h-6 text-rose-600 mx-auto mb-1 lg:mb-2" /> : <TrendingDown className="w-5 h-5 lg:w-6 lg:h-6 text-red-600 mx-auto mb-1 lg:mb-2" />}
-          <p className="text-[9px] lg:text-[10px] text-rose-700 mb-1 font-semibold">Sugeridos vs Zona</p>
-          <p className={`text-lg lg:text-2xl font-black ${parseFloat(vsAvg.suggested) >= 0 ? 'text-rose-900' : 'text-red-900'}`}>
-            {parseFloat(vsAvg.suggested) >= 0 ? '+' : ''}{vsAvg.suggested}%
-          </p>
-        </motion.div>
-      </motion.div>
+              <motion.div whileHover={{ scale: 1.05, y: -3 }} className={`text-center rounded-xl p-3 lg:p-4 border-2 shadow-md ${
+                parseFloat(vsAvg.suggested) >= 0 
+                  ? 'bg-gradient-to-br from-rose-50 to-pink-50 border-rose-300/50' 
+                  : 'bg-gradient-to-br from-red-50 to-orange-50 border-red-300/50'
+              }`}>
+                {parseFloat(vsAvg.suggested) >= 0 ? <TrendingUp className="w-5 h-5 lg:w-6 lg:h-6 text-rose-600 mx-auto mb-1 lg:mb-2" /> : <TrendingDown className="w-5 h-5 lg:w-6 lg:h-6 text-red-600 mx-auto mb-1 lg:mb-2" />}
+                <p className="text-[9px] lg:text-[10px] text-rose-700 mb-1 font-semibold">Sugeridos vs Zona</p>
+                <p className={`text-lg lg:text-2xl font-black ${parseFloat(vsAvg.suggested) >= 0 ? 'text-rose-900' : 'text-red-900'}`}>
+                  {parseFloat(vsAvg.suggested) >= 0 ? '+' : ''}{vsAvg.suggested}%
+                </p>
+              </motion.div>
+            </motion.div>
 
-      <motion.div
-        initial={{ opacity: 0, height: 0 }}
-        animate={{ opacity: 1, height: 'auto' }}
-        exit={{ opacity: 0, height: 0 }}
-        className="p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6"
-      >
-        {/* Radar comparativo */}
-        <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-4 lg:p-5 border border-rose-200/40 shadow-lg">
-          <h4 className="text-xs lg:text-sm font-black text-rose-900 mb-3 lg:mb-4 flex items-center gap-2">
-            <Target className="w-4 h-4 lg:w-5 lg:h-5 text-rose-500" />
-            Performance vs Promedio Zona
-          </h4>
-          <ResponsiveContainer width="100%" height={220}>
-            <RadarChart data={radarData}>
-              <defs>
-                <linearGradient id="radarCurrent" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#fb7185" stopOpacity={0.8} />
-                  <stop offset="100%" stopColor="#fda4af" stopOpacity={0.3} />
-                </linearGradient>
-                <linearGradient id="radarZone" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#fecdd3" stopOpacity={0.5} />
-                  <stop offset="100%" stopColor="#ffe4e6" stopOpacity={0.2} />
-                </linearGradient>
-              </defs>
-              <PolarGrid stroke="#fecdd3" strokeWidth={1.5} />
-              <PolarAngleAxis dataKey="metric" tick={{ fill: '#be123c', fontSize: 10, fontWeight: 600 }} />
-              <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fill: '#fb7185', fontSize: 9 }} />
-              <Radar name="Tu Tienda" dataKey="tuTienda" stroke="#fb7185" strokeWidth={3} fill="url(#radarCurrent)" />
-              <Radar name="Promedio Zona" dataKey="promedio" stroke="#fecdd3" strokeWidth={2} fill="url(#radarZone)" strokeDasharray="5 5" />
-              <Legend wrapperStyle={{ fontSize: 11, fontWeight: 600 }} />
-            </RadarChart>
-          </ResponsiveContainer>
-          <p className="text-[10px] text-center text-rose-600 mt-2">Posición #{position} de {totalStores} en {zone}</p>
-        </div>
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6"
+            >
+              {/* Radar comparativo */}
+              <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-4 lg:p-5 border border-rose-200/40 shadow-lg">
+                <h4 className="text-xs lg:text-sm font-black text-rose-900 mb-3 lg:mb-4 flex items-center gap-2">
+                  <Target className="w-4 h-4 lg:w-5 lg:h-5 text-rose-500" />
+                  Performance vs Promedio Zona
+                </h4>
+                <ResponsiveContainer width="100%" height={220}>
+                  <RadarChart data={radarData}>
+                    <defs>
+                      <linearGradient id="radarCurrent" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#fb7185" stopOpacity={0.8} />
+                        <stop offset="100%" stopColor="#fda4af" stopOpacity={0.3} />
+                      </linearGradient>
+                      <linearGradient id="radarZone" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#fecdd3" stopOpacity={0.5} />
+                        <stop offset="100%" stopColor="#ffe4e6" stopOpacity={0.2} />
+                      </linearGradient>
+                    </defs>
+                    <PolarGrid stroke="#fecdd3" strokeWidth={1.5} />
+                    <PolarAngleAxis dataKey="metric" tick={{ fill: '#be123c', fontSize: 10, fontWeight: 600 }} />
+                    <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fill: '#fb7185', fontSize: 9 }} />
+                    <Radar name="Tu Tienda" dataKey="tuTienda" stroke="#fb7185" strokeWidth={3} fill="url(#radarCurrent)" />
+                    <Radar name="Promedio Zona" dataKey="promedio" stroke="#fecdd3" strokeWidth={2} fill="url(#radarZone)" strokeDasharray="5 5" />
+                    <Legend wrapperStyle={{ fontSize: 11, fontWeight: 600 }} />
+                  </RadarChart>
+                </ResponsiveContainer>
+                <p className="text-[10px] text-center text-rose-600 mt-2">Posición #{position} de {totalStores} en {zone}</p>
+              </div>
 
-        {/* Top 3 Tiendas */}
-        <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-4 lg:p-5 border border-rose-200/40 shadow-lg">
-          <h4 className="text-xs lg:text-sm font-black text-rose-900 mb-3 lg:mb-4 flex items-center gap-2">
-            <Award className="w-4 h-4 lg:w-5 lg:h-5 text-amber-500" />
-            Top 3 Tiendas de {zone}
-          </h4>
-          <div className="space-y-3">
-            {top3.map((store, idx) => {
-              const isCurrentStore = store.storeCode === storeId;
-              const medals = ['🥇', '🥈', '🥉'];
-              return (
-                <motion.div
-                  key={store.storeCode}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: idx * 0.1 }}
-                  whileHover={{ scale: 1.03, x: 5 }}
-                  className={`flex items-center justify-between p-3 rounded-xl border-2 transition-all ${
-                    isCurrentStore 
-                      ? 'bg-gradient-to-r from-rose-100 to-pink-100 border-rose-400 shadow-lg' 
-                      : 'bg-white/50 border-slate-200'
-                  }`}
-                >
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <span className="text-2xl flex-shrink-0">{medals[idx]}</span>
-                    <div className="min-w-0 flex-1">
-                      <p className={`text-sm font-bold truncate ${isCurrentStore ? 'text-rose-900' : 'text-slate-800'}`}>
-                        {store.storeName}
-                      </p>
-                      <p className="text-xs text-slate-600">{formatCurrency(store.sales)}</p>
-                    </div>
-                  </div>
-                  {isCurrentStore && (
-                    <motion.div 
-                      animate={{ scale: [1, 1.2, 1] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                      className="flex-shrink-0 w-6 h-6 bg-rose-500 rounded-full flex items-center justify-center"
-                    >
-                      <span className="text-white text-xs font-bold">✓</span>
-                    </motion.div>
-                  )}
-                </motion.div>
-              );
-            })}
-          </div>
-          <p className="text-[10px] text-slate-500 mt-3 text-center">
-            {isTop3 
-              ? '🎉 ¡En el podio de la zona!' 
-              : `A ${formatCurrency(top3[2].sales - currentStoreData.sales)} de entrar al Top 3`}
-          </p>
-        </div>
-      </motion.div>
+              {/* Top 3 Tiendas */}
+              <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-4 lg:p-5 border border-rose-200/40 shadow-lg">
+                <h4 className="text-xs lg:text-sm font-black text-rose-900 mb-3 lg:mb-4 flex items-center gap-2">
+                  <Award className="w-4 h-4 lg:w-5 lg:h-5 text-amber-500" />
+                  Top 3 Tiendas de {zone}
+                </h4>
+                <div className="space-y-3">
+                  {top3.map((store, idx) => {
+                    const isCurrentStore = store.storeCode === storeId;
+                    const medals = ['🥇', '🥈', '🥉'];
+                    return (
+                      <motion.div
+                        key={store.storeCode}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: idx * 0.1 }}
+                        whileHover={{ scale: 1.03, x: 5 }}
+                        className={`flex items-center justify-between p-3 rounded-xl border-2 transition-all ${
+                          isCurrentStore 
+                            ? 'bg-gradient-to-r from-rose-100 to-pink-100 border-rose-400 shadow-lg' 
+                            : 'bg-white/50 border-slate-200'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          <span className="text-2xl flex-shrink-0">{medals[idx]}</span>
+                          <div className="min-w-0 flex-1">
+                            <p className={`text-sm font-bold truncate ${isCurrentStore ? 'text-rose-900' : 'text-slate-800'}`}>
+                              {store.storeName}
+                            </p>
+                            <p className="text-xs text-slate-600">{formatCurrency(store.sales)}</p>
+                          </div>
+                        </div>
+                        {isCurrentStore && (
+                          <motion.div 
+                            animate={{ scale: [1, 1.2, 1] }}
+                            transition={{ duration: 2, repeat: Infinity }}
+                            className="flex-shrink-0 w-6 h-6 bg-rose-500 rounded-full flex items-center justify-center"
+                          >
+                            <span className="text-white text-xs font-bold">✓</span>
+                          </motion.div>
+                        )}
+                      </motion.div>
+                    );
+                  })}
+                </div>
+                <p className="text-[10px] text-slate-500 mt-3 text-center">
+                  {isTop3 
+                    ? '🎉 ¡En el podio de la zona!' 
+                    : `A ${formatCurrency(top3[2].sales - currentStoreData.sales)} de entrar al Top 3`}
+                </p>
+              </div>
+            </motion.div>
 
-      {/* Ranking completo de tiendas */}
-      <motion.div
-        initial={{ opacity: 0, height: 0 }}
-        animate={{ opacity: 1, height: 'auto' }}
-        exit={{ opacity: 0, height: 0 }}
-        className="px-4 lg:px-6 pb-4 lg:pb-6"
-      >
-        <div className="bg-gradient-to-br from-rose-50/70 to-pink-50/70 rounded-2xl p-4 lg:p-5 border-2 border-rose-200/40 shadow-lg">
-          <h4 className="text-xs lg:text-sm font-black text-slate-900 mb-3 lg:mb-4">
-            📊 Ranking Completo - Ventas del Mes
-          </h4>
-          <ResponsiveContainer width="100%" height={Math.max(200, allStores.length * 35)}>
-            <BarChart data={allStores} layout="vertical">
-              <defs>
-                <linearGradient id="barCurrent" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stopColor="#fb7185" stopOpacity={0.9} />
-                  <stop offset="100%" stopColor="#fda4af" stopOpacity={0.6} />
-                </linearGradient>
-                <linearGradient id="barOther" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stopColor="#fecdd3" stopOpacity={0.7} />
-                  <stop offset="100%" stopColor="#ffe4e6" stopOpacity={0.4} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
-              <XAxis type="number" fontSize={9} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} />
-              <YAxis type="category" dataKey="storeName" fontSize={10} fontWeight={600} width={100} />
-              <Tooltip 
-                contentStyle={{ borderRadius: 12, border: '2px solid #fb7185', background: '#fff', fontSize: 11 }}
-                formatter={(v) => [formatCurrency(v), 'Ventas']}
-              />
-              <Bar dataKey="sales" radius={[0, 8, 8, 0]}>
-                {allStores.map((store, index) => (
-                  <Cell 
-                    key={`cell-${index}`} 
-                    fill={store.storeCode === storeId ? 'url(#barCurrent)' : 'url(#barOther)'} 
-                  />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </motion.div>
+            {/* Ranking completo de tiendas */}
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="px-4 lg:px-6 pb-4 lg:pb-6"
+            >
+              <div className="bg-gradient-to-br from-rose-50/70 to-pink-50/70 rounded-2xl p-4 lg:p-5 border-2 border-rose-200/40 shadow-lg">
+                <h4 className="text-xs lg:text-sm font-black text-slate-900 mb-3 lg:mb-4">
+                  📊 Ranking Completo - Ventas del Mes
+                </h4>
+                <ResponsiveContainer width="100%" height={Math.max(200, allStores.length * 35)}>
+                  <BarChart data={allStores} layout="vertical">
+                    <defs>
+                      <linearGradient id="barCurrent" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stopColor="#fb7185" stopOpacity={0.9} />
+                        <stop offset="100%" stopColor="#fda4af" stopOpacity={0.6} />
+                      </linearGradient>
+                      <linearGradient id="barOther" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stopColor="#fecdd3" stopOpacity={0.7} />
+                        <stop offset="100%" stopColor="#ffe4e6" stopOpacity={0.4} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                    <XAxis type="number" fontSize={9} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} />
+                    <YAxis type="category" dataKey="storeName" fontSize={10} fontWeight={600} width={100} />
+                    <Tooltip 
+                      contentStyle={{ borderRadius: 12, border: '2px solid #fb7185', background: '#fff', fontSize: 11 }}
+                      formatter={(v) => [formatCurrency(v), 'Ventas']}
+                    />
+                    <Bar dataKey="sales" radius={[0, 8, 8, 0]}>
+                      {allStores.map((store, index) => (
+                        <Cell 
+                          key={`cell-${index}`} 
+                          fill={store.storeCode === storeId ? 'url(#barCurrent)' : 'url(#barOther)'} 
+                        />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </motion.div>
 
-      {/* Insights zonales */}
-      <motion.div
-        initial={{ opacity: 0, height: 0 }}
-        animate={{ opacity: 1, height: 'auto' }}
-        exit={{ opacity: 0, height: 0 }}
-        className="px-4 lg:px-6 pb-4 lg:pb-6"
-      >
-        <div className={`rounded-2xl p-4 border-2 ${
-          isTop3 
-            ? 'bg-gradient-to-r from-rose-50 to-pink-50 border-rose-300' 
-            : position <= totalStores / 2
-            ? 'bg-gradient-to-r from-orange-50 to-rose-50 border-orange-300'
-            : 'bg-gradient-to-r from-red-50 to-rose-50 border-red-300'
-        }`}>
-          <p className="text-xs font-bold mb-2 flex items-center gap-2">
-            {isTop3 ? '🎯' : position <= totalStores / 2 ? '⚠️' : '🚨'}
-            <span className={isTop3 ? 'text-rose-900' : position <= totalStores / 2 ? 'text-orange-900' : 'text-red-900'}>
-              Análisis de Posición
-            </span>
-          </p>
-          <p className={`text-xs leading-relaxed ${isTop3 ? 'text-rose-800' : position <= totalStores / 2 ? 'text-orange-800' : 'text-red-800'}`}>
-            {isTop3 
-              ? `Tu tienda está en el Top 3 de ${zone} con ${formatCurrency(currentStoreData.sales)}. Mantén el enfoque en ticket promedio (${parseFloat(vsAvg.avgTicket) >= 0 ? 'por encima' : 'por debajo'} del promedio en ${Math.abs(vsAvg.avgTicket)}%) y sugeridos para consolidar liderazgo.`
-              : position <= totalStores / 2
-              ? `Posición media-alta (#${position}/${totalStores}). Para subir al Top 3, necesitas ${formatCurrency(top3[2].sales - currentStoreData.sales)} más en ventas. Enfoca en ${parseFloat(vsAvg.avgTicket) < 0 ? 'mejorar ticket promedio' : 'aumentar tráfico'} para cerrar brecha.`
-              : `Posición ${position}/${totalStores} requiere acción urgente. Estás ${formatCurrency(Math.abs(currentStoreData.sales - zoneAvg.sales))} ${parseFloat(vsAvg.sales) >= 0 ? 'por encima' : 'por debajo'} del promedio. Prioriza ${parseFloat(vsAvg.transactions) < 0 ? 'recuperar tráfico con promociones' : 'mejorar conversión y ticket'}.`}
-          </p>
-        </div>
-      </motion.div>
+            {/* Insights zonales */}
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="px-4 lg:px-6 pb-4 lg:pb-6"
+            >
+              <div className={`rounded-2xl p-4 border-2 ${
+                isTop3 
+                  ? 'bg-gradient-to-r from-rose-50 to-pink-50 border-rose-300' 
+                  : position <= totalStores / 2
+                  ? 'bg-gradient-to-r from-orange-50 to-rose-50 border-orange-300'
+                  : 'bg-gradient-to-r from-red-50 to-rose-50 border-red-300'
+              }`}>
+                <p className="text-xs font-bold mb-2 flex items-center gap-2">
+                  {isTop3 ? '🎯' : position <= totalStores / 2 ? '⚠️' : '🚨'}
+                  <span className={isTop3 ? 'text-rose-900' : position <= totalStores / 2 ? 'text-orange-900' : 'text-red-900'}>
+                    Análisis de Posición
+                  </span>
+                </p>
+                <p className={`text-xs leading-relaxed ${isTop3 ? 'text-rose-800' : position <= totalStores / 2 ? 'text-orange-800' : 'text-red-800'}`}>
+                  {isTop3 
+                    ? `Tu tienda está en el Top 3 de ${zone} con ${formatCurrency(currentStoreData.sales)}. Mantén el enfoque en ticket promedio (${parseFloat(vsAvg.avgTicket) >= 0 ? 'por encima' : 'por debajo'} del promedio en ${Math.abs(vsAvg.avgTicket)}%) y sugeridos para consolidar liderazgo.`
+                    : position <= totalStores / 2
+                    ? `Posición media-alta (#${position}/${totalStores}). Para subir al Top 3, necesitas ${formatCurrency(top3[2].sales - currentStoreData.sales)} más en ventas. Enfoca en ${parseFloat(vsAvg.avgTicket) < 0 ? 'mejorar ticket promedio' : 'aumentar tráfico'} para cerrar brecha.`
+                    : `Posición ${position}/${totalStores} requiere acción urgente. Estás ${formatCurrency(Math.abs(currentStoreData.sales - zoneAvg.sales))} ${parseFloat(vsAvg.sales) >= 0 ? 'por encima' : 'por debajo'} del promedio. Prioriza ${parseFloat(vsAvg.transactions) < 0 ? 'recuperar tráfico con promociones' : 'mejorar conversión y ticket'}.`}
+                </p>
+              </div>
+            </motion.div>
           </>
         )}
       </AnimatePresence>
