@@ -644,6 +644,45 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                 </p>
                 </div>
 
+                {/* Barra de Proyección Mensual */}
+                <div className="space-y-2 mb-4">
+                  <div className="flex items-center justify-between text-xs lg:text-sm">
+                    <span className="text-white/70">Proyección Cierre Mes</span>
+                    <span className="font-bold lg:font-black text-white lg:text-lg">{budgetData.monthProjectionCompliance.toFixed(0)}%</span>
+                  </div>
+                  <div className="relative h-3 lg:h-4 bg-white/20 rounded-full overflow-hidden cursor-pointer" onClick={() => {
+                    setSelectedMetric('month-projection');
+                    setIsModalOpen(true);
+                  }}>
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${Math.min(budgetData.monthProjectionCompliance, 100)}%` }}
+                      transition={{ duration: 1.5, delay: 0.5 }}
+                      className={`h-full rounded-full relative ${
+                        budgetData.monthProjectionCompliance >= 100 
+                          ? 'bg-gradient-to-r from-emerald-300/80 to-green-200/80' 
+                          : budgetData.monthProjectionCompliance >= 90
+                          ? 'bg-gradient-to-r from-amber-200/80 to-yellow-100/80'
+                          : 'bg-gradient-to-r from-orange-200/80 to-red-200/80'
+                      }`}
+                    >
+                      <div 
+                        className="absolute inset-0"
+                        style={{
+                          background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.8) 50%, transparent 100%)',
+                          width: '40%',
+                          animation: 'slideRight 2.5s linear infinite'
+                        }}
+                      />
+                    </motion.div>
+                  </div>
+                  <p className="text-[10px] lg:text-xs text-white/50 lg:text-white/60">
+                    {budgetData.monthProjectionCompliance >= 100 
+                      ? `🎉 Proyectas superar en ${formatCurrency(budgetData.monthProjection - budgetData.monthlyBudget)}`
+                      : `📊 Falta ${formatCurrency(budgetData.monthlyBudget - budgetData.monthProjection)} para meta mensual`}
+                  </p>
+                </div>
+
                 {needsRecovery && (
                 <div className="bg-white/10 rounded-lg p-3 mb-3">
                   <p className="text-xs text-white/70 flex items-center gap-1">
