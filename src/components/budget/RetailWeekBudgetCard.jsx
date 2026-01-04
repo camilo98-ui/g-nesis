@@ -438,7 +438,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
           </div>
         </CardHeader>
 
-        <CardContent className="p-4 md:p-8 space-y-4">
+        <CardContent className="p-4 md:p-6 space-y-4">
           {/* Sin Presupuesto - Mensaje */}
           {budgetData?.noBudget ? (
             <motion.div
@@ -487,7 +487,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                     key={budgetData.adjustedDailyBudget}
                     initial={{ scale: 1.2, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    className="text-3xl md:text-4xl font-black text-white leading-none mb-2"
+                    className="text-2xl md:text-3xl font-black text-white leading-none mb-2"
                   >
                     {formatCurrency(budgetData.adjustedDailyBudget)}
                   </motion.p>
@@ -542,7 +542,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                 
                 <div className="text-left">
                   <p className="text-sm text-white/90 mb-3 font-semibold">Promedio Histórico</p>
-                  <p className="text-3xl md:text-4xl font-black text-white leading-none mb-2">
+                  <p className="text-2xl md:text-3xl font-black text-white leading-none mb-2">
                     {formatCurrency(budgetData.historicalAvgToday)}
                   </p>
                   <p className="text-xs text-white/70">{format(new Date(), 'EEEE', { locale: es })}s anteriores</p>
