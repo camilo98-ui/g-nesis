@@ -480,7 +480,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                 )}
               </div>
 
-              <div className="grid grid-cols-2 gap-6 mb-4">
+              <div className="space-y-6 mb-4">
                 <div>
                   <p className="text-xs text-white/60 mb-2">Meta del Día (115%)</p>
                   <motion.p
