@@ -1363,7 +1363,7 @@ export default function Home() {
                   >
                   {/* Icon centered */}
                   <div className="flex flex-col items-center justify-center text-center relative z-10">
-                    <div className={`w-12 h-12 ${item.iconBg} backdrop-blur-sm rounded-xl flex items-center justify-center mb-2`}>
+                    <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mb-2 shadow-sm">
                       {item.icon ? (
                         <Icon className={`w-6 h-6 ${item.iconColor}`} />
                       ) : (
@@ -1373,7 +1373,7 @@ export default function Home() {
                     <h3 className={`font-bold ${item.textColor} text-sm`}>
                       {item.specialAction === 'backup' && backupLoading ? 'Guardando...' : item.name}
                     </h3>
-                    <p className="text-[10px] text-gray-500 mt-0.5">{item.description}</p>
+                    <p className="text-[10px] text-gray-600 mt-0.5">{item.description}</p>
                   </div>
                   </div> :
 
