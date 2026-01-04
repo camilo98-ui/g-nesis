@@ -353,7 +353,7 @@ export default function ZonePerformanceComparison({ storeId, formatCurrency, cur
             >
               <div className="bg-gradient-to-br from-rose-50/70 to-pink-50/70 rounded-2xl p-4 lg:p-5 border-2 border-rose-200/40 shadow-lg">
                 <h4 className="text-xs lg:text-sm font-black text-slate-900 mb-3 lg:mb-4">
-                  📊 Ranking Completo - Ventas del Mes
+                  📊 Ranking Completo - Período Seleccionado
                 </h4>
                 <ResponsiveContainer width="100%" height={Math.max(200, allStores.length * 35)}>
                   <BarChart data={allStores} layout="vertical">
