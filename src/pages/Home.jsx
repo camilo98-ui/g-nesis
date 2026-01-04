@@ -736,7 +736,7 @@ export default function Home() {
                 <Button
                   onClick={handleLogin}
                   disabled={(selectedRole !== 'gerente' && !pendingStore) || !selectedRole || isSubmitting}
-                  className="w-full h-14 bg-gradient-to-r from-rose-400/90 via-pink-400/90 to-purple-400/90 hover:from-rose-500 hover:to-purple-500 text-white rounded-2xl font-bold text-base disabled:opacity-40 mt-6 shadow-2xl shadow-rose-300/40"
+                  className="w-full h-14 bg-gradient-to-r from-rose-400 to-pink-400 hover:from-rose-500 hover:to-pink-500 text-white rounded-2xl font-bold text-base disabled:opacity-40 mt-6 shadow-2xl shadow-rose-300/40"
                 >
                 {isSubmitting ? (
                   <span className="flex items-center justify-center gap-2">
@@ -946,7 +946,7 @@ export default function Home() {
                   <Button
                     onClick={handleLogin}
                     disabled={(selectedRole !== 'gerente' && !pendingStore) || !selectedRole || isSubmitting}
-                    className="w-full bg-gradient-to-r from-rose-400 to-purple-400 hover:from-rose-500 hover:to-purple-500 text-white py-4 rounded-xl font-black text-base shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                    className="w-full bg-gradient-to-r from-rose-400 to-pink-400 hover:from-rose-500 hover:to-pink-500 text-white py-4 rounded-xl font-black text-base shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
                   >
                   {isSubmitting ? (
                     <span className="flex items-center justify-center gap-2">
