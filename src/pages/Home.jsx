@@ -593,12 +593,12 @@ export default function Home() {
         {/* Mobile/Tablet View */}
         <div className="lg:hidden min-h-screen flex flex-col justify-center relative z-10">
           <div className="flex-1 flex flex-col justify-center px-4 py-8 max-h-screen overflow-y-auto">
-            <div className="max-w-md mx-auto w-full bg-white/5 backdrop-blur-md rounded-3xl shadow-2xl border border-white/20 p-6">
+            <div className="max-w-md mx-auto w-full bg-white/0 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/10 p-6">
               <div className="mb-8 text-center">
                 <motion.img 
                   src={LOGO_URL} 
                   alt="Popsy" 
-                  className="h-48 object-contain mx-auto mb-6"
+                  className="h-32 object-contain mx-auto mb-6"
                   initial={{ opacity: 0, scale: 0.8, y: -20 }}
                   animate={{ 
                     opacity: 1, 
@@ -631,8 +631,8 @@ export default function Home() {
                       }}
                       className={`relative w-full min-h-[70px] p-4 rounded-2xl border-2 transition-all duration-300 text-left ${
                        isSelected
-                         ? 'border-rose-300/70 bg-gradient-to-r from-rose-100/40 via-pink-100/30 to-purple-100/40 shadow-xl shadow-rose-200/40 scale-[1.02]'
-                         : 'border-slate-200/25 bg-white/15 backdrop-blur-md active:border-rose-200 hover:scale-[1.01] hover:shadow-lg'
+                         ? 'border-rose-300/70 bg-gradient-to-r from-rose-100/30 via-pink-100/20 to-purple-100/30 shadow-xl shadow-rose-200/40 scale-[1.02]'
+                         : 'border-slate-200/20 bg-white/8 backdrop-blur-md active:border-rose-200 hover:scale-[1.01] hover:shadow-lg'
                       }`}
                     >
                       {isLastUsed && (
@@ -820,7 +820,7 @@ export default function Home() {
               <motion.div 
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl border-2 border-white/20 p-7 xl:p-8 space-y-5"
+                className="bg-white/0 backdrop-blur-md rounded-3xl shadow-2xl border-2 border-white/15 p-7 xl:p-8 space-y-5"
                 style={{ boxShadow: '0 25px 80px -15px rgba(217, 70, 239, 0.3), 0 10px 30px -10px rgba(0, 0, 0, 0.15)' }}>
                 
                 <div className="text-center">
@@ -844,8 +844,8 @@ export default function Home() {
                         }}
                         className={`relative w-full p-4 rounded-2xl border-2 transition-all duration-300 text-left flex items-center gap-3 ${
                           isSelected
-                            ? 'border-rose-300/70 bg-gradient-to-r from-rose-100/40 to-purple-100/40 shadow-xl shadow-rose-200/40 scale-[1.01]'
-                            : 'border-slate-200/25 bg-white/15 backdrop-blur-md hover:border-rose-200 hover:shadow-lg hover:scale-[1.01]'
+                            ? 'border-rose-300/70 bg-gradient-to-r from-rose-100/30 to-purple-100/30 shadow-xl shadow-rose-200/40 scale-[1.01]'
+                            : 'border-slate-200/20 bg-white/8 backdrop-blur-md hover:border-rose-200 hover:shadow-lg hover:scale-[1.01]'
                         }`}
                       >
                         {isLastUsed && (
