@@ -465,46 +465,49 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
           <motion.div
             whileHover={{ scale: 1.02, y: -2 }}
             onClick={() => setIsExpanded(!isExpanded)}
-            className="w-full bg-gradient-to-br from-rose-400/80 to-pink-400/80 rounded-2xl shadow-md p-6 border border-rose-300/40 relative overflow-hidden cursor-pointer"
+            className="w-full bg-gradient-to-br from-rose-400/80 to-pink-400/80 rounded-2xl shadow-md p-6 md:p-8 border border-rose-300/40 relative overflow-hidden cursor-pointer"
           >
             <div className="relative z-10">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-2">
                   <Target className="w-6 h-6 text-white" />
-                  <p className="text-sm text-white/80 font-medium">Meta del Día</p>
+                  <p className="text-sm text-white/90 font-semibold">Meta del Día</p>
                 </div>
                 {needsRecovery && (
-                  <div className="px-2 py-1 bg-amber-100/60 rounded-full">
+                  <div className="px-3 py-1 bg-amber-100/70 rounded-full">
                     <p className="text-[10px] font-black text-amber-700">AJUSTADO</p>
                   </div>
                 )}
               </div>
 
-              <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="space-y-6 mb-6">
                 <div className="text-center">
-                  <p className="text-xs text-white/70 mb-2 font-semibold">Meta del Día (105%)</p>
+                  <p className="text-xs text-white/80 mb-3 font-semibold">Meta del Día (105%)</p>
                   <motion.p
                     key={budgetData.adjustedDailyBudget}
                     initial={{ scale: 1.2, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    className="text-3xl md:text-4xl font-black text-white leading-tight"
+                    className="text-4xl md:text-5xl font-black text-white leading-tight mb-2"
                   >
                     {formatCurrency(budgetData.adjustedDailyBudget)}
                   </motion.p>
-                  <p className="text-[10px] text-white/60 mt-1">Base: {formatCurrency(budgetData.adjustedDailyBudget / 1.05)}</p>
+                  <p className="text-xs text-white/70">Base: {formatCurrency(budgetData.adjustedDailyBudget / 1.05)}</p>
                 </div>
-                <div className="text-center border-l border-white/30">
-                  <p className="text-xs text-white/70 mb-2 font-semibold">Promedio Histórico</p>
-                  <p className="text-3xl md:text-4xl font-black text-white leading-tight">
+                
+                <div className="h-px bg-white/30" />
+                
+                <div className="text-center">
+                  <p className="text-xs text-white/80 mb-3 font-semibold">Promedio Histórico - {format(new Date(), 'EEEE', { locale: es })}</p>
+                  <p className="text-4xl md:text-5xl font-black text-white leading-tight mb-2">
                     {formatCurrency(budgetData.historicalAvgToday)}
                   </p>
-                  <p className="text-[10px] text-white/60 mt-1">{format(new Date(), 'EEEE', { locale: es })}s anteriores</p>
+                  <p className="text-xs text-white/70">{format(new Date(), 'EEEE', { locale: es })}s anteriores</p>
                 </div>
               </div>
               
               {/* Sparkline combinado */}
               {budgetData.last7DaysSales?.length > 0 && (
-                <div className="mb-4 h-8 grid grid-cols-2 gap-4">
+                <div className="mb-6 h-10 grid grid-cols-2 gap-6">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={budgetData.last7DaysSales} className="animated-line">
                       <defs>
