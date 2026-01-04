@@ -496,19 +496,23 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                   {budgetData.last7DaysSales?.length > 0 && (
                     <div className="mt-2 h-8">
                       <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={budgetData.last7DaysSales}>
+                        <LineChart data={budgetData.last7DaysSales} className="animated-line">
                           <defs>
                             <filter id="glow1">
-                              <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                              <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
                               <feMerge>
                                 <feMergeNode in="coloredBlur"/>
                                 <feMergeNode in="SourceGraphic"/>
                               </feMerge>
                             </filter>
                             <linearGradient id="lineGradient1" x1="0" y1="0" x2="1" y2="0">
-                              <stop offset="0%" stopColor="#fff" stopOpacity={0.4}/>
+                              <stop offset="0%" stopColor="#fff" stopOpacity={0.5}>
+                                <animate attributeName="stop-opacity" values="0.5;1;0.5" dur="3s" repeatCount="indefinite"/>
+                              </stop>
                               <stop offset="50%" stopColor="#fff" stopOpacity={1}/>
-                              <stop offset="100%" stopColor="#fff" stopOpacity={0.4}/>
+                              <stop offset="100%" stopColor="#fff" stopOpacity={0.5}>
+                                <animate attributeName="stop-opacity" values="0.5;1;0.5" dur="3s" repeatCount="indefinite"/>
+                              </stop>
                             </linearGradient>
                           </defs>
                           <Line 
@@ -537,19 +541,23 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                   {budgetData.last7DaysSales?.length > 0 && (
                     <div className="mt-2 h-8">
                       <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={budgetData.last7DaysSales}>
+                        <LineChart data={budgetData.last7DaysSales} className="animated-line">
                           <defs>
                             <filter id="glow2">
-                              <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                              <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
                               <feMerge>
                                 <feMergeNode in="coloredBlur"/>
                                 <feMergeNode in="SourceGraphic"/>
                               </feMerge>
                             </filter>
                             <linearGradient id="lineGradient2" x1="0" y1="0" x2="1" y2="0">
-                              <stop offset="0%" stopColor="#fff" stopOpacity={0.4}/>
+                              <stop offset="0%" stopColor="#fff" stopOpacity={0.5}>
+                                <animate attributeName="stop-opacity" values="0.5;1;0.5" dur="3s" repeatCount="indefinite"/>
+                              </stop>
                               <stop offset="50%" stopColor="#fff" stopOpacity={1}/>
-                              <stop offset="100%" stopColor="#fff" stopOpacity={0.4}/>
+                              <stop offset="100%" stopColor="#fff" stopOpacity={0.5}>
+                                <animate attributeName="stop-opacity" values="0.5;1;0.5" dur="3s" repeatCount="indefinite"/>
+                              </stop>
                             </linearGradient>
                           </defs>
                           <Line 
