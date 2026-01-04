@@ -777,7 +777,7 @@ export default function Home() {
                     animate={{ opacity: 1, y: 0 }}
                     className="text-4xl xl:text-5xl font-black leading-tight mb-3"
                   >
-                    <span className="text-slate-900">Bienvenido a</span><br />
+                    <span className="text-slate-600">Bienvenido a</span><br />
                     <span className="bg-gradient-to-r from-rose-300 via-pink-200 to-purple-300 bg-clip-text text-transparent">
                       Popsy Management
                     </span>
