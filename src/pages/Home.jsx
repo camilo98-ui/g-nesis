@@ -1275,7 +1275,7 @@ export default function Home() {
               <div key={item.name}>
 
                   {isLocked ?
-                  <div className={`${item.bgColor} rounded-2xl p-4 h-full shadow-md transition-all duration-300 group relative overflow-hidden border border-white/50 backdrop-blur-sm opacity-60 cursor-not-allowed`}>
+                  <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 h-full shadow-lg transition-all duration-300 group relative overflow-hidden border border-white/20 opacity-60 cursor-not-allowed"
 
                       {/* Lock overlay */}
                       <div className="absolute inset-0 bg-gray-900/10 rounded-2xl flex items-center justify-center z-20">
@@ -1294,7 +1294,7 @@ export default function Home() {
                       </div> :
                 item.isSpecialAction && item.specialAction === 'comparable' ?
                 <Link to={createPageUrl('ExecutiveDashboard') + '?comparison=true'}>
-                  <div className={`${item.bgColor} rounded-2xl p-4 h-full shadow-md hover:shadow-xl transition-all duration-300 group relative overflow-hidden border border-white/50 backdrop-blur-sm cursor-pointer`}>
+                  <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 h-full shadow-lg hover:shadow-2xl hover:bg-white/15 transition-all duration-300 group relative overflow-hidden border border-white/20 cursor-pointer"
                     
                     {/* Icon centered */}
                     <div className="flex flex-col items-center justify-center text-center relative z-10">
@@ -1322,7 +1322,7 @@ export default function Home() {
                       try {
                         const response = await base44.functions.invoke('backupToGoogleDrive', {});
                         console.log('✅ Respuesta completa:', response);
-                        
+
                         if (response.data.success) {
                           // Descargar backup localmente
                           const backupBlob = new Blob([JSON.stringify(response.data.full_backup, null, 2)], { type: 'application/json' });
@@ -1334,7 +1334,7 @@ export default function Home() {
                           a.click();
                           window.URL.revokeObjectURL(url);
                           a.remove();
-                          
+
                           toast.success(
                             `✅ ${response.data.message}\n📥 Descargado localmente\n📧 Revisa tu email: ${response.data.email_sent ? 'Enviado ✓' : 'Error al enviar'}`,
                             { duration: 12000 }
@@ -1359,7 +1359,7 @@ export default function Home() {
                       setShowStoreSales(true);
                     }
                   }}
-                  className={`${item.bgColor} rounded-2xl p-4 h-full shadow-md hover:shadow-xl transition-all duration-300 group relative overflow-hidden border border-white/50 backdrop-blur-sm cursor-pointer`}
+                  className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 h-full shadow-lg hover:shadow-2xl hover:bg-white/15 transition-all duration-300 group relative overflow-hidden border border-white/20 cursor-pointer"
                   >
                   {/* Icon centered */}
                   <div className="flex flex-col items-center justify-center text-center relative z-10">
@@ -1378,7 +1378,7 @@ export default function Home() {
                   </div> :
 
                 <Link to={createPageUrl(item.page)}>
-                  <div className={`${item.bgColor} rounded-2xl p-4 h-full shadow-md hover:shadow-xl transition-all duration-300 group relative overflow-hidden border border-white/50 backdrop-blur-sm`}>
+                  <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 h-full shadow-lg hover:shadow-2xl hover:bg-white/15 transition-all duration-300 group relative overflow-hidden border border-white/20"
                     {/* Icon centered */}
                     <div className="flex flex-col items-center justify-center text-center relative z-10">
                       <div className={`w-12 h-12 ${item.iconBg} backdrop-blur-sm rounded-xl flex items-center justify-center mb-2`}>
