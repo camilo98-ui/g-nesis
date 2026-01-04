@@ -8,7 +8,6 @@ export default function ChartInsight({ data, metric, formatCurrency, comparisonD
       return {
         keyData: 'Sin datos disponibles',
         behavior: 'No hay información para analizar en el período seleccionado.',
-        action: 'Verificar que existan registros de ventas para este período.',
         status: 'critical'
       };
     }
@@ -22,94 +21,110 @@ export default function ChartInsight({ data, metric, formatCurrency, comparisonD
     if (validData.length === 0) {
       return {
         keyData: 'No hay ventas registradas',
-        behavior: 'Todos los días del período muestran cero ventas, lo que indica ausencia total de operación o falla en carga de datos.',
-        action: 'URGENTE: Validar operación de la tienda y sistema de registro de ventas.',
+        behavior: 'Todos los días del período muestran $0 en ventas.',
         status: 'critical'
       };
     }
 
-    // Calcular promedio
+    // Calcular métricas detalladas
     const values = validData.map(d => d[metric] || d.ventas || d.sales || 0);
     const average = values.reduce((a, b) => a + b, 0) / values.length;
+    const total = values.reduce((a, b) => a + b, 0);
+    const max = Math.max(...values);
+    const min = Math.min(...values);
+    const maxDay = validData.find(d => (d[metric] || d.ventas || d.sales) === max);
+    const minDay = validData.find(d => (d[metric] || d.ventas || d.sales) === min);
     
+    // Desviación estándar
+    const variance = values.reduce((sum, val) => sum + Math.pow(val - average, 2), 0) / values.length;
+    const stdDev = Math.sqrt(variance);
+    const coefficientOfVariation = (stdDev / average * 100);
+
     // Último valor
     const lastValue = values[values.length - 1];
+    const lastDay = validData[validData.length - 1];
     const lastVsPrev = values.length > 1 ? lastValue - values[values.length - 2] : 0;
     const lastVsAvg = lastValue - average;
     const lastVsAvgPct = average > 0 ? (lastVsAvg / average * 100) : 0;
 
-    // Detectar picos (valores > 115% del promedio)
-    const peaks = validData.filter((d, i) => {
-      const value = d[metric] || d.ventas || d.sales || 0;
-      return value > average * 1.15;
-    });
+    // Identificar días problemáticos (bajo rendimiento < 85% del promedio)
+    const underperformingDays = validData
+      .map((d, i) => {
+        const value = d[metric] || d.ventas || d.sales || 0;
+        const pct = average > 0 ? (value / average * 100) : 0;
+        return { ...d, value, pct, index: i };
+      })
+      .filter(d => d.pct < 85)
+      .sort((a, b) => a.value - b.value);
 
-    // Detectar caídas (valores < 70% del promedio)
-    const drops = validData.filter((d, i) => {
-      const value = d[metric] || d.ventas || d.sales || 0;
-      return value < average * 0.7 && value > 0;
-    });
+    // Identificar días top (> 115% del promedio)
+    const topDays = validData
+      .map((d, i) => {
+        const value = d[metric] || d.ventas || d.sales || 0;
+        const pct = average > 0 ? (value / average * 100) : 0;
+        return { ...d, value, pct, index: i };
+      })
+      .filter(d => d.pct > 115)
+      .sort((a, b) => b.value - a.value);
 
-    // Detectar tendencia general (últimos 3 días vs primeros 3 días)
-    const firstThree = values.slice(0, 3);
-    const lastThree = values.slice(-3);
-    const firstAvg = firstThree.reduce((a, b) => a + b, 0) / firstThree.length;
-    const lastAvg = lastThree.reduce((a, b) => a + b, 0) / lastThree.length;
+    // Detectar tendencia (últimos 40% vs primeros 40%)
+    const splitPoint = Math.floor(values.length * 0.4);
+    const firstSegment = values.slice(0, splitPoint);
+    const lastSegment = values.slice(-splitPoint);
+    const firstAvg = firstSegment.reduce((a, b) => a + b, 0) / firstSegment.length;
+    const lastAvg = lastSegment.reduce((a, b) => a + b, 0) / lastSegment.length;
     const trendPct = firstAvg > 0 ? ((lastAvg - firstAvg) / firstAvg * 100) : 0;
+    const trendDiff = lastAvg - firstAvg;
 
-    // Detectar si hay días sin datos al final (solo advertir si faltan muchos días)
-    const allDataPoints = data.length;
-    const validDataPoints = validData.length;
-    const missingDays = allDataPoints - validDataPoints;
-    const missingPct = allDataPoints > 0 ? (missingDays / allDataPoints * 100) : 0;
+    // Calcular pérdida por días bajos
+    const lostRevenue = underperformingDays.reduce((sum, d) => sum + (average - d.value), 0);
 
-    // Generar el insight
+    // Generar el insight numérico profundo
     let keyData = '';
     let behavior = '';
-    let action = '';
-    let status = 'neutral'; // neutral, positive, warning, critical
+    let status = 'neutral';
 
-    // Determinar estado y mensaje - SOLO si falta más del 50% de los datos
+    const allDataPoints = data.length;
+    const validDataPoints = validData.length;
+    const missingPct = allDataPoints > 0 ? ((allDataPoints - validDataPoints) / allDataPoints * 100) : 0;
+
     if (missingPct > 50) {
       status = 'warning';
-      keyData = `Datos parciales (${validDataPoints} de ${allDataPoints} días)`;
-      behavior = `Análisis basado en ${validDataPoints} días con datos. Se recomienda completar registros faltantes para insights más precisos.`;
-      action = 'Asegurar carga completa de datos diaria para análisis óptimo.';
+      keyData = `${validDataPoints}/${allDataPoints} días registrados (${(100-missingPct).toFixed(0)}% de cobertura)`;
+      behavior = `Promedio: ${formatCurrency(average)} • Total: ${formatCurrency(total)} • Rango: ${formatCurrency(min)} - ${formatCurrency(max)} (amplitud: ${formatCurrency(max - min)})`;
     } else if (trendPct > 10) {
       status = 'positive';
-      keyData = `Promedio del período: ${formatCurrency(average)}`;
-      behavior = `Tendencia creciente del ${trendPct.toFixed(1)}% en los últimos días. ${peaks.length > 0 ? `Detectados ${peaks.length} pico${peaks.length > 1 ? 's' : ''} por encima del promedio.` : ''}`;
-      action = 'Documentar qué estrategias generaron el crecimiento y replicarlas consistentemente.';
+      keyData = `Crecimiento: +${trendPct.toFixed(1)}% (${formatCurrency(trendDiff)} adicionales)`;
+      behavior = `Promedio período: ${formatCurrency(average)} • Total: ${formatCurrency(total)} • Último día: ${formatCurrency(lastValue)} (${lastVsAvgPct > 0 ? '+' : ''}${lastVsAvgPct.toFixed(1)}% vs promedio) • ${topDays.length} días destacados generaron ${formatCurrency(topDays.reduce((s, d) => s + d.value, 0))} (${(topDays.reduce((s, d) => s + d.value, 0) / total * 100).toFixed(0)}% del total)`;
     } else if (trendPct < -10) {
       status = 'warning';
-      keyData = `Promedio del período: ${formatCurrency(average)}`;
-      behavior = `Tendencia a la baja del ${Math.abs(trendPct).toFixed(1)}%. ${drops.length > 0 ? `${drops.length} día${drops.length > 1 ? 's' : ''} con caídas significativas detectadas.` : ''}`;
-      action = 'Analizar causas de la caída y activar plan de reactivación urgente.';
-    } else if (lastVsAvgPct > 15) {
-      status = 'positive';
-      keyData = `Promedio del período: ${formatCurrency(average)}`;
-      behavior = `El último día registró ${formatCurrency(lastValue)}, superando el promedio en ${lastVsAvgPct.toFixed(0)}%. Desempeño destacado.`;
-      action = 'Identificar factores de éxito del día para replicarlos.';
-    } else if (lastVsAvgPct < -15) {
-      status = 'warning';
-      keyData = `Promedio del período: ${formatCurrency(average)}`;
-      behavior = `El último día está ${Math.abs(lastVsAvgPct).toFixed(0)}% por debajo del promedio (${formatCurrency(lastValue)} vs ${formatCurrency(average)}).`;
-      action = 'Revisar operación del día, identificar problemas y corregir para mañana.';
+      keyData = `Caída: ${trendPct.toFixed(1)}% (${formatCurrency(Math.abs(trendDiff))} menos)`;
+      const worstDaysInfo = underperformingDays.slice(0, 3)
+        .map(d => `${d.date ? new Date(d.date).toLocaleDateString('es', {day: 'numeric', month: 'short'}) : `día ${d.index+1}`}: ${formatCurrency(d.value)} (${(d.pct).toFixed(0)}%)`)
+        .join(' • ');
+      behavior = `Promedio: ${formatCurrency(average)} vs máximo: ${formatCurrency(max)} • ${underperformingDays.length} días bajo rendimiento (< 85%) generaron pérdida estimada de ${formatCurrency(lostRevenue)} • Peores días: ${worstDaysInfo || 'N/A'} • Variabilidad: ${coefficientOfVariation.toFixed(0)}% CV`;
+    } else if (Math.abs(lastVsAvgPct) > 15) {
+      status = lastVsAvgPct > 0 ? 'positive' : 'warning';
+      keyData = `Último día: ${formatCurrency(lastValue)} (${lastVsAvgPct > 0 ? '+' : ''}${lastVsAvgPct.toFixed(1)}% vs promedio)`;
+      behavior = `Promedio período: ${formatCurrency(average)} • Total acumulado: ${formatCurrency(total)} • Día máximo: ${formatCurrency(max)}${maxDay?.date ? ` (${new Date(maxDay.date).toLocaleDateString('es', {day: 'numeric', month: 'short'})})` : ''} • Día mínimo: ${formatCurrency(min)}${minDay?.date ? ` (${new Date(minDay.date).toLocaleDateString('es', {day: 'numeric', month: 'short'})})` : ''} • Variación estándar: ±${formatCurrency(stdDev)}`;
     } else {
       status = 'neutral';
-      keyData = `Promedio del período: ${formatCurrency(average)}`;
-      behavior = `Comportamiento estable. ${peaks.length > 0 ? `${peaks.length} día${peaks.length > 1 ? 's' : ''} destacado${peaks.length > 1 ? 's' : ''}.` : 'Sin variaciones significativas.'} ${drops.length > 0 ? `${drops.length} día${drops.length > 1 ? 's' : ''} con bajo rendimiento.` : ''}`;
-      action = 'Mantener consistencia y buscar oportunidades de mejora incremental.';
+      keyData = `Promedio: ${formatCurrency(average)} • Desviación: ±${formatCurrency(stdDev)} (${coefficientOfVariation.toFixed(0)}% CV)`;
+      const performanceDetails = underperformingDays.length > 0 
+        ? `${underperformingDays.length} días débiles dejaron de generar ${formatCurrency(lostRevenue)} • ` 
+        : '';
+      behavior = `Total período: ${formatCurrency(total)} en ${validDataPoints} días • Rango: ${formatCurrency(min)} - ${formatCurrency(max)} • ${performanceDetails}Último registro: ${formatCurrency(lastValue)}${lastDay?.date ? ` (${new Date(lastDay.date).toLocaleDateString('es', {day: 'numeric', month: 'short'})})` : ''}`;
     }
 
     return {
       keyData,
       behavior,
-      action,
       status,
       average,
       lastValue,
-      trendPct
+      trendPct,
+      underperformingDays,
+      topDays
     };
   }, [data, metric, formatCurrency, comparisonData]);
 
@@ -165,11 +180,8 @@ export default function ChartInsight({ data, metric, formatCurrency, comparisonD
             <span>📊</span> Insight Operativo
           </p>
           <div className="space-y-1.5 text-xs text-gray-700 leading-relaxed">
-            <p className="font-semibold">{insight.keyData}</p>
-            <p>{insight.behavior}</p>
-            <p className="font-medium text-gray-900 pt-1 border-t border-gray-200/50">
-              ⚡ Acción: {insight.action}
-            </p>
+            <p className="font-bold text-gray-900">{insight.keyData}</p>
+            <p className="text-[11px] leading-snug">{insight.behavior}</p>
           </div>
         </div>
       </div>
