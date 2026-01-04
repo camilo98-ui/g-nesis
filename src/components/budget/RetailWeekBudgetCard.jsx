@@ -2167,80 +2167,51 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                 </DialogContent>
               </Dialog>
 
-              {/* Barra de Proyección Mensual - NUEVA */}
+              {/* Barra de Proyección Mensual - Estilo simple */}
               <motion.button
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                whileHover={{ scale: 1.02, y: -3 }}
-                whileTap={{ scale: 0.98 }}
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
                 onClick={() => {
                   setSelectedMetric('month-projection');
                   setIsModalOpen(true);
                 }}
-                className="w-full bg-gradient-to-br from-indigo-100/60 via-purple-100/50 to-pink-100/60 rounded-2xl p-4 md:p-5 border-2 border-indigo-200/50 shadow-lg hover:shadow-xl transition-all cursor-pointer"
+                className="w-full bg-white/40 rounded-xl p-3 md:p-4 border border-indigo-200/40 hover:border-indigo-400 transition-all cursor-pointer"
               >
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="w-10 h-10 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-xl flex items-center justify-center shadow-md">
-                      <TrendingUp className="w-5 h-5 text-white" />
-                    </div>
-                    <div className="text-left">
-                      <p className="text-xs text-indigo-700/70 font-semibold">Proyección Cierre Mes</p>
-                      <p className="text-lg md:text-2xl font-black text-indigo-900 leading-tight">
-                        {formatCurrency(budgetData.monthProjection)}
-                      </p>
-                    </div>
-                  </div>
-                  <div className={`px-3 py-1.5 rounded-full ${
-                    budgetData.monthProjectionCompliance >= 100 
-                      ? 'bg-emerald-100 text-emerald-700' 
-                      : budgetData.monthProjectionCompliance >= 90
-                      ? 'bg-amber-100 text-amber-700'
-                      : 'bg-rose-100 text-rose-700'
-                  }`}>
-                    <p className="text-xs font-black">
-                      {budgetData.monthProjectionCompliance.toFixed(0)}%
-                    </p>
-                  </div>
-                </div>
-
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-indigo-600/70">Al ritmo actual proyectas cerrar en</span>
-                    <span className="font-bold text-indigo-900">{formatCurrency(budgetData.monthProjection)}</span>
+                  <div className="flex items-center justify-between text-xs lg:text-sm">
+                    <span className="text-indigo-700/70 font-semibold">Proyección Cierre Mes</span>
+                    <span className="font-bold lg:font-black text-indigo-900 lg:text-lg">{budgetData.monthProjectionCompliance.toFixed(0)}%</span>
                   </div>
-                  <div className="relative h-3 bg-white/50 rounded-full overflow-hidden shadow-inner">
+                  <div className="relative h-3 lg:h-4 bg-white/50 rounded-full overflow-hidden shadow-inner">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${Math.min(budgetData.monthProjectionCompliance, 100)}%` }}
                       transition={{ duration: 1.5, delay: 0.3 }}
                       className={`h-full rounded-full relative ${
                         budgetData.monthProjectionCompliance >= 100 
-                          ? 'bg-gradient-to-r from-emerald-400 to-green-400' 
+                          ? 'bg-gradient-to-r from-emerald-400/80 to-green-300/80' 
                           : budgetData.monthProjectionCompliance >= 90
-                          ? 'bg-gradient-to-r from-amber-400 to-orange-400'
-                          : 'bg-gradient-to-r from-rose-400 to-pink-400'
+                          ? 'bg-gradient-to-r from-amber-400/80 to-orange-300/80'
+                          : 'bg-gradient-to-r from-rose-400/80 to-pink-400/80'
                       }`}
                     >
                       <div 
                         className="absolute inset-0"
                         style={{
-                          background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.6) 50%, transparent 100%)',
-                          width: '30%',
-                          animation: 'slideRight 2s linear infinite'
+                          background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.7) 50%, transparent 100%)',
+                          width: '40%',
+                          animation: 'slideRight 2.5s linear infinite'
                         }}
                       />
                     </motion.div>
                   </div>
-                  <div className="flex items-center justify-between text-[10px]">
-                    <span className="text-indigo-500/60">Vendido: {formatCurrency(budgetData.totalMonthSales)} • Promedio/día: {formatCurrency(budgetData.avgDailySales)}</span>
-                    <span className="text-indigo-700 font-bold">{budgetData.daysElapsed} días transcurridos</span>
-                  </div>
-                </div>
-
-                <div className="mt-3 pt-3 border-t border-indigo-200/30 flex items-center justify-center gap-2 text-indigo-600">
-                  <ChevronRight className="w-3 h-3" />
-                  <span className="text-xs font-semibold">Toca para ver detalles de proyección</span>
+                  <p className="text-[10px] lg:text-xs text-indigo-600/60">
+                    {budgetData.monthProjectionCompliance >= 100 
+                      ? `🎉 Proyectas superar en ${formatCurrency(budgetData.monthProjection - budgetData.monthlyBudget)}`
+                      : `📊 Proyección: ${formatCurrency(budgetData.monthProjection)} • Falta: ${formatCurrency(budgetData.monthlyBudget - budgetData.monthProjection)}`}
+                  </p>
                 </div>
               </motion.button>
 
