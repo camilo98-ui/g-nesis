@@ -412,18 +412,18 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       className="mb-6"
     >
       <Card className="bg-gradient-to-br from-rose-50/30 via-pink-50/20 to-purple-50/20 border border-rose-200/40 shadow-lg overflow-hidden">
-        <CardHeader className="bg-gradient-to-r from-rose-100/20 to-pink-100/20 border-b border-rose-200/30 pb-4">
-          <div className="flex items-center justify-between gap-3">
-            <CardTitle className="text-xl font-black text-slate-900 flex items-center gap-3">
+        <CardHeader className="bg-gradient-to-r from-rose-100/20 to-pink-100/20 border-b border-rose-200/30 pb-4 px-4 md:px-6">
+          <div className="flex items-center justify-between gap-4 md:gap-6">
+            <CardTitle className="text-xl font-black text-slate-900 flex items-center gap-4 flex-1 min-w-0">
               <motion.div
                 animate={{ rotate: [0, 360] }}
                 transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                className="w-12 h-12 rounded-xl bg-gradient-to-br from-rose-400/60 to-pink-400/60 flex items-center justify-center shadow-md flex-shrink-0"
+                className="w-12 h-12 md:w-14 md:h-14 rounded-xl bg-gradient-to-br from-rose-400/60 to-pink-400/60 flex items-center justify-center shadow-md flex-shrink-0"
               >
-                <Target className="w-7 h-7 text-white" />
+                <Target className="w-7 h-7 md:w-8 md:h-8 text-white" />
               </motion.div>
-              <div className="min-w-0">
-                <p className="text-2xl truncate">Presupuesto del Día</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-xl md:text-2xl truncate">Presupuesto del Día</p>
                 <p className="text-xs text-slate-600 font-normal mt-0.5">Calendario Retail - Semana {budgetData.currentWeekNumber} de {budgetData.totalWeeks}</p>
               </div>
             </CardTitle>
