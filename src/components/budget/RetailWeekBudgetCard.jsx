@@ -615,7 +615,10 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                   <span className="font-bold lg:font-black text-white lg:text-lg">{budgetData.projectionCompliance.toFixed(0)}%</span>
                 </div>
                 <div className="relative h-3 lg:h-4 bg-white/20 rounded-full overflow-hidden">
-                  <div
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${Math.min(budgetData.projectionCompliance, 100)}%` }}
+                    transition={{ duration: 1.5, delay: 0.2 }}
                     className={`h-full rounded-full relative overflow-hidden ${
                       budgetData.projectionCompliance >= 100 
                         ? 'bg-gradient-to-r from-emerald-300/80 to-green-200/80' 
@@ -623,19 +626,16 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                         ? 'bg-gradient-to-r from-amber-200/80 to-yellow-100/80'
                         : 'bg-gradient-to-r from-orange-200/80 to-red-200/80'
                     }`}
-                    style={{
-                      width: `${Math.min(budgetData.projectionCompliance, 100)}%`
-                    }}
                   >
                     <div 
                       className="absolute inset-0"
                       style={{
-                        background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.8) 50%, transparent 100%)',
-                        width: '40%',
-                        animation: 'slideRight 2.5s linear infinite'
+                        background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.9) 50%, transparent 100%)',
+                        width: '30%',
+                        animation: 'slideRight 2s ease-in-out infinite'
                       }}
                     />
-                  </div>
+                  </motion.div>
                 </div>
                 <p className="text-[10px] lg:text-xs text-white/50 lg:text-white/60">
                   {budgetData.projectionCompliance >= 100 
@@ -658,7 +658,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                       initial={{ width: 0 }}
                       animate={{ width: `${Math.min(budgetData.monthProjectionCompliance, 100)}%` }}
                       transition={{ duration: 1.5, delay: 0.5 }}
-                      className={`h-full rounded-full relative ${
+                      className={`h-full rounded-full relative overflow-hidden ${
                         budgetData.monthProjectionCompliance >= 100 
                           ? 'bg-gradient-to-r from-emerald-300/80 to-green-200/80' 
                           : budgetData.monthProjectionCompliance >= 90
@@ -669,9 +669,9 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                       <div 
                         className="absolute inset-0"
                         style={{
-                          background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.8) 50%, transparent 100%)',
-                          width: '40%',
-                          animation: 'slideRight 2.5s linear infinite'
+                          background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.9) 50%, transparent 100%)',
+                          width: '30%',
+                          animation: 'slideRight 2s ease-in-out infinite'
                         }}
                       />
                     </motion.div>
