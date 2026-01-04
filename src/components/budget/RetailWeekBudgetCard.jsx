@@ -182,8 +182,8 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       totalWeeklyAvg > 0 ? avg / totalWeeklyAvg : 1/7
     );
 
-    // Calcular presupuesto base usando el 115% del presupuesto mensual para cumplir meta alcanzable
-    const TARGET_PERCENTAGE = 1.15; // 115% del presupuesto
+    // Calcular presupuesto base usando el 105% del presupuesto mensual para cumplir meta alcanzable
+    const TARGET_PERCENTAGE = 1.05; // 105% del presupuesto
     const adjustedMonthlyBudget = activeBudget.sales_budget * TARGET_PERCENTAGE;
     const dailyBaseBudget = adjustedMonthlyBudget / daysInMonth;
 
@@ -482,7 +482,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
 
               <div className="space-y-6 mb-4">
                 <div>
-                  <p className="text-xs text-white/60 mb-2">Meta del Día (115%)</p>
+                  <p className="text-xs text-white/60 mb-2">Meta del Día (105%)</p>
                   <motion.p
                     key={budgetData.adjustedDailyBudget}
                     initial={{ scale: 1.2, opacity: 0 }}
@@ -491,7 +491,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                   >
                     {formatCurrency(budgetData.adjustedDailyBudget)}
                   </motion.p>
-                  <p className="text-[10px] text-white/50 mt-0.5">Base: {formatCurrency(budgetData.adjustedDailyBudget / 1.15)}</p>
+                  <p className="text-[10px] text-white/50 mt-0.5">Base: {formatCurrency(budgetData.adjustedDailyBudget / 1.05)}</p>
                   {/* Sparkline combinado */}
                   {budgetData.last7DaysSales?.length > 0 && (
                     <div className="mt-2 h-8 grid grid-cols-2 gap-4">
@@ -1218,9 +1218,9 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                       });
                       
                       const totalWeeklyAvg = avgByDayOfWeek.reduce((a, b) => a + b, 0);
-                      if (totalWeeklyAvg === 0) return sum + (activeBudget.sales_budget * 1.15 / 30);
-                      
-                      const scaleFactor = (activeBudget.sales_budget * 1.15) / (totalWeeklyAvg * (30 / 7));
+                      if (totalWeeklyAvg === 0) return sum + (activeBudget.sales_budget * 1.05 / 30);
+
+                      const scaleFactor = (activeBudget.sales_budget * 1.05) / (totalWeeklyAvg * (30 / 7));
                       return sum + (avgByDayOfWeek[dayOfWeek] * scaleFactor);
                     }, 0);
                     
@@ -1639,9 +1639,9 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                             });
                             
                             const totalWeeklyAvg = avgByDayOfWeek.reduce((a, b) => a + b, 0);
-                            if (totalWeeklyAvg === 0) return sum + (activeBudget.sales_budget * 1.15 / 30);
+                            if (totalWeeklyAvg === 0) return sum + (activeBudget.sales_budget * 1.05 / 30);
                             
-                            const scaleFactor = (activeBudget.sales_budget * 1.15) / (totalWeeklyAvg * (30 / 7));
+                            const scaleFactor = (activeBudget.sales_budget * 1.05) / (totalWeeklyAvg * (30 / 7));
                             return sum + (avgByDayOfWeek[dayOfWeek] * scaleFactor);
                           }, 0);
                           
@@ -1845,7 +1845,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                           </ul>
                         </div>
                         <p className="text-xs text-slate-600 mt-3">
-                         ✅ Continúa con este ritmo constante para garantizar el cumplimiento de la meta ambiciosa del 115%: {formatCurrency(activeBudget?.sales_budget * 1.15)}.
+                         ✅ Continúa con este ritmo constante para garantizar el cumplimiento de la meta ambiciosa del 105%: {formatCurrency(activeBudget?.sales_budget * 1.05)}.
                         </p>
                       </div>
                     )}
