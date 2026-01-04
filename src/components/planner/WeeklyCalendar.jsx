@@ -411,50 +411,50 @@ export default function WeeklyCalendar({
                                     className={`rounded-xl overflow-hidden border-2 ${role.border} ${role.bg} shadow-md active:shadow-lg transition-all cursor-pointer relative ${snapshot.isDragging ? 'shadow-2xl scale-105' : ''}`}
                                   >
                                     {/* Role Header - Más grande en móvil */}
-                                    <div className={`${role.header} px-2 py-1.5 sm:py-1.5 flex items-center justify-between relative overflow-hidden`}>
+                                    <div className={`${role.header} px-3 py-2 sm:py-1.5 flex items-center justify-between relative overflow-hidden`}>
                                      <IceCreamDecorations />
-                                     <div className="flex items-center gap-1.5 sm:gap-1.5 relative z-10">
+                                     <div className="flex items-center gap-2 sm:gap-1.5 relative z-10">
                                        <motion.div animate={{ scale: [1, 1.15, 1] }} transition={{ duration: 2, repeat: Infinity }}>
-                                         <RoleIcon className="w-4 h-4 sm:w-3.5 sm:h-3.5 text-white drop-shadow-sm" />
+                                         <RoleIcon className="w-5 h-5 sm:w-3.5 sm:h-3.5 text-white drop-shadow-sm" />
                                        </motion.div>
-                                       <span className="text-[11px] sm:text-[10px] font-bold text-white drop-shadow-sm">{role.label}</span>
+                                       <span className="text-[13px] sm:text-[10px] font-bold text-white drop-shadow-sm">{role.label}</span>
                                      </div>
                                      <div {...provided.dragHandleProps} className="cursor-grab active:cursor-grabbing relative z-10 p-1 touch-manipulation">
-                                       <GripVertical className="w-4 h-4 sm:w-3 sm:h-3 text-white/70" />
+                                       <GripVertical className="w-5 h-5 sm:w-3 sm:h-3 text-white/70" />
                                      </div>
                                     </div>
 
                                     {/* Content - Más espacioso en móvil */}
-                                    <div className="p-2 sm:p-2 pt-2 sm:pt-2.5">
-                                     <p className="font-bold text-[11px] sm:text-sm text-gray-700 truncate leading-tight mb-1.5">{shift.cashier_name || 'Sin asignar'}</p>
+                                    <div className="p-3 sm:p-2 pt-2.5 sm:pt-2.5">
+                                     <p className="font-bold text-[13px] sm:text-sm text-gray-700 truncate leading-tight mb-2">{shift.cashier_name || 'Sin asignar'}</p>
                                       {shift.role === 'descanso' ? (
-                                        <div className="flex items-center justify-center bg-indigo-100/50 rounded px-2 py-1.5">
-                                          <span className="text-[11px] sm:text-xs font-medium text-indigo-600">😴 Día libre</span>
+                                        <div className="flex items-center justify-center bg-indigo-100/50 rounded px-2 py-2">
+                                          <span className="text-[13px] sm:text-xs font-medium text-indigo-600">😴 Día libre</span>
                                         </div>
                                       ) : (
-                                        <div className="flex items-center justify-between bg-white/80 rounded-lg px-2 py-1.5">
-                                          <div className="flex items-center gap-1">
-                                            <Clock className={`w-3.5 h-3.5 sm:w-3 sm:h-3 ${role.text}`} />
-                                            <span className="text-[11px] sm:text-xs font-bold text-gray-700">{shift.start_time} - {shift.end_time}</span>
+                                        <div className="flex items-center justify-between bg-white/80 rounded-lg px-2.5 py-2">
+                                          <div className="flex items-center gap-1.5">
+                                            <Clock className={`w-4 h-4 sm:w-3 sm:h-3 ${role.text}`} />
+                                            <span className="text-[13px] sm:text-xs font-bold text-gray-700">{shift.start_time} - {shift.end_time}</span>
                                           </div>
-                                          <span className={`text-[10px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded ${role.text} bg-white/60`}>{duration}h</span>
+                                          <span className={`text-[11px] sm:text-[10px] font-bold px-2 py-1 rounded ${role.text} bg-white/60`}>{duration}h</span>
                                         </div>
                                       )}
                                       {!readOnly && (
-                                        <div className="flex justify-end gap-1 mt-2 sm:mt-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                                        <div className="flex justify-end gap-1.5 mt-2.5 sm:mt-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                                           <motion.button 
                                             whileTap={{ scale: 0.9 }} 
                                             onClick={(e) => { e.stopPropagation(); handleEditShift(shift); }} 
-                                            className="p-1.5 sm:p-1 rounded-lg bg-blue-100 active:bg-blue-200 touch-manipulation"
+                                            className="p-2 sm:p-1 rounded-lg bg-blue-100 active:bg-blue-200 touch-manipulation"
                                           >
-                                            <Pencil className="w-3.5 h-3.5 sm:w-3 sm:h-3 text-blue-600" />
+                                            <Pencil className="w-4 h-4 sm:w-3 sm:h-3 text-blue-600" />
                                           </motion.button>
                                           <motion.button 
                                             whileTap={{ scale: 0.9 }} 
                                             onClick={(e) => { e.stopPropagation(); deleteMutation.mutate(shift.id); }} 
-                                            className="p-1.5 sm:p-1 rounded-lg bg-red-100 active:bg-red-200 touch-manipulation"
+                                            className="p-2 sm:p-1 rounded-lg bg-red-100 active:bg-red-200 touch-manipulation"
                                           >
-                                            <Trash2 className="w-3.5 h-3.5 sm:w-3 sm:h-3 text-red-600" />
+                                            <Trash2 className="w-4 h-4 sm:w-3 sm:h-3 text-red-600" />
                                           </motion.button>
                                         </div>
                                       )}
