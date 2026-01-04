@@ -45,13 +45,39 @@ export default function SalesChart({ data, title, showBudget = true }) {
           <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="colorVentas" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#f97316" stopOpacity={0.3}/>
-                <stop offset="95%" stopColor="#f97316" stopOpacity={0}/>
+                <stop offset="5%" stopColor="#f97316" stopOpacity={0.3}>
+                  <animate attributeName="stopOpacity" values="0.3;0.5;0.3" dur="2s" repeatCount="indefinite"/>
+                </stop>
+                <stop offset="95%" stopColor="#f97316" stopOpacity={0}>
+                  <animate attributeName="stopOpacity" values="0;0.1;0" dur="2s" repeatCount="indefinite"/>
+                </stop>
               </linearGradient>
               <linearGradient id="colorPresupuesto" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3}/>
-                <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3}>
+                  <animate attributeName="stopOpacity" values="0.3;0.5;0.3" dur="2s" repeatCount="indefinite"/>
+                </stop>
+                <stop offset="95%" stopColor="#6366f1" stopOpacity={0}>
+                  <animate attributeName="stopOpacity" values="0;0.1;0" dur="2s" repeatCount="indefinite"/>
+                </stop>
               </linearGradient>
+              <linearGradient id="salesChartLight" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="-20%" stopColor="#fff" stopOpacity="0">
+                  <animate attributeName="offset" values="-0.2;1.2" dur="3s" repeatCount="indefinite"/>
+                </stop>
+                <stop offset="0%" stopColor="#fff" stopOpacity="1">
+                  <animate attributeName="offset" values="0;1.4" dur="3s" repeatCount="indefinite"/>
+                </stop>
+                <stop offset="20%" stopColor="#fff" stopOpacity="0">
+                  <animate attributeName="offset" values="0.2;1.6" dur="3s" repeatCount="indefinite"/>
+                </stop>
+              </linearGradient>
+              <filter id="salesGlow">
+                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                <feMerge>
+                  <feMergeNode in="coloredBlur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
             <XAxis 
@@ -75,21 +101,23 @@ export default function SalesChart({ data, title, showBudget = true }) {
               type="monotone"
               dataKey="sales"
               name="Ventas"
-              stroke="#f97316"
+              stroke="url(#salesChartLight)"
               strokeWidth={3}
               fillOpacity={1}
               fill="url(#colorVentas)"
+              filter="url(#salesGlow)"
             />
             {showBudget && (
               <Area
                 type="monotone"
                 dataKey="budget"
                 name="Presupuesto"
-                stroke="#6366f1"
+                stroke="url(#salesChartLight)"
                 strokeWidth={2}
                 strokeDasharray="5 5"
                 fillOpacity={1}
                 fill="url(#colorPresupuesto)"
+                filter="url(#salesGlow)"
               />
             )}
           </AreaChart>

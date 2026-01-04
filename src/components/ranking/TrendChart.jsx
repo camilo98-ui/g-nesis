@@ -205,11 +205,22 @@ export default function TrendChart({ shiftRecords, cashiers, dateRange, metricTy
                 const colorConfig = CASHIER_COLORS[idx] || CASHIER_COLORS[0];
                 return (
                   <linearGradient key={cashier.id} id={`grad-${cashier.id}`} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={colorConfig.solid} stopOpacity={0.9} />
-                    <stop offset="100%" stopColor={colorConfig.solid} stopOpacity={0.6} />
+                    <stop offset="0%" stopColor={colorConfig.solid} stopOpacity={0.9}>
+                      <animate attributeName="stopOpacity" values="0.9;1;0.9" dur="2s" repeatCount="indefinite"/>
+                    </stop>
+                    <stop offset="100%" stopColor={colorConfig.solid} stopOpacity={0.6}>
+                      <animate attributeName="stopOpacity" values="0.6;0.8;0.6" dur="2s" repeatCount="indefinite"/>
+                    </stop>
                   </linearGradient>
                 );
               })}
+              <filter id="trendGlow">
+                <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                <feMerge>
+                  <feMergeNode in="coloredBlur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
             <XAxis 
@@ -267,6 +278,7 @@ export default function TrendChart({ shiftRecords, cashiers, dateRange, metricTy
                 stackId="a"
                 fill={`url(#grad-${cashier.id})`}
                 radius={idx === activeCashiers.length - 1 ? [8, 8, 0, 0] : [0, 0, 0, 0]}
+                filter="url(#trendGlow)"
               />
             ))}
           </BarChart>
