@@ -11,7 +11,7 @@ import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
 import ComparableChartsGrid from '@/components/executive/ComparableChartsGrid';
 
 import DailyGoalsCard from '@/components/gamification/DailyGoalsCard';
-import RetailWeekBudgetCard from '@/components/budget/RetailWeekBudgetCard';
+import RetailWeekBudgetCard from '@/components/budget/RetailWeekBudgetCard.jsx';
 import ProjectionDetailModal from '@/components/dashboard/ProjectionDetailModal';
 import ZonePerformanceComparison from '@/components/sales/ZonePerformanceComparison';
 
