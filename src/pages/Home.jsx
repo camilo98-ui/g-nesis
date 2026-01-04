@@ -629,10 +629,10 @@ export default function Home() {
                         setLoginError('');
                         localStorage.setItem('lastSelectedRole', role.id);
                       }}
-                      className={`relative w-full min-h-[70px] p-4 rounded-2xl border-2 transition-all duration-300 text-left ${
+                      className={`relative w-full min-h-[70px] p-4 rounded-2xl border-3 transition-all duration-300 text-left ${
                        isSelected
-                         ? 'border-rose-300/70 bg-gradient-to-r from-rose-100/30 via-pink-100/20 to-purple-100/30 shadow-xl shadow-rose-200/40 scale-[1.02]'
-                         : 'border-slate-200/20 bg-white/8 backdrop-blur-md active:border-rose-200 hover:scale-[1.01] hover:shadow-lg'
+                         ? 'border-rose-300 bg-gradient-to-r from-rose-100/30 via-pink-100/20 to-purple-100/30 shadow-xl shadow-rose-200/40 scale-[1.02]'
+                         : 'border-slate-300/60 bg-white/8 backdrop-blur-md active:border-rose-200 hover:scale-[1.01] hover:shadow-lg'
                       }`}
                     >
                       {isLastUsed && (
@@ -842,10 +842,10 @@ export default function Home() {
                           setLoginError('');
                           localStorage.setItem('lastSelectedRole', role.id);
                         }}
-                        className={`relative w-full p-4 rounded-2xl border-2 transition-all duration-300 text-left flex items-center gap-3 ${
+                        className={`relative w-full p-4 rounded-2xl border-3 transition-all duration-300 text-left flex items-center gap-3 ${
                           isSelected
-                            ? 'border-rose-300/70 bg-gradient-to-r from-rose-100/30 to-purple-100/30 shadow-xl shadow-rose-200/40 scale-[1.01]'
-                            : 'border-slate-200/20 bg-white/8 backdrop-blur-md hover:border-rose-200 hover:shadow-lg hover:scale-[1.01]'
+                            ? 'border-rose-300 bg-gradient-to-r from-rose-100/30 to-purple-100/30 shadow-xl shadow-rose-200/40 scale-[1.01]'
+                            : 'border-slate-300/60 bg-white/8 backdrop-blur-md hover:border-rose-200 hover:shadow-lg hover:scale-[1.01]'
                         }`}
                       >
                         {isLastUsed && (
