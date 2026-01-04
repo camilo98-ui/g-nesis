@@ -193,6 +193,24 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       totalWeeklyAvg > 0 ? avg / totalWeeklyAvg : 1/7
     );
 
+    const now = new Date();
+    
+    // CALENDARIO RETAIL: Mes empieza el 29 del mes anterior
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth(); // 0-11
+    
+    // Determinar el inicio del mes retail (29 del mes anterior)
+    const retailMonthStart = new Date(currentYear, currentMonth - 1, 29);
+    
+    // Determinar el fin del mes retail (28 del mes actual)
+    const retailMonthEnd = new Date(currentYear, currentMonth, 28);
+    
+    const monthStart = retailMonthStart;
+    const monthEnd = retailMonthEnd;
+
+    // Calcular días del mes que efectivamente tienen venta (lunes a domingo del mes)
+    const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd }).length;
+
     // AJUSTE INTELIGENTE DE PRESUPUESTO según desempeño de la tienda
     // Primero calculamos métricas preliminares para evaluar desempeño
     const preliminaryMonthlyBudget = activeBudget.sales_budget * 1.05;
