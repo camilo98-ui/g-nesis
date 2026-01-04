@@ -471,6 +471,8 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       monthProjection,
       monthProjectionCompliance,
       monthlyBudget: adjustedMonthlyBudget,
+      targetPercentage: TARGET_PERCENTAGE,
+      performanceLevel,
       // Datos para sparklines (últimos 7 días)
       last7DaysSales: dailySales
         .filter(s => {
