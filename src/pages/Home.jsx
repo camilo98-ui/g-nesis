@@ -592,18 +592,18 @@ export default function Home() {
 
         {/* Mobile/Tablet View */}
         <div className="lg:hidden min-h-screen flex flex-col justify-center relative z-10">
-          <div className="flex-1 flex flex-col justify-center px-4 py-8 max-h-screen overflow-y-auto">
-            <div className="max-w-md mx-auto w-full bg-white/0 backdrop-blur-sm rounded-3xl shadow-2xl border-2 border-rose-200/40 p-6" style={{ boxShadow: '0 0 12px rgba(251, 113, 133, 0.25), 0 0 20px rgba(251, 113, 133, 0.15)' }}>
-              <div className="mb-8 text-center">
+          <div className="flex-1 flex flex-col justify-center px-4 py-4 max-h-screen overflow-y-auto">
+            <div className="max-w-md mx-auto w-full bg-white/0 backdrop-blur-sm rounded-3xl shadow-2xl border-2 border-rose-200/40 p-5" style={{ boxShadow: '0 0 12px rgba(251, 113, 133, 0.25), 0 0 20px rgba(251, 113, 133, 0.15)' }}>
+              <div className="mb-5 text-center">
                 <motion.img 
                   src={LOGO_URL} 
                   alt="Popsy" 
-                  className="h-32 object-contain mx-auto mb-6"
+                  className="h-20 object-contain mx-auto mb-3"
                   initial={{ opacity: 0, scale: 0.8, y: -20 }}
                   animate={{ 
                     opacity: 1, 
                     scale: 1,
-                    y: [0, -12, 0]
+                    y: [0, -8, 0]
                   }}
                   transition={{
                     opacity: { duration: 0.6 },
@@ -611,11 +611,11 @@ export default function Home() {
                     y: { duration: 2.5, repeat: Infinity, ease: "easeInOut" }
                   }}
                 />
-                <h1 className="text-2xl font-black bg-gradient-to-r from-rose-400 to-purple-400 bg-clip-text text-transparent mb-1">Iniciar sesión</h1>
-                <p className="text-slate-600 text-sm font-medium">Selecciona tu rol y comienza</p>
+                <h1 className="text-xl font-black bg-gradient-to-r from-rose-400 to-purple-400 bg-clip-text text-transparent mb-1">Iniciar sesión</h1>
+                <p className="text-slate-600 text-xs font-medium">Selecciona tu rol y comienza</p>
               </div>
 
-              <div className="space-y-3 mb-6">
+              <div className="space-y-2 mb-4">
                 {ROLES.map((role) => {
                   const isSelected = selectedRole === role.id;
                   const lastUsedRole = localStorage.getItem('lastSelectedRole');
@@ -629,7 +629,7 @@ export default function Home() {
                         setLoginError('');
                         localStorage.setItem('lastSelectedRole', role.id);
                       }}
-                      className={`relative w-full min-h-[70px] p-4 rounded-2xl border-3 transition-all duration-300 text-left ${
+                      className={`relative w-full min-h-[60px] p-3 rounded-xl border-2 transition-all duration-300 text-left ${
                        isSelected
                          ? 'border-rose-300 bg-gradient-to-r from-rose-100/30 via-pink-100/20 to-purple-100/30 shadow-xl shadow-rose-200/40 scale-[1.02]'
                          : 'border-slate-300/60 bg-white/8 backdrop-blur-md active:border-rose-200 hover:scale-[1.01] hover:shadow-lg'
@@ -639,35 +639,35 @@ export default function Home() {
                         <motion.div 
                           animate={{ scale: [1, 1.1, 1] }}
                           transition={{ duration: 2, repeat: Infinity }}
-                          className="absolute -top-2 right-2 px-2 py-0.5 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full text-[9px] font-bold text-white shadow-lg"
+                          className="absolute -top-1.5 right-2 px-2 py-0.5 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full text-[8px] font-bold text-white shadow-lg"
                         >
                           ✨ Reciente
                         </motion.div>
                       )}
-                      <div className="flex items-center gap-2.5">
+                      <div className="flex items-center gap-2">
                         <motion.div 
                           animate={isSelected ? { rotate: [0, 5, -5, 0] } : {}}
                           transition={{ duration: 2, repeat: Infinity }}
-                          className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg ${
+                          className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 shadow-md ${
                           isSelected 
                             ? 'bg-white/60 backdrop-blur-sm' 
                             : 'bg-gradient-to-br from-rose-50 to-purple-50'
                           }`}>
-                          <div className="w-5 h-5">
+                          <div className="w-4 h-4">
                             <RoleIcon roleId={role.id} isSelected={isSelected} />
                           </div>
                         </motion.div>
                         <div className="flex-1 min-w-0">
-                          <p className={`font-bold text-[15px] leading-tight ${isSelected ? 'text-slate-800' : 'text-slate-900'}`}>{role.name}</p>
-                          <p className={`text-[11px] leading-tight mt-0.5 ${isSelected ? 'text-slate-600' : 'text-slate-600'}`}>{role.description}</p>
+                          <p className={`font-bold text-sm leading-tight ${isSelected ? 'text-slate-800' : 'text-slate-900'}`}>{role.name}</p>
+                          <p className={`text-[10px] leading-tight mt-0.5 ${isSelected ? 'text-slate-600' : 'text-slate-600'}`}>{role.description}</p>
                         </div>
                         {isSelected && (
                           <motion.div 
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
-                            className="w-5 h-5 rounded-full bg-white flex items-center justify-center flex-shrink-0 shadow-md"
+                            className="w-4 h-4 rounded-full bg-white flex items-center justify-center flex-shrink-0 shadow-md"
                           >
-                            <CheckCircle className="w-3.5 h-3.5 text-rose-500" strokeWidth={3} />
+                            <CheckCircle className="w-3 h-3 text-rose-500" strokeWidth={3} />
                           </motion.div>
                         )}
                       </div>
@@ -677,17 +677,17 @@ export default function Home() {
               </div>
 
               {selectedRole === 'gerente' && (
-                <div className="mb-5 p-3.5 bg-blue-50/60 backdrop-blur-sm border border-blue-200/40 rounded-xl">
-                  <p className="text-xs text-blue-700 flex items-center gap-2 font-medium">
-                    <Info className="w-4 h-4 flex-shrink-0" />
+                <div className="mb-3 p-2.5 bg-blue-50/60 backdrop-blur-sm border border-blue-200/40 rounded-lg">
+                  <p className="text-[10px] text-blue-700 flex items-center gap-1.5 font-medium">
+                    <Info className="w-3 h-3 flex-shrink-0" />
                     Acceso a panel ejecutivo global
                   </p>
                 </div>
               )}
 
               {selectedRole && selectedRole !== 'gerente' && (
-                <div className="mb-5">
-                  <label className="block text-sm font-semibold text-slate-900 mb-3 text-center">Selecciona tu tienda</label>
+                <div className="mb-3">
+                  <label className="block text-xs font-semibold text-slate-900 mb-2 text-center">Selecciona tu tienda</label>
                   <div className="max-w-sm mx-auto">
                     <StoreSelector selectedStore={pendingStore} onStoreChange={handleStoreSelect} />
                   </div>
@@ -695,8 +695,8 @@ export default function Home() {
               )}
 
               {selectedRole && (
-                <div className="mb-4">
-                  <label htmlFor="login-password" className="block text-sm font-semibold text-slate-900 mb-3">
+                <div className="mb-3">
+                  <label htmlFor="login-password" className="block text-xs font-semibold text-slate-900 mb-2">
                     Contraseña
                   </label>
                   <div className="relative">
@@ -709,7 +709,7 @@ export default function Home() {
                       onKeyDown={(e) => e.key === 'Enter' && !isSubmitting && handleLogin()}
                       disabled={isSubmitting}
                       autoComplete="current-password"
-                      className="w-full h-14 pl-4 pr-12 border-2 border-rose-200/60 rounded-xl focus:ring-2 focus:ring-pink-400/50 focus:border-pink-400/50 outline-none text-base text-slate-900 placeholder:text-slate-400 disabled:opacity-50 disabled:cursor-not-allowed bg-white/80 backdrop-blur-sm"
+                      className="w-full h-11 pl-4 pr-12 border-2 border-rose-200/60 rounded-xl focus:ring-2 focus:ring-pink-400/50 focus:border-pink-400/50 outline-none text-sm text-slate-900 placeholder:text-slate-400 disabled:opacity-50 disabled:cursor-not-allowed bg-white/80 backdrop-blur-sm"
                     />
                     <button
                       type="button"
@@ -719,14 +719,14 @@ export default function Home() {
                       {showLoginPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
-                  <p className="text-[11px] text-slate-500 mt-1.5">Contraseña asignada por la empresa</p>
+                  <p className="text-[10px] text-slate-500 mt-1">Contraseña asignada por la empresa</p>
                 </div>
               )}
 
               {loginError && (
-                <div className="mb-4 p-3.5 bg-red-50/60 backdrop-blur-sm border border-red-200/40 rounded-xl">
-                  <p className="text-xs text-red-700 flex items-center gap-2 font-medium">
-                    <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                <div className="mb-3 p-2.5 bg-red-50/60 backdrop-blur-sm border border-red-200/40 rounded-lg">
+                  <p className="text-[10px] text-red-700 flex items-center gap-1.5 font-medium">
+                    <AlertTriangle className="w-3 h-3 flex-shrink-0" />
                     {loginError}
                   </p>
                 </div>
@@ -736,7 +736,7 @@ export default function Home() {
                 <Button
                   onClick={handleLogin}
                   disabled={(selectedRole !== 'gerente' && !pendingStore) || !selectedRole || isSubmitting}
-                  className="w-full h-14 bg-gradient-to-r from-rose-300 to-pink-300 hover:from-rose-400 hover:to-pink-400 text-white rounded-2xl font-bold text-base disabled:opacity-40 mt-6 shadow-xl shadow-rose-200/30"
+                  className="w-full h-12 bg-gradient-to-r from-rose-300 to-pink-300 hover:from-rose-400 hover:to-pink-400 text-white rounded-xl font-bold text-sm disabled:opacity-40 mt-4 shadow-xl shadow-rose-200/30"
                 >
                 {isSubmitting ? (
                   <span className="flex items-center justify-center gap-2">
@@ -749,8 +749,8 @@ export default function Home() {
               </Button>
               </motion.div>
 
-              <div className="text-center mt-4">
-                <Link to={createPageUrl('ExecutiveDashboard')} className="text-xs text-slate-500">
+              <div className="text-center mt-3">
+                <Link to={createPageUrl('ExecutiveDashboard')} className="text-[10px] text-slate-500">
                   ¿Eres administrador?
                 </Link>
               </div>
