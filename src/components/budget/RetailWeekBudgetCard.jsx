@@ -2167,54 +2167,6 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                 </DialogContent>
               </Dialog>
 
-              {/* Barra de Proyección Mensual - Estilo simple */}
-              <motion.button
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.99 }}
-                onClick={() => {
-                  setSelectedMetric('month-projection');
-                  setIsModalOpen(true);
-                }}
-                className="w-full bg-white/40 rounded-xl p-3 md:p-4 border border-indigo-200/40 hover:border-indigo-400 transition-all cursor-pointer"
-              >
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-xs lg:text-sm">
-                    <span className="text-indigo-700/70 font-semibold">Proyección Cierre Mes</span>
-                    <span className="font-bold lg:font-black text-indigo-900 lg:text-lg">{budgetData.monthProjectionCompliance.toFixed(0)}%</span>
-                  </div>
-                  <div className="relative h-3 lg:h-4 bg-white/50 rounded-full overflow-hidden shadow-inner">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${Math.min(budgetData.monthProjectionCompliance, 100)}%` }}
-                      transition={{ duration: 1.5, delay: 0.3 }}
-                      className={`h-full rounded-full relative ${
-                        budgetData.monthProjectionCompliance >= 100 
-                          ? 'bg-gradient-to-r from-emerald-400/80 to-green-300/80' 
-                          : budgetData.monthProjectionCompliance >= 90
-                          ? 'bg-gradient-to-r from-amber-400/80 to-orange-300/80'
-                          : 'bg-gradient-to-r from-rose-400/80 to-pink-400/80'
-                      }`}
-                    >
-                      <div 
-                        className="absolute inset-0"
-                        style={{
-                          background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.7) 50%, transparent 100%)',
-                          width: '40%',
-                          animation: 'slideRight 2.5s linear infinite'
-                        }}
-                      />
-                    </motion.div>
-                  </div>
-                  <p className="text-[10px] lg:text-xs text-indigo-600/60">
-                    {budgetData.monthProjectionCompliance >= 100 
-                      ? `🎉 Proyectas superar en ${formatCurrency(budgetData.monthProjection - budgetData.monthlyBudget)}`
-                      : `📊 Proyección: ${formatCurrency(budgetData.monthProjection)} • Falta: ${formatCurrency(budgetData.monthlyBudget - budgetData.monthProjection)}`}
-                  </p>
-                </div>
-              </motion.button>
-
               {/* Mensaje de estado - interactivo */}
               {needsRecovery ? (
                 <motion.button
