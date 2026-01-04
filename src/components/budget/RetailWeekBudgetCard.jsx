@@ -347,8 +347,8 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
     // Calcular proyección de cierre mensual basada en el ritmo acumulado
     const totalMonthSales = salesUntilYesterday + todayActualSales;
     const daysElapsed = now.getDate();
-    const avgDailySales = daysElapsed > 0 ? totalMonthSales / daysElapsed : 0;
-    const monthProjection = totalMonthSales + (avgDailySales * (remainingDays - 1));
+    const monthAvgDailySales = daysElapsed > 0 ? totalMonthSales / daysElapsed : 0;
+    const monthProjection = totalMonthSales + (monthAvgDailySales * (remainingDays - 1));
     const monthProjectionCompliance = adjustedMonthlyBudget > 0 ? (monthProjection / adjustedMonthlyBudget * 100) : 0;
 
     return {
@@ -377,7 +377,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       // Proyección mensual
       totalMonthSales,
       daysElapsed,
-      avgDailySales,
+      avgDailySales: monthAvgDailySales,
       monthProjection,
       monthProjectionCompliance,
       monthlyBudget: adjustedMonthlyBudget,
