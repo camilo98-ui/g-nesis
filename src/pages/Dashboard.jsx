@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
@@ -204,31 +205,9 @@ function DetailPanel({ metric, data, onClose, chartData, formatCurrency, shiftDa
                   <ComposedChart data={chartData}>
                     <defs>
                       <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.4}>
-                          <animate attributeName="stopOpacity" values="0.4;0.6;0.4" dur="2s" repeatCount="indefinite"/>
-                        </stop>
-                        <stop offset="95%" stopColor="#10b981" stopOpacity={0.05}>
-                          <animate attributeName="stopOpacity" values="0.05;0.15;0.05" dur="2s" repeatCount="indefinite"/>
-                        </stop>
+                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
+                        <stop offset="95%" stopColor="#10b981" stopOpacity={0.05} />
                       </linearGradient>
-                      <linearGradient id="lineLight" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="-20%" stopColor="#fff" stopOpacity="0">
-                          <animate attributeName="offset" values="-0.2;1.2" dur="3s" repeatCount="indefinite"/>
-                        </stop>
-                        <stop offset="0%" stopColor="#fff" stopOpacity="0.8">
-                          <animate attributeName="offset" values="0;1.4" dur="3s" repeatCount="indefinite"/>
-                        </stop>
-                        <stop offset="20%" stopColor="#fff" stopOpacity="0">
-                          <animate attributeName="offset" values="0.2;1.6" dur="3s" repeatCount="indefinite"/>
-                        </stop>
-                      </linearGradient>
-                      <filter id="glow">
-                        <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-                        <feMerge>
-                          <feMergeNode in="coloredBlur"/>
-                          <feMergeNode in="SourceGraphic"/>
-                        </feMerge>
-                      </filter>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                     <XAxis dataKey="date" tick={{ fill: '#6b7280', fontSize: 11 }} />
@@ -240,10 +219,8 @@ function DetailPanel({ metric, data, onClose, chartData, formatCurrency, shiftDa
                       formatter={(v, name) => [name === 'Ventas' ? formatCurrency(v) : formatCurrency(v), name]} />
 
                     <Legend />
-                    <Area yAxisId="left" type="monotone" dataKey="ventas" stroke="url(#lineLight)" strokeWidth={3} fill="url(#colorSales)" name="Ventas" filter="url(#glow)" />
-                    <Line yAxisId="right" type="monotone" dataKey="ticketPromedio" stroke="url(#lineLight)" strokeWidth={2} dot={{ fill: '#f59e0b', r: 4 }} name="Ticket Prom." filter="url(#glow)">
-                      <animate attributeName="r" values="4;6;4" dur="1.5s" repeatCount="indefinite"/>
-                    </Line>
+                    <Area yAxisId="left" type="monotone" dataKey="ventas" stroke="#10b981" strokeWidth={3} fill="url(#colorSales)" name="Ventas" />
+                    <Line yAxisId="right" type="monotone" dataKey="ticketPromedio" stroke="#f59e0b" strokeWidth={2} dot={{ fill: '#f59e0b', r: 4 }} name="Ticket Prom." />
                   </ComposedChart>
                 </ResponsiveContainer>
               </div>
@@ -1509,35 +1486,13 @@ export default function Dashboard() {
                           <AreaChart data={chartData}>
                             <defs>
                               <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}>
-                                  <animate attributeName="stopOpacity" values="0.3;0.5;0.3" dur="2s" repeatCount="indefinite"/>
-                                </stop>
-                                <stop offset="95%" stopColor="#10b981" stopOpacity={0}>
-                                  <animate attributeName="stopOpacity" values="0;0.1;0" dur="2s" repeatCount="indefinite"/>
-                                </stop>
+                                <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                                <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                               </linearGradient>
                               <linearGradient id="comparisonGrad" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="5%" stopColor="#94a3b8" stopOpacity={0.3} />
                                 <stop offset="95%" stopColor="#94a3b8" stopOpacity={0} />
                               </linearGradient>
-                              <linearGradient id="salesLineLight" x1="0%" y1="0%" x2="100%" y2="0%">
-                                <stop offset="-20%" stopColor="#fff" stopOpacity="0">
-                                  <animate attributeName="offset" values="-0.2;1.2" dur="2.5s" repeatCount="indefinite"/>
-                                </stop>
-                                <stop offset="0%" stopColor="#fff" stopOpacity="1">
-                                  <animate attributeName="offset" values="0;1.4" dur="2.5s" repeatCount="indefinite"/>
-                                </stop>
-                                <stop offset="20%" stopColor="#fff" stopOpacity="0">
-                                  <animate attributeName="offset" values="0.2;1.6" dur="2.5s" repeatCount="indefinite"/>
-                                </stop>
-                              </linearGradient>
-                              <filter id="glowMain">
-                                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-                                <feMerge>
-                                  <feMergeNode in="coloredBlur"/>
-                                  <feMergeNode in="SourceGraphic"/>
-                                </feMerge>
-                              </filter>
                             </defs>
                             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                             <XAxis dataKey="date" tick={{ fontSize: 11 }} />
@@ -1559,7 +1514,7 @@ export default function Dashboard() {
                           strokeDasharray="5 5" />
 
                         }
-                            <Area type="monotone" dataKey="ventas" stroke="url(#salesLineLight)" strokeWidth={3} fill="url(#salesGrad)" name={showComparison ? "Período Actual" : "Ventas"} filter="url(#glowMain)" />
+                            <Area type="monotone" dataKey="ventas" stroke="#10b981" strokeWidth={2} fill="url(#salesGrad)" name={showComparison ? "Período Actual" : "Ventas"} />
                           </AreaChart>
                         </ResponsiveContainer>
                       </div>
@@ -1605,12 +1560,8 @@ export default function Dashboard() {
                                 <Line yAxisId="right" type="monotone" dataKey="ventasComparacion" stroke="#94a3b8" strokeWidth={2} strokeDasharray="5 5" dot={{ fill: '#94a3b8', r: 3 }} name="Ventas Anterior" />
                               </>
                         }
-                            <Bar yAxisId="left" dataKey="transactions" fill="#a855f7" radius={[4, 4, 0, 0]} name={showComparison ? "Trans. Actual" : "Transacciones"}>
-                              <animate attributeName="opacity" values="0.8;1;0.8" dur="2s" repeatCount="indefinite"/>
-                            </Bar>
-                            <Line yAxisId="right" type="monotone" dataKey="ventas" stroke="url(#salesLineLight)" strokeWidth={2} dot={{ fill: '#ec4899', r: 3 }} name={showComparison ? "Ventas Actual" : "Ventas"} filter="url(#glowMain)">
-                              <animate attributeName="r" values="3;5;3" dur="1.5s" repeatCount="indefinite"/>
-                            </Line>
+                            <Bar yAxisId="left" dataKey="transactions" fill="#a855f7" radius={[4, 4, 0, 0]} name={showComparison ? "Trans. Actual" : "Transacciones"} />
+                            <Line yAxisId="right" type="monotone" dataKey="ventas" stroke="#ec4899" strokeWidth={2} dot={{ fill: '#ec4899', r: 3 }} name={showComparison ? "Ventas Actual" : "Ventas"} />
                           </ComposedChart>
                         </ResponsiveContainer>
                       </div>
@@ -1664,7 +1615,7 @@ export default function Dashboard() {
                           strokeDasharray="5 5" />
 
                         }
-                            <Area type="monotone" dataKey="ticketPromedio" stroke="url(#salesLineLight)" strokeWidth={3} fill="url(#ticketGrad)" name={showComparison ? "Ticket Actual" : "Ticket Promedio"} filter="url(#glowMain)" />
+                            <Area type="monotone" dataKey="ticketPromedio" stroke="#3b82f6" strokeWidth={2} fill="url(#ticketGrad)" name={showComparison ? "Ticket Actual" : "Ticket Promedio"} />
                           </AreaChart>
                         </ResponsiveContainer>
                       </div>
