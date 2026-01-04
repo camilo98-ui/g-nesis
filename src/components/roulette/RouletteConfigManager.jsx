@@ -151,35 +151,7 @@ export default function RouletteConfigManager({ storeId }) {
         </div>
       </div>
 
-      {/* Tipo de Premio */}
-      <Card className="p-5 bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200">
-        <div className="flex items-center gap-2 mb-3">
-          <Gift className="w-5 h-5 text-purple-600" />
-          <h3 className="font-bold text-gray-800">Tipo de Premio</h3>
-        </div>
-        <div className="flex gap-3">
-          <Button
-            onClick={() => {
-              setAwardType('tienda');
-              setPrizes(DEFAULT_PRIZES_TIENDA);
-            }}
-            variant={awardType === 'tienda' ? 'default' : 'outline'}
-            className={awardType === 'tienda' ? 'bg-pink-500 hover:bg-pink-600' : ''}
-          >
-            ⭐ Popsy Star Tienda
-          </Button>
-          <Button
-            onClick={() => {
-              setAwardType('distrito');
-              setPrizes(DEFAULT_PRIZES_DISTRITO);
-            }}
-            variant={awardType === 'distrito' ? 'default' : 'outline'}
-            className={awardType === 'distrito' ? 'bg-purple-500 hover:bg-purple-600' : ''}
-          >
-            🏆 Popsy Star Distrito
-          </Button>
-        </div>
-      </Card>
+
 
       {/* Configuración de Seguridad */}
       <Card className="p-5 bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200">
