@@ -926,7 +926,106 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100">
+      {/* Fondo 3D con relieve sutil y profesional */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        {/* Gradiente base suave */}
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-100/40 via-gray-50/60 to-purple-100/30" />
+        
+        {/* Siluetas 3D con sombras y relieves sutiles */}
+        <motion.div
+          animate={{
+            x: [0, 30, 0],
+            y: [0, -20, 0],
+            rotateZ: [0, 5, 0]
+          }}
+          transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute -top-32 -right-32 w-96 h-96 rounded-full"
+          style={{
+            background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.08) 0%, rgba(168, 85, 247, 0.06) 100%)',
+            boxShadow: 'inset -10px -10px 30px rgba(255, 255, 255, 0.4), inset 10px 10px 30px rgba(0, 0, 0, 0.05), 0 20px 60px rgba(236, 72, 153, 0.1)',
+            filter: 'blur(40px)'
+          }}
+        />
+        
+        <motion.div
+          animate={{
+            x: [0, -40, 0],
+            y: [0, 30, 0],
+            rotateZ: [0, -8, 0]
+          }}
+          transition={{ duration: 30, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full"
+          style={{
+            background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.07) 0%, rgba(147, 51, 234, 0.05) 100%)',
+            boxShadow: 'inset -15px -15px 40px rgba(255, 255, 255, 0.3), inset 15px 15px 40px rgba(0, 0, 0, 0.04), 0 25px 70px rgba(59, 130, 246, 0.08)',
+            filter: 'blur(50px)'
+          }}
+        />
+        
+        <motion.div
+          animate={{
+            x: [0, 20, 0],
+            y: [0, -30, 0],
+            scale: [1, 1.1, 1]
+          }}
+          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-1/3 right-[15%] w-64 h-64 rounded-full"
+          style={{
+            background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.06) 0%, rgba(236, 72, 153, 0.05) 100%)',
+            boxShadow: 'inset -8px -8px 25px rgba(255, 255, 255, 0.3), inset 8px 8px 25px rgba(0, 0, 0, 0.03), 0 15px 50px rgba(168, 85, 247, 0.07)',
+            filter: 'blur(35px)'
+          }}
+        />
+        
+        <motion.div
+          animate={{
+            x: [0, -15, 0],
+            y: [0, 25, 0],
+            rotateZ: [0, 10, 0]
+          }}
+          transition={{ duration: 28, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute bottom-1/4 left-[20%] w-80 h-80 rounded-full"
+          style={{
+            background: 'linear-gradient(135deg, rgba(251, 113, 133, 0.06) 0%, rgba(249, 168, 212, 0.04) 100%)',
+            boxShadow: 'inset -12px -12px 35px rgba(255, 255, 255, 0.35), inset 12px 12px 35px rgba(0, 0, 0, 0.04), 0 20px 65px rgba(251, 113, 133, 0.08)',
+            filter: 'blur(45px)'
+          }}
+        />
+
+        {/* Elementos geométricos pequeños con relieve */}
+        <motion.div
+          animate={{ rotate: 360, scale: [1, 1.15, 1] }}
+          transition={{ duration: 35, repeat: Infinity, ease: "linear" }}
+          className="absolute top-[15%] left-[25%] w-24 h-24 rounded-2xl opacity-40"
+          style={{
+            background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.1), rgba(244, 114, 182, 0.05))',
+            boxShadow: 'inset -5px -5px 15px rgba(255, 255, 255, 0.5), inset 5px 5px 15px rgba(0, 0, 0, 0.05)',
+            filter: 'blur(8px)'
+          }}
+        />
+        
+        <motion.div
+          animate={{ rotate: -360, y: [0, -20, 0] }}
+          transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
+          className="absolute bottom-[20%] right-[30%] w-32 h-32 rounded-full opacity-30"
+          style={{
+            background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.08), rgba(192, 132, 252, 0.04))',
+            boxShadow: 'inset -6px -6px 18px rgba(255, 255, 255, 0.4), inset 6px 6px 18px rgba(0, 0, 0, 0.04)',
+            filter: 'blur(10px)'
+          }}
+        />
+
+        {/* Grid sutil para agregar textura */}
+        <div 
+          className="absolute inset-0 opacity-[0.02]"
+          style={{
+            backgroundImage: 'linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px)',
+            backgroundSize: '50px 50px'
+          }}
+        />
+      </div>
+
       <div className="max-w-6xl mx-auto px-4 py-6 relative z-10">
 
 
