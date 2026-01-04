@@ -480,29 +480,29 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                 )}
               </div>
 
-              <div className="grid grid-cols-2 gap-8 mb-8">
+              <div className="grid grid-cols-2 gap-4 mb-6">
                 <div className="text-center">
-                  <p className="text-xs text-white/80 mb-4 font-medium">Meta del Día (105%)</p>
+                  <p className="text-xs text-white/80 mb-3 font-medium">Meta del Día (105%)</p>
                   <motion.p
                     key={budgetData.adjustedDailyBudget}
                     initial={{ scale: 1.2, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    className="text-4xl md:text-5xl font-black text-white leading-none mb-3"
+                    className="text-2xl md:text-3xl font-black text-white leading-none mb-2"
                   >
                     {formatCurrency(budgetData.adjustedDailyBudget)}
                   </motion.p>
-                  <p className="text-xs text-white/70">Base: {formatCurrency(budgetData.adjustedDailyBudget / 1.05)}</p>
+                  <p className="text-[10px] text-white/70">Base: {formatCurrency(budgetData.adjustedDailyBudget / 1.05)}</p>
                   
                   {/* Sparkline debajo del número */}
                   {budgetData.last7DaysSales?.length > 0 && (
-                    <div className="mt-4 h-12">
+                    <div className="mt-3 h-10">
                       <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={budgetData.last7DaysSales}>
                           <Line 
                             type="monotone" 
                             dataKey="value" 
                             stroke="#fff" 
-                            strokeWidth={2.5} 
+                            strokeWidth={2} 
                             dot={false}
                             strokeOpacity={0.6}
                           />
@@ -513,22 +513,22 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                 </div>
                 
                 <div className="text-center">
-                  <p className="text-xs text-white/80 mb-4 font-medium">Promedio Histórico</p>
-                  <p className="text-4xl md:text-5xl font-black text-white leading-none mb-3">
+                  <p className="text-xs text-white/80 mb-3 font-medium">Promedio Histórico</p>
+                  <p className="text-2xl md:text-3xl font-black text-white leading-none mb-2">
                     {formatCurrency(budgetData.historicalAvgToday)}
                   </p>
-                  <p className="text-xs text-white/70">{format(new Date(), 'EEEE', { locale: es })}s anteriores</p>
+                  <p className="text-[10px] text-white/70">{format(new Date(), 'EEEE', { locale: es })}s anteriores</p>
                   
                   {/* Sparkline debajo del número */}
                   {budgetData.last7DaysSales?.length > 0 && (
-                    <div className="mt-4 h-12">
+                    <div className="mt-3 h-10">
                       <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={budgetData.last7DaysSales}>
                           <Line 
                             type="monotone" 
                             dataKey="value" 
                             stroke="#fff" 
-                            strokeWidth={2.5} 
+                            strokeWidth={2} 
                             dot={false}
                             strokeOpacity={0.6}
                           />
