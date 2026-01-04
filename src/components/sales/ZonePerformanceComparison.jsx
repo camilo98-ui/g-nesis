@@ -263,38 +263,43 @@ export default function ZonePerformanceComparison({ storeId, formatCurrency }) {
         </motion.div>
       </motion.div>
 
-      <div className="p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+      <motion.div
+        initial={{ opacity: 0, height: 0 }}
+        animate={{ opacity: 1, height: 'auto' }}
+        exit={{ opacity: 0, height: 0 }}
+        className="p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6"
+      >
         {/* Radar comparativo */}
-        <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-4 lg:p-5 border border-indigo-200/40 shadow-lg">
-          <h4 className="text-xs lg:text-sm font-black text-indigo-900 mb-3 lg:mb-4 flex items-center gap-2">
-            <Target className="w-4 h-4 lg:w-5 lg:h-5 text-indigo-500" />
+        <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-4 lg:p-5 border border-rose-200/40 shadow-lg">
+          <h4 className="text-xs lg:text-sm font-black text-rose-900 mb-3 lg:mb-4 flex items-center gap-2">
+            <Target className="w-4 h-4 lg:w-5 lg:h-5 text-rose-500" />
             Performance vs Promedio Zona
           </h4>
           <ResponsiveContainer width="100%" height={220}>
             <RadarChart data={radarData}>
               <defs>
                 <linearGradient id="radarCurrent" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#6366f1" stopOpacity={0.8} />
-                  <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0.3} />
+                  <stop offset="0%" stopColor="#fb7185" stopOpacity={0.8} />
+                  <stop offset="100%" stopColor="#fda4af" stopOpacity={0.3} />
                 </linearGradient>
                 <linearGradient id="radarZone" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#94a3b8" stopOpacity={0.5} />
-                  <stop offset="100%" stopColor="#cbd5e1" stopOpacity={0.2} />
+                  <stop offset="0%" stopColor="#fecdd3" stopOpacity={0.5} />
+                  <stop offset="100%" stopColor="#ffe4e6" stopOpacity={0.2} />
                 </linearGradient>
               </defs>
-              <PolarGrid stroke="#e5e7eb" strokeWidth={1.5} />
-              <PolarAngleAxis dataKey="metric" tick={{ fill: '#64748b', fontSize: 10, fontWeight: 600 }} />
-              <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fill: '#94a3b8', fontSize: 9 }} />
-              <Radar name="Tu Tienda" dataKey="tuTienda" stroke="#6366f1" strokeWidth={3} fill="url(#radarCurrent)" />
-              <Radar name="Promedio Zona" dataKey="promedio" stroke="#94a3b8" strokeWidth={2} fill="url(#radarZone)" strokeDasharray="5 5" />
+              <PolarGrid stroke="#fecdd3" strokeWidth={1.5} />
+              <PolarAngleAxis dataKey="metric" tick={{ fill: '#be123c', fontSize: 10, fontWeight: 600 }} />
+              <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fill: '#fb7185', fontSize: 9 }} />
+              <Radar name="Tu Tienda" dataKey="tuTienda" stroke="#fb7185" strokeWidth={3} fill="url(#radarCurrent)" />
+              <Radar name="Promedio Zona" dataKey="promedio" stroke="#fecdd3" strokeWidth={2} fill="url(#radarZone)" strokeDasharray="5 5" />
               <Legend wrapperStyle={{ fontSize: 11, fontWeight: 600 }} />
             </RadarChart>
           </ResponsiveContainer>
-          <p className="text-[10px] text-center text-indigo-600 mt-2">Posición #{position} de {totalStores} en {zone}</p>
+          <p className="text-[10px] text-center text-rose-600 mt-2">Posición #{position} de {totalStores} en {zone}</p>
         </div>
 
         {/* Top 3 Tiendas */}
-        <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-4 lg:p-5 border border-pink-200/40 shadow-lg">
+        <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-4 lg:p-5 border border-rose-200/40 shadow-lg">
           <h4 className="text-xs lg:text-sm font-black text-pink-900 mb-3 lg:mb-4 flex items-center gap-2">
             <Award className="w-4 h-4 lg:w-5 lg:h-5 text-amber-500" />
             Top 3 Tiendas de {zone}
