@@ -465,33 +465,33 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
           <motion.div
             whileHover={{ scale: 1.02, y: -2 }}
             onClick={() => setIsExpanded(!isExpanded)}
-            className="w-full bg-gradient-to-br from-rose-400/80 to-pink-400/80 rounded-2xl shadow-md p-6 border border-rose-300/40 relative overflow-hidden cursor-pointer"
+            className="w-full bg-gradient-to-br from-rose-400/80 to-pink-400/80 rounded-2xl shadow-md p-6 lg:p-8 border border-rose-300/40 relative overflow-hidden cursor-pointer"
           >
             <div className="relative z-10">
-              <div className="flex items-center justify-between mb-7">
-                <div className="flex items-center gap-2">
-                  <Target className="w-6 h-6 text-white" />
-                  <p className="text-sm text-white/90 font-semibold">Meta del Día</p>
+              <div className="flex items-center justify-between mb-7 lg:mb-5">
+                <div className="flex items-center gap-2 lg:gap-3">
+                  <Target className="w-6 h-6 lg:w-7 lg:h-7 text-white" />
+                  <p className="text-sm lg:text-base text-white/90 font-semibold lg:font-bold">Meta del Día</p>
                 </div>
                 {needsRecovery && (
-                  <div className="px-3 py-1 bg-amber-100/70 rounded-full">
-                    <p className="text-[10px] font-black text-amber-700">AJUSTADO</p>
+                  <div className="px-3 py-1 lg:px-4 lg:py-1.5 bg-amber-100/70 rounded-full">
+                    <p className="text-[10px] lg:text-xs font-black text-amber-700">AJUSTADO</p>
                   </div>
                 )}
               </div>
 
-              <div className="grid grid-cols-2 gap-6 mb-6">
+              <div className="grid grid-cols-2 gap-6 lg:gap-10 mb-6 lg:mb-5">
                 <div className="text-left">
-                  <p className="text-sm text-white/90 mb-3 font-semibold">Meta del Día (105%)</p>
+                  <p className="text-sm lg:text-base text-white/90 mb-3 lg:mb-2 font-semibold">Meta del Día (105%)</p>
                   <motion.p
                     key={budgetData.adjustedDailyBudget}
                     initial={{ scale: 1.2, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    className="text-2xl md:text-3xl font-black text-white leading-none mb-2"
+                    className="text-2xl md:text-3xl lg:text-5xl font-black text-white leading-none mb-2"
                   >
                     {formatCurrency(budgetData.adjustedDailyBudget)}
                   </motion.p>
-                  <p className="text-xs text-white/70">Base: {formatCurrency(budgetData.adjustedDailyBudget / 1.05)}</p>
+                  <p className="text-xs lg:text-sm text-white/70">Base: {formatCurrency(budgetData.adjustedDailyBudget / 1.05)}</p>
                   
                   {/* Sparkline debajo del número */}
                   {budgetData.last7DaysSales?.length > 0 && (
@@ -541,11 +541,11 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                 </div>
                 
                 <div className="text-left">
-                  <p className="text-sm text-white/90 mb-3 font-semibold">Promedio Histórico</p>
-                  <p className="text-2xl md:text-3xl font-black text-white leading-none mb-2">
+                  <p className="text-sm lg:text-base text-white/90 mb-3 lg:mb-2 font-semibold">Promedio Histórico</p>
+                  <p className="text-2xl md:text-3xl lg:text-5xl font-black text-white leading-none mb-2">
                     {formatCurrency(budgetData.historicalAvgToday)}
                   </p>
-                  <p className="text-xs text-white/70">{format(new Date(), 'EEEE', { locale: es })}s anteriores</p>
+                  <p className="text-xs lg:text-sm text-white/70">{format(new Date(), 'EEEE', { locale: es })}s anteriores</p>
                   
                   {/* Sparkline debajo del número */}
                   {budgetData.last7DaysSales?.length > 0 && (
@@ -596,11 +596,11 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
               </div>
 
               <div className="space-y-2 mb-4">
-                <div className="flex items-center justify-between text-xs">
+                <div className="flex items-center justify-between text-xs lg:text-sm">
                   <span className="text-white/70">Proyección Semanal</span>
-                  <span className="font-bold text-white">{budgetData.projectionCompliance.toFixed(0)}%</span>
+                  <span className="font-bold lg:font-black text-white lg:text-lg">{budgetData.projectionCompliance.toFixed(0)}%</span>
                 </div>
-                <div className="relative h-3 bg-white/20 rounded-full overflow-hidden">
+                <div className="relative h-3 lg:h-4 bg-white/20 rounded-full overflow-hidden">
                   <div
                     className={`h-full rounded-full relative overflow-hidden ${
                       budgetData.projectionCompliance >= 100 
@@ -623,7 +623,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                     />
                   </div>
                 </div>
-                <p className="text-[10px] text-white/50">
+                <p className="text-[10px] lg:text-xs text-white/50 lg:text-white/60">
                   {budgetData.projectionCompliance >= 100 
                     ? `🚀 Superando meta en ${(budgetData.projectionCompliance - 100).toFixed(0)}%`
                     : `📈 ${formatCurrency(budgetData.weeklyBudget - budgetData.weekProjection)} para alcanzar meta`}
