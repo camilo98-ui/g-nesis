@@ -7,7 +7,6 @@ import DesignSystem from './pages/DesignSystem';
 import ExecutiveDashboard from './pages/ExecutiveDashboard';
 import ExecutiveExperience from './pages/ExecutiveExperience';
 import FreezerMap from './pages/FreezerMap';
-import Home from './pages/Home';
 import Management from './pages/Management';
 import PopsyPlanner from './pages/PopsyPlanner';
 import PredictiveAnalytics from './pages/PredictiveAnalytics';
@@ -22,6 +21,7 @@ import Settings from './pages/Settings';
 import TWAGuide from './pages/TWAGuide';
 import Team from './pages/Team';
 import Training from './pages/Training';
+import Home from './pages/Home';
 import __Layout from './Layout.jsx';
 
 
@@ -35,7 +35,6 @@ export const PAGES = {
     "ExecutiveDashboard": ExecutiveDashboard,
     "ExecutiveExperience": ExecutiveExperience,
     "FreezerMap": FreezerMap,
-    "Home": Home,
     "Management": Management,
     "PopsyPlanner": PopsyPlanner,
     "PredictiveAnalytics": PredictiveAnalytics,
@@ -50,6 +49,7 @@ export const PAGES = {
     "TWAGuide": TWAGuide,
     "Team": Team,
     "Training": Training,
+    "Home": Home,
 }
 
 export const pagesConfig = {

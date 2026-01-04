@@ -130,14 +130,14 @@ export default function Layout({ children, currentPageName }) {
             <div className="absolute inset-0 bg-gradient-to-br from-pink-200/80 via-purple-200/70 to-blue-200/80" />
 
             {/* Animated color-shifting orbs más visibles */}
-            <div className="absolute top-10 right-[8%] w-[700px] h-[700px] rounded-full blur-3xl animate-gradient-1" style={{ opacity: 0.9 }} />
-            <div className="absolute bottom-10 left-[12%] w-[800px] h-[800px] rounded-full blur-3xl animate-gradient-2" style={{ opacity: 0.85 }} />
-            <div className="absolute top-1/3 left-1/3 w-[600px] h-[600px] rounded-full blur-3xl animate-gradient-3" style={{ opacity: 0.9 }} />
+            <div className="absolute top-10 right-[8%] w-[700px] h-[700px] rounded-full blur-3xl animate-gradient-1 animate-vertical-swap-1" style={{ opacity: 0.9 }} />
+            <div className="absolute bottom-10 left-[12%] w-[800px] h-[800px] rounded-full blur-3xl animate-gradient-2 animate-vertical-swap-2" style={{ opacity: 0.85 }} />
+            <div className="absolute top-1/3 left-1/3 w-[600px] h-[600px] rounded-full blur-3xl animate-gradient-3 animate-vertical-swap-3" style={{ opacity: 0.9 }} />
 
             {/* Orbs secundarios con colores intensos */}
-            <div className="absolute top-1/2 right-[20%] w-[450px] h-[450px] rounded-full blur-3xl animate-pulse-slow" style={{ background: 'radial-gradient(circle, rgba(251, 113, 133, 0.6), rgba(236, 72, 153, 0.3), transparent)', opacity: 0.7 }} />
-            <div className="absolute bottom-1/4 right-[15%] w-[400px] h-[400px] rounded-full blur-3xl" style={{ background: 'radial-gradient(circle, rgba(168, 85, 247, 0.5), rgba(147, 51, 234, 0.25), transparent)', animation: 'gradient-shift-1 18s ease-in-out infinite reverse', opacity: 0.65 }} />
-            <div className="absolute top-[15%] left-[20%] w-[350px] h-[350px] rounded-full blur-2xl animate-float" style={{ background: 'radial-gradient(circle, rgba(59, 130, 246, 0.5), rgba(37, 99, 235, 0.25), transparent)', opacity: 0.6 }} />
+            <div className="absolute top-1/2 right-[20%] w-[450px] h-[450px] rounded-full blur-3xl animate-pulse-slow animate-vertical-swap-4" style={{ background: 'radial-gradient(circle, rgba(251, 113, 133, 0.6), rgba(236, 72, 153, 0.3), transparent)', opacity: 0.7 }} />
+            <div className="absolute bottom-1/4 right-[15%] w-[400px] h-[400px] rounded-full blur-3xl animate-vertical-swap-5" style={{ background: 'radial-gradient(circle, rgba(168, 85, 247, 0.5), rgba(147, 51, 234, 0.25), transparent)', animation: 'gradient-shift-1 18s ease-in-out infinite reverse', opacity: 0.65 }} />
+            <div className="absolute top-[15%] left-[20%] w-[350px] h-[350px] rounded-full blur-2xl animate-float animate-vertical-swap-6" style={{ background: 'radial-gradient(circle, rgba(59, 130, 246, 0.5), rgba(37, 99, 235, 0.25), transparent)', opacity: 0.6 }} />
 
             {/* Grid overlay más sutil */}
             <div className="absolute inset-0 bg-[linear-gradient(to_right,#8885_1px,transparent_1px),linear-gradient(to_bottom,#8885_1px,transparent_1px)] bg-[size:80px_80px] opacity-15" />

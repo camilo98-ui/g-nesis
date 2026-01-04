@@ -373,3 +373,60 @@ meta[name="robots"] {
 .animate-gradient-3 {
   animation: gradient-shift-3 22s ease-in-out infinite;
 }
+
+/* Animaciones de intercambio vertical */
+@keyframes vertical-swap-1 {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(calc(100vh - 120px)); }
+}
+
+@keyframes vertical-swap-2 {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(calc(-100vh + 120px)); }
+}
+
+@keyframes vertical-swap-3 {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  25% { transform: translateY(40vh) translateX(20px); }
+  50% { transform: translateY(-45vh) translateX(-30px); }
+  75% { transform: translateY(35vh) translateX(15px); }
+}
+
+@keyframes vertical-swap-4 {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-55vh); }
+}
+
+@keyframes vertical-swap-5 {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(60vh); }
+}
+
+@keyframes vertical-swap-6 {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(70vh); }
+}
+
+.animate-vertical-swap-1 {
+  animation: vertical-swap-1 20s ease-in-out infinite;
+}
+
+.animate-vertical-swap-2 {
+  animation: vertical-swap-2 22s ease-in-out infinite;
+}
+
+.animate-vertical-swap-3 {
+  animation: vertical-swap-3 25s ease-in-out infinite;
+}
+
+.animate-vertical-swap-4 {
+  animation: vertical-swap-4 18s ease-in-out infinite;
+}
+
+.animate-vertical-swap-5 {
+  animation: vertical-swap-5 24s ease-in-out infinite;
+}
+
+.animate-vertical-swap-6 {
+  animation: vertical-swap-6 21s ease-in-out infinite;
+}
