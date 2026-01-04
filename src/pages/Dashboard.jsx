@@ -629,6 +629,22 @@ export default function Dashboard() {
     });
   }, [dailySales, comparisonRange, showComparison]);
 
+  // Totales acumulados del MES COMPLETO (no filtrados)
+  const monthlyTotals = useMemo(() => {
+    const now = new Date();
+    const monthSales = dailySales.filter(s => {
+      const saleDate = new Date(s.date?.split('T')[0] || s.date);
+      return saleDate.getMonth() === now.getMonth() && saleDate.getFullYear() === now.getFullYear();
+    });
+    
+    return monthSales.reduce((acc, s) => ({
+      sales: acc.sales + (s.total_sales || 0),
+      tickets: acc.tickets + (s.total_tickets || 0),
+      transactions: acc.transactions + (s.total_transactions || 0),
+      suggested: acc.suggested + (s.total_suggested || 0)
+    }), { sales: 0, tickets: 0, transactions: 0, suggested: 0 });
+  }, [dailySales]);
+
   const totals = useMemo(() => {
     return filteredSales.reduce((acc, s) => ({
       sales: acc.sales + (s.total_sales || 0),
@@ -818,8 +834,8 @@ export default function Dashboard() {
     return null;
   };
 
-  // Calcular ticket promedio correctamente
-  const avgTicket = totals.transactions > 0 ? totals.sales / totals.transactions : 0;
+  // Calcular ticket promedio del MES COMPLETO
+  const avgTicketMonth = monthlyTotals.transactions > 0 ? monthlyTotals.sales / monthlyTotals.transactions : 0;
   const comparisonAvgTicket = comparisonTotals && comparisonTotals.transactions > 0 ?
   comparisonTotals.sales / comparisonTotals.transactions :
   0;
@@ -827,8 +843,8 @@ export default function Dashboard() {
   const metrics = [
   {
     id: 'sales',
-    title: 'Ventas Totales',
-    value: totals.sales,
+    title: 'Ventas Totales (Mes)',
+    value: monthlyTotals.sales,
     comparisonValue: comparisonTotals?.sales,
     budget: currentBudget.sales_budget,
     icon: DollarSign,
@@ -839,8 +855,8 @@ export default function Dashboard() {
   },
   {
     id: 'tickets',
-    title: 'Ticket Promedio',
-    value: avgTicket,
+    title: 'Ticket Promedio (Mes)',
+    value: avgTicketMonth,
     comparisonValue: comparisonAvgTicket,
     budget: currentBudget.tickets_budget,
     icon: Receipt,
@@ -851,8 +867,8 @@ export default function Dashboard() {
   },
   {
     id: 'transactions',
-    title: 'Transacciones',
-    value: totals.transactions,
+    title: 'Transacciones (Mes)',
+    value: monthlyTotals.transactions,
     comparisonValue: comparisonTotals?.transactions,
     budget: currentBudget.transactions_budget,
     icon: Zap,
@@ -862,8 +878,8 @@ export default function Dashboard() {
   },
   {
     id: 'suggested',
-    title: 'Sugeridos',
-    value: totals.suggested,
+    title: 'Sugeridos (Mes)',
+    value: monthlyTotals.suggested,
     comparisonValue: comparisonTotals?.suggested,
     budget: currentBudget.suggested_budget,
     icon: Gift,
