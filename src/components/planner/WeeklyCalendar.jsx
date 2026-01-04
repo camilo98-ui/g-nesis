@@ -372,23 +372,23 @@ export default function WeeklyCalendar({
                       className={`min-h-[400px] sm:min-h-[380px] min-w-[110px] sm:min-w-[140px] transition-all relative ${snapshot.isDraggingOver ? 'bg-pink-50/50' : ''} ${isCurrentDay ? 'bg-rose-50/30' : isHovered ? 'bg-gray-50/30' : 'bg-white'} ${holiday ? 'bg-gradient-to-b from-amber-50/50 to-orange-50/30' : ''}`}
                     >
                       {/* Day Header - Mejorado para móvil */}
-                      <div className={`p-2 sm:p-2 text-center border-b sticky top-0 z-10 ${isCurrentDay ? 'bg-gradient-to-r from-rose-300 to-pink-300 text-white shadow-md' : holiday ? 'bg-gradient-to-r from-amber-300 to-orange-300 text-white' : 'bg-gray-50'}`}>
-                        <p className={`text-[10px] sm:text-[10px] font-bold uppercase tracking-wider mb-0.5 ${isCurrentDay || holiday ? 'text-white/90' : 'text-gray-400'}`}>
-                          {format(day, 'EEE', { locale: es })}
-                        </p>
-                        <p className={`text-2xl sm:text-xl font-black ${isCurrentDay || holiday ? 'text-white' : 'text-gray-700'}`}>{format(day, 'd')}</p>
-                        {holiday && (
-                          <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 1, repeat: Infinity }} className="flex items-center justify-center gap-1 text-[10px] text-white/90 mt-0.5">
-                            <PartyPopper className="w-3 h-3" /> Festivo
-                          </motion.div>
-                        )}
-                        <p className={`text-[10px] sm:text-[9px] font-medium mt-1 ${isCurrentDay || holiday ? 'text-white/80' : 'text-gray-500'}`}>
-                          {dayShifts.length} turno{dayShifts.length !== 1 ? 's' : ''}
-                        </p>
+                      <div className={`p-3 sm:p-2 text-center border-b sticky top-0 z-10 ${isCurrentDay ? 'bg-gradient-to-r from-rose-300 to-pink-300 text-white shadow-md' : holiday ? 'bg-gradient-to-r from-amber-300 to-orange-300 text-white' : 'bg-gray-50'}`}>
+                       <p className={`text-[11px] sm:text-[10px] font-bold uppercase tracking-wider mb-1 ${isCurrentDay || holiday ? 'text-white/90' : 'text-gray-400'}`}>
+                         {format(day, 'EEE', { locale: es })}
+                       </p>
+                       <p className={`text-3xl sm:text-xl font-black ${isCurrentDay || holiday ? 'text-white' : 'text-gray-700'}`}>{format(day, 'd')}</p>
+                       {holiday && (
+                         <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 1, repeat: Infinity }} className="flex items-center justify-center gap-1 text-[10px] text-white/90 mt-1">
+                           <PartyPopper className="w-3 h-3" /> Festivo
+                         </motion.div>
+                       )}
+                       <p className={`text-[11px] sm:text-[9px] font-medium mt-1.5 ${isCurrentDay || holiday ? 'text-white/80' : 'text-gray-500'}`}>
+                         {dayShifts.length} turno{dayShifts.length !== 1 ? 's' : ''}
+                       </p>
                       </div>
 
                       {/* Shifts - OPTIMIZADO para móvil */}
-                      <div className="p-1.5 sm:p-1.5 space-y-2 sm:space-y-1.5">
+                      <div className="p-2.5 sm:p-1.5 space-y-3 sm:space-y-1.5">
                         <AnimatePresence>
                           {dayShifts.map((shift, shiftIdx) => {
                             const role = ROLES_CONFIG[shift.role] || ROLES_CONFIG.caja;
