@@ -498,28 +498,28 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                       <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={budgetData.last7DaysSales} className="animated-line">
                           <defs>
-                            <filter id="glowUnified">
+                            <filter id="glowFirst">
                               <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
                               <feMerge>
                                 <feMergeNode in="coloredBlur"/>
                                 <feMergeNode in="SourceGraphic"/>
                               </feMerge>
                             </filter>
-                            <linearGradient id="lineGradientUnified" x1="0%" y1="0%" x2="200%" y2="0%">
+                            <linearGradient id="lineGradientFirst" x1="0%" y1="0%" x2="100%" y2="0%">
                               <stop offset="-20%" stopColor="#fff" stopOpacity="0">
-                                <animate attributeName="offset" values="-0.2;2.2" dur="4s" repeatCount="indefinite"/>
+                                <animate attributeName="offset" values="-0.2;1.2" dur="2s" repeatCount="indefinite"/>
                               </stop>
                               <stop offset="-10%" stopColor="#fff" stopOpacity="0.5">
-                                <animate attributeName="offset" values="-0.1;2.3" dur="4s" repeatCount="indefinite"/>
+                                <animate attributeName="offset" values="-0.1;1.3" dur="2s" repeatCount="indefinite"/>
                               </stop>
                               <stop offset="0%" stopColor="#fff" stopOpacity="1">
-                                <animate attributeName="offset" values="0;2.4" dur="4s" repeatCount="indefinite"/>
+                                <animate attributeName="offset" values="0;1.4" dur="2s" repeatCount="indefinite"/>
                               </stop>
                               <stop offset="10%" stopColor="#fff" stopOpacity="0.5">
-                                <animate attributeName="offset" values="0.1;2.5" dur="4s" repeatCount="indefinite"/>
+                                <animate attributeName="offset" values="0.1;1.5" dur="2s" repeatCount="indefinite"/>
                               </stop>
                               <stop offset="20%" stopColor="#fff" stopOpacity="0">
-                                <animate attributeName="offset" values="0.2;2.6" dur="4s" repeatCount="indefinite"/>
+                                <animate attributeName="offset" values="0.2;1.6" dur="2s" repeatCount="indefinite"/>
                               </stop>
                             </linearGradient>
                           </defs>
@@ -535,10 +535,10 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                           <Line 
                             type="monotone" 
                             dataKey="value" 
-                            stroke="url(#lineGradientUnified)" 
+                            stroke="url(#lineGradientFirst)" 
                             strokeWidth={3} 
                             dot={false}
-                            filter="url(#glowUnified)"
+                            filter="url(#glowFirst)"
                             isAnimationActive={true}
                             animationDuration={2000}
                             animationEasing="ease-in-out"
@@ -547,6 +547,32 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                       </ResponsiveContainer>
                       <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={budgetData.last7DaysSales} className="animated-line">
+                          <defs>
+                            <filter id="glowSecond">
+                              <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                              <feMerge>
+                                <feMergeNode in="coloredBlur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                              </feMerge>
+                            </filter>
+                            <linearGradient id="lineGradientSecond" x1="0%" y1="0%" x2="100%" y2="0%">
+                              <stop offset="-20%" stopColor="#fff" stopOpacity="0">
+                                <animate attributeName="offset" values="-0.2;1.2" dur="2s" begin="2s" repeatCount="indefinite"/>
+                              </stop>
+                              <stop offset="-10%" stopColor="#fff" stopOpacity="0.5">
+                                <animate attributeName="offset" values="-0.1;1.3" dur="2s" begin="2s" repeatCount="indefinite"/>
+                              </stop>
+                              <stop offset="0%" stopColor="#fff" stopOpacity="1">
+                                <animate attributeName="offset" values="0;1.4" dur="2s" begin="2s" repeatCount="indefinite"/>
+                              </stop>
+                              <stop offset="10%" stopColor="#fff" stopOpacity="0.5">
+                                <animate attributeName="offset" values="0.1;1.5" dur="2s" begin="2s" repeatCount="indefinite"/>
+                              </stop>
+                              <stop offset="20%" stopColor="#fff" stopOpacity="0">
+                                <animate attributeName="offset" values="0.2;1.6" dur="2s" begin="2s" repeatCount="indefinite"/>
+                              </stop>
+                            </linearGradient>
+                          </defs>
                           <Line 
                             type="monotone" 
                             dataKey="value" 
@@ -559,10 +585,10 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                           <Line 
                             type="monotone" 
                             dataKey="value" 
-                            stroke="url(#lineGradientUnified)" 
+                            stroke="url(#lineGradientSecond)" 
                             strokeWidth={3} 
                             dot={false}
-                            filter="url(#glowUnified)"
+                            filter="url(#glowSecond)"
                             isAnimationActive={true}
                             animationDuration={2000}
                             animationEasing="ease-in-out"
