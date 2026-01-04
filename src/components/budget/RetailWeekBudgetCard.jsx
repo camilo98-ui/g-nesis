@@ -627,12 +627,19 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                         : 'bg-gradient-to-r from-orange-200/80 to-red-200/80'
                     }`}
                   >
-                    <div 
+                    <motion.div
                       className="absolute inset-0"
                       style={{
                         background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.9) 50%, transparent 100%)',
-                        width: '30%',
-                        animation: 'slideRight 2s ease-in-out infinite'
+                        width: '30%'
+                      }}
+                      animate={{
+                        x: ['-100%', '400%']
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: 'linear'
                       }}
                     />
                   </motion.div>
@@ -666,12 +673,19 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                           : 'bg-gradient-to-r from-orange-200/80 to-red-200/80'
                       }`}
                     >
-                      <div 
+                      <motion.div
                         className="absolute inset-0"
                         style={{
                           background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.9) 50%, transparent 100%)',
-                          width: '30%',
-                          animation: 'slideRight 2s ease-in-out infinite'
+                          width: '30%'
+                        }}
+                        animate={{
+                          x: ['-100%', '400%']
+                        }}
+                        transition={{
+                          duration: 2,
+                          repeat: Infinity,
+                          ease: 'linear'
                         }}
                       />
                     </motion.div>
