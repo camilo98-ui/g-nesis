@@ -709,7 +709,7 @@ export default function Home() {
                       onKeyDown={(e) => e.key === 'Enter' && !isSubmitting && handleLogin()}
                       disabled={isSubmitting}
                       autoComplete="current-password"
-                      className="w-full h-14 pl-4 pr-12 border-2 border-slate-200/60 rounded-xl focus:ring-2 focus:ring-pink-400/50 focus:border-pink-400/50 outline-none text-base text-slate-900 placeholder:text-slate-400 disabled:opacity-50 disabled:cursor-not-allowed bg-white/80 backdrop-blur-sm"
+                      className="w-full h-14 pl-4 pr-12 border-2 border-rose-200/60 rounded-xl focus:ring-2 focus:ring-pink-400/50 focus:border-pink-400/50 outline-none text-base text-slate-900 placeholder:text-slate-400 disabled:opacity-50 disabled:cursor-not-allowed bg-white/80 backdrop-blur-sm"
                     />
                     <button
                       type="button"
@@ -919,7 +919,7 @@ export default function Home() {
                         onKeyDown={(e) => e.key === 'Enter' && !isSubmitting && handleLogin()}
                         disabled={isSubmitting}
                         autoComplete="current-password"
-                        className="w-full pl-11 pr-11 py-3.5 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none text-sm text-slate-900 placeholder:text-slate-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        className="w-full pl-11 pr-11 py-3.5 border-2 border-rose-200 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none text-sm text-slate-900 placeholder:text-slate-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                       />
                       <button
                         type="button"

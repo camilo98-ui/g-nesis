@@ -251,7 +251,7 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
         <PopoverTrigger asChild>
           <Button
             variant="outline"
-            className="w-full h-12 bg-white border-2 border-slate-200 hover:border-pink-300 transition-all shadow-md hover:shadow-lg rounded-2xl justify-between group">
+            className="w-full h-12 bg-white border-2 border-rose-200 hover:border-pink-300 transition-all shadow-md hover:shadow-lg rounded-2xl justify-between group">
 
             <div className="flex items-center gap-2">
               <MapPin className="w-4 h-4 text-pink-500" />
