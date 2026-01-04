@@ -492,109 +492,89 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                     {formatCurrency(budgetData.adjustedDailyBudget)}
                   </motion.p>
                   <p className="text-[10px] text-white/50 mt-0.5">Base: {formatCurrency(budgetData.adjustedDailyBudget / 1.15)}</p>
-                  {/* Sparkline combinado */}
+                  {/* Sparkline combinado con animación secuencial */}
                   {budgetData.last7DaysSales?.length > 0 && (
-                    <div className="mt-2 h-8 grid grid-cols-2 gap-4">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={budgetData.last7DaysSales} className="animated-line">
-                          <defs>
-                            <filter id="glowFirst">
-                              <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-                              <feMerge>
-                                <feMergeNode in="coloredBlur"/>
-                                <feMergeNode in="SourceGraphic"/>
-                              </feMerge>
-                            </filter>
-                            <linearGradient id="lineGradientFirst" x1="0%" y1="0%" x2="100%" y2="0%">
-                              <stop offset="-20%" stopColor="#fff" stopOpacity="0">
-                                <animate attributeName="offset" values="-0.2;1.2" dur="2s" repeatCount="indefinite"/>
-                              </stop>
-                              <stop offset="-10%" stopColor="#fff" stopOpacity="0.5">
-                                <animate attributeName="offset" values="-0.1;1.3" dur="2s" repeatCount="indefinite"/>
-                              </stop>
-                              <stop offset="0%" stopColor="#fff" stopOpacity="1">
-                                <animate attributeName="offset" values="0;1.4" dur="2s" repeatCount="indefinite"/>
-                              </stop>
-                              <stop offset="10%" stopColor="#fff" stopOpacity="0.5">
-                                <animate attributeName="offset" values="0.1;1.5" dur="2s" repeatCount="indefinite"/>
-                              </stop>
-                              <stop offset="20%" stopColor="#fff" stopOpacity="0">
-                                <animate attributeName="offset" values="0.2;1.6" dur="2s" repeatCount="indefinite"/>
-                              </stop>
-                            </linearGradient>
-                          </defs>
-                          <Line 
-                            type="monotone" 
-                            dataKey="value" 
-                            stroke="#fff" 
-                            strokeWidth={2} 
-                            dot={false}
-                            strokeOpacity={0.4}
-                            isAnimationActive={false}
-                          />
-                          <Line 
-                            type="monotone" 
-                            dataKey="value" 
-                            stroke="url(#lineGradientFirst)" 
-                            strokeWidth={3} 
-                            dot={false}
-                            filter="url(#glowFirst)"
-                            isAnimationActive={true}
-                            animationDuration={2000}
-                            animationEasing="ease-in-out"
-                          />
-                        </LineChart>
-                      </ResponsiveContainer>
-                      <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={budgetData.last7DaysSales} className="animated-line">
-                          <defs>
-                            <filter id="glowSecond">
-                              <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-                              <feMerge>
-                                <feMergeNode in="coloredBlur"/>
-                                <feMergeNode in="SourceGraphic"/>
-                              </feMerge>
-                            </filter>
-                            <linearGradient id="lineGradientSecond" x1="0%" y1="0%" x2="100%" y2="0%">
-                              <stop offset="-20%" stopColor="#fff" stopOpacity="0">
-                                <animate attributeName="offset" values="-0.2;1.2" dur="2s" begin="2s" repeatCount="indefinite"/>
-                              </stop>
-                              <stop offset="-10%" stopColor="#fff" stopOpacity="0.5">
-                                <animate attributeName="offset" values="-0.1;1.3" dur="2s" begin="2s" repeatCount="indefinite"/>
-                              </stop>
-                              <stop offset="0%" stopColor="#fff" stopOpacity="1">
-                                <animate attributeName="offset" values="0;1.4" dur="2s" begin="2s" repeatCount="indefinite"/>
-                              </stop>
-                              <stop offset="10%" stopColor="#fff" stopOpacity="0.5">
-                                <animate attributeName="offset" values="0.1;1.5" dur="2s" begin="2s" repeatCount="indefinite"/>
-                              </stop>
-                              <stop offset="20%" stopColor="#fff" stopOpacity="0">
-                                <animate attributeName="offset" values="0.2;1.6" dur="2s" begin="2s" repeatCount="indefinite"/>
-                              </stop>
-                            </linearGradient>
-                          </defs>
-                          <Line 
-                            type="monotone" 
-                            dataKey="value" 
-                            stroke="#fff" 
-                            strokeWidth={2} 
-                            dot={false}
-                            strokeOpacity={0.4}
-                            isAnimationActive={false}
-                          />
-                          <Line 
-                            type="monotone" 
-                            dataKey="value" 
-                            stroke="url(#lineGradientSecond)" 
-                            strokeWidth={3} 
-                            dot={false}
-                            filter="url(#glowSecond)"
-                            isAnimationActive={true}
-                            animationDuration={2000}
-                            animationEasing="ease-in-out"
-                          />
-                        </LineChart>
-                      </ResponsiveContainer>
+                    <div className="mt-2 h-8">
+                      <svg width="100%" height="100%" style={{ overflow: 'visible' }}>
+                        <defs>
+                          <filter id="glowSequential">
+                            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                            <feMerge>
+                              <feMergeNode in="coloredBlur"/>
+                              <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                          </filter>
+                          <linearGradient id="sequentialGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="-20%" stopColor="#fff" stopOpacity="0">
+                              <animate attributeName="offset" values="-0.2;1.2" dur="4s" repeatCount="indefinite"/>
+                            </stop>
+                            <stop offset="-10%" stopColor="#fff" stopOpacity="0.5">
+                              <animate attributeName="offset" values="-0.1;1.3" dur="4s" repeatCount="indefinite"/>
+                            </stop>
+                            <stop offset="0%" stopColor="#fff" stopOpacity="1">
+                              <animate attributeName="offset" values="0;1.4" dur="4s" repeatCount="indefinite"/>
+                            </stop>
+                            <stop offset="10%" stopColor="#fff" stopOpacity="0.5">
+                              <animate attributeName="offset" values="0.1;1.5" dur="4s" repeatCount="indefinite"/>
+                            </stop>
+                            <stop offset="20%" stopColor="#fff" stopOpacity="0">
+                              <animate attributeName="offset" values="0.2;1.6" dur="4s" repeatCount="indefinite"/>
+                            </stop>
+                          </linearGradient>
+                        </defs>
+                        
+                        {/* Primera línea - Lado izquierdo */}
+                        <g transform="translate(0, 0)">
+                          <ResponsiveContainer width="48%" height={32}>
+                            <LineChart data={budgetData.last7DaysSales}>
+                              <Line 
+                                type="monotone" 
+                                dataKey="value" 
+                                stroke="#fff" 
+                                strokeWidth={2} 
+                                dot={false}
+                                strokeOpacity={0.4}
+                                isAnimationActive={false}
+                              />
+                              <Line 
+                                type="monotone" 
+                                dataKey="value" 
+                                stroke="url(#sequentialGradient)" 
+                                strokeWidth={3} 
+                                dot={false}
+                                filter="url(#glowSequential)"
+                                isAnimationActive={false}
+                              />
+                            </LineChart>
+                          </ResponsiveContainer>
+                        </g>
+                        
+                        {/* Segunda línea - Lado derecho */}
+                        <g transform="translate(52%, 0)">
+                          <ResponsiveContainer width="48%" height={32}>
+                            <LineChart data={budgetData.last7DaysSales}>
+                              <Line 
+                                type="monotone" 
+                                dataKey="value" 
+                                stroke="#fff" 
+                                strokeWidth={2} 
+                                dot={false}
+                                strokeOpacity={0.4}
+                                isAnimationActive={false}
+                              />
+                              <Line 
+                                type="monotone" 
+                                dataKey="value" 
+                                stroke="url(#sequentialGradient)" 
+                                strokeWidth={3} 
+                                dot={false}
+                                filter="url(#glowSequential)"
+                                isAnimationActive={false}
+                              />
+                            </LineChart>
+                          </ResponsiveContainer>
+                        </g>
+                      </svg>
                     </div>
                   )}
                 </div>
