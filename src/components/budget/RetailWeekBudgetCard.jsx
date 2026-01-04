@@ -480,134 +480,64 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                 )}
               </div>
 
-              <div className="grid grid-cols-2 gap-6 mb-7">
+              <div className="grid grid-cols-2 gap-8 mb-8">
                 <div className="text-center">
-                  <p className="text-xs text-white/80 mb-3 font-semibold">Meta del Día (105%)</p>
+                  <p className="text-xs text-white/80 mb-4 font-medium">Meta del Día (105%)</p>
                   <motion.p
                     key={budgetData.adjustedDailyBudget}
                     initial={{ scale: 1.2, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    className="text-3xl md:text-4xl font-black text-white leading-tight mb-2"
+                    className="text-4xl md:text-5xl font-black text-white leading-none mb-3"
                   >
                     {formatCurrency(budgetData.adjustedDailyBudget)}
                   </motion.p>
                   <p className="text-xs text-white/70">Base: {formatCurrency(budgetData.adjustedDailyBudget / 1.05)}</p>
+                  
+                  {/* Sparkline debajo del número */}
+                  {budgetData.last7DaysSales?.length > 0 && (
+                    <div className="mt-4 h-12">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={budgetData.last7DaysSales}>
+                          <Line 
+                            type="monotone" 
+                            dataKey="value" 
+                            stroke="#fff" 
+                            strokeWidth={2.5} 
+                            dot={false}
+                            strokeOpacity={0.6}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  )}
                 </div>
                 
-                <div className="text-center border-l border-white/30">
-                  <p className="text-xs text-white/80 mb-3 font-semibold">Promedio Histórico</p>
-                  <p className="text-3xl md:text-4xl font-black text-white leading-tight mb-2">
+                <div className="text-center">
+                  <p className="text-xs text-white/80 mb-4 font-medium">Promedio Histórico</p>
+                  <p className="text-4xl md:text-5xl font-black text-white leading-none mb-3">
                     {formatCurrency(budgetData.historicalAvgToday)}
                   </p>
                   <p className="text-xs text-white/70">{format(new Date(), 'EEEE', { locale: es })}s anteriores</p>
+                  
+                  {/* Sparkline debajo del número */}
+                  {budgetData.last7DaysSales?.length > 0 && (
+                    <div className="mt-4 h-12">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={budgetData.last7DaysSales}>
+                          <Line 
+                            type="monotone" 
+                            dataKey="value" 
+                            stroke="#fff" 
+                            strokeWidth={2.5} 
+                            dot={false}
+                            strokeOpacity={0.6}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  )}
                 </div>
               </div>
-              
-              {/* Sparkline combinado */}
-              {budgetData.last7DaysSales?.length > 0 && (
-                <div className="mb-6 h-10 grid grid-cols-2 gap-6">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={budgetData.last7DaysSales} className="animated-line">
-                      <defs>
-                        <filter id="glowFirst">
-                          <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-                          <feMerge>
-                            <feMergeNode in="coloredBlur"/>
-                            <feMergeNode in="SourceGraphic"/>
-                          </feMerge>
-                        </filter>
-                        <linearGradient id="lineGradientFirst" x1="0%" y1="0%" x2="100%" y2="0%">
-                          <stop offset="-20%" stopColor="#fff" stopOpacity="0">
-                            <animate attributeName="offset" values="-0.2;1.2;1.2" dur="4s" repeatCount="indefinite"/>
-                          </stop>
-                          <stop offset="-10%" stopColor="#fff" stopOpacity="0.5">
-                            <animate attributeName="offset" values="-0.1;1.3;1.3" dur="4s" repeatCount="indefinite"/>
-                          </stop>
-                          <stop offset="0%" stopColor="#fff" stopOpacity="1">
-                            <animate attributeName="offset" values="0;1.4;1.4" dur="4s" repeatCount="indefinite"/>
-                          </stop>
-                          <stop offset="10%" stopColor="#fff" stopOpacity="0.5">
-                            <animate attributeName="offset" values="0.1;1.5;1.5" dur="4s" repeatCount="indefinite"/>
-                          </stop>
-                          <stop offset="20%" stopColor="#fff" stopOpacity="0">
-                            <animate attributeName="offset" values="0.2;1.6;1.6" dur="4s" repeatCount="indefinite"/>
-                          </stop>
-                        </linearGradient>
-                      </defs>
-                      <Line 
-                        type="monotone" 
-                        dataKey="value" 
-                        stroke="#fff" 
-                        strokeWidth={2} 
-                        dot={false}
-                        strokeOpacity={0.4}
-                        isAnimationActive={false}
-                      />
-                      <Line 
-                        type="monotone" 
-                        dataKey="value" 
-                        stroke="url(#lineGradientFirst)" 
-                        strokeWidth={3} 
-                        dot={false}
-                        filter="url(#glowFirst)"
-                        isAnimationActive={true}
-                        animationDuration={2000}
-                        animationEasing="ease-in-out"
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={budgetData.last7DaysSales} className="animated-line">
-                      <defs>
-                        <filter id="glowSecond">
-                          <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-                          <feMerge>
-                            <feMergeNode in="coloredBlur"/>
-                            <feMergeNode in="SourceGraphic"/>
-                          </feMerge>
-                        </filter>
-                        <linearGradient id="lineGradientSecond" x1="0%" y1="0%" x2="100%" y2="0%">
-                          <stop offset="-20%" stopColor="#fff" stopOpacity="0">
-                            <animate attributeName="offset" values="-0.5;-0.5;1.2" dur="4s" repeatCount="indefinite"/>
-                          </stop>
-                          <stop offset="-10%" stopColor="#fff" stopOpacity="0.5">
-                            <animate attributeName="offset" values="-0.4;-0.4;1.3" dur="4s" repeatCount="indefinite"/>
-                          </stop>
-                          <stop offset="0%" stopColor="#fff" stopOpacity="1">
-                            <animate attributeName="offset" values="-0.3;-0.3;1.4" dur="4s" repeatCount="indefinite"/>
-                          </stop>
-                          <stop offset="10%" stopColor="#fff" stopOpacity="0.5">
-                            <animate attributeName="offset" values="-0.2;-0.2;1.5" dur="4s" repeatCount="indefinite"/>
-                          </stop>
-                          <stop offset="20%" stopColor="#fff" stopOpacity="0">
-                            <animate attributeName="offset" values="-0.1;-0.1;1.6" dur="4s" repeatCount="indefinite"/>
-                          </stop>
-                        </linearGradient>
-                      </defs>
-                      <Line 
-                        type="monotone" 
-                        dataKey="value" 
-                        stroke="#fff" 
-                        strokeWidth={2} 
-                        dot={false}
-                        strokeOpacity={0.4}
-                        isAnimationActive={false}
-                      />
-                      <Line 
-                        type="monotone" 
-                        dataKey="value" 
-                        stroke="url(#lineGradientSecond)" 
-                        strokeWidth={3} 
-                        dot={false}
-                        filter="url(#glowSecond)"
-                        isAnimationActive={true}
-                        animationDuration={2000}
-                        animationEasing="ease-in-out"
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-              )}
 
               <div className="space-y-2 mb-4">
                 <div className="flex items-center justify-between text-xs">
