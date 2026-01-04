@@ -57,11 +57,11 @@ export default function ChartInsight({ data, metric, formatCurrency, comparisonD
     const lastAvg = lastThree.reduce((a, b) => a + b, 0) / lastThree.length;
     const trendPct = firstAvg > 0 ? ((lastAvg - firstAvg) / firstAvg * 100) : 0;
 
-    // Detectar si hay días sin datos al final
+    // Detectar si hay días sin datos al final (solo advertir si faltan muchos días)
     const allDataPoints = data.length;
     const validDataPoints = validData.length;
     const missingDays = allDataPoints - validDataPoints;
-    const hasMissingRecent = data[data.length - 1]?.[metric] === 0 || !data[data.length - 1]?.[metric];
+    const missingPct = allDataPoints > 0 ? (missingDays / allDataPoints * 100) : 0;
 
     // Generar el insight
     let keyData = '';
@@ -69,12 +69,12 @@ export default function ChartInsight({ data, metric, formatCurrency, comparisonD
     let action = '';
     let status = 'neutral'; // neutral, positive, warning, critical
 
-    // Determinar estado y mensaje
-    if (hasMissingRecent && missingDays > 0) {
-      status = 'critical';
-      keyData = `Faltan datos de ${missingDays} día${missingDays > 1 ? 's' : ''}`;
-      behavior = 'Se detecta ausencia de información en días recientes, lo que impide análisis completo y puede indicar falla en carga de datos o cierre operativo.';
-      action = 'Validar operación inmediatamente y asegurar carga de datos diaria.';
+    // Determinar estado y mensaje - SOLO si falta más del 50% de los datos
+    if (missingPct > 50) {
+      status = 'warning';
+      keyData = `Datos parciales (${validDataPoints} de ${allDataPoints} días)`;
+      behavior = `Análisis basado en ${validDataPoints} días con datos. Se recomienda completar registros faltantes para insights más precisos.`;
+      action = 'Asegurar carga completa de datos diaria para análisis óptimo.';
     } else if (trendPct > 10) {
       status = 'positive';
       keyData = `Promedio del período: ${formatCurrency(average)}`;
