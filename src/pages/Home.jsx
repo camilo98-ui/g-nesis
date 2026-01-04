@@ -496,9 +496,9 @@ export default function Home() {
   // Si no está logueado, mostrar pantalla de login
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-100 via-gray-50 to-purple-50 relative overflow-hidden">
+      <div className="min-h-screen relative overflow-hidden">
         {/* Fondo 3D con relieve profesional y siluetas */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
           {/* Gradiente base */}
           <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-purple-50/40" />
           
@@ -591,9 +591,9 @@ export default function Home() {
         </div>
 
         {/* Mobile/Tablet View */}
-        <div className="lg:hidden min-h-screen flex flex-col justify-center">
+        <div className="lg:hidden min-h-screen flex flex-col justify-center relative z-10">
           <div className="flex-1 flex flex-col justify-center px-4 py-8 max-h-screen overflow-y-auto">
-            <div className="max-w-md mx-auto w-full bg-white/70 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/60 p-6">
+            <div className="max-w-md mx-auto w-full bg-white/40 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/40 p-6">
               <div className="mb-8 text-center">
                 <motion.img 
                   src={LOGO_URL} 
@@ -630,9 +630,9 @@ export default function Home() {
                         localStorage.setItem('lastSelectedRole', role.id);
                       }}
                       className={`relative w-full min-h-[70px] p-4 rounded-2xl border-2 transition-all duration-300 text-left ${
-                        isSelected
-                          ? 'border-rose-200/60 bg-gradient-to-r from-rose-50/80 via-pink-50/60 to-purple-50/80 shadow-xl shadow-rose-200/30 scale-[1.02]'
-                          : 'border-slate-200/50 bg-white/90 backdrop-blur-sm active:border-rose-200 hover:scale-[1.01] hover:shadow-lg'
+                       isSelected
+                         ? 'border-rose-300/70 bg-gradient-to-r from-rose-100/60 via-pink-100/50 to-purple-100/60 shadow-xl shadow-rose-200/40 scale-[1.02]'
+                         : 'border-slate-200/40 bg-white/50 backdrop-blur-md active:border-rose-200 hover:scale-[1.01] hover:shadow-lg'
                       }`}
                     >
                       {isLastUsed && (
@@ -820,7 +820,7 @@ export default function Home() {
               <motion.div 
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="bg-white/90 backdrop-blur-2xl rounded-3xl shadow-2xl border-2 border-white/60 p-7 xl:p-8 space-y-5"
+                className="bg-white/50 backdrop-blur-xl rounded-3xl shadow-2xl border-2 border-white/40 p-7 xl:p-8 space-y-5"
                 style={{ boxShadow: '0 25px 80px -15px rgba(217, 70, 239, 0.3), 0 10px 30px -10px rgba(0, 0, 0, 0.15)' }}>
                 
                 <div className="text-center">
@@ -844,8 +844,8 @@ export default function Home() {
                         }}
                         className={`relative w-full p-4 rounded-2xl border-2 transition-all duration-300 text-left flex items-center gap-3 ${
                           isSelected
-                            ? 'border-rose-200 bg-gradient-to-r from-rose-100 to-purple-100 shadow-xl shadow-rose-200/40 scale-[1.01]'
-                            : 'border-slate-200 bg-white/70 backdrop-blur-sm hover:border-rose-200 hover:shadow-lg hover:scale-[1.01]'
+                            ? 'border-rose-300/70 bg-gradient-to-r from-rose-100/60 to-purple-100/60 shadow-xl shadow-rose-200/40 scale-[1.01]'
+                            : 'border-slate-200/40 bg-white/40 backdrop-blur-md hover:border-rose-200 hover:shadow-lg hover:scale-[1.01]'
                         }`}
                       >
                         {isLastUsed && (
