@@ -118,17 +118,16 @@ export default function CashierRankingCard({
         animate={{ opacity: 1, x: 0, rotateY: 0 }}
         transition={{ delay, duration: 0.4, type: "spring" }}
         whileHover={{ scale: 1.02, y: -3 }}
-        className={`relative overflow-hidden rounded-2xl ${
+        onClick={handleToggle}
+        className={`relative overflow-hidden rounded-2xl cursor-pointer ${
           isTopThree 
             ? `bg-gradient-to-r ${rankStyle.bg} text-gray-800 shadow-2xl ${rankStyle.ring}` 
             : 'bg-gradient-to-br from-white to-gray-50 border-2 border-gray-200 shadow-lg hover:shadow-2xl hover:border-pink-300'
         } transition-all duration-300`}
         style={{ transformStyle: 'preserve-3d' }}
       >
-        <div className="p-5"
-          onClick={handleToggle}
-        >
-          <div className="flex items-center gap-4 cursor-pointer">
+        <div className="p-6 sm:p-5">
+          <div className="flex items-center gap-5 sm:gap-4">
         {/* Photo + Rank badge - MÁS GRANDE Y DIVERTIDO */}
         <div className="relative flex-shrink-0">
           <motion.div 
