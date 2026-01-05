@@ -36,6 +36,7 @@ const STORE_ORDER_CONFIG = {
 
 export default function SmartOrderPrediction({ allFreezersSlots = [], currentFreezer, storeCode, storeId }) {
   const [activeTab, setActiveTab] = useState('semanal'); // semanal o adicional
+  const [isExpanded, setIsExpanded] = useState(false);
 
   // Obtener historial de neveras para análisis de rotación
   const { data: freezerHistory = [] } = useQuery({
@@ -527,13 +528,15 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
 
       {/* Header con pestañas */}
       <Card className="border-2 border-purple-200 shadow-lg overflow-hidden">
-        <div className="bg-pink-700 p-4 from-purple-500 to-pink-500">
-          <div className="flex items-center justify-between mb-3">
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="w-full bg-pink-700 p-4 from-purple-500 to-pink-500 hover:bg-pink-800 transition-all">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
                 <Package className="w-5 h-5 text-white" />
               </div>
-              <div>
+              <div className="text-left">
                 <h3 className="text-lg font-black text-white">📦 Pronóstico de Pedido</h3>
                 <p className="text-xs text-white/80">
                   {storeCode ? `${storeCode} • ` : ''}
@@ -543,16 +546,25 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
               </div>
             </div>
             <motion.div
-              animate={{ rotate: [0, 5, -5, 0] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
-
-              <Sparkles className="w-6 h-6 text-white" />
+              animate={{ rotate: isExpanded ? 180 : 0 }}
+              transition={{ duration: 0.3 }}>
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
             </motion.div>
           </div>
+        </button>
 
-          {/* Tabs */}
-          <div className="flex gap-2">
+        <AnimatePresence>
+          {isExpanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3 }}>
+              <div className="bg-pink-700 px-4 pb-4">
+                {/* Tabs */}
+                <div className="flex gap-2">
             <button
               onClick={() => setActiveTab('semanal')}
               className={`flex-1 py-2 px-3 rounded-lg text-sm font-bold transition-all ${
@@ -574,11 +586,11 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
 
               <Zap className="w-4 h-4 inline mr-1" />
               Adicional
-            </button>
-          </div>
-        </div>
+              </button>
+              </div>
+                </div>
 
-        <CardContent className="p-4 space-y-4">
+                <CardContent className="p-4 space-y-4">
           {/* Resumen Simple */}
           <div className={`rounded-xl p-4 border-2 ${
             activeTab === 'semanal' 
@@ -825,9 +837,12 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
                 </>
               )}
             </div>
-          </div>
-        </CardContent>
-      </Card>
-    </motion.div>);
+            </div>
+                </CardContent>
+              </motion.div>
+            )}
+            </AnimatePresence>
+            </Card>
+            </motion.div>);
 
-}
+            }
