@@ -210,7 +210,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       if (totalWeeklyAvg === 0) return dailyBaseBudget; // Sin histórico
       const dayOfWeek = date.getDay();
 
-      // Si hay suficiente histórico, usar directamente el promedio histórico escalado al presupuesto mensual
+      // Si hay suficiente histórico para ESTE día específico, usarlo
       if (countByDayOfWeek[dayOfWeek] >= 3) {
         // Escalar el promedio histórico para que la suma semanal coincida con el presupuesto mensual ajustado al 105%
         const totalHistoricalAvg = avgByDayOfWeek.reduce((a, b) => a + b, 0);
@@ -218,8 +218,11 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
         const scaleFactor = adjustedMonthlyBudget / monthlyHistoricalProjection;
         return avgByDayOfWeek[dayOfWeek] * scaleFactor;
       } else {
-        // Sin suficiente histórico, usar presupuesto base ajustado
-        return dailyBaseBudget;
+        // Con poco histórico, usar PESO RELATIVO del día basado en datos disponibles
+        // Esto permite variación por día de semana incluso con pocos datos
+        const weight = weightByDayOfWeek[dayOfWeek];
+        const weeklyBudget = dailyBaseBudget * 7;
+        return weeklyBudget * weight; // Distribuye el presupuesto semanal según peso del día
       }
     };
 
