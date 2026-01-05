@@ -658,6 +658,13 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
                             </span>
                           )}
                         </div>
+                        {activeTab === 'adicional' && flavor.weeklyOrderAmount > 0 && (
+                          <div className="mt-1.5 p-1.5 bg-blue-50 rounded border border-blue-200">
+                            <p className="text-[9px] text-blue-700 font-medium">
+                              ℹ️ Ya pediste <span className="font-black">{flavor.weeklyOrderAmount}x</span> en pedido semanal
+                            </p>
+                          </div>
+                        )}
                         {flavor.reason &&
                       <p className="text-[9px] text-gray-500 mt-1 italic">💡 {flavor.reason}</p>
                       }
@@ -723,6 +730,13 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
                             </span>
                           )}
                         </div>
+                        {activeTab === 'adicional' && flavor.weeklyOrderAmount > 0 && (
+                          <div className="mt-1.5 p-1.5 bg-blue-50 rounded border border-blue-200">
+                            <p className="text-[9px] text-blue-700 font-medium">
+                              ℹ️ Ya pediste <span className="font-black">{flavor.weeklyOrderAmount}x</span> en pedido semanal
+                            </p>
+                          </div>
+                        )}
                         {flavor.reason &&
                       <p className="text-[9px] text-gray-500 mt-1 italic">💡 {flavor.reason}</p>
                       }
