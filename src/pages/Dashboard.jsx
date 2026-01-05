@@ -605,20 +605,22 @@ export default function Dashboard() {
     return budgets.find((b) => b.month === now.getMonth() + 1 && b.year === now.getFullYear()) || {};
   }, [budgets]);
 
+  // Filtrar ventas del mes RETAIL completo (para gráficas)
   const filteredSales = useMemo(() => {
     if (!dailySales.length) return [];
 
-    const activeRange = weekFilter || dateRange;
-    if (!activeRange?.from || !activeRange?.to) return [];
+    const now = new Date();
+    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const retailMonthStart = startOfWeek(firstDayOfMonth, { weekStartsOn: 1 });
 
-    const fromStr = format(activeRange.from, 'yyyy-MM-dd');
-    const toStr = format(activeRange.to, 'yyyy-MM-dd');
+    const fromStr = format(retailMonthStart, 'yyyy-MM-dd');
+    const toStr = format(now, 'yyyy-MM-dd');
 
     return dailySales.filter((s) => {
       const saleDateStr = s.date?.split('T')[0] || s.date;
       return saleDateStr >= fromStr && saleDateStr <= toStr;
     });
-  }, [dailySales, dateRange, weekFilter]);
+  }, [dailySales]);
 
   // Ventas del período de comparación
   const comparisonSales = useMemo(() => {
@@ -676,11 +678,13 @@ export default function Dashboard() {
   }, [comparisonSales, showComparison]);
 
   const chartData = useMemo(() => {
-    const activeRange = weekFilter || dateRange;
-    if (!activeRange?.from || !activeRange?.to) return [];
+    // Usar SIEMPRE el mes RETAIL completo para las gráficas
+    const now = new Date();
+    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const retailMonthStart = startOfWeek(firstDayOfMonth, { weekStartsOn: 1 });
 
     // Generar días de ambos períodos para comparación
-    const currentDays = eachDayOfInterval({ start: activeRange.from, end: activeRange.to });
+    const currentDays = eachDayOfInterval({ start: retailMonthStart, end: now });
     const maxDays = currentDays.length;
 
     const dataWithSales = currentDays.map((day, idx) => {
@@ -752,7 +756,7 @@ export default function Dashboard() {
     }
 
     return dataWithSales;
-  }, [dateRange, dailySales, weekFilter, showComparison, comparisonRange]);
+  }, [dailySales, showComparison, comparisonRange]);
 
 
 
@@ -936,12 +940,6 @@ export default function Dashboard() {
           </div>
           <div className="flex flex-col md:flex-row gap-3 items-center">
             <StoreSelector selectedStore={selectedStore} onStoreChange={handleStoreChange} />
-            {!showComparison && <WeekFilter onWeekChange={setWeekFilter} multiSelect={true} />}
-            <DateFilter
-              dateRange={dateRange}
-              onDateChange={(range) => {setDateRange(range);setWeekFilter(null);}}
-              buttonText={showComparison ? "📅 Período Actual" : undefined}
-              buttonClassName={showComparison ? "border-blue-300 hover:border-blue-500" : undefined} />
 
             {showComparison &&
             <DateFilter
