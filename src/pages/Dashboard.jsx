@@ -473,10 +473,14 @@ function DetailPanel({ metric, data, onClose, chartData, formatCurrency, shiftDa
 
 export default function Dashboard() {
   const [selectedStore, setSelectedStore] = useState('');
-  // Inicializar con el mes completo
-  const [dateRange, setDateRange] = useState({
-    from: startOfMonth(new Date()),
-    to: new Date()
+  // Inicializar con el mes RETAIL completo (desde semana 1)
+  const [dateRange, setDateRange] = useState(() => {
+    const now = new Date();
+    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    return {
+      from: startOfWeek(firstDayOfMonth, { weekStartsOn: 1 }),
+      to: now
+    };
   });
   const [activeMetric, setActiveMetric] = useState(null);
   const [projectionMetric, setProjectionMetric] = useState(null);
@@ -639,16 +643,17 @@ export default function Dashboard() {
     }), { sales: 0, tickets: 0, transactions: 0, suggested: 0 });
   }, [filteredSales]);
 
-  // Totales ACUMULADOS del mes completo (para tarjetas del header)
+  // Totales ACUMULADOS del mes RETAIL/FERIAL (para tarjetas del header)
   const monthTotals = useMemo(() => {
     const now = new Date();
-    const monthStart = startOfMonth(now);
-    const monthEnd = endOfMonth(now);
+    // Mes retail: primera semana que incluye el día 1 del mes (lunes a domingo)
+    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const retailMonthStart = startOfWeek(firstDayOfMonth, { weekStartsOn: 1 });
     
     const monthSales = dailySales.filter(s => {
       const saleDate = s.date?.split('T')[0] || s.date;
       const saleDateObj = new Date(saleDate);
-      return saleDateObj >= monthStart && saleDateObj <= now;
+      return saleDateObj >= retailMonthStart && saleDateObj <= now;
     });
     
     return monthSales.reduce((acc, s) => ({
@@ -751,20 +756,20 @@ export default function Dashboard() {
 
 
 
-  // Proyecciones - CÁLCULO ESTABLE basado en días del mes
+  // Proyecciones - CÁLCULO ESTABLE basado en días del mes RETAIL/FERIAL
   const projections = useMemo(() => {
     if (!currentBudget?.sales_budget) return null;
     const now = new Date();
-    const monthStart = startOfMonth(now);
+    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const monthStart = startOfWeek(firstDayOfMonth, { weekStartsOn: 1 });
     const monthEnd = endOfMonth(now);
     const totalDays = differenceInDays(monthEnd, monthStart) + 1;
     
-    // Usar SOLO datos del mes actual para proyección
+    // Usar SOLO datos del mes RETAIL para proyección (desde semana 1)
     const monthSales = dailySales.filter(s => {
       const saleDate = s.date?.split('T')[0] || s.date;
-      const saleMonth = new Date(saleDate).getMonth();
-      const currentMonth = now.getMonth();
-      return saleMonth === currentMonth;
+      const saleDateObj = new Date(saleDate);
+      return saleDateObj >= monthStart && saleDateObj <= now;
     });
     
     // Calcular ventas acumuladas del mes
@@ -773,8 +778,8 @@ export default function Dashboard() {
       transactions: acc.transactions + (s.total_transactions || 0)
     }), { sales: 0, transactions: 0 });
     
-    // Días transcurridos del mes hasta HOY
-    const daysElapsed = now.getDate();
+    // Días transcurridos del mes RETAIL hasta HOY
+    const daysElapsed = differenceInDays(now, monthStart) + 1;
     const daysRemaining = totalDays - daysElapsed;
 
     // Promedio diario REAL del mes

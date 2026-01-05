@@ -21,9 +21,13 @@ import { startOfMonth, startOfWeek } from 'date-fns';
 
 export default function Rankings() {
   const [selectedStore, setSelectedStore] = useState('');
-  const [dateRange, setDateRange] = useState({
-    from: startOfMonth(new Date()),
-    to: new Date()
+  const [dateRange, setDateRange] = useState(() => {
+    const now = new Date();
+    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    return {
+      from: startOfWeek(firstDayOfMonth, { weekStartsOn: 1 }),
+      to: now
+    };
   });
   const [activeTab, setActiveTab] = useState('sales');
   const [showGlobal, setShowGlobal] = useState(false);
