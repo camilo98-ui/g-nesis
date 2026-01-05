@@ -123,9 +123,13 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
     const monthStart = retailMonthStart;
     const monthEnd = retailMonthEnd;
 
-    // SIEMPRE usar la semana ACTUAL (ignorar filtros de fecha)
+    // SIEMPRE usar la semana ACTUAL para métricas y PPT
     const currentWeekStart = startOfWeek(now, { weekStartsOn: 1 });
     const currentWeekEnd = endOfWeek(now, { weekStartsOn: 1 });
+
+    // Rango para las GRÁFICAS (usa filtro si existe, de lo contrario semana actual)
+    const displayWeekStart = currentDateRange?.from || currentWeekStart;
+    const displayWeekEnd = currentDateRange?.to || currentWeekEnd;
 
     // Obtener todas las semanas retail que tocan el mes actual
     const weeks = eachWeekOfInterval(
@@ -136,8 +140,11 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
     // Calcular días del mes que efectivamente tienen venta (lunes a domingo del mes)
     const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd }).length;
 
-    // Días completos de la semana retail seleccionada (siempre 7 días)
+    // Días completos de la semana retail ACTUAL (siempre 7 días) - para métricas
     const fullCurrentRetailWeekDays = eachDayOfInterval({ start: currentWeekStart, end: currentWeekEnd });
+
+    // Días para GRÁFICAS (usa filtro si existe)
+    const fullDisplayWeekDays = eachDayOfInterval({ start: displayWeekStart, end: displayWeekEnd });
 
     // Analizar histórico de ventas por día de la semana (0=Domingo, 6=Sábado)
     // INCLUYE TODOS LOS DATOS HISTÓRICOS, no solo del mes actual
@@ -317,8 +324,8 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
     const weekProjection = blendedDailyAvg * totalDaysInWeek;
     const projectionCompliance = weeklyBudget > 0 ? (weekProjection / weeklyBudget * 100) : 0;
 
-    // Datos para gráficos - TODOS los días de la semana seleccionada
-    const dailyTrendData = fullCurrentRetailWeekDays.map(day => {
+    // Datos para gráficos - TODOS los días del rango seleccionado (para mostrar en gráficas)
+    const dailyTrendData = fullDisplayWeekDays.map(day => {
       // Buscar venta exacta del día usando parseISO
       const sale = dailySales.find(s => {
         try {
@@ -1072,7 +1079,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                   <div className="flex items-center gap-1.5 md:gap-2 min-w-0">
                     <Calendar className="w-4 h-4 md:w-5 md:h-5 text-purple-400/70 flex-shrink-0" />
                     <h4 className="text-xs md:text-sm font-bold text-purple-700/80 truncate">
-                      Semana {budgetData.currentWeekNumber} ({format(budgetData.currentWeekStart, 'dd MMM', { locale: es })} - {format(budgetData.currentWeekEnd, 'dd MMM', { locale: es })})
+                      Semana Actual ({format(budgetData.currentWeekStart, 'dd MMM', { locale: es })} - {format(budgetData.currentWeekEnd, 'dd MMM', { locale: es })})
                     </h4>
                   </div>
                   <div className={`px-2 md:px-3 py-0.5 md:py-1 rounded-full text-[10px] md:text-xs font-bold flex-shrink-0 self-start md:self-auto ${

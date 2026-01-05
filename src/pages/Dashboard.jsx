@@ -1004,6 +1004,7 @@ export default function Dashboard() {
             activeBudget={currentBudget}
             storeId={selectedStore}
             formatCurrency={formatCurrency}
+            currentDateRange={weekFilter || dateRange}
             onConfigureBudget={() => setShowMonthlyBudget(true)}
             onExpandChange={(expanded) => {
               if (expanded) {
