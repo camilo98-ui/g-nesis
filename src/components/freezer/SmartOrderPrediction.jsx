@@ -357,66 +357,72 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
     };
   }, [fullAnalysis, storeConfig]);
 
-  // PEDIDO ADICIONAL - EL MÁS IMPORTANTE: cubre desde SÁBADO hasta JUEVES siguiente (5-6 días + FIN DE SEMANA)
+  // PEDIDO ADICIONAL - Proyección desde HOY de lo que necesitarás cuando llegue (SÁBADO)
   const additionalOrder = useMemo(() => {
     const allFlavors = fullAnalysis.flavors;
     
     const calculateAdditionalNeeded = (flavor) => {
-      // Cuánto ya se pidió en el semanal
+      // Cuánto pedirás en el semanal (se monta martes, llega jueves)
       const weeklyOrderAmount = weeklyOrder.gourmet.concat(weeklyOrder.exclusivo)
         .find(f => f.name === flavor.name)?.needed || 0;
       
-      // Este pedido debe cubrir SÁBADO a JUEVES (5-6 días) INCLUYENDO FIN DE SEMANA
-      const diasAdicional = 5.5; // Sábado a Jueves siguiente
+      // PROYECCIÓN COMPLETA desde HOY:
+      // 1. Lo que tienes HOY
+      const stockHoy = flavor.totalCount;
       
-      // CASO 1: Con rotación histórica real
-      if (flavor.timesRemoved > 0 && flavor.avgDaysPerRotation) {
-        // Total necesario para esos 5-6 días
-        const rotacionesAdicional = Math.ceil(diasAdicional / flavor.avgDaysPerRotation);
-        
-        // Lo que ya tendrás después del pedido semanal
-        const disponibleDespuesSemanal = flavor.totalCount + weeklyOrderAmount;
-        
-        // Consumo esperado en esos días
-        const necesarioAdicional = rotacionesAdicional;
-        
-        // Faltante
-        const faltante = necesarioAdicional - disponibleDespuesSemanal;
-        
-        if (faltante > 0) {
-          // Buffer 40% porque incluye fin de semana (más ventas)
-          return Math.ceil(faltante * 1.4);
-        }
-        
-        // Rotación muy rápida siempre necesita refuerzo mid-week
-        if (flavor.avgDaysPerRotation <= 3 && disponibleDespuesSemanal < 4) {
-          return Math.ceil((4 - disponibleDespuesSemanal) * 1.3);
-        }
-        
-        return 0;
+      // 2. Consumo estimado HOY → JUEVES (cuando llega el semanal)
+      const diasHastaLlegaSemanal = 4; // Hoy domingo/lunes → jueves
+      let consumoHastaJueves = 0;
+      if (flavor.avgDaysPerRotation && flavor.avgDaysPerRotation > 0) {
+        consumoHastaJueves = Math.ceil(diasHastaLlegaSemanal / flavor.avgDaysPerRotation);
+      } else {
+        // Sin historial: estimar 30% del stock cada 2 días
+        consumoHastaJueves = Math.ceil((stockHoy * 0.3) * (diasHastaLlegaSemanal / 2));
       }
       
-      // CASO 2: Sin historial
-      const disponibleDespuesSemanal = flavor.totalCount + weeklyOrderAmount;
-      const necesarioTotal = Math.ceil(flavor.totalCount * 1.5); // Estimar necesidad para 5-6 días
+      // 3. Stock proyectado el JUEVES (después de consumir pero ANTES de recibir semanal)
+      const stockJuevesAntes = Math.max(0, stockHoy - consumoHastaJueves);
       
-      // Crítico: necesita refuerzo fuerte
-      if (flavor.emptyCount > 0 || flavor.lowCount > 2) {
-        const faltante = Math.max(necesarioTotal - disponibleDespuesSemanal, flavor.emptyCount);
-        return Math.ceil(faltante * 1.3);
+      // 4. Stock proyectado el JUEVES (DESPUÉS de recibir el pedido semanal)
+      const stockJuevesDespues = stockJuevesAntes + weeklyOrderAmount;
+      
+      // 5. Consumo JUEVES → SÁBADO (cuando llega el adicional)
+      const diasJuevesASabado = 2.5;
+      let consumoJuevesASabado = 0;
+      if (flavor.avgDaysPerRotation && flavor.avgDaysPerRotation > 0) {
+        consumoJuevesASabado = Math.ceil(diasJuevesASabado / flavor.avgDaysPerRotation);
+      } else {
+        consumoJuevesASabado = Math.ceil((stockHoy * 0.3) * (diasJuevesASabado / 2));
       }
       
-      // Medio: calcular faltante
-      if (flavor.coverageDays <= 4 || flavor.rotationSpeed > 30) {
-        const faltante = necesarioTotal - disponibleDespuesSemanal;
-        if (faltante > 0) {
-          return Math.ceil(faltante * 1.2);
+      // 6. Stock proyectado el SÁBADO (cuando llega el adicional)
+      const stockSabado = Math.max(0, stockJuevesDespues - consumoJuevesASabado);
+      
+      // 7. Necesidad SÁBADO → JUEVES siguiente (5.5 días con FIN DE SEMANA)
+      const diasSabadoAJueves = 5.5;
+      let necesidadFinales = 0;
+      
+      if (flavor.avgDaysPerRotation && flavor.avgDaysPerRotation > 0) {
+        // Rotaciones necesarias + buffer 50% por fin de semana
+        necesidadFinales = Math.ceil((diasSabadoAJueves / flavor.avgDaysPerRotation) * 1.5);
+      } else {
+        // Sin historial: necesitar al menos el doble del stock actual por ser fin de semana
+        necesidadFinales = Math.ceil(stockHoy * 1.5);
+      }
+      
+      // 8. FALTANTE = Lo que necesitas - Lo que tendrás el sábado
+      const faltante = necesidadFinales - stockSabado;
+      
+      if (faltante > 0) {
+        return Math.max(2, Math.ceil(faltante));
+      }
+      
+      // Casos especiales: rotación muy rápida siempre refuerza
+      if (flavor.avgDaysPerRotation && flavor.avgDaysPerRotation <= 2.5) {
+        const minimoSeguridad = 3;
+        if (stockSabado < minimoSeguridad) {
+          return Math.ceil(minimoSeguridad - stockSabado + 2);
         }
-      }
-      
-      // Bajo: solo si hay déficit claro
-      if (disponibleDespuesSemanal < flavor.totalCount) {
-        return Math.ceil((flavor.totalCount - disponibleDespuesSemanal) * 0.8);
       }
       
       return 0;
