@@ -8,6 +8,8 @@ const GOURMET_FLAVORS = ['Limón N.', 'Maracuyá N.', 'Mandarina N.', 'Vainilla'
 const EXCLUSIVO_FLAVORS = ['Cherry', 'Arroz', 'Chicle', 'Brownie', 'Crema Limón', 'M&M', 'Milky', 'Oreo', 'Macadamia', 'Café', 'Yogurt C.'];
 
 export default function InventoryStatusOverview({ allFreezersSlots = [], rotationAnalysis = {} }) {
+  const [isExpanded, setIsExpanded] = React.useState(false);
+
   // Análisis completo de inventario
   const inventoryAnalysis = useMemo(() => {
     if (!allFreezersSlots || allFreezersSlots.length === 0) {
@@ -116,21 +118,39 @@ export default function InventoryStatusOverview({ allFreezersSlots = [], rotatio
       animate={{ opacity: 1, y: 0 }}
       className="mt-4">
       <Card className="border-2 border-red-200 shadow-lg overflow-hidden">
-        <div className="bg-gradient-to-r from-red-500 to-orange-500 p-4">
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-              <AlertTriangle className="w-5 h-5 text-white" />
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="w-full bg-gradient-to-r from-red-500 to-orange-500 p-4 hover:from-red-600 hover:to-orange-600 transition-all">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                <AlertTriangle className="w-5 h-5 text-white" />
+              </div>
+              <div className="text-left">
+                <h3 className="text-lg font-black text-white">⚠️ Alertas de Inventario</h3>
+                <p className="text-xs text-white/80">
+                  {inventoryAnalysis.total} problema{inventoryAnalysis.total !== 1 ? 's' : ''} detectado{inventoryAnalysis.total !== 1 ? 's' : ''}
+                </p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-lg font-black text-white">⚠️ Alertas de Inventario</h3>
-              <p className="text-xs text-white/80">
-                {inventoryAnalysis.total} problema{inventoryAnalysis.total !== 1 ? 's' : ''} detectado{inventoryAnalysis.total !== 1 ? 's' : ''}
-              </p>
-            </div>
+            <motion.div
+              animate={{ rotate: isExpanded ? 180 : 0 }}
+              transition={{ duration: 0.3 }}>
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </motion.div>
           </div>
-        </div>
+        </button>
 
-        <CardContent className="p-4 space-y-4">
+        <AnimatePresence>
+          {isExpanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3 }}>
+              <CardContent className="p-4 space-y-4">
           {/* Sabores Agotados */}
           {outOfStock.length > 0 && (
             <div>
@@ -209,7 +229,10 @@ export default function InventoryStatusOverview({ allFreezersSlots = [], rotatio
               </div>
             </div>
           )}
-        </CardContent>
+              </CardContent>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </Card>
     </motion.div>
   );
