@@ -629,6 +629,7 @@ export default function Dashboard() {
     });
   }, [dailySales, comparisonRange, showComparison]);
 
+  // Totales del rango filtrado (para gráficas)
   const totals = useMemo(() => {
     return filteredSales.reduce((acc, s) => ({
       sales: acc.sales + (s.total_sales || 0),
@@ -637,6 +638,26 @@ export default function Dashboard() {
       suggested: acc.suggested + (s.total_suggested || 0)
     }), { sales: 0, tickets: 0, transactions: 0, suggested: 0 });
   }, [filteredSales]);
+
+  // Totales ACUMULADOS del mes completo (para tarjetas del header)
+  const monthTotals = useMemo(() => {
+    const now = new Date();
+    const monthStart = startOfMonth(now);
+    const monthEnd = endOfMonth(now);
+    
+    const monthSales = dailySales.filter(s => {
+      const saleDate = s.date?.split('T')[0] || s.date;
+      const saleDateObj = new Date(saleDate);
+      return saleDateObj >= monthStart && saleDateObj <= now;
+    });
+    
+    return monthSales.reduce((acc, s) => ({
+      sales: acc.sales + (s.total_sales || 0),
+      tickets: acc.tickets + (s.total_tickets || 0),
+      transactions: acc.transactions + (s.total_transactions || 0),
+      suggested: acc.suggested + (s.total_suggested || 0)
+    }), { sales: 0, tickets: 0, transactions: 0, suggested: 0 });
+  }, [dailySales]);
 
   // Totals del período de comparación
   const comparisonTotals = useMemo(() => {
@@ -818,17 +839,22 @@ export default function Dashboard() {
     return null;
   };
 
-  // Calcular ticket promedio correctamente
+  // Calcular ticket promedio para el rango filtrado (gráficas)
   const avgTicket = totals.transactions > 0 ? totals.sales / totals.transactions : 0;
+  
+  // Calcular ticket promedio ACUMULADO del mes (tarjetas)
+  const monthAvgTicket = monthTotals.transactions > 0 ? monthTotals.sales / monthTotals.transactions : 0;
+  
   const comparisonAvgTicket = comparisonTotals && comparisonTotals.transactions > 0 ?
   comparisonTotals.sales / comparisonTotals.transactions :
   0;
 
+  // Métricas usando ACUMULADO DEL MES (no del rango filtrado)
   const metrics = [
   {
     id: 'sales',
     title: 'Ventas Totales',
-    value: totals.sales,
+    value: monthTotals.sales,
     comparisonValue: comparisonTotals?.sales,
     budget: currentBudget.sales_budget,
     icon: DollarSign,
@@ -840,7 +866,7 @@ export default function Dashboard() {
   {
     id: 'tickets',
     title: 'Ticket Promedio',
-    value: avgTicket,
+    value: monthAvgTicket,
     comparisonValue: comparisonAvgTicket,
     budget: currentBudget.tickets_budget,
     icon: Receipt,
@@ -852,7 +878,7 @@ export default function Dashboard() {
   {
     id: 'transactions',
     title: 'Transacciones',
-    value: totals.transactions,
+    value: monthTotals.transactions,
     comparisonValue: comparisonTotals?.transactions,
     budget: currentBudget.transactions_budget,
     icon: Zap,
@@ -863,7 +889,7 @@ export default function Dashboard() {
   {
     id: 'suggested',
     title: 'Sugeridos',
-    value: totals.suggested,
+    value: monthTotals.suggested,
     comparisonValue: comparisonTotals?.suggested,
     budget: currentBudget.suggested_budget,
     icon: Gift,
