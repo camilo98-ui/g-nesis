@@ -830,7 +830,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                   <div className="flex items-center justify-between mb-2 md:mb-3">
                     <h4 className="text-sm md:text-base font-bold text-slate-900 flex items-center gap-1.5 md:gap-2">
                       <LineChartIcon className="w-4 h-4 md:w-5 md:h-5 text-rose-400/70" />
-                      Tendencia Diaria de la Semana
+                      Tendencia Diaria del Período
                     </h4>
                   </div>
                   <ResponsiveContainer width="100%" height={200} className="md:hidden">
