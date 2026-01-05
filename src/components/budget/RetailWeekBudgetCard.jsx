@@ -752,6 +752,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
           <AnimatePresence>
             {isExpanded && (
               <>
+              <div id="budget-expanded-content" />
               {/* Días de Mayor Oportunidad */}
               {budgetData.topDays?.length > 0 && (
                 <motion.div
