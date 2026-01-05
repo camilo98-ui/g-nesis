@@ -310,6 +310,99 @@ export default function FreezerMap() {
     staleTime: 30000
   });
 
+  // Historial para análisis de rotación
+  const { data: freezerHistoryData = [] } = useQuery({
+    queryKey: ['freezerHistory', selectedStore],
+    queryFn: () => base44.entities.FreezerHistory.filter({ store_id: selectedStore }),
+    enabled: !!selectedStore
+  });
+
+  // ANÁLISIS DE ROTACIÓN HISTÓRICA
+  const rotationAnalysis = useMemo(() => {
+    if (!freezerHistoryData || freezerHistoryData.length < 2) return {};
+
+    const flavorRotations = {};
+    const sortedHistory = [...freezerHistoryData].sort((a, b) => 
+      new Date(a.date) - new Date(b.date)
+    );
+
+    // Analizar cambios entre snapshots consecutivos
+    for (let i = 1; i < sortedHistory.length; i++) {
+      const prevSnapshot = JSON.parse(sortedHistory[i - 1].snapshot || '[]');
+      const currSnapshot = JSON.parse(sortedHistory[i].snapshot || '[]');
+      const daysDiff = differenceInDays(parseISO(sortedHistory[i].date), parseISO(sortedHistory[i - 1].date));
+
+      // Crear mapa de slots previos
+      const prevMap = {};
+      prevSnapshot.forEach(slot => {
+        const key = `${slot.row}-${slot.position}-${slot.slot_type}`;
+        prevMap[key] = slot;
+      });
+
+      // Detectar cambios
+      currSnapshot.forEach(slot => {
+        const key = `${slot.row}-${slot.position}-${slot.slot_type}`;
+        const prevSlot = prevMap[key];
+
+        if (prevSlot && prevSlot.flavor_name && !prevSlot.is_empty) {
+          const flavorKey = prevSlot.flavor_name.toLowerCase().trim();
+          
+          if (!flavorRotations[flavorKey]) {
+            flavorRotations[flavorKey] = {
+              name: prevSlot.flavor_name,
+              type: prevSlot.flavor_type,
+              timesRemoved: 0,
+              timesAdded: 0,
+              totalDays: 0,
+              avgDaysPerRotation: 0,
+              freezers: new Set()
+            };
+          }
+
+          // Si cambió a vacío o a otro sabor, se "removió"
+          if (slot.is_empty || slot.flavor_name !== prevSlot.flavor_name) {
+            flavorRotations[flavorKey].timesRemoved++;
+            flavorRotations[flavorKey].totalDays += daysDiff;
+            flavorRotations[flavorKey].freezers.add(slot.store_id?.split('_F')[1] || '1');
+          }
+        }
+
+        // Detectar sabores nuevos agregados
+        if (slot.flavor_name && !slot.is_empty) {
+          const flavorKey = slot.flavor_name.toLowerCase().trim();
+          if (!prevSlot || prevSlot.is_empty || prevSlot.flavor_name !== slot.flavor_name) {
+            if (!flavorRotations[flavorKey]) {
+              flavorRotations[flavorKey] = {
+                name: slot.flavor_name,
+                type: slot.flavor_type,
+                timesRemoved: 0,
+                timesAdded: 0,
+                totalDays: 0,
+                avgDaysPerRotation: 0,
+                freezers: new Set()
+              };
+            }
+            flavorRotations[flavorKey].timesAdded++;
+            flavorRotations[flavorKey].freezers.add(slot.store_id?.split('_F')[1] || '1');
+          }
+        }
+      });
+    }
+
+    // Calcular promedio de días por rotación
+    Object.values(flavorRotations).forEach(flavor => {
+      if (flavor.timesRemoved > 0) {
+        flavor.avgDaysPerRotation = flavor.totalDays / flavor.timesRemoved;
+        flavor.rotationVelocity = flavor.avgDaysPerRotation > 0 ? (7 / flavor.avgDaysPerRotation) * 100 : 0;
+      } else {
+        flavor.avgDaysPerRotation = 99;
+        flavor.rotationVelocity = 0;
+      }
+    });
+
+    return flavorRotations;
+  }, [freezerHistoryData]);
+
   // Long press para borrar
   const handleLongPressStart = (slot) => {
     longPressTimer.current = setTimeout(() => {
@@ -1333,12 +1426,19 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
               </motion.div>
             </div>
 
+            {/* Alertas de Inventario */}
+            <InventoryStatusOverview
+              allFreezersSlots={allFreezersSlots}
+              rotationAnalysis={rotationAnalysis}
+            />
+
             {/* Pronóstico de Pedido - Independiente */}
             <SmartOrderPrediction
-            allFreezersSlots={allFreezersSlots}
-            currentFreezer={currentFreezer}
-            storeCode={selectedStore}
-            storeId={selectedStore} />
+              allFreezersSlots={allFreezersSlots}
+              currentFreezer={currentFreezer}
+              storeCode={selectedStore}
+              storeId={selectedStore}
+            />
 
 
             {/* Info Panel */}
