@@ -351,14 +351,24 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       };
     });
 
-    const weeklyData = weeks.map((weekStart, idx) => {
+    // Semanas para el rango FILTRADO (para gráficas)
+    const displayWeeks = eachWeekOfInterval(
+      { start: displayWeekStart, end: displayWeekEnd },
+      { weekStartsOn: 1 }
+    );
+
+    const weeklyData = displayWeeks.map((weekStart, idx) => {
       const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
       // Todos los días de la semana retail (7 días completos)
       const daysInWeek = eachDayOfInterval({ start: weekStart, end: weekEnd });
       
       const weekSales = dailySales.filter(s => {
-        const saleDate = new Date(s.date);
-        return saleDate >= weekStart && saleDate <= weekEnd;
+        try {
+          const saleDate = parseISO(s.date);
+          return saleDate >= weekStart && saleDate <= weekEnd;
+        } catch {
+          return false;
+        }
       }).reduce((sum, s) => sum + (s.total_sales || 0), 0);
 
       const weekBudget = daysInWeek.reduce((sum, day) => sum + getDailyBudget(day), 0);
