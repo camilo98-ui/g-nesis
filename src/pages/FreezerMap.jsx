@@ -10,6 +10,7 @@ import FreezerAuditPanel from '@/components/freezer/FreezerAuditPanel';
 import FreezerHistoryPanel from '@/components/freezer/FreezerHistoryPanel';
 import FreezerDimensionsEditor from '@/components/freezer/FreezerDimensionsEditor';
 import SmartOrderPrediction from '@/components/freezer/SmartOrderPrediction';
+import InventoryStatusOverview from '@/components/freezer/InventoryStatusOverview';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
