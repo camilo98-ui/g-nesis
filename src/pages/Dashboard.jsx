@@ -979,9 +979,9 @@ export default function Dashboard() {
                 setTimeout(() => {
                   const section = document.getElementById('budget-expanded-content');
                   if (section) {
-                    section.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    section.scrollIntoView({ behavior: 'smooth', block: 'center' });
                   }
-                }, 200);
+                }, 400);
               }
             }} />
 
