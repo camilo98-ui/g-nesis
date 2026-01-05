@@ -123,9 +123,9 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
     const monthStart = retailMonthStart;
     const monthEnd = retailMonthEnd;
 
-    // Usar el rango de fechas del filtro si está disponible, de lo contrario, la semana retail actual
-    const currentWeekStart = currentDateRange?.from || startOfWeek(now, { weekStartsOn: 1 });
-    const currentWeekEnd = currentDateRange?.to || endOfWeek(now, { weekStartsOn: 1 });
+    // SIEMPRE usar la semana ACTUAL (ignorar filtros de fecha)
+    const currentWeekStart = startOfWeek(now, { weekStartsOn: 1 });
+    const currentWeekEnd = endOfWeek(now, { weekStartsOn: 1 });
 
     // Obtener todas las semanas retail que tocan el mes actual
     const weeks = eachWeekOfInterval(
