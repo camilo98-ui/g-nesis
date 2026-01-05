@@ -557,10 +557,21 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
                           </div>
                         </div>
                         <div className="flex items-center justify-between text-[9px] text-gray-600">
-                          <span>🏪 {flavor.freezers.size} nevera{flavor.freezers.size > 1 ? 's' : ''} • 📊 {flavor.coverageDays}d cobertura</span>
+                          <span>🏪 N{Array.from(flavor.freezers).join(', ')} • 📍 B{Array.from(flavor.rows).join(', ')}</span>
                           <span className={`font-medium ${flavor.rotationSpeed > 50 ? 'text-red-600' : flavor.rotationSpeed > 30 ? 'text-amber-600' : 'text-green-600'}`}>
-                              ⚡ {flavor.rotationSpeed.toFixed(0)}% rot
+                              ⚡ {flavor.avgDaysPerRotation ? `${flavor.avgDaysPerRotation.toFixed(1)}d rot` : `${flavor.rotationSpeed.toFixed(0)}% rot`}
                             </span>
+                        </div>
+                        <div className="flex items-center justify-between text-[9px] text-gray-500 mt-0.5">
+                          <span>📊 {flavor.coverageDays}d cobertura</span>
+                          {flavor.timesRemoved > 0 && (
+                            <span className="flex items-center gap-1">
+                              <ArrowDownCircle className="w-2.5 h-2.5 text-red-500" />
+                              {flavor.timesRemoved}x
+                              <ArrowUpCircle className="w-2.5 h-2.5 text-green-500 ml-1" />
+                              {flavor.timesAdded}x
+                            </span>
+                          )}
                         </div>
                         {flavor.reason &&
                       <p className="text-[9px] text-gray-500 mt-1 italic">💡 {flavor.reason}</p>
@@ -611,10 +622,21 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
                           </div>
                         </div>
                         <div className="flex items-center justify-between text-[9px] text-gray-600">
-                          <span>🏪 {flavor.freezers.size} nevera{flavor.freezers.size > 1 ? 's' : ''} • 📊 {flavor.coverageDays}d cobertura</span>
+                          <span>🏪 N{Array.from(flavor.freezers).join(', ')} • 📍 B{Array.from(flavor.rows).join(', ')}</span>
                           <span className={`font-medium ${flavor.rotationSpeed > 50 ? 'text-red-600' : flavor.rotationSpeed > 30 ? 'text-amber-600' : 'text-green-600'}`}>
-                              ⚡ {flavor.rotationSpeed.toFixed(0)}% rot
+                              ⚡ {flavor.avgDaysPerRotation ? `${flavor.avgDaysPerRotation.toFixed(1)}d rot` : `${flavor.rotationSpeed.toFixed(0)}% rot`}
                             </span>
+                        </div>
+                        <div className="flex items-center justify-between text-[9px] text-gray-500 mt-0.5">
+                          <span>📊 {flavor.coverageDays}d cobertura</span>
+                          {flavor.timesRemoved > 0 && (
+                            <span className="flex items-center gap-1">
+                              <ArrowDownCircle className="w-2.5 h-2.5 text-red-500" />
+                              {flavor.timesRemoved}x
+                              <ArrowUpCircle className="w-2.5 h-2.5 text-green-500 ml-1" />
+                              {flavor.timesAdded}x
+                            </span>
+                          )}
                         </div>
                         {flavor.reason &&
                       <p className="text-[9px] text-gray-500 mt-1 italic">💡 {flavor.reason}</p>
