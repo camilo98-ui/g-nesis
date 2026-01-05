@@ -265,6 +265,7 @@ export default function ExecutiveDashboard() {
     });
   }, [allDailySales, allBudgets, currentMonth, currentYear, dateRange]);
 
+  // Totales de la SEMANA seleccionada (para gráficas específicas)
   const zoneTotals = useMemo(() => {
     const storesWithData = storesAnalysis.filter(s => s.hasData);
     const totalSales = storesWithData.reduce((sum, s) => sum + s.weekTotalSales, 0);
@@ -272,6 +273,27 @@ export default function ExecutiveDashboard() {
     const totalProjection = storesWithData.reduce((sum, s) => sum + s.weekProjection, 0);
     const totalTransactions = storesWithData.reduce((sum, s) => sum + s.weekTotalTransactions, 0);
     return { totalSales, totalBudget, totalProjection, totalTransactions };
+  }, [storesAnalysis]);
+
+  // Totales ACUMULADOS del mes (para botones del header)
+  const monthlyTotals = useMemo(() => {
+    const storesWithData = storesAnalysis.filter(s => s.hasData);
+    const totalSales = storesWithData.reduce((sum, s) => sum + s.monthTotalSales, 0);
+    const totalTransactions = storesWithData.reduce((sum, s) => sum + s.monthTotalTransactions, 0);
+    const totalBudget = storesWithData.reduce((sum, s) => sum + s.salesBudget, 0);
+    const totalProjection = storesWithData.reduce((sum, s) => sum + s.monthProjection, 0);
+    const totalWeekProjection = storesWithData.reduce((sum, s) => sum + s.weekProjection, 0);
+    const totalWeekBudget = storesWithData.reduce((sum, s) => sum + s.weeklyBudget, 0);
+    
+    return { 
+      totalSales, 
+      totalTransactions, 
+      totalBudget, 
+      totalProjection,
+      totalWeekProjection,
+      totalWeekBudget,
+      avgTicket: totalTransactions > 0 ? totalSales / totalTransactions : 0
+    };
   }, [storesAnalysis]);
 
   const formatCurrency = (v) => new Intl.NumberFormat('es-CO', { 
@@ -754,27 +776,24 @@ Genera:
           </div>
         ) : (
           <>
-            {/* Nueva Sección: Métricas Consolidadas */}
+            {/* Nueva Sección: Métricas Consolidadas - ACUMULADO DEL MES */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              {/* Transacciones + Ticket Promedio del Mes */}
+              {/* Transacciones + Ticket Promedio del Mes ACUMULADO */}
               <motion.div 
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setSelectedKPIDetail('transactions')}
                 className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-xl rounded-lg p-4 border border-blue-500/20 cursor-pointer transition-all hover:border-blue-400/40 hover:shadow-lg hover:shadow-blue-500/20">
-                <p className="text-xs text-blue-300 mb-3 font-bold">Tráfico del Mes</p>
+                <p className="text-xs text-blue-300 mb-3 font-bold">Tráfico Acumulado (Mes)</p>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <p className="text-xs text-slate-400 mb-1">Transacciones</p>
-                    <p className="text-2xl font-black text-white">{storesAnalysis.reduce((sum, s) => sum + s.monthTotalTransactions, 0).toLocaleString()}</p>
+                    <p className="text-2xl font-black text-white">{monthlyTotals.totalTransactions.toLocaleString()}</p>
                   </div>
                   <div>
                     <p className="text-xs text-slate-400 mb-1">Ticket Promedio</p>
                     <p className="text-2xl font-black text-white">
-                      {formatCurrency(
-                        storesAnalysis.reduce((sum, s) => sum + s.monthTotalSales, 0) / 
-                        storesAnalysis.reduce((sum, s) => sum + s.monthTotalTransactions, 0)
-                      )}
+                      {formatCurrency(monthlyTotals.avgTicket)}
                     </p>
                   </div>
                 </div>
@@ -786,22 +805,22 @@ Genera:
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setSelectedKPIDetail('avgSales')}
                 className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 backdrop-blur-xl rounded-lg p-4 border border-amber-500/20 cursor-pointer transition-all hover:border-amber-400/40 hover:shadow-lg hover:shadow-amber-500/20">
-                <p className="text-xs text-amber-300 mb-3 font-bold">Ventas del Mes</p>
+                <p className="text-xs text-amber-300 mb-3 font-bold">Ventas Acumuladas (Mes)</p>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <p className="text-xs text-slate-400 mb-1">Venta Acumulada</p>
-                    <p className="text-2xl font-black text-white">{formatShort(storesAnalysis.reduce((sum, s) => sum + s.monthTotalSales, 0))}</p>
+                    <p className="text-xs text-slate-400 mb-1">Total Acumulado</p>
+                    <p className="text-2xl font-black text-white">{formatShort(monthlyTotals.totalSales)}</p>
                   </div>
                   <div>
                     <p className="text-xs text-slate-400 mb-1">Promedio/Tienda</p>
                     <p className="text-2xl font-black text-white">
-                      {formatShort(storesAnalysis.reduce((sum, s) => sum + s.monthTotalSales, 0) / STORES.length)}
+                      {formatShort(monthlyTotals.totalSales / STORES.length)}
                     </p>
                   </div>
                 </div>
               </motion.div>
 
-              {/* Proyección Mensual + Semanal con % */}
+              {/* Proyección Mensual + Semanal Actual con % */}
               <motion.div 
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
@@ -811,23 +830,23 @@ Genera:
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <p className="text-xs text-slate-400 mb-1">Proy. Mes</p>
-                    <p className="text-xl font-black text-white mb-0.5">{formatShort(zoneTotals.totalProjection)}</p>
+                    <p className="text-xl font-black text-white mb-0.5">{formatShort(monthlyTotals.totalProjection)}</p>
                     <p className={`text-xs font-bold ${
-                      ((zoneTotals.totalProjection/zoneTotals.totalBudget)*100) >= 100 ? 'text-emerald-400' : 'text-red-400'
+                      ((monthlyTotals.totalProjection/monthlyTotals.totalBudget)*100) >= 100 ? 'text-emerald-400' : 'text-red-400'
                     }`}>
-                      {((zoneTotals.totalProjection/zoneTotals.totalBudget)*100).toFixed(0)}%
+                      {((monthlyTotals.totalProjection/monthlyTotals.totalBudget)*100).toFixed(0)}%
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-slate-400 mb-1">Proy. Semana</p>
+                    <p className="text-xs text-slate-400 mb-1">Proy. Sem Actual</p>
                     <p className="text-xl font-black text-white mb-0.5">
-                      {formatShort(storesAnalysis.reduce((sum, s) => sum + s.weekProjection, 0))}
+                      {formatShort(monthlyTotals.totalWeekProjection)}
                     </p>
                     <p className={`text-xs font-bold ${
-                      ((storesAnalysis.reduce((sum, s) => sum + s.weekProjection, 0) / storesAnalysis.reduce((sum, s) => sum + s.weeklyBudget, 0))*100) >= 100 
+                      ((monthlyTotals.totalWeekProjection / monthlyTotals.totalWeekBudget)*100) >= 100 
                         ? 'text-emerald-400' : 'text-red-400'
                     }`}>
-                      {((storesAnalysis.reduce((sum, s) => sum + s.weekProjection, 0) / storesAnalysis.reduce((sum, s) => sum + s.weeklyBudget, 0))*100).toFixed(0)}%
+                      {((monthlyTotals.totalWeekProjection / monthlyTotals.totalWeekBudget)*100).toFixed(0)}%
                     </p>
                   </div>
                 </div>
