@@ -514,83 +514,39 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
         </div>
 
         <CardContent className="p-4 space-y-4">
-          {/* Resumen del Pedido - SIEMPRE VISIBLE */}
-          <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-4 border-2 border-indigo-300 mb-3">
+          {/* Resumen Simple */}
+          <div className={`rounded-xl p-4 border-2 ${
+            activeTab === 'semanal' 
+              ? 'bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-300'
+              : 'bg-gradient-to-br from-pink-50 to-rose-50 border-pink-300'
+          }`}>
             <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <ShoppingCart className="w-5 h-5 text-indigo-600" />
-                <div>
-                  <p className="text-indigo-900 font-black text-base">
-                    {currentOrder.total} Cubetas Totales
-                  </p>
-                  <p className="text-indigo-600 text-[10px]">
-                    📅 Monta: {currentOrder.config?.[activeTab === 'semanal' ? 'semanal' : 'adicional1']} • 
-                    🚚 Llega: {currentOrder.config?.[activeTab === 'semanal' ? 'entregaSemanal' : 'entregaAdicional1']}
-                  </p>
-                </div>
+              <div>
+                <p className="text-sm font-black text-gray-900">
+                  {activeTab === 'semanal' ? '📦 Pedido Semanal' : '⚡ Pedido Adicional'}
+                </p>
+                <p className="text-[11px] text-gray-600 mt-0.5">
+                  {activeTab === 'semanal' 
+                    ? `Montar ${storeConfig.semanal} para recibir ${storeConfig.entregaSemanal}`
+                    : `Montar ${storeConfig.adicional1} para recibir ${storeConfig.entregaAdicional1}`
+                  }
+                </p>
               </div>
               <div className="text-right">
-                <p className="text-2xl font-black text-indigo-900">{currentOrder.total}</p>
+                <p className="text-3xl font-black text-gray-900">{currentOrder.total}</p>
+                <p className="text-[10px] text-gray-500">cubetas</p>
               </div>
             </div>
             
             <div className="grid grid-cols-2 gap-2">
-              <div className="bg-blue-100/60 rounded-lg p-2 text-center border border-blue-300">
-                <p className="text-blue-900 font-black text-lg">{currentOrder.totalGourmet || 0}</p>
-                <p className="text-blue-700 text-[9px] font-bold">🍦 Línea Gourmet</p>
+              <div className="bg-white/60 rounded-lg p-2.5 text-center border border-blue-200">
+                <p className="text-blue-900 font-black text-xl">{currentOrder.totalGourmet || 0}</p>
+                <p className="text-blue-700 text-[10px] font-bold">🍦 Gourmet</p>
               </div>
-              <div className="bg-pink-100/60 rounded-lg p-2 text-center border border-pink-300">
-                <p className="text-pink-900 font-black text-lg">{currentOrder.totalExclusivo || 0}</p>
-                <p className="text-pink-700 text-[9px] font-bold">✨ Línea Exclusivo</p>
+              <div className="bg-white/60 rounded-lg p-2.5 text-center border border-pink-200">
+                <p className="text-pink-900 font-black text-xl">{currentOrder.totalExclusivo || 0}</p>
+                <p className="text-pink-700 text-[10px] font-bold">✨ Exclusivo</p>
               </div>
-            </div>
-          </div>
-
-          {/* Métricas clave */}
-          <div className="grid grid-cols-4 gap-2 mb-3">
-            <div className="p-2 rounded-lg bg-red-50 border border-red-200 text-center">
-              <p className="text-xs font-black text-red-700">{fullAnalysis.critical}</p>
-              <p className="text-[9px] text-red-600">Críticos</p>
-            </div>
-            <div className="p-2 rounded-lg bg-amber-50 border border-amber-200 text-center">
-              <p className="text-xs font-black text-amber-700">{fullAnalysis.empty + fullAnalysis.low}</p>
-              <p className="text-[9px] text-amber-600">Bajos/Vacíos</p>
-            </div>
-            <div className="p-2 rounded-lg bg-blue-50 border border-blue-200 text-center">
-              <p className="text-xs font-black text-blue-700">{fullAnalysis.averageRotation.toFixed(0)}%</p>
-              <p className="text-[9px] text-blue-600">Rotación</p>
-            </div>
-            <div className="p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-center">
-              <p className="text-xs font-black text-emerald-700">{fullAnalysis.coverageDays}d</p>
-              <p className="text-[9px] text-emerald-600">Cobertura</p>
-            </div>
-          </div>
-
-          {/* Descripción analítica del pedido */}
-          <div className={`p-3 rounded-xl border-2 ${
-          activeTab === 'semanal' ?
-          'bg-gradient-to-r from-purple-50 to-indigo-50 border-purple-300' :
-          'bg-gradient-to-r from-pink-50 to-rose-50 border-pink-300'}`
-          }>
-            <p className="text-xs font-bold mb-1.5 flex items-center gap-1">
-              <BarChart3 className="w-3 h-3" />
-              {activeTab === 'semanal' ? '🎯 Pedido Semanal - Cobertura 7 días' : '⚡ Pedido Adicional - Reposición Táctica'}
-            </p>
-            <p className="text-[10px] text-gray-700 leading-relaxed mb-2">
-              {activeTab === 'semanal' ?
-              `Pedido estratégico para ${storeConfig.entregaSemanal}. Incluye ${critical.length} críticos, ${urgent.length} urgentes y sabores de alta rotación. Calculado para mantener operación hasta próximo pedido.` :
-              `Reposición mid-week para ${storeConfig.entregaAdicional1}. Enfocado en sabores con cobertura < 4 días. Evita quiebre de stock entre entregas principales.`}
-            </p>
-            <div className="flex items-center gap-2 text-[9px] text-gray-500">
-              <span className="flex items-center gap-1">
-                <Calendar className="w-2.5 h-2.5" />
-                Monta: {activeTab === 'semanal' ? storeConfig.semanal : storeConfig.adicional1}
-              </span>
-              <span>•</span>
-              <span className="flex items-center gap-1">
-                <TrendingUp className="w-2.5 h-2.5" />
-                Llega: {activeTab === 'semanal' ? storeConfig.entregaSemanal : storeConfig.entregaAdicional1}
-              </span>
             </div>
           </div>
 
@@ -620,54 +576,33 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
                     transition={{ delay: i * 0.03 }}
                     className="p-2.5 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border border-blue-200 hover:shadow-md transition-shadow">
 
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-bold text-blue-800 text-sm">{flavor.name}</span>
-                          <div className="flex items-center gap-2">
-                            {flavor.priority === 'CRÍTICO' &&
-                        <span className="px-2 py-0.5 bg-red-500 text-white text-[9px] font-bold rounded-full">
-                                CRÍTICO
-                              </span>
-                        }
-                            {flavor.priority === 'URGENTE' &&
-                        <span className="px-2 py-0.5 bg-orange-500 text-white text-[9px] font-bold rounded-full">
-                                URGENTE
-                              </span>
-                        }
-                            {flavor.priority === 'ALTA' &&
-                        <span className="px-2 py-0.5 bg-amber-500 text-white text-[9px] font-bold rounded-full">
-                                ALTA
-                              </span>
-                        }
-                            <span className="font-black text-blue-600 text-base">{flavor.needed || flavor.totalCount}x</span>
-                          </div>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-bold text-blue-900 text-sm">{flavor.name}</span>
+                          <span className="font-black text-blue-700 text-2xl">{flavor.needed}x</span>
                         </div>
-                        <div className="flex items-center justify-between text-[9px] text-gray-600">
-                          <span>🏪 N{Array.from(flavor.freezers).join(', ')} • 📍 B{Array.from(flavor.rows).join(', ')}</span>
-                          <span className={`font-medium ${flavor.rotationSpeed > 50 ? 'text-red-600' : flavor.rotationSpeed > 30 ? 'text-amber-600' : 'text-green-600'}`}>
-                              ⚡ {flavor.avgDaysPerRotation ? `${flavor.avgDaysPerRotation.toFixed(1)}d rot` : `${flavor.rotationSpeed.toFixed(0)}% rot`}
-                            </span>
-                        </div>
-                        <div className="flex items-center justify-between text-[9px] text-gray-500 mt-0.5">
-                          <span>📊 {flavor.coverageDays}d cobertura</span>
-                          {flavor.timesRemoved > 0 && (
-                            <span className="flex items-center gap-1">
-                              <ArrowDownCircle className="w-2.5 h-2.5 text-red-500" />
-                              {flavor.timesRemoved}x
-                              <ArrowUpCircle className="w-2.5 h-2.5 text-green-500 ml-1" />
-                              {flavor.timesAdded}x
-                            </span>
+                        
+                        <div className="space-y-1.5">
+                          <p className="text-[11px] text-gray-700 leading-relaxed">
+                            📍 Está en Nevera {Array.from(flavor.freezers).join(', ')}, Bajada {Array.from(flavor.rows).join(', ')}
+                          </p>
+                          
+                          {flavor.avgDaysPerRotation ? (
+                            <p className="text-[11px] text-gray-700 leading-relaxed">
+                              🔄 Se agota cada <span className="font-bold text-red-600">{flavor.avgDaysPerRotation.toFixed(1)} días</span>
+                              {flavor.timesRemoved > 0 && ` (se ha cambiado ${flavor.timesRemoved} veces)`}
+                            </p>
+                          ) : (
+                            <p className="text-[11px] text-gray-700 leading-relaxed">
+                              ⚠️ Stock {flavor.coverageDays <= 2 ? 'crítico' : 'bajo'} - dura solo {flavor.coverageDays} días
+                            </p>
+                          )}
+                          
+                          {activeTab === 'adicional' && flavor.weeklyOrderAmount > 0 && (
+                            <p className="text-[11px] text-blue-700 font-medium bg-blue-50 rounded px-2 py-1">
+                              ℹ️ Ya pediste {flavor.weeklyOrderAmount}x en el pedido semanal. Esto es adicional.
+                            </p>
                           )}
                         </div>
-                        {activeTab === 'adicional' && flavor.weeklyOrderAmount > 0 && (
-                          <div className="mt-1.5 p-1.5 bg-blue-50 rounded border border-blue-200">
-                            <p className="text-[9px] text-blue-700 font-medium">
-                              ℹ️ Ya pediste <span className="font-black">{flavor.weeklyOrderAmount}x</span> en pedido semanal
-                            </p>
-                          </div>
-                        )}
-                        {flavor.reason &&
-                      <p className="text-[9px] text-gray-500 mt-1 italic">💡 {flavor.reason}</p>
-                      }
                       </motion.div>
                   )}
                   </div>
@@ -765,65 +700,29 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
             </motion.div>
           </AnimatePresence>
 
-          {/* Inventario Actual */}
-          <div className="pt-3 border-t border-gray-200 space-y-2">
-            <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg p-3 border border-emerald-200">
-              <p className="text-[10px] font-bold text-emerald-900 mb-1.5 flex items-center gap-1">
-                <CheckCircle className="w-3 h-3" />
-                📦 Con Qué Puedo Continuar
-              </p>
-              <div className="grid grid-cols-3 gap-2 text-[9px]">
-                <div className="text-center">
-                  <div className="text-emerald-700 font-black text-base">{fullAnalysis.total}</div>
-                  <div className="text-emerald-600">Cubetas Total</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-green-700 font-black text-base">
-                    {fullAnalysis.flavors.filter(f => f.avgStock >= 60).length}
-                  </div>
-                  <div className="text-green-600">Stock OK</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-amber-700 font-black text-base">
-                    {fullAnalysis.low + fullAnalysis.empty}
-                  </div>
-                  <div className="text-amber-600">Necesita</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-3 border border-purple-200">
-              <p className="text-[10px] font-bold text-purple-900 mb-1.5 flex items-center gap-1">
-                <Brain className="w-3 h-3" />
-                📊 Análisis de Rotación Histórica
-              </p>
-              <div className="grid grid-cols-2 gap-2 text-[9px]">
-                <div>
-                  <span className="text-red-700 font-bold">{critical.length} Críticos</span> ({"<"}2d)
-                </div>
-                <div>
-                  <span className="text-orange-700 font-bold">{urgent.length} Urgentes</span> (2-4d)
-                </div>
-                <div>
-                  <span className="text-amber-700 font-bold">{highRotation.length} Alta Rotación</span> ({">"}40%)
-                </div>
-                <div>
-                  <span className="text-green-700 font-bold">
-                    {fullAnalysis.flavors.filter(f => f.timesRemoved > 0).length} Con Historial
+          {/* Explicación Simple */}
+          <div className={`rounded-xl p-3 border ${
+            activeTab === 'semanal' 
+              ? 'bg-blue-50/50 border-blue-200'
+              : 'bg-pink-50/50 border-pink-200'
+          }`}>
+            <p className="text-sm text-gray-800 leading-relaxed">
+              {activeTab === 'semanal' ? (
+                <>
+                  <span className="font-bold">¿Qué incluye?</span> Los sabores que se están agotando o ya se agotaron, más los que rotan rápido según el historial. 
+                  <span className="block mt-1.5 text-xs text-gray-600">
+                    💡 Este pedido debe cubrir toda la semana hasta el próximo pedido.
                   </span>
-                </div>
-              </div>
-            </div>
-            
-            <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg p-2.5 border border-blue-200">
-              <p className="text-[9px] text-blue-900 leading-relaxed">
-                <span className="font-bold">💡 Recomendación:</span>{' '}
-                {activeTab === 'semanal' 
-                  ? `Monta este pedido el ${storeConfig.semanal} para recibir ${storeConfig.entregaSemanal}. Prioriza sabores críticos y urgentes para evitar quiebres.`
-                  : `Complementa mid-week el ${storeConfig.adicional1} para llegar ${storeConfig.entregaAdicional1}. Enfócate solo en sabores con cobertura crítica.`
-                }
-              </p>
-            </div>
+                </>
+              ) : (
+                <>
+                  <span className="font-bold">¿Para qué es?</span> Reforzar los sabores que se agotan muy rápido entre miércoles y sábado. 
+                  <span className="block mt-1.5 text-xs text-gray-600">
+                    💡 Solo pide lo que realmente necesitas adicional al pedido semanal.
+                  </span>
+                </>
+              )}
+            </p>
           </div>
         </CardContent>
       </Card>
