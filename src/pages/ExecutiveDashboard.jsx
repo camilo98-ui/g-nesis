@@ -1069,6 +1069,9 @@ Genera:
                         fontSize={11} 
                         tickLine={false}
                         axisLine={{ stroke: '#374151' }}
+                        angle={viewMode === 'day' && dailySalesData.length > 7 ? -20 : 0}
+                        textAnchor={viewMode === 'day' && dailySalesData.length > 7 ? 'end' : 'middle'}
+                        height={viewMode === 'day' && dailySalesData.length > 7 ? 50 : 30}
                       />
                       <YAxis 
                         stroke="#6b7280" 
@@ -1077,7 +1080,23 @@ Genera:
                         axisLine={{ stroke: '#374151' }}
                         tickFormatter={(value) => `$${value.toFixed(1)}M`}
                       />
-                      <Tooltip {...salesVsBudgetTooltip} />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: 'rgba(15, 23, 42, 0.95)', 
+                          border: '1px solid rgba(255,255,255,0.2)',
+                          borderRadius: '8px',
+                          fontSize: '11px',
+                          color: '#fff'
+                        }}
+                        formatter={(value, name) => [
+                          formatCurrency(value * 1000000), 
+                          name === 'sales' ? '💰 Venta' : '🎯 Meta'
+                        ]}
+                        labelFormatter={(label) => {
+                          const item = dailySalesData.find(d => d.date === label);
+                          return item?.fullDate || label;
+                        }}
+                      />
                       <Legend
                         wrapperStyle={{ paddingTop: '16px' }}
                         content={() => (
@@ -1098,7 +1117,7 @@ Genera:
                         dataKey="sales" 
                         fill="url(#salesGradient)" 
                         radius={[6, 6, 0, 0]} 
-                        maxBarSize={40} 
+                        maxBarSize={viewMode === 'month' ? 80 : viewMode === 'week' ? 50 : 40}
                         name="Venta"
                         isAnimationActive={true}
                         animationDuration={1500}
@@ -1113,26 +1132,21 @@ Genera:
                           const { cx, cy } = props;
                           return (
                             <g>
-                              {/* Resplandor exterior más brillante */}
                               <circle cx={cx} cy={cy} r={15} fill="#818cf8" opacity={0.1}>
                                 <animate attributeName="r" values="15;22;15" dur="2s" repeatCount="indefinite" />
                                 <animate attributeName="opacity" values="0.1;0.35;0.1" dur="2s" repeatCount="indefinite" />
                               </circle>
-                              {/* Resplandor medio */}
                               <circle cx={cx} cy={cy} r={10} fill="#a5b4fc" opacity={0.3}>
                                 <animate attributeName="r" values="10;14;10" dur="1.5s" repeatCount="indefinite" />
                                 <animate attributeName="opacity" values="0.3;0.6;0.3" dur="1.5s" repeatCount="indefinite" />
                               </circle>
-                              {/* Anillo brillante */}
                               <circle cx={cx} cy={cy} r={6} fill="none" stroke="#c7d2fe" strokeWidth={2} opacity={0.5}>
                                 <animate attributeName="r" values="6;9;6" dur="1.2s" repeatCount="indefinite" />
                                 <animate attributeName="opacity" values="0.5;0.9;0.5" dur="1.2s" repeatCount="indefinite" />
                               </circle>
-                              {/* Punto central sólido */}
                               <circle cx={cx} cy={cy} r={5} fill="#6366f1" stroke="#e0e7ff" strokeWidth={2}>
                                 <animate attributeName="r" values="5;6.5;5" dur="1s" repeatCount="indefinite" />
                               </circle>
-                              {/* Núcleo brillante */}
                               <circle cx={cx} cy={cy} r={2.5} fill="#e0e7ff">
                                 <animate attributeName="opacity" values="0.8;1;0.8" dur="0.8s" repeatCount="indefinite" />
                               </circle>
