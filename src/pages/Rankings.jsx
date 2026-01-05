@@ -22,7 +22,7 @@ import { startOfMonth, startOfWeek } from 'date-fns';
 export default function Rankings() {
   const [selectedStore, setSelectedStore] = useState('');
   const [dateRange, setDateRange] = useState({
-    from: startOfWeek(startOfMonth(new Date()), { weekStartsOn: 1 }),
+    from: startOfMonth(new Date()),
     to: new Date()
   });
   const [activeTab, setActiveTab] = useState('sales');

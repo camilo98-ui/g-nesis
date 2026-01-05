@@ -33,7 +33,7 @@ import { es } from 'date-fns/locale';
 export default function CashiersDashboard() {
   const [selectedStore, setSelectedStore] = useState('');
   const [dateRange, setDateRange] = useState({ 
-    from: startOfWeek(startOfMonth(new Date()), { weekStartsOn: 1 }), 
+    from: startOfMonth(new Date()), 
     to: new Date() 
   });
   const [searchTerm, setSearchTerm] = useState('');

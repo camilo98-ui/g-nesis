@@ -473,10 +473,10 @@ function DetailPanel({ metric, data, onClose, chartData, formatCurrency, shiftDa
 
 export default function Dashboard() {
   const [selectedStore, setSelectedStore] = useState('');
-  // Inicializar con la semana actual del mes (lunes a domingo)
+  // Inicializar con el mes completo
   const [dateRange, setDateRange] = useState({
-    from: startOfWeek(new Date(), { weekStartsOn: 1 }),
-    to: endOfWeek(new Date(), { weekStartsOn: 1 })
+    from: startOfMonth(new Date()),
+    to: new Date()
   });
   const [activeMetric, setActiveMetric] = useState(null);
   const [projectionMetric, setProjectionMetric] = useState(null);
