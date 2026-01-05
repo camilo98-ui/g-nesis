@@ -270,116 +270,142 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
     };
   }, [fullAnalysis]);
 
-  // PEDIDO SEMANAL - Análisis de demanda para cobertura 7 días
+  // PEDIDO SEMANAL - SIEMPRE calcular basado en rotación histórica
   const weeklyOrder = useMemo(() => {
-    // Calcular necesidad basada en días de cobertura hasta próxima entrega
-    const calculateNeeded = (flavor, isPriority = false) => {
-      // Si es prioritario (crítico/urgente), pedir para cubrir 7 días completos
-      if (isPriority) {
-        // Proyección: si tiene baja cobertura, necesita reposición completa
-        const neededSlots = Math.max(
-          flavor.totalCount, // Mínimo: reponer lo que hay
-          Math.ceil((flavor.lowCount + flavor.emptyCount) * 1.5) // Extra para críticos
-        );
-        return Math.min(neededSlots, flavor.totalCount + 2); // Límite: actual + 2 cubetas máximo
+    const allFlavors = fullAnalysis.flavors;
+    
+    // Calcular necesidad basada en rotación histórica y cobertura
+    const calculateNeeded = (flavor) => {
+      // Si tiene rotación histórica real, usar eso
+      if (flavor.timesRemoved > 0 && flavor.avgDaysPerRotation) {
+        // Frecuencia semanal: 7 días / días por rotación
+        const weeklyConsumption = Math.ceil(7 / flavor.avgDaysPerRotation);
+        // Pedir según consumo + buffer 20%
+        return Math.ceil(weeklyConsumption * 1.2);
       }
       
-      // Para alta rotación, reponer parcialmente según velocidad
-      if (flavor.rotationSpeed > 40) {
-        return Math.ceil(flavor.totalCount * 0.7); // 70% de reposición
+      // Sin historial: usar stock actual y cobertura
+      if (flavor.coverageDays <= 2 || flavor.emptyCount > 0) {
+        return Math.max(flavor.totalCount, Math.ceil((flavor.lowCount + flavor.emptyCount) * 1.5));
       }
       
-      // Para rotación media, reposición conservadora
-      return Math.ceil(flavor.totalCount * 0.5); // 50% de reposición
+      if (flavor.coverageDays <= 4 || flavor.rotationSpeed > 40) {
+        return Math.ceil(flavor.totalCount * 0.8);
+      }
+      
+      if (flavor.rotationSpeed > 20) {
+        return Math.ceil(flavor.totalCount * 0.5);
+      }
+      
+      // Baja rotación: mínimo 1 para mantener frescura
+      return Math.max(1, Math.ceil(flavor.totalCount * 0.3));
     };
 
-    // Construir pedido semanal con lógica de demanda
-    const gourmetCritical = critical.filter(f => GOURMET_FLAVORS.includes(f.name));
-    const gourmetUrgent = urgent.filter(f => GOURMET_FLAVORS.includes(f.name));
-    const gourmetHigh = highRotation.filter(f => GOURMET_FLAVORS.includes(f.name)).slice(0, 3);
-    const gourmetMedium = mediumRotation.filter(f => GOURMET_FLAVORS.includes(f.name)).slice(0, 2);
+    // Separar por línea y calcular
+    const gourmetFlavors = allFlavors
+      .filter(f => GOURMET_FLAVORS.includes(f.name))
+      .map(f => ({
+        ...f,
+        needed: calculateNeeded(f),
+        priority: f.coverageDays <= 2 ? 'CRÍTICO' : 
+                  f.coverageDays <= 4 ? 'URGENTE' : 
+                  f.rotationSpeed > 40 ? 'ALTA' : 'MEDIA'
+      }))
+      .filter(f => f.needed > 0)
+      .sort((a, b) => {
+        const priorityOrder = { 'CRÍTICO': 1, 'URGENTE': 2, 'ALTA': 3, 'MEDIA': 4 };
+        return (priorityOrder[a.priority] || 5) - (priorityOrder[b.priority] || 5);
+      });
 
-    const exclusivoCritical = critical.filter(f => EXCLUSIVO_FLAVORS.includes(f.name));
-    const exclusivoUrgent = urgent.filter(f => EXCLUSIVO_FLAVORS.includes(f.name));
-    const exclusivoHigh = highRotation.filter(f => EXCLUSIVO_FLAVORS.includes(f.name)).slice(0, 3);
-    const exclusivoMedium = mediumRotation.filter(f => EXCLUSIVO_FLAVORS.includes(f.name)).slice(0, 2);
+    const exclusivoFlavors = allFlavors
+      .filter(f => EXCLUSIVO_FLAVORS.includes(f.name))
+      .map(f => ({
+        ...f,
+        needed: calculateNeeded(f),
+        priority: f.coverageDays <= 2 ? 'CRÍTICO' : 
+                  f.coverageDays <= 4 ? 'URGENTE' : 
+                  f.rotationSpeed > 40 ? 'ALTA' : 'MEDIA'
+      }))
+      .filter(f => f.needed > 0)
+      .sort((a, b) => {
+        const priorityOrder = { 'CRÍTICO': 1, 'URGENTE': 2, 'ALTA': 3, 'MEDIA': 4 };
+        return (priorityOrder[a.priority] || 5) - (priorityOrder[b.priority] || 5);
+      });
 
-    // Aplicar cálculo de necesidad
-    const allGourmet = [
-      ...gourmetCritical.map(f => ({ ...f, needed: calculateNeeded(f, true), priority: 'CRÍTICO' })),
-      ...gourmetUrgent.map(f => ({ ...f, needed: calculateNeeded(f, true), priority: 'URGENTE' })),
-      ...gourmetHigh.map(f => ({ ...f, needed: calculateNeeded(f, false), priority: 'ALTA' })),
-      ...gourmetMedium.map(f => ({ ...f, needed: calculateNeeded(f, false), priority: 'MEDIA' }))
-    ];
-
-    const allExclusivo = [
-      ...exclusivoCritical.map(f => ({ ...f, needed: calculateNeeded(f, true), priority: 'CRÍTICO' })),
-      ...exclusivoUrgent.map(f => ({ ...f, needed: calculateNeeded(f, true), priority: 'URGENTE' })),
-      ...exclusivoHigh.map(f => ({ ...f, needed: calculateNeeded(f, false), priority: 'ALTA' })),
-      ...exclusivoMedium.map(f => ({ ...f, needed: calculateNeeded(f, false), priority: 'MEDIA' }))
-    ];
-
-    const totalGourmetCubetas = allGourmet.reduce((sum, f) => sum + f.needed, 0);
-    const totalExclusivoCubetas = allExclusivo.reduce((sum, f) => sum + f.needed, 0);
+    const totalGourmetCubetas = gourmetFlavors.reduce((sum, f) => sum + f.needed, 0);
+    const totalExclusivoCubetas = exclusivoFlavors.reduce((sum, f) => sum + f.needed, 0);
 
     return {
-      gourmet: allGourmet,
-      exclusivo: allExclusivo,
+      gourmet: gourmetFlavors,
+      exclusivo: exclusivoFlavors,
       total: totalGourmetCubetas + totalExclusivoCubetas,
+      totalGourmet: totalGourmetCubetas,
+      totalExclusivo: totalExclusivoCubetas,
       config: storeConfig
     };
-  }, [critical, urgent, highRotation, mediumRotation, storeConfig]);
+  }, [fullAnalysis, storeConfig]);
 
-  // PEDIDO ADICIONAL - Reposición mid-week táctica
+  // PEDIDO ADICIONAL - Basado en rotación mid-week
   const additionalOrder = useMemo(() => {
-    // Lógica: reponer lo que está bajando después del pedido semanal
-    // Enfoque conservador: solo lo que realmente necesita reposición urgente mid-week
+    const allFlavors = fullAnalysis.flavors;
     
     const calculateAdditionalNeeded = (flavor) => {
-      // Si tiene < 3 días de cobertura, necesita reposición
-      if (flavor.coverageDays <= 3) {
-        return Math.ceil(flavor.totalCount * 0.6); // 60% de reposición
+      // Con rotación histórica
+      if (flavor.timesRemoved > 0 && flavor.avgDaysPerRotation) {
+        // Si rota en menos de 4 días, necesita reposición mid-week
+        if (flavor.avgDaysPerRotation <= 4) {
+          const midWeekConsumption = Math.ceil(3.5 / flavor.avgDaysPerRotation);
+          return Math.ceil(midWeekConsumption * 1.1);
+        }
+        return 0;
       }
-      // Si solo 1-2 slots bajos, reponer mínimo
-      if (flavor.lowCount >= 1 && flavor.lowCount <= 2) {
-        return Math.min(flavor.lowCount + 1, flavor.totalCount);
+      
+      // Sin historial: solo urgentes
+      if (flavor.coverageDays <= 3 || flavor.emptyCount > 0) {
+        return Math.ceil(flavor.totalCount * 0.6);
       }
+      
+      if (flavor.lowCount >= 2) {
+        return Math.max(2, Math.ceil(flavor.lowCount * 1.2));
+      }
+      
       return 0;
     };
 
-    // Sabores que necesitan reposición mid-week
-    const gourmetNeeded = [
-      ...urgent.filter(f => GOURMET_FLAVORS.includes(f.name)),
-      ...mediumRotation.filter(f => GOURMET_FLAVORS.includes(f.name) && f.coverageDays <= 4)
-    ];
+    const gourmetFlavors = allFlavors
+      .filter(f => GOURMET_FLAVORS.includes(f.name))
+      .map(f => ({
+        ...f,
+        needed: calculateAdditionalNeeded(f),
+        reason: f.avgDaysPerRotation && f.avgDaysPerRotation <= 4 ? 'Rotación rápida' : 
+                f.coverageDays <= 3 ? 'Cobertura baja' : 'Preventivo'
+      }))
+      .filter(f => f.needed > 0)
+      .sort((a, b) => (a.avgDaysPerRotation || 99) - (b.avgDaysPerRotation || 99));
 
-    const exclusivoNeeded = [
-      ...urgent.filter(f => EXCLUSIVO_FLAVORS.includes(f.name)),
-      ...mediumRotation.filter(f => EXCLUSIVO_FLAVORS.includes(f.name) && f.coverageDays <= 4)
-    ];
+    const exclusivoFlavors = allFlavors
+      .filter(f => EXCLUSIVO_FLAVORS.includes(f.name))
+      .map(f => ({
+        ...f,
+        needed: calculateAdditionalNeeded(f),
+        reason: f.avgDaysPerRotation && f.avgDaysPerRotation <= 4 ? 'Rotación rápida' : 
+                f.coverageDays <= 3 ? 'Cobertura baja' : 'Preventivo'
+      }))
+      .filter(f => f.needed > 0)
+      .sort((a, b) => (a.avgDaysPerRotation || 99) - (b.avgDaysPerRotation || 99));
 
-    const allGourmet = gourmetNeeded.map(f => ({ 
-      ...f, 
-      needed: calculateAdditionalNeeded(f),
-      reason: f.coverageDays <= 3 ? 'Cobertura baja' : 'Reposición preventiva'
-    })).filter(f => f.needed > 0);
-
-    const allExclusivo = exclusivoNeeded.map(f => ({ 
-      ...f, 
-      needed: calculateAdditionalNeeded(f),
-      reason: f.coverageDays <= 3 ? 'Cobertura baja' : 'Reposición preventiva'
-    })).filter(f => f.needed > 0);
-
-    const totalGourmetCubetas = allGourmet.reduce((sum, f) => sum + f.needed, 0);
-    const totalExclusivoCubetas = allExclusivo.reduce((sum, f) => sum + f.needed, 0);
+    const totalGourmetCubetas = gourmetFlavors.reduce((sum, f) => sum + f.needed, 0);
+    const totalExclusivoCubetas = exclusivoFlavors.reduce((sum, f) => sum + f.needed, 0);
 
     return {
-      gourmet: allGourmet,
-      exclusivo: allExclusivo,
+      gourmet: gourmetFlavors,
+      exclusivo: exclusivoFlavors,
       total: totalGourmetCubetas + totalExclusivoCubetas,
+      totalGourmet: totalGourmetCubetas,
+      totalExclusivo: totalExclusivoCubetas,
       config: storeConfig
     };
-  }, [urgent, mediumRotation, storeConfig]);
+  }, [fullAnalysis, storeConfig]);
 
   const currentOrder = activeTab === 'semanal' ? weeklyOrder : additionalOrder;
 
@@ -443,20 +469,34 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
         </div>
 
         <CardContent className="p-4 space-y-4">
-          {/* Info de pedido y entrega */}
-          <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-3 border border-indigo-200 mb-3">
-            <div className="flex items-center justify-between text-xs">
-              <div>
-                <p className="text-indigo-600 font-bold mb-0.5">
-                  📅 Montaje: {currentOrder.config?.[activeTab === 'semanal' ? 'semanal' : 'adicional1']}
-                </p>
-                <p className="text-indigo-500 text-[10px]">
-                  🚚 Entrega: {currentOrder.config?.[activeTab === 'semanal' ? 'entregaSemanal' : 'entregaAdicional1']}
-                </p>
+          {/* Resumen del Pedido - SIEMPRE VISIBLE */}
+          <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-4 border-2 border-indigo-300 mb-3">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <ShoppingCart className="w-5 h-5 text-indigo-600" />
+                <div>
+                  <p className="text-indigo-900 font-black text-base">
+                    {currentOrder.total} Cubetas Totales
+                  </p>
+                  <p className="text-indigo-600 text-[10px]">
+                    📅 Monta: {currentOrder.config?.[activeTab === 'semanal' ? 'semanal' : 'adicional1']} • 
+                    🚚 Llega: {currentOrder.config?.[activeTab === 'semanal' ? 'entregaSemanal' : 'entregaAdicional1']}
+                  </p>
+                </div>
               </div>
               <div className="text-right">
-                <p className="text-indigo-900 font-black text-lg">{currentOrder.total}</p>
-                <p className="text-indigo-600 text-[10px] font-medium">Cubetas totales</p>
+                <p className="text-2xl font-black text-indigo-900">{currentOrder.total}</p>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-2">
+              <div className="bg-blue-100/60 rounded-lg p-2 text-center border border-blue-300">
+                <p className="text-blue-900 font-black text-lg">{currentOrder.totalGourmet || 0}</p>
+                <p className="text-blue-700 text-[9px] font-bold">🍦 Línea Gourmet</p>
+              </div>
+              <div className="bg-pink-100/60 rounded-lg p-2 text-center border border-pink-300">
+                <p className="text-pink-900 font-black text-lg">{currentOrder.totalExclusivo || 0}</p>
+                <p className="text-pink-700 text-[9px] font-bold">✨ Línea Exclusivo</p>
               </div>
             </div>
           </div>
@@ -647,14 +687,22 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
                 </div>
               }
 
-              {currentOrder.total === 0 &&
-              <div className="text-center py-6 text-gray-400">
-                  <CheckCircle className="w-8 h-8 mx-auto mb-2 text-green-500" />
-                  <p className="text-sm font-medium text-green-600">
-                    {activeTab === 'semanal' ? 'Stock completo' : 'No se requiere pedido adicional'}
+              {currentOrder.total === 0 && (
+                <div className="bg-emerald-50 rounded-xl p-4 border border-emerald-200 text-center">
+                  <CheckCircle className="w-8 h-8 mx-auto mb-2 text-emerald-500" />
+                  <p className="text-sm font-bold text-emerald-700 mb-1">
+                    ✅ Stock Óptimo
+                  </p>
+                  <p className="text-xs text-emerald-600">
+                    {activeTab === 'semanal' 
+                      ? 'Todos los sabores tienen buena cobertura para esta semana' 
+                      : 'No se requiere pedido adicional mid-week'}
+                  </p>
+                  <p className="text-[10px] text-emerald-500 mt-2">
+                    💡 Continúa monitoreando la rotación diariamente
                   </p>
                 </div>
-              }
+              )}
             </motion.div>
           </AnimatePresence>
 
