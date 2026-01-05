@@ -834,7 +834,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                     </h4>
                   </div>
                   <ResponsiveContainer width="100%" height={200} className="md:hidden">
-                    <BarChart data={budgetData.dailyTrendData.filter(d => d.ventas > 0)}>
+                    <BarChart data={budgetData.dailyTrendData}>
                       <defs>
                         <linearGradient id="barCumplido" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="0%" stopColor="#a7f3d0" stopOpacity={0.9}>
@@ -949,7 +949,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                     </BarChart>
                   </ResponsiveContainer>
                   <ResponsiveContainer width="100%" height={280} className="hidden md:block">
-                  <BarChart data={budgetData.dailyTrendData.filter(d => d.ventas > 0)}>
+                  <BarChart data={budgetData.dailyTrendData}>
                     <defs>
                       <linearGradient id="barCumplidoDesktop" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor="#a7f3d0" stopOpacity={0.9}>
