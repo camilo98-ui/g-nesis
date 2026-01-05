@@ -270,54 +270,47 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
     };
   }, [fullAnalysis]);
 
-  // PEDIDO SEMANAL - Calcular para cubrir hasta el pedido adicional (no toda la semana)
+  // PEDIDO SEMANAL - Solo cubre desde que llega (JUEVES) hasta que llega el adicional (SÁBADO) = 2-3 días
   const weeklyOrder = useMemo(() => {
     const allFlavors = fullAnalysis.flavors;
     
-    // Calcular necesidad para MIÉRCOLES (no para toda la semana)
-    // Porque el pedido adicional llega mid-week y debe tener ESPACIO en las neveras
+    // Este pedido solo debe cubrir JUEVES y VIERNES (el adicional llega SÁBADO)
     const calculateNeeded = (flavor) => {
       // CASO 1: Con rotación histórica real
       if (flavor.timesRemoved > 0 && flavor.avgDaysPerRotation) {
-        // Rotación muy rápida (< 3 días): necesitará pedido adicional
+        const diasHastaAdicional = 2.5; // Jueves a Sábado
+        
+        // Rotación muy rápida (< 3 días)
         if (flavor.avgDaysPerRotation <= 3) {
-          // Pedir solo para cubrir hasta miércoles (3-4 días)
-          // Esto deja espacio para el pedido adicional
-          const diasHastaAdicional = 4;
-          const rotacionesHastaAdicional = Math.ceil(diasHastaAdicional / flavor.avgDaysPerRotation);
-          return Math.max(flavor.totalCount, rotacionesHastaAdicional + flavor.emptyCount);
+          const rotaciones = Math.ceil(diasHastaAdicional / flavor.avgDaysPerRotation);
+          return Math.max(2, rotaciones + Math.ceil(flavor.emptyCount * 0.5));
         }
         
-        // Rotación media (3-5 días): pedir para toda la semana
-        if (flavor.avgDaysPerRotation <= 5) {
-          const rotacionesPorSemana = Math.ceil(7 / flavor.avgDaysPerRotation);
-          return Math.ceil(flavor.totalCount + rotacionesPorSemana + flavor.lowCount);
+        // Rotación media (3-6 días)
+        if (flavor.avgDaysPerRotacion <= 6) {
+          // Cubrir los 2-3 días + reponer vacíos
+          return Math.max(2, Math.ceil(flavor.totalCount * 0.5) + flavor.emptyCount);
         }
         
-        // Rotación lenta: solo reponer lo necesario
-        return Math.max(2, Math.ceil(flavor.totalCount * 0.8));
+        // Rotación lenta: mínimo para mantener presencia
+        return Math.max(1, Math.ceil(flavor.totalCount * 0.4));
       }
       
-      // CASO 2: Sin historial - ser conservador
+      // CASO 2: Sin historial
       const baseReposicion = flavor.totalCount;
       
-      // Crítico: reponer TODO + 40% (no 50% para dejar espacio)
+      // Crítico: reponer para 3 días
       if (flavor.emptyCount > 0 || flavor.lowCount > 2) {
-        return Math.ceil((baseReposicion + flavor.emptyCount + flavor.lowCount) * 1.4);
+        return Math.ceil(baseReposicion * 0.6 + flavor.emptyCount);
       }
       
-      // Urgente: reponer base + 30%
+      // Medio: 50% del actual
       if (flavor.lowCount > 0 || flavor.coverageDays <= 4) {
-        return Math.ceil(baseReposicion * 1.3);
+        return Math.ceil(baseReposicion * 0.5);
       }
       
-      // Media rotación: reponer base + 20%
-      if (flavor.rotationSpeed > 30 || flavor.mediumCount > 0) {
-        return Math.ceil(baseReposicion * 1.2);
-      }
-      
-      // Baja rotación: 60% para mantener frescura
-      return Math.max(2, Math.ceil(baseReposicion * 0.6));
+      // Bajo: 40%
+      return Math.max(1, Math.ceil(baseReposicion * 0.4));
     };
 
     // Separar por línea y calcular
@@ -364,65 +357,66 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
     };
   }, [fullAnalysis, storeConfig]);
 
-  // PEDIDO ADICIONAL - Para completar la cobertura de toda la semana
+  // PEDIDO ADICIONAL - EL MÁS IMPORTANTE: cubre desde SÁBADO hasta JUEVES siguiente (5-6 días + FIN DE SEMANA)
   const additionalOrder = useMemo(() => {
     const allFlavors = fullAnalysis.flavors;
     
     const calculateAdditionalNeeded = (flavor) => {
-      // Buscar cuánto ya se pidió en el pedido semanal
+      // Cuánto ya se pidió en el semanal
       const weeklyOrderAmount = weeklyOrder.gourmet.concat(weeklyOrder.exclusivo)
         .find(f => f.name === flavor.name)?.needed || 0;
       
-      // Con rotación histórica real
+      // Este pedido debe cubrir SÁBADO a JUEVES (5-6 días) INCLUYENDO FIN DE SEMANA
+      const diasAdicional = 5.5; // Sábado a Jueves siguiente
+      
+      // CASO 1: Con rotación histórica real
       if (flavor.timesRemoved > 0 && flavor.avgDaysPerRotation) {
-        // Solo sabores que rotan MUY rápido necesitan adicional
-        if (flavor.avgDaysPerRotation <= 3) {
-          // Total necesario para la semana completa
-          const totalSemanalNecesario = Math.ceil(7 / flavor.avgDaysPerRotation);
-          
-          // Lo que ya tienes + lo que llegará el martes/miércoles
-          const disponible = flavor.totalCount + weeklyOrderAmount;
-          
-          // Faltante para completar la semana (miércoles a lunes siguiente)
-          const faltante = totalSemanalNecesario - disponible;
-          
-          if (faltante > 0) {
-            // Pedir el faltante + buffer 20% para fin de semana
-            return Math.ceil(faltante * 1.2);
-          }
+        // Total necesario para esos 5-6 días
+        const rotacionesAdicional = Math.ceil(diasAdicional / flavor.avgDaysPerRotation);
+        
+        // Lo que ya tendrás después del pedido semanal
+        const disponibleDespuesSemanal = flavor.totalCount + weeklyOrderAmount;
+        
+        // Consumo esperado en esos días
+        const necesarioAdicional = rotacionesAdicional;
+        
+        // Faltante
+        const faltante = necesarioAdicional - disponibleDespuesSemanal;
+        
+        if (faltante > 0) {
+          // Buffer 40% porque incluye fin de semana (más ventas)
+          return Math.ceil(faltante * 1.4);
         }
         
-        // Rotación 3-5 días: normalmente el semanal cubre, pero revisar
-        if (flavor.avgDaysPerRotation <= 5) {
-          const totalNecesario = Math.ceil(7 / flavor.avgDaysPerRotation);
-          const disponible = flavor.totalCount + weeklyOrderAmount;
-          const faltante = totalNecesario - disponible;
-          
-          // Solo pedir si hay déficit significativo
-          if (faltante >= 2) {
-            return Math.ceil(faltante * 1.1);
-          }
+        // Rotación muy rápida siempre necesita refuerzo mid-week
+        if (flavor.avgDaysPerRotation <= 3 && disponibleDespuesSemanal < 4) {
+          return Math.ceil((4 - disponibleDespuesSemanal) * 1.3);
         }
         
         return 0;
       }
       
-      // Sin historial: analizar después del pedido semanal
+      // CASO 2: Sin historial
       const disponibleDespuesSemanal = flavor.totalCount + weeklyOrderAmount;
+      const necesarioTotal = Math.ceil(flavor.totalCount * 1.5); // Estimar necesidad para 5-6 días
       
-      // Crítico después del semanal
-      if (flavor.coverageDays <= 2 && disponibleDespuesSemanal < 4) {
-        return Math.ceil((4 - disponibleDespuesSemanal) * 1.2);
+      // Crítico: necesita refuerzo fuerte
+      if (flavor.emptyCount > 0 || flavor.lowCount > 2) {
+        const faltante = Math.max(necesarioTotal - disponibleDespuesSemanal, flavor.emptyCount);
+        return Math.ceil(faltante * 1.3);
       }
       
-      // Muchos vacíos no cubiertos por semanal
-      if (flavor.emptyCount > 2 && weeklyOrderAmount < flavor.emptyCount) {
-        return Math.ceil(flavor.emptyCount - weeklyOrderAmount);
+      // Medio: calcular faltante
+      if (flavor.coverageDays <= 4 || flavor.rotationSpeed > 30) {
+        const faltante = necesarioTotal - disponibleDespuesSemanal;
+        if (faltante > 0) {
+          return Math.ceil(faltante * 1.2);
+        }
       }
       
-      // Alta rotación sin historial
-      if (flavor.rotationSpeed > 50 && disponibleDespuesSemanal < 3) {
-        return Math.ceil(3 - disponibleDespuesSemanal);
+      // Bajo: solo si hay déficit claro
+      if (disponibleDespuesSemanal < flavor.totalCount) {
+        return Math.ceil((flavor.totalCount - disponibleDespuesSemanal) * 0.8);
       }
       
       return 0;
@@ -751,17 +745,16 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
             <div className="space-y-1.5 text-xs text-gray-700">
               {activeTab === 'semanal' ? (
                 <>
-                  <p>• Montas este pedido el <span className="font-bold text-blue-700">{storeConfig.semanal}</span></p>
-                  <p>• Te llega el <span className="font-bold text-blue-700">{storeConfig.entregaSemanal}</span></p>
-                  <p>• Calculado para cubrir hasta el <span className="font-bold">{storeConfig.adicional1}</span></p>
-                  <p className="pt-1 text-blue-700 font-semibold">💡 Deja espacio físico para recibir el pedido adicional mid-week</p>
+                  <p>• Montas el <span className="font-bold text-blue-700">{storeConfig.semanal}</span> • Llega <span className="font-bold text-blue-700">{storeConfig.entregaSemanal}</span></p>
+                  <p>• Solo cubre <span className="font-bold">{storeConfig.entregaSemanal}</span> y día siguiente (~2-3 días)</p>
+                  <p className="pt-1 text-blue-700 font-semibold">⚠️ No intentes que dure toda la semana, el adicional es el importante</p>
                 </>
               ) : (
                 <>
-                  <p>• Montas el <span className="font-bold text-pink-700">{storeConfig.adicional1}</span> (mid-week)</p>
-                  <p>• Te llega el <span className="font-bold text-pink-700">{storeConfig.entregaAdicional1}</span></p>
-                  <p>• Completa la cobertura hasta el próximo {storeConfig.semanal} (fin de semana)</p>
-                  <p className="pt-1 text-pink-700 font-semibold">💡 Solo sabores de rotación rápida que necesitan refuerzo</p>
+                  <p>• Montas el <span className="font-bold text-pink-700">{storeConfig.adicional1}</span> • Llega <span className="font-bold text-pink-700">{storeConfig.entregaAdicional1}</span></p>
+                  <p>• <span className="font-black">Debe durar hasta el próximo {storeConfig.entregaSemanal}</span> (5-6 días)</p>
+                  <p>• Incluye TODO EL FIN DE SEMANA (cuando más vendes)</p>
+                  <p className="pt-1 text-pink-700 font-semibold">🔥 Este es el pedido principal - debe ser más grande</p>
                 </>
               )}
             </div>
