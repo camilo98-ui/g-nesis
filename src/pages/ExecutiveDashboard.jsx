@@ -8,7 +8,7 @@ import { STORES, getDisplayName } from '@/components/StoreSelector';
 import DateFilter from '@/components/DateFilter';
 import { ArrowLeft, Search, TrendingUp, TrendingDown, Eye, Zap, Award, Brain, ArrowUpDown, ArrowUp, ArrowDown, BarChart3, Settings, X, Download, Filter } from 'lucide-react';
 import { Input } from "@/components/ui/input";
-import { format, startOfMonth, eachDayOfInterval, startOfWeek, endOfWeek, parseISO, eachWeekOfInterval, addDays, isSameDay, isWithinInterval } from 'date-fns';
+import { format, startOfMonth, eachDayOfInterval, startOfWeek, endOfWeek, parseISO, eachWeekOfInterval, addDays, isSameDay, isWithinInterval, endOfMonth } from 'date-fns';
 import ExecutiveStoreDetailModal from '../components/executive/ExecutiveStoreDetailModal';
 import KPIDetailModal from '../components/executive/KPIDetailModal';
 import ExecutiveComparable from '../components/executive/ExecutiveComparable';
@@ -38,6 +38,7 @@ export default function ExecutiveDashboard() {
   const [showZoneCharts, setShowZoneCharts] = useState(false);
   const [sortConfig, setSortConfig] = useState({ key: 'compliance', direction: 'desc' });
   const [columnFilters, setColumnFilters] = useState({});
+  const [viewMode, setViewMode] = useState('day'); // 'day', 'week', 'month'
 
   const ZONE_NAME = 'Bogotá Noroccidente';
 
@@ -513,42 +514,114 @@ Genera:
     return `${criticalStores.length} tiendas críticas · Brecha total ${formatCurrency(totalGap)}`;
   }, [filteredStores]);
 
-  // Datos para gráficas de KPIs - MEJORADO con presupuesto
+  // Datos para gráficas con diferentes vistas (días, semanas, meses)
   const dailySalesData = useMemo(() => {
-    const days = eachDayOfInterval({ start: dateRange.from, end: dateRange.to });
-    return days.map(day => {
-      // Sumar ventas de todas las tiendas para este día
-      const daySales = allDailySales
-        .filter(s => {
-          try {
-            const saleDate = parseISO(s.date);
-            return isSameDay(saleDate, day);
-          } catch {
-            return false;
-          }
-        })
-        .reduce((sum, s) => sum + (s.total_sales || 0), 0);
-      
-      // Sumar presupuesto de todas las tiendas para este día
-      const dayBudget = storesAnalysis
-        .filter(s => s.hasData && s.getDailyBudget)
-        .reduce((sum, store) => {
-          try {
-            return sum + store.getDailyBudget(day);
-          } catch {
-            return sum;
-          }
+    if (viewMode === 'day') {
+      const days = eachDayOfInterval({ start: dateRange.from, end: dateRange.to });
+      return days.map(day => {
+        const daySales = allDailySales
+          .filter(s => {
+            try {
+              const saleDate = parseISO(s.date);
+              return isSameDay(saleDate, day);
+            } catch {
+              return false;
+            }
+          })
+          .reduce((sum, s) => sum + (s.total_sales || 0), 0);
+        
+        const dayBudget = storesAnalysis
+          .filter(s => s.hasData && s.getDailyBudget)
+          .reduce((sum, store) => {
+            try {
+              return sum + store.getDailyBudget(day);
+            } catch {
+              return sum;
+            }
+          }, 0);
+        
+        return {
+          date: format(day, 'dd/MM'),
+          fullDate: format(day, 'dd MMM'),
+          sales: daySales / 1000000,
+          budget: dayBudget / 1000000,
+          compliance: dayBudget > 0 ? (daySales / dayBudget) * 100 : 0
+        };
+      });
+    } else if (viewMode === 'week') {
+      const weeks = eachWeekOfInterval({ start: dateRange.from, end: dateRange.to }, { weekStartsOn: 0 });
+      return weeks.map((weekStart, idx) => {
+        const weekEnd = addDays(weekStart, 6);
+        const weekDays = eachDayOfInterval({ start: weekStart, end: weekEnd });
+        
+        const weekSales = weekDays.reduce((sum, day) => {
+          const daySales = allDailySales
+            .filter(s => {
+              try {
+                const saleDate = parseISO(s.date);
+                return isSameDay(saleDate, day);
+              } catch {
+                return false;
+              }
+            })
+            .reduce((daySum, s) => daySum + (s.total_sales || 0), 0);
+          return sum + daySales;
         }, 0);
+        
+        const weekBudget = weekDays.reduce((sum, day) => {
+          const dayBudget = storesAnalysis
+            .filter(s => s.hasData && s.getDailyBudget)
+            .reduce((daySum, store) => {
+              try {
+                return daySum + store.getDailyBudget(day);
+              } catch {
+                return daySum;
+              }
+            }, 0);
+          return sum + dayBudget;
+        }, 0);
+        
+        return {
+          date: `S${idx + 1}`,
+          fullDate: `${format(weekStart, 'dd MMM')} - ${format(weekEnd, 'dd MMM')}`,
+          sales: weekSales / 1000000,
+          budget: weekBudget / 1000000,
+          compliance: weekBudget > 0 ? (weekSales / weekBudget) * 100 : 0
+        };
+      });
+    } else {
+      // Por mes
+      const monthStart = startOfMonth(dateRange.from);
+      const monthEnd = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0);
+      const monthDays = eachDayOfInterval({ start: monthStart, end: monthEnd });
       
-      return {
-        date: format(day, 'dd/MM'),
-        fullDate: format(day, 'dd MMM'),
-        sales: daySales / 1000000,
-        budget: dayBudget / 1000000,
-        compliance: dayBudget > 0 ? (daySales / dayBudget) * 100 : 0
-      };
-    });
-  }, [allDailySales, dateRange, storesAnalysis]);
+      const monthSales = monthDays.reduce((sum, day) => {
+        const daySales = allDailySales
+          .filter(s => {
+            try {
+              const saleDate = parseISO(s.date);
+              return isSameDay(saleDate, day);
+            } catch {
+              return false;
+            }
+          })
+          .reduce((daySum, s) => daySum + (s.total_sales || 0), 0);
+        return sum + daySales;
+      }, 0);
+      
+      const monthBudget = storesAnalysis
+        .filter(s => s.hasData)
+        .reduce((sum, store) => sum + (store.salesBudget || 0), 0);
+      
+      return [{
+        date: format(monthStart, 'MMM yyyy'),
+        fullDate: format(monthStart, 'MMMM yyyy'),
+        sales: monthSales / 1000000,
+        budget: monthBudget / 1000000,
+        compliance: monthBudget > 0 ? (monthSales / monthBudget) * 100 : 0
+      }];
+    }
+  }, [allDailySales, dateRange, storesAnalysis, viewMode]);
 
   const statusDistributionData = useMemo(() => [
     { name: 'En Meta', value: statusCounts.positive, color: '#10b981' },
@@ -681,43 +754,83 @@ Genera:
           </div>
         ) : (
           <>
-            {/* Nueva Sección: Métricas Semanales */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            {/* Nueva Sección: Métricas Consolidadas */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              {/* Transacciones + Ticket Promedio del Mes */}
               <motion.div 
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setSelectedKPIDetail('transactions')}
                 className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-xl rounded-lg p-4 border border-blue-500/20 cursor-pointer transition-all hover:border-blue-400/40 hover:shadow-lg hover:shadow-blue-500/20">
-                <p className="text-xs text-blue-300 mb-2">Transacciones</p>
-                <p className="text-3xl font-black text-white mb-1">{zoneTotals.totalTransactions.toLocaleString()}</p>
-                <p className="text-xs text-slate-400">Total semana</p>
+                <p className="text-xs text-blue-300 mb-3 font-bold">Tráfico del Mes</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-xs text-slate-400 mb-1">Transacciones</p>
+                    <p className="text-2xl font-black text-white">{storesAnalysis.reduce((sum, s) => sum + s.monthTotalTransactions, 0).toLocaleString()}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-400 mb-1">Ticket Promedio</p>
+                    <p className="text-2xl font-black text-white">
+                      {formatCurrency(
+                        storesAnalysis.reduce((sum, s) => sum + s.monthTotalSales, 0) / 
+                        storesAnalysis.reduce((sum, s) => sum + s.monthTotalTransactions, 0)
+                      )}
+                    </p>
+                  </div>
+                </div>
               </motion.div>
-              <motion.div 
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => setSelectedKPIDetail('avgTicket')}
-                className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-xl rounded-lg p-4 border border-purple-500/20 cursor-pointer transition-all hover:border-purple-400/40 hover:shadow-lg hover:shadow-purple-500/20">
-                <p className="text-xs text-purple-300 mb-2">Ticket Promedio</p>
-                <p className="text-3xl font-black text-white mb-1">{formatCurrency(zoneTotals.totalSales / zoneTotals.totalTransactions || 0)}</p>
-                <p className="text-xs text-slate-400">Por transacción</p>
-              </motion.div>
+
+              {/* Venta Promedio + Acumulado del Mes */}
               <motion.div 
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setSelectedKPIDetail('avgSales')}
                 className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 backdrop-blur-xl rounded-lg p-4 border border-amber-500/20 cursor-pointer transition-all hover:border-amber-400/40 hover:shadow-lg hover:shadow-amber-500/20">
-                <p className="text-xs text-amber-300 mb-2">Venta Promedio</p>
-                <p className="text-3xl font-black text-white mb-1">{formatShort(zoneTotals.totalSales / STORES.length)}</p>
-                <p className="text-xs text-slate-400">Por tienda</p>
+                <p className="text-xs text-amber-300 mb-3 font-bold">Ventas del Mes</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-xs text-slate-400 mb-1">Venta Acumulada</p>
+                    <p className="text-2xl font-black text-white">{formatShort(storesAnalysis.reduce((sum, s) => sum + s.monthTotalSales, 0))}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-400 mb-1">Promedio/Tienda</p>
+                    <p className="text-2xl font-black text-white">
+                      {formatShort(storesAnalysis.reduce((sum, s) => sum + s.monthTotalSales, 0) / STORES.length)}
+                    </p>
+                  </div>
+                </div>
               </motion.div>
+
+              {/* Proyección Mensual + Semanal con % */}
               <motion.div 
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => setSelectedKPIDetail('gap')}
-                className="bg-gradient-to-br from-rose-500/10 to-red-500/10 backdrop-blur-xl rounded-lg p-4 border border-rose-500/20 cursor-pointer transition-all hover:border-rose-400/40 hover:shadow-lg hover:shadow-rose-500/20">
-                <p className="text-xs text-rose-300 mb-2">Gap Total</p>
-                <p className="text-3xl font-black text-white mb-1">{formatShort(Math.abs(zoneTotals.totalBudget - zoneTotals.totalSales))}</p>
-                <p className="text-xs text-slate-400">Por cerrar</p>
+                onClick={() => setSelectedKPIDetail('projection')}
+                className="bg-gradient-to-br from-emerald-500/10 to-green-500/10 backdrop-blur-xl rounded-lg p-4 border border-emerald-500/20 cursor-pointer transition-all hover:border-emerald-400/40 hover:shadow-lg hover:shadow-emerald-500/20">
+                <p className="text-xs text-emerald-300 mb-3 font-bold">Proyecciones</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-xs text-slate-400 mb-1">Proy. Mes</p>
+                    <p className="text-xl font-black text-white mb-0.5">{formatShort(zoneTotals.totalProjection)}</p>
+                    <p className={`text-xs font-bold ${
+                      ((zoneTotals.totalProjection/zoneTotals.totalBudget)*100) >= 100 ? 'text-emerald-400' : 'text-red-400'
+                    }`}>
+                      {((zoneTotals.totalProjection/zoneTotals.totalBudget)*100).toFixed(0)}%
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-400 mb-1">Proy. Semana</p>
+                    <p className="text-xl font-black text-white mb-0.5">
+                      {formatShort(storesAnalysis.reduce((sum, s) => sum + s.weekProjection, 0))}
+                    </p>
+                    <p className={`text-xs font-bold ${
+                      ((storesAnalysis.reduce((sum, s) => sum + s.weekProjection, 0) / storesAnalysis.reduce((sum, s) => sum + s.weeklyBudget, 0))*100) >= 100 
+                        ? 'text-emerald-400' : 'text-red-400'
+                    }`}>
+                      {((storesAnalysis.reduce((sum, s) => sum + s.weekProjection, 0) / storesAnalysis.reduce((sum, s) => sum + s.weeklyBudget, 0))*100).toFixed(0)}%
+                    </p>
+                  </div>
+                </div>
               </motion.div>
             </div>
 
@@ -877,20 +990,35 @@ Genera:
                     {/* Columna Centro - Gráfica Grande */}
               <div className="col-span-12 lg:col-span-6">
                 <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl rounded-lg p-5 border border-white/10 h-full shadow-xl">
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <h3 className="text-base font-black text-white mb-1">Ventas vs Presupuesto Diario</h3>
-                      <p className="text-xs text-slate-400">
-                        Venta: {formatCurrency(dailySalesData.reduce((sum, d) => sum + (d.sales * 1000000), 0))} · 
-                        Meta: {formatCurrency(dailySalesData.reduce((sum, d) => sum + (d.budget * 1000000), 0))}
-                      </p>
+                  <div className="flex flex-col gap-3 mb-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-base font-black text-white mb-1">Ventas vs Presupuesto</h3>
+                        <p className="text-xs text-slate-400">
+                          Venta: {formatCurrency(dailySalesData.reduce((sum, d) => sum + (d.sales * 1000000), 0))} · 
+                          Meta: {formatCurrency(dailySalesData.reduce((sum, d) => sum + (d.budget * 1000000), 0))}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => setShowZoneCharts(true)}
+                        className="text-xs px-3 py-1.5 rounded-lg bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 border border-blue-500/30 transition-all"
+                      >
+                        Análisis Completo →
+                      </button>
                     </div>
-                    <button
-                      onClick={() => setShowZoneCharts(true)}
-                      className="text-xs px-3 py-1.5 rounded-lg bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 border border-blue-500/30 transition-all"
-                    >
-                      Análisis Completo →
-                    </button>
+                    
+                    {/* Filtro de Vista */}
+                    <div className="flex items-center gap-2">
+                      <select
+                        value={viewMode}
+                        onChange={(e) => setViewMode(e.target.value)}
+                        className="px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-xs transition-all"
+                      >
+                        <option value="day">Por Días</option>
+                        <option value="week">Por Semanas</option>
+                        <option value="month">Por Meses</option>
+                      </select>
+                    </div>
                   </div>
                   <ResponsiveContainer width="100%" height={240}>
                     <ComposedChart data={dailySalesData}>

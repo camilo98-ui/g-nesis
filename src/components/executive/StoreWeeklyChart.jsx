@@ -3,12 +3,15 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BarChart, Bar, ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip, Cell, LineChart, Line } from 'recharts';
 import { ArrowUpDown, X, TrendingUp } from 'lucide-react';
-import { format, parseISO, eachDayOfInterval, isWithinInterval } from 'date-fns';
+import { format, parseISO, eachDayOfInterval, isWithinInterval, addDays } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRange, formatCurrency, formatShort }) {
   const [sortOrder, setSortOrder] = useState('desc');
+  const [sortBy, setSortBy] = useState('compliance'); // 'compliance' o 'sales'
   const [selectedStore, setSelectedStore] = useState(null);
+  const [chartDateRange, setChartDateRange] = useState(dateRange);
+  const [viewMode, setViewMode] = useState('week'); // 'day', 'week', 'month'
 
   // Obtener colores profesionales según cumplimiento
   const getBarColor = (compliance) => {
@@ -18,7 +21,7 @@ export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRa
     return { main: '#ef4444', light: '#f87171', dark: '#dc2626' }; // Rojo crítico
   };
 
-  // Ordenar tiendas
+  // Ordenar tiendas por cumplimiento o ventas
   const chartData = useMemo(() => {
     const data = storesAnalysis
       .filter(s => s.hasData)
@@ -32,10 +35,11 @@ export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRa
         colors: getBarColor(s.weekCompliance)
       }));
     
+    const sortKey = sortBy === 'compliance' ? 'cumplimiento' : 'venta';
     return data.sort((a, b) => 
-      sortOrder === 'desc' ? b.cumplimiento - a.cumplimiento : a.cumplimiento - b.cumplimiento
+      sortOrder === 'desc' ? b[sortKey] - a[sortKey] : a[sortKey] - b[sortKey]
     );
-  }, [storesAnalysis, sortOrder]);
+  }, [storesAnalysis, sortOrder, sortBy]);
 
   // Datos por día de la semana para la tienda seleccionada
   const weekDaysData = useMemo(() => {
@@ -70,9 +74,23 @@ export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRa
 
   return (
     <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl rounded-lg p-5 border border-white/10 shadow-xl">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-base font-black text-white">Tiendas vs PPT Semanal</h3>
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col gap-3 mb-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-base font-black text-white">Tiendas vs PPT Semanal</h3>
+          <span className="text-xs px-2 py-1 rounded bg-white/10 text-slate-300">Top 8</span>
+        </div>
+        
+        {/* Filtros */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-xs transition-all"
+          >
+            <option value="compliance">% Cumplimiento</option>
+            <option value="sales">$ Ventas</option>
+          </select>
+          
           <button
             onClick={() => setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc')}
             className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-xs transition-all"
@@ -80,7 +98,25 @@ export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRa
             <ArrowUpDown className="w-3 h-3" />
             {sortOrder === 'desc' ? 'Mayor → Menor' : 'Menor → Mayor'}
           </button>
-          <span className="text-xs px-2 py-1 rounded bg-white/10 text-slate-300">Top 8</span>
+          
+          <select
+            value={`${format(chartDateRange.from, 'yyyy-MM-dd')}`}
+            onChange={(e) => {
+              const startDate = new Date(e.target.value);
+              setChartDateRange({ from: startDate, to: addDays(startDate, 6) });
+            }}
+            className="px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-xs transition-all"
+          >
+            {Array.from({ length: 8 }, (_, i) => {
+              const weekStart = addDays(new Date(2025, 11, 29), i * 7);
+              const weekEnd = addDays(weekStart, 6);
+              return (
+                <option key={i} value={format(weekStart, 'yyyy-MM-dd')} className="bg-slate-900">
+                  Semana {i + 1} ({format(weekStart, 'dd MMM')} - {format(weekEnd, 'dd MMM')})
+                </option>
+              );
+            })}
+          </select>
         </div>
       </div>
 
