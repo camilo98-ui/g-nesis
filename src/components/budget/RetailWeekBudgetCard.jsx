@@ -1435,6 +1435,95 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                 );
               })()}
 
+              {/* Historial de Presupuestos Diarios */}
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="bg-gradient-to-br from-slate-50 to-gray-50 rounded-xl p-4 border border-slate-200"
+              >
+                <h4 className="font-bold text-slate-900 flex items-center gap-2 text-sm mb-3">
+                  <Calendar className="w-5 h-5 text-slate-500" />
+                  Historial de Presupuestos Diarios
+                </h4>
+                <div className="space-y-1 max-h-64 overflow-y-auto">
+                  {(() => {
+                    const now = new Date();
+                    const monthStart = new Date(now.getFullYear(), now.getMonth() - 1, 29);
+                    const daysUntilNow = eachDayOfInterval({ start: monthStart, end: now });
+                    
+                    return daysUntilNow.reverse().map((day, idx) => {
+                      const dayBudget = getDailyBudget(day);
+                      const sale = dailySales.find(s => {
+                        try {
+                          const saleDate = parseISO(s.date);
+                          return isSameDay(saleDate, day);
+                        } catch {
+                          return false;
+                        }
+                      });
+                      const daySales = sale?.total_sales || 0;
+                      const compliance = dayBudget > 0 ? (daySales / dayBudget * 100) : 0;
+                      const isToday = isSameDay(day, now);
+                      
+                      return (
+                        <motion.div
+                          key={idx}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: idx * 0.02 }}
+                          className={`flex justify-between items-center p-2 rounded-lg transition-all ${
+                            isToday 
+                              ? 'bg-gradient-to-r from-rose-100 to-pink-100 border-2 border-rose-300' 
+                              : compliance >= 100
+                              ? 'bg-emerald-50/50 border border-emerald-200/30'
+                              : 'bg-white border border-slate-200/30'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-bold ${
+                              isToday 
+                                ? 'bg-rose-500 text-white' 
+                                : 'bg-slate-100 text-slate-600'
+                            }`}>
+                              {format(day, 'd')}
+                            </div>
+                            <div>
+                              <p className={`text-xs font-bold ${isToday ? 'text-rose-700' : 'text-slate-700'}`}>
+                                {format(day, 'EEEE', { locale: es })}
+                              </p>
+                              <p className="text-[10px] text-slate-500">
+                                {format(day, 'dd MMM yyyy', { locale: es })}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className={`text-sm font-bold ${isToday ? 'text-rose-700' : 'text-slate-700'}`}>
+                              {formatCurrency(dayBudget)}
+                            </p>
+                            {daySales > 0 && (
+                              <div className="flex items-center gap-1 justify-end">
+                                <p className="text-[10px] text-slate-500">
+                                  {formatCurrency(daySales)}
+                                </p>
+                                <span className={`text-[10px] font-bold ${
+                                  compliance >= 100 ? 'text-emerald-600' : 'text-rose-600'
+                                }`}>
+                                  {compliance.toFixed(0)}%
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </motion.div>
+                      );
+                    });
+                  })()}
+                </div>
+                <p className="text-[10px] text-slate-500 mt-3 text-center">
+                  📊 Presupuestos ajustados según patrón histórico de cada día
+                </p>
+              </motion.div>
+
               {/* Grid de métricas resumidas */}
               <div className="grid grid-cols-2 gap-3">
               <motion.button
