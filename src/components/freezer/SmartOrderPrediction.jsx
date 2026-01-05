@@ -1,9 +1,12 @@
 import React, { useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Package, TrendingUp, AlertCircle, CheckCircle, Calendar, Zap, BarChart3, Sparkles, ShoppingCart, Brain } from 'lucide-react';
+import { Package, TrendingUp, AlertCircle, CheckCircle, Calendar, Zap, BarChart3, Sparkles, ShoppingCart, Brain, ArrowDownCircle, ArrowUpCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { parseISO, differenceInDays, subDays } from 'date-fns';
 
 const GOURMET_FLAVORS = ['Limón N.', 'Maracuyá N.', 'Mandarina N.', 'Vainilla', 'V. Francesa', 'V. Chips', 'Chocolate', 'Belga', 'Frutos', 'Fresa', 'Arequipe', 'Ron'];
 const EXCLUSIVO_FLAVORS = ['Cherry', 'Arroz', 'Chicle', 'Brownie', 'Crema Limón', 'M&M', 'Milky', 'Oreo', 'Macadamia', 'Café', 'Yogurt C.'];
@@ -31,15 +34,109 @@ const STORE_ORDER_CONFIG = {
   'BTA 85': { semanal: 'VIE', adicional2: 'JUE', entregaSemanal: 'MAR', entregaAdicional2: 'SAB' }
 };
 
-export default function SmartOrderPrediction({ allFreezersSlots = [], currentFreezer, storeCode }) {
+export default function SmartOrderPrediction({ allFreezersSlots = [], currentFreezer, storeCode, storeId }) {
   const [activeTab, setActiveTab] = useState('semanal'); // semanal o adicional
+
+  // Obtener historial de neveras para análisis de rotación
+  const { data: freezerHistory = [] } = useQuery({
+    queryKey: ['freezerHistory', storeId],
+    queryFn: () => base44.entities.FreezerHistory.filter({ store_id: storeId }),
+    enabled: !!storeId
+  });
 
   // Obtener configuración de la tienda
   const storeConfig = useMemo(() => {
     return STORE_ORDER_CONFIG[storeCode] || { semanal: 'VIE', adicional1: 'JUE', entregaSemanal: 'MAR', entregaAdicional1: 'SAB' };
   }, [storeCode]);
 
-  // Análisis avanzado con proyección de consumo
+  // ANÁLISIS DE ROTACIÓN HISTÓRICA
+  const rotationAnalysis = useMemo(() => {
+    if (!freezerHistory || freezerHistory.length < 2) return {};
+
+    const flavorRotations = {};
+    const sortedHistory = [...freezerHistory].sort((a, b) => 
+      new Date(a.date) - new Date(b.date)
+    );
+
+    // Analizar cambios entre snapshots consecutivos
+    for (let i = 1; i < sortedHistory.length; i++) {
+      const prevSnapshot = JSON.parse(sortedHistory[i - 1].snapshot || '[]');
+      const currSnapshot = JSON.parse(sortedHistory[i].snapshot || '[]');
+      const daysDiff = differenceInDays(parseISO(sortedHistory[i].date), parseISO(sortedHistory[i - 1].date));
+
+      // Crear mapa de slots previos
+      const prevMap = {};
+      prevSnapshot.forEach(slot => {
+        const key = `${slot.row}-${slot.position}-${slot.slot_type}`;
+        prevMap[key] = slot;
+      });
+
+      // Detectar cambios
+      currSnapshot.forEach(slot => {
+        const key = `${slot.row}-${slot.position}-${slot.slot_type}`;
+        const prevSlot = prevMap[key];
+
+        if (prevSlot && prevSlot.flavor_name && !prevSlot.is_empty) {
+          const flavorKey = prevSlot.flavor_name.toLowerCase().trim();
+          
+          if (!flavorRotations[flavorKey]) {
+            flavorRotations[flavorKey] = {
+              name: prevSlot.flavor_name,
+              type: prevSlot.flavor_type,
+              timesRemoved: 0,
+              timesAdded: 0,
+              totalDays: 0,
+              avgDaysPerRotation: 0,
+              freezers: new Set()
+            };
+          }
+
+          // Si cambió a vacío o a otro sabor, se "removió"
+          if (slot.is_empty || slot.flavor_name !== prevSlot.flavor_name) {
+            flavorRotations[flavorKey].timesRemoved++;
+            flavorRotations[flavorKey].totalDays += daysDiff;
+            flavorRotations[flavorKey].freezers.add(slot.store_id?.split('_F')[1] || '1');
+          }
+        }
+
+        // Detectar sabores nuevos agregados
+        if (slot.flavor_name && !slot.is_empty) {
+          const flavorKey = slot.flavor_name.toLowerCase().trim();
+          if (!prevSlot || prevSlot.is_empty || prevSlot.flavor_name !== slot.flavor_name) {
+            if (!flavorRotations[flavorKey]) {
+              flavorRotations[flavorKey] = {
+                name: slot.flavor_name,
+                type: slot.flavor_type,
+                timesRemoved: 0,
+                timesAdded: 0,
+                totalDays: 0,
+                avgDaysPerRotation: 0,
+                freezers: new Set()
+              };
+            }
+            flavorRotations[flavorKey].timesAdded++;
+            flavorRotations[flavorKey].freezers.add(slot.store_id?.split('_F')[1] || '1');
+          }
+        }
+      });
+    }
+
+    // Calcular promedio de días por rotación
+    Object.values(flavorRotations).forEach(flavor => {
+      if (flavor.timesRemoved > 0) {
+        flavor.avgDaysPerRotation = flavor.totalDays / flavor.timesRemoved;
+        // Velocidad de rotación: menos días = más rápido
+        flavor.rotationVelocity = flavor.avgDaysPerRotation > 0 ? (7 / flavor.avgDaysPerRotation) * 100 : 0;
+      } else {
+        flavor.avgDaysPerRotation = 99; // Sin datos
+        flavor.rotationVelocity = 0;
+      }
+    });
+
+    return flavorRotations;
+  }, [freezerHistory]);
+
+  // ANÁLISIS COMPLETO CON ROTACIÓN HISTÓRICA
   const fullAnalysis = useMemo(() => {
     if (!allFreezersSlots || allFreezersSlots.length === 0) return { 
       flavors: [], total: 0, low: 0, empty: 0, critical: 0, 
@@ -66,12 +163,14 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
           lowCount: 0,
           emptyCount: 0,
           freezers: new Set(),
-          avgStock: 0
+          avgStock: 0,
+          rows: new Set() // Bajadas donde está presente
         };
       }
 
       analysis[key].totalCount++;
       analysis[key].freezers.add(slot.store_id?.split('_F')[1] || '1');
+      analysis[key].rows.add(slot.row);
       totalFilled++;
 
       // Análisis más detallado del stock
@@ -88,20 +187,35 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
       }
     });
 
-    // Calcular métricas avanzadas para cada sabor
-    Object.values(analysis).forEach(flavor => {
+    // Combinar con datos de rotación histórica
+    Object.entries(analysis).forEach(([key, flavor]) => {
+      const historicalData = rotationAnalysis[key];
+      
       // Promedio de stock (full=100%, medium=60%, low=30%, empty=0%)
       const stockValue = (flavor.fullCount * 100 + flavor.mediumCount * 60 + flavor.lowCount * 30) / flavor.totalCount;
       flavor.avgStock = stockValue;
       
-      // Velocidad de rotación estimada (mayor proporción de low/empty = más rápida)
-      flavor.rotationSpeed = ((flavor.lowCount + flavor.emptyCount * 2) / flavor.totalCount) * 100;
+      // Si hay datos históricos, usar velocidad real
+      if (historicalData && historicalData.timesRemoved > 0) {
+        flavor.rotationSpeed = historicalData.rotationVelocity;
+        flavor.avgDaysPerRotation = historicalData.avgDaysPerRotation;
+        flavor.timesRemoved = historicalData.timesRemoved;
+        flavor.timesAdded = historicalData.timesAdded;
+        
+        // Días de cobertura basados en rotación real
+        const currentDaysLeft = Math.max(0, flavor.avgDaysPerRotation - 1);
+        flavor.coverageDays = Math.ceil((stockValue / 100) * currentDaysLeft);
+      } else {
+        // Estimación básica sin historial
+        flavor.rotationSpeed = ((flavor.lowCount + flavor.emptyCount * 2) / flavor.totalCount) * 100;
+        flavor.coverageDays = Math.ceil((stockValue / 20) * (7 - (flavor.rotationSpeed / 20)));
+        flavor.avgDaysPerRotation = null;
+        flavor.timesRemoved = 0;
+        flavor.timesAdded = 0;
+      }
       
-      // Días de cobertura estimados (basado en stock promedio y velocidad)
-      flavor.coverageDays = Math.ceil((stockValue / 20) * (7 - (flavor.rotationSpeed / 20)));
-      
-      // Marcar como crítico si cobertura < 3 días
-      if (flavor.coverageDays < 3) {
+      // Marcar como crítico
+      if (flavor.coverageDays < 3 || flavor.emptyCount > 0) {
         criticalStock++;
       }
     });
@@ -124,7 +238,7 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
       averageRotation: avgRotation,
       coverageDays: Math.round(avgCoverage)
     };
-  }, [allFreezersSlots]);
+  }, [allFreezersSlots, rotationAnalysis]);
 
   // Clasificación inteligente considerando días de cobertura y rotación
   const { critical, urgent, highRotation, mediumRotation, lowRotation } = useMemo(() => {
@@ -522,12 +636,37 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
             </motion.div>
           </AnimatePresence>
 
-          {/* Análisis de planeación de demanda */}
+          {/* Inventario Actual */}
           <div className="pt-3 border-t border-gray-200 space-y-2">
+            <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg p-3 border border-emerald-200">
+              <p className="text-[10px] font-bold text-emerald-900 mb-1.5 flex items-center gap-1">
+                <CheckCircle className="w-3 h-3" />
+                📦 Con Qué Puedo Continuar
+              </p>
+              <div className="grid grid-cols-3 gap-2 text-[9px]">
+                <div className="text-center">
+                  <div className="text-emerald-700 font-black text-base">{fullAnalysis.total}</div>
+                  <div className="text-emerald-600">Cubetas Total</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-green-700 font-black text-base">
+                    {fullAnalysis.flavors.filter(f => f.avgStock >= 60).length}
+                  </div>
+                  <div className="text-green-600">Stock OK</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-amber-700 font-black text-base">
+                    {fullAnalysis.low + fullAnalysis.empty}
+                  </div>
+                  <div className="text-amber-600">Necesita</div>
+                </div>
+              </div>
+            </div>
+
             <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-3 border border-purple-200">
               <p className="text-[10px] font-bold text-purple-900 mb-1.5 flex items-center gap-1">
                 <Brain className="w-3 h-3" />
-                📊 Análisis de Demanda - {fullAnalysis.total} Cubetas
+                📊 Análisis de Rotación Histórica
               </p>
               <div className="grid grid-cols-2 gap-2 text-[9px]">
                 <div>
@@ -540,7 +679,9 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
                   <span className="text-amber-700 font-bold">{highRotation.length} Alta Rotación</span> ({">"}40%)
                 </div>
                 <div>
-                  <span className="text-green-700 font-bold">{mediumRotation.length} Media</span> (20-40%)
+                  <span className="text-green-700 font-bold">
+                    {fullAnalysis.flavors.filter(f => f.timesRemoved > 0).length} Con Historial
+                  </span>
                 </div>
               </div>
             </div>
