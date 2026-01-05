@@ -230,6 +230,7 @@ export default function FreezerMap() {
   const [longPressSlot, setLongPressSlot] = useState(null);
   const longPressTimer = useRef(null);
   const [customFlavors, setCustomFlavors] = useState([]);
+  const [availableFreezers, setAvailableFreezers] = useState([1, 2, 3]);
 
   // Dimensiones independientes por nevera
   const [freezerDimensions, setFreezerDimensions] = useState({
@@ -295,12 +296,14 @@ export default function FreezerMap() {
 
   // Fetch todas las neveras para análisis completo
   const { data: allFreezersSlots = [] } = useQuery({
-    queryKey: ['allFreezersSlots', selectedStore],
+    queryKey: ['allFreezersSlots', selectedStore, availableFreezers],
     queryFn: async () => {
-      const f1 = await base44.entities.FreezerSlot.filter({ store_id: `${selectedStore}_F1` });
-      const f2 = await base44.entities.FreezerSlot.filter({ store_id: `${selectedStore}_F2` });
-      const f3 = await base44.entities.FreezerSlot.filter({ store_id: `${selectedStore}_F3` });
-      return [...f1, ...f2, ...f3];
+      const allSlots = await Promise.all(
+        availableFreezers.map(num => 
+          base44.entities.FreezerSlot.filter({ store_id: `${selectedStore}_F${num}` })
+        )
+      );
+      return allSlots.flat();
     },
     enabled: !!selectedStore,
     staleTime: 30000
@@ -845,7 +848,7 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
             <div className="flex flex-wrap items-center gap-2 mb-4 p-3 bg-white/80 rounded-xl shadow-sm">
               {/* Selector de Nevera */}
               <div className="flex items-center gap-1 bg-gradient-to-r from-cyan-100 to-blue-100 rounded-lg p-1">
-                {[1, 2, 3].map((num) =>
+                {availableFreezers.map((num) =>
               <Button
                 key={num}
                 size="sm"
@@ -856,6 +859,63 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                     🧊 {num}
                   </Button>
               )}
+                {/* Botón Agregar Nevera */}
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    if (availableFreezers.length >= 10) {
+                      toast.error('Máximo 10 neveras');
+                      return;
+                    }
+                    const newNum = Math.max(...availableFreezers) + 1;
+                    setAvailableFreezers([...availableFreezers, newNum]);
+                    setFreezerDimensions(prev => ({
+                      ...prev,
+                      [newNum]: { rows: 7, cols: 5 }
+                    }));
+                    setCurrentFreezer(newNum);
+                    toast.success(`Nevera #${newNum} creada`);
+                  }}
+                  className="text-xs h-7 px-2 text-cyan-600 hover:bg-cyan-200"
+                  title="Agregar nevera">
+                  <Plus className="w-4 h-4" />
+                </Button>
+                {/* Botón Eliminar Nevera Actual */}
+                {availableFreezers.length > 1 && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={async () => {
+                      if (!confirm(`¿Eliminar Nevera #${currentFreezer}? Se borrarán todos sus datos.`)) return;
+                      
+                      // Eliminar todos los slots de esta nevera
+                      const slotsToDelete = slots.filter(s => s.store_id === `${selectedStore}_F${currentFreezer}`);
+                      await Promise.all(slotsToDelete.map(s => base44.entities.FreezerSlot.delete(s.id)));
+                      
+                      // Actualizar estado
+                      const newFreezers = availableFreezers.filter(n => n !== currentFreezer);
+                      setAvailableFreezers(newFreezers);
+                      
+                      // Cambiar a la primera nevera disponible
+                      setCurrentFreezer(newFreezers[0]);
+                      
+                      // Limpiar dimensiones
+                      setFreezerDimensions(prev => {
+                        const updated = { ...prev };
+                        delete updated[currentFreezer];
+                        return updated;
+                      });
+                      
+                      await queryClient.invalidateQueries(['freezerSlots']);
+                      await queryClient.invalidateQueries(['allFreezersSlots']);
+                      toast.success(`Nevera #${currentFreezer} eliminada`);
+                    }}
+                    className="text-xs h-7 px-2 text-red-600 hover:bg-red-100"
+                    title="Eliminar nevera actual">
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                )}
               </div>
               
               <div className="h-6 w-px bg-gray-200 mx-1" />
