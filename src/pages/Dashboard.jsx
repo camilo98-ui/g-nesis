@@ -1742,28 +1742,28 @@ export default function Dashboard() {
                 <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 2, repeat: Infinity }}>
                   <BarChart3 className="w-5 h-5" />
                 </motion.div>
-                Resumen del Período
+                Acumulado del Mes Retail
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <motion.div whileHover={{ scale: 1.05, y: -3 }} className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
                   <p className="text-white/70 text-sm">Venta Total</p>
-                  <p className="text-2xl font-semibold">{formatCurrency(totals.sales)}</p>
-                  <p className="text-xs text-white/50 mt-1">{filteredSales.length} días</p>
+                  <p className="text-2xl font-semibold">{formatCurrency(monthTotals.sales)}</p>
+                  <p className="text-xs text-white/50 mt-1">Desde semana 1</p>
                 </motion.div>
                 <motion.div whileHover={{ scale: 1.05, y: -3 }} className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
                   <p className="text-white/70 text-sm">Ticket Promedio</p>
-                  <p className="text-2xl font-semibold">{formatCurrency(totals.transactions > 0 ? totals.sales / totals.transactions : 0)}</p>
+                  <p className="text-2xl font-semibold">{formatCurrency(monthAvgTicket)}</p>
                   <p className="text-xs text-white/50 mt-1">Venta ÷ Transacciones</p>
                 </motion.div>
                 <motion.div whileHover={{ scale: 1.05, y: -3 }} className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
                   <p className="text-white/70 text-sm">Total Transacciones</p>
-                  <p className="text-2xl font-semibold">{totals.transactions.toLocaleString()}</p>
+                  <p className="text-2xl font-semibold">{monthTotals.transactions.toLocaleString()}</p>
                   <p className="text-xs text-white/50 mt-1">Ventas realizadas</p>
                 </motion.div>
                 <motion.div whileHover={{ scale: 1.05, y: -3 }} className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
                   <p className="text-white/70 text-sm">Sugeridos Vendidos</p>
-                  <p className="text-2xl font-semibold">{totals.suggested.toLocaleString()}</p>
-                  <p className="text-xs text-white/50 mt-1">{totals.transactions > 0 ? (totals.suggested / totals.transactions * 100).toFixed(0) : 0}% de conversión</p>
+                  <p className="text-2xl font-semibold">{monthTotals.suggested.toLocaleString()}</p>
+                  <p className="text-xs text-white/50 mt-1">{monthTotals.transactions > 0 ? (monthTotals.suggested / monthTotals.transactions * 100).toFixed(0) : 0}% de conversión</p>
                 </motion.div>
               </div>
             </motion.div>
