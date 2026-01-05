@@ -647,16 +647,12 @@ export default function Dashboard() {
   // Totales ACUMULADOS del mes RETAIL/FERIAL (para tarjetas del header)
   const monthTotals = useMemo(() => {
     const now = new Date();
-    // CALENDARIO RETAIL: Mes empieza el 29 del mes anterior
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth(); // 0-11
-    const retailMonthStart = new Date(currentYear, currentMonth - 1, 29);
-    const retailMonthEnd = new Date(currentYear, currentMonth, 28);
+    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     
     const monthSales = dailySales.filter(s => {
       const saleDate = s.date?.split('T')[0] || s.date;
       const saleDateObj = new Date(saleDate);
-      return saleDateObj >= retailMonthStart && saleDateObj <= now;
+      return saleDateObj >= firstDayOfMonth && saleDateObj <= now;
     });
     
     return monthSales.reduce((acc, s) => ({
@@ -763,11 +759,9 @@ export default function Dashboard() {
   const projections = useMemo(() => {
     if (!currentBudget?.sales_budget) return null;
     const now = new Date();
-    // CALENDARIO RETAIL: Mes empieza el 29 del mes anterior
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth();
-    const monthStart = new Date(currentYear, currentMonth - 1, 29);
-    const monthEnd = new Date(currentYear, currentMonth, 28);
+    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const monthStart = firstDayOfMonth;
+    const monthEnd = endOfMonth(now);
     const totalDays = differenceInDays(monthEnd, monthStart) + 1;
     
     // Usar SOLO datos del mes RETAIL para proyección (desde semana 1)
