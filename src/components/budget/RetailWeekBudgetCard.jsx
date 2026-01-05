@@ -149,51 +149,6 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
     );
   }
 
-  // Cálculos con presupuesto activo
-  const daysInRetailMonth = retailDays.length;
-  const dailyBudget = activeBudget.sales_budget / daysInRetailMonth;
-  
-  // Días transcurridos en el mes retail
-  const today = new Date();
-  const daysElapsed = retailDays.filter(d => d <= today).length;
-  const daysRemaining = daysInRetailMonth - daysElapsed;
-  
-  // Presupuesto esperado hasta hoy
-  const expectedBudget = dailyBudget * daysElapsed;
-  const budgetGap = expectedBudget - retailTotals.sales;
-  const compliance = expectedBudget > 0 ? (retailTotals.sales / expectedBudget) * 100 : 0;
-  
-  // Venta requerida por día para alcanzar meta
-  const remainingBudget = activeBudget.sales_budget - retailTotals.sales;
-  const requiredDailySales = daysRemaining > 0 ? remainingBudget / daysRemaining : 0;
-
-  // Crear calendario de días con ventas
-  const calendarDays = useMemo(() => {
-    return retailDays.map(day => {
-      const dayStr = format(day, 'yyyy-MM-dd');
-      const dayData = dailySales.find(s => {
-        const saleDate = s.date?.split('T')[0] || s.date;
-        return saleDate === dayStr;
-      });
-      
-      const daySales = dayData?.total_sales || 0;
-      const isPast = day < today;
-      const isToday = isSameDay(day, today);
-      const dayBudget = dailyBudget;
-      const dayCompliance = dayBudget > 0 ? (daySales / dayBudget) * 100 : 0;
-      
-      return {
-        date: day,
-        sales: daySales,
-        budget: dayBudget,
-        compliance: dayCompliance,
-        isPast,
-        isToday,
-        hasData: !!dayData
-      };
-    });
-  }, [retailDays, dailySales, today, dailyBudget]);
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
