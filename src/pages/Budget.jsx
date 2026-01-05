@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import StoreSelector, { STORES } from '@/components/StoreSelector';
 import BudgetForm from '@/components/forms/BudgetForm';
+import AutoBudgetAdjuster from '@/components/budget/AutoBudgetAdjuster';
 import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
 import { ArrowLeft, Target, DollarSign, Receipt, Zap, Gift, Calendar, Pencil, Trash2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -77,9 +78,13 @@ export default function Budget() {
         </div>
 
         {selectedStore ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Form */}
-            <BudgetForm storeId={selectedStore} editingBudget={editingBudget} onClearEdit={() => setEditingBudget(null)} />
+          <div className="space-y-6">
+            {/* Ajustador Automático - Solo para Admin */}
+            <AutoBudgetAdjuster />
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Form */}
+              <BudgetForm storeId={selectedStore} editingBudget={editingBudget} onClearEdit={() => setEditingBudget(null)} />
 
             {/* Existing Budgets */}
             <motion.div
@@ -183,9 +188,10 @@ export default function Budget() {
                     </div>
                   )}
                 </CardContent>
-              </Card>
-            </motion.div>
-          </div>
+                </Card>
+                </motion.div>
+                </div>
+                </div>
         ) : (
           <div className="text-center py-20">
             <motion.div
