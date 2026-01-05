@@ -644,15 +644,18 @@ export default function Dashboard() {
     }), { sales: 0, tickets: 0, transactions: 0, suggested: 0 });
   }, [filteredSales]);
 
-  // Totales del rango filtrado (para tarjetas - respeta filtro de semana)
+  // Totales del rango filtrado (para tarjetas - acumula desde inicio mes retail hasta fin de semana)
   const filteredTotals = useMemo(() => {
     const activeRange = weekFilter || dateRange;
     if (!activeRange?.from || !activeRange?.to) {
       return { sales: 0, tickets: 0, transactions: 0, suggested: 0 };
     }
 
-    const fromStr = format(activeRange.from, 'yyyy-MM-dd');
-    const toStr = format(activeRange.to, 'yyyy-MM-dd');
+    const now = new Date();
+    // Siempre acumular desde inicio del mes retail (29 dic)
+    const retailMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 29);
+    const fromStr = format(retailMonthStart, 'yyyy-MM-dd');
+    const toStr = format(activeRange.to, 'yyyy-MM-dd'); // Hasta el fin del rango seleccionado
     
     const rangeSales = dailySales.filter(s => {
       const saleDate = s.date?.split('T')[0] || s.date;
