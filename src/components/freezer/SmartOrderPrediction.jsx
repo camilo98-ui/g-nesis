@@ -270,35 +270,50 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
     };
   }, [fullAnalysis]);
 
-  // PEDIDO SEMANAL - SIEMPRE calcular basado en rotación histórica
+  // PEDIDO SEMANAL - Calcular para cubrir 7 días completos con realismo
   const weeklyOrder = useMemo(() => {
     const allFlavors = fullAnalysis.flavors;
     
-    // Calcular necesidad basada en rotación histórica y cobertura
+    // Calcular necesidad REAL para 7 días
     const calculateNeeded = (flavor) => {
-      // Si tiene rotación histórica real, usar eso
+      // CASO 1: Con rotación histórica real - el más confiable
       if (flavor.timesRemoved > 0 && flavor.avgDaysPerRotation) {
-        // Frecuencia semanal: 7 días / días por rotación
-        const weeklyConsumption = Math.ceil(7 / flavor.avgDaysPerRotation);
-        // Pedir según consumo + buffer 20%
-        return Math.ceil(weeklyConsumption * 1.2);
+        // ¿Cuántas veces se agota en 7 días?
+        const rotacionesPorSemana = Math.ceil(7 / flavor.avgDaysPerRotation);
+        
+        // Necesitas reponer esas rotaciones + lo que ya está bajo/vacío
+        const reposicion = rotacionesPorSemana + flavor.lowCount + flavor.emptyCount;
+        
+        // AJUSTE: Si el sabor está actualmente en las neveras, significa que se usa
+        // Mínimo pedir la cantidad que tienes actualmente para mantener rotación
+        const minimo = Math.max(flavor.totalCount, reposicion);
+        
+        // Buffer del 30% para fin de semana (viernes/sábado venden más)
+        return Math.ceil(minimo * 1.3);
       }
       
-      // Sin historial: usar stock actual y cobertura
-      if (flavor.coverageDays <= 2 || flavor.emptyCount > 0) {
-        return Math.max(flavor.totalCount, Math.ceil((flavor.lowCount + flavor.emptyCount) * 1.5));
+      // CASO 2: Sin historial pero está en inventario
+      // Si está en la nevera es porque se vende, pedir mínimo lo mismo que tienes
+      const baseReposicion = flavor.totalCount;
+      
+      // Ajustar según estado actual
+      if (flavor.emptyCount > 0 || flavor.lowCount > 2) {
+        // Crítico: reponer TODO + buffer 50%
+        return Math.ceil((baseReposicion + flavor.emptyCount + flavor.lowCount) * 1.5);
       }
       
-      if (flavor.coverageDays <= 4 || flavor.rotationSpeed > 40) {
-        return Math.ceil(flavor.totalCount * 0.8);
+      if (flavor.lowCount > 0 || flavor.coverageDays <= 4) {
+        // Urgente: reponer base + 40%
+        return Math.ceil(baseReposicion * 1.4);
       }
       
-      if (flavor.rotationSpeed > 20) {
-        return Math.ceil(flavor.totalCount * 0.5);
+      if (flavor.rotationSpeed > 30 || flavor.mediumCount > 0) {
+        // Media rotación: reponer base + 30%
+        return Math.ceil(baseReposicion * 1.3);
       }
       
-      // Baja rotación: mínimo 1 para mantener frescura
-      return Math.max(1, Math.ceil(flavor.totalCount * 0.3));
+      // Baja rotación pero presente: mínimo el 70% para mantener frescura
+      return Math.max(2, Math.ceil(baseReposicion * 0.7));
     };
 
     // Separar por línea y calcular
@@ -701,28 +716,39 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
           </AnimatePresence>
 
           {/* Explicación Simple */}
-          <div className={`rounded-xl p-3 border ${
+          <div className={`rounded-xl p-4 border-2 ${
             activeTab === 'semanal' 
-              ? 'bg-blue-50/50 border-blue-200'
-              : 'bg-pink-50/50 border-pink-200'
+              ? 'bg-blue-50/70 border-blue-300'
+              : 'bg-pink-50/70 border-pink-300'
           }`}>
-            <p className="text-sm text-gray-800 leading-relaxed">
+            <p className="text-sm text-gray-900 leading-relaxed font-medium mb-2">
               {activeTab === 'semanal' ? (
                 <>
-                  <span className="font-bold">¿Qué incluye?</span> Los sabores que se están agotando o ya se agotaron, más los que rotan rápido según el historial. 
-                  <span className="block mt-1.5 text-xs text-gray-600">
-                    💡 Este pedido debe cubrir toda la semana hasta el próximo pedido.
-                  </span>
+                  <span className="font-black text-blue-700">📦 Pedido Semanal:</span> Incluye todos los sabores que están en tus neveras, calculado para que duren toda la semana.
                 </>
               ) : (
                 <>
-                  <span className="font-bold">¿Para qué es?</span> Reforzar los sabores que se agotan muy rápido entre miércoles y sábado. 
-                  <span className="block mt-1.5 text-xs text-gray-600">
-                    💡 Solo pide lo que realmente necesitas adicional al pedido semanal.
-                  </span>
+                  <span className="font-black text-pink-700">⚡ Pedido Adicional:</span> Solo los sabores más rápidos que necesitan refuerzo mid-week.
                 </>
               )}
             </p>
+            <div className="space-y-1.5 text-xs text-gray-700">
+              {activeTab === 'semanal' ? (
+                <>
+                  <p>• Montas este pedido el <span className="font-bold text-blue-700">{storeConfig.semanal}</span></p>
+                  <p>• Te llega el <span className="font-bold text-blue-700">{storeConfig.entregaSemanal}</span></p>
+                  <p>• Debe durar hasta el próximo <span className="font-bold">{storeConfig.semanal}</span> (7 días)</p>
+                  <p className="pt-1 text-blue-700 font-semibold">💡 Incluye buffer del 30% para fin de semana</p>
+                </>
+              ) : (
+                <>
+                  <p>• Montas el <span className="font-bold text-pink-700">{storeConfig.adicional1}</span> (después de recibir el semanal)</p>
+                  <p>• Te llega el <span className="font-bold text-pink-700">{storeConfig.entregaAdicional1}</span></p>
+                  <p>• Refuerza solo lo que se agote rápido {storeConfig.entregaSemanal}-{storeConfig.entregaAdicional1}</p>
+                  <p className="pt-1 text-pink-700 font-semibold">💡 Considera lo que ya pediste en el semanal</p>
+                </>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
