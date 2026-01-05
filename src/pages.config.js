@@ -1,3 +1,4 @@
+import Budget from './pages/Budget';
 import CashierProfile from './pages/CashierProfile';
 import CashiersDashboard from './pages/CashiersDashboard';
 import Communication from './pages/Communication';
@@ -21,11 +22,11 @@ import Settings from './pages/Settings';
 import TWAGuide from './pages/TWAGuide';
 import Team from './pages/Team';
 import Training from './pages/Training';
-import Budget from './pages/Budget';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
+    "Budget": Budget,
     "CashierProfile": CashierProfile,
     "CashiersDashboard": CashiersDashboard,
     "Communication": Communication,
@@ -49,7 +50,6 @@ export const PAGES = {
     "TWAGuide": TWAGuide,
     "Team": Team,
     "Training": Training,
-    "Budget": Budget,
 }
 
 export const pagesConfig = {

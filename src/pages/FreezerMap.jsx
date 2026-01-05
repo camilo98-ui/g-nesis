@@ -1275,7 +1275,9 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
             {/* Pronóstico de Pedido - Independiente */}
             <SmartOrderPrediction
             allFreezersSlots={allFreezersSlots}
-            currentFreezer={currentFreezer} />
+            currentFreezer={currentFreezer}
+            storeCode={selectedStore}
+            storeId={selectedStore} />
 
 
             {/* Info Panel */}
