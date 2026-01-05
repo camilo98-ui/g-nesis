@@ -222,23 +222,57 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
 
     const flavorsArray = Object.values(analysis);
     const avgRotation = flavorsArray.length > 0 
-      ? flavorsArray.reduce((sum, f) => sum + f.rotationSpeed, 0) / flavorsArray.length 
-      : 0;
-    
+    ? flavorsArray.reduce((sum, f) => sum + f.rotationSpeed, 0) / flavorsArray.length 
+    : 0;
+
     const avgCoverage = flavorsArray.length > 0
-      ? flavorsArray.reduce((sum, f) => sum + f.coverageDays, 0) / flavorsArray.length
-      : 7;
+    ? flavorsArray.reduce((sum, f) => sum + f.coverageDays, 0) / flavorsArray.length
+    : 7;
+
+    // Calcular recomendaciones de stock (máximo y mínimo) por sabor
+    flavorsArray.forEach(flavor => {
+    if (flavor.avgDaysPerRotation && flavor.avgDaysPerRotation > 0) {
+      // Rotación rápida (<=3 días): máximo para 7-8 días, mínimo para 3-4 días
+      if (flavor.avgDaysPerRotation <= 3) {
+        flavor.maxRecommended = Math.ceil((7 / flavor.avgDaysPerRotation) * 1.2); // +20% seguridad
+        flavor.minRecommended = Math.ceil((3 / flavor.avgDaysPerRotation) * 1.1);
+      }
+      // Rotación media (3-6 días): máximo para 10 días, mínimo para 4 días
+      else if (flavor.avgDaysPerRotation <= 6) {
+        flavor.maxRecommended = Math.ceil((10 / flavor.avgDaysPerRotation) * 1.15);
+        flavor.minRecommended = Math.ceil((4 / flavor.avgDaysPerRotation));
+      }
+      // Rotación lenta (>6 días): máximo para 12 días, mínimo para 5 días
+      else {
+        flavor.maxRecommended = Math.ceil((12 / flavor.avgDaysPerRotation));
+        flavor.minRecommended = Math.ceil((5 / flavor.avgDaysPerRotation));
+      }
+    } else {
+      // Sin historial: usar heurística conservadora
+      flavor.maxRecommended = Math.ceil(flavor.totalCount * 1.5);
+      flavor.minRecommended = Math.max(2, Math.ceil(flavor.totalCount * 0.5));
+    }
+
+    // Estado del stock actual
+    if (flavor.totalCount > flavor.maxRecommended) {
+      flavor.stockStatus = 'exceso';
+    } else if (flavor.totalCount < flavor.minRecommended) {
+      flavor.stockStatus = 'bajo';
+    } else {
+      flavor.stockStatus = 'optimo';
+    }
+    });
 
     return {
-      flavors: flavorsArray,
-      total: totalFilled,
-      low: lowStock,
-      empty: emptyStock,
-      critical: criticalStock,
-      averageRotation: avgRotation,
-      coverageDays: Math.round(avgCoverage)
+    flavors: flavorsArray,
+    total: totalFilled,
+    low: lowStock,
+    empty: emptyStock,
+    critical: criticalStock,
+    averageRotation: avgRotation,
+    coverageDays: Math.round(avgCoverage)
     };
-  }, [allFreezersSlots, rotationAnalysis]);
+    }, [allFreezersSlots, rotationAnalysis]);
 
   // Clasificación inteligente considerando días de cobertura y rotación
   const { critical, urgent, highRotation, mediumRotation, lowRotation } = useMemo(() => {
@@ -611,12 +645,12 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
                           <span className="font-bold text-blue-900 text-sm">{flavor.name}</span>
                           <span className="font-black text-blue-700 text-2xl">{flavor.needed}x</span>
                         </div>
-                        
+
                         <div className="space-y-1.5">
                           <p className="text-[11px] text-gray-700 leading-relaxed">
                             📍 Está en Nevera {Array.from(flavor.freezers).join(', ')}, Bajada {Array.from(flavor.rows).join(', ')}
                           </p>
-                          
+
                           {flavor.avgDaysPerRotation ? (
                             <p className="text-[11px] text-gray-700 leading-relaxed">
                               🔄 Se agota cada <span className="font-bold text-red-600">{flavor.avgDaysPerRotation.toFixed(1)} días</span>
@@ -627,7 +661,20 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
                               ⚠️ Stock {flavor.coverageDays <= 2 ? 'crítico' : 'bajo'} - dura solo {flavor.coverageDays} días
                             </p>
                           )}
-                          
+
+                          {/* Stock recomendado */}
+                          {flavor.maxRecommended && (
+                            <div className="bg-white/60 rounded px-2 py-1 border border-blue-300">
+                              <p className="text-[10px] text-gray-700 leading-relaxed">
+                                📊 <span className="font-bold">Tienes {flavor.totalCount}</span> • 
+                                Mín: <span className="text-orange-600 font-bold">{flavor.minRecommended}</span> • 
+                                Máx: <span className="text-green-600 font-bold">{flavor.maxRecommended}</span>
+                                {flavor.stockStatus === 'exceso' && <span className="text-red-600 ml-1">⚠️ Sobrepasado</span>}
+                                {flavor.stockStatus === 'bajo' && <span className="text-orange-600 ml-1">⚠️ Muy bajo</span>}
+                              </p>
+                            </div>
+                          )}
+
                           {activeTab === 'adicional' && flavor.weeklyOrderAmount > 0 && (
                             <p className="text-[11px] text-blue-700 font-medium bg-blue-50 rounded px-2 py-1">
                               ℹ️ Ya pediste {flavor.weeklyOrderAmount}x en el pedido semanal. Esto es adicional.
@@ -696,6 +743,20 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
                             </span>
                           )}
                         </div>
+
+                        {/* Stock recomendado */}
+                        {flavor.maxRecommended && (
+                          <div className="bg-white/60 rounded px-2 py-1 border border-pink-300 mt-1">
+                            <p className="text-[10px] text-gray-700 leading-relaxed">
+                              📊 <span className="font-bold">Tienes {flavor.totalCount}</span> • 
+                              Mín: <span className="text-orange-600 font-bold">{flavor.minRecommended}</span> • 
+                              Máx: <span className="text-green-600 font-bold">{flavor.maxRecommended}</span>
+                              {flavor.stockStatus === 'exceso' && <span className="text-red-600 ml-1">⚠️ Sobrepasado</span>}
+                              {flavor.stockStatus === 'bajo' && <span className="text-orange-600 ml-1">⚠️ Muy bajo</span>}
+                            </p>
+                          </div>
+                        )}
+
                         {activeTab === 'adicional' && flavor.weeklyOrderAmount > 0 && (
                           <div className="mt-1.5 p-1.5 bg-blue-50 rounded border border-blue-200">
                             <p className="text-[9px] text-blue-700 font-medium">
