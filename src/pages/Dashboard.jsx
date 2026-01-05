@@ -646,17 +646,14 @@ export default function Dashboard() {
 
   // Totales ACUMULADOS del mes RETAIL/FERIAL (para tarjetas del header)
   const monthTotals = useMemo(() => {
-    const activeRange = weekFilter || dateRange;
-    if (!activeRange?.from || !activeRange?.to) {
-      return { sales: 0, tickets: 0, transactions: 0, suggested: 0 };
-    }
-
-    const fromStr = format(activeRange.from, 'yyyy-MM-dd');
-    const toStr = format(activeRange.to, 'yyyy-MM-dd');
+    const now = new Date();
+    // Mes retail empieza el 29 del mes anterior (semana 1)
+    const retailMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 29);
     
     const monthSales = dailySales.filter(s => {
       const saleDate = s.date?.split('T')[0] || s.date;
-      return saleDate >= fromStr && saleDate <= toStr;
+      const saleDateObj = new Date(saleDate);
+      return saleDateObj >= retailMonthStart && saleDateObj <= now;
     });
     
     return monthSales.reduce((acc, s) => ({
@@ -665,7 +662,7 @@ export default function Dashboard() {
       transactions: acc.transactions + (s.total_transactions || 0),
       suggested: acc.suggested + (s.total_suggested || 0)
     }), { sales: 0, tickets: 0, transactions: 0, suggested: 0 });
-  }, [dailySales, dateRange, weekFilter]);
+  }, [dailySales]);
 
   // Totals del período de comparación
   const comparisonTotals = useMemo(() => {
