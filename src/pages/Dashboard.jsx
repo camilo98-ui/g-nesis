@@ -644,7 +644,30 @@ export default function Dashboard() {
     }), { sales: 0, tickets: 0, transactions: 0, suggested: 0 });
   }, [filteredSales]);
 
-  // Totales ACUMULADOS del mes RETAIL/FERIAL (para tarjetas del header)
+  // Totales del rango filtrado (para tarjetas - respeta filtro de semana)
+  const filteredTotals = useMemo(() => {
+    const activeRange = weekFilter || dateRange;
+    if (!activeRange?.from || !activeRange?.to) {
+      return { sales: 0, tickets: 0, transactions: 0, suggested: 0 };
+    }
+
+    const fromStr = format(activeRange.from, 'yyyy-MM-dd');
+    const toStr = format(activeRange.to, 'yyyy-MM-dd');
+    
+    const rangeSales = dailySales.filter(s => {
+      const saleDate = s.date?.split('T')[0] || s.date;
+      return saleDate >= fromStr && saleDate <= toStr;
+    });
+    
+    return rangeSales.reduce((acc, s) => ({
+      sales: acc.sales + (s.total_sales || 0),
+      tickets: acc.tickets + (s.total_tickets || 0),
+      transactions: acc.transactions + (s.total_transactions || 0),
+      suggested: acc.suggested + (s.total_suggested || 0)
+    }), { sales: 0, tickets: 0, transactions: 0, suggested: 0 });
+  }, [dailySales, dateRange, weekFilter]);
+
+  // Totales ACUMULADOS del mes RETAIL/FERIAL (para el resumen al final)
   const monthTotals = useMemo(() => {
     const now = new Date();
     // Mes retail empieza el 29 del mes anterior (semana 1)
@@ -844,22 +867,23 @@ export default function Dashboard() {
     return null;
   };
 
-  // Calcular ticket promedio para el rango filtrado (gráficas)
+  // Calcular ticket promedio para el rango filtrado (tarjetas y gráficas)
   const avgTicket = totals.transactions > 0 ? totals.sales / totals.transactions : 0;
+  const filteredAvgTicket = filteredTotals.transactions > 0 ? filteredTotals.sales / filteredTotals.transactions : 0;
   
-  // Calcular ticket promedio ACUMULADO del mes (tarjetas)
+  // Calcular ticket promedio ACUMULADO del mes retail (para resumen al final)
   const monthAvgTicket = monthTotals.transactions > 0 ? monthTotals.sales / monthTotals.transactions : 0;
   
   const comparisonAvgTicket = comparisonTotals && comparisonTotals.transactions > 0 ?
   comparisonTotals.sales / comparisonTotals.transactions :
   0;
 
-  // Métricas usando ACUMULADO DEL MES (no del rango filtrado)
+  // Métricas usando RANGO FILTRADO (respeta selección de semana)
   const metrics = [
   {
     id: 'sales',
     title: 'Ventas Totales',
-    value: monthTotals.sales,
+    value: filteredTotals.sales,
     comparisonValue: comparisonTotals?.sales,
     budget: currentBudget.sales_budget,
     icon: DollarSign,
@@ -871,7 +895,7 @@ export default function Dashboard() {
   {
     id: 'tickets',
     title: 'Ticket Promedio',
-    value: monthAvgTicket,
+    value: filteredAvgTicket,
     comparisonValue: comparisonAvgTicket,
     budget: currentBudget.tickets_budget,
     icon: Receipt,
@@ -883,7 +907,7 @@ export default function Dashboard() {
   {
     id: 'transactions',
     title: 'Transacciones',
-    value: monthTotals.transactions,
+    value: filteredTotals.transactions,
     comparisonValue: comparisonTotals?.transactions,
     budget: currentBudget.transactions_budget,
     icon: Zap,
@@ -894,7 +918,7 @@ export default function Dashboard() {
   {
     id: 'suggested',
     title: 'Sugeridos',
-    value: monthTotals.suggested,
+    value: filteredTotals.suggested,
     comparisonValue: comparisonTotals?.suggested,
     budget: currentBudget.suggested_budget,
     icon: Gift,
