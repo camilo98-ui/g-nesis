@@ -292,26 +292,26 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       return isWithinInterval(currentWeekStart, { start: w, end: weekEnd });
     }) + 1;
 
-    // Ventas de la semana SELECCIONADA (no necesariamente la actual)
+    // Ventas de la semana SELECCIONADA o del rango filtrado (usa displayWeekStart/displayWeekEnd)
     const currentWeekSales = dailySales.filter(s => {
       try {
         const saleDate = parseISO(s.date);
-        return isWithinInterval(saleDate, { start: currentWeekStart, end: currentWeekEnd });
+        return isWithinInterval(saleDate, { start: displayWeekStart, end: displayWeekEnd });
       } catch {
         return false;
       }
     }).reduce((sum, s) => sum + (s.total_sales || 0), 0);
 
-    // Presupuesto de la semana SELECCIONADA - TODA la semana retail (7 días completos)
-    const weeklyBudget = fullCurrentRetailWeekDays.reduce((sum, day) => sum + getDailyBudget(day), 0);
+    // Presupuesto de la semana SELECCIONADA o del rango filtrado - TODA la semana retail (7 días completos)
+    const weeklyBudget = fullDisplayWeekDays.reduce((sum, day) => sum + getDailyBudget(day), 0);
 
-    // Calcular proyección de la semana - SUAVIZADA con histórico
-    const daysPassedInWeek = eachDayOfInterval({ start: currentWeekStart, end: now })
-      .filter(d => isWithinInterval(d, { start: currentWeekStart, end: currentWeekEnd }) && d <= now).length;
+    // Calcular proyección de la semana - SUAVIZADA con histórico (usa displayWeek)
+    const daysPassedInWeek = eachDayOfInterval({ start: displayWeekStart, end: now })
+      .filter(d => isWithinInterval(d, { start: displayWeekStart, end: displayWeekEnd }) && d <= now).length;
     const avgDailySales = daysPassedInWeek > 0 ? currentWeekSales / daysPassedInWeek : 0;
 
     // Calcular proyección más realista combinando ritmo actual con histórico
-    const totalDaysInWeek = eachDayOfInterval({ start: currentWeekStart, end: currentWeekEnd }).length;
+    const totalDaysInWeek = eachDayOfInterval({ start: displayWeekStart, end: displayWeekEnd }).length;
 
     // Si solo han pasado 1-2 días, ponderar más el histórico (80% histórico, 20% actual)
     // Si han pasado más días, ponderar más el actual (40% histórico, 60% actual)
