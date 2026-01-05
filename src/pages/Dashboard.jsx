@@ -966,6 +966,7 @@ export default function Dashboard() {
               </div>
 
             {/* Retail Week Budget - PRESUPUESTO DEL DÍA (LO MÁS IMPORTANTE) */}
+            <div id="budget-details-section" />
             {!showComparison &&
           <RetailWeekBudgetCard
             dailySales={dailySales}
@@ -973,7 +974,17 @@ export default function Dashboard() {
             storeId={selectedStore}
             formatCurrency={formatCurrency}
             currentDateRange={weekFilter || dateRange}
-            onConfigureBudget={() => setShowMonthlyBudget(true)} />
+            onConfigureBudget={() => setShowMonthlyBudget(true)}
+            onExpandChange={(expanded) => {
+              if (expanded) {
+                setTimeout(() => {
+                  const section = document.getElementById('budget-details-section');
+                  if (section) {
+                    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }, 100);
+              }
+            }} />
 
           }
 

@@ -7,7 +7,7 @@ import { format, startOfMonth, endOfMonth, eachWeekOfInterval, startOfWeek, endO
 import { es } from 'date-fns/locale';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Legend, Cell, LineChart, Line } from 'recharts';
 
-export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId, formatCurrency, onConfigureBudget, currentDateRange }) {
+export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId, formatCurrency, onConfigureBudget, currentDateRange, onExpandChange }) {
   const [expandedSection, setExpandedSection] = useState(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedMetric, setSelectedMetric] = useState(null);
@@ -507,7 +507,11 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
           {/* Presupuesto del Día - DESTACADO */}
           <motion.div
             whileHover={{ scale: 1.02, y: -2 }}
-            onClick={() => setIsExpanded(!isExpanded)}
+            onClick={() => {
+              const newExpanded = !isExpanded;
+              setIsExpanded(newExpanded);
+              onExpandChange?.(newExpanded);
+            }}
             className="w-full bg-gradient-to-br from-rose-400/80 to-pink-400/80 rounded-2xl shadow-md p-6 lg:p-8 border border-rose-300/40 relative overflow-hidden cursor-pointer"
           >
             <div className="relative z-10">
