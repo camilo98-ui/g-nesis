@@ -200,29 +200,25 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       totalWeeklyAvg > 0 ? avg / totalWeeklyAvg : 1/7
     );
 
-    // Calcular presupuesto base usando el 105% del presupuesto mensual para cumplir meta alcanzable
-    const TARGET_PERCENTAGE = 1.05; // 105% del presupuesto
-    const adjustedMonthlyBudget = activeBudget.sales_budget * TARGET_PERCENTAGE;
+    // Calcular presupuesto base usando el presupuesto mensual directo (sin ajuste a la baja)
+    const adjustedMonthlyBudget = activeBudget.sales_budget;
     const dailyBaseBudget = adjustedMonthlyBudget / daysInMonth;
 
     // Función para obtener presupuesto ajustado según día de la semana y tendencia histórica
     const getDailyBudget = (date) => {
-      if (totalWeeklyAvg === 0) return dailyBaseBudget; // Sin histórico
       const dayOfWeek = date.getDay();
 
-      // Escalar el promedio histórico para que la suma semanal coincida con el presupuesto mensual ajustado al 105%
-      const totalHistoricalAvg = avgByDayOfWeek.reduce((a, b) => a + b, 0);
-      if (totalHistoricalAvg === 0) return dailyBaseBudget;
-      
-      const monthlyHistoricalProjection = totalHistoricalAvg * (daysInMonth / 7);
-      const scaleFactor = adjustedMonthlyBudget / monthlyHistoricalProjection;
-      
-      // Si hay datos históricos para este día específico, usar ese promedio escalado
-      if (avgByDayOfWeek[dayOfWeek] > 0) {
-        return avgByDayOfWeek[dayOfWeek] * scaleFactor;
+      // Si hay datos históricos, usar el peso relativo del día para distribuir el presupuesto
+      if (totalWeeklyAvg > 0 && avgByDayOfWeek[dayOfWeek] > 0) {
+        // El peso de este día dentro de la semana
+        const dayWeight = avgByDayOfWeek[dayOfWeek] / totalWeeklyAvg;
+        // Presupuesto semanal = 7 días * base diaria
+        const weeklyBudget = dailyBaseBudget * 7;
+        // Asignar presupuesto según peso histórico del día
+        return weeklyBudget * dayWeight;
       }
       
-      // Si no hay datos para este día, usar presupuesto base
+      // Sin histórico, usar presupuesto base uniforme
       return dailyBaseBudget;
     };
 
