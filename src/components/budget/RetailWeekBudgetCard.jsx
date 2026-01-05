@@ -200,26 +200,30 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       totalWeeklyAvg > 0 ? avg / totalWeeklyAvg : 1/7
     );
 
-    // Calcular presupuesto base usando el presupuesto mensual directo (sin ajuste a la baja)
-    const adjustedMonthlyBudget = activeBudget.sales_budget;
+    // Calcular presupuesto base usando el 105% del presupuesto mensual para cumplir meta alcanzable
+    const TARGET_PERCENTAGE = 1.05; // 105% del presupuesto
+    const adjustedMonthlyBudget = activeBudget.sales_budget * TARGET_PERCENTAGE;
     const dailyBaseBudget = adjustedMonthlyBudget / daysInMonth;
 
     // Función para obtener presupuesto ajustado según día de la semana y tendencia histórica
     const getDailyBudget = (date) => {
+      if (totalWeeklyAvg === 0) return dailyBaseBudget; // Sin histórico
       const dayOfWeek = date.getDay();
 
-      // Si hay datos históricos, usar el peso relativo del día para distribuir el presupuesto
-      if (totalWeeklyAvg > 0 && avgByDayOfWeek[dayOfWeek] > 0) {
-        // El peso de este día dentro de la semana
-        const dayWeight = avgByDayOfWeek[dayOfWeek] / totalWeeklyAvg;
-        // Presupuesto semanal = 7 días * base diaria
+      // Si hay suficiente histórico para ESTE día específico, usarlo
+      if (countByDayOfWeek[dayOfWeek] >= 3) {
+        // Escalar el promedio histórico para que la suma semanal coincida con el presupuesto mensual ajustado al 105%
+        const totalHistoricalAvg = avgByDayOfWeek.reduce((a, b) => a + b, 0);
+        const monthlyHistoricalProjection = totalHistoricalAvg * (daysInMonth / 7);
+        const scaleFactor = adjustedMonthlyBudget / monthlyHistoricalProjection;
+        return avgByDayOfWeek[dayOfWeek] * scaleFactor;
+      } else {
+        // Con poco histórico, usar PESO RELATIVO del día basado en datos disponibles
+        // Esto permite variación por día de semana incluso con pocos datos
+        const weight = weightByDayOfWeek[dayOfWeek];
         const weeklyBudget = dailyBaseBudget * 7;
-        // Asignar presupuesto según peso histórico del día
-        return weeklyBudget * dayWeight;
+        return weeklyBudget * weight; // Distribuye el presupuesto semanal según peso del día
       }
-      
-      // Sin histórico, usar presupuesto base uniforme
-      return dailyBaseBudget;
     };
 
     // Ventas acumuladas hasta hoy
