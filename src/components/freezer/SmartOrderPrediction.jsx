@@ -345,28 +345,53 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
     };
   }, [fullAnalysis, storeConfig]);
 
-  // PEDIDO ADICIONAL - Basado en rotación mid-week
+  // PEDIDO ADICIONAL - ADICIONAL al pedido semanal (mid-week)
   const additionalOrder = useMemo(() => {
     const allFlavors = fullAnalysis.flavors;
     
     const calculateAdditionalNeeded = (flavor) => {
+      // Buscar cuánto ya se pidió en el pedido semanal
+      const weeklyOrderAmount = weeklyOrder.gourmet.concat(weeklyOrder.exclusivo)
+        .find(f => f.name === flavor.name)?.needed || 0;
+      
       // Con rotación histórica
       if (flavor.timesRemoved > 0 && flavor.avgDaysPerRotation) {
-        // Si rota en menos de 4 días, necesita reposición mid-week
-        if (flavor.avgDaysPerRotation <= 4) {
-          const midWeekConsumption = Math.ceil(3.5 / flavor.avgDaysPerRotation);
-          return Math.ceil(midWeekConsumption * 1.1);
+        // Calcular consumo total esperado en 7 días desde el pedido semanal
+        const totalWeekConsumption = Math.ceil(7 / flavor.avgDaysPerRotation);
+        
+        // Ya tenemos stock actual + lo que viene en pedido semanal
+        const disponibleDespuesSemanal = flavor.totalCount + weeklyOrderAmount;
+        
+        // Si el consumo esperado supera lo disponible, pedir la diferencia mid-week
+        const deficit = totalWeekConsumption - disponibleDespuesSemanal;
+        if (deficit > 0) {
+          return Math.ceil(deficit * 1.1); // +10% buffer
         }
+        
+        // Si rota MUY rápido (menos de 3 días), asegurar cobertura mid-week
+        if (flavor.avgDaysPerRotation <= 3 && disponibleDespuesSemanal < 3) {
+          return Math.max(2, Math.ceil(3 - disponibleDespuesSemanal));
+        }
+        
         return 0;
       }
       
-      // Sin historial: solo urgentes
-      if (flavor.coverageDays <= 3 || flavor.emptyCount > 0) {
-        return Math.ceil(flavor.totalCount * 0.6);
+      // Sin historial: analizar situación después del pedido semanal
+      const disponibleDespuesSemanal = flavor.totalCount + weeklyOrderAmount;
+      
+      // Si sigue crítico después del semanal
+      if (flavor.coverageDays <= 2 && disponibleDespuesSemanal < 3) {
+        return Math.max(2, Math.ceil((3 - disponibleDespuesSemanal) * 1.3));
       }
       
-      if (flavor.lowCount >= 2) {
-        return Math.max(2, Math.ceil(flavor.lowCount * 1.2));
+      // Si tiene muchos vacíos y el semanal no cubre
+      if (flavor.emptyCount > 2 && weeklyOrderAmount < flavor.emptyCount) {
+        return Math.ceil((flavor.emptyCount - weeklyOrderAmount) * 0.8);
+      }
+      
+      // Si alta rotación sin historial y bajo stock después del semanal
+      if (flavor.rotationSpeed > 50 && disponibleDespuesSemanal < 2) {
+        return 2;
       }
       
       return 0;
@@ -374,23 +399,43 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
 
     const gourmetFlavors = allFlavors
       .filter(f => GOURMET_FLAVORS.includes(f.name))
-      .map(f => ({
-        ...f,
-        needed: calculateAdditionalNeeded(f),
-        reason: f.avgDaysPerRotation && f.avgDaysPerRotation <= 4 ? 'Rotación rápida' : 
-                f.coverageDays <= 3 ? 'Cobertura baja' : 'Preventivo'
-      }))
+      .map(f => {
+        const needed = calculateAdditionalNeeded(f);
+        const weeklyAmount = weeklyOrder.gourmet.find(wf => wf.name === f.name)?.needed || 0;
+        return {
+          ...f,
+          needed,
+          weeklyOrderAmount: weeklyAmount,
+          reason: needed > 0 ? (
+            f.avgDaysPerRotation && f.avgDaysPerRotation <= 3 
+              ? `Rota cada ${f.avgDaysPerRotation.toFixed(1)}d - necesita más mid-week` 
+              : f.coverageDays <= 2 
+              ? 'Sigue crítico después del semanal' 
+              : 'Alta demanda mid-week'
+          ) : ''
+        };
+      })
       .filter(f => f.needed > 0)
       .sort((a, b) => (a.avgDaysPerRotation || 99) - (b.avgDaysPerRotation || 99));
 
     const exclusivoFlavors = allFlavors
       .filter(f => EXCLUSIVO_FLAVORS.includes(f.name))
-      .map(f => ({
-        ...f,
-        needed: calculateAdditionalNeeded(f),
-        reason: f.avgDaysPerRotation && f.avgDaysPerRotation <= 4 ? 'Rotación rápida' : 
-                f.coverageDays <= 3 ? 'Cobertura baja' : 'Preventivo'
-      }))
+      .map(f => {
+        const needed = calculateAdditionalNeeded(f);
+        const weeklyAmount = weeklyOrder.exclusivo.find(wf => wf.name === f.name)?.needed || 0;
+        return {
+          ...f,
+          needed,
+          weeklyOrderAmount: weeklyAmount,
+          reason: needed > 0 ? (
+            f.avgDaysPerRotation && f.avgDaysPerRotation <= 3 
+              ? `Rota cada ${f.avgDaysPerRotation.toFixed(1)}d - necesita más mid-week` 
+              : f.coverageDays <= 2 
+              ? 'Sigue crítico después del semanal' 
+              : 'Alta demanda mid-week'
+          ) : ''
+        };
+      })
       .filter(f => f.needed > 0)
       .sort((a, b) => (a.avgDaysPerRotation || 99) - (b.avgDaysPerRotation || 99));
 
@@ -405,7 +450,7 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
       totalExclusivo: totalExclusivoCubetas,
       config: storeConfig
     };
-  }, [fullAnalysis, storeConfig]);
+  }, [fullAnalysis, storeConfig, weeklyOrder]);
 
   const currentOrder = activeTab === 'semanal' ? weeklyOrder : additionalOrder;
 
