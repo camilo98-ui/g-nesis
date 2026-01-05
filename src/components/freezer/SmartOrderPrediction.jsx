@@ -760,7 +760,7 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
                   <p>• Montas el <span className="font-bold text-pink-700">{storeConfig.adicional1}</span> • Llega <span className="font-bold text-pink-700">{storeConfig.entregaAdicional1}</span></p>
                   <p>• <span className="font-black">Debe durar hasta el próximo {storeConfig.entregaSemanal}</span> (5-6 días)</p>
                   <p>• Incluye TODO EL FIN DE SEMANA (cuando más vendes)</p>
-                  <p className="pt-1 text-pink-700 font-semibold">🔥 Este es el pedido principal - debe ser más grande</p>
+                  <p className="pt-1 text-pink-700 font-semibold">📊 Se ajusta automáticamente según el día y consumo real observado</p>
                 </>
               )}
             </div>
