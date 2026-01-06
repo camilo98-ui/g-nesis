@@ -597,18 +597,36 @@ export default function Dashboard() {
     return budgets.find((b) => b.month === now.getMonth() + 1 && b.year === now.getFullYear()) || {};
   }, [budgets]);
 
-  // Ventas del período de comparación
-  const comparisonSales = useMemo(() => {
-    if (!showComparison || !comparisonRange || !dailySales.length) return [];
+  // Filtrar ventas según rango seleccionado (para gráficas)
+  const filteredSales = useMemo(() => {
+    if (!dailySales.length) return [];
 
-    const fromStr = format(comparisonRange.from, 'yyyy-MM-dd');
-    const toStr = format(comparisonRange.to, 'yyyy-MM-dd');
+    const now = new Date();
+    const retailMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 29);
+    
+    // Determinar rango: si hay filtro usarlo, si no, mes retail completo
+    let fromDate, toDate;
+    
+    if (weekFilter?.from && weekFilter?.to) {
+      fromDate = weekFilter.from;
+      toDate = weekFilter.to;
+    } else if (dateRange?.from && dateRange?.to) {
+      fromDate = dateRange.from;
+      toDate = dateRange.to;
+    } else {
+      // Sin filtro: mes retail completo
+      fromDate = retailMonthStart;
+      toDate = now;
+    }
+
+    const fromStr = format(fromDate, 'yyyy-MM-dd');
+    const toStr = format(toDate, 'yyyy-MM-dd');
 
     return dailySales.filter((s) => {
       const saleDateStr = s.date?.split('T')[0] || s.date;
       return saleDateStr >= fromStr && saleDateStr <= toStr;
     });
-  }, [dailySales, comparisonRange, showComparison]);
+  }, [dailySales, dateRange, weekFilter]);
 
   // Ventas del período de comparación
   const comparisonSales = useMemo(() => {
