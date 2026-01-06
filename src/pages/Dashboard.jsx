@@ -473,13 +473,12 @@ function DetailPanel({ metric, data, onClose, chartData, formatCurrency, shiftDa
 
 export default function Dashboard() {
   const [selectedStore, setSelectedStore] = useState('');
-  // Inicializar con el mes RETAIL completo (desde semana 1)
+  // Inicializar con la semana ACTUAL por defecto
   const [dateRange, setDateRange] = useState(() => {
     const now = new Date();
-    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     return {
-      from: startOfWeek(firstDayOfMonth, { weekStartsOn: 1 }),
-      to: now
+      from: startOfWeek(now, { weekStartsOn: 1 }),
+      to: endOfWeek(now, { weekStartsOn: 1 })
     };
   });
   const [activeMetric, setActiveMetric] = useState(null);
