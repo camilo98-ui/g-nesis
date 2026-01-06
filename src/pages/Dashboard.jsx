@@ -608,14 +608,7 @@ export default function Dashboard() {
   const filteredSales = useMemo(() => {
     if (!dailySales.length) return [];
 
-    // Si hay weekFilter, usar ese rango específico
-    // Si NO hay weekFilter, usar TODO EL MES RETAIL en lugar del dateRange
-    const activeRange = weekFilter || (() => {
-      const now = new Date();
-      const retailMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 29);
-      return { from: retailMonthStart, to: now };
-    })();
-    
+    const activeRange = weekFilter || dateRange;
     if (!activeRange?.from || !activeRange?.to) return [];
 
     const fromStr = format(activeRange.from, 'yyyy-MM-dd');
@@ -705,14 +698,7 @@ export default function Dashboard() {
   }, [comparisonSales, showComparison]);
 
   const chartData = useMemo(() => {
-    // Si hay weekFilter, usar ese rango específico
-    // Si NO hay weekFilter, usar TODO EL MES RETAIL
-    const activeRange = weekFilter || (() => {
-      const now = new Date();
-      const retailMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 29);
-      return { from: retailMonthStart, to: now };
-    })();
-    
+    const activeRange = weekFilter || dateRange;
     if (!activeRange?.from || !activeRange?.to) return [];
 
     // Generar días de ambos períodos para comparación
@@ -891,12 +877,12 @@ export default function Dashboard() {
   comparisonTotals.sales / comparisonTotals.transactions :
   0;
 
-  // Métricas usando ACUMULADO DEL MES RETAIL (desde semana 1)
+  // Métricas usando RANGO FILTRADO (respeta selección de semana)
   const metrics = [
   {
     id: 'sales',
-    title: 'Ventas Acumuladas',
-    value: monthTotals.sales,
+    title: 'Ventas Totales',
+    value: filteredTotals.sales,
     comparisonValue: comparisonTotals?.sales,
     budget: currentBudget.sales_budget,
     icon: DollarSign,
@@ -908,7 +894,7 @@ export default function Dashboard() {
   {
     id: 'tickets',
     title: 'Ticket Promedio',
-    value: monthAvgTicket,
+    value: filteredAvgTicket,
     comparisonValue: comparisonAvgTicket,
     budget: currentBudget.tickets_budget,
     icon: Receipt,
@@ -920,7 +906,7 @@ export default function Dashboard() {
   {
     id: 'transactions',
     title: 'Transacciones',
-    value: monthTotals.transactions,
+    value: filteredTotals.transactions,
     comparisonValue: comparisonTotals?.transactions,
     budget: currentBudget.transactions_budget,
     icon: Zap,
@@ -931,7 +917,7 @@ export default function Dashboard() {
   {
     id: 'suggested',
     title: 'Sugeridos',
-    value: monthTotals.suggested,
+    value: filteredTotals.suggested,
     comparisonValue: comparisonTotals?.suggested,
     budget: currentBudget.suggested_budget,
     icon: Gift,
@@ -1763,9 +1749,13 @@ export default function Dashboard() {
             }
             </AnimatePresence>
 
-          {/* Resumen Ejecutivo - Acumulado del Mes Retail */}
-          {selectedStore && (
-          <motion.div
+
+
+
+          }
+
+            {/* Resumen Ejecutivo */}
+            <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="bg-gradient-to-r from-pink-500 to-rose-500 rounded-2xl shadow-xl p-6 text-white">
@@ -1799,7 +1789,6 @@ export default function Dashboard() {
                 </motion.div>
               </div>
             </motion.div>
-          )}
           </div> :
 
         <div className="text-center py-20">
