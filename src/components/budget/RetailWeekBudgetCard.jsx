@@ -126,13 +126,13 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
     // Calcular días del mes que efectivamente tienen venta
     const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd }).length;
 
-    // SIEMPRE usar la semana ACTUAL para métricas, PPT y gráficas
+    // Semana actual (por defecto)
     const currentWeekStart = startOfWeek(now, { weekStartsOn: 1 });
     const currentWeekEnd = endOfWeek(now, { weekStartsOn: 1 });
 
-    // Para GRÁFICAS y DATOS: SIEMPRE usar semana actual (ignorar filtros externos)
-    const displayWeekStart = currentWeekStart;
-    const displayWeekEnd = currentWeekEnd;
+    // Para gráficas: usar filtro manual si existe, de lo contrario semana actual
+    const displayWeekStart = currentDateRange?.from || currentWeekStart;
+    const displayWeekEnd = currentDateRange?.to || currentWeekEnd;
 
     // Obtener todas las semanas retail que tocan el mes actual
     const weeks = eachWeekOfInterval(
