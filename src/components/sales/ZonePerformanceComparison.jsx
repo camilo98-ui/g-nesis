@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, TrendingUp, TrendingDown, Award, Target, MapPin } from 'lucide-react';
+import { Trophy, TrendingUp, TrendingDown, Award, Target, MapPin, DollarSign, Receipt, Zap, Gift } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend } from 'recharts';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
