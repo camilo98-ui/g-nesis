@@ -691,42 +691,34 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                   <span className="text-white/70">Proyección Semanal</span>
                   <span className="font-bold lg:font-black text-white lg:text-lg">{budgetData.projectionCompliance.toFixed(0)}%</span>
                 </div>
-                <div className="relative h-3 lg:h-4 bg-white/20 rounded-full overflow-visible">
+                <div className="relative h-3 lg:h-4 bg-white/20 rounded-full overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${Math.min(budgetData.projectionCompliance, 100)}%` }}
                     transition={{ duration: 1.5, delay: 0.2 }}
-                    className={`h-full rounded-full relative overflow-visible ${
+                    className={`h-full rounded-full relative overflow-hidden ${
                       budgetData.projectionCompliance >= 100 
-                        ? 'bg-gradient-to-r from-emerald-400 to-green-300' 
+                        ? 'bg-gradient-to-r from-emerald-300/80 to-green-200/80' 
                         : budgetData.projectionCompliance >= 85
-                        ? 'bg-gradient-to-r from-amber-300 to-yellow-200'
-                        : 'bg-gradient-to-r from-orange-300 to-red-300'
+                        ? 'bg-gradient-to-r from-amber-200/80 to-yellow-100/80'
+                        : 'bg-gradient-to-r from-orange-200/80 to-red-200/80'
                     }`}
-                    style={{
-                      boxShadow: budgetData.projectionCompliance >= 100 
-                        ? '0 0 20px rgba(16, 185, 129, 0.6)' 
-                        : budgetData.projectionCompliance >= 85
-                        ? '0 0 20px rgba(245, 158, 11, 0.6)'
-                        : '0 0 20px rgba(251, 146, 60, 0.6)'
-                    }}
                   >
-                  <motion.div
-                    className="absolute inset-0 rounded-full"
-                    style={{
-                      background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.9) 50%, transparent 100%)',
-                      width: '40%',
-                      filter: 'blur(8px)'
-                    }}
-                    animate={{
-                      x: ['-50%', '250%']
-                    }}
-                    transition={{
-                      duration: 1.5,
-                      repeat: Infinity,
-                      ease: 'linear'
-                    }}
-                  />
+                    <motion.div
+                      className="absolute inset-0"
+                      style={{
+                        background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.8) 50%, transparent 100%)',
+                        width: '50%'
+                      }}
+                      animate={{
+                        x: ['-100%', '200%']
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: 'linear'
+                      }}
+                    />
                   </motion.div>
                 </div>
                 <p className="text-[10px] lg:text-xs text-white/50 lg:text-white/60">
@@ -742,46 +734,38 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                     <span className="text-white/70">Proyección Cierre Mes</span>
                     <span className="font-bold lg:font-black text-white lg:text-lg">{budgetData.monthProjectionCompliance.toFixed(0)}%</span>
                   </div>
-                  <div className="relative h-3 lg:h-4 bg-white/20 rounded-full overflow-visible cursor-pointer" onClick={() => {
-                   setSelectedMetric('month-projection');
-                   setIsModalOpen(true);
+                  <div className="relative h-3 lg:h-4 bg-white/20 rounded-full overflow-hidden cursor-pointer" onClick={() => {
+                    setSelectedMetric('month-projection');
+                    setIsModalOpen(true);
                   }}>
-                   <motion.div
-                     initial={{ width: 0 }}
-                     animate={{ width: `${Math.min(budgetData.monthProjectionCompliance, 100)}%` }}
-                     transition={{ duration: 1.5, delay: 0.5 }}
-                     className={`h-full rounded-full relative overflow-visible ${
-                       budgetData.monthProjectionCompliance >= 100 
-                         ? 'bg-gradient-to-r from-emerald-400 to-green-300' 
-                         : budgetData.monthProjectionCompliance >= 90
-                         ? 'bg-gradient-to-r from-amber-300 to-yellow-200'
-                         : 'bg-gradient-to-r from-orange-300 to-red-300'
-                     }`}
-                     style={{
-                       boxShadow: budgetData.monthProjectionCompliance >= 100 
-                         ? '0 0 20px rgba(16, 185, 129, 0.6)' 
-                         : budgetData.monthProjectionCompliance >= 90
-                         ? '0 0 20px rgba(245, 158, 11, 0.6)'
-                         : '0 0 20px rgba(251, 146, 60, 0.6)'
-                     }}
-                   >
-                     <motion.div
-                       className="absolute inset-0 rounded-full"
-                       style={{
-                         background: 'radial-gradient(circle, rgba(255,255,255,0.7) 0%, transparent 70%)',
-                         filter: 'blur(10px)'
-                       }}
-                       animate={{
-                         opacity: [0.3, 1, 0.3],
-                         scale: [0.8, 1.1, 0.8]
-                       }}
-                       transition={{
-                         duration: 2,
-                         repeat: Infinity,
-                         ease: 'easeInOut'
-                       }}
-                     />
-                   </motion.div>
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${Math.min(budgetData.monthProjectionCompliance, 100)}%` }}
+                      transition={{ duration: 1.5, delay: 0.5 }}
+                      className={`h-full rounded-full relative overflow-hidden ${
+                        budgetData.monthProjectionCompliance >= 100 
+                          ? 'bg-gradient-to-r from-emerald-300/80 to-green-200/80' 
+                          : budgetData.monthProjectionCompliance >= 90
+                          ? 'bg-gradient-to-r from-amber-200/80 to-yellow-100/80'
+                          : 'bg-gradient-to-r from-orange-200/80 to-red-200/80'
+                      }`}
+                    >
+                      <motion.div
+                        className="absolute inset-0"
+                        style={{
+                          background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.8) 50%, transparent 100%)',
+                          width: '50%'
+                        }}
+                        animate={{
+                          x: ['-100%', '200%']
+                        }}
+                        transition={{
+                          duration: 2,
+                          repeat: Infinity,
+                          ease: 'linear'
+                        }}
+                      />
+                    </motion.div>
                   </div>
                   <p className="text-[10px] lg:text-xs text-white/50 lg:text-white/60">
                     {budgetData.monthProjectionCompliance >= 100 
@@ -1225,44 +1209,28 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                     <span className="text-indigo-700/70 font-semibold">Proyección Cierre Mes</span>
                     <span className="font-bold lg:font-black text-indigo-900 lg:text-lg">{budgetData.monthProjectionCompliance.toFixed(0)}%</span>
                   </div>
-                  <div className="relative h-3 lg:h-4 bg-white/20 rounded-full overflow-visible shadow-inner">
-                   <motion.div
-                     initial={{ width: 0 }}
-                     animate={{ width: `${Math.min(budgetData.monthProjectionCompliance, 100)}%` }}
-                     transition={{ duration: 1.5, delay: 0.3 }}
-                     className={`h-full rounded-full relative overflow-visible ${
-                       budgetData.monthProjectionCompliance >= 100 
-                         ? 'bg-gradient-to-r from-emerald-400 to-green-300' 
-                         : budgetData.monthProjectionCompliance >= 90
-                         ? 'bg-gradient-to-r from-amber-300 to-yellow-200'
-                         : 'bg-gradient-to-r from-orange-300 to-red-300'
-                     }`}
-                     style={{
-                       boxShadow: budgetData.monthProjectionCompliance >= 100 
-                         ? '0 0 20px rgba(16, 185, 129, 0.6)' 
-                         : budgetData.monthProjectionCompliance >= 90
-                         ? '0 0 20px rgba(245, 158, 11, 0.6)'
-                         : '0 0 20px rgba(251, 146, 60, 0.6)'
-                     }}
-                   >
-                     <motion.div
-                       className="absolute inset-0 rounded-full"
-                       style={{
-                         background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.9) 50%, transparent 100%)',
-                         width: '40%',
-                         filter: 'blur(8px)'
-                       }}
-                       animate={{
-                         x: ['-50%', '250%']
-                       }}
-                       transition={{
-                         duration: 1.8,
-                         repeat: Infinity,
-                         ease: 'linear',
-                         delay: 0.5
-                       }}
-                     />
-                   </motion.div>
+                  <div className="relative h-3 lg:h-4 bg-white/50 rounded-full overflow-hidden shadow-inner">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${Math.min(budgetData.monthProjectionCompliance, 100)}%` }}
+                      transition={{ duration: 1.5, delay: 0.3 }}
+                      className={`h-full rounded-full relative ${
+                        budgetData.monthProjectionCompliance >= 100 
+                          ? 'bg-gradient-to-r from-emerald-400/80 to-green-300/80' 
+                          : budgetData.monthProjectionCompliance >= 90
+                          ? 'bg-gradient-to-r from-amber-400/80 to-orange-300/80'
+                          : 'bg-gradient-to-r from-rose-400/80 to-pink-400/80'
+                      }`}
+                    >
+                      <div 
+                        className="absolute inset-0"
+                        style={{
+                          background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.7) 50%, transparent 100%)',
+                          width: '40%',
+                          animation: 'slideRight 2.5s linear infinite'
+                        }}
+                      />
+                    </motion.div>
                   </div>
                   <p className="text-[10px] lg:text-xs text-indigo-600/60">
                     {budgetData.monthProjectionCompliance >= 100 
