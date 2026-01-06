@@ -674,16 +674,31 @@ export default function Dashboard() {
     }), { sales: 0, tickets: 0, transactions: 0, suggested: 0 });
   }, [dailySales, dateRange, weekFilter]);
 
-  // Totales ACUMULADOS del mes RETAIL/FERIAL (para el resumen al final)
+  // Totales ACUMULADOS - Usa el filtro activo o el mes RETAIL/FERIAL completo
   const monthTotals = useMemo(() => {
     const now = new Date();
-    // Mes retail empieza el 29 del mes anterior (semana 1)
-    const retailMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 29);
+    
+    // Determinar rango: si hay filtro activo, usarlo; si no, mes retail completo
+    let fromDate, toDate;
+    
+    if (weekFilter?.from && weekFilter?.to) {
+      fromDate = weekFilter.from;
+      toDate = weekFilter.to;
+    } else if (dateRange?.from && dateRange?.to) {
+      fromDate = dateRange.from;
+      toDate = dateRange.to;
+    } else {
+      // Sin filtro: mes retail completo (desde el 29 del mes anterior)
+      fromDate = new Date(now.getFullYear(), now.getMonth() - 1, 29);
+      toDate = now;
+    }
+    
+    const fromStr = format(fromDate, 'yyyy-MM-dd');
+    const toStr = format(toDate, 'yyyy-MM-dd');
     
     const monthSales = dailySales.filter(s => {
       const saleDate = s.date?.split('T')[0] || s.date;
-      const saleDateObj = new Date(saleDate);
-      return saleDateObj >= retailMonthStart && saleDateObj <= now;
+      return saleDate >= fromStr && saleDate <= toStr;
     });
     
     return monthSales.reduce((acc, s) => ({
@@ -692,7 +707,7 @@ export default function Dashboard() {
       transactions: acc.transactions + (s.total_transactions || 0),
       suggested: acc.suggested + (s.total_suggested || 0)
     }), { sales: 0, tickets: 0, transactions: 0, suggested: 0 });
-  }, [dailySales]);
+  }, [dailySales, dateRange, weekFilter]);
 
   // Totals del período de comparación
   const comparisonTotals = useMemo(() => {
