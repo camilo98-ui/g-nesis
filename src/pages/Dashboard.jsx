@@ -999,7 +999,7 @@ export default function Dashboard() {
           </div>
           <div className="flex flex-col md:flex-row gap-3 items-center">
             <StoreSelector selectedStore={selectedStore} onStoreChange={handleStoreChange} />
-            {!showComparison && <WeekFilter onWeekChange={setWeekFilter} multiSelect={true} />}
+            {!showComparison && <WeekFilter onWeekChange={(range) => {setWeekFilter(range);setDateRange(null);}} multiSelect={true} />}
             <DateFilter
               dateRange={dateRange}
               onDateChange={(range) => {setDateRange(range);setWeekFilter(null);}}
