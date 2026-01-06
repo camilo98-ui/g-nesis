@@ -696,31 +696,14 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                     initial={{ width: 0 }}
                     animate={{ width: `${Math.min(budgetData.projectionCompliance, 100)}%` }}
                     transition={{ duration: 1.5, delay: 0.2 }}
-                    className={`h-full rounded-full relative overflow-hidden ${
+                    className={`h-full rounded-full ${
                       budgetData.projectionCompliance >= 100 
-                        ? 'bg-gradient-to-r from-emerald-300/80 to-green-200/80' 
+                        ? 'bg-emerald-400' 
                         : budgetData.projectionCompliance >= 85
-                        ? 'bg-gradient-to-r from-amber-200/80 to-yellow-100/80'
-                        : 'bg-gradient-to-r from-orange-200/80 to-red-200/80'
+                        ? 'bg-amber-400'
+                        : 'bg-rose-400'
                     }`}
-                  >
-                    <motion.div
-                      className="absolute inset-0"
-                      style={{
-                        background: 'radial-gradient(circle, rgba(251,191,36,1) 0%, rgba(253,224,71,0.6) 40%, transparent 70%)',
-                        filter: 'blur(10px)'
-                      }}
-                      animate={{
-                        opacity: [0.3, 0.9, 0.3],
-                        scale: [0.8, 1.2, 0.8]
-                      }}
-                      transition={{
-                        duration: 1.5,
-                        repeat: Infinity,
-                        ease: 'easeInOut'
-                      }}
-                    />
-                  </motion.div>
+                  />
                 </div>
                 <p className="text-[10px] lg:text-xs text-white/50 lg:text-white/60">
                   {budgetData.projectionCompliance >= 100 
@@ -743,31 +726,14 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                       initial={{ width: 0 }}
                       animate={{ width: `${Math.min(budgetData.monthProjectionCompliance, 100)}%` }}
                       transition={{ duration: 1.5, delay: 0.5 }}
-                      className={`h-full rounded-full relative overflow-hidden ${
+                      className={`h-full rounded-full ${
                         budgetData.monthProjectionCompliance >= 100 
-                          ? 'bg-gradient-to-r from-emerald-300/80 to-green-200/80' 
+                          ? 'bg-emerald-400' 
                           : budgetData.monthProjectionCompliance >= 90
-                          ? 'bg-gradient-to-r from-amber-200/80 to-yellow-100/80'
-                          : 'bg-gradient-to-r from-orange-200/80 to-red-200/80'
+                          ? 'bg-amber-400'
+                          : 'bg-rose-400'
                       }`}
-                    >
-                      <motion.div
-                        className="absolute inset-0"
-                        style={{
-                          background: 'radial-gradient(circle, rgba(96,165,250,1) 0%, rgba(147,197,253,0.6) 40%, transparent 70%)',
-                          filter: 'blur(10px)'
-                        }}
-                        animate={{
-                          opacity: [0.3, 0.9, 0.3],
-                          scale: [0.8, 1.2, 0.8]
-                        }}
-                        transition={{
-                          duration: 1.5,
-                          repeat: Infinity,
-                          ease: 'easeInOut'
-                        }}
-                      />
-                    </motion.div>
+                    />
                   </div>
                   <p className="text-[10px] lg:text-xs text-white/50 lg:text-white/60">
                     {budgetData.monthProjectionCompliance >= 100 
