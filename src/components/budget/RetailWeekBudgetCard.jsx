@@ -707,8 +707,10 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                     <motion.div
                       className="absolute inset-0"
                       style={{
-                        background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.8) 50%, transparent 100%)',
-                        width: '50%'
+                        background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.95) 50%, transparent 100%)',
+                        width: '60%',
+                        filter: 'blur(12px)',
+                        boxShadow: '0 0 30px rgba(255,255,255,0.6)'
                       }}
                       animate={{
                         x: ['-100%', '200%']
@@ -753,8 +755,10 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                       <motion.div
                         className="absolute inset-0"
                         style={{
-                          background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.8) 50%, transparent 100%)',
-                          width: '50%'
+                          background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.95) 50%, transparent 100%)',
+                          width: '60%',
+                          filter: 'blur(12px)',
+                          boxShadow: '0 0 30px rgba(255,255,255,0.6)'
                         }}
                         animate={{
                           x: ['-100%', '200%']
