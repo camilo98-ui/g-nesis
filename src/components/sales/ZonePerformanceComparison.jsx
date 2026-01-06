@@ -366,14 +366,40 @@ export default function ZonePerformanceComparison({ storeId, formatCurrency, cur
               'bg-red-50 border-2 border-red-300'
             }`}>
               <p className="text-xs font-bold mb-2">
-                {isTop3 ? '🎯 Excelente Desempeño' : position <= totalStores / 2 ? '⚠️ Buen Desempeño' : '🚨 Requiere Atención'}
+                {isTop3 ? '🎯 Análisis de Liderazgo' : position <= totalStores / 2 ? '⚠️ Análisis de Oportunidad' : '🚨 Análisis Crítico - Plan de Acción'}
               </p>
-              <p className={`text-sm ${isTop3 ? 'text-emerald-800' : position <= totalStores / 2 ? 'text-amber-800' : 'text-red-800'}`}>
-                {isTop3 
-                  ? `¡Felicitaciones! Tu tienda está en el Top 3 de ${zone}. Mantén este rendimiento enfocándote en los indicadores que están por debajo del promedio.`
-                  : position <= totalStores / 2
-                  ? `Tu tienda tiene un desempeño medio-alto. Trabaja en mejorar las métricas que están por debajo del promedio para alcanzar el Top 3.`
-                  : `Tu tienda requiere atención inmediata. Revisa cada métrica y crea un plan de acción para mejorar los indicadores críticos.`}
+              <p className={`text-sm leading-relaxed ${isTop3 ? 'text-emerald-800' : position <= totalStores / 2 ? 'text-amber-800' : 'text-red-800'}`}>
+                {(() => {
+                  const leader = top3[0];
+                  const second = top3[1];
+                  const third = top3[2];
+                  const gapToLeader = leader.sales - currentStoreData.sales;
+                  const gapPercent = ((gapToLeader / currentStoreData.sales) * 100).toFixed(1);
+                  const vsAvgSales = parseFloat(vsAvg.sales);
+                  
+                  if (position === 1) {
+                    const advantage = currentStoreData.sales - (second?.sales || 0);
+                    const advantagePercent = ((advantage / currentStoreData.sales) * 100).toFixed(1);
+                    return `🏆 ¡LÍDER DE LA ZONA ${zone.toUpperCase()}! Posición #1 de ${totalStores} tiendas. Ventas: ${formatCurrency(currentStoreData.sales)} - Tienes ${formatCurrency(advantage)} (${advantagePercent}%) de ventaja sobre el segundo lugar (${second?.storeName || 'N/A'}: ${formatCurrency(second?.sales || 0)}). Promedio zonal: ${formatCurrency(zoneAvg.sales)} - Estás +${Math.abs(vsAvgSales).toFixed(1)}% sobre el promedio. ESTRATEGIA: Protege tu liderazgo manteniendo esta diferencia. Identifica qué métricas específicas (ticket, tráfico, sugeridos) están impulsando tu éxito y refuérzalas.`;
+                  } else if (position === 2) {
+                    const gapToFirst = leader.sales - currentStoreData.sales;
+                    const advantage = currentStoreData.sales - (third?.sales || 0);
+                    return `🥈 SEGUNDO LUGAR en ${zone} (${position}/${totalStores}). Ventas actuales: ${formatCurrency(currentStoreData.sales)}. El líder (${leader.storeName}) tiene ${formatCurrency(leader.sales)}. NECESITAS VENDER ${formatCurrency(gapToFirst)} ADICIONALES (${gapPercent}% de incremento) para alcanzar el #1. Tienes ${formatCurrency(advantage)} de ventaja sobre el tercer lugar (${third?.storeName || 'N/A'}). Promedio: ${formatCurrency(zoneAvg.sales)} (${vsAvgSales >= 0 ? '+' : ''}${vsAvgSales}%). ACCIÓN: Incrementa ${(parseFloat(gapPercent) / 7).toFixed(1)}% tus ventas diarias durante 7 días para alcanzar el liderazgo.`;
+                  } else if (position === 3) {
+                    const gapToFirst = leader.sales - currentStoreData.sales;
+                    const gapToSecond = second.sales - currentStoreData.sales;
+                    return `🥉 TERCER LUGAR en ${zone} (${position}/${totalStores}). Ventas: ${formatCurrency(currentStoreData.sales)}. PARA ALCANZAR EL #1 (${leader.storeName}: ${formatCurrency(leader.sales)}) NECESITAS ${formatCurrency(gapToFirst)} MÁS (${gapPercent}% de crecimiento). Para el #2 (${second.storeName}): ${formatCurrency(gapToSecond)} adicionales. Promedio zonal: ${formatCurrency(zoneAvg.sales)} - Estás ${vsAvgSales >= 0 ? '+' : ''}${vsAvgSales}%. PLAN: Analiza las 3 métricas donde estás más débil vs los líderes y crea un plan de mejora. Necesitas crecer ${(parseFloat(gapPercent) / 14).toFixed(1)}% diario por 14 días.`;
+                  } else if (position <= totalStores / 2) {
+                    const gapToThird = third.sales - currentStoreData.sales;
+                    const gapToFirst = leader.sales - currentStoreData.sales;
+                    return `⚠️ POSICIÓN ${position} de ${totalStores} en ${zone}. Ventas: ${formatCurrency(currentStoreData.sales)}. PARA EL #1 (${leader.storeName}: ${formatCurrency(leader.sales)}) NECESITAS ${formatCurrency(gapToFirst)} ADICIONALES (${gapPercent}% más). Para entrar al Top 3 necesitas ${formatCurrency(gapToThird)} (${((gapToThird / currentStoreData.sales) * 100).toFixed(1)}% de incremento). Promedio: ${formatCurrency(zoneAvg.sales)} (${vsAvgSales >= 0 ? '+' : ''}${vsAvgSales}%). META INMEDIATA: Selecciona cada botón de métrica para identificar dónde tienes mayor brecha. PLAN: Incrementa ${((gapToThird / currentStoreData.sales) * 100 / 7).toFixed(1)}% diario por 7 días para alcanzar Top 3, luego ${((gapToFirst / currentStoreData.sales) * 100 / 14).toFixed(1)}% adicional por 14 días para el liderazgo.`;
+                  } else {
+                    const gapToAvg = zoneAvg.sales - currentStoreData.sales;
+                    const gapToFirst = leader.sales - currentStoreData.sales;
+                    const gapToThird = third.sales - currentStoreData.sales;
+                    return `🚨 POSICIÓN ${position} de ${totalStores} - ZONA CRÍTICA. Ventas: ${formatCurrency(currentStoreData.sales)}. Estás ${formatCurrency(Math.abs(gapToAvg))} BAJO el promedio zonal de ${formatCurrency(zoneAvg.sales)} (${vsAvgSales}%). El líder (${leader.storeName}) tiene ${formatCurrency(leader.sales)} - BRECHA DE ${formatCurrency(gapToFirst)} (${gapPercent}%). PLAN DE RECUPERACIÓN URGENTE: FASE 1 (Días 1-5): Alcanza el promedio vendiendo ${formatCurrency(Math.abs(gapToAvg) / 5)} adicionales diarios (${((Math.abs(gapToAvg) / currentStoreData.sales) * 100 / 5).toFixed(1)}% incremento). FASE 2 (Días 6-15): Genera ${formatCurrency((gapToThird - Math.abs(gapToAvg)) / 10)} extra diarios para Top 3. FASE 3 (Días 16-30): Añade ${formatCurrency((gapToFirst - gapToThird) / 15)} diarios para el #1. Selecciona cada métrica para ver brechas específicas y crear plan de acción detallado.`;
+                  }
+                })()}
               </p>
             </div>
           </motion.div>
