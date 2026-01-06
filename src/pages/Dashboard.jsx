@@ -1109,16 +1109,9 @@ export default function Dashboard() {
                   <p className="text-2xl font-black text-white mb-1">
                     {comparisonTotals.sales > 0 ? ((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100 >= 0 ? '+' : '') + ((totals.sales - comparisonTotals.sales) / comparisonTotals.sales * 100).toFixed(1) : 0}%
                   </p>
-                  <div className="space-y-0.5">
-                    <div className="flex justify-between text-[9px] text-white/80">
-                      <span>Ant: {formatCurrency(comparisonTotals.sales).slice(0, -3)}</span>
-                      <span>Act: {formatCurrency(totals.sales).slice(0, -3)}</span>
-                    </div>
-                    <div className="flex justify-center">
-                      <span className="text-[10px] font-bold text-white/90 bg-white/10 px-2 py-0.5 rounded">
-                        Mes: {formatCurrency(monthTotals.sales).slice(0, -3)}
-                      </span>
-                    </div>
+                  <div className="flex justify-between text-[9px] text-white/80">
+                    <span>Ant: {formatCurrency(comparisonTotals.sales).slice(0, -3)}</span>
+                    <span>Act: {formatCurrency(totals.sales).slice(0, -3)}</span>
                   </div>
                 </motion.button>
 
@@ -1158,16 +1151,9 @@ export default function Dashboard() {
                   <p className="text-2xl font-black text-white mb-1">
                     {comparisonTotals.transactions > 0 ? ((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100 >= 0 ? '+' : '') + ((totals.transactions - comparisonTotals.transactions) / comparisonTotals.transactions * 100).toFixed(1) : 0}%
                   </p>
-                  <div className="space-y-0.5">
-                    <div className="flex justify-between text-[9px] text-white/80">
-                      <span>Ant: {comparisonTotals.transactions.toLocaleString()}</span>
-                      <span>Act: {totals.transactions.toLocaleString()}</span>
-                    </div>
-                    <div className="flex justify-center">
-                      <span className="text-[10px] font-bold text-white/90 bg-white/10 px-2 py-0.5 rounded">
-                        Mes: {monthTotals.transactions.toLocaleString()}
-                      </span>
-                    </div>
+                  <div className="flex justify-between text-[9px] text-white/80">
+                    <span>Ant: {comparisonTotals.transactions.toLocaleString()}</span>
+                    <span>Act: {totals.transactions.toLocaleString()}</span>
                   </div>
                 </motion.button>
 
@@ -1210,16 +1196,9 @@ export default function Dashboard() {
                 ((avgTicket - comparisonTotals.sales / comparisonTotals.transactions) / (comparisonTotals.sales / comparisonTotals.transactions) * 100).toFixed(1) :
                 0}%
                   </p>
-                  <div className="space-y-0.5">
-                    <div className="flex justify-between text-[9px] text-white/80">
-                      <span>Ant: {formatCurrency(comparisonTotals.transactions > 0 ? comparisonTotals.sales / comparisonTotals.transactions : 0).slice(0, -3)}</span>
-                      <span>Act: {formatCurrency(avgTicket).slice(0, -3)}</span>
-                    </div>
-                    <div className="flex justify-center">
-                      <span className="text-[10px] font-bold text-white/90 bg-white/10 px-2 py-0.5 rounded">
-                        Mes: {formatCurrency(monthAvgTicket).slice(0, -3)}
-                      </span>
-                    </div>
+                  <div className="flex justify-between text-[9px] text-white/80">
+                    <span>Ant: {formatCurrency(comparisonTotals.transactions > 0 ? comparisonTotals.sales / comparisonTotals.transactions : 0).slice(0, -3)}</span>
+                    <span>Act: {formatCurrency(avgTicket).slice(0, -3)}</span>
                   </div>
                 </motion.button>
 
@@ -1259,16 +1238,9 @@ export default function Dashboard() {
                   <p className="text-2xl font-black text-white mb-1">
                     {comparisonTotals.suggested > 0 ? ((totals.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100 >= 0 ? '+' : '') + ((totals.suggested - comparisonTotals.suggested) / comparisonTotals.suggested * 100).toFixed(1) : 0}%
                   </p>
-                  <div className="space-y-0.5">
-                    <div className="flex justify-between text-[9px] text-white/80">
-                      <span>Ant: {comparisonTotals.suggested.toLocaleString()}</span>
-                      <span>Act: {totals.suggested.toLocaleString()}</span>
-                    </div>
-                    <div className="flex justify-center">
-                      <span className="text-[10px] font-bold text-white/90 bg-white/10 px-2 py-0.5 rounded">
-                        Mes: {monthTotals.suggested.toLocaleString()}
-                      </span>
-                    </div>
+                  <div className="flex justify-between text-[9px] text-white/80">
+                    <span>Ant: {comparisonTotals.suggested.toLocaleString()}</span>
+                    <span>Act: {totals.suggested.toLocaleString()}</span>
                   </div>
                 </motion.button>
               </motion.div>
