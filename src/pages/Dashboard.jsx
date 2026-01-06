@@ -1750,6 +1750,7 @@ export default function Dashboard() {
             </AnimatePresence>
 
           {/* Resumen Ejecutivo - Acumulado del Mes Retail */}
+          {selectedStore && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -1784,6 +1785,7 @@ export default function Dashboard() {
                 </motion.div>
               </div>
             </motion.div>
+          )}
           </div> :
 
         <div className="text-center py-20">
