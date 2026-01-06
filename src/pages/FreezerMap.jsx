@@ -1453,18 +1453,80 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => {
-                      // Restaurar sabores predefinidos
-                      const defaultFlavors = POPSY_FLAVORS.map(f => ({
-                        name: f.name,
-                        color: f.color,
-                        type: f.type,
-                        line: f.line,
-                        dark: f.dark
-                      }));
-                      localStorage.setItem('customFlavors', JSON.stringify(defaultFlavors));
-                      setCustomFlavors(defaultFlavors);
-                      toast.success('✓ Sabores regenerados');
+                    onClick={async () => {
+                      if (!confirm('¿Llenar la nevera con los sabores predefinidos? Se sobrescribirán los cambios actuales.')) return;
+                      
+                      toast.info('Cargando sabores...');
+                      
+                      // Separar sabores por tipo
+                      const gourmetFlavors = POPSY_FLAVORS.filter(f => f.type === 'gourmet');
+                      const exclusivoFlavors = POPSY_FLAVORS.filter(f => f.type === 'exclusivo');
+                      
+                      let flavorIndex = 0;
+                      const allFlavors = [...gourmetFlavors, ...exclusivoFlavors];
+                      
+                      // Llenar la nevera
+                      for (let row = 1; row <= numRows; row++) {
+                        for (let pos = 1; pos <= numCols; pos++) {
+                          // Slot Frontal
+                          const flavorF = allFlavors[flavorIndex % allFlavors.length];
+                          const existingF = slots.find(s => 
+                            s.store_id === `${selectedStore}_F${currentFreezer}` &&
+                            s.row === row && s.position === pos && s.slot_type === 'F'
+                          );
+                          
+                          const slotDataF = {
+                            row, position: pos, slot_type: 'F',
+                            flavor_name: flavorF.name,
+                            flavor_type: flavorF.type,
+                            color: flavorF.color,
+                            is_empty: false,
+                            stock_level: 'full'
+                          };
+                          
+                          if (existingF?.id) {
+                            await base44.entities.FreezerSlot.update(existingF.id, slotDataF);
+                          } else {
+                            await base44.entities.FreezerSlot.create({
+                              ...slotDataF,
+                              store_id: `${selectedStore}_F${currentFreezer}`
+                            });
+                          }
+                          
+                          flavorIndex++;
+                          
+                          // Slot Trasero
+                          const flavorT = allFlavors[flavorIndex % allFlavors.length];
+                          const existingT = slots.find(s => 
+                            s.store_id === `${selectedStore}_F${currentFreezer}` &&
+                            s.row === row && s.position === pos && s.slot_type === 'T'
+                          );
+                          
+                          const slotDataT = {
+                            row, position: pos, slot_type: 'T',
+                            flavor_name: flavorT.name,
+                            flavor_type: flavorT.type,
+                            color: flavorT.color,
+                            is_empty: false,
+                            stock_level: 'full'
+                          };
+                          
+                          if (existingT?.id) {
+                            await base44.entities.FreezerSlot.update(existingT.id, slotDataT);
+                          } else {
+                            await base44.entities.FreezerSlot.create({
+                              ...slotDataT,
+                              store_id: `${selectedStore}_F${currentFreezer}`
+                            });
+                          }
+                          
+                          flavorIndex++;
+                        }
+                      }
+                      
+                      await queryClient.invalidateQueries(['freezerSlots']);
+                      await refetch();
+                      toast.success('✓ Nevera cargada con sabores predefinidos');
                     }}
                     className="h-7 text-xs text-purple-600 hover:bg-purple-50"
                   >
