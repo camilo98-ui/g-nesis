@@ -256,91 +256,134 @@ export default function ZonePerformanceComparison({ storeId, formatCurrency, cur
               </motion.div>
             </motion.div>
 
+            {/* Gráfica comparativa sofisticada de ventas por tienda */}
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6"
+              className="p-4 lg:p-6"
             >
-              {/* Radar comparativo */}
-              <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-4 lg:p-5 border border-rose-200/40 shadow-lg">
-                <h4 className="text-xs lg:text-sm font-black text-rose-900 mb-3 lg:mb-4 flex items-center gap-2">
-                  <Target className="w-4 h-4 lg:w-5 lg:h-5 text-rose-500" />
-                  Performance vs Promedio Zona
+              <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-5 border border-rose-200/40 shadow-lg">
+                <h4 className="text-sm font-black text-rose-900 mb-4 flex items-center gap-2">
+                  <BarChart className="w-5 h-5 text-rose-500" />
+                  Comparación de Ventas - Todas las Tiendas de {zone}
                 </h4>
-                <ResponsiveContainer width="100%" height={220}>
-                  <RadarChart data={radarData}>
+                
+                <ResponsiveContainer width="100%" height={Math.max(300, allStores.length * 50)}>
+                  <BarChart data={allStores} layout="vertical" margin={{ left: 10, right: 30 }}>
                     <defs>
-                      <linearGradient id="radarCurrent" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#fb7185" stopOpacity={0.8} />
-                        <stop offset="100%" stopColor="#fda4af" stopOpacity={0.3} />
+                      <linearGradient id="barCurrentStore" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stopColor="#fb7185" stopOpacity={1} />
+                        <stop offset="100%" stopColor="#fda4af" stopOpacity={0.8} />
                       </linearGradient>
-                      <linearGradient id="radarZone" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#fecdd3" stopOpacity={0.5} />
-                        <stop offset="100%" stopColor="#ffe4e6" stopOpacity={0.2} />
+                      <linearGradient id="barOtherStore" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stopColor="#cbd5e1" stopOpacity={0.8} />
+                        <stop offset="100%" stopColor="#e2e8f0" stopOpacity={0.5} />
                       </linearGradient>
                     </defs>
-                    <PolarGrid stroke="#fecdd3" strokeWidth={1.5} />
-                    <PolarAngleAxis dataKey="metric" tick={{ fill: '#be123c', fontSize: 10, fontWeight: 600 }} />
-                    <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fill: '#fb7185', fontSize: 9 }} />
-                    <Radar name="Tu Tienda" dataKey="tuTienda" stroke="#fb7185" strokeWidth={3} fill="url(#radarCurrent)" />
-                    <Radar name="Promedio Zona" dataKey="promedio" stroke="#fecdd3" strokeWidth={2} fill="url(#radarZone)" strokeDasharray="5 5" />
-                    <Legend wrapperStyle={{ fontSize: 11, fontWeight: 600 }} />
-                  </RadarChart>
-                </ResponsiveContainer>
-                <p className="text-[10px] text-center text-rose-600 mt-2">Posición #{position} de {totalStores} en {zone}</p>
-              </div>
-
-              {/* Top 3 Tiendas */}
-              <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-4 lg:p-5 border border-rose-200/40 shadow-lg">
-                <h4 className="text-xs lg:text-sm font-black text-rose-900 mb-3 lg:mb-4 flex items-center gap-2">
-                  <Award className="w-4 h-4 lg:w-5 lg:h-5 text-amber-500" />
-                  Top 3 Tiendas de {zone}
-                </h4>
-                <div className="space-y-3">
-                  {top3.map((store, idx) => {
-                    const isCurrentStore = store.storeCode === storeId;
-                    const medals = ['🥇', '🥈', '🥉'];
-                    return (
-                      <motion.div
-                        key={store.storeCode}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: idx * 0.1 }}
-                        whileHover={{ scale: 1.03, x: 5 }}
-                        className={`flex items-center justify-between p-3 rounded-xl border-2 transition-all ${
-                          isCurrentStore 
-                            ? 'bg-gradient-to-r from-rose-100 to-pink-100 border-rose-400 shadow-lg' 
-                            : 'bg-white/50 border-slate-200'
-                        }`}
-                      >
-                        <div className="flex items-center gap-3 flex-1 min-w-0">
-                          <span className="text-2xl flex-shrink-0">{medals[idx]}</span>
-                          <div className="min-w-0 flex-1">
-                            <p className={`text-sm font-bold truncate ${isCurrentStore ? 'text-rose-900' : 'text-slate-800'}`}>
-                              {store.storeName}
-                            </p>
-                            <p className="text-xs text-slate-600">{formatCurrency(store.sales)}</p>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#fecdd3" opacity={0.3} />
+                    <XAxis 
+                      type="number" 
+                      fontSize={11} 
+                      fontWeight={600}
+                      tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`}
+                      stroke="#9f1239"
+                    />
+                    <YAxis 
+                      type="category" 
+                      dataKey="storeName" 
+                      fontSize={12} 
+                      fontWeight={700}
+                      width={120}
+                      tick={(props) => {
+                        const { x, y, payload } = props;
+                        const store = allStores.find(s => s.storeName === payload.value);
+                        const isCurrentStore = store?.storeCode === storeId;
+                        return (
+                          <g transform={`translate(${x},${y})`}>
+                            <text 
+                              x={-10} 
+                              y={0} 
+                              dy={4} 
+                              textAnchor="end" 
+                              fill={isCurrentStore ? '#be123c' : '#64748b'}
+                              fontSize={isCurrentStore ? 13 : 11}
+                              fontWeight={isCurrentStore ? 900 : 600}
+                            >
+                              {payload.value}
+                            </text>
+                          </g>
+                        );
+                      }}
+                    />
+                    <Tooltip 
+                      contentStyle={{ 
+                        borderRadius: 16, 
+                        border: '2px solid #fb7185', 
+                        background: 'linear-gradient(135deg, #fff 0%, #ffe4e6 100%)',
+                        boxShadow: '0 10px 40px rgba(251,113,133,0.3)',
+                        fontSize: 12,
+                        fontWeight: 600
+                      }}
+                      formatter={(v, name, props) => {
+                        const store = props.payload;
+                        return [
+                          <div key="tooltip-content" className="space-y-1">
+                            <div className="font-black text-rose-900">{formatCurrency(v)}</div>
+                            <div className="text-[10px] text-slate-600">
+                              Tickets: {store.tickets?.toLocaleString()}
+                            </div>
+                            <div className="text-[10px] text-slate-600">
+                              Transacciones: {store.transactions?.toLocaleString()}
+                            </div>
+                            <div className="text-[10px] text-slate-600">
+                              Ticket Prom: {formatCurrency(store.avgTicket)}
+                            </div>
+                          </div>,
+                          ''
+                        ];
+                      }}
+                      labelFormatter={(label) => {
+                        const store = allStores.find(s => s.storeName === label);
+                        const pos = allStores.indexOf(store) + 1;
+                        return (
+                          <div className="font-black text-rose-700 mb-1">
+                            {pos === 1 && '🥇 '}
+                            {pos === 2 && '🥈 '}
+                            {pos === 3 && '🥉 '}
+                            {label}
                           </div>
-                        </div>
-                        {isCurrentStore && (
-                          <motion.div 
-                            animate={{ scale: [1, 1.2, 1] }}
-                            transition={{ duration: 2, repeat: Infinity }}
-                            className="flex-shrink-0 w-6 h-6 bg-rose-500 rounded-full flex items-center justify-center"
-                          >
-                            <span className="text-white text-xs font-bold">✓</span>
-                          </motion.div>
-                        )}
-                      </motion.div>
-                    );
-                  })}
+                        );
+                      }}
+                    />
+                    <Bar dataKey="sales" radius={[0, 12, 12, 0]}>
+                      {allStores.map((store, index) => (
+                        <Cell 
+                          key={`cell-${index}`} 
+                          fill={store.storeCode === storeId ? 'url(#barCurrentStore)' : 'url(#barOtherStore)'}
+                          stroke={store.storeCode === storeId ? '#fb7185' : 'transparent'}
+                          strokeWidth={store.storeCode === storeId ? 3 : 0}
+                        />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+
+                {/* Leyenda y estadísticas clave */}
+                <div className="mt-5 grid grid-cols-2 gap-3">
+                  <div className="bg-gradient-to-r from-rose-100 to-pink-100 rounded-xl p-3 border-2 border-rose-300">
+                    <p className="text-[10px] text-rose-700 font-bold mb-1">Tu Posición</p>
+                    <p className="text-2xl font-black text-rose-900">#{position}</p>
+                    <p className="text-[9px] text-rose-600 mt-1">de {totalStores} tiendas</p>
+                  </div>
+                  <div className="bg-gradient-to-r from-slate-100 to-gray-100 rounded-xl p-3 border-2 border-slate-300">
+                    <p className="text-[10px] text-slate-700 font-bold mb-1">Promedio Zona</p>
+                    <p className="text-xl font-black text-slate-900">{formatCurrency(zoneAvg.sales)}</p>
+                    <p className={`text-[9px] font-bold mt-1 ${parseFloat(vsAvg.sales) >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                      {parseFloat(vsAvg.sales) >= 0 ? '↑' : '↓'} {parseFloat(vsAvg.sales) >= 0 ? '+' : ''}{vsAvg.sales}% vs zona
+                    </p>
+                  </div>
                 </div>
-                <p className="text-[10px] text-slate-500 mt-3 text-center">
-                  {isTop3 
-                    ? '🎉 ¡En el podio de la zona!' 
-                    : `A ${formatCurrency(top3[2].sales - currentStoreData.sales)} de entrar al Top 3`}
-                </p>
               </div>
             </motion.div>
 
