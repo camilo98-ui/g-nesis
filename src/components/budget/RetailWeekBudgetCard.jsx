@@ -264,31 +264,29 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
     });
     const todayActualSales = todaySales?.total_sales || 0;
 
-    // Calcular ventas realizadas hasta ayer SOLO en el período retail (29 anterior al 28 actual)
-    const salesUntilYesterday = dailySales.filter(s => {
+    // Calcular ventas realizadas hasta HOY en el período retail (29 anterior al 28 actual)
+    const salesUntilToday = dailySales.filter(s => {
       try {
         const saleDate = parseISO(s.date);
         // CRÍTICO: Solo incluir ventas dentro del mes retail (29 anterior a 28 actual)
-        return saleDate < now && saleDate >= monthStart && saleDate <= monthEnd;
+        return saleDate <= now && saleDate >= monthStart && saleDate <= monthEnd;
       } catch {
         return false;
       }
     }).reduce((sum, s) => sum + (s.total_sales || 0), 0);
 
-    // Presupuesto acumulado hasta ayer - suma de presupuestos ajustados
-    const yesterday = new Date(now);
-    yesterday.setDate(yesterday.getDate() - 1);
-    const daysUntilYesterday = eachDayOfInterval({ start: monthStart, end: yesterday });
-    const budgetUntilYesterday = daysUntilYesterday.reduce((sum, day) => sum + getDailyBudget(day), 0);
+    // Presupuesto acumulado hasta HOY - suma de presupuestos ajustados
+    const daysUntilToday = eachDayOfInterval({ start: monthStart, end: now });
+    const budgetUntilToday = daysUntilToday.reduce((sum, day) => sum + getDailyBudget(day), 0);
 
-    // Brecha acumulada
-    const accumulatedGap = budgetUntilYesterday - salesUntilYesterday;
+    // Brecha acumulada (cuánto falta recuperar del presupuesto acumulado)
+    const accumulatedGap = budgetUntilToday - salesUntilToday;
 
     // Días restantes del mes (incluyendo hoy)
     const remainingDays = eachDayOfInterval({ start: now, end: monthEnd }).length;
 
     // Presupuesto restante a alcanzar (meta del 105%)
-    const remainingBudget = adjustedMonthlyBudget - salesUntilYesterday - todayActualSales;
+    const remainingBudget = adjustedMonthlyBudget - salesUntilToday;
 
     // Presupuesto del día ajustado según patrón histórico
     let adjustedDailyBudget = getDailyBudget(now);
@@ -412,7 +410,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
     });
 
     // Calcular proyección de cierre mensual basada en el ritmo acumulado
-    const totalMonthSales = salesUntilYesterday + todayActualSales;
+    const totalMonthSales = salesUntilToday;
     
     // CRÍTICO: Días transcurridos en el mes RETAIL (desde el 29 del mes anterior)
     const daysElapsed = eachDayOfInterval({ start: monthStart, end: now }).length;
@@ -432,9 +430,9 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       accumulatedGap,
       remainingDays,
       remainingBudget,
-      salesUntilYesterday,
-      budgetUntilYesterday,
-      compliance: budgetUntilYesterday > 0 ? (salesUntilYesterday / budgetUntilYesterday * 100) : 0,
+      salesUntilToday,
+      budgetUntilToday,
+      compliance: budgetUntilToday > 0 ? (salesUntilToday / budgetUntilToday * 100) : 0,
       todayCompliance: adjustedDailyBudget > 0 ? (todayActualSales / adjustedDailyBudget * 100) : 0,
       currentWeekNumber,
       totalWeeks: weeks.length,
@@ -1654,7 +1652,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                         <div className="grid grid-cols-2 gap-2 mb-3">
                           <div className="bg-slate-50 rounded-lg p-2">
                             <p className="text-[10px] text-slate-600">Vendido</p>
-                            <p className="text-base font-bold text-slate-900">{formatCurrency(budgetData.salesUntilYesterday + budgetData.todayActualSales)}</p>
+                            <p className="text-base font-bold text-slate-900">{formatCurrency(budgetData.salesUntilToday)}</p>
                           </div>
                           <div className="bg-rose-50 rounded-lg p-2">
                             <p className="text-[10px] text-rose-600">Por Vender</p>
@@ -1663,7 +1661,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                         </div>
                         <ResponsiveContainer width="100%" height={120}>
                           <BarChart layout="vertical" data={[
-                            { name: 'Vendido', value: budgetData.salesUntilYesterday + budgetData.todayActualSales, fill: '#10b981' },
+                            { name: 'Vendido', value: budgetData.salesUntilToday, fill: '#10b981' },
                             { name: 'Por Vender', value: budgetData.remainingBudget, fill: '#fda4af' }
                           ]}>
                             <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
@@ -2116,15 +2114,15 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                           </div>
                           <div className="flex justify-between items-center p-2 bg-emerald-50 rounded-lg">
                             <span className="text-xs text-emerald-700">Vendido hasta hoy</span>
-                            <span className="font-bold text-emerald-900">{formatCurrency(budgetData.salesUntilYesterday + budgetData.todayActualSales)}</span>
+                            <span className="font-bold text-emerald-900">{formatCurrency(budgetData.salesUntilToday)}</span>
                           </div>
                           <div className="flex justify-between items-center p-2 bg-slate-50 rounded-lg">
                             <span className="text-xs text-slate-700">Presupuesto hasta hoy</span>
-                            <span className="font-bold text-slate-900">{formatCurrency(budgetData.budgetUntilYesterday + budgetData.adjustedDailyBudget)}</span>
+                            <span className="font-bold text-slate-900">{formatCurrency(budgetData.budgetUntilToday)}</span>
                           </div>
                           <div className="flex justify-between items-center p-2 bg-purple-50 rounded-lg">
                             <span className="text-xs text-purple-700">Ritmo diario promedio</span>
-                            <span className="font-bold text-purple-900">{formatCurrency((budgetData.salesUntilYesterday + budgetData.todayActualSales) / (new Date().getDate()))}</span>
+                            <span className="font-bold text-purple-900">{formatCurrency(budgetData.salesUntilToday / budgetData.daysElapsed)}</span>
                           </div>
                         </div>
                         <ResponsiveContainer width="100%" height={160}>
