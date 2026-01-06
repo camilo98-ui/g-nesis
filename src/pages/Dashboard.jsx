@@ -608,11 +608,26 @@ export default function Dashboard() {
   const filteredSales = useMemo(() => {
     if (!dailySales.length) return [];
 
-    const activeRange = weekFilter || dateRange;
-    if (!activeRange?.from || !activeRange?.to) return [];
+    const now = new Date();
+    const retailMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 29);
+    
+    // Determinar rango: si hay filtro usarlo, si no, mes retail completo
+    let fromDate, toDate;
+    
+    if (weekFilter?.from && weekFilter?.to) {
+      fromDate = weekFilter.from;
+      toDate = weekFilter.to;
+    } else if (dateRange?.from && dateRange?.to) {
+      fromDate = dateRange.from;
+      toDate = dateRange.to;
+    } else {
+      // Sin filtro: mes retail completo
+      fromDate = retailMonthStart;
+      toDate = now;
+    }
 
-    const fromStr = format(activeRange.from, 'yyyy-MM-dd');
-    const toStr = format(activeRange.to, 'yyyy-MM-dd');
+    const fromStr = format(fromDate, 'yyyy-MM-dd');
+    const toStr = format(toDate, 'yyyy-MM-dd');
 
     return dailySales.filter((s) => {
       const saleDateStr = s.date?.split('T')[0] || s.date;
