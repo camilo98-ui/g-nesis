@@ -551,11 +551,11 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
           onClick={() => setIsExpanded(!isExpanded)}
           className="w-full bg-pink-700 p-4 from-purple-500 to-pink-500 hover:bg-pink-800 transition-all">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3 flex-1">
               <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
                 <Package className="w-5 h-5 text-white" />
               </div>
-              <div className="text-left">
+              <div className="text-left flex-1">
                 <h3 className="text-lg font-black text-white">📦 Pronóstico de Pedido</h3>
                 <p className="text-xs text-white/80">
                   {storeCode ? `${storeCode} • ` : ''}
@@ -563,18 +563,18 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
                   Cobertura: {fullAnalysis.coverageDays} días
                 </p>
               </div>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsEditingFrequency(!isEditingFrequency);
+                }}
+                className="text-white hover:bg-white/20 h-8 w-8 p-0"
+              >
+                <Edit2 className="w-4 h-4" />
+              </Button>
             </div>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsEditingFrequency(!isEditingFrequency);
-              }}
-              className="text-white hover:bg-white/20"
-            >
-              <Edit2 className="w-4 h-4" />
-            </Button>
             <motion.div
               animate={{ rotate: isExpanded ? 180 : 0 }}
               transition={{ duration: 0.3 }}>
