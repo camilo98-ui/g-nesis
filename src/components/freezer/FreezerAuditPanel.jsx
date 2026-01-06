@@ -16,17 +16,21 @@ export default function FreezerAuditPanel({
   isLoading,
   allSlots = []
 }) {
+  const [selectedFreezer, setSelectedFreezer] = React.useState('total');
+  
   if (!auditData) return null;
 
+  const { byFreezer, total, suggestions } = auditData;
+  const currentData = selectedFreezer === 'total' ? total : byFreezer?.[selectedFreezer] || total;
+  
   const { 
     totalSlots, 
     filledSlots, 
     emptySlots, 
     misplacedSlots, 
     repeatedFlavors, 
-    suggestions,
     efficiency 
-  } = auditData;
+  } = currentData;
 
   const getEfficiencyColor = (eff) => {
     if (eff >= 80) return 'text-green-600 bg-green-100';
@@ -39,16 +43,45 @@ export default function FreezerAuditPanel({
       initial={{ opacity: 0, x: 300 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 300 }}
-      className="fixed right-0 top-24 bottom-0 w-80 bg-white shadow-2xl border-l border-gray-200 z-40 overflow-y-auto"
+      className="fixed right-0 top-24 bottom-0 w-96 bg-white shadow-2xl border-l border-gray-200 z-40 overflow-y-auto"
     >
-      <div className="p-4 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white">
-        <div className="flex items-center gap-2">
-          <BarChart3 className="w-5 h-5 text-pink-600" />
-          <h3 className="font-bold text-gray-800">Auditoría</h3>
+      <div className="p-4 border-b border-gray-100 sticky top-0 bg-white z-10">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <BarChart3 className="w-5 h-5 text-pink-600" />
+            <h3 className="font-bold text-gray-800">Auditoría de Neveras</h3>
+          </div>
+          <Button variant="ghost" size="icon" onClick={onClose}>
+            <X className="w-4 h-4" />
+          </Button>
         </div>
-        <Button variant="ghost" size="icon" onClick={onClose}>
-          <X className="w-4 h-4" />
-        </Button>
+        
+        {/* Selector de Nevera */}
+        <div className="flex gap-2 flex-wrap">
+          <button
+            onClick={() => setSelectedFreezer('total')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              selectedFreezer === 'total'
+                ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            📊 Total
+          </button>
+          {byFreezer && Object.keys(byFreezer).sort((a, b) => a - b).map(freezerNum => (
+            <button
+              key={freezerNum}
+              onClick={() => setSelectedFreezer(freezerNum)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                selectedFreezer === freezerNum
+                  ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              🧊 N#{freezerNum}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="p-4 space-y-4">
