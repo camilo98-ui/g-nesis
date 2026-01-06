@@ -240,7 +240,7 @@ export default function ZonePerformanceComparison({ storeId, formatCurrency, cur
               <p className="text-xs font-bold mb-2 flex items-center gap-2">
                 {currentPosition <= 3 ? '🎯' : currentPosition <= totalStores / 2 ? '⚠️' : '🚨'}
                 <span className={currentPosition <= 3 ? 'text-emerald-900' : currentPosition <= totalStores / 2 ? 'text-amber-900' : 'text-red-900'}>
-                  {currentMetric.label} vs Zona
+                  {currentMetric.label} vs Zona - Análisis Detallado
                 </span>
               </p>
               <p className={`text-sm leading-relaxed ${
@@ -248,10 +248,40 @@ export default function ZonePerformanceComparison({ storeId, formatCurrency, cur
                 currentPosition <= totalStores / 2 ? 'text-amber-800' : 
                 'text-red-800'
               }`}>
-                Posición #{currentPosition} de {totalStores} en {currentMetric.label.toLowerCase()}. 
-                {currentPosition <= 3 ? ` ¡Excelente! Estás en el Top 3 con ${currentMetric.format(currentMetric.getValue(currentStoreData))}. Mantén este nivel de desempeño.` :
-                currentPosition <= totalStores / 2 ? ` Rendimiento medio-alto. Necesitas ${currentMetric.format(currentMetric.getValue(rankedStores[2]) - currentMetric.getValue(currentStoreData))} más para el Top 3.` :
-                ` Requiere mejora urgente. Estás ${currentMetric.format(Math.abs(currentMetric.getValue(currentStoreData) - currentMetric.getValue({ sales: zoneAvg.sales, avgTicket: zoneAvg.avgTicket, transactions: zoneAvg.transactions, suggested: zoneAvg.suggested })))} ${currentMetric.getValue(currentStoreData) >= currentMetric.getValue({ sales: zoneAvg.sales, avgTicket: zoneAvg.avgTicket, transactions: zoneAvg.transactions, suggested: zoneAvg.suggested }) ? 'sobre' : 'bajo'} el promedio.`}
+                {(() => {
+                  const currentValue = currentMetric.getValue(currentStoreData);
+                  const firstPlaceValue = currentMetric.getValue(rankedStores[0]);
+                  const secondPlaceValue = rankedStores[1] ? currentMetric.getValue(rankedStores[1]) : 0;
+                  const thirdPlaceValue = rankedStores[2] ? currentMetric.getValue(rankedStores[2]) : 0;
+                  const gap = firstPlaceValue - currentValue;
+                  const gapPercent = ((gap / firstPlaceValue) * 100).toFixed(1);
+                  const avgZone = { sales: zoneAvg.sales, avgTicket: zoneAvg.avgTicket, transactions: zoneAvg.transactions, suggested: zoneAvg.suggested };
+                  const avgValue = currentMetric.getValue(avgZone);
+                  const vsAvgValue = parseFloat(vsAvg[currentMetric.id === 'ticket' ? 'avgTicket' : currentMetric.id]);
+                  
+                  if (currentPosition === 1) {
+                    const advantage = currentValue - secondPlaceValue;
+                    const advantagePercent = ((advantage / currentValue) * 100).toFixed(1);
+                    return `🏆 ¡PRIMER LUGAR! Eres el líder de la zona con ${currentMetric.format(currentValue)}. Tienes una ventaja de ${currentMetric.format(advantage)} (${advantagePercent}%) sobre el segundo lugar (${rankedStores[1]?.storeName}: ${currentMetric.format(secondPlaceValue)}). Estás ${vsAvgValue >= 0 ? '+' : ''}${vsAvgValue}% ${vsAvgValue >= 0 ? 'sobre' : 'bajo'} el promedio zonal de ${currentMetric.format(avgValue)}. ESTRATEGIA: Mantén este liderazgo enfocándote en la consistencia diaria y protegiendo tu ventaja competitiva.`;
+                  } else if (currentPosition === 2) {
+                    const gapToFirst = firstPlaceValue - currentValue;
+                    const gapPercent = ((gapToFirst / currentValue) * 100).toFixed(1);
+                    return `🥈 SEGUNDO LUGAR con ${currentMetric.format(currentValue)}. El líder (${rankedStores[0]?.storeName}) tiene ${currentMetric.format(firstPlaceValue)}. NECESITAS GENERAR ${currentMetric.format(gapToFirst)} ADICIONALES (${gapPercent}% más) para alcanzar el primer lugar. Estás ${vsAvgValue >= 0 ? '+' : ''}${vsAvgValue}% ${vsAvgValue >= 0 ? 'sobre' : 'bajo'} el promedio de ${currentMetric.format(avgValue)}. ACCIÓN INMEDIATA: Si mantienes tu ritmo actual y aumentas ${gapPercent}% tu desempeño diario, alcanzarás el #1 en días. Analiza qué hace diferente el líder.`;
+                  } else if (currentPosition === 3) {
+                    const gapToFirst = firstPlaceValue - currentValue;
+                    const gapToSecond = secondPlaceValue - currentValue;
+                    return `🥉 TERCER LUGAR con ${currentMetric.format(currentValue)}. Estás en el podio pero NECESITAS ${currentMetric.format(gapToFirst)} ADICIONALES para el #1 (${rankedStores[0]?.storeName}: ${currentMetric.format(firstPlaceValue)}) y ${currentMetric.format(gapToSecond)} para el #2 (${rankedStores[1]?.storeName}: ${currentMetric.format(secondPlaceValue)}). Promedio zonal: ${currentMetric.format(avgValue)} (tú: ${vsAvgValue >= 0 ? '+' : ''}${vsAvgValue}%). PLAN: Incrementa ${((gapToFirst / currentValue) * 100).toFixed(1)}% tu ${currentMetric.label.toLowerCase()} para alcanzar el liderazgo.`;
+                  } else if (currentPosition <= totalStores / 2) {
+                    const gapToThird = thirdPlaceValue - currentValue;
+                    const gapToFirst = firstPlaceValue - currentValue;
+                    return `⚠️ POSICIÓN ${currentPosition} de ${totalStores}. Tu ${currentMetric.label.toLowerCase()}: ${currentMetric.format(currentValue)}. NECESITAS ${currentMetric.format(gapToFirst)} MÁS para el #1 (${rankedStores[0]?.storeName}: ${currentMetric.format(firstPlaceValue)}). Para entrar al Top 3 necesitas ${currentMetric.format(gapToThird)} adicionales (${((gapToThird / currentValue) * 100).toFixed(1)}% de incremento). Promedio zonal: ${currentMetric.format(avgValue)} - Estás ${vsAvgValue >= 0 ? '+' : ''}${Math.abs(vsAvgValue)}% ${vsAvgValue >= 0 ? 'arriba' : 'abajo'}. META REALISTA: Aumenta ${((gapToThird / currentValue) * 100 / 7).toFixed(1)}% diario durante 7 días para alcanzar el Top 3.`;
+                  } else {
+                    const gapToAvg = avgValue - currentValue;
+                    const gapToFirst = firstPlaceValue - currentValue;
+                    const gapToThird = thirdPlaceValue - currentValue;
+                    return `🚨 POSICIÓN ${currentPosition} de ${totalStores} - REQUIERE ACCIÓN URGENTE. Tu ${currentMetric.label.toLowerCase()}: ${currentMetric.format(currentValue)}. El líder tiene ${currentMetric.format(firstPlaceValue)} - NECESITAS ${currentMetric.format(gapToFirst)} ADICIONALES (${((gapToFirst / currentValue) * 100).toFixed(1)}% de incremento) para el #1. Estás ${currentMetric.format(Math.abs(gapToAvg))} ${gapToAvg >= 0 ? 'BAJO' : 'sobre'} el promedio zonal de ${currentMetric.format(avgValue)} (${vsAvgValue}%). PLAN DE RECUPERACIÓN: 1) Alcanza el promedio generando ${currentMetric.format(Math.abs(gapToAvg))} más. 2) Luego necesitas ${currentMetric.format(gapToThird - Math.abs(gapToAvg))} adicionales para el Top 3. META: Incrementa ${((Math.abs(gapToAvg) / currentValue) * 100 / 3).toFixed(1)}% diario los próximos 3 días para salir de la zona crítica.`;
+                  }
+                })()}
               </p>
             </div>
 
