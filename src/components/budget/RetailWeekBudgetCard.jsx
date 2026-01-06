@@ -200,8 +200,35 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       totalWeeklyAvg > 0 ? avg / totalWeeklyAvg : 1/7
     );
 
-    // Calcular presupuesto base usando el 105% del presupuesto mensual para cumplir meta alcanzable
-    const TARGET_PERCENTAGE = 1.05; // 105% del presupuesto
+    // Calcular proyección inicial de cumplimiento mensual para determinar TARGET_PERCENTAGE dinámico
+    const now = new Date();
+    const daysElapsedForEval = eachDayOfInterval({ start: monthStart, end: now }).length;
+    const totalMonthSalesForEval = dailySales.filter(s => {
+      try {
+        const saleDate = parseISO(s.date);
+        return saleDate >= monthStart && saleDate <= now;
+      } catch {
+        return false;
+      }
+    }).reduce((sum, s) => sum + (s.total_sales || 0), 0);
+    
+    const avgDailySalesForEval = daysElapsedForEval > 0 ? totalMonthSalesForEval / daysElapsedForEval : 0;
+    const totalDaysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd }).length;
+    const monthProjectionForEval = avgDailySalesForEval * totalDaysInMonth;
+    const initialProjectionCompliance = activeBudget.sales_budget > 0 ? (monthProjectionForEval / activeBudget.sales_budget * 100) : 0;
+
+    // Determinar TARGET_PERCENTAGE dinámicamente según rendimiento
+    let TARGET_PERCENTAGE;
+    if (initialProjectionCompliance >= 110) {
+      TARGET_PERCENTAGE = 1.10; // 110% - Tienda excelente, meta ambiciosa
+    } else if (initialProjectionCompliance >= 100) {
+      TARGET_PERCENTAGE = 1.05; // 105% - Tienda en meta, mantener estándar
+    } else if (initialProjectionCompliance >= 90) {
+      TARGET_PERCENTAGE = 1.02; // 102% - Tienda cerca, meta alcanzable
+    } else {
+      TARGET_PERCENTAGE = 1.00; // 100% - Tienda necesita recuperar, meta realista
+    }
+
     const adjustedMonthlyBudget = activeBudget.sales_budget * TARGET_PERCENTAGE;
     const dailyBaseBudget = adjustedMonthlyBudget / daysInMonth;
 
