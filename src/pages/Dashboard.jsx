@@ -705,7 +705,14 @@ export default function Dashboard() {
   }, [comparisonSales, showComparison]);
 
   const chartData = useMemo(() => {
-    const activeRange = weekFilter || dateRange;
+    // Si hay weekFilter, usar ese rango específico
+    // Si NO hay weekFilter, usar TODO EL MES RETAIL
+    const activeRange = weekFilter || (() => {
+      const now = new Date();
+      const retailMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 29);
+      return { from: retailMonthStart, to: now };
+    })();
+    
     if (!activeRange?.from || !activeRange?.to) return [];
 
     // Generar días de ambos períodos para comparación
