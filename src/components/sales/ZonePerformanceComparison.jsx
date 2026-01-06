@@ -171,26 +171,6 @@ export default function ZonePerformanceComparison({ storeId, formatCurrency, cur
   const { currentStoreData, position, totalStores, top3, zoneAvg, vsAvg, radarData, allStores } = analysisData;
   const isTop3 = position <= 3;
 
-  // Métricas disponibles
-  const metrics = React.useMemo(() => [
-    { id: 'sales', label: 'Ventas', icon: DollarSign, getValue: (s) => s.sales, format: formatCurrency },
-    { id: 'ticket', label: 'Ticket', icon: Receipt, getValue: (s) => s.avgTicket, format: formatCurrency },
-    { id: 'transactions', label: 'Tráfico', icon: Zap, getValue: (s) => s.transactions, format: (v) => v.toLocaleString() },
-    { id: 'suggested', label: 'Sugeridos', icon: Gift, getValue: (s) => s.suggested, format: (v) => v.toLocaleString() }
-  ], [formatCurrency]);
-
-  // Datos ordenados según métrica seleccionada
-  const rankedStores = useMemo(() => {
-    if (!selectedMetric || !allStores) return allStores || [];
-    const metric = metrics.find(m => m.id === selectedMetric);
-    if (!metric) return allStores;
-    return [...allStores].sort((a, b) => metric.getValue(b) - metric.getValue(a));
-  }, [allStores, selectedMetric, metrics]);
-
-  // Posición en la métrica seleccionada
-  const currentPosition = rankedStores.findIndex(s => s.storeCode === storeId) + 1;
-  const currentMetric = metrics.find(m => m.id === selectedMetric);
-
   return (
     <div className="bg-white/80 backdrop-blur-sm rounded-2xl border-2 border-rose-200/50 shadow-xl overflow-hidden">
       {/* Header Compacto */}
