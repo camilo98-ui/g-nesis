@@ -701,14 +701,24 @@ export default function Dashboard() {
     const now = new Date();
     const retailMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 29);
     
-    // Si hay filtro aplicado (weekFilter o dateRange manual), usar ese rango
-    // Si no hay filtro, mostrar mes retail completo
-    const activeRange = weekFilter || (dateRange && !isSameDay(dateRange.from, retailMonthStart) ? dateRange : null);
+    // Determinar rango a mostrar: si hay weekFilter o dateRange se usa, si no, mes retail completo
+    let startDate, endDate;
     
-    const startDate = activeRange?.from || retailMonthStart;
-    const endDate = activeRange?.to || now;
+    if (weekFilter?.from && weekFilter?.to) {
+      // Filtro de semana aplicado
+      startDate = weekFilter.from;
+      endDate = weekFilter.to;
+    } else if (dateRange?.from && dateRange?.to) {
+      // Filtro de fecha aplicado
+      startDate = dateRange.from;
+      endDate = dateRange.to;
+    } else {
+      // Sin filtro: mostrar mes retail completo
+      startDate = retailMonthStart;
+      endDate = now;
+    }
     
-    // Generar días del rango (filtrado o mes completo)
+    // Generar días del rango
     const currentDays = eachDayOfInterval({ start: startDate, end: endDate });
     const maxDays = currentDays.length;
 
