@@ -1749,13 +1749,8 @@ export default function Dashboard() {
             }
             </AnimatePresence>
 
-
-
-
-          }
-
-            {/* Resumen Ejecutivo */}
-            <motion.div
+          {/* Resumen Ejecutivo - Acumulado del Mes Retail */}
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="bg-gradient-to-r from-pink-500 to-rose-500 rounded-2xl shadow-xl p-6 text-white">
