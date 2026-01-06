@@ -1,12 +1,13 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Package, TrendingUp, AlertCircle, CheckCircle, Calendar, Zap, BarChart3, Sparkles, ShoppingCart, Brain, ArrowDownCircle, ArrowUpCircle } from 'lucide-react';
+import { Package, TrendingUp, AlertCircle, CheckCircle, Calendar, Zap, BarChart3, Sparkles, ShoppingCart, Brain, ArrowDownCircle, ArrowUpCircle, Edit2, Save } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { parseISO, differenceInDays, subDays } from 'date-fns';
+import { toast } from 'sonner';
 
 const GOURMET_FLAVORS = ['Limón N.', 'Maracuyá N.', 'Mandarina N.', 'Vainilla', 'V. Francesa', 'V. Chips', 'Chocolate', 'Belga', 'Frutos', 'Fresa', 'Arequipe', 'Ron'];
 const EXCLUSIVO_FLAVORS = ['Cherry', 'Arroz', 'Chicle', 'Brownie', 'Crema Limón', 'M&M', 'Milky', 'Oreo', 'Macadamia', 'Café', 'Yogurt C.'];
@@ -37,6 +38,8 @@ const STORE_ORDER_CONFIG = {
 export default function SmartOrderPrediction({ allFreezersSlots = [], currentFreezer, storeCode, storeId }) {
   const [activeTab, setActiveTab] = useState('semanal'); // semanal o adicional
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isEditingFrequency, setIsEditingFrequency] = useState(false);
+  const [editedConfig, setEditedConfig] = useState(null);
 
   // Obtener historial de neveras para análisis de rotación
   const { data: freezerHistory = [] } = useQuery({
@@ -47,8 +50,24 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
 
   // Obtener configuración de la tienda
   const storeConfig = useMemo(() => {
+    // Intentar cargar desde localStorage primero
+    const savedConfig = localStorage.getItem(`orderConfig_${storeCode}`);
+    if (savedConfig) {
+      try {
+        return JSON.parse(savedConfig);
+      } catch (e) {
+        console.error('Error cargando configuración guardada:', e);
+      }
+    }
     return STORE_ORDER_CONFIG[storeCode] || { semanal: 'VIE', adicional1: 'JUE', entregaSemanal: 'MAR', entregaAdicional1: 'SAB' };
   }, [storeCode]);
+  
+  // Inicializar editedConfig cuando cambia storeConfig
+  useEffect(() => {
+    if (storeConfig && !editedConfig) {
+      setEditedConfig(storeConfig);
+    }
+  }, [storeConfig]);
 
   // ANÁLISIS DE ROTACIÓN HISTÓRICA
   const rotationAnalysis = useMemo(() => {
@@ -545,6 +564,17 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
                 </p>
               </div>
             </div>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsEditingFrequency(!isEditingFrequency);
+              }}
+              className="text-white hover:bg-white/20"
+            >
+              <Edit2 className="w-4 h-4" />
+            </Button>
             <motion.div
               animate={{ rotate: isExpanded ? 180 : 0 }}
               transition={{ duration: 0.3 }}>
@@ -563,6 +593,104 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.3 }}>
               <div className="bg-pink-700 px-4 pb-4">
+                {/* Editor de Frecuencias */}
+                {isEditingFrequency && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="bg-white/10 rounded-xl p-4 mb-3"
+                  >
+                    <p className="text-white font-bold text-sm mb-3">⚙️ Configurar Frecuencia de Pedidos</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-white/80 text-xs font-medium block mb-1">Montar Semanal</label>
+                        <select
+                          value={editedConfig?.semanal || 'VIE'}
+                          onChange={(e) => setEditedConfig({...editedConfig, semanal: e.target.value})}
+                          className="w-full px-2 py-1 rounded text-sm bg-white/90"
+                        >
+                          <option value="LUN">Lunes</option>
+                          <option value="MAR">Martes</option>
+                          <option value="MIE">Miércoles</option>
+                          <option value="JUE">Jueves</option>
+                          <option value="VIE">Viernes</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-white/80 text-xs font-medium block mb-1">Llega Semanal</label>
+                        <select
+                          value={editedConfig?.entregaSemanal || 'MAR'}
+                          onChange={(e) => setEditedConfig({...editedConfig, entregaSemanal: e.target.value})}
+                          className="w-full px-2 py-1 rounded text-sm bg-white/90"
+                        >
+                          <option value="LUN">Lunes</option>
+                          <option value="MAR">Martes</option>
+                          <option value="MIE">Miércoles</option>
+                          <option value="JUE">Jueves</option>
+                          <option value="VIE">Viernes</option>
+                          <option value="SAB">Sábado</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-white/80 text-xs font-medium block mb-1">Montar Adicional</label>
+                        <select
+                          value={editedConfig?.adicional1 || 'JUE'}
+                          onChange={(e) => setEditedConfig({...editedConfig, adicional1: e.target.value})}
+                          className="w-full px-2 py-1 rounded text-sm bg-white/90"
+                        >
+                          <option value="LUN">Lunes</option>
+                          <option value="MAR">Martes</option>
+                          <option value="MIE">Miércoles</option>
+                          <option value="JUE">Jueves</option>
+                          <option value="VIE">Viernes</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-white/80 text-xs font-medium block mb-1">Llega Adicional</label>
+                        <select
+                          value={editedConfig?.entregaAdicional1 || 'SAB'}
+                          onChange={(e) => setEditedConfig({...editedConfig, entregaAdicional1: e.target.value})}
+                          className="w-full px-2 py-1 rounded text-sm bg-white/90"
+                        >
+                          <option value="LUN">Lunes</option>
+                          <option value="MAR">Martes</option>
+                          <option value="MIE">Miércoles</option>
+                          <option value="JUE">Jueves</option>
+                          <option value="VIE">Viernes</option>
+                          <option value="SAB">Sábado</option>
+                          <option value="DOM">Domingo</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div className="flex gap-2 mt-3">
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          localStorage.setItem(`orderConfig_${storeCode}`, JSON.stringify(editedConfig));
+                          toast.success('✓ Frecuencia guardada');
+                          setIsEditingFrequency(false);
+                        }}
+                        className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white"
+                      >
+                        <Save className="w-3 h-3 mr-1" />
+                        Guardar
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setEditedConfig(storeConfig);
+                          setIsEditingFrequency(false);
+                        }}
+                        className="bg-white/90"
+                      >
+                        Cancelar
+                      </Button>
+                    </div>
+                  </motion.div>
+                )}
+                
                 {/* Tabs */}
                 <div className="flex gap-2">
             <button
