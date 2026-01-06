@@ -447,6 +447,8 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       weeklyData,
       currentWeekStart,
       currentWeekEnd,
+      displayWeekStart,
+      displayWeekEnd,
       // Proyección mensual
       totalMonthSales,
       daysElapsed,
@@ -1116,7 +1118,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                   <div className="flex items-center gap-1.5 md:gap-2 min-w-0">
                     <Calendar className="w-4 h-4 md:w-5 md:h-5 text-purple-400/70 flex-shrink-0" />
                     <h4 className="text-xs md:text-sm font-bold text-purple-700/80 truncate">
-                      Semana Actual ({format(budgetData.currentWeekStart, 'dd MMM', { locale: es })} - {format(budgetData.currentWeekEnd, 'dd MMM', { locale: es })})
+                      Semana Seleccionada ({format(budgetData.displayWeekStart, 'dd MMM', { locale: es })} - {format(budgetData.displayWeekEnd, 'dd MMM', { locale: es })})
                     </h4>
                   </div>
                   <div className={`px-2 md:px-3 py-0.5 md:py-1 rounded-full text-[10px] md:text-xs font-bold flex-shrink-0 self-start md:self-auto ${
