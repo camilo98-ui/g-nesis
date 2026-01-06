@@ -698,13 +698,11 @@ export default function Dashboard() {
   }, [comparisonSales, showComparison]);
 
   const chartData = useMemo(() => {
-    // SIEMPRE mostrar el mes retail completo (desde semana 1)
-    const now = new Date();
-    const retailMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 29);
-    const retailMonthEnd = now; // Hasta hoy
-    
-    // Generar días del mes retail para las gráficas
-    const currentDays = eachDayOfInterval({ start: retailMonthStart, end: retailMonthEnd });
+    const activeRange = weekFilter || dateRange;
+    if (!activeRange?.from || !activeRange?.to) return [];
+
+    // Generar días del rango seleccionado
+    const currentDays = eachDayOfInterval({ start: activeRange.from, end: activeRange.to });
     const maxDays = currentDays.length;
 
     const dataWithSales = currentDays.map((day, idx) => {
@@ -879,12 +877,12 @@ export default function Dashboard() {
   comparisonTotals.sales / comparisonTotals.transactions :
   0;
 
-  // Métricas usando ACUMULADO DEL MES (siempre muestran el total del mes, no el filtro)
+  // Métricas usando RANGO FILTRADO (respeta selección de semana/fecha)
   const metrics = [
   {
     id: 'sales',
     title: 'Ventas Totales',
-    value: monthTotals.sales,
+    value: filteredTotals.sales,
     comparisonValue: comparisonTotals?.sales,
     budget: currentBudget.sales_budget,
     icon: DollarSign,
@@ -896,7 +894,7 @@ export default function Dashboard() {
   {
     id: 'tickets',
     title: 'Ticket Promedio',
-    value: monthAvgTicket,
+    value: filteredAvgTicket,
     comparisonValue: comparisonAvgTicket,
     budget: currentBudget.tickets_budget,
     icon: Receipt,
@@ -908,7 +906,7 @@ export default function Dashboard() {
   {
     id: 'transactions',
     title: 'Transacciones',
-    value: monthTotals.transactions,
+    value: filteredTotals.transactions,
     comparisonValue: comparisonTotals?.transactions,
     budget: currentBudget.transactions_budget,
     icon: Zap,
@@ -919,7 +917,7 @@ export default function Dashboard() {
   {
     id: 'suggested',
     title: 'Sugeridos',
-    value: monthTotals.suggested,
+    value: filteredTotals.suggested,
     comparisonValue: comparisonTotals?.suggested,
     budget: currentBudget.suggested_budget,
     icon: Gift,
