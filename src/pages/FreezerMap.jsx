@@ -1445,10 +1445,33 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
             <div className="mt-4 p-3 bg-white/80 rounded-xl shadow-sm space-y-3">
               {/* Add flavor */}
               <div className="p-2 rounded-lg border border-pink-200 bg-pink-50/50">
-                <button onClick={() => setShowAddFlavor(!showAddFlavor)} className="flex items-center gap-2 text-sm font-medium text-pink-700 w-full">
-                  <Plus className="w-4 h-4" />
-                  Crear Nuevo Sabor
-                </button>
+                <div className="flex items-center justify-between mb-2">
+                  <button onClick={() => setShowAddFlavor(!showAddFlavor)} className="flex items-center gap-2 text-sm font-medium text-pink-700">
+                    <Plus className="w-4 h-4" />
+                    Crear Nuevo Sabor
+                  </button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      // Restaurar sabores predefinidos
+                      const defaultFlavors = POPSY_FLAVORS.map(f => ({
+                        name: f.name,
+                        color: f.color,
+                        type: f.type,
+                        line: f.line,
+                        dark: f.dark
+                      }));
+                      localStorage.setItem('customFlavors', JSON.stringify(defaultFlavors));
+                      setCustomFlavors(defaultFlavors);
+                      toast.success('✓ Sabores regenerados');
+                    }}
+                    className="h-7 text-xs text-purple-600 hover:bg-purple-50"
+                  >
+                    <RotateCcw className="w-3 h-3 mr-1" />
+                    Regenerar
+                  </Button>
+                </div>
                 <AnimatePresence>
                   {showAddFlavor &&
                 <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="mt-2 space-y-2">
