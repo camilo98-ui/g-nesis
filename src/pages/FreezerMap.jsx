@@ -766,56 +766,132 @@ export default function FreezerMap() {
     setDraggedSlot(null);
   };
 
-  // Auditoría
+  // Auditoría - ANÁLISIS POR NEVERA Y ACUMULADO
   const runAudit = useCallback(() => {
-    const filledSlots = slots.filter((s) => !s.is_empty && s.flavor_name);
-    // Contar vacíos reales: numRows filas x numCols posiciones x 2 slots (F y T)
-    const totalSlotsInFreezer = numRows * numCols * 2;
-    const emptySlots = totalSlotsInFreezer - filledSlots.length;
+    // Análisis por nevera individual
+    const freezerAnalysis = {};
+    
+    availableFreezers.forEach(freezerNum => {
+      const freezerSlots = allFreezersSlots.filter(s => 
+        s.store_id === `${selectedStore}_F${freezerNum}`
+      );
+      
+      const filledSlots = freezerSlots.filter(s => !s.is_empty && s.flavor_name);
+      const dimensions = freezerDimensions[freezerNum] || { rows: 7, cols: 5 };
+      const totalSlotsInFreezer = dimensions.rows * dimensions.cols * 2;
+      const emptySlots = totalSlotsInFreezer - filledSlots.length;
 
-    // Detectar repetidos con más precisión
-    const flavorCounts = {};
-    const flavorDetails = {};
-    filledSlots.forEach((s) => {
-      const key = s.flavor_name.toLowerCase().trim();
-      flavorCounts[key] = (flavorCounts[key] || 0) + 1;
-      if (!flavorDetails[key]) {
-        flavorDetails[key] = { name: s.flavor_name, positions: [] };
-      }
-      flavorDetails[key].positions.push(`${s.row}-${s.position}${s.slot_type || 'F'}`);
+      // Detectar repetidos
+      const flavorCounts = {};
+      const flavorDetails = {};
+      filledSlots.forEach((s) => {
+        const key = s.flavor_name.toLowerCase().trim();
+        flavorCounts[key] = (flavorCounts[key] || 0) + 1;
+        if (!flavorDetails[key]) {
+          flavorDetails[key] = { name: s.flavor_name, positions: [] };
+        }
+        flavorDetails[key].positions.push(`${s.row}-${s.position}${s.slot_type || 'F'}`);
+      });
+      const repeatedFlavors = Object.entries(flavorCounts)
+        .filter(([_, count]) => count > 2)
+        .map(([key, count]) => ({
+          name: flavorDetails[key].name,
+          count,
+          positions: flavorDetails[key].positions.join(', ')
+        }));
+
+      // Detectar mal ubicados
+      const misplacedSlots = filledSlots.filter((s) => {
+        const idealTypes = IDEAL_RULES[s.row] || ['gourmet', 'exclusivo'];
+        return !idealTypes.includes(s.flavor_type);
+      }).map((s) => ({
+        ...s,
+        reason: `Debería estar en fila ${s.flavor_type === 'gourmet' ? 1 : 2}`
+      }));
+
+      const efficiency = Math.round(
+        filledSlots.length / totalSlotsInFreezer * 100 - 
+        misplacedSlots.length * 2 - 
+        repeatedFlavors.length * 3
+      );
+
+      freezerAnalysis[freezerNum] = {
+        freezerNum,
+        totalSlots: totalSlotsInFreezer,
+        filledSlots: filledSlots.length,
+        emptySlots,
+        repeatedFlavors,
+        misplacedSlots,
+        efficiency: Math.max(0, Math.min(100, efficiency))
+      };
     });
-    const repeatedFlavors = Object.entries(flavorCounts).
-    filter(([_, count]) => count > 2).
-    map(([key, count]) => ({
-      name: flavorDetails[key].name,
-      count,
-      positions: flavorDetails[key].positions.join(', ')
-    }));
 
-    // Detectar mal ubicados
-    const misplacedSlots = filledSlots.filter((s) => {
+    // ACUMULADO TOTAL
+    const allFilled = allFreezersSlots.filter(s => !s.is_empty && s.flavor_name);
+    const totalCapacity = Object.values(freezerDimensions).reduce((sum, dim) => 
+      sum + (dim.rows * dim.cols * 2), 0
+    );
+    const totalEmpty = totalCapacity - allFilled.length;
+
+    // Repetidos totales
+    const totalFlavorCounts = {};
+    const totalFlavorDetails = {};
+    allFilled.forEach((s) => {
+      const key = s.flavor_name.toLowerCase().trim();
+      totalFlavorCounts[key] = (totalFlavorCounts[key] || 0) + 1;
+      if (!totalFlavorDetails[key]) {
+        totalFlavorDetails[key] = { name: s.flavor_name, positions: [] };
+      }
+      const freezerNum = s.store_id?.split('_F')[1] || '1';
+      totalFlavorDetails[key].positions.push(`N${freezerNum}:${s.row}-${s.position}${s.slot_type || 'F'}`);
+    });
+    const totalRepeated = Object.entries(totalFlavorCounts)
+      .filter(([_, count]) => count > 2)
+      .map(([key, count]) => ({
+        name: totalFlavorDetails[key].name,
+        count,
+        positions: totalFlavorDetails[key].positions.join(', ')
+      }));
+
+    // Mal ubicados totales
+    const totalMisplaced = allFilled.filter((s) => {
       const idealTypes = IDEAL_RULES[s.row] || ['gourmet', 'exclusivo'];
       return !idealTypes.includes(s.flavor_type);
-    }).map((s) => ({
-      ...s,
-      reason: `Debería estar en fila ${s.flavor_type === 'gourmet' ? 1 : 2}`
-    }));
+    }).map((s) => {
+      const freezerNum = s.store_id?.split('_F')[1] || '1';
+      return {
+        ...s,
+        freezerNum,
+        reason: `Debería estar en fila ${s.flavor_type === 'gourmet' ? 1 : 2}`
+      };
+    });
 
-    // Sugerencias
+    const totalEfficiency = Math.round(
+      allFilled.length / totalCapacity * 100 - 
+      totalMisplaced.length * 2 - 
+      totalRepeated.length * 3
+    );
+
+    // Sugerencias generales
     const suggestions = [];
-    if (emptySlots > 10) suggestions.push(`Hay ${emptySlots} espacios vacíos. Considera llenar la nevera.`);
-    if (repeatedFlavors.length > 0) suggestions.push(`Reduce sabores repetidos: ${repeatedFlavors.map((f) => f.name).join(', ')}`);
-    if (misplacedSlots.length > 0) suggestions.push(`Reorganiza ${misplacedSlots.length} sabores mal ubicados según las reglas de exhibición.`);
-
-    const efficiency = Math.round(filledSlots.length / totalSlotsInFreezer * 100 - misplacedSlots.length * 2 - repeatedFlavors.length * 3);
+    if (totalEmpty > 15) suggestions.push(`Hay ${totalEmpty} espacios vacíos en todas las neveras. Considera llenarlas.`);
+    if (totalRepeated.length > 0) suggestions.push(`Reduce sabores repetidos: ${totalRepeated.map((f) => f.name).join(', ')}`);
+    if (totalMisplaced.length > 0) suggestions.push(`Reorganiza ${totalMisplaced.length} sabores mal ubicados según las reglas de exhibición.`);
 
     setAuditData({
-      totalSlots: totalSlotsInFreezer, filledSlots: filledSlots.length, emptySlots,
-      misplacedSlots, repeatedFlavors, suggestions,
-      efficiency: Math.max(0, Math.min(100, efficiency))
+      byFreezer: freezerAnalysis,
+      total: {
+        totalSlots: totalCapacity,
+        filledSlots: allFilled.length,
+        emptySlots: totalEmpty,
+        repeatedFlavors: totalRepeated,
+        misplacedSlots: totalMisplaced,
+        efficiency: Math.max(0, Math.min(100, totalEfficiency))
+      },
+      suggestions
     });
     setShowAudit(true);
-  }, [slots, numRows, numCols]);
+  }, [allFreezersSlots, selectedStore, availableFreezers, freezerDimensions]);
 
   // Optimizar con IA
   const optimizeWithAI = async () => {
