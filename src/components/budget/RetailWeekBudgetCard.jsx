@@ -322,26 +322,26 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       return isWithinInterval(currentWeekStart, { start: w, end: weekEnd });
     }) + 1;
 
-    // Ventas de la semana SELECCIONADA o del rango filtrado (usa displayWeekStart/displayWeekEnd)
+    // Ventas de la semana ACTUAL (siempre la semana real, no filtrada)
     const currentWeekSales = dailySales.filter(s => {
       try {
         const saleDate = parseISO(s.date);
-        return isWithinInterval(saleDate, { start: displayWeekStart, end: displayWeekEnd });
+        return isWithinInterval(saleDate, { start: currentWeekStart, end: currentWeekEnd });
       } catch {
         return false;
       }
     }).reduce((sum, s) => sum + (s.total_sales || 0), 0);
 
-    // Presupuesto de la semana SELECCIONADA o del rango filtrado - TODA la semana retail (7 días completos)
-    const weeklyBudget = fullDisplayWeekDays.reduce((sum, day) => sum + getDailyBudget(day), 0);
+    // Presupuesto de la semana ACTUAL - TODA la semana retail (7 días completos)
+    const weeklyBudget = fullCurrentRetailWeekDays.reduce((sum, day) => sum + getDailyBudget(day), 0);
 
-    // Calcular proyección de la semana - SUAVIZADA con histórico (usa displayWeek)
-    const daysPassedInWeek = eachDayOfInterval({ start: displayWeekStart, end: now })
-      .filter(d => isWithinInterval(d, { start: displayWeekStart, end: displayWeekEnd }) && d <= now).length;
+    // Calcular proyección de la semana ACTUAL - SUAVIZADA con histórico
+    const daysPassedInWeek = eachDayOfInterval({ start: currentWeekStart, end: now })
+      .filter(d => isWithinInterval(d, { start: currentWeekStart, end: currentWeekEnd }) && d <= now).length;
     const avgDailySales = daysPassedInWeek > 0 ? currentWeekSales / daysPassedInWeek : 0;
 
     // Calcular proyección más realista combinando ritmo actual con histórico
-    const totalDaysInWeek = eachDayOfInterval({ start: displayWeekStart, end: displayWeekEnd }).length;
+    const totalDaysInWeek = 7; // Siempre 7 días en una semana
 
     // Si solo han pasado 1-2 días, ponderar más el histórico (80% histórico, 20% actual)
     // Si han pasado más días, ponderar más el actual (40% histórico, 60% actual)
@@ -705,19 +705,19 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                     }`}
                   >
                     <motion.div
-                      className="absolute inset-0"
+                      className="absolute left-0 top-0 bottom-0"
                       style={{
-                        background: 'radial-gradient(circle, rgba(251,191,36,1) 0%, rgba(253,224,71,0.6) 40%, transparent 70%)',
-                        filter: 'blur(10px)'
+                        background: 'radial-gradient(ellipse 80px 100% at center, rgba(251,191,36,0.9) 0%, rgba(253,224,71,0.6) 50%, transparent 100%)',
+                        filter: 'blur(12px)',
+                        width: '80px'
                       }}
                       animate={{
-                        opacity: [0.3, 0.9, 0.3],
-                        scale: [0.8, 1.2, 0.8]
+                        left: ['-80px', '100%']
                       }}
                       transition={{
-                        duration: 1.5,
+                        duration: 2.5,
                         repeat: Infinity,
-                        ease: 'easeInOut'
+                        ease: 'linear'
                       }}
                     />
                   </motion.div>
@@ -752,19 +752,20 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                       }`}
                     >
                       <motion.div
-                        className="absolute inset-0"
+                        className="absolute left-0 top-0 bottom-0"
                         style={{
-                          background: 'radial-gradient(circle, rgba(96,165,250,1) 0%, rgba(147,197,253,0.6) 40%, transparent 70%)',
-                          filter: 'blur(10px)'
+                          background: 'radial-gradient(ellipse 80px 100% at center, rgba(96,165,250,0.9) 0%, rgba(147,197,253,0.6) 50%, transparent 100%)',
+                          filter: 'blur(12px)',
+                          width: '80px'
                         }}
                         animate={{
-                          opacity: [0.3, 0.9, 0.3],
-                          scale: [0.8, 1.2, 0.8]
+                          left: ['-80px', '100%']
                         }}
                         transition={{
-                          duration: 1.5,
+                          duration: 2.5,
                           repeat: Infinity,
-                          ease: 'easeInOut'
+                          ease: 'linear',
+                          delay: 0.5
                         }}
                       />
                     </motion.div>
