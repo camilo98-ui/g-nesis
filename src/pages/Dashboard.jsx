@@ -473,14 +473,8 @@ function DetailPanel({ metric, data, onClose, chartData, formatCurrency, shiftDa
 
 export default function Dashboard() {
   const [selectedStore, setSelectedStore] = useState('');
-  // Inicializar con la semana ACTUAL por defecto
-  const [dateRange, setDateRange] = useState(() => {
-    const now = new Date();
-    return {
-      from: startOfWeek(now, { weekStartsOn: 1 }),
-      to: endOfWeek(now, { weekStartsOn: 1 })
-    };
-  });
+  // SIN filtro por defecto, para mostrar mes retail completo
+  const [dateRange, setDateRange] = useState(null);
   const [activeMetric, setActiveMetric] = useState(null);
   const [projectionMetric, setProjectionMetric] = useState(null);
 
