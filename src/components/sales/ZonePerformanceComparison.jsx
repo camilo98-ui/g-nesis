@@ -168,7 +168,7 @@ export default function ZonePerformanceComparison({ storeId, formatCurrency, cur
     );
   }
 
-  const { currentStoreData, position, totalStores, top3, zoneAvg, vsAvg, radarData, allStores } = analysisData;
+  const { currentStoreData, position, totalStores, top3, zoneAvg, vsAvg, radarData } = analysisData;
   const isTop3 = position <= 3;
 
   return (
