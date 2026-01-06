@@ -123,6 +123,9 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
     const monthStart = retailMonthStart;
     const monthEnd = retailMonthEnd;
 
+    // Calcular días del mes que efectivamente tienen venta
+    const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd }).length;
+
     // SIEMPRE usar la semana ACTUAL para métricas y PPT
     const currentWeekStart = startOfWeek(now, { weekStartsOn: 1 });
     const currentWeekEnd = endOfWeek(now, { weekStartsOn: 1 });
@@ -137,8 +140,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       { weekStartsOn: 1 }
     );
 
-    // Calcular días del mes que efectivamente tienen venta (lunes a domingo del mes)
-    const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd }).length;
+
 
     // Días completos de la semana retail ACTUAL (siempre 7 días) - para métricas
     const fullCurrentRetailWeekDays = eachDayOfInterval({ start: currentWeekStart, end: currentWeekEnd });
@@ -201,7 +203,6 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
     );
 
     // Calcular proyección inicial de cumplimiento mensual para determinar TARGET_PERCENTAGE dinámico
-    const now = new Date();
     const daysElapsedForEval = eachDayOfInterval({ start: monthStart, end: now }).length;
     const totalMonthSalesForEval = dailySales.filter(s => {
       try {
@@ -213,8 +214,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
     }).reduce((sum, s) => sum + (s.total_sales || 0), 0);
     
     const avgDailySalesForEval = daysElapsedForEval > 0 ? totalMonthSalesForEval / daysElapsedForEval : 0;
-    const totalDaysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd }).length;
-    const monthProjectionForEval = avgDailySalesForEval * totalDaysInMonth;
+    const monthProjectionForEval = avgDailySalesForEval * daysInMonth;
     const initialProjectionCompliance = activeBudget.sales_budget > 0 ? (monthProjectionForEval / activeBudget.sales_budget * 100) : 0;
 
     // Determinar TARGET_PERCENTAGE dinámicamente según rendimiento
@@ -417,13 +417,10 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
     // CRÍTICO: Días transcurridos en el mes RETAIL (desde el 29 del mes anterior)
     const daysElapsed = eachDayOfInterval({ start: monthStart, end: now }).length;
     
-    // Total de días en el mes retail (29 anterior a 28 actual = 30 días)
-    const totalDaysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd }).length;
-    
     const monthAvgDailySales = daysElapsed > 0 ? totalMonthSales / daysElapsed : 0;
     
     // Proyección = promedio diario actual * total de días del mes
-    const monthProjection = monthAvgDailySales * totalDaysInMonth;
+    const monthProjection = monthAvgDailySales * daysInMonth;
     
     const monthProjectionCompliance = adjustedMonthlyBudget > 0 ? (monthProjection / adjustedMonthlyBudget * 100) : 0;
 
