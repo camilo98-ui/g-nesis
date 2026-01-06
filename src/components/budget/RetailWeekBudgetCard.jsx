@@ -691,36 +691,42 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                   <span className="text-white/70">Proyección Semanal</span>
                   <span className="font-bold lg:font-black text-white lg:text-lg">{budgetData.projectionCompliance.toFixed(0)}%</span>
                 </div>
-                <div className="relative h-3 lg:h-4 bg-white/20 rounded-full overflow-hidden">
+                <div className="relative h-3 lg:h-4 bg-white/20 rounded-full overflow-visible">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${Math.min(budgetData.projectionCompliance, 100)}%` }}
                     transition={{ duration: 1.5, delay: 0.2 }}
-                    className={`h-full rounded-full relative overflow-hidden ${
+                    className={`h-full rounded-full relative overflow-visible ${
                       budgetData.projectionCompliance >= 100 
-                        ? 'bg-gradient-to-r from-emerald-300/80 to-green-200/80' 
+                        ? 'bg-gradient-to-r from-emerald-400 to-green-300' 
                         : budgetData.projectionCompliance >= 85
-                        ? 'bg-gradient-to-r from-amber-200/80 to-yellow-100/80'
-                        : 'bg-gradient-to-r from-orange-200/80 to-red-200/80'
+                        ? 'bg-gradient-to-r from-amber-300 to-yellow-200'
+                        : 'bg-gradient-to-r from-orange-300 to-red-300'
                     }`}
+                    style={{
+                      boxShadow: budgetData.projectionCompliance >= 100 
+                        ? '0 0 20px rgba(16, 185, 129, 0.6)' 
+                        : budgetData.projectionCompliance >= 85
+                        ? '0 0 20px rgba(245, 158, 11, 0.6)'
+                        : '0 0 20px rgba(251, 146, 60, 0.6)'
+                    }}
                   >
-                    <motion.div
-                      className="absolute inset-0"
-                      style={{
-                        background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.95) 50%, transparent 100%)',
-                        width: '60%',
-                        filter: 'blur(12px)',
-                        boxShadow: '0 0 30px rgba(255,255,255,0.6)'
-                      }}
-                      animate={{
-                        x: ['-100%', '200%']
-                      }}
-                      transition={{
-                        duration: 2,
-                        repeat: Infinity,
-                        ease: 'linear'
-                      }}
-                    />
+                  <motion.div
+                    className="absolute inset-0 rounded-full"
+                    style={{
+                      background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.9) 50%, transparent 100%)',
+                      width: '40%',
+                      filter: 'blur(8px)'
+                    }}
+                    animate={{
+                      x: ['-50%', '250%']
+                    }}
+                    transition={{
+                      duration: 1.5,
+                      repeat: Infinity,
+                      ease: 'linear'
+                    }}
+                  />
                   </motion.div>
                 </div>
                 <p className="text-[10px] lg:text-xs text-white/50 lg:text-white/60">
