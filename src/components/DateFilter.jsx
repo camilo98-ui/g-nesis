@@ -316,6 +316,20 @@ export default function DateFilter({ dateRange, onDateChange, buttonClassName = 
 
         </PopoverContent>
       </Popover>
+      
+      {/* Botón para limpiar filtro */}
+      {dateRange?.from && (
+        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onDateChange(null)}
+            className="h-8 px-2 text-xs text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-full"
+          >
+            ✕ Limpiar
+          </Button>
+        </motion.div>
+      )}
     </div>);
 
 }
