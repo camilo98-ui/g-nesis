@@ -754,7 +754,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                   <p className="text-[10px] lg:text-xs text-white/50 lg:text-white/60">
                     {budgetData.monthProjectionCompliance >= 100 
                       ? `🎉 Proyectas superar en ${formatCurrency(budgetData.monthProjection - budgetData.monthlyBudget)}`
-                      : `📊 Falta ${formatCurrency(budgetData.monthlyBudget - budgetData.totalMonthSales)} para meta mensual`}
+                      : `📊 Proyección: ${formatCurrency(budgetData.monthProjection)} • Falta: ${formatCurrency(budgetData.monthlyBudget - budgetData.monthProjection)}`}
                   </p>
                 </div>
 
