@@ -705,19 +705,19 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                     }`}
                   >
                     <motion.div
-                      className="absolute inset-0"
-                      style={{
-                        background: 'radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(255,255,255,0.5) 40%, transparent 70%)',
-                        filter: 'blur(8px)'
-                      }}
+                      className="absolute inset-0 overflow-hidden"
                       animate={{
-                        opacity: [0, 1, 0],
-                        scale: [0.8, 1.1, 0.8]
+                        x: ['-100%', '200%']
                       }}
                       transition={{
-                        duration: 1.5,
+                        duration: 2,
                         repeat: Infinity,
-                        ease: 'easeInOut'
+                        ease: 'linear'
+                      }}
+                      style={{
+                        background: 'radial-gradient(ellipse 100px 200px at center, rgba(255,255,255,1) 0%, rgba(255,255,255,0.6) 30%, transparent 60%)',
+                        filter: 'blur(8px)',
+                        width: '50%'
                       }}
                     />
                   </motion.div>
@@ -752,19 +752,19 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                       }`}
                     >
                       <motion.div
-                        className="absolute inset-0"
-                        style={{
-                          background: 'radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(255,255,255,0.5) 40%, transparent 70%)',
-                          filter: 'blur(8px)'
-                        }}
+                        className="absolute inset-0 overflow-hidden"
                         animate={{
-                          opacity: [0, 1, 0],
-                          scale: [0.8, 1.1, 0.8]
+                          x: ['-100%', '200%']
                         }}
                         transition={{
-                          duration: 1.5,
+                          duration: 2,
                           repeat: Infinity,
-                          ease: 'easeInOut'
+                          ease: 'linear'
+                        }}
+                        style={{
+                          background: 'radial-gradient(ellipse 100px 200px at center, rgba(255,255,255,1) 0%, rgba(255,255,255,0.6) 30%, transparent 60%)',
+                          filter: 'blur(8px)',
+                          width: '50%'
                         }}
                       />
                     </motion.div>
