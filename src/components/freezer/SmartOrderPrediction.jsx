@@ -40,6 +40,7 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
   const [isExpanded, setIsExpanded] = useState(false);
   const [isEditingFrequency, setIsEditingFrequency] = useState(false);
   const [editedConfig, setEditedConfig] = useState(null);
+  const [configVersion, setConfigVersion] = useState(0);
 
   // Obtener historial de neveras para análisis de rotación
   const { data: freezerHistory = [] } = useQuery({
@@ -60,7 +61,7 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
       }
     }
     return STORE_ORDER_CONFIG[storeCode] || { semanal: 'VIE', adicional1: 'JUE', entregaSemanal: 'MAR', entregaAdicional1: 'SAB' };
-  }, [storeCode]);
+  }, [storeCode, configVersion]);
   
   // Inicializar editedConfig cuando cambia storeConfig
   useEffect(() => {
@@ -668,6 +669,7 @@ export default function SmartOrderPrediction({ allFreezersSlots = [], currentFre
                         size="sm"
                         onClick={() => {
                           localStorage.setItem(`orderConfig_${storeCode}`, JSON.stringify(editedConfig));
+                          setConfigVersion(v => v + 1);
                           toast.success('✓ Frecuencia guardada');
                           setIsEditingFrequency(false);
                         }}
