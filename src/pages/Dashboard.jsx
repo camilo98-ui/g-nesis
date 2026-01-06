@@ -1789,6 +1789,7 @@ export default function Dashboard() {
                 </motion.div>
               </div>
             </motion.div>
+            )}
           </div> :
 
         <div className="text-center py-20">
