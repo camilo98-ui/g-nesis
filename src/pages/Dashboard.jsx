@@ -877,12 +877,12 @@ export default function Dashboard() {
   comparisonTotals.sales / comparisonTotals.transactions :
   0;
 
-  // Métricas usando RANGO FILTRADO (respeta selección de semana)
+  // Métricas usando ACUMULADO DEL MES RETAIL (desde semana 1)
   const metrics = [
   {
     id: 'sales',
-    title: 'Ventas Totales',
-    value: filteredTotals.sales,
+    title: 'Ventas Acumuladas',
+    value: monthTotals.sales,
     comparisonValue: comparisonTotals?.sales,
     budget: currentBudget.sales_budget,
     icon: DollarSign,
@@ -894,7 +894,7 @@ export default function Dashboard() {
   {
     id: 'tickets',
     title: 'Ticket Promedio',
-    value: filteredAvgTicket,
+    value: monthAvgTicket,
     comparisonValue: comparisonAvgTicket,
     budget: currentBudget.tickets_budget,
     icon: Receipt,
@@ -906,7 +906,7 @@ export default function Dashboard() {
   {
     id: 'transactions',
     title: 'Transacciones',
-    value: filteredTotals.transactions,
+    value: monthTotals.transactions,
     comparisonValue: comparisonTotals?.transactions,
     budget: currentBudget.transactions_budget,
     icon: Zap,
@@ -917,7 +917,7 @@ export default function Dashboard() {
   {
     id: 'suggested',
     title: 'Sugeridos',
-    value: filteredTotals.suggested,
+    value: monthTotals.suggested,
     comparisonValue: comparisonTotals?.suggested,
     budget: currentBudget.suggested_budget,
     icon: Gift,
