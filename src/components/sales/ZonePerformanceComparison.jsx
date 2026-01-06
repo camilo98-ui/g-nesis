@@ -129,6 +129,26 @@ export default function ZonePerformanceComparison({ storeId, formatCurrency, cur
     };
   }, [allZoneSales, storeId]);
 
+  // Métricas disponibles - SIEMPRE se ejecuta
+  const metrics = React.useMemo(() => [
+    { id: 'sales', label: 'Ventas', icon: DollarSign, getValue: (s) => s.sales, format: formatCurrency },
+    { id: 'ticket', label: 'Ticket', icon: Receipt, getValue: (s) => s.avgTicket, format: formatCurrency },
+    { id: 'transactions', label: 'Tráfico', icon: Zap, getValue: (s) => s.transactions, format: (v) => v.toLocaleString() },
+    { id: 'suggested', label: 'Sugeridos', icon: Gift, getValue: (s) => s.suggested, format: (v) => v.toLocaleString() }
+  ], [formatCurrency]);
+
+  // Datos ordenados según métrica seleccionada - SIEMPRE se ejecuta
+  const rankedStores = useMemo(() => {
+    if (!analysisData || !selectedMetric) return analysisData?.allStores || [];
+    const metric = metrics.find(m => m.id === selectedMetric);
+    if (!metric) return analysisData.allStores;
+    return [...analysisData.allStores].sort((a, b) => metric.getValue(b) - metric.getValue(a));
+  }, [analysisData, selectedMetric, metrics]);
+
+  // Posición en la métrica seleccionada - SIEMPRE se ejecuta
+  const currentPosition = rankedStores.findIndex(s => s.storeCode === storeId) + 1;
+  const currentMetric = metrics.find(m => m.id === selectedMetric);
+
   if (isLoading) {
     return (
       <div className="bg-gradient-to-br from-rose-50/40 via-pink-50/30 to-rose-50/40 rounded-3xl border-2 border-rose-200/30 shadow-2xl p-8">
