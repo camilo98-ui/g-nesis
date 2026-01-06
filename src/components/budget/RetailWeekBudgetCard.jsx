@@ -696,13 +696,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                     initial={{ width: 0 }}
                     animate={{ width: `${Math.min(budgetData.projectionCompliance, 100)}%` }}
                     transition={{ duration: 1.5, delay: 0.2 }}
-                    className={`h-full rounded-full relative overflow-hidden ${
-                      budgetData.projectionCompliance >= 100 
-                        ? 'bg-gradient-to-r from-emerald-300/80 to-green-200/80' 
-                        : budgetData.projectionCompliance >= 85
-                        ? 'bg-gradient-to-r from-amber-200/80 to-yellow-100/80'
-                        : 'bg-gradient-to-r from-orange-200/80 to-red-200/80'
-                    }`}
+                    className="h-full rounded-full relative overflow-hidden bg-gradient-to-r from-emerald-400/90 to-green-300/90"
                   >
                     <motion.div
                       className="absolute inset-0"
@@ -743,13 +737,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                       initial={{ width: 0 }}
                       animate={{ width: `${Math.min(budgetData.monthProjectionCompliance, 100)}%` }}
                       transition={{ duration: 1.5, delay: 0.5 }}
-                      className={`h-full rounded-full relative overflow-hidden ${
-                        budgetData.monthProjectionCompliance >= 100 
-                          ? 'bg-gradient-to-r from-emerald-300/80 to-green-200/80' 
-                          : budgetData.monthProjectionCompliance >= 90
-                          ? 'bg-gradient-to-r from-amber-200/80 to-yellow-100/80'
-                          : 'bg-gradient-to-r from-orange-200/80 to-red-200/80'
-                      }`}
+                      className="h-full rounded-full relative overflow-hidden bg-gradient-to-r from-emerald-400/90 to-green-300/90"
                     >
                       <motion.div
                         className="absolute inset-0"
