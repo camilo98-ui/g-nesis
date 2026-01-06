@@ -152,19 +152,20 @@ export default function ZonePerformanceComparison({ storeId, formatCurrency, cur
   const isTop3 = position <= 3;
 
   // Métricas disponibles
-  const metrics = [
+  const metrics = React.useMemo(() => [
     { id: 'sales', label: 'Ventas', icon: DollarSign, getValue: (s) => s.sales, format: formatCurrency },
     { id: 'ticket', label: 'Ticket', icon: Receipt, getValue: (s) => s.avgTicket, format: formatCurrency },
     { id: 'transactions', label: 'Tráfico', icon: Zap, getValue: (s) => s.transactions, format: (v) => v.toLocaleString() },
     { id: 'suggested', label: 'Sugeridos', icon: Gift, getValue: (s) => s.suggested, format: (v) => v.toLocaleString() }
-  ];
+  ], [formatCurrency]);
 
   // Datos ordenados según métrica seleccionada
   const rankedStores = useMemo(() => {
-    if (!selectedMetric) return allStores;
+    if (!selectedMetric || !allStores) return allStores || [];
     const metric = metrics.find(m => m.id === selectedMetric);
+    if (!metric) return allStores;
     return [...allStores].sort((a, b) => metric.getValue(b) - metric.getValue(a));
-  }, [allStores, selectedMetric]);
+  }, [allStores, selectedMetric, metrics]);
 
   // Posición en la métrica seleccionada
   const currentPosition = rankedStores.findIndex(s => s.storeCode === storeId) + 1;
