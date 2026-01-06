@@ -362,6 +362,15 @@ meta[name="robots"] {
   animation: slideRight 2s linear infinite;
 }
 
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(300%);
+  }
+}
+
 .animate-gradient-1 {
   animation: gradient-shift-1 14s ease-in-out infinite;
 }

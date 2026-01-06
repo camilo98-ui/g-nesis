@@ -696,14 +696,22 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                     initial={{ width: 0 }}
                     animate={{ width: `${Math.min(budgetData.projectionCompliance, 100)}%` }}
                     transition={{ duration: 1.5, delay: 0.2 }}
-                    className={`h-full rounded-full ${
+                    className={`h-full rounded-full relative overflow-hidden ${
                       budgetData.projectionCompliance >= 100 
-                        ? 'bg-emerald-400' 
+                        ? 'bg-emerald-300' 
                         : budgetData.projectionCompliance >= 85
-                        ? 'bg-amber-400'
-                        : 'bg-rose-400'
+                        ? 'bg-amber-300'
+                        : 'bg-rose-300'
                     }`}
-                  />
+                  >
+                    <div 
+                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-40"
+                      style={{
+                        animation: 'shimmer 2s linear infinite',
+                        width: '50%'
+                      }}
+                    />
+                  </motion.div>
                 </div>
                 <p className="text-[10px] lg:text-xs text-white/50 lg:text-white/60">
                   {budgetData.projectionCompliance >= 100 
@@ -726,14 +734,22 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                       initial={{ width: 0 }}
                       animate={{ width: `${Math.min(budgetData.monthProjectionCompliance, 100)}%` }}
                       transition={{ duration: 1.5, delay: 0.5 }}
-                      className={`h-full rounded-full ${
+                      className={`h-full rounded-full relative overflow-hidden ${
                         budgetData.monthProjectionCompliance >= 100 
-                          ? 'bg-emerald-400' 
+                          ? 'bg-emerald-300' 
                           : budgetData.monthProjectionCompliance >= 90
-                          ? 'bg-amber-400'
-                          : 'bg-rose-400'
+                          ? 'bg-amber-300'
+                          : 'bg-rose-300'
                       }`}
-                    />
+                    >
+                      <div 
+                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-40"
+                        style={{
+                          animation: 'shimmer 2s linear infinite',
+                          width: '50%'
+                        }}
+                      />
+                    </motion.div>
                   </div>
                   <p className="text-[10px] lg:text-xs text-white/50 lg:text-white/60">
                     {budgetData.monthProjectionCompliance >= 100 
