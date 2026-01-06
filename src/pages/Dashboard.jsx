@@ -698,11 +698,13 @@ export default function Dashboard() {
   }, [comparisonSales, showComparison]);
 
   const chartData = useMemo(() => {
-    const activeRange = weekFilter || dateRange;
-    if (!activeRange?.from || !activeRange?.to) return [];
-
-    // Generar días del rango seleccionado
-    const currentDays = eachDayOfInterval({ start: activeRange.from, end: activeRange.to });
+    // SIEMPRE mostrar el mes retail completo (desde semana 1)
+    const now = new Date();
+    const retailMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 29);
+    const retailMonthEnd = now; // Hasta hoy
+    
+    // Generar días del mes retail para las gráficas
+    const currentDays = eachDayOfInterval({ start: retailMonthStart, end: retailMonthEnd });
     const maxDays = currentDays.length;
 
     const dataWithSales = currentDays.map((day, idx) => {
