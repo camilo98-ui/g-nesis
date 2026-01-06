@@ -1625,7 +1625,7 @@ export default function Dashboard() {
                   </Card>
 
                   {/* Rendimiento vs Zona */}
-                  <ZonePerformanceComparison storeId={selectedStore} formatCurrency={formatCurrency} />
+                  <ZonePerformanceComparison storeId={selectedStore} formatCurrency={formatCurrency} currentDateRange={weekFilter || dateRange} />
                 </div>
 
                 {/* Second Row */}
