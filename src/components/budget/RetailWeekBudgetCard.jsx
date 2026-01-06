@@ -714,15 +714,15 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                   <motion.div
                     className="absolute inset-0 rounded-full"
                     style={{
-                      background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.9) 50%, transparent 100%)',
-                      width: '40%',
-                      filter: 'blur(8px)'
+                      background: 'linear-gradient(90deg, transparent 0%, #ffffff 50%, transparent 100%)',
+                      width: '80%',
+                      filter: 'blur(4px)'
                     }}
                     animate={{
-                      x: ['-50%', '250%']
+                      x: ['-80%', '180%']
                     }}
                     transition={{
-                      duration: 1.5,
+                      duration: 1.2,
                       repeat: Infinity,
                       ease: 'linear'
                     }}
@@ -1242,18 +1242,18 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                      <motion.div
                        className="absolute inset-0 rounded-full"
                        style={{
-                         background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.9) 50%, transparent 100%)',
-                         width: '40%',
-                         filter: 'blur(8px)'
+                         background: 'linear-gradient(90deg, transparent 0%, #ffffff 50%, transparent 100%)',
+                         width: '80%',
+                         filter: 'blur(4px)'
                        }}
                        animate={{
-                         x: ['-50%', '250%']
+                         x: ['-80%', '180%']
                        }}
                        transition={{
-                         duration: 1.8,
+                         duration: 1.2,
                          repeat: Infinity,
                          ease: 'linear',
-                         delay: 0.5
+                         delay: 0.6
                        }}
                      />
                    </motion.div>
