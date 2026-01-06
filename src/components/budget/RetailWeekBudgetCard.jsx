@@ -742,40 +742,46 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                     <span className="text-white/70">Proyección Cierre Mes</span>
                     <span className="font-bold lg:font-black text-white lg:text-lg">{budgetData.monthProjectionCompliance.toFixed(0)}%</span>
                   </div>
-                  <div className="relative h-3 lg:h-4 bg-white/20 rounded-full overflow-hidden cursor-pointer" onClick={() => {
-                    setSelectedMetric('month-projection');
-                    setIsModalOpen(true);
+                  <div className="relative h-3 lg:h-4 bg-white/20 rounded-full overflow-visible cursor-pointer" onClick={() => {
+                   setSelectedMetric('month-projection');
+                   setIsModalOpen(true);
                   }}>
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${Math.min(budgetData.monthProjectionCompliance, 100)}%` }}
-                      transition={{ duration: 1.5, delay: 0.5 }}
-                      className={`h-full rounded-full relative overflow-hidden ${
-                        budgetData.monthProjectionCompliance >= 100 
-                          ? 'bg-gradient-to-r from-emerald-300/80 to-green-200/80' 
-                          : budgetData.monthProjectionCompliance >= 90
-                          ? 'bg-gradient-to-r from-amber-200/80 to-yellow-100/80'
-                          : 'bg-gradient-to-r from-orange-200/80 to-red-200/80'
-                      }`}
-                    >
-                      <motion.div
-                        className="absolute inset-0"
-                        style={{
-                          background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.95) 50%, transparent 100%)',
-                          width: '60%',
-                          filter: 'blur(12px)',
-                          boxShadow: '0 0 30px rgba(255,255,255,0.6)'
-                        }}
-                        animate={{
-                          x: ['-100%', '200%']
-                        }}
-                        transition={{
-                          duration: 2,
-                          repeat: Infinity,
-                          ease: 'linear'
-                        }}
-                      />
-                    </motion.div>
+                   <motion.div
+                     initial={{ width: 0 }}
+                     animate={{ width: `${Math.min(budgetData.monthProjectionCompliance, 100)}%` }}
+                     transition={{ duration: 1.5, delay: 0.5 }}
+                     className={`h-full rounded-full relative overflow-visible ${
+                       budgetData.monthProjectionCompliance >= 100 
+                         ? 'bg-gradient-to-r from-emerald-400 to-green-300' 
+                         : budgetData.monthProjectionCompliance >= 90
+                         ? 'bg-gradient-to-r from-amber-300 to-yellow-200'
+                         : 'bg-gradient-to-r from-orange-300 to-red-300'
+                     }`}
+                     style={{
+                       boxShadow: budgetData.monthProjectionCompliance >= 100 
+                         ? '0 0 20px rgba(16, 185, 129, 0.6)' 
+                         : budgetData.monthProjectionCompliance >= 90
+                         ? '0 0 20px rgba(245, 158, 11, 0.6)'
+                         : '0 0 20px rgba(251, 146, 60, 0.6)'
+                     }}
+                   >
+                     <motion.div
+                       className="absolute inset-0 rounded-full"
+                       style={{
+                         background: 'radial-gradient(circle, rgba(255,255,255,0.7) 0%, transparent 70%)',
+                         filter: 'blur(10px)'
+                       }}
+                       animate={{
+                         opacity: [0.3, 1, 0.3],
+                         scale: [0.8, 1.1, 0.8]
+                       }}
+                       transition={{
+                         duration: 2,
+                         repeat: Infinity,
+                         ease: 'easeInOut'
+                       }}
+                     />
+                   </motion.div>
                   </div>
                   <p className="text-[10px] lg:text-xs text-white/50 lg:text-white/60">
                     {budgetData.monthProjectionCompliance >= 100 
