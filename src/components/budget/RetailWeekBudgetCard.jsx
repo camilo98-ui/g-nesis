@@ -752,6 +752,61 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                       transition={{ duration: 1.5, delay: 0.5 }}
                       className={`h-full rounded-full relative overflow-hidden ${
                         budgetData.monthProjectionCompliance >= 100 
+                          ? 'bg-gradient-to-r from-emerald-400 to-green-300' 
+                          : budgetData.monthProjectionCompliance >= 90
+                          ? 'bg-gradient-to-r from-amber-300 to-yellow-200'
+                          : 'bg-gradient-to-r from-orange-300 to-red-300'
+                      }`}
+                      style={{
+                        boxShadow: budgetData.monthProjectionCompliance >= 100 
+                          ? '0 0 20px rgba(16, 185, 129, 0.6)' 
+                          : budgetData.monthProjectionCompliance >= 90
+                          ? '0 0 20px rgba(245, 158, 11, 0.6)'
+                          : '0 0 20px rgba(251, 146, 60, 0.6)'
+                      }}
+                    >
+                      <motion.div
+                        className="absolute inset-0 rounded-full"
+                        style={{
+                          background: 'linear-gradient(90deg, transparent 0%, #ffffff 50%, transparent 100%)',
+                          width: '50%',
+                          filter: 'blur(3px)'
+                        }}
+                        animate={{
+                          x: ['0%', '100%']
+                        }}
+                        transition={{
+                          duration: 1.2,
+                          repeat: Infinity,
+                          ease: 'linear',
+                          delay: 0.6
+                        }}
+                      />
+                    </motion.div>
+                  </div>
+                  <p className="text-[10px] lg:text-xs text-white/50 lg:text-white/60">
+                    {budgetData.monthProjectionCompliance >= 100 
+                      ? `🎉 Proyectas superar en ${formatCurrency(budgetData.monthProjection - budgetData.monthlyBudget)}`
+                      : `📊 Falta ${formatCurrency(budgetData.monthlyBudget - budgetData.totalMonthSales)} para meta mensual`}
+                  </p>
+                </div>
+
+                {/* Barra de Proyección Mensual */}
+                <div className="space-y-2 mb-4">
+                  <div className="flex items-center justify-between text-xs lg:text-sm">
+                    <span className="text-white/70">Proyección Cierre Mes</span>
+                    <span className="font-bold lg:font-black text-white lg:text-lg">{budgetData.monthProjectionCompliance.toFixed(0)}%</span>
+                  </div>
+                  <div className="relative h-3 lg:h-4 bg-white/20 rounded-full overflow-hidden cursor-pointer" onClick={() => {
+                    setSelectedMetric('month-projection');
+                    setIsModalOpen(true);
+                  }}>
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${Math.min(budgetData.monthProjectionCompliance, 100)}%` }}
+                      transition={{ duration: 1.5, delay: 0.5 }}
+                      className={`h-full rounded-full relative overflow-hidden ${
+                        budgetData.monthProjectionCompliance >= 100 
                           ? 'bg-gradient-to-r from-emerald-300/80 to-green-200/80' 
                           : budgetData.monthProjectionCompliance >= 90
                           ? 'bg-gradient-to-r from-amber-200/80 to-yellow-100/80'
