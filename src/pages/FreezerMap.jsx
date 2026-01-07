@@ -471,62 +471,100 @@ export default function FreezerMap() {
     } catch (e) {console.error(e);}
   }, [selectedStore, allFreezersSlots]);
 
-  // Mutation para actualizar slot - CORREGIDO para evitar sobrescribir store_id
+  // Mutation para actualizar slot - REFORZADO para prevenir borrado
   const updateSlotMutation = useMutation({
     mutationFn: async ({ slotData, isNew }) => {
+      // VERIFICAR que el slot tenga datos válidos antes de guardar
+      if (!slotData.flavor_name && !slotData.is_empty) {
+        throw new Error('Datos inválidos: sabor sin nombre');
+      }
+
       if (isNew) {
-        // Para nuevo: incluir store_id completo
+        // Para nuevo: incluir store_id completo y TODOS los campos
         const finalSlotData = {
-          ...slotData,
-          store_id: `${selectedStore}_F${currentFreezer}`
+          store_id: `${selectedStore}_F${currentFreezer}`,
+          row: slotData.row,
+          position: slotData.position,
+          slot_type: slotData.slot_type,
+          flavor_name: slotData.flavor_name || '',
+          flavor_type: slotData.flavor_type || 'vacio',
+          color: slotData.color || '',
+          is_empty: slotData.is_empty ?? true,
+          stock_level: slotData.stock_level || 'full'
         };
+        console.log('Creando nuevo slot:', finalSlotData);
         return await base44.entities.FreezerSlot.create(finalSlotData);
       }
       
-      // Para update: NO enviar store_id, solo los campos editables
-      const { store_id, id, ...editableFields } = slotData;
-      return await base44.entities.FreezerSlot.update(id, editableFields);
+      // Para update: NO enviar store_id pero SÍ todos los demás campos editables
+      const updateData = {
+        row: slotData.row,
+        position: slotData.position,
+        slot_type: slotData.slot_type,
+        flavor_name: slotData.flavor_name || '',
+        flavor_type: slotData.flavor_type || 'vacio',
+        color: slotData.color || '',
+        is_empty: slotData.is_empty ?? true,
+        stock_level: slotData.stock_level || 'full'
+      };
+      console.log('Actualizando slot ID', slotData.id, 'con datos:', updateData);
+      return await base44.entities.FreezerSlot.update(slotData.id, updateData);
     },
     onSuccess: async (data, variables) => {
-      // Invalidar queries y esperar a que se actualicen
+      console.log('✓ Slot guardado exitosamente:', data);
+      
+      // Invalidar queries y esperar
       await queryClient.invalidateQueries(['freezerSlots']);
       await queryClient.invalidateQueries(['allFreezersSlots']);
       
-      // Forzar refetch inmediato para obtener datos actualizados
+      // Forzar refetch inmediato
       await refetch();
       
-      // Esperar un poco más en móvil para asegurar que se guardó
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Esperar confirmación
+      await new Promise(resolve => setTimeout(resolve, 150));
       
       setSavingSlot({ row: variables.slotData.row, position: variables.slotData.position, success: true });
       setTimeout(() => setSavingSlot(null), 1000);
-      toast.success('✓ Sabor guardado');
+      toast.success('✓ Sabor guardado permanentemente');
     },
     onError: (error) => {
-      console.error('Error al guardar slot:', error);
-      toast.error('Error al guardar');
+      console.error('❌ Error al guardar slot:', error);
+      toast.error('Error al guardar: ' + error.message);
       setSavingSlot(null);
     }
   });
 
-  // Borrar slot - CORREGIDO para identificar correctamente el slot por tipo y store
+  // Borrar slot - PROTECCIÓN contra borrado accidental
   const clearSlot = useCallback(async (slot) => {
-    if (!slot || slot.is_empty) return;
+    if (!slot || slot.is_empty) {
+      console.log('Slot ya está vacío, no hay nada que borrar');
+      return;
+    }
 
-    // Guardar para undo
+    console.log('Vaciando slot:', { row: slot.row, position: slot.position, type: slot.slot_type, sabor: slot.flavor_name });
+
+    // Guardar para undo ANTES de borrar
     setUndoStack((prev) => [...prev.slice(-9), { action: 'clear', slot: { ...slot } }]);
 
-    // Buscar el slot exacto por store_id, row, position Y slot_type
+    // Buscar el slot EXACTO - MUY IMPORTANTE
     const existing = slots.find((s) =>
-    s.store_id === `${selectedStore}_F${currentFreezer}` &&
-    s.row === slot.row &&
-    s.position === slot.position &&
-    s.slot_type === slot.slot_type
+      s.store_id === `${selectedStore}_F${currentFreezer}` &&
+      s.row === slot.row &&
+      s.position === slot.position &&
+      s.slot_type === slot.slot_type
     );
 
-    if (existing?.id) {
-      setSavingSlot({ row: slot.row, position: slot.position, saving: true });
-      // Solo actualizar los campos necesarios sin tocar store_id
+    if (!existing?.id) {
+      console.error('No se encontró el slot a vaciar:', slot);
+      toast.error('Error: slot no encontrado');
+      return;
+    }
+
+    console.log('Vaciando slot ID:', existing.id);
+    setSavingSlot({ row: slot.row, position: slot.position, saving: true });
+    
+    try {
+      // SOLO vaciar los campos, NO tocar store_id, row, position, slot_type
       await base44.entities.FreezerSlot.update(existing.id, {
         flavor_name: '',
         flavor_type: 'vacio',
@@ -534,13 +572,21 @@ export default function FreezerMap() {
         is_empty: true,
         stock_level: 'full'
       });
+      
       await queryClient.invalidateQueries(['freezerSlots']);
+      await queryClient.invalidateQueries(['allFreezersSlots']);
       await refetch();
+      
       setSavingSlot({ row: slot.row, position: slot.position, success: true });
       setTimeout(() => setSavingSlot(null), 800);
-      toast.success(`Slot ${slot.slot_type} vaciado`);
+      toast.success(`✓ Slot ${slot.slot_type} vaciado`);
+      console.log('✓ Slot vaciado exitosamente');
+    } catch (error) {
+      console.error('Error al vaciar slot:', error);
+      toast.error('Error al vaciar slot');
+      setSavingSlot(null);
     }
-  }, [slots, queryClient, selectedStore, currentFreezer]);
+  }, [slots, queryClient, selectedStore, currentFreezer, refetch]);
 
   // Doble click para borrar
   const handleDoubleClick = useCallback((slot) => {
@@ -553,17 +599,19 @@ export default function FreezerMap() {
     setShowFlavorSelector(true);
   };
 
-  // Seleccionar sabor - CORREGIDO: mantener slot_type y todos los datos
+  // Seleccionar sabor - REFORZADO para mantener TODOS los datos del sabor
   const handleFlavorSelect = async (flavor) => {
     if (!selectedSlot) return;
 
     // CRÍTICO: usar el slot_type del slot que fue clickeado
     const slotType = selectedSlot.slot_type;
 
+    console.log('Guardando sabor:', flavor.name, 'en', { row: selectedSlot.row, position: selectedSlot.position, type: slotType });
+
     setUndoStack((prev) => [...prev.slice(-9), { action: 'edit', slot: { ...selectedSlot } }]);
     setSavingSlot({ row: selectedSlot.row, position: selectedSlot.position, saving: true });
 
-    // Buscar el slot existente ANTES de crear slotData
+    // Buscar el slot existente EXACTO
     const existing = slots.find((s) =>
       s.store_id === `${selectedStore}_F${currentFreezer}` &&
       s.row === selectedSlot.row &&
@@ -571,26 +619,29 @@ export default function FreezerMap() {
       s.slot_type === slotType
     );
 
+    // Preparar datos COMPLETOS del sabor
     const slotData = {
       row: selectedSlot.row,
       position: selectedSlot.position,
       slot_type: slotType,
-      flavor_name: flavor.name,
-      flavor_type: flavor.type || flavor.line,
+      flavor_name: flavor.name || '',
+      flavor_type: flavor.type || flavor.line || 'gourmet',
       color: flavor.color || getFlavorColor(flavor.name),
       is_empty: flavor.is_empty || false,
-      stock_level: 'full'
+      stock_level: flavor.stock_level || 'full'
     };
 
-    // Si existe, agregar el ID pero NO store_id (se mantiene automáticamente)
-    // Si es nuevo, agregar store_id
+    // Agregar ID si existe, sino store_id
     if (existing?.id) {
       slotData.id = existing.id;
+      console.log('Actualizando slot existente ID:', existing.id);
     } else {
       slotData.store_id = `${selectedStore}_F${currentFreezer}`;
+      console.log('Creando nuevo slot con store_id:', slotData.store_id);
     }
 
-    updateSlotMutation.mutate({
+    // GUARDAR INMEDIATAMENTE
+    await updateSlotMutation.mutateAsync({
       slotData,
       isNew: !existing
     });
