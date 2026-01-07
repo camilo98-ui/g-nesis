@@ -247,7 +247,7 @@ export default function FreezerMap() {
   const { data: customFlavorsFromDB = [] } = useQuery({
     queryKey: ['customFlavors'],
     queryFn: () => base44.entities.CustomFlavor.list(),
-    staleTime: Infinity, // Los sabores no cambian frecuentemente
+    staleTime: Infinity,
     onSuccess: (data) => {
       setCustomFlavors(data);
       console.log(`✓ ${data.length} sabores personalizados cargados desde BD`);
@@ -265,6 +265,51 @@ export default function FreezerMap() {
       setCustomFlavors(customFlavorsFromDB);
     }
   }, [customFlavorsFromDB]);
+
+  // MIGRAR sabores de localStorage a BD si existen (solo una vez)
+  useEffect(() => {
+    const migrateLocalStorageFlavors = async () => {
+      const migrated = localStorage.getItem('flavorsMigrated');
+      if (migrated) return; // Ya se migró antes
+
+      const savedFlavors = localStorage.getItem('customFlavors');
+      if (savedFlavors) {
+        try {
+          const parsed = JSON.parse(savedFlavors);
+          if (parsed.length > 0) {
+            console.log(`Migrando ${parsed.length} sabores de localStorage a BD...`);
+            
+            for (const flavor of parsed) {
+              // Verificar si ya existe
+              const exists = customFlavorsFromDB.some(f => 
+                f.name.toLowerCase().trim() === flavor.name.toLowerCase().trim()
+              );
+              
+              if (!exists) {
+                await base44.entities.CustomFlavor.create({
+                  name: flavor.name,
+                  color: flavor.color,
+                  type: flavor.type || flavor.line || 'gourmet',
+                  line: flavor.line || flavor.type || 'gourmet',
+                  dark: flavor.dark || false
+                });
+              }
+            }
+            
+            await queryClient.invalidateQueries(['customFlavors']);
+            localStorage.setItem('flavorsMigrated', 'true');
+            toast.success(`✓ ${parsed.length} sabores recuperados de localStorage`);
+          }
+        } catch (e) {
+          console.error('Error migrando sabores:', e);
+        }
+      }
+    };
+
+    if (customFlavorsFromDB) {
+      migrateLocalStorageFlavors();
+    }
+  }, [customFlavorsFromDB, queryClient]);
 
   const handleStoreChange = (store) => {
     setSelectedStore(store);
