@@ -243,37 +243,28 @@ export default function FreezerMap() {
   const numRows = freezerDimensions[currentFreezer]?.rows || 7;
   const numCols = freezerDimensions[currentFreezer]?.cols || 5;
 
-  // Cargar sabores personalizados al inicio y mantener sincronizado
+  // Cargar sabores personalizados desde la base de datos
+  const { data: customFlavorsFromDB = [] } = useQuery({
+    queryKey: ['customFlavors'],
+    queryFn: () => base44.entities.CustomFlavor.list(),
+    staleTime: Infinity, // Los sabores no cambian frecuentemente
+    onSuccess: (data) => {
+      setCustomFlavors(data);
+      console.log(`✓ ${data.length} sabores personalizados cargados desde BD`);
+    }
+  });
+
   useEffect(() => {
     const saved = localStorage.getItem('selectedStore');
     if (saved) setSelectedStore(saved);
-    
-    // Cargar sabores personalizados del localStorage
-    const loadCustomFlavors = () => {
-      const savedFlavors = localStorage.getItem('customFlavors');
-      if (savedFlavors) {
-        try {
-          const parsed = JSON.parse(savedFlavors);
-          setCustomFlavors(parsed);
-        } catch (e) {
-          console.error('Error cargando sabores personalizados:', e);
-          localStorage.removeItem('customFlavors');
-        }
-      }
-    };
-    
-    loadCustomFlavors();
-    
-    // Listener para cambios en localStorage (para sincronizar entre pestañas)
-    const handleStorageChange = (e) => {
-      if (e.key === 'customFlavors') {
-        loadCustomFlavors();
-      }
-    };
-    
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
+
+  // Sincronizar customFlavors cuando se cargan de la BD
+  useEffect(() => {
+    if (customFlavorsFromDB.length > 0) {
+      setCustomFlavors(customFlavorsFromDB);
+    }
+  }, [customFlavorsFromDB]);
 
   const handleStoreChange = (store) => {
     setSelectedStore(store);
@@ -1680,36 +1671,42 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                           <option value="gourmet">🍦 Gourmet</option>
                           <option value="exclusivo">✨ Exclusivo</option>
                         </select>
-                        <Button size="sm" className="bg-pink-500 text-white" onClick={() => {
+                        <Button size="sm" className="bg-pink-500 text-white" onClick={async () => {
                       if (newFlavor.name.trim()) {
-                        // Crear el nuevo sabor con todas sus propiedades
-                        const flavorToAdd = {
-                          name: newFlavor.name,
-                          color: newFlavor.color,
-                          type: newFlavor.line,
-                          line: newFlavor.line,
-                          dark: ['#3D2314', '#4A2511', '#1A1A1A', '#6F4E37', '#8B4513', '#DC143C', '#E30B5C', '#C71585', '#E31837', '#4169E1', '#7B3F00', '#D70026', '#8B008B', '#6A0DAD'].includes(newFlavor.color)
-                        };
+                        // Verificar si ya existe
+                        const exists = customFlavors.some(f => 
+                          f.name.toLowerCase().trim() === newFlavor.name.toLowerCase().trim()
+                        );
                         
-                        // Agregar a sabores personalizados
-                        const updatedCustomFlavors = [...customFlavors, flavorToAdd];
-                        setCustomFlavors(updatedCustomFlavors);
-                        
-                        // Guardar en localStorage con verificación
-                        try {
-                          localStorage.setItem('customFlavors', JSON.stringify(updatedCustomFlavors));
-                          // Verificar que se guardó correctamente
-                          const verification = localStorage.getItem('customFlavors');
-                          if (!verification) {
-                            throw new Error('No se pudo guardar en localStorage');
-                          }
-                          toast.success(`✓ Sabor "${newFlavor.name}" guardado permanentemente`);
-                        } catch (error) {
-                          toast.error('Error al guardar sabor: ' + error.message);
+                        if (exists) {
+                          toast.error('Este sabor ya existe');
+                          return;
                         }
                         
-                        setNewFlavor({ name: '', color: '#FFB5C5', line: 'gourmet' });
-                        setShowAddFlavor(false);
+                        try {
+                          // Crear el nuevo sabor con todas sus propiedades
+                          const flavorToAdd = {
+                            name: newFlavor.name.trim(),
+                            color: newFlavor.color,
+                            type: newFlavor.line,
+                            line: newFlavor.line,
+                            dark: ['#3D2314', '#4A2511', '#1A1A1A', '#6F4E37', '#8B4513', '#DC143C', '#E30B5C', '#C71585', '#E31837', '#4169E1', '#7B3F00', '#D70026', '#8B008B', '#6A0DAD'].includes(newFlavor.color)
+                          };
+                          
+                          // GUARDAR EN BASE DE DATOS (disponible para todas las tiendas)
+                          await base44.entities.CustomFlavor.create(flavorToAdd);
+                          
+                          // Actualizar lista local
+                          await queryClient.invalidateQueries(['customFlavors']);
+                          
+                          toast.success(`✓ Sabor "${newFlavor.name}" guardado permanentemente para todas las tiendas`);
+                          
+                          setNewFlavor({ name: '', color: '#FFB5C5', line: 'gourmet' });
+                          setShowAddFlavor(false);
+                        } catch (error) {
+                          console.error('Error al guardar sabor:', error);
+                          toast.error('Error al guardar sabor: ' + error.message);
+                        }
                       }
                     }}>
                           <Check className="w-4 h-4" />
