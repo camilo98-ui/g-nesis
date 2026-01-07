@@ -442,11 +442,11 @@ export default function FreezerMap() {
           position: pos,
           front: frontSlot || {
             row, position: pos, slot_type: 'F', flavor_name: '', flavor_type: 'vacio',
-            color: '', is_empty: true, stock_level: 'full', store_id: selectedStore
+            color: '', is_empty: true, stock_level: 'full', store_id: `${selectedStore}_F${currentFreezer}`
           },
           back: backSlot || {
             row, position: pos, slot_type: 'T', flavor_name: '', flavor_type: 'vacio',
-            color: '', is_empty: true, stock_level: 'full', store_id: selectedStore
+            color: '', is_empty: true, stock_level: 'full', store_id: `${selectedStore}_F${currentFreezer}`
           }
         });
       }
@@ -455,21 +455,21 @@ export default function FreezerMap() {
     return grid;
   }, [slots, selectedStore, numRows, numCols]);
 
-  // Guardar en historial con usuario
+  // Guardar en historial con usuario - GUARDAR TODAS LAS NEVERAS
   const saveToHistory = useCallback(async (changesCount = 1) => {
-    if (!selectedStore || slots.length === 0) return;
+    if (!selectedStore || allFreezersSlots.length === 0) return;
     try {
       const user = await base44.auth.me().catch(() => null);
       await base44.entities.FreezerHistory.create({
         store_id: selectedStore,
         date: format(new Date(), 'yyyy-MM-dd'),
-        snapshot: JSON.stringify(slots),
-        filled_slots: slots.filter((s) => !s.is_empty && s.flavor_name).length,
+        snapshot: JSON.stringify(allFreezersSlots), // CRÍTICO: guardar TODAS las neveras
+        filled_slots: allFreezersSlots.filter((s) => !s.is_empty && s.flavor_name).length,
         changes_count: changesCount,
         created_by_user: user?.full_name || user?.email || 'Usuario'
       });
     } catch (e) {console.error(e);}
-  }, [selectedStore, slots]);
+  }, [selectedStore, allFreezersSlots]);
 
   // Mutation para actualizar slot - CORREGIDO para evitar sobrescribir store_id
   const updateSlotMutation = useMutation({
@@ -969,24 +969,33 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
     try {
       const snapshot = JSON.parse(entry.snapshot);
 
-      // Limpiar actual
-      for (const s of slots) {
+      // Limpiar slots de TODAS las neveras (el snapshot tiene todas)
+      const allCurrentSlots = await base44.entities.FreezerSlot.filter({ store_id: { $regex: `^${selectedStore}_F` } });
+      for (const s of allCurrentSlots) {
         if (s.id) await base44.entities.FreezerSlot.delete(s.id);
       }
 
-      // Restaurar
+      // Restaurar todos los slots del snapshot (conservando su store_id original)
       for (const s of snapshot) {
         await base44.entities.FreezerSlot.create({
-          store_id: selectedStore, row: s.row, position: s.position,
-          flavor_name: s.flavor_name, flavor_type: s.flavor_type,
-          color: s.color, is_empty: s.is_empty, stock_level: s.stock_level
+          store_id: s.store_id, // CRÍTICO: mantener el store_id original que incluye la nevera
+          row: s.row, 
+          position: s.position,
+          slot_type: s.slot_type,
+          flavor_name: s.flavor_name, 
+          flavor_type: s.flavor_type,
+          color: s.color, 
+          is_empty: s.is_empty, 
+          stock_level: s.stock_level
         });
       }
 
-      queryClient.invalidateQueries(['freezerSlots']);
+      await queryClient.invalidateQueries(['freezerSlots']);
+      await queryClient.invalidateQueries(['allFreezersSlots']);
       toast.success('Mapa restaurado');
       setShowHistory(false);
     } catch (e) {
+      console.error('Error al restaurar:', e);
       toast.error('Error al restaurar');
     }
   };
