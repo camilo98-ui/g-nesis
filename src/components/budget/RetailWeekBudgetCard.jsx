@@ -714,11 +714,9 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                   </motion.div>
                 </div>
                 <p className="text-[10px] lg:text-xs text-white/50 lg:text-white/60">
-                  Brecha del mes: {budgetData.accumulatedGap > 0 
-                    ? `⚠️ ${formatCurrency(budgetData.accumulatedGap)} por recuperar` 
-                    : budgetData.accumulatedGap < 0 
-                    ? `✅ ${formatCurrency(Math.abs(budgetData.accumulatedGap))} de superávit`
-                    : '✅ Sin brecha'}
+                  {budgetData.projectionCompliance >= 100 
+                    ? `🚀 Superando meta en ${(budgetData.projectionCompliance - 100).toFixed(0)}%`
+                    : `📈 ${formatCurrency(budgetData.weeklyBudget - budgetData.weekProjection)} para alcanzar meta`}
                 </p>
                 </div>
 
