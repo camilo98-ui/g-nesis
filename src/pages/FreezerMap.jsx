@@ -137,7 +137,7 @@ const IDEAL_RULES = {
 };
 
 // Modal simplificado - SIN selección F/T (se infiere del slot clickeado)
-function FlavorSelectorModal({ selectedSlot, onClose, onSelect, customFlavors }) {
+function FlavorSelectorModal({ selectedSlot, onClose, onSelect, customFlavors, onDeleteFlavor }) {
   const [search, setSearch] = useState('');
 
   // Combinar sabores predefinidos con personalizados
@@ -186,22 +186,40 @@ function FlavorSelectorModal({ selectedSlot, onClose, onSelect, customFlavors })
             <span className="text-[10px] text-gray-500">Vacío</span>
           </button>
           
-          {filteredFlavors.map((flavor) => (
-            <button
-              key={flavor.name}
-              onClick={() => onSelect(flavor)}
-              className="flex flex-col items-center p-2 rounded-lg border border-gray-200 hover:border-pink-400 hover:bg-pink-50 transition-colors"
-            >
-              <div
-                className="w-10 h-10 rounded-full shadow-md mb-1"
-                style={{ 
-                  background: `radial-gradient(circle at 35% 35%, ${flavor.color}ff, ${flavor.color}cc, ${flavor.color}99)`,
-                  boxShadow: `0 4px 12px ${flavor.color}40`
-                }}
-              />
-              <span className="text-[9px] font-medium text-center leading-tight line-clamp-2">{flavor.name}</span>
-            </button>
-          ))}
+          {filteredFlavors.map((flavor) => {
+            const isCustom = customFlavors.some(cf => cf.name === flavor.name);
+            return (
+              <div key={flavor.name} className="relative group">
+                <button
+                  onClick={() => onSelect(flavor)}
+                  className="flex flex-col items-center p-2 rounded-lg border border-gray-200 hover:border-pink-400 hover:bg-pink-50 transition-colors w-full"
+                >
+                  <div
+                    className="w-10 h-10 rounded-full shadow-md mb-1"
+                    style={{ 
+                      background: `radial-gradient(circle at 35% 35%, ${flavor.color}ff, ${flavor.color}cc, ${flavor.color}99)`,
+                      boxShadow: `0 4px 12px ${flavor.color}40`
+                    }}
+                  />
+                  <span className="text-[9px] font-medium text-center leading-tight line-clamp-2">{flavor.name}</span>
+                </button>
+                {isCustom && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (confirm(`¿Eliminar "${flavor.name}"?`)) {
+                        onDeleteFlavor(flavor.id);
+                      }
+                    }}
+                    className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-xs hover:bg-red-600"
+                    title="Eliminar sabor"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+            );
+          })}
         </div>
         
         {filteredFlavors.length === 0 && search && (
@@ -506,6 +524,20 @@ export default function FreezerMap() {
       });
     } catch (e) {console.error(e);}
   }, [selectedStore, allFreezersSlots]);
+
+  // Mutation para borrar sabor personalizado
+  const deleteFlavorMutation = useMutation({
+    mutationFn: async (flavorId) => {
+      return await base44.entities.CustomFlavor.delete(flavorId);
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries(['customFlavors']);
+      toast.success('✓ Sabor eliminado');
+    },
+    onError: (error) => {
+      toast.error('Error al eliminar: ' + error.message);
+    }
+  });
 
   // Mutation para actualizar slot - REFORZADO para prevenir borrado
   const updateSlotMutation = useMutation({
@@ -1784,13 +1816,14 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
       {/* Flavor Selector Modal with Search */}
       <AnimatePresence>
         {showFlavorSelector &&
-        <FlavorSelectorModal
-          selectedSlot={selectedSlot}
-          onClose={() => {setShowFlavorSelector(false);setSelectedSlot(null);}}
-          onSelect={handleFlavorSelect}
-          customFlavors={customFlavors} />
+          <FlavorSelectorModal
+            selectedSlot={selectedSlot}
+            onClose={() => {setShowFlavorSelector(false);setSelectedSlot(null);}}
+            onSelect={handleFlavorSelect}
+            customFlavors={customFlavors}
+            onDeleteFlavor={(flavorId) => deleteFlavorMutation.mutate(flavorId)} />
 
-        }
+          }
       </AnimatePresence>
 
       {/* Audit Panel */}
