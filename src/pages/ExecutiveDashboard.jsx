@@ -925,24 +925,14 @@ Genera:
         <div className="absolute -bottom-1/2 -left-1/2 w-[1000px] h-[1000px] bg-gradient-to-br from-blue-500/10 via-cyan-500/10 to-emerald-500/10 rounded-full blur-3xl opacity-50" />
       </div>
 
+      {/* Back Button - Siempre visible pero sutil */}
+      <Link to={createPageUrl('Home')}>
+        <div className="fixed left-4 top-4 w-9 h-9 rounded-lg bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/15 flex items-center justify-center transition-all cursor-pointer z-50 shadow-lg hover:shadow-xl">
+          <ArrowLeft className="w-4 h-4 text-slate-300 hover:text-white transition-colors" />
+        </div>
+      </Link>
+
       <div id="dashboard-scroll-container" className="w-full h-full mx-auto px-2 py-4 relative z-10 overflow-y-auto">
-        {/* Back Button - Aparece al hacer scroll hacia arriba */}
-        <AnimatePresence>
-          {showBackButton && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="sticky top-2 left-2 z-50 mb-4"
-            >
-              <Link to={createPageUrl('Home')}>
-                <div className="w-8 h-8 rounded-lg bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 flex items-center justify-center transition-all cursor-pointer shadow-lg">
-                  <ArrowLeft className="w-4 h-4 text-slate-400" />
-                </div>
-              </Link>
-            </motion.div>
-          )}
-        </AnimatePresence>
         {/* Header Compacto con Filtro de Semanas */}
         <div className="mb-6">
           <div className="flex items-center justify-between gap-4 flex-wrap">
