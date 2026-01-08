@@ -10,6 +10,12 @@ export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRa
   const [sortOrder, setSortOrder] = useState('desc');
   const [sortBy, setSortBy] = useState('compliance'); // 'compliance' o 'sales'
   const [selectedStore, setSelectedStore] = useState(null);
+  const [hoveredIndex, setHoveredIndex] = useState(null);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  React.useEffect(() => {
+    setIsLoaded(true);
+  }, []);
 
   // Obtener colores profesionales según cumplimiento
   const getBarColor = (compliance) => {
@@ -39,10 +45,12 @@ export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRa
     );
   }, [storesAnalysis, sortOrder, sortBy]);
 
-  // Dividir en dos columnas
+  // Dividir en dos columnas con altura uniforme
   const halfLength = Math.ceil(chartData.length / 2);
   const firstColumn = chartData.slice(0, halfLength);
   const secondColumn = chartData.slice(halfLength);
+  const maxRows = Math.max(firstColumn.length, secondColumn.length);
+  const chartHeight = Math.max(maxRows * 35, 250);
 
   // Datos por día de la semana para la tienda seleccionada
   const weekDaysData = useMemo(() => {
@@ -77,6 +85,42 @@ export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRa
 
   return (
     <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl rounded-lg p-5 border border-white/10 shadow-xl">
+      <style>{`
+        @keyframes pulseGlow {
+          0%, 100% {
+            filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.6));
+            opacity: 1;
+          }
+          50% {
+            filter: drop-shadow(0 0 16px rgba(239, 68, 68, 0.9));
+            opacity: 0.85;
+          }
+        }
+        @keyframes gentleGlow {
+          0%, 100% {
+            filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.3));
+          }
+          50% {
+            filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.5));
+          }
+        }
+        .critical-bar {
+          animation: pulseGlow 2s ease-in-out infinite;
+        }
+        .warning-bar {
+          animation: gentleGlow 3s ease-in-out infinite;
+        }
+        .bar-hovered {
+          filter: brightness(1.2) drop-shadow(0 0 12px currentColor);
+          transform: scaleX(1.02);
+          transition: all 0.3s ease;
+        }
+        .bar-dimmed {
+          opacity: 0.3;
+          filter: grayscale(0.5);
+          transition: all 0.3s ease;
+        }
+      `}</style>
       <div className="flex flex-col gap-3 mb-4">
         <div className="flex items-center justify-between">
           <h3 className="text-base font-black text-white">Tiendas vs PPT Semanal</h3>
@@ -130,7 +174,7 @@ export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRa
       <div className="grid grid-cols-2 gap-4">
         {/* Primera Columna */}
         <div>
-          <ResponsiveContainer width="100%" height={Math.max(firstColumn.length * 35, 200)}>
+          <ResponsiveContainer width="100%" height={chartHeight}>
             <BarChart 
               data={firstColumn}
               layout="vertical"
@@ -230,10 +274,34 @@ export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRa
                 maxBarSize={22}
                 onClick={handleBarClick}
                 cursor="pointer"
+                onMouseEnter={(_, index) => setHoveredIndex(`col1-${index}`)}
+                onMouseLeave={() => setHoveredIndex(null)}
+                isAnimationActive={isLoaded}
+                animationBegin={0}
+                animationDuration={1500}
+                animationEasing="ease-out"
               >
-                {firstColumn.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={`url(#gradient-col1-${index})`} />
-                ))}
+                {firstColumn.map((entry, index) => {
+                  const isCritical = entry.cumplimiento < 70;
+                  const isWarning = entry.cumplimiento >= 70 && entry.cumplimiento < 85;
+                  const isHovered = hoveredIndex === `col1-${index}`;
+                  const isDimmed = hoveredIndex && !isHovered;
+                  
+                  return (
+                    <Cell 
+                      key={`cell-${index}`} 
+                      fill={`url(#gradient-col1-${index})`}
+                      className={`
+                        ${isCritical ? 'critical-bar' : isWarning ? 'warning-bar' : ''}
+                        ${isHovered ? 'bar-hovered' : ''}
+                        ${isDimmed ? 'bar-dimmed' : ''}
+                      `}
+                      style={{
+                        animationDelay: `${index * 100}ms`
+                      }}
+                    />
+                  );
+                })}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
@@ -241,7 +309,7 @@ export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRa
 
         {/* Segunda Columna */}
         <div>
-          <ResponsiveContainer width="100%" height={Math.max(secondColumn.length * 35, 200)}>
+          <ResponsiveContainer width="100%" height={chartHeight}>
             <BarChart 
               data={secondColumn}
               layout="vertical"
@@ -341,10 +409,34 @@ export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRa
                 maxBarSize={22}
                 onClick={handleBarClick}
                 cursor="pointer"
+                onMouseEnter={(_, index) => setHoveredIndex(`col2-${index}`)}
+                onMouseLeave={() => setHoveredIndex(null)}
+                isAnimationActive={isLoaded}
+                animationBegin={0}
+                animationDuration={1500}
+                animationEasing="ease-out"
               >
-                {secondColumn.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={`url(#gradient-col2-${index})`} />
-                ))}
+                {secondColumn.map((entry, index) => {
+                  const isCritical = entry.cumplimiento < 70;
+                  const isWarning = entry.cumplimiento >= 70 && entry.cumplimiento < 85;
+                  const isHovered = hoveredIndex === `col2-${index}`;
+                  const isDimmed = hoveredIndex && !isHovered;
+                  
+                  return (
+                    <Cell 
+                      key={`cell-${index}`} 
+                      fill={`url(#gradient-col2-${index})`}
+                      className={`
+                        ${isCritical ? 'critical-bar' : isWarning ? 'warning-bar' : ''}
+                        ${isHovered ? 'bar-hovered' : ''}
+                        ${isDimmed ? 'bar-dimmed' : ''}
+                      `}
+                      style={{
+                        animationDelay: `${(firstColumn.length + index) * 100}ms`
+                      }}
+                    />
+                  );
+                })}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
