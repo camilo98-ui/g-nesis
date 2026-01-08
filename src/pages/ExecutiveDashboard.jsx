@@ -1111,13 +1111,13 @@ Genera:
                 <div className="space-y-3">
                   <div>
                     <p className="text-xs text-slate-400 mb-1">Venta Acumulada</p>
-                    <p className="text-3xl font-black text-white">{formatShort(monthlyTotals.totalSales)}</p>
+                    <p className="text-2xl font-black text-white">{formatCurrency(monthlyTotals.totalSales)}</p>
                   </div>
                   <div className="h-px bg-white/10"></div>
                   <div>
                     <p className="text-xs text-slate-400 mb-1">Presupuesto Mes</p>
-                    <p className="text-2xl font-bold text-blue-300">
-                      {currentZoneBudget?.sales_budget ? formatShort(currentZoneBudget.sales_budget) : formatShort(monthlyTotals.totalBudget)}
+                    <p className="text-xl font-bold text-blue-300">
+                      {currentZoneBudget?.sales_budget ? formatCurrency(currentZoneBudget.sales_budget) : formatCurrency(monthlyTotals.totalBudget)}
                     </p>
                   </div>
                   <div className="pt-2">
@@ -1179,15 +1179,15 @@ Genera:
                 <div className="space-y-3">
                   <div>
                     <p className="text-xs text-slate-400 mb-1">Venta Promedio/Día</p>
-                    <p className="text-3xl font-black text-white">
-                      {dynamicTotals.avgDailySales > 0 ? formatShort(dynamicTotals.avgDailySales) : '$0'}
+                    <p className="text-2xl font-black text-white">
+                      {dynamicTotals.avgDailySales > 0 ? formatCurrency(dynamicTotals.avgDailySales) : '$0'}
                     </p>
                   </div>
                   <div className="h-px bg-white/10"></div>
                   <div>
                     <p className="text-xs text-slate-400 mb-1">Transacciones/Día</p>
                     <p className="text-2xl font-bold text-amber-300">
-                      {Math.round(dynamicTotals.avgDailyTransactions).toLocaleString()}
+                      {Math.round(dynamicTotals.avgDailyTransactions).toLocaleString('es-CO')}
                     </p>
                   </div>
                   <div className="pt-2">
@@ -1210,8 +1210,8 @@ Genera:
                 <div className="space-y-3">
                   <div>
                     <p className="text-xs text-slate-400 mb-1">Proyección Semana Actual</p>
-                    <p className="text-3xl font-black text-white">
-                      {formatShort(dynamicTotals.currentWeekProjection)}
+                    <p className="text-xl font-black text-white">
+                      {formatCurrency(dynamicTotals.currentWeekProjection)}
                     </p>
                     <p className={`text-sm font-bold ${
                       dynamicTotals.currentWeekBudget > 0 && ((dynamicTotals.currentWeekProjection/dynamicTotals.currentWeekBudget)*100) >= 100 
@@ -1225,8 +1225,8 @@ Genera:
                   <div className="h-px bg-white/10"></div>
                   <div>
                     <p className="text-xs text-slate-400 mb-1">Proyección Cierre Mes</p>
-                    <p className="text-2xl font-bold text-emerald-300">
-                      {formatShort(dynamicTotals.monthProjection)}
+                    <p className="text-lg font-bold text-emerald-300">
+                      {formatCurrency(dynamicTotals.monthProjection)}
                     </p>
                     <p className={`text-xs font-bold ${
                       dynamicTotals.totalMonthBudget > 0 && ((dynamicTotals.monthProjection/dynamicTotals.totalMonthBudget)*100) >= 100 
@@ -1253,7 +1253,7 @@ Genera:
                   <p className="text-xs text-blue-300 mb-1">
                     {dynamicTotals.isRetailWeek ? 'Venta Semana' : 'Venta Acumulada'}
                   </p>
-                  <p className="text-3xl font-black text-white tabular-nums">{formatShort(dynamicTotals.totalSales)}</p>
+                  <p className="text-2xl font-black text-white tabular-nums">{formatCurrency(dynamicTotals.totalSales)}</p>
                   <ResponsiveContainer width="100%" height={30}>
                     <AreaChart data={dailySalesData.slice(-7)}>
                       <defs>
@@ -1300,8 +1300,8 @@ Genera:
                         initial={{ scale: 0.5, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         transition={{ duration: 0.5, type: "spring" }}
-                        className="text-3xl font-black text-red-400 tabular-nums">
-                        {formatShort(Math.max(0, (currentZoneBudget?.sales_budget || monthlyTotals.totalBudget) - monthlyTotals.totalSales))}
+                        className="text-xl font-black text-red-400 tabular-nums">
+                        {formatCurrency(Math.max(0, (currentZoneBudget?.sales_budget || monthlyTotals.totalBudget) - monthlyTotals.totalSales))}
                       </motion.p>
                       <p className="text-[10px] text-red-300">Arrastre Acumulado</p>
                     </div>
@@ -1334,10 +1334,10 @@ Genera:
                           {idx + 1}
                         </span>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs font-bold text-white truncate">{cashier.cashier_name}</p>
-                          <p className="text-[9px] text-slate-400">
-                            {formatShort(cashier.total_sales)} • Ticket: {formatCurrency(cashier.avg_ticket)}
-                          </p>
+                        <p className="text-xs font-bold text-white truncate">{cashier.cashier_name}</p>
+                        <p className="text-[9px] text-slate-400">
+                          {formatCurrency(cashier.total_sales)}
+                        </p>
                         </div>
                       </div>
                     ))}
@@ -2239,9 +2239,9 @@ Genera:
                         <div className="grid grid-cols-4 gap-3">
                           <div className="bg-emerald-500/10 rounded-lg p-3 border border-emerald-500/20">
                             <p className="text-xs text-emerald-300 mb-1">💰 Ventas</p>
-                            <p className="text-lg font-black text-white">{formatShort(cashier.total_sales)}</p>
+                            <p className="text-base font-black text-white">{formatCurrency(cashier.total_sales)}</p>
                             <p className="text-[9px] text-slate-500 mt-1">
-                              Prom: {formatShort(cashier.total_sales / cashier.shifts_count)}/turno
+                              Prom: {formatCurrency(cashier.total_sales / cashier.shifts_count)}/turno
                             </p>
                           </div>
 
