@@ -340,9 +340,18 @@ export default function ExecutiveDashboard() {
     const rangeProjection = avgDailySales * totalDaysInRange;
     
     // PROYECCIÓN DE LA SEMANA ACTUAL (independiente del filtro)
-    const currentWeekNum = Math.ceil((now - RETAIL_WEEK_START) / (7 * 24 * 60 * 60 * 1000)) + 1;
+    // Calcular qué semana retail es hoy
+    const daysSinceRetailStart = Math.floor((now - RETAIL_WEEK_START) / (24 * 60 * 60 * 1000));
+    const currentWeekNum = Math.floor(daysSinceRetailStart / 7) + 1;
     const currentWeekStart = addDays(RETAIL_WEEK_START, (currentWeekNum - 1) * 7);
     const currentWeekEnd = addDays(currentWeekStart, 6);
+    
+    console.log('📅 Semana Actual:', {
+      weekNum: currentWeekNum,
+      weekStart: format(currentWeekStart, 'yyyy-MM-dd'),
+      weekEnd: format(currentWeekEnd, 'yyyy-MM-dd'),
+      today: format(now, 'yyyy-MM-dd')
+    });
     
     const currentWeekSales = allDailySales.filter(s => {
       try {
@@ -353,10 +362,22 @@ export default function ExecutiveDashboard() {
       }
     });
     
+    console.log('💰 Ventas Semana Actual:', {
+      salesCount: currentWeekSales.length,
+      totalSales: currentWeekSales.reduce((sum, s) => sum + (s.total_sales || 0), 0)
+    });
+    
     const currentWeekTotalSales = currentWeekSales.reduce((sum, s) => sum + (s.total_sales || 0), 0);
-    const daysElapsedCurrentWeek = eachDayOfInterval({ start: currentWeekStart, end: now }).filter(d => d <= now).length;
+    const daysElapsedCurrentWeek = eachDayOfInterval({ start: currentWeekStart, end: now })
+      .filter(d => d >= currentWeekStart && d <= now).length;
     const avgDailySalesCurrentWeek = daysElapsedCurrentWeek > 0 ? currentWeekTotalSales / daysElapsedCurrentWeek : 0;
     const currentWeekProjection = avgDailySalesCurrentWeek * 7;
+    
+    console.log('📊 Proyección Semana:', {
+      daysElapsed: daysElapsedCurrentWeek,
+      avgDaily: avgDailySalesCurrentWeek,
+      projection: currentWeekProjection
+    });
     
     const currentWeekBudget = storesAnalysis.reduce((sum, store) => {
       if (!store.hasData || !store.getDailyBudget) return sum;
