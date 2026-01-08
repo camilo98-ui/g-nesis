@@ -814,6 +814,18 @@ Genera:
                     <span className="text-sm font-medium">
                       {format(dateRange.from, 'dd MMM')} - {format(dateRange.to, 'dd MMM')}
                     </span>
+                    {(dateRange.from.getTime() !== RETAIL_WEEK_START.getTime() || dateRange.to.getTime() !== addDays(RETAIL_WEEK_START, 6).getTime()) && (
+                      <X 
+                        className="w-3 h-3 text-red-400 hover:text-red-300" 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDateRange({ 
+                            from: startOfMonth(new Date()), 
+                            to: endOfMonth(new Date()) 
+                          });
+                        }}
+                      />
+                    )}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0 bg-slate-900 border-white/20" align="end">
