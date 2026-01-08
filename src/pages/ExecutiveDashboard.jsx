@@ -29,6 +29,7 @@ export default function ExecutiveDashboard() {
   const [selectedWeeks, setSelectedWeeks] = useState([1, 2, 3, 4]); // Semanas seleccionadas por defecto
   const [customDateRange, setCustomDateRange] = useState({ from: null, to: null });
   const [useCustomDates, setUseCustomDates] = useState(false);
+  const [showBackButton, setShowBackButton] = useState(false);
   
   // Calcular dateRange basado en semanas seleccionadas o fechas personalizadas
   const dateRange = useMemo(() => {
@@ -686,6 +687,25 @@ Genera:
     }
   }, [storesAnalysis.length, isLoading]);
 
+  useEffect(() => {
+    let lastScrollY = 0;
+    const handleScroll = (e) => {
+      const currentScrollY = e.target.scrollTop;
+      if (currentScrollY < lastScrollY && currentScrollY > 100) {
+        setShowBackButton(true);
+      } else {
+        setShowBackButton(false);
+      }
+      lastScrollY = currentScrollY;
+    };
+
+    const container = document.getElementById('dashboard-scroll-container');
+    if (container) {
+      container.addEventListener('scroll', handleScroll);
+      return () => container.removeEventListener('scroll', handleScroll);
+    }
+  }, []);
+
   const tableContextSummary = useMemo(() => {
     const criticalStores = filteredStores.filter(s => s.status === 'critical');
     const totalGap = criticalStores.reduce((sum, s) => sum + Math.max(0, s.gap), 0);
@@ -905,14 +925,24 @@ Genera:
         <div className="absolute -bottom-1/2 -left-1/2 w-[1000px] h-[1000px] bg-gradient-to-br from-blue-500/10 via-cyan-500/10 to-emerald-500/10 rounded-full blur-3xl opacity-50" />
       </div>
 
-      {/* Back Button */}
-      <Link to={createPageUrl('Home')}>
-        <div className="fixed left-3 sm:left-6 top-4 sm:top-8 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 hover:bg-white/20 flex items-center justify-center transition-all cursor-pointer z-50">
-          <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-        </div>
-      </Link>
-
-      <div className="w-full h-full mx-auto px-2 py-4 relative z-10 overflow-y-auto">
+      <div id="dashboard-scroll-container" className="w-full h-full mx-auto px-2 py-4 relative z-10 overflow-y-auto">
+        {/* Back Button - Aparece al hacer scroll hacia arriba */}
+        <AnimatePresence>
+          {showBackButton && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="sticky top-2 left-2 z-50 mb-4"
+            >
+              <Link to={createPageUrl('Home')}>
+                <div className="w-8 h-8 rounded-lg bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 flex items-center justify-center transition-all cursor-pointer shadow-lg">
+                  <ArrowLeft className="w-4 h-4 text-slate-400" />
+                </div>
+              </Link>
+            </motion.div>
+          )}
+        </AnimatePresence>
         {/* Header Compacto con Filtro de Semanas */}
         <div className="mb-6">
           <div className="flex items-center justify-between gap-4 flex-wrap">
