@@ -60,6 +60,7 @@ export default function ExecutiveDashboard() {
   const [viewMode, setViewMode] = useState('day'); // 'day', 'week', 'month'
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [showTopCashiers, setShowTopCashiers] = useState(false);
+  const [hoveredStoreForChart, setHoveredStoreForChart] = useState(null);
 
   const ZONE_NAME = 'Bogotá Noroccidente';
 
@@ -721,31 +722,37 @@ Genera:
     return `${criticalStores.length} tiendas críticas · Brecha total ${formatCurrency(totalGap)}`;
   }, [filteredStores]);
 
-  // Datos para gráficas con diferentes vistas (días, semanas, meses)
+  // Datos para gráficas con diferentes vistas (días, semanas, meses) - ZONA O TIENDA ESPECÍFICA
   const dailySalesData = useMemo(() => {
     if (viewMode === 'day') {
       const days = eachDayOfInterval({ start: dateRange.from, end: dateRange.to });
       return days.map(day => {
+        // Si hay tienda hovereada, filtrar solo sus ventas
         const daySales = allDailySales
           .filter(s => {
             try {
               const saleDate = parseISO(s.date);
-              return isSameDay(saleDate, day);
+              const dateMatch = isSameDay(saleDate, day);
+              const storeMatch = hoveredStoreForChart ? s.store_id === hoveredStoreForChart.code : true;
+              return dateMatch && storeMatch;
             } catch {
               return false;
             }
           })
           .reduce((sum, s) => sum + (s.total_sales || 0), 0);
         
-        const dayBudget = storesAnalysis
-          .filter(s => s.hasData && s.getDailyBudget)
-          .reduce((sum, store) => {
-            try {
-              return sum + store.getDailyBudget(day);
-            } catch {
-              return sum;
-            }
-          }, 0);
+        // Si hay tienda hovereada, calcular solo su presupuesto
+        const dayBudget = hoveredStoreForChart && hoveredStoreForChart.getDailyBudget
+          ? hoveredStoreForChart.getDailyBudget(day)
+          : storesAnalysis
+            .filter(s => s.hasData && s.getDailyBudget)
+            .reduce((sum, store) => {
+              try {
+                return sum + store.getDailyBudget(day);
+              } catch {
+                return sum;
+              }
+            }, 0);
         
         return {
           date: format(day, 'dd/MM'),
@@ -766,7 +773,9 @@ Genera:
             .filter(s => {
               try {
                 const saleDate = parseISO(s.date);
-                return isSameDay(saleDate, day);
+                const dateMatch = isSameDay(saleDate, day);
+                const storeMatch = hoveredStoreForChart ? s.store_id === hoveredStoreForChart.code : true;
+                return dateMatch && storeMatch;
               } catch {
                 return false;
               }
@@ -775,18 +784,20 @@ Genera:
           return sum + daySales;
         }, 0);
         
-        const weekBudget = weekDays.reduce((sum, day) => {
-          const dayBudget = storesAnalysis
-            .filter(s => s.hasData && s.getDailyBudget)
-            .reduce((daySum, store) => {
-              try {
-                return daySum + store.getDailyBudget(day);
-              } catch {
-                return daySum;
-              }
-            }, 0);
-          return sum + dayBudget;
-        }, 0);
+        const weekBudget = hoveredStoreForChart && hoveredStoreForChart.getDailyBudget
+          ? weekDays.reduce((sum, day) => sum + hoveredStoreForChart.getDailyBudget(day), 0)
+          : weekDays.reduce((sum, day) => {
+            const dayBudget = storesAnalysis
+              .filter(s => s.hasData && s.getDailyBudget)
+              .reduce((daySum, store) => {
+                try {
+                  return daySum + store.getDailyBudget(day);
+                } catch {
+                  return daySum;
+                }
+              }, 0);
+            return sum + dayBudget;
+          }, 0);
         
         return {
           date: `S${idx + 1}`,
@@ -1124,6 +1135,7 @@ Genera:
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setSelectedKPIDetail('sales')}
+                onMouseEnter={() => setHoveredStoreForChart(null)}
                 className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-xl rounded-lg p-3 border border-blue-500/20 cursor-pointer transition-all hover:border-blue-400/40 hover:shadow-lg hover:shadow-blue-500/20">
                 <p className="text-xs text-blue-300 mb-2 font-bold uppercase tracking-wider">
                   💰 Mes Actual
@@ -1161,6 +1173,7 @@ Genera:
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setSelectedKPIDetail('transactions')}
+                onMouseEnter={() => setHoveredStoreForChart(null)}
                 className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-xl rounded-lg p-3 border border-purple-500/20 cursor-pointer transition-all hover:border-purple-400/40 hover:shadow-lg hover:shadow-purple-500/20">
                 <p className="text-xs text-purple-300 mb-2 font-bold uppercase tracking-wider">
                   🧊 Ticket y Transacciones
@@ -1192,6 +1205,7 @@ Genera:
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setSelectedKPIDetail('avgSales')}
+                onMouseEnter={() => setHoveredStoreForChart(null)}
                 className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 backdrop-blur-xl rounded-lg p-3 border border-amber-500/20 cursor-pointer transition-all hover:border-amber-400/40 hover:shadow-lg hover:shadow-amber-500/20">
                 <p className="text-xs text-amber-300 mb-2 font-bold uppercase tracking-wider">
                   📊 Promedios Diarios
@@ -1223,6 +1237,7 @@ Genera:
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setSelectedKPIDetail('projection')}
+                onMouseEnter={() => setHoveredStoreForChart(null)}
                 className="bg-gradient-to-br from-emerald-500/10 to-green-500/10 backdrop-blur-xl rounded-lg p-3 border border-emerald-500/20 cursor-pointer transition-all hover:border-emerald-400/40 hover:shadow-lg hover:shadow-emerald-500/20">
                 <p className="text-xs text-emerald-300 mb-2 font-bold uppercase tracking-wider">
                   📈 Proyección
@@ -1269,6 +1284,7 @@ Genera:
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setSelectedKPIDetail('sales')}
+                  onMouseEnter={() => setHoveredStoreForChart(null)}
                   className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-xl rounded-lg p-2 border border-blue-500/20 cursor-pointer transition-all hover:border-blue-400/40 hover:shadow-lg hover:shadow-blue-500/20">
                   <p className="text-[10px] text-blue-300 mb-1">
                     {dynamicTotals.isRetailWeek ? 'Venta Semana' : 'Venta Acumulada'}
@@ -1312,6 +1328,7 @@ Genera:
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setSelectedKPIDetail('gap')}
+                  onMouseEnter={() => setHoveredStoreForChart(null)}
                   className="bg-gradient-to-br from-red-500/10 to-rose-600/10 backdrop-blur-xl rounded-lg p-4 border border-red-500/20 cursor-pointer transition-all hover:border-red-400/40 hover:shadow-lg hover:shadow-red-500/20">
                   <p className="text-xs text-red-300 mb-2 font-bold uppercase tracking-wider">⚠️ Brecha Negativa</p>
                   <div className="space-y-2">
@@ -1341,6 +1358,7 @@ Genera:
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setShowTopCashiers(true)}
+                  onMouseEnter={() => setHoveredStoreForChart(null)}
                   className="bg-gradient-to-br from-amber-500/10 to-yellow-500/10 backdrop-blur-xl rounded-lg p-4 border border-amber-500/20 cursor-pointer transition-all hover:border-amber-400/40 hover:shadow-lg hover:shadow-amber-500/20">
                   <p className="text-xs text-amber-300 mb-2 font-bold uppercase tracking-wider">🏆 Top 3 Cajeros</p>
                   <div className="space-y-1.5">
@@ -1375,7 +1393,9 @@ Genera:
                   <div className="flex flex-col gap-3 mb-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h3 className="text-base font-black text-white mb-1">Ventas vs Presupuesto</h3>
+                        <h3 className="text-base font-black text-white mb-1">
+                          {hoveredStoreForChart ? `📍 ${hoveredStoreForChart.name}` : 'Ventas vs Presupuesto'}
+                        </h3>
                         <p className="text-xs text-slate-400">
                           Venta: {formatCurrency(dailySalesData.reduce((sum, d) => sum + (d.sales * 1000000), 0))} · 
                           Meta: {formatCurrency(dailySalesData.reduce((sum, d) => sum + (d.budget * 1000000), 0))}
@@ -1414,14 +1434,20 @@ Genera:
                           <stop offset="100%" stopColor="#4f46e5" stopOpacity={0.4}/>
                         </linearGradient>
                         <linearGradient id="lineShimmer" x1="0%" y1="0%" x2="100%" y2="0%">
-                          <stop offset="0%" stopColor="#6366f1" stopOpacity={0.4}>
-                            <animate attributeName="offset" values="0;1;0" dur="3s" repeatCount="indefinite" />
+                          <stop offset="-100%" stopColor="#6366f1" stopOpacity={0.3}>
+                            <animate attributeName="offset" values="-1;2" dur="4s" repeatCount="indefinite" />
                           </stop>
-                          <stop offset="50%" stopColor="#818cf8" stopOpacity={1}>
-                            <animate attributeName="offset" values="0.5;1.5;0.5" dur="3s" repeatCount="indefinite" />
+                          <stop offset="-50%" stopColor="#818cf8" stopOpacity={0.8}>
+                            <animate attributeName="offset" values="-0.5;2.5" dur="4s" repeatCount="indefinite" />
                           </stop>
-                          <stop offset="100%" stopColor="#6366f1" stopOpacity={0.4}>
-                            <animate attributeName="offset" values="1;2;1" dur="3s" repeatCount="indefinite" />
+                          <stop offset="0%" stopColor="#a5b4fc" stopOpacity={1}>
+                            <animate attributeName="offset" values="0;3" dur="4s" repeatCount="indefinite" />
+                          </stop>
+                          <stop offset="50%" stopColor="#818cf8" stopOpacity={0.8}>
+                            <animate attributeName="offset" values="0.5;3.5" dur="4s" repeatCount="indefinite" />
+                          </stop>
+                          <stop offset="100%" stopColor="#6366f1" stopOpacity={0.3}>
+                            <animate attributeName="offset" values="1;4" dur="4s" repeatCount="indefinite" />
                           </stop>
                         </linearGradient>
                       </defs>
@@ -1495,23 +1521,19 @@ Genera:
                           const { cx, cy } = props;
                           return (
                             <g>
-                              <circle cx={cx} cy={cy} r={15} fill="#818cf8" opacity={0.1}>
-                                <animate attributeName="r" values="15;22;15" dur="2s" repeatCount="indefinite" />
-                                <animate attributeName="opacity" values="0.1;0.35;0.1" dur="2s" repeatCount="indefinite" />
+                              <circle cx={cx} cy={cy} r={8} fill="#818cf8" opacity={0.08}>
+                                <animate attributeName="r" values="8;10;8" dur="3s" repeatCount="indefinite" />
+                                <animate attributeName="opacity" values="0.08;0.15;0.08" dur="3s" repeatCount="indefinite" />
                               </circle>
-                              <circle cx={cx} cy={cy} r={10} fill="#a5b4fc" opacity={0.3}>
-                                <animate attributeName="r" values="10;14;10" dur="1.5s" repeatCount="indefinite" />
-                                <animate attributeName="opacity" values="0.3;0.6;0.3" dur="1.5s" repeatCount="indefinite" />
-                              </circle>
-                              <circle cx={cx} cy={cy} r={6} fill="none" stroke="#c7d2fe" strokeWidth={2} opacity={0.5}>
-                                <animate attributeName="r" values="6;9;6" dur="1.2s" repeatCount="indefinite" />
-                                <animate attributeName="opacity" values="0.5;0.9;0.5" dur="1.2s" repeatCount="indefinite" />
+                              <circle cx={cx} cy={cy} r={6} fill="#a5b4fc" opacity={0.2}>
+                                <animate attributeName="r" values="6;7;6" dur="2.5s" repeatCount="indefinite" />
+                                <animate attributeName="opacity" values="0.2;0.35;0.2" dur="2.5s" repeatCount="indefinite" />
                               </circle>
                               <circle cx={cx} cy={cy} r={5} fill="#6366f1" stroke="#e0e7ff" strokeWidth={2}>
-                                <animate attributeName="r" values="5;6.5;5" dur="1s" repeatCount="indefinite" />
+                                <animate attributeName="r" values="5;5.5;5" dur="2s" repeatCount="indefinite" />
                               </circle>
-                              <circle cx={cx} cy={cy} r={2.5} fill="#e0e7ff">
-                                <animate attributeName="opacity" values="0.8;1;0.8" dur="0.8s" repeatCount="indefinite" />
+                              <circle cx={cx} cy={cy} r={2} fill="#e0e7ff">
+                                <animate attributeName="opacity" values="0.9;1;0.9" dur="1.5s" repeatCount="indefinite" />
                               </circle>
                             </g>
                           );
@@ -1773,6 +1795,8 @@ Genera:
                       <tr
                         key={store.code}
                         onClick={() => store.hasData && setSelectedStoreDetail(store)}
+                        onMouseEnter={() => store.hasData && setHoveredStoreForChart(store)}
+                        onMouseLeave={() => setHoveredStoreForChart(null)}
                         className={`border-b border-white/5 ${store.hasData ? 'cursor-pointer hover:bg-white/5' : ''}`}
                       >
                         {/* Tienda */}
