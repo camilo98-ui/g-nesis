@@ -1138,29 +1138,29 @@ Genera:
                 onMouseEnter={() => setHoveredStoreForChart(null)}
                 className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-xl rounded-lg p-3 border border-blue-500/20 cursor-pointer transition-all hover:border-blue-400/40 hover:shadow-lg hover:shadow-blue-500/20">
                 <p className="text-xs text-blue-300 mb-2 font-bold uppercase tracking-wider">
-                  💰 Mes Actual
+                  💰 {dynamicTotals.isRetailWeek ? 'Venta Semana' : 'Venta Período'}
                 </p>
                 <div className="space-y-2">
                   <div>
                     <p className="text-xs text-slate-400 mb-0.5">Venta Acumulada</p>
-                    <p className="text-xl font-black text-white">{formatCurrency(monthlyTotals.totalSales)}</p>
+                    <p className="text-xl font-black text-white">{formatCurrency(dynamicTotals.totalSales)}</p>
                   </div>
                   <div className="h-px bg-white/10"></div>
                   <div>
-                    <p className="text-xs text-slate-400 mb-0.5">Presupuesto Mes</p>
+                    <p className="text-xs text-slate-400 mb-0.5">Presupuesto</p>
                     <p className="text-lg font-bold text-blue-300">
-                      {currentZoneBudget?.sales_budget ? formatCurrency(currentZoneBudget.sales_budget) : formatCurrency(monthlyTotals.totalBudget)}
+                      {formatCurrency(dynamicTotals.totalBudget)}
                     </p>
                   </div>
                   <div className="pt-1">
                     <p className={`text-2xl font-black ${
-                      (currentZoneBudget?.sales_budget || monthlyTotals.totalBudget) > 0 && 
-                      ((monthlyTotals.totalSales/(currentZoneBudget?.sales_budget || monthlyTotals.totalBudget))*100) >= 100 ? 'text-emerald-400' : 
-                      (currentZoneBudget?.sales_budget || monthlyTotals.totalBudget) > 0 && 
-                      ((monthlyTotals.totalSales/(currentZoneBudget?.sales_budget || monthlyTotals.totalBudget))*100) >= 85 ? 'text-amber-400' : 'text-red-400'
+                      dynamicTotals.totalBudget > 0 && 
+                      ((dynamicTotals.totalSales/dynamicTotals.totalBudget)*100) >= 100 ? 'text-emerald-400' : 
+                      dynamicTotals.totalBudget > 0 && 
+                      ((dynamicTotals.totalSales/dynamicTotals.totalBudget)*100) >= 85 ? 'text-amber-400' : 'text-red-400'
                     }`}>
-                      {(currentZoneBudget?.sales_budget || monthlyTotals.totalBudget) > 0 
-                        ? ((monthlyTotals.totalSales/(currentZoneBudget?.sales_budget || monthlyTotals.totalBudget))*100).toFixed(1) 
+                      {dynamicTotals.totalBudget > 0 
+                        ? ((dynamicTotals.totalSales/dynamicTotals.totalBudget)*100).toFixed(1) 
                         : '0.0'}%
                     </p>
                     <p className="text-xs text-slate-500">Cumplimiento Actual</p>
