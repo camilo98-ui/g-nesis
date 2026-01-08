@@ -39,6 +39,11 @@ export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRa
     );
   }, [storesAnalysis, sortOrder, sortBy]);
 
+  // Dividir en dos columnas
+  const halfLength = Math.ceil(chartData.length / 2);
+  const firstColumn = chartData.slice(0, halfLength);
+  const secondColumn = chartData.slice(halfLength);
+
   // Datos por día de la semana para la tienda seleccionada
   const weekDaysData = useMemo(() => {
     if (!selectedStore) return null;
@@ -75,7 +80,9 @@ export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRa
       <div className="flex flex-col gap-3 mb-4">
         <div className="flex items-center justify-between">
           <h3 className="text-base font-black text-white">Tiendas vs PPT Semanal</h3>
-          <span className="text-xs px-2 py-1 rounded bg-white/10 text-slate-300">Top 8</span>
+          <span className="text-xs px-2 py-1 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+            {chartData.length} Tiendas
+          </span>
         </div>
         
         {/* Filtros */}
@@ -119,118 +126,230 @@ export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRa
         </div>
       </div>
 
-      <ResponsiveContainer width="100%" height={340}>
-        <BarChart 
-          data={chartData.slice(0, 8)}
-          layout="vertical"
-          margin={{ left: 10, right: 10 }}
-        >
-          <defs>
-            {chartData.slice(0, 8).map((item, idx) => (
-              <linearGradient key={idx} id={`gradient-${idx}`} x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor={item.colors.main} stopOpacity={0.8} />
-                <stop offset="50%" stopColor={item.colors.light} stopOpacity={1} />
-                <stop offset="100%" stopColor={item.colors.dark} stopOpacity={1} />
-              </linearGradient>
-            ))}
-          </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.15} horizontal={false} />
-          <XAxis 
-            type="number" 
-            stroke="#6b7280" 
-            fontSize={10}
-            tickLine={false}
-            tickFormatter={(v) => `$${v.toFixed(1)}M`}
-          />
-          <YAxis 
-            type="category" 
-            dataKey="name" 
-            stroke="#9ca3af" 
-            fontSize={10} 
-            width={70}
-            tickLine={false}
-          />
-          <Tooltip
-            content={({ active, payload }) => {
-              if (!active || !payload || payload.length === 0) return null;
-              
-              const data = payload[0].payload;
-              const gap = (data.presupuesto - data.venta) * 1000000;
-              
-              return (
-                <div className="bg-slate-900/98 backdrop-blur-xl border-2 border-white/20 rounded-xl p-4 shadow-2xl max-w-xs">
-                  {/* Título */}
-                  <div className="border-b border-white/10 pb-2 mb-3">
-                    <p className="text-xs font-bold text-slate-300 uppercase tracking-wider">
-                      {data.fullName}
-                    </p>
-                  </div>
-
-                  {/* Valores principales */}
-                  <div className="space-y-1.5 mb-3 text-xs">
-                    <div className="flex items-center justify-between">
-                      <span className="text-slate-400">💰 Venta:</span>
-                      <span className="font-bold text-emerald-400">
-                        {formatCurrency(data.venta * 1000000)}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-slate-400">🎯 Meta:</span>
-                      <span className="font-bold text-indigo-400">
-                        {formatCurrency(data.presupuesto * 1000000)}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-slate-400">📊 Cumplimiento:</span>
-                      <span className={`font-bold ${
-                        data.cumplimiento >= 100 ? 'text-emerald-400' : 
-                        data.cumplimiento >= 85 ? 'text-amber-400' : 'text-red-400'
-                      }`}>
-                        {data.cumplimiento.toFixed(1)}%
-                      </span>
-                    </div>
-                    {gap !== 0 && (
-                      <div className="flex items-center justify-between">
-                        <span className="text-slate-400">{gap > 0 ? '⚠️ Gap:' : '✅ Exceso:'}</span>
-                        <span className={`font-bold ${gap > 0 ? 'text-red-400' : 'text-emerald-400'}`}>
-                          {formatCurrency(Math.abs(gap))}
-                        </span>
+      {/* Dos columnas de gráficas */}
+      <div className="grid grid-cols-2 gap-4">
+        {/* Primera Columna */}
+        <div>
+          <ResponsiveContainer width="100%" height={Math.max(firstColumn.length * 35, 200)}>
+            <BarChart 
+              data={firstColumn}
+              layout="vertical"
+              margin={{ left: 10, right: 10 }}
+            >
+              <defs>
+                {firstColumn.map((item, idx) => (
+                  <linearGradient key={idx} id={`gradient-col1-${idx}`} x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor={item.colors.main} stopOpacity={0.8} />
+                    <stop offset="50%" stopColor={item.colors.light} stopOpacity={1} />
+                    <stop offset="100%" stopColor={item.colors.dark} stopOpacity={1} />
+                  </linearGradient>
+                ))}
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.15} horizontal={false} />
+              <XAxis 
+                type="number" 
+                stroke="#6b7280" 
+                fontSize={10}
+                tickLine={false}
+                tickFormatter={(v) => `$${v.toFixed(1)}M`}
+              />
+              <YAxis 
+                type="category" 
+                dataKey="name" 
+                stroke="#9ca3af" 
+                fontSize={10} 
+                width={70}
+                tickLine={false}
+              />
+              <Tooltip
+                content={({ active, payload }) => {
+                  if (!active || !payload || payload.length === 0) return null;
+                  
+                  const data = payload[0].payload;
+                  const gap = (data.presupuesto - data.venta) * 1000000;
+                  
+                  return (
+                    <div className="bg-slate-900/98 backdrop-blur-xl border-2 border-white/20 rounded-xl p-4 shadow-2xl max-w-xs">
+                      <div className="border-b border-white/10 pb-2 mb-3">
+                        <p className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+                          {data.fullName}
+                        </p>
                       </div>
-                    )}
-                  </div>
+                      <div className="space-y-1.5 mb-3 text-xs">
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-400">💰 Venta:</span>
+                          <span className="font-bold text-emerald-400">
+                            {formatCurrency(data.venta * 1000000)}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-400">🎯 Meta:</span>
+                          <span className="font-bold text-indigo-400">
+                            {formatCurrency(data.presupuesto * 1000000)}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-400">📊 Cumplimiento:</span>
+                          <span className={`font-bold ${
+                            data.cumplimiento >= 100 ? 'text-emerald-400' : 
+                            data.cumplimiento >= 85 ? 'text-amber-400' : 'text-red-400'
+                          }`}>
+                            {data.cumplimiento.toFixed(1)}%
+                          </span>
+                        </div>
+                        {gap !== 0 && (
+                          <div className="flex items-center justify-between">
+                            <span className="text-slate-400">{gap > 0 ? '⚠️ Gap:' : '✅ Exceso:'}</span>
+                            <span className={`font-bold ${gap > 0 ? 'text-red-400' : 'text-emerald-400'}`}>
+                              {formatCurrency(Math.abs(gap))}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="border-t border-white/10 pt-3">
+                        <p className="text-[10px] font-bold text-blue-300 uppercase tracking-wider mb-1.5">
+                          💡 Acción
+                        </p>
+                        <p className="text-xs text-slate-200 leading-relaxed">
+                          {data.cumplimiento >= 100 
+                            ? 'Excelente desempeño. Click para ver detalle diario.' 
+                            : data.cumplimiento >= 85 
+                            ? 'Cerca de la meta. Click para analizar días críticos.'
+                            : 'Requiere atención. Click para plan de acción diario.'}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                }}
+                cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                wrapperStyle={{ outline: 'none' }}
+              />
+              <Bar 
+                dataKey="venta" 
+                radius={[0, 8, 8, 0]} 
+                maxBarSize={22}
+                onClick={handleBarClick}
+                cursor="pointer"
+              >
+                {firstColumn.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={`url(#gradient-col1-${index})`} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
 
-                  {/* Insight contextual */}
-                  <div className="border-t border-white/10 pt-3">
-                    <p className="text-[10px] font-bold text-blue-300 uppercase tracking-wider mb-1.5">
-                      💡 Acción
-                    </p>
-                    <p className="text-xs text-slate-200 leading-relaxed">
-                      {data.cumplimiento >= 100 
-                        ? 'Excelente desempeño. Click para ver detalle diario.' 
-                        : data.cumplimiento >= 85 
-                        ? 'Cerca de la meta. Click para analizar días críticos.'
-                        : 'Requiere atención. Click para plan de acción diario.'}
-                    </p>
-                  </div>
-                </div>
-              );
-            }}
-            cursor={{ fill: 'rgba(255,255,255,0.05)' }}
-            wrapperStyle={{ outline: 'none' }}
-          />
-          <Bar 
-            dataKey="venta" 
-            radius={[0, 8, 8, 0]} 
-            maxBarSize={22}
-            onClick={handleBarClick}
-            cursor="pointer"
-          >
-            {chartData.slice(0, 8).map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={`url(#gradient-${index})`} />
-            ))}
-          </Bar>
-        </BarChart>
-      </ResponsiveContainer>
+        {/* Segunda Columna */}
+        <div>
+          <ResponsiveContainer width="100%" height={Math.max(secondColumn.length * 35, 200)}>
+            <BarChart 
+              data={secondColumn}
+              layout="vertical"
+              margin={{ left: 10, right: 10 }}
+            >
+              <defs>
+                {secondColumn.map((item, idx) => (
+                  <linearGradient key={idx} id={`gradient-col2-${idx}`} x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor={item.colors.main} stopOpacity={0.8} />
+                    <stop offset="50%" stopColor={item.colors.light} stopOpacity={1} />
+                    <stop offset="100%" stopColor={item.colors.dark} stopOpacity={1} />
+                  </linearGradient>
+                ))}
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.15} horizontal={false} />
+              <XAxis 
+                type="number" 
+                stroke="#6b7280" 
+                fontSize={10}
+                tickLine={false}
+                tickFormatter={(v) => `$${v.toFixed(1)}M`}
+              />
+              <YAxis 
+                type="category" 
+                dataKey="name" 
+                stroke="#9ca3af" 
+                fontSize={10} 
+                width={70}
+                tickLine={false}
+              />
+              <Tooltip
+                content={({ active, payload }) => {
+                  if (!active || !payload || payload.length === 0) return null;
+                  
+                  const data = payload[0].payload;
+                  const gap = (data.presupuesto - data.venta) * 1000000;
+                  
+                  return (
+                    <div className="bg-slate-900/98 backdrop-blur-xl border-2 border-white/20 rounded-xl p-4 shadow-2xl max-w-xs">
+                      <div className="border-b border-white/10 pb-2 mb-3">
+                        <p className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+                          {data.fullName}
+                        </p>
+                      </div>
+                      <div className="space-y-1.5 mb-3 text-xs">
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-400">💰 Venta:</span>
+                          <span className="font-bold text-emerald-400">
+                            {formatCurrency(data.venta * 1000000)}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-400">🎯 Meta:</span>
+                          <span className="font-bold text-indigo-400">
+                            {formatCurrency(data.presupuesto * 1000000)}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-400">📊 Cumplimiento:</span>
+                          <span className={`font-bold ${
+                            data.cumplimiento >= 100 ? 'text-emerald-400' : 
+                            data.cumplimiento >= 85 ? 'text-amber-400' : 'text-red-400'
+                          }`}>
+                            {data.cumplimiento.toFixed(1)}%
+                          </span>
+                        </div>
+                        {gap !== 0 && (
+                          <div className="flex items-center justify-between">
+                            <span className="text-slate-400">{gap > 0 ? '⚠️ Gap:' : '✅ Exceso:'}</span>
+                            <span className={`font-bold ${gap > 0 ? 'text-red-400' : 'text-emerald-400'}`}>
+                              {formatCurrency(Math.abs(gap))}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="border-t border-white/10 pt-3">
+                        <p className="text-[10px] font-bold text-blue-300 uppercase tracking-wider mb-1.5">
+                          💡 Acción
+                        </p>
+                        <p className="text-xs text-slate-200 leading-relaxed">
+                          {data.cumplimiento >= 100 
+                            ? 'Excelente desempeño. Click para ver detalle diario.' 
+                            : data.cumplimiento >= 85 
+                            ? 'Cerca de la meta. Click para analizar días críticos.'
+                            : 'Requiere atención. Click para plan de acción diario.'}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                }}
+                cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                wrapperStyle={{ outline: 'none' }}
+              />
+              <Bar 
+                dataKey="venta" 
+                radius={[0, 8, 8, 0]} 
+                maxBarSize={22}
+                onClick={handleBarClick}
+                cursor="pointer"
+              >
+                {secondColumn.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={`url(#gradient-col2-${index})`} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
 
       {/* Modal de días de la semana - Pantalla Completa con Portal */}
       {selectedStore && weekDaysData && createPortal(
