@@ -886,7 +886,7 @@ export default function FreezerMap() {
   };
 
   // Auditoría - ANÁLISIS POR NEVERA Y ACUMULADO
-  const runAudit = useCallback(() => {
+  const runAudit = useCallback((freezerToShow = null) => {
     // Análisis por nevera individual
     const freezerAnalysis = {};
     
@@ -900,17 +900,19 @@ export default function FreezerMap() {
       const totalSlotsInFreezer = dimensions.rows * dimensions.cols * 2;
       const emptySlots = totalSlotsInFreezer - filledSlots.length;
 
-      // Detectar repetidos
+      // Detectar repetidos CORRECTAMENTE - por nombre exacto
       const flavorCounts = {};
       const flavorDetails = {};
       filledSlots.forEach((s) => {
         const key = s.flavor_name.toLowerCase().trim();
-        flavorCounts[key] = (flavorCounts[key] || 0) + 1;
-        if (!flavorDetails[key]) {
+        if (!flavorCounts[key]) {
+          flavorCounts[key] = 0;
           flavorDetails[key] = { name: s.flavor_name, positions: [] };
         }
+        flavorCounts[key]++;
         flavorDetails[key].positions.push(`${s.row}-${s.position}${s.slot_type || 'F'}`);
       });
+      
       const repeatedFlavors = Object.entries(flavorCounts)
         .filter(([_, count]) => count > 2)
         .map(([key, count]) => ({
@@ -945,25 +947,28 @@ export default function FreezerMap() {
       };
     });
 
-    // ACUMULADO TOTAL
+    // ACUMULADO TOTAL - CORREGIDO
     const allFilled = allFreezersSlots.filter(s => !s.is_empty && s.flavor_name);
-    const totalCapacity = Object.values(freezerDimensions).reduce((sum, dim) => 
-      sum + (dim.rows * dim.cols * 2), 0
-    );
+    const totalCapacity = availableFreezers.reduce((sum, freezerNum) => {
+      const dim = freezerDimensions[freezerNum] || { rows: 7, cols: 5 };
+      return sum + (dim.rows * dim.cols * 2);
+    }, 0);
     const totalEmpty = totalCapacity - allFilled.length;
 
-    // Repetidos totales
+    // Repetidos totales CORREGIDOS
     const totalFlavorCounts = {};
     const totalFlavorDetails = {};
     allFilled.forEach((s) => {
       const key = s.flavor_name.toLowerCase().trim();
-      totalFlavorCounts[key] = (totalFlavorCounts[key] || 0) + 1;
-      if (!totalFlavorDetails[key]) {
+      if (!totalFlavorCounts[key]) {
+        totalFlavorCounts[key] = 0;
         totalFlavorDetails[key] = { name: s.flavor_name, positions: [] };
       }
+      totalFlavorCounts[key]++;
       const freezerNum = s.store_id?.split('_F')[1] || '1';
       totalFlavorDetails[key].positions.push(`N${freezerNum}:${s.row}-${s.position}${s.slot_type || 'F'}`);
     });
+    
     const totalRepeated = Object.entries(totalFlavorCounts)
       .filter(([_, count]) => count > 2)
       .map(([key, count]) => ({
@@ -1007,7 +1012,8 @@ export default function FreezerMap() {
         misplacedSlots: totalMisplaced,
         efficiency: Math.max(0, Math.min(100, totalEfficiency))
       },
-      suggestions
+      suggestions,
+      selectedFreezer: freezerToShow
     });
     setShowAudit(true);
   }, [allFreezersSlots, selectedStore, availableFreezers, freezerDimensions]);
@@ -1152,7 +1158,12 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                 size="sm"
                 variant={currentFreezer === num ? "default" : "ghost"}
                 onClick={() => setCurrentFreezer(num)}
-                className={`text-xs h-7 px-3 ${currentFreezer === num ? 'bg-cyan-500 text-white' : 'text-cyan-700 hover:bg-cyan-200'}`}>
+                onContextMenu={(e) => {
+                  e.preventDefault();
+                  runAudit(num);
+                }}
+                className={`text-xs h-7 px-3 ${currentFreezer === num ? 'bg-cyan-500 text-white' : 'text-cyan-700 hover:bg-cyan-200'}`}
+                title="Click derecho para ver resumen de esta nevera">
 
                     🧊 {num}
                   </Button>
