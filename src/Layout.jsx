@@ -123,7 +123,7 @@ export default function Layout({ children, currentPageName }) {
       <ErrorBoundary>
         <div className="min-h-screen app-container">
           {/* Main Content */}
-          <main className="pt-4 min-h-screen pb-4 relative">
+          <main className="h-screen overflow-hidden relative">
           {/* Professional Gradient Background - Enhanced */}
           <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
             {/* Base gradient más vibrante */}
@@ -148,7 +148,7 @@ export default function Layout({ children, currentPageName }) {
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.2),transparent_60%)]" />
           </div>
 
-          <div className="container mx-auto px-2 sm:px-4 relative z-10">
+          <div className="w-full h-full relative z-10">
             {children}
           </div>
         </main>
