@@ -10,8 +10,6 @@ export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRa
   const [sortOrder, setSortOrder] = useState('desc');
   const [sortBy, setSortBy] = useState('compliance'); // 'compliance' o 'sales'
   const [selectedStore, setSelectedStore] = useState(null);
-  const [chartDateRange, setChartDateRange] = useState(dateRange);
-  const [viewMode, setViewMode] = useState('week'); // 'day', 'week', 'month'
 
   // Obtener colores profesionales según cumplimiento
   const getBarColor = (compliance) => {
@@ -99,24 +97,9 @@ export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRa
             {sortOrder === 'desc' ? 'Mayor → Menor' : 'Menor → Mayor'}
           </button>
           
-          <select
-            value={`${format(chartDateRange.from, 'yyyy-MM-dd')}`}
-            onChange={(e) => {
-              const startDate = new Date(e.target.value);
-              setChartDateRange({ from: startDate, to: addDays(startDate, 6) });
-            }}
-            className="px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-xs transition-all"
-          >
-            {Array.from({ length: 8 }, (_, i) => {
-              const weekStart = addDays(new Date(2025, 11, 29), i * 7);
-              const weekEnd = addDays(weekStart, 6);
-              return (
-                <option key={i} value={format(weekStart, 'yyyy-MM-dd')} className="bg-slate-900">
-                  Semana {i + 1} ({format(weekStart, 'dd MMM')} - {format(weekEnd, 'dd MMM')})
-                </option>
-              );
-            })}
-          </select>
+          <span className="text-xs text-slate-400 px-2 py-1 bg-white/5 rounded-lg border border-white/10">
+            📅 {format(dateRange.from, 'dd MMM')} - {format(dateRange.to, 'dd MMM')}
+          </span>
         </div>
       </div>
 

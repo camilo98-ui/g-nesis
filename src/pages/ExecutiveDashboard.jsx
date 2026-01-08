@@ -5,8 +5,10 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { STORES, getDisplayName } from '@/components/StoreSelector';
-import DateFilter from '@/components/DateFilter';
-import { ArrowLeft, Search, TrendingUp, TrendingDown, Eye, Zap, Award, Brain, ArrowUpDown, ArrowUp, ArrowDown, BarChart3, Settings, X, Download, Filter } from 'lucide-react';
+import { ArrowLeft, Search, TrendingUp, TrendingDown, Eye, Zap, Award, Brain, ArrowUpDown, ArrowUp, ArrowDown, BarChart3, Settings, X, Download, Filter, CalendarDays } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { format, startOfMonth, eachDayOfInterval, startOfWeek, endOfWeek, parseISO, eachWeekOfInterval, addDays, isSameDay, isWithinInterval, endOfMonth } from 'date-fns';
 import ExecutiveStoreDetailModal from '../components/executive/ExecutiveStoreDetailModal';
@@ -39,6 +41,7 @@ export default function ExecutiveDashboard() {
   const [sortConfig, setSortConfig] = useState({ key: 'compliance', direction: 'desc' });
   const [columnFilters, setColumnFilters] = useState({});
   const [viewMode, setViewMode] = useState('day'); // 'day', 'week', 'month'
+  const [calendarOpen, setCalendarOpen] = useState(false);
 
   const ZONE_NAME = 'Bogotá Noroccidente';
 
@@ -719,28 +722,94 @@ Genera:
             </div>
 
             <div className="flex items-center gap-2 flex-wrap">
-              {/* Filtro de Semanas Retail */}
-              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-xl rounded-lg px-3 py-2 border border-white/20">
-                <Filter className="w-4 h-4 text-blue-400" />
-                <select
-                  value={`${format(dateRange.from, 'yyyy-MM-dd')}`}
-                  onChange={(e) => {
-                    const startDate = new Date(e.target.value);
-                    setDateRange({ from: startDate, to: addDays(startDate, 6) });
-                  }}
-                  className="bg-transparent text-white text-sm font-medium outline-none cursor-pointer"
-                >
-                  {Array.from({ length: 8 }, (_, i) => {
-                    const weekStart = addDays(RETAIL_WEEK_START, i * 7);
-                    const weekEnd = addDays(weekStart, 6);
-                    return (
-                      <option key={i} value={format(weekStart, 'yyyy-MM-dd')} className="bg-slate-900">
-                        Semana {i + 1} ({format(weekStart, 'dd MMM')} - {format(weekEnd, 'dd MMM')})
-                      </option>
-                    );
-                  })}
-                </select>
-              </div>
+              {/* Calendario de Fechas */}
+              <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+                <PopoverTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    className="bg-white/10 backdrop-blur-xl border-white/20 text-white hover:bg-white/20 hover:text-white gap-2"
+                  >
+                    <CalendarDays className="w-4 h-4 text-blue-400" />
+                    <span className="text-sm font-medium">
+                      {format(dateRange.from, 'dd MMM')} - {format(dateRange.to, 'dd MMM')}
+                    </span>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 bg-slate-900 border-white/20" align="end">
+                  <div className="p-4 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-bold text-white">Seleccionar Rango</p>
+                      <button 
+                        onClick={() => {
+                          setDateRange({ from: RETAIL_WEEK_START, to: addDays(RETAIL_WEEK_START, 6) });
+                        }}
+                        className="text-xs text-blue-400 hover:text-blue-300"
+                      >
+                        Reiniciar
+                      </button>
+                    </div>
+                    
+                    {/* Accesos rápidos de semanas */}
+                    <div className="space-y-2">
+                      <p className="text-xs text-slate-400 font-medium">Semanas Retail</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {Array.from({ length: 8 }, (_, i) => {
+                          const weekStart = addDays(RETAIL_WEEK_START, i * 7);
+                          const weekEnd = addDays(weekStart, 6);
+                          const isSelected = format(dateRange.from, 'yyyy-MM-dd') === format(weekStart, 'yyyy-MM-dd');
+                          return (
+                            <button
+                              key={i}
+                              onClick={() => {
+                                setDateRange({ from: weekStart, to: weekEnd });
+                                setCalendarOpen(false);
+                              }}
+                              className={`px-2 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                                isSelected 
+                                  ? 'bg-blue-500 text-white' 
+                                  : 'bg-white/10 text-slate-300 hover:bg-white/20'
+                              }`}
+                            >
+                              S{i + 1} ({format(weekStart, 'dd/MM')})
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    
+                    <div className="border-t border-white/10 pt-4">
+                      <p className="text-xs text-slate-400 font-medium mb-2">Rango Personalizado</p>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-[10px] text-slate-500 mb-1">Desde</p>
+                          <Calendar
+                            mode="single"
+                            selected={dateRange.from}
+                            onSelect={(date) => date && setDateRange(prev => ({ ...prev, from: date }))}
+                            className="rounded-md border border-white/10 bg-slate-800"
+                          />
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-slate-500 mb-1">Hasta</p>
+                          <Calendar
+                            mode="single"
+                            selected={dateRange.to}
+                            onSelect={(date) => date && setDateRange(prev => ({ ...prev, to: date }))}
+                            className="rounded-md border border-white/10 bg-slate-800"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <Button 
+                      onClick={() => setCalendarOpen(false)}
+                      className="w-full bg-blue-500 hover:bg-blue-600"
+                    >
+                      Aplicar Filtro
+                    </Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
 
               <div className="relative w-48">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
