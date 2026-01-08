@@ -25,10 +25,21 @@ export default function ExecutiveDashboard() {
   // Semana retail iniciando 29 de diciembre 2025
   const RETAIL_WEEK_START = new Date(2025, 11, 29); // 29 dic 2025
   
-  const [dateRange, setDateRange] = useState({ 
-    from: RETAIL_WEEK_START, // 29 dic 2025
-    to: endOfMonth(new Date())
-  });
+  // Selector múltiple de semanas
+  const [selectedWeeks, setSelectedWeeks] = useState([1, 2, 3, 4]); // Semanas seleccionadas por defecto
+  
+  // Calcular dateRange basado en semanas seleccionadas
+  const dateRange = useMemo(() => {
+    if (selectedWeeks.length === 0) {
+      return { from: RETAIL_WEEK_START, to: RETAIL_WEEK_START };
+    }
+    const minWeek = Math.min(...selectedWeeks);
+    const maxWeek = Math.max(...selectedWeeks);
+    return {
+      from: addDays(RETAIL_WEEK_START, (minWeek - 1) * 7),
+      to: addDays(RETAIL_WEEK_START, maxWeek * 7 - 1)
+    };
+  }, [selectedWeeks]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStoreDetail, setSelectedStoreDetail] = useState(null);
   const [aiInsights, setAiInsights] = useState(null);
@@ -797,17 +808,17 @@ Genera:
               <h1 className="text-2xl font-bold text-white mb-1">
                 {ZONE_NAME}
               </h1>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-wrap">
                 <p className="text-sm text-slate-400">
                   {format(dateRange.from, 'dd MMM')} - {format(dateRange.to, 'dd MMM yyyy')}
                 </p>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">
-                  {(() => {
-                    const startWeek = Math.ceil((dateRange.from - RETAIL_WEEK_START) / (7 * 24 * 60 * 60 * 1000)) + 1;
-                    const endWeek = Math.ceil((dateRange.to - RETAIL_WEEK_START) / (7 * 24 * 60 * 60 * 1000)) + 1;
-                    return startWeek === endWeek ? `Semana ${startWeek}` : `Semanas ${startWeek}-${endWeek}`;
-                  })()}
-                </span>
+                <div className="flex items-center gap-2 flex-wrap">
+                  {selectedWeeks.sort((a, b) => a - b).map((week, idx) => (
+                    <span key={week} className="text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                      S{week}
+                    </span>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -823,15 +834,12 @@ Genera:
                     <span className="text-sm font-medium">
                       {format(dateRange.from, 'dd MMM')} - {format(dateRange.to, 'dd MMM')}
                     </span>
-                    {(dateRange.from.getTime() !== RETAIL_WEEK_START.getTime() || dateRange.to.getTime() !== endOfMonth(new Date()).getTime()) && (
+                    {selectedWeeks.length < 4 && (
                       <X 
                         className="w-3 h-3 text-red-400 hover:text-red-300" 
                         onClick={(e) => {
                           e.stopPropagation();
-                          setDateRange({ 
-                            from: RETAIL_WEEK_START, 
-                            to: endOfMonth(new Date()) 
-                          });
+                          setSelectedWeeks([1, 2, 3, 4]);
                         }}
                       />
                     )}
@@ -840,71 +848,62 @@ Genera:
                 <PopoverContent className="w-auto p-0 bg-slate-900 border-white/20" align="end">
                   <div className="p-4 space-y-4">
                     <div className="flex items-center justify-between">
-                      <p className="text-sm font-bold text-white">Seleccionar Rango</p>
-                      <button 
-                        onClick={() => {
-                          setDateRange({ 
-                            from: RETAIL_WEEK_START, 
-                            to: endOfMonth(new Date()) 
-                          });
-                        }}
-                        className="text-xs text-blue-400 hover:text-blue-300"
-                      >
-                        Mes Completo
-                      </button>
+                      <div>
+                        <p className="text-sm font-bold text-white">Seleccionar Semanas</p>
+                        <p className="text-xs text-slate-400 mt-0.5">
+                          {selectedWeeks.length === 0 ? 'Ninguna seleccionada' : `${selectedWeeks.length} semanas seleccionadas`}
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={() => setSelectedWeeks([])}
+                          className="text-xs text-red-400 hover:text-red-300"
+                        >
+                          Limpiar
+                        </button>
+                        <button 
+                          onClick={() => setSelectedWeeks([1, 2, 3, 4])}
+                          className="text-xs text-blue-400 hover:text-blue-300"
+                        >
+                          Mes Completo
+                        </button>
+                      </div>
                     </div>
                     
-                    {/* Accesos rápidos de semanas */}
+                    {/* Selector múltiple de semanas */}
                     <div className="space-y-2">
-                      <p className="text-xs text-slate-400 font-medium">Semanas Retail</p>
-                      <div className="grid grid-cols-2 gap-2">
+                      <p className="text-xs text-slate-400 font-medium">Click para seleccionar/deseleccionar</p>
+                      <div className="grid grid-cols-4 gap-2">
                         {Array.from({ length: 8 }, (_, i) => {
+                          const weekNum = i + 1;
                           const weekStart = addDays(RETAIL_WEEK_START, i * 7);
                           const weekEnd = addDays(weekStart, 6);
-                          const isSelected = format(dateRange.from, 'yyyy-MM-dd') === format(weekStart, 'yyyy-MM-dd');
+                          const isSelected = selectedWeeks.includes(weekNum);
                           return (
                             <button
                               key={i}
                               onClick={() => {
-                                setDateRange({ from: weekStart, to: weekEnd });
-                                setCalendarOpen(false);
+                                if (isSelected) {
+                                  setSelectedWeeks(prev => prev.filter(w => w !== weekNum));
+                                } else {
+                                  setSelectedWeeks(prev => [...prev, weekNum].sort((a, b) => a - b));
+                                }
                               }}
-                              className={`px-2 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                              className={`px-2 py-2 rounded-lg text-xs font-bold transition-all ${
                                 isSelected 
-                                  ? 'bg-blue-500 text-white' 
+                                  ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30' 
                                   : 'bg-white/10 text-slate-300 hover:bg-white/20'
                               }`}
                             >
-                              S{i + 1} ({format(weekStart, 'dd/MM')})
+                              <div>S{weekNum}</div>
+                              <div className="text-[9px] opacity-70">{format(weekStart, 'dd/MM')}</div>
                             </button>
                           );
                         })}
                       </div>
                     </div>
                     
-                    <div className="border-t border-white/10 pt-4">
-                      <p className="text-xs text-slate-400 font-medium mb-2">Rango Personalizado</p>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <p className="text-[10px] text-slate-500 mb-1">Desde</p>
-                          <Calendar
-                            mode="single"
-                            selected={dateRange.from}
-                            onSelect={(date) => date && setDateRange(prev => ({ ...prev, from: date }))}
-                            className="rounded-md border border-white/10 bg-slate-800"
-                          />
-                        </div>
-                        <div>
-                          <p className="text-[10px] text-slate-500 mb-1">Hasta</p>
-                          <Calendar
-                            mode="single"
-                            selected={dateRange.to}
-                            onSelect={(date) => date && setDateRange(prev => ({ ...prev, to: date }))}
-                            className="rounded-md border border-white/10 bg-slate-800"
-                          />
-                        </div>
-                      </div>
-                    </div>
+
                     
                     <Button 
                       onClick={() => setCalendarOpen(false)}
