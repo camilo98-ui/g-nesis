@@ -1046,35 +1046,33 @@ Genera:
           <>
             {/* Métricas Consolidadas - Dinámicas según Filtro de Fechas */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-              {/* 1. Venta vs PPT de la Zona (del rango seleccionado) */}
+              {/* 1. Presupuesto y Cumplimiento Mensual */}
               <motion.div 
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setSelectedKPIDetail('sales')}
                 className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-xl rounded-lg p-5 border border-blue-500/20 cursor-pointer transition-all hover:border-blue-400/40 hover:shadow-lg hover:shadow-blue-500/20">
                 <p className="text-xs text-blue-300 mb-3 font-bold uppercase tracking-wider">
-                  💰 Venta vs PPT Zona
+                  💰 Mes Actual
                 </p>
                 <div className="space-y-3">
                   <div>
-                    <p className="text-xs text-slate-400 mb-1">
-                      {dynamicTotals.isRetailWeek ? 'Venta Semana' : 'Venta Acumulada'}
-                    </p>
-                    <p className="text-3xl font-black text-white">{formatShort(dynamicTotals.totalSales)}</p>
+                    <p className="text-xs text-slate-400 mb-1">Venta Acumulada</p>
+                    <p className="text-3xl font-black text-white">{formatShort(monthlyTotals.totalSales)}</p>
                   </div>
                   <div className="h-px bg-white/10"></div>
                   <div>
-                    <p className="text-xs text-slate-400 mb-1">Presupuesto</p>
-                    <p className="text-2xl font-bold text-blue-300">{formatShort(dynamicTotals.totalBudget)}</p>
+                    <p className="text-xs text-slate-400 mb-1">Presupuesto Mes</p>
+                    <p className="text-2xl font-bold text-blue-300">{formatShort(monthlyTotals.totalBudget)}</p>
                   </div>
                   <div className="pt-2">
                     <p className={`text-3xl font-black ${
-                      dynamicTotals.totalBudget > 0 && ((dynamicTotals.totalSales/dynamicTotals.totalBudget)*100) >= 100 ? 'text-emerald-400' : 
-                      dynamicTotals.totalBudget > 0 && ((dynamicTotals.totalSales/dynamicTotals.totalBudget)*100) >= 85 ? 'text-amber-400' : 'text-red-400'
+                      monthlyTotals.totalBudget > 0 && ((monthlyTotals.totalSales/monthlyTotals.totalBudget)*100) >= 100 ? 'text-emerald-400' : 
+                      monthlyTotals.totalBudget > 0 && ((monthlyTotals.totalSales/monthlyTotals.totalBudget)*100) >= 85 ? 'text-amber-400' : 'text-red-400'
                     }`}>
-                      {dynamicTotals.totalBudget > 0 ? ((dynamicTotals.totalSales/dynamicTotals.totalBudget)*100).toFixed(1) : '0.0'}%
+                      {monthlyTotals.totalBudget > 0 ? ((monthlyTotals.totalSales/monthlyTotals.totalBudget)*100).toFixed(1) : '0.0'}%
                     </p>
-                    <p className="text-xs text-slate-500">Cumplimiento</p>
+                    <p className="text-xs text-slate-500">Cumplimiento Actual</p>
                   </div>
                 </div>
               </motion.div>
