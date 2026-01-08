@@ -1268,79 +1268,74 @@ Genera:
                 </div>
                 </motion.div>
 
+                {/* Brecha Acumulada */}
                 <motion.div 
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => setSelectedKPIDetail('weeklyStatus')}
-                  className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl rounded-lg p-4 border border-white/10 cursor-pointer transition-all hover:border-white/20 hover:shadow-lg hover:shadow-white/10">
-                  <p className="text-xs text-slate-400 mb-2">Estado Semanal</p>
-                  <div className="flex items-center justify-between mb-3">
+                  onClick={() => setSelectedKPIDetail('gap')}
+                  className="bg-gradient-to-br from-red-500/10 to-rose-600/10 backdrop-blur-xl rounded-lg p-4 border border-red-500/20 cursor-pointer transition-all hover:border-red-400/40 hover:shadow-lg hover:shadow-red-500/20">
+                  <p className="text-xs text-red-300 mb-2 font-bold uppercase tracking-wider">⚠️ Brecha Negativa</p>
+                  <div className="space-y-2">
                     <div>
                       <motion.p 
                         initial={{ scale: 0.5, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
-                        transition={{ duration: 0.5, type: "spring", delay: 0.1 }}
-                        className="text-2xl font-black text-emerald-400 tabular-nums">
-                        {storesAnalysis.filter(s => s.hasData && s.weekCompliance >= 90).length}
+                        transition={{ duration: 0.5, type: "spring" }}
+                        className="text-3xl font-black text-red-400 tabular-nums">
+                        {formatShort(Math.max(0, (currentZoneBudget?.sales_budget || monthlyTotals.totalBudget) - monthlyTotals.totalSales))}
                       </motion.p>
-                      <p className="text-[10px] text-emerald-300">En Meta</p>
+                      <p className="text-[10px] text-red-300">Arrastre Acumulado</p>
                     </div>
-                    <div className="text-right">
-                      <motion.p 
-                        initial={{ scale: 0.5, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ duration: 0.5, type: "spring", delay: 0.2 }}
-                        className="text-2xl font-black text-red-400 tabular-nums">
-                        {storesAnalysis.filter(s => s.hasData && s.weekCompliance < 70).length}
-                      </motion.p>
-                      <p className="text-[10px] text-red-300">Críticas</p>
+                    <div className="pt-1">
+                      <p className="text-xl font-black text-red-300 tabular-nums">
+                        {((currentZoneBudget?.sales_budget || monthlyTotals.totalBudget) > 0 
+                          ? ((((currentZoneBudget?.sales_budget || monthlyTotals.totalBudget) - monthlyTotals.totalSales) / (currentZoneBudget?.sales_budget || monthlyTotals.totalBudget)) * 100).toFixed(1)
+                          : '0.0')}%
+                      </p>
+                      <p className="text-[10px] text-slate-500">% Gap del PPT</p>
                     </div>
                   </div>
-                  <div className="grid grid-cols-3 gap-1">
-                    <motion.div 
-                      initial={{ scaleX: 0, opacity: 0 }}
-                      animate={{ scaleX: 1, opacity: 1 }}
-                      transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
-                      className="bg-emerald-500/20 rounded py-1 text-center relative overflow-hidden">
-                      <motion.div
-                        className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-400/40 to-transparent"
-                        animate={{ x: ['-100%', '200%'] }}
-                        transition={{ duration: 2.5, repeat: Infinity, ease: "linear" }}
-                      />
-                      <p className="text-xs font-bold text-emerald-400 relative z-10">
-                        {storesAnalysis.filter(s => s.hasData && s.weekCompliance >= 90).length}
-                      </p>
-                    </motion.div>
-                    <motion.div 
-                      initial={{ scaleX: 0, opacity: 0 }}
-                      animate={{ scaleX: 1, opacity: 1 }}
-                      transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
-                      className="bg-amber-500/20 rounded py-1 text-center relative overflow-hidden">
-                      <motion.div
-                        className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-400/40 to-transparent"
-                        animate={{ x: ['-100%', '200%'] }}
-                        transition={{ duration: 2.5, repeat: Infinity, ease: "linear", delay: 0.5 }}
-                      />
-                      <p className="text-xs font-bold text-amber-400 relative z-10">
-                        {storesAnalysis.filter(s => s.hasData && s.weekCompliance >= 70 && s.weekCompliance < 90).length}
-                      </p>
-                    </motion.div>
-                    <motion.div 
-                      initial={{ scaleX: 0, opacity: 0 }}
-                      animate={{ scaleX: 1, opacity: 1 }}
-                      transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
-                      className="bg-red-500/20 rounded py-1 text-center relative overflow-hidden">
-                      <motion.div
-                        className="absolute inset-0 bg-gradient-to-r from-transparent via-red-400/40 to-transparent"
-                        animate={{ x: ['-100%', '200%'] }}
-                        transition={{ duration: 2.5, repeat: Infinity, ease: "linear", delay: 1 }}
-                      />
-                      <p className="text-xs font-bold text-red-400 relative z-10">
-                        {storesAnalysis.filter(s => s.hasData && s.weekCompliance < 70).length}
-                      </p>
-                    </motion.div>
-                    </div>
-                    </motion.div>
+                </motion.div>
+
+                {/* Top 3 Cajeros Zona */}
+                <motion.div 
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => window.location.href = createPageUrl('Rankings')}
+                  className="bg-gradient-to-br from-amber-500/10 to-yellow-500/10 backdrop-blur-xl rounded-lg p-4 border border-amber-500/20 cursor-pointer transition-all hover:border-amber-400/40 hover:shadow-lg hover:shadow-amber-500/20">
+                  <p className="text-xs text-amber-300 mb-2 font-bold uppercase tracking-wider">🏆 Top Cajeros</p>
+                  <div className="space-y-1.5">
+                    {storesAnalysis
+                      .filter(s => s.hasData)
+                      .flatMap(store => {
+                        // Aquí necesitamos los datos reales de cajeros - por ahora simulamos con las tiendas top
+                        return [];
+                      })
+                      .slice(0, 0).length === 0 ? (
+                        // Mientras no tengamos el ranking global, mostrar top 3 tiendas
+                        storesAnalysis
+                          .filter(s => s.hasData)
+                          .sort((a, b) => b.weekCompliance - a.weekCompliance)
+                          .slice(0, 3)
+                          .map((store, idx) => (
+                            <div key={store.code} className="flex items-center gap-2">
+                              <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black ${
+                                idx === 0 ? 'bg-yellow-500 text-white' :
+                                idx === 1 ? 'bg-gray-400 text-white' :
+                                'bg-amber-600 text-white'
+                              }`}>
+                                {idx + 1}
+                              </span>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-bold text-white truncate">{store.name}</p>
+                                <p className="text-[9px] text-slate-400">{store.weekCompliance.toFixed(0)}% • {formatShort(store.weekTotalSales)}</p>
+                              </div>
+                            </div>
+                          ))
+                      ) : null}
+                  </div>
+                  <p className="text-[9px] text-slate-500 mt-2 text-center">Click para ver ranking completo</p>
+                </motion.div>
                     </div>
 
                     {/* Columna Centro - Gráfica Grande */}
