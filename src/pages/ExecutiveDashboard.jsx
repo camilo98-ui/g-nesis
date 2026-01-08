@@ -339,6 +339,37 @@ export default function ExecutiveDashboard() {
     // Proyección para el rango completo
     const rangeProjection = avgDailySales * totalDaysInRange;
     
+    // PROYECCIÓN DE LA SEMANA ACTUAL (independiente del filtro)
+    const currentWeekNum = Math.ceil((now - RETAIL_WEEK_START) / (7 * 24 * 60 * 60 * 1000)) + 1;
+    const currentWeekStart = addDays(RETAIL_WEEK_START, (currentWeekNum - 1) * 7);
+    const currentWeekEnd = addDays(currentWeekStart, 6);
+    
+    const currentWeekSales = allDailySales.filter(s => {
+      try {
+        const saleDate = parseISO(s.date);
+        return isWithinInterval(saleDate, { start: currentWeekStart, end: currentWeekEnd }) && saleDate <= now;
+      } catch {
+        return false;
+      }
+    });
+    
+    const currentWeekTotalSales = currentWeekSales.reduce((sum, s) => sum + (s.total_sales || 0), 0);
+    const daysElapsedCurrentWeek = eachDayOfInterval({ start: currentWeekStart, end: now }).filter(d => d <= now).length;
+    const avgDailySalesCurrentWeek = daysElapsedCurrentWeek > 0 ? currentWeekTotalSales / daysElapsedCurrentWeek : 0;
+    const currentWeekProjection = avgDailySalesCurrentWeek * 7;
+    
+    const currentWeekBudget = storesAnalysis.reduce((sum, store) => {
+      if (!store.hasData || !store.getDailyBudget) return sum;
+      const weekDays = eachDayOfInterval({ start: currentWeekStart, end: currentWeekEnd });
+      return sum + weekDays.reduce((daySum, day) => {
+        try {
+          return daySum + store.getDailyBudget(day);
+        } catch {
+          return daySum;
+        }
+      }, 0);
+    }, 0);
+    
     // Proyección mensual completa (del mes actual)
     const monthStart = startOfMonth(now);
     const monthEnd = endOfMonth(now);
@@ -364,6 +395,8 @@ export default function ExecutiveDashboard() {
       totalTransactions, 
       totalBudget: totalBudgetInRange,
       rangeProjection,
+      currentWeekProjection,
+      currentWeekBudget,
       monthProjection,
       totalMonthBudget,
       avgTicket,
@@ -1087,7 +1120,7 @@ Genera:
                 </div>
               </motion.div>
 
-              {/* 4. Proyección del Rango + Proyección Mensual */}
+              {/* 4. Proyección Semana Actual + Proyección Mes */}
               <motion.div 
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
@@ -1098,24 +1131,22 @@ Genera:
                 </p>
                 <div className="space-y-3">
                   <div>
-                    <p className="text-xs text-slate-400 mb-1">
-                      {dynamicTotals.isRetailWeek ? 'Proyección Semana' : 'Proyección Rango'}
-                    </p>
+                    <p className="text-xs text-slate-400 mb-1">Proyección Semana Actual</p>
                     <p className="text-3xl font-black text-white">
-                      {formatShort(dynamicTotals.rangeProjection)}
+                      {formatShort(dynamicTotals.currentWeekProjection)}
                     </p>
                     <p className={`text-sm font-bold ${
-                      dynamicTotals.totalBudget > 0 && ((dynamicTotals.rangeProjection/dynamicTotals.totalBudget)*100) >= 100 
+                      dynamicTotals.currentWeekBudget > 0 && ((dynamicTotals.currentWeekProjection/dynamicTotals.currentWeekBudget)*100) >= 100 
                         ? 'text-emerald-400' : 'text-red-400'
                     }`}>
-                      {dynamicTotals.totalBudget > 0 
-                        ? ((dynamicTotals.rangeProjection/dynamicTotals.totalBudget)*100).toFixed(1) 
+                      {dynamicTotals.currentWeekBudget > 0 
+                        ? ((dynamicTotals.currentWeekProjection/dynamicTotals.currentWeekBudget)*100).toFixed(1) 
                         : '0.0'}% del PPT
                     </p>
                   </div>
                   <div className="h-px bg-white/10"></div>
                   <div>
-                    <p className="text-xs text-slate-400 mb-1">Proyección Mes</p>
+                    <p className="text-xs text-slate-400 mb-1">Proyección Cierre Mes</p>
                     <p className="text-2xl font-bold text-emerald-300">
                       {formatShort(dynamicTotals.monthProjection)}
                     </p>
