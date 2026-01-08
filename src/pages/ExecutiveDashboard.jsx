@@ -797,9 +797,18 @@ Genera:
               <h1 className="text-2xl font-bold text-white mb-1">
                 {ZONE_NAME}
               </h1>
-              <p className="text-sm text-slate-400">
-                Semana {Math.ceil((dateRange.from - RETAIL_WEEK_START) / (7 * 24 * 60 * 60 * 1000)) + 1} · {format(dateRange.from, 'dd MMM')} - {format(dateRange.to, 'dd MMM yyyy')}
-              </p>
+              <div className="flex items-center gap-3">
+                <p className="text-sm text-slate-400">
+                  {format(dateRange.from, 'dd MMM')} - {format(dateRange.to, 'dd MMM yyyy')}
+                </p>
+                <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                  {(() => {
+                    const startWeek = Math.ceil((dateRange.from - RETAIL_WEEK_START) / (7 * 24 * 60 * 60 * 1000)) + 1;
+                    const endWeek = Math.ceil((dateRange.to - RETAIL_WEEK_START) / (7 * 24 * 60 * 60 * 1000)) + 1;
+                    return startWeek === endWeek ? `Semana ${startWeek}` : `Semanas ${startWeek}-${endWeek}`;
+                  })()}
+                </span>
+              </div>
             </div>
 
             <div className="flex items-center gap-2 flex-wrap">
