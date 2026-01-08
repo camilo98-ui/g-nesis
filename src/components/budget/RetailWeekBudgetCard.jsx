@@ -289,15 +289,15 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
         // Con poco histórico, usar PESO RELATIVO del día basado en datos disponibles
         // Esto permite variación por día de semana incluso con pocos datos
         const weight = weightByDayOfWeek[dayOfWeek];
+        
+        // CRÍTICO: Si el peso es 0 o inválido, usar distribución uniforme
+        if (!weight || weight <= 0) {
+          console.log('⚠️ Peso 0 detectado, usando base budget:', { dayOfWeek, dailyBaseBudget });
+          return dailyBaseBudget;
+        }
+        
         const weeklyBudget = dailyBaseBudget * 7;
         const calculatedBudget = weeklyBudget * weight;
-        
-        console.log('📊 Con peso relativo:', {
-          dayOfWeek,
-          weight,
-          weeklyBudget,
-          calculatedBudget
-        });
         
         return calculatedBudget > 0 ? calculatedBudget : dailyBaseBudget;
       }
