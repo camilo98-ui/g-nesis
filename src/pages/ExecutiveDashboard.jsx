@@ -932,9 +932,9 @@ Genera:
         </div>
       </Link>
 
-      <div id="dashboard-scroll-container" className="w-full h-full mx-auto px-2 py-4 relative z-10 overflow-y-auto">
+      <div id="dashboard-scroll-container" className="w-full h-full mx-auto px-2 py-2 relative z-10 overflow-y-auto">
         {/* Header Compacto con Filtro de Semanas */}
-        <div className="mb-6">
+        <div className="mb-3">
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div>
               <h1 className="text-2xl font-bold text-white mb-1">
@@ -1118,30 +1118,30 @@ Genera:
         ) : (
           <>
             {/* Métricas Consolidadas - Dinámicas según Filtro de Fechas */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
               {/* 1. Presupuesto y Cumplimiento Mensual */}
               <motion.div 
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setSelectedKPIDetail('sales')}
-                className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-xl rounded-lg p-5 border border-blue-500/20 cursor-pointer transition-all hover:border-blue-400/40 hover:shadow-lg hover:shadow-blue-500/20">
-                <p className="text-xs text-blue-300 mb-3 font-bold uppercase tracking-wider">
+                className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-xl rounded-lg p-3 border border-blue-500/20 cursor-pointer transition-all hover:border-blue-400/40 hover:shadow-lg hover:shadow-blue-500/20">
+                <p className="text-xs text-blue-300 mb-2 font-bold uppercase tracking-wider">
                   💰 Mes Actual
                 </p>
-                <div className="space-y-3">
+                <div className="space-y-2">
                   <div>
-                    <p className="text-xs text-slate-400 mb-1">Venta Acumulada</p>
-                    <p className="text-2xl font-black text-white">{formatCurrency(monthlyTotals.totalSales)}</p>
+                    <p className="text-xs text-slate-400 mb-0.5">Venta Acumulada</p>
+                    <p className="text-xl font-black text-white">{formatCurrency(monthlyTotals.totalSales)}</p>
                   </div>
                   <div className="h-px bg-white/10"></div>
                   <div>
-                    <p className="text-xs text-slate-400 mb-1">Presupuesto Mes</p>
-                    <p className="text-xl font-bold text-blue-300">
+                    <p className="text-xs text-slate-400 mb-0.5">Presupuesto Mes</p>
+                    <p className="text-lg font-bold text-blue-300">
                       {currentZoneBudget?.sales_budget ? formatCurrency(currentZoneBudget.sales_budget) : formatCurrency(monthlyTotals.totalBudget)}
                     </p>
                   </div>
-                  <div className="pt-2">
-                    <p className={`text-3xl font-black ${
+                  <div className="pt-1">
+                    <p className={`text-2xl font-black ${
                       (currentZoneBudget?.sales_budget || monthlyTotals.totalBudget) > 0 && 
                       ((monthlyTotals.totalSales/(currentZoneBudget?.sales_budget || monthlyTotals.totalBudget))*100) >= 100 ? 'text-emerald-400' : 
                       (currentZoneBudget?.sales_budget || monthlyTotals.totalBudget) > 0 && 
@@ -1161,21 +1161,21 @@ Genera:
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setSelectedKPIDetail('transactions')}
-                className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-xl rounded-lg p-5 border border-purple-500/20 cursor-pointer transition-all hover:border-purple-400/40 hover:shadow-lg hover:shadow-purple-500/20">
-                <p className="text-xs text-purple-300 mb-3 font-bold uppercase tracking-wider">
+                className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-xl rounded-lg p-3 border border-purple-500/20 cursor-pointer transition-all hover:border-purple-400/40 hover:shadow-lg hover:shadow-purple-500/20">
+                <p className="text-xs text-purple-300 mb-2 font-bold uppercase tracking-wider">
                   🧊 Ticket y Transacciones
                 </p>
-                <div className="space-y-3">
+                <div className="space-y-2">
                   <div>
-                    <p className="text-xs text-slate-400 mb-1">Ticket Promedio</p>
-                    <p className="text-3xl font-black text-white">
+                    <p className="text-xs text-slate-400 mb-0.5">Ticket Promedio</p>
+                    <p className="text-2xl font-black text-white">
                       {dynamicTotals.avgTicket > 0 ? formatCurrency(dynamicTotals.avgTicket) : '$0'}
                     </p>
                   </div>
                   <div className="h-px bg-white/10"></div>
                   <div>
-                    <p className="text-xs text-slate-400 mb-1">Transacciones Totales</p>
-                    <p className="text-2xl font-bold text-purple-300">
+                    <p className="text-xs text-slate-400 mb-0.5">Transacciones Totales</p>
+                    <p className="text-xl font-bold text-purple-300">
                       {dynamicTotals.totalTransactions.toLocaleString()}
                     </p>
                   </div>
@@ -1192,21 +1192,21 @@ Genera:
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setSelectedKPIDetail('avgSales')}
-                className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 backdrop-blur-xl rounded-lg p-5 border border-amber-500/20 cursor-pointer transition-all hover:border-amber-400/40 hover:shadow-lg hover:shadow-amber-500/20">
-                <p className="text-xs text-amber-300 mb-3 font-bold uppercase tracking-wider">
+                className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 backdrop-blur-xl rounded-lg p-3 border border-amber-500/20 cursor-pointer transition-all hover:border-amber-400/40 hover:shadow-lg hover:shadow-amber-500/20">
+                <p className="text-xs text-amber-300 mb-2 font-bold uppercase tracking-wider">
                   📊 Promedios Diarios
                 </p>
-                <div className="space-y-3">
+                <div className="space-y-2">
                   <div>
-                    <p className="text-xs text-slate-400 mb-1">Venta Promedio/Día</p>
-                    <p className="text-2xl font-black text-white">
+                    <p className="text-xs text-slate-400 mb-0.5">Venta Promedio/Día</p>
+                    <p className="text-xl font-black text-white">
                       {dynamicTotals.avgDailySales > 0 ? formatCurrency(dynamicTotals.avgDailySales) : '$0'}
                     </p>
                   </div>
                   <div className="h-px bg-white/10"></div>
                   <div>
-                    <p className="text-xs text-slate-400 mb-1">Transacciones/Día</p>
-                    <p className="text-2xl font-bold text-amber-300">
+                    <p className="text-xs text-slate-400 mb-0.5">Transacciones/Día</p>
+                    <p className="text-xl font-bold text-amber-300">
                       {Math.round(dynamicTotals.avgDailyTransactions).toLocaleString('es-CO')}
                     </p>
                   </div>
@@ -1223,11 +1223,11 @@ Genera:
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setSelectedKPIDetail('projection')}
-                className="bg-gradient-to-br from-emerald-500/10 to-green-500/10 backdrop-blur-xl rounded-lg p-5 border border-emerald-500/20 cursor-pointer transition-all hover:border-emerald-400/40 hover:shadow-lg hover:shadow-emerald-500/20">
-                <p className="text-xs text-emerald-300 mb-3 font-bold uppercase tracking-wider">
+                className="bg-gradient-to-br from-emerald-500/10 to-green-500/10 backdrop-blur-xl rounded-lg p-3 border border-emerald-500/20 cursor-pointer transition-all hover:border-emerald-400/40 hover:shadow-lg hover:shadow-emerald-500/20">
+                <p className="text-xs text-emerald-300 mb-2 font-bold uppercase tracking-wider">
                   📈 Proyección
                 </p>
-                <div className="space-y-3">
+                <div className="space-y-2">
                   <div>
                     <p className="text-xs text-slate-400 mb-1">Proyección Semana Actual</p>
                     <p className="text-xl font-black text-white">
@@ -1262,19 +1262,19 @@ Genera:
             </div>
 
             {/* Grid Principal Estilo Power BI */}
-            <div className="grid grid-cols-12 gap-4 mb-6">
+            <div className="grid grid-cols-12 gap-3 mb-3">
               {/* Columna Izquierda - KPIs */}
-              <div className="col-span-12 lg:col-span-2 grid grid-cols-2 lg:grid-cols-1 gap-4">
+              <div className="col-span-12 lg:col-span-2 grid grid-cols-2 lg:grid-cols-1 gap-2">
                 <motion.div 
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setSelectedKPIDetail('sales')}
-                  className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-xl rounded-lg p-4 border border-blue-500/20 cursor-pointer transition-all hover:border-blue-400/40 hover:shadow-lg hover:shadow-blue-500/20">
-                  <p className="text-xs text-blue-300 mb-1">
+                  className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-xl rounded-lg p-2 border border-blue-500/20 cursor-pointer transition-all hover:border-blue-400/40 hover:shadow-lg hover:shadow-blue-500/20">
+                  <p className="text-[10px] text-blue-300 mb-1">
                     {dynamicTotals.isRetailWeek ? 'Venta Semana' : 'Venta Acumulada'}
                   </p>
-                  <p className="text-2xl font-black text-white tabular-nums">{formatCurrency(dynamicTotals.totalSales)}</p>
-                  <ResponsiveContainer width="100%" height={30}>
+                  <p className="text-lg font-black text-white tabular-nums">{formatCurrency(dynamicTotals.totalSales)}</p>
+                  <ResponsiveContainer width="100%" height={25}>
                     <AreaChart data={dailySalesData.slice(-7)}>
                       <defs>
                         <linearGradient id="miniArea" x1="0" y1="0" x2="0" y2="1">
@@ -1619,7 +1619,7 @@ Genera:
               </div>
 
               {/* Columna Derecha - Mix de Gráficas */}
-              <div className="col-span-12 lg:col-span-4 space-y-4">
+              <div className="col-span-12 lg:col-span-4 space-y-3">
                 {/* Tiendas vs Presupuesto Semanal - Componente Mejorado */}
                 <StoreWeeklyChart
                   storesAnalysis={storesAnalysis}
@@ -1688,17 +1688,17 @@ Genera:
 
 
             {/* Panel de Estado del Planner */}
-            <div className="mb-8 sm:mb-12 lg:mb-20">
+            <div className="mb-4">
               <PlannerStatusPanel stores={STORES.map(s => ({ code: s.code, name: getDisplayName(s.code) }))} />
             </div>
 
             {/* Contexto */}
-            <div className="mb-4 sm:mb-6">
+            <div className="mb-2">
               <p className="text-xs sm:text-sm font-medium text-slate-400">{tableContextSummary}</p>
             </div>
 
             {/* Tabla - Responsive con scroll horizontal en móvil */}
-            <div id="stores-table" className="mb-8 sm:mb-12 lg:mb-20">
+            <div id="stores-table" className="mb-4">
               <div className="bg-white/5 backdrop-blur-2xl rounded-xl border border-white/10 overflow-x-auto">
                 <table className="w-full min-w-[900px]">
                   <thead>
@@ -1876,9 +1876,9 @@ Genera:
             </div>
 
             {/* Prioridades Dinámicas */}
-            <div className="mb-8 sm:mb-12 lg:mb-20">
-              <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-white mb-4 sm:mb-6 lg:mb-10 tracking-tight">Prioridades de hoy</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
+            <div className="mb-4">
+              <h2 className="text-lg font-black text-white mb-3 tracking-tight">Prioridades de hoy</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {/* Intervenir */}
                 {storesAnalysis
                   .filter(s => s.status === 'critical')
