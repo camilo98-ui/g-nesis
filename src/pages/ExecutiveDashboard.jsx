@@ -58,6 +58,7 @@ export default function ExecutiveDashboard() {
   const [columnFilters, setColumnFilters] = useState({});
   const [viewMode, setViewMode] = useState('day'); // 'day', 'week', 'month'
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const [showTopCashiers, setShowTopCashiers] = useState(false);
 
   const ZONE_NAME = 'Bogotá Noroccidente';
 
@@ -77,6 +78,16 @@ export default function ExecutiveDashboard() {
   const { data: zoneBudgets = [] } = useQuery({
     queryKey: ['zoneBudgets', ZONE_NAME],
     queryFn: () => base44.entities.ZoneBudget.filter({ zone_name: ZONE_NAME })
+  });
+
+  const { data: allShiftRecords = [] } = useQuery({
+    queryKey: ['allShiftRecords'],
+    queryFn: () => base44.entities.ShiftRecord.list()
+  });
+
+  const { data: allCashiers = [] } = useQuery({
+    queryKey: ['allCashiers'],
+    queryFn: () => base44.entities.Cashier.list()
   });
 
   const currentZoneBudget = useMemo(() => {
@@ -827,6 +838,48 @@ Genera:
       }));
   }, [storesAnalysis]);
 
+  // Ranking de cajeros en el rango de fechas seleccionado
+  const topCashiersRanking = useMemo(() => {
+    const shiftsInRange = allShiftRecords.filter(shift => {
+      try {
+        const shiftDate = parseISO(shift.date);
+        return isWithinInterval(shiftDate, { start: dateRange.from, end: dateRange.to });
+      } catch {
+        return false;
+      }
+    });
+
+    const cashierStats = {};
+    
+    shiftsInRange.forEach(shift => {
+      if (!cashierStats[shift.cashier_id]) {
+        const cashier = allCashiers.find(c => c.id === shift.cashier_id);
+        cashierStats[shift.cashier_id] = {
+          cashier_id: shift.cashier_id,
+          cashier_name: cashier?.name || shift.cashier_id,
+          store_id: shift.store_id,
+          total_sales: 0,
+          total_transactions: 0,
+          total_suggested: 0,
+          shifts_count: 0
+        };
+      }
+      
+      cashierStats[shift.cashier_id].total_sales += shift.sales || 0;
+      cashierStats[shift.cashier_id].total_transactions += shift.transactions || 0;
+      cashierStats[shift.cashier_id].total_suggested += shift.suggested_sales || 0;
+      cashierStats[shift.cashier_id].shifts_count += 1;
+    });
+
+    return Object.values(cashierStats)
+      .filter(c => c.total_sales > 0)
+      .map(c => ({
+        ...c,
+        avg_ticket: c.total_transactions > 0 ? c.total_sales / c.total_transactions : 0
+      }))
+      .sort((a, b) => b.total_sales - a.total_sales);
+  }, [allShiftRecords, allCashiers, dateRange]);
+
   // Preparar datos para tooltips
   const zoneDataForTooltips = useMemo(() => ({
     zoneSales: zoneTotals.totalSales,
@@ -1267,40 +1320,32 @@ Genera:
                 <motion.div 
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => window.location.href = createPageUrl('Rankings')}
+                  onClick={() => setShowTopCashiers(true)}
                   className="bg-gradient-to-br from-amber-500/10 to-yellow-500/10 backdrop-blur-xl rounded-lg p-4 border border-amber-500/20 cursor-pointer transition-all hover:border-amber-400/40 hover:shadow-lg hover:shadow-amber-500/20">
-                  <p className="text-xs text-amber-300 mb-2 font-bold uppercase tracking-wider">🏆 Top Cajeros</p>
+                  <p className="text-xs text-amber-300 mb-2 font-bold uppercase tracking-wider">🏆 Top 3 Cajeros</p>
                   <div className="space-y-1.5">
-                    {storesAnalysis
-                      .filter(s => s.hasData)
-                      .flatMap(store => {
-                        // Aquí necesitamos los datos reales de cajeros - por ahora simulamos con las tiendas top
-                        return [];
-                      })
-                      .slice(0, 0).length === 0 ? (
-                        // Mientras no tengamos el ranking global, mostrar top 3 tiendas
-                        storesAnalysis
-                          .filter(s => s.hasData)
-                          .sort((a, b) => b.weekCompliance - a.weekCompliance)
-                          .slice(0, 3)
-                          .map((store, idx) => (
-                            <div key={store.code} className="flex items-center gap-2">
-                              <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black ${
-                                idx === 0 ? 'bg-yellow-500 text-white' :
-                                idx === 1 ? 'bg-gray-400 text-white' :
-                                'bg-amber-600 text-white'
-                              }`}>
-                                {idx + 1}
-                              </span>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-xs font-bold text-white truncate">{store.name}</p>
-                                <p className="text-[9px] text-slate-400">{store.weekCompliance.toFixed(0)}% • {formatShort(store.weekTotalSales)}</p>
-                              </div>
-                            </div>
-                          ))
-                      ) : null}
+                    {topCashiersRanking.slice(0, 3).map((cashier, idx) => (
+                      <div key={cashier.cashier_id} className="flex items-center gap-2">
+                        <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black ${
+                          idx === 0 ? 'bg-yellow-500 text-white' :
+                          idx === 1 ? 'bg-gray-400 text-white' :
+                          'bg-amber-600 text-white'
+                        }`}>
+                          {idx + 1}
+                        </span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-bold text-white truncate">{cashier.cashier_name}</p>
+                          <p className="text-[9px] text-slate-400">
+                            {formatShort(cashier.total_sales)} • Ticket: {formatCurrency(cashier.avg_ticket)}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                    {topCashiersRanking.length === 0 && (
+                      <p className="text-xs text-slate-500 text-center py-2">Sin datos de cajeros</p>
+                    )}
                   </div>
-                  <p className="text-[9px] text-slate-500 mt-2 text-center">Click para ver ranking completo</p>
+                  <p className="text-[9px] text-slate-500 mt-2 text-center">Click para ver detalle completo</p>
                 </motion.div>
                     </div>
 
@@ -2117,6 +2162,124 @@ Genera:
                   zoneTotals={zoneTotals}
                   zoneBudget={currentZoneBudget}
                 />
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Modal Top Cajeros */}
+      <AnimatePresence>
+        {showTopCashiers && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setShowTopCashiers(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl border border-white/20 max-w-5xl w-full max-h-[90vh] overflow-hidden"
+            >
+              <div className="bg-gradient-to-r from-amber-500/20 to-yellow-500/20 border-b border-white/10 p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-yellow-500 flex items-center justify-center">
+                      <Award className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-black text-white">Top Cajeros de Zona</h2>
+                      <p className="text-sm text-slate-300">
+                        {format(dateRange.from, 'dd MMM')} - {format(dateRange.to, 'dd MMM yyyy')}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowTopCashiers(false)}
+                    className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center"
+                  >
+                    <X className="w-5 h-5 text-white" />
+                  </button>
+                </div>
+              </div>
+              
+              <div className="p-6 overflow-y-auto max-h-[calc(90vh-100px)]">
+                <div className="space-y-4">
+                  {topCashiersRanking.slice(0, 10).map((cashier, idx) => {
+                    const store = STORES.find(s => s.code === cashier.store_id);
+                    const storeName = getDisplayName(cashier.store_id);
+                    
+                    return (
+                      <motion.div
+                        key={cashier.cashier_id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: idx * 0.05 }}
+                        className="bg-white/5 rounded-xl p-5 border border-white/10 hover:border-white/20 transition-all"
+                      >
+                        <div className="flex items-center gap-4 mb-4">
+                          <span className={`w-10 h-10 rounded-full flex items-center justify-center text-base font-black ${
+                            idx === 0 ? 'bg-yellow-500 text-white shadow-lg shadow-yellow-500/30' :
+                            idx === 1 ? 'bg-gray-400 text-white shadow-lg shadow-gray-400/30' :
+                            idx === 2 ? 'bg-amber-600 text-white shadow-lg shadow-amber-600/30' :
+                            'bg-slate-700 text-white'
+                          }`}>
+                            {idx + 1}
+                          </span>
+                          <div className="flex-1">
+                            <p className="text-lg font-black text-white">{cashier.cashier_name}</p>
+                            <p className="text-xs text-slate-400">{storeName} • {cashier.shifts_count} turnos</p>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-4 gap-3">
+                          <div className="bg-emerald-500/10 rounded-lg p-3 border border-emerald-500/20">
+                            <p className="text-xs text-emerald-300 mb-1">💰 Ventas</p>
+                            <p className="text-lg font-black text-white">{formatShort(cashier.total_sales)}</p>
+                            <p className="text-[9px] text-slate-500 mt-1">
+                              Prom: {formatShort(cashier.total_sales / cashier.shifts_count)}/turno
+                            </p>
+                          </div>
+
+                          <div className="bg-purple-500/10 rounded-lg p-3 border border-purple-500/20">
+                            <p className="text-xs text-purple-300 mb-1">🎫 Ticket Prom</p>
+                            <p className="text-lg font-black text-white">{formatCurrency(cashier.avg_ticket)}</p>
+                            <p className="text-[9px] text-slate-500 mt-1">
+                              Por transacción
+                            </p>
+                          </div>
+
+                          <div className="bg-blue-500/10 rounded-lg p-3 border border-blue-500/20">
+                            <p className="text-xs text-blue-300 mb-1">🧾 Transacciones</p>
+                            <p className="text-lg font-black text-white">{cashier.total_transactions}</p>
+                            <p className="text-[9px] text-slate-500 mt-1">
+                              {(cashier.total_transactions / cashier.shifts_count).toFixed(0)}/turno
+                            </p>
+                          </div>
+
+                          <div className="bg-pink-500/10 rounded-lg p-3 border border-pink-500/20">
+                            <p className="text-xs text-pink-300 mb-1">✨ Sugeridos</p>
+                            <p className="text-lg font-black text-white">{cashier.total_suggested || 0}</p>
+                            <p className="text-[9px] text-slate-500 mt-1">
+                              {cashier.shifts_count > 0 ? ((cashier.total_suggested || 0) / cashier.shifts_count).toFixed(0) : 0}/turno
+                            </p>
+                          </div>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+
+                  {topCashiersRanking.length === 0 && (
+                    <div className="text-center py-12">
+                      <Award className="w-16 h-16 text-slate-600 mx-auto mb-4" />
+                      <p className="text-slate-400">No hay datos de cajeros en este período</p>
+                    </div>
+                  )}
+                </div>
               </div>
             </motion.div>
           </motion.div>
