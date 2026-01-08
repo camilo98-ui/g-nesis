@@ -1234,40 +1234,6 @@ Genera:
                     </ResponsiveContainer>
                     </motion.div>
 
-                    <motion.div 
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => setSelectedKPIDetail('compliance')}
-                    className="bg-gradient-to-br from-emerald-500/10 to-green-500/10 backdrop-blur-xl rounded-lg p-4 border border-emerald-500/20 cursor-pointer transition-all hover:border-emerald-400/40 hover:shadow-lg hover:shadow-emerald-500/20">
-                  <p className="text-xs text-emerald-300 mb-1">Cumplimiento</p>
-                  <motion.p 
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ duration: 0.5, type: "spring" }}
-                    className={`text-4xl font-black tabular-nums ${
-                      dynamicTotals.totalBudget > 0 && ((dynamicTotals.totalSales/dynamicTotals.totalBudget)*100) >= 100 ? 'text-emerald-400' : 
-                      dynamicTotals.totalBudget > 0 && ((dynamicTotals.totalSales/dynamicTotals.totalBudget)*100) >= 85 ? 'text-amber-400' : 'text-red-400'
-                    }`}>
-                    {dynamicTotals.totalBudget > 0 ? ((dynamicTotals.totalSales/dynamicTotals.totalBudget)*100).toFixed(0) : 0}%
-                  </motion.p>
-                  <div className="mt-2 bg-slate-800/50 rounded-full h-2 overflow-hidden relative">
-                    <motion.div 
-                      initial={{ width: 0 }}
-                      animate={{ width: `${Math.min(dynamicTotals.totalBudget > 0 ? ((dynamicTotals.totalSales/dynamicTotals.totalBudget)*100) : 0, 100)}%` }}
-                      transition={{ duration: 1.5, ease: "easeOut" }}
-                      className={`h-full rounded-full relative ${
-                        dynamicTotals.totalBudget > 0 && ((dynamicTotals.totalSales/dynamicTotals.totalBudget)*100) >= 100 ? 'bg-emerald-500' : 
-                        dynamicTotals.totalBudget > 0 && ((dynamicTotals.totalSales/dynamicTotals.totalBudget)*100) >= 85 ? 'bg-amber-500' : 'bg-red-500'
-                      }`}>
-                      <motion.div
-                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-                        animate={{ x: ['-100%', '200%'] }}
-                        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                      />
-                  </motion.div>
-                </div>
-                </motion.div>
-
                 {/* Brecha Acumulada */}
                 <motion.div 
                   whileHover={{ scale: 1.02 }}
