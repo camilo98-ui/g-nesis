@@ -1046,69 +1046,141 @@ Genera:
           <>
             {/* Métricas Consolidadas - Dinámicas según Filtro de Fechas */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-              {/* 1. Presupuesto y Cumplimiento Mensual */}
+              {/* 1. Brecha Negativa del Mes */}
               <motion.div 
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => setSelectedKPIDetail('sales')}
-                className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-xl rounded-lg p-5 border border-blue-500/20 cursor-pointer transition-all hover:border-blue-400/40 hover:shadow-lg hover:shadow-blue-500/20">
-                <p className="text-xs text-blue-300 mb-3 font-bold uppercase tracking-wider">
-                  💰 Mes Actual
+                onClick={() => setSelectedKPIDetail('gap')}
+                className="bg-gradient-to-br from-red-500/10 to-rose-500/10 backdrop-blur-xl rounded-lg p-5 border border-red-500/20 cursor-pointer transition-all hover:border-red-400/40 hover:shadow-lg hover:shadow-red-500/20">
+                <p className="text-xs text-red-300 mb-3 font-bold uppercase tracking-wider">
+                  ⚠️ Brecha Mensual
                 </p>
                 <div className="space-y-3">
                   <div>
-                    <p className="text-xs text-slate-400 mb-1">Venta Acumulada</p>
-                    <p className="text-3xl font-black text-white">{formatShort(monthlyTotals.totalSales)}</p>
-                  </div>
-                  <div className="h-px bg-white/10"></div>
-                  <div>
-                    <p className="text-xs text-slate-400 mb-1">Presupuesto Mes</p>
-                    <p className="text-2xl font-bold text-blue-300">
-                      {currentZoneBudget?.sales_budget ? formatShort(currentZoneBudget.sales_budget) : formatShort(monthlyTotals.totalBudget)}
-                    </p>
-                  </div>
-                  <div className="pt-2">
-                    <p className={`text-3xl font-black ${
-                      (currentZoneBudget?.sales_budget || monthlyTotals.totalBudget) > 0 && 
-                      ((monthlyTotals.totalSales/(currentZoneBudget?.sales_budget || monthlyTotals.totalBudget))*100) >= 100 ? 'text-emerald-400' : 
-                      (currentZoneBudget?.sales_budget || monthlyTotals.totalBudget) > 0 && 
-                      ((monthlyTotals.totalSales/(currentZoneBudget?.sales_budget || monthlyTotals.totalBudget))*100) >= 85 ? 'text-amber-400' : 'text-red-400'
-                    }`}>
-                      {(currentZoneBudget?.sales_budget || monthlyTotals.totalBudget) > 0 
-                        ? ((monthlyTotals.totalSales/(currentZoneBudget?.sales_budget || monthlyTotals.totalBudget))*100).toFixed(1) 
-                        : '0.0'}%
-                    </p>
-                    <p className="text-xs text-slate-500">Cumplimiento Actual</p>
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* 2. Ticket Promedio y Transacciones Totales (del rango) */}
-              <motion.div 
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => setSelectedKPIDetail('transactions')}
-                className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-xl rounded-lg p-5 border border-purple-500/20 cursor-pointer transition-all hover:border-purple-400/40 hover:shadow-lg hover:shadow-purple-500/20">
-                <p className="text-xs text-purple-300 mb-3 font-bold uppercase tracking-wider">
-                  🧊 Ticket y Transacciones
-                </p>
-                <div className="space-y-3">
-                  <div>
-                    <p className="text-xs text-slate-400 mb-1">Ticket Promedio</p>
-                    <p className="text-3xl font-black text-white">
-                      {dynamicTotals.avgTicket > 0 ? formatCurrency(dynamicTotals.avgTicket) : '$0'}
+                    <p className="text-xs text-slate-400 mb-1">En Negativo</p>
+                    <p className="text-3xl font-black text-red-400">
+                      {(() => {
+                        const budget = currentZoneBudget?.sales_budget || monthlyTotals.totalBudget;
+                        const gap = budget - monthlyTotals.totalSales;
+                        return gap > 0 ? formatShort(gap) : '$0';
+                      })()}
                     </p>
                   </div>
                   <div className="h-px bg-white/10"></div>
                   <div>
-                    <p className="text-xs text-slate-400 mb-1">Transacciones Totales</p>
-                    <p className="text-2xl font-bold text-purple-300">
-                      {dynamicTotals.totalTransactions.toLocaleString()}
+                    <p className="text-xs text-slate-400 mb-1">% de Brecha</p>
+                    <p className="text-2xl font-bold text-red-300">
+                      {(() => {
+                        const budget = currentZoneBudget?.sales_budget || monthlyTotals.totalBudget;
+                        const gap = budget - monthlyTotals.totalSales;
+                        const gapPercent = budget > 0 ? (gap / budget) * 100 : 0;
+                        return gapPercent > 0 ? `-${gapPercent.toFixed(1)}%` : '0%';
+                      })()}
                     </p>
                   </div>
                   <div className="pt-2">
                     <p className="text-xs text-slate-500">
-                      {dynamicTotals.daysElapsedInRange} de {dynamicTotals.totalDaysInRange} días
+                      {(() => {
+                        const budget = currentZoneBudget?.sales_budget || monthlyTotals.totalBudget;
+                        const compliance = budget > 0 ? ((monthlyTotals.totalSales/budget)*100).toFixed(1) : '0.0';
+                        return `Cumplimiento: ${compliance}%`;
+                      })()}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* 2. PPT Semanas Siguientes */}
+              <motion.div 
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setSelectedKPIDetail('weeklyBudget')}
+                className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-xl rounded-lg p-5 border border-purple-500/20 cursor-pointer transition-all hover:border-purple-400/40 hover:shadow-lg hover:shadow-purple-500/20">
+                <p className="text-xs text-purple-300 mb-3 font-bold uppercase tracking-wider">
+                  📅 PPT Semanas Siguientes
+                </p>
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-xs text-slate-400 mb-1">Próximas Semanas</p>
+                    <ResponsiveContainer width="100%" height={60}>
+                      <LineChart data={(() => {
+                        const now = new Date();
+                        const monthEnd = endOfMonth(now);
+                        const weeksRemaining = [];
+                        let currentWeek = addDays(dateRange.to, 1);
+                        
+                        while (currentWeek <= monthEnd && weeksRemaining.length < 4) {
+                          const weekEnd = addDays(currentWeek, 6) > monthEnd ? monthEnd : addDays(currentWeek, 6);
+                          const weekDays = eachDayOfInterval({ start: currentWeek, end: weekEnd });
+                          const weekBudget = storesAnalysis.reduce((sum, store) => {
+                            if (!store.hasData || !store.getDailyBudget) return sum;
+                            return sum + weekDays.reduce((daySum, day) => {
+                              try {
+                                return daySum + store.getDailyBudget(day);
+                              } catch {
+                                return daySum;
+                              }
+                            }, 0);
+                          }, 0);
+                          
+                          weeksRemaining.push({
+                            name: `S${weeksRemaining.length + 1}`,
+                            ppt: weekBudget / 1000000
+                          });
+                          
+                          currentWeek = addDays(currentWeek, 7);
+                        }
+                        
+                        return weeksRemaining;
+                      })()}>
+                        <defs>
+                          <linearGradient id="pptLineGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#a855f7" stopOpacity={0.8}/>
+                            <stop offset="100%" stopColor="#a855f7" stopOpacity={0.2}/>
+                          </linearGradient>
+                        </defs>
+                        <Line 
+                          type="monotone" 
+                          dataKey="ppt" 
+                          stroke="#a855f7" 
+                          strokeWidth={3}
+                          dot={{ fill: '#a855f7', r: 4 }}
+                          fill="url(#pptLineGrad)"
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="h-px bg-white/10"></div>
+                  <div>
+                    <p className="text-xs text-slate-400 mb-1">Total Pendiente</p>
+                    <p className="text-2xl font-bold text-purple-300">
+                      {(() => {
+                        const now = new Date();
+                        const monthEnd = endOfMonth(now);
+                        const weeksRemaining = [];
+                        let currentWeek = addDays(dateRange.to, 1);
+                        let totalPending = 0;
+                        
+                        while (currentWeek <= monthEnd && weeksRemaining.length < 4) {
+                          const weekEnd = addDays(currentWeek, 6) > monthEnd ? monthEnd : addDays(currentWeek, 6);
+                          const weekDays = eachDayOfInterval({ start: currentWeek, end: weekEnd });
+                          const weekBudget = storesAnalysis.reduce((sum, store) => {
+                            if (!store.hasData || !store.getDailyBudget) return sum;
+                            return sum + weekDays.reduce((daySum, day) => {
+                              try {
+                                return daySum + store.getDailyBudget(day);
+                              } catch {
+                                return daySum;
+                              }
+                            }, 0);
+                          }, 0);
+                          
+                          totalPending += weekBudget;
+                          currentWeek = addDays(currentWeek, 7);
+                        }
+                        
+                        return formatShort(totalPending);
+                      })()}
                     </p>
                   </div>
                 </div>
