@@ -26,7 +26,7 @@ export default function ExecutiveDashboard() {
   const RETAIL_WEEK_START = new Date(2025, 11, 29); // 29 dic 2025
   
   const [dateRange, setDateRange] = useState({ 
-    from: startOfMonth(new Date()), 
+    from: RETAIL_WEEK_START, // 29 dic 2025
     to: endOfMonth(new Date())
   });
   const [searchQuery, setSearchQuery] = useState('');
@@ -814,13 +814,13 @@ Genera:
                     <span className="text-sm font-medium">
                       {format(dateRange.from, 'dd MMM')} - {format(dateRange.to, 'dd MMM')}
                     </span>
-                    {(dateRange.from.getTime() !== RETAIL_WEEK_START.getTime() || dateRange.to.getTime() !== addDays(RETAIL_WEEK_START, 6).getTime()) && (
+                    {(dateRange.from.getTime() !== RETAIL_WEEK_START.getTime() || dateRange.to.getTime() !== endOfMonth(new Date()).getTime()) && (
                       <X 
                         className="w-3 h-3 text-red-400 hover:text-red-300" 
                         onClick={(e) => {
                           e.stopPropagation();
                           setDateRange({ 
-                            from: startOfMonth(new Date()), 
+                            from: RETAIL_WEEK_START, 
                             to: endOfMonth(new Date()) 
                           });
                         }}
@@ -835,7 +835,7 @@ Genera:
                       <button 
                         onClick={() => {
                           setDateRange({ 
-                            from: startOfMonth(new Date()), 
+                            from: RETAIL_WEEK_START, 
                             to: endOfMonth(new Date()) 
                           });
                         }}
