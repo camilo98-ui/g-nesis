@@ -845,77 +845,107 @@ Genera:
           </div>
         ) : (
           <>
-            {/* Nueva Sección: Métricas Consolidadas - ACUMULADO DEL MES */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              {/* Transacciones + Ticket Promedio del Mes ACUMULADO */}
+            {/* Métricas Consolidadas - Más Claras */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+              {/* 1. Venta vs PPT de la Zona */}
+              <motion.div 
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setSelectedKPIDetail('sales')}
+                className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-xl rounded-lg p-5 border border-blue-500/20 cursor-pointer transition-all hover:border-blue-400/40 hover:shadow-lg hover:shadow-blue-500/20">
+                <p className="text-xs text-blue-300 mb-3 font-bold uppercase tracking-wider">💰 Venta vs PPT Zona</p>
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-xs text-slate-400 mb-1">Venta Total</p>
+                    <p className="text-3xl font-black text-white">{formatShort(monthlyTotals.totalSales)}</p>
+                  </div>
+                  <div className="h-px bg-white/10"></div>
+                  <div>
+                    <p className="text-xs text-slate-400 mb-1">Presupuesto Total</p>
+                    <p className="text-2xl font-bold text-blue-300">{formatShort(monthlyTotals.totalBudget)}</p>
+                  </div>
+                  <div className="pt-2">
+                    <p className={`text-3xl font-black ${
+                      ((monthlyTotals.totalSales/monthlyTotals.totalBudget)*100) >= 100 ? 'text-emerald-400' : 
+                      ((monthlyTotals.totalSales/monthlyTotals.totalBudget)*100) >= 85 ? 'text-amber-400' : 'text-red-400'
+                    }`}>
+                      {((monthlyTotals.totalSales/monthlyTotals.totalBudget)*100).toFixed(1)}%
+                    </p>
+                    <p className="text-xs text-slate-500">Cumplimiento</p>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* 2. Ticket Promedio y Transacciones Acumuladas */}
               <motion.div 
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setSelectedKPIDetail('transactions')}
-                className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-xl rounded-lg p-4 border border-blue-500/20 cursor-pointer transition-all hover:border-blue-400/40 hover:shadow-lg hover:shadow-blue-500/20">
-                <p className="text-xs text-blue-300 mb-3 font-bold">Tráfico Acumulado (Mes)</p>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <p className="text-xs text-slate-400 mb-1">Transacciones</p>
-                    <p className="text-2xl font-black text-white">{monthlyTotals.totalTransactions.toLocaleString()}</p>
-                  </div>
+                className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-xl rounded-lg p-5 border border-purple-500/20 cursor-pointer transition-all hover:border-purple-400/40 hover:shadow-lg hover:shadow-purple-500/20">
+                <p className="text-xs text-purple-300 mb-3 font-bold uppercase tracking-wider">🧊 Ticket y Transacciones</p>
+                <div className="space-y-3">
                   <div>
                     <p className="text-xs text-slate-400 mb-1">Ticket Promedio</p>
-                    <p className="text-2xl font-black text-white">
-                      {formatCurrency(monthlyTotals.avgTicket)}
-                    </p>
+                    <p className="text-3xl font-black text-white">{formatCurrency(monthlyTotals.avgTicket)}</p>
+                  </div>
+                  <div className="h-px bg-white/10"></div>
+                  <div>
+                    <p className="text-xs text-slate-400 mb-1">Transacciones Totales</p>
+                    <p className="text-2xl font-bold text-purple-300">{monthlyTotals.totalTransactions.toLocaleString()}</p>
                   </div>
                 </div>
               </motion.div>
 
-              {/* Venta Promedio + Acumulado del Mes */}
+              {/* 3. Venta Promedio y Transacciones Promedio */}
               <motion.div 
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setSelectedKPIDetail('avgSales')}
-                className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 backdrop-blur-xl rounded-lg p-4 border border-amber-500/20 cursor-pointer transition-all hover:border-amber-400/40 hover:shadow-lg hover:shadow-amber-500/20">
-                <p className="text-xs text-amber-300 mb-3 font-bold">Ventas Acumuladas (Mes)</p>
-                <div className="grid grid-cols-2 gap-3">
+                className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 backdrop-blur-xl rounded-lg p-5 border border-amber-500/20 cursor-pointer transition-all hover:border-amber-400/40 hover:shadow-lg hover:shadow-amber-500/20">
+                <p className="text-xs text-amber-300 mb-3 font-bold uppercase tracking-wider">📊 Promedios Diarios</p>
+                <div className="space-y-3">
                   <div>
-                    <p className="text-xs text-slate-400 mb-1">Total Acumulado</p>
-                    <p className="text-2xl font-black text-white">{formatShort(monthlyTotals.totalSales)}</p>
+                    <p className="text-xs text-slate-400 mb-1">Venta Promedio/Día</p>
+                    <p className="text-3xl font-black text-white">
+                      {formatShort(monthlyTotals.totalSales / new Date().getDate())}
+                    </p>
                   </div>
+                  <div className="h-px bg-white/10"></div>
                   <div>
-                    <p className="text-xs text-slate-400 mb-1">Promedio/Tienda</p>
-                    <p className="text-2xl font-black text-white">
-                      {formatShort(monthlyTotals.totalSales / STORES.length)}
+                    <p className="text-xs text-slate-400 mb-1">Transacciones/Día</p>
+                    <p className="text-2xl font-bold text-amber-300">
+                      {Math.round(monthlyTotals.totalTransactions / new Date().getDate()).toLocaleString()}
                     </p>
                   </div>
                 </div>
               </motion.div>
 
-              {/* Proyección Mensual + Semanal Actual con % */}
+              {/* 4. Proyecciones (Mes y Semana) */}
               <motion.div 
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setSelectedKPIDetail('projection')}
-                className="bg-gradient-to-br from-emerald-500/10 to-green-500/10 backdrop-blur-xl rounded-lg p-4 border border-emerald-500/20 cursor-pointer transition-all hover:border-emerald-400/40 hover:shadow-lg hover:shadow-emerald-500/20">
-                <p className="text-xs text-emerald-300 mb-3 font-bold">Proyecciones</p>
-                <div className="grid grid-cols-2 gap-3">
+                className="bg-gradient-to-br from-emerald-500/10 to-green-500/10 backdrop-blur-xl rounded-lg p-5 border border-emerald-500/20 cursor-pointer transition-all hover:border-emerald-400/40 hover:shadow-lg hover:shadow-emerald-500/20">
+                <p className="text-xs text-emerald-300 mb-3 font-bold uppercase tracking-wider">📈 Proyección</p>
+                <div className="space-y-3">
                   <div>
-                    <p className="text-xs text-slate-400 mb-1">Proy. Mes</p>
-                    <p className="text-xl font-black text-white mb-0.5">{formatShort(monthlyTotals.totalProjection)}</p>
-                    <p className={`text-xs font-bold ${
+                    <p className="text-xs text-slate-400 mb-1">Proyección Mes</p>
+                    <p className="text-3xl font-black text-white">{formatShort(monthlyTotals.totalProjection)}</p>
+                    <p className={`text-sm font-bold ${
                       ((monthlyTotals.totalProjection/monthlyTotals.totalBudget)*100) >= 100 ? 'text-emerald-400' : 'text-red-400'
                     }`}>
-                      {((monthlyTotals.totalProjection/monthlyTotals.totalBudget)*100).toFixed(0)}%
+                      {((monthlyTotals.totalProjection/monthlyTotals.totalBudget)*100).toFixed(1)}% del PPT
                     </p>
                   </div>
+                  <div className="h-px bg-white/10"></div>
                   <div>
-                    <p className="text-xs text-slate-400 mb-1">Proy. Sem Actual</p>
-                    <p className="text-xl font-black text-white mb-0.5">
-                      {formatShort(monthlyTotals.totalWeekProjection)}
-                    </p>
+                    <p className="text-xs text-slate-400 mb-1">Proyección Semana</p>
+                    <p className="text-2xl font-bold text-emerald-300">{formatShort(monthlyTotals.totalWeekProjection)}</p>
                     <p className={`text-xs font-bold ${
                       ((monthlyTotals.totalWeekProjection / monthlyTotals.totalWeekBudget)*100) >= 100 
                         ? 'text-emerald-400' : 'text-red-400'
                     }`}>
-                      {((monthlyTotals.totalWeekProjection / monthlyTotals.totalWeekBudget)*100).toFixed(0)}%
+                      {((monthlyTotals.totalWeekProjection / monthlyTotals.totalWeekBudget)*100).toFixed(1)}%
                     </p>
                   </div>
                 </div>
