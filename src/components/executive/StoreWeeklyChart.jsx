@@ -88,20 +88,18 @@ export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRa
       <style>{`
         @keyframes pulseGlow {
           0%, 100% {
-            filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.6));
             opacity: 1;
           }
           50% {
-            filter: drop-shadow(0 0 16px rgba(239, 68, 68, 0.9));
-            opacity: 0.85;
+            opacity: 0.75;
           }
         }
         @keyframes gentleGlow {
           0%, 100% {
-            filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.3));
+            opacity: 1;
           }
           50% {
-            filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.5));
+            opacity: 0.85;
           }
         }
         .critical-bar {
@@ -111,7 +109,7 @@ export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRa
           animation: gentleGlow 3s ease-in-out infinite;
         }
         .bar-hovered {
-          filter: brightness(1.2) drop-shadow(0 0 12px currentColor);
+          filter: brightness(1.2);
           transform: scaleX(1.02);
           transition: all 0.3s ease;
         }
