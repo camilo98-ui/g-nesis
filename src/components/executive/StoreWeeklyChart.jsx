@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BarChart, Bar, ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip, Cell, LineChart, Line } from 'recharts';
 import { ArrowUpDown, X, TrendingUp } from 'lucide-react';
-import { format, parseISO, eachDayOfInterval, isWithinInterval, addDays } from 'date-fns';
+import { format, parseISO, eachDayOfInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRange, formatCurrency, formatShort }) {
