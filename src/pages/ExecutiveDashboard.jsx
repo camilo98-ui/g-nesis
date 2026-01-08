@@ -1063,14 +1063,20 @@ Genera:
                   <div className="h-px bg-white/10"></div>
                   <div>
                     <p className="text-xs text-slate-400 mb-1">Presupuesto Mes</p>
-                    <p className="text-2xl font-bold text-blue-300">{formatShort(monthlyTotals.totalBudget)}</p>
+                    <p className="text-2xl font-bold text-blue-300">
+                      {currentZoneBudget?.sales_budget ? formatShort(currentZoneBudget.sales_budget) : formatShort(monthlyTotals.totalBudget)}
+                    </p>
                   </div>
                   <div className="pt-2">
                     <p className={`text-3xl font-black ${
-                      monthlyTotals.totalBudget > 0 && ((monthlyTotals.totalSales/monthlyTotals.totalBudget)*100) >= 100 ? 'text-emerald-400' : 
-                      monthlyTotals.totalBudget > 0 && ((monthlyTotals.totalSales/monthlyTotals.totalBudget)*100) >= 85 ? 'text-amber-400' : 'text-red-400'
+                      (currentZoneBudget?.sales_budget || monthlyTotals.totalBudget) > 0 && 
+                      ((monthlyTotals.totalSales/(currentZoneBudget?.sales_budget || monthlyTotals.totalBudget))*100) >= 100 ? 'text-emerald-400' : 
+                      (currentZoneBudget?.sales_budget || monthlyTotals.totalBudget) > 0 && 
+                      ((monthlyTotals.totalSales/(currentZoneBudget?.sales_budget || monthlyTotals.totalBudget))*100) >= 85 ? 'text-amber-400' : 'text-red-400'
                     }`}>
-                      {monthlyTotals.totalBudget > 0 ? ((monthlyTotals.totalSales/monthlyTotals.totalBudget)*100).toFixed(1) : '0.0'}%
+                      {(currentZoneBudget?.sales_budget || monthlyTotals.totalBudget) > 0 
+                        ? ((monthlyTotals.totalSales/(currentZoneBudget?.sales_budget || monthlyTotals.totalBudget))*100).toFixed(1) 
+                        : '0.0'}%
                     </p>
                     <p className="text-xs text-slate-500">Cumplimiento Actual</p>
                   </div>
