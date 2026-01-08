@@ -1912,6 +1912,8 @@ Genera:
                     <div
                       key={store.code}
                       onClick={() => setSelectedStoreDetail(store)}
+                      onMouseEnter={() => setHoveredStoreForChart(store)}
+                      onMouseLeave={() => setHoveredStoreForChart(null)}
                       className="relative bg-gradient-to-br from-red-500/20 to-rose-600/20 backdrop-blur-xl rounded-xl p-4 sm:p-6 lg:p-8 border border-red-500/30 cursor-pointer"
                     >
                       <div className="relative z-10">
@@ -1953,6 +1955,8 @@ Genera:
                     <div
                       key={store.code}
                       onClick={() => setSelectedStoreDetail(store)}
+                      onMouseEnter={() => setHoveredStoreForChart(store)}
+                      onMouseLeave={() => setHoveredStoreForChart(null)}
                       className="relative bg-gradient-to-br from-amber-500/20 to-orange-600/20 backdrop-blur-xl rounded-xl p-4 sm:p-6 lg:p-8 border border-amber-500/30 cursor-pointer"
                     >
                       <div className="relative z-10">
@@ -1994,6 +1998,8 @@ Genera:
                     <div
                       key={store.code}
                       onClick={() => setSelectedStoreDetail(store)}
+                      onMouseEnter={() => setHoveredStoreForChart(store)}
+                      onMouseLeave={() => setHoveredStoreForChart(null)}
                       className="relative bg-gradient-to-br from-emerald-500/20 to-green-600/20 backdrop-blur-xl rounded-xl p-4 sm:p-6 lg:p-8 border border-emerald-500/30 cursor-pointer"
                     >
                       <div className="relative z-10">
