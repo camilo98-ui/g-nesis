@@ -16,12 +16,17 @@ export default function FreezerAuditPanel({
   isLoading,
   allSlots = []
 }) {
-  const [selectedFreezer, setSelectedFreezer] = React.useState('total');
+  const [selectedFreezer, setSelectedFreezer] = React.useState(auditData.selectedFreezer || 'total');
   
   if (!auditData) return null;
 
   const { byFreezer, total, suggestions } = auditData;
   const currentData = selectedFreezer === 'total' ? total : byFreezer?.[selectedFreezer] || total;
+  
+  // Filtrar slots según la nevera seleccionada
+  const relevantSlots = selectedFreezer === 'total' 
+    ? allSlots 
+    : allSlots.filter(s => s.store_id?.endsWith(`_F${selectedFreezer}`));
   
   const { 
     totalSlots, 
@@ -143,22 +148,27 @@ export default function FreezerAuditPanel({
             <div className="text-[10px] text-cyan-600 mt-2 pt-2 border-t border-cyan-200 max-h-48 overflow-y-auto">
               {(() => {
                 const flavorCounts = {};
-                allSlots.forEach(s => {
+                relevantSlots.forEach(s => {
                   if (!s.is_empty && s.flavor_name) {
                     const key = s.flavor_name.toLowerCase().trim();
-                    flavorCounts[key] = (flavorCounts[key] || 0) + 1;
+                    if (!flavorCounts[key]) {
+                      flavorCounts[key] = 0;
+                    }
+                    flavorCounts[key]++;
                   }
                 });
                 const sortedFlavors = Object.entries(flavorCounts)
-                  .map(([name, count]) => {
-                    const originalSlot = allSlots.find(s => s.flavor_name?.toLowerCase().trim() === name);
-                    return { name: originalSlot?.flavor_name || name, count };
+                  .map(([key, count]) => {
+                    const originalSlot = relevantSlots.find(s => s.flavor_name?.toLowerCase().trim() === key);
+                    return { name: originalSlot?.flavor_name || key, count };
                   })
                   .sort((a, b) => b.count - a.count);
                 
                 return sortedFlavors.length > 0 ? (
                   <div>
-                    <p className="font-semibold mb-1">Todos los sabores en nevera:</p>
+                    <p className="font-semibold mb-1">
+                      {selectedFreezer === 'total' ? 'Todos los sabores:' : `Sabores en Nevera #${selectedFreezer}:`}
+                    </p>
                     <div className="space-y-0.5">
                       {sortedFlavors.map((f, i) => (
                         <div key={i} className="flex justify-between">
