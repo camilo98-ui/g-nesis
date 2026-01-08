@@ -27,9 +27,14 @@ export default function ExecutiveDashboard() {
   
   // Selector múltiple de semanas
   const [selectedWeeks, setSelectedWeeks] = useState([1, 2, 3, 4]); // Semanas seleccionadas por defecto
+  const [customDateRange, setCustomDateRange] = useState({ from: null, to: null });
+  const [useCustomDates, setUseCustomDates] = useState(false);
   
-  // Calcular dateRange basado en semanas seleccionadas
+  // Calcular dateRange basado en semanas seleccionadas o fechas personalizadas
   const dateRange = useMemo(() => {
+    if (useCustomDates && customDateRange.from && customDateRange.to) {
+      return customDateRange;
+    }
     if (selectedWeeks.length === 0) {
       return { from: RETAIL_WEEK_START, to: RETAIL_WEEK_START };
     }
@@ -39,7 +44,7 @@ export default function ExecutiveDashboard() {
       from: addDays(RETAIL_WEEK_START, (minWeek - 1) * 7),
       to: addDays(RETAIL_WEEK_START, maxWeek * 7 - 1)
     };
-  }, [selectedWeeks]);
+  }, [selectedWeeks, customDateRange, useCustomDates]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStoreDetail, setSelectedStoreDetail] = useState(null);
   const [aiInsights, setAiInsights] = useState(null);
@@ -883,6 +888,7 @@ Genera:
                             <button
                               key={i}
                               onClick={() => {
+                                setUseCustomDates(false);
                                 if (isSelected) {
                                   setSelectedWeeks(prev => prev.filter(w => w !== weekNum));
                                 } else {
@@ -890,7 +896,7 @@ Genera:
                                 }
                               }}
                               className={`px-2 py-2 rounded-lg text-xs font-bold transition-all ${
-                                isSelected 
+                                isSelected && !useCustomDates
                                   ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30' 
                                   : 'bg-white/10 text-slate-300 hover:bg-white/20'
                               }`}
@@ -900,6 +906,41 @@ Genera:
                             </button>
                           );
                         })}
+                      </div>
+                    </div>
+                    
+                    {/* Calendario personalizado */}
+                    <div className="border-t border-white/10 pt-4">
+                      <p className="text-xs text-slate-400 font-medium mb-2">Rango Personalizado</p>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-[10px] text-slate-500 mb-1">Desde</p>
+                          <Calendar
+                            mode="single"
+                            selected={customDateRange.from}
+                            onSelect={(date) => {
+                              if (date) {
+                                setCustomDateRange(prev => ({ ...prev, from: date }));
+                                setUseCustomDates(true);
+                              }
+                            }}
+                            className="rounded-md border border-white/10 bg-slate-800"
+                          />
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-slate-500 mb-1">Hasta</p>
+                          <Calendar
+                            mode="single"
+                            selected={customDateRange.to}
+                            onSelect={(date) => {
+                              if (date) {
+                                setCustomDateRange(prev => ({ ...prev, to: date }));
+                                setUseCustomDates(true);
+                              }
+                            }}
+                            className="rounded-md border border-white/10 bg-slate-800"
+                          />
+                        </div>
                       </div>
                     </div>
                     
