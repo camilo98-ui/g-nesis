@@ -912,7 +912,7 @@ Genera:
         </div>
       </Link>
 
-      <div className="max-w-[2400px] mx-auto px-6 py-6 relative z-10">
+      <div className="w-full mx-auto px-2 py-6 relative z-10">
         {/* Header Compacto con Filtro de Semanas */}
         <div className="mb-6">
           <div className="flex items-center justify-between gap-4 flex-wrap">
