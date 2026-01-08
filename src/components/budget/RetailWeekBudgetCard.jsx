@@ -125,6 +125,14 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
 
     // Calcular días del mes que efectivamente tienen venta
     const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd }).length;
+    
+    console.log('🎯 Presupuesto Debug:', {
+      store: storeId,
+      salesBudget: activeBudget.sales_budget,
+      daysInMonth,
+      monthStart: format(monthStart, 'yyyy-MM-dd'),
+      monthEnd: format(monthEnd, 'yyyy-MM-dd')
+    });
 
     // Semana actual (por defecto)
     const currentWeekStart = startOfWeek(now, { weekStartsOn: 1 });
@@ -232,9 +240,27 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
     const adjustedMonthlyBudget = activeBudget.sales_budget * TARGET_PERCENTAGE;
     const dailyBaseBudget = adjustedMonthlyBudget / daysInMonth;
 
+    console.log('💰 Presupuesto Calculado:', {
+      store: storeId,
+      adjustedMonthlyBudget,
+      dailyBaseBudget,
+      totalWeeklyAvg
+    });
+
     // Función para obtener presupuesto ajustado según día de la semana y tendencia histórica
     const getDailyBudget = (date) => {
-      if (totalWeeklyAvg === 0) return dailyBaseBudget; // Sin histórico
+      // CRÍTICO: Si no hay presupuesto base, devolver 0 inmediatamente
+      if (!dailyBaseBudget || dailyBaseBudget <= 0) {
+        console.warn('⚠️ Daily base budget is 0 or invalid:', { dailyBaseBudget, store: storeId });
+        return 0;
+      }
+      
+      // Sin histórico, usar presupuesto base
+      if (totalWeeklyAvg === 0) {
+        console.log('📊 Sin histórico, usando base:', dailyBaseBudget);
+        return dailyBaseBudget;
+      }
+      
       const dayOfWeek = date.getDay();
 
       // Si hay suficiente histórico para ESTE día específico, usarlo
@@ -242,14 +268,38 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
         // Escalar el promedio histórico para que la suma semanal coincida con el presupuesto mensual ajustado al 105%
         const totalHistoricalAvg = avgByDayOfWeek.reduce((a, b) => a + b, 0);
         const monthlyHistoricalProjection = totalHistoricalAvg * (daysInMonth / 7);
+        
+        if (monthlyHistoricalProjection <= 0) {
+          console.warn('⚠️ Historical projection is 0, using base budget');
+          return dailyBaseBudget;
+        }
+        
         const scaleFactor = adjustedMonthlyBudget / monthlyHistoricalProjection;
-        return avgByDayOfWeek[dayOfWeek] * scaleFactor;
+        const calculatedBudget = avgByDayOfWeek[dayOfWeek] * scaleFactor;
+        
+        console.log('📈 Con histórico suficiente:', {
+          dayOfWeek,
+          avgForDay: avgByDayOfWeek[dayOfWeek],
+          scaleFactor,
+          calculatedBudget
+        });
+        
+        return calculatedBudget > 0 ? calculatedBudget : dailyBaseBudget;
       } else {
         // Con poco histórico, usar PESO RELATIVO del día basado en datos disponibles
         // Esto permite variación por día de semana incluso con pocos datos
         const weight = weightByDayOfWeek[dayOfWeek];
         const weeklyBudget = dailyBaseBudget * 7;
-        return weeklyBudget * weight; // Distribuye el presupuesto semanal según peso del día
+        const calculatedBudget = weeklyBudget * weight;
+        
+        console.log('📊 Con peso relativo:', {
+          dayOfWeek,
+          weight,
+          weeklyBudget,
+          calculatedBudget
+        });
+        
+        return calculatedBudget > 0 ? calculatedBudget : dailyBaseBudget;
       }
     };
 
