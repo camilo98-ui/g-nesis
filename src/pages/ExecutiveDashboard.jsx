@@ -26,8 +26,8 @@ export default function ExecutiveDashboard() {
   const RETAIL_WEEK_START = new Date(2025, 11, 29); // 29 dic 2025
   
   const [dateRange, setDateRange] = useState({ 
-    from: RETAIL_WEEK_START, 
-    to: addDays(RETAIL_WEEK_START, 6) // Primera semana
+    from: startOfMonth(new Date()), 
+    to: endOfMonth(new Date())
   });
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStoreDetail, setSelectedStoreDetail] = useState(null);
@@ -834,11 +834,14 @@ Genera:
                       <p className="text-sm font-bold text-white">Seleccionar Rango</p>
                       <button 
                         onClick={() => {
-                          setDateRange({ from: RETAIL_WEEK_START, to: addDays(RETAIL_WEEK_START, 6) });
+                          setDateRange({ 
+                            from: startOfMonth(new Date()), 
+                            to: endOfMonth(new Date()) 
+                          });
                         }}
                         className="text-xs text-blue-400 hover:text-blue-300"
                       >
-                        Reiniciar
+                        Mes Completo
                       </button>
                     </div>
                     
