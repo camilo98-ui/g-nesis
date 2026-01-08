@@ -951,7 +951,9 @@ Genera:
                 </p>
                 <div className="space-y-3">
                   <div>
-                    <p className="text-xs text-slate-400 mb-1">Venta Total</p>
+                    <p className="text-xs text-slate-400 mb-1">
+                      {dynamicTotals.isRetailWeek ? 'Venta Semana' : 'Venta Acumulada'}
+                    </p>
                     <p className="text-3xl font-black text-white">{formatShort(dynamicTotals.totalSales)}</p>
                   </div>
                   <div className="h-px bg-white/10"></div>
@@ -1087,8 +1089,10 @@ Genera:
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setSelectedKPIDetail('sales')}
                   className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-xl rounded-lg p-4 border border-blue-500/20 cursor-pointer transition-all hover:border-blue-400/40 hover:shadow-lg hover:shadow-blue-500/20">
-                  <p className="text-xs text-blue-300 mb-1">Venta Total</p>
-                  <p className="text-3xl font-black text-white tabular-nums">{formatShort(zoneTotals.totalSales)}</p>
+                  <p className="text-xs text-blue-300 mb-1">
+                    {dynamicTotals.isRetailWeek ? 'Venta Semana' : 'Venta Acumulada'}
+                  </p>
+                  <p className="text-3xl font-black text-white tabular-nums">{formatShort(dynamicTotals.totalSales)}</p>
                   <ResponsiveContainer width="100%" height={30}>
                     <AreaChart data={dailySalesData.slice(-7)}>
                       <defs>
@@ -1133,19 +1137,19 @@ Genera:
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{ duration: 0.5, type: "spring" }}
                     className={`text-4xl font-black tabular-nums ${
-                      ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 100 ? 'text-emerald-400' : 
-                      ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 85 ? 'text-amber-400' : 'text-red-400'
+                      dynamicTotals.totalBudget > 0 && ((dynamicTotals.totalSales/dynamicTotals.totalBudget)*100) >= 100 ? 'text-emerald-400' : 
+                      dynamicTotals.totalBudget > 0 && ((dynamicTotals.totalSales/dynamicTotals.totalBudget)*100) >= 85 ? 'text-amber-400' : 'text-red-400'
                     }`}>
-                    {((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(0)}%
+                    {dynamicTotals.totalBudget > 0 ? ((dynamicTotals.totalSales/dynamicTotals.totalBudget)*100).toFixed(0) : 0}%
                   </motion.p>
                   <div className="mt-2 bg-slate-800/50 rounded-full h-2 overflow-hidden relative">
                     <motion.div 
                       initial={{ width: 0 }}
-                      animate={{ width: `${Math.min(((zoneTotals.totalSales/zoneTotals.totalBudget)*100), 100)}%` }}
+                      animate={{ width: `${Math.min(dynamicTotals.totalBudget > 0 ? ((dynamicTotals.totalSales/dynamicTotals.totalBudget)*100) : 0, 100)}%` }}
                       transition={{ duration: 1.5, ease: "easeOut" }}
                       className={`h-full rounded-full relative ${
-                        ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 100 ? 'bg-emerald-500' : 
-                        ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 85 ? 'bg-amber-500' : 'bg-red-500'
+                        dynamicTotals.totalBudget > 0 && ((dynamicTotals.totalSales/dynamicTotals.totalBudget)*100) >= 100 ? 'bg-emerald-500' : 
+                        dynamicTotals.totalBudget > 0 && ((dynamicTotals.totalSales/dynamicTotals.totalBudget)*100) >= 85 ? 'bg-amber-500' : 'bg-red-500'
                       }`}>
                       <motion.div
                         className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
