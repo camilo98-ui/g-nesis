@@ -96,10 +96,6 @@ export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRa
             <ArrowUpDown className="w-3 h-3" />
             {sortOrder === 'desc' ? 'Mayor → Menor' : 'Menor → Mayor'}
           </button>
-          
-          <span className="text-xs text-slate-400 px-2 py-1 bg-white/5 rounded-lg border border-white/10">
-            📅 {format(dateRange.from, 'dd MMM')} - {format(dateRange.to, 'dd MMM')}
-          </span>
         </div>
       </div>
 
