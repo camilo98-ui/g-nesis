@@ -898,7 +898,7 @@ Genera:
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden">
+    <div className="min-h-screen h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden">
       {/* Simplified Background - Static */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-1/2 -right-1/2 w-[1200px] h-[1200px] bg-gradient-to-br from-pink-500/15 via-purple-500/15 to-blue-500/15 rounded-full blur-3xl opacity-60" />
@@ -912,7 +912,7 @@ Genera:
         </div>
       </Link>
 
-      <div className="w-full mx-auto px-2 py-6 relative z-10">
+      <div className="w-full h-full mx-auto px-2 py-4 relative z-10 overflow-y-auto">
         {/* Header Compacto con Filtro de Semanas */}
         <div className="mb-6">
           <div className="flex items-center justify-between gap-4 flex-wrap">
