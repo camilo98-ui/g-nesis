@@ -278,7 +278,88 @@ export default function ExecutiveDashboard() {
     return { totalSales, totalBudget, totalProjection, totalTransactions };
   }, [storesAnalysis]);
 
-  // Totales ACUMULADOS del mes (para botones del header)
+  // Totales DINÁMICOS basados en dateRange seleccionado
+  const dynamicTotals = useMemo(() => {
+    // Determinar si estamos en semana retail completa o rango personalizado
+    const isRetailWeek = (dateRange.to.getTime() - dateRange.from.getTime()) === (6 * 24 * 60 * 60 * 1000);
+    
+    // Filtrar ventas dentro del rango de fechas seleccionado
+    const salesInRange = allDailySales.filter(s => {
+      try {
+        const saleDate = parseISO(s.date);
+        return isWithinInterval(saleDate, { start: dateRange.from, end: dateRange.to });
+      } catch {
+        return false;
+      }
+    });
+
+    const totalSales = salesInRange.reduce((sum, s) => sum + (s.total_sales || 0), 0);
+    const totalTransactions = salesInRange.reduce((sum, s) => sum + (s.total_transactions || 0), 0);
+    const avgTicket = totalTransactions > 0 ? totalSales / totalTransactions : 0;
+
+    // Calcular presupuesto del rango seleccionado
+    const daysInRange = eachDayOfInterval({ start: dateRange.from, end: dateRange.to });
+    const totalBudgetInRange = storesAnalysis.reduce((sum, store) => {
+      if (!store.hasData || !store.getDailyBudget) return sum;
+      const storeBudget = daysInRange.reduce((daySum, day) => {
+        try {
+          return daySum + store.getDailyBudget(day);
+        } catch {
+          return daySum;
+        }
+      }, 0);
+      return sum + storeBudget;
+    }, 0);
+
+    // Días transcurridos en el rango vs total de días
+    const now = new Date();
+    const daysElapsedInRange = daysInRange.filter(d => d <= now).length;
+    const totalDaysInRange = daysInRange.length;
+    
+    // Promedio diario en el rango
+    const avgDailySales = daysElapsedInRange > 0 ? totalSales / daysElapsedInRange : 0;
+    const avgDailyTransactions = daysElapsedInRange > 0 ? totalTransactions / daysElapsedInRange : 0;
+    
+    // Proyección para el rango completo
+    const rangeProjection = avgDailySales * totalDaysInRange;
+    
+    // Proyección mensual completa (del mes actual)
+    const monthStart = startOfMonth(now);
+    const monthEnd = endOfMonth(now);
+    const monthSales = allDailySales.filter(s => {
+      try {
+        const saleDate = parseISO(s.date);
+        return saleDate >= monthStart && saleDate <= now;
+      } catch {
+        return false;
+      }
+    });
+    const totalMonthSales = monthSales.reduce((sum, s) => sum + (s.total_sales || 0), 0);
+    const daysElapsedMonth = now.getDate();
+    const daysInMonth = monthEnd.getDate();
+    const avgDailySalesMonth = daysElapsedMonth > 0 ? totalMonthSales / daysElapsedMonth : 0;
+    const monthProjection = totalMonthSales + (avgDailySalesMonth * (daysInMonth - daysElapsedMonth));
+    
+    // Presupuesto mensual total
+    const totalMonthBudget = storesAnalysis.reduce((sum, s) => sum + (s.salesBudget || 0), 0);
+
+    return { 
+      totalSales, 
+      totalTransactions, 
+      totalBudget: totalBudgetInRange,
+      rangeProjection,
+      monthProjection,
+      totalMonthBudget,
+      avgTicket,
+      avgDailySales,
+      avgDailyTransactions,
+      daysElapsedInRange,
+      totalDaysInRange,
+      isRetailWeek
+    };
+  }, [allDailySales, dateRange, storesAnalysis]);
+
+  // Totales ACUMULADOS del mes (para referencias)
   const monthlyTotals = useMemo(() => {
     const storesWithData = storesAnalysis.filter(s => s.hasData);
     const totalSales = storesWithData.reduce((sum, s) => sum + s.monthTotalSales, 0);
@@ -845,107 +926,140 @@ Genera:
           </div>
         ) : (
           <>
-            {/* Métricas Consolidadas - Más Claras */}
+            {/* Métricas Consolidadas - Dinámicas según Filtro de Fechas */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-              {/* 1. Venta vs PPT de la Zona */}
+              {/* 1. Venta vs PPT de la Zona (del rango seleccionado) */}
               <motion.div 
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setSelectedKPIDetail('sales')}
                 className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-xl rounded-lg p-5 border border-blue-500/20 cursor-pointer transition-all hover:border-blue-400/40 hover:shadow-lg hover:shadow-blue-500/20">
-                <p className="text-xs text-blue-300 mb-3 font-bold uppercase tracking-wider">💰 Venta vs PPT Zona</p>
+                <p className="text-xs text-blue-300 mb-3 font-bold uppercase tracking-wider">
+                  💰 Venta vs PPT Zona
+                </p>
                 <div className="space-y-3">
                   <div>
                     <p className="text-xs text-slate-400 mb-1">Venta Total</p>
-                    <p className="text-3xl font-black text-white">{formatShort(monthlyTotals.totalSales)}</p>
+                    <p className="text-3xl font-black text-white">{formatShort(dynamicTotals.totalSales)}</p>
                   </div>
                   <div className="h-px bg-white/10"></div>
                   <div>
-                    <p className="text-xs text-slate-400 mb-1">Presupuesto Total</p>
-                    <p className="text-2xl font-bold text-blue-300">{formatShort(monthlyTotals.totalBudget)}</p>
+                    <p className="text-xs text-slate-400 mb-1">Presupuesto</p>
+                    <p className="text-2xl font-bold text-blue-300">{formatShort(dynamicTotals.totalBudget)}</p>
                   </div>
                   <div className="pt-2">
                     <p className={`text-3xl font-black ${
-                      ((monthlyTotals.totalSales/monthlyTotals.totalBudget)*100) >= 100 ? 'text-emerald-400' : 
-                      ((monthlyTotals.totalSales/monthlyTotals.totalBudget)*100) >= 85 ? 'text-amber-400' : 'text-red-400'
+                      dynamicTotals.totalBudget > 0 && ((dynamicTotals.totalSales/dynamicTotals.totalBudget)*100) >= 100 ? 'text-emerald-400' : 
+                      dynamicTotals.totalBudget > 0 && ((dynamicTotals.totalSales/dynamicTotals.totalBudget)*100) >= 85 ? 'text-amber-400' : 'text-red-400'
                     }`}>
-                      {((monthlyTotals.totalSales/monthlyTotals.totalBudget)*100).toFixed(1)}%
+                      {dynamicTotals.totalBudget > 0 ? ((dynamicTotals.totalSales/dynamicTotals.totalBudget)*100).toFixed(1) : '0.0'}%
                     </p>
                     <p className="text-xs text-slate-500">Cumplimiento</p>
                   </div>
                 </div>
               </motion.div>
 
-              {/* 2. Ticket Promedio y Transacciones Acumuladas */}
+              {/* 2. Ticket Promedio y Transacciones Totales (del rango) */}
               <motion.div 
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setSelectedKPIDetail('transactions')}
                 className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-xl rounded-lg p-5 border border-purple-500/20 cursor-pointer transition-all hover:border-purple-400/40 hover:shadow-lg hover:shadow-purple-500/20">
-                <p className="text-xs text-purple-300 mb-3 font-bold uppercase tracking-wider">🧊 Ticket y Transacciones</p>
+                <p className="text-xs text-purple-300 mb-3 font-bold uppercase tracking-wider">
+                  🧊 Ticket y Transacciones
+                </p>
                 <div className="space-y-3">
                   <div>
                     <p className="text-xs text-slate-400 mb-1">Ticket Promedio</p>
-                    <p className="text-3xl font-black text-white">{formatCurrency(monthlyTotals.avgTicket)}</p>
+                    <p className="text-3xl font-black text-white">
+                      {dynamicTotals.avgTicket > 0 ? formatCurrency(dynamicTotals.avgTicket) : '$0'}
+                    </p>
                   </div>
                   <div className="h-px bg-white/10"></div>
                   <div>
                     <p className="text-xs text-slate-400 mb-1">Transacciones Totales</p>
-                    <p className="text-2xl font-bold text-purple-300">{monthlyTotals.totalTransactions.toLocaleString()}</p>
+                    <p className="text-2xl font-bold text-purple-300">
+                      {dynamicTotals.totalTransactions.toLocaleString()}
+                    </p>
+                  </div>
+                  <div className="pt-2">
+                    <p className="text-xs text-slate-500">
+                      {dynamicTotals.daysElapsedInRange} de {dynamicTotals.totalDaysInRange} días
+                    </p>
                   </div>
                 </div>
               </motion.div>
 
-              {/* 3. Venta Promedio y Transacciones Promedio */}
+              {/* 3. Promedios Diarios (del rango) */}
               <motion.div 
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setSelectedKPIDetail('avgSales')}
                 className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 backdrop-blur-xl rounded-lg p-5 border border-amber-500/20 cursor-pointer transition-all hover:border-amber-400/40 hover:shadow-lg hover:shadow-amber-500/20">
-                <p className="text-xs text-amber-300 mb-3 font-bold uppercase tracking-wider">📊 Promedios Diarios</p>
+                <p className="text-xs text-amber-300 mb-3 font-bold uppercase tracking-wider">
+                  📊 Promedios Diarios
+                </p>
                 <div className="space-y-3">
                   <div>
                     <p className="text-xs text-slate-400 mb-1">Venta Promedio/Día</p>
                     <p className="text-3xl font-black text-white">
-                      {formatShort(monthlyTotals.totalSales / new Date().getDate())}
+                      {dynamicTotals.avgDailySales > 0 ? formatShort(dynamicTotals.avgDailySales) : '$0'}
                     </p>
                   </div>
                   <div className="h-px bg-white/10"></div>
                   <div>
                     <p className="text-xs text-slate-400 mb-1">Transacciones/Día</p>
                     <p className="text-2xl font-bold text-amber-300">
-                      {Math.round(monthlyTotals.totalTransactions / new Date().getDate()).toLocaleString()}
+                      {Math.round(dynamicTotals.avgDailyTransactions).toLocaleString()}
+                    </p>
+                  </div>
+                  <div className="pt-2">
+                    <p className="text-xs text-slate-500">
+                      Basado en {dynamicTotals.daysElapsedInRange} días
                     </p>
                   </div>
                 </div>
               </motion.div>
 
-              {/* 4. Proyecciones (Mes y Semana) */}
+              {/* 4. Proyección del Rango + Proyección Mensual */}
               <motion.div 
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setSelectedKPIDetail('projection')}
                 className="bg-gradient-to-br from-emerald-500/10 to-green-500/10 backdrop-blur-xl rounded-lg p-5 border border-emerald-500/20 cursor-pointer transition-all hover:border-emerald-400/40 hover:shadow-lg hover:shadow-emerald-500/20">
-                <p className="text-xs text-emerald-300 mb-3 font-bold uppercase tracking-wider">📈 Proyección</p>
+                <p className="text-xs text-emerald-300 mb-3 font-bold uppercase tracking-wider">
+                  📈 Proyección
+                </p>
                 <div className="space-y-3">
                   <div>
-                    <p className="text-xs text-slate-400 mb-1">Proyección Mes</p>
-                    <p className="text-3xl font-black text-white">{formatShort(monthlyTotals.totalProjection)}</p>
+                    <p className="text-xs text-slate-400 mb-1">
+                      {dynamicTotals.isRetailWeek ? 'Proyección Semana' : 'Proyección Rango'}
+                    </p>
+                    <p className="text-3xl font-black text-white">
+                      {formatShort(dynamicTotals.rangeProjection)}
+                    </p>
                     <p className={`text-sm font-bold ${
-                      ((monthlyTotals.totalProjection/monthlyTotals.totalBudget)*100) >= 100 ? 'text-emerald-400' : 'text-red-400'
+                      dynamicTotals.totalBudget > 0 && ((dynamicTotals.rangeProjection/dynamicTotals.totalBudget)*100) >= 100 
+                        ? 'text-emerald-400' : 'text-red-400'
                     }`}>
-                      {((monthlyTotals.totalProjection/monthlyTotals.totalBudget)*100).toFixed(1)}% del PPT
+                      {dynamicTotals.totalBudget > 0 
+                        ? ((dynamicTotals.rangeProjection/dynamicTotals.totalBudget)*100).toFixed(1) 
+                        : '0.0'}% del PPT
                     </p>
                   </div>
                   <div className="h-px bg-white/10"></div>
                   <div>
-                    <p className="text-xs text-slate-400 mb-1">Proyección Semana</p>
-                    <p className="text-2xl font-bold text-emerald-300">{formatShort(monthlyTotals.totalWeekProjection)}</p>
+                    <p className="text-xs text-slate-400 mb-1">Proyección Mes</p>
+                    <p className="text-2xl font-bold text-emerald-300">
+                      {formatShort(dynamicTotals.monthProjection)}
+                    </p>
                     <p className={`text-xs font-bold ${
-                      ((monthlyTotals.totalWeekProjection / monthlyTotals.totalWeekBudget)*100) >= 100 
+                      dynamicTotals.totalMonthBudget > 0 && ((dynamicTotals.monthProjection/dynamicTotals.totalMonthBudget)*100) >= 100 
                         ? 'text-emerald-400' : 'text-red-400'
                     }`}>
-                      {((monthlyTotals.totalWeekProjection / monthlyTotals.totalWeekBudget)*100).toFixed(1)}%
+                      {dynamicTotals.totalMonthBudget > 0 
+                        ? ((dynamicTotals.monthProjection/dynamicTotals.totalMonthBudget)*100).toFixed(1) 
+                        : '0.0'}%
                     </p>
                   </div>
                 </div>
