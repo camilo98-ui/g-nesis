@@ -1270,9 +1270,10 @@ Genera:
                 transition={{ duration: 1.5, ease: "easeOut" }}
               >
                 <motion.div
-                  className="h-full w-full bg-gradient-to-r from-white/40 to-transparent"
-                  animate={{ x: ['-100%', '200%'] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                  className="h-full w-full bg-gradient-to-r from-transparent via-white/60 to-transparent"
+                  style={{ width: '100px' }}
+                  animate={{ x: ['-120px', 'calc(100% + 120px)'] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "linear", repeatDelay: 0 }}
                 />
               </motion.div>
             </div>
