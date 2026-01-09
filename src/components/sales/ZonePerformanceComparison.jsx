@@ -13,17 +13,16 @@ export default function ZonePerformanceComparison({ storeId, formatCurrency, cur
   
   // Determinar rango de fechas según modo gregoriano o filtro activo
   const now = new Date();
+  const monthStart = gregorianMode ? startOfMonth(now) : new Date(now.getFullYear(), now.getMonth() - 1, 29);
+  const monthEnd = gregorianMode ? endOfMonth(now) : new Date(now.getFullYear(), now.getMonth(), 28);
+  
   const dateStart = currentDateRange?.from 
     ? format(currentDateRange.from, 'yyyy-MM-dd') 
-    : gregorianMode 
-    ? format(startOfMonth(now), 'yyyy-MM-dd')
-    : format(new Date(now.getFullYear(), now.getMonth() - 1, 29), 'yyyy-MM-dd');
+    : format(monthStart, 'yyyy-MM-dd');
   
   const dateEnd = currentDateRange?.to 
     ? format(currentDateRange.to, 'yyyy-MM-dd') 
-    : gregorianMode
-    ? format(endOfMonth(now), 'yyyy-MM-dd')
-    : format(new Date(now.getFullYear(), now.getMonth(), 28), 'yyyy-MM-dd');
+    : format(monthEnd, 'yyyy-MM-dd');
 
   // Determinar zona basada en código de tienda
   const currentStore = STORES.find(s => s.code === storeId);
@@ -138,6 +137,34 @@ export default function ZonePerformanceComparison({ storeId, formatCurrency, cur
       allStores: ranked
     };
   }, [allZoneSales, storeId]);
+
+  // Generar chartData con fechas formateadas para gráficas
+  const chartData = useMemo(() => {
+    if (!allZoneSales.length) return [];
+    
+    const startDate = currentDateRange?.from || monthStart;
+    const endDate = currentDateRange?.to || now;
+    const days = eachDayOfInterval({ start: startDate, end: endDate });
+    
+    return days.map(day => {
+      const dayStr = format(day, 'yyyy-MM-dd');
+      const dayData = allZoneSales.find(s => {
+        const saleDate = s.date?.split('T')[0] || s.date;
+        return saleDate === dayStr;
+      }) || {};
+      
+      return {
+        date: format(day, 'dd MMM', { locale: es }),
+        fullDate: format(day, 'EEEE dd MMMM yyyy', { locale: es }),
+        dayName: format(day, 'EEEE', { locale: es }),
+        ventas: dayData.total_sales || 0,
+        tickets: dayData.total_tickets || 0,
+        ticketPromedio: dayData.total_transactions > 0 ? dayData.total_sales / dayData.total_transactions : 0,
+        transactions: dayData.total_transactions || 0,
+        suggested: dayData.total_suggested || 0
+      };
+    });
+  }, [allZoneSales, currentDateRange, monthStart, now]);
 
   // Métricas disponibles - SIEMPRE se ejecuta
   const metrics = React.useMemo(() => [
@@ -340,6 +367,34 @@ export default function ZonePerformanceComparison({ storeId, formatCurrency, cur
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
+
+            {/* Tabla de Ranking Detallada */}
+            <div className="mt-4 space-y-2">
+              {rankedStores.slice(0, 5).map((store, idx) => {
+                const isCurrentStore = store.storeCode === storeId;
+                const position = idx + 1;
+                return (
+                  <div 
+                    key={store.storeCode}
+                    className={`flex items-center justify-between p-2 rounded-lg ${
+                      isCurrentStore ? 'bg-rose-100 border-2 border-rose-300' : 'bg-gray-50'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className={`text-sm font-bold ${isCurrentStore ? 'text-rose-700' : 'text-gray-500'}`}>
+                        #{position}
+                      </span>
+                      <span className={`text-xs font-medium ${isCurrentStore ? 'text-rose-900' : 'text-gray-700'}`}>
+                        {store.storeName}
+                      </span>
+                    </div>
+                    <span className={`text-sm font-bold ${isCurrentStore ? 'text-rose-700' : 'text-gray-600'}`}>
+                      {currentMetric.format(currentMetric.getValue(store))}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
           </motion.div>
         ) : (
           <motion.div
