@@ -1060,7 +1060,7 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
                 </div>
               </motion.div>
             )}
-          </div>
+          </AnimatePresence>
         </CardContent>
       </Card>
 
