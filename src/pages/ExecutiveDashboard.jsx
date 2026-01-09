@@ -900,7 +900,7 @@ Genera:
           budget: dayBudget / 1000000,
           compliance: dayBudget > 0 ? (daySales / dayBudget) * 100 : 0
         };
-      });
+      }).filter(d => d.sales > 0 || d.budget > 0);
     } else if (viewMode === 'week') {
       const weeks = eachWeekOfInterval({ start: dateRange.from, end: dateRange.to }, { weekStartsOn: 0 });
       return weeks.map((weekStart, idx) => {
@@ -1756,7 +1756,7 @@ Genera:
                       </select>
                     </div>
                   </div>
-                  <ResponsiveContainer width="100%" height={240}>
+                  <ResponsiveContainer width="100%" height={340}>
                     <ComposedChart data={dailySalesData}>
                       <defs>
                         <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
