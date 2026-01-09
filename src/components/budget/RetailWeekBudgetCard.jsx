@@ -133,18 +133,18 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       monthEnd: format(monthEnd, 'yyyy-MM-dd')
     });
 
-    // Semana actual (por defecto)
-    const currentWeekStart = startOfWeek(now, { weekStartsOn: 1 });
-    const currentWeekEnd = endOfWeek(now, { weekStartsOn: 1 });
+    // Semana actual según modo
+    const currentWeekStart = gregorianMode ? startOfWeek(now, { weekStartsOn: 0 }) : startOfWeek(now, { weekStartsOn: 1 });
+    const currentWeekEnd = gregorianMode ? endOfWeek(now, { weekStartsOn: 0 }) : endOfWeek(now, { weekStartsOn: 1 });
 
     // Para gráficas: usar filtro manual si existe, de lo contrario semana actual
     const displayWeekStart = currentDateRange?.from || currentWeekStart;
     const displayWeekEnd = currentDateRange?.to || currentWeekEnd;
 
-    // Obtener todas las semanas retail que tocan el mes actual
+    // Obtener todas las semanas según modo
     const weeks = eachWeekOfInterval(
       { start: monthStart, end: monthEnd },
-      { weekStartsOn: 1 }
+      { weekStartsOn: gregorianMode ? 0 : 1 }
     );
 
 
@@ -365,9 +365,9 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       adjustedDailyBudget = Math.min(adjustedDailyBudget, maxIncrease);
     }
 
-    // Calcular número de semana retail (considerando semanas que empiezan antes del mes)
+    // Calcular número de semana según modo
     const currentWeekNumber = weeks.findIndex(w => {
-      const weekEnd = endOfWeek(w, { weekStartsOn: 1 });
+      const weekEnd = endOfWeek(w, { weekStartsOn: gregorianMode ? 0 : 1 });
       return isWithinInterval(currentWeekStart, { start: w, end: weekEnd });
     }) + 1;
 
@@ -1410,15 +1410,15 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
               {/* Proyección de Semanas Futuras */}
               {(() => {
                 const now = new Date();
-                const monthStart = startOfMonth(now);
-                const monthEnd = endOfMonth(now);
-                const weeks = eachWeekOfInterval({ start: monthStart, end: monthEnd }, { weekStartsOn: 1 });
+                const monthStartCalc = gregorianMode ? startOfMonth(now) : new Date(now.getFullYear(), now.getMonth() - 1, 29);
+                const monthEndCalc = gregorianMode ? endOfMonth(now) : new Date(now.getFullYear(), now.getMonth(), 28);
+                const weeks = eachWeekOfInterval({ start: monthStartCalc, end: monthEndCalc }, { weekStartsOn: gregorianMode ? 0 : 1 });
                 
                 const futureWeeks = weeks
                   .map((weekStart, idx) => {
-                    const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
+                    const weekEnd = endOfWeek(weekStart, { weekStartsOn: gregorianMode ? 0 : 1 });
                     const daysInWeek = eachDayOfInterval({ start: weekStart, end: weekEnd })
-                      .filter(d => d >= monthStart && d <= monthEnd);
+                      .filter(d => d >= monthStartCalc && d <= monthEndCalc);
                     
                     const weekBudget = daysInWeek.reduce((sum, day) => {
                       const dayOfWeek = day.getDay();
@@ -1771,7 +1771,11 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                           </div>
                           <div className="flex justify-between items-center p-2 bg-slate-50 rounded-lg">
                             <span className="text-xs text-slate-700">Días en la semana (en mes)</span>
-                            <span className="font-bold text-slate-900">{eachDayOfInterval({ start: budgetData.currentWeekStart, end: budgetData.currentWeekEnd }).filter(d => isWithinInterval(d, { start: startOfMonth(new Date()), end: endOfMonth(new Date()) })).length} días</span>
+                            <span className="font-bold text-slate-900">{eachDayOfInterval({ start: budgetData.currentWeekStart, end: budgetData.currentWeekEnd }).filter(d => {
+                              const monthStartBound = gregorianMode ? startOfMonth(new Date()) : new Date(new Date().getFullYear(), new Date().getMonth() - 1, 29);
+                              const monthEndBound = gregorianMode ? endOfMonth(new Date()) : new Date(new Date().getFullYear(), new Date().getMonth(), 28);
+                              return isWithinInterval(d, { start: monthStartBound, end: monthEndBound });
+                            }).length} días</span>
                           </div>
                           <div className="flex justify-between items-center p-2 bg-purple-50 rounded-lg">
                             <span className="text-xs text-purple-700">Promedio diario requerido</span>
@@ -1831,16 +1835,16 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
 
                     {selectedMetric === 'weekly-projection' && (() => {
                       const now = new Date();
-                      const monthStart = startOfMonth(now);
-                      const monthEnd = endOfMonth(now);
-                      const weeks = eachWeekOfInterval({ start: monthStart, end: monthEnd }, { weekStartsOn: 1 });
+                      const monthStartCalc = gregorianMode ? startOfMonth(now) : new Date(now.getFullYear(), now.getMonth() - 1, 29);
+                      const monthEndCalc = gregorianMode ? endOfMonth(now) : new Date(now.getFullYear(), now.getMonth(), 28);
+                      const weeks = eachWeekOfInterval({ start: monthStartCalc, end: monthEndCalc }, { weekStartsOn: gregorianMode ? 0 : 1 });
                       
                       // Proyectar presupuestos de semanas futuras basado en el ritmo actual
                       const futureWeeks = weeks
                         .map((weekStart, idx) => {
-                          const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
+                          const weekEnd = endOfWeek(weekStart, { weekStartsOn: gregorianMode ? 0 : 1 });
                           const daysInWeek = eachDayOfInterval({ start: weekStart, end: weekEnd })
-                            .filter(d => d >= monthStart && d <= monthEnd);
+                            .filter(d => d >= monthStartCalc && d <= monthEndCalc);
                           
                           const weekBudget = daysInWeek.reduce((sum, day) => {
                             const dayOfWeek = day.getDay();
