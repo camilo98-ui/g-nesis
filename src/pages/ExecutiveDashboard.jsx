@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { STORES, getDisplayName } from '@/components/StoreSelector';
-import { ArrowLeft, Search, TrendingUp, TrendingDown, Eye, Zap, Award, Brain, ArrowUpDown, ArrowUp, ArrowDown, BarChart3, Settings, X, Download, Filter, CalendarDays, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Search, TrendingUp, TrendingDown, Eye, Zap, Award, ArrowUpDown, ArrowUp, ArrowDown, BarChart3, Settings, X, Download, Filter, CalendarDays, AlertTriangle } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
@@ -98,8 +98,7 @@ export default function ExecutiveDashboard() {
   }, [selectedWeeks, customDateRange, useCustomDates, gregorianMode]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStoreDetail, setSelectedStoreDetail] = useState(null);
-  const [aiInsights, setAiInsights] = useState(null);
-  const [loadingInsights, setLoadingInsights] = useState(false);
+
   const [hoveredKPI, setHoveredKPI] = useState(null);
   const [selectedKPIDetail, setSelectedKPIDetail] = useState(null);
   const [showComparable, setShowComparable] = useState(false);
@@ -800,65 +799,9 @@ export default function ExecutiveDashboard() {
     return 'Sostener desempeño';
   };
 
-  const generateAIInsights = async () => {
-    if (loadingInsights || aiInsights) return;
-    setLoadingInsights(true);
 
-    try {
-      const storesWithData = storesAnalysis.filter(s => s.hasData);
-      const criticalStores = storesAnalysis.filter(s => s.status === 'critical');
-      const topStore = storesWithData.sort((a, b) => b.salesCompliance - a.salesCompliance)[0];
-      const worstStore = storesWithData.sort((a, b) => a.salesCompliance - b.salesCompliance)[0];
-      
-      const totalGap = criticalStores.reduce((sum, s) => sum + Math.max(0, s.gap), 0);
-      const avgTicketZone = zoneTotals.totalSales / zoneTotals.totalTransactions;
-      const daysLeft = Math.ceil((new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0) - new Date()) / (1000 * 60 * 60 * 24));
 
-      const prompt = `Eres un analista ejecutivo de retail. Analiza esta zona y genera un reporte estructurado:
 
-DATOS DE LA ZONA:
-- Cumplimiento: ${((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(1)}%
-- Venta actual: $${(zoneTotals.totalSales/1000000).toFixed(1)}M de $${(zoneTotals.totalBudget/1000000).toFixed(1)}M
-- Brecha total: $${(totalGap/1000000).toFixed(1)}M
-- Tiendas críticas: ${criticalStores.length} de ${storesAnalysis.length}
-- Ticket promedio zona: $${avgTicketZone.toFixed(0)}
-- Días restantes del mes: ${daysLeft}
-
-TOP PERFORMER: ${topStore.name} (${topStore.salesCompliance.toFixed(0)}%, Ticket: $${topStore.avgTicket.toFixed(0)})
-PEOR PERFORMER: ${worstStore.name} (${worstStore.salesCompliance.toFixed(0)}%, Brecha: $${(worstStore.gap/1000000).toFixed(1)}M)
-
-TIENDAS CRÍTICAS DETALLE:
-${criticalStores.slice(0, 3).map(s => `- ${s.name}: ${s.salesCompliance.toFixed(0)}% (Brecha: $${(s.gap/1000000).toFixed(1)}M, Ticket: $${s.avgTicket.toFixed(0)})`).join('\n')}
-
-Genera:
-1. Estado numérico conciso (máx 30 palabras)
-2. Acción inmediata específica con números
-3. Pronóstico: Si se ejecuta, cuánto cerraría la brecha en %`;
-
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            estado_numerico: { type: "string" },
-            accion_inmediata: { type: "string" },
-            pronostico_impacto: { type: "string" }
-          }
-        }
-      });
-
-      setAiInsights(result);
-    } catch (e) {
-      console.error(e);
-    }
-    setLoadingInsights(false);
-  };
-
-  useEffect(() => {
-    if (storesAnalysis.length > 0 && !isLoading) {
-      generateAIInsights();
-    }
-  }, [storesAnalysis.length, isLoading]);
 
 
 
@@ -2637,91 +2580,7 @@ Genera:
               </div>
             </div>
 
-            {/* Análisis Inteligente - Oculto en móvil, visible en desktop */}
-            {aiInsights && (
-              <div className="hidden lg:block bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-xl rounded-xl border border-purple-500/30 overflow-hidden mb-8">
-                <div className="p-6 lg:p-8 border-b border-purple-500/20">
-                  <div className="flex items-center gap-3 lg:gap-4 mb-4 lg:mb-6">
-                    <div className="w-10 h-10 lg:w-14 lg:h-14 rounded-xl bg-purple-500/20 flex items-center justify-center">
-                      <Brain className="w-6 h-6 lg:w-8 lg:h-8 text-purple-400" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-purple-300 uppercase tracking-wide">Análisis IA</p>
-                      <p className="text-xs lg:text-sm text-slate-400">Diagnóstico + Acción</p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-4 lg:space-y-6">
-                    {/* Estado Numérico */}
-                    <div className="bg-white/5 rounded-xl p-4 lg:p-6 border border-purple-500/20">
-                      <div className="flex items-center gap-2 mb-2 lg:mb-3">
-                        <div className="w-1.5 h-1.5 lg:w-2 lg:h-2 rounded-full bg-purple-400" />
-                        <p className="text-[10px] lg:text-xs font-bold text-purple-300 uppercase tracking-wider">📊 Diagnóstico</p>
-                      </div>
-                      <p className="text-sm lg:text-lg text-white leading-relaxed">
-                        {aiInsights.estado_numerico}
-                      </p>
-                    </div>
-
-                    {/* Acción Inmediata */}
-                    <div className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 rounded-xl p-4 lg:p-6 border border-amber-500/30">
-                      <div className="flex items-center gap-2 mb-2 lg:mb-3">
-                        <div className="w-1.5 h-1.5 lg:w-2 lg:h-2 rounded-full bg-amber-400" />
-                        <p className="text-[10px] lg:text-xs font-bold text-amber-300 uppercase tracking-wider">🎯 Acción</p>
-                      </div>
-                      <p className="text-sm lg:text-lg text-white leading-relaxed font-medium">
-                        {aiInsights.accion_inmediata}
-                      </p>
-                    </div>
-
-                    {/* Pronóstico */}
-                    <div className="bg-gradient-to-br from-emerald-500/10 to-green-500/10 rounded-xl p-4 lg:p-6 border border-emerald-500/30">
-                      <div className="flex items-center gap-2 mb-2 lg:mb-3">
-                        <div className="w-1.5 h-1.5 lg:w-2 lg:h-2 rounded-full bg-emerald-400" />
-                        <p className="text-[10px] lg:text-xs font-bold text-emerald-300 uppercase tracking-wider">📈 Pronóstico</p>
-                      </div>
-                      <p className="text-sm lg:text-lg text-white leading-relaxed">
-                        {aiInsights.pronostico_impacto}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* KPIs de Proyección - Oculto en móvil */}
-                <div className="hidden lg:block p-6 lg:p-8">
-                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-                    <div>
-                      <p className="text-xs text-slate-400 mb-2">Proyección Mes</p>
-                      <p className="text-2xl lg:text-3xl font-black text-white tabular-nums mb-1">{formatKPI(zoneTotals.totalProjection)}</p>
-                      <p className="text-xs text-purple-300">vs {formatKPI(zoneTotals.totalBudget)}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-slate-400 mb-2">% Proyectado</p>
-                      <p className={`text-2xl lg:text-3xl font-black tabular-nums ${
-                        ((zoneTotals.totalProjection/zoneTotals.totalBudget)*100) >= 100 ? 'text-emerald-400' :
-                        ((zoneTotals.totalProjection/zoneTotals.totalBudget)*100) >= 90 ? 'text-amber-400' : 'text-red-400'
-                      }`}>
-                        {((zoneTotals.totalProjection/zoneTotals.totalBudget)*100).toFixed(0)}%
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-slate-400 mb-2">Gap a Cerrar</p>
-                      <p className={`text-2xl lg:text-3xl font-black tabular-nums ${
-                        (zoneTotals.totalBudget - zoneTotals.totalProjection) <= 0 ? 'text-emerald-400' : 'text-red-400'
-                      }`}>
-                        {formatKPI(Math.abs(zoneTotals.totalBudget - zoneTotals.totalProjection))}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-slate-400 mb-2">En Riesgo</p>
-                      <p className="text-2xl lg:text-3xl font-black text-white tabular-nums mb-1">
-                        {storesAnalysis.filter(s => s.hasData && (s.projection / s.salesBudget) < 0.85).length}
-                      </p>
-                    </div>
-                  </div>
-                  </div>
-                  </div>
-                  )}
+            
                   </div>
                   )}
                   </div>
