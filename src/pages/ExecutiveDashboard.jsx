@@ -1576,9 +1576,9 @@ Genera:
             </div>
 
             {/* Grid Principal Estilo Power BI */}
-            <div className="grid grid-cols-12 gap-3 mb-3">
+            <div className="grid grid-cols-12 gap-4 mb-4">
               {/* Columna Izquierda - KPIs */}
-              <div className="col-span-12 lg:col-span-2 grid grid-cols-2 lg:grid-cols-1 gap-2">
+              <div className="col-span-12 lg:col-span-3 grid grid-cols-3 lg:grid-cols-1 gap-3">
                 <motion.div 
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
