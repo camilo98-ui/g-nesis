@@ -1271,8 +1271,8 @@ Genera:
               >
                 <motion.div
                   className="h-full w-full bg-gradient-to-r from-transparent via-white/60 to-transparent"
-                  style={{ width: '100px' }}
-                  animate={{ x: ['-120px', 'calc(100% + 120px)'] }}
+                  style={{ width: '200px' }}
+                  animate={{ x: ['-220px', 'calc(100% + 220px)'] }}
                   transition={{ duration: 3, repeat: Infinity, ease: "linear", repeatDelay: 0 }}
                 />
               </motion.div>
