@@ -26,7 +26,7 @@ import ChartInsight from '@/components/dashboard/ChartInsight';
 import {
   DollarSign, Receipt, Zap, Gift, TrendingUp, TrendingDown, ArrowLeft,
   BarChart3, AlertTriangle, CheckCircle2, X, Target,
-  ClipboardCheck, Snowflake, Package, Calendar, Activity } from
+  ClipboardCheck, Snowflake, Package, Calendar, Activity, CalendarDays } from
 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -484,6 +484,7 @@ export default function Dashboard() {
   const [showMonthlyBudget, setShowMonthlyBudget] = useState(false);
   const [showComparison, setShowComparison] = useState(false);
   const [comparisonRange, setComparisonRange] = useState(null);
+  const [gregorianMode, setGregorianMode] = useState(false);
 
   // Fetch weather data
   useEffect(() => {
@@ -603,8 +604,9 @@ export default function Dashboard() {
 
     const now = new Date();
     const retailMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 29);
+    const gregorianStart = startOfMonth(now);
     
-    // Determinar rango: si hay filtro usarlo, si no, mes retail completo
+    // Determinar rango: si hay filtro usarlo, si no, según modo
     let fromDate, toDate;
     
     if (weekFilter?.from && weekFilter?.to) {
@@ -614,8 +616,8 @@ export default function Dashboard() {
       fromDate = dateRange.from;
       toDate = dateRange.to;
     } else {
-      // Sin filtro: mes retail completo
-      fromDate = retailMonthStart;
+      // Sin filtro: usar modo gregoriano o retail
+      fromDate = gregorianMode ? gregorianStart : retailMonthStart;
       toDate = now;
     }
 
@@ -626,7 +628,7 @@ export default function Dashboard() {
       const saleDateStr = s.date?.split('T')[0] || s.date;
       return saleDateStr >= fromStr && saleDateStr <= toStr;
     });
-  }, [dailySales, dateRange, weekFilter]);
+  }, [dailySales, dateRange, weekFilter, gregorianMode]);
 
   // Ventas del período de comparación
   const comparisonSales = useMemo(() => {
@@ -674,11 +676,12 @@ export default function Dashboard() {
     }), { sales: 0, tickets: 0, transactions: 0, suggested: 0 });
   }, [dailySales, dateRange, weekFilter]);
 
-  // Totales ACUMULADOS - Usa el filtro activo o el mes RETAIL/FERIAL completo
+  // Totales ACUMULADOS - Usa el filtro activo o el mes según modo
   const monthTotals = useMemo(() => {
     const now = new Date();
+    const gregorianStart = startOfMonth(now);
     
-    // Determinar rango: si hay filtro activo, usarlo; si no, mes retail completo
+    // Determinar rango: si hay filtro activo, usarlo; si no, según modo
     let fromDate, toDate;
     
     if (weekFilter?.from && weekFilter?.to) {
@@ -688,8 +691,8 @@ export default function Dashboard() {
       fromDate = dateRange.from;
       toDate = dateRange.to;
     } else {
-      // Sin filtro: mes retail completo (desde el 29 del mes anterior)
-      fromDate = new Date(now.getFullYear(), now.getMonth() - 1, 29);
+      // Sin filtro: según modo gregoriano o retail
+      fromDate = gregorianMode ? gregorianStart : new Date(now.getFullYear(), now.getMonth() - 1, 29);
       toDate = now;
     }
     
@@ -707,7 +710,7 @@ export default function Dashboard() {
       transactions: acc.transactions + (s.total_transactions || 0),
       suggested: acc.suggested + (s.total_suggested || 0)
     }), { sales: 0, tickets: 0, transactions: 0, suggested: 0 });
-  }, [dailySales, dateRange, weekFilter]);
+  }, [dailySales, dateRange, weekFilter, gregorianMode]);
 
   // Totals del período de comparación
   const comparisonTotals = useMemo(() => {
@@ -723,8 +726,9 @@ export default function Dashboard() {
   const chartData = useMemo(() => {
     const now = new Date();
     const retailMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 29);
+    const gregorianStart = startOfMonth(now);
     
-    // Determinar rango a mostrar: si hay weekFilter o dateRange se usa, si no, mes retail completo
+    // Determinar rango a mostrar: según filtros o modo
     let startDate, endDate;
     
     if (weekFilter?.from && weekFilter?.to) {
@@ -736,8 +740,8 @@ export default function Dashboard() {
       startDate = dateRange.from;
       endDate = dateRange.to;
     } else {
-      // Sin filtro: mostrar mes retail completo
-      startDate = retailMonthStart;
+      // Sin filtro: según modo gregoriano o retail
+      startDate = gregorianMode ? gregorianStart : retailMonthStart;
       endDate = now;
     }
     
@@ -814,20 +818,21 @@ export default function Dashboard() {
     }
 
     return dataWithSales;
-  }, [dateRange, dailySales, weekFilter, showComparison, comparisonRange]);
+  }, [dateRange, dailySales, weekFilter, showComparison, comparisonRange, gregorianMode]);
 
 
 
-  // Proyecciones - CÁLCULO ESTABLE basado en días del mes RETAIL/FERIAL
+  // Proyecciones - CÁLCULO ESTABLE basado en modo gregoriano o retail
   const projections = useMemo(() => {
     if (!currentBudget?.sales_budget) return null;
     const now = new Date();
-    // Mes retail empieza el 29 del mes anterior (semana 1)
-    const monthStart = new Date(now.getFullYear(), now.getMonth() - 1, 29);
-    const monthEnd = new Date(now.getFullYear(), now.getMonth(), 28);
+    
+    // Determinar inicio/fin según modo
+    const monthStart = gregorianMode ? startOfMonth(now) : new Date(now.getFullYear(), now.getMonth() - 1, 29);
+    const monthEnd = gregorianMode ? endOfMonth(now) : new Date(now.getFullYear(), now.getMonth(), 28);
     const totalDays = differenceInDays(monthEnd, monthStart) + 1;
     
-    // Usar SOLO datos del mes RETAIL para proyección (desde semana 1)
+    // Usar SOLO datos del período según modo
     const monthSales = dailySales.filter(s => {
       const saleDate = s.date?.split('T')[0] || s.date;
       const saleDateObj = new Date(saleDate);
@@ -840,7 +845,7 @@ export default function Dashboard() {
       transactions: acc.transactions + (s.total_transactions || 0)
     }), { sales: 0, transactions: 0 });
     
-    // Días transcurridos del mes RETAIL hasta HOY
+    // Días transcurridos hasta HOY
     const daysElapsed = differenceInDays(now, monthStart) + 1;
     const daysRemaining = totalDays - daysElapsed;
 
@@ -891,7 +896,7 @@ export default function Dashboard() {
       budget: currentBudget.sales_budget,
       dailyAvgSales
     };
-  }, [currentBudget, dailySales]);
+  }, [currentBudget, dailySales, gregorianMode]);
 
   const formatCurrency = (val) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(Math.round(val));
   const selectedStoreName = STORES.find((s) => s.code === selectedStore)?.name || '';
@@ -999,12 +1004,31 @@ export default function Dashboard() {
           </div>
           <div className="flex flex-col md:flex-row gap-3 items-center">
             <StoreSelector selectedStore={selectedStore} onStoreChange={handleStoreChange} />
-            {!showComparison && <WeekFilter onWeekChange={(range) => {setWeekFilter(range);setDateRange(null);}} multiSelect={true} />}
+            {!showComparison && <WeekFilter onWeekChange={(range) => {setWeekFilter(range);setDateRange(null);setGregorianMode(false);}} multiSelect={true} />}
             <DateFilter
               dateRange={dateRange}
-              onDateChange={(range) => {setDateRange(range);setWeekFilter(null);}}
+              onDateChange={(range) => {setDateRange(range);setWeekFilter(null);setGregorianMode(false);}}
               buttonText={showComparison ? "📅 Período Actual" : undefined}
               buttonClassName={showComparison ? "border-blue-300 hover:border-blue-500" : undefined} />
+            {!showComparison && (
+              <Button
+                onClick={() => {
+                  setGregorianMode(!gregorianMode);
+                  if (!gregorianMode) {
+                    setWeekFilter(null);
+                    setDateRange(null);
+                  }
+                }}
+                className={`gap-2 transition-all ${
+                  gregorianMode
+                    ? 'bg-indigo-500 hover:bg-indigo-600 text-white border-indigo-400'
+                    : 'bg-white border-2 border-pink-200 hover:border-pink-300 text-gray-700'
+                }`}
+              >
+                <CalendarDays className={`w-4 h-4 ${gregorianMode ? 'text-white' : 'text-pink-500'}`} />
+                <span className="text-sm font-medium">Gregoriano</span>
+              </Button>
+            )}
 
             {showComparison &&
             <DateFilter
@@ -1062,22 +1086,23 @@ export default function Dashboard() {
             {/* Retail Week Budget - PRESUPUESTO DEL DÍA (LO MÁS IMPORTANTE) */}
             {!showComparison &&
           <RetailWeekBudgetCard
-            dailySales={dailySales}
-            activeBudget={currentBudget}
-            storeId={selectedStore}
-            formatCurrency={formatCurrency}
-            currentDateRange={weekFilter || dateRange}
-            onConfigureBudget={() => setShowMonthlyBudget(true)}
-            onExpandChange={(expanded) => {
-              if (expanded) {
-                setTimeout(() => {
-                  const section = document.getElementById('budget-expanded-content');
-                  if (section) {
-                    section.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                  }
-                }, 400);
-              }
-            }} />
+          dailySales={dailySales}
+          activeBudget={currentBudget}
+          storeId={selectedStore}
+          formatCurrency={formatCurrency}
+          currentDateRange={weekFilter || dateRange}
+          gregorianMode={gregorianMode}
+          onConfigureBudget={() => setShowMonthlyBudget(true)}
+          onExpandChange={(expanded) => {
+            if (expanded) {
+              setTimeout(() => {
+                const section = document.getElementById('budget-expanded-content');
+                if (section) {
+                  section.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+              }, 400);
+            }
+          }} />
 
           }
 
@@ -1804,7 +1829,7 @@ export default function Dashboard() {
                 <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 2, repeat: Infinity }}>
                   <BarChart3 className="w-5 h-5" />
                 </motion.div>
-                Acumulado del Mes Retail
+                Acumulado del Mes {gregorianMode ? 'Gregoriano' : 'Retail'}
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <motion.div whileHover={{ scale: 1.05, y: -3 }} className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
