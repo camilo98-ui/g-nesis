@@ -872,6 +872,20 @@ Genera:
   }, [storesAnalysis.length, isLoading]);
 
   useEffect(() => {
+    setMounted(true);
+    const saved = localStorage.getItem('executiveDashboardLayout');
+    if (saved) {
+      try {
+        setLayout(JSON.parse(saved));
+      } catch {
+        setLayout(defaultLayout);
+      }
+    } else {
+      setLayout(defaultLayout);
+    }
+  }, []);
+
+  useEffect(() => {
     let lastScrollY = 0;
     const handleScroll = (e) => {
       const currentScrollY = e.target.scrollTop;
@@ -889,6 +903,16 @@ Genera:
       return () => container.removeEventListener('scroll', handleScroll);
     }
   }, []);
+
+  const handleLayoutChange = (newLayout) => {
+    setLayout(newLayout);
+    localStorage.setItem('executiveDashboardLayout', JSON.stringify(newLayout));
+  };
+
+  const resetLayout = () => {
+    setLayout(defaultLayout);
+    localStorage.removeItem('executiveDashboardLayout');
+  };
 
   const tableContextSummary = useMemo(() => {
     const criticalStores = filteredStores.filter(s => s.status === 'critical');
