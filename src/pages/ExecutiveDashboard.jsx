@@ -21,9 +21,7 @@ import StoreWeeklyChart from '../components/executive/StoreWeeklyChart';
 import ExecutiveWeatherSalesAnalysis from '../components/executive/ExecutiveWeatherSalesAnalysis';
 import BogotaRainMap from '../components/weather/BogotaRainMap';
 import { useExecutiveTooltip } from '../components/executive/ExecutiveChartTooltip';
-import GridLayout from 'react-grid-layout';
-import 'react-grid-layout/css/styles.css';
-import 'react-resizable/css/styles.css';
+
 import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, ResponsiveContainer, CartesianGrid, XAxis, YAxis, ComposedChart, Tooltip, Legend, ReferenceLine } from 'recharts';
 
 // Hook para animar números con easing
@@ -113,21 +111,7 @@ export default function ExecutiveDashboard() {
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [showTopCashiers, setShowTopCashiers] = useState(false);
   const [hoveredStoreForChart, setHoveredStoreForChart] = useState(null);
-  const [layout, setLayout] = useState([]);
-  const [mounted, setMounted] = useState(false);
-
   const ZONE_NAME = 'Bogotá Noroccidente';
-
-  // Layout por defecto
-  const defaultLayout = [
-    { x: 0, y: 0, w: 12, h: 6, i: 'metrics' },
-    { x: 0, y: 6, w: 7, h: 10, i: 'chart' },
-    { x: 7, y: 6, w: 5, h: 10, i: 'weather' },
-    { x: 0, y: 16, w: 12, h: 5, i: 'planner' },
-    { x: 0, y: 21, w: 12, h: 8, i: 'table' },
-    { x: 0, y: 29, w: 12, h: 4, i: 'priorities' },
-    { x: 0, y: 33, w: 12, h: 6, i: 'insights' }
-  ];
 
   const currentMonth = new Date().getMonth() + 1;
   const currentYear = new Date().getFullYear();
@@ -871,19 +855,7 @@ Genera:
     }
   }, [storesAnalysis.length, isLoading]);
 
-  useEffect(() => {
-    setMounted(true);
-    const saved = localStorage.getItem('executiveDashboardLayout');
-    if (saved) {
-      try {
-        setLayout(JSON.parse(saved));
-      } catch {
-        setLayout(defaultLayout);
-      }
-    } else {
-      setLayout(defaultLayout);
-    }
-  }, []);
+
 
   useEffect(() => {
     let lastScrollY = 0;
@@ -901,15 +873,7 @@ Genera:
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handleLayoutChange = (newLayout) => {
-    setLayout(newLayout);
-    localStorage.setItem('executiveDashboardLayout', JSON.stringify(newLayout));
-  };
 
-  const resetLayout = () => {
-    setLayout(defaultLayout);
-    localStorage.removeItem('executiveDashboardLayout');
-  };
 
   const tableContextSummary = useMemo(() => {
     const criticalStores = filteredStores.filter(s => s.status === 'critical');
@@ -1355,58 +1319,6 @@ Genera:
           </div>
         ) : (
           <>
-            {/* Botón Reset Layout */}
-            {mounted && layout.length > 0 && (
-              <div className="flex justify-end mb-4">
-                <button
-                  onClick={resetLayout}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-700/50 hover:bg-slate-600/50 border border-white/10 text-white text-sm font-medium transition-colors"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                  Restablecer Layout
-                </button>
-              </div>
-            )}
-            
-            <style>{`
-              .react-grid-layout {
-                background: transparent;
-              }
-              .react-grid-item {
-                background: transparent;
-                border: 2px dashed rgba(255, 255, 255, 0.1);
-                border-radius: 8px;
-                transition: all 0.2s ease;
-              }
-              .react-grid-item:hover {
-                border-color: rgba(255, 255, 255, 0.3);
-                background: rgba(255, 255, 255, 0.02);
-              }
-              .react-grid-item.react-grid-placeholder {
-                background: rgba(59, 130, 246, 0.1);
-                opacity: 0.5;
-                border-color: rgba(59, 130, 246, 0.5);
-              }
-              .react-grid-item > .react-resizable-handle {
-                opacity: 0.3;
-              }
-              .react-grid-item:hover > .react-resizable-handle {
-                opacity: 1;
-              }
-              .react-grid-item > .react-resizable-handle::after {
-                content: "";
-                position: absolute;
-                right: 3px;
-                bottom: 3px;
-                width: 5px;
-                height: 5px;
-                border-right: 2px solid rgba(255, 255, 255, 0.5);
-                border-bottom: 2px solid rgba(255, 255, 255, 0.5);
-              }
-            `}</style>
-
             {/* Barra de progreso del mes */}
             <div className="mb-4 h-1 bg-white/5 rounded-full overflow-hidden">
               <motion.div
@@ -1419,25 +1331,10 @@ Genera:
               />
             </div>
 
-            {/* GridLayout - Draggable & Resizable */}
-            {mounted && layout.length > 0 && (
-              <GridLayout
-                className="relative w-full mb-4"
-                layout={layout}
-                onLayoutChange={handleLayoutChange}
-                cols={12}
-                rowHeight={30}
-                width={typeof window !== 'undefined' ? window.innerWidth - 40 : 1200}
-                isDraggable={true}
-                isResizable={true}
-                compactType="vertical"
-                preventCollision={false}
-                useCSSTransforms={true}
-                containerPadding={[0, 0]}
-                margin={[16, 16]}
-              >
+            {/* Contenido sin GridLayout */}
+            <div>
                 {/* Métricas */}
-                <div key="metrics" className="grid-item bg-transparent p-0">
+                <div className="bg-transparent p-0">
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     {/* 1. Presupuesto y Cumplimiento Mensual */}
               <motion.div 
@@ -2782,8 +2679,8 @@ Genera:
                   )}
                   </div>
                   )}
-                  </GridLayout>
-                  )}
+                  </div>
+                  {/* Fin contenido sin GridLayout */}
                   </>
                   )}
                   </div>
