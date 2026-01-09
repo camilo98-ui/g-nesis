@@ -2077,8 +2077,24 @@ Genera:
                 </div>
               </div>
 
-              {/* Columna Derecha - Mix de Gráficas */}
+              {/* Columna Derecha - Weather & KPIs */}
               <div className="col-span-12 lg:col-span-4 space-y-3">
+                {/* Análisis Clima vs Ventas - Profesional */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <ExecutiveWeatherSalesAnalysis
+                    weatherData={null}
+                    dailySales={allDailySales}
+                    storesAnalysis={storesAnalysis}
+                    dateRange={dateRange}
+                    formatCurrency={formatCurrency}
+                    formatKPI={formatKPI}
+                  />
+                </motion.div>
+
                 {/* Tiendas vs Presupuesto Semanal - Componente Mejorado */}
                 <StoreWeeklyChart
                   storesAnalysis={storesAnalysis}
