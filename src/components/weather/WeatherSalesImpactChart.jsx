@@ -840,14 +840,24 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
                     </Button>
                   </motion.div>
                 </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 border-0 shadow-none bg-transparent" align="end">
-                <WeatherCalendar
-                  selected={dateRange}
-                  onSelect={setDateRange}
-                  onApply={() => setIsCalendarOpen(false)}
-                />
-              </PopoverContent>
-            </Popover>
+                <PopoverContent className="w-auto p-0 border-0 shadow-none bg-transparent" align="end">
+                  <WeatherCalendar
+                    selected={dateRange}
+                    onSelect={setDateRange}
+                    onApply={() => setIsCalendarOpen(false)}
+                  />
+                </PopoverContent>
+              </Popover>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleResetToMonth}
+                className="px-3 py-2 rounded-lg bg-white/20 text-white hover:bg-white/30 text-xs font-medium transition-colors"
+                title="Volver al mes actual"
+              >
+                Reset
+              </motion.button>
+            </div>
           </div>
 
           {/* Botones de vista dinámicos con información */}
