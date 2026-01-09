@@ -1383,9 +1383,27 @@ Genera:
               />
             </div>
 
-            {/* Métricas Consolidadas - Dinámicas según Filtro de Fechas */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-              {/* 1. Presupuesto y Cumplimiento Mensual */}
+            {/* GridLayout - Draggable & Resizable */}
+            {mounted && layout.length > 0 && (
+              <GridLayout
+                className="relative w-full mb-4"
+                layout={layout}
+                onLayoutChange={handleLayoutChange}
+                cols={12}
+                rowHeight={30}
+                width={typeof window !== 'undefined' ? window.innerWidth - 40 : 1200}
+                isDraggable={true}
+                isResizable={true}
+                compactType="vertical"
+                preventCollision={false}
+                useCSSTransforms={true}
+                containerPadding={[0, 0]}
+                margin={[16, 16]}
+              >
+                {/* Métricas */}
+                <div key="metrics" className="grid-item bg-transparent p-0">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {/* 1. Presupuesto y Cumplimiento Mensual */}
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
