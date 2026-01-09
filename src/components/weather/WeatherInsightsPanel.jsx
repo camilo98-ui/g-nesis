@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Zap, TrendingDown, AlertCircle, Lightbulb, Droplets, Thermometer } from 'lucide-react';
+import { Zap, TrendingDown, TrendingUp, AlertCircle, Lightbulb, Target } from 'lucide-react';
 
 export default function WeatherInsightsPanel({ data, kpis, dateRange }) {
   const insights = useMemo(() => {
@@ -19,19 +19,10 @@ export default function WeatherInsightsPanel({ data, kpis, dateRange }) {
 
     const salesDifference = ((sunnyAvgSales - rainyAvgSales) / rainyAvgSales) * 100 || 0;
 
-    // Temperature correlation
-    const hotDays = data.filter(d => d.temperature > 25);
-    const coldDays = data.filter(d => d.temperature <= 25);
-    
-    const hotAvgSales = hotDays.length > 0
-      ? hotDays.reduce((sum, d) => sum + d.sales, 0) / hotDays.length
-      : 0;
+    const sortedByTemp = [...data].sort((a, b) => b.temperature - a.temperature);
+    const hottest = sortedByTemp[0];
+    const coldest = sortedByTemp[sortedByTemp.length - 1];
 
-    const coldAvgSales = coldDays.length > 0
-      ? coldDays.reduce((sum, d) => sum + d.sales, 0) / coldDays.length
-      : 0;
-
-    // Find best and worst days
     const sortedBySales = [...data].sort((a, b) => b.sales - a.sales);
     const bestSalesDay = sortedBySales[0];
     const worstSalesDay = sortedBySales[sortedBySales.length - 1];
@@ -39,180 +30,160 @@ export default function WeatherInsightsPanel({ data, kpis, dateRange }) {
     return [
       {
         type: 'impact',
-        title: 'Impacto Lluvia',
+        title: 'Impacto de Lluvia',
         value: `${Math.abs(salesDifference).toFixed(1)}%`,
         description: rainyDaysData.length > 0 
-          ? `Ventas ${salesDifference > 0 ? 'caen' : 'suben'} en días lluviosos`
+          ? `Las ventas ${salesDifference > 0 ? 'disminuyen' : 'aumentan'} cuando llueve`
           : 'Sin datos de lluvia',
-        icon: Droplets,
-        color: 'from-blue-500 to-cyan-500',
-        stat: `${rainyDaysData.length} días lluviosos`,
-        highlight: salesDifference < 0
-      },
-      {
-        type: 'temp',
-        title: 'Impacto Temperatura',
-        value: `${Math.abs(((hotAvgSales - coldAvgSales) / coldAvgSales * 100)).toFixed(1)}%`,
-        description: hotAvgSales > coldAvgSales 
-          ? 'Más ventas con temperatura cálida'
-          : 'Mejor desempeño en días fríos',
-        icon: Thermometer,
-        color: 'from-amber-500 to-red-500',
-        stat: `${hotDays.length} días cálidos`,
-        highlight: hotAvgSales > coldAvgSales
+        icon: TrendingDown,
+        color: 'text-red-400',
+        bgColor: 'from-red-500/10 to-red-600/5',
+        iconBg: 'bg-red-500/20',
+        metric: `${rainyDaysData.length} días lluviosos`
       },
       {
         type: 'best',
         title: 'Mejor Día',
-        value: `$${(bestSalesDay.sales / 1000000).toFixed(1)}M`,
-        description: `${bestSalesDay.displayDate} — ${bestSalesDay.temperature.toFixed(0)}°C`,
+        value: `$${(bestSalesDay.sales / 1000000).toFixed(2)}M`,
+        description: bestSalesDay.displayDate,
         icon: Zap,
-        color: 'from-emerald-500 to-green-500',
-        stat: '↑ Día excepcional',
-        highlight: true
+        color: 'text-emerald-400',
+        bgColor: 'from-emerald-500/10 to-green-600/5',
+        iconBg: 'bg-emerald-500/20',
+        metric: `+${((bestSalesDay.sales / (data.reduce((s, d) => s + d.sales, 0) / data.length)) * 100 - 100).toFixed(1)}% vs promedio`,
+        temp: `${bestSalesDay.temperature.toFixed(0)}°C`
+      },
+      {
+        type: 'worst',
+        title: 'Peor Día',
+        value: `$${(worstSalesDay.sales / 1000000).toFixed(2)}M`,
+        description: worstSalesDay.displayDate,
+        icon: AlertCircle,
+        color: 'text-amber-400',
+        bgColor: 'from-amber-500/10 to-orange-600/5',
+        iconBg: 'bg-amber-500/20',
+        metric: `${((worstSalesDay.sales / (data.reduce((s, d) => s + d.sales, 0) / data.length)) * 100 - 100).toFixed(1)}% vs promedio`,
+        temp: `${worstSalesDay.temperature.toFixed(0)}°C`
       },
       {
         type: 'recommendation',
         title: 'Recomendación',
         value: 'Optimizar',
-        description: `Stock +${Math.abs(salesDifference).toFixed(0)}% en días soleados`,
+        description: `Aumentar inventario en días soleados`,
         icon: Lightbulb,
-        color: 'from-purple-500 to-pink-500',
-        stat: 'Data-driven insight',
-        highlight: false
+        color: 'text-blue-400',
+        bgColor: 'from-blue-500/10 to-cyan-600/5',
+        iconBg: 'bg-blue-500/20',
+        metric: `+${Math.abs(salesDifference).toFixed(0)}% potencial`
       }
     ];
   }, [data]);
-
-  const container = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.3,
-      },
-    },
-  };
-
-  const item = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0 },
-  };
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.3 }}
+      transition={{ delay: 0.2 }}
     >
-      <h2 className="text-2xl font-black text-white mb-8">Insights Clave</h2>
+      <h2 className="text-xl font-black text-white mb-6 flex items-center gap-2">
+        <Target className="w-5 h-5 text-blue-400" />
+        Insights Clave
+      </h2>
       
-      <motion.div
-        variants={container}
-        initial="hidden"
-        animate="show"
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
-      >
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {insights.map((insight, idx) => {
           const Icon = insight.icon;
 
           return (
             <motion.div
               key={idx}
-              variants={item}
-              whileHover={{ y: -4, transition: { duration: 0.2 } }}
-              className="group relative h-full"
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ delay: idx * 0.1 }}
+              whileHover={{ y: -4 }}
+              className={`group relative rounded-2xl p-5 border border-white/10 hover:border-white/20 transition-all duration-300 backdrop-blur-xl overflow-hidden`}
+              style={{
+                background: `linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%)`
+              }}
             >
-              {/* Glow Background */}
-              <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl -z-10"
-                style={{
-                  background: `linear-gradient(135deg, ${insight.color === 'from-blue-500 to-cyan-500' ? 'rgba(59, 130, 246, 0.3), rgba(34, 211, 238, 0.2)' : insight.color === 'from-amber-500 to-red-500' ? 'rgba(245, 158, 11, 0.3), rgba(239, 68, 68, 0.2)' : insight.color === 'from-emerald-500 to-green-500' ? 'rgba(16, 185, 129, 0.3), rgba(34, 197, 94, 0.2)' : 'rgba(168, 85, 247, 0.3), rgba(236, 72, 153, 0.2)'})`
-                }}
-              />
+              {/* Gradient Border Glow */}
+              <div className={`absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl -z-10 bg-gradient-to-br ${insight.bgColor}`} />
 
-              <div className={`relative h-full rounded-2xl p-6 border border-white/10 hover:border-white/20 transition-all duration-300
-                backdrop-blur-xl overflow-hidden bg-gradient-to-br
-                ${insight.highlight ? 'via-white/[0.08]' : 'via-white/[0.02]'} from-white/[0.05] to-white/[0.01]`}
-              >
-                {/* Highlight accent for important insights */}
-                {insight.highlight && (
-                  <div className="absolute top-0 right-0 w-32 h-32 opacity-10 pointer-events-none"
-                    style={{
-                      background: `radial-gradient(circle, currentColor, transparent)`
-                    }}
-                  />
-                )}
+              {/* Animated Background */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                <div 
+                  className="absolute inset-0"
+                  style={{
+                    background: `radial-gradient(circle at 100% 0%, rgba(59, 130, 246, 0.1), transparent 50%)`
+                  }}
+                />
+              </div>
 
-                <div className="relative z-10">
-                  {/* Header */}
-                  <div className="flex items-start justify-between mb-6">
-                    <p className="text-xs font-black text-slate-400 uppercase tracking-widest">
-                      {insight.title}
-                    </p>
-                    <motion.div
-                      whileHover={{ scale: 1.1, rotate: 10 }}
-                      className={`w-10 h-10 rounded-xl flex items-center justify-center backdrop-blur-xl border border-white/20
-                        bg-gradient-to-br ${insight.color}`}
-                    >
-                      <Icon className="w-5 h-5 text-white" />
-                    </motion.div>
-                  </div>
-
-                  {/* Value */}
-                  <motion.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.2 + idx * 0.1 }}
-                    className={`text-3xl font-black mb-2 bg-gradient-to-r ${insight.color} bg-clip-text text-transparent`}
-                  >
-                    {insight.value}
-                  </motion.p>
-
-                  {/* Description */}
-                  <p className="text-sm text-slate-400 leading-relaxed mb-4">
-                    {insight.description}
+              <div className="relative z-10">
+                <div className="flex items-start justify-between mb-4">
+                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                    {insight.title}
                   </p>
-
-                  {/* Stat Badge */}
-                  <div className="pt-4 border-t border-white/10">
-                    <p className="text-xs text-slate-500 font-medium">
-                      {insight.stat}
-                    </p>
-                  </div>
+                  <motion.div
+                    whileHover={{ scale: 1.1, rotate: 10 }}
+                    className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-300 ${insight.color} ${insight.iconBg}`}
+                  >
+                    <Icon className="w-4.5 h-4.5" />
+                  </motion.div>
                 </div>
 
-                {/* Shimmer on hover */}
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.2 + idx * 0.1 }}
+                  className={`text-2xl font-black ${insight.color} mb-2`}
+                >
+                  {insight.value}
+                </motion.p>
+
+                <p className="text-xs text-slate-400 mb-3 leading-relaxed">
+                  {insight.description}
+                </p>
+
+                {/* Metric Badge */}
                 <motion.div
-                  className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-30 transition-opacity duration-300 pointer-events-none"
-                  style={{
-                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent)',
-                  }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3 + idx * 0.1 }}
+                  className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium ${insight.iconBg} ${insight.color}`}
+                >
+                  <div className="w-1.5 h-1.5 rounded-full bg-current opacity-50" />
+                  {insight.metric}
+                </motion.div>
+
+                {insight.temp && (
+                  <div className="mt-2 text-xs text-slate-500">
+                    Temperatura: {insight.temp}
+                  </div>
+                )}
+              </div>
+
+              {/* Shimmer effect */}
+              <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-40 transition-opacity duration-300 pointer-events-none overflow-hidden">
+                <div 
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-10"
+                  style={{ animation: 'shimmer 3s infinite' }}
                 />
               </div>
             </motion.div>
           );
         })}
-      </motion.div>
+      </div>
 
-      {/* Summary Card */}
+      {/* Summary Note */}
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.7 }}
-        className="mt-8 p-6 rounded-2xl border border-white/10 backdrop-blur-xl"
-        style={{
-          background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)'
-        }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5 }}
+        className="mt-6 p-4 rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl text-center"
       >
-        <div className="flex items-center gap-3 mb-3">
-          <div className="w-2 h-2 rounded-full bg-blue-400" />
-          <p className="text-sm font-bold text-white">Conclusión del Análisis</p>
-        </div>
-        <p className="text-sm text-slate-400 leading-relaxed">
-          Basado en {data.length} días de datos históricos, se detectó una correlación significativa entre las condiciones climáticas y el desempeño de ventas. 
-          Los días soleados muestran mayor actividad de compra, mientras que la lluvia tiende a reducir el tráfico. 
-          Se recomienda ajustar estrategias de inventario y personal según el pronóstico del clima.
+        <p className="text-sm text-slate-400">
+          <span className="font-semibold text-slate-300">Análisis de {data.length} días</span> basado en datos históricos de clima y ventas
         </p>
       </motion.div>
     </motion.div>
