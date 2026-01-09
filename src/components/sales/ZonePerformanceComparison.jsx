@@ -8,12 +8,22 @@ import { STORES } from '@/components/StoreSelector';
 import { startOfMonth, endOfMonth, format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
-export default function ZonePerformanceComparison({ storeId, formatCurrency, currentDateRange }) {
+export default function ZonePerformanceComparison({ storeId, formatCurrency, currentDateRange, gregorianMode }) {
   const [selectedMetric, setSelectedMetric] = React.useState(null);
   
-  // Usar el rango de fechas del filtro activo
-  const dateStart = currentDateRange?.from ? format(currentDateRange.from, 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd');
-  const dateEnd = currentDateRange?.to ? format(currentDateRange.to, 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd');
+  // Determinar rango de fechas según modo gregoriano o filtro activo
+  const now = new Date();
+  const dateStart = currentDateRange?.from 
+    ? format(currentDateRange.from, 'yyyy-MM-dd') 
+    : gregorianMode 
+    ? format(startOfMonth(now), 'yyyy-MM-dd')
+    : format(new Date(now.getFullYear(), now.getMonth() - 1, 29), 'yyyy-MM-dd');
+  
+  const dateEnd = currentDateRange?.to 
+    ? format(currentDateRange.to, 'yyyy-MM-dd') 
+    : gregorianMode
+    ? format(endOfMonth(now), 'yyyy-MM-dd')
+    : format(new Date(now.getFullYear(), now.getMonth(), 28), 'yyyy-MM-dd');
 
   // Determinar zona basada en código de tienda
   const currentStore = STORES.find(s => s.code === storeId);
