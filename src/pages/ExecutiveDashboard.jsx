@@ -897,11 +897,8 @@ Genera:
       lastScrollY = currentScrollY;
     };
 
-    const container = document.getElementById('dashboard-scroll-container');
-    if (container) {
-      container.addEventListener('scroll', handleScroll);
-      return () => container.removeEventListener('scroll', handleScroll);
-    }
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const handleLayoutChange = (newLayout) => {
