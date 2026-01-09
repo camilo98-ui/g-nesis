@@ -2780,12 +2780,12 @@ Genera:
                       </p>
                     </div>
                   </div>
-                </div>
-              </div>
-            )}
-          </>
-        )}
-      </div>
+                  </div>
+                  </div>
+                  )}
+                  </div>
+                  )}
+                  </div>
 
       {/* Modal Detalle Tienda */}
       <AnimatePresence>
