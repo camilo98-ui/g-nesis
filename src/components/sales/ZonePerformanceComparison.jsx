@@ -5,7 +5,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { STORES } from '@/components/StoreSelector';
-import { startOfMonth, endOfMonth, format } from 'date-fns';
+import { startOfMonth, endOfMonth, format, eachDayOfInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 export default function ZonePerformanceComparison({ storeId, formatCurrency, currentDateRange, gregorianMode }) {
