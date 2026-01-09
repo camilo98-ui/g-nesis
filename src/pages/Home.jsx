@@ -592,7 +592,7 @@ export default function Home() {
 
         {/* Mobile/Tablet View */}
         <div className="lg:hidden min-h-screen flex flex-col justify-center relative z-10">
-          <div className="flex-1 flex flex-col justify-center px-4 py-4 max-h-screen overflow-y-auto">
+          <div className="flex-1 flex flex-col justify-center px-4 py-4 overflow-y-auto">
             <div className="max-w-md mx-auto w-full bg-white/0 backdrop-blur-sm rounded-3xl shadow-2xl border-2 border-rose-200/40 p-5" style={{ boxShadow: '0 0 12px rgba(251, 113, 133, 0.25), 0 0 20px rgba(251, 113, 133, 0.15)' }}>
               <div className="mb-5 text-center">
                 <motion.img 
