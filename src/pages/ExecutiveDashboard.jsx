@@ -1268,14 +1268,7 @@ Genera:
                   width: `${(new Date().getDate() / new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate()) * 100}%`
                 }}
                 transition={{ duration: 1.5, ease: "easeOut" }}
-              >
-                <motion.div
-                  className="h-full bg-gradient-to-r from-transparent via-white/60 via-white/50 to-transparent"
-                  style={{ width: '300px' }}
-                  animate={{ x: ['-300px', 'calc(100% + 300px)'] }}
-                  transition={{ duration: 4, repeat: Infinity, ease: "linear", repeatDelay: 0 }}
-                />
-              </motion.div>
+              />
             </div>
 
             {/* Métricas Consolidadas - Dinámicas según Filtro de Fechas */}
