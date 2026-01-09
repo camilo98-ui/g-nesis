@@ -399,12 +399,12 @@ export default function ExecutiveDashboard() {
     // Proyección para el rango completo
     const rangeProjection = avgDailySales * totalDaysInRange;
     
-    // PROYECCIÓN DE LA SEMANA ACTUAL (independiente del filtro)
+    // PROYECCIÓN DE LA SEMANA ACTUAL (independiente del filtro, excepto en modo gregoriano)
     // Calcular qué semana retail es hoy
     const daysSinceRetailStart = Math.floor((now - RETAIL_WEEK_START) / (24 * 60 * 60 * 1000));
     const currentWeekNum = Math.floor(daysSinceRetailStart / 7) + 1;
-    const currentWeekStart = addDays(RETAIL_WEEK_START, (currentWeekNum - 1) * 7);
-    const currentWeekEnd = addDays(currentWeekStart, 6);
+    const currentWeekStart = gregorianMode ? startOfMonth(now) : addDays(RETAIL_WEEK_START, (currentWeekNum - 1) * 7);
+    const currentWeekEnd = gregorianMode ? now : addDays(currentWeekStart, 6);
     
     console.log('📅 Semana Actual:', {
       weekNum: currentWeekNum,
@@ -487,7 +487,7 @@ export default function ExecutiveDashboard() {
       totalDaysInRange,
       isRetailWeek
     };
-  }, [allDailySales, dateRange, storesAnalysis]);
+  }, [allDailySales, dateRange, storesAnalysis, gregorianMode]);
 
   // Totales ACUMULADOS del mes (para referencias)
   const monthlyTotals = useMemo(() => {
