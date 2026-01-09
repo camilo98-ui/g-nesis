@@ -287,33 +287,53 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
               whileHover={{ x: 5, scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
-              onClick={() => handleStoreClick(store)}
-              className={`w-full flex items-center gap-3 p-4 rounded-xl transition-all cursor-pointer ${
+              className={`w-full flex items-center gap-3 p-3.5 rounded-xl transition-all cursor-pointer ${
               selectedStore === store.code ?
               'bg-gradient-to-r from-pink-400 via-rose-400 to-purple-400 border-2 border-pink-300 shadow-lg shadow-pink-500/30' :
               'bg-gradient-to-r from-white to-pink-50/50 hover:from-pink-50 hover:to-rose-50 border-2 border-transparent hover:border-pink-200'}`
               }>
 
-                <motion.div
-                  className={`w-11 h-11 rounded-xl flex items-center justify-center shadow-md ${
-                  selectedStore === store.code ?
-                  'bg-white/30 backdrop-blur-sm' :
-                  'bg-gradient-to-br from-pink-100 to-rose-100'}`
-                  }>
+                    <button
+                onClick={() => handleStoreClick(store)}
+                className="flex-1 flex items-center gap-3 text-left">
 
-                  <MapPin className={`w-5 h-5 ${selectedStore === store.code ? 'text-white' : 'text-pink-500'}`} />
-                </motion.div>
-                <span className={`text-sm font-bold flex-1 ${
-                selectedStore === store.code ?
-                'text-white' :
-                'text-gray-800'}`
-                }>
-                  {store.displayName}
-                </span>
-                {hasPassword(store.code) &&
-                  <Lock className={`w-4 h-4 ${selectedStore === store.code ? 'text-white/80' : 'text-amber-500'}`} />
+                      <motion.div
+                      className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-md ${
+                      selectedStore === store.code ?
+                      'bg-white/30 backdrop-blur-sm' :
+                      'bg-gradient-to-br from-pink-100 to-rose-100'}`
+                      }>
+
+                        <MapPin className={`w-5 h-5 ${selectedStore === store.code ? 'text-white' : 'text-pink-500'}`} />
+                      </motion.div>
+                      <span className={`text-sm font-bold flex-1 ${
+                      selectedStore === store.code ?
+                      'text-white' :
+                      'text-gray-800'}`
+                      }>
+                        {store.displayName}
+                      </span>
+                      {hasPassword(store.code) &&
+                <Lock className={`w-3 h-3 ${selectedStore === store.code ? 'text-white/80' : 'text-amber-500'}`} />
                 }
-              </motion.div>
+                    </button>
+                    <motion.button
+                whileHover={{ rotate: 90 }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setEditPasswordDialog({ open: true, store });
+                  setNewPassword(storePasswords.find((p) => p.store_code === store.code)?.password || '');
+                }}
+                className={`p-1.5 rounded-lg transition-colors ${
+                selectedStore === store.code ?
+                'hover:bg-white/20' :
+                'hover:bg-pink-200/50'}`
+                }
+                title="Configurar contraseña">
+
+                      <Settings className={`w-3.5 h-3.5 ${selectedStore === store.code ? 'text-white/80' : 'text-pink-400'}`} />
+                    </motion.button>
+                  </motion.div>
             )}
             {filteredStores.length === 0 &&
             <motion.div
