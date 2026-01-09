@@ -100,20 +100,20 @@ export default function ChartInsight({ data, metric, formatCurrency, comparisonD
       status = 'warning';
       keyData = `Caída: ${trendPct.toFixed(1)}% (${formatCurrency(Math.abs(trendDiff))} menos)`;
       const worstDaysInfo = underperformingDays.slice(0, 3)
-        .map(d => `${d.date ? new Date(d.date).toLocaleDateString('es', {day: 'numeric', month: 'short'}) : `día ${d.index+1}`}: ${formatCurrency(d.value)} (${(d.pct).toFixed(0)}%)`)
+        .map(d => `${d.fullDate || d.date || `día ${d.index+1}`}: ${formatCurrency(d.value)} (${(d.pct).toFixed(0)}%)`)
         .join(' • ');
       behavior = `Promedio: ${formatCurrency(average)} vs máximo: ${formatCurrency(max)} • ${underperformingDays.length} días bajo rendimiento (< 85%) generaron pérdida estimada de ${formatCurrency(lostRevenue)} • Peores días: ${worstDaysInfo || 'N/A'} • Variabilidad: ${coefficientOfVariation.toFixed(0)}% CV`;
     } else if (Math.abs(lastVsAvgPct) > 15) {
       status = lastVsAvgPct > 0 ? 'positive' : 'warning';
       keyData = `Último día: ${formatCurrency(lastValue)} (${lastVsAvgPct > 0 ? '+' : ''}${lastVsAvgPct.toFixed(1)}% vs promedio)`;
-      behavior = `Promedio período: ${formatCurrency(average)} • Total acumulado: ${formatCurrency(total)} • Día máximo: ${formatCurrency(max)}${maxDay?.date ? ` (${new Date(maxDay.date).toLocaleDateString('es', {day: 'numeric', month: 'short'})})` : ''} • Día mínimo: ${formatCurrency(min)}${minDay?.date ? ` (${new Date(minDay.date).toLocaleDateString('es', {day: 'numeric', month: 'short'})})` : ''} • Variación estándar: ±${formatCurrency(stdDev)}`;
+      behavior = `Promedio período: ${formatCurrency(average)} • Total acumulado: ${formatCurrency(total)} • Día máximo: ${formatCurrency(max)} (${maxDay?.fullDate || maxDay?.date || 'N/A'}) • Día mínimo: ${formatCurrency(min)} (${minDay?.fullDate || minDay?.date || 'N/A'}) • Variación estándar: ±${formatCurrency(stdDev)}`;
     } else {
       status = 'neutral';
       keyData = `Promedio: ${formatCurrency(average)} • Desviación: ±${formatCurrency(stdDev)} (${coefficientOfVariation.toFixed(0)}% CV)`;
       const performanceDetails = underperformingDays.length > 0 
         ? `${underperformingDays.length} días débiles dejaron de generar ${formatCurrency(lostRevenue)} • ` 
         : '';
-      behavior = `Total período: ${formatCurrency(total)} en ${validDataPoints} días • Rango: ${formatCurrency(min)} - ${formatCurrency(max)} • ${performanceDetails}Último registro: ${formatCurrency(lastValue)}${lastDay?.date ? ` (${new Date(lastDay.date).toLocaleDateString('es', {day: 'numeric', month: 'short'})})` : ''}`;
+      behavior = `Total período: ${formatCurrency(total)} en ${validDataPoints} días • Rango: ${formatCurrency(min)} - ${formatCurrency(max)} • ${performanceDetails}Último registro: ${formatCurrency(lastValue)} (${lastDay?.fullDate || lastDay?.date || 'N/A'})`;
     }
 
     return {
