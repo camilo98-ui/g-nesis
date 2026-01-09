@@ -2454,9 +2454,9 @@ Genera:
             </div>
 
             {/* Prioridades Dinámicas */}
-            <div className="mb-4">
-              <h2 className="text-lg font-black text-white mb-3 tracking-tight">Prioridades de hoy</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="mb-6">
+              <h2 className="text-lg font-black text-white mb-4 tracking-tight">Prioridades de hoy</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {/* Intervenir */}
                 {storesAnalysis
                   .filter(s => s.status === 'critical')
