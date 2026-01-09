@@ -120,8 +120,10 @@ export default function CashiersDashboard() {
 
   // Calcular estadísticas de cada cajero
   const cashierStats = useMemo(() => {
+    if (!dateRange || !dateRange.from || !dateRange.to) return {};
     const stats = {};
     const filteredRecords = shiftRecords.filter((r) => {
+      if (!r.date) return false;
       const d = new Date(r.date);
       return d >= dateRange.from && d <= dateRange.to;
     });
@@ -175,7 +177,14 @@ export default function CashiersDashboard() {
 
   // Totales del equipo - calculados directamente desde shiftRecords de la tienda
   const teamTotals = useMemo(() => {
+    if (!dateRange || !dateRange.from || !dateRange.to) {
+        return {
+            totalSales: 0, totalTickets: 0, avgTicket: 0, avgSales: 0,
+            avgSuggested: 0, totalCashiers: activeCashiers.length
+        };
+    }
     const filteredRecords = shiftRecords.filter((r) => {
+      if (!r.date) return false;
       const d = new Date(r.date);
       return d >= dateRange.from && d <= dateRange.to;
     });

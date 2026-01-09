@@ -273,7 +273,7 @@ export default function Rankings() {
   }).format(v);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50/50 via-rose-50/30 to-amber-50/40 relative">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50/50 via-rose-50/30 to-amber-50/40">
       <FloatingIceCreamsBg />
       <div className="max-w-4xl mx-auto px-4 py-6 relative z-10">
         {/* Header */}
