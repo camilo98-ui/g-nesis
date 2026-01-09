@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BarChart, Bar, ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip, Cell, LineChart, Line } from 'recharts';
-import { ArrowUpDown, X, TrendingUp } from 'lucide-react';
+import { ArrowUpDown, X, TrendingUp, Download } from 'lucide-react';
 import { format, parseISO, eachDayOfInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -83,6 +83,38 @@ export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRa
     setSelectedStore(store);
   };
 
+  const exportToExcel = () => {
+    const getEstado = (cumplimiento) => {
+      if (cumplimiento >= 100) return 'Excelente';
+      if (cumplimiento >= 85) return 'En Meta';
+      if (cumplimiento >= 70) return 'Alerta';
+      return 'Crítico';
+    };
+
+    // Preparar datos en el orden actual del gráfico
+    const rows = chartData.map(store => [
+      store.fullName,
+      store.cumplimiento,
+      store.venta * 1000000,
+      store.presupuesto * 1000000,
+      getEstado(store.cumplimiento)
+    ]);
+
+    // Crear CSV con encabezados
+    const headers = ['Nombre de Tienda', '% Cumplimiento', 'Venta Real', 'Presupuesto', 'Estado'];
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.join(','))
+    ].join('\n');
+
+    // Descargar archivo
+    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `Tiendas_Cumplimiento_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+  };
+
   return (
     <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl rounded-lg p-5 border border-white/10 shadow-xl">
       <style>{`
@@ -122,9 +154,19 @@ export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRa
       <div className="flex flex-col gap-3 mb-4">
         <div className="flex items-center justify-between">
           <h3 className="text-base font-black text-white">Tiendas vs PPT Semanal</h3>
-          <span className="text-xs px-2 py-1 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-            {chartData.length} Tiendas
-          </span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={exportToExcel}
+              className="flex items-center gap-1 px-2 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30 text-emerald-300 text-xs font-medium transition-all"
+              title="Exportar a Excel"
+            >
+              <Download className="w-3 h-3" />
+              Excel
+            </button>
+            <span className="text-xs px-2 py-1 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+              {chartData.length} Tiendas
+            </span>
+          </div>
         </div>
         
         {/* Filtros */}
