@@ -21,6 +21,9 @@ import StoreWeeklyChart from '../components/executive/StoreWeeklyChart';
 import ExecutiveWeatherSalesAnalysis from '../components/executive/ExecutiveWeatherSalesAnalysis';
 import BogotaRainMap from '../components/weather/BogotaRainMap';
 import { useExecutiveTooltip } from '../components/executive/ExecutiveChartTooltip';
+import GridLayout from 'react-grid-layout';
+import 'react-grid-layout/css/styles.css';
+import 'react-resizable/css/styles.css';
 import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, ResponsiveContainer, CartesianGrid, XAxis, YAxis, ComposedChart, Tooltip, Legend, ReferenceLine } from 'recharts';
 
 // Hook para animar números con easing
