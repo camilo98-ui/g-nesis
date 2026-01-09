@@ -1502,8 +1502,8 @@ Genera:
                         strokeWidth={2.5} 
                         fill="url(#miniArea)"
                         isAnimationActive={true}
-                        animationDuration={2000}
-                        animationEasing="ease-in-out"
+                        animationDuration={1500}
+                        animationEasing="ease-out"
                       />
                     </AreaChart>
                     </ResponsiveContainer>
@@ -1775,21 +1775,29 @@ Genera:
                         type="monotone" 
                         dataKey="budget" 
                         stroke="url(#lineShimmer)" 
-                        strokeWidth={3} 
+                        strokeWidth={3.5} 
                         dot={(props) => {
-                          const { cx, cy } = props;
+                          const { cx, cy, index } = props;
+                          const isLast = index === dailySalesData.length - 1;
+                          const data = dailySalesData[index];
+                          const hasHighImpact = data && Math.abs(data.sales - data.budget) > data.budget * 0.15;
+
                           return (
                             <g>
-                              <circle cx={cx} cy={cy} r={8} fill="#818cf8" opacity={0.08}>
-                                <animate attributeName="r" values="8;10;8" dur="3s" repeatCount="indefinite" />
-                                <animate attributeName="opacity" values="0.08;0.15;0.08" dur="3s" repeatCount="indefinite" />
-                              </circle>
-                              <circle cx={cx} cy={cy} r={6} fill="#a5b4fc" opacity={0.2}>
-                                <animate attributeName="r" values="6;7;6" dur="2.5s" repeatCount="indefinite" />
-                                <animate attributeName="opacity" values="0.2;0.35;0.2" dur="2.5s" repeatCount="indefinite" />
-                              </circle>
+                              {(isLast || hasHighImpact) && (
+                                <>
+                                  <circle cx={cx} cy={cy} r={12} fill="#818cf8" opacity={0.1}>
+                                    <animate attributeName="r" values="12;16;12" dur="2.5s" repeatCount="indefinite" />
+                                    <animate attributeName="opacity" values="0.1;0.25;0.1" dur="2.5s" repeatCount="indefinite" />
+                                  </circle>
+                                  <circle cx={cx} cy={cy} r={9} fill="#a5b4fc" opacity={0.15}>
+                                    <animate attributeName="r" values="9;11;9" dur="2s" repeatCount="indefinite" />
+                                    <animate attributeName="opacity" values="0.15;0.3;0.15" dur="2s" repeatCount="indefinite" />
+                                  </circle>
+                                </>
+                              )}
                               <circle cx={cx} cy={cy} r={5} fill="#6366f1" stroke="#e0e7ff" strokeWidth={2}>
-                                <animate attributeName="r" values="5;5.5;5" dur="2s" repeatCount="indefinite" />
+                                {isLast && <animate attributeName="r" values="5;6.5;5" dur="1.8s" repeatCount="indefinite" />}
                               </circle>
                               <circle cx={cx} cy={cy} r={2} fill="#e0e7ff">
                                 <animate attributeName="opacity" values="0.9;1;0.9" dur="1.5s" repeatCount="indefinite" />
@@ -1802,7 +1810,9 @@ Genera:
                         isAnimationActive={true}
                         animationDuration={2000}
                         animationEasing="ease-in-out"
-                      />
+                      >
+                        <animate attributeName="stroke-dashoffset" values="0;-10;0" dur="8s" repeatCount="indefinite" />
+                      </Line>
                     </ComposedChart>
                   </ResponsiveContainer>
 

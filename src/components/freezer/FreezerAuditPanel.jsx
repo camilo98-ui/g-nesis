@@ -133,7 +133,7 @@ export default function FreezerAuditPanel({
               <span className="text-gray-600">Total de sabores diferentes:</span>
               <span className="font-bold text-cyan-700">{(() => {
                 const uniqueFlavors = new Set();
-                allSlots.forEach(s => {
+                relevantSlots.forEach(s => {
                   if (!s.is_empty && s.flavor_name) {
                     uniqueFlavors.add(s.flavor_name.toLowerCase().trim());
                   }
