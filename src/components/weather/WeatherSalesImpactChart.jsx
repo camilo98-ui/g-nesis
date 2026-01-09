@@ -1264,6 +1264,7 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
             color="from-amber-100 to-orange-100"
             trend={stats.sunnyImpact}
             delay={0}
+            onClick={() => setSelectedStatCard('sunny')}
           />
           <StatCard
             icon={CloudRain}
@@ -1273,6 +1274,7 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
             color="from-blue-100 to-cyan-100"
             trend={stats.rainyImpact}
             delay={0.1}
+            onClick={() => setSelectedStatCard('rainy')}
           />
           <StatCard
             icon={TrendingUp}
@@ -1281,6 +1283,7 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
             subvalue={stats.bestDay?.fullDate}
             color="from-emerald-100 to-green-100"
             delay={0.2}
+            onClick={() => setSelectedStatCard('best')}
           />
           <StatCard
             icon={TrendingDown}
@@ -1289,9 +1292,130 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
             subvalue={stats.worstDay?.fullDate}
             color="from-rose-100 to-red-100"
             delay={0.3}
+            onClick={() => setSelectedStatCard('worst')}
           />
         </div>
       )}
+
+      {/* Modal de detalles */}
+      <AnimatePresence>
+        {selectedStatCard && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="bg-white rounded-2xl shadow-xl p-6 border-2 border-gray-100"
+          >
+            {selectedStatCard === 'sunny' && stats && (
+              <div>
+                <div className="flex items-center gap-3 mb-4">
+                  <Sun className="w-6 h-6 text-amber-500" />
+                  <h3 className="text-lg font-bold text-gray-800">Análisis Días Soleados</h3>
+                  <button onClick={() => setSelectedStatCard(null)} className="ml-auto text-gray-400 hover:text-gray-600">✕</button>
+                </div>
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div className="bg-amber-50 p-3 rounded-lg">
+                    <p className="text-xs text-gray-600">Total Días</p>
+                    <p className="text-2xl font-black text-amber-700">{stats.sunnyCount}</p>
+                  </div>
+                  <div className="bg-amber-50 p-3 rounded-lg">
+                    <p className="text-xs text-gray-600">Venta Total</p>
+                    <p className="text-2xl font-black text-amber-700">{formatCurrency(chartData.filter(d => d.weatherType === 'sunny' && d.sales > 0).reduce((s, d) => s + d.sales, 0))}</p>
+                  </div>
+                  <div className="bg-amber-50 p-3 rounded-lg">
+                    <p className="text-xs text-gray-600">Promedio Día</p>
+                    <p className="text-2xl font-black text-amber-700">{formatCurrency(stats.avgSunny)}</p>
+                  </div>
+                  <div className="bg-amber-50 p-3 rounded-lg">
+                    <p className="text-xs text-gray-600">Impacto vs Promedio</p>
+                    <p className={`text-2xl font-black ${stats.sunnyImpact >= 0 ? 'text-green-600' : 'text-red-600'}`}>{stats.sunnyImpact >= 0 ? '+' : ''}{stats.sunnyImpact.toFixed(1)}%</p>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-700 bg-amber-50 p-3 rounded-lg">{stats.sunnyImpact > 5 ? `Los días soleados son muy productivos. Incrementa inventario ${stats.sunnyImpact > 20 ? 'significativamente' : 'moderadamente'} estos días.` : stats.sunnyImpact < -5 ? `Los días soleados generan menos ventas. Considera actividades indoor o promociones especiales.` : 'El clima soleado tiene impacto neutral.'}</p>
+              </div>
+            )}
+
+            {selectedStatCard === 'rainy' && stats && (
+              <div>
+                <div className="flex items-center gap-3 mb-4">
+                  <CloudRain className="w-6 h-6 text-blue-500" />
+                  <h3 className="text-lg font-bold text-gray-800">Análisis Días Lluviosos</h3>
+                  <button onClick={() => setSelectedStatCard(null)} className="ml-auto text-gray-400 hover:text-gray-600">✕</button>
+                </div>
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div className="bg-blue-50 p-3 rounded-lg">
+                    <p className="text-xs text-gray-600">Total Días</p>
+                    <p className="text-2xl font-black text-blue-700">{stats.rainyCount}</p>
+                  </div>
+                  <div className="bg-blue-50 p-3 rounded-lg">
+                    <p className="text-xs text-gray-600">Venta Total</p>
+                    <p className="text-2xl font-black text-blue-700">{formatCurrency(chartData.filter(d => d.weatherType === 'rainy' && d.sales > 0).reduce((s, d) => s + d.sales, 0))}</p>
+                  </div>
+                  <div className="bg-blue-50 p-3 rounded-lg">
+                    <p className="text-xs text-gray-600">Promedio Día</p>
+                    <p className="text-2xl font-black text-blue-700">{formatCurrency(stats.avgRainy)}</p>
+                  </div>
+                  <div className="bg-blue-50 p-3 rounded-lg">
+                    <p className="text-xs text-gray-600">Impacto vs Promedio</p>
+                    <p className={`text-2xl font-black ${stats.rainyImpact >= 0 ? 'text-green-600' : 'text-red-600'}`}>{stats.rainyImpact >= 0 ? '+' : ''}{stats.rainyImpact.toFixed(1)}%</p>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-700 bg-blue-50 p-3 rounded-lg">{stats.rainyImpact < -10 ? `La lluvia reduce significativamente las ventas. Implementa delivery y promociones indoor para mitigar el impacto.` : stats.rainyImpact > 5 ? `¡La lluvia aumenta las ventas! Los clientes prefieren helado en estos días. Aumenta stock y personal.` : 'La lluvia tiene efecto moderado en ventas.'}</p>
+              </div>
+            )}
+
+            {selectedStatCard === 'best' && stats?.bestDay && (
+              <div>
+                <div className="flex items-center gap-3 mb-4">
+                  <TrendingUp className="w-6 h-6 text-emerald-500" />
+                  <h3 className="text-lg font-bold text-gray-800">Mejor Día del Período</h3>
+                  <button onClick={() => setSelectedStatCard(null)} className="ml-auto text-gray-400 hover:text-gray-600">✕</button>
+                </div>
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div className="bg-emerald-50 p-3 rounded-lg col-span-2">
+                    <p className="text-xs text-gray-600">Fecha</p>
+                    <p className="text-xl font-black text-emerald-700 capitalize">{stats.bestDay.fullDate}</p>
+                  </div>
+                  <div className="bg-emerald-50 p-3 rounded-lg">
+                    <p className="text-xs text-gray-600">Ventas</p>
+                    <p className="text-2xl font-black text-emerald-700">{formatCurrency(stats.bestDay.sales)}</p>
+                  </div>
+                  <div className="bg-emerald-50 p-3 rounded-lg">
+                    <p className="text-xs text-gray-600">Clima</p>
+                    <p className="text-lg font-black text-emerald-700">{stats.bestDay.weatherType === 'sunny' ? '☀️ Soleado' : stats.bestDay.weatherType === 'rainy' ? '🌧️ Lluvioso' : '☁️ Nublado'}</p>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-700 bg-emerald-50 p-3 rounded-lg">Este fue tu mejor día. Analiza qué hizo diferente este día (clima, eventos, promociones) para replicar el éxito.</p>
+              </div>
+            )}
+
+            {selectedStatCard === 'worst' && stats?.worstDay && (
+              <div>
+                <div className="flex items-center gap-3 mb-4">
+                  <TrendingDown className="w-6 h-6 text-rose-500" />
+                  <h3 className="text-lg font-bold text-gray-800">Menor Día del Período</h3>
+                  <button onClick={() => setSelectedStatCard(null)} className="ml-auto text-gray-400 hover:text-gray-600">✕</button>
+                </div>
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div className="bg-rose-50 p-3 rounded-lg col-span-2">
+                    <p className="text-xs text-gray-600">Fecha</p>
+                    <p className="text-xl font-black text-rose-700 capitalize">{stats.worstDay.fullDate}</p>
+                  </div>
+                  <div className="bg-rose-50 p-3 rounded-lg">
+                    <p className="text-xs text-gray-600">Ventas</p>
+                    <p className="text-2xl font-black text-rose-700">{formatCurrency(stats.worstDay.sales)}</p>
+                  </div>
+                  <div className="bg-rose-50 p-3 rounded-lg">
+                    <p className="text-xs text-gray-600">Clima</p>
+                    <p className="text-lg font-black text-rose-700">{stats.worstDay.weatherType === 'sunny' ? '☀️ Soleado' : stats.worstDay.weatherType === 'rainy' ? '🌧️ Lluvioso' : '☁️ Nublado'}</p>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-700 bg-rose-50 p-3 rounded-lg">Día de bajo desempeño. Revisa factores externos (clima, eventos locales, problemas operacionales) que hayan afectado las ventas.</p>
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Gráfica principal */}
       <motion.div
