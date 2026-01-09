@@ -1565,15 +1565,9 @@ Genera:
                           <stop offset="100%" stopColor="#3b82f6" stopOpacity={0}/>
                         </linearGradient>
                         <linearGradient id="shimmer" x1="0%" y1="0%" x2="100%" y2="0%">
-                          <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.3}>
-                            <animate attributeName="offset" values="0;1;0" dur="3s" repeatCount="indefinite" />
-                          </stop>
-                          <stop offset="50%" stopColor="#60a5fa" stopOpacity={0.8}>
-                            <animate attributeName="offset" values="0.5;1.5;0.5" dur="3s" repeatCount="indefinite" />
-                          </stop>
-                          <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.3}>
-                            <animate attributeName="offset" values="1;2;1" dur="3s" repeatCount="indefinite" />
-                          </stop>
+                          <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.5}/>
+                          <stop offset="50%" stopColor="#60a5fa" stopOpacity={0.9}/>
+                          <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.5}/>
                         </linearGradient>
                       </defs>
                       <Area 
@@ -1913,9 +1907,8 @@ Genera:
                                   fill="url(#salesGradient)"
                                   rx={6}
                                   filter="url(#greenGlow)"
-                                >
-                                  <animate attributeName="opacity" values="0.8;1;0.8" dur="3s" repeatCount="indefinite" />
-                                </rect>
+                                  opacity={0.9}
+                                />
                               )}
                               <rect
                                 x={x}
@@ -1953,22 +1946,12 @@ Genera:
                             <g>
                               {(isLast || hasHighImpact) && (
                                 <>
-                                  <circle cx={cx} cy={cy} r={12} fill="#818cf8" opacity={0.1}>
-                                    <animate attributeName="r" values="12;16;12" dur="2.5s" repeatCount="indefinite" />
-                                    <animate attributeName="opacity" values="0.1;0.25;0.1" dur="2.5s" repeatCount="indefinite" />
-                                  </circle>
-                                  <circle cx={cx} cy={cy} r={9} fill="#a5b4fc" opacity={0.15}>
-                                    <animate attributeName="r" values="9;11;9" dur="2s" repeatCount="indefinite" />
-                                    <animate attributeName="opacity" values="0.15;0.3;0.15" dur="2s" repeatCount="indefinite" />
-                                  </circle>
+                                  <circle cx={cx} cy={cy} r={14} fill="#818cf8" opacity={0.15} />
+                                  <circle cx={cx} cy={cy} r={10} fill="#a5b4fc" opacity={0.2} />
                                 </>
                               )}
-                              <circle cx={cx} cy={cy} r={5} fill="#6366f1" stroke="#e0e7ff" strokeWidth={2}>
-                                {isLast && <animate attributeName="r" values="5;6.5;5" dur="1.8s" repeatCount="indefinite" />}
-                              </circle>
-                              <circle cx={cx} cy={cy} r={2} fill="#e0e7ff">
-                                <animate attributeName="opacity" values="0.9;1;0.9" dur="1.5s" repeatCount="indefinite" />
-                              </circle>
+                              <circle cx={cx} cy={cy} r={isLast ? 6 : 5} fill="#6366f1" stroke="#e0e7ff" strokeWidth={2} />
+                              <circle cx={cx} cy={cy} r={2} fill="#e0e7ff" opacity={0.95} />
                             </g>
                           );
                         }}
@@ -1977,9 +1960,7 @@ Genera:
                         isAnimationActive={true}
                         animationDuration={2000}
                         animationEasing="ease-in-out"
-                      >
-                        <animate attributeName="stroke-dashoffset" values="0;-10;0" dur="8s" repeatCount="indefinite" />
-                      </Line>
+                      />
                     </ComposedChart>
                   </ResponsiveContainer>
 
@@ -2098,15 +2079,9 @@ Genera:
                       <BarChart data={topStoresTrend} layout="vertical">
                         <defs>
                           <linearGradient id="greenBarGradient" x1="0" y1="0" x2="1" y2="0">
-                            <stop offset="0%" stopColor="#10b981" stopOpacity={0.8}>
-                              <animate attributeName="stopOpacity" values="0.8;1;0.8" dur="2s" repeatCount="indefinite" />
-                            </stop>
-                            <stop offset="50%" stopColor="#34d399" stopOpacity={1}>
-                              <animate attributeName="offset" values="0.3;0.7;0.3" dur="2s" repeatCount="indefinite" />
-                            </stop>
-                            <stop offset="100%" stopColor="#059669" stopOpacity={1}>
-                              <animate attributeName="stopOpacity" values="1;0.8;1" dur="2s" repeatCount="indefinite" />
-                            </stop>
+                            <stop offset="0%" stopColor="#10b981" stopOpacity={0.9}/>
+                            <stop offset="50%" stopColor="#34d399" stopOpacity={1}/>
+                            <stop offset="100%" stopColor="#059669" stopOpacity={0.9}/>
                           </linearGradient>
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.15} horizontal={false} />
