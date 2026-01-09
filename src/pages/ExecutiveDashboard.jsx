@@ -140,6 +140,16 @@ export default function ExecutiveDashboard() {
     queryFn: () => base44.entities.Cashier.list()
   });
 
+  const { data: weatherData = null, isLoading: loadingWeather } = useQuery({
+    queryKey: ['weatherData'],
+    queryFn: async () => {
+      const response = await base44.functions.invoke('getWeatherDataForBogota', {});
+      return response.data || null;
+    },
+    retry: 1,
+    staleTime: 1000 * 60 * 60 // 1 hora
+  });
+
   const currentZoneBudget = useMemo(() => {
     // Primero buscar el presupuesto activo
     const activeBudget = zoneBudgets.find(b => b.is_active === true);
