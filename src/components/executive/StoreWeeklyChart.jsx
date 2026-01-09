@@ -181,9 +181,8 @@ export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRa
               <defs>
                 {firstColumn.map((item, idx) => (
                   <linearGradient key={idx} id={`gradient-col1-${idx}`} x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0%" stopColor={item.colors.main} stopOpacity={0.8} />
-                    <stop offset="50%" stopColor={item.colors.light} stopOpacity={1} />
-                    <stop offset="100%" stopColor={item.colors.dark} stopOpacity={1} />
+                    <stop offset="0%" stopColor={item.colors.main} stopOpacity={0.85} />
+                    <stop offset="100%" stopColor={item.colors.main} stopOpacity={0.95} />
                   </linearGradient>
                 ))}
               </defs>
@@ -316,9 +315,8 @@ export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRa
               <defs>
                 {secondColumn.map((item, idx) => (
                   <linearGradient key={idx} id={`gradient-col2-${idx}`} x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0%" stopColor={item.colors.main} stopOpacity={0.8} />
-                    <stop offset="50%" stopColor={item.colors.light} stopOpacity={1} />
-                    <stop offset="100%" stopColor={item.colors.dark} stopOpacity={1} />
+                    <stop offset="0%" stopColor={item.colors.main} stopOpacity={0.85} />
+                    <stop offset="100%" stopColor={item.colors.main} stopOpacity={0.95} />
                   </linearGradient>
                 ))}
               </defs>
