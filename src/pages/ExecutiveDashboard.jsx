@@ -516,6 +516,22 @@ export default function ExecutiveDashboard() {
 
   const formatShort = (v) => `$${(v / 1000000).toFixed(1)}M`;
 
+  // Formateo abreviado para KPIs (solo visualización)
+  const formatKPI = (value) => {
+    if (value >= 1000000000) {
+      return `$${(value / 1000000000).toFixed(2)}B`;
+    } else if (value >= 1000000) {
+      return `$${(value / 1000000).toFixed(1)}M`;
+    } else {
+      return new Intl.NumberFormat('es-CO', { 
+        style: 'currency', 
+        currency: 'COP', 
+        maximumFractionDigits: 0, 
+        minimumFractionDigits: 0
+      }).format(Math.round(value));
+    }
+  };
+
   // Determinar KPI más crítico
   const criticalKPI = useMemo(() => {
     const gap = (currentZoneBudget?.sales_budget || monthlyTotals.totalBudget) - monthlyTotals.totalSales;
@@ -1357,14 +1373,14 @@ Genera:
                         animate={{ scale: 1, opacity: 1 }}
                         transition={{ duration: 0.5, type: "spring", stiffness: 200 }}
                       >
-                        {formatCurrency(dynamicTotals.totalSales)}
+                        {formatKPI(dynamicTotals.totalSales)}
                       </motion.p>
                     </div>
                     <div className="h-px bg-white/10"></div>
                     <div>
                       <p className="text-xs text-slate-400 mb-0.5">Presupuesto</p>
                       <p className="text-lg font-bold text-blue-300 tabular-nums">
-                        {formatCurrency(dynamicTotals.totalBudget)}
+                        {formatKPI(dynamicTotals.totalBudget)}
                       </p>
                     </div>
                     <div className="pt-1">
@@ -1424,14 +1440,14 @@ Genera:
                     <div>
                       <p className="text-xs text-slate-400 mb-0.5">Ticket Promedio</p>
                       <p className="text-2xl font-black text-white tabular-nums">
-                        {dynamicTotals.avgTicket > 0 ? formatCurrency(dynamicTotals.avgTicket) : '$0'}
+                        {dynamicTotals.avgTicket > 0 ? formatKPI(dynamicTotals.avgTicket) : '$0'}
                       </p>
                     </div>
                     <div className="h-px bg-white/10"></div>
                     <div>
                       <p className="text-xs text-slate-400 mb-0.5">Transacciones Totales</p>
                       <p className="text-xl font-bold text-purple-300 tabular-nums">
-                        {dynamicTotals.totalTransactions.toLocaleString()}
+                        {dynamicTotals.totalTransactions.toLocaleString('es-CO')}
                       </p>
                     </div>
                     <div className="pt-1">
@@ -1463,7 +1479,7 @@ Genera:
                     <div>
                       <p className="text-xs text-slate-400 mb-0.5">Venta Promedio/Día</p>
                       <p className="text-xl font-black text-white tabular-nums">
-                        {dynamicTotals.avgDailySales > 0 ? formatCurrency(dynamicTotals.avgDailySales) : '$0'}
+                        {dynamicTotals.avgDailySales > 0 ? formatKPI(dynamicTotals.avgDailySales) : '$0'}
                       </p>
                     </div>
                     <div className="h-px bg-white/10"></div>
@@ -1511,7 +1527,7 @@ Genera:
                     <div>
                       <p className="text-xs text-slate-400 mb-1">Proyección Semana Actual</p>
                       <p className="text-xl font-black text-white tabular-nums">
-                        {formatCurrency(dynamicTotals.currentWeekProjection)}
+                        {formatKPI(dynamicTotals.currentWeekProjection)}
                       </p>
                       <p className={`text-sm font-bold tabular-nums ${
                         dynamicTotals.currentWeekBudget > 0 && ((dynamicTotals.currentWeekProjection/dynamicTotals.currentWeekBudget)*100) >= 100 
@@ -1526,7 +1542,7 @@ Genera:
                     <div>
                       <p className="text-xs text-slate-400 mb-1">Proyección Cierre Mes</p>
                       <p className="text-lg font-bold text-emerald-300 tabular-nums">
-                        {formatCurrency(dynamicTotals.monthProjection)}
+                        {formatKPI(dynamicTotals.monthProjection)}
                       </p>
                       <p className={`text-xs font-bold tabular-nums ${
                         dynamicTotals.totalMonthBudget > 0 && ((dynamicTotals.monthProjection/dynamicTotals.totalMonthBudget)*100) >= 100 
@@ -1662,7 +1678,7 @@ Genera:
                             repeatDelay: 10
                           }}
                         >
-                          {formatCurrency(Math.max(0, (currentZoneBudget?.sales_budget || monthlyTotals.totalBudget) - monthlyTotals.totalSales))}
+                          {formatKPI(Math.max(0, (currentZoneBudget?.sales_budget || monthlyTotals.totalBudget) - monthlyTotals.totalSales))}
                         </motion.p>
                         <p className="text-[10px] text-red-300">Brecha frente al presupuesto</p>
                       </div>
