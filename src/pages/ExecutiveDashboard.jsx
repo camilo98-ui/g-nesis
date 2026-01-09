@@ -466,8 +466,7 @@ export default function ExecutiveDashboard() {
     const daysElapsedMonth = now.getDate();
     const daysInMonth = monthEnd.getDate();
     const avgDailySalesMonth = daysElapsedMonth > 0 ? totalMonthSales / daysElapsedMonth : 0;
-    // En modo gregoriano, la proyección es solo la venta acumulada hasta hoy
-    const monthProjection = gregorianMode ? totalMonthSales : (totalMonthSales + (avgDailySalesMonth * (daysInMonth - daysElapsedMonth)));
+    const monthProjection = totalMonthSales + (avgDailySalesMonth * (daysInMonth - daysElapsedMonth));
     
     // Presupuesto mensual total
     const totalMonthBudget = storesAnalysis.reduce((sum, s) => sum + (s.salesBudget || 0), 0);
