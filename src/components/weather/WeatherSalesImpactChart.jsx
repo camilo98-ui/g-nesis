@@ -790,6 +790,20 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
       });
     }
 
+    if (viewMode === 'cloudy') {
+      const cloudyDays = withSales.filter(d => d.weatherType === 'cloudy');
+      const cloudyTotal = cloudyDays.reduce((sum, d) => sum + d.sales, 0);
+      const cloudyPercent = totalSales > 0 ? (cloudyTotal / totalSales * 100).toFixed(1) : 0;
+      const daysAboveAvg = cloudyDays.filter(d => d.sales > avgDaily).length;
+      
+      list.push({
+        icon: '☁️',
+        title: 'Análisis Días Nublados',
+        description: `${cloudyDays.length} días nublados • ${cloudyPercent}% del total (${formatCurrency(cloudyTotal)}) • ${daysAboveAvg}/${cloudyDays.length} días sobre promedio • Impacto: ${stats.cloudyImpact.toFixed(1)}% • Promedio nublado: ${formatCurrency(stats.avgCloudy)} vs General: ${formatCurrency(avgDaily)}`,
+        color: 'bg-gray-50 border-gray-200'
+      });
+    }
+
     if (viewMode === 'comparison') {
       const minTemp = Math.min(...chartData.filter(d => !d.isForecast).map(d => d.temperature));
       const maxTemp = Math.max(...chartData.filter(d => !d.isForecast).map(d => d.temperature));
