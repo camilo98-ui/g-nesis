@@ -1,67 +1,74 @@
-import React, { useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
-  ComposedChart,
-  Bar,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  ReferenceLine
+  ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid,
+  Tooltip, Legend, ResponsiveContainer, Cell, ReferenceLine
 } from 'recharts';
+import { Cloud, CloudRain, Sun, Droplets } from 'lucide-react';
+
+const getWeatherIcon = (precipitation) => {
+  if (precipitation > 5) return <CloudRain className="w-3.5 h-3.5 text-blue-400" />;
+  if (precipitation > 1) return <Cloud className="w-3.5 h-3.5 text-slate-400" />;
+  return <Sun className="w-3.5 h-3.5 text-amber-400" />;
+};
 
 const CustomTooltip = ({ active, payload, label }) => {
-  if (!active || !payload) return null;
+  if (!active || !payload || payload.length === 0) return null;
 
-  const data = payload[0]?.payload;
-  if (!data) return null;
-
-  const getWeatherIcon = (code) => {
-    if (code === 0 || code === 1) return '☀️';
-    if (code === 2 || code === 3) return '⛅';
-    if (code >= 45 && code <= 48) return '🌫️';
-    if (code >= 51 && code <= 67) return '🌧️';
-    if (code >= 80 && code <= 82) return '🌧️';
-    if (code >= 85 && code <= 86) return '⛈️';
-    return '🌤️';
-  };
-
-  const avgSales = payload.find(p => p.name === 'Ventas')?.value || 0;
+  const data = payload[0].payload;
+  const avgSales = payload[0].payload.avgSales || 2500000;
+  const diff = ((data.sales - avgSales) / avgSales) * 100;
 
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="backdrop-blur-xl rounded-xl border border-white/20 bg-slate-950/80 p-4 shadow-2xl"
+      className="rounded-xl backdrop-blur-xl bg-slate-900/95 border border-white/20 p-4 shadow-2xl"
     >
-      <p className="text-sm font-bold text-white mb-2">{data.displayDate}</p>
+      <p className="font-bold text-white mb-3">{data.displayDate}</p>
       
-      <div className="space-y-2 text-xs">
-        <div className="flex items-center justify-between gap-4">
-          <span className="text-slate-400">Ventas:</span>
-          <span className="font-bold text-blue-400">${(data.sales / 1000000).toFixed(1)}M</span>
-        </div>
-        
-        <div className="flex items-center justify-between gap-4">
-          <span className="text-slate-400">Temperatura:</span>
-          <span className="font-bold text-amber-400">{data.temperature.toFixed(1)}°C {getWeatherIcon(data.weatherCode)}</span>
-        </div>
-
-        {data.precipitation > 0 && (
-          <div className="flex items-center justify-between gap-4">
-            <span className="text-slate-400">Precipitación:</span>
-            <span className="font-bold text-cyan-400">{data.precipitation.toFixed(1)}mm</span>
+      <div className="space-y-2.5 text-sm">
+        {/* Sales */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-blue-400 to-cyan-400" />
+            <span className="text-slate-300">Ventas</span>
           </div>
-        )}
+          <div className="text-right">
+            <p className="font-semibold text-white">${(data.sales / 1000000).toFixed(2)}M</p>
+            <p className={`text-xs ${diff > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+              {diff > 0 ? '+' : ''}{diff.toFixed(1)}% vs promedio
+            </p>
+          </div>
+        </div>
 
-        <div className="pt-2 border-t border-white/10">
-          <div className="flex items-center justify-between gap-4">
-            <span className="text-slate-400">vs Promedio:</span>
-            <span className={`font-bold ${data.sales > 5000000 ? 'text-emerald-400' : 'text-red-400'}`}>
-              {data.sales > 5000000 ? '+' : ''}{((data.sales - 5000000) / 5000000 * 100).toFixed(0)}%
+        {/* Temperature */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-2.5 h-2.5 rounded-full bg-orange-400" />
+            <span className="text-slate-300">Temperatura</span>
+          </div>
+          <p className="font-semibold text-white">{data.temperature.toFixed(1)}°C</p>
+        </div>
+
+        {/* Precipitation */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Droplets className="w-3.5 h-3.5 text-blue-400" />
+            <span className="text-slate-300">Precipitación</span>
+          </div>
+          <p className="font-semibold text-white">{data.precipitation.toFixed(1)}mm</p>
+        </div>
+
+        {/* Weather Type */}
+        <div className="flex items-center justify-between pt-2.5 border-t border-white/10">
+          <div className="flex items-center gap-2">
+            <span className="text-slate-300">Clima</span>
+          </div>
+          <div className="flex items-center gap-1">
+            {getWeatherIcon(data.precipitation)}
+            <span className="font-semibold text-white text-xs">
+              {data.precipitation > 5 ? 'Lluvioso' : data.precipitation > 1 ? 'Nublado' : 'Soleado'}
             </span>
           </div>
         </div>
@@ -71,42 +78,84 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 export default function WeatherSalesMainChart({ data, selectedMetrics }) {
+  const [hoveredBar, setHoveredBar] = useState(null);
+
   const chartData = useMemo(() => {
-    return data.map(d => ({
+    if (data.length === 0) return [];
+
+    const avgSales = data.reduce((sum, d) => sum + d.sales, 0) / data.length;
+    
+    return data.map((d, idx) => ({
       ...d,
-      salesM: d.sales / 1000000
+      avgSales,
+      isBest: d.sales === Math.max(...data.map(x => x.sales)),
+      isWorst: d.sales === Math.min(...data.map(x => x.sales)),
+      index: idx
     }));
   }, [data]);
 
-  const avgSales = useMemo(() => {
-    return chartData.length > 0
-      ? chartData.reduce((sum, d) => sum + d.sales, 0) / chartData.length
-      : 0;
+  // Calcular insights
+  const insights = useMemo(() => {
+    if (chartData.length === 0) return null;
+
+    const rainyDays = chartData.filter(d => d.precipitation > 1);
+    const sunnyDays = chartData.filter(d => d.precipitation <= 1);
+
+    if (rainyDays.length === 0 || sunnyDays.length === 0) return null;
+
+    const rainyAvg = rainyDays.reduce((sum, d) => sum + d.sales, 0) / rainyDays.length;
+    const sunnyAvg = sunnyDays.reduce((sum, d) => sum + d.sales, 0) / sunnyDays.length;
+    const diff = ((sunnyAvg - rainyAvg) / rainyAvg) * 100;
+
+    return {
+      text: `Las ventas caen un ${Math.abs(diff).toFixed(0)}% en días lluviosos`,
+      percentage: diff,
+      rainyCount: rainyDays.length,
+      sunnyCount: sunnyDays.length
+    };
   }, [chartData]);
 
-  const maxSalesIndex = chartData.reduce((maxIdx, d, idx) => 
-    d.sales > chartData[maxIdx].sales ? idx : maxIdx, 0);
-  const minSalesIndex = chartData.reduce((minIdx, d, idx) => 
-    d.sales < chartData[minIdx].sales ? idx : minIdx, 0);
+  if (chartData.length === 0) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="h-80 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center"
+      >
+        <p className="text-slate-400">Cargando datos...</p>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.2 }}
-      className="rounded-3xl border border-white/10 hover:border-white/20 transition-all duration-300 overflow-hidden
-        backdrop-blur-xl p-6"
+      transition={{ delay: 0.1 }}
+      className="rounded-2xl backdrop-blur-xl border border-white/10 p-6 overflow-hidden"
       style={{
-        background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)'
+        background: 'linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%)'
       }}
     >
-      {/* Header */}
-      <div className="mb-8">
-        <h2 className="text-xl font-black text-white mb-2">Correlación Clima & Ventas</h2>
-        <p className="text-sm text-slate-400">
-          Análisis de {chartData.length} días — patrones de venta según condiciones climáticas
-        </p>
-      </div>
+      {/* Insight Banner */}
+      {insights && (
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.2 }}
+          className="mb-6 p-4 rounded-xl bg-gradient-to-r from-red-500/10 to-orange-500/10 border border-red-500/20 flex items-start gap-3"
+        >
+          <div className="w-2 h-2 rounded-full bg-red-400 mt-2 flex-shrink-0" />
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-red-300">
+              {insights.text}
+            </p>
+            <p className="text-xs text-slate-400 mt-1">
+              {insights.rainyCount} días lluviosos vs {insights.sunnyCount} soleados
+            </p>
+          </div>
+        </motion.div>
+      )}
 
       {/* Chart */}
       <ResponsiveContainer width="100%" height={400}>
@@ -114,11 +163,11 @@ export default function WeatherSalesMainChart({ data, selectedMetrics }) {
           <defs>
             <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.8} />
-              <stop offset="100%" stopColor="#0ea5e9" stopOpacity={0.4} />
+              <stop offset="100%" stopColor="#06b6d4" stopOpacity={0.4} />
             </linearGradient>
-            <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#f59e0b" />
-              <stop offset="100%" stopColor="#ef4444" />
+            <linearGradient id="tempGradient" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="#f97316" stopOpacity={0.3} />
+              <stop offset="100%" stopColor="#f97316" stopOpacity={0.8} />
             </linearGradient>
           </defs>
 
@@ -128,103 +177,107 @@ export default function WeatherSalesMainChart({ data, selectedMetrics }) {
             vertical={false}
           />
 
-          {/* Reference line for average sales */}
-          <ReferenceLine 
-            y={avgSales / 1000000} 
-            stroke="rgba(148, 163, 184, 0.3)"
-            strokeDasharray="5 5"
-            label={{ value: 'Promedio', position: 'right', fill: '#94a3b8', fontSize: 12 }}
-          />
-
           <XAxis 
-            dataKey="displayDate"
-            stroke="rgba(148, 163, 184, 0.3)"
-            tick={{ fill: '#94a3b8', fontSize: 12 }}
-            axisLine={false}
+            dataKey="displayDate" 
+            stroke="rgba(255,255,255,0.2)"
+            style={{ fontSize: '12px' }}
+            tick={{ fill: 'rgba(255,255,255,0.5)' }}
           />
 
           <YAxis 
-            stroke="rgba(148, 163, 184, 0.3)"
-            tick={{ fill: '#94a3b8', fontSize: 12 }}
-            axisLine={false}
-            label={{ value: 'Ventas (M)', angle: -90, position: 'insideLeft', fill: '#94a3b8' }}
+            yAxisId="left"
+            stroke="rgba(255,255,255,0.2)"
+            style={{ fontSize: '12px' }}
+            tick={{ fill: 'rgba(255,255,255,0.5)' }}
           />
 
           <YAxis 
-            yAxisId="right"
-            stroke="rgba(148, 163, 184, 0.3)"
-            tick={{ fill: '#94a3b8', fontSize: 12 }}
-            axisLine={false}
-            label={{ value: 'Temperatura (°C)', angle: 90, position: 'insideRight', fill: '#94a3b8' }}
+            yAxisId="right" 
+            orientation="right"
+            stroke="rgba(255,255,255,0.2)"
+            style={{ fontSize: '12px' }}
+            tick={{ fill: 'rgba(255,255,255,0.5)' }}
           />
 
-          <Tooltip content={<CustomTooltip />} />
+          {/* Reference Line for Average */}
+          <ReferenceLine 
+            yAxisId="left"
+            y={chartData[0]?.avgSales || 0}
+            stroke="rgba(100, 200, 255, 0.3)"
+            strokeDasharray="4 4"
+            label={{
+              value: 'Promedio',
+              position: 'right',
+              fill: 'rgba(255,255,255,0.4)',
+              fontSize: 12
+            }}
+          />
 
-          {/* Bars with rounded corners highlight */}
+          {/* Bars with conditional styling */}
           <Bar 
-            dataKey="salesM"
-            name="Ventas"
+            yAxisId="left"
+            dataKey="sales" 
             fill="url(#barGradient)"
             radius={[8, 8, 0, 0]}
-            isAnimationActive={true}
+            onMouseEnter={(data) => setHoveredBar(data.index)}
+            onMouseLeave={() => setHoveredBar(null)}
           >
-            {/* Highlight best and worst days */}
             {chartData.map((entry, index) => (
-              <circle
-                key={index}
-                cx={0}
-                cy={0}
-                r={index === maxSalesIndex || index === minSalesIndex ? 8 : 0}
-                fill={index === maxSalesIndex ? '#10b981' : '#ef4444'}
-                opacity={0.5}
+              <Cell
+                key={`cell-${index}`}
+                fill={
+                  entry.isBest ? '#10b981' :
+                  entry.isWorst ? '#ef4444' :
+                  'url(#barGradient)'
+                }
+                opacity={hoveredBar === null || hoveredBar === index ? 1 : 0.3}
               />
             ))}
           </Bar>
 
-          {/* Temperature line - smooth and organic */}
+          {/* Temperature Line */}
           <Line
             yAxisId="right"
             type="monotone"
             dataKey="temperature"
-            name="Temperatura"
-            stroke="url(#lineGradient)"
+            stroke="#f97316"
             strokeWidth={3}
             dot={false}
             isAnimationActive={true}
-            animationDuration={800}
+            animationDuration={1000}
           />
 
+          <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(59, 130, 246, 0.05)' }} />
+
           <Legend 
-            wrapperStyle={{ paddingTop: 20 }}
+            wrapperStyle={{ paddingTop: '20px' }}
             iconType="line"
+            formatter={(value) => {
+              const labels = { sales: 'Ventas', temperature: 'Temperatura (°C)' };
+              return labels[value] || value;
+            }}
           />
         </ComposedChart>
       </ResponsiveContainer>
 
-      {/* Bottom insights */}
+      {/* Legend below chart */}
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-        className="mt-6 pt-6 border-t border-white/10 grid grid-cols-2 md:grid-cols-3 gap-4"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.3 }}
+        className="mt-6 grid grid-cols-3 gap-4 text-sm"
       >
-        <div>
-          <p className="text-xs text-slate-500 mb-1">Mejor Día</p>
-          <p className="text-sm font-bold text-emerald-400">
-            {chartData[maxSalesIndex]?.displayDate}
-          </p>
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-white/5 border border-white/10">
+          <div className="w-3 h-3 rounded-full bg-emerald-500" />
+          <span className="text-slate-400">Mejor día</span>
         </div>
-        <div>
-          <p className="text-xs text-slate-500 mb-1">Peor Día</p>
-          <p className="text-sm font-bold text-red-400">
-            {chartData[minSalesIndex]?.displayDate}
-          </p>
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-white/5 border border-white/10">
+          <div className="w-3 h-3 rounded-full bg-blue-500" />
+          <span className="text-slate-400">Ventas</span>
         </div>
-        <div>
-          <p className="text-xs text-slate-500 mb-1">Rango de Ventas</p>
-          <p className="text-sm font-bold text-blue-400">
-            ${((chartData[maxSalesIndex]?.sales - chartData[minSalesIndex]?.sales) / 1000000).toFixed(1)}M
-          </p>
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-white/5 border border-white/10">
+          <div className="w-3 h-3 rounded-full bg-red-500" />
+          <span className="text-slate-400">Peor día</span>
         </div>
       </motion.div>
     </motion.div>
