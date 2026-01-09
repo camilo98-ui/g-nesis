@@ -1443,6 +1443,18 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
                     </Bar>
                   )}
 
+                  {viewMode === 'cloudy' && (
+                    <Bar yAxisId="sales" dataKey="sales" name="Ventas (Nublados)" radius={[6, 6, 0, 0]}>
+                      {chartData.map((entry, index) => (
+                        <Cell 
+                          key={`cell-cloudy-${index}`} 
+                          fill={entry.weatherType === 'cloudy' ? '#9ca3af' : '#e5e7eb'} 
+                          opacity={entry.weatherType === 'cloudy' ? 1 : 0.3}
+                        />
+                      ))}
+                    </Bar>
+                  )}
+
                   <Line
                     yAxisId="temp"
                     type="monotone"
