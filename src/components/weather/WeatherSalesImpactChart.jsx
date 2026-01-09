@@ -750,47 +750,114 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
     );
   }
 
-  // Generar insights dinámicos
+  // Generar insights dinámicos según vista activa
   const insights = useMemo(() => {
-    if (!stats) return [];
+    if (!stats || !chartData.length) return [];
     const list = [];
-    
-    if (stats.sunnyImpact > 5) {
+
+    const withSales = chartData.filter(d => d.sales > 0 && !d.isForecast);
+    const totalSales = withSales.reduce((sum, d) => sum + d.sales, 0);
+    const avgDaily = totalSales / Math.max(withSales.length, 1);
+    const totalDays = chartData.filter(d => !d.isForecast).length;
+
+    // Insights según vista activa
+    if (viewMode === 'sunny') {
+      const sunnyDays = withSales.filter(d => d.weatherType === 'sunny');
+      const sunnyTotal = sunnyDays.reduce((sum, d) => sum + d.sales, 0);
+      const sunnyPercent = totalSales > 0 ? (sunnyTotal / totalSales * 100).toFixed(1) : 0;
+      const daysAboveAvg = sunnyDays.filter(d => d.sales > avgDaily).length;
+      
       list.push({
         icon: '☀️',
-        title: 'Los días soleados impulsan ventas',
-        description: `Las ventas suben ${stats.sunnyImpact.toFixed(0)}% en días soleados. Aprovecha para promociones outdoor.`,
+        title: 'Desempeño Días Soleados',
+        description: `${sunnyDays.length} días soleados • ${sunnyPercent}% del total de ventas (${formatCurrency(sunnyTotal)}) • ${daysAboveAvg}/${sunnyDays.length} días sobre promedio (${avgDaily > 0 ? (daysAboveAvg/sunnyDays.length*100).toFixed(0) : 0}%) • Promedio: ${formatCurrency(stats.avgSunny)} vs General: ${formatCurrency(avgDaily)}`,
         color: 'bg-amber-50 border-amber-200'
       });
     }
-    
-    if (stats.rainyImpact < -5) {
+
+    if (viewMode === 'rainy') {
+      const rainyDays = withSales.filter(d => d.weatherType === 'rainy');
+      const rainyTotal = rainyDays.reduce((sum, d) => sum + d.sales, 0);
+      const rainyPercent = totalSales > 0 ? (rainyTotal / totalSales * 100).toFixed(1) : 0;
+      const daysAboveAvg = rainyDays.filter(d => d.sales > avgDaily).length;
+      const lostRevenue = rainyDays.filter(d => d.sales < avgDaily).reduce((sum, d) => sum + (avgDaily - d.sales), 0);
+      
       list.push({
         icon: '🌧️',
-        title: 'La lluvia afecta el tráfico',
-        description: `Las ventas bajan ${Math.abs(stats.rainyImpact).toFixed(0)}% en días lluviosos. Considera delivery o promociones indoor.`,
+        title: 'Análisis Días Lluviosos',
+        description: `${rainyDays.length} días lluviosos • ${rainyPercent}% del total (${formatCurrency(rainyTotal)}) • ${daysAboveAvg}/${rainyDays.length} días sobre promedio • Impacto: ${stats.rainyImpact.toFixed(1)}% • Ingresos perdidos estimados: ${formatCurrency(lostRevenue)} • Promedio lluvioso: ${formatCurrency(stats.avgRainy)}`,
         color: 'bg-blue-50 border-blue-200'
       });
-    } else if (stats.rainyImpact > 0) {
+    }
+
+    if (viewMode === 'comparison') {
+      const minTemp = Math.min(...chartData.filter(d => !d.isForecast).map(d => d.temperature));
+      const maxTemp = Math.max(...chartData.filter(d => !d.isForecast).map(d => d.temperature));
+      const optimalTempDays = withSales.filter(d => d.temperature >= 20 && d.temperature <= 24);
+      const optimalPercent = withSales.length > 0 ? (optimalTempDays.length / withSales.length * 100).toFixed(0) : 0;
+      
       list.push({
-        icon: '🌧️',
-        title: '¡Sorpresa! La lluvia no afecta',
-        description: `Las ventas se mantienen estables incluso con lluvia. Tu clientela es fiel.`,
-        color: 'bg-green-50 border-green-200'
+        icon: '🌡️',
+        title: 'Correlación Temperatura-Ventas',
+        description: `Rango: ${minTemp.toFixed(1)}°C - ${maxTemp.toFixed(1)}°C • ${optimalPercent}% de días en rango óptimo (20-24°C) • Estos días generan ${formatCurrency(optimalTempDays.reduce((s, d) => s + d.sales, 0))} • Días fuera de rango: ${withSales.length - optimalTempDays.length} días • Venta promedio óptimo: ${optimalTempDays.length > 0 ? formatCurrency(optimalTempDays.reduce((s, d) => s + d.sales, 0) / optimalTempDays.length) : 'N/A'}`,
+        color: 'bg-orange-50 border-orange-200'
       });
     }
-    
-    if (stats.bestDay) {
+
+    if (viewMode === 'trend') {
+      const firstHalf = withSales.slice(0, Math.ceil(withSales.length / 2));
+      const secondHalf = withSales.slice(Math.ceil(withSales.length / 2));
+      const firstAvg = firstHalf.reduce((s, d) => s + d.sales, 0) / Math.max(firstHalf.length, 1);
+      const secondAvg = secondHalf.reduce((s, d) => s + d.sales, 0) / Math.max(secondHalf.length, 1);
+      const trend = firstAvg > 0 ? ((secondAvg - firstAvg) / firstAvg * 100).toFixed(1) : 0;
+      const maxGrowthDay = withSales.reduce((prev, curr, idx, arr) => {
+        if (idx === 0) return curr;
+        const prevVal = arr[idx - 1].sales;
+        const currVal = curr.sales;
+        const prevGrowth = prev.dailyGrowth || 0;
+        const currGrowth = prevVal > 0 ? ((currVal - prevVal) / prevVal * 100) : 0;
+        return currGrowth > prevGrowth ? {...curr, dailyGrowth: currGrowth} : {...prev, dailyGrowth: prevGrowth};
+      }, null);
+      
       list.push({
-        icon: '🏆',
-        title: `Mejor día: ${stats.bestDay.fullDate}`,
-        description: `Venta de ${formatCurrency(stats.bestDay.sales)} con clima ${stats.bestDay.weatherType === 'sunny' ? 'soleado' : stats.bestDay.weatherType === 'rainy' ? 'lluvioso' : 'nublado'}.`,
+        icon: '📈',
+        title: 'Análisis de Tendencia',
+        description: `Tendencia general: ${trend}% • Primera mitad promedio: ${formatCurrency(firstAvg)} vs Segunda mitad: ${formatCurrency(secondAvg)} • Diferencia: ${formatCurrency(Math.abs(secondAvg - firstAvg))} • Estabilidad (variación): ${((Math.max(...withSales.map(d => d.sales)) - Math.min(...withSales.map(d => d.sales))) / avgDaily * 100).toFixed(0)}% • Volatilidad: ${trend > 0 ? 'Crecimiento positivo' : trend < 0 ? 'Decrecimiento' : 'Estable'}`,
         color: 'bg-emerald-50 border-emerald-200'
       });
     }
-    
+
+    if (showForecast && chartData.some(d => d.isForecast)) {
+      const forecastDays = chartData.filter(d => d.isForecast);
+      const forecastTotal = forecastDays.reduce((s, d) => s + d.sales, 0);
+      const forecastAvg = forecastTotal / Math.max(forecastDays.length, 1);
+      const sunnyForecast = forecastDays.filter(d => d.weatherType === 'sunny').length;
+      const rainyForecast = forecastDays.filter(d => d.weatherType === 'rainy').length;
+      
+      list.push({
+        icon: '🔮',
+        title: 'Proyección 7 Días',
+        description: `Ingresos estimados: ${formatCurrency(forecastTotal)} • Promedio diario: ${formatCurrency(forecastAvg)} vs Histórico: ${formatCurrency(avgDaily)} • Variación: ${avgDaily > 0 ? ((forecastAvg - avgDaily) / avgDaily * 100).toFixed(1) : 0}% • Composición: ${sunnyForecast} días soleados, ${rainyForecast} lluviosos • Recomendación: Prepara inventario para ${forecastAvg > avgDaily ? 'demanda alta' : 'demanda moderada'}`,
+        color: 'bg-cyan-50 border-cyan-200'
+      });
+    }
+
+    // Insights generales si no hay vista específica
+    if (!viewMode || viewMode === 'bars') {
+      const daysAboveAvg = withSales.filter(d => d.sales > avgDaily).length;
+      const totalAboveAvg = withSales.filter(d => d.sales > avgDaily).reduce((s, d) => s + d.sales, 0);
+      const percentAboveAvg = (daysAboveAvg / Math.max(withSales.length, 1) * 100).toFixed(0);
+      
+      list.push({
+        icon: '📊',
+        title: 'Resumen General',
+        description: `Período: ${totalDays} días • Días con ventas: ${withSales.length} • Total: ${formatCurrency(totalSales)} • Promedio: ${formatCurrency(avgDaily)} • ${percentAboveAvg}% de días (${daysAboveAvg} días) superan el promedio generando ${formatCurrency(totalAboveAvg)} (${(totalAboveAvg/totalSales*100).toFixed(0)}%) • Mejor día: ${formatCurrency(stats.bestDay?.sales || 0)} • Peor día: ${formatCurrency(stats.worstDay?.sales || 0)}`,
+        color: 'bg-purple-50 border-purple-200'
+      });
+    }
+
     return list;
-  }, [stats, formatCurrency]);
+  }, [stats, chartData, viewMode, showForecast, formatCurrency]);
 
   return (
     <div className="space-y-4">
