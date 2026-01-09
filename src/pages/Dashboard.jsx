@@ -476,7 +476,7 @@ export default function Dashboard() {
   const queryClient = useQueryClient();
   
   const [selectedStore, setSelectedStore] = useState('');
-  const [dateRange, setDateRange] = useState(null);
+  const [dateRange, setDateRange] = useState({ from: startOfMonth(new Date()), to: new Date() });
   const [activeMetric, setActiveMetric] = useState(null);
   const [projectionMetric, setProjectionMetric] = useState(null);
 
@@ -488,7 +488,7 @@ export default function Dashboard() {
   const [showMonthlyBudget, setShowMonthlyBudget] = useState(false);
   const [showComparison, setShowComparison] = useState(false);
   const [comparisonRange, setComparisonRange] = useState(null);
-  const [gregorianMode, setGregorianMode] = useState(false);
+  const [gregorianMode, setGregorianMode] = useState(true);
 
   // Fetch weather data - historical para análisis
   useEffect(() => {
