@@ -1,11 +1,11 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { motion, AnimatePresence, useSpring, useTransform } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { STORES, getDisplayName } from '@/components/StoreSelector';
-import { ArrowLeft, Search, TrendingUp, TrendingDown, Eye, Zap, Award, Brain, ArrowUpDown, ArrowUp, ArrowDown, BarChart3, Settings, X, Download, Filter, CalendarDays } from 'lucide-react';
+import { ArrowLeft, Search, TrendingUp, TrendingDown, Eye, Zap, Award, Brain, ArrowUpDown, ArrowUp, ArrowDown, BarChart3, Settings, X, Download, Filter, CalendarDays, AlertTriangle } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,45 @@ import PlannerStatusPanel from '../components/executive/PlannerStatusPanel';
 import StoreWeeklyChart from '../components/executive/StoreWeeklyChart';
 import { useExecutiveTooltip } from '../components/executive/ExecutiveChartTooltip';
 import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, ResponsiveContainer, CartesianGrid, XAxis, YAxis, ComposedChart, Tooltip, Legend, ReferenceLine } from 'recharts';
+
+// Hook para animar números con easing
+function useAnimatedNumber(value, duration = 1000) {
+  const [displayValue, setDisplayValue] = useState(value);
+  const startTimeRef = useRef(null);
+  const startValueRef = useRef(value);
+  const animationFrameRef = useRef(null);
+
+  useEffect(() => {
+    startValueRef.current = displayValue;
+    startTimeRef.current = Date.now();
+    
+    const animate = () => {
+      const now = Date.now();
+      const elapsed = now - startTimeRef.current;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // Easing ease-out
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const newValue = startValueRef.current + (value - startValueRef.current) * eased;
+      
+      setDisplayValue(newValue);
+      
+      if (progress < 1) {
+        animationFrameRef.current = requestAnimationFrame(animate);
+      }
+    };
+    
+    animationFrameRef.current = requestAnimationFrame(animate);
+    
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, [value, duration]);
+  
+  return displayValue;
+}
 
 export default function ExecutiveDashboard() {
   // Semana retail iniciando 29 de diciembre 2025
@@ -468,6 +507,98 @@ export default function ExecutiveDashboard() {
   }).format(Math.round(v));
 
   const formatShort = (v) => `$${(v / 1000000).toFixed(1)}M`;
+
+  // Determinar KPI más crítico
+  const criticalKPI = useMemo(() => {
+    const gap = (currentZoneBudget?.sales_budget || monthlyTotals.totalBudget) - monthlyTotals.totalSales;
+    const gapPercentage = ((currentZoneBudget?.sales_budget || monthlyTotals.totalBudget) > 0 
+      ? (gap / (currentZoneBudget?.sales_budget || monthlyTotals.totalBudget)) * 100 
+      : 0);
+    
+    if (gapPercentage > 15) return 'gap';
+    
+    const weekCompliance = dynamicTotals.totalBudget > 0 
+      ? (dynamicTotals.totalSales / dynamicTotals.totalBudget) * 100 
+      : 0;
+    if (weekCompliance < 70) return 'sales';
+    
+    const monthProjectionCompliance = dynamicTotals.totalMonthBudget > 0
+      ? (dynamicTotals.monthProjection / dynamicTotals.totalMonthBudget) * 100
+      : 0;
+    if (monthProjectionCompliance < 85) return 'projection';
+    
+    return null;
+  }, [dynamicTotals, monthlyTotals, currentZoneBudget]);
+
+  // Interpretaciones ejecutivas
+  const getKPIInsight = (kpiType) => {
+    const daysLeft = Math.ceil((endOfMonth(new Date()) - new Date()) / (1000 * 60 * 60 * 24));
+    
+    if (kpiType === 'sales') {
+      const compliance = dynamicTotals.totalBudget > 0 
+        ? (dynamicTotals.totalSales / dynamicTotals.totalBudget) * 100 
+        : 0;
+      if (compliance >= 100) return '✓ Meta cumplida en el período actual';
+      if (compliance >= 85) return 'Ritmo adecuado, mantener ejecución';
+      return `Se requieren ${formatCurrency((dynamicTotals.totalBudget - dynamicTotals.totalSales) / Math.max(daysLeft, 1))} diarios adicionales`;
+    }
+    
+    if (kpiType === 'gap') {
+      const gap = (currentZoneBudget?.sales_budget || monthlyTotals.totalBudget) - monthlyTotals.totalSales;
+      if (gap <= 0) return '✓ Sin déficit acumulado';
+      return `Recuperar ${formatCurrency(gap / Math.max(daysLeft, 1))} diarios para cerrar brecha`;
+    }
+    
+    if (kpiType === 'projection') {
+      const projCompliance = dynamicTotals.totalMonthBudget > 0
+        ? (dynamicTotals.monthProjection / dynamicTotals.totalMonthBudget) * 100
+        : 0;
+      if (projCompliance >= 100) return 'Proyección indica cierre exitoso del mes';
+      if (projCompliance >= 90) return 'Al ritmo actual, el mes cerraría en ' + projCompliance.toFixed(0) + '% del presupuesto';
+      return 'Proyección por debajo de meta, acelerar ventas diarias';
+    }
+    
+    if (kpiType === 'transactions') {
+      const avgTicket = dynamicTotals.avgTicket;
+      if (avgTicket > 32000) return 'Ticket promedio por encima del objetivo';
+      if (avgTicket > 28000) return 'Ticket promedio dentro del rango esperado';
+      return 'Oportunidad de incrementar valor por transacción';
+    }
+    
+    return '';
+  };
+
+  // Función para obtener estado de tienda
+  const getStoreStatus = (store) => {
+    if (!store.hasData) return { text: 'Sin datos', color: 'text-slate-500' };
+    if (store.salesCompliance >= 100) return { text: 'Excelente', color: 'text-emerald-400' };
+    if (store.salesCompliance >= 90) return { text: 'En meta', color: 'text-green-400' };
+    if (store.salesCompliance >= 70) return { text: 'En riesgo', color: 'text-amber-400' };
+    return { text: 'Crítico', color: 'text-red-400' };
+  };
+
+  // Función para obtener sugerencia ejecutiva
+  const getStoreSuggestion = (store) => {
+    if (!store.hasData) return 'Activar registro de ventas';
+    
+    const zoneAvgTicket = zoneTotals.totalSales / zoneTotals.totalTransactions;
+    
+    if (store.salesCompliance < 70) {
+      if (store.avgTicket < zoneAvgTicket * 0.85) return '→ Reforzar ticket promedio';
+      if (store.totalTransactions < 100) return '→ Ajustar horarios y dotación';
+      return '→ Intervención operativa inmediata';
+    }
+    
+    if (store.salesCompliance < 90) {
+      if (store.avgTicket < zoneAvgTicket) return '→ Impulsar ticket promedio';
+      if (store.monthProjectionCompliance >= 95) return '→ Acelerar cierre semanal';
+      return '→ Activar promoción local';
+    }
+    
+    if (store.salesCompliance >= 110) return '→ Escalar mejores prácticas';
+    
+    return '→ Sostener desempeño';
+  };
 
   const exportToExcel = () => {
     const headers = ['Tienda', 'Código', 'PPT Día', 'PPT Semana', 'Venta Semana', '% Venta Sem', 'Proy Semana', '% Proy Sem', 'Proy Mes', '% Proy Mes', '% Cumplimiento Mes'];
@@ -1136,34 +1267,50 @@ Genera:
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setSelectedKPIDetail('sales')}
                 onMouseEnter={() => setHoveredStoreForChart(null)}
-                className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-xl rounded-lg p-3 border border-blue-500/20 cursor-pointer transition-all hover:border-blue-400/40 hover:shadow-lg hover:shadow-blue-500/20">
-                <p className="text-xs text-blue-300 mb-2 font-bold uppercase tracking-wider">
-                  💰 {dynamicTotals.isRetailWeek ? 'Venta Semana' : 'Venta Período'}
-                </p>
-                <div className="space-y-2">
-                  <div>
-                    <p className="text-xs text-slate-400 mb-0.5">Venta Acumulada</p>
-                    <p className="text-xl font-black text-white">{formatCurrency(dynamicTotals.totalSales)}</p>
-                  </div>
-                  <div className="h-px bg-white/10"></div>
-                  <div>
-                    <p className="text-xs text-slate-400 mb-0.5">Presupuesto</p>
-                    <p className="text-lg font-bold text-blue-300">
-                      {formatCurrency(dynamicTotals.totalBudget)}
-                    </p>
-                  </div>
-                  <div className="pt-1">
-                    <p className={`text-2xl font-black ${
-                      dynamicTotals.totalBudget > 0 && 
-                      ((dynamicTotals.totalSales/dynamicTotals.totalBudget)*100) >= 100 ? 'text-emerald-400' : 
-                      dynamicTotals.totalBudget > 0 && 
-                      ((dynamicTotals.totalSales/dynamicTotals.totalBudget)*100) >= 85 ? 'text-amber-400' : 'text-red-400'
-                    }`}>
-                      {dynamicTotals.totalBudget > 0 
-                        ? ((dynamicTotals.totalSales/dynamicTotals.totalBudget)*100).toFixed(1) 
-                        : '0.0'}%
-                    </p>
-                    <p className="text-xs text-slate-500">Cumplimiento Actual</p>
+                className={`relative bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-xl rounded-lg p-3 border border-blue-500/20 cursor-pointer transition-all hover:border-blue-400/40 hover:shadow-lg hover:shadow-blue-500/20 ${
+                  criticalKPI === 'sales' ? 'shadow-2xl shadow-blue-500/40' : ''
+                }`}>
+                {criticalKPI === 'sales' && (
+                  <motion.div
+                    className="absolute inset-0 rounded-lg bg-blue-500/10"
+                    animate={{ opacity: [0.3, 0.6, 0.3] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                  />
+                )}
+                <div className="relative z-10">
+                  <p className="text-xs text-blue-300 mb-2 font-bold uppercase tracking-wider">
+                    💰 {dynamicTotals.isRetailWeek ? 'Venta Semana' : 'Venta Período'}
+                  </p>
+                  <div className="space-y-2">
+                    <div>
+                      <p className="text-xs text-slate-400 mb-0.5">Venta Acumulada</p>
+                      <p className="text-xl font-black text-white tabular-nums">{formatCurrency(dynamicTotals.totalSales)}</p>
+                    </div>
+                    <div className="h-px bg-white/10"></div>
+                    <div>
+                      <p className="text-xs text-slate-400 mb-0.5">Presupuesto</p>
+                      <p className="text-lg font-bold text-blue-300 tabular-nums">
+                        {formatCurrency(dynamicTotals.totalBudget)}
+                      </p>
+                    </div>
+                    <div className="pt-1">
+                      <p className={`text-2xl font-black tabular-nums ${
+                        dynamicTotals.totalBudget > 0 && 
+                        ((dynamicTotals.totalSales/dynamicTotals.totalBudget)*100) >= 100 ? 'text-emerald-400' : 
+                        dynamicTotals.totalBudget > 0 && 
+                        ((dynamicTotals.totalSales/dynamicTotals.totalBudget)*100) >= 85 ? 'text-amber-400' : 'text-red-400'
+                      }`}>
+                        {dynamicTotals.totalBudget > 0 
+                          ? ((dynamicTotals.totalSales/dynamicTotals.totalBudget)*100).toFixed(1) 
+                          : '0.0'}%
+                      </p>
+                      <p className="text-xs text-slate-500">Cumplimiento Actual</p>
+                    </div>
+                    <div className="pt-2 border-t border-white/10">
+                      <p className="text-[10px] text-slate-400 italic leading-tight">
+                        {getKPIInsight('sales')}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </motion.div>
@@ -1174,28 +1321,44 @@ Genera:
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setSelectedKPIDetail('transactions')}
                 onMouseEnter={() => setHoveredStoreForChart(null)}
-                className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-xl rounded-lg p-3 border border-purple-500/20 cursor-pointer transition-all hover:border-purple-400/40 hover:shadow-lg hover:shadow-purple-500/20">
-                <p className="text-xs text-purple-300 mb-2 font-bold uppercase tracking-wider">
-                  🧊 Ticket y Transacciones
-                </p>
-                <div className="space-y-2">
-                  <div>
-                    <p className="text-xs text-slate-400 mb-0.5">Ticket Promedio</p>
-                    <p className="text-2xl font-black text-white">
-                      {dynamicTotals.avgTicket > 0 ? formatCurrency(dynamicTotals.avgTicket) : '$0'}
-                    </p>
-                  </div>
-                  <div className="h-px bg-white/10"></div>
-                  <div>
-                    <p className="text-xs text-slate-400 mb-0.5">Transacciones Totales</p>
-                    <p className="text-xl font-bold text-purple-300">
-                      {dynamicTotals.totalTransactions.toLocaleString()}
-                    </p>
-                  </div>
-                  <div className="pt-2">
-                    <p className="text-xs text-slate-500">
-                      {dynamicTotals.daysElapsedInRange} de {dynamicTotals.totalDaysInRange} días
-                    </p>
+                className={`relative bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-xl rounded-lg p-3 border border-purple-500/20 cursor-pointer transition-all hover:border-purple-400/40 hover:shadow-lg hover:shadow-purple-500/20 ${
+                  criticalKPI === 'transactions' ? 'shadow-2xl shadow-purple-500/40' : ''
+                }`}>
+                {criticalKPI === 'transactions' && (
+                  <motion.div
+                    className="absolute inset-0 rounded-lg bg-purple-500/10"
+                    animate={{ opacity: [0.3, 0.6, 0.3] }}
+                    transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+                  />
+                )}
+                <div className="relative z-10">
+                  <p className="text-xs text-purple-300 mb-2 font-bold uppercase tracking-wider">
+                    🧊 Ticket y Transacciones
+                  </p>
+                  <div className="space-y-2">
+                    <div>
+                      <p className="text-xs text-slate-400 mb-0.5">Ticket Promedio</p>
+                      <p className="text-2xl font-black text-white tabular-nums">
+                        {dynamicTotals.avgTicket > 0 ? formatCurrency(dynamicTotals.avgTicket) : '$0'}
+                      </p>
+                    </div>
+                    <div className="h-px bg-white/10"></div>
+                    <div>
+                      <p className="text-xs text-slate-400 mb-0.5">Transacciones Totales</p>
+                      <p className="text-xl font-bold text-purple-300 tabular-nums">
+                        {dynamicTotals.totalTransactions.toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="pt-1">
+                      <p className="text-xs text-slate-500">
+                        {dynamicTotals.daysElapsedInRange} de {dynamicTotals.totalDaysInRange} días
+                      </p>
+                    </div>
+                    <div className="pt-2 border-t border-white/10">
+                      <p className="text-[10px] text-slate-400 italic leading-tight">
+                        {getKPIInsight('transactions')}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </motion.div>
@@ -1207,27 +1370,34 @@ Genera:
                 onClick={() => setSelectedKPIDetail('avgSales')}
                 onMouseEnter={() => setHoveredStoreForChart(null)}
                 className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 backdrop-blur-xl rounded-lg p-3 border border-amber-500/20 cursor-pointer transition-all hover:border-amber-400/40 hover:shadow-lg hover:shadow-amber-500/20">
-                <p className="text-xs text-amber-300 mb-2 font-bold uppercase tracking-wider">
-                  📊 Promedios Diarios
-                </p>
-                <div className="space-y-2">
-                  <div>
-                    <p className="text-xs text-slate-400 mb-0.5">Venta Promedio/Día</p>
-                    <p className="text-xl font-black text-white">
-                      {dynamicTotals.avgDailySales > 0 ? formatCurrency(dynamicTotals.avgDailySales) : '$0'}
-                    </p>
-                  </div>
-                  <div className="h-px bg-white/10"></div>
-                  <div>
-                    <p className="text-xs text-slate-400 mb-0.5">Transacciones/Día</p>
-                    <p className="text-xl font-bold text-amber-300">
-                      {Math.round(dynamicTotals.avgDailyTransactions).toLocaleString('es-CO')}
-                    </p>
-                  </div>
-                  <div className="pt-2">
-                    <p className="text-xs text-slate-500">
-                      Basado en {dynamicTotals.daysElapsedInRange} días
-                    </p>
+                <div className="relative z-10">
+                  <p className="text-xs text-amber-300 mb-2 font-bold uppercase tracking-wider">
+                    📊 Promedios Diarios
+                  </p>
+                  <div className="space-y-2">
+                    <div>
+                      <p className="text-xs text-slate-400 mb-0.5">Venta Promedio/Día</p>
+                      <p className="text-xl font-black text-white tabular-nums">
+                        {dynamicTotals.avgDailySales > 0 ? formatCurrency(dynamicTotals.avgDailySales) : '$0'}
+                      </p>
+                    </div>
+                    <div className="h-px bg-white/10"></div>
+                    <div>
+                      <p className="text-xs text-slate-400 mb-0.5">Transacciones/Día</p>
+                      <p className="text-xl font-bold text-amber-300 tabular-nums">
+                        {Math.round(dynamicTotals.avgDailyTransactions).toLocaleString('es-CO')}
+                      </p>
+                    </div>
+                    <div className="pt-1">
+                      <p className="text-xs text-slate-500">
+                        Basado en {dynamicTotals.daysElapsedInRange} días
+                      </p>
+                    </div>
+                    <div className="pt-2 border-t border-white/10">
+                      <p className="text-[10px] text-slate-400 italic leading-tight">
+                        Ritmo sostenido de {formatCurrency(dynamicTotals.avgDailySales * 7)} semanales
+                      </p>
+                    </div>
                   </div>
                 </div>
               </motion.div>
@@ -1238,39 +1408,55 @@ Genera:
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setSelectedKPIDetail('projection')}
                 onMouseEnter={() => setHoveredStoreForChart(null)}
-                className="bg-gradient-to-br from-emerald-500/10 to-green-500/10 backdrop-blur-xl rounded-lg p-3 border border-emerald-500/20 cursor-pointer transition-all hover:border-emerald-400/40 hover:shadow-lg hover:shadow-emerald-500/20">
-                <p className="text-xs text-emerald-300 mb-2 font-bold uppercase tracking-wider">
-                  📈 Proyección
-                </p>
-                <div className="space-y-2">
-                  <div>
-                    <p className="text-xs text-slate-400 mb-1">Proyección Semana Actual</p>
-                    <p className="text-xl font-black text-white">
-                      {formatCurrency(dynamicTotals.currentWeekProjection)}
-                    </p>
-                    <p className={`text-sm font-bold ${
-                      dynamicTotals.currentWeekBudget > 0 && ((dynamicTotals.currentWeekProjection/dynamicTotals.currentWeekBudget)*100) >= 100 
-                        ? 'text-emerald-400' : 'text-red-400'
-                    }`}>
-                      {dynamicTotals.currentWeekBudget > 0 
-                        ? ((dynamicTotals.currentWeekProjection/dynamicTotals.currentWeekBudget)*100).toFixed(1) 
-                        : '0.0'}% del PPT
-                    </p>
-                  </div>
-                  <div className="h-px bg-white/10"></div>
-                  <div>
-                    <p className="text-xs text-slate-400 mb-1">Proyección Cierre Mes</p>
-                    <p className="text-lg font-bold text-emerald-300">
-                      {formatCurrency(dynamicTotals.monthProjection)}
-                    </p>
-                    <p className={`text-xs font-bold ${
-                      dynamicTotals.totalMonthBudget > 0 && ((dynamicTotals.monthProjection/dynamicTotals.totalMonthBudget)*100) >= 100 
-                        ? 'text-emerald-400' : 'text-red-400'
-                    }`}>
-                      {dynamicTotals.totalMonthBudget > 0 
-                        ? ((dynamicTotals.monthProjection/dynamicTotals.totalMonthBudget)*100).toFixed(1) 
-                        : '0.0'}%
-                    </p>
+                className={`relative bg-gradient-to-br from-emerald-500/10 to-green-500/10 backdrop-blur-xl rounded-lg p-3 border border-emerald-500/20 cursor-pointer transition-all hover:border-emerald-400/40 hover:shadow-lg hover:shadow-emerald-500/20 ${
+                  criticalKPI === 'projection' ? 'shadow-2xl shadow-emerald-500/40' : ''
+                }`}>
+                {criticalKPI === 'projection' && (
+                  <motion.div
+                    className="absolute inset-0 rounded-lg bg-emerald-500/10"
+                    animate={{ opacity: [0.3, 0.6, 0.3] }}
+                    transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
+                  />
+                )}
+                <div className="relative z-10">
+                  <p className="text-xs text-emerald-300 mb-2 font-bold uppercase tracking-wider">
+                    📈 Proyección
+                  </p>
+                  <div className="space-y-2">
+                    <div>
+                      <p className="text-xs text-slate-400 mb-1">Proyección Semana Actual</p>
+                      <p className="text-xl font-black text-white tabular-nums">
+                        {formatCurrency(dynamicTotals.currentWeekProjection)}
+                      </p>
+                      <p className={`text-sm font-bold tabular-nums ${
+                        dynamicTotals.currentWeekBudget > 0 && ((dynamicTotals.currentWeekProjection/dynamicTotals.currentWeekBudget)*100) >= 100 
+                          ? 'text-emerald-400' : 'text-red-400'
+                      }`}>
+                        {dynamicTotals.currentWeekBudget > 0 
+                          ? ((dynamicTotals.currentWeekProjection/dynamicTotals.currentWeekBudget)*100).toFixed(1) 
+                          : '0.0'}% del PPT
+                      </p>
+                    </div>
+                    <div className="h-px bg-white/10"></div>
+                    <div>
+                      <p className="text-xs text-slate-400 mb-1">Proyección Cierre Mes</p>
+                      <p className="text-lg font-bold text-emerald-300 tabular-nums">
+                        {formatCurrency(dynamicTotals.monthProjection)}
+                      </p>
+                      <p className={`text-xs font-bold tabular-nums ${
+                        dynamicTotals.totalMonthBudget > 0 && ((dynamicTotals.monthProjection/dynamicTotals.totalMonthBudget)*100) >= 100 
+                          ? 'text-emerald-400' : 'text-red-400'
+                      }`}>
+                        {dynamicTotals.totalMonthBudget > 0 
+                          ? ((dynamicTotals.monthProjection/dynamicTotals.totalMonthBudget)*100).toFixed(1) 
+                          : '0.0'}%
+                      </p>
+                    </div>
+                    <div className="pt-2 border-t border-white/10">
+                      <p className="text-[10px] text-slate-400 italic leading-tight">
+                        {getKPIInsight('projection')}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </motion.div>
@@ -1329,26 +1515,53 @@ Genera:
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setSelectedKPIDetail('gap')}
                   onMouseEnter={() => setHoveredStoreForChart(null)}
-                  className="bg-gradient-to-br from-red-500/10 to-rose-600/10 backdrop-blur-xl rounded-lg p-4 border border-red-500/20 cursor-pointer transition-all hover:border-red-400/40 hover:shadow-lg hover:shadow-red-500/20">
-                  <p className="text-xs text-red-300 mb-2 font-bold uppercase tracking-wider">⚠️ Brecha Negativa</p>
-                  <div className="space-y-2">
-                    <div>
-                      <motion.p 
-                        initial={{ scale: 0.5, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ duration: 0.5, type: "spring" }}
-                        className="text-xl font-black text-red-400 tabular-nums">
-                        {formatCurrency(Math.max(0, (currentZoneBudget?.sales_budget || monthlyTotals.totalBudget) - monthlyTotals.totalSales))}
-                      </motion.p>
-                      <p className="text-[10px] text-red-300">Arrastre Acumulado</p>
+                  className={`relative bg-gradient-to-br from-red-500/10 to-rose-600/10 backdrop-blur-xl rounded-lg p-4 border border-red-500/20 cursor-pointer transition-all hover:border-red-400/40 hover:shadow-lg hover:shadow-red-500/20 ${
+                    criticalKPI === 'gap' ? 'shadow-2xl shadow-red-500/50' : ''
+                  }`}>
+                  {criticalKPI === 'gap' && (
+                    <motion.div
+                      className="absolute inset-0 rounded-lg bg-red-500/10"
+                      animate={{ opacity: [0.2, 0.5, 0.2] }}
+                      transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                    />
+                  )}
+                  <div className="relative z-10">
+                    <div className="flex items-center gap-2 mb-2">
+                      <motion.div
+                        animate={criticalKPI === 'gap' ? { 
+                          scale: [1, 1.2, 1],
+                          opacity: [0.7, 1, 0.7]
+                        } : {}}
+                        transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                      >
+                        <AlertTriangle className="w-4 h-4 text-red-400" />
+                      </motion.div>
+                      <p className="text-xs text-red-300 font-bold uppercase tracking-wider">Déficit Acumulado</p>
                     </div>
-                    <div className="pt-1">
-                      <p className="text-xl font-black text-red-300 tabular-nums">
-                        {((currentZoneBudget?.sales_budget || monthlyTotals.totalBudget) > 0 
-                          ? ((((currentZoneBudget?.sales_budget || monthlyTotals.totalBudget) - monthlyTotals.totalSales) / (currentZoneBudget?.sales_budget || monthlyTotals.totalBudget)) * 100).toFixed(1)
-                          : '0.0')}%
-                      </p>
-                      <p className="text-[10px] text-slate-500">% Gap del PPT</p>
+                    <div className="space-y-2">
+                      <div>
+                        <motion.p 
+                          initial={{ scale: 0.5, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ duration: 0.5, type: "spring" }}
+                          className="text-xl font-black text-red-400 tabular-nums">
+                          {formatCurrency(Math.max(0, (currentZoneBudget?.sales_budget || monthlyTotals.totalBudget) - monthlyTotals.totalSales))}
+                        </motion.p>
+                        <p className="text-[10px] text-red-300">Brecha frente al presupuesto</p>
+                      </div>
+                      <div className="pt-1">
+                        <p className="text-xl font-black text-red-300 tabular-nums">
+                          {((currentZoneBudget?.sales_budget || monthlyTotals.totalBudget) > 0 
+                            ? ((((currentZoneBudget?.sales_budget || monthlyTotals.totalBudget) - monthlyTotals.totalSales) / (currentZoneBudget?.sales_budget || monthlyTotals.totalBudget)) * 100).toFixed(1)
+                            : '0.0')}%
+                        </p>
+                        <p className="text-[10px] text-slate-500">% Déficit del PPT</p>
+                      </div>
+                      <div className="pt-2 border-t border-white/10">
+                        <p className="text-[10px] text-slate-400 italic leading-tight">
+                          {getKPIInsight('gap')}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </motion.div>
@@ -1475,15 +1688,61 @@ Genera:
                           border: '1px solid rgba(255,255,255,0.2)',
                           borderRadius: '8px',
                           fontSize: '11px',
-                          color: '#fff'
+                          color: '#fff',
+                          padding: '12px'
                         }}
-                        formatter={(value, name) => [
-                          formatCurrency(value * 1000000), 
-                          name === 'sales' ? '💰 Venta' : '🎯 Meta'
-                        ]}
-                        labelFormatter={(label) => {
-                          const item = dailySalesData.find(d => d.date === label);
-                          return item?.fullDate || label;
+                        content={({ active, payload, label }) => {
+                          if (!active || !payload || payload.length === 0) return null;
+                          const data = payload[0].payload;
+                          const sales = data.sales * 1000000;
+                          const budget = data.budget * 1000000;
+                          const diff = sales - budget;
+                          const compliance = data.compliance;
+
+                          // Calcular impacto
+                          let impact = 'Medio';
+                          if (Math.abs(diff) > budget * 0.2) impact = 'Alto';
+                          else if (Math.abs(diff) < budget * 0.1) impact = 'Bajo';
+
+                          return (
+                            <div className="bg-slate-900/95 border border-white/20 rounded-lg p-3 shadow-xl">
+                              <p className="text-xs text-slate-400 mb-2">{data.fullDate || label}</p>
+                              <div className="space-y-1.5">
+                                <div className="flex justify-between items-center gap-4">
+                                  <span className="text-xs text-emerald-400">💰 Venta</span>
+                                  <span className="text-sm font-bold text-white tabular-nums">{formatCurrency(sales)}</span>
+                                </div>
+                                <div className="flex justify-between items-center gap-4">
+                                  <span className="text-xs text-indigo-400">🎯 Meta</span>
+                                  <span className="text-sm font-bold text-white tabular-nums">{formatCurrency(budget)}</span>
+                                </div>
+                                <div className="h-px bg-white/10 my-1"></div>
+                                <div className="flex justify-between items-center gap-4">
+                                  <span className="text-xs text-slate-400">Diferencia</span>
+                                  <span className={`text-sm font-bold tabular-nums ${diff >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                    {diff >= 0 ? '+' : ''}{formatCurrency(diff)}
+                                  </span>
+                                </div>
+                                <div className="flex justify-between items-center gap-4">
+                                  <span className="text-xs text-slate-400">Cumplimiento</span>
+                                  <span className={`text-sm font-bold tabular-nums ${
+                                    compliance >= 100 ? 'text-emerald-400' : 
+                                    compliance >= 85 ? 'text-amber-400' : 'text-red-400'
+                                  }`}>
+                                    {compliance.toFixed(1)}%
+                                  </span>
+                                </div>
+                                <div className="pt-1 mt-1 border-t border-white/10">
+                                  <p className="text-[10px] text-slate-500 italic">
+                                    Impacto en el mes: <span className={`font-bold ${
+                                      impact === 'Alto' ? 'text-amber-400' : 
+                                      impact === 'Medio' ? 'text-blue-400' : 'text-slate-400'
+                                    }`}>{impact}</span>
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          );
                         }}
                       />
                       <Legend
@@ -1877,7 +2136,10 @@ Genera:
                         </td>
 
                         {/* % Cumplimiento Mes */}
-                        <td className="py-3 px-2 text-right">
+                        <td 
+                          className="py-3 px-2 text-right group relative"
+                          onMouseEnter={() => setHoveredStoreForChart(store)}
+                        >
                           {!store.hasData ? (
                             <span className="text-xs text-slate-500">—</span>
                           ) : (
@@ -1889,6 +2151,16 @@ Genera:
                                 {store.salesCompliance.toFixed(0)}%
                               </span>
                               <p className="text-[10px] text-slate-400 tabular-nums">{formatShort(store.monthTotalSales)}</p>
+
+                              {/* Insight al hover */}
+                              <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute right-2 top-full mt-1 bg-slate-900/95 border border-white/20 rounded-lg p-2 shadow-xl z-50 w-48">
+                                <p className={`text-xs font-bold mb-1 ${getStoreStatus(store).color}`}>
+                                  {getStoreStatus(store).text}
+                                </p>
+                                <p className="text-[10px] text-slate-400 leading-tight">
+                                  {getStoreSuggestion(store)}
+                                </p>
+                              </div>
                             </div>
                           )}
                         </td>
