@@ -222,9 +222,9 @@ export default function Home() {
       // Maletín ejecutivo con color
       return (
         <svg viewBox="0 0 24 24" fill="none" className="w-full h-full">
-          <motion.rect x="4" y="8" width="16" height="12" rx="2" stroke={iconColor} strokeWidth="2" fill={isSelected ? 'none' : 'rgba(71,85,105,0.1)'} animate={isSelected ? { scale: [1, 1.02, 1] } : {}} transition={{ duration: 1.5, repeat: Infinity }} />
+          <rect x="4" y="8" width="16" height="12" rx="2" stroke={iconColor} strokeWidth="2" fill={isSelected ? 'none' : 'rgba(71,85,105,0.1)'} />
           <path d="M8 8V6a2 2 0 012-2h4a2 2 0 012 2v2" stroke={iconColor} strokeWidth="2" fill="none" />
-          <motion.line x1="4" y1="12" x2="20" y2="12" stroke={iconColor} strokeWidth="2" animate={isSelected ? { opacity: [0.5, 1, 0.5] } : {}} transition={{ duration: 1.5, repeat: Infinity }} />
+          <line x1="4" y1="12" x2="20" y2="12" stroke={iconColor} strokeWidth="2" />
         </svg>);
 
     }
