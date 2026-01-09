@@ -2785,9 +2785,10 @@ Genera:
                   )}
                   </div>
                   )}
-                  </div>
+                  </GridLayout>
+                  )}
 
-      {/* Modal Detalle Tienda */}
+                  {/* Modal Detalle Tienda */}
       <AnimatePresence>
         {selectedStoreDetail && (
           <ExecutiveStoreDetailModal
