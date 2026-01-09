@@ -19,6 +19,7 @@ import ZoneChartsPanel from '../components/executive/ZoneChartsPanel';
 import PlannerStatusPanel from '../components/executive/PlannerStatusPanel';
 import StoreWeeklyChart from '../components/executive/StoreWeeklyChart';
 import ExecutiveWeatherSalesAnalysis from '../components/executive/ExecutiveWeatherSalesAnalysis';
+import BogotaRainMap from '../components/weather/BogotaRainMap';
 import { useExecutiveTooltip } from '../components/executive/ExecutiveChartTooltip';
 import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, ResponsiveContainer, CartesianGrid, XAxis, YAxis, ComposedChart, Tooltip, Legend, ReferenceLine } from 'recharts';
 
