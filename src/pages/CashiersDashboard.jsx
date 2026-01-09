@@ -251,7 +251,7 @@ export default function CashiersDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-white relative">
+    <div className="min-h-screen bg-white">
       <FloatingIceCreamsBg />
       
       <div className="max-w-7xl mx-auto px-4 py-6 relative z-10">
