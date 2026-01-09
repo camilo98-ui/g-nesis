@@ -50,7 +50,7 @@ export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRa
   const firstColumn = chartData.slice(0, halfLength);
   const secondColumn = chartData.slice(halfLength);
   const maxRows = Math.max(firstColumn.length, secondColumn.length);
-  const chartHeight = Math.max(maxRows * 35, 250);
+  const chartHeight = Math.max(maxRows * 35, 420);
 
   // Datos por día de la semana para la tienda seleccionada
   const weekDaysData = useMemo(() => {
