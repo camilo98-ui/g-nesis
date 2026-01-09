@@ -1411,24 +1411,6 @@ Genera:
             `}</style>
 
             {/* Barra de progreso del mes */}
-            {mounted && layout.length > 0 ? (
-            <GridLayout
-              className="relative w-full"
-              layout={layout}
-              onLayoutChange={handleLayoutChange}
-              cols={12}
-              rowHeight={30}
-              width={typeof window !== 'undefined' ? window.innerWidth - 40 : 1200}
-              isDraggable={true}
-              isResizable={true}
-              compactType="vertical"
-              preventCollision={false}
-              useCSSTransforms={true}
-              containerPadding={[0, 0]}
-              margin={[16, 16]}
-            >
-              {/* Barra de progreso */}
-              <div key="progress" className="col-span-12">
             <div className="mb-4 h-1 bg-white/5 rounded-full overflow-hidden">
               <motion.div
                 className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"
