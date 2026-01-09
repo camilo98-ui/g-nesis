@@ -1154,7 +1154,7 @@ Genera:
         </div>
       </Link>
 
-      <div id="dashboard-scroll-container" className="w-full h-full mx-auto px-2 py-2 relative z-10 overflow-y-auto">
+      <div id="dashboard-scroll-container" className="w-full mx-auto px-2 py-2 relative z-10">
         {/* Header Compacto con Filtro de Semanas */}
         <div className="mb-3">
           <div className="flex items-center justify-between gap-4 flex-wrap">
