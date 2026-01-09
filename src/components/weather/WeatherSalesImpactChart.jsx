@@ -584,6 +584,7 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
   const [showForecast, setShowForecast] = useState(false);
   const [forecastData, setForecastData] = useState(null);
   const [loadingForecast, setLoadingForecast] = useState(false);
+  const [selectedStatCard, setSelectedStatCard] = useState(null);
 
   // Cargar pronóstico cuando se activa
   useEffect(() => {
