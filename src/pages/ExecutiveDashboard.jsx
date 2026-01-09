@@ -1377,7 +1377,7 @@ Genera:
               style={layoutEditMode ? { 
                 position: 'relative',
                 backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 19px, rgba(59, 130, 246, 0.1) 19px, rgba(59, 130, 246, 0.1) 20px)'
-              } : {}}
+              } : {}}>
                 {/* Métricas KPIs - 4 Columnas */}
                 <div className="bg-transparent p-0 mb-6">
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
