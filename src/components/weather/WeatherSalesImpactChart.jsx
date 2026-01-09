@@ -960,6 +960,14 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
               weatherType="rainy"
             />
             <ViewButton
+              active={viewMode === 'cloudy'}
+              onClick={() => setViewMode('cloudy')}
+              icon={Cloud}
+              label={`Nublados ${stats ? `(${stats.cloudyCount})` : ''}`}
+              color="from-gray-200 to-slate-200"
+              weatherType="cloudy"
+            />
+            <ViewButton
               active={viewMode === 'comparison'}
               onClick={() => setViewMode('comparison')}
               icon={Thermometer}
