@@ -111,11 +111,35 @@ export default function WeatherSalesImpact() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950/20 to-slate-950 relative overflow-hidden">
-      {/* Gradient Background */}
+    <div className="min-h-screen bg-slate-950 relative overflow-hidden">
+      {/* Premium Gradient Background */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-500/10 via-purple-500/5 to-transparent rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-tr from-cyan-500/10 via-blue-500/5 to-transparent rounded-full blur-3xl" />
+        {/* Animated gradient orbs */}
+        <motion.div
+          className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-500/15 via-cyan-500/10 to-transparent rounded-full blur-3xl"
+          animate={{
+            y: [0, 30, 0],
+            x: [0, -20, 0]
+          }}
+          transition={{
+            duration: 6,
+            repeat: Infinity,
+            ease: 'easeInOut'
+          }}
+        />
+        <motion.div
+          className="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-tr from-indigo-500/15 via-purple-500/10 to-transparent rounded-full blur-3xl"
+          animate={{
+            y: [0, -30, 0],
+            x: [0, 20, 0]
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: 'easeInOut'
+          }}
+        />
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-b from-blue-500/5 via-transparent to-transparent rounded-full blur-3xl opacity-50" />
       </div>
 
       <div className="relative z-10">
@@ -130,12 +154,24 @@ export default function WeatherSalesImpact() {
         <WeatherFilters 
           selectedMetrics={selectedMetrics}
           onMetricsChange={setSelectedMetrics}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
         />
 
         {/* Main Content */}
-        <div className="max-w-7xl mx-auto px-4 py-8">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="max-w-7xl mx-auto px-4 py-12"
+        >
           {/* KPI Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-10"
+          >
             <KPICard
               title="Venta Promedio"
               value={`$${(kpis.avgSales / 1000000).toFixed(1)}M`}
@@ -168,23 +204,34 @@ export default function WeatherSalesImpact() {
               gradient="from-purple-500/20 to-pink-500/20"
               color="text-purple-400"
             />
-          </div>
+          </motion.div>
 
           {/* Main Chart */}
-          <div className="mb-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="mb-12"
+          >
             <WeatherSalesMainChart 
               data={processedData}
               selectedMetrics={selectedMetrics}
             />
-          </div>
+          </motion.div>
 
           {/* Insights */}
-          <WeatherInsightsPanel 
-            data={processedData}
-            kpis={kpis}
-            dateRange={dateRange}
-          />
-        </div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            <WeatherInsightsPanel 
+              data={processedData}
+              kpis={kpis}
+              dateRange={dateRange}
+            />
+          </motion.div>
+        </motion.div>
       </div>
     </div>
   );
