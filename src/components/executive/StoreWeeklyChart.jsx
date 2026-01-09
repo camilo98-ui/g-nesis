@@ -441,6 +441,39 @@ export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRa
         </div>
       </div>
 
+      {/* Podio Top 3 */}
+      <div className="mt-4 pt-4 border-t border-white/10">
+        <div className="flex items-center justify-between mb-3">
+          <h4 className="text-xs font-bold text-amber-300">🏆 Top 3 Rendimiento</h4>
+        </div>
+        <div className="flex items-end justify-center gap-2">
+          {chartData.slice(0, 3).map((store, idx) => {
+            const position = idx === 0 ? 1 : idx === 1 ? 2 : 3;
+            const heights = { 1: 'h-16', 2: 'h-12', 3: 'h-10' };
+            const colors = {
+              1: 'from-yellow-500/30 to-amber-500/30 border-yellow-500/40',
+              2: 'from-gray-400/30 to-slate-400/30 border-gray-400/40',
+              3: 'from-amber-600/30 to-orange-600/30 border-amber-600/40'
+            };
+            
+            return (
+              <motion.div
+                key={store.code}
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: idx * 0.1 }}
+                className={`flex-1 ${heights[position]} bg-gradient-to-br ${colors[position]} border rounded-t-lg flex flex-col items-center justify-center cursor-pointer hover:scale-105 transition-all`}
+                onClick={() => handleBarClick(store)}
+              >
+                <span className="text-lg font-black text-white">{position}</span>
+                <p className="text-[8px] text-white font-bold text-center px-1 truncate w-full">{store.name}</p>
+                <p className="text-[9px] font-black text-emerald-300">{store.cumplimiento.toFixed(0)}%</p>
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Modal de días de la semana - Pantalla Completa con Portal */}
       {selectedStore && weekDaysData && createPortal(
         <AnimatePresence>
