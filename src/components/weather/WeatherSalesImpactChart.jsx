@@ -488,27 +488,27 @@ function WeatherCalendar({ selected, onSelect, onApply }) {
   );
 }
 
-// Función para obtener tipo de clima basado en código WMO
+// Función para obtener tipo de clima basado en código WMO (más precisa)
 const getWeatherType = (code, precipitation, temp) => {
-  if (code === 0) return 'sunny';
-  if (code === 1) return 'sunny';
-  if (code === 2) return precipitation < 0.5 ? 'sunny' : 'cloudy';
-  if (code === 3) return 'cloudy';
-  if (code === 45 || code === 48) return 'cloudy';
-  if (code === 51) return precipitation > 1 ? 'rainy' : 'cloudy';
-  if (code === 53 || code === 55) return 'rainy';
-  if (code >= 56 && code <= 57) return 'rainy';
-  if (code === 61) return precipitation > 2 ? 'rainy' : 'cloudy';
-  if (code === 63 || code === 65) return 'rainy';
-  if (code >= 66 && code <= 67) return 'rainy';
-  if (code >= 71 && code <= 77) return 'rainy';
-  if (code === 80) return precipitation > 2 ? 'rainy' : 'cloudy';
-  if (code === 81 || code === 82) return 'rainy';
-  if (code >= 85 && code <= 86) return 'rainy';
-  if (code === 95 || code >= 96) return 'rainy';
-  if (precipitation >= 5) return 'rainy';
-  if (precipitation >= 1) return 'cloudy';
-  return 'sunny';
+  // Códigos WMO oficiales
+  if (code === 0) return 'sunny'; // Cielo despejado
+  if (code === 1) return 'sunny'; // Principalmente despejado
+  if (code === 2) return 'cloudy'; // Parcialmente nublado
+  if (code === 3) return 'cloudy'; // Nublado
+  if (code === 45 || code === 48) return 'cloudy'; // Niebla
+  if (code >= 51 && code <= 57) return precipitation > 2 ? 'rainy' : 'cloudy'; // Llovizna
+  if (code >= 61 && code <= 67) return 'rainy'; // Lluvia
+  if (code >= 71 && code <= 77) return 'rainy'; // Nieve
+  if (code >= 80 && code <= 82) return 'rainy'; // Chubascos de lluvia
+  if (code >= 85 && code <= 86) return 'rainy'; // Chubascos de nieve
+  if (code >= 95) return 'rainy'; // Tormenta
+  
+  // Fallback basado en precipitación
+  if (precipitation > 5) return 'rainy';
+  if (precipitation > 1) return 'cloudy';
+  if (precipitation > 0.1) return 'cloudy';
+  
+  return 'sunny'; // Por defecto soleado si no hay precipitación
 };
 
 export default function WeatherSalesImpactChart({ weatherData, dailySales = [], formatCurrency }) {
