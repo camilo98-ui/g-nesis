@@ -830,15 +830,16 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
             </div>
 
             {/* Calendar Selector */}
-            <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
-              <PopoverTrigger asChild>
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button variant="secondary" className="gap-2 bg-white/20 text-white hover:bg-white/30 border-0">
-                    <CalendarIcon className="w-4 h-4" />
-                    <span className="font-medium">{getDateLabel()}</span>
-                  </Button>
-                </motion.div>
-              </PopoverTrigger>
+            <div className="flex items-center gap-2">
+              <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+                <PopoverTrigger asChild>
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Button variant="secondary" className="gap-2 bg-white/20 text-white hover:bg-white/30 border-0">
+                      <CalendarIcon className="w-4 h-4" />
+                      <span className="font-medium">{getDateLabel()}</span>
+                    </Button>
+                  </motion.div>
+                </PopoverTrigger>
               <PopoverContent className="w-auto p-0 border-0 shadow-none bg-transparent" align="end">
                 <WeatherCalendar
                   selected={dateRange}
