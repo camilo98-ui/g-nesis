@@ -136,6 +136,7 @@ export default function ExecutiveWeatherSalesAnalysis({ weatherData, dailySales,
   }, [weatherData, dailySales, dateRange]);
 
   const chartData = useMemo(() => {
+    if (!weatherAnalysis.withSales || weatherAnalysis.withSales.length === 0) return [];
     return weatherAnalysis.withSales.map(day => ({
       date: format(parseISO(day.date), 'dd/MM'),
       fullDate: format(parseISO(day.date), 'EEE dd MMM'),
