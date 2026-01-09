@@ -14,6 +14,7 @@ import DailyGoalsCard from '@/components/gamification/DailyGoalsCard';
 import RetailWeekBudgetCard from '@/components/budget/RetailWeekBudgetCard';
 import ProjectionDetailModal from '@/components/dashboard/ProjectionDetailModal';
 import ZonePerformanceComparison from '@/components/sales/ZonePerformanceComparison';
+import WeatherSalesImpactChart from '@/components/weather/WeatherSalesImpactChart';
 
 import GrowthVelocityChart from '@/components/management/GrowthVelocityChart';
 import StoreReportGenerator from '@/components/reports/StoreReportGenerator';
@@ -478,6 +479,7 @@ export default function Dashboard() {
   const [projectionMetric, setProjectionMetric] = useState(null);
 
   const [weatherData, setWeatherData] = useState(null);
+  const [loadingWeather, setLoadingWeather] = useState(false);
   const [weekFilter, setWeekFilter] = useState(null);
   const [showCompraVale, setShowCompraVale] = useState(false);
   const [showStoreSales, setShowStoreSales] = useState(false);
@@ -486,25 +488,30 @@ export default function Dashboard() {
   const [comparisonRange, setComparisonRange] = useState(null);
   const [gregorianMode, setGregorianMode] = useState(false);
 
-  // Fetch weather data
+  // Fetch weather data - historical para análisis
   useEffect(() => {
     const fetchWeather = async () => {
+      if (!selectedStore) return;
+      
+      setLoadingWeather(true);
       const end = new Date();
       const start = new Date();
-      start.setDate(start.getDate() - 30);
+      start.setDate(start.getDate() - 90); // 3 meses de datos históricos
 
       try {
         const response = await fetch(
-          `https://archive-api.open-meteo.com/v1/archive?latitude=4.6097&longitude=-74.0817&start_date=${format(start, 'yyyy-MM-dd')}&end_date=${format(end, 'yyyy-MM-dd')}&daily=weathercode,temperature_2m_max,temperature_2m_min,temperature_2m_mean,precipitation_sum&timezone=America%2FBogota}`
+          `https://archive-api.open-meteo.com/v1/archive?latitude=4.6097&longitude=-74.0817&start_date=${format(start, 'yyyy-MM-dd')}&end_date=${format(end, 'yyyy-MM-dd')}&daily=weathercode,temperature_2m_max,temperature_2m_min,temperature_2m_mean,precipitation_sum,relative_humidity_2m_mean&timezone=America%2FBogota`
         );
         const data = await response.json();
         setWeatherData({ history: data.daily });
       } catch (e) {
         console.error('Error fetching weather:', e);
+      } finally {
+        setLoadingWeather(false);
       }
     };
 
-    if (selectedStore) fetchWeather();
+    fetchWeather();
   }, [selectedStore]);
 
   useEffect(() => {
@@ -1761,12 +1768,41 @@ export default function Dashboard() {
 
                 {/* Third Row - Velocidad de Crecimiento */}
                 <GrowthVelocityChart
-              dailyTrend={chartData.map((d) => ({ ...d, sales: d.ventas }))}
-              budget={currentBudget?.sales_budget || 0}
-              formatCurrency={formatCurrency} />
+                dailyTrend={chartData.map((d) => ({ ...d, sales: d.ventas }))}
+                budget={currentBudget?.sales_budget || 0}
+                formatCurrency={formatCurrency} />
 
-              </motion.div>
-          }
+                {/* Weather Impact Analysis - NUEVO */}
+                {weatherData && !loadingWeather && (
+                <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                >
+                    <WeatherSalesImpactChart
+                  weatherData={weatherData}
+                  dailySales={dailySales}
+                  formatCurrency={formatCurrency} />
+                  </motion.div>
+                )}
+
+                {loadingWeather && (
+                <Card className="bg-gradient-to-br from-sky-50 to-blue-50 border-0 shadow-lg">
+                    <CardContent className="p-12 text-center">
+                      <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                    className="w-16 h-16 mx-auto mb-4"
+                  >
+                        <Activity className="w-16 h-16 text-blue-500" />
+                      </motion.div>
+                      <p className="text-gray-600 font-medium">Cargando datos del clima...</p>
+                      <p className="text-gray-400 text-sm mt-2">Analizando 90 días de historia meteorológica</p>
+                    </CardContent>
+                  </Card>
+                )}
+                </motion.div>
+                }
 
 
 
