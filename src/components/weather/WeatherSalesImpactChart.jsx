@@ -640,11 +640,32 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
 
     // Agregar pronóstico si está activado y hay datos
     if (showForecast && forecastData?.time) {
+      // Calcular promedio de ventas por tipo de clima (para predicción)
+      const salesByWeather = historyData.reduce((acc, d) => {
+        if (d.sales > 0) {
+          if (!acc[d.weatherType]) acc[d.weatherType] = [];
+          acc[d.weatherType].push(d.sales);
+        }
+        return acc;
+      }, {});
+
+      const avgSalesByWeather = {
+        sunny: salesByWeather.sunny?.length ? salesByWeather.sunny.reduce((a, b) => a + b, 0) / salesByWeather.sunny.length : 0,
+        rainy: salesByWeather.rainy?.length ? salesByWeather.rainy.reduce((a, b) => a + b, 0) / salesByWeather.rainy.length : 0,
+        cloudy: salesByWeather.cloudy?.length ? salesByWeather.cloudy.reduce((a, b) => a + b, 0) / salesByWeather.cloudy.length : 0,
+      };
+
+      // Usar promedio general si no hay datos de ese tipo de clima
+      const overallAvg = historyData.filter(d => d.sales > 0).reduce((sum, d) => sum + d.sales, 0) / Math.max(historyData.filter(d => d.sales > 0).length, 1);
+
       const forecastItems = forecastData.time.map((date, idx) => {
         const temp = forecastData.temperature_2m_max?.[idx] || 0;
         const precipitation = forecastData.precipitation_sum?.[idx] || 0;
         const weatherCode = forecastData.weathercode?.[idx] || 0;
         const weatherType = getWeatherType(weatherCode, precipitation, temp);
+
+        // Predecir ventas basado en tipo de clima histórico
+        const predictedSales = avgSalesByWeather[weatherType] || overallAvg;
 
         return {
           date: format(parseISO(date), 'dd', { locale: es }),
@@ -652,10 +673,11 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
           dateStr: date,
           temperature: Math.round(temp * 10) / 10,
           precipitation: Math.round(precipitation * 10) / 10,
-          sales: 0,
+          sales: Math.round(predictedSales),
           weatherType,
           weatherColor: weatherType === 'sunny' ? '#fbbf24' : weatherType === 'rainy' ? '#60a5fa' : '#d1d5db',
-          isForecast: true
+          isForecast: true,
+          isPredicted: true
         };
       });
       return [...historyData, ...forecastItems];
@@ -1030,31 +1052,38 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
                     <Cloud className="w-8 h-8 text-cyan-600" />
                   </motion.div>
                   <div className="flex-1">
-                    <h4 className="font-bold text-cyan-900 mb-2">🔮 Pronóstico 7 Días</h4>
+                    <h4 className="font-bold text-cyan-900 mb-2">🔮 Pronóstico 7 Días - Clima & Ventas</h4>
                     <div className="grid grid-cols-7 gap-1 mb-2">
-                      {forecastData.time?.slice(0, 7).map((date, idx) => {
-                        const temp = forecastData.temperature_2m_max?.[idx] || 0;
-                        const precip = forecastData.precipitation_sum?.[idx] || 0;
-                        const wType = getWeatherType(forecastData.weathercode?.[idx], precip, temp);
+                      {chartData.filter(d => d.isForecast).slice(0, 7).map((dayData, idx) => {
                         return (
-                          <div key={idx} className="bg-white/80 rounded-lg p-1.5 text-center">
-                            <p className="text-[9px] text-gray-500 font-medium">{format(parseISO(date), 'EEE', { locale: es })}</p>
+                          <div key={idx} className="bg-white/80 rounded-lg p-1.5 text-center border border-cyan-200">
+                            <p className="text-[9px] text-gray-500 font-medium">{format(parseISO(dayData.dateStr), 'EEE', { locale: es })}</p>
                             <motion.div
                               animate={{ scale: [1, 1.1, 1] }}
                               transition={{ duration: 1.5, repeat: Infinity, delay: idx * 0.1 }}
                               className="my-1 flex justify-center"
                             >
-                              {wType === 'sunny' && <Sun className="w-4 h-4 text-amber-500" />}
-                              {wType === 'rainy' && <CloudRain className="w-4 h-4 text-blue-500" />}
-                              {wType === 'cloudy' && <Cloud className="w-4 h-4 text-gray-400" />}
+                              {dayData.weatherType === 'sunny' && <Sun className="w-4 h-4 text-amber-500" />}
+                              {dayData.weatherType === 'rainy' && <CloudRain className="w-4 h-4 text-blue-500" />}
+                              {dayData.weatherType === 'cloudy' && <Cloud className="w-4 h-4 text-gray-400" />}
                             </motion.div>
-                            <p className="text-[10px] font-bold text-gray-700">{Math.round(temp)}°</p>
+                            <p className="text-[10px] font-bold text-gray-700">{Math.round(dayData.temperature)}°</p>
+                            <div className="mt-1 pt-1 border-t border-cyan-200">
+                              <p className="text-[8px] text-cyan-600 font-medium">Venta Est.</p>
+                              <p className="text-[9px] font-black text-cyan-700">{formatCurrency(dayData.sales).slice(0, -3)}</p>
+                            </div>
                           </div>
                         );
                       })}
                     </div>
+                    <div className="bg-gradient-to-r from-cyan-100 to-blue-100 rounded-lg p-2 mb-2">
+                      <p className="text-[10px] font-bold text-cyan-900 mb-1">💰 Proyección Total 7 Días:</p>
+                      <p className="text-lg font-black text-cyan-700">
+                        {formatCurrency(chartData.filter(d => d.isForecast).slice(0, 7).reduce((sum, d) => sum + d.sales, 0))}
+                      </p>
+                    </div>
                     <p className="text-xs text-cyan-800 leading-relaxed">
-                      Planifica inventario y personal según el clima proyectado. Días soleados = mayor demanda.
+                      Las ventas proyectadas se basan en el patrón histórico según tipo de clima. Planifica inventario y personal en consecuencia.
                     </p>
                   </div>
                 </div>
@@ -1169,7 +1198,7 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
                           </div>
                           <p className="flex justify-between gap-4">
                             <span className="text-gray-500">💰 Venta:</span>
-                            <span className="font-bold">{formatCurrency(data?.sales)}</span>
+                            <span className="font-bold">{formatCurrency(data?.sales)}{data?.isPredicted ? ' (Est.)' : ''}</span>
                           </p>
                           <p className="flex justify-between gap-4">
                             <span className="text-gray-500">🌡️ Temp:</span>
@@ -1195,9 +1224,10 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
                           <Cell 
                             key={`cell-${index}`} 
                             fill={entry.weatherType === 'sunny' ? '#fbbf24' : entry.weatherType === 'rainy' ? '#3b82f6' : '#9ca3af'} 
-                            opacity={entry.isForecast ? 0.4 : 0.85}
-                            strokeDasharray={entry.isForecast ? "4 2" : "0"}
-                            stroke={entry.isForecast ? entry.weatherColor : "none"}
+                            opacity={entry.isForecast ? 0.5 : 0.85}
+                            strokeDasharray={entry.isForecast ? "5 3" : "0"}
+                            stroke={entry.isForecast ? '#06b6d4' : "none"}
+                            strokeWidth={entry.isForecast ? 2 : 0}
                           />
                         ))}
                       </Bar>
