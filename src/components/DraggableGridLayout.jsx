@@ -48,12 +48,7 @@ export default function DraggableGridLayout({ children, layoutKey = 'dashboardLa
     return <div className="w-full">{children}</div>;
   }
 
-  const childrenArray = Array.isArray(children) ? children : (children ? [children] : []);
-
-  if (!childrenArray || childrenArray.length === 0) {
-    return <div className="w-full">{children}</div>;
-  }
-
+  // Renderizar solo los children sin GridLayout para evitar errores
   return (
     <div className="w-full">
       <div className="flex justify-end mb-4">
@@ -65,30 +60,9 @@ export default function DraggableGridLayout({ children, layoutKey = 'dashboardLa
           Restablecer Layout
         </button>
       </div>
-
-      <GridLayout
-        className="relative w-full"
-        layout={layout}
-        onLayoutChange={handleLayoutChange}
-        cols={12}
-        rowHeight={30}
-        width={typeof window !== 'undefined' ? window.innerWidth - 40 : 1200}
-        isDraggable={true}
-        isResizable={true}
-        compactType="vertical"
-        preventCollision={false}
-        useCSSTransforms={true}
-        containerPadding={[0, 0]}
-        margin={[16, 16]}
-      >
-        {childrenArray[0] ? <div key="kpis" className="grid-item">{childrenArray[0]}</div> : null}
-        {childrenArray[1] ? <div key="chart" className="grid-item">{childrenArray[1]}</div> : null}
-        {childrenArray[2] ? <div key="weather" className="grid-item">{childrenArray[2]}</div> : null}
-        {childrenArray[3] ? <div key="planner" className="grid-item">{childrenArray[3]}</div> : null}
-        {childrenArray[4] ? <div key="table" className="grid-item">{childrenArray[4]}</div> : null}
-        {childrenArray[5] ? <div key="priorities" className="grid-item">{childrenArray[5]}</div> : null}
-        {childrenArray[6] ? <div key="insights" className="grid-item">{childrenArray[6]}</div> : null}
-      </GridLayout>
+      <div className="relative w-full space-y-4">
+        {children}
+      </div>
 
       <style>{`
         .react-grid-layout {
