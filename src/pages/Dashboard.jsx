@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import StoreSelector, { STORES, getDisplayName } from '@/components/StoreSelector';
@@ -473,6 +473,8 @@ function DetailPanel({ metric, data, onClose, chartData, formatCurrency, shiftDa
 }
 
 export default function Dashboard() {
+  const queryClient = useQueryClient();
+  
   const [selectedStore, setSelectedStore] = useState('');
   const [dateRange, setDateRange] = useState(null);
   const [activeMetric, setActiveMetric] = useState(null);
