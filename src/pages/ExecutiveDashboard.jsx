@@ -2451,7 +2451,7 @@ Genera:
                           </div>
                           <div className="flex justify-between items-center">
                             <span className="text-xs sm:text-sm text-slate-300">Brecha</span>
-                            <span className="text-sm sm:text-base lg:text-lg font-bold text-white tabular-nums">{formatShort(store.gap)}</span>
+                            <span className="text-sm sm:text-base lg:text-lg font-bold text-white tabular-nums">{formatKPI(store.gap)}</span>
                           </div>
                         </div>
                         
@@ -2606,8 +2606,8 @@ Genera:
                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
                     <div>
                       <p className="text-xs text-slate-400 mb-2">Proyección Mes</p>
-                      <p className="text-2xl lg:text-3xl font-black text-white tabular-nums mb-1">{formatShort(zoneTotals.totalProjection)}</p>
-                      <p className="text-xs text-purple-300">vs {formatShort(zoneTotals.totalBudget)}</p>
+                      <p className="text-2xl lg:text-3xl font-black text-white tabular-nums mb-1">{formatKPI(zoneTotals.totalProjection)}</p>
+                      <p className="text-xs text-purple-300">vs {formatKPI(zoneTotals.totalBudget)}</p>
                     </div>
                     <div>
                       <p className="text-xs text-slate-400 mb-2">% Proyectado</p>
@@ -2623,7 +2623,7 @@ Genera:
                       <p className={`text-2xl lg:text-3xl font-black tabular-nums ${
                         (zoneTotals.totalBudget - zoneTotals.totalProjection) <= 0 ? 'text-emerald-400' : 'text-red-400'
                       }`}>
-                        {formatShort(Math.abs(zoneTotals.totalBudget - zoneTotals.totalProjection))}
+                        {formatKPI(Math.abs(zoneTotals.totalBudget - zoneTotals.totalProjection))}
                       </p>
                     </div>
                     <div>
@@ -2806,15 +2806,15 @@ Genera:
                         <div className="grid grid-cols-4 gap-3">
                           <div className="bg-emerald-500/10 rounded-lg p-3 border border-emerald-500/20">
                             <p className="text-xs text-emerald-300 mb-1">💰 Ventas</p>
-                            <p className="text-base font-black text-white">{formatCurrency(cashier.total_sales)}</p>
+                            <p className="text-base font-black text-white">{formatKPI(cashier.total_sales)}</p>
                             <p className="text-[9px] text-slate-500 mt-1">
-                              Prom: {formatCurrency(cashier.total_sales / cashier.shifts_count)}/turno
+                              Prom: {formatKPI(cashier.total_sales / cashier.shifts_count)}/turno
                             </p>
                           </div>
 
                           <div className="bg-purple-500/10 rounded-lg p-3 border border-purple-500/20">
                             <p className="text-xs text-purple-300 mb-1">🎫 Ticket Prom</p>
-                            <p className="text-lg font-black text-white">{formatCurrency(cashier.avg_ticket)}</p>
+                            <p className="text-lg font-black text-white">{formatKPI(cashier.avg_ticket)}</p>
                             <p className="text-[9px] text-slate-500 mt-1">
                               Por transacción
                             </p>
