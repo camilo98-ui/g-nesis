@@ -122,7 +122,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
     const monthStart = gregorianMode ? gregorianStart : retailMonthStart;
     const monthEnd = gregorianMode ? gregorianEnd : retailMonthEnd;
 
-    // Calcular días del mes que efectivamente tienen venta
+    // Calcular días del mes según modo
     const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd }).length;
     
     console.log('🎯 Presupuesto Debug:', {
@@ -130,7 +130,8 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       salesBudget: activeBudget.sales_budget,
       daysInMonth,
       monthStart: format(monthStart, 'yyyy-MM-dd'),
-      monthEnd: format(monthEnd, 'yyyy-MM-dd')
+      monthEnd: format(monthEnd, 'yyyy-MM-dd'),
+      mode: gregorianMode ? 'Gregoriano' : 'Retail'
     });
 
     // Semana actual según modo
@@ -226,14 +227,20 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
 
     // Determinar TARGET_PERCENTAGE dinámicamente según rendimiento
     let TARGET_PERCENTAGE;
-    if (initialProjectionCompliance >= 110) {
-      TARGET_PERCENTAGE = 1.10; // 110% - Tienda excelente, meta ambiciosa
-    } else if (initialProjectionCompliance >= 100) {
-      TARGET_PERCENTAGE = 1.05; // 105% - Tienda en meta, mantener estándar
-    } else if (initialProjectionCompliance >= 90) {
-      TARGET_PERCENTAGE = 1.02; // 102% - Tienda cerca, meta alcanzable
+    if (gregorianMode) {
+      // En modo gregoriano, usar presupuesto base sin ajuste (100%)
+      TARGET_PERCENTAGE = 1.00;
     } else {
-      TARGET_PERCENTAGE = 1.00; // 100% - Tienda necesita recuperar, meta realista
+      // En modo retail, ajustar según rendimiento
+      if (initialProjectionCompliance >= 110) {
+        TARGET_PERCENTAGE = 1.10; // 110% - Tienda excelente, meta ambiciosa
+      } else if (initialProjectionCompliance >= 100) {
+        TARGET_PERCENTAGE = 1.05; // 105% - Tienda en meta, mantener estándar
+      } else if (initialProjectionCompliance >= 90) {
+        TARGET_PERCENTAGE = 1.02; // 102% - Tienda cerca, meta alcanzable
+      } else {
+        TARGET_PERCENTAGE = 1.00; // 100% - Tienda necesita recuperar, meta realista
+      }
     }
 
     const adjustedMonthlyBudget = activeBudget.sales_budget * TARGET_PERCENTAGE;
@@ -561,7 +568,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
               <div className="min-w-0 flex-1">
                 <p className="text-xl md:text-2xl truncate">Presupuesto del Día</p>
                 <p className="text-xs text-slate-600 font-normal mt-0.5">
-                  {gregorianMode ? 'Calendario Gregoriano' : `Calendario Retail - Semana ${budgetData.currentWeekNumber} de ${budgetData.totalWeeks}`}
+                  {gregorianMode ? `Calendario Gregoriano (${format(monthStart, 'dd MMM', { locale: es })} - ${format(monthEnd, 'dd MMM', { locale: es })})` : `Calendario Retail - Semana ${budgetData.currentWeekNumber} de ${budgetData.totalWeeks}`}
                 </p>
               </div>
             </CardTitle>
@@ -624,16 +631,20 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
 
               <div className="grid grid-cols-2 gap-6 lg:gap-10 mb-6 lg:mb-5">
                 <div className="text-left">
-                  <p className="text-sm lg:text-base text-white/90 mb-3 lg:mb-2 font-semibold">Meta del Día (105%)</p>
+                  <p className="text-sm lg:text-base text-white/90 mb-3 lg:mb-2 font-semibold">
+                    Meta del Día {gregorianMode ? '' : '(105%)'}
+                  </p>
                   <motion.p
-                    key={budgetData.adjustedDailyBudget}
+                    key={`${budgetData.adjustedDailyBudget}-${gregorianMode}`}
                     initial={{ scale: 1.2, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     className="text-2xl md:text-3xl lg:text-5xl font-black text-white leading-none mb-2"
                   >
                     {formatCurrency(budgetData.adjustedDailyBudget)}
                   </motion.p>
-                  <p className="text-xs lg:text-sm text-white/70">Base: {formatCurrency(budgetData.adjustedDailyBudget / 1.05)}</p>
+                  <p className="text-xs lg:text-sm text-white/70">
+                    Base: {formatCurrency(gregorianMode ? budgetData.dailyBaseBudget : budgetData.adjustedDailyBudget / 1.05)}
+                  </p>
                   
                   {/* Sparkline debajo del número */}
                   {budgetData.last7DaysSales?.length > 0 && (
