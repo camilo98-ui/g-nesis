@@ -2097,7 +2097,7 @@ Genera:
                   transition={{ delay: 0.3 }}
                 >
                   <ExecutiveWeatherSalesAnalysis
-                    weatherData={null}
+                    weatherData={weatherData}
                     dailySales={allDailySales}
                     storesAnalysis={storesAnalysis}
                     dateRange={dateRange}
