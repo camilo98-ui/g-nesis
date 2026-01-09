@@ -1259,24 +1259,66 @@ Genera:
           </div>
         ) : (
           <>
+            {/* Barra de progreso del mes - Invisible pero genera sensación */}
+            <div className="mb-2 h-1 bg-white/5 rounded-full overflow-hidden">
+              <motion.div
+                className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"
+                initial={{ width: 0 }}
+                animate={{ 
+                  width: `${(new Date().getDate() / new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate()) * 100}%`
+                }}
+                transition={{ duration: 1.5, ease: "easeOut" }}
+              >
+                <motion.div
+                  className="h-full w-full bg-gradient-to-r from-white/40 to-transparent"
+                  animate={{ x: ['-100%', '200%'] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                />
+              </motion.div>
+            </div>
+
             {/* Métricas Consolidadas - Dinámicas según Filtro de Fechas */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
               {/* 1. Presupuesto y Cumplimiento Mensual */}
               <motion.div 
-                whileHover={{ scale: 1.02 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
+                whileHover={{ scale: 1.03, y: -2 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setSelectedKPIDetail('sales')}
                 onMouseEnter={() => setHoveredStoreForChart(null)}
-                className={`relative bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-xl rounded-lg p-3 border border-blue-500/20 cursor-pointer transition-all hover:border-blue-400/40 hover:shadow-lg hover:shadow-blue-500/20 ${
-                  criticalKPI === 'sales' ? 'shadow-2xl shadow-blue-500/40' : ''
+                className={`relative overflow-hidden bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-xl rounded-lg p-3 border cursor-pointer transition-all ${
+                  criticalKPI === 'sales' 
+                    ? 'border-blue-400/60 shadow-2xl' 
+                    : (dynamicTotals.totalBudget > 0 && ((dynamicTotals.totalSales/dynamicTotals.totalBudget)*100) >= 100)
+                      ? 'border-emerald-500/40 shadow-lg shadow-emerald-500/30'
+                      : 'border-blue-500/20 hover:border-blue-400/40 hover:shadow-lg hover:shadow-blue-500/20'
                 }`}>
-                {criticalKPI === 'sales' && (
+
+                {/* Glow animado según estado */}
+                {(dynamicTotals.totalBudget > 0 && ((dynamicTotals.totalSales/dynamicTotals.totalBudget)*100) >= 100) && (
                   <motion.div
-                    className="absolute inset-0 rounded-lg bg-blue-500/10"
-                    animate={{ opacity: [0.3, 0.6, 0.3] }}
-                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute inset-0 bg-emerald-500/20"
+                    animate={{ opacity: [0.2, 0.4, 0.2] }}
+                    transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
                   />
                 )}
+                {criticalKPI === 'sales' && (
+                  <>
+                    <motion.div
+                      className="absolute inset-0 bg-blue-500/15"
+                      animate={{ opacity: [0.2, 0.5, 0.2] }}
+                      transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
+                    />
+                    <motion.div
+                      className="absolute -inset-2 bg-blue-500/20 blur-xl"
+                      animate={{ opacity: [0.3, 0.7, 0.3], scale: [0.95, 1.05, 0.95] }}
+                      transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                    />
+                  </>
+                )}
+
                 <div className="relative z-10">
                   <p className="text-xs text-blue-300 mb-2 font-bold uppercase tracking-wider">
                     💰 {dynamicTotals.isRetailWeek ? 'Venta Semana' : 'Venta Período'}
@@ -1284,7 +1326,14 @@ Genera:
                   <div className="space-y-2">
                     <div>
                       <p className="text-xs text-slate-400 mb-0.5">Venta Acumulada</p>
-                      <p className="text-xl font-black text-white tabular-nums">{formatCurrency(dynamicTotals.totalSales)}</p>
+                      <motion.p 
+                        className="text-xl font-black text-white tabular-nums"
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ duration: 0.5, type: "spring", stiffness: 200 }}
+                      >
+                        {formatCurrency(dynamicTotals.totalSales)}
+                      </motion.p>
                     </div>
                     <div className="h-px bg-white/10"></div>
                     <div>
@@ -1294,23 +1343,34 @@ Genera:
                       </p>
                     </div>
                     <div className="pt-1">
-                      <p className={`text-2xl font-black tabular-nums ${
-                        dynamicTotals.totalBudget > 0 && 
-                        ((dynamicTotals.totalSales/dynamicTotals.totalBudget)*100) >= 100 ? 'text-emerald-400' : 
-                        dynamicTotals.totalBudget > 0 && 
-                        ((dynamicTotals.totalSales/dynamicTotals.totalBudget)*100) >= 85 ? 'text-amber-400' : 'text-red-400'
-                      }`}>
+                      <motion.p 
+                        className={`text-2xl font-black tabular-nums ${
+                          dynamicTotals.totalBudget > 0 && 
+                          ((dynamicTotals.totalSales/dynamicTotals.totalBudget)*100) >= 100 ? 'text-emerald-400' : 
+                          dynamicTotals.totalBudget > 0 && 
+                          ((dynamicTotals.totalSales/dynamicTotals.totalBudget)*100) >= 85 ? 'text-amber-400' : 'text-red-400'
+                        }`}
+                        animate={criticalKPI === 'sales' ? {
+                          scale: [1, 1.05, 1],
+                        } : {}}
+                        transition={{ duration: 2, repeat: Infinity }}
+                      >
                         {dynamicTotals.totalBudget > 0 
                           ? ((dynamicTotals.totalSales/dynamicTotals.totalBudget)*100).toFixed(1) 
                           : '0.0'}%
-                      </p>
+                      </motion.p>
                       <p className="text-xs text-slate-500">Cumplimiento Actual</p>
                     </div>
-                    <div className="pt-2 border-t border-white/10">
+                    <motion.div 
+                      className="pt-2 border-t border-white/10"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.3 }}
+                    >
                       <p className="text-[10px] text-slate-400 italic leading-tight">
                         {getKPIInsight('sales')}
                       </p>
-                    </div>
+                    </motion.div>
                   </div>
                 </div>
               </motion.div>
@@ -1511,27 +1571,58 @@ Genera:
 
                 {/* Brecha Acumulada */}
                 <motion.div 
-                  whileHover={{ scale: 1.02 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
+                  whileHover={{ scale: 1.03, y: -2 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setSelectedKPIDetail('gap')}
                   onMouseEnter={() => setHoveredStoreForChart(null)}
-                  className={`relative bg-gradient-to-br from-red-500/10 to-rose-600/10 backdrop-blur-xl rounded-lg p-4 border border-red-500/20 cursor-pointer transition-all hover:border-red-400/40 hover:shadow-lg hover:shadow-red-500/20 ${
-                    criticalKPI === 'gap' ? 'shadow-2xl shadow-red-500/50' : ''
+                  className={`relative overflow-hidden bg-gradient-to-br from-red-500/10 to-rose-600/10 backdrop-blur-xl rounded-lg p-4 border cursor-pointer transition-all ${
+                    criticalKPI === 'gap' 
+                      ? 'border-red-400/70 shadow-2xl' 
+                      : 'border-red-500/20 hover:border-red-400/40 hover:shadow-lg hover:shadow-red-500/20'
                   }`}>
+
+                  {/* Respiración continua del déficit */}
+                  <motion.div
+                    className="absolute inset-0 bg-red-500/10 rounded-lg"
+                    animate={{ 
+                      opacity: [0.15, 0.4, 0.15],
+                      scale: [0.98, 1.02, 0.98]
+                    }}
+                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                  />
+
+                  {/* Sombra expansiva */}
+                  <motion.div
+                    className="absolute -inset-3 bg-red-500/20 blur-2xl"
+                    animate={{ 
+                      opacity: [0.2, 0.5, 0.2],
+                      scale: [0.9, 1.1, 0.9]
+                    }}
+                    transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+                  />
+
                   {criticalKPI === 'gap' && (
                     <motion.div
-                      className="absolute inset-0 rounded-lg bg-red-500/10"
-                      animate={{ opacity: [0.2, 0.5, 0.2] }}
+                      className="absolute -inset-4 bg-red-500/30 blur-3xl"
+                      animate={{ 
+                        opacity: [0.3, 0.6, 0.3],
+                        scale: [0.85, 1.15, 0.85]
+                      }}
                       transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                     />
                   )}
+
                   <div className="relative z-10">
                     <div className="flex items-center gap-2 mb-2">
                       <motion.div
-                        animate={criticalKPI === 'gap' ? { 
-                          scale: [1, 1.2, 1],
-                          opacity: [0.7, 1, 0.7]
-                        } : {}}
+                        animate={{ 
+                          scale: [1, 1.3, 1],
+                          opacity: [0.6, 1, 0.6],
+                          rotate: [0, 5, -5, 0]
+                        }}
                         transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
                       >
                         <AlertTriangle className="w-4 h-4 text-red-400" />
@@ -1541,10 +1632,17 @@ Genera:
                     <div className="space-y-2">
                       <div>
                         <motion.p 
-                          initial={{ scale: 0.5, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          transition={{ duration: 0.5, type: "spring" }}
-                          className="text-xl font-black text-red-400 tabular-nums">
+                          className="text-xl font-black text-red-400 tabular-nums"
+                          animate={criticalKPI === 'gap' ? {
+                            x: [-1, 1, -1, 0],
+                            scale: [1, 1.02, 1]
+                          } : {}}
+                          transition={{ 
+                            duration: 0.3,
+                            repeat: criticalKPI === 'gap' ? Infinity : 0,
+                            repeatDelay: 10
+                          }}
+                        >
                           {formatCurrency(Math.max(0, (currentZoneBudget?.sales_budget || monthlyTotals.totalBudget) - monthlyTotals.totalSales))}
                         </motion.p>
                         <p className="text-[10px] text-red-300">Brecha frente al presupuesto</p>
@@ -1557,11 +1655,19 @@ Genera:
                         </p>
                         <p className="text-[10px] text-slate-500">% Déficit del PPT</p>
                       </div>
-                      <div className="pt-2 border-t border-white/10">
-                        <p className="text-[10px] text-slate-400 italic leading-tight">
+                      <motion.div 
+                        className="pt-2 border-t border-white/10"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.4 }}
+                      >
+                        <p className="text-[10px] text-red-300 italic leading-tight font-medium">
                           {getKPIInsight('gap')}
                         </p>
-                      </div>
+                        <p className="text-[9px] text-slate-500 mt-1">
+                          Cada día sin acción aumenta la brecha
+                        </p>
+                      </motion.div>
                     </div>
                   </div>
                 </motion.div>
@@ -1768,9 +1874,49 @@ Genera:
                         maxBarSize={viewMode === 'month' ? 80 : viewMode === 'week' ? 50 : 40}
                         name="Venta"
                         isAnimationActive={true}
-                        animationDuration={1500}
-                        animationEasing="ease-in-out"
+                        animationDuration={1200}
+                        animationEasing="ease-out"
+                        animationBegin={0}
+                        shape={(props) => {
+                          const { x, y, width, height, payload } = props;
+                          const meetsGoal = payload.compliance >= 100;
+
+                          return (
+                            <g>
+                              {meetsGoal && (
+                                <rect
+                                  x={x}
+                                  y={y}
+                                  width={width}
+                                  height={height}
+                                  fill="url(#salesGradient)"
+                                  rx={6}
+                                  filter="url(#greenGlow)"
+                                >
+                                  <animate attributeName="opacity" values="0.8;1;0.8" dur="3s" repeatCount="indefinite" />
+                                </rect>
+                              )}
+                              <rect
+                                x={x}
+                                y={y}
+                                width={width}
+                                height={height}
+                                fill="url(#salesGradient)"
+                                rx={6}
+                              />
+                            </g>
+                          );
+                        }}
                       />
+                      <defs>
+                        <filter id="greenGlow">
+                          <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                          <feMerge>
+                            <feMergeNode in="coloredBlur"/>
+                            <feMergeNode in="SourceGraphic"/>
+                          </feMerge>
+                        </filter>
+                      </defs>
                       <Line 
                         type="monotone" 
                         dataKey="budget" 
@@ -2095,17 +2241,34 @@ Genera:
                         </td>
 
                         {/* Venta Semana */}
-                        <td className="py-3 px-2 text-right">
+                        <td className="py-3 px-2 text-right relative">
                           {!store.hasData ? (
                             <span className="text-xs text-slate-500">—</span>
                           ) : (
-                            <div>
-                              <p className={`text-lg font-black mb-0.5 tabular-nums ${
-                                store.weekCompliance >= 100 ? 'text-emerald-400' :
-                                store.weekCompliance >= 70 ? 'text-amber-400' : 'text-red-400'
-                              }`}>
+                            <div className="relative">
+                              {/* Glow para tiendas críticas */}
+                              {store.weekCompliance < 70 && (
+                                <motion.div
+                                  className="absolute -inset-2 bg-red-500/20 blur-lg rounded-lg"
+                                  animate={{ 
+                                    opacity: [0.2, 0.5, 0.2],
+                                    scale: [0.95, 1.05, 0.95]
+                                  }}
+                                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                                />
+                              )}
+
+                              <motion.p 
+                                className={`text-lg font-black mb-0.5 tabular-nums relative z-10 ${
+                                  store.weekCompliance >= 100 ? 'text-emerald-400' :
+                                  store.weekCompliance >= 70 ? 'text-amber-400' : 'text-red-400'
+                                }`}
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ duration: 0.4, delay: 0.05 }}
+                              >
                                 {store.weekCompliance.toFixed(0)}%
-                              </p>
+                              </motion.p>
                               <p className="text-[10px] text-purple-400 font-semibold tabular-nums">{formatShort(store.weekTotalSales)}</p>
                             </div>
                           )}
@@ -2153,24 +2316,80 @@ Genera:
                           {!store.hasData ? (
                             <span className="text-xs text-slate-500">—</span>
                           ) : (
-                            <div className="flex flex-col items-end gap-0.5">
-                              <span className={`font-black text-2xl tabular-nums ${
-                                store.salesCompliance >= 90 ? 'text-emerald-400' :
-                                store.salesCompliance >= 70 ? 'text-amber-400' : 'text-red-400'
-                              }`}>
+                            <div className="flex flex-col items-end gap-0.5 relative">
+                              {/* Glow para excelentes */}
+                              {store.salesCompliance >= 110 && (
+                                <motion.div
+                                  className="absolute -inset-3 bg-emerald-500/25 blur-xl rounded-lg"
+                                  animate={{ opacity: [0.3, 0.5, 0.3] }}
+                                  transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                                />
+                              )}
+
+                              {/* Pulso para críticas */}
+                              {store.salesCompliance < 70 && (
+                                <>
+                                  <motion.div
+                                    className="absolute -right-1 top-0 w-2 h-2 bg-red-500 rounded-full"
+                                    animate={{ 
+                                      scale: [1, 1.5, 1],
+                                      opacity: [0.6, 1, 0.6]
+                                    }}
+                                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                                  />
+                                  <motion.div
+                                    className="absolute -inset-2 bg-red-500/20 blur-lg rounded-lg"
+                                    animate={{ 
+                                      opacity: [0.2, 0.4, 0.2],
+                                    }}
+                                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                                  />
+                                </>
+                              )}
+
+                              <motion.span 
+                                className={`font-black text-2xl tabular-nums relative z-10 ${
+                                  store.salesCompliance >= 90 ? 'text-emerald-400' :
+                                  store.salesCompliance >= 70 ? 'text-amber-400' : 'text-red-400'
+                                }`}
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ duration: 0.3 }}
+                              >
                                 {store.salesCompliance.toFixed(0)}%
-                              </span>
+                              </motion.span>
                               <p className="text-[10px] text-slate-400 tabular-nums">{formatShort(store.monthTotalSales)}</p>
 
-                              {/* Insight al hover */}
-                              <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute right-2 top-full mt-1 bg-slate-900/95 border border-white/20 rounded-lg p-2 shadow-xl z-50 w-48">
-                                <p className={`text-xs font-bold mb-1 ${getStoreStatus(store).color}`}>
-                                  {getStoreStatus(store).text}
-                                </p>
-                                <p className="text-[10px] text-slate-400 leading-tight">
-                                  {getStoreSuggestion(store)}
-                                </p>
-                              </div>
+                              {/* Insight enriquecido al hover */}
+                              <motion.div 
+                                className="opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto absolute right-2 top-full mt-2 bg-slate-900/98 border border-white/30 rounded-xl p-3 shadow-2xl z-50 w-56"
+                                initial={{ y: -10, opacity: 0 }}
+                                whileHover={{ y: 0, opacity: 1 }}
+                                transition={{ duration: 0.2 }}
+                              >
+                                <div className="space-y-2">
+                                  <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                                    <p className="text-xs font-bold text-white">{store.name}</p>
+                                    <p className={`text-xs font-bold ${getStoreStatus(store).color}`}>
+                                      {getStoreStatus(store).text}
+                                    </p>
+                                  </div>
+
+                                  <div className="text-[10px] text-slate-300 leading-tight">
+                                    <p className="font-medium mb-1">Acción sugerida:</p>
+                                    <p className="text-amber-300 font-semibold">{getStoreSuggestion(store)}</p>
+                                  </div>
+
+                                  {store.salesCompliance < 90 && (
+                                    <div className="text-[9px] text-slate-400 pt-2 border-t border-white/10">
+                                      <p>Impacto estimado:</p>
+                                      <p className="text-emerald-400 font-bold">
+                                        +{formatCurrency(store.gap * 0.3)} recuperables
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
+                              </motion.div>
                             </div>
                           )}
                         </td>
