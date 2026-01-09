@@ -22,6 +22,7 @@ import Settings from './pages/Settings';
 import TWAGuide from './pages/TWAGuide';
 import Team from './pages/Team';
 import Training from './pages/Training';
+import WeatherSalesImpact from './pages/WeatherSalesImpact';
 import __Layout from './Layout.jsx';
 
 
@@ -50,6 +51,7 @@ export const PAGES = {
     "TWAGuide": TWAGuide,
     "Team": Team,
     "Training": Training,
+    "WeatherSalesImpact": WeatherSalesImpact,
 }
 
 export const pagesConfig = {
