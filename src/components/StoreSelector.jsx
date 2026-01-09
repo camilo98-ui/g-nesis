@@ -249,22 +249,24 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
     <>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            className="w-full h-12 bg-white border-2 border-rose-200 hover:border-pink-300 transition-all shadow-md hover:shadow-lg rounded-2xl justify-between group">
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <Button
+              variant="outline"
+              className="w-full min-w-[200px] h-11 bg-white border-2 border-rose-200 hover:border-pink-400 transition-all shadow-md hover:shadow-lg rounded-2xl justify-between group px-4">
 
-            <div className="flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-pink-500" />
-              {selectedStore ?
-              <span className="text-pink-700 font-medium truncate">{getDisplayName(selectedStore)}</span> :
+              <div className="flex items-center gap-2.5">
+                <MapPin className="w-4 h-4 text-pink-500" />
+                {selectedStore ?
+                <span className="text-pink-700 font-semibold truncate">{getDisplayName(selectedStore)}</span> :
 
-              <span className="text-gray-500">Selecciona una tienda</span>
-              }
-            </div>
-            <svg className="w-4 h-4 text-gray-400 group-hover:text-pink-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </Button>
+                <span className="text-gray-500 font-medium">Selecciona una tienda</span>
+                }
+              </div>
+              <svg className="w-4 h-4 text-gray-400 group-hover:text-pink-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </Button>
+          </motion.div>
         </PopoverTrigger>
         <PopoverContent className="w-[340px] p-3" align="center" side="bottom" sideOffset={8}>
           <div className="relative mb-3">
