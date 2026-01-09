@@ -612,10 +612,17 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
       salesByDate[dateKey] = s.total_sales || 0;
     });
 
+    // Normalizar fechas para comparación
+    const start = new Date(dateRange.from);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(dateRange.to);
+    end.setHours(23, 59, 59, 999);
+
     const historyData = weatherData.history.time
       .filter(date => {
         const d = parseISO(date);
-        return d >= dateRange.from && d <= dateRange.to;
+        d.setHours(0, 0, 0, 0);
+        return d >= start && d <= end;
       })
       .map((date) => {
         const idx = weatherData.history.time.indexOf(date);
