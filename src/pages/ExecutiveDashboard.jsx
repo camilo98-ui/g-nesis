@@ -2178,17 +2178,17 @@ Genera:
 
 
             {/* Panel de Estado del Planner */}
-            <div className="mb-4">
+            <div className="mb-5">
               <PlannerStatusPanel stores={STORES.map(s => ({ code: s.code, name: getDisplayName(s.code) }))} />
             </div>
 
             {/* Contexto */}
-            <div className="mb-2">
+            <div className="mb-4">
               <p className="text-xs sm:text-sm font-medium text-slate-400">{tableContextSummary}</p>
             </div>
 
             {/* Tabla - Responsive con scroll horizontal en móvil */}
-            <div id="stores-table" className="mb-4">
+            <div id="stores-table" className="mb-5">
               <div className="bg-white/5 backdrop-blur-2xl rounded-xl border border-white/10 overflow-x-auto">
                 <table className="w-full min-w-[900px]">
                   <thead>
