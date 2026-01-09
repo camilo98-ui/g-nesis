@@ -3004,6 +3004,5 @@ Genera:
         )}
       </AnimatePresence>
       </div>
-      </div>
       );
       }
