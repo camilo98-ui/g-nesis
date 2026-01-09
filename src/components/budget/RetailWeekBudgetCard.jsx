@@ -7,7 +7,7 @@ import { format, startOfMonth, endOfMonth, eachWeekOfInterval, startOfWeek, endO
 import { es } from 'date-fns/locale';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Legend, Cell, LineChart, Line } from 'recharts';
 
-export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId, formatCurrency, onConfigureBudget, currentDateRange, onExpandChange }) {
+export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId, formatCurrency, onConfigureBudget, currentDateRange, onExpandChange, gregorianMode }) {
   const [expandedSection, setExpandedSection] = useState(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedMetric, setSelectedMetric] = useState(null);
@@ -110,18 +110,17 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
 
     const now = new Date();
     
-    // CALENDARIO RETAIL: Mes empieza el 29 del mes anterior
+    // Determinar inicio/fin según modo gregoriano o retail
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth(); // 0-11
     
-    // Determinar el inicio del mes retail (29 del mes anterior)
     const retailMonthStart = new Date(currentYear, currentMonth - 1, 29);
-    
-    // Determinar el fin del mes retail (28 del mes actual)
     const retailMonthEnd = new Date(currentYear, currentMonth, 28);
+    const gregorianStart = startOfMonth(now);
+    const gregorianEnd = endOfMonth(now);
     
-    const monthStart = retailMonthStart;
-    const monthEnd = retailMonthEnd;
+    const monthStart = gregorianMode ? gregorianStart : retailMonthStart;
+    const monthEnd = gregorianMode ? gregorianEnd : retailMonthEnd;
 
     // Calcular días del mes que efectivamente tienen venta
     const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd }).length;
@@ -531,7 +530,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
         .sort((a, b) => b.avg - a.avg)
         .slice(0, 3)
     };
-  }, [dailySales, activeBudget, currentDateRange]);
+  }, [dailySales, activeBudget, currentDateRange, gregorianMode]);
 
   const smartRecommendation = getSmartRecommendation(budgetData);
 
@@ -561,7 +560,9 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
               </motion.div>
               <div className="min-w-0 flex-1">
                 <p className="text-xl md:text-2xl truncate">Presupuesto del Día</p>
-                <p className="text-xs text-slate-600 font-normal mt-0.5">Calendario Retail - Semana {budgetData.currentWeekNumber} de {budgetData.totalWeeks}</p>
+                <p className="text-xs text-slate-600 font-normal mt-0.5">
+                  {gregorianMode ? 'Calendario Gregoriano' : `Calendario Retail - Semana ${budgetData.currentWeekNumber} de ${budgetData.totalWeeks}`}
+                </p>
               </div>
             </CardTitle>
             <div className="text-right flex-shrink-0">
