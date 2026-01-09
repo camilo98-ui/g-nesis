@@ -48,7 +48,11 @@ export default function DraggableGridLayout({ children, layoutKey = 'dashboardLa
     return <div className="w-full">{children}</div>;
   }
 
-  const childrenArray = Array.isArray(children) ? children : [children];
+  const childrenArray = Array.isArray(children) ? children : (children ? [children] : []);
+
+  if (!childrenArray || childrenArray.length === 0) {
+    return <div className="w-full">{children}</div>;
+  }
 
   return (
     <div className="w-full">
@@ -77,13 +81,13 @@ export default function DraggableGridLayout({ children, layoutKey = 'dashboardLa
         containerPadding={[0, 0]}
         margin={[16, 16]}
       >
-        {childrenArray[0] && <div key="kpis" className="grid-item">{React.cloneElement(childrenArray[0], { key: 'kpis' })}</div>}
-        {childrenArray[1] && <div key="chart" className="grid-item">{React.cloneElement(childrenArray[1], { key: 'chart' })}</div>}
-        {childrenArray[2] && <div key="weather" className="grid-item">{React.cloneElement(childrenArray[2], { key: 'weather' })}</div>}
-        {childrenArray[3] && <div key="planner" className="grid-item">{React.cloneElement(childrenArray[3], { key: 'planner' })}</div>}
-        {childrenArray[4] && <div key="table" className="grid-item">{React.cloneElement(childrenArray[4], { key: 'table' })}</div>}
-        {childrenArray[5] && <div key="priorities" className="grid-item">{React.cloneElement(childrenArray[5], { key: 'priorities' })}</div>}
-        {childrenArray[6] && <div key="insights" className="grid-item">{React.cloneElement(childrenArray[6], { key: 'insights' })}</div>}
+        {childrenArray[0] ? <div key="kpis" className="grid-item">{childrenArray[0]}</div> : null}
+        {childrenArray[1] ? <div key="chart" className="grid-item">{childrenArray[1]}</div> : null}
+        {childrenArray[2] ? <div key="weather" className="grid-item">{childrenArray[2]}</div> : null}
+        {childrenArray[3] ? <div key="planner" className="grid-item">{childrenArray[3]}</div> : null}
+        {childrenArray[4] ? <div key="table" className="grid-item">{childrenArray[4]}</div> : null}
+        {childrenArray[5] ? <div key="priorities" className="grid-item">{childrenArray[5]}</div> : null}
+        {childrenArray[6] ? <div key="insights" className="grid-item">{childrenArray[6]}</div> : null}
       </GridLayout>
 
       <style>{`
