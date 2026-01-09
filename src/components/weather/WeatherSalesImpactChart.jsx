@@ -148,40 +148,88 @@ const WeatherButtonIcon = ({ type, active }) => {
   return null;
 };
 
-// Botón de vista con animación mejorada
+// Botón de vista con animación mejorada y más dinámica
 const ViewButton = ({ active, onClick, icon: Icon, label, color, weatherType }) => (
   <motion.button
-    whileHover={{ scale: 1.08, y: -3 }}
+    whileHover={{ scale: 1.08, y: -5, rotate: active ? 2 : 0 }}
     whileTap={{ scale: 0.92 }}
     onClick={onClick}
+    animate={active ? {
+      boxShadow: ['0 4px 15px rgba(0,0,0,0.1)', '0 6px 25px rgba(0,0,0,0.15)', '0 4px 15px rgba(0,0,0,0.1)']
+    } : {}}
+    transition={{ boxShadow: { duration: 2, repeat: Infinity } }}
     className={`
       flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm
       transition-all duration-300 shadow-sm relative overflow-hidden
       ${active 
-        ? `bg-gradient-to-r ${color} text-gray-700 shadow-md` 
+        ? `bg-gradient-to-r ${color} text-gray-800 shadow-lg ring-2 ring-offset-2 ${
+            weatherType === 'sunny' ? 'ring-amber-300' : 
+            weatherType === 'rainy' ? 'ring-blue-300' : 
+            weatherType === 'cloudy' ? 'ring-gray-300' : 
+            'ring-purple-300'
+          }` 
         : 'bg-white/80 text-gray-500 hover:bg-gray-50 border border-gray-200'
       }
     `}
   >
     {/* Background animation for weather buttons */}
     {active && weatherType === 'sunny' && (
-      <motion.div
-        className="absolute inset-0 bg-gradient-to-r from-amber-400/20 to-orange-400/20"
-        animate={{ opacity: [0.3, 0.6, 0.3] }}
-        transition={{ duration: 2, repeat: Infinity }}
-      />
+      <>
+        <motion.div
+          className="absolute inset-0 bg-gradient-to-r from-amber-400/30 to-orange-400/30"
+          animate={{ opacity: [0.3, 0.7, 0.3] }}
+          transition={{ duration: 2, repeat: Infinity }}
+        />
+        {/* Rayos de sol */}
+        {[...Array(4)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-0.5 h-full bg-yellow-300/40"
+            style={{ left: `${20 + i * 20}%` }}
+            animate={{ opacity: [0.2, 0.6, 0.2], scaleY: [0.8, 1.2, 0.8] }}
+            transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.2 }}
+          />
+        ))}
+      </>
     )}
     {active && weatherType === 'rainy' && (
+      <>
+        <motion.div
+          className="absolute inset-0 bg-gradient-to-b from-blue-400/20 to-blue-600/30"
+          animate={{ y: ['-100%', '100%'] }}
+          transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+        />
+        {/* Gotas de lluvia */}
+        {[...Array(6)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-0.5 h-2 bg-blue-400/60 rounded-full"
+            style={{ left: `${10 + i * 15}%`, top: '0' }}
+            animate={{ y: ['0%', '100%'], opacity: [0, 1, 0] }}
+            transition={{ duration: 1, repeat: Infinity, delay: i * 0.15, ease: "linear" }}
+          />
+        ))}
+      </>
+    )}
+    {active && weatherType === 'cloudy' && (
       <motion.div
-        className="absolute inset-0 bg-gradient-to-b from-blue-400/10 to-blue-600/20"
-        animate={{ y: ['-100%', '100%'] }}
-        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+        className="absolute inset-0 bg-gradient-to-r from-gray-300/20 to-gray-400/20"
+        animate={{ x: ['-100%', '100%'] }}
+        transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
       />
     )}
     
     <motion.div
-      animate={active ? { rotate: [0, 15, -15, 0], scale: [1, 1.3, 1] } : {}}
-      transition={{ duration: 0.6, repeat: active ? Infinity : 0, repeatDelay: 2 }}
+      animate={active ? { 
+        rotate: weatherType === 'sunny' ? 360 : [0, 15, -15, 0], 
+        scale: [1, 1.3, 1],
+        y: weatherType === 'rainy' ? [0, -3, 0] : 0
+      } : {}}
+      transition={{ 
+        rotate: { duration: weatherType === 'sunny' ? 8 : 0.6, repeat: Infinity, ease: weatherType === 'sunny' ? "linear" : "easeInOut" },
+        scale: { duration: 0.6, repeat: active ? Infinity : 0, repeatDelay: 2 },
+        y: { duration: 1.5, repeat: Infinity }
+      }}
       className="relative z-10"
     >
       {weatherType ? (
@@ -190,7 +238,23 @@ const ViewButton = ({ active, onClick, icon: Icon, label, color, weatherType }) 
         <Icon className="w-4 h-4" />
       )}
     </motion.div>
-    <span className="relative z-10">{label}</span>
+    <motion.span 
+      className="relative z-10"
+      animate={active ? { scale: [1, 1.05, 1] } : {}}
+      transition={{ duration: 2, repeat: Infinity }}
+    >
+      {label}
+    </motion.span>
+    
+    {/* Indicador de selección activa */}
+    {active && (
+      <motion.div
+        className="absolute bottom-0 left-0 right-0 h-1 bg-white/50 rounded-full"
+        initial={{ scaleX: 0 }}
+        animate={{ scaleX: 1 }}
+        transition={{ duration: 0.3 }}
+      />
+    )}
   </motion.button>
 );
 
@@ -751,7 +815,7 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
             </Popover>
           </div>
 
-          {/* Botones de vista en tonos pastel más sutiles */}
+          {/* Botones de vista dinámicos con información */}
           <div className="flex flex-wrap gap-2 mt-4">
             <ViewButton
               active={viewMode === 'bars'}
@@ -768,16 +832,234 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
               color="from-emerald-200 to-teal-200"
             />
             <ViewButton
+              active={viewMode === 'sunny'}
+              onClick={() => setViewMode('sunny')}
+              icon={Sun}
+              label={`Soleados ${stats ? `(${stats.sunnyCount})` : ''}`}
+              color="from-amber-200 to-orange-200"
+              weatherType="sunny"
+            />
+            <ViewButton
+              active={viewMode === 'rainy'}
+              onClick={() => setViewMode('rainy')}
+              icon={CloudRain}
+              label={`Lluviosos ${stats ? `(${stats.rainyCount})` : ''}`}
+              color="from-blue-200 to-cyan-200"
+              weatherType="rainy"
+            />
+            <ViewButton
+              active={viewMode === 'comparison'}
+              onClick={() => setViewMode('comparison')}
+              icon={Thermometer}
+              label="Temp vs Venta"
+              color="from-orange-200 to-red-200"
+            />
+            <ViewButton
               active={showForecast}
               onClick={() => {
                 setShowForecast(!showForecast);
                 if (!showForecast) setForecastData(null);
               }}
               icon={Cloud}
-              label={loadingForecast ? "..." : "Pronóstico"}
+              label={loadingForecast ? "..." : "Pronóstico 7D"}
               color="from-cyan-200 to-blue-200"
               weatherType={showForecast ? 'cloudy' : undefined}
             />
+          </div>
+
+          {/* Panel informativo según vista activa */}
+          <AnimatePresence>
+            {viewMode === 'sunny' && stats && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mt-3 bg-gradient-to-r from-amber-500/20 to-orange-500/20 rounded-xl p-4 border-2 border-amber-300/50"
+              >
+                <div className="flex items-start gap-3">
+                  <motion.div
+                    animate={{ rotate: 360, scale: [1, 1.2, 1] }}
+                    transition={{ rotate: { duration: 10, repeat: Infinity, ease: "linear" }, scale: { duration: 2, repeat: Infinity } }}
+                  >
+                    <Sun className="w-8 h-8 text-amber-600" />
+                  </motion.div>
+                  <div className="flex-1">
+                    <h4 className="font-bold text-amber-900 mb-2">☀️ Días Soleados - Análisis</h4>
+                    <div className="grid grid-cols-3 gap-3 mb-2">
+                      <div className="bg-white/80 rounded-lg p-2 text-center">
+                        <p className="text-xs text-gray-500">Días</p>
+                        <p className="text-xl font-black text-amber-700">{stats.sunnyCount}</p>
+                      </div>
+                      <div className="bg-white/80 rounded-lg p-2 text-center">
+                        <p className="text-xs text-gray-500">Venta Prom.</p>
+                        <p className="text-xl font-black text-amber-700">{formatCurrency(stats.avgSunny)}</p>
+                      </div>
+                      <div className="bg-white/80 rounded-lg p-2 text-center">
+                        <p className="text-xs text-gray-500">Impacto</p>
+                        <p className={`text-xl font-black ${stats.sunnyImpact >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {stats.sunnyImpact >= 0 ? '+' : ''}{stats.sunnyImpact.toFixed(0)}%
+                        </p>
+                      </div>
+                    </div>
+                    <p className="text-xs text-amber-800 leading-relaxed">
+                      {stats.sunnyImpact > 5 ? 
+                        `Los días soleados generan ${stats.sunnyImpact.toFixed(0)}% más ventas. Programa promociones outdoor y aumenta inventario estos días.` :
+                        stats.sunnyImpact < -5 ?
+                        `Curiosamente, los días soleados tienen ${Math.abs(stats.sunnyImpact).toFixed(0)}% menos ventas. La gente prefiere otras actividades.` :
+                        'El clima soleado tiene impacto neutral en ventas.'
+                      }
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {viewMode === 'rainy' && stats && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mt-3 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-xl p-4 border-2 border-blue-300/50"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="relative">
+                    <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity }}>
+                      <CloudRain className="w-8 h-8 text-blue-600" />
+                    </motion.div>
+                    {[0, 1, 2].map((i) => (
+                      <motion.div
+                        key={i}
+                        className="absolute w-1 h-2 bg-blue-400 rounded-full"
+                        style={{ left: `${8 + i * 8}px`, top: '32px' }}
+                        animate={{ y: [0, 12], opacity: [1, 0] }}
+                        transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.2 }}
+                      />
+                    ))}
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-bold text-blue-900 mb-2">🌧️ Días Lluviosos - Análisis</h4>
+                    <div className="grid grid-cols-3 gap-3 mb-2">
+                      <div className="bg-white/80 rounded-lg p-2 text-center">
+                        <p className="text-xs text-gray-500">Días</p>
+                        <p className="text-xl font-black text-blue-700">{stats.rainyCount}</p>
+                      </div>
+                      <div className="bg-white/80 rounded-lg p-2 text-center">
+                        <p className="text-xs text-gray-500">Venta Prom.</p>
+                        <p className="text-xl font-black text-blue-700">{formatCurrency(stats.avgRainy)}</p>
+                      </div>
+                      <div className="bg-white/80 rounded-lg p-2 text-center">
+                        <p className="text-xs text-gray-500">Impacto</p>
+                        <p className={`text-xl font-black ${stats.rainyImpact >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {stats.rainyImpact >= 0 ? '+' : ''}{stats.rainyImpact.toFixed(0)}%
+                        </p>
+                      </div>
+                    </div>
+                    <p className="text-xs text-blue-800 leading-relaxed">
+                      {stats.rainyImpact < -10 ? 
+                        `La lluvia reduce ventas ${Math.abs(stats.rainyImpact).toFixed(0)}%. Considera delivery, promociones indoor y combos para llevar.` :
+                        stats.rainyImpact > 5 ?
+                        `¡Increíble! La lluvia aumenta ventas ${stats.rainyImpact.toFixed(0)}%. Los clientes buscan refugio con helado.` :
+                        'La lluvia tiene impacto moderado en ventas.'
+                      }
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {viewMode === 'comparison' && stats && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mt-3 bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-xl p-4 border-2 border-orange-300/50"
+              >
+                <div className="flex items-start gap-3">
+                  <motion.div
+                    animate={{ scale: [1, 1.15, 1] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    <Thermometer className="w-8 h-8 text-orange-600" />
+                  </motion.div>
+                  <div className="flex-1">
+                    <h4 className="font-bold text-orange-900 mb-2">🌡️ Temperatura vs Ventas</h4>
+                    <p className="text-xs text-orange-800 leading-relaxed">
+                      Esta vista correlaciona la temperatura ambiente con el desempeño de ventas. Temperaturas extremas (muy altas o muy bajas) pueden impulsar o reducir el consumo de helados.
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {viewMode === 'trend' && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mt-3 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 rounded-xl p-4 border-2 border-emerald-300/50"
+              >
+                <div className="flex items-start gap-3">
+                  <motion.div
+                    animate={{ y: [0, -5, 0] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                  >
+                    <Activity className="w-8 h-8 text-emerald-600" />
+                  </motion.div>
+                  <div className="flex-1">
+                    <h4 className="font-bold text-emerald-900 mb-2">📈 Vista de Tendencia</h4>
+                    <p className="text-xs text-emerald-800 leading-relaxed">
+                      Visualiza patrones de ventas a lo largo del tiempo con una curva suave que facilita identificar ciclos y tendencias climáticas.
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {showForecast && forecastData && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mt-3 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-xl p-4 border-2 border-cyan-300/50"
+              >
+                <div className="flex items-start gap-3">
+                  <motion.div
+                    animate={{ rotate: [0, 10, -10, 0], y: [0, -3, 0] }}
+                    transition={{ duration: 3, repeat: Infinity }}
+                  >
+                    <Cloud className="w-8 h-8 text-cyan-600" />
+                  </motion.div>
+                  <div className="flex-1">
+                    <h4 className="font-bold text-cyan-900 mb-2">🔮 Pronóstico 7 Días</h4>
+                    <div className="grid grid-cols-7 gap-1 mb-2">
+                      {forecastData.time?.slice(0, 7).map((date, idx) => {
+                        const temp = forecastData.temperature_2m_max?.[idx] || 0;
+                        const precip = forecastData.precipitation_sum?.[idx] || 0;
+                        const wType = getWeatherType(forecastData.weathercode?.[idx], precip, temp);
+                        return (
+                          <div key={idx} className="bg-white/80 rounded-lg p-1.5 text-center">
+                            <p className="text-[9px] text-gray-500 font-medium">{format(parseISO(date), 'EEE', { locale: es })}</p>
+                            <motion.div
+                              animate={{ scale: [1, 1.1, 1] }}
+                              transition={{ duration: 1.5, repeat: Infinity, delay: idx * 0.1 }}
+                              className="my-1 flex justify-center"
+                            >
+                              {wType === 'sunny' && <Sun className="w-4 h-4 text-amber-500" />}
+                              {wType === 'rainy' && <CloudRain className="w-4 h-4 text-blue-500" />}
+                              {wType === 'cloudy' && <Cloud className="w-4 h-4 text-gray-400" />}
+                            </motion.div>
+                            <p className="text-[10px] font-bold text-gray-700">{Math.round(temp)}°</p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <p className="text-xs text-cyan-800 leading-relaxed">
+                      Planifica inventario y personal según el clima proyectado. Días soleados = mayor demanda.
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
           </div>
         </CardContent>
       </Card>
