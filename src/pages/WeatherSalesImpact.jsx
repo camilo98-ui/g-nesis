@@ -6,11 +6,11 @@ import { format, subDays, parseISO, isWithinInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Cloud, CloudRain, Sun, Wind, Droplets, TrendingUp, Calendar, RotateCcw, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import WeatherSalesHeader from '../components/weather/WeatherSalesHeader';
-import KPICard from '../components/weather/KPICard';
-import WeatherSalesMainChart from '../components/weather/WeatherSalesMainChart';
-import WeatherInsightsPanel from '../components/weather/WeatherInsightsPanel';
-import WeatherFilters from '../components/weather/WeatherFilters';
+import WeatherSalesHeader from '@/components/weather/WeatherSalesHeader';
+import KPICard from '@/components/weather/KPICard';
+import WeatherSalesMainChart from '@/components/weather/WeatherSalesMainChart';
+import WeatherInsightsPanel from '@/components/weather/WeatherInsightsPanel';
+import WeatherFilters from '@/components/weather/WeatherFilters';
 
 export default function WeatherSalesImpact() {
   const [dateRange, setDateRange] = useState({
