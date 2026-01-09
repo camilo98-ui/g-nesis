@@ -69,9 +69,17 @@ export default function ExecutiveDashboard() {
   const [customDateRange, setCustomDateRange] = useState({ from: null, to: null });
   const [useCustomDates, setUseCustomDates] = useState(false);
   const [showBackButton, setShowBackButton] = useState(false);
+  const [gregorianMode, setGregorianMode] = useState(false);
   
-  // Calcular dateRange basado en semanas seleccionadas o fechas personalizadas
+  // Calcular dateRange basado en semanas seleccionadas, fechas personalizadas o modo gregoriano
   const dateRange = useMemo(() => {
+    if (gregorianMode) {
+      const now = new Date();
+      return {
+        from: startOfMonth(now),
+        to: now
+      };
+    }
     if (useCustomDates && customDateRange.from && customDateRange.to) {
       return customDateRange;
     }
@@ -84,7 +92,7 @@ export default function ExecutiveDashboard() {
       from: addDays(RETAIL_WEEK_START, (minWeek - 1) * 7),
       to: addDays(RETAIL_WEEK_START, maxWeek * 7 - 1)
     };
-  }, [selectedWeeks, customDateRange, useCustomDates]);
+  }, [selectedWeeks, customDateRange, useCustomDates, gregorianMode]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStoreDetail, setSelectedStoreDetail] = useState(null);
   const [aiInsights, setAiInsights] = useState(null);
@@ -1097,18 +1105,37 @@ Genera:
             </div>
 
             <div className="flex items-center gap-2 flex-wrap">
+              {/* Botón Modo Gregoriano */}
+              <Button
+                onClick={() => {
+                  setGregorianMode(!gregorianMode);
+                  if (!gregorianMode) {
+                    setUseCustomDates(false);
+                  }
+                }}
+                className={`backdrop-blur-xl border gap-2 transition-all ${
+                  gregorianMode
+                    ? 'bg-indigo-500/30 border-indigo-400/50 text-white hover:bg-indigo-500/40'
+                    : 'bg-white/10 border-white/20 text-white hover:bg-white/20'
+                }`}
+              >
+                <CalendarDays className={`w-4 h-4 ${gregorianMode ? 'text-indigo-300' : 'text-slate-400'}`} />
+                <span className="text-sm font-medium">Gregoriano</span>
+              </Button>
+
               {/* Calendario de Fechas */}
               <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
                 <PopoverTrigger asChild>
                   <Button 
                     variant="outline" 
-                    className="bg-white/10 backdrop-blur-xl border-white/20 text-white hover:bg-white/20 hover:text-white gap-2"
+                    disabled={gregorianMode}
+                    className="bg-white/10 backdrop-blur-xl border-white/20 text-white hover:bg-white/20 hover:text-white gap-2 disabled:opacity-50"
                   >
                     <CalendarDays className="w-4 h-4 text-blue-400" />
                     <span className="text-sm font-medium">
                       {format(dateRange.from, 'dd MMM')} - {format(dateRange.to, 'dd MMM')}
                     </span>
-                    {selectedWeeks.length < 4 && (
+                    {selectedWeeks.length < 4 && !gregorianMode && (
                       <X 
                         className="w-3 h-3 text-red-400 hover:text-red-300" 
                         onClick={(e) => {
