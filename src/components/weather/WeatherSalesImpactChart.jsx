@@ -259,13 +259,15 @@ const ViewButton = ({ active, onClick, icon: Icon, label, color, weatherType }) 
 );
 
 // Tarjeta de estadística MUY animada
-const StatCard = ({ icon: Icon, label, value, subvalue, color, trend, delay = 0 }) => (
-  <motion.div
+const StatCard = ({ icon: Icon, label, value, subvalue, color, trend, delay = 0, onClick }) => (
+  <motion.button
+    onClick={onClick}
     initial={{ opacity: 0, y: 30, scale: 0.9 }}
     animate={{ opacity: 1, y: 0, scale: 1 }}
     transition={{ delay, type: "spring", stiffness: 200 }}
-    whileHover={{ scale: 1.05, y: -5, rotate: 1 }}
-    className={`bg-gradient-to-br ${color} rounded-2xl p-4 shadow-md cursor-pointer relative overflow-hidden`}
+    whileHover={{ scale: 1.08, y: -8, rotate: 1 }}
+    whileTap={{ scale: 0.95 }}
+    className={`bg-gradient-to-br ${color} rounded-2xl p-4 shadow-md cursor-pointer relative overflow-hidden text-left w-full transition-all`}
   >
     {/* Floating particles */}
     <motion.div
@@ -313,7 +315,7 @@ const StatCard = ({ icon: Icon, label, value, subvalue, color, trend, delay = 0 
         <span className="font-medium">{trend >= 0 ? '+' : ''}{trend.toFixed(1)}%</span>
       </motion.div>
     )}
-  </motion.div>
+  </motion.button>
 );
 
 // Insight Card animada
