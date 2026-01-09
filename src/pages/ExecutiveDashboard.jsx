@@ -113,8 +113,21 @@ export default function ExecutiveDashboard() {
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [showTopCashiers, setShowTopCashiers] = useState(false);
   const [hoveredStoreForChart, setHoveredStoreForChart] = useState(null);
+  const [layout, setLayout] = useState([]);
+  const [mounted, setMounted] = useState(false);
 
   const ZONE_NAME = 'Bogotá Noroccidente';
+
+  // Layout por defecto
+  const defaultLayout = [
+    { x: 0, y: 0, w: 12, h: 6, i: 'metrics' },
+    { x: 0, y: 6, w: 7, h: 10, i: 'chart' },
+    { x: 7, y: 6, w: 5, h: 10, i: 'weather' },
+    { x: 0, y: 16, w: 12, h: 5, i: 'planner' },
+    { x: 0, y: 21, w: 12, h: 8, i: 'table' },
+    { x: 0, y: 29, w: 12, h: 4, i: 'priorities' },
+    { x: 0, y: 33, w: 12, h: 6, i: 'insights' }
+  ];
 
   const currentMonth = new Date().getMonth() + 1;
   const currentYear = new Date().getFullYear();
