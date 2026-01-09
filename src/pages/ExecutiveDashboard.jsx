@@ -18,8 +18,7 @@ import ZoneBudgetManager from '../components/executive/ZoneBudgetManager';
 import ZoneChartsPanel from '../components/executive/ZoneChartsPanel';
 import PlannerStatusPanel from '../components/executive/PlannerStatusPanel';
 import StoreWeeklyChart from '../components/executive/StoreWeeklyChart';
-import ExecutiveWeatherSalesAnalysis from '../components/executive/ExecutiveWeatherSalesAnalysis';
-import BogotaRainMap from '../components/weather/BogotaRainMap';
+
 import { useExecutiveTooltip } from '../components/executive/ExecutiveChartTooltip';
 
 import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, ResponsiveContainer, CartesianGrid, XAxis, YAxis, ComposedChart, Tooltip, Legend, ReferenceLine } from 'recharts';
@@ -2081,33 +2080,8 @@ export default function ExecutiveDashboard() {
                 </div>
               </div>
 
-            {/* Columna Derecha - Weather & KPIs */}
+            {/* Columna Derecha - KPIs */}
             <div className="col-span-1 lg:col-span-4 space-y-4">
-                {/* Análisis Clima vs Ventas - Profesional */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                >
-                  <ExecutiveWeatherSalesAnalysis
-                    weatherData={weatherData}
-                    dailySales={allDailySales}
-                    storesAnalysis={storesAnalysis}
-                    dateRange={dateRange}
-                    formatCurrency={formatCurrency}
-                    formatKPI={formatKPI}
-                  />
-                </motion.div>
-
-                {/* Mapa de Lluvia Bogotá */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 }}
-                >
-                  <BogotaRainMap weatherData={weatherData} formatCurrency={formatCurrency} />
-                </motion.div>
-
                 {/* Tiendas vs Presupuesto Semanal - Componente Mejorado */}
                 <StoreWeeklyChart
                   storesAnalysis={storesAnalysis}
