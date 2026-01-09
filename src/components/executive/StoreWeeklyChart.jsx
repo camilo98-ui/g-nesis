@@ -5,6 +5,7 @@ import { BarChart, Bar, ResponsiveContainer, CartesianGrid, XAxis, YAxis, Toolti
 import { ArrowUpDown, X, TrendingUp, Download } from 'lucide-react';
 import { format, parseISO, eachDayOfInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
+import * as XLSX from 'xlsx';
 
 export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRange, formatCurrency, formatShort }) {
   const [sortOrder, setSortOrder] = useState('desc');
@@ -91,28 +92,66 @@ export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRa
       return 'Crítico';
     };
 
-    // Preparar datos en el orden actual del gráfico
-    const rows = chartData.map(store => [
-      store.fullName,
-      store.cumplimiento,
-      store.venta * 1000000,
-      store.presupuesto * 1000000,
-      getEstado(store.cumplimiento)
-    ]);
+    // Preparar datos en formato estructurado
+    const excelData = chartData.map(store => ({
+      'Nombre de Tienda': store.fullName,
+      '% Cumplimiento': store.cumplimiento / 100, // Como decimal para formato porcentaje
+      'Venta Real': Math.round(store.venta * 1000000), // Valor completo sin decimales
+      'Presupuesto': Math.round(store.presupuesto * 1000000), // Valor completo sin decimales
+      'Estado': getEstado(store.cumplimiento)
+    }));
 
-    // Crear CSV con encabezados
-    const headers = ['Nombre de Tienda', '% Cumplimiento', 'Venta Real', 'Presupuesto', 'Estado'];
-    const csvContent = [
-      headers.join(','),
-      ...rows.map(row => row.join(','))
-    ].join('\n');
+    // Crear workbook y worksheet
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(excelData);
 
-    // Descargar archivo
-    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `Tiendas_Cumplimiento_${new Date().toISOString().split('T')[0]}.csv`;
-    link.click();
+    // Configurar anchos de columna
+    ws['!cols'] = [
+      { wch: 25 }, // Nombre de Tienda
+      { wch: 18 }, // % Cumplimiento
+      { wch: 18 }, // Venta Real
+      { wch: 18 }, // Presupuesto
+      { wch: 15 }  // Estado
+    ];
+
+    // Aplicar formato a las celdas
+    const range = XLSX.utils.decode_range(ws['!ref']);
+    for (let R = range.s.r; R <= range.e.r; ++R) {
+      for (let C = range.s.c; C <= range.e.c; ++C) {
+        const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
+        if (!ws[cellAddress]) continue;
+
+        // Formato para encabezados (fila 0)
+        if (R === 0) {
+          ws[cellAddress].s = {
+            font: { bold: true, sz: 12 },
+            fill: { fgColor: { rgb: 'E0E7FF' } },
+            alignment: { horizontal: 'center', vertical: 'center' }
+          };
+        }
+
+        // Formato para % Cumplimiento (columna B)
+        if (C === 1 && R > 0) {
+          ws[cellAddress].z = '0.00%';
+          ws[cellAddress].t = 'n';
+        }
+
+        // Formato para Venta Real y Presupuesto (columnas C y D)
+        if ((C === 2 || C === 3) && R > 0) {
+          ws[cellAddress].z = '#,##0';
+          ws[cellAddress].t = 'n';
+        }
+      }
+    }
+
+    // Habilitar filtros en encabezados
+    ws['!autofilter'] = { ref: XLSX.utils.encode_range(range) };
+
+    // Agregar worksheet al workbook
+    XLSX.utils.book_append_sheet(wb, ws, 'Cumplimiento Tiendas');
+
+    // Exportar archivo
+    XLSX.writeFile(wb, `Tiendas_Cumplimiento_${new Date().toISOString().split('T')[0]}.xlsx`);
   };
 
   return (
