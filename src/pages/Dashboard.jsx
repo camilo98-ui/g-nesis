@@ -1006,8 +1006,17 @@ export default function Dashboard() {
             <StoreSelector selectedStore={selectedStore} onStoreChange={handleStoreChange} />
             {!showComparison && <WeekFilter onWeekChange={(range) => {setWeekFilter(range);setDateRange(null);setGregorianMode(false);}} multiSelect={true} />}
             <DateFilter
-              dateRange={dateRange}
-              onDateChange={(range) => {setDateRange(range);setWeekFilter(null);setGregorianMode(false);}}
+              dateRange={showComparison ? (weekFilter || dateRange || { from: startOfMonth(new Date()), to: new Date() }) : dateRange}
+              onDateChange={(range) => {
+                if (showComparison) {
+                  setDateRange(range);
+                  setWeekFilter(null);
+                } else {
+                  setDateRange(range);
+                  setWeekFilter(null);
+                  setGregorianMode(false);
+                }
+              }}
               buttonText={showComparison ? "📅 Período Actual" : undefined}
               buttonClassName={showComparison ? "border-blue-300 hover:border-blue-500" : undefined} />
             {!showComparison && (
@@ -1030,14 +1039,13 @@ export default function Dashboard() {
               </Button>
             )}
 
-            {showComparison &&
-            <DateFilter
-              dateRange={comparisonRange || { from: startOfMonth(new Date()), to: new Date() }}
-              onDateChange={setComparisonRange}
-              buttonClassName="border-pink-300 hover:border-pink-500"
-              buttonText="📅 Comparar con" />
-
-            }
+            {showComparison && (
+              <DateFilter
+                dateRange={comparisonRange || { from: new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1), to: new Date(new Date().getFullYear(), new Date().getMonth(), 0) }}
+                onDateChange={setComparisonRange}
+                buttonClassName="border-pink-300 hover:border-pink-500"
+                buttonText="📅 Comparar con" />
+            )}
           </div>
         </div>
 
