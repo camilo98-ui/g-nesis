@@ -68,13 +68,13 @@ export default function ExecutiveWeatherSalesAnalysis({ weatherData, dailySales,
     const end = new Date(dateRange.to);
     end.setHours(23, 59, 59, 999);
 
-    const weatherDays = weatherData?.history?.time
-      ?.filter(date => {
+    const weatherDays = (weatherData?.history?.time || [])
+      .filter(date => {
         const d = parseISO(date);
         d.setHours(0, 0, 0, 0);
         return d >= start && d <= end;
       })
-      ?.map((date, idx) => {
+      .map((date, idx) => {
         const temp = weatherData.history.temperature_2m_mean?.[idx] || 0;
         const precipitation = weatherData.history.precipitation_sum?.[idx] || 0;
         const weatherCode = weatherData.history.weathercode?.[idx] || 0;
@@ -102,6 +102,24 @@ export default function ExecutiveWeatherSalesAnalysis({ weatherData, dailySales,
           weatherCode
         };
       });
+
+    if (!weatherDays || weatherDays.length === 0) {
+      return {
+        rainyDays: 0,
+        sunnyDays: 0,
+        sunnySales: 0,
+        rainySales: 0,
+        avgSalesRainy: 0,
+        avgSalesSunny: 0,
+        rainyImpact: 0,
+        sunnyImpact: 0,
+        temperatureAvg: 0,
+        precipitationTotal: 0,
+        correlationScore: 'Sin datos',
+        weatherDays: [],
+        withSales: []
+      };
+    }
 
     const rainyDays = weatherDays.filter(d => d.isRainy);
     const sunnyDays = weatherDays.filter(d => d.isSunny);
