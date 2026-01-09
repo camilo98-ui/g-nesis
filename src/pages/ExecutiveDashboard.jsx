@@ -1754,7 +1754,7 @@ Genera:
                     </div>
 
                     {/* Columna Centro - Gráfica Grande */}
-              <div className="col-span-12 lg:col-span-6">
+              <div className="col-span-12 lg:col-span-5">
                 <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl rounded-lg p-5 border border-white/10 h-full shadow-xl">
                   <div className="flex flex-col gap-3 mb-4">
                     <div className="flex items-center justify-between">
