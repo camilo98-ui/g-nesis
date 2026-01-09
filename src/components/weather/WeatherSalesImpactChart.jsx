@@ -577,7 +577,7 @@ const getWeatherType = (code, precipitation, temp) => {
 
 export default function WeatherSalesImpactChart({ weatherData, dailySales = [], formatCurrency }) {
   const [viewMode, setViewMode] = useState('bars');
-  const [dateRange, setDateRange] = useState({ from: subDays(new Date(), 29), to: new Date() });
+  const [dateRange, setDateRange] = useState({ from: startOfMonth(new Date()), to: endOfMonth(new Date()) });
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [showForecast, setShowForecast] = useState(false);
   const [forecastData, setForecastData] = useState(null);
