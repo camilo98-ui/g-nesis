@@ -535,7 +535,10 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
         }))
         .filter(d => d.count >= 2)
         .sort((a, b) => b.avg - a.avg)
-        .slice(0, 3)
+        .slice(0, 3),
+      monthStart,
+      monthEnd,
+      getDailyBudget
     };
   }, [dailySales, activeBudget, currentDateRange, gregorianMode]);
 
@@ -568,7 +571,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
               <div className="min-w-0 flex-1">
                 <p className="text-xl md:text-2xl truncate">Presupuesto del Día</p>
                 <p className="text-xs text-slate-600 font-normal mt-0.5">
-                  {gregorianMode ? `Calendario Gregoriano (${format(monthStart, 'dd MMM', { locale: es })} - ${format(monthEnd, 'dd MMM', { locale: es })})` : `Calendario Retail - Semana ${budgetData.currentWeekNumber} de ${budgetData.totalWeeks}`}
+                  {gregorianMode ? `Calendario Gregoriano (${format(budgetData.monthStart, 'dd MMM', { locale: es })} - ${format(budgetData.monthEnd, 'dd MMM', { locale: es })})` : `Calendario Retail - Semana ${budgetData.currentWeekNumber} de ${budgetData.totalWeeks}`}
                 </p>
               </div>
             </CardTitle>
