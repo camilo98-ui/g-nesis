@@ -48,6 +48,8 @@ export default function DraggableGridLayout({ children, layoutKey = 'dashboardLa
     return <div className="w-full">{children}</div>;
   }
 
+  const childrenArray = Array.isArray(children) ? children : [children];
+
   return (
     <div className="w-full">
       <div className="flex justify-end mb-4">
@@ -75,27 +77,13 @@ export default function DraggableGridLayout({ children, layoutKey = 'dashboardLa
         containerPadding={[0, 0]}
         margin={[16, 16]}
       >
-        <div key="kpis" className="grid-item">
-          {React.cloneElement(children[0], { key: 'kpis' })}
-        </div>
-        <div key="chart" className="grid-item">
-          {React.cloneElement(children[1], { key: 'chart' })}
-        </div>
-        <div key="weather" className="grid-item">
-          {React.cloneElement(children[2], { key: 'weather' })}
-        </div>
-        <div key="planner" className="grid-item">
-          {React.cloneElement(children[3], { key: 'planner' })}
-        </div>
-        <div key="table" className="grid-item">
-          {React.cloneElement(children[4], { key: 'table' })}
-        </div>
-        <div key="priorities" className="grid-item">
-          {React.cloneElement(children[5], { key: 'priorities' })}
-        </div>
-        <div key="insights" className="grid-item">
-          {React.cloneElement(children[6], { key: 'insights' })}
-        </div>
+        {childrenArray[0] && <div key="kpis" className="grid-item">{React.cloneElement(childrenArray[0], { key: 'kpis' })}</div>}
+        {childrenArray[1] && <div key="chart" className="grid-item">{React.cloneElement(childrenArray[1], { key: 'chart' })}</div>}
+        {childrenArray[2] && <div key="weather" className="grid-item">{React.cloneElement(childrenArray[2], { key: 'weather' })}</div>}
+        {childrenArray[3] && <div key="planner" className="grid-item">{React.cloneElement(childrenArray[3], { key: 'planner' })}</div>}
+        {childrenArray[4] && <div key="table" className="grid-item">{React.cloneElement(childrenArray[4], { key: 'table' })}</div>}
+        {childrenArray[5] && <div key="priorities" className="grid-item">{React.cloneElement(childrenArray[5], { key: 'priorities' })}</div>}
+        {childrenArray[6] && <div key="insights" className="grid-item">{React.cloneElement(childrenArray[6], { key: 'insights' })}</div>}
       </GridLayout>
 
       <style>{`
