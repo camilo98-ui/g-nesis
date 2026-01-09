@@ -1318,8 +1318,8 @@ Genera:
           </div>
         ) : (
           <>
-            {/* Barra de progreso del mes - Invisible pero genera sensación */}
-            <div className="mb-2 h-1 bg-white/5 rounded-full overflow-hidden">
+            {/* Barra de progreso del mes */}
+            <div className="mb-4 h-1 bg-white/5 rounded-full overflow-hidden">
               <motion.div
                 className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"
                 initial={{ width: 0 }}
@@ -1331,7 +1331,7 @@ Genera:
             </div>
 
             {/* Métricas Consolidadas - Dinámicas según Filtro de Fechas */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
               {/* 1. Presupuesto y Cumplimiento Mensual */}
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
