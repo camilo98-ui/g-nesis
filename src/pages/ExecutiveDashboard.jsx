@@ -111,6 +111,11 @@ export default function ExecutiveDashboard() {
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [showTopCashiers, setShowTopCashiers] = useState(false);
   const [hoveredStoreForChart, setHoveredStoreForChart] = useState(null);
+  const [layoutEditMode, setLayoutEditMode] = useState(false);
+  const [customLayout, setCustomLayout] = useState(() => {
+    const saved = localStorage.getItem('executiveDashboardLayout');
+    return saved ? JSON.parse(saved) : {};
+  });
   const ZONE_NAME = 'Bogotá Noroccidente';
 
   const currentMonth = new Date().getMonth() + 1;
@@ -857,6 +862,12 @@ Genera:
 
 
 
+  const saveLayoutEdit = () => {
+    localStorage.setItem('executiveDashboardLayout', JSON.stringify(customLayout));
+    setLayoutEditMode(false);
+    toast.success('Layout guardado correctamente');
+  };
+
   useEffect(() => {
     let lastScrollY = 0;
     const handleScroll = (e) => {
@@ -1115,9 +1126,38 @@ Genera:
         </div>
       </Link>
 
-      <div id="dashboard-scroll-container" className="w-full mx-auto px-2 py-2 relative z-10">
+      <div id="dashboard-scroll-container" className="w-full mx-auto px-3 sm:px-4 lg:px-6 py-4 relative z-10">
+        {/* Botón Modo Edición */}
+        <div className="flex justify-end mb-4">
+          {!layoutEditMode && (
+            <Button
+              onClick={() => setLayoutEditMode(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 text-blue-300 rounded-lg text-sm"
+            >
+              <Settings className="w-4 h-4" />
+              Editar Layout
+            </Button>
+          )}
+          {layoutEditMode && (
+            <div className="flex gap-2">
+              <Button
+                onClick={() => setLayoutEditMode(false)}
+                className="px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white rounded-lg text-sm"
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={saveLayoutEdit}
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm"
+              >
+                Guardar
+              </Button>
+            </div>
+          )}
+        </div>
+
         {/* Header Compacto con Filtro de Semanas */}
-        <div className="mb-3">
+        <div className="mb-4">
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div>
               <h1 className="text-2xl font-bold text-white mb-1">
@@ -1320,7 +1360,7 @@ Genera:
         ) : (
           <>
             {/* Barra de progreso del mes */}
-            <div className="mb-4 h-1 bg-white/5 rounded-full overflow-hidden">
+            <div className="mb-6 h-1 bg-white/5 rounded-full overflow-hidden">
               <motion.div
                 className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"
                 initial={{ width: 0 }}
@@ -1331,11 +1371,16 @@ Genera:
               />
             </div>
 
-            {/* Contenido sin GridLayout */}
-            <div>
-                {/* Métricas */}
-                <div className="bg-transparent p-0">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Contenido - Layout Responsive Mejorado */}
+            <div 
+              className={layoutEditMode ? "border-2 border-dashed border-blue-500/50 p-4 rounded-lg mb-6" : ""}
+              style={layoutEditMode ? { 
+                position: 'relative',
+                backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 19px, rgba(59, 130, 246, 0.1) 19px, rgba(59, 130, 246, 0.1) 20px)'
+              } : {}}
+                {/* Métricas KPIs - 4 Columnas */}
+                <div className="bg-transparent p-0 mb-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                     {/* 1. Presupuesto y Cumplimiento Mensual */}
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
@@ -1579,10 +1624,10 @@ Genera:
               </motion.div>
             </div>
 
-            {/* Grid Principal Estilo Power BI */}
-            <div className="grid grid-cols-12 gap-4 mb-4">
+            {/* Grid Principal Estilo Power BI - 3 Columnas */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 mb-6">
               {/* Columna Izquierda - KPIs */}
-              <div className="col-span-12 lg:col-span-3 grid grid-cols-3 lg:grid-cols-1 gap-3">
+              <div className="col-span-1 lg:col-span-3 grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-3">
                 <motion.div 
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
@@ -1757,9 +1802,9 @@ Genera:
                 </motion.div>
                     </div>
 
-                    {/* Columna Centro - Gráfica Grande */}
-              <div className="col-span-12 lg:col-span-5">
-                <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl rounded-lg p-5 border border-white/10 h-full shadow-xl">
+            {/* Columna Centro - Gráfica Grande */}
+            <div className="col-span-1 lg:col-span-5">
+              <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl rounded-lg p-4 sm:p-5 border border-white/10 h-full shadow-xl">
                   <div className="flex flex-col gap-3 mb-4">
                     <div className="flex items-center justify-between">
                       <div>
@@ -2093,8 +2138,8 @@ Genera:
                 </div>
               </div>
 
-              {/* Columna Derecha - Weather & KPIs */}
-              <div className="col-span-12 lg:col-span-4 space-y-4">
+            {/* Columna Derecha - Weather & KPIs */}
+            <div className="col-span-1 lg:col-span-4 space-y-4">
                 {/* Análisis Clima vs Ventas - Profesional */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
@@ -2182,17 +2227,17 @@ Genera:
 
 
             {/* Panel de Estado del Planner */}
-            <div className="mb-5">
+            <div className="mb-8">
               <PlannerStatusPanel stores={STORES.map(s => ({ code: s.code, name: getDisplayName(s.code) }))} />
             </div>
 
             {/* Contexto */}
-            <div className="mb-4">
+            <div className="mb-6">
               <p className="text-xs sm:text-sm font-medium text-slate-400">{tableContextSummary}</p>
             </div>
 
             {/* Tabla - Responsive con scroll horizontal en móvil */}
-            <div id="stores-table" className="mb-5">
+            <div id="stores-table" className="mb-8">
               <div className="bg-white/5 backdrop-blur-2xl rounded-xl border border-white/10 overflow-x-auto">
                 <table className="w-full min-w-[900px]">
                   <thead>
@@ -2458,9 +2503,9 @@ Genera:
             </div>
 
             {/* Prioridades Dinámicas */}
-            <div className="mb-6">
-              <h2 className="text-lg font-black text-white mb-4 tracking-tight">Prioridades de hoy</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="mb-8">
+              <h2 className="text-xl sm:text-2xl font-black text-white mb-6 tracking-tight">Prioridades de hoy</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {/* Intervenir */}
                 {storesAnalysis
                   .filter(s => s.status === 'critical')
@@ -2594,7 +2639,7 @@ Genera:
 
             {/* Análisis Inteligente - Oculto en móvil, visible en desktop */}
             {aiInsights && (
-              <div className="hidden lg:block bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-xl rounded-xl border border-purple-500/30 overflow-hidden">
+              <div className="hidden lg:block bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-xl rounded-xl border border-purple-500/30 overflow-hidden mb-8">
                 <div className="p-6 lg:p-8 border-b border-purple-500/20">
                   <div className="flex items-center gap-3 lg:gap-4 mb-4 lg:mb-6">
                     <div className="w-10 h-10 lg:w-14 lg:h-14 rounded-xl bg-purple-500/20 flex items-center justify-center">
