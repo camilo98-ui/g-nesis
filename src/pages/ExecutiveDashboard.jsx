@@ -865,42 +865,46 @@ Genera:
   const dailySalesData = useMemo(() => {
     if (viewMode === 'day') {
       const days = eachDayOfInterval({ start: dateRange.from, end: dateRange.to });
-      return days.map(day => {
-        // Si hay tienda hovereada, filtrar solo sus ventas
-        const daySales = allDailySales
-          .filter(s => {
-            try {
-              const saleDate = parseISO(s.date);
-              const dateMatch = isSameDay(saleDate, day);
-              const storeMatch = hoveredStoreForChart ? s.store_id === hoveredStoreForChart.code : true;
-              return dateMatch && storeMatch;
-            } catch {
-              return false;
-            }
-          })
-          .reduce((sum, s) => sum + (s.total_sales || 0), 0);
-        
-        // Si hay tienda hovereada, calcular solo su presupuesto
-        const dayBudget = hoveredStoreForChart && hoveredStoreForChart.getDailyBudget
-          ? hoveredStoreForChart.getDailyBudget(day)
-          : storesAnalysis
-            .filter(s => s.hasData && s.getDailyBudget)
-            .reduce((sum, store) => {
+      const now = new Date();
+      return days
+        .filter(day => day <= now) // Solo días hasta hoy
+        .map(day => {
+          // Si hay tienda hovereada, filtrar solo sus ventas
+          const daySales = allDailySales
+            .filter(s => {
               try {
-                return sum + store.getDailyBudget(day);
+                const saleDate = parseISO(s.date);
+                const dateMatch = isSameDay(saleDate, day);
+                const storeMatch = hoveredStoreForChart ? s.store_id === hoveredStoreForChart.code : true;
+                return dateMatch && storeMatch;
               } catch {
-                return sum;
+                return false;
               }
-            }, 0);
-        
-        return {
-          date: format(day, 'dd/MM'),
-          fullDate: format(day, 'dd MMM'),
-          sales: daySales / 1000000,
-          budget: dayBudget / 1000000,
-          compliance: dayBudget > 0 ? (daySales / dayBudget) * 100 : 0
-        };
-      }).filter(d => d.sales > 0 || d.budget > 0);
+            })
+            .reduce((sum, s) => sum + (s.total_sales || 0), 0);
+          
+          // Si hay tienda hovereada, calcular solo su presupuesto
+          const dayBudget = hoveredStoreForChart && hoveredStoreForChart.getDailyBudget
+            ? hoveredStoreForChart.getDailyBudget(day)
+            : storesAnalysis
+              .filter(s => s.hasData && s.getDailyBudget)
+              .reduce((sum, store) => {
+                try {
+                  return sum + store.getDailyBudget(day);
+                } catch {
+                  return sum;
+                }
+              }, 0);
+          
+          return {
+            date: format(day, 'dd/MM'),
+            fullDate: format(day, 'dd MMM'),
+            sales: daySales / 1000000,
+            budget: dayBudget / 1000000,
+            compliance: dayBudget > 0 ? (daySales / dayBudget) * 100 : 0
+          };
+        })
+        .filter(d => d.sales > 0 || d.budget > 0); // Solo días con datos
     } else if (viewMode === 'week') {
       const weeks = eachWeekOfInterval({ start: dateRange.from, end: dateRange.to }, { weekStartsOn: 0 });
       return weeks.map((weekStart, idx) => {
