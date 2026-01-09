@@ -3000,6 +3000,9 @@ Genera:
           </motion.div>
         )}
       </AnimatePresence>
+          </>
+        )}
+      </div>
     </div>
   );
 }
