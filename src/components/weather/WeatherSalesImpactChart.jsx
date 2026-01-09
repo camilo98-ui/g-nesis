@@ -1101,6 +1101,51 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
               </motion.div>
             )}
 
+            {viewMode === 'cloudy' && stats && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mt-3 bg-gradient-to-r from-gray-500/20 to-slate-500/20 rounded-xl p-4 border-2 border-gray-300/50"
+              >
+                <div className="flex items-start gap-3">
+                  <motion.div
+                    animate={{ x: [-2, 2, -2] }}
+                    transition={{ duration: 3, repeat: Infinity }}
+                  >
+                    <Cloud className="w-8 h-8 text-gray-600" />
+                  </motion.div>
+                  <div className="flex-1">
+                    <h4 className="font-bold text-gray-900 mb-2">☁️ Días Nublados - Análisis</h4>
+                    <div className="grid grid-cols-3 gap-3 mb-2">
+                      <div className="bg-white/80 rounded-lg p-2 text-center">
+                        <p className="text-xs text-gray-500">Días</p>
+                        <p className="text-xl font-black text-gray-700">{stats.cloudyCount}</p>
+                      </div>
+                      <div className="bg-white/80 rounded-lg p-2 text-center">
+                        <p className="text-xs text-gray-500">Venta Prom.</p>
+                        <p className="text-xl font-black text-gray-700">{formatCurrency(stats.avgCloudy)}</p>
+                      </div>
+                      <div className="bg-white/80 rounded-lg p-2 text-center">
+                        <p className="text-xs text-gray-500">Impacto</p>
+                        <p className={`text-xl font-black ${stats.cloudyImpact >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {stats.cloudyImpact >= 0 ? '+' : ''}{stats.cloudyImpact.toFixed(0)}%
+                        </p>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-800 leading-relaxed">
+                      {stats.cloudyImpact > 5 ? 
+                        `Los días nublados generan ${stats.cloudyImpact.toFixed(0)}% más ventas. La cobertura de nubes favorece el consumo de helados.` :
+                        stats.cloudyImpact < -5 ?
+                        `Los días nublados reducen ventas ${Math.abs(stats.cloudyImpact).toFixed(0)}%. Considera actividades de marketing para días nublados.` :
+                        'El clima nublado tiene impacto neutral en ventas.'
+                      }
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
             {viewMode === 'comparison' && stats && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
