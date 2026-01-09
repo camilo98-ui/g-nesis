@@ -2090,7 +2090,7 @@ Genera:
               </div>
 
               {/* Columna Derecha - Weather & KPIs */}
-              <div className="col-span-12 lg:col-span-4 space-y-3">
+              <div className="col-span-12 lg:col-span-4 space-y-4">
                 {/* Análisis Clima vs Ventas - Profesional */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
