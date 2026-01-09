@@ -734,6 +734,11 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
     return `${format(dateRange.from, 'dd/MM')} - ${format(dateRange.to, 'dd/MM')}`;
   };
 
+  const handleResetToMonth = () => {
+    setDateRange({ from: startOfMonth(new Date()), to: endOfMonth(new Date()) });
+    setIsCalendarOpen(false);
+  };
+
   if (!chartData.length) {
     return (
       <Card className="bg-white shadow-xl border-0">
