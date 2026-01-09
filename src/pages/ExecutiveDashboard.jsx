@@ -2787,6 +2787,9 @@ Genera:
                   )}
                   </GridLayout>
                   )}
+                  </>
+                  )}
+                  </div>
 
                   {/* Modal Detalle Tienda */}
       <AnimatePresence>
