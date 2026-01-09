@@ -68,13 +68,13 @@ export default function ExecutiveWeatherSalesAnalysis({ weatherData, dailySales,
     const end = new Date(dateRange.to);
     end.setHours(23, 59, 59, 999);
 
-    const weatherDays = weatherData.history.time
-      .filter(date => {
+    const weatherDays = weatherData?.history?.time
+      ?.filter(date => {
         const d = parseISO(date);
         d.setHours(0, 0, 0, 0);
         return d >= start && d <= end;
       })
-      .map((date, idx) => {
+      ?.map((date, idx) => {
         const temp = weatherData.history.temperature_2m_mean?.[idx] || 0;
         const precipitation = weatherData.history.precipitation_sum?.[idx] || 0;
         const weatherCode = weatherData.history.weathercode?.[idx] || 0;
