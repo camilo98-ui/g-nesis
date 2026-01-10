@@ -726,7 +726,7 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
   }, [stats, chartData]);
 
   return (
-    <div className="space-y-5 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-6 rounded-3xl">
+    <div className="space-y-5">
       {/* Header Ejecutivo Minimalista */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -1021,11 +1021,7 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
         <div className="relative z-30 p-8">
           <div className="h-[500px]">
             <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart 
-                data={filteredData} 
-                margin={{ top: 20, right: 20, bottom: 20, left: 10 }}
-                style={{ backgroundColor: 'transparent' }}
-              >
+              <ComposedChart data={filteredData} margin={{ top: 20, right: 20, bottom: 20, left: 10 }}>
                 <defs>
                   {/* Gradientes 3D profesionales */}
                   <linearGradient id="sunnyBar3D" x1="0" y1="0" x2="0" y2="1">
