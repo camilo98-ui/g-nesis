@@ -270,51 +270,62 @@ export default function CashiersDashboard() {
       <FloatingIceCreamsBg />
       
       <div className="max-w-7xl mx-auto px-4 py-6 relative z-10">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-          <div className="flex items-center gap-4">
+        {/* Header - Reorganizado para móvil */}
+        <div className="space-y-3 mb-6">
+          {/* Fila 1: Botón volver + Título */}
+          <div className="flex items-center gap-3">
             <Link to={createPageUrl('Home')}>
-              <Button variant="ghost" size="icon" className="rounded-full hover:bg-pink-50">
+              <Button variant="ghost" size="icon" className="rounded-full hover:bg-pink-50 flex-shrink-0">
                 <ArrowLeft className="w-5 h-5 text-pink-600" />
               </Button>
             </Link>
-            <div>
+            <div className="flex-1 min-w-0">
               <motion.h1
                 animate={{
                   backgroundPosition: ['0% 50%', '100% 50%', '0% 50%']
                 }}
-                transition={{ duration: 5, repeat: Infinity }} className="bg-clip-text text-pink-700 text-2xl font-bold md:text-3xl from-pink-500 via-rose-500 to-pink-500 flex items-center gap-2">Cajeros
-
-
-
-
+                transition={{ duration: 5, repeat: Infinity }} 
+                className="bg-clip-text text-pink-700 text-2xl font-bold md:text-3xl from-pink-500 via-rose-500 to-pink-500"
+              >
+                Cajeros
               </motion.h1>
-              {selectedStore &&
-              <p className="text-pink-700 text-sm font-medium">{getDisplayName(selectedStore)}</p>
-              }
+              {selectedStore && (
+                <p className="text-pink-700 text-sm font-medium truncate">{getDisplayName(selectedStore)}</p>
+              )}
             </div>
           </div>
-          <div className="flex flex-col md:flex-row gap-3 items-center">
+
+          {/* Fila 2: Selectores principales */}
+          <div className="flex flex-col sm:flex-row gap-2">
+            <div className="flex-1">
+              <StoreSelector selectedStore={selectedStore} onStoreChange={handleStoreChange} />
+            </div>
+            <div className="flex-shrink-0">
+              <DateFilter dateRange={dateRange} onDateChange={setDateRange} />
+            </div>
+          </div>
+
+          {/* Fila 3: Botones de acción */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setShowSalesModal(true)}
-              className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-green-500 hover:from-emerald-500 hover:to-green-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/30 transition-all"
+              className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-emerald-400 to-green-500 hover:from-emerald-500 hover:to-green-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/30 transition-all"
             >
               <Receipt className="w-5 h-5 text-white" />
             </motion.button>
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setShowBadgeConfig(true)} className="bg-background text-pink-700 px-3 text-xs font-medium rounded-md inline-flex items-center justify-center whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border shadow-sm hover:text-accent-foreground h-8 gap-2 border-violet-200 hover:bg-violet-50">
-
-
+              onClick={() => setShowBadgeConfig(true)} 
+              className="flex-shrink-0 text-pink-700 px-3 text-xs font-semibold rounded-xl h-10 gap-2 border-2 border-violet-200 hover:bg-violet-50 bg-white"
+            >
               <Settings className="w-4 h-4" />
-              Config Insignias
+              <span className="hidden sm:inline">Config Insignias</span>
+              <span className="sm:hidden">Config</span>
             </Button>
             <PerformanceAnalyzer storeId={selectedStore} storeName={getDisplayName(selectedStore)} dateRange={dateRange} />
-            <StoreSelector selectedStore={selectedStore} onStoreChange={handleStoreChange} />
-            <DateFilter dateRange={dateRange} onDateChange={setDateRange} />
           </div>
         </div>
 
