@@ -71,7 +71,7 @@ export default function FreezerAuditPanel({
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
-            📊 Total
+            📊 Resumen (3 neveras)
           </button>
           {byFreezer && Object.keys(byFreezer).sort((a, b) => a - b).map(freezerNum => (
             <button
