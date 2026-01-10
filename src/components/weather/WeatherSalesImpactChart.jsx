@@ -1021,7 +1021,11 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
         <div className="relative z-30 p-8">
           <div className="h-[500px]">
             <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart data={filteredData} margin={{ top: 20, right: 20, bottom: 20, left: 10 }}>
+              <ComposedChart 
+                data={filteredData} 
+                margin={{ top: 20, right: 20, bottom: 20, left: 10 }}
+                style={{ backgroundColor: 'transparent' }}
+              >
                 <defs>
                   {/* Gradientes 3D profesionales */}
                   <linearGradient id="sunnyBar3D" x1="0" y1="0" x2="0" y2="1">
