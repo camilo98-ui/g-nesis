@@ -1230,45 +1230,8 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
                   stroke="#10b981"
                   strokeWidth={3}
                   filter="url(#neonGlow)"
-                  dot={(props) => {
-                    const { cx, cy, payload, index } = props;
-                    if (payload.sales === 0) return null;
-                    return (
-                      <g>
-                        <circle
-                          cx={cx}
-                          cy={cy}
-                          r={5}
-                          fill="#10b981"
-                          stroke="#fff"
-                          strokeWidth={2}
-                          filter="drop-shadow(0 0 4px rgba(16, 185, 129, 0.6))"
-                        />
-                      </g>
-                    );
-                  }}
-                  activeDot={(props) => {
-                    const { cx, cy } = props;
-                    return (
-                      <g>
-                        <circle
-                          cx={cx}
-                          cy={cy}
-                          r={12}
-                          fill="rgba(16, 185, 129, 0.2)"
-                        />
-                        <circle 
-                          cx={cx} 
-                          cy={cy} 
-                          r={7} 
-                          fill="#10b981" 
-                          stroke="#fff" 
-                          strokeWidth={2.5} 
-                          filter="drop-shadow(0 0 8px rgba(16, 185, 129, 1))" 
-                        />
-                      </g>
-                    );
-                  }}
+                  dot={{ r: 5, fill: "#10b981", stroke: "#fff", strokeWidth: 2 }}
+                  activeDot={{ r: 7, fill: "#10b981", stroke: "#fff", strokeWidth: 2.5 }}
                 />
 
                 {/* Línea de temperatura volumétrica con neon glow */}
