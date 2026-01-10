@@ -1222,18 +1222,6 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
                   })}
                 </Bar>
 
-                {/* Línea de ventas - visible en todos los modos */}
-                <Line
-                  yAxisId="sales"
-                  type="monotone"
-                  dataKey="sales"
-                  stroke="#10b981"
-                  strokeWidth={3}
-                  filter="url(#neonGlow)"
-                  dot={{ r: 5, fill: "#10b981", stroke: "#fff", strokeWidth: 2 }}
-                  activeDot={{ r: 7, fill: "#10b981", stroke: "#fff", strokeWidth: 2.5 }}
-                />
-
                 {/* Línea de temperatura volumétrica con neon glow */}
                 <Line
                   yAxisId="temp"
@@ -1242,8 +1230,57 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
                   stroke="url(#sweepGradient)"
                   strokeWidth={5}
                   filter="url(#neonGlow)"
-                  dot={{ r: 7, fill: "#fb923c", stroke: "#fff", strokeWidth: 2.5 }}
-                  activeDot={{ r: 10, fill: "#fb923c", stroke: "#fff", strokeWidth: 3 }}
+                  dot={(props) => {
+                    const { cx, cy, index } = props;
+                    return (
+                      <g>
+                        {/* Glow pulsante */}
+                        <motion.circle
+                          cx={cx}
+                          cy={cy}
+                          r={10}
+                          fill="rgba(251, 146, 60, 0.15)"
+                          initial={{ scale: 0 }}
+                          animate={{ 
+                            scale: [1, 1.4, 1],
+                            opacity: [0.3, 0.6, 0.3]
+                          }}
+                          transition={{ 
+                            duration: 2.5,
+                            repeat: Infinity,
+                            delay: 0.08 * index
+                          }}
+                        />
+                        <circle
+                          cx={cx}
+                          cy={cy}
+                          r={7}
+                          fill="#fb923c"
+                          stroke="#fff"
+                          strokeWidth={2.5}
+                          filter="drop-shadow(0 0 6px rgba(251, 146, 60, 0.8))"
+                        />
+                      </g>
+                    );
+                  }}
+                  activeDot={(props) => {
+                    const { cx, cy } = props;
+                    return (
+                      <g>
+                        <motion.circle
+                          cx={cx}
+                          cy={cy}
+                          r={18}
+                          fill="rgba(251, 146, 60, 0.15)"
+                          animate={{ r: [18, 24, 18], opacity: [0.2, 0.5, 0.2] }}
+                          transition={{ duration: 1.2, repeat: Infinity }}
+                        />
+                        <circle cx={cx} cy={cy} r={10} fill="#fb923c" stroke="#fff" strokeWidth={3} 
+                          filter="drop-shadow(0 0 12px rgba(251, 146, 60, 1))" 
+                        />
+                      </g>
+                    );
+                  }}
                 />
               </ComposedChart>
             </ResponsiveContainer>
