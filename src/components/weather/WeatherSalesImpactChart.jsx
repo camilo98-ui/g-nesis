@@ -4,6 +4,7 @@ import {
   CloudRain, Sun, Cloud, Thermometer, TrendingUp, TrendingDown, 
   Zap, Calendar as CalendarIcon, BarChart3, Activity, X, Check, ChevronLeft, ChevronRight, Sparkles
 } from 'lucide-react';
+import { AnimatePresence } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { 
@@ -453,6 +454,7 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
   const [showForecast, setShowForecast] = useState(false);
   const [forecastData, setForecastData] = useState(null);
   const [loadingForecast, setLoadingForecast] = useState(false);
+  const [showKPIDetail, setShowKPIDetail] = useState(null);
 
   // Cargar pronóstico
   useEffect(() => {
@@ -609,6 +611,7 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
 
   // Datos filtrados por vista
   const filteredData = viewMode === 'all' ? chartData :
+    viewMode === 'temp' ? chartData :
     chartData.map(d => ({
       ...d,
       sales: d.weatherType === viewMode ? d.sales : 0
@@ -639,9 +642,9 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
 
     // Proyección 7 días
     const forecastDays = chartData.filter(d => d.isForecast).slice(0, 7);
-    const forecastTotal = forecastDays.reduce((s, d) => s + d.sales, 0);
-    const forecastAvg = forecastTotal / Math.max(forecastDays.length, 1);
-    const forecastVariation = stats.avgTotal > 0 ? ((forecastAvg - stats.avgTotal) / stats.avgTotal * 100) : 0;
+    const forecastTotal = forecastDays.length > 0 ? forecastDays.reduce((s, d) => s + d.sales, 0) : 0;
+    const forecastAvg = forecastDays.length > 0 ? forecastTotal / forecastDays.length : 0;
+    const forecastVariation = stats.avgTotal > 0 && forecastAvg > 0 ? ((forecastAvg - stats.avgTotal) / stats.avgTotal * 100) : 0;
 
     // Riesgo climático
     const rainyForecast = forecastDays.filter(d => d.weatherType === 'rainy').length;
@@ -695,10 +698,12 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
       {financialMetrics && stats && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Impacto Neto */}
-          <motion.div
+          <motion.button
+            onClick={() => setShowKPIDetail('net_impact')}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="relative bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 overflow-hidden"
+            whileHover={{ scale: 1.02 }}
+            className="relative bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 overflow-hidden cursor-pointer text-left"
             style={{ boxShadow: '0 10px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)' }}
           >
             <motion.div
@@ -723,14 +728,16 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
                 }
               </p>
             </div>
-          </motion.div>
+          </motion.button>
 
           {/* Variación Porcentual */}
-          <motion.div
+          <motion.button
+            onClick={() => setShowKPIDetail('deviation')}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="relative bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 overflow-hidden"
+            whileHover={{ scale: 1.02 }}
+            className="relative bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 overflow-hidden cursor-pointer text-left"
             style={{ boxShadow: '0 10px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)' }}
           >
             <motion.div
@@ -739,33 +746,32 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
               transition={{ duration: 3, repeat: Infinity, delay: 1 }}
             />
             <div className="relative z-10">
-              <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Mayor Desviación Climática</p>
+              <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Impacto Clima Nublado</p>
               <motion.p 
-                className={`text-4xl font-black mb-1 ${Math.abs(stats.rainyImpact) > Math.abs(stats.sunnyImpact) ? 'text-blue-400' : 'text-amber-400'}`}
-                key={Math.max(Math.abs(stats.rainyImpact), Math.abs(stats.sunnyImpact))}
+                className="text-4xl font-black mb-1 text-slate-400"
+                key={stats.cloudyImpact}
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
               >
-                {Math.abs(stats.rainyImpact) > Math.abs(stats.sunnyImpact) ? 
-                  (stats.rainyImpact >= 0 ? '+' : '−') + Math.abs(stats.rainyImpact).toFixed(0) :
-                  (stats.sunnyImpact >= 0 ? '+' : '−') + Math.abs(stats.sunnyImpact).toFixed(0)
-                }%
+                {stats.cloudyImpact >= 0 ? '+' : '−'}{Math.abs(stats.cloudyImpact).toFixed(0)}%
               </motion.p>
               <p className="text-slate-400 text-xs">
-                {Math.abs(stats.rainyImpact) > Math.abs(stats.sunnyImpact) ? 
-                  `🌧️ Lluvia vs día promedio` :
-                  `☀️ Sol vs día promedio`
-                }
+                ☁️ Nublado vs día promedio
               </p>
             </div>
-          </motion.div>
+          </motion.button>
 
           {/* Proyección 7 Días */}
-          <motion.div
+          <motion.button
+            onClick={() => {
+              if (!showForecast) setShowForecast(true);
+              setShowKPIDetail('forecast');
+            }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="relative bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 overflow-hidden"
+            whileHover={{ scale: 1.02 }}
+            className="relative bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 overflow-hidden cursor-pointer text-left"
             style={{ boxShadow: '0 10px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)' }}
           >
             <motion.div
@@ -776,33 +782,40 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
             <div className="relative z-10">
               <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Proyección 7 Días</p>
               <motion.p 
-                className={`text-4xl font-black mb-1 ${financialMetrics.forecastVariation >= 0 ? 'text-cyan-400' : 'text-orange-400'}`}
+                className={`text-4xl font-black mb-1 ${
+                  !showForecast ? 'text-slate-500' :
+                  financialMetrics.forecastVariation >= 0 ? 'text-cyan-400' : 'text-orange-400'
+                }`}
                 key={financialMetrics.forecastTotal}
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
               >
-                {formatCurrency(financialMetrics.forecastTotal)}
+                {!showForecast ? 'Clic para ver' : formatCurrency(financialMetrics.forecastTotal)}
               </motion.p>
               <div className="flex items-center gap-2">
-                <span className={`text-xs font-bold ${financialMetrics.forecastVariation >= 0 ? 'text-cyan-300' : 'text-orange-300'}`}>
-                  {financialMetrics.forecastVariation >= 0 ? '+' : ''}{financialMetrics.forecastVariation.toFixed(1)}%
-                </span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold border" style={{
-                  backgroundColor: financialMetrics.riskLevel === 'alto' ? 'rgba(239, 68, 68, 0.2)' :
-                                   financialMetrics.riskLevel === 'medio' ? 'rgba(251, 146, 60, 0.2)' :
-                                   'rgba(34, 197, 94, 0.2)',
-                  color: financialMetrics.riskLevel === 'alto' ? '#fca5a5' :
-                         financialMetrics.riskLevel === 'medio' ? '#fdba74' :
-                         '#86efac',
-                  borderColor: financialMetrics.riskLevel === 'alto' ? 'rgba(239, 68, 68, 0.3)' :
-                               financialMetrics.riskLevel === 'medio' ? 'rgba(251, 146, 60, 0.3)' :
-                               'rgba(34, 197, 94, 0.3)'
-                }}>
-                  Riesgo {financialMetrics.riskLevel}
-                </span>
+                {showForecast && (
+                  <span className={`text-xs font-bold ${financialMetrics.forecastVariation >= 0 ? 'text-cyan-300' : 'text-orange-300'}`}>
+                    {financialMetrics.forecastVariation >= 0 ? '+' : ''}{financialMetrics.forecastVariation.toFixed(1)}%
+                  </span>
+                )}
+                {showForecast && (
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold border" style={{
+                    backgroundColor: financialMetrics.riskLevel === 'alto' ? 'rgba(239, 68, 68, 0.2)' :
+                                     financialMetrics.riskLevel === 'medio' ? 'rgba(251, 146, 60, 0.2)' :
+                                     'rgba(34, 197, 94, 0.2)',
+                    color: financialMetrics.riskLevel === 'alto' ? '#fca5a5' :
+                           financialMetrics.riskLevel === 'medio' ? '#fdba74' :
+                           '#86efac',
+                    borderColor: financialMetrics.riskLevel === 'alto' ? 'rgba(239, 68, 68, 0.3)' :
+                                 financialMetrics.riskLevel === 'medio' ? 'rgba(251, 146, 60, 0.3)' :
+                                 'rgba(34, 197, 94, 0.3)'
+                  }}>
+                    Riesgo {financialMetrics.riskLevel}
+                  </span>
+                )}
               </div>
             </div>
-          </motion.div>
+          </motion.button>
         </div>
       )}
 
@@ -854,6 +867,20 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
             glowColor="#f97316"
           />
         </div>
+        
+        {/* Botón de Pronóstico */}
+        <Button
+          onClick={() => setShowForecast(!showForecast)}
+          variant={showForecast ? "default" : "outline"}
+          className={`h-8 px-4 text-xs font-semibold ${
+            showForecast 
+              ? 'bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white border-0' 
+              : 'border-slate-300 text-slate-700 hover:border-cyan-400 hover:bg-cyan-50'
+          }`}
+          disabled={loadingForecast}
+        >
+          {loadingForecast ? 'Cargando...' : showForecast ? '✓ Pronóstico Activo' : 'Ver Pronóstico 7 días'}
+        </Button>
       </div>
 
       {/* Gráfica Principal - 70% del foco visual */}
@@ -1305,6 +1332,164 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
           </div>
         </motion.div>
       )}
+
+      {/* Modal de Detalles de KPI */}
+      <AnimatePresence>
+        {showKPIDetail && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowKPIDetail(null)}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-8 max-w-2xl w-full border border-slate-700 shadow-2xl"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-black text-white">
+                  {showKPIDetail === 'net_impact' && 'Impacto Neto del Clima'}
+                  {showKPIDetail === 'deviation' && 'Impacto Clima Nublado'}
+                  {showKPIDetail === 'forecast' && 'Proyección 7 Días'}
+                </h3>
+                <button
+                  onClick={() => setShowKPIDetail(null)}
+                  className="p-2 hover:bg-slate-700 rounded-xl transition-colors"
+                >
+                  <X className="w-6 h-6 text-slate-400" />
+                </button>
+              </div>
+
+              {showKPIDetail === 'net_impact' && financialMetrics && stats && (
+                <div className="space-y-4">
+                  <div className="bg-slate-800/50 rounded-xl p-5 border border-slate-700">
+                    <p className="text-slate-300 text-sm mb-3">Balance financiero total del clima en el período analizado</p>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-400 text-sm">Ganancia en días soleados:</span>
+                        <span className="text-emerald-400 font-bold text-lg">+{formatCurrency(financialMetrics.sunnyGain)}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-400 text-sm">Pérdida en días lluviosos:</span>
+                        <span className="text-rose-400 font-bold text-lg">−{formatCurrency(financialMetrics.rainyLoss)}</span>
+                      </div>
+                      <div className="h-px bg-slate-700 my-2"></div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-white font-bold">Balance neto:</span>
+                        <span className={`font-black text-2xl ${financialMetrics.netImpact >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                          {financialMetrics.netImpact >= 0 ? '+' : '−'}{formatCurrency(Math.abs(financialMetrics.netImpact))}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-slate-400 text-sm">
+                    {financialMetrics.netImpact >= 0 ? 
+                      '✅ El clima tuvo un impacto positivo neto en este período.' :
+                      '⚠️ El clima tuvo un impacto negativo neto en este período. Considera estrategias de mitigación para días lluviosos.'}
+                  </p>
+                </div>
+              )}
+
+              {showKPIDetail === 'deviation' && stats && (
+                <div className="space-y-4">
+                  <div className="bg-slate-800/50 rounded-xl p-5 border border-slate-700">
+                    <p className="text-slate-300 text-sm mb-4">Comparativa de ventas en días nublados vs promedio general</p>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-400 text-sm">Venta promedio general:</span>
+                        <span className="text-white font-bold text-lg">{formatCurrency(stats.avgTotal)}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-400 text-sm">Venta promedio días nublados:</span>
+                        <span className="text-slate-300 font-bold text-lg">{formatCurrency(stats.avgCloudy)}</span>
+                      </div>
+                      <div className="h-px bg-slate-700 my-2"></div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-white font-bold">Diferencia:</span>
+                        <span className={`font-black text-2xl ${stats.cloudyImpact >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                          {stats.cloudyImpact >= 0 ? '+' : ''}{stats.cloudyImpact.toFixed(1)}%
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
+                    <p className="text-slate-400 text-xs">
+                      📊 Días analizados: {stats.cloudyCount} días nublados de {stats.sunnyCount + stats.rainyCount + stats.cloudyCount} totales
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {showKPIDetail === 'forecast' && financialMetrics && showForecast && (
+                <div className="space-y-4">
+                  <div className="bg-slate-800/50 rounded-xl p-5 border border-slate-700">
+                    <p className="text-slate-300 text-sm mb-4">Proyección de ventas basada en pronóstico climático</p>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-400 text-sm">Venta proyectada total:</span>
+                        <span className="text-cyan-400 font-bold text-xl">{formatCurrency(financialMetrics.forecastTotal)}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-400 text-sm">Venta promedio histórica:</span>
+                        <span className="text-slate-300 font-bold text-lg">{formatCurrency(stats.avgTotal * 7)}</span>
+                      </div>
+                      <div className="h-px bg-slate-700 my-2"></div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-white font-bold">Variación vs histórico:</span>
+                        <span className={`font-black text-2xl ${financialMetrics.forecastVariation >= 0 ? 'text-emerald-400' : 'text-orange-400'}`}>
+                          {financialMetrics.forecastVariation >= 0 ? '+' : ''}{financialMetrics.forecastVariation.toFixed(1)}%
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className={`rounded-xl p-4 border ${
+                    financialMetrics.riskLevel === 'alto' ? 'bg-rose-500/10 border-rose-500/30' :
+                    financialMetrics.riskLevel === 'medio' ? 'bg-orange-500/10 border-orange-500/30' :
+                    'bg-emerald-500/10 border-emerald-500/30'
+                  }`}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className={`px-2 py-1 rounded-lg text-xs font-black uppercase ${
+                        financialMetrics.riskLevel === 'alto' ? 'bg-rose-500/30 text-rose-300' :
+                        financialMetrics.riskLevel === 'medio' ? 'bg-orange-500/30 text-orange-300' :
+                        'bg-emerald-500/30 text-emerald-300'
+                      }`}>
+                        Riesgo {financialMetrics.riskLevel}
+                      </span>
+                    </div>
+                    <p className="text-slate-300 text-sm">
+                      {financialMetrics.rainyForecast > 0 && `Se pronostican ${financialMetrics.rainyForecast} días lluviosos. `}
+                      {financialMetrics.riskLevel === 'alto' ? 
+                        'Impacto significativo esperado. Implementa estrategia de mitigación.' :
+                        financialMetrics.riskLevel === 'medio' ? 
+                        'Impacto moderado. Monitorea y ajusta inventario.' :
+                        'Condiciones favorables. Operación estándar.'}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {showKPIDetail === 'forecast' && !showForecast && (
+                <div className="text-center py-8">
+                  <p className="text-slate-400 mb-4">Activa el pronóstico para ver la proyección detallada</p>
+                  <Button
+                    onClick={() => {
+                      setShowForecast(true);
+                      setShowKPIDetail(null);
+                    }}
+                    className="bg-cyan-500 hover:bg-cyan-600"
+                  >
+                    Activar Pronóstico
+                  </Button>
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
