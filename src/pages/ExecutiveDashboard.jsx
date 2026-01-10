@@ -207,58 +207,40 @@ export default function ExecutiveDashboard() {
       );
       const totalWeeklyAvg = avgByDayOfWeek.reduce((a, b) => a + b, 0);
 
-      // Presupuesto mensual
+      // Presupuesto mensual - SIN ajustes, usar el presupuesto real de la tienda
       const activeBudget = allBudgets.find(b => b.store_id === store.code && b.is_active === true);
       const budget = activeBudget || allBudgets.find(b => b.store_id === store.code && b.month === currentMonth && b.year === currentYear);
       const salesBudget = budget?.sales_budget || 0;
 
-      const TARGET_PERCENTAGE = 1.15;
-      const adjustedMonthlyBudget = salesBudget * TARGET_PERCENTAGE;
-      const dailyBaseBudget = adjustedMonthlyBudget / daysInMonth;
+      // PPT diario base = presupuesto mensual / días del mes
+      const dailyBaseBudget = salesBudget / daysInMonth;
 
-      // Función para obtener presupuesto diario ajustado
+      // Función para obtener presupuesto diario (usar presupuesto real sin ajustes)
       const getDailyBudget = (date) => {
-        if (totalWeeklyAvg === 0) return dailyBaseBudget;
-        const dayOfWeek = date.getDay();
-        if (countByDayOfWeek[dayOfWeek] >= 3) {
-          const totalHistoricalAvg = avgByDayOfWeek.reduce((a, b) => a + b, 0);
-          const monthlyHistoricalProjection = totalHistoricalAvg * (daysInMonth / 7);
-          const scaleFactor = adjustedMonthlyBudget / monthlyHistoricalProjection;
-          return avgByDayOfWeek[dayOfWeek] * scaleFactor;
-        }
         return dailyBaseBudget;
       };
 
-      // PPT del día de hoy
-      const adjustedDailyBudget = getDailyBudget(now);
+      // PPT del día de hoy (presupuesto real sin multiplicadores)
+      const adjustedDailyBudget = dailyBaseBudget;
 
-      // Presupuesto semanal - suma de presupuestos diarios de la semana que caen en el mes
-      const daysInCurrentWeek = eachDayOfInterval({ start: currentWeekStart, end: currentWeekEnd })
-        .filter(d => d >= monthStart && d <= monthEnd);
-      // Meta semanal más agresiva: 120% del presupuesto base
-      const WEEKLY_TARGET = 1.20;
-      const weeklyBudget = daysInCurrentWeek.reduce((sum, day) => sum + getDailyBudget(day), 0) * WEEKLY_TARGET;
+      // VENTAS DE LA SEMANA ACTUAL (semana en la que estamos HOY)
+      // Calcular inicio y fin de la semana actual basado en el modo
+      const todayWeekStart = gregorianMode 
+        ? startOfWeek(now, { weekStartsOn: 1 }) // Gregoriano: lunes a domingo
+        : (() => {
+            const daysSinceRetailStart = Math.floor((now - RETAIL_WEEK_START) / (24 * 60 * 60 * 1000));
+            const currentRetailWeekNum = Math.floor(daysSinceRetailStart / 7);
+            return addDays(RETAIL_WEEK_START, currentRetailWeekNum * 7);
+          })();
+      
+      const todayWeekEnd = addDays(todayWeekStart, 6);
 
-      // VENTAS DE LA SEMANA ACTUAL
+      // Filtrar ventas de la semana actual (donde estamos hoy)
       const weekSales = storeSales.filter(s => {
         try {
           const saleDate = parseISO(s.date);
-          const isInRange = isWithinInterval(saleDate, { start: currentWeekStart, end: currentWeekEnd });
-          
-          // Debug temporal
-          if (store.code === 'BTA 11' && isInRange) {
-            console.log('✅ Venta encontrada en semana:', {
-              store: store.code,
-              date: s.date,
-              sales: s.total_sales,
-              weekStart: currentWeekStart.toISOString(),
-              weekEnd: currentWeekEnd.toISOString()
-            });
-          }
-          
-          return isInRange;
+          return isWithinInterval(saleDate, { start: todayWeekStart, end: todayWeekEnd }) && saleDate <= now;
         } catch (error) {
-          console.error('Error parseando fecha:', s.date, error);
           return false;
         }
       });
@@ -267,16 +249,8 @@ export default function ExecutiveDashboard() {
       const weekTotalTransactions = weekSales.reduce((sum, s) => sum + (s.total_transactions || 0), 0);
       const weekAvgTicket = weekTotalTransactions > 0 ? weekTotalSales / weekTotalTransactions : 0;
       
-      // Debug temporal para primera tienda
-      if (store.code === 'BTA 11') {
-        console.log('📊 Análisis BTA 11:', {
-          weekSalesCount: weekSales.length,
-          weekTotalSales,
-          weekTotalTransactions,
-          allSalesCount: storeSales.length,
-          dateRange: `${currentWeekStart.toISOString().split('T')[0]} a ${currentWeekEnd.toISOString().split('T')[0]}`
-        });
-      }
+      // Presupuesto semanal (7 días de presupuesto diario)
+      const weeklyBudget = dailyBaseBudget * 7;
 
       // VENTAS DEL MES
       const monthSales = storeSales.filter(s => {
@@ -2320,7 +2294,7 @@ export default function ExecutiveDashboard() {
                                 <p className="font-black text-pink-400 text-base tabular-nums">{formatShort(store.weekProjection)}</p>
                                 <p className={`text-xs font-bold mt-0.5 tabular-nums ${
                                   store.weekProjectionCompliance >= 100 ? 'text-emerald-400' :
-                                  store.weekProjectionCompliance >= 85 ? 'text-amber-400' : 'text-red-400'
+                                  store.weekProjectionCompliance >= 90 ? 'text-amber-400' : 'text-red-400'
                                 }`}>
                                   {store.weekProjectionCompliance.toFixed(0)}%
                                 </p>
@@ -2337,7 +2311,7 @@ export default function ExecutiveDashboard() {
                                 <p className="font-black text-blue-400 text-base tabular-nums">{formatShort(store.monthTotalSales)}</p>
                                 <p className={`text-xs font-bold mt-0.5 tabular-nums ${
                                   store.salesCompliance >= 100 ? 'text-emerald-400' :
-                                  store.salesCompliance >= 70 ? 'text-amber-400' : 'text-red-400'
+                                  store.salesCompliance >= 90 ? 'text-amber-400' : 'text-red-400'
                                 }`}>
                                   {store.salesCompliance.toFixed(0)}%
                                 </p>
@@ -2352,7 +2326,7 @@ export default function ExecutiveDashboard() {
                             ) : (
                               <div className="relative">
                                 {/* Glow para excelentes proyecciones */}
-                                {store.monthProjectionCompliance >= 110 && (
+                                {store.monthProjectionCompliance >= 100 && (
                                   <motion.div
                                     className="absolute -inset-3 bg-emerald-500/25 blur-xl rounded-lg"
                                     animate={{ opacity: [0.3, 0.5, 0.3] }}
@@ -2360,10 +2334,15 @@ export default function ExecutiveDashboard() {
                                   />
                                 )}
 
-                                <p className="font-black text-emerald-400 text-base tabular-nums relative z-10">{formatShort(store.monthProjection)}</p>
+                                <p className={`font-black text-base tabular-nums relative z-10 ${
+                                  store.monthProjectionCompliance >= 100 ? 'text-emerald-400' :
+                                  store.monthProjectionCompliance >= 96 ? 'text-amber-400' : 'text-red-400'
+                                }`}>
+                                  {formatShort(store.monthProjection)}
+                                </p>
                                 <p className={`text-xs font-bold mt-0.5 tabular-nums relative z-10 ${
                                   store.monthProjectionCompliance >= 100 ? 'text-emerald-400' :
-                                  store.monthProjectionCompliance >= 85 ? 'text-amber-400' : 'text-red-400'
+                                  store.monthProjectionCompliance >= 96 ? 'text-amber-400' : 'text-red-400'
                                 }`}>
                                   {store.monthProjectionCompliance.toFixed(0)}%
                                 </p>
