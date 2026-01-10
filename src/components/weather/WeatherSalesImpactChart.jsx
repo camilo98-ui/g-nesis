@@ -995,54 +995,61 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
 
           {viewMode === 'cloudy' && (
             <>
-              {/* Ambiente nublado con nubes flotantes */}
+              {/* Ambiente nublado intenso */}
               <motion.div
-                className="absolute inset-0 bg-gradient-to-b from-slate-300/10 to-gray-400/8 pointer-events-none z-5"
-                animate={{ opacity: [0.5, 0.7, 0.5] }}
+                className="absolute inset-0 bg-gradient-to-b from-slate-400/25 to-gray-500/20 pointer-events-none z-5"
+                animate={{ opacity: [0.7, 1, 0.7] }}
                 transition={{ duration: 6, repeat: Infinity }}
               />
-              {/* Nubes difusas */}
-              {[...Array(8)].map((_, i) => (
+              {/* Nubes grandes flotantes */}
+              {[...Array(12)].map((_, i) => (
                 <motion.div
                   key={`cloud-${i}`}
-                  className="absolute rounded-full pointer-events-none z-10 blur-xl"
+                  className="absolute rounded-full pointer-events-none z-10"
                   style={{ 
-                    left: `${-10 + Math.random() * 110}%`,
-                    top: `${10 + Math.random() * 60}%`,
-                    width: `${60 + Math.random() * 80}px`,
-                    height: `${30 + Math.random() * 40}px`,
-                    background: 'radial-gradient(circle, rgba(148, 163, 184, 0.15), transparent)'
+                    left: `${-15 + Math.random() * 120}%`,
+                    top: `${5 + Math.random() * 70}%`,
+                    width: `${100 + Math.random() * 150}px`,
+                    height: `${50 + Math.random() * 70}px`,
+                    background: 'radial-gradient(ellipse, rgba(100, 116, 139, 0.45) 0%, rgba(148, 163, 184, 0.25) 50%, transparent 100%)',
+                    filter: 'blur(25px)'
                   }}
                   animate={{ 
-                    x: [0, 50 + Math.random() * 100, 0],
-                    opacity: [0.3, 0.6, 0.3]
+                    x: [0, 80 + Math.random() * 150, 0],
+                    opacity: [0.5, 0.8, 0.5],
+                    scale: [1, 1.1, 1]
                   }}
                   transition={{ 
-                    duration: 15 + Math.random() * 10,
+                    duration: 20 + Math.random() * 15,
                     repeat: Infinity,
-                    delay: Math.random() * 5,
-                    ease: "linear"
+                    delay: Math.random() * 8,
+                    ease: "easeInOut"
                   }}
                 />
               ))}
-              {/* Partículas de neblina */}
-              {[...Array(12)].map((_, i) => (
+              {/* Neblina densa */}
+              {[...Array(20)].map((_, i) => (
                 <motion.div
                   key={`mist-${i}`}
-                  className="absolute w-2 h-2 bg-slate-300/20 rounded-full pointer-events-none z-5 blur-md"
+                  className="absolute rounded-full pointer-events-none z-8"
                   style={{ 
                     left: `${Math.random() * 100}%`,
-                    top: `${Math.random() * 100}%`
+                    top: `${Math.random() * 100}%`,
+                    width: `${40 + Math.random() * 60}px`,
+                    height: `${40 + Math.random() * 60}px`,
+                    background: 'radial-gradient(circle, rgba(148, 163, 184, 0.35), transparent)',
+                    filter: 'blur(20px)'
                   }}
                   animate={{ 
-                    scale: [1, 1.5, 1],
-                    opacity: [0.2, 0.4, 0.2],
-                    x: [0, 30, 0]
+                    scale: [1, 1.3, 1],
+                    opacity: [0.4, 0.7, 0.4],
+                    x: [0, 40, 0],
+                    y: [0, -20, 0]
                   }}
                   transition={{ 
-                    duration: 8 + Math.random() * 4,
+                    duration: 10 + Math.random() * 5,
                     repeat: Infinity,
-                    delay: Math.random() * 3
+                    delay: Math.random() * 5
                   }}
                 />
               ))}
