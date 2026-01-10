@@ -401,7 +401,7 @@ export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRa
                   const isHovered = hoveredIndex === `col1-${index}`;
                   const isDimmed = hoveredIndex && !isHovered;
                   const projColor = entry.proyeccionCompliance >= 100 ? '#10b981' : 
-                                    entry.proyeccionCompliance >= 96 ? '#f59e0b' : '#ef4444';
+                                    entry.proyeccionCompliance >= 90 ? '#f59e0b' : '#ef4444';
                   
                   return (
                     <Cell 
@@ -571,7 +571,7 @@ export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRa
                   const isHovered = hoveredIndex === `col2-${index}`;
                   const isDimmed = hoveredIndex && !isHovered;
                   const projColor = entry.proyeccionCompliance >= 100 ? '#10b981' : 
-                                    entry.proyeccionCompliance >= 96 ? '#f59e0b' : '#ef4444';
+                                    entry.proyeccionCompliance >= 90 ? '#f59e0b' : '#ef4444';
                   
                   return (
                     <Cell 
