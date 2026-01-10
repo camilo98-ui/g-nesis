@@ -1164,17 +1164,16 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
                   label={{ value: 'Temp °C', angle: 90, position: 'insideRight', fill: '#fb923c', fontSize: 12, fontWeight: 700 }}
                 />
 
-                {/* Línea de promedio morada visible */}
+                {/* Línea de promedio sutil */}
                 {stats && viewMode === 'all' && (
                   <Line
                     yAxisId="sales"
                     type="monotone"
                     dataKey={() => stats.avgTotal}
-                    stroke="#a78bfa"
-                    strokeWidth={3}
-                    strokeDasharray="8 4"
+                    stroke="#64748b"
+                    strokeWidth={2}
+                    strokeDasharray="10 5"
                     dot={false}
-                    opacity={0.9}
                   />
                 )}
 
