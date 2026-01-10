@@ -2153,12 +2153,13 @@ export default function ExecutiveDashboard() {
               <p className="text-xs sm:text-sm font-medium text-slate-400">{tableContextSummary}</p>
             </div>
 
-            {/* Tabla - Responsive con scroll horizontal en móvil */}
+            {/* Tabla - Reorganizada: PPT Día | PPT Tienda | Real Semana | Proy Semana | Real Mes | Proy Mes */}
             <div id="stores-table" className="mb-8">
               <div className="bg-white/5 backdrop-blur-2xl rounded-xl border border-white/10 overflow-x-auto">
-                <table className="w-full min-w-[900px]">
+                <table className="w-full min-w-[1000px]">
                   <thead>
                     <tr className="border-b border-white/10">
+                      {/* Tienda */}
                       <th 
                         onClick={() => handleSort('name')}
                         className="sticky left-0 bg-slate-950/80 backdrop-blur-xl z-10 text-left py-3 px-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider cursor-pointer border-r border-white/10"
@@ -2168,252 +2169,241 @@ export default function ExecutiveDashboard() {
                           {sortConfig.key === 'name' && (sortConfig.direction === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />)}
                         </div>
                       </th>
+
+                      {/* PPT Día */}
                       <th 
                         onClick={() => handleSort('dailyBudget')}
-                        className="text-right py-3 px-2 text-[10px] font-bold text-orange-400 uppercase tracking-wider cursor-pointer"
+                        className="text-center py-3 px-3 text-[10px] font-bold text-orange-400 uppercase tracking-wider cursor-pointer bg-orange-500/5"
                       >
-                        <div className="flex items-center justify-end gap-2">
-                          PPT Hoy
+                        <div className="flex flex-col items-center gap-1">
+                          <span>PPT Día</span>
+                          <span className="text-[8px] text-slate-500 normal-case">
+                            {gregorianMode ? 'Gregoriano' : 'Semana Retail'}
+                          </span>
                           {sortConfig.key === 'dailyBudget' && (sortConfig.direction === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />)}
                         </div>
                       </th>
-                      <th 
-                        onClick={() => handleSort('weeklyBudget')}
-                        className="text-right py-3 px-2 text-[10px] font-bold text-cyan-400 uppercase tracking-wider cursor-pointer"
-                      >
-                        <div className="flex items-center justify-end gap-2">
-                          PPT Sem
-                          {sortConfig.key === 'weeklyBudget' && (sortConfig.direction === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />)}
+
+                      {/* PPT Tienda (Presupuesto total del filtro) */}
+                      <th className="text-center py-3 px-3 text-[10px] font-bold text-cyan-400 uppercase tracking-wider bg-cyan-500/5">
+                        <div className="flex flex-col items-center gap-1">
+                          <span>PPT Tienda</span>
+                          <span className="text-[8px] text-slate-500 normal-case">Período Filtrado</span>
                         </div>
                       </th>
+
+                      {/* Real Semana */}
                       <th 
                         onClick={() => handleSort('weekCompliance')}
-                        className="text-right py-3 px-2 text-[10px] font-bold text-purple-400 uppercase tracking-wider cursor-pointer"
+                        className="text-center py-3 px-3 text-[10px] font-bold text-purple-400 uppercase tracking-wider cursor-pointer bg-purple-500/5"
                       >
-                        <div className="flex items-center justify-end gap-2">
-                          Venta Sem
+                        <div className="flex flex-col items-center gap-1">
+                          <span>Real Semana</span>
+                          <span className="text-[8px] text-slate-500 normal-case">Venta Actual</span>
                           {sortConfig.key === 'weekCompliance' && (sortConfig.direction === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />)}
                         </div>
                       </th>
+
+                      {/* Proyección Semana */}
                       <th 
                         onClick={() => handleSort('weekProjection')}
-                        className="text-right py-3 px-2 text-[10px] font-bold text-pink-400 uppercase tracking-wider cursor-pointer"
+                        className="text-center py-3 px-3 text-[10px] font-bold text-pink-400 uppercase tracking-wider cursor-pointer bg-pink-500/5"
                       >
-                        <div className="flex items-center justify-end gap-2">
-                          Proy Sem
+                        <div className="flex flex-col items-center gap-1">
+                          <span>Proy Semana</span>
+                          <span className="text-[8px] text-slate-500 normal-case">Estimación</span>
                           {sortConfig.key === 'weekProjection' && (sortConfig.direction === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />)}
                         </div>
                       </th>
+
+                      {/* Real Mes */}
                       <th 
-                        onClick={() => handleSort('monthProjection')}
-                        className="text-right py-3 px-2 text-[10px] font-bold text-emerald-400 uppercase tracking-wider cursor-pointer"
+                        onClick={() => handleSort('sales')}
+                        className="text-center py-3 px-3 text-[10px] font-bold text-blue-400 uppercase tracking-wider cursor-pointer bg-blue-500/5"
                       >
-                        <div className="flex items-center justify-end gap-2">
-                          Proy Mes
-                          {sortConfig.key === 'monthProjection' && (sortConfig.direction === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />)}
+                        <div className="flex flex-col items-center gap-1">
+                          <span>Real Mes</span>
+                          <span className="text-[8px] text-slate-500 normal-case">Acumulado</span>
+                          {sortConfig.key === 'sales' && (sortConfig.direction === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />)}
                         </div>
                       </th>
+
+                      {/* Proyección Mes */}
                       <th 
-                        onClick={() => handleSort('compliance')}
-                        className="text-right py-3 px-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider cursor-pointer"
+                        onClick={() => handleSort('monthProjection')}
+                        className="text-center py-3 px-3 text-[10px] font-bold text-emerald-400 uppercase tracking-wider cursor-pointer bg-emerald-500/5"
                       >
-                        <div className="flex items-center justify-end gap-2">
-                          % Mes
-                          {sortConfig.key === 'compliance' && (sortConfig.direction === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />)}
+                        <div className="flex flex-col items-center gap-1">
+                          <span>Proy Mes</span>
+                          <span className="text-[8px] text-slate-500 normal-case">Cierre Estimado</span>
+                          {sortConfig.key === 'monthProjection' && (sortConfig.direction === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />)}
                         </div>
                       </th>
                     </tr>
                   </thead>
                   <tbody>
-                    {sortedStores.map((store) => (
-                      <tr
-                        key={store.code}
-                        onClick={() => store.hasData && setSelectedStoreDetail(store)}
-                        onMouseEnter={() => store.hasData && setHoveredStoreForChart(store)}
-                        onMouseLeave={() => setHoveredStoreForChart(null)}
-                        className={`border-b border-white/5 ${store.hasData ? 'cursor-pointer hover:bg-white/5' : ''}`}
-                      >
-                        {/* Tienda */}
-                        <td className="sticky left-0 bg-slate-950/90 backdrop-blur-xl z-10 py-3 px-3 border-r border-white/10">
-                          <p className={`font-bold text-xs ${!store.hasData ? 'text-slate-600' : 'text-white'}`}>
-                            {store.name}
-                          </p>
-                          <p className="text-[9px] text-slate-500 mt-0.5">{store.code}</p>
-                        </td>
+                    {sortedStores.map((store) => {
+                      // Calcular PPT Tienda basado en el filtro de fechas
+                      const daysInFilter = eachDayOfInterval({ start: dateRange.from, end: dateRange.to });
+                      const storeBudgetFiltered = store.getDailyBudget ? 
+                        daysInFilter.reduce((sum, day) => {
+                          try {
+                            return sum + store.getDailyBudget(day);
+                          } catch {
+                            return sum;
+                          }
+                        }, 0) : 0;
 
-                        {/* PPT Hoy */}
-                        <td className="py-3 px-2 text-right">
-                          {!store.hasData ? (
-                            <span className="text-xs text-slate-500">—</span>
-                          ) : (
-                            <p className="font-bold text-orange-400 text-sm tabular-nums">{formatShort(store.dailyBudget)}</p>
-                          )}
-                        </td>
+                      return (
+                        <tr
+                          key={store.code}
+                          onClick={() => store.hasData && setSelectedStoreDetail(store)}
+                          onMouseEnter={() => store.hasData && setHoveredStoreForChart(store)}
+                          onMouseLeave={() => setHoveredStoreForChart(null)}
+                          className={`border-b border-white/5 ${store.hasData ? 'cursor-pointer hover:bg-white/5' : ''} transition-colors`}
+                        >
+                          {/* Tienda */}
+                          <td className="sticky left-0 bg-slate-950/90 backdrop-blur-xl z-10 py-3 px-3 border-r border-white/10">
+                            <p className={`font-bold text-xs ${!store.hasData ? 'text-slate-600' : 'text-white'}`}>
+                              {store.name}
+                            </p>
+                            <p className="text-[9px] text-slate-500 mt-0.5">{store.code}</p>
+                          </td>
 
-                        {/* PPT Semana */}
-                        <td className="py-3 px-2 text-right">
-                          {!store.hasData ? (
-                            <span className="text-xs text-slate-500">—</span>
-                          ) : (
-                            <p className="font-bold text-cyan-400 text-sm tabular-nums">{formatShort(store.weeklyBudget)}</p>
-                          )}
-                        </td>
+                          {/* PPT Día */}
+                          <td className="py-3 px-3 text-center">
+                            {!store.hasData ? (
+                              <span className="text-xs text-slate-500">—</span>
+                            ) : (
+                              <div>
+                                <p className="font-black text-orange-400 text-base tabular-nums">{formatShort(store.dailyBudget)}</p>
+                                <p className="text-[9px] text-slate-500 mt-0.5">meta hoy</p>
+                              </div>
+                            )}
+                          </td>
 
-                        {/* Venta Semana */}
-                        <td className="py-3 px-2 text-right relative">
-                          {!store.hasData ? (
-                            <span className="text-xs text-slate-500">—</span>
-                          ) : (
-                            <div className="relative">
-                              {/* Glow para tiendas críticas */}
-                              {store.weekCompliance < 70 && (
-                                <motion.div
-                                  className="absolute -inset-2 bg-red-500/20 blur-lg rounded-lg"
-                                  animate={{ 
-                                    opacity: [0.2, 0.5, 0.2],
-                                    scale: [0.95, 1.05, 0.95]
-                                  }}
-                                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                                />
-                              )}
+                          {/* PPT Tienda (del filtro) */}
+                          <td className="py-3 px-3 text-center">
+                            {!store.hasData ? (
+                              <span className="text-xs text-slate-500">—</span>
+                            ) : (
+                              <div>
+                                <p className="font-black text-cyan-400 text-base tabular-nums">{formatShort(storeBudgetFiltered)}</p>
+                                <p className="text-[9px] text-slate-500 mt-0.5">filtro actual</p>
+                              </div>
+                            )}
+                          </td>
 
-                              <motion.p 
-                                className={`text-lg font-black mb-0.5 tabular-nums relative z-10 ${
+                          {/* Real Semana */}
+                          <td className="py-3 px-3 text-center">
+                            {!store.hasData ? (
+                              <span className="text-xs text-slate-500">—</span>
+                            ) : (
+                              <div>
+                                <p className="font-black text-purple-400 text-base tabular-nums">{formatShort(store.weekTotalSales)}</p>
+                                <p className={`text-xs font-bold mt-0.5 tabular-nums ${
                                   store.weekCompliance >= 100 ? 'text-emerald-400' :
                                   store.weekCompliance >= 70 ? 'text-amber-400' : 'text-red-400'
-                                }`}
-                                initial={{ opacity: 0, x: -10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ duration: 0.4, delay: 0.05 }}
-                              >
-                                {store.weekCompliance.toFixed(0)}%
-                              </motion.p>
-                              <p className="text-[10px] text-purple-400 font-semibold tabular-nums">{formatShort(store.weekTotalSales)}</p>
-                            </div>
-                          )}
-                        </td>
+                                }`}>
+                                  {store.weekCompliance.toFixed(0)}%
+                                </p>
+                              </div>
+                            )}
+                          </td>
 
-                        {/* Proyección Semana */}
-                        <td className="py-3 px-2 text-right">
-                          {!store.hasData ? (
-                            <span className="text-xs text-slate-500">—</span>
-                          ) : (
-                            <div>
-                              <p className={`text-lg font-black mb-0.5 tabular-nums ${
-                                store.weekProjectionCompliance >= 100 ? 'text-emerald-400' :
-                                store.weekProjectionCompliance >= 85 ? 'text-amber-400' : 'text-red-400'
-                              }`}>
-                                {store.weekProjectionCompliance.toFixed(0)}%
-                              </p>
-                              <p className="text-[10px] text-pink-400 font-semibold tabular-nums">{formatShort(store.weekProjection)}</p>
-                            </div>
-                          )}
-                        </td>
+                          {/* Proyección Semana */}
+                          <td className="py-3 px-3 text-center">
+                            {!store.hasData ? (
+                              <span className="text-xs text-slate-500">—</span>
+                            ) : (
+                              <div>
+                                <p className="font-black text-pink-400 text-base tabular-nums">{formatShort(store.weekProjection)}</p>
+                                <p className={`text-xs font-bold mt-0.5 tabular-nums ${
+                                  store.weekProjectionCompliance >= 100 ? 'text-emerald-400' :
+                                  store.weekProjectionCompliance >= 85 ? 'text-amber-400' : 'text-red-400'
+                                }`}>
+                                  {store.weekProjectionCompliance.toFixed(0)}%
+                                </p>
+                              </div>
+                            )}
+                          </td>
 
-                        {/* Proyección Mes */}
-                        <td className="py-3 px-2 text-right">
-                          {!store.hasData ? (
-                            <span className="text-xs text-slate-500">—</span>
-                          ) : (
-                            <div>
-                              <p className={`text-lg font-black mb-0.5 tabular-nums ${
-                                store.monthProjectionCompliance >= 100 ? 'text-emerald-400' :
-                                store.monthProjectionCompliance >= 85 ? 'text-amber-400' : 'text-red-400'
-                              }`}>
-                                {store.monthProjectionCompliance.toFixed(0)}%
-                              </p>
-                              <p className="text-[10px] text-emerald-400 font-semibold tabular-nums">{formatShort(store.monthProjection)}</p>
-                            </div>
-                          )}
-                        </td>
-
-                        {/* % Cumplimiento Mes */}
-                        <td 
-                          className="py-3 px-2 text-right group relative"
-                          onMouseEnter={() => setHoveredStoreForChart(store)}
-                        >
-                          {!store.hasData ? (
-                            <span className="text-xs text-slate-500">—</span>
-                          ) : (
-                            <div className="flex flex-col items-end gap-0.5 relative">
-                              {/* Glow para excelentes */}
-                              {store.salesCompliance >= 110 && (
-                                <motion.div
-                                  className="absolute -inset-3 bg-emerald-500/25 blur-xl rounded-lg"
-                                  animate={{ opacity: [0.3, 0.5, 0.3] }}
-                                  transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                                />
-                              )}
-
-                              {/* Pulso para críticas */}
-                              {store.salesCompliance < 70 && (
-                                <>
-                                  <motion.div
-                                    className="absolute -right-1 top-0 w-2 h-2 bg-red-500 rounded-full"
-                                    animate={{ 
-                                      scale: [1, 1.5, 1],
-                                      opacity: [0.6, 1, 0.6]
-                                    }}
-                                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                                  />
-                                  <motion.div
-                                    className="absolute -inset-2 bg-red-500/20 blur-lg rounded-lg"
-                                    animate={{ 
-                                      opacity: [0.2, 0.4, 0.2],
-                                    }}
-                                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                                  />
-                                </>
-                              )}
-
-                              <motion.span 
-                                className={`font-black text-2xl tabular-nums relative z-10 ${
-                                  store.salesCompliance >= 90 ? 'text-emerald-400' :
+                          {/* Real Mes */}
+                          <td className="py-3 px-3 text-center">
+                            {!store.hasData ? (
+                              <span className="text-xs text-slate-500">—</span>
+                            ) : (
+                              <div>
+                                <p className="font-black text-blue-400 text-base tabular-nums">{formatShort(store.monthTotalSales)}</p>
+                                <p className={`text-xs font-bold mt-0.5 tabular-nums ${
+                                  store.salesCompliance >= 100 ? 'text-emerald-400' :
                                   store.salesCompliance >= 70 ? 'text-amber-400' : 'text-red-400'
-                                }`}
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{ duration: 0.3 }}
-                              >
-                                {store.salesCompliance.toFixed(0)}%
-                              </motion.span>
-                              <p className="text-[10px] text-slate-400 tabular-nums">{formatShort(store.monthTotalSales)}</p>
+                                }`}>
+                                  {store.salesCompliance.toFixed(0)}%
+                                </p>
+                              </div>
+                            )}
+                          </td>
 
-                              {/* Insight enriquecido al hover */}
-                              <motion.div 
-                                className="opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto absolute right-2 top-full mt-2 bg-slate-900/98 border border-white/30 rounded-xl p-3 shadow-2xl z-50 w-56"
-                                initial={{ y: -10, opacity: 0 }}
-                                whileHover={{ y: 0, opacity: 1 }}
-                                transition={{ duration: 0.2 }}
-                              >
-                                <div className="space-y-2">
-                                  <div className="flex items-center justify-between border-b border-white/10 pb-2">
-                                    <p className="text-xs font-bold text-white">{store.name}</p>
-                                    <p className={`text-xs font-bold ${getStoreStatus(store).color}`}>
-                                      {getStoreStatus(store).text}
-                                    </p>
-                                  </div>
+                          {/* Proyección Mes */}
+                          <td className="py-3 px-3 text-center group relative">
+                            {!store.hasData ? (
+                              <span className="text-xs text-slate-500">—</span>
+                            ) : (
+                              <div className="relative">
+                                {/* Glow para excelentes proyecciones */}
+                                {store.monthProjectionCompliance >= 110 && (
+                                  <motion.div
+                                    className="absolute -inset-3 bg-emerald-500/25 blur-xl rounded-lg"
+                                    animate={{ opacity: [0.3, 0.5, 0.3] }}
+                                    transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                                  />
+                                )}
 
-                                  <div className="text-[10px] text-slate-300 leading-tight">
-                                    <p className="font-medium mb-1">Acción sugerida:</p>
-                                    <p className="text-amber-300 font-semibold">{getStoreSuggestion(store)}</p>
-                                  </div>
+                                <p className="font-black text-emerald-400 text-base tabular-nums relative z-10">{formatShort(store.monthProjection)}</p>
+                                <p className={`text-xs font-bold mt-0.5 tabular-nums relative z-10 ${
+                                  store.monthProjectionCompliance >= 100 ? 'text-emerald-400' :
+                                  store.monthProjectionCompliance >= 85 ? 'text-amber-400' : 'text-red-400'
+                                }`}>
+                                  {store.monthProjectionCompliance.toFixed(0)}%
+                                </p>
 
-                                  {store.salesCompliance < 90 && (
-                                    <div className="text-[9px] text-slate-400 pt-2 border-t border-white/10">
-                                      <p>Impacto estimado:</p>
-                                      <p className="text-emerald-400 font-bold">
-                                        +{formatCurrency(store.gap * 0.3)} recuperables
+                                {/* Tooltip con acción sugerida */}
+                                <motion.div 
+                                  className="opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto absolute right-2 top-full mt-2 bg-slate-900/98 border border-white/30 rounded-xl p-3 shadow-2xl z-50 w-56"
+                                  initial={{ y: -10, opacity: 0 }}
+                                  whileHover={{ y: 0, opacity: 1 }}
+                                  transition={{ duration: 0.2 }}
+                                >
+                                  <div className="space-y-2">
+                                    <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                                      <p className="text-xs font-bold text-white">{store.name}</p>
+                                      <p className={`text-xs font-bold ${getStoreStatus(store).color}`}>
+                                        {getStoreStatus(store).text}
                                       </p>
                                     </div>
-                                  )}
-                                </div>
-                              </motion.div>
-                            </div>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
+
+                                    <div className="text-[10px] text-slate-300 leading-tight">
+                                      <p className="font-medium mb-1">Acción sugerida:</p>
+                                      <p className="text-amber-300 font-semibold">{getStoreSuggestion(store)}</p>
+                                    </div>
+
+                                    {store.salesCompliance < 90 && (
+                                      <div className="text-[9px] text-slate-400 pt-2 border-t border-white/10">
+                                        <p>Brecha vs presupuesto:</p>
+                                        <p className="text-red-400 font-bold">
+                                          {formatCurrency(store.gap)}
+                                        </p>
+                                      </div>
+                                    )}
+                                  </div>
+                                </motion.div>
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
