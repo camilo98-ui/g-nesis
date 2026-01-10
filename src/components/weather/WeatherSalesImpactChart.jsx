@@ -1011,6 +1011,33 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
                     <stop offset="0%" stopColor="rgba(255,255,255,0.1)" />
                     <stop offset="100%" stopColor="rgba(255,255,255,0)" />
                   </linearGradient>
+                  
+                  {/* Neon Glow para línea de temperatura */}
+                  <filter id="neonGlow" x="-50%" y="-50%" width="200%" height="200%">
+                    <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                    <feMerge>
+                      <feMergeNode in="coloredBlur"/>
+                      <feMergeNode in="coloredBlur"/>
+                      <feMergeNode in="SourceGraphic"/>
+                    </feMerge>
+                  </filter>
+                  
+                  {/* Gradiente animado para barrido de luz */}
+                  <linearGradient id="sweepGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="rgba(251, 146, 60, 0.2)">
+                      <animate attributeName="stop-color" 
+                        values="rgba(251, 146, 60, 0.2);rgba(251, 146, 60, 0.8);rgba(251, 146, 60, 0.2)" 
+                        dur="3s" repeatCount="indefinite"/>
+                    </stop>
+                    <stop offset="50%" stopColor="rgba(251, 146, 60, 0.8)">
+                      <animate attributeName="offset" values="0;1;0" dur="3s" repeatCount="indefinite"/>
+                    </stop>
+                    <stop offset="100%" stopColor="rgba(251, 146, 60, 0.2)">
+                      <animate attributeName="stop-color" 
+                        values="rgba(251, 146, 60, 0.2);rgba(251, 146, 60, 0.8);rgba(251, 146, 60, 0.2)" 
+                        dur="3s" repeatCount="indefinite"/>
+                    </stop>
+                  </linearGradient>
                 </defs>
                 
                 <CartesianGrid strokeDasharray="4 4" stroke="rgba(148, 163, 184, 0.08)" />
@@ -1090,18 +1117,27 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
                         stroke={entry.isForecast ? '#06b6d4' : 'rgba(255,255,255,0.1)'}
                         strokeWidth={entry.isForecast ? 2 : 1}
                         strokeDasharray={entry.isForecast ? "6 4" : "0"}
-                      />
+                      >
+                        <animate
+                          attributeName="opacity"
+                          values={isVisible && !entry.isForecast ? "0.85;1;0.85" : entry.isForecast ? "0.35" : "0.12"}
+                          dur="3s"
+                          repeatCount="indefinite"
+                          begin={`${index * 0.1}s`}
+                        />
+                      </Cell>
                     );
                   })}
                 </Bar>
 
-                {/* Línea de temperatura volumétrica con glow térmico */}
+                {/* Línea de temperatura volumétrica con neon glow */}
                 <Line
                   yAxisId="temp"
                   type="natural"
                   dataKey="temperature"
-                  stroke="#fb923c"
-                  strokeWidth={4}
+                  stroke="url(#sweepGradient)"
+                  strokeWidth={5}
+                  filter="url(#neonGlow)"
                   dot={(props) => {
                     const { cx, cy, index } = props;
                     return (
