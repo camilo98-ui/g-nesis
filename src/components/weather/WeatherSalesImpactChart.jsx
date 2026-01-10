@@ -726,7 +726,7 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
   }, [stats, chartData]);
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-6 rounded-3xl">
       {/* Header Ejecutivo Minimalista */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
