@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -18,10 +18,14 @@ import CashierGoalsManager from '@/components/gamification/CashierGoalsManager';
 import { ViewProfileButton } from '@/components/cashier/CashierFullProfile';
 import CashierAssignmentSuggestion from '@/components/ai/CashierAssignmentSuggestion';
 import CashierSalesModal from '@/components/forms/CashierSalesModal';
+
+const DailySalesForm = lazy(() => import('@/components/forms/DailySalesForm'));
+const ShiftRecordForm = lazy(() => import('@/components/forms/ShiftRecordForm'));
+
 import {
   ArrowLeft, Users, Search, TrendingUp, TrendingDown,
   Award, Target, BarChart3, User, ChevronRight, Star,
-  Flame, Crown, Medal, Eye, Hash, Settings } from
+  Flame, Crown, Medal, Eye, Hash, Settings, Receipt } from
 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -44,6 +48,8 @@ export default function CashiersDashboard() {
   const [selectedCashier, setSelectedCashier] = useState(null);
   const [showBadgeConfig, setShowBadgeConfig] = useState(false);
   const [showCashierSales, setShowCashierSales] = useState(false);
+  const [showSalesModal, setShowSalesModal] = useState(false);
+  const [salesTab, setSalesTab] = useState('tienda');
 
   useEffect(() => {
     const saved = localStorage.getItem('selectedStore');
@@ -289,6 +295,14 @@ export default function CashiersDashboard() {
             </div>
           </div>
           <div className="flex flex-col md:flex-row gap-3 items-center">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowSalesModal(true)}
+              className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-green-500 hover:from-emerald-500 hover:to-green-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/30 transition-all"
+            >
+              <Receipt className="w-5 h-5 text-white" />
+            </motion.button>
             <Button
               variant="outline"
               size="sm"
@@ -697,6 +711,74 @@ export default function CashiersDashboard() {
 
         }
       </AnimatePresence>
+
+      {/* Modal Registrar Ventas */}
+      <Suspense fallback={null}>
+        {showSalesModal && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowSalesModal(false)}>
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              onClick={(e) => e.stopPropagation()} 
+              className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden border-2 border-white/60"
+            >
+              <div className="bg-gradient-to-r from-fuchsia-500 via-pink-500 to-violet-500 p-5 text-white text-center relative">
+                <button onClick={() => setShowSalesModal(false)} className="absolute top-4 right-4 text-white/80 hover:text-white">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+                <motion.div
+                  animate={{ rotate: [0, 5, -5, 0] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  <TrendingUp className="w-10 h-10 mx-auto mb-2" />
+                </motion.div>
+                <h2 className="text-xl font-black">Registrar Ventas</h2>
+              </div>
+
+              <div className="flex border-b-2 border-pink-200/50 bg-gradient-to-r from-pink-50/50 to-violet-50/50 backdrop-blur-sm">
+                <button
+                  onClick={() => setSalesTab('tienda')}
+                  className={`flex-1 py-4 px-6 font-bold text-sm transition-all relative ${
+                    salesTab === 'tienda' ? 'text-pink-600' : 'text-gray-500'
+                  }`}
+                >
+                  🏪 Venta de Tienda
+                  {salesTab === 'tienda' && (
+                    <motion.div 
+                      layoutId="activeTab"
+                      className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-pink-500 to-fuchsia-500 rounded-t-full" 
+                    />
+                  )}
+                </button>
+                <button
+                  onClick={() => setSalesTab('cajero')}
+                  className={`flex-1 py-4 px-6 font-bold text-sm transition-all relative ${
+                    salesTab === 'cajero' ? 'text-violet-600' : 'text-gray-500'
+                  }`}
+                >
+                  👤 Venta de Cajero
+                  {salesTab === 'cajero' && (
+                    <motion.div 
+                      layoutId="activeTab"
+                      className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-violet-500 to-purple-500 rounded-t-full" 
+                    />
+                  )}
+                </button>
+              </div>
+
+              <div className="p-6 max-h-[70vh] overflow-y-auto">
+                {salesTab === 'tienda' ? (
+                  <DailySalesForm storeId={selectedStore} onSuccess={() => setShowSalesModal(false)} />
+                ) : (
+                  <ShiftRecordForm storeId={selectedStore} onSuccess={() => setShowSalesModal(false)} />
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </Suspense>
     </div>);
 
 }
