@@ -1121,26 +1121,26 @@ export default function Home() {
         />
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 py-6 relative z-10">
+      <div className="max-w-5xl mx-auto px-4 py-4 relative z-10">
 
 
         {/* Header con logo animado */}
-        <div className="text-center mb-6">
+        <div className="text-center mb-8">
           <motion.img
             src={LOGO_URL}
             alt="Popsy"
-            className="h-32 sm:h-36 md:h-40 object-contain mx-auto mb-2 cursor-pointer drop-shadow-lg"
+            className="h-24 sm:h-28 md:h-32 object-contain mx-auto mb-3 cursor-pointer drop-shadow-lg"
             animate={{ y: [0, -8, 0] }}
             transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
             onClick={() => setShowStory(true)}
           />
 
-          <p className="text-gray-400 text-sm mb-3">Sistema de Gestión</p>
+          <p className="text-gray-400 text-sm mb-4">Sistema de Gestión</p>
 
           {/* Store Selector */}
           <div className="flex flex-col items-center gap-2">
             <p className="text-gray-600 font-medium text-sm">¿A qué tienda deseas ingresar?</p>
-            <div className="w-full max-w-md mx-auto">
+            <div className="w-full max-w-sm mx-auto">
               <StoreSelector
                 selectedStore={selectedStore}
                 onStoreChange={handleStoreChange}
@@ -1151,7 +1151,7 @@ export default function Home() {
 
         {/* Quick Actions */}
         {(selectedStore || selectedRole === 'gerente') && (
-        <div className="mb-4 flex justify-center gap-2 flex-wrap">
+        <div className="mb-6 flex justify-center gap-2 flex-wrap">
 
 
             <Button
@@ -1216,7 +1216,7 @@ export default function Home() {
 
         {/* Menu Grid */}
         {(selectedStore || selectedRole === 'gerente') && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 max-w-4xl mx-auto">
 
             {MENU_ITEMS.filter((item) => {
               // Restricciones: Panel Ejecutivo solo para gerente, otras opciones solo si hay tienda seleccionada
