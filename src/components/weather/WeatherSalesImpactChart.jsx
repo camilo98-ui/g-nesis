@@ -229,90 +229,25 @@ const getWeatherType = (code, precipitation) => {
 // Botón climático con neumorphism y glow
 const ClimateButton = ({ active, onClick, icon: Icon, label, color, glowColor, weatherType }) => (
   <motion.button
-    whileHover={{ scale: 1.05, y: -2 }}
-    whileTap={{ scale: 0.95 }}
+    whileHover={{ scale: 1.02 }}
+    whileTap={{ scale: 0.98 }}
     onClick={onClick}
     className={`
-      relative px-5 py-3 rounded-2xl font-bold text-sm
-      transition-all duration-500 overflow-hidden
+      relative px-4 py-2 rounded-lg text-xs font-semibold
+      transition-all duration-200
       ${active 
-        ? `bg-gradient-to-br ${color} text-slate-900 shadow-xl` 
-        : 'bg-white/80 backdrop-blur-sm text-slate-700 hover:text-slate-900 border-2 border-slate-300 hover:border-slate-400'
+        ? `bg-gradient-to-br ${color} text-white shadow-md` 
+        : 'bg-white border border-slate-300 text-slate-700 hover:border-slate-400 hover:bg-slate-50'
       }
     `}
     style={active ? {
-      boxShadow: `0 0 30px ${glowColor}40, 0 8px 25px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.3)`
+      boxShadow: `0 0 20px ${glowColor}30, 0 4px 12px rgba(0,0,0,0.1)`
     } : {}}
   >
-    {/* Glow effect para botón activo */}
-    {active && (
-      <motion.div
-        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-        animate={{ x: ['-100%', '100%'] }}
-        transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-      />
-    )}
-
-    {/* Partículas climáticas internas */}
-    {active && weatherType === 'rainy' && (
-      <>
-        {[...Array(5)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-0.5 h-3 bg-blue-300/60 rounded-full"
-            style={{ left: `${15 + i * 18}%`, top: '-10px' }}
-            animate={{ y: ['0%', '200%'], opacity: [0, 1, 0] }}
-            transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.2, ease: "linear" }}
-          />
-        ))}
-      </>
-    )}
-
-    {active && weatherType === 'sunny' && (
-      <>
-        {[...Array(6)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-0.5 bg-yellow-300/40"
-            style={{ 
-              left: `${10 + i * 15}%`,
-              height: '100%',
-              transformOrigin: 'center'
-            }}
-            animate={{ 
-              opacity: [0.2, 0.6, 0.2],
-              scaleY: [0.6, 1, 0.6]
-            }}
-            transition={{ duration: 2, repeat: Infinity, delay: i * 0.15 }}
-          />
-        ))}
-      </>
-    )}
-
-    <div className="relative z-10 flex items-center gap-2">
-      <motion.div
-        animate={active ? {
-          rotate: weatherType === 'sunny' ? 360 : 0,
-          scale: [1, 1.2, 1]
-        } : {}}
-        transition={{
-          rotate: { duration: 8, repeat: Infinity, ease: "linear" },
-          scale: { duration: 2, repeat: Infinity }
-        }}
-      >
-        <Icon className="w-5 h-5" />
-      </motion.div>
+    <div className="relative z-10 flex items-center gap-1.5">
+      {active && <Icon className="w-4 h-4" />}
       <span>{label}</span>
     </div>
-
-    {/* Barra inferior indicadora */}
-    {active && (
-      <motion.div
-        className="absolute bottom-0 left-0 right-0 h-1 bg-white/40 rounded-full"
-        initial={{ scaleX: 0 }}
-        animate={{ scaleX: 1 }}
-      />
-    )}
   </motion.button>
 );
 
@@ -727,35 +662,24 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
 
   return (
     <div className="space-y-5">
-      {/* Header Ejecutivo Minimalista */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <motion.div
-            animate={{ rotate: [0, 360] }}
-            transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-            className="p-3 bg-slate-100/90 backdrop-blur-sm rounded-2xl border border-slate-300/50 shadow-lg"
-            style={{ boxShadow: '0 4px 20px rgba(100, 116, 139, 0.15)' }}
-          >
-            <Activity className="w-7 h-7 text-slate-700" />
-          </motion.div>
-          <div>
-            <h2 className="text-2xl font-black text-slate-900">Impacto Climático en Ventas</h2>
-            <p className="text-slate-600 text-sm font-semibold">
-              {chartData.filter(d => !d.isForecast).length} días • Análisis financiero ejecutivo
-            </p>
-          </div>
+      {/* Header Ejecutivo Limpio */}
+      <div className="flex items-center justify-between mb-1">
+        <div>
+          <h2 className="text-2xl font-black text-slate-900">Impacto Climático en Ventas</h2>
+          <p className="text-slate-600 text-sm font-medium">
+            {chartData.filter(d => !d.isForecast).length} días analizados
+          </p>
         </div>
 
         <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
           <PopoverTrigger asChild>
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Button 
-                className="bg-slate-800/80 backdrop-blur-sm text-slate-200 hover:bg-slate-700/80 border border-slate-600/50 shadow-lg gap-2 h-10 px-4 rounded-xl font-semibold text-sm"
-              >
-                <CalendarIcon className="w-4 h-4" />
-                {getDateLabel()}
-              </Button>
-            </motion.div>
+            <Button 
+              variant="outline"
+              className="border-slate-300 hover:border-slate-400 gap-2 h-9 px-3 text-sm font-medium"
+            >
+              <CalendarIcon className="w-4 h-4" />
+              {getDateLabel()}
+            </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0 border-0 shadow-none bg-transparent" align="end">
             <WeatherCalendar
@@ -882,10 +806,10 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
         </div>
       )}
 
-      {/* Selectores de Escenario Climático */}
-      <div className="flex items-center gap-3">
-        <span className="text-slate-700 text-sm font-black">Escenario:</span>
-        <div className="flex flex-wrap gap-2">
+      {/* Selectores de Escenario - Sobrios */}
+      <div className="flex items-center gap-2">
+        <span className="text-slate-500 text-xs font-semibold uppercase tracking-wide">Escenario:</span>
+        <div className="flex flex-wrap gap-1.5">
           <ClimateButton
             active={viewMode === 'all'}
             onClick={() => setViewMode('all')}
