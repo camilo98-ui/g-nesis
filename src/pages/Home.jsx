@@ -1216,7 +1216,7 @@ export default function Home() {
 
         {/* Menu Grid */}
         {(selectedStore || selectedRole === 'gerente') && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 max-w-4xl mx-auto">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
 
             {MENU_ITEMS.filter((item) => {
               // Restricciones: Panel Ejecutivo solo para gerente, otras opciones solo si hay tienda seleccionada
