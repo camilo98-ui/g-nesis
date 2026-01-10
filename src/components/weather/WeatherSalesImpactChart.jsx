@@ -4,7 +4,6 @@ import {
   CloudRain, Sun, Cloud, Thermometer, TrendingUp, TrendingDown, 
   Zap, Calendar as CalendarIcon, BarChart3, Activity, X, Check, ChevronLeft, ChevronRight, Sparkles
 } from 'lucide-react';
-import { AnimatePresence } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { 
