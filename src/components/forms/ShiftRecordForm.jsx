@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Save, User, DollarSign, Receipt, Zap, Gift, Loader2, CheckCircle, Sun, Sunset, Moon, Calendar } from 'lucide-react';
+import { Save, User, DollarSign, Receipt, Zap, Gift, Loader2, CheckCircle, Sun, Sunset, Moon, Calendar, Plus, Upload, X } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from 'sonner';
 
 const SHIFTS = [
@@ -18,6 +19,9 @@ const SHIFTS = [
 export default function ShiftRecordForm({ storeId, onSuccess }) {
     const queryClient = useQueryClient();
     const [showSuccess, setShowSuccess] = useState(false);
+    const [showAddCashier, setShowAddCashier] = useState(false);
+    const [newCashier, setNewCashier] = useState({ name: '', email: '', phone: '', photo_url: '' });
+    const [uploadingPhoto, setUploadingPhoto] = useState(false);
     const [formData, setFormData] = useState({
       cashier_id: '',
       date: new Date().toISOString().split('T')[0],
@@ -68,6 +72,43 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
       setEditingRecord(null);
     }
   }, [existingRecords, formData.cashier_id, formData.date, formData.shift]);
+
+  const createCashierMutation = useMutation({
+    mutationFn: async (cashierData) => {
+      return await base44.entities.Cashier.create({
+        ...cashierData,
+        store_id: storeId,
+        is_active: true,
+        hire_date: new Date().toISOString().split('T')[0]
+      });
+    },
+    onSuccess: (newCashier) => {
+      queryClient.invalidateQueries({ queryKey: ['cashiers'] });
+      toast.success('✅ Cajero agregado correctamente');
+      setFormData({ ...formData, cashier_id: newCashier.id });
+      setShowAddCashier(false);
+      setNewCashier({ name: '', email: '', phone: '', photo_url: '' });
+    },
+    onError: (error) => {
+      toast.error('Error al agregar cajero: ' + error.message);
+    }
+  });
+
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingPhoto(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      setNewCashier({ ...newCashier, photo_url: file_url });
+      toast.success('✅ Foto cargada');
+    } catch (error) {
+      toast.error('Error al cargar foto: ' + error.message);
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
 
   const deleteMutation = useMutation({
     mutationFn: async (recordId) => {
@@ -215,6 +256,129 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
 
   return (
     <>
+      {/* Dialog para añadir cajero */}
+      <Dialog open={showAddCashier} onOpenChange={setShowAddCashier}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-violet-700">
+              <User className="w-5 h-5" />
+              Añadir Nuevo Cajero
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {/* Foto */}
+            <div className="flex flex-col items-center gap-3">
+              {newCashier.photo_url ? (
+                <div className="relative">
+                  <img 
+                    src={newCashier.photo_url} 
+                    alt="Preview" 
+                    className="w-24 h-24 rounded-full object-cover border-4 border-violet-200"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setNewCashier({ ...newCashier, photo_url: '' })}
+                    className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <label className="w-24 h-24 bg-violet-50 rounded-full flex flex-col items-center justify-center cursor-pointer border-2 border-dashed border-violet-300 hover:border-violet-500 transition-all">
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    className="hidden" 
+                    onChange={handlePhotoUpload}
+                    disabled={uploadingPhoto}
+                  />
+                  {uploadingPhoto ? (
+                    <Loader2 className="w-6 h-6 text-violet-500 animate-spin" />
+                  ) : (
+                    <>
+                      <Upload className="w-6 h-6 text-violet-500" />
+                      <span className="text-[10px] text-violet-600 mt-1">Subir foto</span>
+                    </>
+                  )}
+                </label>
+              )}
+            </div>
+
+            {/* Nombre */}
+            <div>
+              <Label className="text-sm font-semibold text-gray-700 mb-2 block">Nombre Completo *</Label>
+              <Input
+                placeholder="Ej: Juan Pérez"
+                value={newCashier.name}
+                onChange={(e) => setNewCashier({ ...newCashier, name: e.target.value })}
+                className="h-11"
+              />
+            </div>
+
+            {/* Email */}
+            <div>
+              <Label className="text-sm font-semibold text-gray-700 mb-2 block">Email</Label>
+              <Input
+                type="email"
+                placeholder="ejemplo@correo.com"
+                value={newCashier.email}
+                onChange={(e) => setNewCashier({ ...newCashier, email: e.target.value })}
+                className="h-11"
+              />
+            </div>
+
+            {/* Teléfono */}
+            <div>
+              <Label className="text-sm font-semibold text-gray-700 mb-2 block">Teléfono</Label>
+              <Input
+                placeholder="3001234567"
+                value={newCashier.phone}
+                onChange={(e) => setNewCashier({ ...newCashier, phone: e.target.value })}
+                className="h-11"
+              />
+            </div>
+
+            {/* Botones */}
+            <div className="flex gap-2 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setShowAddCashier(false);
+                  setNewCashier({ name: '', email: '', phone: '', photo_url: '' });
+                }}
+                className="flex-1"
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={() => {
+                  if (!newCashier.name.trim()) {
+                    toast.error('Ingresa el nombre del cajero');
+                    return;
+                  }
+                  createCashierMutation.mutate(newCashier);
+                }}
+                disabled={createCashierMutation.isPending}
+                className="flex-1 bg-violet-600 hover:bg-violet-700"
+              >
+                {createCashierMutation.isPending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Guardando...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4 mr-2" />
+                    Guardar
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <AnimatePresence mode="wait">
         {showSuccess && (
           <motion.div
@@ -273,7 +437,7 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
           </div>
         )}
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Selector de Cajero con Reconocimiento Facial */}
+          {/* Selector de Cajero con botón Añadir */}
           <motion.div 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -287,19 +451,29 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
               Identificación de Cajero
             </Label>
 
-            <Select 
-              value={formData.cashier_id} 
-              onValueChange={(val) => setFormData({...formData, cashier_id: val})}
-            >
-              <SelectTrigger className="border-2 border-violet-200 focus:border-violet-400 bg-white rounded-xl h-12 text-base font-semibold focus:ring-2 focus:ring-violet-200 transition-all">
-                <SelectValue placeholder="Selecciona" />
-              </SelectTrigger>
-              <SelectContent>
-                {cashiers.map(c => (
-                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex gap-2">
+              <Select 
+                value={formData.cashier_id} 
+                onValueChange={(val) => setFormData({...formData, cashier_id: val})}
+              >
+                <SelectTrigger className="border-2 border-violet-200 focus:border-violet-400 bg-white rounded-xl h-12 text-base font-semibold focus:ring-2 focus:ring-violet-200 transition-all">
+                  <SelectValue placeholder="Selecciona" />
+                </SelectTrigger>
+                <SelectContent>
+                  {cashiers.map(c => (
+                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              <Button
+                type="button"
+                onClick={() => setShowAddCashier(true)}
+                className="bg-violet-600 hover:bg-violet-700 text-white h-12 w-12 rounded-xl flex items-center justify-center shadow-md"
+              >
+                <Plus className="w-5 h-5" />
+              </Button>
+            </div>
           </motion.div>
 
           {/* Fecha */}
