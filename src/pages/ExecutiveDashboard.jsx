@@ -207,7 +207,7 @@ export default function ExecutiveDashboard() {
       );
       const totalWeeklyAvg = avgByDayOfWeek.reduce((a, b) => a + b, 0);
 
-      // Presupuesto mensual - SIN ajustes, usar el presupuesto real de la tienda
+      // Presupuesto mensual
       const activeBudget = allBudgets.find(b => b.store_id === store.code && b.is_active === true);
       const budget = activeBudget || allBudgets.find(b => b.store_id === store.code && b.month === currentMonth && b.year === currentYear);
       const salesBudget = budget?.sales_budget || 0;
@@ -215,13 +215,31 @@ export default function ExecutiveDashboard() {
       // PPT diario base = presupuesto mensual / días del mes
       const dailyBaseBudget = salesBudget / daysInMonth;
 
-      // Función para obtener presupuesto diario (usar presupuesto real sin ajustes)
+      // Calcular PPT del día ajustado por histórico del día de la semana
       const getDailyBudget = (date) => {
-        return dailyBaseBudget;
+        const dayOfWeek = date.getDay();
+        
+        // Si no hay suficiente histórico para ese día (menos de 3 registros), usar base
+        if (countByDayOfWeek[dayOfWeek] < 3) {
+          return dailyBaseBudget;
+        }
+        
+        // Calcular factor de ajuste basado en histórico
+        const totalWeeklyHistorical = avgByDayOfWeek.reduce((a, b) => a + b, 0);
+        if (totalWeeklyHistorical === 0) return dailyBaseBudget;
+        
+        // Proyección mensual basada en histórico semanal
+        const monthlyHistoricalProjection = totalWeeklyHistorical * (daysInMonth / 7);
+        
+        // Factor de escala para que la suma de PPTs diarios ajustados = presupuesto mensual
+        const scaleFactor = salesBudget / monthlyHistoricalProjection;
+        
+        // PPT del día = promedio histórico del día * factor de escala
+        return avgByDayOfWeek[dayOfWeek] * scaleFactor;
       };
 
-      // PPT del día de hoy (presupuesto real sin multiplicadores)
-      const adjustedDailyBudget = dailyBaseBudget;
+      // PPT del día de hoy (ajustado por histórico)
+      const adjustedDailyBudget = getDailyBudget(now);
 
       // VENTAS DE LA SEMANA ACTUAL (semana en la que estamos HOY)
       // Calcular inicio y fin de la semana actual basado en el modo
