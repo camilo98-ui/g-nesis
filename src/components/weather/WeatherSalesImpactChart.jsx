@@ -894,68 +894,155 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
         <AnimatePresence>
           {viewMode === 'rainy' && (
             <>
-              {/* Lluvia animada */}
-              {[...Array(20)].map((_, i) => (
+              {/* Lluvia animada abundante */}
+              {[...Array(35)].map((_, i) => (
                 <motion.div
                   key={`rain-${i}`}
-                  className="absolute w-0.5 bg-gradient-to-b from-blue-400/60 to-transparent rounded-full pointer-events-none z-20"
+                  className="absolute w-0.5 bg-gradient-to-b from-blue-400/70 to-transparent rounded-full pointer-events-none z-20"
                   style={{ 
-                    left: `${5 + (i * 4.5)}%`,
-                    height: '25px'
+                    left: `${2 + (i * 2.8)}%`,
+                    height: `${20 + Math.random() * 15}px`
                   }}
                   initial={{ y: '-100%', opacity: 0 }}
                   animate={{ 
-                    y: ['0%', '120%'],
-                    opacity: [0, 0.6, 0]
+                    y: ['0%', '130%'],
+                    opacity: [0, 0.7, 0]
                   }}
                   exit={{ opacity: 0 }}
                   transition={{ 
-                    duration: 0.8 + Math.random() * 0.4,
+                    duration: 0.6 + Math.random() * 0.3,
                     repeat: Infinity,
-                    delay: Math.random() * 2,
+                    delay: Math.random() * 1.5,
                     ease: "linear"
                   }}
                 />
               ))}
-              {/* Relámpago esporádico muy sutil */}
-              {Math.random() > 0.7 && (
+              {/* Gotas en el fondo */}
+              {[...Array(8)].map((_, i) => (
                 <motion.div
-                  className="absolute inset-0 bg-blue-300/5 pointer-events-none z-10"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: [0, 0.15, 0, 0.1, 0] }}
-                  transition={{ duration: 0.3, repeat: Infinity, repeatDelay: 8 }}
+                  key={`drop-${i}`}
+                  className="absolute w-1 h-1 bg-blue-300/30 rounded-full pointer-events-none z-5"
+                  style={{ 
+                    left: `${10 + Math.random() * 80}%`,
+                    top: `${Math.random() * 100}%`
+                  }}
+                  animate={{ 
+                    scale: [0.5, 1.5, 0.5],
+                    opacity: [0.2, 0.5, 0.2]
+                  }}
+                  transition={{ 
+                    duration: 2 + Math.random() * 2,
+                    repeat: Infinity,
+                    delay: Math.random() * 3
+                  }}
                 />
-              )}
-              {/* Oscurecimiento leve */}
-              <div className="absolute inset-0 bg-slate-900/10 pointer-events-none z-5" />
+              ))}
+              {/* Ambiente lluvioso con neblina */}
+              <div className="absolute inset-0 bg-gradient-to-b from-blue-900/8 to-slate-900/12 pointer-events-none z-5" />
             </>
           )}
 
           {viewMode === 'sunny' && (
             <>
-              {/* Luz cálida */}
+              {/* Resplandor dorado intenso */}
               <motion.div
-                className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-orange-500/5 pointer-events-none z-5"
-                animate={{ opacity: [0.3, 0.5, 0.3] }}
-                transition={{ duration: 3, repeat: Infinity }}
+                className="absolute inset-0 bg-gradient-to-br from-yellow-400/12 via-amber-400/8 to-orange-400/10 pointer-events-none z-5"
+                animate={{ opacity: [0.6, 0.9, 0.6] }}
+                transition={{ duration: 4, repeat: Infinity }}
               />
-              {/* Partículas de luz */}
-              {[...Array(15)].map((_, i) => (
+              {/* Rayos de sol */}
+              {[...Array(6)].map((_, i) => (
                 <motion.div
-                  key={`light-${i}`}
-                  className="absolute w-1 h-1 bg-amber-300/40 rounded-full pointer-events-none z-10"
+                  key={`ray-${i}`}
+                  className="absolute w-px h-full bg-gradient-to-b from-yellow-300/30 via-amber-300/20 to-transparent pointer-events-none z-10"
                   style={{ 
-                    left: `${10 + Math.random() * 80}%`,
-                    top: `${10 + Math.random() * 80}%`
+                    left: `${15 + i * 15}%`,
+                    transformOrigin: 'top center'
                   }}
                   animate={{ 
-                    scale: [0, 1.5, 0],
-                    opacity: [0, 0.6, 0]
+                    opacity: [0.3, 0.7, 0.3],
+                    scaleY: [0.8, 1, 0.8]
                   }}
                   transition={{ 
-                    duration: 3 + Math.random() * 2,
+                    duration: 5 + i * 0.5,
                     repeat: Infinity,
-                    delay: Math.random() * 5
+                    delay: i * 0.8
+                  }}
+                />
+              ))}
+              {/* Partículas de luz brillantes */}
+              {[...Array(25)].map((_, i) => (
+                <motion.div
+                  key={`light-${i}`}
+                  className="absolute w-1.5 h-1.5 bg-yellow-200/60 rounded-full pointer-events-none z-10 blur-sm"
+                  style={{ 
+                    left: `${5 + Math.random() * 90}%`,
+                    top: `${5 + Math.random() * 90}%`
+                  }}
+                  animate={{ 
+                    scale: [0, 2, 0],
+                    opacity: [0, 0.8, 0]
+                  }}
+                  transition={{ 
+                    duration: 2 + Math.random() * 2,
+                    repeat: Infinity,
+                    delay: Math.random() * 4
+                  }}
+                />
+              ))}
+            </>
+          )}
+
+          {viewMode === 'cloudy' && (
+            <>
+              {/* Ambiente nublado con nubes flotantes */}
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-b from-slate-300/10 to-gray-400/8 pointer-events-none z-5"
+                animate={{ opacity: [0.5, 0.7, 0.5] }}
+                transition={{ duration: 6, repeat: Infinity }}
+              />
+              {/* Nubes difusas */}
+              {[...Array(8)].map((_, i) => (
+                <motion.div
+                  key={`cloud-${i}`}
+                  className="absolute rounded-full pointer-events-none z-10 blur-xl"
+                  style={{ 
+                    left: `${-10 + Math.random() * 110}%`,
+                    top: `${10 + Math.random() * 60}%`,
+                    width: `${60 + Math.random() * 80}px`,
+                    height: `${30 + Math.random() * 40}px`,
+                    background: 'radial-gradient(circle, rgba(148, 163, 184, 0.15), transparent)'
+                  }}
+                  animate={{ 
+                    x: [0, 50 + Math.random() * 100, 0],
+                    opacity: [0.3, 0.6, 0.3]
+                  }}
+                  transition={{ 
+                    duration: 15 + Math.random() * 10,
+                    repeat: Infinity,
+                    delay: Math.random() * 5,
+                    ease: "linear"
+                  }}
+                />
+              ))}
+              {/* Partículas de neblina */}
+              {[...Array(12)].map((_, i) => (
+                <motion.div
+                  key={`mist-${i}`}
+                  className="absolute w-2 h-2 bg-slate-300/20 rounded-full pointer-events-none z-5 blur-md"
+                  style={{ 
+                    left: `${Math.random() * 100}%`,
+                    top: `${Math.random() * 100}%`
+                  }}
+                  animate={{ 
+                    scale: [1, 1.5, 1],
+                    opacity: [0.2, 0.4, 0.2],
+                    x: [0, 30, 0]
+                  }}
+                  transition={{ 
+                    duration: 8 + Math.random() * 4,
+                    repeat: Infinity,
+                    delay: Math.random() * 3
                   }}
                 />
               ))}
