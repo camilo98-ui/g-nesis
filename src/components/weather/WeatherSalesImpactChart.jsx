@@ -995,59 +995,57 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
 
           {viewMode === 'cloudy' && (
             <>
-              {/* Ambiente nublado intenso */}
-              <motion.div
-                className="absolute inset-0 bg-gradient-to-b from-slate-400/25 to-gray-500/20 pointer-events-none z-5"
-                animate={{ opacity: [0.7, 1, 0.7] }}
-                transition={{ duration: 6, repeat: Infinity }}
-              />
-              {/* Nubes grandes flotantes */}
-              {[...Array(12)].map((_, i) => (
+              {/* Capa de oscurecimiento nublado */}
+              <div className="absolute inset-0 bg-slate-700/15 pointer-events-none z-20" />
+
+              {/* Nubes grandes y visibles */}
+              {[...Array(15)].map((_, i) => (
                 <motion.div
                   key={`cloud-${i}`}
-                  className="absolute rounded-full pointer-events-none z-10"
+                  className="absolute pointer-events-none z-30"
                   style={{ 
-                    left: `${-15 + Math.random() * 120}%`,
-                    top: `${5 + Math.random() * 70}%`,
-                    width: `${100 + Math.random() * 150}px`,
-                    height: `${50 + Math.random() * 70}px`,
-                    background: 'radial-gradient(ellipse, rgba(100, 116, 139, 0.45) 0%, rgba(148, 163, 184, 0.25) 50%, transparent 100%)',
-                    filter: 'blur(25px)'
+                    left: `${-20 + i * 8}%`,
+                    top: `${10 + (i % 5) * 15}%`,
+                    width: `${150 + Math.random() * 100}px`,
+                    height: `${70 + Math.random() * 50}px`,
+                    background: 'radial-gradient(ellipse at center, rgba(148, 163, 184, 0.7) 0%, rgba(100, 116, 139, 0.4) 40%, transparent 70%)',
+                    borderRadius: '50%',
+                    filter: 'blur(15px)'
                   }}
                   animate={{ 
-                    x: [0, 80 + Math.random() * 150, 0],
-                    opacity: [0.5, 0.8, 0.5],
-                    scale: [1, 1.1, 1]
+                    x: [-50, 100, -50],
+                    opacity: [0.6, 0.9, 0.6]
                   }}
                   transition={{ 
-                    duration: 20 + Math.random() * 15,
+                    duration: 25 + i * 2,
                     repeat: Infinity,
-                    delay: Math.random() * 8,
-                    ease: "easeInOut"
+                    ease: "linear"
                   }}
                 />
               ))}
-              {/* Neblina densa */}
-              {[...Array(20)].map((_, i) => (
+
+              {/* Neblina flotante densa */}
+              {[...Array(25)].map((_, i) => (
                 <motion.div
-                  key={`mist-${i}`}
-                  className="absolute rounded-full pointer-events-none z-8"
+                  key={`fog-${i}`}
+                  className="absolute pointer-events-none z-25"
                   style={{ 
-                    left: `${Math.random() * 100}%`,
+                    left: `${Math.random() * 110 - 5}%`,
                     top: `${Math.random() * 100}%`,
-                    width: `${40 + Math.random() * 60}px`,
-                    height: `${40 + Math.random() * 60}px`,
-                    background: 'radial-gradient(circle, rgba(148, 163, 184, 0.35), transparent)',
-                    filter: 'blur(20px)'
+                    width: `${60 + Math.random() * 100}px`,
+                    height: `${60 + Math.random() * 100}px`,
+                    background: 'radial-gradient(circle, rgba(156, 163, 175, 0.6), rgba(148, 163, 184, 0.3) 50%, transparent)',
+                    borderRadius: '50%',
+                    filter: 'blur(30px)'
                   }}
                   animate={{ 
-                    scale: [1, 1.3, 1],
-                    opacity: [0.4, 0.7, 0.4],
-                    x: [0, 40, 0],
-                    y: [0, -20, 0]
+                    x: [0, 60, 0],
+                    y: [0, -30, 0],
+                    opacity: [0.5, 0.8, 0.5],
+                    scale: [1, 1.2, 1]
                   }}
                   transition={{ 
-                    duration: 10 + Math.random() * 5,
+                    duration: 12 + Math.random() * 8,
                     repeat: Infinity,
                     delay: Math.random() * 5
                   }}
