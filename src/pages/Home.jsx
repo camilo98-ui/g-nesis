@@ -96,17 +96,6 @@ const MENU_ITEMS = [
   textColor: 'text-cyan-700'
 },
 {
-  name: 'Ventas',
-  page: 'Dashboard',
-  icon: Receipt,
-  description: 'Registrar ventas',
-  bgColor: 'bg-gradient-to-br from-emerald-100/90 to-green-100/80',
-  iconBg: 'bg-emerald-200/60',
-  iconColor: 'text-emerald-500',
-  textColor: 'text-emerald-700',
-  isSpecialAction: true
-},
-{
   name: 'PopsyStars',
   page: 'Rankings',
   icon: Award,
