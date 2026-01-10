@@ -1,16 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import SmartSearch from '@/components/SmartSearch';
-import MotivationalHeader from '@/components/MotivationalHeader';
 import ErrorBoundary from '@/components/ErrorBoundary';
-import PopsyRainingIcons from '@/components/PopsyRainingIcons';
 import { DateFilterProvider, useDateFilter } from '@/components/DateFilterContext';
 import { base44 } from '@/api/base44Client';
-import { 
-  Home, LayoutDashboard, Menu, Snowflake, CalendarDays, TrendingUp, Calendar
-} from 'lucide-react';
-import { Link as RouterLink } from 'react-router-dom';
+import { Calendar } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -21,10 +15,7 @@ import { motion } from 'framer-motion';
 
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/6a749247d_Capturadepantalla2025-11-251251441.png";
 
-const NAV_ITEMS = [
-  { name: 'Inicio', page: 'Home', icon: Home, isIcon: true },
-  { name: 'Planner', page: 'PopsyPlanner', icon: CalendarDays, isIcon: true },
-];
+
 
 function DateFilterBar() {
   const { startDate, endDate, setStartDate, setEndDate } = useDateFilter();
@@ -99,22 +90,8 @@ function DateFilterBar() {
 }
 
 export default function Layout({ children, currentPageName }) {
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [selectedStore, setSelectedStore] = useState('');
-  const [userRole, setUserRole] = useState('lider');
 
   useEffect(() => {
-    const saved = localStorage.getItem('selectedStore');
-    const savedRole = localStorage.getItem('userRole');
-    if (saved) setSelectedStore(saved);
-    if (savedRole) setUserRole(savedRole);
-    
-    // Load theme on mount
-    const savedTheme = localStorage.getItem('popsyTheme') || 'classic';
-    const root = document.documentElement;
-    root.classList.add(`theme-${savedTheme}`);
-    
-    // Set language to Spanish to prevent translation prompts
     document.documentElement.lang = 'es';
   }, []);
 

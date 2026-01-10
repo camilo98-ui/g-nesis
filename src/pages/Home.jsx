@@ -162,8 +162,7 @@ export default function Home() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showStory, setShowStory] = useState(false);
   const [showDirectory, setShowDirectory] = useState(false);
-  const [showInstall, setShowInstall] = useState(false);
-  const [deferredPrompt, setDeferredPrompt] = useState(null);
+
   const [showWelcome, setShowWelcome] = useState(false);
   const [showReport, setShowReport] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -325,14 +324,7 @@ export default function Home() {
     staleTime: 10 * 60 * 1000
   });
 
-  useEffect(() => {
-    const handler = (e) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-    };
-    window.addEventListener('beforeinstallprompt', handler);
-    return () => window.removeEventListener('beforeinstallprompt', handler);
-  }, []);
+
 
   // Cargar sesión guardada
   useEffect(() => {
@@ -1220,25 +1212,7 @@ export default function Home() {
               <Target className="w-4 h-4 mr-1" />
               Presupuestos
             </Button>
-            <Link to={createPageUrl('PopsyPlanner')}>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-gray-500 hover:text-violet-600 hover:bg-violet-50 transition-all"
-              >
-                <CalendarDays className="w-4 h-4 mr-1" />
-                Planner
-              </Button>
-            </Link>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowInstall(true)}
-              className="text-gray-500 hover:text-purple-600 hover:bg-purple-50 transition-all"
-            >
-              <Download className="w-4 h-4 mr-1" />
-              Instalar App
-            </Button>
+
             <Button
               variant="ghost"
               size="sm"
@@ -1534,55 +1508,7 @@ export default function Home() {
 
 
 
-      {/* Install App Modal */}
-      {showInstall && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowInstall(false)}>
-          <motion.div 
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            onClick={(e) => e.stopPropagation()} 
-            className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border-2 border-white/60"
-          >
-            <div className="bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500 p-5 text-white text-center">
-              <motion.div
-                animate={{ y: [0, -5, 0] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
-                <Download className="w-10 h-10 mx-auto mb-2" />
-              </motion.div>
-              <h2 className="text-xl font-black">Instalar Popsy App</h2>
-              <p className="text-white/90 text-sm font-medium">Accede más rápido 🚀</p>
-            </div>
 
-            <div className="p-5">
-              <Button
-                onClick={async () => {
-                  if (deferredPrompt) {
-                    deferredPrompt.prompt();
-                    const { outcome } = await deferredPrompt.userChoice;
-                    if (outcome === 'accepted') {
-                      setDeferredPrompt(null);
-                      setShowInstall(false);
-                    }
-                  } else {
-                    alert('Para instalar:\n\niPhone/iPad: Toca Compartir ⬆️ → "Añadir a inicio"\n\nAndroid: Menú ⋮ → "Instalar app"');
-                  }
-                }}
-                className="w-full bg-gradient-to-r from-violet-600 via-purple-500 to-fuchsia-600 hover:from-violet-700 hover:via-purple-600 hover:to-fuchsia-700 text-white py-6 font-bold shadow-xl"
-              >
-                <Download className="w-5 h-5 mr-2" />
-                {deferredPrompt ? 'Instalar ahora' : 'Ver instrucciones'}
-              </Button>
-            </div>
-
-            <div className="p-4 bg-gray-50 border-t text-center">
-              <Button variant="ghost" onClick={() => setShowInstall(false)} className="text-gray-500">
-                Cerrar
-              </Button>
-            </div>
-          </motion.div>
-        </div>
-      )}
     </div>
   );
 }
