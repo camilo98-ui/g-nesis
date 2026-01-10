@@ -323,7 +323,11 @@ export default function DateFilter({ dateRange, onDateChange, buttonClassName = 
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => onDateChange(null)}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onDateChange({ from: startOfMonth(new Date()), to: new Date() });
+            }}
             className="h-8 px-2 text-xs text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-full"
           >
             ✕ Limpiar
