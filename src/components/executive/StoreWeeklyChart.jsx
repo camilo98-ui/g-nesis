@@ -36,7 +36,9 @@ export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRa
         code: s.code,
         venta: s.weekTotalSales / 1000000,
         presupuesto: s.weeklyBudget / 1000000,
+        proyeccion: s.weekProjection / 1000000,
         cumplimiento: s.weekCompliance,
+        proyeccionCompliance: s.weekProjectionCompliance,
         colors: getBarColor(s.weekCompliance)
       }));
     
@@ -350,7 +352,7 @@ export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRa
               <Bar 
                 dataKey="venta" 
                 radius={[0, 8, 8, 0]} 
-                maxBarSize={22}
+                maxBarSize={18}
                 onClick={handleBarClick}
                 cursor="pointer"
                 onMouseEnter={(_, index) => setHoveredIndex(`col1-${index}`)}
@@ -377,6 +379,41 @@ export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRa
                       `}
                       style={{
                         animationDelay: `${index * 100}ms`
+                      }}
+                    />
+                  );
+                })}
+              </Bar>
+              <Bar 
+                dataKey="proyeccion" 
+                radius={[0, 8, 8, 0]} 
+                maxBarSize={18}
+                onClick={handleBarClick}
+                cursor="pointer"
+                onMouseEnter={(_, index) => setHoveredIndex(`col1-${index}`)}
+                onMouseLeave={() => setHoveredIndex(null)}
+                isAnimationActive={isLoaded}
+                animationBegin={100}
+                animationDuration={1500}
+                animationEasing="ease-out"
+              >
+                {firstColumn.map((entry, index) => {
+                  const isHovered = hoveredIndex === `col1-${index}`;
+                  const isDimmed = hoveredIndex && !isHovered;
+                  const projColor = entry.proyeccionCompliance >= 100 ? '#10b981' : 
+                                    entry.proyeccionCompliance >= 96 ? '#f59e0b' : '#ef4444';
+                  
+                  return (
+                    <Cell 
+                      key={`cell-proj-${index}`} 
+                      fill={projColor}
+                      opacity={0.6}
+                      className={`
+                        ${isHovered ? 'bar-hovered' : ''}
+                        ${isDimmed ? 'bar-dimmed' : ''}
+                      `}
+                      style={{
+                        animationDelay: `${index * 100 + 100}ms`
                       }}
                     />
                   );
@@ -485,7 +522,7 @@ export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRa
               <Bar 
                 dataKey="venta" 
                 radius={[0, 8, 8, 0]} 
-                maxBarSize={22}
+                maxBarSize={18}
                 onClick={handleBarClick}
                 cursor="pointer"
                 onMouseEnter={(_, index) => setHoveredIndex(`col2-${index}`)}
@@ -512,6 +549,41 @@ export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRa
                       `}
                       style={{
                         animationDelay: `${(firstColumn.length + index) * 100}ms`
+                      }}
+                    />
+                  );
+                })}
+              </Bar>
+              <Bar 
+                dataKey="proyeccion" 
+                radius={[0, 8, 8, 0]} 
+                maxBarSize={18}
+                onClick={handleBarClick}
+                cursor="pointer"
+                onMouseEnter={(_, index) => setHoveredIndex(`col2-${index}`)}
+                onMouseLeave={() => setHoveredIndex(null)}
+                isAnimationActive={isLoaded}
+                animationBegin={100}
+                animationDuration={1500}
+                animationEasing="ease-out"
+              >
+                {secondColumn.map((entry, index) => {
+                  const isHovered = hoveredIndex === `col2-${index}`;
+                  const isDimmed = hoveredIndex && !isHovered;
+                  const projColor = entry.proyeccionCompliance >= 100 ? '#10b981' : 
+                                    entry.proyeccionCompliance >= 96 ? '#f59e0b' : '#ef4444';
+                  
+                  return (
+                    <Cell 
+                      key={`cell-proj-${index}`} 
+                      fill={projColor}
+                      opacity={0.6}
+                      className={`
+                        ${isHovered ? 'bar-hovered' : ''}
+                        ${isDimmed ? 'bar-dimmed' : ''}
+                      `}
+                      style={{
+                        animationDelay: `${(firstColumn.length + index) * 100 + 100}ms`
                       }}
                     />
                   );
