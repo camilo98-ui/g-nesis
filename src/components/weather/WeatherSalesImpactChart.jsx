@@ -861,8 +861,8 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="relative bg-gradient-to-br from-slate-50 via-white to-slate-50 rounded-3xl overflow-hidden border border-slate-200 shadow-2xl"
-        style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.08)' }}
+        className="relative bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 rounded-3xl overflow-hidden border border-slate-800 shadow-2xl"
+        style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.5)' }}
       >
         {/* Efectos climáticos interactivos dentro del área de gráfica */}
         <AnimatePresence>
@@ -987,12 +987,12 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
                   </linearGradient>
                 </defs>
                 
-                <CartesianGrid strokeDasharray="4 4" stroke="rgba(148, 163, 184, 0.15)" />
+                <CartesianGrid strokeDasharray="4 4" stroke="rgba(148, 163, 184, 0.08)" />
                 
                 <XAxis 
                   dataKey="date" 
-                  tick={{ fontSize: 12, fill: '#475569', fontWeight: 700 }} 
-                  stroke="rgba(148, 163, 184, 0.4)"
+                  tick={{ fontSize: 12, fill: '#cbd5e1', fontWeight: 700 }} 
+                  stroke="rgba(148, 163, 184, 0.3)"
                   axisLine={{ strokeWidth: 2 }}
                 />
                 
@@ -1000,11 +1000,11 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
                   yAxisId="sales"
                   orientation="left"
                   tickFormatter={(v) => `$${(v / 1000000).toFixed(1)}M`}
-                  tick={{ fontSize: 12, fill: '#475569', fontWeight: 700 }}
-                  stroke="rgba(71, 85, 105, 0.4)"
+                  tick={{ fontSize: 12, fill: '#cbd5e1', fontWeight: 700 }}
+                  stroke="rgba(203, 213, 225, 0.3)"
                   axisLine={{ strokeWidth: 2 }}
                   width={80}
-                  label={{ value: 'Ventas', angle: -90, position: 'insideLeft', fill: '#475569', fontSize: 12, fontWeight: 700 }}
+                  label={{ value: 'Ventas', angle: -90, position: 'insideLeft', fill: '#cbd5e1', fontSize: 12, fontWeight: 700 }}
                 />
                 
                 <YAxis
@@ -1012,11 +1012,11 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
                   orientation="right"
                   domain={[10, 26]}
                   tickFormatter={(v) => `${v}°`}
-                  tick={{ fontSize: 12, fill: '#ea580c', fontWeight: 700 }}
-                  stroke="rgba(234, 88, 12, 0.5)"
+                  tick={{ fontSize: 12, fill: '#fb923c', fontWeight: 700 }}
+                  stroke="rgba(251, 146, 60, 0.5)"
                   axisLine={{ strokeWidth: 2 }}
                   width={55}
-                  label={{ value: 'Temp °C', angle: 90, position: 'insideRight', fill: '#ea580c', fontSize: 12, fontWeight: 700 }}
+                  label={{ value: 'Temp °C', angle: 90, position: 'insideRight', fill: '#fb923c', fontSize: 12, fontWeight: 700 }}
                 />
 
                 {/* Línea de promedio sutil */}
@@ -1025,7 +1025,7 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
                     yAxisId="sales"
                     type="monotone"
                     dataKey={() => stats.avgTotal}
-                    stroke="#94a3b8"
+                    stroke="#64748b"
                     strokeWidth={2}
                     strokeDasharray="10 5"
                     dot={false}
@@ -1133,22 +1133,22 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
           </div>
 
           {/* Leyenda minimalista */}
-          <div className="flex justify-center gap-8 mt-6 pt-4 border-t border-slate-200/30">
+          <div className="flex justify-center gap-8 mt-6 pt-4 border-t border-slate-700/30">
             <div className="flex items-center gap-2">
               <div className="w-4 h-10 bg-gradient-to-b from-purple-400 to-purple-600 rounded-sm shadow-lg" 
                 style={{ boxShadow: '0 4px 10px rgba(139, 92, 246, 0.3)' }}
               />
-              <span className="text-slate-700 text-sm font-bold">Ventas</span>
+              <span className="text-slate-200 text-sm font-bold">Ventas</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-10 h-1.5 bg-gradient-to-r from-orange-400 to-red-500 rounded-full shadow-lg" 
                 style={{ boxShadow: '0 0 8px rgba(251, 146, 60, 0.5)' }}
               />
-              <span className="text-slate-700 text-sm font-bold">Temperatura</span>
+              <span className="text-slate-200 text-sm font-bold">Temperatura</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-10 bg-gradient-to-b from-cyan-400/40 to-cyan-600/40 rounded-sm border-2 border-dashed border-cyan-400" />
-              <span className="text-slate-700 text-sm font-bold">Pronóstico</span>
+              <span className="text-slate-200 text-sm font-bold">Pronóstico</span>
             </div>
           </div>
         </div>
