@@ -733,14 +733,14 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
           <motion.div
             animate={{ rotate: [0, 360] }}
             transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-            className="p-3 bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700/50"
-            style={{ boxShadow: '0 0 20px rgba(100, 116, 139, 0.3), inset 0 1px 0 rgba(255,255,255,0.05)' }}
+            className="p-3 bg-slate-100/90 backdrop-blur-sm rounded-2xl border border-slate-300/50 shadow-lg"
+            style={{ boxShadow: '0 4px 20px rgba(100, 116, 139, 0.15)' }}
           >
-            <Activity className="w-7 h-7 text-slate-400" />
+            <Activity className="w-7 h-7 text-slate-700" />
           </motion.div>
           <div>
-            <h2 className="text-2xl font-black text-slate-800">Impacto Climático en Ventas</h2>
-            <p className="text-slate-500 text-sm font-medium">
+            <h2 className="text-2xl font-black text-slate-900">Impacto Climático en Ventas</h2>
+            <p className="text-slate-600 text-sm font-semibold">
               {chartData.filter(d => !d.isForecast).length} días • Análisis financiero ejecutivo
             </p>
           </div>
@@ -884,7 +884,7 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
 
       {/* Selectores de Escenario Climático */}
       <div className="flex items-center gap-3">
-        <span className="text-slate-600 text-sm font-bold">Escenario:</span>
+        <span className="text-slate-700 text-sm font-black">Escenario:</span>
         <div className="flex flex-wrap gap-2">
           <ClimateButton
             active={viewMode === 'all'}
@@ -937,8 +937,8 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="relative bg-gradient-to-br from-slate-900 via-slate-850 to-slate-900 rounded-3xl overflow-hidden border border-slate-700/50 shadow-2xl"
-        style={{ boxShadow: '0 30px 90px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.03)' }}
+        className="relative bg-gradient-to-br from-slate-50 via-white to-slate-50 rounded-3xl overflow-hidden border border-slate-200 shadow-2xl"
+        style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.08)' }}
       >
         {/* Efectos climáticos interactivos dentro del área de gráfica */}
         <AnimatePresence>
@@ -1063,12 +1063,12 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
                   </linearGradient>
                 </defs>
                 
-                <CartesianGrid strokeDasharray="4 4" stroke="rgba(148, 163, 184, 0.08)" />
+                <CartesianGrid strokeDasharray="4 4" stroke="rgba(148, 163, 184, 0.15)" />
                 
                 <XAxis 
                   dataKey="date" 
-                  tick={{ fontSize: 12, fill: '#64748b', fontWeight: 700 }} 
-                  stroke="rgba(100, 116, 139, 0.3)"
+                  tick={{ fontSize: 12, fill: '#475569', fontWeight: 700 }} 
+                  stroke="rgba(148, 163, 184, 0.4)"
                   axisLine={{ strokeWidth: 2 }}
                 />
                 
@@ -1076,11 +1076,11 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
                   yAxisId="sales"
                   orientation="left"
                   tickFormatter={(v) => `$${(v / 1000000).toFixed(1)}M`}
-                  tick={{ fontSize: 12, fill: '#94a3b8', fontWeight: 700 }}
-                  stroke="rgba(148, 163, 184, 0.3)"
+                  tick={{ fontSize: 12, fill: '#475569', fontWeight: 700 }}
+                  stroke="rgba(71, 85, 105, 0.4)"
                   axisLine={{ strokeWidth: 2 }}
                   width={80}
-                  label={{ value: 'Ventas', angle: -90, position: 'insideLeft', fill: '#94a3b8', fontSize: 12, fontWeight: 700 }}
+                  label={{ value: 'Ventas', angle: -90, position: 'insideLeft', fill: '#475569', fontSize: 12, fontWeight: 700 }}
                 />
                 
                 <YAxis
@@ -1088,11 +1088,11 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
                   orientation="right"
                   domain={[10, 26]}
                   tickFormatter={(v) => `${v}°`}
-                  tick={{ fontSize: 12, fill: '#fb923c', fontWeight: 700 }}
-                  stroke="rgba(251, 146, 60, 0.4)"
+                  tick={{ fontSize: 12, fill: '#ea580c', fontWeight: 700 }}
+                  stroke="rgba(234, 88, 12, 0.5)"
                   axisLine={{ strokeWidth: 2 }}
                   width={55}
-                  label={{ value: 'Temp °C', angle: 90, position: 'insideRight', fill: '#fb923c', fontSize: 12, fontWeight: 700 }}
+                  label={{ value: 'Temp °C', angle: 90, position: 'insideRight', fill: '#ea580c', fontSize: 12, fontWeight: 700 }}
                 />
 
                 {/* Línea de promedio sutil */}
@@ -1101,7 +1101,7 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
                     yAxisId="sales"
                     type="monotone"
                     dataKey={() => stats.avgTotal}
-                    stroke="#64748b"
+                    stroke="#94a3b8"
                     strokeWidth={2}
                     strokeDasharray="10 5"
                     dot={false}
@@ -1209,22 +1209,22 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
           </div>
 
           {/* Leyenda minimalista */}
-          <div className="flex justify-center gap-8 mt-6 pt-4 border-t border-slate-700/30">
+          <div className="flex justify-center gap-8 mt-6 pt-4 border-t border-slate-200/30">
             <div className="flex items-center gap-2">
               <div className="w-4 h-10 bg-gradient-to-b from-purple-400 to-purple-600 rounded-sm shadow-lg" 
                 style={{ boxShadow: '0 4px 10px rgba(139, 92, 246, 0.3)' }}
               />
-              <span className="text-slate-400 text-sm font-semibold">Ventas</span>
+              <span className="text-slate-700 text-sm font-bold">Ventas</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-10 h-1.5 bg-gradient-to-r from-orange-400 to-red-500 rounded-full shadow-lg" 
                 style={{ boxShadow: '0 0 8px rgba(251, 146, 60, 0.5)' }}
               />
-              <span className="text-slate-400 text-sm font-semibold">Temperatura</span>
+              <span className="text-slate-700 text-sm font-bold">Temperatura</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-10 bg-gradient-to-b from-cyan-400/40 to-cyan-600/40 rounded-sm border-2 border-dashed border-cyan-400" />
-              <span className="text-slate-400 text-sm font-semibold">Pronóstico</span>
+              <span className="text-slate-700 text-sm font-bold">Pronóstico</span>
             </div>
           </div>
         </div>
