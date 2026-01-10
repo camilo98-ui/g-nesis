@@ -317,9 +317,24 @@ export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRa
                           <span className="text-slate-400">📊 Cumplimiento:</span>
                           <span className={`font-bold ${
                             data.cumplimiento >= 100 ? 'text-emerald-400' : 
-                            data.cumplimiento >= 85 ? 'text-amber-400' : 'text-red-400'
+                            data.cumplimiento >= 90 ? 'text-amber-400' : 'text-red-400'
                           }`}>
                             {data.cumplimiento.toFixed(1)}%
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-400">📈 Proyección:</span>
+                          <span className="font-bold text-purple-400">
+                            {formatCurrency(data.proyeccion * 1000000)}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-400">📊 Proy %:</span>
+                          <span className={`font-bold ${
+                            data.proyeccionCompliance >= 100 ? 'text-emerald-400' : 
+                            data.proyeccionCompliance >= 90 ? 'text-amber-400' : 'text-red-400'
+                          }`}>
+                            {data.proyeccionCompliance.toFixed(1)}%
                           </span>
                         </div>
                         {gap !== 0 && (
@@ -338,7 +353,7 @@ export default function StoreWeeklyChart({ storesAnalysis, allDailySales, dateRa
                         <p className="text-xs text-slate-200 leading-relaxed">
                           {data.cumplimiento >= 100 
                             ? 'Excelente desempeño. Click para ver detalle diario.' 
-                            : data.cumplimiento >= 85 
+                            : data.cumplimiento >= 90 
                             ? 'Cerca de la meta. Click para analizar días críticos.'
                             : 'Requiere atención. Click para plan de acción diario.'}
                         </p>
