@@ -760,7 +760,7 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
             </div>
           </motion.button>
 
-          {/* Proyección 7 Días */}
+          {/* Proyección Día Siguiente + 7 Días */}
           <motion.button
             onClick={() => {
               if (!showForecast) setShowForecast(true);
@@ -779,40 +779,50 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
               transition={{ duration: 5, repeat: Infinity }}
             />
             <div className="relative z-10">
-              <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Proyección 7 Días</p>
-              <motion.p 
-                className={`text-4xl font-black mb-1 ${
-                  !showForecast ? 'text-slate-500' :
-                  financialMetrics.forecastVariation >= 0 ? 'text-cyan-400' : 'text-orange-400'
-                }`}
-                key={financialMetrics.forecastTotal}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-              >
-                {!showForecast ? 'Clic para ver' : formatCurrency(financialMetrics.forecastTotal)}
-              </motion.p>
-              <div className="flex items-center gap-2">
-                {showForecast && (
-                  <span className={`text-xs font-bold ${financialMetrics.forecastVariation >= 0 ? 'text-cyan-300' : 'text-orange-300'}`}>
-                    {financialMetrics.forecastVariation >= 0 ? '+' : ''}{financialMetrics.forecastVariation.toFixed(1)}%
-                  </span>
-                )}
-                {showForecast && (
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold border" style={{
-                    backgroundColor: financialMetrics.riskLevel === 'alto' ? 'rgba(239, 68, 68, 0.2)' :
-                                     financialMetrics.riskLevel === 'medio' ? 'rgba(251, 146, 60, 0.2)' :
-                                     'rgba(34, 197, 94, 0.2)',
-                    color: financialMetrics.riskLevel === 'alto' ? '#fca5a5' :
-                           financialMetrics.riskLevel === 'medio' ? '#fdba74' :
-                           '#86efac',
-                    borderColor: financialMetrics.riskLevel === 'alto' ? 'rgba(239, 68, 68, 0.3)' :
-                                 financialMetrics.riskLevel === 'medio' ? 'rgba(251, 146, 60, 0.3)' :
-                                 'rgba(34, 197, 94, 0.3)'
-                  }}>
-                    Riesgo {financialMetrics.riskLevel}
-                  </span>
-                )}
-              </div>
+              {!showForecast ? (
+                <>
+                  <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Pronóstico</p>
+                  <motion.p 
+                    className="text-4xl font-black mb-1 text-slate-500"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                  >
+                    Clic para ver
+                  </motion.p>
+                  <p className="text-slate-400 text-xs">Próximos 7 días</p>
+                </>
+              ) : (() => {
+                const tomorrowData = chartData.find(d => d.isForecast);
+                return (
+                  <>
+                    <p className="text-cyan-400 text-xs font-bold uppercase tracking-wider mb-2">🔮 Mañana</p>
+                    <motion.p 
+                      className="text-3xl font-black mb-1 text-cyan-300"
+                      key={tomorrowData?.sales}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                    >
+                      {tomorrowData ? formatCurrency(tomorrowData.sales) : '—'}
+                    </motion.p>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {tomorrowData && (
+                        <>
+                          <span className="text-xs text-slate-400">
+                            {tomorrowData.weatherType === 'sunny' ? '☀️ Soleado' :
+                             tomorrowData.weatherType === 'rainy' ? '🌧️ Lluvia' :
+                             '☁️ Nublado'} • {tomorrowData.temperature}°C
+                          </span>
+                          <span className={`text-xs font-bold ${
+                            financialMetrics.forecastVariation >= 0 ? 'text-cyan-300' : 'text-orange-300'
+                          }`}>
+                            Total 7d: {formatCurrency(financialMetrics.forecastTotal)}
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  </>
+                );
+              })()}
             </div>
           </motion.button>
         </div>
