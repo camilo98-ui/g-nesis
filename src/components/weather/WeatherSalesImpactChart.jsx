@@ -1215,14 +1215,14 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
                       <Cell 
                         key={`cell-${index}`}
                         fill={fill}
-                        opacity={entry.isForecast ? 0.35 : isVisible ? 1 : 0.12}
+                        opacity={entry.isForecast ? 0.75 : isVisible ? 1 : 0.12}
                         stroke={entry.isForecast ? '#06b6d4' : 'rgba(255,255,255,0.1)'}
-                        strokeWidth={entry.isForecast ? 2 : 1}
-                        strokeDasharray={entry.isForecast ? "6 4" : "0"}
+                        strokeWidth={entry.isForecast ? 3 : 1}
+                        strokeDasharray={entry.isForecast ? "8 4" : "0"}
                       >
                         <animate
                           attributeName="opacity"
-                          values={isVisible && !entry.isForecast ? "0.85;1;0.85" : entry.isForecast ? "0.35" : "0.12"}
+                          values={isVisible && !entry.isForecast ? "0.85;1;0.85" : entry.isForecast ? "0.65;0.85;0.65" : "0.12"}
                           dur="3s"
                           repeatCount="indefinite"
                           begin={`${index * 0.1}s`}
