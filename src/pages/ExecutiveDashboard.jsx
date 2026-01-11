@@ -244,14 +244,14 @@ export default function ExecutiveDashboard() {
       // VENTAS DE LA SEMANA ACTUAL (semana en la que estamos HOY)
       // Calcular inicio y fin de la semana actual basado en el modo
       const todayWeekStart = gregorianMode 
-        ? startOfWeek(now, { weekStartsOn: 1 }) // Gregoriano: lunes a domingo
+        ? startOfMonth(now) // Gregoriano: desde inicio del mes hasta hoy
         : (() => {
             const daysSinceRetailStart = Math.floor((now - RETAIL_WEEK_START) / (24 * 60 * 60 * 1000));
             const currentRetailWeekNum = Math.floor(daysSinceRetailStart / 7);
             return addDays(RETAIL_WEEK_START, currentRetailWeekNum * 7);
           })();
       
-      const todayWeekEnd = addDays(todayWeekStart, 6);
+      const todayWeekEnd = gregorianMode ? now : addDays(todayWeekStart, 6);
 
       // Filtrar ventas de la semana actual (donde estamos hoy)
       const weekSales = storeSales.filter(s => {
