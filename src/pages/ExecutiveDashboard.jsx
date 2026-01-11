@@ -239,19 +239,24 @@ export default function ExecutiveDashboard() {
       };
 
       // PPT del día de hoy (ajustado por histórico)
-      const adjustedDailyBudget = getDailyBudget(now);
+      // En modo gregoriano, calcular PPT acumulado desde inicio de mes hasta hoy
+      const adjustedDailyBudget = gregorianMode 
+        ? eachDayOfInterval({ start: startOfMonth(now), end: now }).reduce((sum, day) => {
+            return sum + getDailyBudget(day);
+          }, 0)
+        : getDailyBudget(now);
 
       // VENTAS DE LA SEMANA ACTUAL (semana en la que estamos HOY)
       // Calcular inicio y fin de la semana actual basado en el modo
       const todayWeekStart = gregorianMode 
-        ? startOfMonth(now) // Gregoriano: desde inicio del mes hasta hoy
+        ? startOfWeek(now, { weekStartsOn: 1 }) // Gregoriano: lunes a domingo
         : (() => {
             const daysSinceRetailStart = Math.floor((now - RETAIL_WEEK_START) / (24 * 60 * 60 * 1000));
             const currentRetailWeekNum = Math.floor(daysSinceRetailStart / 7);
             return addDays(RETAIL_WEEK_START, currentRetailWeekNum * 7);
           })();
       
-      const todayWeekEnd = gregorianMode ? now : addDays(todayWeekStart, 6);
+      const todayWeekEnd = addDays(todayWeekStart, 6);
 
       // Filtrar ventas de la semana actual (donde estamos hoy)
       const weekSales = storeSales.filter(s => {
