@@ -1632,8 +1632,8 @@ export default function Dashboard() {
                   <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
                     <CardHeader className="pb-2">
                       <div className="flex items-center justify-between">
-                        <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
-                          <TrendingUp className="w-4 h-4 text-green-500" />
+                        <CardTitle className="text-base sm:text-sm font-medium text-gray-600 flex items-center gap-2">
+                          <TrendingUp className="w-5 h-5 sm:w-4 sm:h-4 text-green-500" />
                           Ventas Diarias {showComparison && '- Comparativo'}
                         </CardTitle>
                       </div>
@@ -1645,7 +1645,7 @@ export default function Dashboard() {
                       />
                     </CardHeader>
                     <CardContent>
-                      <div className="h-64">
+                      <div className="h-80 sm:h-64">
                         <ResponsiveContainer width="100%" height="100%">
                           <AreaChart data={chartData}>
                             <defs>
@@ -1659,8 +1659,8 @@ export default function Dashboard() {
                               </linearGradient>
                             </defs>
                             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                            <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-                            <YAxis tickFormatter={(v) => `$${(v / 1000000).toFixed(1)}M`} tick={{ fontSize: 11 }} />
+                            <XAxis dataKey="date" tick={{ fontSize: 12 }} angle={-20} textAnchor="end" height={60} />
+                            <YAxis tickFormatter={(v) => `$${(v / 1000000).toFixed(1)}M`} tick={{ fontSize: 12 }} />
                             <Tooltip
                           contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
                           labelFormatter={(label, payload) => payload?.[0]?.payload?.fullDate || label}
@@ -1694,8 +1694,8 @@ export default function Dashboard() {
                   {/* Transacciones vs Venta */}
                   <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
-                        <Zap className="w-4 h-4 text-purple-500" />
+                      <CardTitle className="text-base sm:text-sm font-medium text-gray-600 flex items-center gap-2">
+                        <Zap className="w-5 h-5 sm:w-4 sm:h-4 text-purple-500" />
                         Transacciones vs Ventas {showComparison && '- Comparativo'}
                       </CardTitle>
                       <ChartInsight 
@@ -1706,13 +1706,13 @@ export default function Dashboard() {
                       />
                     </CardHeader>
                     <CardContent>
-                      <div className="h-64">
+                      <div className="h-80 sm:h-64">
                         <ResponsiveContainer width="100%" height="100%">
                           <ComposedChart data={chartData}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                            <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-                            <YAxis yAxisId="left" tick={{ fontSize: 11 }} />
-                            <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11 }} tickFormatter={(v) => `$${(v / 1000000).toFixed(1)}M`} />
+                            <XAxis dataKey="date" tick={{ fontSize: 12 }} angle={-20} textAnchor="end" height={60} />
+                            <YAxis yAxisId="left" tick={{ fontSize: 12 }} />
+                            <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 12 }} tickFormatter={(v) => `$${(v / 1000000).toFixed(1)}M`} />
                             <Tooltip
                           contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
                           formatter={(v, name) => [name.includes('Ventas') ? formatCurrency(v) : v.toLocaleString(), name]} />
@@ -1735,8 +1735,8 @@ export default function Dashboard() {
                   {/* Ticket Promedio */}
                   <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
-                        <Receipt className="w-4 h-4 text-blue-500" />
+                      <CardTitle className="text-base sm:text-sm font-medium text-gray-600 flex items-center gap-2">
+                        <Receipt className="w-5 h-5 sm:w-4 sm:h-4 text-blue-500" />
                         Ticket Promedio {showComparison && '- Comparativo'}
                       </CardTitle>
                       <ChartInsight 
@@ -1747,7 +1747,7 @@ export default function Dashboard() {
                       />
                     </CardHeader>
                     <CardContent>
-                      <div className="h-64">
+                      <div className="h-80 sm:h-64">
                         <ResponsiveContainer width="100%" height="100%">
                           <AreaChart data={chartData}>
                             <defs>
@@ -1761,8 +1761,8 @@ export default function Dashboard() {
                               </linearGradient>
                             </defs>
                             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                            <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-                            <YAxis tickFormatter={(v) => `$${(v / 1000).toFixed(0)}K`} tick={{ fontSize: 11 }} />
+                            <XAxis dataKey="date" tick={{ fontSize: 12 }} angle={-20} textAnchor="end" height={60} />
+                            <YAxis tickFormatter={(v) => `$${(v / 1000).toFixed(0)}K`} tick={{ fontSize: 12 }} />
                             <Tooltip
                           contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
                           formatter={(v, name) => [formatCurrency(v), name]} />
