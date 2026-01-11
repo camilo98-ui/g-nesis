@@ -239,24 +239,38 @@ export default function ExecutiveDashboard() {
       };
 
       // PPT del día de hoy (ajustado por histórico)
-      // En modo gregoriano, calcular PPT acumulado desde inicio de mes hasta hoy
+      // En modo gregoriano: calcular cuánto necesita vender HOY para estar en ritmo
       const adjustedDailyBudget = gregorianMode 
-        ? eachDayOfInterval({ start: startOfMonth(now), end: now }).reduce((sum, day) => {
-            return sum + getDailyBudget(day);
-          }, 0)
+        ? (() => {
+            const monthEnd = endOfMonth(now);
+            const daysLeftIncludingToday = Math.ceil((monthEnd - now) / (1000 * 60 * 60 * 24)) + 1;
+            
+            // Ventas acumuladas del mes hasta AYER
+            const salesUntilYesterday = storeSales.filter(s => {
+              try {
+                const saleDate = parseISO(s.date);
+                return saleDate >= monthStart && saleDate < now;
+              } catch {
+                return false;
+              }
+            }).reduce((sum, s) => sum + (s.total_sales || 0), 0);
+            
+            // PPT HOY = (Presupuesto Mensual - Ventas hasta ayer) / Días restantes
+            return daysLeftIncludingToday > 0 ? (salesBudget - salesUntilYesterday) / daysLeftIncludingToday : 0;
+          })()
         : getDailyBudget(now);
 
       // VENTAS DE LA SEMANA ACTUAL (semana en la que estamos HOY)
       // Calcular inicio y fin de la semana actual basado en el modo
       const todayWeekStart = gregorianMode 
-        ? startOfWeek(now, { weekStartsOn: 1 }) // Gregoriano: lunes a domingo
+        ? startOfMonth(now) // Gregoriano: desde inicio del mes hasta hoy
         : (() => {
             const daysSinceRetailStart = Math.floor((now - RETAIL_WEEK_START) / (24 * 60 * 60 * 1000));
             const currentRetailWeekNum = Math.floor(daysSinceRetailStart / 7);
             return addDays(RETAIL_WEEK_START, currentRetailWeekNum * 7);
           })();
       
-      const todayWeekEnd = addDays(todayWeekStart, 6);
+      const todayWeekEnd = gregorianMode ? now : addDays(todayWeekStart, 6);
 
       // Filtrar ventas de la semana actual (donde estamos hoy)
       const weekSales = storeSales.filter(s => {
