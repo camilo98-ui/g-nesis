@@ -693,8 +693,8 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
         </Popover>
       </div>
 
-      {/* KPIs Financieros Críticos - Máximo 3 */}
-      {financialMetrics && stats && (
+      {/* KPIs Financieros Críticos - Máximo 3 - Solo si hay filtro activo */}
+      {financialMetrics && stats && viewMode !== 'all' && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Impacto Neto */}
           <motion.button
@@ -882,7 +882,8 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
         </Button>
       </div>
 
-      {/* Gráfica Principal - 70% del foco visual */}
+      {/* Gráfica Principal - Solo visible si hay filtro activo */}
+      {viewMode !== 'all' && (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -1309,9 +1310,10 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
           </div>
         </div>
       </motion.div>
+      )}
 
-      {/* Panel de Insights Cuantitativos Ejecutivos */}
-      {stats && financialMetrics && (
+      {/* Panel de Insights Cuantitativos Ejecutivos - Solo si hay filtro activo */}
+      {stats && financialMetrics && viewMode !== 'all' && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
