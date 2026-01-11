@@ -107,7 +107,7 @@ export default function GrowthVelocityChart({ dailyTrend = [], budget = 0, forma
           </motion.div>
         </div>
 
-        <div className="h-64 sm:h-48">
+        <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={velocityData}>
               <defs>
