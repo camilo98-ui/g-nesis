@@ -1659,8 +1659,8 @@ export default function Dashboard() {
                               </linearGradient>
                             </defs>
                             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                            <XAxis dataKey="date" tick={{ fontSize: 12 }} angle={-20} textAnchor="end" height={60} />
-                            <YAxis tickFormatter={(v) => `$${(v / 1000000).toFixed(1)}M`} tick={{ fontSize: 12 }} />
+                            <XAxis dataKey="date" tick={{ fontSize: 11 }} angle={-35} textAnchor="end" height={70} interval={0} />
+                            <YAxis tickFormatter={(v) => `$${(v / 1000000).toFixed(1)}M`} tick={{ fontSize: 12 }} width={70} />
                             <Tooltip
                           contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
                           labelFormatter={(label, payload) => payload?.[0]?.payload?.fullDate || label}
@@ -1710,9 +1710,9 @@ export default function Dashboard() {
                         <ResponsiveContainer width="100%" height="100%">
                           <ComposedChart data={chartData}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                            <XAxis dataKey="date" tick={{ fontSize: 12 }} angle={-20} textAnchor="end" height={60} />
-                            <YAxis yAxisId="left" tick={{ fontSize: 12 }} />
-                            <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 12 }} tickFormatter={(v) => `$${(v / 1000000).toFixed(1)}M`} />
+                            <XAxis dataKey="date" tick={{ fontSize: 11 }} angle={-35} textAnchor="end" height={70} interval={0} />
+                            <YAxis yAxisId="left" tick={{ fontSize: 12 }} width={50} />
+                            <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 12 }} tickFormatter={(v) => `$${(v / 1000000).toFixed(1)}M`} width={70} />
                             <Tooltip
                           contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
                           formatter={(v, name) => [name.includes('Ventas') ? formatCurrency(v) : v.toLocaleString(), name]} />
@@ -1747,7 +1747,7 @@ export default function Dashboard() {
                       />
                     </CardHeader>
                     <CardContent>
-                      <div className="h-80 sm:h-64">
+                      <div className="h-96">
                         <ResponsiveContainer width="100%" height="100%">
                           <AreaChart data={chartData}>
                             <defs>
@@ -1761,8 +1761,8 @@ export default function Dashboard() {
                               </linearGradient>
                             </defs>
                             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                            <XAxis dataKey="date" tick={{ fontSize: 12 }} angle={-20} textAnchor="end" height={60} />
-                            <YAxis tickFormatter={(v) => `$${(v / 1000).toFixed(0)}K`} tick={{ fontSize: 12 }} />
+                            <XAxis dataKey="date" tick={{ fontSize: 11 }} angle={-35} textAnchor="end" height={70} interval={0} />
+                            <YAxis tickFormatter={(v) => `$${(v / 1000).toFixed(0)}K`} tick={{ fontSize: 12 }} width={70} />
                             <Tooltip
                           contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
                           formatter={(v, name) => [formatCurrency(v), name]} />
