@@ -454,6 +454,7 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
   const [forecastData, setForecastData] = useState(null);
   const [loadingForecast, setLoadingForecast] = useState(false);
   const [showKPIDetail, setShowKPIDetail] = useState(null);
+  const [showFullAnalysis, setShowFullAnalysis] = useState(false);
 
   // Cargar pronóstico
   useEffect(() => {
@@ -693,8 +694,8 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
         </Popover>
       </div>
 
-      {/* KPIs Financieros Críticos - Máximo 3 - Solo si hay filtro activo */}
-      {financialMetrics && stats && viewMode !== 'all' && (
+      {/* KPIs Financieros Críticos - Siempre visibles */}
+      {financialMetrics && stats && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Impacto Neto */}
           <motion.button
@@ -818,8 +819,39 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
         </div>
       )}
 
-      {/* Selectores de Escenario - Sobrios */}
-      <div className="flex items-center gap-2">
+      {/* Botón para desplegar análisis completo */}
+      <div className="flex justify-center">
+        <Button
+          onClick={() => setShowFullAnalysis(!showFullAnalysis)}
+          variant="outline"
+          className="border-slate-300 hover:border-slate-400 bg-white hover:bg-slate-50 gap-2 px-6 py-3 text-sm font-semibold transition-all"
+        >
+          {showFullAnalysis ? (
+            <>
+              <X className="w-4 h-4" />
+              Contraer Análisis
+            </>
+          ) : (
+            <>
+              <BarChart3 className="w-4 h-4" />
+              Ver Análisis Completo
+            </>
+          )}
+        </Button>
+      </div>
+
+      {/* Contenido desplegable - Solo visible cuando showFullAnalysis es true */}
+      <AnimatePresence>
+        {showFullAnalysis && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            className="space-y-5"
+          >
+            {/* Selectores de Escenario - Sobrios */}
+            <div className="flex items-center gap-2">
         <span className="text-slate-500 text-xs font-semibold uppercase tracking-wide">Escenario:</span>
         <div className="flex flex-wrap gap-1.5">
           <ClimateButton
@@ -882,8 +914,7 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
         </Button>
       </div>
 
-      {/* Gráfica Principal - Solo visible si hay filtro activo */}
-      {viewMode !== 'all' && (
+      {/* Gráfica Principal */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -1310,10 +1341,9 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
           </div>
         </div>
       </motion.div>
-      )}
 
-      {/* Panel de Insights Cuantitativos Ejecutivos - Solo si hay filtro activo */}
-      {stats && financialMetrics && viewMode !== 'all' && (
+      {/* Panel de Insights Cuantitativos Ejecutivos */}
+      {stats && financialMetrics && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -1463,6 +1493,9 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
           </div>
         </motion.div>
       )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Modal de Detalles de KPI */}
       <AnimatePresence>
