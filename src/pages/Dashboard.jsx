@@ -989,8 +989,9 @@ export default function Dashboard() {
       
       <div className="max-w-screen-2xl mx-auto px-2 py-6 relative z-10">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col gap-4 mb-6">
+          {/* Título y Botón Volver */}
+          <div className="flex items-center gap-3">
             <Link to={createPageUrl('Home')}>
               <Button variant="ghost" size="icon" className="rounded-full hover:bg-pink-50">
                 <ArrowLeft className="w-5 h-5 text-pink-600" />
@@ -1001,19 +1002,35 @@ export default function Dashboard() {
                 animate={{
                   backgroundPosition: ['0% 50%', '100% 50%', '0% 50%']
                 }}
-                transition={{ duration: 5, repeat: Infinity }} className="bg-clip-text text-pink-700 text-2xl font-bold md:text-3xl from-violet-600 via-pink-500 to-violet-600">Tienda
-
-
-
+                transition={{ duration: 5, repeat: Infinity }} 
+                className="bg-clip-text text-pink-700 text-2xl font-bold md:text-3xl from-violet-600 via-pink-500 to-violet-600"
+              >
+                Tienda
               </motion.h1>
-              {selectedStore &&
-              <p className="text-pink-700 text-sm font-medium">{getDisplayName(selectedStore)}</p>
-              }
+              {selectedStore && (
+                <p className="text-pink-700 text-sm font-medium">{getDisplayName(selectedStore)}</p>
+              )}
             </div>
           </div>
-          <div className="flex flex-col md:flex-row gap-3 items-center">
+
+          {/* Selector de Tienda - Ancho completo en móvil */}
+          <div className="w-full">
             <StoreSelector selectedStore={selectedStore} onStoreChange={handleStoreChange} />
-            {!showComparison && <WeekFilter onWeekChange={(range) => {setWeekFilter(range);setDateRange(null);setGregorianMode(false);}} multiSelect={true} />}
+          </div>
+
+          {/* Filtros y Controles - Grid responsive */}
+          <div className="grid grid-cols-2 gap-2">
+            {!showComparison && (
+              <WeekFilter 
+                onWeekChange={(range) => {
+                  setWeekFilter(range);
+                  setDateRange(null);
+                  setGregorianMode(false);
+                }} 
+                multiSelect={true} 
+              />
+            )}
+            
             <DateFilter
               dateRange={showComparison ? (weekFilter || dateRange || { from: startOfMonth(new Date()), to: new Date() }) : dateRange}
               onDateChange={(range) => {
@@ -1026,8 +1043,10 @@ export default function Dashboard() {
                   setGregorianMode(false);
                 }
               }}
-              buttonText={showComparison ? "📅 Período Actual" : undefined}
-              buttonClassName={showComparison ? "border-blue-300 hover:border-blue-500" : undefined} />
+              buttonText={showComparison ? undefined : undefined}
+              buttonClassName={showComparison ? "border-blue-300 hover:border-blue-500" : undefined}
+            />
+
             {!showComparison && (
               <Button
                 onClick={() => {
@@ -1037,7 +1056,7 @@ export default function Dashboard() {
                     setDateRange(null);
                   }
                 }}
-                className={`gap-2 transition-all ${
+                className={`gap-2 transition-all w-full ${
                   gregorianMode
                     ? 'bg-indigo-500 hover:bg-indigo-600 text-white border-indigo-400'
                     : 'bg-white border-2 border-pink-200 hover:border-pink-300 text-gray-700'
@@ -1053,7 +1072,8 @@ export default function Dashboard() {
                 dateRange={comparisonRange || { from: new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1), to: new Date(new Date().getFullYear(), new Date().getMonth(), 0) }}
                 onDateChange={setComparisonRange}
                 buttonClassName="border-pink-300 hover:border-pink-500"
-                buttonText="📅 Comparar con" />
+                buttonText="📅 Comparar"
+              />
             )}
           </div>
         </div>
@@ -1061,7 +1081,7 @@ export default function Dashboard() {
         {selectedStore ?
         <div className="space-y-6">
             {/* Acciones rápidas */}
-            <div className="flex justify-end gap-2 items-center">
+            <div className="grid grid-cols-2 gap-2 mb-4">
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button
                 variant="outline"
@@ -1070,7 +1090,7 @@ export default function Dashboard() {
                   setShowComparison(false);
                   setComparisonRange(null);
                 }}
-                className={`gap-1 transition-all ${!showComparison ? 'bg-pink-50 text-pink-600 border-pink-200' : 'border-gray-200 text-gray-700 hover:border-pink-300 hover:bg-pink-50 hover:text-pink-600'}`}>
+                className={`gap-1 transition-all w-full ${!showComparison ? 'bg-pink-50 text-pink-600 border-pink-200' : 'border-gray-200 text-gray-700 hover:border-pink-300 hover:bg-pink-50 hover:text-pink-600'}`}>
 
                   <Activity className="w-4 h-4" />
                   Actual
@@ -1091,14 +1111,13 @@ export default function Dashboard() {
                     }
                   }
                 }}
-                className={`gap-1 transition-all ${showComparison ? 'bg-pink-50 text-pink-600 border-pink-200' : 'border-gray-200 text-gray-700 hover:border-pink-300 hover:bg-pink-50 hover:text-pink-600'}`}>
+                className={`gap-1 transition-all w-full ${showComparison ? 'bg-pink-50 text-pink-600 border-pink-200' : 'border-gray-200 text-gray-700 hover:border-pink-300 hover:bg-pink-50 hover:text-pink-600'}`}>
 
                   <BarChart3 className="w-4 h-4" />
                   Comparable
                 </Button>
               </motion.div>
-
-              </div>
+            </div>
 
             {/* Retail Week Budget - PRESUPUESTO DEL DÍA (LO MÁS IMPORTANTE) */}
             {!showComparison &&
