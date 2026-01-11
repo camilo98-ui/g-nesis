@@ -165,56 +165,56 @@ export default function CashierVisualProfile({ cashier, storeCode, shiftRecords 
         </div>
 
         {/* Quick Stats */}
-        <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3 px-4">
-          <div className="bg-emerald-50 rounded-xl p-3 text-center">
-            <DollarSign className="w-5 h-5 text-emerald-500 mx-auto mb-1" />
-            <p className="text-lg font-black text-emerald-600">
+        <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-3 px-4">
+          <div className="bg-emerald-50 rounded-xl p-5 sm:p-3 text-center">
+            <DollarSign className="w-6 h-6 sm:w-5 sm:h-5 text-emerald-500 mx-auto mb-2 sm:mb-1" />
+            <p className="text-xl sm:text-lg font-black text-emerald-600">
               {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stats.avgSales)}
             </p>
-            <p className="text-[10px] text-gray-500">Promedio Venta</p>
+            <p className="text-xs sm:text-[10px] text-gray-500 mt-1">Promedio Venta</p>
           </div>
-          <div className="bg-blue-50 rounded-xl p-3 text-center">
-            <Receipt className="w-5 h-5 text-blue-500 mx-auto mb-1" />
-            <p className="text-lg font-black text-blue-600">${Math.round(stats.avgTicket / 1000)}K</p>
-            <p className="text-[10px] text-gray-500">Ticket Prom.</p>
+          <div className="bg-blue-50 rounded-xl p-5 sm:p-3 text-center">
+            <Receipt className="w-6 h-6 sm:w-5 sm:h-5 text-blue-500 mx-auto mb-2 sm:mb-1" />
+            <p className="text-xl sm:text-lg font-black text-blue-600">${Math.round(stats.avgTicket / 1000)}K</p>
+            <p className="text-xs sm:text-[10px] text-gray-500 mt-1">Ticket Prom.</p>
           </div>
-          <div className="bg-purple-50 rounded-xl p-3 text-center">
-            <Zap className="w-5 h-5 text-purple-500 mx-auto mb-1" />
-            <p className="text-lg font-black text-purple-600">{Math.round(stats.daysWorked > 0 ? stats.totalTransactions / stats.daysWorked : 0)}</p>
-            <p className="text-[10px] text-gray-500">Trans. Promedio</p>
+          <div className="bg-purple-50 rounded-xl p-5 sm:p-3 text-center">
+            <Zap className="w-6 h-6 sm:w-5 sm:h-5 text-purple-500 mx-auto mb-2 sm:mb-1" />
+            <p className="text-xl sm:text-lg font-black text-purple-600">{Math.round(stats.daysWorked > 0 ? stats.totalTransactions / stats.daysWorked : 0)}</p>
+            <p className="text-xs sm:text-[10px] text-gray-500 mt-1">Trans. Promedio</p>
           </div>
-          <div className="bg-pink-50 rounded-xl p-3 text-center">
-            <Gift className="w-5 h-5 text-pink-500 mx-auto mb-1" />
-            <p className="text-lg font-black text-pink-600">{stats.totalSuggested}</p>
-            <p className="text-[10px] text-gray-500">Sugeridos</p>
+          <div className="bg-pink-50 rounded-xl p-5 sm:p-3 text-center">
+            <Gift className="w-6 h-6 sm:w-5 sm:h-5 text-pink-500 mx-auto mb-2 sm:mb-1" />
+            <p className="text-xl sm:text-lg font-black text-pink-600">{stats.totalSuggested}</p>
+            <p className="text-xs sm:text-[10px] text-gray-500 mt-1">Sugeridos</p>
           </div>
         </div>
 
         {/* Performance vs Team */}
         {teamAvg.avgSales > 0 && (
-          <div className="mt-4 mx-4 p-4 bg-gradient-to-r from-gray-50 to-slate-100 rounded-xl">
-            <h4 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-emerald-500" />
+          <div className="mt-6 sm:mt-4 mx-4 p-5 sm:p-4 bg-gradient-to-r from-gray-50 to-slate-100 rounded-xl">
+            <h4 className="text-base sm:text-sm font-bold text-gray-700 mb-4 sm:mb-3 flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 sm:w-4 sm:h-4 text-emerald-500" />
               Rendimiento vs Equipo
             </h4>
-            <div className="space-y-3">
+            <div className="space-y-4 sm:space-y-3">
               <div>
-                <div className="flex justify-between text-xs mb-1">
-                  <span className="text-gray-500">Ventas</span>
-                  <span className={stats.totalSales > teamAvg.avgSales ? 'text-emerald-600 font-bold' : 'text-red-500'}>
+                <div className="flex justify-between text-sm sm:text-xs mb-2 sm:mb-1">
+                  <span className="text-gray-500 font-medium">Ventas</span>
+                  <span className={`font-bold ${stats.totalSales > teamAvg.avgSales ? 'text-emerald-600' : 'text-red-500'}`}>
                    {Math.round((stats.totalSales / teamAvg.avgSales) * 100 - 100)}%
                   </span>
                 </div>
-                <Progress value={Math.min(100, (stats.totalSales / teamAvg.avgSales) * 50)} className="h-2" />
+                <Progress value={Math.min(100, (stats.totalSales / teamAvg.avgSales) * 50)} className="h-3 sm:h-2" />
               </div>
               <div>
-                <div className="flex justify-between text-xs mb-1">
-                  <span className="text-gray-500">Ticket Promedio</span>
-                  <span className={stats.avgTicket > teamAvg.avgTicket ? 'text-emerald-600 font-bold' : 'text-red-500'}>
+                <div className="flex justify-between text-sm sm:text-xs mb-2 sm:mb-1">
+                  <span className="text-gray-500 font-medium">Ticket Promedio</span>
+                  <span className={`font-bold ${stats.avgTicket > teamAvg.avgTicket ? 'text-emerald-600' : 'text-red-500'}`}>
                    {Math.round((stats.avgTicket / (teamAvg.avgTicket || 1)) * 100 - 100)}%
                   </span>
                 </div>
-                <Progress value={Math.min(100, (stats.avgTicket / (teamAvg.avgTicket || 1)) * 50)} className="h-2" />
+                <Progress value={Math.min(100, (stats.avgTicket / (teamAvg.avgTicket || 1)) * 50)} className="h-3 sm:h-2" />
               </div>
             </div>
           </div>
