@@ -66,48 +66,46 @@ export default function GrowthVelocityChart({ dailyTrend = [], budget = 0, forma
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-4">
+        <div className="grid grid-cols-3 gap-3 mb-4">
           <motion.div 
             whileHover={{ scale: 1.02 }}
-            className={`${status.bg} rounded-xl p-4 sm:p-3 text-center`}
+            className={`${status.bg} rounded-xl p-3 text-center`}
           >
-            <div className="flex items-center justify-center gap-1 mb-2 sm:mb-1">
+            <div className="flex items-center justify-center gap-1 mb-1">
               {currentVelocity >= 100 ? 
-                <TrendingUp className={`w-5 h-5 sm:w-4 sm:h-4 ${status.color}`} /> : 
-                <TrendingDown className={`w-5 h-5 sm:w-4 sm:h-4 ${status.color}`} />
+                <TrendingUp className={`w-4 h-4 ${status.color}`} /> : 
+                <TrendingDown className={`w-4 h-4 ${status.color}`} />
               }
-              <span className="text-sm sm:text-xs text-gray-500 font-medium">Velocidad</span>
+              <span className="text-xs text-gray-500">Velocidad</span>
             </div>
-            <p className={`text-2xl sm:text-xl font-bold ${status.color}`}>{currentVelocity.toFixed(0)}%</p>
-            <p className="text-sm sm:text-xs text-gray-400 mt-1">{status.label}</p>
+            <p className={`text-xl font-bold ${status.color}`}>{currentVelocity.toFixed(0)}%</p>
+            <p className="text-xs text-gray-400">{status.label}</p>
           </motion.div>
 
           <motion.div 
             whileHover={{ scale: 1.02 }}
-            className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-4 sm:p-3 text-center"
+            className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-3 text-center"
           >
-            <Zap className="w-5 h-5 sm:w-4 sm:h-4 text-blue-500 mx-auto mb-2 sm:mb-1" />
-            <p className="text-sm sm:text-xs text-gray-500 font-medium">Brecha</p>
-            <p className={`text-xl sm:text-lg font-bold ${currentGap >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {currentGap >= 0 ? '+' : ''}${(currentGap / 1000000).toFixed(1)}M
+            <Zap className="w-4 h-4 text-blue-500 mx-auto mb-1" />
+            <p className="text-xs text-gray-500">Brecha</p>
+            <p className={`text-lg font-bold ${currentGap >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {currentGap >= 0 ? '+' : ''}${(currentGap / 1000000).toFixed(1)}M COP
             </p>
-            <p className="text-xs text-gray-400 mt-1">COP</p>
           </motion.div>
 
           <motion.div 
             whileHover={{ scale: 1.02 }}
-            className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-4 sm:p-3 text-center"
+            className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-3 text-center"
           >
-            <Activity className="w-5 h-5 sm:w-4 sm:h-4 text-purple-500 mx-auto mb-2 sm:mb-1" />
-            <p className="text-sm sm:text-xs text-gray-500 font-medium">Acumulado</p>
-            <p className="text-xl sm:text-lg font-bold text-purple-600">
-              ${((velocityData[velocityData.length - 1]?.cumulative || 0) / 1000000).toFixed(1)}M
+            <Activity className="w-4 h-4 text-purple-500 mx-auto mb-1" />
+            <p className="text-xs text-gray-500">Acumulado</p>
+            <p className="text-lg font-bold text-purple-600">
+              ${((velocityData[velocityData.length - 1]?.cumulative || 0) / 1000000).toFixed(1)}M COP
             </p>
-            <p className="text-xs text-gray-400 mt-1">COP</p>
           </motion.div>
         </div>
 
-        <div className="h-64 sm:h-48">
+        <div className="h-48">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={velocityData}>
               <defs>
@@ -117,18 +115,18 @@ export default function GrowthVelocityChart({ dailyTrend = [], budget = 0, forma
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-              <YAxis domain={[50, 150]} tick={{ fontSize: 11 }} tickFormatter={(v) => `${v}%`} />
+              <XAxis dataKey="date" tick={{ fontSize: 10 }} />
+              <YAxis domain={[50, 150]} tick={{ fontSize: 10 }} tickFormatter={(v) => `${v}%`} />
               <Tooltip 
                 content={({ active, payload }) => {
                   if (!active || !payload?.length) return null;
                   const data = payload[0].payload;
                   return (
-                    <div className="bg-white p-3 sm:p-2 rounded-lg shadow-lg border text-sm sm:text-xs">
-                      <p className="font-medium mb-1">{data.fullDate || data.date}</p>
+                    <div className="bg-white p-2 rounded-lg shadow-lg border text-xs">
+                      <p className="font-medium">{data.fullDate || data.date}</p>
                       <p className="text-purple-600 font-bold">Velocidad: {data.velocity?.toFixed(1)}%</p>
-                      <p className="text-gray-500 text-xs">Acumulado: {formatCurrency?.(data.cumulative)}</p>
-                      <p className="text-gray-400 text-xs">Esperado: {formatCurrency?.(data.expected)}</p>
+                      <p className="text-gray-500">Acumulado: {formatCurrency?.(data.cumulative)}</p>
+                      <p className="text-gray-400">Esperado: {formatCurrency?.(data.expected)}</p>
                     </div>
                   );
                 }}

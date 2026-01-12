@@ -169,19 +169,19 @@ export default function ChartInsight({ data, metric, formatCurrency, comparisonD
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       whileHover={{ scale: 1.01, y: -2 }}
-      className={`mt-3 bg-gradient-to-br ${config.bgColor} border-2 ${config.borderColor} rounded-xl px-4 py-4 sm:py-3 shadow-md`}
+      className={`mt-3 bg-gradient-to-br ${config.bgColor} border-2 ${config.borderColor} rounded-xl px-4 py-3 shadow-md`}
     >
       <div className="flex items-start gap-3">
-        <div className={`p-2.5 sm:p-2 rounded-lg bg-white/50 flex-shrink-0`}>
-          <Icon className={`w-5 h-5 sm:w-4 sm:h-4 ${config.iconColor}`} />
+        <div className={`p-2 rounded-lg bg-white/50 flex-shrink-0`}>
+          <Icon className={`w-4 h-4 ${config.iconColor}`} />
         </div>
         <div className="flex-1 min-w-0">
-          <p className={`text-sm sm:text-xs font-bold ${config.textColor} mb-2 sm:mb-1 flex items-center gap-1.5`}>
+          <p className={`text-xs font-bold ${config.textColor} mb-1 flex items-center gap-1.5`}>
             <span>📊</span> Insight Operativo
           </p>
-          <div className="space-y-2 sm:space-y-1.5 text-sm sm:text-xs text-gray-700 leading-relaxed">
-            <p className="font-bold text-gray-900 text-base sm:text-sm">{insight.keyData}</p>
-            <p className="text-sm sm:text-[11px] leading-snug">{insight.behavior}</p>
+          <div className="space-y-1.5 text-xs text-gray-700 leading-relaxed">
+            <p className="font-bold text-gray-900">{insight.keyData}</p>
+            <p className="text-[11px] leading-snug">{insight.behavior}</p>
           </div>
         </div>
       </div>

@@ -989,9 +989,8 @@ export default function Dashboard() {
       
       <div className="max-w-screen-2xl mx-auto px-2 py-6 relative z-10">
         {/* Header */}
-        <div className="flex flex-col gap-4 mb-6">
-          {/* Título y Botón Volver */}
-          <div className="flex items-center gap-3">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-4">
             <Link to={createPageUrl('Home')}>
               <Button variant="ghost" size="icon" className="rounded-full hover:bg-pink-50">
                 <ArrowLeft className="w-5 h-5 text-pink-600" />
@@ -1002,35 +1001,19 @@ export default function Dashboard() {
                 animate={{
                   backgroundPosition: ['0% 50%', '100% 50%', '0% 50%']
                 }}
-                transition={{ duration: 5, repeat: Infinity }} 
-                className="bg-clip-text text-pink-700 text-2xl font-bold md:text-3xl from-violet-600 via-pink-500 to-violet-600"
-              >
-                Tienda
+                transition={{ duration: 5, repeat: Infinity }} className="bg-clip-text text-pink-700 text-2xl font-bold md:text-3xl from-violet-600 via-pink-500 to-violet-600">Tienda
+
+
+
               </motion.h1>
-              {selectedStore && (
-                <p className="text-pink-700 text-sm font-medium">{getDisplayName(selectedStore)}</p>
-              )}
+              {selectedStore &&
+              <p className="text-pink-700 text-sm font-medium">{getDisplayName(selectedStore)}</p>
+              }
             </div>
           </div>
-
-          {/* Selector de Tienda - Ancho completo en móvil */}
-          <div className="w-full">
+          <div className="flex flex-col md:flex-row gap-3 items-center">
             <StoreSelector selectedStore={selectedStore} onStoreChange={handleStoreChange} />
-          </div>
-
-          {/* Filtros y Controles - Grid responsive */}
-          <div className="grid grid-cols-2 gap-2">
-            {!showComparison && (
-              <WeekFilter 
-                onWeekChange={(range) => {
-                  setWeekFilter(range);
-                  setDateRange(null);
-                  setGregorianMode(false);
-                }} 
-                multiSelect={true} 
-              />
-            )}
-            
+            {!showComparison && <WeekFilter onWeekChange={(range) => {setWeekFilter(range);setDateRange(null);setGregorianMode(false);}} multiSelect={true} />}
             <DateFilter
               dateRange={showComparison ? (weekFilter || dateRange || { from: startOfMonth(new Date()), to: new Date() }) : dateRange}
               onDateChange={(range) => {
@@ -1043,10 +1026,8 @@ export default function Dashboard() {
                   setGregorianMode(false);
                 }
               }}
-              buttonText={showComparison ? undefined : undefined}
-              buttonClassName={showComparison ? "border-blue-300 hover:border-blue-500" : undefined}
-            />
-
+              buttonText={showComparison ? "📅 Período Actual" : undefined}
+              buttonClassName={showComparison ? "border-blue-300 hover:border-blue-500" : undefined} />
             {!showComparison && (
               <Button
                 onClick={() => {
@@ -1056,7 +1037,7 @@ export default function Dashboard() {
                     setDateRange(null);
                   }
                 }}
-                className={`gap-2 transition-all w-full ${
+                className={`gap-2 transition-all ${
                   gregorianMode
                     ? 'bg-indigo-500 hover:bg-indigo-600 text-white border-indigo-400'
                     : 'bg-white border-2 border-pink-200 hover:border-pink-300 text-gray-700'
@@ -1072,8 +1053,7 @@ export default function Dashboard() {
                 dateRange={comparisonRange || { from: new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1), to: new Date(new Date().getFullYear(), new Date().getMonth(), 0) }}
                 onDateChange={setComparisonRange}
                 buttonClassName="border-pink-300 hover:border-pink-500"
-                buttonText="📅 Comparar"
-              />
+                buttonText="📅 Comparar con" />
             )}
           </div>
         </div>
@@ -1081,7 +1061,7 @@ export default function Dashboard() {
         {selectedStore ?
         <div className="space-y-6">
             {/* Acciones rápidas */}
-            <div className="grid grid-cols-2 gap-2 mb-4">
+            <div className="flex justify-end gap-2 items-center">
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button
                 variant="outline"
@@ -1090,7 +1070,7 @@ export default function Dashboard() {
                   setShowComparison(false);
                   setComparisonRange(null);
                 }}
-                className={`gap-1 transition-all w-full ${!showComparison ? 'bg-pink-50 text-pink-600 border-pink-200' : 'border-gray-200 text-gray-700 hover:border-pink-300 hover:bg-pink-50 hover:text-pink-600'}`}>
+                className={`gap-1 transition-all ${!showComparison ? 'bg-pink-50 text-pink-600 border-pink-200' : 'border-gray-200 text-gray-700 hover:border-pink-300 hover:bg-pink-50 hover:text-pink-600'}`}>
 
                   <Activity className="w-4 h-4" />
                   Actual
@@ -1111,13 +1091,14 @@ export default function Dashboard() {
                     }
                   }
                 }}
-                className={`gap-1 transition-all w-full ${showComparison ? 'bg-pink-50 text-pink-600 border-pink-200' : 'border-gray-200 text-gray-700 hover:border-pink-300 hover:bg-pink-50 hover:text-pink-600'}`}>
+                className={`gap-1 transition-all ${showComparison ? 'bg-pink-50 text-pink-600 border-pink-200' : 'border-gray-200 text-gray-700 hover:border-pink-300 hover:bg-pink-50 hover:text-pink-600'}`}>
 
                   <BarChart3 className="w-4 h-4" />
                   Comparable
                 </Button>
               </motion.div>
-            </div>
+
+              </div>
 
             {/* Retail Week Budget - PRESUPUESTO DEL DÍA (LO MÁS IMPORTANTE) */}
             {!showComparison &&
@@ -1632,8 +1613,8 @@ export default function Dashboard() {
                   <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
                     <CardHeader className="pb-2">
                       <div className="flex items-center justify-between">
-                        <CardTitle className="text-base sm:text-sm font-medium text-gray-600 flex items-center gap-2">
-                          <TrendingUp className="w-5 h-5 sm:w-4 sm:h-4 text-green-500" />
+                        <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+                          <TrendingUp className="w-4 h-4 text-green-500" />
                           Ventas Diarias {showComparison && '- Comparativo'}
                         </CardTitle>
                       </div>
@@ -1645,7 +1626,7 @@ export default function Dashboard() {
                       />
                     </CardHeader>
                     <CardContent>
-                      <div className="h-80 sm:h-64">
+                      <div className="h-64">
                         <ResponsiveContainer width="100%" height="100%">
                           <AreaChart data={chartData}>
                             <defs>
@@ -1659,8 +1640,8 @@ export default function Dashboard() {
                               </linearGradient>
                             </defs>
                             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                            <XAxis dataKey="date" tick={{ fontSize: 12 }} angle={-20} textAnchor="end" height={60} />
-                            <YAxis tickFormatter={(v) => `$${(v / 1000000).toFixed(1)}M`} tick={{ fontSize: 12 }} />
+                            <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                            <YAxis tickFormatter={(v) => `$${(v / 1000000).toFixed(1)}M`} tick={{ fontSize: 11 }} />
                             <Tooltip
                           contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
                           labelFormatter={(label, payload) => payload?.[0]?.payload?.fullDate || label}
@@ -1694,8 +1675,8 @@ export default function Dashboard() {
                   {/* Transacciones vs Venta */}
                   <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-base sm:text-sm font-medium text-gray-600 flex items-center gap-2">
-                        <Zap className="w-5 h-5 sm:w-4 sm:h-4 text-purple-500" />
+                      <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+                        <Zap className="w-4 h-4 text-purple-500" />
                         Transacciones vs Ventas {showComparison && '- Comparativo'}
                       </CardTitle>
                       <ChartInsight 
@@ -1706,13 +1687,13 @@ export default function Dashboard() {
                       />
                     </CardHeader>
                     <CardContent>
-                      <div className="h-80 sm:h-64">
+                      <div className="h-64">
                         <ResponsiveContainer width="100%" height="100%">
                           <ComposedChart data={chartData}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                            <XAxis dataKey="date" tick={{ fontSize: 12 }} angle={-20} textAnchor="end" height={60} />
-                            <YAxis yAxisId="left" tick={{ fontSize: 12 }} />
-                            <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 12 }} tickFormatter={(v) => `$${(v / 1000000).toFixed(1)}M`} />
+                            <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                            <YAxis yAxisId="left" tick={{ fontSize: 11 }} />
+                            <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11 }} tickFormatter={(v) => `$${(v / 1000000).toFixed(1)}M`} />
                             <Tooltip
                           contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
                           formatter={(v, name) => [name.includes('Ventas') ? formatCurrency(v) : v.toLocaleString(), name]} />
@@ -1735,8 +1716,8 @@ export default function Dashboard() {
                   {/* Ticket Promedio */}
                   <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-base sm:text-sm font-medium text-gray-600 flex items-center gap-2">
-                        <Receipt className="w-5 h-5 sm:w-4 sm:h-4 text-blue-500" />
+                      <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+                        <Receipt className="w-4 h-4 text-blue-500" />
                         Ticket Promedio {showComparison && '- Comparativo'}
                       </CardTitle>
                       <ChartInsight 
@@ -1747,7 +1728,7 @@ export default function Dashboard() {
                       />
                     </CardHeader>
                     <CardContent>
-                      <div className="h-80 sm:h-64">
+                      <div className="h-64">
                         <ResponsiveContainer width="100%" height="100%">
                           <AreaChart data={chartData}>
                             <defs>
@@ -1761,8 +1742,8 @@ export default function Dashboard() {
                               </linearGradient>
                             </defs>
                             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                            <XAxis dataKey="date" tick={{ fontSize: 12 }} angle={-20} textAnchor="end" height={60} />
-                            <YAxis tickFormatter={(v) => `$${(v / 1000).toFixed(0)}K`} tick={{ fontSize: 12 }} />
+                            <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                            <YAxis tickFormatter={(v) => `$${(v / 1000).toFixed(0)}K`} tick={{ fontSize: 11 }} />
                             <Tooltip
                           contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
                           formatter={(v, name) => [formatCurrency(v), name]} />

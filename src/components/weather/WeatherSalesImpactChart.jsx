@@ -696,14 +696,14 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
 
       {/* KPIs Financieros Críticos - Siempre visibles */}
       {financialMetrics && stats && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Impacto Neto */}
           <motion.button
             onClick={() => setShowKPIDetail('net_impact')}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             whileHover={{ scale: 1.02 }}
-            className="relative bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl rounded-2xl p-8 sm:p-6 border border-slate-700/50 overflow-hidden cursor-pointer text-left"
+            className="relative bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 overflow-hidden cursor-pointer text-left"
             style={{ boxShadow: '0 10px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)' }}
           >
             <motion.div
@@ -712,16 +712,16 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
               transition={{ duration: 4, repeat: Infinity }}
             />
             <div className="relative z-10">
-              <p className="text-slate-400 text-sm sm:text-xs font-bold uppercase tracking-wider mb-3 sm:mb-2">Impacto Neto del Clima</p>
+              <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Impacto Neto del Clima</p>
               <motion.p 
-                className={`text-5xl sm:text-4xl font-black mb-2 sm:mb-1 ${financialMetrics.netImpact >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}
+                className={`text-4xl font-black mb-1 ${financialMetrics.netImpact >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}
                 key={financialMetrics.netImpact}
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
               >
                 {financialMetrics.netImpact >= 0 ? '+' : '−'}{formatCurrency(Math.abs(financialMetrics.netImpact))}
               </motion.p>
-              <p className="text-slate-400 text-sm sm:text-xs">
+              <p className="text-slate-400 text-xs">
                 {financialMetrics.netImpact >= 0 ? 
                   `Sol generó +${formatCurrency(financialMetrics.sunnyGain)} adicionales` :
                   `Lluvia impactó −${formatCurrency(financialMetrics.rainyLoss)}`
@@ -737,7 +737,7 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
             whileHover={{ scale: 1.02 }}
-            className="relative bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl rounded-2xl p-8 sm:p-6 border border-slate-700/50 overflow-hidden cursor-pointer text-left"
+            className="relative bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 overflow-hidden cursor-pointer text-left"
             style={{ boxShadow: '0 10px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)' }}
           >
             <motion.div
@@ -746,16 +746,16 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
               transition={{ duration: 3, repeat: Infinity, delay: 1 }}
             />
             <div className="relative z-10">
-              <p className="text-slate-400 text-sm sm:text-xs font-bold uppercase tracking-wider mb-3 sm:mb-2">Impacto Clima Nublado</p>
+              <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Impacto Clima Nublado</p>
               <motion.p 
-                className="text-5xl sm:text-4xl font-black mb-2 sm:mb-1 text-slate-400"
+                className="text-4xl font-black mb-1 text-slate-400"
                 key={stats.cloudyImpact}
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
               >
                 {stats.cloudyImpact >= 0 ? '+' : '−'}{Math.abs(stats.cloudyImpact).toFixed(0)}%
               </motion.p>
-              <p className="text-slate-400 text-sm sm:text-xs">
+              <p className="text-slate-400 text-xs">
                 ☁️ Nublado vs día promedio
               </p>
             </div>
@@ -771,7 +771,7 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
             whileHover={{ scale: 1.02 }}
-            className="relative bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl rounded-2xl p-8 sm:p-6 border border-slate-700/50 overflow-hidden cursor-pointer text-left"
+            className="relative bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 overflow-hidden cursor-pointer text-left"
             style={{ boxShadow: '0 10px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)' }}
           >
             <motion.div
@@ -780,9 +780,9 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
               transition={{ duration: 5, repeat: Infinity }}
             />
             <div className="relative z-10">
-              <p className="text-slate-400 text-sm sm:text-xs font-bold uppercase tracking-wider mb-3 sm:mb-2">Proyección 7 Días</p>
+              <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Proyección 7 Días</p>
               <motion.p 
-                className={`text-5xl sm:text-4xl font-black mb-2 sm:mb-1 ${
+                className={`text-4xl font-black mb-1 ${
                   !showForecast ? 'text-slate-500' :
                   financialMetrics.forecastVariation >= 0 ? 'text-cyan-400' : 'text-orange-400'
                 }`}
@@ -792,7 +792,7 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
               >
                 {!showForecast ? 'Clic para ver' : formatCurrency(financialMetrics.forecastTotal)}
               </motion.p>
-              <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-center gap-2">
                 {showForecast && (
                   <span className={`text-xs font-bold ${financialMetrics.forecastVariation >= 0 ? 'text-cyan-300' : 'text-orange-300'}`}>
                     {financialMetrics.forecastVariation >= 0 ? '+' : ''}{financialMetrics.forecastVariation.toFixed(1)}%
@@ -851,9 +851,9 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
             className="space-y-5"
           >
             {/* Selectores de Escenario - Sobrios */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-2">
-        <span className="text-slate-500 text-sm sm:text-xs font-semibold uppercase tracking-wide">Escenario:</span>
-        <div className="flex flex-wrap gap-2 sm:gap-1.5 w-full sm:w-auto">
+            <div className="flex items-center gap-2">
+        <span className="text-slate-500 text-xs font-semibold uppercase tracking-wide">Escenario:</span>
+        <div className="flex flex-wrap gap-1.5">
           <ClimateButton
             active={viewMode === 'all'}
             onClick={() => setViewMode('all')}
@@ -903,7 +903,7 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
         <Button
           onClick={() => setShowForecast(!showForecast)}
           variant={showForecast ? "default" : "outline"}
-          className={`h-10 sm:h-8 px-6 sm:px-4 text-sm sm:text-xs font-semibold w-full sm:w-auto ${
+          className={`h-8 px-4 text-xs font-semibold ${
             showForecast 
               ? 'bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white border-0' 
               : 'border-slate-300 text-slate-700 hover:border-cyan-400 hover:bg-cyan-50'
@@ -1094,8 +1094,8 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
           style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.5) 1px, transparent 1px)', backgroundSize: '30px 30px' }} 
         />
 
-        <div className="relative z-30 p-6 sm:p-8">
-          <div className="h-[400px] sm:h-[500px]">
+        <div className="relative z-30 p-8">
+          <div className="h-[500px]">
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={filteredData} margin={{ top: 20, right: 20, bottom: 20, left: 10 }}>
                 <defs>
@@ -1321,22 +1321,22 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
           </div>
 
           {/* Leyenda minimalista */}
-          <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-8 mt-6 pt-4 border-t border-slate-700/30">
-            <div className="flex items-center gap-3 sm:gap-2 justify-center">
-              <div className="w-5 h-12 sm:w-4 sm:h-10 bg-gradient-to-b from-purple-400 to-purple-600 rounded-sm shadow-lg" 
+          <div className="flex justify-center gap-8 mt-6 pt-4 border-t border-slate-700/30">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-10 bg-gradient-to-b from-purple-400 to-purple-600 rounded-sm shadow-lg" 
                 style={{ boxShadow: '0 4px 10px rgba(139, 92, 246, 0.3)' }}
               />
-              <span className="text-slate-200 text-base sm:text-sm font-bold">Ventas</span>
+              <span className="text-slate-200 text-sm font-bold">Ventas</span>
             </div>
-            <div className="flex items-center gap-3 sm:gap-2 justify-center">
-              <div className="w-12 h-2 sm:w-10 sm:h-1.5 bg-gradient-to-r from-orange-400 to-red-500 rounded-full shadow-lg" 
+            <div className="flex items-center gap-2">
+              <div className="w-10 h-1.5 bg-gradient-to-r from-orange-400 to-red-500 rounded-full shadow-lg" 
                 style={{ boxShadow: '0 0 8px rgba(251, 146, 60, 0.5)' }}
               />
-              <span className="text-slate-200 text-base sm:text-sm font-bold">Temperatura</span>
+              <span className="text-slate-200 text-sm font-bold">Temperatura</span>
             </div>
-            <div className="flex items-center gap-3 sm:gap-2 justify-center">
-              <div className="w-5 h-12 sm:w-4 sm:h-10 bg-gradient-to-b from-cyan-400/40 to-cyan-600/40 rounded-sm border-2 border-dashed border-cyan-400" />
-              <span className="text-slate-200 text-base sm:text-sm font-bold">Pronóstico</span>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-10 bg-gradient-to-b from-cyan-400/40 to-cyan-600/40 rounded-sm border-2 border-dashed border-cyan-400" />
+              <span className="text-slate-200 text-sm font-bold">Pronóstico</span>
             </div>
           </div>
         </div>
@@ -1348,33 +1348,33 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="relative bg-gradient-to-br from-slate-900/95 to-slate-800/95 backdrop-blur-xl rounded-2xl overflow-hidden border border-slate-700/50 shadow-xl p-6 sm:p-6"
+          className="relative bg-gradient-to-br from-slate-900/95 to-slate-800/95 backdrop-blur-xl rounded-2xl overflow-hidden border border-slate-700/50 shadow-xl p-6"
           style={{ boxShadow: '0 15px 50px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.03)' }}
         >
-          <div className="flex items-center gap-4 sm:gap-3 mb-6 sm:mb-5">
+          <div className="flex items-center gap-3 mb-5">
             <motion.div
               animate={{ scale: [1, 1.1, 1] }}
               transition={{ duration: 2, repeat: Infinity }}
-              className="p-3 sm:p-2.5 bg-purple-500/20 rounded-xl border border-purple-500/30"
+              className="p-2.5 bg-purple-500/20 rounded-xl border border-purple-500/30"
             >
-              <Zap className="w-6 h-6 sm:w-5 sm:h-5 text-purple-400" />
+              <Zap className="w-5 h-5 text-purple-400" />
             </motion.div>
-            <h3 className="text-xl sm:text-lg font-black text-white">Análisis Financiero Ejecutivo</h3>
+            <h3 className="text-lg font-black text-white">Análisis Financiero Ejecutivo</h3>
           </div>
 
           <div className="space-y-4">
             {/* Impacto por día lluvioso */}
             {stats.rainyCount > 0 && (
-              <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-5 sm:p-4 border border-slate-700/50">
-                <div className="flex items-start gap-4 sm:gap-3">
-                  <CloudRain className="w-6 h-6 sm:w-5 sm:h-5 text-blue-400 mt-1 sm:mt-0.5 flex-shrink-0" />
+              <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-4 border border-slate-700/50">
+                <div className="flex items-start gap-3">
+                  <CloudRain className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
                   <div className="flex-1">
-                    <p className="text-white font-bold text-base sm:text-sm mb-2 sm:mb-1">Costo por día lluvioso</p>
-                    <p className="text-slate-300 text-xl sm:text-lg font-black">
+                    <p className="text-white font-bold text-sm mb-1">Costo por día lluvioso</p>
+                    <p className="text-slate-300 text-lg font-black">
                       {stats.avgRainy < stats.avgTotal ? '−' : '+'}{formatCurrency(Math.abs(stats.avgRainy - stats.avgTotal))}
+                      <span className="text-slate-400 text-xs font-normal ml-2">vs día promedio</span>
                     </p>
-                    <p className="text-slate-400 text-xs font-normal mt-1">vs día promedio</p>
-                    <p className="text-slate-400 text-sm sm:text-xs mt-3 sm:mt-2 leading-relaxed">
+                    <p className="text-slate-400 text-xs mt-2">
                       Cada día lluvioso implica {stats.avgRainy < stats.avgTotal ? 'una pérdida' : 'una ganancia'} estimada de {formatCurrency(Math.abs(stats.avgRainy - stats.avgTotal))}
                     </p>
                   </div>
@@ -1427,39 +1427,39 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
             )}
 
             {/* Comparativa cuantitativa */}
-            <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-5 sm:p-4 border border-slate-700/50">
-              <div className="flex items-start gap-4 sm:gap-3">
-                <BarChart3 className="w-6 h-6 sm:w-5 sm:h-5 text-purple-400 mt-1 sm:mt-0.5 flex-shrink-0" />
+            <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-4 border border-slate-700/50">
+              <div className="flex items-start gap-3">
+                <BarChart3 className="w-5 h-5 text-purple-400 mt-0.5 flex-shrink-0" />
                 <div className="flex-1">
-                  <p className="text-white font-bold text-base sm:text-sm mb-4 sm:mb-3">Comparativa de rendimiento por clima</p>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-3">
-                    <div className="text-center bg-slate-700/20 rounded-lg p-4 sm:p-3">
-                      <div className="flex items-center justify-center gap-2 sm:gap-1 mb-2 sm:mb-1">
-                        <Sun className="w-5 h-5 sm:w-4 sm:h-4 text-amber-400" />
-                        <p className="text-amber-300 text-sm sm:text-xs font-bold">Soleado</p>
+                  <p className="text-white font-bold text-sm mb-3">Comparativa de rendimiento por clima</p>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="text-center">
+                      <div className="flex items-center justify-center gap-1 mb-1">
+                        <Sun className="w-4 h-4 text-amber-400" />
+                        <p className="text-amber-300 text-xs font-bold">Soleado</p>
                       </div>
-                      <p className="text-white font-black text-xl sm:text-base">{formatCurrency(stats.avgSunny).slice(0, -3)}</p>
-                      <p className={`text-sm sm:text-xs font-bold mt-1 sm:mt-0.5 ${stats.sunnyImpact >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                      <p className="text-white font-black text-base">{formatCurrency(stats.avgSunny).slice(0, -3)}</p>
+                      <p className={`text-xs font-bold mt-0.5 ${stats.sunnyImpact >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                         {stats.sunnyImpact >= 0 ? '+' : ''}{stats.sunnyImpact.toFixed(0)}%
                       </p>
                     </div>
-                    <div className="text-center bg-slate-700/20 rounded-lg p-4 sm:p-3">
-                      <div className="flex items-center justify-center gap-2 sm:gap-1 mb-2 sm:mb-1">
-                        <CloudRain className="w-5 h-5 sm:w-4 sm:h-4 text-blue-400" />
-                        <p className="text-blue-300 text-sm sm:text-xs font-bold">Lluvioso</p>
+                    <div className="text-center">
+                      <div className="flex items-center justify-center gap-1 mb-1">
+                        <CloudRain className="w-4 h-4 text-blue-400" />
+                        <p className="text-blue-300 text-xs font-bold">Lluvioso</p>
                       </div>
-                      <p className="text-white font-black text-xl sm:text-base">{formatCurrency(stats.avgRainy).slice(0, -3)}</p>
-                      <p className={`text-sm sm:text-xs font-bold mt-1 sm:mt-0.5 ${stats.rainyImpact >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                      <p className="text-white font-black text-base">{formatCurrency(stats.avgRainy).slice(0, -3)}</p>
+                      <p className={`text-xs font-bold mt-0.5 ${stats.rainyImpact >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                         {stats.rainyImpact >= 0 ? '+' : ''}{stats.rainyImpact.toFixed(0)}%
                       </p>
                     </div>
-                    <div className="text-center bg-slate-700/20 rounded-lg p-4 sm:p-3">
-                      <div className="flex items-center justify-center gap-2 sm:gap-1 mb-2 sm:mb-1">
-                        <Cloud className="w-5 h-5 sm:w-4 sm:h-4 text-slate-400" />
-                        <p className="text-slate-300 text-sm sm:text-xs font-bold">Nublado</p>
+                    <div className="text-center">
+                      <div className="flex items-center justify-center gap-1 mb-1">
+                        <Cloud className="w-4 h-4 text-slate-400" />
+                        <p className="text-slate-300 text-xs font-bold">Nublado</p>
                       </div>
-                      <p className="text-white font-black text-xl sm:text-base">{formatCurrency(stats.avgCloudy).slice(0, -3)}</p>
-                      <p className={`text-sm sm:text-xs font-bold mt-1 sm:mt-0.5 ${stats.cloudyImpact >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                      <p className="text-white font-black text-base">{formatCurrency(stats.avgCloudy).slice(0, -3)}</p>
+                      <p className={`text-xs font-bold mt-0.5 ${stats.cloudyImpact >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                         {stats.cloudyImpact >= 0 ? '+' : ''}{stats.cloudyImpact.toFixed(0)}%
                       </p>
                     </div>
@@ -1469,17 +1469,17 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
             </div>
 
             {/* Acción recomendada */}
-            <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 backdrop-blur-sm rounded-xl p-5 sm:p-4 border border-purple-500/20">
-              <div className="flex items-start gap-4 sm:gap-3">
+            <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 backdrop-blur-sm rounded-xl p-4 border border-purple-500/20">
+              <div className="flex items-start gap-3">
                 <motion.div
                   animate={{ y: [0, -3, 0] }}
                   transition={{ duration: 2, repeat: Infinity }}
                 >
-                  <TrendingUp className="w-6 h-6 sm:w-5 sm:h-5 text-purple-400 mt-1 sm:mt-0.5 flex-shrink-0" />
+                  <TrendingUp className="w-5 h-5 text-purple-400 mt-0.5 flex-shrink-0" />
                 </motion.div>
                 <div className="flex-1">
-                  <p className="text-purple-300 font-bold text-base sm:text-sm mb-2 sm:mb-1">Acción recomendada</p>
-                  <p className="text-slate-300 text-base sm:text-sm leading-relaxed">
+                  <p className="text-purple-300 font-bold text-sm mb-1">Acción recomendada</p>
+                  <p className="text-slate-300 text-sm leading-relaxed">
                     {Math.abs(stats.rainyImpact) > Math.abs(stats.sunnyImpact) && stats.rainyImpact < -10 ?
                       `Prioridad: Estrategia anti-lluvia. Cada día lluvioso pierdes ~${formatCurrency(Math.abs(stats.avgRainy - stats.avgTotal))}. Implementa delivery, promociones indoor y combos para llevar.` :
                       Math.abs(stats.sunnyImpact) > Math.abs(stats.rainyImpact) && stats.sunnyImpact > 10 ?

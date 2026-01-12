@@ -226,9 +226,9 @@ export default function ZonePerformanceComparison({ storeId, formatCurrency, cur
         </div>
       </div>
 
-      {/* Botones de Métricas - Mejorados para móvil */}
-      <div className="p-3 sm:p-4 bg-gradient-to-br from-rose-50/50 to-pink-50/50 border-b border-rose-200/30">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+      {/* Botones de Métricas */}
+      <div className="p-4 bg-gradient-to-br from-rose-50/50 to-pink-50/50 border-b border-rose-200/30">
+        <div className="grid grid-cols-4 gap-2">
           {metrics.map((metric) => {
             const MetricIcon = metric.icon;
             const isActive = selectedMetric === metric.id;
@@ -241,15 +241,15 @@ export default function ZonePerformanceComparison({ storeId, formatCurrency, cur
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
                 onClick={() => setSelectedMetric(isActive ? null : metric.id)}
-                className={`p-4 sm:p-3 rounded-xl transition-all ${
+                className={`p-3 rounded-xl transition-all ${
                   isActive 
                     ? 'bg-gradient-to-br from-rose-500 to-pink-500 text-white shadow-lg' 
                     : 'bg-white hover:bg-rose-50 text-gray-700 border-2 border-rose-200/50'
                 }`}
               >
-                <MetricIcon className={`w-6 h-6 sm:w-5 sm:h-5 mx-auto mb-2 sm:mb-1 ${isActive ? 'text-white' : 'text-rose-500'}`} />
-                <p className={`text-sm sm:text-xs font-bold mb-1 ${isActive ? 'text-white' : 'text-gray-700'}`}>{metric.label}</p>
-                <p className={`text-xl sm:text-lg font-black ${isActive ? 'text-white' : isPositive ? 'text-emerald-600' : 'text-red-600'}`}>
+                <MetricIcon className={`w-5 h-5 mx-auto mb-1 ${isActive ? 'text-white' : 'text-rose-500'}`} />
+                <p className={`text-xs font-bold ${isActive ? 'text-white' : 'text-gray-700'}`}>{metric.label}</p>
+                <p className={`text-lg font-black ${isActive ? 'text-white' : isPositive ? 'text-emerald-600' : 'text-red-600'}`}>
                   {isPositive ? '+' : ''}{vsAvgValue}%
                 </p>
               </motion.button>
@@ -269,18 +269,18 @@ export default function ZonePerformanceComparison({ storeId, formatCurrency, cur
             className="p-5"
           >
             {/* Insight Operativo */}
-            <div className={`rounded-xl p-4 sm:p-4 mb-4 ${
+            <div className={`rounded-xl p-4 mb-4 ${
               currentPosition <= 3 ? 'bg-emerald-50 border-2 border-emerald-300' : 
               currentPosition <= totalStores / 2 ? 'bg-amber-50 border-2 border-amber-300' : 
               'bg-red-50 border-2 border-red-300'
             }`}>
-              <p className="text-sm sm:text-xs font-bold mb-2 flex items-center gap-2">
+              <p className="text-xs font-bold mb-2 flex items-center gap-2">
                 {currentPosition <= 3 ? '🎯' : currentPosition <= totalStores / 2 ? '⚠️' : '🚨'}
                 <span className={currentPosition <= 3 ? 'text-emerald-900' : currentPosition <= totalStores / 2 ? 'text-amber-900' : 'text-red-900'}>
                   {currentMetric.label} vs Zona - Análisis Detallado
                 </span>
               </p>
-              <p className={`text-sm sm:text-sm leading-relaxed ${
+              <p className={`text-sm leading-relaxed ${
                 currentPosition <= 3 ? 'text-emerald-800' : 
                 currentPosition <= totalStores / 2 ? 'text-amber-800' : 
                 'text-red-800'
@@ -323,27 +323,27 @@ export default function ZonePerformanceComparison({ storeId, formatCurrency, cur
             </div>
 
             {/* Ranking */}
-            <ResponsiveContainer width="100%" height={Math.min(500, rankedStores.length * 50)}>
-              <BarChart data={rankedStores} layout="vertical" margin={{ left: 10, right: 25, top: 10, bottom: 10 }}>
+            <ResponsiveContainer width="100%" height={Math.min(400, rankedStores.length * 40)}>
+              <BarChart data={rankedStores} layout="vertical" margin={{ left: 5, right: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
-                <XAxis type="number" fontSize={11} tickFormatter={currentMetric.format} />
+                <XAxis type="number" fontSize={10} tickFormatter={currentMetric.format} />
                 <YAxis 
                   type="category" 
                   dataKey="storeName" 
-                  fontSize={12} 
+                  fontSize={11} 
                   fontWeight={600}
-                  width={110}
+                  width={90}
                   tick={(props) => {
                     const isCurrentStore = rankedStores[props.index]?.storeCode === storeId;
                     return (
                       <g transform={`translate(${props.x},${props.y})`}>
                         <text 
-                          x={-10} 
+                          x={-8} 
                           y={0} 
-                          dy={5} 
+                          dy={4} 
                           textAnchor="end" 
                           fill={isCurrentStore ? '#be123c' : '#64748b'}
-                          fontSize={isCurrentStore ? 14 : 12}
+                          fontSize={isCurrentStore ? 12 : 10}
                           fontWeight={isCurrentStore ? 900 : 600}
                         >
                           {props.payload.value}
@@ -376,19 +376,19 @@ export default function ZonePerformanceComparison({ storeId, formatCurrency, cur
                 return (
                   <div 
                     key={store.storeCode}
-                    className={`flex items-center justify-between p-3 sm:p-2 rounded-lg ${
+                    className={`flex items-center justify-between p-2 rounded-lg ${
                       isCurrentStore ? 'bg-rose-100 border-2 border-rose-300' : 'bg-gray-50'
                     }`}
                   >
-                    <div className="flex items-center gap-3 sm:gap-2">
-                      <span className={`text-base sm:text-sm font-bold ${isCurrentStore ? 'text-rose-700' : 'text-gray-500'}`}>
+                    <div className="flex items-center gap-2">
+                      <span className={`text-sm font-bold ${isCurrentStore ? 'text-rose-700' : 'text-gray-500'}`}>
                         #{position}
                       </span>
-                      <span className={`text-sm sm:text-xs font-medium ${isCurrentStore ? 'text-rose-900' : 'text-gray-700'}`}>
+                      <span className={`text-xs font-medium ${isCurrentStore ? 'text-rose-900' : 'text-gray-700'}`}>
                         {store.storeName}
                       </span>
                     </div>
-                    <span className={`text-base sm:text-sm font-bold ${isCurrentStore ? 'text-rose-700' : 'text-gray-600'}`}>
+                    <span className={`text-sm font-bold ${isCurrentStore ? 'text-rose-700' : 'text-gray-600'}`}>
                       {currentMetric.format(currentMetric.getValue(store))}
                     </span>
                   </div>
@@ -410,17 +410,17 @@ export default function ZonePerformanceComparison({ storeId, formatCurrency, cur
             
             {/* Resumen General */}
             <div className="grid grid-cols-2 gap-3 mb-4">
-              <div className="bg-gradient-to-br from-rose-100 to-pink-100 rounded-xl p-5 sm:p-4 text-center">
-                <p className="text-sm sm:text-xs text-rose-700 font-bold mb-2 sm:mb-1">Posición General</p>
-                <p className="text-4xl sm:text-3xl font-black text-rose-900">#{position}</p>
-                <p className="text-sm sm:text-xs text-rose-600 mt-2 sm:mt-1">de {totalStores} tiendas</p>
+              <div className="bg-gradient-to-br from-rose-100 to-pink-100 rounded-xl p-4 text-center">
+                <p className="text-xs text-rose-700 font-bold mb-1">Posición General</p>
+                <p className="text-3xl font-black text-rose-900">#{position}</p>
+                <p className="text-xs text-rose-600 mt-1">de {totalStores} tiendas</p>
               </div>
-              <div className="bg-gradient-to-br from-slate-100 to-gray-100 rounded-xl p-5 sm:p-4 text-center">
-                <p className="text-sm sm:text-xs text-slate-700 font-bold mb-2 sm:mb-1">Ventas vs Zona</p>
-                <p className={`text-4xl sm:text-3xl font-black ${parseFloat(vsAvg.sales) >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+              <div className="bg-gradient-to-br from-slate-100 to-gray-100 rounded-xl p-4 text-center">
+                <p className="text-xs text-slate-700 font-bold mb-1">Ventas vs Zona</p>
+                <p className={`text-3xl font-black ${parseFloat(vsAvg.sales) >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
                   {parseFloat(vsAvg.sales) >= 0 ? '+' : ''}{vsAvg.sales}%
                 </p>
-                <p className="text-sm sm:text-xs text-slate-600 mt-2 sm:mt-1">{formatCurrency(currentStoreData.sales)}</p>
+                <p className="text-xs text-slate-600 mt-1">{formatCurrency(currentStoreData.sales)}</p>
               </div>
             </div>
 
