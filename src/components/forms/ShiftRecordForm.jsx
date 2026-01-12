@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Save, User, DollarSign, Receipt, Zap, Gift, Loader2, CheckCircle, Sun, Sunset, Moon, Calendar, Plus, Upload, X } from 'lucide-react';
+import { Save, User, DollarSign, Receipt, Zap, Gift, Loader2, CheckCircle, Sun, Sunset, Moon, Calendar, Plus, Upload, X, Pencil, Trash2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from 'sonner';
 
@@ -20,6 +20,7 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
     const queryClient = useQueryClient();
     const [showSuccess, setShowSuccess] = useState(false);
     const [showAddCashier, setShowAddCashier] = useState(false);
+    const [editingCashier, setEditingCashier] = useState(null);
     const [newCashier, setNewCashier] = useState({ name: '', email: '', phone: '', photo_url: '' });
     const [uploadingPhoto, setUploadingPhoto] = useState(false);
     const [formData, setFormData] = useState({
@@ -75,6 +76,9 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
 
   const createCashierMutation = useMutation({
     mutationFn: async (cashierData) => {
+      if (editingCashier) {
+        return await base44.entities.Cashier.update(editingCashier.id, cashierData);
+      }
       return await base44.entities.Cashier.create({
         ...cashierData,
         store_id: storeId,
@@ -82,15 +86,35 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
         hire_date: new Date().toISOString().split('T')[0]
       });
     },
-    onSuccess: (newCashier) => {
+    onSuccess: (savedCashier) => {
       queryClient.invalidateQueries({ queryKey: ['cashiers'] });
-      toast.success('✅ Cajero agregado correctamente');
-      setFormData({ ...formData, cashier_id: newCashier.id });
+      toast.success(editingCashier ? '✅ Cajero actualizado' : '✅ Cajero agregado correctamente');
+      if (!editingCashier) {
+        setFormData({ ...formData, cashier_id: savedCashier.id });
+      }
       setShowAddCashier(false);
+      setEditingCashier(null);
       setNewCashier({ name: '', email: '', phone: '', photo_url: '' });
     },
     onError: (error) => {
-      toast.error('Error al agregar cajero: ' + error.message);
+      toast.error('Error al guardar cajero: ' + error.message);
+    }
+  });
+
+  const deleteCashierMutation = useMutation({
+    mutationFn: async (cashierId) => {
+      await base44.entities.Cashier.update(cashierId, { is_active: false });
+      return cashierId;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cashiers'] });
+      toast.success('✅ Cajero eliminado');
+      setShowAddCashier(false);
+      setEditingCashier(null);
+      setNewCashier({ name: '', email: '', phone: '', photo_url: '' });
+    },
+    onError: (error) => {
+      toast.error('Error al eliminar cajero: ' + error.message);
     }
   });
 
@@ -256,13 +280,19 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
 
   return (
     <>
-      {/* Dialog para añadir cajero */}
-      <Dialog open={showAddCashier} onOpenChange={setShowAddCashier}>
+      {/* Dialog para añadir/editar cajero */}
+      <Dialog open={showAddCashier} onOpenChange={(open) => {
+        setShowAddCashier(open);
+        if (!open) {
+          setEditingCashier(null);
+          setNewCashier({ name: '', email: '', phone: '', photo_url: '' });
+        }
+      }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-violet-700">
               <User className="w-5 h-5" />
-              Añadir Nuevo Cajero
+              {editingCashier ? 'Editar Cajero' : 'Añadir Nuevo Cajero'}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
@@ -345,12 +375,38 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
                 variant="outline"
                 onClick={() => {
                   setShowAddCashier(false);
+                  setEditingCashier(null);
                   setNewCashier({ name: '', email: '', phone: '', photo_url: '' });
                 }}
                 className="flex-1"
               >
                 Cancelar
               </Button>
+              {editingCashier && (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={() => {
+                    if (confirm('¿Seguro que deseas eliminar este cajero?')) {
+                      deleteCashierMutation.mutate(editingCashier.id);
+                    }
+                  }}
+                  disabled={deleteCashierMutation.isPending}
+                  className="flex-1"
+                >
+                  {deleteCashierMutation.isPending ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Eliminando...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Eliminar
+                    </>
+                  )}
+                </Button>
+              )}
               <Button
                 onClick={() => {
                   if (!newCashier.name.trim()) {
@@ -365,12 +421,12 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
                 {createCashierMutation.isPending ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Guardando...
+                    {editingCashier ? 'Actualizando...' : 'Guardando...'}
                   </>
                 ) : (
                   <>
                     <Save className="w-4 h-4 mr-2" />
-                    Guardar
+                    {editingCashier ? 'Actualizar' : 'Guardar'}
                   </>
                 )}
               </Button>
@@ -461,15 +517,49 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
                 </SelectTrigger>
                 <SelectContent>
                   {cashiers.map(c => (
-                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    <SelectItem key={c.id} value={c.id}>
+                      <div className="flex items-center gap-2">
+                        {c.photo_url && (
+                          <img src={c.photo_url} alt={c.name} className="w-6 h-6 rounded-full object-cover" />
+                        )}
+                        <span>{c.name}</span>
+                      </div>
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
               
               <Button
                 type="button"
-                onClick={() => setShowAddCashier(true)}
+                onClick={() => {
+                  const selectedCashier = cashiers.find(c => c.id === formData.cashier_id);
+                  if (selectedCashier) {
+                    setEditingCashier(selectedCashier);
+                    setNewCashier({
+                      name: selectedCashier.name || '',
+                      email: selectedCashier.email || '',
+                      phone: selectedCashier.phone || '',
+                      photo_url: selectedCashier.photo_url || ''
+                    });
+                  }
+                  setShowAddCashier(true);
+                }}
+                disabled={!formData.cashier_id}
+                className="bg-amber-600 hover:bg-amber-700 text-white h-12 w-12 rounded-xl flex items-center justify-center shadow-md disabled:opacity-50"
+                title="Editar cajero seleccionado"
+              >
+                <Pencil className="w-5 h-5" />
+              </Button>
+              
+              <Button
+                type="button"
+                onClick={() => {
+                  setEditingCashier(null);
+                  setNewCashier({ name: '', email: '', phone: '', photo_url: '' });
+                  setShowAddCashier(true);
+                }}
                 className="bg-violet-600 hover:bg-violet-700 text-white h-12 w-12 rounded-xl flex items-center justify-center shadow-md"
+                title="Añadir nuevo cajero"
               >
                 <Plus className="w-5 h-5" />
               </Button>
