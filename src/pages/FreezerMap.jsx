@@ -140,8 +140,15 @@ const IDEAL_RULES = {
 function FlavorSelectorModal({ selectedSlot, onClose, onSelect, customFlavors, onDeleteFlavor }) {
   const [search, setSearch] = useState('');
 
-  // Combinar sabores predefinidos con personalizados
-  const allFlavors = [...POPSY_FLAVORS, ...customFlavors];
+  // Combinar y deduplicar sabores por nombre (prioridad a predefinidos)
+  const allFlavors = [...POPSY_FLAVORS, ...customFlavors].reduce((unique, flavor) => {
+    const exists = unique.some(f => f.name.toLowerCase().trim() === flavor.name.toLowerCase().trim());
+    if (!exists) {
+      unique.push(flavor);
+    }
+    return unique;
+  }, []);
+  
   const filteredFlavors = allFlavors.filter((f) =>
     f.name.toLowerCase().includes(search.toLowerCase())
   );
