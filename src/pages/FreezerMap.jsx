@@ -892,22 +892,46 @@ export default function FreezerMap() {
     setDraggedSlot(null);
   };
 
-  // Auditoría - ANÁLISIS POR NEVERA Y ACUMULADO
+  // Auditoría - ANÁLISIS POR NEVERA Y ACUMULADO - CORREGIDO 100%
   const runAudit = useCallback((freezerToShow = null) => {
+    console.log('🔍 INICIO AUDITORÍA:', {
+      totalSlotsEnBD: allFreezersSlots.length,
+      neveras: availableFreezers,
+      tienda: selectedStore
+    });
+
     // Análisis por nevera individual
     const freezerAnalysis = {};
     
     availableFreezers.forEach(freezerNum => {
+      // FILTRAR EXACTO por store_id completo
       const freezerSlots = allFreezersSlots.filter(s => 
         s.store_id === `${selectedStore}_F${freezerNum}`
       );
       
-      const filledSlots = freezerSlots.filter(s => !s.is_empty && s.flavor_name);
+      console.log(`📦 Nevera #${freezerNum}:`, {
+        totalSlotsEnBD: freezerSlots.length,
+        storeIdEsperado: `${selectedStore}_F${freezerNum}`
+      });
+      
+      // CONTEO REAL de slots llenos (que tienen sabor y NO están vacíos)
+      const filledSlots = freezerSlots.filter(s => !s.is_empty && s.flavor_name && s.flavor_name.trim() !== '');
+      
+      // CAPACIDAD TOTAL = filas × columnas × 2 (F y T)
       const dimensions = freezerDimensions[freezerNum] || { rows: 7, cols: 5 };
       const totalSlotsInFreezer = dimensions.rows * dimensions.cols * 2;
+      
+      // VACÍOS = capacidad total - slots llenos REALES
       const emptySlots = totalSlotsInFreezer - filledSlots.length;
 
-      // Detectar repetidos CORRECTAMENTE - por nombre exacto
+      console.log(`📊 Nevera #${freezerNum} - Conteo:`, {
+        dimensiones: `${dimensions.rows}x${dimensions.cols}`,
+        capacidadTotal: totalSlotsInFreezer,
+        llenos: filledSlots.length,
+        vacios: emptySlots
+      });
+
+      // Detectar repetidos CORRECTAMENTE - por nombre normalizado
       const flavorCounts = {};
       const flavorDetails = {};
       filledSlots.forEach((s) => {
@@ -920,6 +944,7 @@ export default function FreezerMap() {
         flavorDetails[key].positions.push(`${s.row}-${s.position}${s.slot_type || 'F'}`);
       });
       
+      // REPETIDOS = sabores con más de 2 cubetas
       const repeatedFlavors = Object.entries(flavorCounts)
         .filter(([_, count]) => count > 2)
         .map(([key, count]) => ({
@@ -927,6 +952,8 @@ export default function FreezerMap() {
           count,
           positions: flavorDetails[key].positions.join(', ')
         }));
+
+      console.log(`🔁 Nevera #${freezerNum} - Repetidos:`, repeatedFlavors);
 
       // Detectar mal ubicados
       const misplacedSlots = filledSlots.filter((s) => {
@@ -937,11 +964,11 @@ export default function FreezerMap() {
         reason: `Debería estar en fila ${s.flavor_type === 'gourmet' ? 1 : 2}`
       }));
 
-      const efficiency = Math.round(
-        filledSlots.length / totalSlotsInFreezer * 100 - 
-        misplacedSlots.length * 2 - 
-        repeatedFlavors.length * 3
-      );
+      // EFICIENCIA: % de ocupación - penalizaciones
+      const occupancyPercentage = (filledSlots.length / totalSlotsInFreezer) * 100;
+      const penaltyMisplaced = misplacedSlots.length * 2;
+      const penaltyRepeated = repeatedFlavors.length * 3;
+      const efficiency = Math.max(0, Math.min(100, Math.round(occupancyPercentage - penaltyMisplaced - penaltyRepeated)));
 
       freezerAnalysis[freezerNum] = {
         freezerNum,
@@ -950,19 +977,33 @@ export default function FreezerMap() {
         emptySlots,
         repeatedFlavors,
         misplacedSlots,
-        efficiency: Math.max(0, Math.min(100, efficiency))
+        efficiency
       };
+
+      console.log(`✅ Nevera #${freezerNum} - Resumen Final:`, freezerAnalysis[freezerNum]);
     });
 
-    // ACUMULADO TOTAL - CORREGIDO
-    const allFilled = allFreezersSlots.filter(s => !s.is_empty && s.flavor_name);
+    // ========== ACUMULADO TOTAL DE LAS 3 NEVERAS ==========
+    
+    // TODOS los slots llenos (con sabor y no vacíos)
+    const allFilled = allFreezersSlots.filter(s => !s.is_empty && s.flavor_name && s.flavor_name.trim() !== '');
+    
+    // CAPACIDAD TOTAL de todas las neveras
     const totalCapacity = availableFreezers.reduce((sum, freezerNum) => {
       const dim = freezerDimensions[freezerNum] || { rows: 7, cols: 5 };
       return sum + (dim.rows * dim.cols * 2);
     }, 0);
+    
+    // VACÍOS TOTALES = capacidad total - slots llenos
     const totalEmpty = totalCapacity - allFilled.length;
 
-    // Repetidos totales CORREGIDOS
+    console.log('📦 TOTALES ACUMULADOS:', {
+      capacidadTotal: totalCapacity,
+      slotsLlenos: allFilled.length,
+      slotsVacios: totalEmpty
+    });
+
+    // REPETIDOS TOTALES - contando en todas las neveras
     const totalFlavorCounts = {};
     const totalFlavorDetails = {};
     allFilled.forEach((s) => {
@@ -972,7 +1013,7 @@ export default function FreezerMap() {
         totalFlavorDetails[key] = { name: s.flavor_name, positions: [] };
       }
       totalFlavorCounts[key]++;
-      const freezerNum = s.store_id?.split('_F')[1] || '1';
+      const freezerNum = s.store_id?.split('_F')[1] || '?';
       totalFlavorDetails[key].positions.push(`N${freezerNum}:${s.row}-${s.position}${s.slot_type || 'F'}`);
     });
     
@@ -984,12 +1025,14 @@ export default function FreezerMap() {
         positions: totalFlavorDetails[key].positions.join(', ')
       }));
 
+    console.log('🔁 REPETIDOS TOTALES:', totalRepeated);
+
     // Mal ubicados totales
     const totalMisplaced = allFilled.filter((s) => {
       const idealTypes = IDEAL_RULES[s.row] || ['gourmet', 'exclusivo'];
       return !idealTypes.includes(s.flavor_type);
     }).map((s) => {
-      const freezerNum = s.store_id?.split('_F')[1] || '1';
+      const freezerNum = s.store_id?.split('_F')[1] || '?';
       return {
         ...s,
         freezerNum,
@@ -997,11 +1040,18 @@ export default function FreezerMap() {
       };
     });
 
-    const totalEfficiency = Math.round(
-      allFilled.length / totalCapacity * 100 - 
+    // EFICIENCIA TOTAL
+    const totalOccupancy = (allFilled.length / totalCapacity) * 100;
+    const totalEfficiency = Math.max(0, Math.min(100, Math.round(
+      totalOccupancy - 
       totalMisplaced.length * 2 - 
       totalRepeated.length * 3
-    );
+    )));
+
+    console.log('📊 EFICIENCIA TOTAL:', {
+      ocupacion: totalOccupancy.toFixed(1) + '%',
+      eficienciaFinal: totalEfficiency + '%'
+    });
 
     // Sugerencias generales
     const suggestions = [];
@@ -1009,7 +1059,7 @@ export default function FreezerMap() {
     if (totalRepeated.length > 0) suggestions.push(`Reduce sabores repetidos: ${totalRepeated.map((f) => f.name).join(', ')}`);
     if (totalMisplaced.length > 0) suggestions.push(`Reorganiza ${totalMisplaced.length} sabores mal ubicados según las reglas de exhibición.`);
 
-    setAuditData({
+    const auditResult = {
       byFreezer: freezerAnalysis,
       total: {
         totalSlots: totalCapacity,
@@ -1017,11 +1067,15 @@ export default function FreezerMap() {
         emptySlots: totalEmpty,
         repeatedFlavors: totalRepeated,
         misplacedSlots: totalMisplaced,
-        efficiency: Math.max(0, Math.min(100, totalEfficiency))
+        efficiency: totalEfficiency
       },
       suggestions,
       selectedFreezer: freezerToShow
-    });
+    };
+
+    console.log('✅ AUDITORÍA COMPLETA:', auditResult);
+    
+    setAuditData(auditResult);
     setShowAudit(true);
   }, [allFreezersSlots, selectedStore, availableFreezers, freezerDimensions]);
 
