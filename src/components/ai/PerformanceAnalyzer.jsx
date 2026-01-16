@@ -49,37 +49,37 @@ export default function PerformanceAnalyzer({ storeId, storeName }) {
     enabled: cashiers.length > 0
   });
 
+  // Preparar datos de cajeros
+  const last30Days = subDays(new Date(), 30);
+  const recentRecords = shiftRecords.filter(r => new Date(r.date) >= last30Days);
+  
+  const cashierData = cashiers.map(c => {
+    const records = recentRecords.filter(r => r.cashier_id === c.id);
+    const totalSales = records.reduce((sum, r) => sum + (r.sales || 0), 0);
+    const totalTransactions = records.reduce((sum, r) => sum + (r.transactions || 0), 0);
+    const totalSuggested = records.reduce((sum, r) => sum + (r.suggested_sales || 0), 0);
+    const avgTicket = totalTransactions > 0 ? totalSales / totalTransactions : 0;
+    const cashierBadges = badges.filter(b => b.cashier_id === c.id);
+    const cashierChecklists = checklists.filter(ch => ch.cashier_id === c.id);
+    const avgChecklist = cashierChecklists.length > 0 
+      ? cashierChecklists.reduce((a, ch) => a + (ch.completion_percentage || 0), 0) / cashierChecklists.length 
+      : 0;
+
+    return {
+      name: c.name,
+      id: c.id,
+      totalSales,
+      totalTransactions,
+      totalSuggested,
+      avgTicket,
+      daysWorked: records.length,
+      badges: cashierBadges.length,
+      avgChecklist
+    };
+  });
+
   const analyzePerformance = async () => {
     setIsAnalyzing(true);
-    
-    const last30Days = subDays(new Date(), 30);
-    const recentRecords = shiftRecords.filter(r => new Date(r.date) >= last30Days);
-    
-    // Preparar datos por cajero
-    const cashierData = cashiers.map(c => {
-      const records = recentRecords.filter(r => r.cashier_id === c.id);
-      const totalSales = records.reduce((sum, r) => sum + (r.sales || 0), 0);
-      const totalTransactions = records.reduce((sum, r) => sum + (r.transactions || 0), 0);
-      const totalSuggested = records.reduce((sum, r) => sum + (r.suggested_sales || 0), 0);
-      const avgTicket = totalTransactions > 0 ? totalSales / totalTransactions : 0;
-      const cashierBadges = badges.filter(b => b.cashier_id === c.id);
-      const cashierChecklists = checklists.filter(ch => ch.cashier_id === c.id);
-      const avgChecklist = cashierChecklists.length > 0 
-        ? cashierChecklists.reduce((a, ch) => a + (ch.completion_percentage || 0), 0) / cashierChecklists.length 
-        : 0;
-
-      return {
-        name: c.name,
-        id: c.id,
-        totalSales,
-        totalTransactions,
-        totalSuggested,
-        avgTicket,
-        daysWorked: records.length,
-        badges: cashierBadges.length,
-        avgChecklist
-      };
-    });
 
     try {
       const result = await base44.integrations.Core.InvokeLLM({
