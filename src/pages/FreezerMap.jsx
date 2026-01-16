@@ -920,6 +920,9 @@ export default function FreezerMap() {
       // VACÍOS REALES = slots que existen en BD y están vacíos
       const emptySlots = freezerSlots.filter(s => s.is_empty || !s.flavor_name || s.flavor_name.trim() === '').length;
       
+      // Dimensiones para referencia
+      const dimensions = freezerDimensions[freezerNum] || { rows: 7, cols: 5 };
+      
       // TOTAL DE SLOTS = solo los que existen en la BD
       const totalSlotsInFreezer = freezerSlots.length;
 
