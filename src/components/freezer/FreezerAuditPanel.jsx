@@ -28,9 +28,17 @@ export default function FreezerAuditPanel({
     ? allSlots 
     : allSlots.filter(s => s.store_id?.endsWith(`_F${selectedFreezer}`));
   
-  // RECALCULAR conteos reales basado en los slots actuales
-  const actualFilledSlots = relevantSlots.filter(s => !s.is_empty && s.flavor_name && s.flavor_name.trim() !== '').length;
-  const actualEmptySlots = relevantSlots.filter(s => s.is_empty || !s.flavor_name || s.flavor_name.trim() === '').length;
+  // RECALCULAR conteos reales basado en los slots actuales - CONTEO PRECISO
+  const actualFilledSlots = relevantSlots.filter(s => {
+    const isFilled = !s.is_empty && s.flavor_name && s.flavor_name.trim() !== '';
+    return isFilled;
+  }).length;
+  
+  const actualEmptySlots = relevantSlots.filter(s => {
+    const isEmpty = s.is_empty || !s.flavor_name || s.flavor_name.trim() === '';
+    return isEmpty;
+  }).length;
+  
   const actualTotalSlots = relevantSlots.length;
   
   // Usar valores recalculados en lugar de los que vienen de auditData
@@ -44,11 +52,18 @@ export default function FreezerAuditPanel({
   const emptySlots = actualEmptySlots;
   const totalSlots = actualTotalSlots;
   
-  console.log(`📊 Panel mostrando (${selectedFreezer}):`, {
-    totalSlots,
-    filledSlots,
-    emptySlots,
-    relevantSlotsCount: relevantSlots.length
+  // DEBUG DETALLADO
+  console.log(`📊 Panel Auditoría (${selectedFreezer}):`, {
+    totalSlots: actualTotalSlots,
+    filledSlots: actualFilledSlots,
+    emptySlots: actualEmptySlots,
+    allSlotsLength: allSlots?.length || 0,
+    relevantSlotsLength: relevantSlots.length,
+    sampleSlots: relevantSlots.slice(0, 3).map(s => ({
+      store_id: s.store_id,
+      flavor: s.flavor_name,
+      is_empty: s.is_empty
+    }))
   });
 
   const getEfficiencyColor = (eff) => {
