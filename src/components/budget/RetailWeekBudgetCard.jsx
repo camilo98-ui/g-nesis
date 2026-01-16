@@ -635,7 +635,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
               <div className="grid grid-cols-2 gap-6 lg:gap-10 mb-6 lg:mb-5">
                 <div className="text-left">
                   <p className="text-sm lg:text-base text-white/90 mb-3 lg:mb-2 font-semibold">
-                    Meta del Día {gregorianMode ? '' : '(105%)'}
+                    Meta del Día {gregorianMode ? '' : `(${Math.round(TARGET_PERCENTAGE * 100)}%)`}
                   </p>
                   <motion.p
                     key={`${budgetData.adjustedDailyBudget}-${gregorianMode}`}
