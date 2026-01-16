@@ -645,9 +645,17 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                   >
                     {formatCurrency(budgetData.adjustedDailyBudget)}
                   </motion.p>
-                  <p className="text-xs lg:text-sm text-white/70">
-                    Base: {formatCurrency(gregorianMode ? budgetData.dailyBaseBudget : budgetData.adjustedDailyBudget / 1.05)}
-                  </p>
+                  <div className="space-y-1">
+                    <p className="text-xs lg:text-sm text-white/70">
+                      Base: {formatCurrency(gregorianMode ? budgetData.dailyBaseBudget : budgetData.adjustedDailyBudget / 1.05)}
+                    </p>
+                    <p className={`text-sm lg:text-base font-bold ${
+                      budgetData.todayCompliance >= 100 ? 'text-emerald-300' :
+                      budgetData.todayCompliance >= 80 ? 'text-amber-300' : 'text-rose-300'
+                    }`}>
+                      {budgetData.todayCompliance.toFixed(1)}% de la meta
+                    </p>
+                  </div>
                   
                   {/* Sparkline debajo del número */}
                   {budgetData.last7DaysSales?.length > 0 && (
