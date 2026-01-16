@@ -997,11 +997,19 @@ export default function FreezerMap() {
 
     // ========== ACUMULADO TOTAL DE LAS 3 NEVERAS ==========
     
-    // TODOS los slots llenos (con sabor y no vacíos)
-    const allFilled = allFreezersSlots.filter(s => !s.is_empty && s.flavor_name && s.flavor_name.trim() !== '');
+    // TODOS los slots llenos (solo frontales F)
+    const allFilled = allFreezersSlots.filter(s => 
+      !s.is_empty && 
+      s.flavor_name && 
+      s.flavor_name.trim() !== '' &&
+      s.slot_type === 'F' // SOLO CONTAR FRONTALES
+    );
     
-    // VACÍOS TOTALES = slots que existen en BD y están vacíos
-    const totalEmpty = allFreezersSlots.filter(s => s.is_empty || !s.flavor_name || s.flavor_name.trim() === '').length;
+    // VACÍOS TOTALES = slots frontales vacíos
+    const totalEmpty = allFreezersSlots.filter(s => 
+      (s.is_empty || !s.flavor_name || s.flavor_name.trim() === '') &&
+      s.slot_type === 'F' // SOLO CONTAR FRONTALES
+    ).length;
     
     // CAPACIDAD TOTAL = todos los slots que existen en BD
     const totalCapacity = allFreezersSlots.length;
