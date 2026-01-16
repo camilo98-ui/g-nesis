@@ -917,12 +917,11 @@ export default function FreezerMap() {
       // CONTEO REAL de slots llenos (que tienen sabor y NO están vacíos)
       const filledSlots = freezerSlots.filter(s => !s.is_empty && s.flavor_name && s.flavor_name.trim() !== '');
       
-      // CAPACIDAD TOTAL = filas × columnas × 2 (F y T)
-      const dimensions = freezerDimensions[freezerNum] || { rows: 7, cols: 5 };
-      const totalSlotsInFreezer = dimensions.rows * dimensions.cols * 2;
+      // VACÍOS REALES = slots que existen en BD y están vacíos
+      const emptySlots = freezerSlots.filter(s => s.is_empty || !s.flavor_name || s.flavor_name.trim() === '').length;
       
-      // VACÍOS = capacidad total - slots llenos REALES
-      const emptySlots = totalSlotsInFreezer - filledSlots.length;
+      // TOTAL DE SLOTS = solo los que existen en la BD
+      const totalSlotsInFreezer = freezerSlots.length;
 
       console.log(`📊 Nevera #${freezerNum} - Conteo:`, {
         dimensiones: `${dimensions.rows}x${dimensions.cols}`,
