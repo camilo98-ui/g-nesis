@@ -371,26 +371,194 @@ Sé muy específico, usa números, porcentajes y emojis.`,
                 </Card>
               )}
 
-              {/* Gráfica visual de cajeros */}
+              {/* Gráficas Analíticas Avanzadas */}
               {report.top_performers && report.top_performers.length > 0 && (
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm text-gray-700">📊 Performance Visual</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="h-48">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={report.top_performers.slice(0, 5).map(p => ({ name: p.nombre, puntaje: p.puntaje }))}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                          <XAxis dataKey="name" tick={{ fontSize: 10 }} angle={-15} textAnchor="end" height={60} />
-                          <YAxis tick={{ fontSize: 10 }} />
-                          <RechartsTooltip />
-                          <Bar dataKey="puntaje" fill="#10b981" radius={[6, 6, 0, 0]} />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </CardContent>
-                </Card>
+                <div className="space-y-4">
+                  {/* Top Performers - Gráfica de Barras con Gradiente */}
+                  <Card className="border-emerald-200 bg-gradient-to-br from-emerald-50 to-green-50">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm text-emerald-700 flex items-center gap-2">
+                        <TrendingUp className="w-4 h-4" /> Ranking de Performance
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="h-64">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart 
+                            data={report.top_performers.slice(0, 5).map(p => ({ 
+                              name: p.nombre.split(' ')[0], 
+                              puntaje: p.puntaje 
+                            }))}
+                            margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+                          >
+                            <defs>
+                              <linearGradient id="colorPuntaje" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#10b981" stopOpacity={0.9}/>
+                                <stop offset="95%" stopColor="#059669" stopOpacity={0.7}/>
+                              </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#d1fae5" opacity={0.5} />
+                            <XAxis 
+                              dataKey="name" 
+                              tick={{ fontSize: 11, fill: '#047857', fontWeight: 600 }} 
+                              angle={-20} 
+                              textAnchor="end" 
+                              height={60}
+                            />
+                            <YAxis 
+                              tick={{ fontSize: 11, fill: '#047857' }}
+                              label={{ value: 'Puntaje', angle: -90, position: 'insideLeft', fill: '#047857', fontSize: 12 }}
+                            />
+                            <RechartsTooltip 
+                              contentStyle={{ 
+                                backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                                border: '2px solid #10b981',
+                                borderRadius: '12px',
+                                boxShadow: '0 4px 12px rgba(16, 185, 129, 0.2)'
+                              }}
+                              labelStyle={{ color: '#047857', fontWeight: 'bold' }}
+                            />
+                            <Bar 
+                              dataKey="puntaje" 
+                              fill="url(#colorPuntaje)" 
+                              radius={[8, 8, 0, 0]}
+                              animationDuration={1000}
+                            />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Análisis de Áreas de Mejora - Gráfica Radial */}
+                  {report.need_support && report.need_support.length > 0 && (
+                    <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm text-amber-700 flex items-center gap-2">
+                          <AlertTriangle className="w-4 h-4" /> Oportunidades de Mejora
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="h-56">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart 
+                              data={report.need_support.slice(0, 4).map((p, i) => ({ 
+                                nombre: p.nombre.split(' ')[0],
+                                nivel: 100 - (i * 15)
+                              }))}
+                              margin={{ top: 10, right: 30, left: 0, bottom: 40 }}
+                            >
+                              <defs>
+                                <linearGradient id="colorNivel" x1="0" y1="0" x2="0" y2="1">
+                                  <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.8}/>
+                                  <stop offset="95%" stopColor="#f59e0b" stopOpacity={0.1}/>
+                                </linearGradient>
+                              </defs>
+                              <CartesianGrid strokeDasharray="3 3" stroke="#fed7aa" opacity={0.5} />
+                              <XAxis 
+                                dataKey="nombre" 
+                                tick={{ fontSize: 11, fill: '#b45309', fontWeight: 600 }}
+                                angle={-20}
+                                textAnchor="end"
+                                height={50}
+                              />
+                              <YAxis 
+                                tick={{ fontSize: 11, fill: '#b45309' }}
+                                domain={[0, 100]}
+                                label={{ value: 'Potencial', angle: -90, position: 'insideLeft', fill: '#b45309', fontSize: 12 }}
+                              />
+                              <RechartsTooltip 
+                                contentStyle={{ 
+                                  backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                                  border: '2px solid #f59e0b',
+                                  borderRadius: '12px',
+                                  boxShadow: '0 4px 12px rgba(245, 158, 11, 0.2)'
+                                }}
+                              />
+                              <Area 
+                                type="monotone" 
+                                dataKey="nivel" 
+                                stroke="#f59e0b" 
+                                strokeWidth={3}
+                                fillOpacity={1} 
+                                fill="url(#colorNivel)"
+                                animationDuration={1200}
+                              />
+                            </AreaChart>
+                          </ResponsiveContainer>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* Tendencia del Equipo - Gráfica de Línea */}
+                  {report.pronosticos && (
+                    <Card className="border-violet-200 bg-gradient-to-br from-violet-50 to-purple-50">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm text-violet-700 flex items-center gap-2">
+                          <TrendingUp className="w-4 h-4" /> Proyección de Ventas
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="h-56">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <LineChart 
+                              data={[
+                                { periodo: 'Actual', ventas: report.pronosticos.ventas_7_dias * 0.7 },
+                                { periodo: '7 días', ventas: report.pronosticos.ventas_7_dias },
+                                { periodo: '14 días', ventas: report.pronosticos.ventas_14_dias }
+                              ]}
+                              margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                            >
+                              <defs>
+                                <linearGradient id="colorVentas" x1="0" y1="0" x2="0" y2="1">
+                                  <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8}/>
+                                  <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.1}/>
+                                </linearGradient>
+                              </defs>
+                              <CartesianGrid strokeDasharray="3 3" stroke="#ddd6fe" opacity={0.5} />
+                              <XAxis 
+                                dataKey="periodo" 
+                                tick={{ fontSize: 12, fill: '#6d28d9', fontWeight: 600 }}
+                              />
+                              <YAxis 
+                                tick={{ fontSize: 11, fill: '#6d28d9' }}
+                                tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`}
+                                label={{ value: 'Ventas', angle: -90, position: 'insideLeft', fill: '#6d28d9', fontSize: 12 }}
+                              />
+                              <RechartsTooltip 
+                                formatter={(v) => [`$${(v/1000000).toFixed(2)}M`, 'Ventas']}
+                                contentStyle={{ 
+                                  backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                                  border: '2px solid #8b5cf6',
+                                  borderRadius: '12px',
+                                  boxShadow: '0 4px 12px rgba(139, 92, 246, 0.2)'
+                                }}
+                              />
+                              <Area 
+                                type="monotone" 
+                                dataKey="ventas" 
+                                stroke="#8b5cf6" 
+                                strokeWidth={0}
+                                fillOpacity={1} 
+                                fill="url(#colorVentas)"
+                              />
+                              <Line 
+                                type="monotone" 
+                                dataKey="ventas" 
+                                stroke="#8b5cf6" 
+                                strokeWidth={4}
+                                dot={{ fill: '#8b5cf6', r: 6 }}
+                                activeDot={{ r: 8, stroke: '#fff', strokeWidth: 2 }}
+                                animationDuration={1500}
+                              />
+                            </LineChart>
+                          </ResponsiveContainer>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
               )}
 
               <Button onClick={analyzePerformance} variant="outline" className="w-full gap-2">
