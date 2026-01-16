@@ -987,14 +987,11 @@ export default function FreezerMap() {
     // TODOS los slots llenos (con sabor y no vacíos)
     const allFilled = allFreezersSlots.filter(s => !s.is_empty && s.flavor_name && s.flavor_name.trim() !== '');
     
-    // CAPACIDAD TOTAL de todas las neveras
-    const totalCapacity = availableFreezers.reduce((sum, freezerNum) => {
-      const dim = freezerDimensions[freezerNum] || { rows: 7, cols: 5 };
-      return sum + (dim.rows * dim.cols * 2);
-    }, 0);
+    // VACÍOS TOTALES = slots que existen en BD y están vacíos
+    const totalEmpty = allFreezersSlots.filter(s => s.is_empty || !s.flavor_name || s.flavor_name.trim() === '').length;
     
-    // VACÍOS TOTALES = capacidad total - slots llenos
-    const totalEmpty = totalCapacity - allFilled.length;
+    // CAPACIDAD TOTAL = todos los slots que existen en BD
+    const totalCapacity = allFreezersSlots.length;
 
     console.log('📦 TOTALES ACUMULADOS:', {
       capacidadTotal: totalCapacity,
