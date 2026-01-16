@@ -16,8 +16,8 @@ const DEFAULT_PRIZES_TIENDA = [
 const DEFAULT_PRIZES_DISTRITO = [
   { id: 1, name: 'Bono $80.000 Olímpica', value: 80000, color: '#FFE4E8', emoji: '💰' },
   { id: 2, name: 'Piscilago x2', value: 0, color: '#E8E4FF', emoji: '🏊' },
-  { id: 3, name: 'Domingo remunerado', value: 0, color: '#D4F1F4', emoji: '☀️' },
-  { id: 4, name: 'Descanso pago', value: 0, color: '#FFF4E4', emoji: '🏖️' },
+  { id: 3, name: 'Domingo pago', value: 0, color: '#D4F1F4', emoji: '☀️' },
+  { id: 4, name: 'Descanso Remunerado', value: 0, color: '#FFF4E4', emoji: '🏖️' },
   { id: 5, name: 'Litro de helado', value: 0, color: '#E4F8E8', emoji: '🍦' },
   { id: 6, name: 'Entradas Cine PREMIUM', value: 0, color: '#FFE8DC', emoji: '🎥' },
   { id: 7, name: 'Descanso + Malteada', value: 0, color: '#F4E4FF', emoji: '🍹' },
