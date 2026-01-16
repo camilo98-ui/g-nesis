@@ -635,7 +635,15 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
               <div className="grid grid-cols-2 gap-6 lg:gap-10 mb-6 lg:mb-5">
                 <div className="text-left">
                   <p className="text-sm lg:text-base text-white/90 mb-3 lg:mb-2 font-semibold">
-                    Meta del Día {gregorianMode ? '' : '(105%)'}
+                    Meta del Día ({gregorianMode ? '100' : ((() => {
+                      const initialProjection = budgetData.monthProjection;
+                      const originalBudget = activeBudget.sales_budget;
+                      const projCompliance = originalBudget > 0 ? (initialProjection / originalBudget) : 0;
+                      if (projCompliance >= 1.1) return '110';
+                      if (projCompliance >= 1.0) return '105';
+                      if (projCompliance >= 0.9) return '102';
+                      return '100';
+                    })())}%)
                   </p>
                   <motion.p
                     key={`${budgetData.adjustedDailyBudget}-${gregorianMode}`}
@@ -647,7 +655,16 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                   </motion.p>
                   <div className="space-y-1">
                     <p className="text-xs lg:text-sm text-white/70">
-                      Base: {formatCurrency(gregorianMode ? budgetData.dailyBaseBudget : budgetData.adjustedDailyBudget / 1.05)}
+                      Base 100%: {formatCurrency(budgetData.dailyBaseBudget / ((() => {
+                        const initialProjection = budgetData.monthProjection;
+                        const originalBudget = activeBudget.sales_budget;
+                        const projCompliance = originalBudget > 0 ? (initialProjection / originalBudget) : 0;
+                        if (gregorianMode) return 1.0;
+                        if (projCompliance >= 1.1) return 1.10;
+                        if (projCompliance >= 1.0) return 1.05;
+                        if (projCompliance >= 0.9) return 1.02;
+                        return 1.0;
+                      })()))}
                     </p>
                     <p className={`text-sm lg:text-base font-bold ${
                       budgetData.todayCompliance >= 100 ? 'text-emerald-300' :
