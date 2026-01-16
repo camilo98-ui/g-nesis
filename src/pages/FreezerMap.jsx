@@ -914,11 +914,21 @@ export default function FreezerMap() {
         storeIdEsperado: `${selectedStore}_F${freezerNum}`
       });
       
-      // CONTEO REAL de slots llenos (que tienen sabor y NO están vacíos)
-      const filledSlots = freezerSlots.filter(s => !s.is_empty && s.flavor_name && s.flavor_name.trim() !== '');
+      // CONTEO REAL de slots llenos (solo F=frontal, ya que cada bajada tiene F+T)
+      // Una nevera de 7x5 tiene 35 BAJADAS, cada bajada tiene 2 slots (F y T) = 70 slots totales
+      // Pero para el usuario solo contamos los slots frontales (F) que es lo que ve
+      const filledSlots = freezerSlots.filter(s => 
+        !s.is_empty && 
+        s.flavor_name && 
+        s.flavor_name.trim() !== '' &&
+        s.slot_type === 'F' // SOLO CONTAR FRONTALES
+      );
       
-      // VACÍOS REALES = slots que existen en BD y están vacíos
-      const emptySlots = freezerSlots.filter(s => s.is_empty || !s.flavor_name || s.flavor_name.trim() === '').length;
+      // VACÍOS REALES = slots frontales vacíos
+      const emptySlots = freezerSlots.filter(s => 
+        (s.is_empty || !s.flavor_name || s.flavor_name.trim() === '') &&
+        s.slot_type === 'F' // SOLO CONTAR FRONTALES
+      ).length;
       
       // Dimensiones para referencia
       const dimensions = freezerDimensions[freezerNum] || { rows: 7, cols: 5 };
