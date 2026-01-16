@@ -49,37 +49,37 @@ export default function PerformanceAnalyzer({ storeId, storeName }) {
     enabled: cashiers.length > 0
   });
 
-  // Preparar datos de cajeros
-  const last30Days = subDays(new Date(), 30);
-  const recentRecords = shiftRecords.filter(r => new Date(r.date) >= last30Days);
-  
-  const cashierData = cashiers.map(c => {
-    const records = recentRecords.filter(r => r.cashier_id === c.id);
-    const totalSales = records.reduce((sum, r) => sum + (r.sales || 0), 0);
-    const totalTransactions = records.reduce((sum, r) => sum + (r.transactions || 0), 0);
-    const totalSuggested = records.reduce((sum, r) => sum + (r.suggested_sales || 0), 0);
-    const avgTicket = totalTransactions > 0 ? totalSales / totalTransactions : 0;
-    const cashierBadges = badges.filter(b => b.cashier_id === c.id);
-    const cashierChecklists = checklists.filter(ch => ch.cashier_id === c.id);
-    const avgChecklist = cashierChecklists.length > 0 
-      ? cashierChecklists.reduce((a, ch) => a + (ch.completion_percentage || 0), 0) / cashierChecklists.length 
-      : 0;
-
-    return {
-      name: c.name,
-      id: c.id,
-      totalSales,
-      totalTransactions,
-      totalSuggested,
-      avgTicket,
-      daysWorked: records.length,
-      badges: cashierBadges.length,
-      avgChecklist
-    };
-  });
-
   const analyzePerformance = async () => {
     setIsAnalyzing(true);
+    
+    const last30Days = subDays(new Date(), 30);
+    const recentRecords = shiftRecords.filter(r => new Date(r.date) >= last30Days);
+    
+    // Preparar datos por cajero
+    const cashierData = cashiers.map(c => {
+      const records = recentRecords.filter(r => r.cashier_id === c.id);
+      const totalSales = records.reduce((sum, r) => sum + (r.sales || 0), 0);
+      const totalTransactions = records.reduce((sum, r) => sum + (r.transactions || 0), 0);
+      const totalSuggested = records.reduce((sum, r) => sum + (r.suggested_sales || 0), 0);
+      const avgTicket = totalTransactions > 0 ? totalSales / totalTransactions : 0;
+      const cashierBadges = badges.filter(b => b.cashier_id === c.id);
+      const cashierChecklists = checklists.filter(ch => ch.cashier_id === c.id);
+      const avgChecklist = cashierChecklists.length > 0 
+        ? cashierChecklists.reduce((a, ch) => a + (ch.completion_percentage || 0), 0) / cashierChecklists.length 
+        : 0;
+
+      return {
+        name: c.name,
+        id: c.id,
+        totalSales,
+        totalTransactions,
+        totalSuggested,
+        avgTicket,
+        daysWorked: records.length,
+        badges: cashierBadges.length,
+        avgChecklist
+      };
+    });
 
     try {
       const result = await base44.integrations.Core.InvokeLLM({
@@ -372,7 +372,7 @@ Sé muy específico, usa números, porcentajes y emojis.`,
               )}
 
               {/* Gráfica visual de cajeros */}
-              {cashierData.length > 0 && (
+              {report.top_performers && report.top_performers.length > 0 && (
                 <Card>
                   <CardHeader className="pb-2">
                     <CardTitle className="text-sm text-gray-700">📊 Performance Visual</CardTitle>
@@ -380,12 +380,12 @@ Sé muy específico, usa números, porcentajes y emojis.`,
                   <CardContent>
                     <div className="h-48">
                       <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={cashierData.slice(0, 5)}>
+                        <BarChart data={report.top_performers.slice(0, 5).map(p => ({ name: p.nombre, puntaje: p.puntaje }))}>
                           <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                           <XAxis dataKey="name" tick={{ fontSize: 10 }} angle={-15} textAnchor="end" height={60} />
-                          <YAxis tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} tick={{ fontSize: 10 }} />
-                          <RechartsTooltip formatter={(v) => [`$${v.toLocaleString()}`, 'Ventas']} />
-                          <Bar dataKey="totalSales" fill="#10b981" radius={[6, 6, 0, 0]} />
+                          <YAxis tick={{ fontSize: 10 }} />
+                          <RechartsTooltip />
+                          <Bar dataKey="puntaje" fill="#10b981" radius={[6, 6, 0, 0]} />
                         </BarChart>
                       </ResponsiveContainer>
                     </div>
