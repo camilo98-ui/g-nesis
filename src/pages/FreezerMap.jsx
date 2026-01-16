@@ -1900,7 +1900,7 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
 
       {/* Audit Panel */}
       <AnimatePresence>
-        {showAudit && <FreezerAuditPanel auditData={auditData} allSlots={slots} onClose={() => setShowAudit(false)} onApplySuggestions={() => toast.info('Sugerencias aplicadas')} onAutoCorrect={optimizeWithAI} isLoading={isOptimizing} />}
+        {showAudit && <FreezerAuditPanel auditData={auditData} allSlots={allFreezersSlots} onClose={() => setShowAudit(false)} onApplySuggestions={() => toast.info('Sugerencias aplicadas')} onAutoCorrect={optimizeWithAI} isLoading={isOptimizing} />}
       </AnimatePresence>
 
       {/* History Panel */}
