@@ -54,11 +54,25 @@ export default function BudgetForm({ storeId, onSuccess, editingBudget, onClearE
 
   const createMutation = useMutation({
     mutationFn: async (data) => {
-      // Check if budget exists for this month/year
+      // Si estamos editando, actualizar directamente
+      if (editingBudget) {
+        const budgetData = {
+          store_id: storeId,
+          month: parseInt(data.month),
+          year: parseInt(data.year),
+          sales_budget: parseFloat(data.sales_budget) || 0,
+          tickets_budget: parseInt(data.tickets_budget) || 0,
+          transactions_budget: parseInt(data.transactions_budget) || 0,
+          suggested_budget: parseInt(data.suggested_budget) || 0
+        };
+        return base44.entities.Budget.update(editingBudget.id, budgetData);
+      }
+      
+      // Si estamos creando, verificar si existe
       const existing = await base44.entities.Budget.filter({ 
         store_id: storeId, 
-        month: data.month,
-        year: data.year
+        month: parseInt(data.month),
+        year: parseInt(data.year)
       });
       
       const budgetData = {
