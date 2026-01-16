@@ -794,12 +794,11 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                         : 'bg-rose-300'
                     }`}
                   >
-                    <div 
-                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-40"
-                      style={{
-                        animation: 'shimmer 2s linear infinite',
-                        width: '50%'
-                      }}
+                    <motion.div 
+                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-50"
+                      animate={{ x: ['-100%', '200%'] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                      style={{ width: '50%' }}
                     />
                   </motion.div>
                 </div>
@@ -832,12 +831,11 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                           : 'bg-rose-300'
                       }`}
                     >
-                      <div 
-                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-40"
-                        style={{
-                          animation: 'shimmer 2s linear infinite',
-                          width: '50%'
-                        }}
+                      <motion.div 
+                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-50"
+                        animate={{ x: ['-100%', '200%'] }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                        style={{ width: '50%' }}
                       />
                     </motion.div>
                   </div>
