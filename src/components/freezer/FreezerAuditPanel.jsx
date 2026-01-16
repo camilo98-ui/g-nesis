@@ -28,6 +28,7 @@ export default function FreezerAuditPanel({
     ? allSlots 
     : allSlots.filter(s => s.store_id?.endsWith(`_F${selectedFreezer}`));
   
+  // Usar los valores calculados de auditData que ya vienen correctos desde FreezerMap
   const { 
     totalSlots, 
     filledSlots, 
@@ -36,6 +37,13 @@ export default function FreezerAuditPanel({
     repeatedFlavors, 
     efficiency 
   } = currentData;
+  
+  console.log(`📊 Panel mostrando (${selectedFreezer}):`, {
+    totalSlots,
+    filledSlots,
+    emptySlots,
+    calculated: currentData
+  });
 
   const getEfficiencyColor = (eff) => {
     if (eff >= 80) return 'text-green-600 bg-green-100';
