@@ -308,12 +308,19 @@ export default function CashiersDashboard() {
           {/* Fila 3: Botones de acción */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1">
             <motion.button
-              whileHover={{ scale: 1.05 }}
+              whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setShowSalesModal(true)}
-              className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-emerald-400 to-green-500 hover:from-emerald-500 hover:to-green-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/30 transition-all"
+              className="relative flex-shrink-0 h-10 px-4 bg-gradient-to-br from-emerald-400 via-emerald-500 to-green-500 hover:from-emerald-500 hover:via-emerald-600 hover:to-green-600 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/40 hover:shadow-xl hover:shadow-emerald-500/50 transition-all overflow-hidden group"
             >
-              <Receipt className="w-5 h-5 text-white" />
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                animate={{ x: ['-100%', '200%'] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                style={{ width: '50%' }}
+              />
+              <Receipt className="w-5 h-5 text-white relative z-10" />
+              <span className="text-sm font-bold text-white relative z-10 hidden sm:inline">Registrar Ventas</span>
             </motion.button>
             <Button
               variant="outline"
