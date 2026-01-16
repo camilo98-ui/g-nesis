@@ -28,21 +28,27 @@ export default function FreezerAuditPanel({
     ? allSlots 
     : allSlots.filter(s => s.store_id?.endsWith(`_F${selectedFreezer}`));
   
-  // Usar los valores calculados de auditData que ya vienen correctos desde FreezerMap
+  // RECALCULAR conteos reales basado en los slots actuales
+  const actualFilledSlots = relevantSlots.filter(s => !s.is_empty && s.flavor_name && s.flavor_name.trim() !== '').length;
+  const actualEmptySlots = relevantSlots.filter(s => s.is_empty || !s.flavor_name || s.flavor_name.trim() === '').length;
+  const actualTotalSlots = relevantSlots.length;
+  
+  // Usar valores recalculados en lugar de los que vienen de auditData
   const { 
-    totalSlots, 
-    filledSlots, 
-    emptySlots, 
     misplacedSlots, 
     repeatedFlavors, 
     efficiency 
   } = currentData;
   
+  const filledSlots = actualFilledSlots;
+  const emptySlots = actualEmptySlots;
+  const totalSlots = actualTotalSlots;
+  
   console.log(`📊 Panel mostrando (${selectedFreezer}):`, {
     totalSlots,
     filledSlots,
     emptySlots,
-    calculated: currentData
+    relevantSlotsCount: relevantSlots.length
   });
 
   const getEfficiencyColor = (eff) => {
