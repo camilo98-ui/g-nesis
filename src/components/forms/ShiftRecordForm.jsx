@@ -832,9 +832,14 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
             >
               <Button
                 type="button"
-                onClick={() => setShowHistory(!showHistory)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log('Historial clicked, current state:', showHistory);
+                  setShowHistory(!showHistory);
+                }}
                 disabled={!formData.cashier_id}
-                className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white shadow-lg hover:shadow-xl py-7 px-6 text-lg font-bold rounded-[20px] transition-all"
+                className={`${showHistory ? 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600' : 'bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600'} text-white shadow-lg hover:shadow-xl py-7 px-6 text-lg font-bold rounded-[20px] transition-all disabled:opacity-30`}
               >
                 <History className="w-6 h-6" />
               </Button>
@@ -864,66 +869,121 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
           )}
         </form>
 
-        {/* Historial de Turnos */}
-        {showHistory && formData.cashier_id && (
-          <div className="border-t border-gray-200 p-6 bg-gray-50">
-            <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
-              <History className="w-5 h-5 text-blue-600" />
-              Historial de Turnos
-            </h3>
-            {loadingHistory ? (
-              <p className="text-gray-400 text-center py-4">Cargando...</p>
-            ) : shiftHistory.length === 0 ? (
-              <p className="text-gray-400 text-center py-4">No hay registros</p>
-            ) : (
-              <div className="space-y-2 max-h-96 overflow-y-auto">
-                {shiftHistory.map((shift) => {
-                  const ShiftIcon = SHIFTS.find(s => s.value === shift.shift)?.icon || Sun;
-                  const shiftLabel = SHIFTS.find(s => s.value === shift.shift)?.label || shift.shift;
-                  const shiftColor = SHIFTS.find(s => s.value === shift.shift)?.color || 'text-gray-500';
-                  
-                  return (
-                    <div key={shift.id} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex items-center justify-between hover:shadow-md transition-all">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <p className="font-bold text-gray-700">{shift.date}</p>
-                          <div className={`flex items-center gap-1 px-2 py-1 rounded-lg bg-gray-100 ${shiftColor}`}>
-                            <ShiftIcon className="w-4 h-4" />
-                            <span className="text-xs font-bold">{shiftLabel}</span>
+        {/* Historial de Turnos - MEJORADO */}
+        <AnimatePresence>
+          {showHistory && formData.cashier_id && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="border-t border-gray-200 overflow-hidden"
+            >
+              <div className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-bold text-lg flex items-center gap-2">
+                    <History className="w-5 h-5 text-blue-600" />
+                    Historial de Turnos
+                  </h3>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setShowHistory(false)}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+                {loadingHistory ? (
+                  <div className="text-center py-8">
+                    <Loader2 className="w-8 h-8 animate-spin mx-auto text-blue-500 mb-2" />
+                    <p className="text-gray-500">Cargando historial...</p>
+                  </div>
+                ) : shiftHistory.length === 0 ? (
+                  <div className="text-center py-8 bg-white rounded-xl border-2 border-dashed border-gray-300">
+                    <p className="text-gray-400 font-medium">No hay registros previos</p>
+                    <p className="text-xs text-gray-400 mt-1">Los turnos guardados aparecerán aquí</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
+                    {shiftHistory.map((shift) => {
+                      const ShiftIcon = SHIFTS.find(s => s.value === shift.shift)?.icon || Sun;
+                      const shiftLabel = SHIFTS.find(s => s.value === shift.shift)?.label || shift.shift;
+                      const shiftColor = SHIFTS.find(s => s.value === shift.shift)?.color || 'text-gray-500';
+                      
+                      return (
+                        <motion.div
+                          key={shift.id}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          className="bg-white rounded-xl p-4 shadow-md border border-blue-100 hover:shadow-lg transition-all"
+                        >
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-2">
+                              <p className="font-bold text-gray-800 text-base">{shift.date}</p>
+                              <div className={`flex items-center gap-1 px-3 py-1.5 rounded-lg bg-gradient-to-r from-gray-100 to-gray-50 ${shiftColor} border border-gray-200`}>
+                                <ShiftIcon className="w-4 h-4" />
+                                <span className="text-xs font-bold">{shiftLabel}</span>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                        <div className="flex gap-4 text-sm text-gray-600">
-                          <span>💰 ${shift.sales?.toLocaleString('es-CO')}</span>
-                          <span>🎫 ${shift.average_ticket?.toLocaleString('es-CO', { maximumFractionDigits: 0 })}</span>
-                          <span>⚡ {shift.transactions}</span>
-                          <span>✨ {shift.suggested_sales}</span>
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleEditShift(shift)}
-                          className="text-blue-600 hover:bg-blue-50"
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleDeleteShift(shift.id)}
-                          className="text-red-600 hover:bg-red-50"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  );
-                })}
+                          
+                          <div className="grid grid-cols-2 gap-3 mb-3">
+                            <div className="bg-emerald-50 rounded-lg p-2 border border-emerald-200">
+                              <p className="text-xs text-emerald-600 font-semibold mb-1">Ventas</p>
+                              <p className="text-lg font-bold text-emerald-700">${shift.sales?.toLocaleString('es-CO')}</p>
+                            </div>
+                            <div className="bg-sky-50 rounded-lg p-2 border border-sky-200">
+                              <p className="text-xs text-sky-600 font-semibold mb-1">Ticket Prom.</p>
+                              <p className="text-lg font-bold text-sky-700">${shift.average_ticket?.toLocaleString('es-CO', { maximumFractionDigits: 0 })}</p>
+                            </div>
+                            <div className="bg-violet-50 rounded-lg p-2 border border-violet-200">
+                              <p className="text-xs text-violet-600 font-semibold mb-1">Transacciones</p>
+                              <p className="text-lg font-bold text-violet-700">{shift.transactions}</p>
+                            </div>
+                            <div className="bg-pink-50 rounded-lg p-2 border border-pink-200">
+                              <p className="text-xs text-pink-600 font-semibold mb-1">Sugeridos</p>
+                              <p className="text-lg font-bold text-pink-700">{shift.suggested_sales}</p>
+                            </div>
+                          </div>
+                          
+                          <div className="flex gap-2 pt-2 border-t border-gray-100">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleEditShift(shift);
+                              }}
+                              className="flex-1 text-blue-600 hover:bg-blue-50 border-blue-200 font-semibold"
+                            >
+                              <Pencil className="w-4 h-4 mr-1" />
+                              Editar
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleDeleteShift(shift.id);
+                              }}
+                              className="flex-1 text-red-600 hover:bg-red-50 border-red-200 font-semibold"
+                            >
+                              <Trash2 className="w-4 h-4 mr-1" />
+                              Eliminar
+                            </Button>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
     </>
   );
