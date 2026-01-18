@@ -105,13 +105,14 @@ export default function Layout({ children, currentPageName }) {
           <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
             {/* Base gradient simple */}
             <div className="absolute inset-0 bg-gradient-to-br from-pink-100 via-purple-100 to-blue-100" />
+          </div>
 
           <div className="w-full relative z-10 overflow-y-auto">
             {children}
           </div>
-        </main>
-        </div>
-      </ErrorBoundary>
-    </DateFilterProvider>
-  );
-}
+          </main>
+          </div>
+          </ErrorBoundary>
+          </DateFilterProvider>
+          );
+          }
