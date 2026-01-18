@@ -349,11 +349,11 @@ export default function FreezerMap() {
       return result;
     },
     enabled: !!selectedStore,
-    staleTime: 0, // Sin caché para siempre tener datos frescos
-    cacheTime: 0, // No guardar en caché
-    refetchOnMount: 'always',
-    refetchOnWindowFocus: true, // Recargar cuando vuelve a la app en móvil
-    refetchOnReconnect: true // Recargar cuando se reconecta internet
+    staleTime: 300000, // 5 minutos - mantener datos frescos pero estables
+    cacheTime: 600000, // 10 minutos
+    refetchOnMount: false, // NO recargar al montar - evita reversiones
+    refetchOnWindowFocus: false, // NO recargar al volver - evita reversiones
+    refetchOnReconnect: false // NO recargar al reconectar - evita reversiones
   });
 
   // Fetch todas las neveras para análisis completo
@@ -368,7 +368,9 @@ export default function FreezerMap() {
       return allSlots.flat();
     },
     enabled: !!selectedStore,
-    staleTime: 30000
+    staleTime: 300000, // 5 minutos
+    refetchOnMount: false,
+    refetchOnWindowFocus: false
   });
 
   // Historial para análisis de rotación
@@ -588,19 +590,29 @@ export default function FreezerMap() {
     onSuccess: async (data, variables) => {
       console.log('✓ Slot guardado exitosamente:', data);
       
-      // Invalidar queries y esperar
-      await queryClient.invalidateQueries(['freezerSlots']);
-      await queryClient.invalidateQueries(['allFreezersSlots']);
+      // Actualización optimista - actualizar cache directamente SIN refetch
+      queryClient.setQueryData(['freezerSlots', selectedStore, currentFreezer], (old) => {
+        if (!old) return old;
+        const updated = [...old];
+        const index = updated.findIndex(s => 
+          s.row === variables.slotData.row && 
+          s.position === variables.slotData.position && 
+          s.slot_type === variables.slotData.slot_type
+        );
+        if (index >= 0) {
+          updated[index] = { ...updated[index], ...variables.slotData };
+        } else {
+          updated.push({ ...variables.slotData, id: data.id });
+        }
+        return updated;
+      });
       
-      // Forzar refetch inmediato
-      await refetch();
-      
-      // Esperar confirmación
-      await new Promise(resolve => setTimeout(resolve, 150));
+      // Actualizar cache de todas las neveras
+      queryClient.invalidateQueries(['allFreezersSlots']);
       
       setSavingSlot({ row: variables.slotData.row, position: variables.slotData.position, success: true });
       setTimeout(() => setSavingSlot(null), 1000);
-      toast.success('✓ Sabor guardado permanentemente');
+      toast.success('✓ Sabor guardado');
     },
     onError: (error) => {
       console.error('❌ Error al guardar slot:', error);
