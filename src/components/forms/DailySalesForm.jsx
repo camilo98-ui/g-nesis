@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Save, DollarSign, Receipt, Zap, Gift, Loader2, Calendar, Sparkles } from 'lucide-react';
+import { Save, DollarSign, Receipt, Zap, Gift, Loader2, Calendar, Sparkles, History, Edit2, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 // Explosión de confetti de colores Popsy
 const PopsyConfetti = () => (
@@ -42,12 +44,22 @@ const PopsyConfetti = () => (
 export default function DailySalesForm({ storeId, onSuccess }) {
   const queryClient = useQueryClient();
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [editingRecord, setEditingRecord] = useState(null);
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
     total_sales: '',
     total_tickets: '',
     total_transactions: '',
     total_suggested: ''
+  });
+
+  // Cargar historial de ventas
+  const { data: salesHistory = [], isLoading: loadingHistory } = useQuery({
+    queryKey: ['dailySalesHistory', storeId],
+    queryFn: () => base44.entities.DailySales.filter({ store_id: storeId }, '-date', 30),
+    enabled: !!storeId && showHistory,
+    staleTime: 60000
   });
 
   // Calcular ticket promedio automáticamente
@@ -67,11 +79,6 @@ export default function DailySalesForm({ storeId, onSuccess }) {
       const transactionsValue = parseInt(data.total_transactions) || 0;
       const suggestedValue = parseInt(data.total_suggested) || 0;
       
-      const existing = await base44.entities.DailySales.filter({ 
-        store_id: storeId, 
-        date: data.date 
-      });
-      
       const recordData = {
         store_id: storeId,
         date: data.date,
@@ -82,10 +89,21 @@ export default function DailySalesForm({ storeId, onSuccess }) {
       };
       
       let record;
-      if (existing.length > 0) {
-        record = await base44.entities.DailySales.update(existing[0].id, recordData);
+      if (editingRecord) {
+        // Actualizar registro existente
+        record = await base44.entities.DailySales.update(editingRecord.id, recordData);
       } else {
-        record = await base44.entities.DailySales.create(recordData);
+        // Verificar si ya existe registro para esa fecha
+        const existing = await base44.entities.DailySales.filter({ 
+          store_id: storeId, 
+          date: data.date 
+        });
+        
+        if (existing.length > 0) {
+          record = await base44.entities.DailySales.update(existing[0].id, recordData);
+        } else {
+          record = await base44.entities.DailySales.create(recordData);
+        }
       }
       
       // Crear log sin requerir autenticación
@@ -109,17 +127,18 @@ export default function DailySalesForm({ storeId, onSuccess }) {
       return record;
     },
     onSuccess: () => {
-      // Solo invalidar consultas de ventas de tienda, NO de cajeros
       queryClient.invalidateQueries({ queryKey: ['dailySales'] });
+      queryClient.invalidateQueries({ queryKey: ['dailySalesHistory'] });
       queryClient.invalidateQueries({ queryKey: ['salesLogs'] });
       queryClient.invalidateQueries({ queryKey: ['budgets'] });
       queryClient.invalidateQueries({ queryKey: ['dailyBudgets'] });
       
-      toast.success('¡Ventas registradas correctamente!');
+      toast.success(editingRecord ? '¡Venta actualizada!' : '¡Venta registrada!');
       
       setShowSuccess(true);
       setTimeout(() => {
         setShowSuccess(false);
+        setEditingRecord(null);
         setFormData({
           date: new Date().toISOString().split('T')[0],
           total_sales: '',
@@ -132,6 +151,15 @@ export default function DailySalesForm({ storeId, onSuccess }) {
     },
     onError: (error) => {
       toast.error('Error al guardar: ' + error.message);
+    }
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id) => base44.entities.DailySales.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dailySales'] });
+      queryClient.invalidateQueries({ queryKey: ['dailySalesHistory'] });
+      toast.success('Venta eliminada');
     }
   });
 
@@ -149,6 +177,24 @@ export default function DailySalesForm({ storeId, onSuccess }) {
     }
     
     createMutation.mutate(formData);
+  };
+
+  const handleEdit = (record) => {
+    setEditingRecord(record);
+    setFormData({
+      date: record.date,
+      total_sales: record.total_sales.toString(),
+      total_tickets: record.total_tickets.toString(),
+      total_transactions: record.total_transactions.toString(),
+      total_suggested: record.total_suggested.toString()
+    });
+    setShowHistory(false);
+  };
+
+  const handleDelete = (id) => {
+    if (confirm('¿Eliminar este registro de ventas?')) {
+      deleteMutation.mutate(id);
+    }
   };
 
   return (
@@ -396,35 +442,122 @@ export default function DailySalesForm({ storeId, onSuccess }) {
             </motion.div>
           </div>
 
-          {/* Botón Guardar */}
-          <motion.div 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.35 }}
-            whileHover={{ scale: 1.02 }} 
-            whileTap={{ scale: 0.98 }}
-          >
-            <Button 
-              type="submit" 
-              disabled={createMutation.isPending}
-              className="w-full bg-gradient-to-r from-pink-500 via-rose-500 to-pink-500 hover:from-pink-600 hover:via-rose-600 hover:to-pink-600 text-white shadow-lg hover:shadow-xl py-7 text-lg font-bold rounded-[20px] transition-all"
+          {/* Botones */}
+          <div className="flex gap-3">
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.35 }}
+              whileHover={{ scale: 1.02 }} 
+              whileTap={{ scale: 0.98 }}
+              className="flex-1"
             >
-              {createMutation.isPending ? (
-                <span className="flex items-center justify-center gap-3">
-                  <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}>
-                    <Loader2 className="w-6 h-6" />
-                  </motion.div>
-                  Guardando...
-                </span>
-              ) : (
-                <span className="flex items-center justify-center gap-3">
-                  <Save className="w-6 h-6" />
-                  Guardar Ventas
-                </span>
-              )}
+              <Button 
+                type="submit" 
+                disabled={createMutation.isPending}
+                className="w-full bg-gradient-to-r from-pink-500 via-rose-500 to-pink-500 hover:from-pink-600 hover:via-rose-600 hover:to-pink-600 text-white shadow-lg hover:shadow-xl py-7 text-lg font-bold rounded-[20px] transition-all"
+              >
+                {createMutation.isPending ? (
+                  <span className="flex items-center justify-center gap-3">
+                    <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}>
+                      <Loader2 className="w-6 h-6" />
+                    </motion.div>
+                    Guardando...
+                  </span>
+                ) : (
+                  <span className="flex items-center justify-center gap-3">
+                    <Save className="w-6 h-6" />
+                    {editingRecord ? 'Actualizar' : 'Guardar'}
+                  </span>
+                )}
+              </Button>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Button
+                type="button"
+                onClick={() => setShowHistory(!showHistory)}
+                className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white shadow-lg hover:shadow-xl py-7 px-6 text-lg font-bold rounded-[20px] transition-all"
+              >
+                <History className="w-6 h-6" />
+              </Button>
+            </motion.div>
+          </div>
+
+          {editingRecord && (
+            <Button
+              type="button"
+              onClick={() => {
+                setEditingRecord(null);
+                setFormData({
+                  date: new Date().toISOString().split('T')[0],
+                  total_sales: '',
+                  total_tickets: '',
+                  total_transactions: '',
+                  total_suggested: ''
+                });
+              }}
+              variant="outline"
+              className="w-full"
+            >
+              Cancelar edición
             </Button>
-          </motion.div>
+          )}
         </form>
+
+        {/* Historial */}
+        {showHistory && (
+          <div className="border-t border-gray-200 p-6 bg-gray-50">
+            <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+              <History className="w-5 h-5 text-purple-600" />
+              Historial de Ventas
+            </h3>
+            {loadingHistory ? (
+              <p className="text-gray-400 text-center py-4">Cargando...</p>
+            ) : salesHistory.length === 0 ? (
+              <p className="text-gray-400 text-center py-4">No hay registros</p>
+            ) : (
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {salesHistory.map((record) => (
+                  <div key={record.id} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex items-center justify-between hover:shadow-md transition-all">
+                    <div className="flex-1">
+                      <p className="font-bold text-gray-700">{format(new Date(record.date), 'dd MMM yyyy', { locale: es })}</p>
+                      <div className="flex gap-4 text-sm text-gray-600 mt-1">
+                        <span>💰 ${record.total_sales?.toLocaleString('es-CO')}</span>
+                        <span>🎫 {record.total_transactions}</span>
+                        <span>✨ {record.total_suggested}</span>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleEdit(record)}
+                        className="text-blue-600 hover:bg-blue-50"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleDelete(record.id)}
+                        className="text-red-600 hover:bg-red-50"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </motion.div>
     </>
   );
