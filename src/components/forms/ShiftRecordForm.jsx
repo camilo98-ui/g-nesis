@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Save, User, DollarSign, Receipt, Zap, Gift, Loader2, CheckCircle, Sun, Sunset, Moon, Calendar, Plus, Upload, X, Pencil, Trash2 } from 'lucide-react';
+import { Save, User, DollarSign, Receipt, Zap, Gift, Loader2, CheckCircle, Sun, Sunset, Moon, Calendar, Plus, Upload, X, Pencil, Trash2, History } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from 'sonner';
 
@@ -20,6 +20,7 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
     const queryClient = useQueryClient();
     const [showSuccess, setShowSuccess] = useState(false);
     const [showAddCashier, setShowAddCashier] = useState(false);
+    const [showHistory, setShowHistory] = useState(false);
     const [editingCashier, setEditingCashier] = useState(null);
     const [newCashier, setNewCashier] = useState({ name: '', email: '', phone: '', photo_url: '' });
     const [uploadingPhoto, setUploadingPhoto] = useState(false);
@@ -55,6 +56,17 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
     }),
     enabled: !!storeId && !!formData.cashier_id && !!formData.date,
     staleTime: 0
+  });
+
+  // Historial de turnos del cajero seleccionado
+  const { data: shiftHistory = [], isLoading: loadingHistory } = useQuery({
+    queryKey: ['shiftHistory', storeId, formData.cashier_id],
+    queryFn: () => base44.entities.ShiftRecord.filter({ 
+      store_id: storeId,
+      cashier_id: formData.cashier_id
+    }, '-date', 30),
+    enabled: !!storeId && !!formData.cashier_id && showHistory,
+    staleTime: 60000
   });
 
   // Cargar datos existentes en el formulario
@@ -143,17 +155,20 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
       queryClient.removeQueries();
       queryClient.clear();
       queryClient.refetchQueries({ queryKey: ['shiftRecords'] });
-      toast.success('✅ Turno eliminado correctamente');
-      setEditingRecord(null);
-      setFormData({
-        cashier_id: '',
-        date: new Date().toISOString().split('T')[0],
-        shift: 'morning',
-        sales: '',
-        tickets: '',
-        transactions: '',
-        suggested_sales: ''
-      });
+      queryClient.refetchQueries({ queryKey: ['shiftHistory'] });
+      toast.success('✅ Turno eliminado');
+      if (editingRecord) {
+        setEditingRecord(null);
+        setFormData({
+          cashier_id: '',
+          date: new Date().toISOString().split('T')[0],
+          shift: 'morning',
+          sales: '',
+          tickets: '',
+          transactions: '',
+          suggested_sales: ''
+        });
+      }
     }
   });
 
@@ -236,10 +251,11 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
       
       // Refetch inmediato de las queries críticas
       queryClient.refetchQueries({ queryKey: ['shiftRecords'] });
+      queryClient.refetchQueries({ queryKey: ['shiftHistory'] });
       queryClient.refetchQueries({ queryKey: ['cashiers'] });
       queryClient.refetchQueries({ queryKey: ['dailySales'] });
 
-      toast.success(editingRecord ? '✅ Turno actualizado correctamente' : '✅ Turno registrado correctamente');
+      toast.success(editingRecord ? '✅ Turno actualizado' : '✅ Turno registrado');
 
       setShowSuccess(true);
       setTimeout(() => {
@@ -276,6 +292,26 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
     }
 
     createMutation.mutate(formData);
+  };
+
+  const handleEditShift = (shift) => {
+    setEditingRecord(shift);
+    setFormData({
+      cashier_id: shift.cashier_id,
+      date: shift.date,
+      shift: shift.shift,
+      sales: shift.sales.toString(),
+      tickets: shift.tickets.toString(),
+      transactions: shift.transactions.toString(),
+      suggested_sales: shift.suggested_sales.toString()
+    });
+    setShowHistory(false);
+  };
+
+  const handleDeleteShift = (shiftId) => {
+    if (confirm('¿Eliminar este registro de turno?')) {
+      deleteMutation.mutate(shiftId);
+    }
   };
 
   return (
@@ -723,69 +759,171 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
             </motion.div>
           </div>
 
-          {/* Botones Guardar y Eliminar */}
-          <motion.div 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.45 }}
-            className="flex gap-3"
-          >
-            {editingRecord && (
+          {/* Botones Guardar, Eliminar e Historial */}
+          <div className="flex gap-3">
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.45 }}
+              className="flex gap-3 flex-1"
+            >
+              {editingRecord && (
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="flex-1"
+                >
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      if (confirm('¿Seguro que deseas eliminar este turno?')) {
+                        deleteMutation.mutate(editingRecord.id);
+                      }
+                    }}
+                    disabled={deleteMutation.isPending}
+                    className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-lg hover:shadow-xl py-7 text-lg font-bold rounded-[20px] transition-all"
+                  >
+                    {deleteMutation.isPending ? (
+                      <span className="flex items-center justify-center gap-3">
+                        <Loader2 className="w-6 h-6 animate-spin" />
+                        Eliminando...
+                      </span>
+                    ) : (
+                      <span className="flex items-center justify-center gap-3">
+                        🗑️ Eliminar
+                      </span>
+                    )}
+                  </Button>
+                </motion.div>
+              )}
               <motion.div
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="flex-1"
+                className={editingRecord ? 'flex-1' : 'w-full'}
               >
-                <Button
-                  type="button"
-                  onClick={() => {
-                    if (confirm('¿Seguro que deseas eliminar este turno?')) {
-                      deleteMutation.mutate(editingRecord.id);
-                    }
-                  }}
-                  disabled={deleteMutation.isPending}
-                  className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-lg hover:shadow-xl py-7 text-lg font-bold rounded-[20px] transition-all"
+                <Button 
+                  type="submit" 
+                  disabled={createMutation.isPending}
+                  className={`w-full ${editingRecord ? 'bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-500 hover:from-amber-600 hover:via-yellow-600 hover:to-amber-600' : 'bg-gradient-to-r from-violet-500 via-purple-500 to-violet-500 hover:from-violet-600 hover:via-purple-600 hover:to-violet-600'} text-white shadow-lg hover:shadow-xl py-7 text-lg font-bold rounded-[20px] transition-all`}
                 >
-                  {deleteMutation.isPending ? (
+                  {createMutation.isPending ? (
                     <span className="flex items-center justify-center gap-3">
-                      <Loader2 className="w-6 h-6 animate-spin" />
-                      Eliminando...
+                      <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}>
+                        <Loader2 className="w-6 h-6" />
+                      </motion.div>
+                      {editingRecord ? 'Actualizando...' : 'Guardando...'}
                     </span>
                   ) : (
                     <span className="flex items-center justify-center gap-3">
-                      🗑️ Eliminar
+                      <Save className="w-6 h-6" />
+                      {editingRecord ? 'Actualizar' : 'Guardar'}
                     </span>
                   )}
                 </Button>
               </motion.div>
-            )}
+            </motion.div>
+
             <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className={editingRecord ? 'flex-1' : 'w-full'}
             >
-              <Button 
-                type="submit" 
-                disabled={createMutation.isPending}
-                className={`w-full ${editingRecord ? 'bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-500 hover:from-amber-600 hover:via-yellow-600 hover:to-amber-600' : 'bg-gradient-to-r from-violet-500 via-purple-500 to-violet-500 hover:from-violet-600 hover:via-purple-600 hover:to-violet-600'} text-white shadow-lg hover:shadow-xl py-7 text-lg font-bold rounded-[20px] transition-all`}
+              <Button
+                type="button"
+                onClick={() => setShowHistory(!showHistory)}
+                disabled={!formData.cashier_id}
+                className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white shadow-lg hover:shadow-xl py-7 px-6 text-lg font-bold rounded-[20px] transition-all"
               >
-                {createMutation.isPending ? (
-                  <span className="flex items-center justify-center gap-3">
-                    <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}>
-                      <Loader2 className="w-6 h-6" />
-                    </motion.div>
-                    {editingRecord ? 'Actualizando...' : 'Guardando...'}
-                  </span>
-                ) : (
-                  <span className="flex items-center justify-center gap-3">
-                    <Save className="w-6 h-6" />
-                    {editingRecord ? 'Actualizar' : 'Guardar'}
-                  </span>
-                )}
+                <History className="w-6 h-6" />
               </Button>
             </motion.div>
-          </motion.div>
+          </div>
+
+          {editingRecord && (
+            <Button
+              type="button"
+              onClick={() => {
+                setEditingRecord(null);
+                setFormData({
+                  cashier_id: '',
+                  date: new Date().toISOString().split('T')[0],
+                  shift: 'morning',
+                  sales: '',
+                  tickets: '',
+                  transactions: '',
+                  suggested_sales: ''
+                });
+              }}
+              variant="outline"
+              className="w-full"
+            >
+              Cancelar edición
+            </Button>
+          )}
         </form>
+
+        {/* Historial de Turnos */}
+        {showHistory && formData.cashier_id && (
+          <div className="border-t border-gray-200 p-6 bg-gray-50">
+            <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+              <History className="w-5 h-5 text-blue-600" />
+              Historial de Turnos
+            </h3>
+            {loadingHistory ? (
+              <p className="text-gray-400 text-center py-4">Cargando...</p>
+            ) : shiftHistory.length === 0 ? (
+              <p className="text-gray-400 text-center py-4">No hay registros</p>
+            ) : (
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {shiftHistory.map((shift) => {
+                  const ShiftIcon = SHIFTS.find(s => s.value === shift.shift)?.icon || Sun;
+                  const shiftLabel = SHIFTS.find(s => s.value === shift.shift)?.label || shift.shift;
+                  const shiftColor = SHIFTS.find(s => s.value === shift.shift)?.color || 'text-gray-500';
+                  
+                  return (
+                    <div key={shift.id} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex items-center justify-between hover:shadow-md transition-all">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <p className="font-bold text-gray-700">{shift.date}</p>
+                          <div className={`flex items-center gap-1 px-2 py-1 rounded-lg bg-gray-100 ${shiftColor}`}>
+                            <ShiftIcon className="w-4 h-4" />
+                            <span className="text-xs font-bold">{shiftLabel}</span>
+                          </div>
+                        </div>
+                        <div className="flex gap-4 text-sm text-gray-600">
+                          <span>💰 ${shift.sales?.toLocaleString('es-CO')}</span>
+                          <span>🎫 ${shift.average_ticket?.toLocaleString('es-CO', { maximumFractionDigits: 0 })}</span>
+                          <span>⚡ {shift.transactions}</span>
+                          <span>✨ {shift.suggested_sales}</span>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleEditShift(shift)}
+                          className="text-blue-600 hover:bg-blue-50"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleDeleteShift(shift.id)}
+                          className="text-red-600 hover:bg-red-50"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
       </motion.div>
     </>
   );
