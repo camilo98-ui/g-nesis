@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { STORES, getDisplayName } from '@/components/StoreSelector';
+import { useDateFilter } from '@/components/DateFilterContext';
 import { ArrowLeft, Search, TrendingUp, TrendingDown, Eye, Zap, Award, ArrowUpDown, ArrowUp, ArrowDown, BarChart3, Settings, X, Download, Filter, CalendarDays, AlertTriangle } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
@@ -63,6 +64,9 @@ function useAnimatedNumber(value, duration = 1000) {
 }
 
 export default function ExecutiveDashboard() {
+  // USAR FILTRO GLOBAL DE FECHAS
+  const { startDate: globalStartDate, endDate: globalEndDate } = useDateFilter();
+  
   // Semana retail iniciando 29 de diciembre 2025
   const RETAIL_WEEK_START = new Date(2025, 11, 29); // 29 dic 2025
   
@@ -73,8 +77,21 @@ export default function ExecutiveDashboard() {
   const [showBackButton, setShowBackButton] = useState(false);
   const [gregorianMode, setGregorianMode] = useState(false);
   
-  // Calcular dateRange basado en semanas seleccionadas, fechas personalizadas o modo gregoriano
+  // Calcular dateRange basado en FILTRO GLOBAL primero, luego semanas retail
   const dateRange = useMemo(() => {
+    // PRIORIDAD 1: Usar fechas del filtro global del Layout
+    if (globalStartDate && globalEndDate) {
+      console.log('📅 Usando filtro global:', { 
+        from: format(globalStartDate, 'yyyy-MM-dd'), 
+        to: format(globalEndDate, 'yyyy-MM-dd') 
+      });
+      return {
+        from: globalStartDate,
+        to: globalEndDate
+      };
+    }
+    
+    // PRIORIDAD 2: Modo gregoriano
     if (gregorianMode) {
       const now = new Date();
       return {
@@ -82,9 +99,13 @@ export default function ExecutiveDashboard() {
         to: now
       };
     }
+    
+    // PRIORIDAD 3: Fechas personalizadas locales
     if (useCustomDates && customDateRange.from && customDateRange.to) {
       return customDateRange;
     }
+    
+    // PRIORIDAD 4: Semanas retail por defecto
     if (selectedWeeks.length === 0) {
       return { from: RETAIL_WEEK_START, to: RETAIL_WEEK_START };
     }
@@ -94,7 +115,7 @@ export default function ExecutiveDashboard() {
       from: addDays(RETAIL_WEEK_START, (minWeek - 1) * 7),
       to: addDays(RETAIL_WEEK_START, maxWeek * 7 - 1)
     };
-  }, [selectedWeeks, customDateRange, useCustomDates, gregorianMode]);
+  }, [globalStartDate, globalEndDate, selectedWeeks, customDateRange, useCustomDates, gregorianMode]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStoreDetail, setSelectedStoreDetail] = useState(null);
 
@@ -119,9 +140,34 @@ export default function ExecutiveDashboard() {
   const currentMonth = new Date().getMonth() + 1;
   const currentYear = new Date().getFullYear();
 
+  // FILTRAR VENTAS POR RANGO DE FECHAS DEL FILTRO GLOBAL
   const { data: allDailySales = [], isLoading: loadingSales } = useQuery({
-    queryKey: ['allDailySales'],
-    queryFn: () => base44.entities.DailySales.list()
+    queryKey: ['allDailySales', dateRange.from, dateRange.to],
+    queryFn: async () => {
+      const allSales = await base44.entities.DailySales.list();
+      console.log('📊 Total DailySales en BD:', allSales.length);
+      
+      // Filtrar por rango de fechas
+      const filtered = allSales.filter(s => {
+        try {
+          const saleDate = parseISO(s.date);
+          const inRange = isWithinInterval(saleDate, { start: dateRange.from, end: dateRange.to });
+          return inRange;
+        } catch {
+          return false;
+        }
+      });
+      
+      console.log('✅ Ventas filtradas:', {
+        from: format(dateRange.from, 'yyyy-MM-dd'),
+        to: format(dateRange.to, 'yyyy-MM-dd'),
+        count: filtered.length,
+        totalSales: filtered.reduce((sum, s) => sum + (s.total_sales || 0), 0)
+      });
+      
+      return filtered;
+    },
+    enabled: !!dateRange.from && !!dateRange.to
   });
 
   const { data: allBudgets = [], isLoading: loadingBudgets } = useQuery({
