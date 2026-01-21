@@ -213,29 +213,27 @@ export default function ExecutiveDashboard() {
 
   const storesAnalysis = useMemo(() => {
     const now = new Date();
-    // Usar el rango de fechas seleccionado
-    const currentWeekStart = dateRange.from;
-    const currentWeekEnd = dateRange.to;
     const monthStart = startOfMonth(now);
     const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
     const daysInMonth = monthEnd.getDate();
 
     // Debug inicial
-    console.log('🔍 INICIO ANÁLISIS:', {
-      weekRange: `${format(currentWeekStart, 'yyyy-MM-dd')} a ${format(currentWeekEnd, 'yyyy-MM-dd')}`,
+    console.log('🔍 INICIO ANÁLISIS CON FILTRO:', {
+      filtroActivo: `${format(dateRange.from, 'yyyy-MM-dd')} a ${format(dateRange.to, 'yyyy-MM-dd')}`,
       totalSalesRecords: allDailySales.length,
       sampleDates: allDailySales.slice(0, 3).map(s => ({ store: s.store_id, date: s.date, sales: s.total_sales }))
     });
 
     return STORES.map(store => {
-      // Filtrar ventas de esta tienda
-      const storeSales = allDailySales.filter(s => s.store_id === store.code);
+      // VENTAS DE LA TIENDA EN EL RANGO FILTRADO
+      const storeSalesInRange = allDailySales.filter(s => s.store_id === store.code);
+      console.log(`📊 ${store.code}: ${storeSalesInRange.length} registros de venta en rango filtrado`);
 
-      // Analizar histórico de ventas por día de la semana
+      // Analizar histórico de ventas por día de la semana (usando TODO el histórico de la tienda)
       const salesByDayOfWeek = [0, 0, 0, 0, 0, 0, 0];
       const countByDayOfWeek = [0, 0, 0, 0, 0, 0, 0];
 
-      storeSales.forEach(s => {
+      storeSalesInRange.forEach(s => {
         try {
           const saleDate = parseISO(s.date);
           const dayOfWeek = saleDate.getDay();
@@ -306,37 +304,26 @@ export default function ExecutiveDashboard() {
           })()
         : getDailyBudget(now);
 
-      // VENTAS DE LA SEMANA ACTUAL (semana en la que estamos HOY)
-      // Calcular inicio y fin de la semana actual basado en el modo
-      const todayWeekStart = gregorianMode 
-        ? startOfMonth(now) // Gregoriano: desde inicio del mes hasta hoy
-        : (() => {
-            const daysSinceRetailStart = Math.floor((now - RETAIL_WEEK_START) / (24 * 60 * 60 * 1000));
-            const currentRetailWeekNum = Math.floor(daysSinceRetailStart / 7);
-            return addDays(RETAIL_WEEK_START, currentRetailWeekNum * 7);
-          })();
-      
-      const todayWeekEnd = gregorianMode ? now : addDays(todayWeekStart, 6);
+      // ========== USAR RANGO DE FECHAS FILTRADO ==========
+      // Ventas en el rango filtrado
+      const salesInFilteredRange = storeSalesInRange;
 
-      // Filtrar ventas de la semana actual (donde estamos hoy)
-      const weekSales = storeSales.filter(s => {
-        try {
-          const saleDate = parseISO(s.date);
-          return isWithinInterval(saleDate, { start: todayWeekStart, end: todayWeekEnd }) && saleDate <= now;
-        } catch (error) {
-          return false;
-        }
-      });
-
-      const weekTotalSales = weekSales.reduce((sum, s) => sum + (s.total_sales || 0), 0);
-      const weekTotalTransactions = weekSales.reduce((sum, s) => sum + (s.total_transactions || 0), 0);
+      const weekTotalSales = salesInFilteredRange.reduce((sum, s) => sum + (s.total_sales || 0), 0);
+      const weekTotalTransactions = salesInFilteredRange.reduce((sum, s) => sum + (s.total_transactions || 0), 0);
       const weekAvgTicket = weekTotalTransactions > 0 ? weekTotalSales / weekTotalTransactions : 0;
       
-      // Presupuesto semanal (7 días de presupuesto diario)
-      const weeklyBudget = dailyBaseBudget * 7;
+      // Presupuesto del rango filtrado (días del filtro * presupuesto diario)
+      const daysInFilteredRange = eachDayOfInterval({ start: dateRange.from, end: dateRange.to });
+      const weeklyBudget = daysInFilteredRange.reduce((sum, day) => {
+        try {
+          return sum + getDailyBudget(day);
+        } catch {
+          return sum + dailyBaseBudget;
+        }
+      }, 0);
 
-      // VENTAS DEL MES
-      const monthSales = storeSales.filter(s => {
+      // VENTAS DEL MES (acumulado real del mes actual)
+      const monthSales = storeSalesInRange.filter(s => {
         try {
           const saleDate = parseISO(s.date);
           return saleDate >= monthStart && saleDate <= now;
@@ -348,16 +335,16 @@ export default function ExecutiveDashboard() {
       const monthTotalSales = monthSales.reduce((sum, s) => sum + (s.total_sales || 0), 0);
       const monthTotalTransactions = monthSales.reduce((sum, s) => sum + (s.total_transactions || 0), 0);
 
-      // PROYECCIONES con histórico
-      const daysPassedInWeek = eachDayOfInterval({ start: currentWeekStart, end: now }).filter(d => d <= now).length;
-      const avgDailySalesWeek = daysPassedInWeek > 0 ? weekTotalSales / daysPassedInWeek : 0;
-      const totalDaysInWeek = eachDayOfInterval({ start: currentWeekStart, end: currentWeekEnd }).length;
+      // PROYECCIONES basadas en el rango filtrado
+      const daysPassedInRange = daysInFilteredRange.filter(d => d <= now).length;
+      const avgDailySalesInRange = daysPassedInRange > 0 ? weekTotalSales / daysPassedInRange : 0;
+      const totalDaysInRange = daysInFilteredRange.length;
       
-      const historicalWeight = daysPassedInWeek <= 2 ? 0.8 : 0.4;
+      const historicalWeight = daysPassedInRange <= 2 ? 0.8 : 0.4;
       const currentWeight = 1 - historicalWeight;
-      const historicalDailyAvg = totalWeeklyAvg > 0 ? totalWeeklyAvg / 7 : avgDailySalesWeek;
-      const blendedDailyAvg = (historicalDailyAvg * historicalWeight) + (avgDailySalesWeek * currentWeight);
-      const weekProjection = blendedDailyAvg * totalDaysInWeek;
+      const historicalDailyAvg = totalWeeklyAvg > 0 ? totalWeeklyAvg / 7 : avgDailySalesInRange;
+      const blendedDailyAvg = (historicalDailyAvg * historicalWeight) + (avgDailySalesInRange * currentWeight);
+      const weekProjection = blendedDailyAvg * totalDaysInRange;
 
       const daysElapsed = now.getDate();
       const daysRemaining = daysInMonth - daysElapsed;
@@ -414,7 +401,7 @@ export default function ExecutiveDashboard() {
         dailyAvg: dailyAvgMonth
       };
     });
-  }, [allDailySales, allBudgets, currentMonth, currentYear, dateRange]);
+  }, [allDailySales, allBudgets, currentMonth, currentYear, dateRange, globalStartDate, globalEndDate]);
 
   // Totales de la SEMANA seleccionada (para gráficas específicas)
   const zoneTotals = useMemo(() => {
