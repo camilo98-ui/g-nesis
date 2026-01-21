@@ -290,7 +290,7 @@ export default function ExecutiveDashboard() {
             const daysLeftIncludingToday = Math.ceil((monthEnd - now) / (1000 * 60 * 60 * 24)) + 1;
             
             // Ventas acumuladas del mes hasta AYER
-            const salesUntilYesterday = storeSales.filter(s => {
+            const salesUntilYesterday = storeSalesInRange.filter(s => {
               try {
                 const saleDate = parseISO(s.date);
                 return saleDate >= monthStart && saleDate < now;
