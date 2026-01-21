@@ -5,11 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { STORES, getDisplayName } from '@/components/StoreSelector';
-import { useDateFilter } from '@/components/DateFilterContext';
 import { ArrowLeft, Search, TrendingUp, TrendingDown, Eye, Zap, Award, ArrowUpDown, ArrowUp, ArrowDown, BarChart3, Settings, X, Download, Filter, CalendarDays, AlertTriangle } from 'lucide-react';
-import DistrictModeSelector from '@/components/executive/DistrictModeSelector';
-import DistrictKPICard from '@/components/executive/DistrictKPICard';
-import StoresComparisonGrid from '@/components/executive/StoresComparisonGrid';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
@@ -67,9 +63,6 @@ function useAnimatedNumber(value, duration = 1000) {
 }
 
 export default function ExecutiveDashboard() {
-  // USAR FILTRO GLOBAL DE FECHAS
-  const { startDate: globalStartDate, endDate: globalEndDate } = useDateFilter();
-  
   // Semana retail iniciando 29 de diciembre 2025
   const RETAIL_WEEK_START = new Date(2025, 11, 29); // 29 dic 2025
   
@@ -79,23 +72,9 @@ export default function ExecutiveDashboard() {
   const [useCustomDates, setUseCustomDates] = useState(false);
   const [showBackButton, setShowBackButton] = useState(false);
   const [gregorianMode, setGregorianMode] = useState(false);
-  const [modeControl, setModeControl] = useState('accumulated'); // accumulated, retail, gregorian
   
-  // Calcular dateRange basado en FILTRO GLOBAL primero, luego semanas retail
+  // Calcular dateRange basado en semanas seleccionadas, fechas personalizadas o modo gregoriano
   const dateRange = useMemo(() => {
-    // PRIORIDAD 1: Usar fechas del filtro global del Layout
-    if (globalStartDate && globalEndDate) {
-      console.log('📅 Usando filtro global:', { 
-        from: format(globalStartDate, 'yyyy-MM-dd'), 
-        to: format(globalEndDate, 'yyyy-MM-dd') 
-      });
-      return {
-        from: globalStartDate,
-        to: globalEndDate
-      };
-    }
-    
-    // PRIORIDAD 2: Modo gregoriano
     if (gregorianMode) {
       const now = new Date();
       return {
@@ -103,13 +82,9 @@ export default function ExecutiveDashboard() {
         to: now
       };
     }
-    
-    // PRIORIDAD 3: Fechas personalizadas locales
     if (useCustomDates && customDateRange.from && customDateRange.to) {
       return customDateRange;
     }
-    
-    // PRIORIDAD 4: Semanas retail por defecto
     if (selectedWeeks.length === 0) {
       return { from: RETAIL_WEEK_START, to: RETAIL_WEEK_START };
     }
@@ -119,7 +94,7 @@ export default function ExecutiveDashboard() {
       from: addDays(RETAIL_WEEK_START, (minWeek - 1) * 7),
       to: addDays(RETAIL_WEEK_START, maxWeek * 7 - 1)
     };
-  }, [globalStartDate, globalEndDate, selectedWeeks, customDateRange, useCustomDates, gregorianMode]);
+  }, [selectedWeeks, customDateRange, useCustomDates, gregorianMode]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStoreDetail, setSelectedStoreDetail] = useState(null);
 
@@ -144,34 +119,9 @@ export default function ExecutiveDashboard() {
   const currentMonth = new Date().getMonth() + 1;
   const currentYear = new Date().getFullYear();
 
-  // FILTRAR VENTAS POR RANGO DE FECHAS DEL FILTRO GLOBAL
   const { data: allDailySales = [], isLoading: loadingSales } = useQuery({
-    queryKey: ['allDailySales', dateRange.from, dateRange.to],
-    queryFn: async () => {
-      const allSales = await base44.entities.DailySales.list();
-      console.log('📊 Total DailySales en BD:', allSales.length);
-      
-      // Filtrar por rango de fechas
-      const filtered = allSales.filter(s => {
-        try {
-          const saleDate = parseISO(s.date);
-          const inRange = isWithinInterval(saleDate, { start: dateRange.from, end: dateRange.to });
-          return inRange;
-        } catch {
-          return false;
-        }
-      });
-      
-      console.log('✅ Ventas filtradas:', {
-        from: format(dateRange.from, 'yyyy-MM-dd'),
-        to: format(dateRange.to, 'yyyy-MM-dd'),
-        count: filtered.length,
-        totalSales: filtered.reduce((sum, s) => sum + (s.total_sales || 0), 0)
-      });
-      
-      return filtered;
-    },
-    enabled: !!dateRange.from && !!dateRange.to
+    queryKey: ['allDailySales'],
+    queryFn: () => base44.entities.DailySales.list()
   });
 
   const { data: allBudgets = [], isLoading: loadingBudgets } = useQuery({
@@ -217,27 +167,29 @@ export default function ExecutiveDashboard() {
 
   const storesAnalysis = useMemo(() => {
     const now = new Date();
+    // Usar el rango de fechas seleccionado
+    const currentWeekStart = dateRange.from;
+    const currentWeekEnd = dateRange.to;
     const monthStart = startOfMonth(now);
     const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
     const daysInMonth = monthEnd.getDate();
 
     // Debug inicial
-    console.log('🔍 INICIO ANÁLISIS CON FILTRO:', {
-      filtroActivo: `${format(dateRange.from, 'yyyy-MM-dd')} a ${format(dateRange.to, 'yyyy-MM-dd')}`,
+    console.log('🔍 INICIO ANÁLISIS:', {
+      weekRange: `${format(currentWeekStart, 'yyyy-MM-dd')} a ${format(currentWeekEnd, 'yyyy-MM-dd')}`,
       totalSalesRecords: allDailySales.length,
       sampleDates: allDailySales.slice(0, 3).map(s => ({ store: s.store_id, date: s.date, sales: s.total_sales }))
     });
 
     return STORES.map(store => {
-      // VENTAS DE LA TIENDA EN EL RANGO FILTRADO
-      const storeSalesInRange = allDailySales.filter(s => s.store_id === store.code);
-      console.log(`📊 ${store.code}: ${storeSalesInRange.length} registros de venta en rango filtrado`);
+      // Filtrar ventas de esta tienda
+      const storeSales = allDailySales.filter(s => s.store_id === store.code);
 
-      // Analizar histórico de ventas por día de la semana (usando TODO el histórico de la tienda)
+      // Analizar histórico de ventas por día de la semana
       const salesByDayOfWeek = [0, 0, 0, 0, 0, 0, 0];
       const countByDayOfWeek = [0, 0, 0, 0, 0, 0, 0];
 
-      storeSalesInRange.forEach(s => {
+      storeSales.forEach(s => {
         try {
           const saleDate = parseISO(s.date);
           const dayOfWeek = saleDate.getDay();
@@ -294,7 +246,7 @@ export default function ExecutiveDashboard() {
             const daysLeftIncludingToday = Math.ceil((monthEnd - now) / (1000 * 60 * 60 * 24)) + 1;
             
             // Ventas acumuladas del mes hasta AYER
-            const salesUntilYesterday = storeSalesInRange.filter(s => {
+            const salesUntilYesterday = storeSales.filter(s => {
               try {
                 const saleDate = parseISO(s.date);
                 return saleDate >= monthStart && saleDate < now;
@@ -308,26 +260,37 @@ export default function ExecutiveDashboard() {
           })()
         : getDailyBudget(now);
 
-      // ========== USAR RANGO DE FECHAS FILTRADO ==========
-      // Ventas en el rango filtrado
-      const salesInFilteredRange = storeSalesInRange;
+      // VENTAS DE LA SEMANA ACTUAL (semana en la que estamos HOY)
+      // Calcular inicio y fin de la semana actual basado en el modo
+      const todayWeekStart = gregorianMode 
+        ? startOfMonth(now) // Gregoriano: desde inicio del mes hasta hoy
+        : (() => {
+            const daysSinceRetailStart = Math.floor((now - RETAIL_WEEK_START) / (24 * 60 * 60 * 1000));
+            const currentRetailWeekNum = Math.floor(daysSinceRetailStart / 7);
+            return addDays(RETAIL_WEEK_START, currentRetailWeekNum * 7);
+          })();
+      
+      const todayWeekEnd = gregorianMode ? now : addDays(todayWeekStart, 6);
 
-      const weekTotalSales = salesInFilteredRange.reduce((sum, s) => sum + (s.total_sales || 0), 0);
-      const weekTotalTransactions = salesInFilteredRange.reduce((sum, s) => sum + (s.total_transactions || 0), 0);
+      // Filtrar ventas de la semana actual (donde estamos hoy)
+      const weekSales = storeSales.filter(s => {
+        try {
+          const saleDate = parseISO(s.date);
+          return isWithinInterval(saleDate, { start: todayWeekStart, end: todayWeekEnd }) && saleDate <= now;
+        } catch (error) {
+          return false;
+        }
+      });
+
+      const weekTotalSales = weekSales.reduce((sum, s) => sum + (s.total_sales || 0), 0);
+      const weekTotalTransactions = weekSales.reduce((sum, s) => sum + (s.total_transactions || 0), 0);
       const weekAvgTicket = weekTotalTransactions > 0 ? weekTotalSales / weekTotalTransactions : 0;
       
-      // Presupuesto del rango filtrado (días del filtro * presupuesto diario)
-      const daysInFilteredRange = eachDayOfInterval({ start: dateRange.from, end: dateRange.to });
-      const weeklyBudget = daysInFilteredRange.reduce((sum, day) => {
-        try {
-          return sum + getDailyBudget(day);
-        } catch {
-          return sum + dailyBaseBudget;
-        }
-      }, 0);
+      // Presupuesto semanal (7 días de presupuesto diario)
+      const weeklyBudget = dailyBaseBudget * 7;
 
-      // VENTAS DEL MES (acumulado real del mes actual)
-      const monthSales = storeSalesInRange.filter(s => {
+      // VENTAS DEL MES
+      const monthSales = storeSales.filter(s => {
         try {
           const saleDate = parseISO(s.date);
           return saleDate >= monthStart && saleDate <= now;
@@ -339,16 +302,16 @@ export default function ExecutiveDashboard() {
       const monthTotalSales = monthSales.reduce((sum, s) => sum + (s.total_sales || 0), 0);
       const monthTotalTransactions = monthSales.reduce((sum, s) => sum + (s.total_transactions || 0), 0);
 
-      // PROYECCIONES basadas en el rango filtrado
-      const daysPassedInRange = daysInFilteredRange.filter(d => d <= now).length;
-      const avgDailySalesInRange = daysPassedInRange > 0 ? weekTotalSales / daysPassedInRange : 0;
-      const totalDaysInRange = daysInFilteredRange.length;
+      // PROYECCIONES con histórico
+      const daysPassedInWeek = eachDayOfInterval({ start: currentWeekStart, end: now }).filter(d => d <= now).length;
+      const avgDailySalesWeek = daysPassedInWeek > 0 ? weekTotalSales / daysPassedInWeek : 0;
+      const totalDaysInWeek = eachDayOfInterval({ start: currentWeekStart, end: currentWeekEnd }).length;
       
-      const historicalWeight = daysPassedInRange <= 2 ? 0.8 : 0.4;
+      const historicalWeight = daysPassedInWeek <= 2 ? 0.8 : 0.4;
       const currentWeight = 1 - historicalWeight;
-      const historicalDailyAvg = totalWeeklyAvg > 0 ? totalWeeklyAvg / 7 : avgDailySalesInRange;
-      const blendedDailyAvg = (historicalDailyAvg * historicalWeight) + (avgDailySalesInRange * currentWeight);
-      const weekProjection = blendedDailyAvg * totalDaysInRange;
+      const historicalDailyAvg = totalWeeklyAvg > 0 ? totalWeeklyAvg / 7 : avgDailySalesWeek;
+      const blendedDailyAvg = (historicalDailyAvg * historicalWeight) + (avgDailySalesWeek * currentWeight);
+      const weekProjection = blendedDailyAvg * totalDaysInWeek;
 
       const daysElapsed = now.getDate();
       const daysRemaining = daysInMonth - daysElapsed;
@@ -405,22 +368,15 @@ export default function ExecutiveDashboard() {
         dailyAvg: dailyAvgMonth
       };
     });
-  }, [allDailySales, allBudgets, currentMonth, currentYear, dateRange, globalStartDate, globalEndDate]);
+  }, [allDailySales, allBudgets, currentMonth, currentYear, dateRange]);
 
-  // Totales del RANGO FILTRADO (se actualizan con el filtro global)
+  // Totales de la SEMANA seleccionada (para gráficas específicas)
   const zoneTotals = useMemo(() => {
     const storesWithData = storesAnalysis.filter(s => s.hasData);
     const totalSales = storesWithData.reduce((sum, s) => sum + s.weekTotalSales, 0);
     const totalBudget = storesWithData.reduce((sum, s) => sum + s.weeklyBudget, 0);
     const totalProjection = storesWithData.reduce((sum, s) => sum + s.weekProjection, 0);
     const totalTransactions = storesWithData.reduce((sum, s) => sum + s.weekTotalTransactions, 0);
-    
-    console.log('📊 TOTALES ZONA (rango filtrado):', {
-      ventas: totalSales,
-      presupuesto: totalBudget,
-      transacciones: totalTransactions
-    });
-    
     return { totalSales, totalBudget, totalProjection, totalTransactions };
   }, [storesAnalysis]);
 
@@ -559,7 +515,7 @@ export default function ExecutiveDashboard() {
     };
   }, [allDailySales, dateRange, storesAnalysis, gregorianMode]);
 
-  // Totales del MES ACTUAL (para referencias mensuales independientes del filtro)
+  // Totales ACUMULADOS del mes (para referencias)
   const monthlyTotals = useMemo(() => {
     const storesWithData = storesAnalysis.filter(s => s.hasData);
     const totalSales = storesWithData.reduce((sum, s) => sum + s.monthTotalSales, 0);
@@ -568,11 +524,6 @@ export default function ExecutiveDashboard() {
     const totalProjection = storesWithData.reduce((sum, s) => sum + s.monthProjection, 0);
     const totalWeekProjection = storesWithData.reduce((sum, s) => sum + s.weekProjection, 0);
     const totalWeekBudget = storesWithData.reduce((sum, s) => sum + s.weeklyBudget, 0);
-    
-    console.log('📅 TOTALES MES ACTUAL:', {
-      ventas: totalSales,
-      presupuesto: totalBudget
-    });
     
     return { 
       totalSales, 
@@ -607,60 +558,58 @@ export default function ExecutiveDashboard() {
     }
   };
 
-  // Determinar KPI más crítico (basado en rango filtrado)
+  // Determinar KPI más crítico
   const criticalKPI = useMemo(() => {
-    // Usar datos del filtro actual (zoneTotals ya está filtrado)
-    const gap = zoneTotals.totalBudget - zoneTotals.totalSales;
-    const gapPercentage = zoneTotals.totalBudget > 0 
-      ? (gap / zoneTotals.totalBudget) * 100 
-      : 0;
+    const gap = (currentZoneBudget?.sales_budget || monthlyTotals.totalBudget) - monthlyTotals.totalSales;
+    const gapPercentage = ((currentZoneBudget?.sales_budget || monthlyTotals.totalBudget) > 0 
+      ? (gap / (currentZoneBudget?.sales_budget || monthlyTotals.totalBudget)) * 100 
+      : 0);
     
     if (gapPercentage > 15) return 'gap';
     
-    const compliance = zoneTotals.totalBudget > 0 
-      ? (zoneTotals.totalSales / zoneTotals.totalBudget) * 100 
+    const weekCompliance = dynamicTotals.totalBudget > 0 
+      ? (dynamicTotals.totalSales / dynamicTotals.totalBudget) * 100 
       : 0;
-    if (compliance < 70) return 'sales';
+    if (weekCompliance < 70) return 'sales';
     
-    const projectionCompliance = zoneTotals.totalBudget > 0
-      ? (zoneTotals.totalProjection / zoneTotals.totalBudget) * 100
+    const monthProjectionCompliance = dynamicTotals.totalMonthBudget > 0
+      ? (dynamicTotals.monthProjection / dynamicTotals.totalMonthBudget) * 100
       : 0;
-    if (projectionCompliance < 85) return 'projection';
+    if (monthProjectionCompliance < 85) return 'projection';
     
     return null;
-  }, [zoneTotals]);
+  }, [dynamicTotals, monthlyTotals, currentZoneBudget]);
 
-  // Interpretaciones ejecutivas (basadas en datos del rango filtrado)
+  // Interpretaciones ejecutivas
   const getKPIInsight = (kpiType) => {
-    const daysInRange = eachDayOfInterval({ start: dateRange.from, end: dateRange.to }).length;
+    const daysLeft = Math.ceil((endOfMonth(new Date()) - new Date()) / (1000 * 60 * 60 * 24));
     
     if (kpiType === 'sales') {
-      const compliance = zoneTotals.totalBudget > 0 
-        ? (zoneTotals.totalSales / zoneTotals.totalBudget) * 100 
+      const compliance = dynamicTotals.totalBudget > 0 
+        ? (dynamicTotals.totalSales / dynamicTotals.totalBudget) * 100 
         : 0;
-      if (compliance >= 100) return '✓ Meta cumplida en el período filtrado';
+      if (compliance >= 100) return '✓ Meta cumplida en el período actual';
       if (compliance >= 85) return 'Ritmo adecuado, mantener ejecución';
-      const gap = zoneTotals.totalBudget - zoneTotals.totalSales;
-      return `Faltan ${formatCurrency(gap)} en el período`;
+      return `Se requieren ${formatCurrency((dynamicTotals.totalBudget - dynamicTotals.totalSales) / Math.max(daysLeft, 1))} diarios adicionales`;
     }
     
     if (kpiType === 'gap') {
-      const gap = zoneTotals.totalBudget - zoneTotals.totalSales;
-      if (gap <= 0) return '✓ Sin déficit en período filtrado';
-      return `Recuperar ${formatCurrency(gap / Math.max(daysInRange, 1))} diarios promedio`;
+      const gap = (currentZoneBudget?.sales_budget || monthlyTotals.totalBudget) - monthlyTotals.totalSales;
+      if (gap <= 0) return '✓ Sin déficit acumulado';
+      return `Recuperar ${formatCurrency(gap / Math.max(daysLeft, 1))} diarios para cerrar brecha`;
     }
     
     if (kpiType === 'projection') {
-      const projCompliance = zoneTotals.totalBudget > 0
-        ? (zoneTotals.totalProjection / zoneTotals.totalBudget) * 100
+      const projCompliance = dynamicTotals.totalMonthBudget > 0
+        ? (dynamicTotals.monthProjection / dynamicTotals.totalMonthBudget) * 100
         : 0;
-      if (projCompliance >= 100) return 'Proyección indica cierre exitoso';
-      if (projCompliance >= 90) return 'Al ritmo actual: ' + projCompliance.toFixed(0) + '% del presupuesto';
-      return 'Proyección por debajo de meta, acelerar ventas';
+      if (projCompliance >= 100) return 'Proyección indica cierre exitoso del mes';
+      if (projCompliance >= 90) return 'Al ritmo actual, el mes cerraría en ' + projCompliance.toFixed(0) + '% del presupuesto';
+      return 'Proyección por debajo de meta, acelerar ventas diarias';
     }
     
     if (kpiType === 'transactions') {
-      const avgTicket = zoneTotals.totalTransactions > 0 ? zoneTotals.totalSales / zoneTotals.totalTransactions : 0;
+      const avgTicket = dynamicTotals.avgTicket;
       if (avgTicket > 32000) return 'Ticket promedio por encima del objetivo';
       if (avgTicket > 28000) return 'Ticket promedio dentro del rango esperado';
       return 'Oportunidad de incrementar valor por transacción';
@@ -1131,106 +1080,6 @@ export default function ExecutiveDashboard() {
       </Link>
 
       <div id="dashboard-scroll-container" className="w-full mx-auto px-3 sm:px-4 lg:px-6 py-4 relative z-10">
-        {/* Header con Mode Selector */}
-        <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-white">Control de Distrito</h1>
-            <p className="text-sm text-slate-400 mt-1">{ZONE_NAME}</p>
-          </div>
-          <DistrictModeSelector selectedMode={modeControl} onModeChange={setModeControl} />
-        </div>
-
-        {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-            {[1, 2, 3, 4, 5].map(i => (
-              <div key={i} className="bg-white/5 backdrop-blur-xl rounded-lg h-32 animate-pulse" />
-            ))}
-          </div>
-        ) : (
-          <>
-            {/* KPIs Principales del Distrito */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-              <DistrictKPICard
-                icon="💰"
-                label="Venta Distrito"
-                value={zoneTotals.totalSales}
-                budget={zoneTotals.totalBudget}
-                format="currency"
-              />
-              <DistrictKPICard
-                icon="📈"
-                label="Cumplimiento"
-                value={zoneTotals.totalBudget > 0 ? ((zoneTotals.totalSales / zoneTotals.totalBudget) * 100) : 0}
-                budget={100}
-                format="number"
-                unit="%"
-                isCritical={zoneTotals.totalBudget > 0 && ((zoneTotals.totalSales / zoneTotals.totalBudget) * 100) < 85}
-              />
-              <DistrictKPICard
-                icon="📊"
-                label="Venta Promedio"
-                value={eachDayOfInterval({ start: dateRange.from, end: dateRange.to }).filter(d => d <= new Date()).length > 0 
-                  ? zoneTotals.totalSales / eachDayOfInterval({ start: dateRange.from, end: dateRange.to }).filter(d => d <= new Date()).length 
-                  : 0}
-                format="currency"
-              />
-              <DistrictKPICard
-                icon="🧊"
-                label="TCs Promedio"
-                value={eachDayOfInterval({ start: dateRange.from, end: dateRange.to }).filter(d => d <= new Date()).length > 0 
-                  ? Math.round(zoneTotals.totalTransactions / eachDayOfInterval({ start: dateRange.from, end: dateRange.to }).filter(d => d <= new Date()).length)
-                  : 0}
-                format="number"
-              />
-              <DistrictKPICard
-                icon="🎯"
-                label="Ticket Promedio"
-                value={zoneTotals.totalTransactions > 0 ? zoneTotals.totalSales / zoneTotals.totalTransactions : 0}
-                format="currency"
-              />
-            </div>
-
-            {/* Comparativa de Tiendas */}
-            <div className="mb-8">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold text-white">Desempeño por Tienda vs PPT</h2>
-                <div className="flex items-center gap-2">
-                  <Input
-                    placeholder="Buscar tienda..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-48 h-9 text-sm bg-white/10 border-white/20 text-white placeholder:text-slate-400"
-                  />
-                  <Button
-                    onClick={exportToExcel}
-                    size="sm"
-                    className="bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30 text-emerald-300"
-                  >
-                    <Download className="w-4 h-4 mr-1" />
-                    Excel
-                  </Button>
-                </div>
-              </div>
-              <StoresComparisonGrid 
-                stores={sortedStores.filter(s => s.hasData).map(store => ({
-                  id: store.code,
-                  name: store.name,
-                  sales: store.weekTotalSales,
-                  budget: store.weeklyBudget,
-                  transactionCount: store.weekTotalTransactions,
-                  avgTicket: store.weekTotalTransactions > 0 ? store.weekTotalSales / store.weekTotalTransactions : 0
-                }))}
-                onStoreSelect={(storeData) => {
-                  const fullStore = storesAnalysis.find(s => s.code === storeData.id);
-                  if (fullStore) {
-                    setSelectedStoreDetail(fullStore);
-                  }
-                }}
-              />
-            </div>
-          </>
-        )}
-
         {/* Botón Modo Edición */}
         <div className="flex justify-end mb-4">
           {!layoutEditMode && (
@@ -1497,13 +1346,13 @@ export default function ExecutiveDashboard() {
                 className={`relative overflow-hidden bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-xl rounded-lg p-3 border cursor-pointer transition-all ${
                   criticalKPI === 'sales' 
                     ? 'border-blue-400/60 shadow-2xl' 
-                    : (zoneTotals.totalBudget > 0 && ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 100)
+                    : (dynamicTotals.totalBudget > 0 && ((dynamicTotals.totalSales/dynamicTotals.totalBudget)*100) >= 100)
                       ? 'border-emerald-500/40 shadow-lg shadow-emerald-500/30'
                       : 'border-blue-500/20 hover:border-blue-400/40 hover:shadow-lg hover:shadow-blue-500/20'
                 }`}>
 
                 {/* Glow animado según estado */}
-                {(zoneTotals.totalBudget > 0 && ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 100) && (
+                {(dynamicTotals.totalBudget > 0 && ((dynamicTotals.totalSales/dynamicTotals.totalBudget)*100) >= 100) && (
                   <motion.div
                     className="absolute inset-0 bg-emerald-500/20"
                     animate={{ opacity: [0.2, 0.4, 0.2] }}
@@ -1527,47 +1376,45 @@ export default function ExecutiveDashboard() {
 
                 <div className="relative z-10">
                   <p className="text-xs text-blue-300 mb-2 font-bold uppercase tracking-wider">
-                    💰 Venta Período Filtrado
+                    💰 {dynamicTotals.isRetailWeek ? 'Venta Semana' : 'Venta Período'}
                   </p>
                   <div className="space-y-2">
                     <div>
                       <p className="text-xs text-slate-400 mb-0.5">Venta Acumulada</p>
                       <motion.p 
                         className="text-xl font-black text-white tabular-nums"
-                        key={zoneTotals.totalSales}
                         initial={{ scale: 0.8, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         transition={{ duration: 0.5, type: "spring", stiffness: 200 }}
                       >
-                        {formatKPI(zoneTotals.totalSales)}
+                        {formatKPI(dynamicTotals.totalSales)}
                       </motion.p>
                     </div>
                     <div className="h-px bg-white/10"></div>
                     <div>
                       <p className="text-xs text-slate-400 mb-0.5">Presupuesto</p>
                       <p className="text-lg font-bold text-blue-300 tabular-nums">
-                        {formatKPI(zoneTotals.totalBudget)}
+                        {formatKPI(dynamicTotals.totalBudget)}
                       </p>
                     </div>
                     <div className="pt-1">
                       <motion.p 
                         className={`text-2xl font-black tabular-nums ${
-                          zoneTotals.totalBudget > 0 && 
-                          ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 100 ? 'text-emerald-400' : 
-                          zoneTotals.totalBudget > 0 && 
-                          ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 85 ? 'text-amber-400' : 'text-red-400'
+                          dynamicTotals.totalBudget > 0 && 
+                          ((dynamicTotals.totalSales/dynamicTotals.totalBudget)*100) >= 100 ? 'text-emerald-400' : 
+                          dynamicTotals.totalBudget > 0 && 
+                          ((dynamicTotals.totalSales/dynamicTotals.totalBudget)*100) >= 85 ? 'text-amber-400' : 'text-red-400'
                         }`}
-                        key={zoneTotals.totalSales}
                         animate={criticalKPI === 'sales' ? {
                           scale: [1, 1.05, 1],
                         } : {}}
                         transition={{ duration: 2, repeat: Infinity }}
                       >
-                        {zoneTotals.totalBudget > 0 
-                          ? ((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(1) 
+                        {dynamicTotals.totalBudget > 0 
+                          ? ((dynamicTotals.totalSales/dynamicTotals.totalBudget)*100).toFixed(1) 
                           : '0.0'}%
                       </motion.p>
-                      <p className="text-xs text-slate-500">Cumplimiento Período</p>
+                      <p className="text-xs text-slate-500">Cumplimiento Actual</p>
                     </div>
                     <motion.div 
                       className="pt-2 border-t border-white/10"
@@ -1583,7 +1430,7 @@ export default function ExecutiveDashboard() {
                 </div>
               </motion.div>
 
-              {/* 2. Ticket Promedio y Transacciones Totales (del rango filtrado) */}
+              {/* 2. Ticket Promedio y Transacciones Totales (del rango) */}
               <motion.div 
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
@@ -1606,26 +1453,20 @@ export default function ExecutiveDashboard() {
                   <div className="space-y-2">
                     <div>
                       <p className="text-xs text-slate-400 mb-0.5">Ticket Promedio</p>
-                      <motion.p 
-                        className="text-2xl font-black text-white tabular-nums"
-                        key={zoneTotals.totalSales}
-                        initial={{ scale: 0.8, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ duration: 0.5 }}
-                      >
-                        {zoneTotals.totalTransactions > 0 ? formatKPI(zoneTotals.totalSales / zoneTotals.totalTransactions) : '$0'}
-                      </motion.p>
+                      <p className="text-2xl font-black text-white tabular-nums">
+                        {dynamicTotals.avgTicket > 0 ? formatKPI(dynamicTotals.avgTicket) : '$0'}
+                      </p>
                     </div>
                     <div className="h-px bg-white/10"></div>
                     <div>
                       <p className="text-xs text-slate-400 mb-0.5">Transacciones Totales</p>
                       <p className="text-xl font-bold text-purple-300 tabular-nums">
-                        {zoneTotals.totalTransactions.toLocaleString('es-CO')}
+                        {dynamicTotals.totalTransactions.toLocaleString('es-CO')}
                       </p>
                     </div>
                     <div className="pt-1">
                       <p className="text-xs text-slate-500">
-                        Período filtrado
+                        {dynamicTotals.daysElapsedInRange} de {dynamicTotals.totalDaysInRange} días
                       </p>
                     </div>
                     <div className="pt-2 border-t border-white/10">
@@ -1637,7 +1478,7 @@ export default function ExecutiveDashboard() {
                 </div>
               </motion.div>
 
-              {/* 3. Promedios Diarios (del rango filtrado) */}
+              {/* 3. Promedios Diarios (del rango) */}
               <motion.div 
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
@@ -1651,42 +1492,32 @@ export default function ExecutiveDashboard() {
                   <div className="space-y-2">
                     <div>
                       <p className="text-xs text-slate-400 mb-0.5">Venta Promedio/Día</p>
-                      <motion.p 
-                        className="text-xl font-black text-white tabular-nums"
-                        key={zoneTotals.totalSales}
-                        initial={{ scale: 0.8, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ duration: 0.5 }}
-                      >
-                        {eachDayOfInterval({ start: dateRange.from, end: dateRange.to }).filter(d => d <= new Date()).length > 0 
-                          ? formatKPI(zoneTotals.totalSales / eachDayOfInterval({ start: dateRange.from, end: dateRange.to }).filter(d => d <= new Date()).length) 
-                          : '$0'}
-                      </motion.p>
+                      <p className="text-xl font-black text-white tabular-nums">
+                        {dynamicTotals.avgDailySales > 0 ? formatKPI(dynamicTotals.avgDailySales) : '$0'}
+                      </p>
                     </div>
                     <div className="h-px bg-white/10"></div>
                     <div>
                       <p className="text-xs text-slate-400 mb-0.5">Transacciones/Día</p>
                       <p className="text-xl font-bold text-amber-300 tabular-nums">
-                        {eachDayOfInterval({ start: dateRange.from, end: dateRange.to }).filter(d => d <= new Date()).length > 0
-                          ? Math.round(zoneTotals.totalTransactions / eachDayOfInterval({ start: dateRange.from, end: dateRange.to }).filter(d => d <= new Date()).length).toLocaleString('es-CO')
-                          : '0'}
+                        {Math.round(dynamicTotals.avgDailyTransactions).toLocaleString('es-CO')}
                       </p>
                     </div>
                     <div className="pt-1">
                       <p className="text-xs text-slate-500">
-                        {eachDayOfInterval({ start: dateRange.from, end: dateRange.to }).filter(d => d <= new Date()).length} días en período
+                        Basado en {dynamicTotals.daysElapsedInRange} días
                       </p>
                     </div>
                     <div className="pt-2 border-t border-white/10">
                       <p className="text-[10px] text-slate-400 italic leading-tight">
-                        Ritmo del período filtrado
+                        Ritmo sostenido de {formatCurrency(dynamicTotals.avgDailySales * 7)} semanales
                       </p>
                     </div>
                   </div>
                 </div>
               </motion.div>
 
-              {/* 4. Proyección Período Filtrado */}
+              {/* 4. Proyección Semana Actual + Proyección Mes */}
               <motion.div 
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
@@ -1704,36 +1535,36 @@ export default function ExecutiveDashboard() {
                 )}
                 <div className="relative z-10">
                   <p className="text-xs text-emerald-300 mb-2 font-bold uppercase tracking-wider">
-                    📈 Proyección Período
+                    📈 Proyección
                   </p>
                   <div className="space-y-2">
                     <div>
-                      <p className="text-xs text-slate-400 mb-1">Proyección Completa</p>
-                      <motion.p 
-                        className="text-xl font-black text-white tabular-nums"
-                        key={zoneTotals.totalProjection}
-                        initial={{ scale: 0.8, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ duration: 0.5 }}
-                      >
-                        {formatKPI(zoneTotals.totalProjection)}
-                      </motion.p>
+                      <p className="text-xs text-slate-400 mb-1">Proyección Semana Actual</p>
+                      <p className="text-xl font-black text-white tabular-nums">
+                        {formatKPI(dynamicTotals.currentWeekProjection)}
+                      </p>
                       <p className={`text-sm font-bold tabular-nums ${
-                        zoneTotals.totalBudget > 0 && ((zoneTotals.totalProjection/zoneTotals.totalBudget)*100) >= 100 
+                        dynamicTotals.currentWeekBudget > 0 && ((dynamicTotals.currentWeekProjection/dynamicTotals.currentWeekBudget)*100) >= 100 
                           ? 'text-emerald-400' : 'text-red-400'
                       }`}>
-                        {zoneTotals.totalBudget > 0 
-                          ? ((zoneTotals.totalProjection/zoneTotals.totalBudget)*100).toFixed(1) 
+                        {dynamicTotals.currentWeekBudget > 0 
+                          ? ((dynamicTotals.currentWeekProjection/dynamicTotals.currentWeekBudget)*100).toFixed(1) 
                           : '0.0'}% del PPT
                       </p>
                     </div>
                     <div className="h-px bg-white/10"></div>
                     <div>
-                      <p className="text-xs text-slate-400 mb-1">Déficit</p>
-                      <p className={`text-lg font-bold tabular-nums ${
-                        zoneTotals.totalBudget - zoneTotals.totalSales <= 0 ? 'text-emerald-400' : 'text-red-400'
+                      <p className="text-xs text-slate-400 mb-1">Proyección Cierre Mes</p>
+                      <p className="text-lg font-bold text-emerald-300 tabular-nums">
+                        {formatKPI(dynamicTotals.monthProjection)}
+                      </p>
+                      <p className={`text-xs font-bold tabular-nums ${
+                        dynamicTotals.totalMonthBudget > 0 && ((dynamicTotals.monthProjection/dynamicTotals.totalMonthBudget)*100) >= 100 
+                          ? 'text-emerald-400' : 'text-red-400'
                       }`}>
-                        {formatKPI(Math.max(0, zoneTotals.totalBudget - zoneTotals.totalSales))}
+                        {dynamicTotals.totalMonthBudget > 0 
+                          ? ((dynamicTotals.monthProjection/dynamicTotals.totalMonthBudget)*100).toFixed(1) 
+                          : '0.0'}%
                       </p>
                     </div>
                     <div className="pt-2 border-t border-white/10">
@@ -1757,17 +1588,9 @@ export default function ExecutiveDashboard() {
                   onMouseEnter={() => setHoveredStoreForChart(null)}
                   className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-xl rounded-lg p-2 border border-blue-500/20 cursor-pointer transition-all hover:border-blue-400/40 hover:shadow-lg hover:shadow-blue-500/20">
                   <p className="text-[10px] text-blue-300 mb-1">
-                    Venta Período
+                    {dynamicTotals.isRetailWeek ? 'Venta Semana' : 'Venta Acumulada'}
                   </p>
-                  <motion.p 
-                    className="text-lg font-black text-white tabular-nums"
-                    key={zoneTotals.totalSales}
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ duration: 0.4 }}
-                  >
-                    {formatCurrency(zoneTotals.totalSales)}
-                  </motion.p>
+                  <p className="text-lg font-black text-white tabular-nums">{formatCurrency(dynamicTotals.totalSales)}</p>
                   <ResponsiveContainer width="100%" height={25}>
                     <AreaChart data={dailySalesData.slice(-7)}>
                       <defs>
@@ -1795,7 +1618,7 @@ export default function ExecutiveDashboard() {
                     </ResponsiveContainer>
                     </motion.div>
 
-                {/* Déficit del Período Filtrado */}
+                {/* Brecha Acumulada */}
                 <motion.div 
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -1853,13 +1676,12 @@ export default function ExecutiveDashboard() {
                       >
                         <AlertTriangle className="w-4 h-4 text-red-400" />
                       </motion.div>
-                      <p className="text-xs text-red-300 font-bold uppercase tracking-wider">Déficit Período</p>
+                      <p className="text-xs text-red-300 font-bold uppercase tracking-wider">Déficit Acumulado</p>
                     </div>
                     <div className="space-y-2">
                       <div>
                         <motion.p 
                           className="text-xl font-black text-red-400 tabular-nums"
-                          key={zoneTotals.totalSales}
                           animate={criticalKPI === 'gap' ? {
                             x: [-1, 1, -1, 0],
                             scale: [1, 1.02, 1]
@@ -1870,15 +1692,15 @@ export default function ExecutiveDashboard() {
                             repeatDelay: 10
                           }}
                         >
-                          {formatKPI(Math.max(0, zoneTotals.totalBudget - zoneTotals.totalSales))}
+                          {formatKPI(Math.max(0, (currentZoneBudget?.sales_budget || monthlyTotals.totalBudget) - monthlyTotals.totalSales))}
                         </motion.p>
                         <p className="text-[10px] text-red-300">Brecha frente al presupuesto</p>
                       </div>
                       <div className="pt-1">
                         <p className="text-xl font-black text-red-300 tabular-nums">
-                          {zoneTotals.totalBudget > 0 
-                            ? (((zoneTotals.totalBudget - zoneTotals.totalSales) / zoneTotals.totalBudget) * 100).toFixed(1)
-                            : '0.0'}%
+                          {((currentZoneBudget?.sales_budget || monthlyTotals.totalBudget) > 0 
+                            ? ((((currentZoneBudget?.sales_budget || monthlyTotals.totalBudget) - monthlyTotals.totalSales) / (currentZoneBudget?.sales_budget || monthlyTotals.totalBudget)) * 100).toFixed(1)
+                            : '0.0')}%
                         </p>
                         <p className="text-[10px] text-slate-500">% Déficit del PPT</p>
                       </div>
@@ -1890,6 +1712,9 @@ export default function ExecutiveDashboard() {
                       >
                         <p className="text-[10px] text-red-300 italic leading-tight font-medium">
                           {getKPIInsight('gap')}
+                        </p>
+                        <p className="text-[9px] text-slate-500 mt-1">
+                          Cada día sin acción aumenta la brecha
                         </p>
                       </motion.div>
                     </div>
