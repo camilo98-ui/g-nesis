@@ -1127,6 +1127,11 @@ export default function ExecutiveDashboard() {
       </Link>
 
       <div id="dashboard-scroll-container" className="w-full mx-auto px-3 sm:px-4 lg:px-6 py-4 relative z-10">
+        {/* Mode Selector */}
+        <div className="mb-6 flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-white">Control de Distrito</h1>
+          <DistrictModeSelector selectedMode={modeControl} onModeChange={setModeControl} />
+        </div>
         {/* Botón Modo Edición */}
         <div className="flex justify-end mb-4">
           {!layoutEditMode && (
