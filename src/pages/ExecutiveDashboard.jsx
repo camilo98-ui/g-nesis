@@ -79,6 +79,7 @@ export default function ExecutiveDashboard() {
   const [useCustomDates, setUseCustomDates] = useState(false);
   const [showBackButton, setShowBackButton] = useState(false);
   const [gregorianMode, setGregorianMode] = useState(false);
+  const [modeControl, setModeControl] = useState('accumulated'); // accumulated, retail, gregorian
   
   // Calcular dateRange basado en FILTRO GLOBAL primero, luego semanas retail
   const dateRange = useMemo(() => {
