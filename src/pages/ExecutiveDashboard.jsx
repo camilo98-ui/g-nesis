@@ -403,13 +403,20 @@ export default function ExecutiveDashboard() {
     });
   }, [allDailySales, allBudgets, currentMonth, currentYear, dateRange, globalStartDate, globalEndDate]);
 
-  // Totales de la SEMANA seleccionada (para gráficas específicas)
+  // Totales del RANGO FILTRADO (se actualizan con el filtro global)
   const zoneTotals = useMemo(() => {
     const storesWithData = storesAnalysis.filter(s => s.hasData);
     const totalSales = storesWithData.reduce((sum, s) => sum + s.weekTotalSales, 0);
     const totalBudget = storesWithData.reduce((sum, s) => sum + s.weeklyBudget, 0);
     const totalProjection = storesWithData.reduce((sum, s) => sum + s.weekProjection, 0);
     const totalTransactions = storesWithData.reduce((sum, s) => sum + s.weekTotalTransactions, 0);
+    
+    console.log('📊 TOTALES ZONA (rango filtrado):', {
+      ventas: totalSales,
+      presupuesto: totalBudget,
+      transacciones: totalTransactions
+    });
+    
     return { totalSales, totalBudget, totalProjection, totalTransactions };
   }, [storesAnalysis]);
 
@@ -548,7 +555,7 @@ export default function ExecutiveDashboard() {
     };
   }, [allDailySales, dateRange, storesAnalysis, gregorianMode]);
 
-  // Totales ACUMULADOS del mes (para referencias)
+  // Totales del MES ACTUAL (para referencias mensuales independientes del filtro)
   const monthlyTotals = useMemo(() => {
     const storesWithData = storesAnalysis.filter(s => s.hasData);
     const totalSales = storesWithData.reduce((sum, s) => sum + s.monthTotalSales, 0);
@@ -557,6 +564,11 @@ export default function ExecutiveDashboard() {
     const totalProjection = storesWithData.reduce((sum, s) => sum + s.monthProjection, 0);
     const totalWeekProjection = storesWithData.reduce((sum, s) => sum + s.weekProjection, 0);
     const totalWeekBudget = storesWithData.reduce((sum, s) => sum + s.weeklyBudget, 0);
+    
+    console.log('📅 TOTALES MES ACTUAL:', {
+      ventas: totalSales,
+      presupuesto: totalBudget
+    });
     
     return { 
       totalSales, 
@@ -591,58 +603,60 @@ export default function ExecutiveDashboard() {
     }
   };
 
-  // Determinar KPI más crítico
+  // Determinar KPI más crítico (basado en rango filtrado)
   const criticalKPI = useMemo(() => {
-    const gap = (currentZoneBudget?.sales_budget || monthlyTotals.totalBudget) - monthlyTotals.totalSales;
-    const gapPercentage = ((currentZoneBudget?.sales_budget || monthlyTotals.totalBudget) > 0 
-      ? (gap / (currentZoneBudget?.sales_budget || monthlyTotals.totalBudget)) * 100 
-      : 0);
+    // Usar datos del filtro actual (zoneTotals ya está filtrado)
+    const gap = zoneTotals.totalBudget - zoneTotals.totalSales;
+    const gapPercentage = zoneTotals.totalBudget > 0 
+      ? (gap / zoneTotals.totalBudget) * 100 
+      : 0;
     
     if (gapPercentage > 15) return 'gap';
     
-    const weekCompliance = dynamicTotals.totalBudget > 0 
-      ? (dynamicTotals.totalSales / dynamicTotals.totalBudget) * 100 
+    const compliance = zoneTotals.totalBudget > 0 
+      ? (zoneTotals.totalSales / zoneTotals.totalBudget) * 100 
       : 0;
-    if (weekCompliance < 70) return 'sales';
+    if (compliance < 70) return 'sales';
     
-    const monthProjectionCompliance = dynamicTotals.totalMonthBudget > 0
-      ? (dynamicTotals.monthProjection / dynamicTotals.totalMonthBudget) * 100
+    const projectionCompliance = zoneTotals.totalBudget > 0
+      ? (zoneTotals.totalProjection / zoneTotals.totalBudget) * 100
       : 0;
-    if (monthProjectionCompliance < 85) return 'projection';
+    if (projectionCompliance < 85) return 'projection';
     
     return null;
-  }, [dynamicTotals, monthlyTotals, currentZoneBudget]);
+  }, [zoneTotals]);
 
-  // Interpretaciones ejecutivas
+  // Interpretaciones ejecutivas (basadas en datos del rango filtrado)
   const getKPIInsight = (kpiType) => {
-    const daysLeft = Math.ceil((endOfMonth(new Date()) - new Date()) / (1000 * 60 * 60 * 24));
+    const daysInRange = eachDayOfInterval({ start: dateRange.from, end: dateRange.to }).length;
     
     if (kpiType === 'sales') {
-      const compliance = dynamicTotals.totalBudget > 0 
-        ? (dynamicTotals.totalSales / dynamicTotals.totalBudget) * 100 
+      const compliance = zoneTotals.totalBudget > 0 
+        ? (zoneTotals.totalSales / zoneTotals.totalBudget) * 100 
         : 0;
-      if (compliance >= 100) return '✓ Meta cumplida en el período actual';
+      if (compliance >= 100) return '✓ Meta cumplida en el período filtrado';
       if (compliance >= 85) return 'Ritmo adecuado, mantener ejecución';
-      return `Se requieren ${formatCurrency((dynamicTotals.totalBudget - dynamicTotals.totalSales) / Math.max(daysLeft, 1))} diarios adicionales`;
+      const gap = zoneTotals.totalBudget - zoneTotals.totalSales;
+      return `Faltan ${formatCurrency(gap)} en el período`;
     }
     
     if (kpiType === 'gap') {
-      const gap = (currentZoneBudget?.sales_budget || monthlyTotals.totalBudget) - monthlyTotals.totalSales;
-      if (gap <= 0) return '✓ Sin déficit acumulado';
-      return `Recuperar ${formatCurrency(gap / Math.max(daysLeft, 1))} diarios para cerrar brecha`;
+      const gap = zoneTotals.totalBudget - zoneTotals.totalSales;
+      if (gap <= 0) return '✓ Sin déficit en período filtrado';
+      return `Recuperar ${formatCurrency(gap / Math.max(daysInRange, 1))} diarios promedio`;
     }
     
     if (kpiType === 'projection') {
-      const projCompliance = dynamicTotals.totalMonthBudget > 0
-        ? (dynamicTotals.monthProjection / dynamicTotals.totalMonthBudget) * 100
+      const projCompliance = zoneTotals.totalBudget > 0
+        ? (zoneTotals.totalProjection / zoneTotals.totalBudget) * 100
         : 0;
-      if (projCompliance >= 100) return 'Proyección indica cierre exitoso del mes';
-      if (projCompliance >= 90) return 'Al ritmo actual, el mes cerraría en ' + projCompliance.toFixed(0) + '% del presupuesto';
-      return 'Proyección por debajo de meta, acelerar ventas diarias';
+      if (projCompliance >= 100) return 'Proyección indica cierre exitoso';
+      if (projCompliance >= 90) return 'Al ritmo actual: ' + projCompliance.toFixed(0) + '% del presupuesto';
+      return 'Proyección por debajo de meta, acelerar ventas';
     }
     
     if (kpiType === 'transactions') {
-      const avgTicket = dynamicTotals.avgTicket;
+      const avgTicket = zoneTotals.totalTransactions > 0 ? zoneTotals.totalSales / zoneTotals.totalTransactions : 0;
       if (avgTicket > 32000) return 'Ticket promedio por encima del objetivo';
       if (avgTicket > 28000) return 'Ticket promedio dentro del rango esperado';
       return 'Oportunidad de incrementar valor por transacción';
@@ -1379,13 +1393,13 @@ export default function ExecutiveDashboard() {
                 className={`relative overflow-hidden bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-xl rounded-lg p-3 border cursor-pointer transition-all ${
                   criticalKPI === 'sales' 
                     ? 'border-blue-400/60 shadow-2xl' 
-                    : (dynamicTotals.totalBudget > 0 && ((dynamicTotals.totalSales/dynamicTotals.totalBudget)*100) >= 100)
+                    : (zoneTotals.totalBudget > 0 && ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 100)
                       ? 'border-emerald-500/40 shadow-lg shadow-emerald-500/30'
                       : 'border-blue-500/20 hover:border-blue-400/40 hover:shadow-lg hover:shadow-blue-500/20'
                 }`}>
 
                 {/* Glow animado según estado */}
-                {(dynamicTotals.totalBudget > 0 && ((dynamicTotals.totalSales/dynamicTotals.totalBudget)*100) >= 100) && (
+                {(zoneTotals.totalBudget > 0 && ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 100) && (
                   <motion.div
                     className="absolute inset-0 bg-emerald-500/20"
                     animate={{ opacity: [0.2, 0.4, 0.2] }}
@@ -1409,45 +1423,47 @@ export default function ExecutiveDashboard() {
 
                 <div className="relative z-10">
                   <p className="text-xs text-blue-300 mb-2 font-bold uppercase tracking-wider">
-                    💰 {dynamicTotals.isRetailWeek ? 'Venta Semana' : 'Venta Período'}
+                    💰 Venta Período Filtrado
                   </p>
                   <div className="space-y-2">
                     <div>
                       <p className="text-xs text-slate-400 mb-0.5">Venta Acumulada</p>
                       <motion.p 
                         className="text-xl font-black text-white tabular-nums"
+                        key={zoneTotals.totalSales}
                         initial={{ scale: 0.8, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         transition={{ duration: 0.5, type: "spring", stiffness: 200 }}
                       >
-                        {formatKPI(dynamicTotals.totalSales)}
+                        {formatKPI(zoneTotals.totalSales)}
                       </motion.p>
                     </div>
                     <div className="h-px bg-white/10"></div>
                     <div>
                       <p className="text-xs text-slate-400 mb-0.5">Presupuesto</p>
                       <p className="text-lg font-bold text-blue-300 tabular-nums">
-                        {formatKPI(dynamicTotals.totalBudget)}
+                        {formatKPI(zoneTotals.totalBudget)}
                       </p>
                     </div>
                     <div className="pt-1">
                       <motion.p 
                         className={`text-2xl font-black tabular-nums ${
-                          dynamicTotals.totalBudget > 0 && 
-                          ((dynamicTotals.totalSales/dynamicTotals.totalBudget)*100) >= 100 ? 'text-emerald-400' : 
-                          dynamicTotals.totalBudget > 0 && 
-                          ((dynamicTotals.totalSales/dynamicTotals.totalBudget)*100) >= 85 ? 'text-amber-400' : 'text-red-400'
+                          zoneTotals.totalBudget > 0 && 
+                          ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 100 ? 'text-emerald-400' : 
+                          zoneTotals.totalBudget > 0 && 
+                          ((zoneTotals.totalSales/zoneTotals.totalBudget)*100) >= 85 ? 'text-amber-400' : 'text-red-400'
                         }`}
+                        key={zoneTotals.totalSales}
                         animate={criticalKPI === 'sales' ? {
                           scale: [1, 1.05, 1],
                         } : {}}
                         transition={{ duration: 2, repeat: Infinity }}
                       >
-                        {dynamicTotals.totalBudget > 0 
-                          ? ((dynamicTotals.totalSales/dynamicTotals.totalBudget)*100).toFixed(1) 
+                        {zoneTotals.totalBudget > 0 
+                          ? ((zoneTotals.totalSales/zoneTotals.totalBudget)*100).toFixed(1) 
                           : '0.0'}%
                       </motion.p>
-                      <p className="text-xs text-slate-500">Cumplimiento Actual</p>
+                      <p className="text-xs text-slate-500">Cumplimiento Período</p>
                     </div>
                     <motion.div 
                       className="pt-2 border-t border-white/10"
@@ -1463,7 +1479,7 @@ export default function ExecutiveDashboard() {
                 </div>
               </motion.div>
 
-              {/* 2. Ticket Promedio y Transacciones Totales (del rango) */}
+              {/* 2. Ticket Promedio y Transacciones Totales (del rango filtrado) */}
               <motion.div 
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
@@ -1486,20 +1502,26 @@ export default function ExecutiveDashboard() {
                   <div className="space-y-2">
                     <div>
                       <p className="text-xs text-slate-400 mb-0.5">Ticket Promedio</p>
-                      <p className="text-2xl font-black text-white tabular-nums">
-                        {dynamicTotals.avgTicket > 0 ? formatKPI(dynamicTotals.avgTicket) : '$0'}
-                      </p>
+                      <motion.p 
+                        className="text-2xl font-black text-white tabular-nums"
+                        key={zoneTotals.totalSales}
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ duration: 0.5 }}
+                      >
+                        {zoneTotals.totalTransactions > 0 ? formatKPI(zoneTotals.totalSales / zoneTotals.totalTransactions) : '$0'}
+                      </motion.p>
                     </div>
                     <div className="h-px bg-white/10"></div>
                     <div>
                       <p className="text-xs text-slate-400 mb-0.5">Transacciones Totales</p>
                       <p className="text-xl font-bold text-purple-300 tabular-nums">
-                        {dynamicTotals.totalTransactions.toLocaleString('es-CO')}
+                        {zoneTotals.totalTransactions.toLocaleString('es-CO')}
                       </p>
                     </div>
                     <div className="pt-1">
                       <p className="text-xs text-slate-500">
-                        {dynamicTotals.daysElapsedInRange} de {dynamicTotals.totalDaysInRange} días
+                        Período filtrado
                       </p>
                     </div>
                     <div className="pt-2 border-t border-white/10">
@@ -1511,7 +1533,7 @@ export default function ExecutiveDashboard() {
                 </div>
               </motion.div>
 
-              {/* 3. Promedios Diarios (del rango) */}
+              {/* 3. Promedios Diarios (del rango filtrado) */}
               <motion.div 
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
@@ -1525,32 +1547,42 @@ export default function ExecutiveDashboard() {
                   <div className="space-y-2">
                     <div>
                       <p className="text-xs text-slate-400 mb-0.5">Venta Promedio/Día</p>
-                      <p className="text-xl font-black text-white tabular-nums">
-                        {dynamicTotals.avgDailySales > 0 ? formatKPI(dynamicTotals.avgDailySales) : '$0'}
-                      </p>
+                      <motion.p 
+                        className="text-xl font-black text-white tabular-nums"
+                        key={zoneTotals.totalSales}
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ duration: 0.5 }}
+                      >
+                        {eachDayOfInterval({ start: dateRange.from, end: dateRange.to }).filter(d => d <= new Date()).length > 0 
+                          ? formatKPI(zoneTotals.totalSales / eachDayOfInterval({ start: dateRange.from, end: dateRange.to }).filter(d => d <= new Date()).length) 
+                          : '$0'}
+                      </motion.p>
                     </div>
                     <div className="h-px bg-white/10"></div>
                     <div>
                       <p className="text-xs text-slate-400 mb-0.5">Transacciones/Día</p>
                       <p className="text-xl font-bold text-amber-300 tabular-nums">
-                        {Math.round(dynamicTotals.avgDailyTransactions).toLocaleString('es-CO')}
+                        {eachDayOfInterval({ start: dateRange.from, end: dateRange.to }).filter(d => d <= new Date()).length > 0
+                          ? Math.round(zoneTotals.totalTransactions / eachDayOfInterval({ start: dateRange.from, end: dateRange.to }).filter(d => d <= new Date()).length).toLocaleString('es-CO')
+                          : '0'}
                       </p>
                     </div>
                     <div className="pt-1">
                       <p className="text-xs text-slate-500">
-                        Basado en {dynamicTotals.daysElapsedInRange} días
+                        {eachDayOfInterval({ start: dateRange.from, end: dateRange.to }).filter(d => d <= new Date()).length} días en período
                       </p>
                     </div>
                     <div className="pt-2 border-t border-white/10">
                       <p className="text-[10px] text-slate-400 italic leading-tight">
-                        Ritmo sostenido de {formatCurrency(dynamicTotals.avgDailySales * 7)} semanales
+                        Ritmo del período filtrado
                       </p>
                     </div>
                   </div>
                 </div>
               </motion.div>
 
-              {/* 4. Proyección Semana Actual + Proyección Mes */}
+              {/* 4. Proyección Período Filtrado */}
               <motion.div 
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
@@ -1568,36 +1600,36 @@ export default function ExecutiveDashboard() {
                 )}
                 <div className="relative z-10">
                   <p className="text-xs text-emerald-300 mb-2 font-bold uppercase tracking-wider">
-                    📈 Proyección
+                    📈 Proyección Período
                   </p>
                   <div className="space-y-2">
                     <div>
-                      <p className="text-xs text-slate-400 mb-1">Proyección Semana Actual</p>
-                      <p className="text-xl font-black text-white tabular-nums">
-                        {formatKPI(dynamicTotals.currentWeekProjection)}
-                      </p>
+                      <p className="text-xs text-slate-400 mb-1">Proyección Completa</p>
+                      <motion.p 
+                        className="text-xl font-black text-white tabular-nums"
+                        key={zoneTotals.totalProjection}
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ duration: 0.5 }}
+                      >
+                        {formatKPI(zoneTotals.totalProjection)}
+                      </motion.p>
                       <p className={`text-sm font-bold tabular-nums ${
-                        dynamicTotals.currentWeekBudget > 0 && ((dynamicTotals.currentWeekProjection/dynamicTotals.currentWeekBudget)*100) >= 100 
+                        zoneTotals.totalBudget > 0 && ((zoneTotals.totalProjection/zoneTotals.totalBudget)*100) >= 100 
                           ? 'text-emerald-400' : 'text-red-400'
                       }`}>
-                        {dynamicTotals.currentWeekBudget > 0 
-                          ? ((dynamicTotals.currentWeekProjection/dynamicTotals.currentWeekBudget)*100).toFixed(1) 
+                        {zoneTotals.totalBudget > 0 
+                          ? ((zoneTotals.totalProjection/zoneTotals.totalBudget)*100).toFixed(1) 
                           : '0.0'}% del PPT
                       </p>
                     </div>
                     <div className="h-px bg-white/10"></div>
                     <div>
-                      <p className="text-xs text-slate-400 mb-1">Proyección Cierre Mes</p>
-                      <p className="text-lg font-bold text-emerald-300 tabular-nums">
-                        {formatKPI(dynamicTotals.monthProjection)}
-                      </p>
-                      <p className={`text-xs font-bold tabular-nums ${
-                        dynamicTotals.totalMonthBudget > 0 && ((dynamicTotals.monthProjection/dynamicTotals.totalMonthBudget)*100) >= 100 
-                          ? 'text-emerald-400' : 'text-red-400'
+                      <p className="text-xs text-slate-400 mb-1">Déficit</p>
+                      <p className={`text-lg font-bold tabular-nums ${
+                        zoneTotals.totalBudget - zoneTotals.totalSales <= 0 ? 'text-emerald-400' : 'text-red-400'
                       }`}>
-                        {dynamicTotals.totalMonthBudget > 0 
-                          ? ((dynamicTotals.monthProjection/dynamicTotals.totalMonthBudget)*100).toFixed(1) 
-                          : '0.0'}%
+                        {formatKPI(Math.max(0, zoneTotals.totalBudget - zoneTotals.totalSales))}
                       </p>
                     </div>
                     <div className="pt-2 border-t border-white/10">
@@ -1621,9 +1653,17 @@ export default function ExecutiveDashboard() {
                   onMouseEnter={() => setHoveredStoreForChart(null)}
                   className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-xl rounded-lg p-2 border border-blue-500/20 cursor-pointer transition-all hover:border-blue-400/40 hover:shadow-lg hover:shadow-blue-500/20">
                   <p className="text-[10px] text-blue-300 mb-1">
-                    {dynamicTotals.isRetailWeek ? 'Venta Semana' : 'Venta Acumulada'}
+                    Venta Período
                   </p>
-                  <p className="text-lg font-black text-white tabular-nums">{formatCurrency(dynamicTotals.totalSales)}</p>
+                  <motion.p 
+                    className="text-lg font-black text-white tabular-nums"
+                    key={zoneTotals.totalSales}
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ duration: 0.4 }}
+                  >
+                    {formatCurrency(zoneTotals.totalSales)}
+                  </motion.p>
                   <ResponsiveContainer width="100%" height={25}>
                     <AreaChart data={dailySalesData.slice(-7)}>
                       <defs>
@@ -1651,7 +1691,7 @@ export default function ExecutiveDashboard() {
                     </ResponsiveContainer>
                     </motion.div>
 
-                {/* Brecha Acumulada */}
+                {/* Déficit del Período Filtrado */}
                 <motion.div 
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -1709,12 +1749,13 @@ export default function ExecutiveDashboard() {
                       >
                         <AlertTriangle className="w-4 h-4 text-red-400" />
                       </motion.div>
-                      <p className="text-xs text-red-300 font-bold uppercase tracking-wider">Déficit Acumulado</p>
+                      <p className="text-xs text-red-300 font-bold uppercase tracking-wider">Déficit Período</p>
                     </div>
                     <div className="space-y-2">
                       <div>
                         <motion.p 
                           className="text-xl font-black text-red-400 tabular-nums"
+                          key={zoneTotals.totalSales}
                           animate={criticalKPI === 'gap' ? {
                             x: [-1, 1, -1, 0],
                             scale: [1, 1.02, 1]
@@ -1725,15 +1766,15 @@ export default function ExecutiveDashboard() {
                             repeatDelay: 10
                           }}
                         >
-                          {formatKPI(Math.max(0, (currentZoneBudget?.sales_budget || monthlyTotals.totalBudget) - monthlyTotals.totalSales))}
+                          {formatKPI(Math.max(0, zoneTotals.totalBudget - zoneTotals.totalSales))}
                         </motion.p>
                         <p className="text-[10px] text-red-300">Brecha frente al presupuesto</p>
                       </div>
                       <div className="pt-1">
                         <p className="text-xl font-black text-red-300 tabular-nums">
-                          {((currentZoneBudget?.sales_budget || monthlyTotals.totalBudget) > 0 
-                            ? ((((currentZoneBudget?.sales_budget || monthlyTotals.totalBudget) - monthlyTotals.totalSales) / (currentZoneBudget?.sales_budget || monthlyTotals.totalBudget)) * 100).toFixed(1)
-                            : '0.0')}%
+                          {zoneTotals.totalBudget > 0 
+                            ? (((zoneTotals.totalBudget - zoneTotals.totalSales) / zoneTotals.totalBudget) * 100).toFixed(1)
+                            : '0.0'}%
                         </p>
                         <p className="text-[10px] text-slate-500">% Déficit del PPT</p>
                       </div>
@@ -1745,9 +1786,6 @@ export default function ExecutiveDashboard() {
                       >
                         <p className="text-[10px] text-red-300 italic leading-tight font-medium">
                           {getKPIInsight('gap')}
-                        </p>
-                        <p className="text-[9px] text-slate-500 mt-1">
-                          Cada día sin acción aumenta la brecha
                         </p>
                       </motion.div>
                     </div>
