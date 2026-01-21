@@ -7,6 +7,9 @@ import { createPageUrl } from '@/utils';
 import { STORES, getDisplayName } from '@/components/StoreSelector';
 import { useDateFilter } from '@/components/DateFilterContext';
 import { ArrowLeft, Search, TrendingUp, TrendingDown, Eye, Zap, Award, ArrowUpDown, ArrowUp, ArrowDown, BarChart3, Settings, X, Download, Filter, CalendarDays, AlertTriangle } from 'lucide-react';
+import DistrictModeSelector from '@/components/executive/DistrictModeSelector';
+import DistrictKPICard from '@/components/executive/DistrictKPICard';
+import StoresComparisonGrid from '@/components/executive/StoresComparisonGrid';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
@@ -1127,11 +1130,106 @@ export default function ExecutiveDashboard() {
       </Link>
 
       <div id="dashboard-scroll-container" className="w-full mx-auto px-3 sm:px-4 lg:px-6 py-4 relative z-10">
-        {/* Mode Selector */}
-        <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-white">Control de Distrito</h1>
+        {/* Header con Mode Selector */}
+        <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-white">Control de Distrito</h1>
+            <p className="text-sm text-slate-400 mt-1">{ZONE_NAME}</p>
+          </div>
           <DistrictModeSelector selectedMode={modeControl} onModeChange={setModeControl} />
         </div>
+
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+            {[1, 2, 3, 4, 5].map(i => (
+              <div key={i} className="bg-white/5 backdrop-blur-xl rounded-lg h-32 animate-pulse" />
+            ))}
+          </div>
+        ) : (
+          <>
+            {/* KPIs Principales del Distrito */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+              <DistrictKPICard
+                icon="💰"
+                label="Venta Distrito"
+                value={zoneTotals.totalSales}
+                budget={zoneTotals.totalBudget}
+                format="currency"
+              />
+              <DistrictKPICard
+                icon="📈"
+                label="Cumplimiento"
+                value={zoneTotals.totalBudget > 0 ? ((zoneTotals.totalSales / zoneTotals.totalBudget) * 100) : 0}
+                budget={100}
+                format="number"
+                unit="%"
+                isCritical={zoneTotals.totalBudget > 0 && ((zoneTotals.totalSales / zoneTotals.totalBudget) * 100) < 85}
+              />
+              <DistrictKPICard
+                icon="📊"
+                label="Venta Promedio"
+                value={eachDayOfInterval({ start: dateRange.from, end: dateRange.to }).filter(d => d <= new Date()).length > 0 
+                  ? zoneTotals.totalSales / eachDayOfInterval({ start: dateRange.from, end: dateRange.to }).filter(d => d <= new Date()).length 
+                  : 0}
+                format="currency"
+              />
+              <DistrictKPICard
+                icon="🧊"
+                label="TCs Promedio"
+                value={eachDayOfInterval({ start: dateRange.from, end: dateRange.to }).filter(d => d <= new Date()).length > 0 
+                  ? Math.round(zoneTotals.totalTransactions / eachDayOfInterval({ start: dateRange.from, end: dateRange.to }).filter(d => d <= new Date()).length)
+                  : 0}
+                format="number"
+              />
+              <DistrictKPICard
+                icon="🎯"
+                label="Ticket Promedio"
+                value={zoneTotals.totalTransactions > 0 ? zoneTotals.totalSales / zoneTotals.totalTransactions : 0}
+                format="currency"
+              />
+            </div>
+
+            {/* Comparativa de Tiendas */}
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-bold text-white">Desempeño por Tienda vs PPT</h2>
+                <div className="flex items-center gap-2">
+                  <Input
+                    placeholder="Buscar tienda..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-48 h-9 text-sm bg-white/10 border-white/20 text-white placeholder:text-slate-400"
+                  />
+                  <Button
+                    onClick={exportToExcel}
+                    size="sm"
+                    className="bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30 text-emerald-300"
+                  >
+                    <Download className="w-4 h-4 mr-1" />
+                    Excel
+                  </Button>
+                </div>
+              </div>
+              <StoresComparisonGrid 
+                stores={sortedStores.filter(s => s.hasData).map(store => ({
+                  id: store.code,
+                  name: store.name,
+                  sales: store.weekTotalSales,
+                  budget: store.weeklyBudget,
+                  transactionCount: store.weekTotalTransactions,
+                  avgTicket: store.weekTotalTransactions > 0 ? store.weekTotalSales / store.weekTotalTransactions : 0
+                }))}
+                onStoreSelect={(storeData) => {
+                  const fullStore = storesAnalysis.find(s => s.code === storeData.id);
+                  if (fullStore) {
+                    setSelectedStoreDetail(fullStore);
+                  }
+                }}
+              />
+            </div>
+          </>
+        )}
+
         {/* Botón Modo Edición */}
         <div className="flex justify-end mb-4">
           {!layoutEditMode && (
