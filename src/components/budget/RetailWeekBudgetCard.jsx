@@ -666,12 +666,6 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
                         return 1.0;
                       })()))}
                     </p>
-                    <p className={`text-sm lg:text-base font-bold ${
-                      budgetData.todayCompliance >= 100 ? 'text-emerald-300' :
-                      budgetData.todayCompliance >= 80 ? 'text-amber-300' : 'text-rose-300'
-                    }`}>
-                      {budgetData.todayCompliance.toFixed(1)}% de la meta
-                    </p>
                   </div>
                   
                   {/* Sparkline debajo del número */}
