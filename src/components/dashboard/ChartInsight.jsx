@@ -12,10 +12,25 @@ export default function ChartInsight({ data, metric, formatCurrency, comparisonD
       };
     }
 
-    // Filtrar datos válidos (mayores a 0)
+    // Filtrar datos válidos (mayores a 0) Y que NO sean del futuro
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
     const validData = data.filter(d => {
       const value = d[metric] || d.ventas || d.sales || 0;
-      return value > 0;
+      // Verificar que tenga valor Y que no sea fecha futura
+      if (value <= 0) return false;
+      
+      // Si tiene fecha completa, verificar que no sea futuro
+      if (d.fullDate || d.date) {
+        try {
+          const dataDate = new Date(d.fullDate || d.date);
+          return dataDate <= today;
+        } catch {
+          return true; // Si no se puede parsear, incluir de todos modos
+        }
+      }
+      return true;
     });
 
     if (validData.length === 0) {
