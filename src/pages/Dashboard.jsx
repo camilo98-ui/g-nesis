@@ -614,7 +614,6 @@ export default function Dashboard() {
     const now = new Date();
     const retailMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 29);
     const gregorianStart = startOfMonth(now);
-    const gregorianEnd = endOfMonth(now);
     
     // Determinar rango: si hay filtro usarlo, si no, según modo
     let fromDate, toDate;
@@ -627,13 +626,8 @@ export default function Dashboard() {
       toDate = dateRange.to;
     } else {
       // Sin filtro: usar modo gregoriano o retail
-      if (gregorianMode) {
-        fromDate = gregorianStart;
-        toDate = gregorianEnd; // CORRECCIÓN: Usar fin del mes gregoriano completo
-      } else {
-        fromDate = retailMonthStart;
-        toDate = now;
-      }
+      fromDate = gregorianMode ? gregorianStart : retailMonthStart;
+      toDate = now;
     }
 
     const fromStr = format(fromDate, 'yyyy-MM-dd');
@@ -695,7 +689,6 @@ export default function Dashboard() {
   const monthTotals = useMemo(() => {
     const now = new Date();
     const gregorianStart = startOfMonth(now);
-    const gregorianEnd = endOfMonth(now);
     
     // Determinar rango: si hay filtro activo, usarlo; si no, según modo
     let fromDate, toDate;
@@ -708,13 +701,8 @@ export default function Dashboard() {
       toDate = dateRange.to;
     } else {
       // Sin filtro: según modo gregoriano o retail
-      if (gregorianMode) {
-        fromDate = gregorianStart;
-        toDate = gregorianEnd; // CORRECCIÓN: Usar fin del mes gregoriano completo
-      } else {
-        fromDate = new Date(now.getFullYear(), now.getMonth() - 1, 29);
-        toDate = now;
-      }
+      fromDate = gregorianMode ? gregorianStart : new Date(now.getFullYear(), now.getMonth() - 1, 29);
+      toDate = now;
     }
     
     const fromStr = format(fromDate, 'yyyy-MM-dd');
@@ -748,7 +736,6 @@ export default function Dashboard() {
     const now = new Date();
     const retailMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 29);
     const gregorianStart = startOfMonth(now);
-    const gregorianEnd = endOfMonth(now);
     
     // Determinar rango a mostrar: según filtros o modo
     let startDate, endDate;
@@ -763,13 +750,8 @@ export default function Dashboard() {
       endDate = dateRange.to;
     } else {
       // Sin filtro: según modo gregoriano o retail
-      if (gregorianMode) {
-        startDate = gregorianStart;
-        endDate = gregorianEnd; // CORRECCIÓN: Usar fin del mes gregoriano completo
-      } else {
-        startDate = retailMonthStart;
-        endDate = now;
-      }
+      startDate = gregorianMode ? gregorianStart : retailMonthStart;
+      endDate = now;
     }
     
     // Generar días del rango
