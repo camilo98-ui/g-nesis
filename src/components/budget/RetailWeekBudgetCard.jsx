@@ -114,8 +114,24 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth(); // 0-11
     
-    const retailMonthStart = new Date(currentYear, currentMonth - 1, 29);
-    const retailMonthEnd = new Date(currentYear, currentMonth, 28);
+    // Calendario retail basado en semanas (según tabla proporcionada)
+    const retailCalendar = {
+      0: { start: new Date(currentYear - 1, 11, 29), end: new Date(currentYear, 1, 1) }, // Enero: 29 dic - 1 feb
+      1: { start: new Date(currentYear, 1, 2), end: new Date(currentYear, 2, 1) }, // Febrero: 2 feb - 1 mar
+      2: { start: new Date(currentYear, 2, 2), end: new Date(currentYear, 2, 29) }, // Marzo: 2 mar - 29 mar
+      3: { start: new Date(currentYear, 2, 30), end: new Date(currentYear, 4, 3) }, // Abril: 30 mar - 3 may
+      4: { start: new Date(currentYear, 4, 4), end: new Date(currentYear, 4, 31) }, // Mayo: 4 may - 31 may
+      5: { start: new Date(currentYear, 5, 1), end: new Date(currentYear, 6, 5) }, // Junio: 1 jun - 5 jul
+      6: { start: new Date(currentYear, 6, 6), end: new Date(currentYear, 7, 2) }, // Julio: 6 jul - 2 ago
+      7: { start: new Date(currentYear, 7, 3), end: new Date(currentYear, 7, 30) }, // Agosto: 3 ago - 30 ago
+      8: { start: new Date(currentYear, 7, 31), end: new Date(currentYear, 8, 27) }, // Septiembre: 31 ago - 27 sep
+      9: { start: new Date(currentYear, 8, 28), end: new Date(currentYear, 10, 1) }, // Octubre: 28 sep - 1 nov
+      10: { start: new Date(currentYear, 10, 2), end: new Date(currentYear, 10, 29) }, // Noviembre: 2 nov - 29 nov
+      11: { start: new Date(currentYear, 10, 30), end: new Date(currentYear + 1, 0, 2) } // Diciembre: 30 nov - 2 ene
+    };
+    
+    const retailMonthStart = retailCalendar[currentMonth].start;
+    const retailMonthEnd = retailCalendar[currentMonth].end;
     const gregorianStart = startOfMonth(now);
     const gregorianEnd = endOfMonth(now);
     
