@@ -612,7 +612,26 @@ export default function Dashboard() {
     if (!dailySales.length) return [];
 
     const now = new Date();
-    const retailMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 29);
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth(); // 0-11
+    
+    // Calendario retail basado en semanas
+    const retailCalendar = {
+      0: { start: new Date(currentYear - 1, 11, 29), end: new Date(currentYear, 1, 1) },
+      1: { start: new Date(currentYear, 1, 2), end: new Date(currentYear, 2, 1) },
+      2: { start: new Date(currentYear, 2, 2), end: new Date(currentYear, 2, 29) },
+      3: { start: new Date(currentYear, 2, 30), end: new Date(currentYear, 4, 3) },
+      4: { start: new Date(currentYear, 4, 4), end: new Date(currentYear, 4, 31) },
+      5: { start: new Date(currentYear, 5, 1), end: new Date(currentYear, 6, 5) },
+      6: { start: new Date(currentYear, 6, 6), end: new Date(currentYear, 7, 2) },
+      7: { start: new Date(currentYear, 7, 3), end: new Date(currentYear, 7, 30) },
+      8: { start: new Date(currentYear, 7, 31), end: new Date(currentYear, 8, 27) },
+      9: { start: new Date(currentYear, 8, 28), end: new Date(currentYear, 10, 1) },
+      10: { start: new Date(currentYear, 10, 2), end: new Date(currentYear, 10, 29) },
+      11: { start: new Date(currentYear, 10, 30), end: new Date(currentYear + 1, 0, 2) }
+    };
+    
+    const retailMonthStart = retailCalendar[currentMonth].start;
     const gregorianStart = startOfMonth(now);
     
     // Determinar rango: si hay filtro usarlo, si no, según modo
@@ -688,6 +707,26 @@ export default function Dashboard() {
   // Totales ACUMULADOS - Usa el filtro activo o el mes según modo
   const monthTotals = useMemo(() => {
     const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth(); // 0-11
+    
+    // Calendario retail basado en semanas
+    const retailCalendar = {
+      0: { start: new Date(currentYear - 1, 11, 29), end: new Date(currentYear, 1, 1) },
+      1: { start: new Date(currentYear, 1, 2), end: new Date(currentYear, 2, 1) },
+      2: { start: new Date(currentYear, 2, 2), end: new Date(currentYear, 2, 29) },
+      3: { start: new Date(currentYear, 2, 30), end: new Date(currentYear, 4, 3) },
+      4: { start: new Date(currentYear, 4, 4), end: new Date(currentYear, 4, 31) },
+      5: { start: new Date(currentYear, 5, 1), end: new Date(currentYear, 6, 5) },
+      6: { start: new Date(currentYear, 6, 6), end: new Date(currentYear, 7, 2) },
+      7: { start: new Date(currentYear, 7, 3), end: new Date(currentYear, 7, 30) },
+      8: { start: new Date(currentYear, 7, 31), end: new Date(currentYear, 8, 27) },
+      9: { start: new Date(currentYear, 8, 28), end: new Date(currentYear, 10, 1) },
+      10: { start: new Date(currentYear, 10, 2), end: new Date(currentYear, 10, 29) },
+      11: { start: new Date(currentYear, 10, 30), end: new Date(currentYear + 1, 0, 2) }
+    };
+    
+    const retailMonthStart = retailCalendar[currentMonth].start;
     const gregorianStart = startOfMonth(now);
     
     // Determinar rango: si hay filtro activo, usarlo; si no, según modo
@@ -701,7 +740,7 @@ export default function Dashboard() {
       toDate = dateRange.to;
     } else {
       // Sin filtro: según modo gregoriano o retail
-      fromDate = gregorianMode ? gregorianStart : new Date(now.getFullYear(), now.getMonth() - 1, 29);
+      fromDate = gregorianMode ? gregorianStart : retailMonthStart;
       toDate = now;
     }
     
@@ -734,7 +773,26 @@ export default function Dashboard() {
 
   const chartData = useMemo(() => {
     const now = new Date();
-    const retailMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 29);
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth(); // 0-11
+    
+    // Calendario retail basado en semanas
+    const retailCalendar = {
+      0: { start: new Date(currentYear - 1, 11, 29), end: new Date(currentYear, 1, 1) },
+      1: { start: new Date(currentYear, 1, 2), end: new Date(currentYear, 2, 1) },
+      2: { start: new Date(currentYear, 2, 2), end: new Date(currentYear, 2, 29) },
+      3: { start: new Date(currentYear, 2, 30), end: new Date(currentYear, 4, 3) },
+      4: { start: new Date(currentYear, 4, 4), end: new Date(currentYear, 4, 31) },
+      5: { start: new Date(currentYear, 5, 1), end: new Date(currentYear, 6, 5) },
+      6: { start: new Date(currentYear, 6, 6), end: new Date(currentYear, 7, 2) },
+      7: { start: new Date(currentYear, 7, 3), end: new Date(currentYear, 7, 30) },
+      8: { start: new Date(currentYear, 7, 31), end: new Date(currentYear, 8, 27) },
+      9: { start: new Date(currentYear, 8, 28), end: new Date(currentYear, 10, 1) },
+      10: { start: new Date(currentYear, 10, 2), end: new Date(currentYear, 10, 29) },
+      11: { start: new Date(currentYear, 10, 30), end: new Date(currentYear + 1, 0, 2) }
+    };
+    
+    const retailMonthStart = retailCalendar[currentMonth].start;
     const gregorianStart = startOfMonth(now);
     
     // Determinar rango a mostrar: según filtros o modo
@@ -835,10 +893,28 @@ export default function Dashboard() {
   const projections = useMemo(() => {
     if (!currentBudget?.sales_budget) return null;
     const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth(); // 0-11
+    
+    // Calendario retail basado en semanas
+    const retailCalendar = {
+      0: { start: new Date(currentYear - 1, 11, 29), end: new Date(currentYear, 1, 1) },
+      1: { start: new Date(currentYear, 1, 2), end: new Date(currentYear, 2, 1) },
+      2: { start: new Date(currentYear, 2, 2), end: new Date(currentYear, 2, 29) },
+      3: { start: new Date(currentYear, 2, 30), end: new Date(currentYear, 4, 3) },
+      4: { start: new Date(currentYear, 4, 4), end: new Date(currentYear, 4, 31) },
+      5: { start: new Date(currentYear, 5, 1), end: new Date(currentYear, 6, 5) },
+      6: { start: new Date(currentYear, 6, 6), end: new Date(currentYear, 7, 2) },
+      7: { start: new Date(currentYear, 7, 3), end: new Date(currentYear, 7, 30) },
+      8: { start: new Date(currentYear, 7, 31), end: new Date(currentYear, 8, 27) },
+      9: { start: new Date(currentYear, 8, 28), end: new Date(currentYear, 10, 1) },
+      10: { start: new Date(currentYear, 10, 2), end: new Date(currentYear, 10, 29) },
+      11: { start: new Date(currentYear, 10, 30), end: new Date(currentYear + 1, 0, 2) }
+    };
     
     // Determinar inicio/fin según modo
-    const monthStart = gregorianMode ? startOfMonth(now) : new Date(now.getFullYear(), now.getMonth() - 1, 29);
-    const monthEnd = gregorianMode ? endOfMonth(now) : new Date(now.getFullYear(), now.getMonth(), 28);
+    const monthStart = gregorianMode ? startOfMonth(now) : retailCalendar[currentMonth].start;
+    const monthEnd = gregorianMode ? endOfMonth(now) : retailCalendar[currentMonth].end;
     const totalDays = differenceInDays(monthEnd, monthStart) + 1;
     
     // Usar SOLO datos del período según modo
