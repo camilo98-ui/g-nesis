@@ -559,7 +559,7 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
     return historyData;
   }, [weatherData, dailySales, dateRange, showForecast, forecastData]);
 
-  // Estadísticas
+  // Estadísticas avanzadas con correlaciones
   const stats = useMemo(() => {
     if (!chartData.length) return null;
 
@@ -576,6 +576,37 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
     const bestDay = withSales.reduce((best, d) => d.sales > (best?.sales || 0) ? d : best, null);
     const worstDay = withSales.reduce((worst, d) => d.sales < (worst?.sales || Infinity) ? d : worst, null);
 
+    // Correlación temperatura-ventas (Pearson)
+    const meanTemp = withSales.reduce((s, d) => s + d.temperature, 0) / withSales.length;
+    const meanSales = avgTotal;
+    const numerator = withSales.reduce((s, d) => s + (d.temperature - meanTemp) * (d.sales - meanSales), 0);
+    const denomTemp = Math.sqrt(withSales.reduce((s, d) => s + Math.pow(d.temperature - meanTemp, 2), 0));
+    const denomSales = Math.sqrt(withSales.reduce((s, d) => s + Math.pow(d.sales - meanSales, 2), 0));
+    const tempCorrelation = (denomTemp && denomSales) ? numerator / (denomTemp * denomSales) : 0;
+
+    // Análisis por rangos de temperatura
+    const tempRanges = {
+      cold: withSales.filter(d => d.temperature < 16), // <16°C
+      mild: withSales.filter(d => d.temperature >= 16 && d.temperature < 21), // 16-21°C
+      warm: withSales.filter(d => d.temperature >= 21 && d.temperature < 25), // 21-25°C
+      hot: withSales.filter(d => d.temperature >= 25) // >25°C
+    };
+
+    const avgByTemp = {
+      cold: tempRanges.cold.length ? tempRanges.cold.reduce((s, d) => s + d.sales, 0) / tempRanges.cold.length : 0,
+      mild: tempRanges.mild.length ? tempRanges.mild.reduce((s, d) => s + d.sales, 0) / tempRanges.mild.length : 0,
+      warm: tempRanges.warm.length ? tempRanges.warm.reduce((s, d) => s + d.sales, 0) / tempRanges.warm.length : 0,
+      hot: tempRanges.hot.length ? tempRanges.hot.reduce((s, d) => s + d.sales, 0) / tempRanges.hot.length : 0,
+    };
+
+    const optimalTemp = Object.entries(avgByTemp).reduce((best, [range, avg]) => 
+      avg > best.avg ? { range, avg } : best, { range: 'none', avg: 0 });
+
+    // Análisis de precipitación
+    const rainyDays = withSales.filter(d => d.precipitation > 0);
+    const heavyRain = rainyDays.filter(d => d.precipitation > 10);
+    const lightRain = rainyDays.filter(d => d.precipitation > 0 && d.precipitation <= 10);
+
     return {
       avgTotal,
       avgSunny,
@@ -588,7 +619,15 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
       rainyImpact: avgTotal > 0 ? ((avgRainy - avgTotal) / avgTotal * 100) : 0,
       cloudyImpact: avgTotal > 0 ? ((avgCloudy - avgTotal) / avgTotal * 100) : 0,
       bestDay,
-      worstDay
+      worstDay,
+      tempCorrelation,
+      tempRanges,
+      avgByTemp,
+      optimalTemp,
+      heavyRainDays: heavyRain.length,
+      lightRainDays: lightRain.length,
+      avgHeavyRain: heavyRain.length ? heavyRain.reduce((s, d) => s + d.sales, 0) / heavyRain.length : 0,
+      avgLightRain: lightRain.length ? lightRain.reduce((s, d) => s + d.sales, 0) / lightRain.length : 0
     };
   }, [chartData]);
 
@@ -696,67 +735,103 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
 
       {/* KPIs Financieros Críticos - Siempre visibles */}
       {financialMetrics && stats && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {/* Impacto Neto */}
           <motion.button
             onClick={() => setShowKPIDetail('net_impact')}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             whileHover={{ scale: 1.02 }}
-            className="relative bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 overflow-hidden cursor-pointer text-left"
+            className="relative bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl rounded-2xl p-5 border border-slate-700/50 overflow-hidden cursor-pointer text-left"
             style={{ boxShadow: '0 10px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)' }}
           >
             <motion.div
-              className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl"
+              className="absolute top-0 right-0 w-24 h-24 bg-purple-500/10 rounded-full blur-3xl"
               animate={{ scale: [1, 1.3, 1] }}
               transition={{ duration: 4, repeat: Infinity }}
             />
             <div className="relative z-10">
-              <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Impacto Neto del Clima</p>
+              <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1.5">Impacto Neto</p>
               <motion.p 
-                className={`text-4xl font-black mb-1 ${financialMetrics.netImpact >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}
+                className={`text-3xl font-black mb-1 ${financialMetrics.netImpact >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}
                 key={financialMetrics.netImpact}
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
               >
                 {financialMetrics.netImpact >= 0 ? '+' : '−'}{formatCurrency(Math.abs(financialMetrics.netImpact))}
               </motion.p>
-              <p className="text-slate-400 text-xs">
-                {financialMetrics.netImpact >= 0 ? 
-                  `Sol generó +${formatCurrency(financialMetrics.sunnyGain)} adicionales` :
-                  `Lluvia impactó −${formatCurrency(financialMetrics.rainyLoss)}`
-                }
+              <p className="text-slate-400 text-[10px]">
+                {financialMetrics.netImpact >= 0 ? '☀️ Clima favorable' : '🌧️ Clima adverso'}
               </p>
             </div>
           </motion.button>
 
-          {/* Variación Porcentual */}
+          {/* Correlación Temperatura */}
           <motion.button
-            onClick={() => setShowKPIDetail('deviation')}
+            onClick={() => setShowKPIDetail('temperature')}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
             whileHover={{ scale: 1.02 }}
-            className="relative bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 overflow-hidden cursor-pointer text-left"
+            className="relative bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl rounded-2xl p-5 border border-slate-700/50 overflow-hidden cursor-pointer text-left"
             style={{ boxShadow: '0 10px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)' }}
           >
             <motion.div
-              className="absolute bottom-0 left-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl"
+              className="absolute bottom-0 left-0 w-24 h-24 bg-orange-500/10 rounded-full blur-3xl"
               animate={{ scale: [1, 1.2, 1] }}
               transition={{ duration: 3, repeat: Infinity, delay: 1 }}
             />
             <div className="relative z-10">
-              <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Impacto Clima Nublado</p>
+              <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1.5">Correlación Temp</p>
               <motion.p 
-                className="text-4xl font-black mb-1 text-slate-400"
-                key={stats.cloudyImpact}
+                className={`text-3xl font-black mb-1 ${
+                  Math.abs(stats.tempCorrelation) > 0.5 ? 'text-orange-400' : 
+                  Math.abs(stats.tempCorrelation) > 0.3 ? 'text-amber-400' : 
+                  'text-slate-400'
+                }`}
+                key={stats.tempCorrelation}
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
               >
-                {stats.cloudyImpact >= 0 ? '+' : '−'}{Math.abs(stats.cloudyImpact).toFixed(0)}%
+                {(stats.tempCorrelation * 100).toFixed(0)}%
               </motion.p>
-              <p className="text-slate-400 text-xs">
-                ☁️ Nublado vs día promedio
+              <p className="text-slate-400 text-[10px]">
+                {Math.abs(stats.tempCorrelation) > 0.5 ? '🔥 Fuerte' : 
+                 Math.abs(stats.tempCorrelation) > 0.3 ? '📊 Moderada' : 
+                 '➖ Débil'}
+              </p>
+            </div>
+          </motion.button>
+
+          {/* Temperatura Óptima */}
+          <motion.button
+            onClick={() => setShowKPIDetail('optimal')}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            whileHover={{ scale: 1.02 }}
+            className="relative bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl rounded-2xl p-5 border border-slate-700/50 overflow-hidden cursor-pointer text-left"
+            style={{ boxShadow: '0 10px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)' }}
+          >
+            <motion.div
+              className="absolute top-0 right-0 w-24 h-24 bg-amber-500/10 rounded-full blur-3xl"
+              animate={{ scale: [1, 1.3, 1] }}
+              transition={{ duration: 4, repeat: Infinity, delay: 0.5 }}
+            />
+            <div className="relative z-10">
+              <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1.5">Temp Óptima</p>
+              <motion.p 
+                className="text-3xl font-black mb-1 text-amber-400"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+              >
+                {stats.optimalTemp.range === 'cold' ? '<16°C' :
+                 stats.optimalTemp.range === 'mild' ? '16-21°C' :
+                 stats.optimalTemp.range === 'warm' ? '21-25°C' :
+                 stats.optimalTemp.range === 'hot' ? '>25°C' : 'N/A'}
+              </motion.p>
+              <p className="text-slate-400 text-[10px]">
+                {formatCurrency(stats.optimalTemp.avg)} promedio
               </p>
             </div>
           </motion.button>
@@ -771,18 +846,18 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
             whileHover={{ scale: 1.02 }}
-            className="relative bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 overflow-hidden cursor-pointer text-left"
+            className="relative bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl rounded-2xl p-5 border border-slate-700/50 overflow-hidden cursor-pointer text-left"
             style={{ boxShadow: '0 10px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)' }}
           >
             <motion.div
-              className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-3xl"
+              className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/10 rounded-full blur-3xl"
               animate={{ scale: [1, 1.3, 1] }}
               transition={{ duration: 5, repeat: Infinity }}
             />
             <div className="relative z-10">
-              <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Proyección 7 Días</p>
+              <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1.5">Proyección 7 Días</p>
               <motion.p 
-                className={`text-4xl font-black mb-1 ${
+                className={`text-3xl font-black mb-1 ${
                   !showForecast ? 'text-slate-500' :
                   financialMetrics.forecastVariation >= 0 ? 'text-cyan-400' : 'text-orange-400'
                 }`}
@@ -790,16 +865,16 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
               >
-                {!showForecast ? 'Clic para ver' : formatCurrency(financialMetrics.forecastTotal)}
+                {!showForecast ? '👆 Ver' : formatCurrency(financialMetrics.forecastTotal)}
               </motion.p>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 flex-wrap">
                 {showForecast && (
-                  <span className={`text-xs font-bold ${financialMetrics.forecastVariation >= 0 ? 'text-cyan-300' : 'text-orange-300'}`}>
-                    {financialMetrics.forecastVariation >= 0 ? '+' : ''}{financialMetrics.forecastVariation.toFixed(1)}%
+                  <span className={`text-[10px] font-bold ${financialMetrics.forecastVariation >= 0 ? 'text-cyan-300' : 'text-orange-300'}`}>
+                    {financialMetrics.forecastVariation >= 0 ? '+' : ''}{financialMetrics.forecastVariation.toFixed(0)}%
                   </span>
                 )}
                 {showForecast && (
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold border" style={{
+                  <span className="px-1.5 py-0.5 rounded-full text-[9px] font-bold border" style={{
                     backgroundColor: financialMetrics.riskLevel === 'alto' ? 'rgba(239, 68, 68, 0.2)' :
                                      financialMetrics.riskLevel === 'medio' ? 'rgba(251, 146, 60, 0.2)' :
                                      'rgba(34, 197, 94, 0.2)',
@@ -810,7 +885,7 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
                                  financialMetrics.riskLevel === 'medio' ? 'rgba(251, 146, 60, 0.3)' :
                                  'rgba(34, 197, 94, 0.3)'
                   }}>
-                    Riesgo {financialMetrics.riskLevel}
+                    {financialMetrics.riskLevel}
                   </span>
                 )}
               </div>
@@ -1426,13 +1501,13 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
               </div>
             )}
 
-            {/* Comparativa cuantitativa */}
+            {/* Comparativa cuantitativa mejorada */}
             <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-4 border border-slate-700/50">
-              <div className="flex items-start gap-3">
+              <div className="flex items-start gap-3 mb-4">
                 <BarChart3 className="w-5 h-5 text-purple-400 mt-0.5 flex-shrink-0" />
                 <div className="flex-1">
-                  <p className="text-white font-bold text-sm mb-3">Comparativa de rendimiento por clima</p>
-                  <div className="grid grid-cols-3 gap-3">
+                  <p className="text-white font-bold text-sm mb-3">Comparativa por Clima</p>
+                  <div className="grid grid-cols-3 gap-3 mb-4">
                     <div className="text-center">
                       <div className="flex items-center justify-center gap-1 mb-1">
                         <Sun className="w-4 h-4 text-amber-400" />
@@ -1442,6 +1517,7 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
                       <p className={`text-xs font-bold mt-0.5 ${stats.sunnyImpact >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                         {stats.sunnyImpact >= 0 ? '+' : ''}{stats.sunnyImpact.toFixed(0)}%
                       </p>
+                      <p className="text-[9px] text-slate-400 mt-1">{stats.sunnyCount} días</p>
                     </div>
                     <div className="text-center">
                       <div className="flex items-center justify-center gap-1 mb-1">
@@ -1452,6 +1528,7 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
                       <p className={`text-xs font-bold mt-0.5 ${stats.rainyImpact >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                         {stats.rainyImpact >= 0 ? '+' : ''}{stats.rainyImpact.toFixed(0)}%
                       </p>
+                      <p className="text-[9px] text-slate-400 mt-1">{stats.rainyCount} días</p>
                     </div>
                     <div className="text-center">
                       <div className="flex items-center justify-center gap-1 mb-1">
@@ -1462,31 +1539,83 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
                       <p className={`text-xs font-bold mt-0.5 ${stats.cloudyImpact >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                         {stats.cloudyImpact >= 0 ? '+' : ''}{stats.cloudyImpact.toFixed(0)}%
                       </p>
+                      <p className="text-[9px] text-slate-400 mt-1">{stats.cloudyCount} días</p>
                     </div>
                   </div>
+
+                  {/* Análisis de intensidad de lluvia */}
+                  {stats.rainyCount > 0 && (
+                    <div className="border-t border-slate-700/50 pt-3">
+                      <p className="text-slate-300 text-xs font-bold mb-2">Impacto por Intensidad de Lluvia</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="bg-slate-700/30 rounded-lg p-2 text-center">
+                          <p className="text-blue-300 text-[10px] mb-1">🌦️ Lluvia Ligera</p>
+                          <p className="text-white font-bold text-sm">{formatCurrency(stats.avgLightRain).slice(0, -3)}</p>
+                          <p className="text-[9px] text-slate-400">{stats.lightRainDays} días</p>
+                        </div>
+                        <div className="bg-slate-700/30 rounded-lg p-2 text-center">
+                          <p className="text-blue-400 text-[10px] mb-1">🌧️ Lluvia Fuerte</p>
+                          <p className="text-white font-bold text-sm">{formatCurrency(stats.avgHeavyRain).slice(0, -3)}</p>
+                          <p className="text-[9px] text-slate-400">{stats.heavyRainDays} días</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
 
-            {/* Acción recomendada */}
-            <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 backdrop-blur-sm rounded-xl p-4 border border-purple-500/20">
-              <div className="flex items-start gap-3">
-                <motion.div
-                  animate={{ y: [0, -3, 0] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
-                  <TrendingUp className="w-5 h-5 text-purple-400 mt-0.5 flex-shrink-0" />
-                </motion.div>
-                <div className="flex-1">
-                  <p className="text-purple-300 font-bold text-sm mb-1">Acción recomendada</p>
-                  <p className="text-slate-300 text-sm leading-relaxed">
-                    {Math.abs(stats.rainyImpact) > Math.abs(stats.sunnyImpact) && stats.rainyImpact < -10 ?
-                      `Prioridad: Estrategia anti-lluvia. Cada día lluvioso pierdes ~${formatCurrency(Math.abs(stats.avgRainy - stats.avgTotal))}. Implementa delivery, promociones indoor y combos para llevar.` :
-                      Math.abs(stats.sunnyImpact) > Math.abs(stats.rainyImpact) && stats.sunnyImpact > 10 ?
-                      `Maximiza días soleados: cada día genera +${formatCurrency(stats.avgSunny - stats.avgTotal)}. Aumenta inventario, extiende horarios y promociona productos refrescantes.` :
-                      `El clima tiene impacto moderado (±${Math.max(Math.abs(stats.rainyImpact), Math.abs(stats.sunnyImpact)).toFixed(0)}%). Enfócate en optimización operacional, marketing y experiencia de cliente.`
-                    }
-                  </p>
+            {/* Acciones recomendadas - Ahora basadas en pronóstico */}
+            <div className="grid md:grid-cols-2 gap-3">
+              {/* Estrategia de corto plazo */}
+              <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-sm rounded-xl p-4 border border-purple-500/20">
+                <div className="flex items-start gap-3">
+                  <motion.div
+                    animate={{ y: [0, -3, 0] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    <TrendingUp className="w-5 h-5 text-purple-400 mt-0.5 flex-shrink-0" />
+                  </motion.div>
+                  <div className="flex-1">
+                    <p className="text-purple-300 font-bold text-sm mb-1">Estrategia Inmediata</p>
+                    <p className="text-slate-300 text-sm leading-relaxed">
+                      {showForecast && financialMetrics.rainyForecast > 2 ?
+                        `⚠️ ${financialMetrics.rainyForecast} días lluviosos próximos. Activa: delivery/domicilios, promociones "clima lluvioso", combos para llevar, marketing digital. Prepara inventario para productos indoor.` :
+                        showForecast && financialMetrics.rainyForecast === 0 ?
+                        `☀️ 7 días favorables. Maximiza: stock de productos refrescantes, horarios extendidos, promociones outdoor, eventos especiales. Proyección +${financialMetrics.forecastVariation.toFixed(0)}%.` :
+                        Math.abs(stats.rainyImpact) > Math.abs(stats.sunnyImpact) && stats.rainyImpact < -10 ?
+                        `🌧️ Alta vulnerabilidad a lluvia (${stats.rainyImpact.toFixed(0)}%). Implementa delivery, promociones indoor, combos para llevar.` :
+                        `☀️ Clima favorable domina (${stats.sunnyImpact.toFixed(0)}%). Maximiza días soleados con stock reforzado y horarios extendidos.`
+                      }
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Optimización por temperatura */}
+              <div className="bg-gradient-to-br from-orange-500/10 to-red-500/10 backdrop-blur-sm rounded-xl p-4 border border-orange-500/20">
+                <div className="flex items-start gap-3">
+                  <Thermometer className="w-5 h-5 text-orange-400 mt-0.5 flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-orange-300 font-bold text-sm mb-1">Optimización por Temperatura</p>
+                    <p className="text-slate-300 text-sm leading-relaxed">
+                      {Math.abs(stats.tempCorrelation) > 0.5 ?
+                        `🔥 Correlación fuerte (${(stats.tempCorrelation * 100).toFixed(0)}%). Rango óptimo: ${
+                          stats.optimalTemp.range === 'cold' ? 'días frescos <16°C' :
+                          stats.optimalTemp.range === 'mild' ? 'clima templado 16-21°C' :
+                          stats.optimalTemp.range === 'warm' ? 'días cálidos 21-25°C' :
+                          'días calurosos >25°C'
+                        }. Ajusta mix de productos según pronóstico térmico.` :
+                        Math.abs(stats.tempCorrelation) > 0.3 ?
+                        `📊 Correlación moderada (${(stats.tempCorrelation * 100).toFixed(0)}%). La temperatura ${stats.tempCorrelation > 0 ? 'favorece' : 'reduce'} ventas. Monitorea rangos ${
+                          stats.optimalTemp.range === 'cold' ? '<16°C' :
+                          stats.optimalTemp.range === 'mild' ? '16-21°C' :
+                          stats.optimalTemp.range === 'warm' ? '21-25°C' : '>25°C'
+                        } para mejores resultados.` :
+                        `➖ Correlación débil (${(stats.tempCorrelation * 100).toFixed(0)}%). La temperatura no es determinante. Prioriza factores operacionales y marketing sobre clima.`
+                      }
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1558,83 +1687,285 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
                 </div>
               )}
 
-              {showKPIDetail === 'deviation' && stats && (
+              {showKPIDetail === 'temperature' && stats && (
                 <div className="space-y-4">
                   <div className="bg-slate-800/50 rounded-xl p-5 border border-slate-700">
-                    <p className="text-slate-300 text-sm mb-4">Comparativa de ventas en días nublados vs promedio general</p>
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center">
-                        <span className="text-slate-400 text-sm">Venta promedio general:</span>
-                        <span className="text-white font-bold text-lg">{formatCurrency(stats.avgTotal)}</span>
+                    <div className="flex items-center gap-2 mb-4">
+                      <Thermometer className="w-5 h-5 text-orange-400" />
+                      <p className="text-white font-bold">Correlación Temperatura-Ventas</p>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      {/* Coeficiente de correlación */}
+                      <div className="bg-slate-700/30 rounded-lg p-4">
+                        <p className="text-slate-300 text-sm mb-2">Coeficiente de Pearson</p>
+                        <div className="flex items-center gap-3">
+                          <span className={`text-4xl font-black ${
+                            Math.abs(stats.tempCorrelation) > 0.7 ? 'text-orange-400' :
+                            Math.abs(stats.tempCorrelation) > 0.5 ? 'text-amber-400' :
+                            Math.abs(stats.tempCorrelation) > 0.3 ? 'text-yellow-400' :
+                            'text-slate-400'
+                          }`}>
+                            {(stats.tempCorrelation * 100).toFixed(0)}%
+                          </span>
+                          <div className="flex-1">
+                            <div className="h-3 bg-slate-600/30 rounded-full overflow-hidden">
+                              <motion.div
+                                initial={{ width: 0 }}
+                                animate={{ width: `${Math.abs(stats.tempCorrelation) * 100}%` }}
+                                className={`h-full ${
+                                  Math.abs(stats.tempCorrelation) > 0.5 ? 'bg-gradient-to-r from-orange-500 to-red-500' :
+                                  Math.abs(stats.tempCorrelation) > 0.3 ? 'bg-gradient-to-r from-amber-500 to-orange-500' :
+                                  'bg-gradient-to-r from-slate-400 to-slate-500'
+                                }`}
+                              />
+                            </div>
+                            <p className="text-[10px] text-slate-400 mt-1">
+                              {Math.abs(stats.tempCorrelation) > 0.7 ? 'Correlación muy fuerte' :
+                               Math.abs(stats.tempCorrelation) > 0.5 ? 'Correlación fuerte' :
+                               Math.abs(stats.tempCorrelation) > 0.3 ? 'Correlación moderada' :
+                               'Correlación débil'}
+                            </p>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-slate-400 text-sm">Venta promedio días nublados:</span>
-                        <span className="text-slate-300 font-bold text-lg">{formatCurrency(stats.avgCloudy)}</span>
+
+                      {/* Ventas por rango de temperatura */}
+                      <div>
+                        <p className="text-slate-300 text-sm font-bold mb-3">Rendimiento por Rango de Temperatura</p>
+                        <div className="space-y-2">
+                          {[
+                            { key: 'cold', label: '🧊 Frío (<16°C)', color: 'from-cyan-500 to-blue-600' },
+                            { key: 'mild', label: '🌤️ Templado (16-21°C)', color: 'from-green-500 to-emerald-600' },
+                            { key: 'warm', label: '☀️ Cálido (21-25°C)', color: 'from-amber-500 to-orange-600' },
+                            { key: 'hot', label: '🔥 Caluroso (>25°C)', color: 'from-orange-500 to-red-600' }
+                          ].map(range => {
+                            const avg = stats.avgByTemp[range.key];
+                            const count = stats.tempRanges[range.key].length;
+                            const impact = stats.avgTotal > 0 ? ((avg - stats.avgTotal) / stats.avgTotal * 100) : 0;
+                            const isOptimal = stats.optimalTemp.range === range.key;
+                            
+                            return (
+                              <div key={range.key} className={`bg-slate-700/20 rounded-lg p-3 ${isOptimal ? 'ring-2 ring-amber-400/50' : ''}`}>
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className="text-slate-200 text-xs font-semibold flex items-center gap-2">
+                                    {range.label}
+                                    {isOptimal && <span className="px-2 py-0.5 bg-amber-500/20 text-amber-300 rounded-full text-[9px] font-black">ÓPTIMO</span>}
+                                  </span>
+                                  <span className="text-white font-bold">{formatCurrency(avg).slice(0, -3)}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <div className="flex-1 h-2 bg-slate-600/30 rounded-full overflow-hidden">
+                                    <div className={`h-full bg-gradient-to-r ${range.color}`} style={{ width: `${Math.min((avg / stats.avgTotal * 100), 150)}%` }} />
+                                  </div>
+                                  <span className={`text-xs font-bold ${impact >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                    {impact >= 0 ? '+' : ''}{impact.toFixed(0)}%
+                                  </span>
+                                </div>
+                                <p className="text-[10px] text-slate-400 mt-1">{count} días registrados</p>
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
-                      <div className="h-px bg-slate-700 my-2"></div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-white font-bold">Diferencia:</span>
-                        <span className={`font-black text-2xl ${stats.cloudyImpact >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                          {stats.cloudyImpact >= 0 ? '+' : ''}{stats.cloudyImpact.toFixed(1)}%
-                        </span>
+
+                      {/* Insight accionable */}
+                      <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-4">
+                        <p className="text-orange-300 font-bold text-sm mb-2">💡 Acción Basada en Temperatura</p>
+                        <p className="text-slate-300 text-xs leading-relaxed">
+                          {stats.optimalTemp.range === 'hot' && stats.tempCorrelation > 0.3 ?
+                            'Días calurosos (>25°C) generan mejores ventas. En pronóstico de calor: refuerza stock de productos refrescantes, helados premium, bebidas frías, y extiende horarios.' :
+                            stats.optimalTemp.range === 'warm' && stats.tempCorrelation > 0.3 ?
+                            'Clima cálido (21-25°C) es tu mejor aliado. En este rango: maximiza visibilidad de productos estrella, capacita en upselling, y asegura inventario completo.' :
+                            stats.optimalTemp.range === 'mild' ?
+                            'Clima templado (16-21°C) ofrece estabilidad. Mantén operación estándar, enfócate en experiencia de cliente y promociones de fidelización.' :
+                            stats.optimalTemp.range === 'cold' ?
+                            'Días fríos funcionan mejor para tu tienda. Considera promociones de productos calientes, combos reconfortantes, y ambiente acogedor.' :
+                            'Temperatura no es factor determinante. Prioriza calidad de servicio, marketing y experiencia sobre clima.'
+                          }
+                        </p>
                       </div>
                     </div>
-                  </div>
-                  <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
-                    <p className="text-slate-400 text-xs">
-                      📊 Días analizados: {stats.cloudyCount} días nublados de {stats.sunnyCount + stats.rainyCount + stats.cloudyCount} totales
-                    </p>
                   </div>
                 </div>
               )}
 
-              {showKPIDetail === 'forecast' && financialMetrics && showForecast && (
+              {showKPIDetail === 'optimal' && stats && (
                 <div className="space-y-4">
                   <div className="bg-slate-800/50 rounded-xl p-5 border border-slate-700">
-                    <p className="text-slate-300 text-sm mb-4">Proyección de ventas basada en pronóstico climático</p>
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center">
-                        <span className="text-slate-400 text-sm">Venta proyectada total:</span>
-                        <span className="text-cyan-400 font-bold text-xl">{formatCurrency(financialMetrics.forecastTotal)}</span>
+                    <div className="flex items-center gap-2 mb-4">
+                      <Sparkles className="w-5 h-5 text-amber-400" />
+                      <p className="text-white font-bold">Rango de Temperatura Óptimo</p>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      {/* Temperatura óptima destacada */}
+                      <div className="bg-gradient-to-r from-amber-500/20 to-orange-500/20 border-2 border-amber-500/50 rounded-xl p-4 text-center">
+                        <p className="text-amber-300 text-xs mb-2">🏆 MEJOR RENDIMIENTO</p>
+                        <p className="text-4xl font-black text-white mb-2">
+                          {stats.optimalTemp.range === 'cold' ? '<16°C' :
+                           stats.optimalTemp.range === 'mild' ? '16-21°C' :
+                           stats.optimalTemp.range === 'warm' ? '21-25°C' :
+                           '>25°C'}
+                        </p>
+                        <p className="text-white font-bold text-lg">{formatCurrency(stats.optimalTemp.avg)}</p>
+                        <p className="text-slate-300 text-xs mt-2">Venta promedio en este rango</p>
                       </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-slate-400 text-sm">Venta promedio histórica:</span>
-                        <span className="text-slate-300 font-bold text-lg">{formatCurrency(stats.avgTotal * 7)}</span>
+
+                      {/* Comparativa todos los rangos */}
+                      <div className="grid grid-cols-2 gap-2">
+                        {[
+                          { key: 'cold', label: '🧊 <16°C', emoji: '🧊' },
+                          { key: 'mild', label: '🌤️ 16-21°C', emoji: '🌤️' },
+                          { key: 'warm', label: '☀️ 21-25°C', emoji: '☀️' },
+                          { key: 'hot', label: '🔥 >25°C', emoji: '🔥' }
+                        ].map(range => {
+                          const avg = stats.avgByTemp[range.key];
+                          const count = stats.tempRanges[range.key].length;
+                          const isOptimal = stats.optimalTemp.range === range.key;
+                          
+                          return (
+                            <div key={range.key} className={`bg-slate-700/30 rounded-lg p-3 ${isOptimal ? 'ring-2 ring-amber-400' : ''}`}>
+                              <p className="text-slate-300 text-[10px] mb-1">{range.label}</p>
+                              <p className="text-white font-bold text-sm">{formatCurrency(avg).slice(0, -3)}</p>
+                              <p className="text-[9px] text-slate-400 mt-1">{count} días</p>
+                            </div>
+                          );
+                        })}
                       </div>
-                      <div className="h-px bg-slate-700 my-2"></div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-white font-bold">Variación vs histórico:</span>
-                        <span className={`font-black text-2xl ${financialMetrics.forecastVariation >= 0 ? 'text-emerald-400' : 'text-orange-400'}`}>
-                          {financialMetrics.forecastVariation >= 0 ? '+' : ''}{financialMetrics.forecastVariation.toFixed(1)}%
-                        </span>
+
+                      {/* Plan de acción */}
+                      <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4">
+                        <p className="text-amber-300 font-bold text-sm mb-2">📋 Plan de Acción</p>
+                        <ul className="text-slate-300 text-xs space-y-2 leading-relaxed">
+                          <li>• Monitorea el pronóstico de temperatura diariamente</li>
+                          <li>• En días dentro del rango óptimo ({
+                            stats.optimalTemp.range === 'cold' ? '<16°C' :
+                            stats.optimalTemp.range === 'mild' ? '16-21°C' :
+                            stats.optimalTemp.range === 'warm' ? '21-25°C' : '>25°C'
+                          }): maximiza inventario, personal y marketing</li>
+                          <li>• Ajusta mix de productos según temperatura proyectada</li>
+                          <li>• Considera promociones específicas para rangos sub-óptimos</li>
+                        </ul>
                       </div>
                     </div>
-                  </div>
-                  <div className={`rounded-xl p-4 border ${
-                    financialMetrics.riskLevel === 'alto' ? 'bg-rose-500/10 border-rose-500/30' :
-                    financialMetrics.riskLevel === 'medio' ? 'bg-orange-500/10 border-orange-500/30' :
-                    'bg-emerald-500/10 border-emerald-500/30'
-                  }`}>
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className={`px-2 py-1 rounded-lg text-xs font-black uppercase ${
-                        financialMetrics.riskLevel === 'alto' ? 'bg-rose-500/30 text-rose-300' :
-                        financialMetrics.riskLevel === 'medio' ? 'bg-orange-500/30 text-orange-300' :
-                        'bg-emerald-500/30 text-emerald-300'
-                      }`}>
-                        Riesgo {financialMetrics.riskLevel}
-                      </span>
-                    </div>
-                    <p className="text-slate-300 text-sm">
-                      {financialMetrics.rainyForecast > 0 && `Se pronostican ${financialMetrics.rainyForecast} días lluviosos. `}
-                      {financialMetrics.riskLevel === 'alto' ? 
-                        'Impacto significativo esperado. Implementa estrategia de mitigación.' :
-                        financialMetrics.riskLevel === 'medio' ? 
-                        'Impacto moderado. Monitorea y ajusta inventario.' :
-                        'Condiciones favorables. Operación estándar.'}
-                    </p>
                   </div>
                 </div>
               )}
+
+              {showKPIDetail === 'forecast' && financialMetrics && showForecast && (() => {
+                const forecastDays = chartData.filter(d => d.isForecast);
+                return (
+                  <div className="space-y-4">
+                    {/* Proyección general */}
+                    <div className="bg-slate-800/50 rounded-xl p-5 border border-slate-700">
+                      <p className="text-slate-300 text-sm mb-4">Proyección basada en pronóstico climático de 7 días</p>
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-400 text-sm">Venta proyectada total:</span>
+                          <span className="text-cyan-400 font-bold text-xl">{formatCurrency(financialMetrics.forecastTotal)}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-400 text-sm">Histórico 7 días típico:</span>
+                          <span className="text-slate-300 font-bold text-lg">{formatCurrency(stats.avgTotal * 7)}</span>
+                        </div>
+                        <div className="h-px bg-slate-700 my-2"></div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-white font-bold">Variación proyectada:</span>
+                          <span className={`font-black text-2xl ${financialMetrics.forecastVariation >= 0 ? 'text-emerald-400' : 'text-orange-400'}`}>
+                            {financialMetrics.forecastVariation >= 0 ? '+' : ''}{financialMetrics.forecastVariation.toFixed(1)}%
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Desglose día por día del pronóstico */}
+                    <div className="bg-slate-800/50 rounded-xl p-5 border border-slate-700">
+                      <p className="text-white font-bold text-sm mb-3">📅 Pronóstico Día por Día</p>
+                      <div className="space-y-2">
+                        {forecastDays.slice(0, 7).map((day, idx) => (
+                          <div key={idx} className="flex items-center justify-between bg-slate-700/30 rounded-lg p-3">
+                            <div className="flex items-center gap-3">
+                              {day.weatherType === 'sunny' && <Sun className="w-5 h-5 text-amber-400" />}
+                              {day.weatherType === 'rainy' && <CloudRain className="w-5 h-5 text-blue-400" />}
+                              {day.weatherType === 'cloudy' && <Cloud className="w-5 h-5 text-slate-400" />}
+                              <div>
+                                <p className="text-white text-xs font-bold">{day.fullDate}</p>
+                                <p className="text-slate-400 text-[10px]">
+                                  {day.temperature}°C • {day.precipitation > 0 ? `${day.precipitation}mm` : 'Sin lluvia'}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-cyan-300 font-black text-sm">{formatCurrency(day.sales).slice(0, -3)}</p>
+                              <p className={`text-[10px] font-bold ${
+                                day.sales > stats.avgTotal ? 'text-emerald-400' : 'text-orange-400'
+                              }`}>
+                                {day.sales > stats.avgTotal ? '+' : ''}{((day.sales - stats.avgTotal) / stats.avgTotal * 100).toFixed(0)}%
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Análisis de riesgo detallado */}
+                    <div className={`rounded-xl p-4 border ${
+                      financialMetrics.riskLevel === 'alto' ? 'bg-rose-500/10 border-rose-500/30' :
+                      financialMetrics.riskLevel === 'medio' ? 'bg-orange-500/10 border-orange-500/30' :
+                      'bg-emerald-500/10 border-emerald-500/30'
+                    }`}>
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase ${
+                          financialMetrics.riskLevel === 'alto' ? 'bg-rose-500/30 text-rose-300' :
+                          financialMetrics.riskLevel === 'medio' ? 'bg-orange-500/30 text-orange-300' :
+                          'bg-emerald-500/30 text-emerald-300'
+                        }`}>
+                          Riesgo {financialMetrics.riskLevel}
+                        </span>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <p className="text-slate-300 text-sm font-bold">Análisis:</p>
+                        <ul className="text-slate-300 text-xs space-y-1.5 ml-4">
+                          <li>• {financialMetrics.rainyForecast} días lluviosos proyectados</li>
+                          <li>• Pérdida estimada por lluvia: {formatCurrency(financialMetrics.estimatedLoss)}</li>
+                          <li>• Promedio día lluvioso: {formatCurrency(stats.avgRainy)} ({stats.rainyImpact.toFixed(0)}% vs normal)</li>
+                        </ul>
+                        
+                        <div className="border-t border-slate-600/50 pt-3 mt-3">
+                          <p className="text-slate-300 text-sm font-bold mb-2">Plan de Contingencia:</p>
+                          <ul className="text-slate-300 text-xs space-y-1.5 ml-4 leading-relaxed">
+                            {financialMetrics.riskLevel === 'alto' ? (
+                              <>
+                                <li>• <span className="font-bold text-rose-300">URGENTE:</span> Activar delivery/domicilios HOY</li>
+                                <li>• Promoción "Días de Lluvia" con descuentos agresivos</li>
+                                <li>• Duplicar marketing digital y redes sociales</li>
+                                <li>• Preparar combos para llevar y productos indoor</li>
+                                <li>• Meta ajustada: compensar con días soleados posteriores</li>
+                              </>
+                            ) : financialMetrics.riskLevel === 'medio' ? (
+                              <>
+                                <li>• Reforzar canales de venta alternativos (apps, delivery)</li>
+                                <li>• Promociones preventivas en días previos a lluvia</li>
+                                <li>• Inventario balanceado: productos para llevar</li>
+                                <li>• Monitorear pronóstico diariamente</li>
+                              </>
+                            ) : (
+                              <>
+                                <li>• ✅ Condiciones favorables - operación estándar</li>
+                                <li>• Aprovecha días soleados para maximizar ventas</li>
+                                <li>• Mantén inventario completo de productos estrella</li>
+                                <li>• Considera promociones especiales para impulsar</li>
+                              </>
+                            )}
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
 
               {showKPIDetail === 'forecast' && !showForecast && (
                 <div className="text-center py-8">
