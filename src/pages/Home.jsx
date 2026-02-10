@@ -1023,61 +1023,6 @@ export default function Home() {
     );
   }
 
-  // Fetch datos para el mini resumen "Hoy en la tienda"
-  const { data: todaySales } = useQuery({
-    queryKey: ['todaySales', selectedStore],
-    queryFn: async () => {
-      const today = format(new Date(), 'yyyy-MM-dd');
-      const sales = await base44.entities.DailySales.filter({ store_id: selectedStore, date: today });
-      return sales[0] || null;
-    },
-    enabled: !!selectedStore,
-    staleTime: 2 * 60 * 1000
-  });
-
-  const { data: currentBudget } = useQuery({
-    queryKey: ['currentBudget', selectedStore],
-    queryFn: async () => {
-      const now = new Date();
-      const budgets = await base44.entities.Budget.filter({ 
-        store_id: selectedStore,
-        month: now.getMonth() + 1,
-        year: now.getFullYear()
-      });
-      return budgets.find(b => b.is_active) || budgets[0] || null;
-    },
-    enabled: !!selectedStore,
-    staleTime: 10 * 60 * 1000
-  });
-
-  const { data: topCashiers } = useQuery({
-    queryKey: ['topCashiers', selectedStore],
-    queryFn: async () => {
-      const startOfMonthDate = format(startOfMonth(new Date()), 'yyyy-MM-dd');
-      const records = await base44.entities.ShiftRecord.filter({ store_id: selectedStore });
-      const monthRecords = records.filter(r => r.date >= startOfMonthDate);
-      
-      const cashierSales = {};
-      monthRecords.forEach(r => {
-        if (!cashierSales[r.cashier_id]) {
-          cashierSales[r.cashier_id] = { sales: 0, name: r.cashier_id };
-        }
-        cashierSales[r.cashier_id].sales += r.sales || 0;
-      });
-      
-      return Object.values(cashierSales).sort((a, b) => b.sales - a.sales).slice(0, 1);
-    },
-    enabled: !!selectedStore,
-    staleTime: 5 * 60 * 1000
-  });
-
-  const formatCurrency = (val) => new Intl.NumberFormat('es-CO', { 
-    style: 'currency', 
-    currency: 'COP', 
-    minimumFractionDigits: 0, 
-    maximumFractionDigits: 0 
-  }).format(Math.round(val));
-
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Fondo orgánico premium */}
