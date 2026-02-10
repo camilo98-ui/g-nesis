@@ -969,397 +969,497 @@ export default function Home() {
     );
   }
 
+  // Fetch datos para el mini resumen "Hoy en la tienda"
+  const { data: todaySales } = useQuery({
+    queryKey: ['todaySales', selectedStore],
+    queryFn: async () => {
+      const today = format(new Date(), 'yyyy-MM-dd');
+      const sales = await base44.entities.DailySales.filter({ store_id: selectedStore, date: today });
+      return sales[0] || null;
+    },
+    enabled: !!selectedStore,
+    staleTime: 2 * 60 * 1000
+  });
+
+  const { data: currentBudget } = useQuery({
+    queryKey: ['currentBudget', selectedStore],
+    queryFn: async () => {
+      const now = new Date();
+      const budgets = await base44.entities.Budget.filter({ 
+        store_id: selectedStore,
+        month: now.getMonth() + 1,
+        year: now.getFullYear()
+      });
+      return budgets.find(b => b.is_active) || budgets[0] || null;
+    },
+    enabled: !!selectedStore,
+    staleTime: 10 * 60 * 1000
+  });
+
+  const { data: topCashiers } = useQuery({
+    queryKey: ['topCashiers', selectedStore],
+    queryFn: async () => {
+      const startOfMonthDate = format(startOfMonth(new Date()), 'yyyy-MM-dd');
+      const records = await base44.entities.ShiftRecord.filter({ store_id: selectedStore });
+      const monthRecords = records.filter(r => r.date >= startOfMonthDate);
+      
+      const cashierSales = {};
+      monthRecords.forEach(r => {
+        if (!cashierSales[r.cashier_id]) {
+          cashierSales[r.cashier_id] = { sales: 0, name: r.cashier_id };
+        }
+        cashierSales[r.cashier_id].sales += r.sales || 0;
+      });
+      
+      return Object.values(cashierSales).sort((a, b) => b.sales - a.sales).slice(0, 1);
+    },
+    enabled: !!selectedStore,
+    staleTime: 5 * 60 * 1000
+  });
+
+  const formatCurrency = (val) => new Intl.NumberFormat('es-CO', { 
+    style: 'currency', 
+    currency: 'COP', 
+    minimumFractionDigits: 0, 
+    maximumFractionDigits: 0 
+  }).format(Math.round(val));
+
   return (
     <div className="min-h-screen relative overflow-hidden">
-      {/* Fondo 3D profesional con relieve neomórfico */}
+      {/* Fondo orgánico premium */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
-        {/* Base con gradiente ultra suave */}
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-50/80 via-white to-purple-50/40" />
+        {/* Gradiente base premium */}
+        <div className="absolute inset-0 bg-gradient-to-br from-rose-50/40 via-white to-purple-50/30" />
         
-        {/* Silueta principal superior derecha - relieve sofisticado */}
+        {/* Formas orgánicas flotantes */}
         <motion.div 
           animate={{ 
-            x: [0, 40, 0],
-            y: [0, -25, 0],
-            rotateZ: [0, 8, 0]
+            x: [0, 30, 0],
+            y: [0, -20, 0],
+            rotate: [0, 5, 0]
           }}
-          transition={{ duration: 24, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute -top-48 -right-48 w-[480px] h-[480px]"
+          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute -top-32 -right-32 w-96 h-96 rounded-full opacity-30"
           style={{
-            background: 'linear-gradient(145deg, rgba(236, 72, 153, 0.12), rgba(244, 114, 182, 0.07), rgba(251, 207, 232, 0.02))',
-            borderRadius: '42% 58% 45% 55% / 48% 62% 38% 52%',
-            boxShadow: `
-              inset -22px -22px 55px rgba(255, 255, 255, 0.8),
-              inset 22px 22px 55px rgba(236, 72, 153, 0.13),
-              0 35px 100px rgba(236, 72, 153, 0.18),
-              0 15px 40px rgba(236, 72, 153, 0.08)
-            `,
-            filter: 'blur(1px)'
+            background: 'radial-gradient(circle, rgba(251, 113, 133, 0.15), rgba(252, 165, 165, 0.08), transparent)',
+            filter: 'blur(40px)'
           }}
         />
         
-        {/* Silueta inferior izquierda - profundidad intensa */}
         <motion.div 
           animate={{ 
-            x: [0, -50, 0],
-            y: [0, 40, 0],
-            rotateZ: [0, -10, 0]
-          }}
-          transition={{ duration: 28, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute -bottom-60 -left-60 w-[600px] h-[600px]"
-          style={{
-            background: 'linear-gradient(145deg, rgba(168, 85, 247, 0.11), rgba(192, 132, 252, 0.06), rgba(221, 214, 254, 0.02))',
-            borderRadius: '55% 45% 62% 38% / 45% 55% 45% 55%',
-            boxShadow: `
-              inset -20px -20px 50px rgba(255, 255, 255, 0.7),
-              inset 20px 20px 50px rgba(168, 85, 247, 0.11),
-              0 30px 90px rgba(168, 85, 247, 0.16),
-              0 12px 35px rgba(168, 85, 247, 0.07)
-            `,
-            filter: 'blur(1.5px)'
-          }}
-        />
-        
-        {/* Silueta central rotante - efecto hipnótico */}
-        <motion.div 
-          animate={{ 
-            scale: [1, 1.18, 1],
-            rotateZ: [0, 180, 360]
-          }}
-          transition={{ duration: 35, repeat: Infinity, ease: "linear" }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[380px] h-[380px]"
-          style={{
-            background: 'linear-gradient(145deg, rgba(147, 51, 234, 0.08), rgba(236, 72, 153, 0.05), rgba(244, 114, 182, 0.02))',
-            borderRadius: '38% 62% 55% 45% / 62% 45% 55% 38%',
-            boxShadow: `
-              inset -15px -15px 40px rgba(255, 255, 255, 0.6),
-              inset 15px 15px 40px rgba(147, 51, 234, 0.09),
-              0 25px 75px rgba(147, 51, 234, 0.11)
-            `,
-            filter: 'blur(2px)'
-          }}
-        />
-
-        {/* Elemento superior izquierda - cristal */}
-        <motion.div
-          animate={{ 
-            rotate: [0, 360],
-            x: [0, 25, 0],
-            y: [0, -18, 0],
-            scale: [1, 1.1, 1]
-          }}
-          transition={{ duration: 32, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-[18%] left-[12%] w-36 h-36"
-          style={{
-            background: 'linear-gradient(145deg, rgba(59, 130, 246, 0.10), rgba(96, 165, 250, 0.05), rgba(147, 197, 253, 0.02))',
-            borderRadius: '30% 70% 70% 30% / 30% 30% 70% 70%',
-            boxShadow: `
-              inset -10px -10px 30px rgba(255, 255, 255, 0.9),
-              inset 10px 10px 30px rgba(59, 130, 246, 0.11),
-              0 18px 55px rgba(59, 130, 246, 0.13)
-            `,
-            transform: 'rotate(25deg)',
-            filter: 'blur(0.5px)'
-          }}
-        />
-
-        {/* Elemento inferior derecha - esfera suave */}
-        <motion.div
-          animate={{ 
-            rotate: [0, -360],
-            scale: [1, 1.3, 1],
             x: [0, -25, 0],
-            y: [0, 15, 0]
+            y: [0, 30, 0],
+            rotate: [0, -8, 0]
           }}
-          transition={{ duration: 36, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute bottom-[22%] right-[15%] w-40 h-40"
+          transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full opacity-25"
           style={{
-            background: 'linear-gradient(145deg, rgba(251, 113, 133, 0.09), rgba(253, 164, 175, 0.05), rgba(254, 205, 211, 0.02))',
-            borderRadius: '60% 40% 30% 70% / 60% 30% 70% 40%',
-            boxShadow: `
-              inset -12px -12px 35px rgba(255, 255, 255, 0.8),
-              inset 12px 12px 35px rgba(251, 113, 133, 0.10),
-              0 20px 65px rgba(251, 113, 133, 0.12)
-            `,
-            filter: 'blur(1px)'
+            background: 'radial-gradient(circle, rgba(192, 132, 252, 0.18), rgba(216, 180, 254, 0.10), transparent)',
+            filter: 'blur(50px)'
           }}
         />
 
-        {/* Partículas de luz flotantes */}
-        <motion.div
+        <motion.div 
           animate={{ 
-            opacity: [0.3, 0.6, 0.3],
-            scale: [1, 1.5, 1]
+            scale: [1, 1.2, 1],
+            opacity: [0.2, 0.3, 0.2]
           }}
-          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-[30%] right-[25%] w-2 h-2 rounded-full bg-pink-300/40 blur-sm"
-        />
-        <motion.div
-          animate={{ 
-            opacity: [0.2, 0.5, 0.2],
-            scale: [1, 1.3, 1]
-          }}
-          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-          className="absolute bottom-[35%] left-[30%] w-3 h-3 rounded-full bg-purple-300/30 blur-sm"
-        />
-
-        {/* Grid ultra sutil para textura */}
-        <div 
-          className="absolute inset-0 opacity-[0.015]"
+          transition={{ duration: 15, repeat: Infinity }}
+          className="absolute top-1/3 right-1/4 w-64 h-64 rounded-full"
           style={{
-            backgroundImage: 'radial-gradient(circle, rgba(120, 120, 120, 0.4) 1px, transparent 1px)',
-            backgroundSize: '50px 50px'
+            background: 'radial-gradient(circle, rgba(244, 114, 182, 0.12), transparent)',
+            filter: 'blur(60px)'
           }}
         />
 
-        {/* Luz ambiental superior */}
+        {/* Textura sutil */}
         <div 
-          className="absolute inset-0 opacity-40"
+          className="absolute inset-0 opacity-[0.02]"
           style={{
-            background: 'radial-gradient(circle at 30% 15%, rgba(255, 255, 255, 0.5), transparent 45%), radial-gradient(circle at 70% 85%, rgba(236, 72, 153, 0.06), transparent 50%)'
+            backgroundImage: 'radial-gradient(circle, rgba(0, 0, 0, 0.3) 1px, transparent 1px)',
+            backgroundSize: '40px 40px'
           }}
         />
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 py-4 relative z-10">
-
-
-        {/* Header con logo animado */}
-        <div className="text-center mb-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
+        {/* Header Premium con mucho aire */}
+        <div className="text-center mb-16">
           <motion.img
             src={LOGO_URL}
             alt="Popsy"
-            className="h-24 sm:h-28 md:h-32 object-contain mx-auto mb-3 cursor-pointer drop-shadow-lg"
-            animate={{ y: [0, -8, 0] }}
-            transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+            className="h-28 sm:h-32 md:h-36 object-contain mx-auto mb-8 cursor-pointer"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ 
+              opacity: 1, 
+              scale: 1,
+              y: [0, -5, 0]
+            }}
+            transition={{
+              opacity: { duration: 0.6 },
+              scale: { duration: 0.6 },
+              y: { duration: 3, repeat: Infinity, ease: "easeInOut" }
+            }}
+            whileHover={{ scale: 1.05 }}
             onClick={() => setShowStory(true)}
           />
 
-          <p className="text-gray-400 text-sm mb-4">Sistema de Gestión</p>
+          <motion.h2 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="text-slate-400 text-sm font-semibold tracking-wider uppercase mb-10"
+          >
+            Sistema de Gestión
+          </motion.h2>
 
-          {/* Store Selector */}
-          <div className="flex flex-col items-center gap-2">
-            <p className="text-gray-600 font-medium text-sm">¿A qué tienda deseas ingresar?</p>
-            <div className="w-full max-w-sm mx-auto">
+          {/* Pregunta humana */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="mb-6"
+          >
+            <p className="text-slate-700 font-medium text-lg mb-4">
+              ¿A qué tienda deseas ingresar?
+            </p>
+            
+            {/* Selector tipo pill premium */}
+            <div className="max-w-md mx-auto">
               <StoreSelector
                 selectedStore={selectedStore}
                 onStoreChange={handleStoreChange}
               />
             </div>
-          </div>
+          </motion.div>
         </div>
 
-        {/* Quick Actions */}
-        {(selectedStore || selectedRole === 'gerente') && (
-        <div className="mb-6 flex justify-center gap-2 flex-wrap">
+        {/* Mini resumen "Hoy en la tienda" */}
+        {selectedStore && todaySales && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="max-w-3xl mx-auto mb-12"
+          >
+            <div className="bg-white/40 backdrop-blur-xl rounded-3xl shadow-lg border border-white/60 p-6 sm:p-8">
+              <div className="flex items-center justify-center gap-2 mb-6">
+                <motion.div
+                  animate={{ rotate: [0, 360] }}
+                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                >
+                  <Sparkles className="w-5 h-5 text-rose-400" />
+                </motion.div>
+                <h3 className="text-slate-700 font-bold text-lg">Hoy en la tienda</h3>
+              </div>
+              
+              <div className="grid grid-cols-3 gap-4">
+                <motion.div 
+                  whileHover={{ y: -4, scale: 1.02 }}
+                  className="text-center bg-gradient-to-br from-rose-50/60 to-pink-50/40 rounded-2xl p-4 border border-rose-100/50"
+                >
+                  <p className="text-rose-400 text-xs font-semibold mb-2">Ventas</p>
+                  <p className="text-2xl font-black text-rose-600">{formatCurrency(todaySales.total_sales || 0)}</p>
+                  {currentBudget?.sales_budget && (
+                    <div className="mt-2">
+                      <div className="h-1.5 bg-rose-100 rounded-full overflow-hidden">
+                        <motion.div 
+                          initial={{ width: 0 }}
+                          animate={{ width: `${Math.min((todaySales.total_sales / (currentBudget.sales_budget / 30)) * 100, 100)}%` }}
+                          transition={{ duration: 1, delay: 0.5 }}
+                          className="h-full bg-gradient-to-r from-rose-400 to-pink-500 rounded-full"
+                        />
+                      </div>
+                      <p className="text-[10px] text-slate-500 mt-1">
+                        {((todaySales.total_sales / (currentBudget.sales_budget / 30)) * 100).toFixed(0)}% de meta
+                      </p>
+                    </div>
+                  )}
+                </motion.div>
 
+                <motion.div 
+                  whileHover={{ y: -4, scale: 1.02 }}
+                  className="text-center bg-gradient-to-br from-purple-50/60 to-violet-50/40 rounded-2xl p-4 border border-purple-100/50"
+                >
+                  <p className="text-purple-400 text-xs font-semibold mb-2">Ticket Promedio</p>
+                  <p className="text-2xl font-black text-purple-600">
+                    {todaySales.total_transactions > 0 
+                      ? formatCurrency(todaySales.total_sales / todaySales.total_transactions)
+                      : '$0'}
+                  </p>
+                  <p className="text-[10px] text-slate-500 mt-2">
+                    {todaySales.total_transactions || 0} transacciones
+                  </p>
+                </motion.div>
 
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                localStorage.removeItem('selectedStore');
-                localStorage.removeItem('popsySession');
-                localStorage.removeItem('userRole');
-                window.location.href = '/Home';
-              }}
-              className="text-gray-500 hover:text-red-600 hover:bg-red-50 transition-all"
-            >
-              <LogOut className="w-4 h-4 mr-1" />
-              Cerrar Sesión
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                // Si es gerente, mostrar el modal de zona
-                if (selectedRole === 'gerente') {
-                  // Importar dinámicamente y mostrar ZoneBudgetManager
-                  import('@/components/executive/ZoneBudgetManager').then(module => {
-                    const ZoneBudgetManager = module.default;
-                    // Crear un estado temporal para mostrar el modal
-                    const modalRoot = document.createElement('div');
-                    document.body.appendChild(modalRoot);
-                    const root = require('react-dom/client').createRoot(modalRoot);
-                    const handleClose = () => {
-                      root.unmount();
-                      document.body.removeChild(modalRoot);
-                    };
-                    root.render(
-                      React.createElement(ZoneBudgetManager, {
-                        zoneName: 'Bogotá Noroccidente',
-                        onClose: handleClose
-                      })
-                    );
-                  });
-                } else {
-                  setShowBudgetDashboard(true);
-                }
-              }}
-              className="text-gray-500 hover:text-sky-600 hover:bg-sky-50 transition-all"
-            >
-              <Target className="w-4 h-4 mr-1" />
-              Presupuestos
-            </Button>
-
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowReport(true)}
-              className="text-gray-500 hover:text-rose-600 hover:bg-rose-50 transition-all"
-            >
-              <FileText className="w-4 h-4 mr-1" />
-              Informe
-            </Button>
-          </div>
+                <motion.div 
+                  whileHover={{ y: -4, scale: 1.02 }}
+                  className="text-center bg-gradient-to-br from-amber-50/60 to-yellow-50/40 rounded-2xl p-4 border border-amber-100/50"
+                >
+                  <p className="text-amber-500 text-xs font-semibold mb-2">Ranking</p>
+                  {topCashiers?.[0] ? (
+                    <>
+                      <div className="flex items-center justify-center gap-1 mb-1">
+                        <Trophy className="w-4 h-4 text-amber-500" />
+                        <p className="text-lg font-black text-amber-600">Top 1</p>
+                      </div>
+                      <p className="text-[10px] text-slate-600 truncate">{formatCurrency(topCashiers[0].sales)}</p>
+                    </>
+                  ) : (
+                    <p className="text-sm text-slate-400 mt-2">Sin datos</p>
+                  )}
+                </motion.div>
+              </div>
+            </div>
+          </motion.div>
         )}
 
-        {/* Menu Grid */}
+        {/* Tarjetas principales - Layout horizontal premium */}
         {(selectedStore || selectedRole === 'gerente') && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-
-            {MENU_ITEMS.filter((item) => {
-              // Restricciones: Panel Ejecutivo solo para gerente, otras opciones solo si hay tienda seleccionada
-              const needsStore = item.page !== 'ExecutiveDashboard';
-              if (needsStore && !selectedStore && item.requiredRole !== 'gerente') return false;
-              if (item.requiredRole && selectedRole !== item.requiredRole) return false;
-              
-              // Restricción de tiendas específicas para Experiencia Popsy
-              if (item.restrictedStores && !item.restrictedStores.includes(selectedStore)) return false;
-              
-              return true;
-            }).map((item, index) => {
-            const Icon = item.icon;
-
-            // Restricciones por rol - solo embajador no ve Presupuestos
-            const isLocked = selectedRole === 'embajador' && item.page === 'Budget';
-
-            return (
-              <div key={item.name}>
-
-                  {isLocked ?
-                  <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 h-full shadow-lg transition-all duration-300 group relative overflow-hidden border border-white/20 opacity-60 cursor-not-allowed">
-
-                      {/* Lock overlay */}
-                      <div className="absolute inset-0 bg-gray-900/10 rounded-2xl flex items-center justify-center z-20">
-                        <Lock className="w-6 h-6 text-gray-600" />
-                      </div>
-                      
-                      <div className="flex flex-col items-center justify-center text-center relative z-10">
-                        <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mb-2 shadow-sm">
-                          <Icon className={`w-6 h-6 ${item.iconColor}`} />
-                        </div>
-                        <h3 className={`font-bold ${item.textColor} text-sm`}>
-                          {item.name}
-                        </h3>
-                        <p className="text-[10px] text-gray-600 mt-0.5">{item.description}</p>
-                      </div>
-                      </div> :
-                item.isSpecialAction && item.specialAction === 'comparable' ?
-                <Link to={createPageUrl('ExecutiveDashboard') + '?comparison=true'}>
-                  <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 h-full shadow-lg hover:shadow-2xl hover:bg-white/15 transition-all duration-300 group relative overflow-hidden border border-white/20 cursor-pointer">
-                    
-                    {/* Icon centered */}
-                    <div className="flex flex-col items-center justify-center text-center relative z-10">
-                      <div className={`w-12 h-12 ${item.iconBg} backdrop-blur-sm rounded-xl flex items-center justify-center mb-2`}>
-                        <Icon className={`w-6 h-6 ${item.iconColor}`} />
-                      </div>
-                      <h3 className={`font-bold ${item.textColor} text-sm`}>
-                        {item.name}
-                      </h3>
-                      <p className="text-[10px] text-gray-500 mt-0.5">{item.description}</p>
-                    </div>
-                    </div>
-                    </Link> :
-                item.isSpecialAction ?
-                <div
-                  onClick={async () => {
-                    if (item.specialAction === 'logout') {
-                      localStorage.removeItem('selectedStore');
-                      localStorage.removeItem('popsySession');
-                      window.location.href = '/Home';
-                    } else if (item.specialAction === 'budgetTrend') {
-                      setShowBudgetDashboard(true);
-                    } else if (item.specialAction === 'backup') {
-                      setBackupLoading(true);
-                      try {
-                        const response = await base44.functions.invoke('backupToGoogleDrive', {});
-                        console.log('✅ Respuesta completa:', response);
-
-                        if (response.data.success) {
-                          // Descargar backup localmente
-                          const backupBlob = new Blob([JSON.stringify(response.data.full_backup, null, 2)], { type: 'application/json' });
-                          const url = window.URL.createObjectURL(backupBlob);
-                          const a = document.createElement('a');
-                          a.href = url;
-                          a.download = response.data.file_name;
-                          document.body.appendChild(a);
-                          a.click();
-                          window.URL.revokeObjectURL(url);
-                          a.remove();
-
-                          toast.success(
-                            `✅ ${response.data.message}\n📥 Descargado localmente\n📧 Revisa tu email: ${response.data.email_sent ? 'Enviado ✓' : 'Error al enviar'}`,
-                            { duration: 12000 }
-                          );
-                        } else {
-                          toast.error(
-                            `❌ ${response.data.error}\n\nDetalles: ${response.data.details || 'Ver consola (F12)'}`,
-                            { duration: 15000 }
-                          );
-                          console.error('❌ Error completo:', response.data);
-                        }
-                      } catch (error) {
-                        toast.error(`❌ Error: ${error.message}\n\nVer consola (F12) para más detalles`, { duration: 12000 });
-                        console.error('❌ Exception:', error);
-                      }
-                      setBackupLoading(false);
-                    } else if (item.specialAction === 'experiencia') {
-                      setShowExperienciaPopsy(true);
-                    } else if (item.specialAction === 'customerFeedback') {
-                      setShowCustomerExperience(true);
-                    } else {
-                      setShowStoreSales(true);
-                    }
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="max-w-6xl mx-auto"
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
+              {/* Tienda */}
+              <Link to={createPageUrl('Dashboard')}>
+                <motion.div
+                  whileHover={{ y: -8, scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  className="group relative bg-white/50 backdrop-blur-xl rounded-3xl p-6 shadow-xl border border-white/60 overflow-hidden cursor-pointer h-full"
+                  style={{ 
+                    boxShadow: '0 8px 32px rgba(236, 72, 153, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.9)'
                   }}
-                  className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 h-full shadow-lg hover:shadow-2xl hover:bg-white/15 transition-all duration-300 group relative overflow-hidden border border-white/20 cursor-pointer"
-                  >
-                  {/* Icon centered */}
-                  {/* Icon centered */}
-                  <div className="flex flex-col items-center justify-center text-center relative z-10">
-                    <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mb-2 shadow-sm">
-                      {item.icon ? (
-                        <Icon className={`w-6 h-6 ${item.iconColor}`} />
-                      ) : (
-                        <LogOut className={`w-6 h-6 ${item.iconColor}`} />
-                      )}
-                    </div>
-                    <h3 className={`font-bold ${item.textColor} text-sm`}>
-                      {item.specialAction === 'backup' && backupLoading ? 'Guardando...' : item.name}
-                    </h3>
-                    <p className="text-[10px] text-gray-600 mt-0.5">{item.description}</p>
+                >
+                  <motion.div
+                    className="absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br from-rose-300/20 to-pink-300/10 rounded-full blur-2xl"
+                    animate={{ scale: [1, 1.3, 1], opacity: [0.3, 0.5, 0.3] }}
+                    transition={{ duration: 4, repeat: Infinity }}
+                  />
+                  
+                  <div className="relative z-10 text-center">
+                    <motion.div 
+                      className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-rose-100 to-pink-100 rounded-2xl flex items-center justify-center shadow-lg"
+                      whileHover={{ rotate: [0, -5, 5, 0], scale: 1.1 }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <LayoutDashboard className="w-8 h-8 text-rose-500" />
+                    </motion.div>
+                    <h3 className="text-slate-800 font-black text-base mb-1">Tienda</h3>
+                    <p className="text-slate-500 text-xs font-medium">Ventas y métricas</p>
                   </div>
-                  </div> :
+                </motion.div>
+              </Link>
 
-                <Link to={createPageUrl(item.page)}>
-                  <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 h-full shadow-lg hover:shadow-2xl hover:bg-white/15 transition-all duration-300 group relative overflow-hidden border border-white/20">
-                    {/* Icon centered */}
-                    <div className="flex flex-col items-center justify-center text-center relative z-10">
-                      <div className={`w-12 h-12 ${item.iconBg} backdrop-blur-sm rounded-xl flex items-center justify-center mb-2`}>
-                        <Icon className={`w-6 h-6 ${item.iconColor}`} />
-                      </div>
-                      <h3 className={`font-bold ${item.textColor} text-sm`}>
-                        {item.name}
-                      </h3>
-                      <p className="text-[10px] text-gray-500 mt-0.5">{item.description}</p>
-                    </div>
+              {/* Cajeros */}
+              <Link to={createPageUrl('CashiersDashboard')}>
+                <motion.div
+                  whileHover={{ y: -8, scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  className="group relative bg-white/50 backdrop-blur-xl rounded-3xl p-6 shadow-xl border border-white/60 overflow-hidden cursor-pointer h-full"
+                  style={{ 
+                    boxShadow: '0 8px 32px rgba(139, 92, 246, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.9)'
+                  }}
+                >
+                  <motion.div
+                    className="absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br from-violet-300/20 to-purple-300/10 rounded-full blur-2xl"
+                    animate={{ scale: [1, 1.3, 1], opacity: [0.3, 0.5, 0.3] }}
+                    transition={{ duration: 4, repeat: Infinity, delay: 0.5 }}
+                  />
+                  
+                  <div className="relative z-10 text-center">
+                    <motion.div 
+                      className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-violet-100 to-purple-100 rounded-2xl flex items-center justify-center shadow-lg"
+                      whileHover={{ rotate: [0, -5, 5, 0], scale: 1.1 }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <Users className="w-8 h-8 text-violet-500" />
+                    </motion.div>
+                    <h3 className="text-slate-800 font-black text-base mb-1">Cajeros</h3>
+                    <p className="text-slate-500 text-xs font-medium">Rendimiento del equipo</p>
                   </div>
-                </Link>
-                }
-              </div>
-            );
-          })}
-        </div>
+                </motion.div>
+              </Link>
+
+              {/* Mapa Nevera */}
+              <Link to={createPageUrl('FreezerMap')}>
+                <motion.div
+                  whileHover={{ y: -8, scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  className="group relative bg-white/50 backdrop-blur-xl rounded-3xl p-6 shadow-xl border border-white/60 overflow-hidden cursor-pointer h-full"
+                  style={{ 
+                    boxShadow: '0 8px 32px rgba(6, 182, 212, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.9)'
+                  }}
+                >
+                  <motion.div
+                    className="absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br from-cyan-300/20 to-blue-300/10 rounded-full blur-2xl"
+                    animate={{ 
+                      scale: [1, 1.2, 1], 
+                      opacity: [0.3, 0.6, 0.3] 
+                    }}
+                    transition={{ duration: 3, repeat: Infinity, delay: 1 }}
+                  />
+                  
+                  <div className="relative z-10 text-center">
+                    <motion.div 
+                      className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-cyan-100 to-blue-100 rounded-2xl flex items-center justify-center shadow-lg"
+                      animate={{ 
+                        boxShadow: [
+                          '0 0 0 0 rgba(6, 182, 212, 0)',
+                          '0 0 0 8px rgba(6, 182, 212, 0.2)',
+                          '0 0 0 0 rgba(6, 182, 212, 0)'
+                        ]
+                      }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                      whileHover={{ scale: 1.1 }}
+                    >
+                      <Snowflake className="w-8 h-8 text-cyan-500" />
+                    </motion.div>
+                    <h3 className="text-slate-800 font-black text-base mb-1">Mapa Nevera</h3>
+                    <p className="text-slate-500 text-xs font-medium">Inventario de helados</p>
+                  </div>
+                </motion.div>
+              </Link>
+
+              {/* PopsyStars */}
+              <Link to={createPageUrl('Rankings')}>
+                <motion.div
+                  whileHover={{ y: -8, scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  className="group relative bg-white/50 backdrop-blur-xl rounded-3xl p-6 shadow-xl border border-white/60 overflow-hidden cursor-pointer h-full"
+                  style={{ 
+                    boxShadow: '0 8px 32px rgba(251, 191, 36, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.9)'
+                  }}
+                >
+                  <motion.div
+                    className="absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br from-amber-300/20 to-yellow-300/10 rounded-full blur-2xl"
+                    animate={{ 
+                      scale: [1, 1.4, 1], 
+                      opacity: [0.4, 0.6, 0.4],
+                      rotate: [0, 180, 360]
+                    }}
+                    transition={{ duration: 5, repeat: Infinity, delay: 1.5 }}
+                  />
+                  
+                  <div className="relative z-10 text-center">
+                    <motion.div 
+                      className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-amber-100 to-yellow-100 rounded-2xl flex items-center justify-center shadow-lg relative"
+                      whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1 }}
+                      transition={{ duration: 0.6 }}
+                    >
+                      <Award className="w-8 h-8 text-amber-500" />
+                      <motion.div
+                        className="absolute -top-1 -right-1 w-3 h-3 bg-amber-400 rounded-full"
+                        animate={{ scale: [1, 1.3, 1], opacity: [1, 0.5, 1] }}
+                        transition={{ duration: 1.5, repeat: Infinity }}
+                      />
+                    </motion.div>
+                    <h3 className="text-slate-800 font-black text-base mb-1">PopsyStars</h3>
+                    <p className="text-slate-500 text-xs font-medium">Top cajeros del mes</p>
+                  </div>
+                </motion.div>
+              </Link>
+
+              {/* Experiencia Cliente */}
+              <motion.div
+                whileHover={{ y: -8, scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => setShowCustomerExperience(true)}
+                className="group relative bg-white/50 backdrop-blur-xl rounded-3xl p-6 shadow-xl border border-white/60 overflow-hidden cursor-pointer h-full"
+                style={{ 
+                  boxShadow: '0 8px 32px rgba(168, 85, 247, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.9)'
+                }}
+              >
+                <motion.div
+                  className="absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br from-purple-300/20 to-fuchsia-300/10 rounded-full blur-2xl"
+                  animate={{ scale: [1, 1.3, 1], opacity: [0.3, 0.5, 0.3] }}
+                  transition={{ duration: 4, repeat: Infinity, delay: 2 }}
+                />
+                
+                <div className="relative z-10 text-center">
+                  <motion.div 
+                    className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-purple-100 to-fuchsia-100 rounded-2xl flex items-center justify-center shadow-lg"
+                    whileHover={{ rotate: [0, -5, 5, 0], scale: 1.1 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <Sparkles className="w-8 h-8 text-purple-500" />
+                  </motion.div>
+                  <h3 className="text-slate-800 font-black text-base mb-1">Experiencia Cliente</h3>
+                  <p className="text-slate-500 text-xs font-medium">Feedback rápido</p>
+                </div>
+              </motion.div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Botones de acción secundarios */}
+        {(selectedStore || selectedRole === 'gerente') && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6 }}
+            className="flex justify-center gap-3 flex-wrap mt-8"
+          >
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowReport(true)}
+                className="bg-white/60 hover:bg-white/80 backdrop-blur-sm border border-slate-200/50 text-slate-600 hover:text-rose-600 shadow-md hover:shadow-lg transition-all rounded-full px-5"
+              >
+                <FileText className="w-4 h-4 mr-2" />
+                Informe
+              </Button>
+            </motion.div>
+
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  if (selectedRole === 'gerente') {
+                    import('@/components/executive/ZoneBudgetManager').then(module => {
+                      const ZoneBudgetManager = module.default;
+                      const modalRoot = document.createElement('div');
+                      document.body.appendChild(modalRoot);
+                      const root = require('react-dom/client').createRoot(modalRoot);
+                      const handleClose = () => {
+                        root.unmount();
+                        document.body.removeChild(modalRoot);
+                      };
+                      root.render(
+                        React.createElement(ZoneBudgetManager, {
+                          zoneName: 'Bogotá Noroccidente',
+                          onClose: handleClose
+                        })
+                      );
+                    });
+                  } else {
+                    setShowBudgetDashboard(true);
+                  }
+                }}
+                className="bg-white/60 hover:bg-white/80 backdrop-blur-sm border border-slate-200/50 text-slate-600 hover:text-sky-600 shadow-md hover:shadow-lg transition-all rounded-full px-5"
+              >
+                <Target className="w-4 h-4 mr-2" />
+                Presupuestos
+              </Button>
+            </motion.div>
+
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleLogout}
+                className="bg-white/60 hover:bg-white/80 backdrop-blur-sm border border-slate-200/50 text-slate-600 hover:text-red-600 shadow-md hover:shadow-lg transition-all rounded-full px-5"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Cerrar Sesión
+              </Button>
+            </motion.div>
+          </motion.div>
         )}
       </div>
 
