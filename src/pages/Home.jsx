@@ -1025,64 +1025,140 @@ export default function Home() {
 
   return (
     <div className="min-h-screen relative overflow-hidden">
-      {/* Fondo orgánico premium */}
+      {/* Fondo orgánico premium luxury */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
-        {/* Gradiente base premium */}
-        <div className="absolute inset-0 bg-gradient-to-br from-rose-50/40 via-white to-purple-50/30" />
+        {/* Base cálida y elegante */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white via-rose-50/30 to-purple-50/20" />
         
-        {/* Formas orgánicas flotantes */}
+        {/* Blob orgánico 1 - Rosado pastel superior derecha */}
         <motion.div 
           animate={{ 
-            x: [0, 30, 0],
-            y: [0, -20, 0],
-            rotate: [0, 5, 0]
+            x: [0, 40, -15, 0],
+            y: [0, -30, 20, 0],
+            scale: [1, 1.1, 0.95, 1],
+            rotate: [0, 8, -5, 0]
           }}
-          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute -top-32 -right-32 w-96 h-96 rounded-full opacity-30"
+          transition={{ duration: 35, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute -top-48 -right-48 w-[600px] h-[600px]"
           style={{
-            background: 'radial-gradient(circle, rgba(251, 113, 133, 0.15), rgba(252, 165, 165, 0.08), transparent)',
-            filter: 'blur(40px)'
+            background: 'radial-gradient(ellipse at 30% 40%, rgba(251, 207, 232, 0.08) 0%, rgba(253, 242, 248, 0.05) 40%, transparent 70%)',
+            filter: 'blur(80px)',
+            borderRadius: '45% 55% 60% 40% / 50% 45% 55% 50%'
           }}
         />
         
+        {/* Blob orgánico 2 - Lila suave inferior izquierda */}
         <motion.div 
           animate={{ 
-            x: [0, -25, 0],
-            y: [0, 30, 0],
-            rotate: [0, -8, 0]
+            x: [0, -35, 20, 0],
+            y: [0, 40, -25, 0],
+            scale: [1, 0.9, 1.15, 1],
+            rotate: [0, -10, 6, 0]
           }}
-          transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full opacity-25"
+          transition={{ duration: 40, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute -bottom-56 -left-56 w-[700px] h-[700px]"
           style={{
-            background: 'radial-gradient(circle, rgba(192, 132, 252, 0.18), rgba(216, 180, 254, 0.10), transparent)',
-            filter: 'blur(50px)'
+            background: 'radial-gradient(ellipse at 60% 50%, rgba(216, 180, 254, 0.09) 0%, rgba(233, 213, 255, 0.06) 35%, transparent 65%)',
+            filter: 'blur(90px)',
+            borderRadius: '60% 40% 45% 55% / 55% 60% 40% 45%'
           }}
         />
 
+        {/* Blob orgánico 3 - Durazno claro centro */}
         <motion.div 
           animate={{ 
-            scale: [1, 1.2, 1],
-            opacity: [0.2, 0.3, 0.2]
+            x: [0, 25, -30, 0],
+            y: [0, -20, 35, 0],
+            scale: [1, 1.05, 0.92, 1],
+            rotate: [0, 12, -8, 0]
           }}
-          transition={{ duration: 15, repeat: Infinity }}
-          className="absolute top-1/3 right-1/4 w-64 h-64 rounded-full"
+          transition={{ duration: 32, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-1/4 right-1/3 w-[550px] h-[550px]"
           style={{
-            background: 'radial-gradient(circle, rgba(244, 114, 182, 0.12), transparent)',
+            background: 'radial-gradient(ellipse at 45% 55%, rgba(254, 215, 170, 0.07) 0%, rgba(254, 237, 218, 0.04) 40%, transparent 70%)',
+            filter: 'blur(75px)',
+            borderRadius: '50% 50% 55% 45% / 45% 50% 50% 55%'
+          }}
+        />
+
+        {/* Blob orgánico 4 - Menta muy sutil inferior derecha */}
+        <motion.div 
+          animate={{ 
+            x: [0, 45, -20, 0],
+            y: [0, 30, -15, 0],
+            scale: [1, 0.88, 1.08, 1],
+            rotate: [0, -15, 10, 0]
+          }}
+          transition={{ duration: 38, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute bottom-1/4 right-1/5 w-[480px] h-[480px]"
+          style={{
+            background: 'radial-gradient(ellipse at 55% 45%, rgba(167, 243, 208, 0.06) 0%, rgba(209, 250, 229, 0.03) 45%, transparent 75%)',
+            filter: 'blur(70px)',
+            borderRadius: '55% 45% 50% 50% / 50% 55% 45% 50%'
+          }}
+        />
+
+        {/* Blob orgánico 5 - Rosa pálido superior centro */}
+        <motion.div 
+          animate={{ 
+            x: [0, -28, 35, 0],
+            y: [0, -35, 18, 0],
+            scale: [1, 1.12, 0.96, 1],
+            rotate: [0, 9, -12, 0]
+          }}
+          transition={{ duration: 42, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-1/6 left-1/3 w-[520px] h-[520px]"
+          style={{
+            background: 'radial-gradient(ellipse at 40% 60%, rgba(252, 165, 165, 0.08) 0%, rgba(254, 205, 211, 0.05) 38%, transparent 68%)',
+            filter: 'blur(85px)',
+            borderRadius: '48% 52% 58% 42% / 52% 48% 52% 48%'
+          }}
+        />
+
+        {/* Wave suave inferior - overlay de profundidad */}
+        <motion.div 
+          animate={{ 
+            x: [0, 15, -10, 0],
+            opacity: [0.03, 0.05, 0.03]
+          }}
+          transition={{ duration: 28, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute bottom-0 left-0 right-0 h-[400px]"
+          style={{
+            background: 'linear-gradient(to top, rgba(251, 207, 232, 0.06) 0%, transparent 100%)',
             filter: 'blur(60px)'
           }}
         />
 
-        {/* Textura sutil */}
-        <div 
-          className="absolute inset-0 opacity-[0.02]"
+        {/* Capa de resplandor superior sutil */}
+        <motion.div 
+          animate={{ 
+            opacity: [0.02, 0.04, 0.02],
+            scale: [1, 1.05, 1]
+          }}
+          transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-0 left-0 right-0 h-[300px]"
           style={{
-            backgroundImage: 'radial-gradient(circle, rgba(0, 0, 0, 0.3) 1px, transparent 1px)',
-            backgroundSize: '40px 40px'
+            background: 'radial-gradient(ellipse at 50% 0%, rgba(233, 213, 255, 0.08) 0%, transparent 70%)',
+            filter: 'blur(100px)'
+          }}
+        />
+
+        {/* Textura finísima para profundidad */}
+        <div 
+          className="absolute inset-0 opacity-[0.015]"
+          style={{
+            backgroundImage: 'radial-gradient(circle at 25% 25%, rgba(251, 113, 133, 0.4) 1px, transparent 1px), radial-gradient(circle at 75% 75%, rgba(216, 180, 254, 0.4) 1px, transparent 1px)',
+            backgroundSize: '60px 60px, 45px 45px'
           }}
         />
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8 }}
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10"
+      >
         {/* Header Premium con mucho aire */}
         <div className="text-center mb-16">
           <motion.img
@@ -1460,7 +1536,7 @@ export default function Home() {
             </motion.div>
           </motion.div>
         )}
-      </div>
+      </motion.div>
 
       {/* Modales con Lazy Loading */}
       <Suspense fallback={null}>
