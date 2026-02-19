@@ -37,7 +37,8 @@ const STORES = [
 { code: "BTA 89", name: "CC DIVERPLAZA 2", displayName: "DIVERPLAZA 2" },
 { code: "BTA 16", name: "CC SAN RAFAEL", displayName: "SAN RAFAEL" },
 { code: "BTA 13", name: "CC PORTAL CL 80 #1", displayName: "PORTAL 80 #1" },
-{ code: "TUNJA 2", name: "CC VIVA TUNJA", displayName: "VIVA TUNJA" }];
+{ code: "TUNJA 2", name: "CC VIVA TUNJA", displayName: "VIVA TUNJA" },
+{ code: "BTA 92", name: "BOGOTA 92", displayName: "BOGOTÁ 92" }];
 
 
 // Helper para obtener nombre corto sin BTA/código
