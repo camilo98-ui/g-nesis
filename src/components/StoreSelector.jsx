@@ -147,8 +147,15 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
   const [editPasswordDialog, setEditPasswordDialog] = useState({ open: false, store: null });
   const [newPassword, setNewPassword] = useState('');
   const [showNewPassword, setShowNewPassword] = useState(false);
+  const [storeConfig, setStoreConfig] = useState(null); // { activeStoreCodes, customStores }
 
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    base44.auth.me().then(user => {
+      if (user?.store_config) setStoreConfig(user.store_config);
+    }).catch(() => {});
+  }, []);
 
   // Fetch store passwords
   const { data: storePasswords = [] } = useQuery({
