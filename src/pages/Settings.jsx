@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import AnimatedIcon from '@/components/AnimatedIcon';
 import BackupToGoogleDrive from '@/components/BackupToGoogleDrive';
+import StoreManager from '@/components/StoreManager';
 import { ArrowLeft, Settings as SettingsIcon, MessageCircle, Bell, Save, Loader2, Check, Phone } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -153,6 +154,9 @@ export default function Settings() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Store Manager */}
+          <StoreManager />
 
           {/* Google Drive Backup */}
           <BackupToGoogleDrive />
