@@ -131,6 +131,17 @@ const MENU_ITEMS = [
   specialAction: 'backup'
 },
 {
+  name: 'Configuración',
+  page: 'Settings',
+  icon: SettingsIcon,
+  description: 'Tiendas y ajustes',
+  bgColor: 'bg-gradient-to-br from-slate-100/90 to-gray-100/80',
+  iconBg: 'bg-slate-200/60',
+  iconColor: 'text-slate-600',
+  textColor: 'text-slate-700',
+  requiredRole: 'gerente'
+},
+{
   name: 'Experiencia Cliente',
   page: 'CustomerExperience',
   icon: Sparkles,
