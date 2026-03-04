@@ -186,14 +186,23 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
     }
   });
 
+  // Calcular lista de tiendas activas según storeConfig
+  const activeStores = useMemo(() => {
+    if (!storeConfig) return STORES;
+    const { activeStoreCodes, customStores = [] } = storeConfig;
+    const allStores = [...STORES, ...customStores];
+    if (!activeStoreCodes) return allStores;
+    return allStores.filter(s => activeStoreCodes.includes(s.code));
+  }, [storeConfig]);
+
   const filteredStores = useMemo(() => {
-    if (!search.trim()) return STORES;
+    if (!search.trim()) return activeStores;
     const term = search.toLowerCase();
-    return STORES.filter((s) =>
-    s.code.toLowerCase().includes(term) ||
-    s.name.toLowerCase().includes(term)
+    return activeStores.filter((s) =>
+      s.code.toLowerCase().includes(term) ||
+      s.name.toLowerCase().includes(term)
     );
-  }, [search]);
+  }, [search, activeStores]);
 
   const selectedStoreName = STORES.find((s) => s.code === selectedStore)?.name || '';
 
