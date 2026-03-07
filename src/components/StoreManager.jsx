@@ -75,7 +75,7 @@ export default function StoreManager() {
 
   const activateAll = () => setActiveStoreCodes(null);
 
-  const handleAddStore = () => {
+  const handleAddStore = async () => {
     if (!newStore.code.trim() || !newStore.name.trim()) {
       toast.error('El código y nombre son obligatorios');
       return;
@@ -90,10 +90,26 @@ export default function StoreManager() {
       name: newStore.name.trim().toUpperCase(),
       displayName: (newStore.displayName.trim() || newStore.name.trim()).toUpperCase(),
     };
-    setCustomStores(prev => [...prev, store]);
+    const updatedCustomStores = [...customStores, store];
+    setCustomStores(updatedCustomStores);
     setNewStore({ code: '', name: '', displayName: '' });
     setShowAddForm(false);
-    toast.success(`Tienda ${store.displayName} añadida`);
+
+    // Guardar automáticamente
+    setSaving(true);
+    try {
+      await base44.auth.updateMe({
+        store_config: {
+          activeStoreCodes,
+          customStores: updatedCustomStores,
+        }
+      });
+      toast.success(`Tienda ${store.displayName} añadida y guardada`);
+    } catch {
+      toast.error('Tienda añadida pero no se pudo guardar. Presiona "Guardar cambios".');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleRemoveCustomStore = (code) => {
