@@ -201,13 +201,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       ? historicalSalesForDay.reduce((sum, s) => sum + s.total_sales, 0) / historicalSalesForDay.length
       : 0;
     
-    // Log para debug
-    console.log('📊 Histórico día actual:', {
-      dia: format(now, 'EEEE', { locale: es }),
-      promedio: historicalAvgToday,
-      cantidadDias: historicalSalesForDay.length,
-      fechasEncontradas: historicalSalesForDay.map(s => s.date)
-    });
+
 
     // Calcular promedio por día de semana
     const avgByDayOfWeek = salesByDayOfWeek.map((sum, idx) => 
