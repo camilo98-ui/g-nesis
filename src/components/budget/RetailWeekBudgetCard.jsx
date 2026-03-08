@@ -187,14 +187,13 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
     // Promedio histórico del día de la semana actual (ej: promedio de todos los viernes)
     const todayDayOfWeek = now.getDay();
     
-    // Buscar TODOS los registros históricos del mismo día de la semana (ej: todos los viernes)
+    // Últimos 90 días del mismo día de semana para evitar datos atípicos viejos
+    const ninetyDaysAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
     const historicalSalesForDay = dailySales.filter(s => {
       try {
         const saleDate = parseISO(s.date);
-        return saleDate.getDay() === todayDayOfWeek && s.total_sales > 0;
-      } catch {
-        return false;
-      }
+        return saleDate.getDay() === todayDayOfWeek && s.total_sales > 0 && saleDate >= ninetyDaysAgo && saleDate < now;
+      } catch { return false; }
     });
     
     const historicalAvgToday = historicalSalesForDay.length > 0
