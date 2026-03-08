@@ -196,9 +196,9 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       } catch { return false; }
     });
     
-    const historicalAvgToday = historicalSalesForDay.length > 0
-      ? historicalSalesForDay.reduce((sum, s) => sum + s.total_sales, 0) / historicalSalesForDay.length
-      : 0;
+    const _hSorted = historicalSalesForDay.map(s => s.total_sales).sort((a, b) => a - b);
+    const _hTrimmed = _hSorted.length >= 4 ? _hSorted.slice(1, -1) : _hSorted; // quita min y max si hay 4+
+    const historicalAvgToday = _hTrimmed.length > 0 ? _hTrimmed.reduce((s, v) => s + v, 0) / _hTrimmed.length : 0;
     
 
 
