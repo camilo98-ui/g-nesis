@@ -141,14 +141,8 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
     // Calcular días del mes según modo
     const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd }).length;
     
-    console.log('🎯 Presupuesto Debug:', {
-      store: storeId,
-      salesBudget: activeBudget.sales_budget,
-      daysInMonth,
-      monthStart: format(monthStart, 'yyyy-MM-dd'),
-      monthEnd: format(monthEnd, 'yyyy-MM-dd'),
-      mode: gregorianMode ? 'Gregoriano' : 'Retail'
-    });
+    // Filtrar solo ventas de esta tienda
+    dailySales = storeId ? dailySales.filter(s => s.store_id === storeId) : dailySales;
 
     // Semana actual según modo
     const currentWeekStart = gregorianMode ? startOfWeek(now, { weekStartsOn: 0 }) : startOfWeek(now, { weekStartsOn: 1 });
