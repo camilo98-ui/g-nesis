@@ -171,17 +171,17 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
     const salesByDayOfWeek = [0, 0, 0, 0, 0, 0, 0]; // Sum
     const countByDayOfWeek = [0, 0, 0, 0, 0, 0, 0]; // Count
 
+    const ninetyDaysAgoForAvg = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
     dailySales.forEach(s => {
       try {
         const saleDate = parseISO(s.date);
-        const dayOfWeek = saleDate.getDay(); // 0=Dom, 1=Lun, ..., 6=Sáb
-        if (s.total_sales && s.total_sales > 0) { // Solo contar días con ventas reales
+        if (saleDate < ninetyDaysAgoForAvg || saleDate >= now) return;
+        const dayOfWeek = saleDate.getDay();
+        if (s.total_sales && s.total_sales > 0) {
           salesByDayOfWeek[dayOfWeek] += s.total_sales;
           countByDayOfWeek[dayOfWeek]++;
         }
-      } catch (error) {
-        console.error('Error parsing date:', s.date, error);
-      }
+      } catch { }
     });
 
     // Promedio histórico del día de la semana actual (ej: promedio de todos los viernes)
