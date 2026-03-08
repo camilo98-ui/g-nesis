@@ -404,8 +404,8 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
       }
     }).reduce((sum, s) => sum + (s.total_sales || 0), 0);
 
-    // Presupuesto de la semana SELECCIONADA o del rango filtrado - TODA la semana retail (7 días completos)
-    const weeklyBudget = fullDisplayWeekDays.reduce((sum, day) => sum + getDailyBudget(day), 0);
+    // Presupuesto de la semana ACTUAL (siempre 7 días reales, no el rango filtrado)
+    const weeklyBudget = fullCurrentRetailWeekDays.reduce((sum, day) => sum + getDailyBudget(day), 0);
 
     // Calcular proyección de la semana - SUAVIZADA con histórico (usa displayWeek)
     const daysPassedInWeek = eachDayOfInterval({ start: displayWeekStart, end: now })
