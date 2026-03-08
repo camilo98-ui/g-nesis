@@ -250,12 +250,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
     const adjustedMonthlyBudget = activeBudget.sales_budget * TARGET_PERCENTAGE;
     const dailyBaseBudget = adjustedMonthlyBudget / daysInMonth;
 
-    console.log('💰 Presupuesto Calculado:', {
-      store: storeId,
-      adjustedMonthlyBudget,
-      dailyBaseBudget,
-      totalWeeklyAvg
-    });
+
 
     // Función para obtener presupuesto ajustado según día de la semana y tendencia histórica
     const getDailyBudget = (date) => {
