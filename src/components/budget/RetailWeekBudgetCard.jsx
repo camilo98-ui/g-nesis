@@ -299,14 +299,9 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
         const scaleFactor = adjustedMonthlyBudget / monthlyHistoricalProjection;
         const calculatedBudget = avgByDayOfWeek[dayOfWeek] * scaleFactor;
         
-        console.log('📈 Con histórico suficiente:', {
-          dayOfWeek,
-          avgForDay: avgByDayOfWeek[dayOfWeek],
-          scaleFactor,
-          calculatedBudget
-        });
-        
-        return calculatedBudget > 0 ? calculatedBudget : dailyBaseBudget;
+        // Cap: ningún día puede superar 1.5x el presupuesto base diario para evitar metas irreales
+        const cappedBudget = Math.min(calculatedBudget > 0 ? calculatedBudget : dailyBaseBudget, dailyBaseBudget * 1.5);
+        return cappedBudget;
       } else {
         // Con poco histórico, usar PESO RELATIVO del día basado en datos disponibles
         // Esto permite variación por día de semana incluso con pocos datos
