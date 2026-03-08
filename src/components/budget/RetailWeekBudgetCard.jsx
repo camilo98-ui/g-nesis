@@ -315,8 +315,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId
         
         const weeklyBudget = dailyBaseBudget * 7;
         const calculatedBudget = weeklyBudget * weight;
-        
-        return calculatedBudget > 0 ? calculatedBudget : dailyBaseBudget;
+        return Math.min(calculatedBudget > 0 ? calculatedBudget : dailyBaseBudget, dailyBaseBudget * 1.5);
       }
     };
 
