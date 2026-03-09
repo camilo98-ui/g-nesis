@@ -194,12 +194,10 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
 
   // Calcular lista de tiendas activas según storeConfig
   const activeStores = useMemo(() => {
-    if (!storeConfig) return STORES;
-    const { activeStoreCodes, customStores = [] } = storeConfig;
     const allStores = [...STORES, ...customStores];
-    if (!activeStoreCodes) return allStores;
-    return allStores.filter(s => activeStoreCodes.includes(s.code));
-  }, [storeConfig]);
+    if (!storeConfig?.activeStoreCodes) return allStores;
+    return allStores.filter(s => storeConfig.activeStoreCodes.includes(s.code));
+  }, [storeConfig, customStores]);
 
   const filteredStores = useMemo(() => {
     if (!search.trim()) return activeStores;
