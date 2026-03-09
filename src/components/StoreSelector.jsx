@@ -151,9 +151,15 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
 
   const queryClient = useQueryClient();
 
+  const [customStores, setCustomStores] = useState([]);
+
   useEffect(() => {
     base44.auth.me().then(user => {
       if (user?.store_config) setStoreConfig(user.store_config);
+    }).catch(() => {});
+    // Leer tiendas custom desde entidad compartida
+    base44.entities.Store.list().then(stores => {
+      setCustomStores(stores.map(s => ({ code: s.code, name: s.name, displayName: s.name })));
     }).catch(() => {});
   }, []);
 
