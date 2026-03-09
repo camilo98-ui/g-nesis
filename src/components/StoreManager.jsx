@@ -44,12 +44,15 @@ export default function StoreManager() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
+    // Cargar preferencias del usuario (qué tiendas están activas)
     base44.auth.me().then(user => {
-      if (user?.store_config) {
-        const cfg = user.store_config;
-        if (cfg.activeStoreCodes !== undefined) setActiveStoreCodes(cfg.activeStoreCodes);
-        if (cfg.customStores) setCustomStores(cfg.customStores);
+      if (user?.store_config?.activeStoreCodes !== undefined) {
+        setActiveStoreCodes(user.store_config.activeStoreCodes);
       }
+    }).catch(() => {});
+    // Cargar tiendas custom desde entidad compartida (visible para todos los usuarios)
+    base44.entities.Store.list().then(stores => {
+      setCustomStores(stores.map(s => ({ code: s.code, name: s.name, displayName: s.name, _entityId: s.id })));
     }).catch(() => {});
   }, []);
 
