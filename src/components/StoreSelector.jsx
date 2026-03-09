@@ -208,7 +208,7 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
     );
   }, [search, activeStores]);
 
-  const selectedStoreName = STORES.find((s) => s.code === selectedStore)?.name || '';
+  const selectedStoreName = [...STORES, ...customStores].find((s) => s.code === selectedStore)?.name || '';
 
   const handleStoreClick = (store) => {
     onStoreChange(store.code);
