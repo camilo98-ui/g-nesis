@@ -88,50 +88,42 @@ export default function StoreManager() {
       toast.error('Ya existe una tienda con ese código');
       return;
     }
+    const displayName = (newStore.displayName.trim() || newStore.name.trim()).toUpperCase();
     const store = {
       code: newStore.code.trim().toUpperCase(),
-      name: newStore.name.trim().toUpperCase(),
-      displayName: (newStore.displayName.trim() || newStore.name.trim()).toUpperCase(),
+      name: displayName,
     };
-    const updatedCustomStores = [...customStores, store];
-    setCustomStores(updatedCustomStores);
-    setNewStore({ code: '', name: '', displayName: '' });
-    setShowAddForm(false);
-
-    // Guardar automáticamente
     setSaving(true);
     try {
-      await base44.auth.updateMe({
-        store_config: {
-          activeStoreCodes,
-          customStores: updatedCustomStores,
-        }
-      });
-      toast.success(`Tienda ${store.displayName} añadida y guardada`);
+      // Guardar en entidad Store (compartida entre todos los usuarios)
+      const created = await base44.entities.Store.create(store);
+      setCustomStores(prev => [...prev, { ...store, displayName, _entityId: created.id }]);
+      setNewStore({ code: '', name: '', displayName: '' });
+      setShowAddForm(false);
+      toast.success(`Tienda ${displayName} añadida`);
     } catch {
-      toast.error('Tienda añadida pero no se pudo guardar. Presiona "Guardar cambios".');
+      toast.error('Error al guardar la tienda');
     } finally {
       setSaving(false);
     }
   };
 
-  const handleRemoveCustomStore = (code) => {
-    setCustomStores(prev => prev.filter(s => s.code !== code));
-    if (activeStoreCodes) {
-      setActiveStoreCodes(prev => prev.filter(c => c !== code));
+  const handleRemoveCustomStore = async (code) => {
+    const store = customStores.find(s => s.code === code);
+    if (store?._entityId) {
+      try {
+        await base44.entities.Store.delete(store._entityId);
+      } catch { }
     }
+    setCustomStores(prev => prev.filter(s => s.code !== code));
+    if (activeStoreCodes) setActiveStoreCodes(prev => prev.filter(c => c !== code));
     toast.success('Tienda eliminada');
   };
 
   const handleSave = async () => {
     setSaving(true);
     try {
-      await base44.auth.updateMe({
-        store_config: {
-          activeStoreCodes,
-          customStores,
-        }
-      });
+      await base44.auth.updateMe({ store_config: { activeStoreCodes } });
       toast.success('¡Configuración de tiendas guardada!');
     } catch {
       toast.error('Error al guardar');
