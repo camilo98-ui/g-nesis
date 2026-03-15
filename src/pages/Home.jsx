@@ -921,6 +921,7 @@ export default function Home() {
           {showStory && <PopsyStoryModal onClose={() => setShowStory(false)} />}
         </Suspense>
       </div>
+    </div>
     );
   }
 
