@@ -945,152 +945,49 @@ export default function Home() {
 
   return (
     <div className="min-h-screen relative overflow-hidden">
-      {/* Fondo 3D profesional con relieve neomórfico */}
+      {/* Fondo ondas rosas suaves */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
-        {/* Base con gradiente ultra suave */}
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-50/80 via-white to-purple-50/40" />
-        
-        {/* Silueta principal superior derecha - relieve sofisticado */}
-        <motion.div 
-          animate={{ 
-            x: [0, 40, 0],
-            y: [0, -25, 0],
-            rotateZ: [0, 8, 0]
-          }}
-          transition={{ duration: 24, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute -top-48 -right-48 w-[480px] h-[480px]"
-          style={{
-            background: 'linear-gradient(145deg, rgba(236, 72, 153, 0.12), rgba(244, 114, 182, 0.07), rgba(251, 207, 232, 0.02))',
-            borderRadius: '42% 58% 45% 55% / 48% 62% 38% 52%',
-            boxShadow: `
-              inset -22px -22px 55px rgba(255, 255, 255, 0.8),
-              inset 22px 22px 55px rgba(236, 72, 153, 0.13),
-              0 35px 100px rgba(236, 72, 153, 0.18),
-              0 15px 40px rgba(236, 72, 153, 0.08)
-            `,
-            filter: 'blur(1px)'
-          }}
-        />
-        
-        {/* Silueta inferior izquierda - profundidad intensa */}
-        <motion.div 
-          animate={{ 
-            x: [0, -50, 0],
-            y: [0, 40, 0],
-            rotateZ: [0, -10, 0]
-          }}
-          transition={{ duration: 28, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute -bottom-60 -left-60 w-[600px] h-[600px]"
-          style={{
-            background: 'linear-gradient(145deg, rgba(168, 85, 247, 0.11), rgba(192, 132, 252, 0.06), rgba(221, 214, 254, 0.02))',
-            borderRadius: '55% 45% 62% 38% / 45% 55% 45% 55%',
-            boxShadow: `
-              inset -20px -20px 50px rgba(255, 255, 255, 0.7),
-              inset 20px 20px 50px rgba(168, 85, 247, 0.11),
-              0 30px 90px rgba(168, 85, 247, 0.16),
-              0 12px 35px rgba(168, 85, 247, 0.07)
-            `,
-            filter: 'blur(1.5px)'
-          }}
-        />
-        
-        {/* Silueta central rotante - efecto hipnótico */}
-        <motion.div 
-          animate={{ 
-            scale: [1, 1.18, 1],
-            rotateZ: [0, 180, 360]
-          }}
-          transition={{ duration: 35, repeat: Infinity, ease: "linear" }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[380px] h-[380px]"
-          style={{
-            background: 'linear-gradient(145deg, rgba(147, 51, 234, 0.08), rgba(236, 72, 153, 0.05), rgba(244, 114, 182, 0.02))',
-            borderRadius: '38% 62% 55% 45% / 62% 45% 55% 38%',
-            boxShadow: `
-              inset -15px -15px 40px rgba(255, 255, 255, 0.6),
-              inset 15px 15px 40px rgba(147, 51, 234, 0.09),
-              0 25px 75px rgba(147, 51, 234, 0.11)
-            `,
-            filter: 'blur(2px)'
-          }}
-        />
-
-        {/* Elemento superior izquierda - cristal */}
+        <div className="absolute inset-0 bg-[#fdf0f3]" />
         <motion.div
-          animate={{ 
-            rotate: [0, 360],
-            x: [0, 25, 0],
-            y: [0, -18, 0],
-            scale: [1, 1.1, 1]
-          }}
-          transition={{ duration: 32, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-[18%] left-[12%] w-36 h-36"
+          animate={{ x: [0, 30, 0], y: [0, -20, 0] }}
+          transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute"
           style={{
-            background: 'linear-gradient(145deg, rgba(59, 130, 246, 0.10), rgba(96, 165, 250, 0.05), rgba(147, 197, 253, 0.02))',
-            borderRadius: '30% 70% 70% 30% / 30% 30% 70% 70%',
-            boxShadow: `
-              inset -10px -10px 30px rgba(255, 255, 255, 0.9),
-              inset 10px 10px 30px rgba(59, 130, 246, 0.11),
-              0 18px 55px rgba(59, 130, 246, 0.13)
-            `,
-            transform: 'rotate(25deg)',
-            filter: 'blur(0.5px)'
+            bottom: '-10%', left: '-5%',
+            width: '110%', height: '65%',
+            background: 'rgba(242, 176, 196, 0.45)',
+            borderRadius: '60% 40% 0% 0% / 50% 50% 0% 0%',
+            filter: 'blur(18px)'
           }}
-        />
-
-        {/* Elemento inferior derecha - esfera suave */}
-        <motion.div
-          animate={{ 
-            rotate: [0, -360],
-            scale: [1, 1.3, 1],
-            x: [0, -25, 0],
-            y: [0, 15, 0]
-          }}
-          transition={{ duration: 36, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute bottom-[22%] right-[15%] w-40 h-40"
-          style={{
-            background: 'linear-gradient(145deg, rgba(251, 113, 133, 0.09), rgba(253, 164, 175, 0.05), rgba(254, 205, 211, 0.02))',
-            borderRadius: '60% 40% 30% 70% / 60% 30% 70% 40%',
-            boxShadow: `
-              inset -12px -12px 35px rgba(255, 255, 255, 0.8),
-              inset 12px 12px 35px rgba(251, 113, 133, 0.10),
-              0 20px 65px rgba(251, 113, 133, 0.12)
-            `,
-            filter: 'blur(1px)'
-          }}
-        />
-
-        {/* Partículas de luz flotantes */}
-        <motion.div
-          animate={{ 
-            opacity: [0.3, 0.6, 0.3],
-            scale: [1, 1.5, 1]
-          }}
-          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-[30%] right-[25%] w-2 h-2 rounded-full bg-pink-300/40 blur-sm"
         />
         <motion.div
-          animate={{ 
-            opacity: [0.2, 0.5, 0.2],
-            scale: [1, 1.3, 1]
-          }}
-          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-          className="absolute bottom-[35%] left-[30%] w-3 h-3 rounded-full bg-purple-300/30 blur-sm"
-        />
-
-        {/* Grid ultra sutil para textura */}
-        <div 
-          className="absolute inset-0 opacity-[0.015]"
+          animate={{ x: [0, -25, 0], y: [0, 25, 0] }}
+          transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute"
           style={{
-            backgroundImage: 'radial-gradient(circle, rgba(120, 120, 120, 0.4) 1px, transparent 1px)',
-            backgroundSize: '50px 50px'
+            bottom: '10%', right: '-10%',
+            width: '75%', height: '55%',
+            background: 'rgba(240, 160, 185, 0.35)',
+            borderRadius: '50% 50% 40% 60% / 55% 45% 55% 45%',
+            filter: 'blur(22px)'
           }}
         />
-
-        {/* Luz ambiental superior */}
-        <div 
-          className="absolute inset-0 opacity-40"
+        <motion.div
+          animate={{ x: [0, 20, 0], y: [0, 15, 0] }}
+          transition={{ duration: 26, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute"
           style={{
-            background: 'radial-gradient(circle at 30% 15%, rgba(255, 255, 255, 0.5), transparent 45%), radial-gradient(circle at 70% 85%, rgba(236, 72, 153, 0.06), transparent 50%)'
+            top: '5%', left: '-5%',
+            width: '60%', height: '40%',
+            background: 'rgba(248, 200, 215, 0.30)',
+            borderRadius: '40% 60% 60% 40% / 40% 40% 60% 60%',
+            filter: 'blur(25px)'
+          }}
+        />
+        <div
+          className="absolute inset-0"
+          style={{
+            background: 'radial-gradient(ellipse at 50% 30%, rgba(255,255,255,0.6) 0%, transparent 65%)'
           }}
         />
       </div>
