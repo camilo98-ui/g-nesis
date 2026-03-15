@@ -261,110 +261,91 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
 
   return (
     <>
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-            <Button
-              variant="outline"
-              className="w-full min-w-[200px] h-11 bg-white border-2 border-rose-200 hover:border-pink-400 transition-all shadow-md hover:shadow-lg rounded-2xl justify-between group px-4">
+      <div className="relative">
+        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+          <button
+            onClick={() => { setOpen(!open); setSearch(''); }}
+            className="w-full min-w-[200px] h-11 bg-white border-2 border-rose-200 hover:border-pink-400 transition-all shadow-md hover:shadow-lg rounded-2xl flex items-center justify-between px-4"
+          >
+            <div className="flex items-center gap-2.5">
+              <MapPin className="w-4 h-4 text-pink-500" />
+              {selectedStore
+                ? <span className="text-pink-700 font-semibold truncate">{getDisplayName(selectedStore)}</span>
+                : <span className="text-gray-500 font-medium">Selecciona una tienda</span>
+              }
+            </div>
+            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+        </motion.div>
 
-              <div className="flex items-center gap-2.5">
-                <MapPin className="w-4 h-4 text-pink-500" />
-                {selectedStore ?
-                <span className="text-pink-700 font-semibold truncate">{getDisplayName(selectedStore)}</span> :
-
-                <span className="text-gray-500 font-medium">Selecciona una tienda</span>
-                }
+        {open && (
+          <>
+            {/* Overlay para cerrar al hacer click fuera */}
+            <div className="fixed inset-0 z-40" onClick={() => { setOpen(false); setSearch(''); }} />
+            <div className="absolute z-50 mt-2 w-full min-w-[300px] bg-white rounded-2xl shadow-2xl border border-pink-100 p-3">
+              <div className="relative mb-3">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-pink-400" />
+                <input
+                  autoFocus
+                  placeholder="Buscar tienda..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full pl-10 pr-3 h-10 text-sm bg-gradient-to-r from-pink-50 to-rose-50 border border-pink-200 focus:border-pink-400 focus:outline-none rounded-xl placeholder:text-gray-400 font-medium"
+                />
               </div>
-              <svg className="w-4 h-4 text-gray-400 group-hover:text-pink-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </Button>
-          </motion.div>
-        </PopoverTrigger>
-        <PopoverContent className="w-[340px] p-3" align="center" side="bottom" sideOffset={8}>
-          <div className="relative mb-3">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-pink-400" />
-            <input
-              placeholder="Buscar tienda..."
-              value={search}
-              onChange={(e) => {
-                e.stopPropagation();
-                setSearch(e.target.value);
-              }}
-              onKeyDown={(e) => e.stopPropagation()}
-              onPointerDown={(e) => e.stopPropagation()}
-              className="w-full pl-10 h-10 text-sm bg-gradient-to-r from-pink-50 to-rose-50 border border-pink-200 focus:border-pink-400 focus:outline-none rounded-md placeholder:text-gray-500 font-medium px-3"
-            />
-          </div>
-          <div className="max-h-[320px] overflow-y-auto space-y-2 px-1">
-            {filteredStores.map((store) =>
-            <motion.div
-              key={store.code}
-              initial={{ opacity: 0, x: -10, scale: 0.95 }}
-              animate={{ opacity: 1, x: 0, scale: 1 }}
-              whileHover={{ x: 5, scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}
-              className={`w-full flex items-center gap-3 p-3.5 rounded-xl transition-all cursor-pointer ${
-              selectedStore === store.code ?
-              'bg-gradient-to-r from-pink-400 via-rose-400 to-purple-400 border-2 border-pink-300 shadow-lg shadow-pink-500/30' :
-              'bg-gradient-to-r from-white to-pink-50/50 hover:from-pink-50 hover:to-rose-50 border-2 border-transparent hover:border-pink-200'}`
-              }>
-
+              <div className="max-h-[300px] overflow-y-auto space-y-1.5">
+                {filteredStores.map((store) => (
+                  <div
+                    key={store.code}
+                    className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all cursor-pointer ${
+                      selectedStore === store.code
+                        ? 'bg-gradient-to-r from-pink-400 via-rose-400 to-purple-400 border-2 border-pink-300 shadow-lg'
+                        : 'bg-gradient-to-r from-white to-pink-50/50 hover:from-pink-50 hover:to-rose-50 border-2 border-transparent hover:border-pink-200'
+                    }`}
+                  >
                     <button
-                onClick={() => handleStoreClick(store)}
-                className="flex-1 flex items-center gap-3 text-left">
-
-                      <motion.div
-                      className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-md ${
-                      selectedStore === store.code ?
-                      'bg-white/30 backdrop-blur-sm' :
-                      'bg-gradient-to-br from-pink-100 to-rose-100'}`
-                      }>
-
-                        <MapPin className={`w-5 h-5 ${selectedStore === store.code ? 'text-white' : 'text-pink-500'}`} />
-                      </motion.div>
-                      <span className={`text-sm font-bold flex-1 ${
-                      selectedStore === store.code ?
-                      'text-white' :
-                      'text-gray-800'}`
-                      }>
+                      onClick={() => handleStoreClick(store)}
+                      className="flex-1 flex items-center gap-3 text-left"
+                    >
+                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center shadow-sm ${
+                        selectedStore === store.code ? 'bg-white/30' : 'bg-gradient-to-br from-pink-100 to-rose-100'
+                      }`}>
+                        <MapPin className={`w-4 h-4 ${selectedStore === store.code ? 'text-white' : 'text-pink-500'}`} />
+                      </div>
+                      <span className={`text-sm font-bold flex-1 ${selectedStore === store.code ? 'text-white' : 'text-gray-800'}`}>
                         {store.displayName}
                       </span>
-                      {hasPassword(store.code) &&
-                <Lock className={`w-3 h-3 ${selectedStore === store.code ? 'text-white/80' : 'text-amber-500'}`} />
-                }
+                      {hasPassword(store.code) && (
+                        <Lock className={`w-3 h-3 ${selectedStore === store.code ? 'text-white/80' : 'text-amber-500'}`} />
+                      )}
                     </button>
-                    <motion.button
-                whileHover={{ rotate: 90 }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setEditPasswordDialog({ open: true, store });
-                  setNewPassword(storePasswords.find((p) => p.store_code === store.code)?.password || '');
-                }}
-                className={`p-1.5 rounded-lg transition-colors ${
-                selectedStore === store.code ?
-                'hover:bg-white/20' :
-                'hover:bg-pink-200/50'}`
-                }
-                title="Configurar contraseña">
-
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEditPasswordDialog({ open: true, store });
+                        setNewPassword(storePasswords.find((p) => p.store_code === store.code)?.password || '');
+                      }}
+                      className={`p-1.5 rounded-lg transition-colors ${
+                        selectedStore === store.code ? 'hover:bg-white/20' : 'hover:bg-pink-200/50'
+                      }`}
+                      title="Configurar contraseña"
+                    >
                       <Settings className={`w-3.5 h-3.5 ${selectedStore === store.code ? 'text-white/80' : 'text-pink-400'}`} />
-                    </motion.button>
-                  </motion.div>
-            )}
-            {filteredStores.length === 0 &&
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-center py-8">
-              <p className="text-gray-400 text-sm">No se encontró "{search}"</p>
-            </motion.div>
-            }
-          </div>
-        </PopoverContent>
-      </Popover>
+                    </button>
+                  </div>
+                ))}
+                {filteredStores.length === 0 && (
+                  <div className="text-center py-8">
+                    <p className="text-gray-400 text-sm">No se encontró "{search}"</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </>
+        )}
+      </div>
       
 
       
