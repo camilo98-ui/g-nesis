@@ -489,95 +489,58 @@ export default function Home() {
   if (!isLoggedIn) {
     return (
       <div className="min-h-screen relative overflow-hidden">
-        {/* Fondo 3D con relieve profesional y siluetas */}
+        {/* Fondo ondas rosas suaves */}
         <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
-          {/* Gradiente base */}
-          <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-purple-50/40" />
-          
-          {/* Silueta principal superior derecha - relieve fuerte */}
-          <motion.div 
-            animate={{ 
-              x: [0, 40, 0],
-              y: [0, -25, 0],
-              rotateZ: [0, 8, 0]
+          {/* Base blanco-rosado */}
+          <div className="absolute inset-0 bg-[#fdf0f3]" />
+
+          {/* Onda 1 - grande inferior */}
+          <motion.div
+            animate={{ x: [0, 30, 0], y: [0, -20, 0] }}
+            transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute"
+            style={{
+              bottom: '-10%', left: '-5%',
+              width: '110%', height: '65%',
+              background: 'rgba(242, 176, 196, 0.45)',
+              borderRadius: '60% 40% 0% 0% / 50% 50% 0% 0%',
+              filter: 'blur(18px)'
             }}
+          />
+
+          {/* Onda 2 - media derecha */}
+          <motion.div
+            animate={{ x: [0, -25, 0], y: [0, 25, 0] }}
             transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute -top-40 -right-40 w-96 h-96 rounded-[40%]"
+            className="absolute"
             style={{
-              background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.12) 0%, rgba(244, 114, 182, 0.08) 50%, rgba(251, 207, 232, 0.04) 100%)',
-              boxShadow: 'inset -15px -15px 40px rgba(255, 255, 255, 0.6), inset 15px 15px 40px rgba(0, 0, 0, 0.08), 0 25px 80px rgba(236, 72, 153, 0.15)',
-              filter: 'blur(2px)'
-            }}
-          />
-          
-          {/* Silueta inferior izquierda - relieve medio */}
-          <motion.div 
-            animate={{ 
-              x: [0, -35, 0],
-              y: [0, 40, 0],
-              rotateZ: [0, -10, 0]
-            }}
-            transition={{ duration: 28, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute -bottom-48 -left-48 w-[450px] h-[450px] rounded-[45%]"
-            style={{
-              background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.10) 0%, rgba(192, 132, 252, 0.06) 50%, rgba(233, 213, 255, 0.03) 100%)',
-              boxShadow: 'inset -12px -12px 35px rgba(255, 255, 255, 0.5), inset 12px 12px 35px rgba(0, 0, 0, 0.06), 0 20px 70px rgba(168, 85, 247, 0.12)',
-              filter: 'blur(2px)'
-            }}
-          />
-          
-          {/* Silueta central - efecto de profundidad */}
-          <motion.div 
-            animate={{ 
-              scale: [1, 1.15, 1],
-              rotateZ: [0, 180, 360]
-            }}
-            transition={{ duration: 35, repeat: Infinity, ease: "linear" }}
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full"
-            style={{
-              background: 'linear-gradient(135deg, rgba(147, 51, 234, 0.08) 0%, rgba(236, 72, 153, 0.06) 50%, rgba(244, 114, 182, 0.04) 100%)',
-              boxShadow: 'inset -10px -10px 30px rgba(255, 255, 255, 0.4), inset 10px 10px 30px rgba(0, 0, 0, 0.05), 0 15px 60px rgba(147, 51, 234, 0.1)',
-              filter: 'blur(3px)'
+              bottom: '10%', right: '-10%',
+              width: '75%', height: '55%',
+              background: 'rgba(240, 160, 185, 0.35)',
+              borderRadius: '50% 50% 40% 60% / 55% 45% 55% 45%',
+              filter: 'blur(22px)'
             }}
           />
 
-          {/* Formas geométricas pequeñas con relieve - superior */}
+          {/* Onda 3 - pequeña superior izquierda */}
           <motion.div
-            animate={{ 
-              rotate: 360,
-              x: [0, 15, 0],
-              y: [0, -10, 0]
-            }}
-            transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-            className="absolute top-[20%] left-[15%] w-28 h-28 rounded-3xl"
+            animate={{ x: [0, 20, 0], y: [0, 15, 0] }}
+            transition={{ duration: 26, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute"
             style={{
-              background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.09), rgba(96, 165, 250, 0.05))',
-              boxShadow: 'inset -6px -6px 20px rgba(255, 255, 255, 0.6), inset 6px 6px 20px rgba(0, 0, 0, 0.06)',
-              transform: 'rotate(25deg)',
-              filter: 'blur(1px)'
+              top: '5%', left: '-5%',
+              width: '60%', height: '40%',
+              background: 'rgba(248, 200, 215, 0.30)',
+              borderRadius: '40% 60% 60% 40% / 40% 40% 60% 60%',
+              filter: 'blur(25px)'
             }}
           />
 
-          <motion.div
-            animate={{ 
-              rotate: -360,
-              scale: [1, 1.2, 1]
-            }}
-            transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-            className="absolute bottom-[25%] right-[18%] w-32 h-32 rounded-full"
+          {/* Brillo central suave */}
+          <div
+            className="absolute inset-0"
             style={{
-              background: 'linear-gradient(135deg, rgba(251, 113, 133, 0.08), rgba(253, 164, 175, 0.04))',
-              boxShadow: 'inset -7px -7px 22px rgba(255, 255, 255, 0.5), inset 7px 7px 22px rgba(0, 0, 0, 0.05)',
-              filter: 'blur(1.5px)'
-            }}
-          />
-
-          {/* Textura de puntos para profundidad */}
-          <div 
-            className="absolute inset-0 opacity-[0.015]"
-            style={{
-              backgroundImage: 'radial-gradient(circle, rgba(0,0,0,0.4) 1px, transparent 1px)',
-              backgroundSize: '30px 30px'
+              background: 'radial-gradient(ellipse at 50% 30%, rgba(255,255,255,0.6) 0%, transparent 65%)'
             }}
           />
         </div>
