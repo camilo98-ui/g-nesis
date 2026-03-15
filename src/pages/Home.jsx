@@ -755,17 +755,22 @@ export default function Home() {
           <div className="flex items-center justify-center p-8 xl:p-10 w-full max-w-2xl">
             <div className="w-full max-w-lg">
               <motion.div 
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="bg-white/0 backdrop-blur-md rounded-3xl shadow-2xl border-2 border-rose-200/40 p-7 xl:p-8 space-y-5"
-                style={{ boxShadow: '0 0 12px rgba(251, 113, 133, 0.25), 0 0 20px rgba(251, 113, 133, 0.15), 0 25px 80px -15px rgba(217, 70, 239, 0.3)' }}>
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+                className="bg-white/70 backdrop-blur-xl rounded-3xl p-8 xl:p-10 space-y-6"
+                style={{ 
+                  boxShadow: '0 0 0 1.5px rgba(251,113,133,0.25), 0 8px 40px rgba(236,72,153,0.12), 0 32px 80px rgba(168,85,247,0.10), inset 0 1px 0 rgba(255,255,255,0.8)',
+                }}>
                 
-                <div className="text-center">
-                  <h2 className="text-3xl font-black text-rose-300 mb-2">Iniciar sesión</h2>
+                {/* Header */}
+                <div className="text-center space-y-1">
+                  <h2 className="text-3xl font-bold text-slate-500">Iniciar sesión</h2>
                   <p className="text-sm text-slate-700 font-medium">Selecciona tu rol y comienza</p>
                 </div>
 
-                <div className="space-y-3">
+                {/* Role Cards */}
+                <div className="space-y-2.5">
                   {ROLES.map((role) => {
                     const isSelected = selectedRole === role.id;
                     const lastUsedRole = localStorage.getItem('lastSelectedRole');
@@ -779,42 +784,36 @@ export default function Home() {
                           setLoginError('');
                           localStorage.setItem('lastSelectedRole', role.id);
                         }}
-                        className={`relative w-full p-4 rounded-2xl border-3 transition-all duration-300 text-left flex items-center gap-3 ${
+                        className={`relative w-full p-4 rounded-2xl border transition-all duration-200 text-left flex items-center gap-3.5 ${
                           isSelected
-                            ? 'border-rose-300 bg-gradient-to-r from-rose-100/30 to-purple-100/30 shadow-xl shadow-rose-200/40 scale-[1.01]'
-                            : 'border-slate-300/60 bg-white/8 backdrop-blur-md hover:border-rose-200 hover:shadow-lg hover:scale-[1.01]'
+                            ? 'border-rose-300/60 bg-gradient-to-r from-rose-50 to-pink-50/80 shadow-md shadow-rose-100/60'
+                            : 'border-slate-200/80 bg-white/60 hover:border-rose-200 hover:bg-rose-50/30 hover:shadow-sm'
                         }`}
+                        style={isSelected ? { boxShadow: '0 2px 16px rgba(251,113,133,0.18), inset 0 1px 0 rgba(255,255,255,0.9)' } : { boxShadow: '0 1px 6px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)' }}
                       >
                         {isLastUsed && (
-                          <motion.div 
-                            animate={{ scale: [1, 1.05, 1] }}
-                            transition={{ duration: 2, repeat: Infinity }}
-                            className="absolute -top-2 right-3 px-2.5 py-0.5 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full text-[10px] font-bold text-white shadow-lg"
-                          >
+                          <div className="absolute -top-2 right-3 px-2 py-0.5 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full text-[9px] font-bold text-white shadow">
                             ✨ Reciente
-                          </motion.div>
+                          </div>
                         )}
-                        <motion.div 
-                          animate={isSelected ? { rotate: [0, 5, -5, 0] } : {}}
-                          transition={{ duration: 2, repeat: Infinity }}
-                          className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-all shadow-lg ${
-                          isSelected ? 'bg-white/60 backdrop-blur-sm' : 'bg-gradient-to-br from-rose-50 to-purple-50'
-                          }`}>
+                        <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                          isSelected ? 'bg-white shadow-sm' : 'bg-rose-50/80'
+                        }`}>
                           <div className="w-6 h-6">
                             <RoleIcon roleId={role.id} isSelected={isSelected} />
                           </div>
-                        </motion.div>
+                        </div>
                         <div className="flex-1 min-w-0">
-                          <p className={`text-base font-bold mb-0.5 ${isSelected ? 'text-slate-800' : 'text-slate-900'}`}>{role.name}</p>
-                          <p className={`text-xs leading-snug ${isSelected ? 'text-slate-600' : 'text-slate-600'}`}>{role.description}</p>
+                          <p className="text-sm font-bold text-slate-800 mb-0.5">{role.name}</p>
+                          <p className="text-xs text-slate-500 leading-snug">{role.description}</p>
                         </div>
                         {isSelected && (
                           <motion.div 
-                            initial={{ scale: 0, rotate: -180 }}
-                            animate={{ scale: 1, rotate: 0 }}
-                            className="w-6 h-6 rounded-full bg-white flex items-center justify-center flex-shrink-0 shadow-lg"
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            className="w-5 h-5 rounded-full bg-rose-400 flex items-center justify-center flex-shrink-0 shadow"
                           >
-                            <CheckCircle className="w-4 h-4 text-rose-500" strokeWidth={3} />
+                            <CheckCircle className="w-3.5 h-3.5 text-white" strokeWidth={3} />
                           </motion.div>
                         )}
                       </button>
@@ -822,27 +821,28 @@ export default function Home() {
                   })}
                 </div>
 
+                {/* Gerente info */}
                 {selectedRole === 'gerente' && (
-                  <div className="p-3 bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-xl">
-                    <p className="text-xs text-blue-700 flex items-center gap-2 font-medium">
-                      <Info className="w-4 h-4 flex-shrink-0" />
+                  <div className="px-3 py-2.5 bg-blue-50/80 border border-blue-200/60 rounded-xl">
+                    <p className="text-xs text-blue-600 flex items-center gap-2 font-medium">
+                      <Info className="w-3.5 h-3.5 flex-shrink-0" />
                       Acceso a panel ejecutivo global
                     </p>
                   </div>
                 )}
 
+                {/* Store Selector */}
                 {selectedRole && selectedRole !== 'gerente' && (
-                  <div>
-                    <label className="block text-sm font-bold text-slate-900 mb-2 text-center">Selecciona tu tienda</label>
-                    <div className="max-w-md mx-auto">
-                      <StoreSelector selectedStore={pendingStore} onStoreChange={handleStoreSelect} />
-                    </div>
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-semibold text-slate-700">Selecciona tu tienda</label>
+                    <StoreSelector selectedStore={pendingStore} onStoreChange={handleStoreSelect} />
                   </div>
                 )}
 
+                {/* Password */}
                 {selectedRole && (
-                  <div>
-                    <label htmlFor="login-password-desktop" className="block text-sm font-bold text-slate-900 mb-2">
+                  <div className="space-y-1.5">
+                    <label htmlFor="login-password-desktop" className="block text-sm font-semibold text-slate-700">
                       Contraseña
                     </label>
                     <div className="relative">
@@ -856,7 +856,8 @@ export default function Home() {
                         onKeyDown={(e) => e.key === 'Enter' && !isSubmitting && handleLogin()}
                         disabled={isSubmitting}
                         autoComplete="current-password"
-                        className="w-full pl-11 pr-11 py-3.5 border-2 border-rose-200 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none text-sm text-slate-900 placeholder:text-slate-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        className="w-full pl-11 pr-11 py-3 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:border-rose-300 focus:ring-2 focus:ring-rose-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all bg-white/80"
+                        style={{ boxShadow: '0 1px 6px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.9)' }}
                       />
                       <button
                         type="button"
@@ -866,44 +867,47 @@ export default function Home() {
                         {showLoginPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
                     </div>
-                    <p className="text-[11px] text-slate-500 mt-1.5">Contraseña asignada por la empresa</p>
+                    <p className="text-[11px] text-slate-400">Contraseña asignada por la empresa</p>
                   </div>
                 )}
 
+                {/* Error */}
                 {loginError && (
-                  <div className="p-3 bg-gradient-to-r from-red-50 to-pink-50 border-2 border-red-200 rounded-xl">
-                    <p className="text-red-600 text-xs flex items-center gap-2 font-medium">
-                      <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                  <div className="px-3 py-2.5 bg-red-50/80 border border-red-200/60 rounded-xl">
+                    <p className="text-red-500 text-xs flex items-center gap-2 font-medium">
+                      <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
                       {loginError}
                     </p>
                   </div>
                 )}
 
-                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                {/* Submit Button */}
+                <motion.div whileHover={{ scale: 1.015 }} whileTap={{ scale: 0.98 }}>
                   <Button
                     onClick={handleLogin}
                     disabled={(selectedRole !== 'gerente' && !pendingStore) || !selectedRole || isSubmitting}
-                    className="w-full bg-gradient-to-r from-rose-300 to-pink-300 hover:from-rose-400 hover:to-pink-400 text-white py-4 rounded-xl font-black text-base shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                    className="w-full bg-gradient-to-r from-rose-400 to-pink-400 hover:from-rose-500 hover:to-pink-500 text-white py-3.5 rounded-2xl font-bold text-base shadow-lg shadow-rose-200/50 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 border-0"
                   >
-                  {isSubmitting ? (
-                    <span className="flex items-center justify-center gap-2">
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Entrando...
-                    </span>
-                  ) : (
-                    <span className="flex items-center justify-center gap-2">
-                      <span className="text-base font-black">Entrar 🚀</span>
-                    </span>
-                  )}
-                </Button>
+                    {isSubmitting ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Entrando...
+                      </span>
+                    ) : (
+                      <span className="flex items-center justify-center gap-2">
+                        Entrar <span className="text-base">🚀</span>
+                      </span>
+                    )}
+                  </Button>
                 </motion.div>
 
                 <div className="text-center">
-                  <Link to={createPageUrl('ExecutiveDashboard')} className="text-xs text-slate-400 hover:text-rose-400 transition-colors inline-block">
+                  <Link to={createPageUrl('ExecutiveDashboard')} className="text-xs text-slate-400 hover:text-rose-400 transition-colors">
                     Acceso administrativo
                   </Link>
                 </div>
               </motion.div>
+            </div>
           </div>
         </div>
 
