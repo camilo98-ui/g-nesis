@@ -904,7 +904,6 @@ export default function Home() {
                   </Link>
                 </div>
               </motion.div>
-            </div>
           </div>
         </div>
 
