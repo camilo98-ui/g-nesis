@@ -157,9 +157,10 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
     base44.auth.me().then(user => {
       if (user?.store_config) setStoreConfig(user.store_config);
     }).catch(() => {});
-    // Leer tiendas custom desde entidad compartida
+    // Leer tiendas custom desde entidad compartida (excluir las que ya están en BASE_STORES)
     base44.entities.Store.list().then(stores => {
-      setCustomStores(stores.map(s => ({ code: s.code, name: s.name, displayName: s.name })));
+      const baseCodes = new Set(STORES.map(s => s.code));
+      setCustomStores(stores.filter(s => !baseCodes.has(s.code)).map(s => ({ code: s.code, name: s.name, displayName: s.name })));
     }).catch(() => {});
   }, []);
 
