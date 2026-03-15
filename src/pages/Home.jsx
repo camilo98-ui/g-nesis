@@ -926,8 +926,8 @@ export default function Home() {
         </Suspense>
       </div>
     </div>
-    );
-  }
+  );
+}
 
   return (
     <div className="min-h-screen relative overflow-hidden">
