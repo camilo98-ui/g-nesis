@@ -285,12 +285,14 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
         <PopoverContent className="w-[340px] p-3" align="center" side="bottom" sideOffset={8}>
           <div className="relative mb-3">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-pink-400" />
-            <Input
+            <input
+              autoFocus
               placeholder="Buscar tienda..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 h-10 text-sm bg-gradient-to-r from-pink-50 to-rose-50 border-pink-200 focus:border-pink-400 placeholder:text-gray-500 font-medium" />
-
+              onKeyDown={(e) => e.stopPropagation()}
+              className="w-full pl-10 h-10 text-sm bg-gradient-to-r from-pink-50 to-rose-50 border border-pink-200 focus:border-pink-400 focus:outline-none rounded-md placeholder:text-gray-500 font-medium px-3"
+            />
           </div>
           <div className="max-h-[320px] overflow-y-auto space-y-2 px-1">
             {filteredStores.map((store) =>
