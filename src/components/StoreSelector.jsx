@@ -201,11 +201,23 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
 
   const filteredStores = useMemo(() => {
     if (!search.trim()) return activeStores;
-    const term = search.toLowerCase();
-    return activeStores.filter((s) =>
-      s.code.toLowerCase().includes(term) ||
-      s.name.toLowerCase().includes(term)
-    );
+    const term = search.toLowerCase().trim();
+    return activeStores.filter((s) => {
+      const code = s.code.toLowerCase();
+      const name = s.name.toLowerCase();
+      const displayName = (s.displayName || '').toLowerCase();
+      // Extraer solo el número del código (ej: "BTA 11" -> "11")
+      const codeNumber = code.replace(/[^0-9]/g, '');
+      return (
+        code.includes(term) ||
+        name.includes(term) ||
+        displayName.includes(term) ||
+        codeNumber.includes(term) ||
+        // Buscar por iniciales de palabras (ej: "pi" -> "PLAZA IMPERIAL")
+        name.split(' ').some(word => word.toLowerCase().startsWith(term)) ||
+        displayName.split(' ').some(word => word.toLowerCase().startsWith(term))
+      );
+    });
   }, [search, activeStores]);
 
   const selectedStoreName = [...STORES, ...customStores].find((s) => s.code === selectedStore)?.name || '';
