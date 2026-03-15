@@ -286,11 +286,14 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
           <div className="relative mb-3">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-pink-400" />
             <input
-              autoFocus
               placeholder="Buscar tienda..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                e.stopPropagation();
+                setSearch(e.target.value);
+              }}
               onKeyDown={(e) => e.stopPropagation()}
+              onPointerDown={(e) => e.stopPropagation()}
               className="w-full pl-10 h-10 text-sm bg-gradient-to-r from-pink-50 to-rose-50 border border-pink-200 focus:border-pink-400 focus:outline-none rounded-md placeholder:text-gray-500 font-medium px-3"
             />
           </div>
