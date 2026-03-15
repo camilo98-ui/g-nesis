@@ -751,63 +751,8 @@ export default function Home() {
         </div>
 
         {/* Desktop View */}
-        <div className="hidden lg:flex min-h-screen relative z-10">
-          <div className="w-[40%] px-10 xl:px-12 py-8 flex flex-col justify-center">
-            <div className="max-w-lg">
-              <motion.img
-                src={LOGO_URL}
-                alt="Popsy Management"
-                className="h-24 xl:h-28 object-contain mb-8 drop-shadow-2xl"
-                animate={{ y: [0, -8, 0] }}
-                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-              />
-
-              <div className="space-y-6">
-                <div>
-                  <motion.h1 
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-4xl xl:text-5xl font-black leading-tight mb-3"
-                  >
-                    <span className="text-slate-600">Bienvenido a</span><br />
-                    <span className="bg-gradient-to-r from-rose-300 via-pink-200 to-purple-300 bg-clip-text text-transparent">
-                      Popsy Management
-                    </span>
-                  </motion.h1>
-                  <p className="text-base xl:text-lg text-slate-700 leading-relaxed font-medium">Gestión empresarial inteligente para equipos de alto impacto 🚀</p>
-                </div>
-
-                <div className="space-y-4 pt-3">
-                  {[
-                    { icon: TrendingUp, title: 'Métricas en tiempo real', text: 'Monitoreo continuo del desempeño', gradient: 'from-rose-300 to-pink-300' },
-                    { icon: Users, title: 'Gestión de equipos', text: 'Optimiza recursos y productividad', gradient: 'from-purple-300 to-indigo-300' },
-                    { icon: Target, title: 'Logro de objetivos', text: 'Cumple metas con análisis predictivo', gradient: 'from-blue-300 to-cyan-300' }
-                  ].map((feature, i) => (
-                    <motion.div 
-                      key={i} 
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.2 }}
-                      className="flex items-start gap-3"
-                    >
-                      <motion.div 
-                        whileHover={{ rotate: 5, scale: 1.1 }}
-                        className={`w-11 h-11 rounded-xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center flex-shrink-0 shadow-lg`}
-                      >
-                        <feature.icon className="w-5 h-5 text-white" />
-                      </motion.div>
-                      <div className="pt-1.5">
-                        <p className="text-slate-900 font-bold text-base mb-0.5">{feature.title}</p>
-                        <p className="text-slate-600 text-sm leading-relaxed">{feature.text}</p>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="w-[60%] flex items-center justify-center p-8 xl:p-10">
+        <div className="hidden lg:flex min-h-screen relative z-10 items-center justify-center">
+          <div className="flex items-center justify-center p-8 xl:p-10 w-full max-w-2xl">
             <div className="w-full max-w-lg">
               <motion.div 
                 initial={{ opacity: 0, scale: 0.95 }}
