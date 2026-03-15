@@ -754,6 +754,19 @@ export default function Home() {
         <div className="hidden lg:flex min-h-screen relative z-10 items-center justify-center">
           <div className="flex items-center justify-center p-8 xl:p-10 w-full max-w-2xl">
             <div className="w-full max-w-lg">
+              {/* Logo flotante desktop */}
+              <div className="text-center mb-6">
+                <motion.img
+                  src={LOGO_URL}
+                  alt="Popsy"
+                  className="h-28 xl:h-32 object-contain mx-auto drop-shadow-xl cursor-pointer"
+                  animate={{ y: [0, -8, 0] }}
+                  transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                  onClick={() => setShowStory(true)}
+                />
+                <p className="text-slate-400 text-sm mt-2">Sistema de Gestión</p>
+              </div>
+
               <motion.div 
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
