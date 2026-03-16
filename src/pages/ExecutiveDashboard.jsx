@@ -23,44 +23,7 @@ import { useExecutiveTooltip } from '../components/executive/ExecutiveChartToolt
 
 import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, ResponsiveContainer, CartesianGrid, XAxis, YAxis, ComposedChart, Tooltip, Legend, ReferenceLine } from 'recharts';
 
-// Hook para animar números con easing
-function useAnimatedNumber(value, duration = 1000) {
-  const [displayValue, setDisplayValue] = useState(value);
-  const startTimeRef = useRef(null);
-  const startValueRef = useRef(value);
-  const animationFrameRef = useRef(null);
 
-  useEffect(() => {
-    startValueRef.current = displayValue;
-    startTimeRef.current = Date.now();
-    
-    const animate = () => {
-      const now = Date.now();
-      const elapsed = now - startTimeRef.current;
-      const progress = Math.min(elapsed / duration, 1);
-      
-      // Easing ease-out
-      const eased = 1 - Math.pow(1 - progress, 3);
-      const newValue = startValueRef.current + (value - startValueRef.current) * eased;
-      
-      setDisplayValue(newValue);
-      
-      if (progress < 1) {
-        animationFrameRef.current = requestAnimationFrame(animate);
-      }
-    };
-    
-    animationFrameRef.current = requestAnimationFrame(animate);
-    
-    return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-    };
-  }, [value, duration]);
-  
-  return displayValue;
-}
 
 export default function ExecutiveDashboard() {
   // Semana retail iniciando 29 de diciembre 2025
