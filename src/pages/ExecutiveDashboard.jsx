@@ -1707,8 +1707,8 @@ export default function ExecutiveDashboard() {
             </div>
 
             {/* Contexto */}
-            <div className="mb-6">
-              <p className="text-xs sm:text-sm font-medium text-slate-400">{tableContextSummary}</p>
+            <div className="mb-3">
+              <p className="text-xs font-medium text-slate-400">{tableContextSummary}</p>
             </div>
 
             <StoresTable
