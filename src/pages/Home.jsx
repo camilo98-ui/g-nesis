@@ -944,10 +944,15 @@ export default function Home() {
 
   return (
     <div className="min-h-screen relative overflow-hidden">
-      {/* Fondo 3D profesional con relieve neomórfico */}
+      {/* Fondo - oscuro ejecutivo para gerente, claro para otros */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
-        {/* Base con gradiente ultra suave */}
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-50/80 via-white to-purple-50/40" />
+        <div className={`absolute inset-0 ${selectedRole === 'gerente' ? 'bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950' : 'bg-gradient-to-br from-gray-50/80 via-white to-purple-50/40'}`} />
+        {selectedRole === 'gerente' && (
+          <>
+            <div className="absolute -top-1/2 -right-1/2 w-[800px] h-[800px] bg-gradient-to-br from-pink-500/10 via-purple-500/10 to-blue-500/10 rounded-full blur-3xl opacity-40" />
+            <div className="absolute -bottom-1/2 -left-1/2 w-[600px] h-[600px] bg-gradient-to-br from-blue-500/8 via-cyan-500/8 to-emerald-500/8 rounded-full blur-3xl opacity-30" />
+          </>
+        )}
         
         {/* Silueta principal superior derecha - relieve sofisticado */}
         <motion.div 
