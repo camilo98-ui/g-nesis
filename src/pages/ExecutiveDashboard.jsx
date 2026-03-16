@@ -1694,45 +1694,7 @@ export default function ExecutiveDashboard() {
                           );
                         }}
                       />
-                      <defs>
-                        <filter id="greenGlow">
-                          <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-                          <feMerge>
-                            <feMergeNode in="coloredBlur"/>
-                            <feMergeNode in="SourceGraphic"/>
-                          </feMerge>
-                        </filter>
-                      </defs>
-                      <Line 
-                        type="monotone" 
-                        dataKey="budget" 
-                        stroke="url(#lineShimmer)" 
-                        strokeWidth={3.5} 
-                        dot={(props) => {
-                          const { cx, cy, index } = props;
-                          const isLast = index === dailySalesData.length - 1;
-                          const data = dailySalesData[index];
-                          const hasHighImpact = data && Math.abs(data.sales - data.budget) > data.budget * 0.15;
-
-                          return (
-                            <g>
-                              {(isLast || hasHighImpact) && (
-                                <>
-                                  <circle cx={cx} cy={cy} r={14} fill="#818cf8" opacity={0.15} />
-                                  <circle cx={cx} cy={cy} r={10} fill="#a5b4fc" opacity={0.2} />
-                                </>
-                              )}
-                              <circle cx={cx} cy={cy} r={isLast ? 6 : 5} fill="#6366f1" stroke="#e0e7ff" strokeWidth={2} />
-                              <circle cx={cx} cy={cy} r={2} fill="#e0e7ff" opacity={0.95} />
-                            </g>
-                          );
-                        }}
-                        name="Meta"
-                        strokeDasharray="5 5"
-                        isAnimationActive={true}
-                        animationDuration={2000}
-                        animationEasing="ease-in-out"
-                      />
+                      <Line type="monotone" dataKey="budget" stroke="#6366f1" strokeWidth={3} dot={{r:3,fill:'#6366f1'}} name="Meta" strokeDasharray="5 5" isAnimationActive={true} animationDuration={2000}/>
                     </ComposedChart>
                   </ResponsiveContainer>
 
