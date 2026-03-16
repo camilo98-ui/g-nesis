@@ -1313,25 +1313,17 @@ export default function ExecutiveDashboard() {
         ) : (
           <>
             {/* Barra de progreso del mes */}
-            <div className="mb-6 h-1 bg-white/5 rounded-full overflow-hidden">
+            <div className="mb-4 h-1 bg-white/5 rounded-full overflow-hidden">
               <motion.div
                 className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"
                 initial={{ width: 0 }}
-                animate={{ 
-                  width: `${(new Date().getDate() / new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate()) * 100}%`
-                }}
+                animate={{ width: `${(new Date().getDate() / new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate()) * 100}%` }}
                 transition={{ duration: 1.5, ease: "easeOut" }}
               />
             </div>
 
-            {/* Contenido - Layout Responsive Mejorado */}
-            <div 
-              className={layoutEditMode ? "border-2 border-dashed border-blue-500/50 p-4 rounded-lg mb-6" : ""}
-              style={layoutEditMode ? { 
-                position: 'relative',
-                backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 19px, rgba(59, 130, 246, 0.1) 19px, rgba(59, 130, 246, 0.1) 20px)'
-              } : {}}>
-                {/* Métricas KPIs - 4 Columnas */}
+            {/* HIDDEN COMPATIBILITY */}
+            <div className="hidden">
                 <div className="bg-transparent p-0 mb-6">
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                     {/* 1. Presupuesto y Cumplimiento Mensual */}
