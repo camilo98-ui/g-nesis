@@ -18,6 +18,7 @@ const CustomerExperienceModal = lazy(() => import('@/components/customer/Custome
 const DailySalesForm = lazy(() => import('@/components/forms/DailySalesForm'));
 const ShiftRecordForm = lazy(() => import('@/components/forms/ShiftRecordForm'));
 const MonthlyBudgetDashboard = lazy(() => import('@/components/budget/MonthlyBudgetDashboard'));
+import GerenteHomePanel from '@/components/executive/GerenteHomePanel';
 import {
   LayoutDashboard, Users, TrendingUp,
   Award, Target, Bell, Phone, Download, FileText,
