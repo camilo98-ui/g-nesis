@@ -954,7 +954,7 @@ export default function Home() {
           </>
         )}
         
-        {selectedRole !== 'gerente' && <>
+        {selectedRole !== 'gerente' && <React.Fragment>
         {/* Silueta principal superior derecha - relieve sofisticado */}
         <motion.div 
           animate={{ 
