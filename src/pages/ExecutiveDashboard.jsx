@@ -1761,9 +1761,7 @@ export default function ExecutiveDashboard() {
 
             
                   </div>
-                  )}
-                  </div>
-                  {/* Fin contenido sin GridLayout */}
+                  {/* Fin contenido */}
                   </>
                   )}
                   </div>
