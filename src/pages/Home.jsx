@@ -1096,37 +1096,42 @@ export default function Home() {
 
       <div className="max-w-5xl mx-auto px-4 py-4 relative z-10">
 
-
-        {/* Header con logo animado */}
-        <div className="text-center mb-8">
+        {/* Header */}
+        <div className="text-center mb-6">
           <motion.img
             src={LOGO_URL}
             alt="Popsy"
-            className="h-24 sm:h-28 md:h-32 object-contain mx-auto mb-3 cursor-pointer drop-shadow-lg"
-            animate={{ y: [0, -8, 0] }}
+            className="h-20 sm:h-24 object-contain mx-auto mb-2 cursor-pointer drop-shadow-lg"
+            animate={{ y: [0, -6, 0] }}
             transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
             onClick={() => setShowStory(true)}
           />
-
-          <p className="text-gray-400 text-sm mb-4">Sistema de Gestión</p>
-
-          {/* Store Selector */}
-          <div className="flex flex-col items-center gap-2">
-            <p className="text-gray-600 font-medium text-sm">¿A qué tienda deseas ingresar?</p>
-            <div className="w-full max-w-sm mx-auto">
-              <StoreSelector
-                selectedStore={selectedStore}
-                onStoreChange={handleStoreChange}
-              />
-            </div>
-          </div>
+          {selectedRole !== 'gerente' && (
+            <>
+              <p className="text-gray-400 text-sm mb-3">Sistema de Gestión</p>
+              <div className="flex flex-col items-center gap-2">
+                <p className="text-gray-600 font-medium text-sm">¿A qué tienda deseas ingresar?</p>
+                <div className="w-full max-w-sm mx-auto">
+                  <StoreSelector selectedStore={selectedStore} onStoreChange={handleStoreChange} />
+                </div>
+              </div>
+            </>
+          )}
+          {selectedRole === 'gerente' && (
+            <p className="text-slate-500 text-xs">Sistema de Gestión · Gerencia</p>
+          )}
         </div>
+
+        {/* GERENTE: Panel ejecutivo de zona */}
+        {selectedRole === 'gerente' && (
+          <div className="mb-6">
+            <GerenteHomePanel />
+          </div>
+        )}
 
         {/* Quick Actions */}
         {(selectedStore || selectedRole === 'gerente') && (
-        <div className="mb-6 flex justify-center gap-2 flex-wrap">
-
-
+        <div className="mb-4 flex justify-center gap-2 flex-wrap">
             <Button
               variant="ghost"
               size="sm"
@@ -1136,58 +1141,37 @@ export default function Home() {
                 localStorage.removeItem('userRole');
                 window.location.href = '/Home';
               }}
-              className="text-gray-500 hover:text-red-600 hover:bg-red-50 transition-all"
+              className="text-gray-400 hover:text-red-500 hover:bg-red-50/50 transition-all text-xs"
             >
-              <LogOut className="w-4 h-4 mr-1" />
+              <LogOut className="w-3.5 h-3.5 mr-1" />
               Cerrar Sesión
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                // Si es gerente, mostrar el modal de zona
-                if (selectedRole === 'gerente') {
-                  // Importar dinámicamente y mostrar ZoneBudgetManager
-                  import('@/components/executive/ZoneBudgetManager').then(module => {
-                    const ZoneBudgetManager = module.default;
-                    // Crear un estado temporal para mostrar el modal
-                    const modalRoot = document.createElement('div');
-                    document.body.appendChild(modalRoot);
-                    const root = require('react-dom/client').createRoot(modalRoot);
-                    const handleClose = () => {
-                      root.unmount();
-                      document.body.removeChild(modalRoot);
-                    };
-                    root.render(
-                      React.createElement(ZoneBudgetManager, {
-                        zoneName: 'Bogotá Noroccidente',
-                        onClose: handleClose
-                      })
-                    );
-                  });
-                } else {
-                  setShowBudgetDashboard(true);
-                }
-              }}
-              className="text-gray-500 hover:text-sky-600 hover:bg-sky-50 transition-all"
-            >
-              <Target className="w-4 h-4 mr-1" />
-              Presupuestos
-            </Button>
-
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowReport(true)}
-              className="text-gray-500 hover:text-rose-600 hover:bg-rose-50 transition-all"
-            >
-              <FileText className="w-4 h-4 mr-1" />
-              Informe
-            </Button>
+            {selectedRole !== 'gerente' && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowBudgetDashboard(true)}
+                className="text-gray-400 hover:text-sky-600 hover:bg-sky-50/50 transition-all text-xs"
+              >
+                <Target className="w-3.5 h-3.5 mr-1" />
+                Presupuestos
+              </Button>
+            )}
+            {selectedRole !== 'gerente' && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowReport(true)}
+                className="text-gray-400 hover:text-rose-500 hover:bg-rose-50/50 transition-all text-xs"
+              >
+                <FileText className="w-3.5 h-3.5 mr-1" />
+                Informe
+              </Button>
+            )}
           </div>
         )}
 
-        {/* Menu Grid */}
+        {/* Menu Grid - solo para no-gerente o gerente con tienda */}
         {(selectedStore || selectedRole === 'gerente') && (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
 
