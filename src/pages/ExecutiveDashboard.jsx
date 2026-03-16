@@ -1326,22 +1326,8 @@ export default function ExecutiveDashboard() {
             <div className="hidden">
                 <div className="bg-transparent p-0 mb-6">
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                    {/* 1. Presupuesto y Cumplimiento Mensual */}
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, ease: "easeOut" }}
-                whileHover={{ scale: 1.03, y: -2 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => setSelectedKPIDetail('sales')}
-                onMouseEnter={() => setHoveredStoreForChart(null)}
-                className={`relative overflow-hidden bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-xl rounded-lg p-3 border cursor-pointer transition-all ${
-                  criticalKPI === 'sales' 
-                    ? 'border-blue-400/60 shadow-2xl' 
-                    : (dynamicTotals.totalBudget > 0 && ((dynamicTotals.totalSales/dynamicTotals.totalBudget)*100) >= 100)
-                      ? 'border-emerald-500/40 shadow-lg shadow-emerald-500/30'
-                      : 'border-blue-500/20 hover:border-blue-400/40 hover:shadow-lg hover:shadow-blue-500/20'
-                }`}>
+                    {/* KPI 1 placeholder - hidden, new view above */}
+              <motion.div onClick={() => setSelectedKPIDetail('sales')} className="hidden">
 
                 {/* Glow animado según estado */}
                 {(dynamicTotals.totalBudget > 0 && ((dynamicTotals.totalSales/dynamicTotals.totalBudget)*100) >= 100) && (
