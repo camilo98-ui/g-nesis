@@ -954,6 +954,7 @@ export default function Home() {
           </>
         )}
         
+        {selectedRole !== 'gerente' && <>
         {/* Silueta principal superior derecha - relieve sofisticado */}
         <motion.div 
           animate={{ 
