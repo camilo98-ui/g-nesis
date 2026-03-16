@@ -78,7 +78,8 @@ export default function GerenteHomePanel() {
 
   const storesData = useMemo(() => {
     const filteredStores = activeStoreCodes
-      ? STORES.filter(s => activeStoreCodes.includes(s.code))
+      ? STORES.filter(s => activeStoreCodes.includes(s.code) || true) // nuevas BASE_STORES siempre incluidas
+          .filter(s => activeStoreCodes.includes(s.code))
       : STORES;
 
     return filteredStores.map(store => {
