@@ -1098,7 +1098,7 @@ export default function Home() {
             background: 'radial-gradient(circle at 30% 15%, rgba(255, 255, 255, 0.5), transparent 45%), radial-gradient(circle at 70% 85%, rgba(236, 72, 153, 0.06), transparent 50%)'
           }}
         />
-        </>}
+        </React.Fragment>}
       </div>
 
       <div className="max-w-5xl mx-auto px-4 py-4 relative z-10">
