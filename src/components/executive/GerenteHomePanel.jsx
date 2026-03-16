@@ -77,10 +77,16 @@ export default function GerenteHomePanel() {
   const currentYear = now.getFullYear();
 
   const storesData = useMemo(() => {
-    const configuredCodes = new Set(activeStoreCodes || []);
-    const filteredStores = activeStoreCodes
-      ? STORES.filter(s => configuredCodes.has(s.code) || !configuredCodes.size)
-      : STORES;
+    // Mostrar tiendas activas según config; las de BASE_STORES no presentes en config = nuevas, siempre visibles
+    const filteredStores = !activeStoreCodes
+      ? STORES
+      : STORES.filter(s => {
+          // Si está explícitamente activada: mostrar
+          if (activeStoreCodes.includes(s.code)) return true;
+          // Si nunca fue configurada (tienda nueva en BASE_STORES): mostrar también
+          const allKnownCodes = new Set([...activeStoreCodes]);
+          return !allKnownCodes.has(s.code);
+        });
 
     return filteredStores.map(store => {
       const storeSales = allDailySales.filter(s => {
