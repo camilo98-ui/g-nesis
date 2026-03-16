@@ -197,7 +197,15 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
   const activeStores = useMemo(() => {
     const allStores = [...STORES, ...customStores];
     if (!storeConfig?.activeStoreCodes) return allStores;
-    return allStores.filter(s => storeConfig.activeStoreCodes.includes(s.code));
+    // Las tiendas de BASE_STORES que no están en activeStoreCodes se consideran "nuevas"
+    // y se incluyen automáticamente para que no queden ocultas al agregar tiendas al sistema
+    const configured = new Set(storeConfig.activeStoreCodes);
+    const customCodes = new Set(customStores.map(s => s.code));
+    return allStores.filter(s => {
+      if (configured.has(s.code)) return true; // activa explícitamente
+      if (customCodes.has(s.code)) return false; // custom no activada = oculta
+      return true; // BASE_STORES nueva (no estaba cuando se configuró) = mostrar siempre
+    });
   }, [storeConfig, customStores]);
 
   const filteredStores = useMemo(() => {
