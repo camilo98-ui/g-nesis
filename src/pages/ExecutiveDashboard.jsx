@@ -1287,6 +1287,16 @@ export default function ExecutiveDashboard() {
               />
             </div>
 
+            {/* NUEVA VISTA EJECUTIVA - Zona + Tiendas */}
+            <div className="mb-6">
+              <ZoneExecutiveSummary
+                storesAnalysis={storesAnalysis}
+                monthlyTotals={monthlyTotals}
+                dynamicTotals={dynamicTotals}
+                onStoreClick={setSelectedStoreDetail}
+              />
+            </div>
+
             {/* HIDDEN COMPATIBILITY */}
             <div className="hidden">
                 <div className="bg-transparent p-0 mb-6">
