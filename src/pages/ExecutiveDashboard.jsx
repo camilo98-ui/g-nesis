@@ -1476,36 +1476,20 @@ export default function ExecutiveDashboard() {
                 </motion.div>
 
                 {/* Top 3 Cajeros Zona */}
-                <motion.div 
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => setShowTopCashiers(true)}
-                  onMouseEnter={() => setHoveredStoreForChart(null)}
-                  className="bg-gradient-to-br from-amber-500/10 to-yellow-500/10 backdrop-blur-xl rounded-lg p-4 border border-amber-500/20 cursor-pointer transition-all hover:border-amber-400/40 hover:shadow-lg hover:shadow-amber-500/20">
+                <motion.div whileHover={{scale:1.02}} onClick={()=>setShowTopCashiers(true)} className="bg-gradient-to-br from-amber-500/10 to-yellow-500/10 backdrop-blur-xl rounded-lg p-4 border border-amber-500/20 cursor-pointer transition-all hover:border-amber-400/40">
                   <p className="text-xs text-amber-300 mb-2 font-bold uppercase tracking-wider">🏆 Top 3 Cajeros</p>
                   <div className="space-y-1.5">
                     {topCashiersRanking.slice(0, 3).map((cashier, idx) => (
                       <div key={cashier.cashier_id} className="flex items-center gap-2">
-                        <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black ${
-                          idx === 0 ? 'bg-yellow-500 text-white' :
-                          idx === 1 ? 'bg-gray-400 text-white' :
-                          'bg-amber-600 text-white'
-                        }`}>
-                          {idx + 1}
-                        </span>
+                        <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black ${idx===0?'bg-yellow-500':idx===1?'bg-gray-400':'bg-amber-600'} text-white`}>{idx+1}</span>
                         <div className="flex-1 min-w-0">
-                        <p className="text-xs font-bold text-white truncate">{cashier.cashier_name}</p>
-                        <p className="text-[9px] text-slate-400">
-                          {formatCurrency(cashier.total_sales)}
-                        </p>
+                          <p className="text-xs font-bold text-white truncate">{cashier.cashier_name}</p>
+                          <p className="text-[9px] text-slate-400">{formatCurrency(cashier.total_sales)}</p>
                         </div>
                       </div>
                     ))}
-                    {topCashiersRanking.length === 0 && (
-                      <p className="text-xs text-slate-500 text-center py-2">Sin datos de cajeros</p>
-                    )}
+                    {topCashiersRanking.length === 0 && <p className="text-xs text-slate-500 text-center py-2">Sin datos</p>}
                   </div>
-                  <p className="text-[9px] text-slate-500 mt-2 text-center">Click para ver detalle completo</p>
                 </motion.div>
                     </div>
 
