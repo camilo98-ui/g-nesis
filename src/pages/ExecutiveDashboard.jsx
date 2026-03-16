@@ -1301,9 +1301,10 @@ export default function ExecutiveDashboard() {
             <div className="hidden">
                 <div className="bg-transparent p-0 mb-6">
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                    {/* KPI 1 placeholder - hidden, new view above */}
-              <motion.div onClick={() => setSelectedKPIDetail('sales')} className="hidden">
-
+                    {/* KPI 1 placeholder */}
+                    <motion.div onClick={() => setSelectedKPIDetail('sales')} className="hidden" />
+                  </div>
+                </div>
             </div>
 
             {/* Grid Principal Estilo Power BI - 3 Columnas */}
