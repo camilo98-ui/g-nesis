@@ -1,10 +1,11 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { STORES, getDisplayName } from '@/components/StoreSelector';
+import { BASE_STORES } from '@/components/StoreManager';
 import { parseISO, isWithinInterval, startOfMonth, endOfMonth, format } from 'date-fns';
 import { TrendingUp, TrendingDown, ArrowRight, Target, BarChart3, Zap } from 'lucide-react';
 
