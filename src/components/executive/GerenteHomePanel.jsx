@@ -37,6 +37,24 @@ export default function GerenteHomePanel() {
   const daysInMonth = monthEnd.getDate();
   const daysElapsed = now.getDate();
 
+  const [activeStoreCodes, setActiveStoreCodes] = useState(null);
+
+  useEffect(() => {
+    base44.auth.me().then(user => {
+      if (user?.store_config?.activeStoreCodes) {
+        setActiveStoreCodes(user.store_config.activeStoreCodes);
+      } else {
+        setActiveStoreCodes(null); // null = todas activas
+      }
+    }).catch(() => setActiveStoreCodes(null));
+
+    // También cargar tiendas custom
+    base44.entities.Store.list().then(stores => {
+      const baseCodes = new Set(BASE_STORES.map(s => s.code));
+      // Se usan solo para saber si existen, el filtrado lo hace activeStoreCodes
+    }).catch(() => {});
+  }, []);
+
   const { data: allDailySales = [] } = useQuery({
     queryKey: ['gerenteHomeSales'],
     queryFn: () => base44.entities.DailySales.list(),
