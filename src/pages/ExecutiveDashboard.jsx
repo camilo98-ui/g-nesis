@@ -1654,46 +1654,7 @@ export default function ExecutiveDashboard() {
                         )}
                       />
                       <ReferenceLine y={0} stroke="#475569" strokeDasharray="3 3" />
-                      <Bar 
-                        dataKey="sales" 
-                        fill="url(#salesGradient)" 
-                        radius={[6, 6, 0, 0]} 
-                        maxBarSize={viewMode === 'month' ? 80 : viewMode === 'week' ? 50 : 40}
-                        name="Venta"
-                        isAnimationActive={true}
-                        animationDuration={1200}
-                        animationEasing="ease-out"
-                        animationBegin={0}
-                        shape={(props) => {
-                          const { x, y, width, height, payload } = props;
-                          const meetsGoal = payload.compliance >= 100;
-
-                          return (
-                            <g>
-                              {meetsGoal && (
-                                <rect
-                                  x={x}
-                                  y={y}
-                                  width={width}
-                                  height={height}
-                                  fill="url(#salesGradient)"
-                                  rx={6}
-                                  filter="url(#greenGlow)"
-                                  opacity={0.9}
-                                />
-                              )}
-                              <rect
-                                x={x}
-                                y={y}
-                                width={width}
-                                height={height}
-                                fill="url(#salesGradient)"
-                                rx={6}
-                              />
-                            </g>
-                          );
-                        }}
-                      />
+                      <Bar dataKey="sales" fill="url(#salesGradient)" radius={[5,5,0,0]} maxBarSize={viewMode==='month'?80:viewMode==='week'?50:40} name="Venta" isAnimationActive={true} animationDuration={1200}/>
                       <Line type="monotone" dataKey="budget" stroke="#6366f1" strokeWidth={3} dot={{r:3,fill:'#6366f1'}} name="Meta" strokeDasharray="5 5" isAnimationActive={true} animationDuration={2000}/>
                     </ComposedChart>
                   </ResponsiveContainer>
