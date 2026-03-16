@@ -63,7 +63,11 @@ export default function StoreManager() {
 
   const isActive = (code) => {
     if (activeStoreCodes === null) return true;
-    return activeStoreCodes.includes(code);
+    if (activeStoreCodes.includes(code)) return true;
+    // Tiendas BASE nuevas (no en la config guardada) = activas por defecto
+    const customCodes = new Set(customStores.map(s => s.code));
+    if (!customCodes.has(code)) return true;
+    return false;
   };
 
   const toggleStore = (code) => {
