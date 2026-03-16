@@ -77,7 +77,11 @@ export default function GerenteHomePanel() {
   const currentYear = now.getFullYear();
 
   const storesData = useMemo(() => {
-    return STORES.map(store => {
+    const filteredStores = activeStoreCodes
+      ? STORES.filter(s => activeStoreCodes.includes(s.code))
+      : STORES;
+
+    return filteredStores.map(store => {
       const storeSales = allDailySales.filter(s => {
         try {
           const d = parseISO(s.date);
