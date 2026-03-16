@@ -209,7 +209,7 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
   }, [storeConfig, customStores]);
 
   const filteredStores = useMemo(() => {
-    if (!search.trim()) return activeStores;
+    if (!search.trim()) return [];
     const term = search.toLowerCase().trim();
     return activeStores.filter((s) => {
       const code = s.code.toLowerCase();
