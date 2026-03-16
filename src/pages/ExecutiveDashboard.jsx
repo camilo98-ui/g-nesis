@@ -1759,6 +1759,10 @@ export default function ExecutiveDashboard() {
               </div>
             </div>
 
+          </>
+          )}
+          </div>
+
       {/* Modal Detalle Tienda */}
       <AnimatePresence>
         {selectedStoreDetail && (
