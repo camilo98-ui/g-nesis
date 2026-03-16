@@ -1828,138 +1828,35 @@ export default function ExecutiveDashboard() {
               gregorianMode={gregorianMode}
             />
 
-            {/* Prioridades Dinámicas */}
+            {/* Prioridades del día */}
             <div className="mb-8">
-              <h2 className="text-xl sm:text-2xl font-black text-white mb-6 tracking-tight">Prioridades de hoy</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                {/* Intervenir */}
-                {storesAnalysis
-                  .filter(s => s.status === 'critical')
-                  .sort((a, b) => b.gap - a.gap)
-                  .slice(0, 1)
-                  .map(store => (
-                    <div
-                      key={store.code}
-                      onClick={() => setSelectedStoreDetail(store)}
-                      onMouseEnter={() => setHoveredStoreForChart(store)}
-                      onMouseLeave={() => setHoveredStoreForChart(null)}
-                      className="relative bg-gradient-to-br from-red-500/20 to-rose-600/20 backdrop-blur-xl rounded-xl p-4 sm:p-6 lg:p-8 border border-red-500/30 cursor-pointer"
-                    >
-                      <div className="relative z-10">
-                        <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-5">
-                          <div className="w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-red-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <TrendingDown className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-white" />
-                          </div>
-                          <div>
-                            <p className="text-[10px] sm:text-xs font-bold text-red-300 uppercase tracking-wide">Intervenir Hoy</p>
-                            <p className="font-black text-white text-sm sm:text-base lg:text-xl">{store.name}</p>
-                          </div>
-                        </div>
-                        
-                        <div className="space-y-2 sm:space-y-3 mb-3 sm:mb-6">
-                          <div className="flex justify-between items-center">
-                            <span className="text-xs sm:text-sm text-slate-300">Cumplimiento</span>
-                            <span className="text-base sm:text-lg lg:text-xl font-black text-red-300 tabular-nums">{store.salesCompliance.toFixed(0)}%</span>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span className="text-xs sm:text-sm text-slate-300">Brecha</span>
-                            <span className="text-sm sm:text-base lg:text-lg font-bold text-white tabular-nums">{formatKPI(store.gap)}</span>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center gap-2 text-white text-xs sm:text-sm">
-                          <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
-                          <span className="font-semibold">Ver detalle</span>
+              <h2 className="text-xl font-black text-white mb-4 tracking-tight">Prioridades de hoy</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {[
+                  { label: 'Intervenir Hoy', stores: storesAnalysis.filter(s=>s.status==='critical').sort((a,b)=>b.gap-a.gap), color: 'red', icon: <TrendingDown className="w-5 h-5 text-white"/>, sub: (s) => `Brecha: ${formatKPI(s.gap)}` },
+                  { label: 'Acelerar', stores: storesAnalysis.filter(s=>s.status==='negative'&&s.salesCompliance>=80).sort((a,b)=>b.salesCompliance-a.salesCompliance), color: 'amber', icon: <Zap className="w-5 h-5 text-white"/>, sub: (s) => `Falta ${(90-s.salesCompliance).toFixed(0)}% para 90%` },
+                  { label: 'Reconocer', stores: storesAnalysis.filter(s=>s.status==='positive'&&s.salesCompliance>=110).sort((a,b)=>b.salesCompliance-a.salesCompliance), color: 'emerald', icon: <Award className="w-5 h-5 text-white"/>, sub: (s) => `+${(s.salesCompliance-100).toFixed(0)}% sobre meta` }
+                ].map(({ label, stores, color, icon, sub }) => {
+                  const store = stores[0];
+                  if (!store) return null;
+                  return (
+                    <div key={label} onClick={()=>setSelectedStoreDetail(store)} onMouseEnter={()=>setHoveredStoreForChart(store)} onMouseLeave={()=>setHoveredStoreForChart(null)}
+                      className={`bg-gradient-to-br from-${color}-500/20 to-${color}-600/20 backdrop-blur-xl rounded-xl p-5 border border-${color}-500/30 cursor-pointer hover:brightness-110 transition-all`}>
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className={`w-10 h-10 bg-${color}-500 rounded-lg flex items-center justify-center`}>{icon}</div>
+                        <div>
+                          <p className={`text-[10px] font-bold text-${color}-300 uppercase tracking-wide`}>{label}</p>
+                          <p className="font-black text-white text-base">{store.name}</p>
                         </div>
                       </div>
-                    </div>
-                  ))}
-
-                {/* Acelerar */}
-                {storesAnalysis
-                  .filter(s => s.status === 'negative' && s.salesCompliance >= 80)
-                  .sort((a, b) => b.salesCompliance - a.salesCompliance)
-                  .slice(0, 1)
-                  .map(store => (
-                    <div
-                      key={store.code}
-                      onClick={() => setSelectedStoreDetail(store)}
-                      onMouseEnter={() => setHoveredStoreForChart(store)}
-                      onMouseLeave={() => setHoveredStoreForChart(null)}
-                      className="relative bg-gradient-to-br from-amber-500/20 to-orange-600/20 backdrop-blur-xl rounded-xl p-4 sm:p-6 lg:p-8 border border-amber-500/30 cursor-pointer"
-                    >
-                      <div className="relative z-10">
-                        <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-5">
-                          <div className="w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-amber-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <Zap className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-white" />
-                          </div>
-                          <div>
-                            <p className="text-[10px] sm:text-xs font-bold text-amber-300 uppercase tracking-wide">Acelerar</p>
-                            <p className="font-black text-white text-sm sm:text-base lg:text-xl">{store.name}</p>
-                          </div>
-                        </div>
-                        
-                        <div className="space-y-2 sm:space-y-3 mb-3 sm:mb-6">
-                          <div className="flex justify-between items-center">
-                            <span className="text-xs sm:text-sm text-slate-300">Cumplimiento</span>
-                            <span className="text-base sm:text-lg lg:text-xl font-black text-amber-300 tabular-nums">{store.salesCompliance.toFixed(0)}%</span>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span className="text-xs sm:text-sm text-slate-300">Falta 90%</span>
-                            <span className="text-sm sm:text-base lg:text-lg font-bold text-white tabular-nums">{(90 - store.salesCompliance).toFixed(0)}%</span>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center gap-2 text-white text-xs sm:text-sm">
-                          <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
-                          <span className="font-semibold">Ver detalle</span>
-                        </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between"><span className="text-xs text-slate-300">Cumplimiento</span><span className={`text-lg font-black text-${color}-300`}>{store.salesCompliance.toFixed(0)}%</span></div>
+                        <p className="text-xs text-slate-400">{sub(store)}</p>
                       </div>
+                      <div className="flex items-center gap-1 mt-3 text-white text-xs"><Eye className="w-3 h-3"/><span>Ver detalle</span></div>
                     </div>
-                  ))}
-
-                {/* Reconocer */}
-                {storesAnalysis
-                  .filter(s => s.status === 'positive' && s.salesCompliance >= 110)
-                  .sort((a, b) => b.salesCompliance - a.salesCompliance)
-                  .slice(0, 1)
-                  .map(store => (
-                    <div
-                      key={store.code}
-                      onClick={() => setSelectedStoreDetail(store)}
-                      onMouseEnter={() => setHoveredStoreForChart(store)}
-                      onMouseLeave={() => setHoveredStoreForChart(null)}
-                      className="relative bg-gradient-to-br from-emerald-500/20 to-green-600/20 backdrop-blur-xl rounded-xl p-4 sm:p-6 lg:p-8 border border-emerald-500/30 cursor-pointer"
-                    >
-                      <div className="relative z-10">
-                        <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-5">
-                          <div className="w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-emerald-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <Award className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-white" />
-                          </div>
-                          <div>
-                            <p className="text-[10px] sm:text-xs font-bold text-emerald-300 uppercase tracking-wide">Reconocer</p>
-                            <p className="font-black text-white text-sm sm:text-base lg:text-xl">{store.name}</p>
-                          </div>
-                        </div>
-                        
-                        <div className="space-y-2 sm:space-y-3 mb-3 sm:mb-6">
-                          <div className="flex justify-between items-center">
-                            <span className="text-xs sm:text-sm text-slate-300">Cumplimiento</span>
-                            <span className="text-base sm:text-lg lg:text-xl font-black text-emerald-300 tabular-nums">{store.salesCompliance.toFixed(0)}%</span>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span className="text-xs sm:text-sm text-slate-300">Sobre meta</span>
-                            <span className="text-sm sm:text-base lg:text-lg font-bold text-white tabular-nums">+{(store.salesCompliance - 100).toFixed(0)}%</span>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center gap-2 text-white text-xs sm:text-sm">
-                          <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
-                          <span className="font-semibold">Ver detalle</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                  );
+                })}
               </div>
             </div>
 
