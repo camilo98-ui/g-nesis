@@ -32,6 +32,8 @@ const BASE_STORES = [
   { code: "TUNJA 2", name: "CC VIVA TUNJA", displayName: "VIVA TUNJA" },
   { code: "BTA 92", name: "BOGOTA 92", displayName: "BOGOTÁ 92" },
   { code: "BTA 93", name: "CC COLINA", displayName: "CC COLINA" },
+  { code: "BTA 94", name: "CC ECO PLAZA", displayName: "ECO PLAZA" },
+  { code: "BTA 95", name: "CC CASA BLANCA", displayName: "CASA BLANCA" },
 ];
 
 export { BASE_STORES };
