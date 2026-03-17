@@ -1118,7 +1118,7 @@ export default function Home() {
             </>
           )}
           {selectedRole === 'gerente' && (
-            <p className="text-slate-500 text-xs">Sistema de Gestión · Gerencia</p>
+            <p className="text-gray-400 text-sm">Sistema de Gestión · Gerencia</p>
           )}
         </div>
 
