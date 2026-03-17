@@ -61,6 +61,7 @@ const AuthenticatedApp = () => {
           }
         />
       ))}
+      <Route path="/GenesisCommandCenter" element={<LayoutWrapper currentPageName="GenesisCommandCenter"><GenesisCommandCenter /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
