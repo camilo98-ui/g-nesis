@@ -32,6 +32,17 @@ const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/pub
 const MENU_ITEMS = [
 
   {
+    name: 'Command Center',
+    page: 'GenesisCommandCenter',
+    icon: Activity,
+    description: 'Monitoreo Global',
+    bgColor: 'bg-gradient-to-br from-slate-800 to-slate-900',
+    iconBg: 'bg-cyan-500/20',
+    iconColor: 'text-cyan-400',
+    textColor: 'text-cyan-300',
+    requiredRole: 'gerente'
+  },
+  {
     name: 'Experiencia Gerencial',
     page: 'ExecutiveExperience',
     icon: Sparkles,
