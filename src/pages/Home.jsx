@@ -20,7 +20,7 @@ const ShiftRecordForm = lazy(() => import('@/components/forms/ShiftRecordForm'))
 const MonthlyBudgetDashboard = lazy(() => import('@/components/budget/MonthlyBudgetDashboard'));
 import GerenteHomePanel from '@/components/executive/GerenteHomePanel.jsx';
 import {
-  LayoutDashboard, Users, TrendingUp,
+  LayoutDashboard, Users, TrendingUp, Activity,
   Award, Target, Bell, Phone, Download, FileText,
   Lock, Eye, EyeOff, Receipt, Snowflake, Settings as SettingsIcon, AlertTriangle, CheckCircle, Info, CalendarDays, LogOut, Sparkles, Palette, Trophy } from
 'lucide-react';
