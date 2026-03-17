@@ -30,17 +30,7 @@ import { toast } from 'sonner';
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/6a749247d_Capturadepantalla2025-11-251251441.png";
 
 const MENU_ITEMS = [
-  {
-    name: 'Panel Ejecutivo',
-    page: 'ExecutiveDashboard',
-    icon: TrendingUp,
-    description: 'Análisis Gerencial',
-    bgColor: 'bg-gradient-to-br from-slate-100/90 to-gray-100/80',
-    iconBg: 'bg-slate-200/60',
-    iconColor: 'text-slate-600',
-    textColor: 'text-slate-700',
-    requiredRole: 'gerente'
-  },
+
   {
     name: 'Experiencia Gerencial',
     page: 'ExecutiveExperience',
