@@ -89,9 +89,11 @@ export default function DailySalesForm({ storeId, onSuccess }) {
       };
       
       let record;
+      let action = 'create';
       if (editingRecord) {
         // Actualizar registro existente
         record = await base44.entities.DailySales.update(editingRecord.id, recordData);
+        action = 'update';
       } else {
         // Verificar si ya existe registro para esa fecha
         const existing = await base44.entities.DailySales.filter({ 
@@ -101,6 +103,7 @@ export default function DailySalesForm({ storeId, onSuccess }) {
         
         if (existing.length > 0) {
           record = await base44.entities.DailySales.update(existing[0].id, recordData);
+          action = 'update';
         } else {
           record = await base44.entities.DailySales.create(recordData);
         }
@@ -113,14 +116,13 @@ export default function DailySalesForm({ storeId, onSuccess }) {
           store_id: storeId,
           record_type: 'daily_sales',
           record_id: record.id,
-          action: existing.length > 0 ? 'update' : 'create',
+          action,
           user_email: user.email,
           sales_amount: salesValue,
           action_date: data.date,
           details: JSON.stringify({ total_transactions: transactionsValue })
         });
       } catch (logError) {
-        // Si falla el log, continuar de todas formas
         console.warn('No se pudo crear el log:', logError);
       }
       
