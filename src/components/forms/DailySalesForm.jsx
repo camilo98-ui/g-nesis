@@ -127,11 +127,15 @@ export default function DailySalesForm({ storeId, onSuccess }) {
       return record;
     },
     onSuccess: () => {
+      // Invalidar TODAS las queries que usan ventas diarias en toda la app
       queryClient.invalidateQueries({ queryKey: ['dailySales'] });
       queryClient.invalidateQueries({ queryKey: ['dailySalesHistory'] });
+      queryClient.invalidateQueries({ queryKey: ['allDailySales'] });
+      queryClient.invalidateQueries({ queryKey: ['genesis_sales'] });
       queryClient.invalidateQueries({ queryKey: ['salesLogs'] });
       queryClient.invalidateQueries({ queryKey: ['budgets'] });
       queryClient.invalidateQueries({ queryKey: ['dailyBudgets'] });
+      queryClient.invalidateQueries({ queryKey: ['gerenteHomeSales'] });
       
       toast.success(editingRecord ? '¡Venta actualizada!' : '¡Venta registrada!');
       
