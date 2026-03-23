@@ -594,11 +594,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                           ? `✅ A favor: ${formatCurrency(activeBudget.sales_gap)}`
                           : `Valor exacto del Excel`}
                     </p>
-                    {budgetData.gapRecoveryIncrement > 0 && (
-                      <p className="text-[10px] lg:text-xs text-white/50 mt-1">
-                        ⚠️ Brecha total: {formatCurrency(Math.abs(activeBudget?.sales_gap || 0))} ÷ {budgetData.remainingDays} días
-                      </p>
-                    )}
+
                   </div>
 
                   {/* Brecha total visible debajo */}
