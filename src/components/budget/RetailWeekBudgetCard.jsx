@@ -289,24 +289,27 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
     const excelRec = dailyBudgets?.find(db => db.store_id === storeId && (db.date?.split('T')[0] || db.date) === todayStr);
     const excelBudgetForToday = excelRec?.budget_amount > 0 ? excelRec.budget_amount : (activeBudget.sales_budget / daysInMonth);
 
-    // Brecha real del mes (campo sales_gap en Budget, negativo = déficit, positivo = superávit)
-    // La brecha se distribuye inteligentemente entre los días restantes del mes
-    const salesGap = activeBudget.sales_gap || 0; // Diff Ventas del informe compartido
+    // Brecha real del mes:
+    // Primero usamos sales_gap si está definido (brecha manual ingresada)
+    // Si no, usamos accumulatedGap (brecha calculada automáticamente de datos reales)
+    const manualGap = (activeBudget.sales_gap !== undefined && activeBudget.sales_gap !== null)
+      ? activeBudget.sales_gap
+      : null;
+    
+    // accumulatedGap = budgetUntilYesterday - salesUntilYesterday (positivo = déficit)
+    // Lo convertimos al mismo signo que salesGap (negativo = déficit)
+    const effectiveGap = manualGap !== null ? manualGap : -accumulatedGap;
+    const salesGap = effectiveGap;
     
     let gapRecoveryIncrement = 0;
     let adjustedDailyBudget = excelBudgetForToday;
     
     if (salesGap < 0 && remainingDays > 0) {
       // Brecha NEGATIVA: hay déficit → sumar el incremento diario para recuperarla
-      // Distribuir la brecha negativa entre los días restantes del mes
       gapRecoveryIncrement = Math.abs(salesGap) / remainingDays;
       adjustedDailyBudget = excelBudgetForToday + gapRecoveryIncrement;
-    } else if (salesGap > 0) {
-      // Brecha POSITIVA: la tienda está adelantada → mantener el PPT Excel (no reducir)
-      // Solo se aplica si el Excel tiene un valor, no se incrementa más
-      gapRecoveryIncrement = 0;
-      adjustedDailyBudget = excelBudgetForToday;
     }
+    // Brecha positiva: mantener PPT Excel sin cambios
 
     // Calcular número de semana del mes
     const currentWeekNumber = weeks.findIndex(w => {
