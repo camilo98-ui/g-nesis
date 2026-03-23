@@ -1097,10 +1097,10 @@ export default function Home() {
         </>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 lg:px-12 py-6 relative z-10">
+      <div className="min-h-screen flex flex-col items-center justify-center px-6 lg:px-12 relative z-10">
 
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-16">
           <motion.img
             src={LOGO_URL}
             alt="Popsy"
