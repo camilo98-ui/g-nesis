@@ -1158,6 +1158,13 @@ export default function ExecutiveDashboard() {
               <span className="hidden sm:inline">Excel</span>
             </button>
 
+            {/* Importar Excel Presupuesto */}
+            <button onClick={() => setShowBudgetImporter(true)}
+              className="h-9 px-3 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/25 flex items-center gap-1.5 text-emerald-300 text-sm transition-all">
+              <FileSpreadsheet className="w-4 h-4" />
+              <span className="hidden sm:inline">PPT Excel</span>
+            </button>
+
             {/* Presupuesto */}
             <button onClick={() => setShowBudgetManager(true)} className="h-9 w-9 rounded-lg bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/25 flex items-center justify-center text-purple-300 transition-all">
               <Settings className="w-4 h-4" />
