@@ -1569,43 +1569,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                 formatCurrency={formatCurrency}
                 gregorianMode={gregorianMode}
               />
-              {false && selectedMetric === 'weekly-budget' && (
-                      <div>
-                        <h4 className="text-sm md:text-base font-bold text-slate-900 mb-3">Desglose de Meta Semanal</h4>
-                        <div className="space-y-2 mb-3">
-                          <div className="flex justify-between items-center p-2 bg-purple-50 rounded-lg">
-                            <span className="text-xs text-purple-700">Presupuesto total semana</span>
-                            <span className="font-bold text-purple-900">{formatCurrency(budgetData.weeklyBudget)}</span>
-                          </div>
-                          <div className="flex justify-between items-center p-2 bg-slate-50 rounded-lg">
-                            <span className="text-xs text-slate-700">Días en la semana (en mes)</span>
-                            <span className="font-bold text-slate-900">{eachDayOfInterval({ start: budgetData.currentWeekStart, end: budgetData.currentWeekEnd }).filter(d => {
-                              const monthStartBound = gregorianMode ? startOfMonth(new Date()) : new Date(new Date().getFullYear(), new Date().getMonth() - 1, 29);
-                              const monthEndBound = gregorianMode ? endOfMonth(new Date()) : new Date(new Date().getFullYear(), new Date().getMonth(), 28);
-                              return isWithinInterval(d, { start: monthStartBound, end: monthEndBound });
-                            }).length} días</span>
-                          </div>
-                          <div className="flex justify-between items-center p-2 bg-purple-50 rounded-lg">
-                            <span className="text-xs text-purple-700">Promedio diario requerido</span>
-                            <span className="font-bold text-purple-900">{formatCurrency(budgetData.weeklyBudget / 7)}</span>
-                          </div>
-                        </div>
-                        <ResponsiveContainer width="100%" height={150}>
-                          <BarChart data={budgetData.dailyTrendData}>
-                            <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
-                            <XAxis dataKey="date" fontSize={9} angle={-45} textAnchor="end" height={50} />
-                            <YAxis fontSize={10} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} />
-                            <Tooltip formatter={(v) => formatCurrency(v)} />
-                            <Bar dataKey="presupuesto" fill="#a78bfa" radius={[6, 6, 0, 0]} />
-                          </BarChart>
-                        </ResponsiveContainer>
-                        <p className="text-xs text-slate-600 mt-2">
-                          📆 Meta distribuida según patrón histórico de cada día de la semana
-                        </p>
-                      </div>
-                    )}
-
-                    {selectedMetric === 'weekly-sales' && (
+              {false && selectedMetric === 'weekly-sales' && (
                       <div>
                         <h4 className="text-sm md:text-base font-bold text-slate-900 mb-3">Ventas de la Semana</h4>
                         <div className="grid grid-cols-2 gap-2 mb-3">
