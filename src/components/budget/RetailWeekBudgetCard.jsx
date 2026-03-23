@@ -299,7 +299,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
     let gapRecoveryIncrement = 0;
     let adjustedDailyBudget = excelBudgetForToday;
     
-    if (salesGap < 0 && remainingDays > 0) {
+    if (salesGap !== 0 && remainingDays > 0) {
       // Días restantes del mes desde HOY
       const remainingDaysList = eachDayOfInterval({ start: now, end: monthEnd });
       
@@ -310,8 +310,8 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
         // Fin de semana (Viernes=5, Sábado=6, Domingo=0) venden más → más peso
         const isWeekend = dow === 0 || dow === 5 || dow === 6;
         const historicalAvg = avgByDayOfWeek[dow] || dailyBaseBudget;
-        // Multiplicar por 1.3 si es fin de semana/viernes para darle más carga
-        return historicalAvg * (isWeekend ? 1.3 : 1.0);
+        // Multiplicar por 1.5 si es fin de semana/viernes para darle más carga (aumentado de 1.3)
+        return historicalAvg * (isWeekend ? 1.5 : 1.0);
       });
       
       const totalWeight = remainingWeights.reduce((a, b) => a + b, 0);
@@ -320,18 +320,22 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
       const todayDow = now.getDay();
       const isWeekend = todayDow === 0 || todayDow === 5 || todayDow === 6;
       const todayHistoricalAvg = avgByDayOfWeek[todayDow] || dailyBaseBudget;
-      const todayWeight = todayHistoricalAvg * (isWeekend ? 1.3 : 1.0);
+      const todayWeight = todayHistoricalAvg * (isWeekend ? 1.5 : 1.0);
       
       // El incremento del día de hoy = (brecha total * proporción del día de hoy)
       // Días con mayor venta histórica absorben más brecha = metas más ambiciosas en días fuertes
-      const todayGapShare = totalWeight > 0 
+      let todayGapShare = totalWeight > 0 
         ? Math.abs(salesGap) * (todayWeight / totalWeight)
         : Math.abs(salesGap) / remainingDays;
       
-      gapRecoveryIncrement = todayGapShare;
+      // Factor agresivo: cuanto mayor sea la brecha, más alto el incremento (y también para brechas positivas)
+      // Multiplica por 1.2 para brechas negativas altas, y por 0.8 para positivas (mantener racha)
+      const aggressionFactor = salesGap < 0 ? 1.3 : 0.8;
+      todayGapShare = todayGapShare * aggressionFactor;
+      
+      gapRecoveryIncrement = salesGap < 0 ? todayGapShare : -todayGapShare;
       adjustedDailyBudget = excelBudgetForToday + gapRecoveryIncrement;
     }
-    // Brecha positiva: mantener PPT Excel sin cambios
 
     // Calcular número de semana del mes
     const currentWeekNumber = weeks.findIndex(w => {
