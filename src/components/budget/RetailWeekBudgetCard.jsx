@@ -622,16 +622,9 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                   </motion.p>
                   <div className="space-y-1">
                     <p className="text-xs lg:text-sm text-white/70">
-                      Base 100%: {formatCurrency(budgetData.dailyBaseBudget / ((() => {
-                        const initialProjection = budgetData.monthProjection;
-                        const originalBudget = activeBudget.sales_budget;
-                        const projCompliance = originalBudget > 0 ? (initialProjection / originalBudget) : 0;
-                        if (gregorianMode) return 1.0;
-                        if (projCompliance >= 1.1) return 1.10;
-                        if (projCompliance >= 1.0) return 1.05;
-                        if (projCompliance >= 0.9) return 1.02;
-                        return 1.0;
-                      })()))}
+                      {budgetData.gapRecoveryIncrement > 0
+                        ? `Excel: ${formatCurrency(budgetData.excelBudgetForToday)} + ${formatCurrency(budgetData.gapRecoveryIncrement)}`
+                        : `Valor exacto del Excel`}
                     </p>
                   </div>
                   
