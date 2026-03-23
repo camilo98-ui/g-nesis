@@ -1343,9 +1343,9 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
               {/* Proyección de Semanas Futuras */}
               {(() => {
                 const now = new Date();
-                const monthStartCalc = gregorianMode ? startOfMonth(now) : new Date(now.getFullYear(), now.getMonth() - 1, 29);
-                const monthEndCalc = gregorianMode ? endOfMonth(now) : new Date(now.getFullYear(), now.getMonth(), 28);
-                const weeks = eachWeekOfInterval({ start: monthStartCalc, end: monthEndCalc }, { weekStartsOn: gregorianMode ? 0 : 1 });
+                const monthStartCalc = startOfMonth(now);
+                const monthEndCalc = endOfMonth(now);
+                const weeks = eachWeekOfInterval({ start: monthStartCalc, end: monthEndCalc }, { weekStartsOn: 1 });
                 
                 const futureWeeks = weeks
                   .map((weekStart, idx) => {
