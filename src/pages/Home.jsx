@@ -1306,7 +1306,6 @@ export default function Home() {
                     </Link>
                    )}
                 ))}
-        )}
       </div>
 
       {/* Modales con Lazy Loading */}
