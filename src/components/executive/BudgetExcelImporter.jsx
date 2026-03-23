@@ -492,67 +492,68 @@ export default function BudgetExcelImporter({ onClose }) {
               )}
 
               {/* Tabla */}
-              <div className="rounded-xl border border-white/8 overflow-hidden">
-                <div className="grid px-4 py-2 text-[10px] font-bold text-slate-500 uppercase tracking-wider border-b border-white/8"
-                  style={{ gridTemplateColumns: hasTransactions || hasTicket ? '3fr 2fr 1.5fr 1.5fr 1.5fr' : '4fr 3fr 2fr' }}>
-                  <span>Tienda</span>
-                  <span className="text-right">PPT Mes Ventas</span>
-                  <span className="text-right">PPT Día</span>
-                  {hasTicket && <span className="text-right">PPT Ticket</span>}
-                  {hasTransactions && <span className="text-right">PPT Trx Mes</span>}
-                </div>
-                <div className="max-h-80 overflow-y-auto divide-y divide-white/5">
-                  {parsedData.stores.map((item, i) => (
-                    <motion.div
-                      key={item.store.code}
-                      initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.03 }}
-                      className="grid px-4 py-3 hover:bg-white/3 transition-colors"
-                      style={{ gridTemplateColumns: hasTransactions || hasTicket ? '3fr 2fr 1.5fr 1.5fr 1.5fr' : '4fr 3fr 2fr' }}
-                    >
-                      <div>
-                        <p className="text-xs font-bold text-white">{item.store.displayName}</p>
-                        <p className="text-[9px] text-slate-500">{item.store.code}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-xs font-black text-emerald-400 tabular-nums">{fmtCOP(item.monthly)}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-xs font-bold text-amber-300 tabular-nums">{fmtCOP(item.daily)}</p>
-                      </div>
+              {(() => {
+                const cols = hasTicket && hasTransactions ? '3fr 2fr 1.5fr 1.5fr'
+                  : hasTicket || hasTransactions ? '3fr 2fr 1.5fr'
+                  : '4fr 3fr';
+                const totalMonthly = parsedData.stores.reduce((s, x) => s + (x.monthly || 0), 0);
+                return (
+                  <div className="rounded-xl border border-white/8 overflow-hidden">
+                    <div className="grid px-4 py-2 text-[10px] font-bold text-slate-500 uppercase tracking-wider border-b border-white/8"
+                      style={{ gridTemplateColumns: cols }}>
+                      <span>Tienda</span>
+                      <span className="text-right">PPT Mes Ventas</span>
+                      {hasTicket && <span className="text-right">PPT Ticket</span>}
+                      {hasTransactions && <span className="text-right">PPT Trx Mes</span>}
+                    </div>
+                    <div className="max-h-80 overflow-y-auto divide-y divide-white/5">
+                      {parsedData.stores.map((item, i) => (
+                        <motion.div
+                          key={item.store.code}
+                          initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: i * 0.03 }}
+                          className="grid px-4 py-3 hover:bg-white/3 transition-colors"
+                          style={{ gridTemplateColumns: cols }}
+                        >
+                          <div>
+                            <p className="text-xs font-bold text-white">{item.store.displayName}</p>
+                            <p className="text-[9px] text-slate-500">{item.store.code}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-xs font-black text-emerald-400 tabular-nums">{fmtCOP(item.monthly)}</p>
+                          </div>
+                          {hasTicket && (
+                            <div className="text-right">
+                              <p className="text-xs font-bold text-purple-300 tabular-nums">{fmtCOP(item.ticket)}</p>
+                            </div>
+                          )}
+                          {hasTransactions && (
+                            <div className="text-right">
+                              <p className="text-xs font-bold text-blue-300 tabular-nums">{fmtNum(item.transactions)}</p>
+                            </div>
+                          )}
+                        </motion.div>
+                      ))}
+                    </div>
+                    {/* Totales */}
+                    <div className="grid px-4 py-3 border-t border-white/10 bg-white/3"
+                      style={{ gridTemplateColumns: cols }}>
+                      <p className="text-xs font-black text-white">TOTAL ZONA ({parsedData.stores.length} tiendas)</p>
+                      <p className="text-xs font-black text-emerald-300 tabular-nums text-right">
+                        {fmtCOP(totalMonthly)}
+                      </p>
                       {hasTicket && (
-                        <div className="text-right">
-                          <p className="text-xs font-bold text-purple-300 tabular-nums">{fmtCOP(item.ticket)}</p>
-                        </div>
+                        <p className="text-xs font-black text-purple-200 tabular-nums text-right">–</p>
                       )}
                       {hasTransactions && (
-                        <div className="text-right">
-                          <p className="text-xs font-bold text-blue-300 tabular-nums">{fmtNum(item.transactions)}</p>
-                        </div>
+                        <p className="text-xs font-black text-blue-200 tabular-nums text-right">
+                          {fmtNum(parsedData.stores.reduce((s, x) => s + (x.transactions || 0), 0))}
+                        </p>
                       )}
-                    </motion.div>
-                  ))}
-                </div>
-                {/* Totales */}
-                <div className="grid px-4 py-3 border-t border-white/10 bg-white/3"
-                  style={{ gridTemplateColumns: hasTransactions || hasTicket ? '3fr 2fr 1.5fr 1.5fr 1.5fr' : '4fr 3fr 2fr' }}>
-                  <p className="text-xs font-black text-white">TOTAL ZONA ({parsedData.stores.length} tiendas)</p>
-                  <p className="text-xs font-black text-emerald-300 tabular-nums text-right">
-                    {fmtCOP(parsedData.stores.reduce((s, x) => s + (x.monthly || 0), 0))}
-                  </p>
-                  <p className="text-xs font-black text-amber-200 tabular-nums text-right">
-                    {fmtCOP(parsedData.stores.reduce((s, x) => s + (x.daily || 0), 0))}
-                  </p>
-                  {hasTicket && (
-                    <p className="text-xs font-black text-purple-200 tabular-nums text-right">–</p>
-                  )}
-                  {hasTransactions && (
-                    <p className="text-xs font-black text-blue-200 tabular-nums text-right">
-                      {fmtNum(parsedData.stores.reduce((s, x) => s + (x.transactions || 0), 0))}
-                    </p>
-                  )}
-                </div>
-              </div>
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Tiendas no encontradas */}
               {(() => {
