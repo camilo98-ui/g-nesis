@@ -36,6 +36,23 @@ const matchStore = (cellValue) => {
   const normalized = normalize(String(cellValue));
   if (!normalized) return null;
 
+  // Intentar extraer número de "BOGOTA XX" o "BTA XX" directamente del texto original
+  const bogotaNumMatch = String(cellValue).match(/(?:bogota|bta)\s*(\d+)/i);
+  if (bogotaNumMatch) {
+    const num = bogotaNumMatch[1];
+    for (const store of BASE_STORES) {
+      const storeNum = store.code.replace(/[^0-9]/g, '');
+      if (storeNum === num) return store;
+    }
+  }
+
+  // Tunja directo
+  const tunjaMatch = String(cellValue).match(/tunja\s*(\d+)/i);
+  if (tunjaMatch) {
+    const found = BASE_STORES.find(s => s.code === `TUNJA ${tunjaMatch[1]}`);
+    if (found) return found;
+  }
+
   for (const store of BASE_STORES) {
     const keywords = STORE_KEYWORDS[store.code] || [];
     // Exact keyword match
