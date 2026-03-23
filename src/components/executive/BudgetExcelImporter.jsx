@@ -361,7 +361,7 @@ export default function BudgetExcelImporter({ onClose }) {
         try {
           const today = format(new Date(parsedData.year, parsedData.month - 1, new Date().getDate()), 'yyyy-MM-dd');
           const existingDaily = await base44.entities.DailyBudget.filter({ store_id: item.store.code, date: today });
-          const dailyData = { store_id: item.store.code, date: today, sales_budget: item.daily, month: parsedData.month, year: parsedData.year };
+          const dailyData = { store_id: item.store.code, date: today, budget_amount: item.daily, month: parsedData.month, year: parsedData.year };
           if (existingDaily.length > 0) {
             await base44.entities.DailyBudget.update(existingDaily[0].id, dailyData);
           } else {
