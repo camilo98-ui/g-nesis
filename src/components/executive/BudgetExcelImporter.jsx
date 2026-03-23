@@ -591,7 +591,7 @@ export default function BudgetExcelImporter({ onClose }) {
                     {parsedData.stores.length} de {BASE_STORES.length} tiendas detectadas · {monthNames[parsedData.month - 1]} {parsedData.year}
                   </p>
                   <p className="text-[11px] text-slate-400">
-                    {parsedData.daysInMonth} días · PPT diario = presupuesto mensual ÷ {parsedData.daysInMonth}
+                    {parsedData.daysInMonth} días · {parsedData.hasDailyBreakdown ? '✅ PPT diario individual detectado por día' : 'PPT diario = presupuesto mensual ÷ ' + parsedData.daysInMonth}
                   </p>
                 </div>
                 {parsedData.stores.length < BASE_STORES.length && (
