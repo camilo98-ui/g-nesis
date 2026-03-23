@@ -1291,21 +1291,22 @@ export default function Home() {
                     </h3>
                     <p className="text-[10px] lg:text-xs text-gray-600 mt-0.5">{item.description}</p>
                   </div>
-                  </div> :
-                  <Link to={createPageUrl(item.page)}>
-                  <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-5 lg:p-6 h-full shadow-lg hover:shadow-2xl hover:bg-white/15 transition-all duration-300 group relative overflow-hidden border border-white/20">
-                    <div className="flex flex-col items-center justify-center text-center relative z-10">
-                      <div className={`w-14 h-14 lg:w-16 lg:h-16 ${item.iconBg} backdrop-blur-sm rounded-2xl flex items-center justify-center mb-3`}>
-                        <Icon className={`w-7 h-7 lg:w-8 lg:h-8 ${item.iconColor}`} />
-                      </div>
-                      <h3 className={`font-bold ${item.textColor} text-sm lg:text-base`}>
-                        {item.name}
-                      </h3>
-                      <p className="text-[10px] lg:text-xs text-gray-500 mt-0.5">{item.description}</p>
-                    </div>
                   </div>
+                  ) : (
+                  <Link to={createPageUrl(item.page)}>
+                    <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-5 lg:p-6 h-full shadow-lg hover:shadow-2xl hover:bg-white/15 transition-all duration-300 group relative overflow-hidden border border-white/20">
+                      <div className="flex flex-col items-center justify-center text-center relative z-10">
+                        <div className={`w-14 h-14 lg:w-16 lg:h-16 ${item.iconBg} backdrop-blur-sm rounded-2xl flex items-center justify-center mb-3`}>
+                          <Icon className={`w-7 h-7 lg:w-8 lg:h-8 ${item.iconColor}`} />
+                        </div>
+                        <h3 className={`font-bold ${item.textColor} text-sm lg:text-base`}>
+                          {item.name}
+                        </h3>
+                        <p className="text-[10px] lg:text-xs text-gray-500 mt-0.5">{item.description}</p>
+                      </div>
+                    </div>
                   </Link>
-                  ) : null}
+                  )}
                   </div>
             );
           })}
