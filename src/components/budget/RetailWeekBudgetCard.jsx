@@ -1577,22 +1577,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
     </motion.div>
   );
 }
-// end of RetailWeekBudgetCard
-                          
-                          return {
-                            semana: `S${idx + 1}`,
-                            weekStart,
-                            weekEnd,
-                            presupuesto: weekBudget,
-                            isCurrent: idx + 1 === budgetData.currentWeekNumber,
-                            isFuture: idx + 1 > budgetData.currentWeekNumber
-                          };
-                        })
-                        .filter(w => w.isFuture);
-                      
-                      return (
-                      <div>
-                        <h4 className="text-sm md:text-base font-bold text-slate-900 mb-3">Proyección de Cierre Semanal</h4>
+// end of file
                         <div className="space-y-2 mb-3">
                           <div className="flex justify-between items-center p-2 bg-pink-50 rounded-lg">
                             <span className="text-xs text-pink-700">Proyección de cierre</span>
