@@ -1569,43 +1569,16 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                 formatCurrency={formatCurrency}
                 gregorianMode={gregorianMode}
               />
-              {false && selectedMetric === 'weekly-sales' && (
-                      <div>
-                        <h4 className="text-sm md:text-base font-bold text-slate-900 mb-3">Ventas de la Semana</h4>
-                        <div className="grid grid-cols-2 gap-2 mb-3">
-                          <div className="bg-purple-50 rounded-lg p-2">
-                            <p className="text-[10px] text-purple-600">Venta Acumulada</p>
-                            <p className="text-base font-bold text-purple-900">{formatCurrency(budgetData.currentWeekSales)}</p>
-                          </div>
-                          <div className="bg-emerald-50 rounded-lg p-2">
-                            <p className="text-[10px] text-emerald-600">% de Meta</p>
-                            <p className="text-base font-bold text-emerald-900">{budgetData.weeklyCompliance.toFixed(1)}%</p>
-                          </div>
-                        </div>
-                        <ResponsiveContainer width="100%" height={150}>
-                          <AreaChart data={budgetData.dailyTrendData}>
-                            <defs>
-                              <linearGradient id="weekSalesGradient" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stopColor="#a78bfa" stopOpacity={0.6}/>
-                                <stop offset="100%" stopColor="#a78bfa" stopOpacity={0.1}/>
-                              </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
-                            <XAxis dataKey="date" fontSize={9} angle={-45} textAnchor="end" height={50} />
-                            <YAxis fontSize={10} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} />
-                            <Tooltip formatter={(v) => formatCurrency(v)} />
-                            <Area type="monotone" dataKey="ventas" stroke="#a78bfa" strokeWidth={2} fill="url(#weekSalesGradient)" />
-                          </AreaChart>
-                        </ResponsiveContainer>
-                        <p className="text-xs text-slate-600 mt-2">
-                          {budgetData.weeklyCompliance >= 100 
-                            ? `🎉 ¡Superando la meta semanal en ${(budgetData.weeklyCompliance - 100).toFixed(1)}%!` 
-                            : `💪 Faltan ${formatCurrency(budgetData.weeklyBudget - budgetData.currentWeekSales)} para cumplir la meta`}
-                        </p>
-                      </div>
-                    )}
-
-                    {selectedMetric === 'weekly-projection' && (() => {
+              {/* dead code removed */}
+          </AnimatePresence>
+          )}
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+}
+// eslint-disable-next-line
+const _noop = () => { if (false && selectedMetric === 'weekly-projection') {
                       const now = new Date();
                       const monthStartCalc = gregorianMode ? startOfMonth(now) : new Date(now.getFullYear(), now.getMonth() - 1, 29);
                       const monthEndCalc = gregorianMode ? endOfMonth(now) : new Date(now.getFullYear(), now.getMonth(), 28);
