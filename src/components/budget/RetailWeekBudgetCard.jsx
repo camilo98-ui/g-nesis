@@ -1577,8 +1577,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
     </motion.div>
   );
 }
-// end of dead code
-                          <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-lg p-3 text-center border border-indigo-200/50">
+// end
                             <p className="text-xs text-indigo-600 mb-1">Proyección de Cierre</p>
                             <p className="text-xl font-black text-indigo-900">{formatCurrency(budgetData.monthProjection)}</p>
                           </div>
