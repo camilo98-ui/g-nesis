@@ -1569,24 +1569,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                 formatCurrency={formatCurrency}
                 gregorianMode={gregorianMode}
               />
-              {false && <div>
-                    {selectedMetric === 'remaining' && (
-                      <div>
-                        <h4 className="text-sm md:text-base font-bold text-slate-900 mb-3">Proyección de Días Restantes</h4>
-                        <div className="space-y-2 mb-3">
-                          <div className="flex justify-between items-center p-2 bg-emerald-50 rounded-lg">
-                            <span className="text-xs text-emerald-700">Días restantes</span>
-                            <span className="font-bold text-emerald-900">{budgetData.remainingDays} días</span>
-                          </div>
-                          <div className="flex justify-between items-center p-2 bg-rose-50 rounded-lg">
-                            <span className="text-xs text-rose-700">Promedio diario necesario</span>
-                            <span className="font-bold text-rose-900">{formatCurrency(budgetData.remainingBudget / budgetData.remainingDays)}</span>
-                          </div>
-                          <div className="flex justify-between items-center p-2 bg-slate-50 rounded-lg">
-                            <span className="text-xs text-slate-700">Ritmo actual</span>
-                            <span className="font-bold text-slate-900">{formatCurrency(budgetData.todayActualSales)}/día</span>
-                          </div>
-                        </div>
+              {/* Dead code removed */}
                         
                         {/* Lista de días restantes */}
                         <div className="bg-gradient-to-br from-emerald-50/50 to-green-50/50 rounded-lg p-3 mb-3 border border-emerald-200/40">
