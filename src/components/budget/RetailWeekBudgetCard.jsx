@@ -685,54 +685,46 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                   )}
                 </div>
 
-                {/* Panel derecho: Brecha total y % de impacto */}
-                {(() => {
-                  // Usar sales_gap del BD si existe, sino usar el calculado (accumulatedGap negativo = brecha)
-                  const displayGap = (activeBudget?.sales_gap !== undefined && activeBudget?.sales_gap !== null)
-                    ? activeBudget.sales_gap
-                    : -budgetData.accumulatedGap;
-                  return (
-                  <div className="text-right space-y-2">
-                    <p className="text-sm lg:text-base text-white/90 font-semibold">Brecha del Mes</p>
-                    <motion.p
-                      key={`${displayGap}-brecha`}
-                      initial={{ scale: 1.2, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      className={`text-2xl md:text-3xl lg:text-4xl font-black leading-none ${
-                        displayGap < 0 ? 'text-red-300' : 'text-emerald-300'
-                      }`}
-                    >
-                      {displayGap < 0 ? '📉' : '📈'} {formatCurrency(Math.abs(displayGap))}
-                    </motion.p>
-                    
-                    {/* % de impacto */}
-                    {budgetData.monthlyBudget > 0 && (
-                      <div className="space-y-1.5">
-                        <p className="text-xs lg:text-sm text-white/70">Impacto en presupuesto</p>
-                        <motion.p
-                          initial={{ scale: 1.1, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          className={`text-xl md:text-2xl lg:text-3xl font-black ${
-                            displayGap < 0 ? 'text-red-200' : 'text-emerald-200'
+                {/* Panel derecho: Brecha Acumulada a Hoy */}
+                <div className="text-right space-y-2">
+                  <p className="text-sm lg:text-base text-white/90 font-semibold">Brecha Acumulada Hoy</p>
+                  <motion.p
+                    key={`${budgetData.accumulatedGap}-brecha-actual`}
+                    initial={{ scale: 1.2, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className={`text-2xl md:text-3xl lg:text-4xl font-black leading-none ${
+                      budgetData.accumulatedGap > 0 ? 'text-red-300' : 'text-emerald-300'
+                    }`}
+                  >
+                    {budgetData.accumulatedGap > 0 ? '📉' : '📈'} {formatCurrency(Math.abs(budgetData.accumulatedGap))}
+                  </motion.p>
+                  
+                  {/* % de impacto */}
+                  {budgetData.monthlyBudget > 0 && (
+                    <div className="space-y-1.5">
+                      <p className="text-xs lg:text-sm text-white/70">Impacto acumulado</p>
+                      <motion.p
+                        initial={{ scale: 1.1, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        className={`text-xl md:text-2xl lg:text-3xl font-black ${
+                          budgetData.accumulatedGap > 0 ? 'text-red-200' : 'text-emerald-200'
+                        }`}
+                      >
+                        {((Math.abs(budgetData.accumulatedGap) / budgetData.monthlyBudget) * 100).toFixed(1)}%
+                      </motion.p>
+                      <div className="w-full h-2 bg-white/20 rounded-full overflow-hidden mt-2">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${Math.min(((Math.abs(budgetData.accumulatedGap) / budgetData.monthlyBudget) * 100), 100)}%` }}
+                          transition={{ duration: 1.2, delay: 0.2 }}
+                          className={`h-full rounded-full ${
+                            budgetData.accumulatedGap > 0 ? 'bg-red-400' : 'bg-emerald-400'
                           }`}
-                        >
-                          {((Math.abs(displayGap) / budgetData.monthlyBudget) * 100).toFixed(1)}%
-                        </motion.p>
-                        <div className="w-full h-2 bg-white/20 rounded-full overflow-hidden mt-2">
-                          <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${Math.min(((Math.abs(displayGap) / budgetData.monthlyBudget) * 100), 100)}%` }}
-                            transition={{ duration: 1.2, delay: 0.2 }}
-                            className={`h-full rounded-full ${
-                              displayGap < 0 ? 'bg-red-400' : 'bg-emerald-400'
-                            }`}
-                          />
-                        </div>
+                        />
                       </div>
-                    )}
-                  </div>
-                  );
-                })()}
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="space-y-2 mb-4">
