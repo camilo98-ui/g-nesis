@@ -684,37 +684,35 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
               </div>
 
               <div className="space-y-2 mb-4">
-                <div className="flex items-center justify-between text-xs lg:text-sm">
-                  <span className="text-white/70">Proyección Semanal</span>
-                  <span className="font-bold lg:font-black text-white lg:text-lg">{budgetData.projectionCompliance.toFixed(0)}%</span>
-                </div>
-                <div className="relative h-3 lg:h-4 bg-white/20 rounded-full overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${Math.min(budgetData.projectionCompliance, 100)}%` }}
-                    transition={{ duration: 1.5, delay: 0.2 }}
-                    className={`h-full rounded-full relative overflow-hidden ${
-                      budgetData.projectionCompliance >= 100 
-                        ? 'bg-emerald-300' 
-                        : budgetData.projectionCompliance >= 85
-                        ? 'bg-amber-300'
-                        : 'bg-rose-300'
-                    }`}
-                  >
-                    <motion.div 
-                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-50"
-                      animate={{ x: ['-100%', '200%'] }}
-                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                      style={{ width: '50%' }}
-                    />
-                  </motion.div>
-                </div>
-                <p className="text-[10px] lg:text-xs text-white/50 lg:text-white/60">
-                  {budgetData.projectionCompliance >= 100 
-                    ? `🚀 Superando meta en ${(budgetData.projectionCompliance - 100).toFixed(0)}%`
-                    : `📈 ${formatCurrency(budgetData.weeklyBudget - budgetData.weekProjection)} para alcanzar meta`}
-                </p>
-                </div>
+               <div className="flex items-center justify-between text-xs lg:text-sm">
+                 <span className="text-white/70">Proyección Mes</span>
+                 <span className="font-bold lg:font-black text-white lg:text-lg">{formatCurrency(budgetData.monthProjection)}</span>
+               </div>
+               <div className="relative h-3 lg:h-4 bg-white/20 rounded-full overflow-hidden">
+                 <motion.div
+                   initial={{ width: 0 }}
+                   animate={{ width: `${Math.min(budgetData.monthProjectionCompliance, 100)}%` }}
+                   transition={{ duration: 1.5, delay: 0.2 }}
+                   className={`h-full rounded-full relative overflow-hidden ${
+                     budgetData.monthProjectionCompliance >= 100 
+                       ? 'bg-emerald-300' 
+                       : budgetData.monthProjectionCompliance >= 85
+                       ? 'bg-amber-300'
+                       : 'bg-rose-300'
+                   }`}
+                 >
+                   <motion.div 
+                     className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-50"
+                     animate={{ x: ['-100%', '200%'] }}
+                     transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                     style={{ width: '50%' }}
+                   />
+                 </motion.div>
+               </div>
+               <p className="text-[10px] lg:text-xs text-white/50 lg:text-white/60">
+                 {budgetData.monthProjectionCompliance.toFixed(0)}% · ${budgetData.monthlyBudget.toLocaleString('es-CO')}
+               </p>
+               </div>
 
                 {/* Barra de Proyección Mensual */}
                 <div className="space-y-2 mb-4">
