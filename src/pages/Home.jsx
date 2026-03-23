@@ -1293,21 +1293,21 @@ export default function Home() {
                       <p className="text-[10px] lg:text-xs text-gray-600 mt-0.5">{item.description}</p>
                     </div>
                   ) : (
-                    <Link to={createPageUrl(item.page)}>
-                      <div className="flex flex-col items-center justify-center text-center relative z-10">
-                        <div className={`w-14 h-14 lg:w-16 lg:h-16 ${item.iconBg} backdrop-blur-sm rounded-2xl flex items-center justify-center mb-3`}>
-                          <Icon className={`w-7 h-7 lg:w-8 lg:h-8 ${item.iconColor}`} />
-                        </div>
-                        <h3 className={`font-bold ${item.textColor} text-sm lg:text-base`}>
-                          {item.name}
-                        </h3>
-                        <p className="text-[10px] lg:text-xs text-gray-500 mt-0.5">{item.description}</p>
-                      </div>
-                    </Link>
-                    )}
-                    </button>
-                    ))}
-                    </div>
+                   <Link to={createPageUrl(item.page)}>
+                     <div className="flex flex-col items-center justify-center text-center relative z-10">
+                       <div className={`w-14 h-14 lg:w-16 lg:h-16 ${item.iconBg} backdrop-blur-sm rounded-2xl flex items-center justify-center mb-3`}>
+                         <Icon className={`w-7 h-7 lg:w-8 lg:h-8 ${item.iconColor}`} />
+                       </div>
+                       <h3 className={`font-bold ${item.textColor} text-sm lg:text-base`}>
+                         {item.name}
+                       </h3>
+                       <p className="text-[10px] lg:text-xs text-gray-500 mt-0.5">{item.description}</p>
+                     </div>
+                   </Link>
+                  )}
+                  </button>
+                  ))}
+                  </div>
 
       {/* Modales con Lazy Loading */}
       <Suspense fallback={null}>
