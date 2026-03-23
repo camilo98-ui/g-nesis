@@ -7,7 +7,7 @@ import { format, startOfMonth, endOfMonth, eachWeekOfInterval, startOfWeek, endO
 import { es } from 'date-fns/locale';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Legend, Cell, LineChart, Line } from 'recharts';
 
-export default function RetailWeekBudgetCard({ dailySales, activeBudget, storeId, formatCurrency, onConfigureBudget, currentDateRange, onExpandChange, gregorianMode }) {
+export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBudgets = [], storeId, formatCurrency, onConfigureBudget, currentDateRange, onExpandChange, gregorianMode }) {
   const [expandedSection, setExpandedSection] = useState(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedMetric, setSelectedMetric] = useState(null);
