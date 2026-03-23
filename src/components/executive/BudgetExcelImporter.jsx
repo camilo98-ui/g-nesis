@@ -599,7 +599,7 @@ export default function BudgetExcelImporter({ onClose }) {
 
         // ── 2. Guardar DailyBudget
         const existingDailyRecords = await base44.entities.DailyBudget.filter({ store_id: item.store.code });
-        await new Promise(r => setTimeout(r, 300));
+        await new Promise(r => setTimeout(r, 500));
         
         const existingByDate = {};
         for (const rec of existingDailyRecords) {
