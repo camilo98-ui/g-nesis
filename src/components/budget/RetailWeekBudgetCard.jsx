@@ -338,21 +338,14 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
     // Presupuesto restante a alcanzar (meta del 105%)
     const remainingBudget = adjustedMonthlyBudget - salesUntilYesterday - todayActualSales;
 
-    // META DEL DÍA: usar valor del Excel (DailyBudget) si existe, si no calcular
+    // PPT exacto del Excel para hoy + recuperación de brecha separada
     const todayStr = format(now, 'yyyy-MM-dd');
-    const excelDailyBudget = dailyBudgets?.find(db =>
-      db.store_id === storeId && (db.date?.split('T')[0] || db.date) === todayStr
-    );
-    let adjustedDailyBudget = excelDailyBudget?.sales_budget || getDailyBudget(now);
-
-    // Solo redistribuir brecha si NO hay valor del Excel
-    if (!excelDailyBudget && remainingDays > 0 && accumulatedGap > 0) {
-      const remainingDaysArray = eachDayOfInterval({ start: now, end: monthEnd });
-      const remainingBaseBudget = remainingDaysArray.reduce((sum, day) => sum + getDailyBudget(day), 0);
-      const todayBaseBudget = getDailyBudget(now);
-      const todayWeight = remainingBaseBudget > 0 ? todayBaseBudget / remainingBaseBudget : 1 / remainingDays;
-      adjustedDailyBudget = Math.min(todayBaseBudget + (accumulatedGap * 0.5 * todayWeight), todayBaseBudget * 1.4);
-    }
+    const excelRec = dailyBudgets?.find(db => db.store_id === storeId && (db.date?.split('T')[0] || db.date) === todayStr);
+    const excelBudgetForToday = excelRec?.sales_budget > 0 ? excelRec.sales_budget : getDailyBudget(now);
+    const remArr = remainingDays > 0 && accumulatedGap > 0 ? eachDayOfInterval({ start: now, end: monthEnd }) : [];
+    const remBase = remArr.reduce((s, d) => s + getDailyBudget(d), 0);
+    const gapRecoveryIncrement = remBase > 0 && accumulatedGap > 0 ? Math.min(accumulatedGap * 0.5 * (getDailyBudget(now) / remBase), excelBudgetForToday * 0.4) : 0;
+    const adjustedDailyBudget = excelBudgetForToday + gapRecoveryIncrement;
 
     // Calcular número de semana según modo
     const currentWeekNumber = weeks.findIndex(w => {
