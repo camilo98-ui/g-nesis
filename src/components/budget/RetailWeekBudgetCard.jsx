@@ -2390,63 +2390,40 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                         </div>
                       );
                     })()}
-                  </div>}
-
                   {/* Mensaje de estado - interactivo */}
-              {needsRecovery ? (
-                <motion.button
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  whileHover={{ scale: 1.02, x: 4 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => {
-                    setSelectedMetric('recovery-plan');
-                    setIsModalOpen(true);
-                  }}
-                  className="w-full bg-amber-50/40 border-l-4 border-amber-400/50 rounded-r-lg p-3 md:p-4 text-left hover:bg-amber-100/50 transition-all cursor-pointer"
-                >
-              <div className="flex items-start gap-2 md:gap-3">
-                <AlertTriangle className="w-4 h-4 md:w-5 md:h-5 text-amber-500/70 flex-shrink-0 mt-0.5" />
-                <div className="min-w-0 flex-1">
-                  <p className="font-bold text-amber-700/80 text-xs md:text-sm mb-1">
-                    Presupuesto Redistribuido
-                  </p>
-                  <p className="text-[10px] md:text-xs text-amber-600/80 leading-relaxed">
-                    Existe una brecha de {formatCurrency(budgetData.accumulatedGap)} que debe recuperarse. 
-                    El presupuesto diario se ajustó de {formatCurrency(budgetData.dailyBaseBudget)} a {formatCurrency(budgetData.adjustedDailyBudget)} 
-                    para alcanzar la meta del mes en los {budgetData.remainingDays} días restantes.
-                  </p>
-                </div>
-                <ChevronRight className="w-4 h-4 text-amber-500/70 flex-shrink-0 mt-0.5" />
-                  </div>
-                </motion.button>
-              ) : (
-                <motion.button
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  whileHover={{ scale: 1.02, x: 4 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => {
-                    setSelectedMetric('on-track');
-                    setIsModalOpen(true);
-                  }}
-                  className="w-full bg-emerald-50/40 border-l-4 border-emerald-400/50 rounded-r-lg p-3 md:p-4 text-left hover:bg-emerald-100/50 transition-all cursor-pointer"
-                >
-              <div className="flex items-start gap-2 md:gap-3">
-                <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5 text-emerald-500/70 flex-shrink-0 mt-0.5" />
-                <div className="min-w-0 flex-1">
-                  <p className="font-bold text-emerald-700/80 text-xs md:text-sm mb-1">
-                    ¡En meta!
-                  </p>
-                  <p className="text-[10px] md:text-xs text-emerald-600/80 leading-relaxed">
-                    El negocio está cumpliendo el presupuesto. Mantén el ritmo de ventas para alcanzar 
-                    la meta del mes. Presupuesto diario: {formatCurrency(budgetData.adjustedDailyBudget)}
-                  </p>
-                </div>
-                <ChevronRight className="w-4 h-4 text-emerald-500/70 flex-shrink-0 mt-0.5" />
-                  </div>
-                </motion.button>
-              )}
+                  {needsRecovery ? (
+                    <motion.button whileHover={{ scale: 1.02, x: 4 }} whileTap={{ scale: 0.98 }}
+                      onClick={() => { setSelectedMetric('recovery-plan'); setIsModalOpen(true); }}
+                      className="w-full bg-amber-50/40 border-l-4 border-amber-400/50 rounded-r-lg p-3 md:p-4 text-left hover:bg-amber-100/50 transition-all cursor-pointer"
+                    >
+                      <div className="flex items-start gap-2 md:gap-3">
+                        <AlertTriangle className="w-4 h-4 md:w-5 md:h-5 text-amber-500/70 flex-shrink-0 mt-0.5" />
+                        <div className="min-w-0 flex-1">
+                          <p className="font-bold text-amber-700/80 text-xs md:text-sm mb-1">PPT Excel del Día + Recuperación de Brecha</p>
+                          <p className="text-[10px] md:text-xs text-amber-600/80 leading-relaxed">
+                            PPT Excel: {formatCurrency(budgetData.excelBudgetForToday)} + Recuperación: +{formatCurrency(budgetData.gapRecoveryIncrement)} = {formatCurrency(budgetData.adjustedDailyBudget)}
+                          </p>
+                        </div>
+                        <ChevronRight className="w-4 h-4 text-amber-500/70 flex-shrink-0 mt-0.5" />
+                      </div>
+                    </motion.button>
+                  ) : (
+                    <motion.button whileHover={{ scale: 1.02, x: 4 }} whileTap={{ scale: 0.98 }}
+                      onClick={() => { setSelectedMetric('on-track'); setIsModalOpen(true); }}
+                      className="w-full bg-emerald-50/40 border-l-4 border-emerald-400/50 rounded-r-lg p-3 md:p-4 text-left hover:bg-emerald-100/50 transition-all cursor-pointer"
+                    >
+                      <div className="flex items-start gap-2 md:gap-3">
+                        <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5 text-emerald-500/70 flex-shrink-0 mt-0.5" />
+                        <div className="min-w-0 flex-1">
+                          <p className="font-bold text-emerald-700/80 text-xs md:text-sm mb-1">¡En meta!</p>
+                          <p className="text-[10px] md:text-xs text-emerald-600/80 leading-relaxed">
+                            PPT del día (Excel): {formatCurrency(budgetData.excelBudgetForToday)}
+                          </p>
+                        </div>
+                        <ChevronRight className="w-4 h-4 text-emerald-500/70 flex-shrink-0 mt-0.5" />
+                      </div>
+                    </motion.button>
+                  )}
             </>
             )}
           </AnimatePresence>
