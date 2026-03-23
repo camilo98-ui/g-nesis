@@ -17,6 +17,7 @@ import StoresTable from '../components/executive/StoresTable';
 import KPIDetailModal from '../components/executive/KPIDetailModal';
 import ExecutiveComparable from '../components/executive/ExecutiveComparable';
 import ZoneBudgetManager from '../components/executive/ZoneBudgetManager';
+import BudgetExcelImporter from '../components/executive/BudgetExcelImporter';
 import ZoneChartsPanel from '../components/executive/ZoneChartsPanel';
 import PlannerStatusPanel from '../components/executive/PlannerStatusPanel';
 import StoreWeeklyChart from '../components/executive/StoreWeeklyChart';
@@ -67,6 +68,7 @@ export default function ExecutiveDashboard() {
   const [selectedKPIDetail, setSelectedKPIDetail] = useState(null);
   const [showComparable, setShowComparable] = useState(false);
   const [showBudgetManager, setShowBudgetManager] = useState(false);
+  const [showBudgetImporter, setShowBudgetImporter] = useState(false);
   const [showZoneCharts, setShowZoneCharts] = useState(false);
   const [sortConfig, setSortConfig] = useState({ key: 'compliance', direction: 'desc' });
   const [columnFilters, setColumnFilters] = useState({});
