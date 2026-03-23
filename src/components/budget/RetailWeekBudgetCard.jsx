@@ -698,7 +698,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                         initial={{ scale: 1.2, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         className={`text-2xl md:text-3xl lg:text-4xl font-black leading-none ${
-                          monthGap < 0 ? 'text-red-300' : 'text-emerald-300'
+                          monthGap < 0 ? 'text-red-400' : 'text-emerald-400'
                         }`}
                       >
                         {monthGap < 0 ? '📉' : '📈'} {formatCurrency(Math.abs(monthGap))}
@@ -707,25 +707,34 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                       {/* % de impacto */}
                       {budgetData.monthlyBudget > 0 && (
                         <div className="space-y-1.5">
-                          <p className="text-xs lg:text-sm text-white/70">Impacto en presupuesto</p>
+                          <p className="text-xs lg:text-sm text-white/80">Impacto en presupuesto</p>
                           <motion.p
                             initial={{ scale: 1.1, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             className={`text-xl md:text-2xl lg:text-3xl font-black ${
-                              monthGap < 0 ? 'text-red-200' : 'text-emerald-200'
+                              monthGap < 0 ? 'text-red-300' : 'text-emerald-300'
                             }`}
                           >
                             {((Math.abs(monthGap) / budgetData.monthlyBudget) * 100).toFixed(1)}%
                           </motion.p>
-                          <div className="w-full h-2 bg-white/20 rounded-full overflow-hidden mt-2">
+                          <div className={`w-full h-3 rounded-full overflow-hidden mt-2 ${
+                            monthGap < 0 ? 'bg-red-600/40' : 'bg-emerald-600/40'
+                          }`}>
                             <motion.div
                               initial={{ width: 0 }}
                               animate={{ width: `${Math.min(((Math.abs(monthGap) / budgetData.monthlyBudget) * 100), 100)}%` }}
                               transition={{ duration: 1.2, delay: 0.2 }}
-                              className={`h-full rounded-full ${
+                              className={`h-full rounded-full relative overflow-hidden ${
                                 monthGap < 0 ? 'bg-red-400' : 'bg-emerald-400'
                               }`}
-                            />
+                            >
+                              <motion.div 
+                                className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-60"
+                                animate={{ x: ['-100%', '200%'] }}
+                                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                                style={{ width: '50%' }}
+                              />
+                            </motion.div>
                           </div>
                         </div>
                       )}
