@@ -138,7 +138,10 @@ export default function BudgetExcelImporter({ onClose }) {
 
         for (const row of rowsWithHeaders) {
           const storeMatch = matchStore(row[pdvKey]);
-          if (!storeMatch) continue;
+          if (!storeMatch) {
+            console.warn(`⚠️ No se pudo emparejar tienda:`, row[pdvKey]);
+            continue;
+          }
 
           // Parsear fecha
           let fechaVal = row[fechaKey];
