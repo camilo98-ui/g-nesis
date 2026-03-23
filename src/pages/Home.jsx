@@ -1305,6 +1305,7 @@ export default function Home() {
                       </div>
                     </Link>
                   )}
+                </button>
                 ))}
       </div>
 
