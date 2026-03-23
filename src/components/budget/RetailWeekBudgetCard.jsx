@@ -486,7 +486,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
               <div className="min-w-0 flex-1">
                 <p className="text-xl md:text-2xl truncate">Presupuesto del Día</p>
                 <p className="text-xs text-slate-600 font-normal mt-0.5">
-                  {gregorianMode ? `Calendario Gregoriano (${format(budgetData.monthStart, 'dd MMM', { locale: es })} - ${format(budgetData.monthEnd, 'dd MMM', { locale: es })})` : `Calendario Retail - Semana ${budgetData.currentWeekNumber} de ${budgetData.totalWeeks}`}
+                  {format(budgetData.monthStart, 'dd MMM', { locale: es })} - {format(budgetData.monthEnd, 'dd MMM', { locale: es })} · Semana {budgetData.currentWeekNumber} de {budgetData.totalWeeks}
                 </p>
               </div>
             </CardTitle>
