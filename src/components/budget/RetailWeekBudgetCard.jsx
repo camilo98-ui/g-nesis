@@ -1591,7 +1591,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                 formatCurrency={formatCurrency}
                 gregorianMode={gregorianMode}
               />
-              {false && <div className="mt-4">
+              {false && <div>
                     {selectedMetric === 'base' && (
                       <div>
                         <h4 className="text-sm md:text-base font-bold text-slate-900 mb-3">Presupuesto Base vs Ajustado</h4>
