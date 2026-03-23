@@ -1386,6 +1386,13 @@ export default function ExecutiveDashboard() {
         )}
       </AnimatePresence>
 
+      {/* Modal Importar Excel Presupuesto */}
+      <AnimatePresence>
+        {showBudgetImporter && (
+          <BudgetExcelImporter onClose={() => setShowBudgetImporter(false)} />
+        )}
+      </AnimatePresence>
+
       {/* Modal Zone Charts */}
       <AnimatePresence>
         {showZoneCharts && (
