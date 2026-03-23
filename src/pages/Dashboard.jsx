@@ -1935,7 +1935,7 @@ export default function Dashboard() {
                 <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 2, repeat: Infinity }}>
                   <BarChart3 className="w-5 h-5" />
                 </motion.div>
-                Acumulado del Mes {gregorianMode ? 'Gregoriano' : 'Retail'}
+                Acumulado del Mes
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <motion.div whileHover={{ scale: 1.05, y: -3 }} className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
