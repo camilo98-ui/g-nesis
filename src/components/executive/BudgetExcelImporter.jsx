@@ -268,33 +268,43 @@ export default function BudgetExcelImporter({ onClose }) {
       item.daily = Math.round(item.monthly / daysInMonth);
     }
 
-    // Modo libre: si no encontramos suficientes, escanear toda la hoja sin restricción de columnas
+    // Modo libre: si no encontramos suficientes, escanear toda la hoja acumulando por tienda
     if (foundStores.length < 6) {
+      const freeAccum = {};
       for (let i = 0; i < rows.length; i++) {
         const row = rows[i];
         let storeFound = null;
-        const rowNums = [];
+        let rowVal = 0;
 
         for (const cell of row) {
           const s = matchStore(cell);
           if (s) storeFound = s;
           const n = parseNum(cell);
-          if (n && n > 500_000) rowNums.push(n);
+          if (n && n > 100_000) rowVal = Math.max(rowVal, n);
         }
 
-        if (storeFound && rowNums.length > 0) {
-          const alreadyFound = foundStores.find(s => s.store.code === storeFound.code);
-          if (!alreadyFound) {
-            rowNums.sort((a, b) => b - a);
-            const monthly = rowNums[0];
-            foundStores.push({
-              store: storeFound,
-              monthly,
-              daily: Math.round(monthly / daysInMonth),
-              ticket: null,
-              transactions: null,
-            });
+        if (storeFound && rowVal > 0) {
+          if (!freeAccum[storeFound.code]) {
+            freeAccum[storeFound.code] = { store: storeFound, total: 0, rows: 0 };
           }
+          freeAccum[storeFound.code].total += rowVal;
+          freeAccum[storeFound.code].rows += 1;
+        }
+      }
+
+      for (const acc of Object.values(freeAccum)) {
+        const alreadyFound = foundStores.find(s => s.store.code === acc.store.code);
+        if (!alreadyFound) {
+          const monthly = acc.rows === 1 && acc.total < 5_000_000
+            ? Math.round(acc.total * daysInMonth)
+            : Math.round(acc.total);
+          foundStores.push({
+            store: acc.store,
+            monthly,
+            daily: Math.round(monthly / daysInMonth),
+            ticket: null,
+            transactions: null,
+          });
         }
       }
     }
