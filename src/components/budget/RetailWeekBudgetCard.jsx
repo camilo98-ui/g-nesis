@@ -1577,8 +1577,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
     </motion.div>
   );
 }
-// eslint-disable-next-line
-const _noop = () => { if (false && selectedMetric === 'weekly-projection') {
+// end of file
                       const now = new Date();
                       const monthStartCalc = gregorianMode ? startOfMonth(now) : new Date(now.getFullYear(), now.getMonth() - 1, 29);
                       const monthEndCalc = gregorianMode ? endOfMonth(now) : new Date(now.getFullYear(), now.getMonth(), 28);
