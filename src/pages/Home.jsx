@@ -1316,11 +1316,10 @@ export default function Home() {
                         {item.name}
                       </h3>
                       <p className="text-[10px] lg:text-xs text-gray-500 mt-0.5">{item.description}</p>
-                    </div>
-                   </div>
-                   </Link>
-                ))}
-              </div>
+                      </div>
+                      </Link>
+                      ))}
+                      </div>
 
       {/* Modales con Lazy Loading */}
                    <Suspense fallback={null}>
