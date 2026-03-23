@@ -1459,6 +1459,13 @@ export default function Home() {
         )}
       </Suspense>
 
+      {/* Modal Importar Presupuesto Excel */}
+      <AnimatePresence>
+        {showBudgetImporter && (
+          <BudgetExcelImporter onClose={() => setShowBudgetImporter(false)} />
+        )}
+      </AnimatePresence>
+
 
 
 
