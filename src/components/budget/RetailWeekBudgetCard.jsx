@@ -1569,50 +1569,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                 formatCurrency={formatCurrency}
                 gregorianMode={gregorianMode}
               />
-              {false && selectedMetric === 'compliance' && (
-                      <div>
-                        <h4 className="text-sm md:text-base font-bold text-slate-900 mb-3">Evolución del Cumplimiento</h4>
-                        <div className="bg-gradient-to-r from-rose-50 to-emerald-50 rounded-lg p-3 mb-3">
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-xs text-slate-700">Cumplimiento Actual</span>
-                            <span className={`text-2xl font-black ${budgetData.compliance >= 95 ? 'text-emerald-600' : 'text-amber-600'}`}>
-                              {budgetData.compliance.toFixed(1)}%
-                            </span>
-                          </div>
-                          <div className="h-3 bg-white rounded-full overflow-hidden">
-                            <motion.div
-                              initial={{ width: 0 }}
-                              animate={{ width: `${Math.min(budgetData.compliance, 100)}%` }}
-                              transition={{ duration: 1 }}
-                              className={`h-full rounded-full ${budgetData.compliance >= 95 ? 'bg-gradient-to-r from-emerald-400 to-green-500' : 'bg-gradient-to-r from-amber-400 to-orange-500'}`}
-                            />
-                          </div>
-                        </div>
-                        <ResponsiveContainer width="100%" height={150}>
-                          <AreaChart data={budgetData.dailyTrendData}>
-                            <defs>
-                              <linearGradient id="complianceGradient" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stopColor="#10b981" stopOpacity={0.6}/>
-                                <stop offset="100%" stopColor="#10b981" stopOpacity={0.1}/>
-                              </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
-                            <XAxis dataKey="date" fontSize={9} angle={-45} textAnchor="end" height={50} />
-                            <YAxis fontSize={10} tickFormatter={(v) => `${v}%`} domain={[0, 150]} />
-                            <Tooltip formatter={(v) => `${v.toFixed(1)}%`} />
-                            <ReferenceLine y={100} stroke="#10b981" strokeDasharray="3 3" strokeWidth={2} label={{ value: '100%', fill: '#10b981', fontSize: 10 }} />
-                            <Area type="monotone" dataKey="cumplimiento" stroke="#10b981" strokeWidth={2} fill="url(#complianceGradient)" />
-                          </AreaChart>
-                        </ResponsiveContainer>
-                        <p className="text-xs text-slate-600 mt-2">
-                          {budgetData.compliance >= 100 
-                            ? `🎯 ¡Excelente! Superando la meta en ${(budgetData.compliance - 100).toFixed(1)}%` 
-                            : `📈 Faltan ${(100 - budgetData.compliance).toFixed(1)} puntos para alcanzar el 100%`}
-                        </p>
-                      </div>
-                    )}
-
-                    {selectedMetric === 'weekly-budget' && (
+              {false && selectedMetric === 'weekly-budget' && (
                       <div>
                         <h4 className="text-sm md:text-base font-bold text-slate-900 mb-3">Desglose de Meta Semanal</h4>
                         <div className="space-y-2 mb-3">
