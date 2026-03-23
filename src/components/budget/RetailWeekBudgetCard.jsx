@@ -1577,27 +1577,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
     </motion.div>
   );
 }
-// end
-                            <p className="text-xs text-indigo-600 mb-1">Proyección de Cierre</p>
-                            <p className="text-xl font-black text-indigo-900">{formatCurrency(budgetData.monthProjection)}</p>
-                          </div>
-                          <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg p-3 text-center border border-purple-200/50">
-                            <p className="text-xs text-purple-600 mb-1">Meta Mensual (105%)</p>
-                            <p className="text-xl font-black text-purple-900">{formatCurrency(budgetData.monthlyBudget)}</p>
-                          </div>
-                          <div className="bg-emerald-50 rounded-lg p-3">
-                            <p className="text-xs text-emerald-600 mb-1">Vendido Hasta Hoy</p>
-                            <p className="text-lg font-bold text-emerald-900">{formatCurrency(budgetData.totalMonthSales)}</p>
-                            <p className="text-[10px] text-emerald-600 mt-1">{budgetData.daysElapsed} días</p>
-                          </div>
-                          <div className="bg-amber-50 rounded-lg p-3">
-                            <p className="text-xs text-amber-600 mb-1">Promedio Diario</p>
-                            <p className="text-lg font-bold text-amber-900">{formatCurrency(budgetData.avgDailySales)}</p>
-                            <p className="text-[10px] text-amber-600 mt-1">Ritmo actual</p>
-                          </div>
-                        </div>
-
-                        <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-4 mb-4 border-2 border-indigo-200/50">
+// eof
                           <div className="flex items-center justify-between mb-3">
                             <span className="text-sm font-bold text-indigo-900">Cumplimiento Proyectado</span>
                             <span className={`text-3xl font-black ${
