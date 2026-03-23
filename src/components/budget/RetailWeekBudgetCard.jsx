@@ -1569,7 +1569,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                 formatCurrency={formatCurrency}
                 gregorianMode={gregorianMode}
               />
-              {selectedMetric === 'pending' && (
+              {false && selectedMetric === 'pending' && (
                       <div>
                         <h4 className="text-sm md:text-base font-bold text-slate-900 mb-3">Análisis de Venta Pendiente</h4>
                         <div className="grid grid-cols-2 gap-2 mb-3">
