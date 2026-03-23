@@ -950,7 +950,7 @@ export default function Home() {
       {/* Fondo blanco */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
         <div className="absolute inset-0 bg-white" />
-        <React.Fragment>
+        <>
         {/* Silueta principal superior derecha - relieve sofisticado */}
         <motion.div 
           animate={{ 
