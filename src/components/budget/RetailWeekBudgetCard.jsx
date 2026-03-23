@@ -618,11 +618,22 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                 </div>
                 
                 <div className="text-left">
-                  <p className="text-sm lg:text-base text-white/90 mb-3 lg:mb-2 font-semibold">Promedio Histórico</p>
-                  <p className="text-2xl md:text-3xl lg:text-5xl font-black text-white leading-none mb-2">
-                    {formatCurrency(budgetData.historicalAvgToday)}
+                  <p className="text-sm lg:text-base text-white/90 mb-3 lg:mb-2 font-semibold">
+                    Brecha {budgetData.accumulatedGap >= 0 ? '📈 Positiva' : '📉 Negativa'}
                   </p>
-                  <p className="text-xs lg:text-sm text-white/70">{format(new Date(), 'EEEE', { locale: es })}s anteriores</p>
+                  <motion.p
+                    key={`${budgetData.accumulatedGap}-${gregorianMode}`}
+                    initial={{ scale: 1.2, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className={`text-2xl md:text-3xl lg:text-5xl font-black leading-none mb-2 ${
+                      budgetData.accumulatedGap >= 0 ? 'text-emerald-200' : 'text-rose-200'
+                    }`}
+                  >
+                    {formatCurrency(Math.abs(budgetData.accumulatedGap))}
+                  </motion.p>
+                  <p className={`text-xs lg:text-sm ${budgetData.accumulatedGap >= 0 ? 'text-emerald-100' : 'text-rose-100'}`}>
+                    {budgetData.accumulatedGap >= 0 ? 'Superando meta' : 'Recuperar'}
+                  </p>
                   
                   {/* Sparkline debajo del número */}
                   {budgetData.last7DaysSales?.length > 0 && (
