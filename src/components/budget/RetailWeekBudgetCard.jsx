@@ -290,14 +290,9 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
     const excelBudgetForToday = excelRec?.budget_amount > 0 ? excelRec.budget_amount : (activeBudget.sales_budget / daysInMonth);
 
     // Brecha real del mes:
-    // Primero usamos sales_gap si está definido (brecha manual ingresada)
-    // Si no, usamos accumulatedGap (brecha calculada automáticamente de datos reales)
     const manualGap = (activeBudget.sales_gap !== undefined && activeBudget.sales_gap !== null)
       ? activeBudget.sales_gap
       : null;
-    
-    // accumulatedGap = budgetUntilYesterday - salesUntilYesterday (positivo = déficit)
-    // Lo convertimos al mismo signo que salesGap (negativo = déficit)
     const effectiveGap = manualGap !== null ? manualGap : -accumulatedGap;
     const salesGap = effectiveGap;
     
@@ -305,8 +300,35 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
     let adjustedDailyBudget = excelBudgetForToday;
     
     if (salesGap < 0 && remainingDays > 0) {
-      // Brecha NEGATIVA: hay déficit → sumar el incremento diario para recuperarla
-      gapRecoveryIncrement = Math.abs(salesGap) / remainingDays;
+      // Días restantes del mes desde HOY
+      const remainingDaysList = eachDayOfInterval({ start: now, end: monthEnd });
+      
+      // Calcular el "peso de venta" de cada día restante según histórico
+      // Cuanto más vende históricamente ese día de semana, más incremento absorbe
+      const remainingWeights = remainingDaysList.map(day => {
+        const dow = day.getDay();
+        // Fin de semana (Viernes=5, Sábado=6, Domingo=0) venden más → más peso
+        const isWeekend = dow === 0 || dow === 5 || dow === 6;
+        const historicalAvg = avgByDayOfWeek[dow] || dailyBaseBudget;
+        // Multiplicar por 1.3 si es fin de semana/viernes para darle más carga
+        return historicalAvg * (isWeekend ? 1.3 : 1.0);
+      });
+      
+      const totalWeight = remainingWeights.reduce((a, b) => a + b, 0);
+      
+      // Peso del día de HOY
+      const todayDow = now.getDay();
+      const isWeekend = todayDow === 0 || todayDow === 5 || todayDow === 6;
+      const todayHistoricalAvg = avgByDayOfWeek[todayDow] || dailyBaseBudget;
+      const todayWeight = todayHistoricalAvg * (isWeekend ? 1.3 : 1.0);
+      
+      // El incremento del día de hoy = (brecha total * proporción del día de hoy)
+      // Días con mayor venta histórica absorben más brecha = metas más ambiciosas en días fuertes
+      const todayGapShare = totalWeight > 0 
+        ? Math.abs(salesGap) * (todayWeight / totalWeight)
+        : Math.abs(salesGap) / remainingDays;
+      
+      gapRecoveryIncrement = todayGapShare;
       adjustedDailyBudget = excelBudgetForToday + gapRecoveryIncrement;
     }
     // Brecha positiva: mantener PPT Excel sin cambios
