@@ -554,23 +554,19 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
               <div className="grid grid-cols-2 gap-6 lg:gap-10 mb-6 lg:mb-5">
                 <div className="text-left">
                   <p className="text-sm lg:text-base text-white/90 mb-3 lg:mb-2 font-semibold">
-                    {budgetData.gapRecoveryIncrement > 0
-                      ? `PPT Excel + Brecha`
-                      : `PPT Excel del Día`}
+                    Venta del Mes
                   </p>
                   <motion.p
-                    key={`${budgetData.adjustedDailyBudget}-${gregorianMode}`}
+                    key={`${budgetData.totalMonthSales}-${gregorianMode}`}
                     initial={{ scale: 1.2, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     className="text-2xl md:text-3xl lg:text-5xl font-black text-white leading-none mb-2"
                   >
-                    {formatCurrency(budgetData.adjustedDailyBudget)}
+                    {formatCurrency(budgetData.totalMonthSales)}
                   </motion.p>
                   <div className="space-y-1">
                     <p className="text-xs lg:text-sm text-white/70">
-                      {budgetData.gapRecoveryIncrement > 0
-                        ? `Excel: ${formatCurrency(budgetData.excelBudgetForToday)} + ${formatCurrency(budgetData.gapRecoveryIncrement)}`
-                        : `Valor exacto del Excel`}
+                      Acumulado desde el 1º
                     </p>
                   </div>
                   
