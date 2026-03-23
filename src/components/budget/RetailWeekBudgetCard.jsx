@@ -601,12 +601,12 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                       : `PPT del Día`}
                   </p>
                   <motion.p
-                    key={`${budgetData.adjustedDailyBudget}-${gregorianMode}`}
+                    key={`${budgetData.excelBudgetForToday + budgetData.gapRecoveryIncrement}-${gregorianMode}`}
                     initial={{ scale: 1.2, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     className="text-2xl md:text-3xl lg:text-5xl font-black text-white leading-none mb-2"
                   >
-                    {formatCurrency(budgetData.adjustedDailyBudget)}
+                    {formatCurrency(budgetData.excelBudgetForToday + budgetData.gapRecoveryIncrement)}
                   </motion.p>
                   <div className="space-y-1">
                     <p className="text-xs lg:text-sm text-white/70">
