@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQueryClient } from '@tanstack/react-query';
 import { X, Upload, FileSpreadsheet, CheckCircle2, AlertTriangle, Loader2, Info } from 'lucide-react';
@@ -8,7 +8,6 @@ import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
 import { BASE_STORES } from '@/components/StoreManager';
 import { format, getDaysInMonth } from 'date-fns';
-import { es } from 'date-fns/locale';
 
 // Normalizar texto para comparación (sin tildes, mayúsculas, sin espacios extra)
 const normalize = (str = '') =>
@@ -16,33 +15,51 @@ const normalize = (str = '') =>
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9\s]/g, '').trim();
 
-// Intentar identificar a qué tienda pertenece un nombre del Excel
+// Palabras clave por tienda para matching robusto
+const STORE_KEYWORDS = {
+  'BTA 18': ['plaza imperial', 'imperial', 'bta 18', '18'],
+  'BTA 21': ['centro chia', 'chia', 'bta 21', '21'],
+  'BTA 96': ['av chile', 'chile', 'gran ahorrar', 'ahorrar', 'bta 96', '96', '27'],
+  'BTA 52': ['centro suba', 'suba', 'bta 52', '52'],
+  'BTA 94': ['eco plaza', 'ecoplaza', 'bta 94', '94', '56'],
+  'BTA 62': ['fontanar', 'bta 62', '62'],
+  'BTA 93': ['colina', 'parque la colina', 'bta 93', '93', '66'],
+  'BTA 95': ['casa blanca', 'casablanca', 'bta 95', '95', '71'],
+  'BTA 78': ['plaza imperial 2', 'imperial 2', 'bta 78', '78'],
+  'BTA 85': ['mansion cajica', 'cajica', 'bta 85', '85'],
+  'TUNJA 1': ['unicentro', 'tunja 1', 'tunja1'],
+  'TUNJA 2': ['viva tunja', 'biva tunja', 'tunja 2', 'tunja2'],
+};
+
 const matchStore = (cellValue) => {
   if (!cellValue) return null;
-  const normalized = normalize(cellValue);
-  
+  const normalized = normalize(String(cellValue));
+  if (!normalized) return null;
+
   for (const store of BASE_STORES) {
-    // Comparar con código exacto
-    if (normalize(store.code) === normalized) return store;
-    // Comparar con displayName
-    if (normalize(store.displayName) === normalized) return store;
-    // Comparar con name
-    if (normalize(store.name) === normalized) return store;
-    // Comparar si el valor contiene el número del código (ej: "11" en "BTA 11")
-    const codeNum = store.code.replace(/[^0-9]/g, '');
-    if (codeNum && normalized === codeNum) return store;
-    // Fuzzy: si el nombre del store está contenido en el valor o viceversa
-    const dispNorm = normalize(store.displayName);
-    if (dispNorm && (normalized.includes(dispNorm) || dispNorm.includes(normalized))) return store;
+    const keywords = STORE_KEYWORDS[store.code] || [];
+    // Exact keyword match
+    for (const kw of keywords) {
+      if (normalized === kw) return store;
+    }
+    // Contains keyword (longer keywords first to avoid false positives)
+    const sortedKw = [...keywords].sort((a, b) => b.length - a.length);
+    for (const kw of sortedKw) {
+      if (kw.length >= 4 && normalized.includes(kw)) return store;
+    }
   }
   return null;
 };
 
-// Parsear valor numérico de una celda (puede venir como string con $, comas, puntos)
+// Parsear valor numérico de una celda
 const parseNum = (val) => {
   if (val === null || val === undefined || val === '') return null;
   if (typeof val === 'number') return val;
-  const cleaned = val.toString().replace(/[\$\s,]/g, '').replace(/\./g, '');
+  // Formato colombiano: puntos como separador de miles, coma como decimal
+  const cleaned = val.toString()
+    .replace(/[\$\s]/g, '')
+    .replace(/\./g, '')   // quitar puntos (miles)
+    .replace(/,/g, '.');  // coma → punto decimal
   const num = parseFloat(cleaned);
   return isNaN(num) ? null : num;
 };
@@ -50,10 +67,9 @@ const parseNum = (val) => {
 export default function BudgetExcelImporter({ onClose }) {
   const queryClient = useQueryClient();
   const fileInputRef = useRef(null);
-  const [step, setStep] = useState('upload'); // upload | preview | saving | done
-  const [parsedData, setParsedData] = useState(null); // { month, year, stores: [{store, monthly, daily}] }
+  const [step, setStep] = useState('upload');
+  const [parsedData, setParsedData] = useState(null);
   const [errors, setErrors] = useState([]);
-  const [saving, setSaving] = useState(false);
   const [savedCount, setSavedCount] = useState(0);
 
   const now = new Date();
@@ -67,7 +83,6 @@ export default function BudgetExcelImporter({ onClose }) {
         const wb = XLSX.read(data, { type: 'array' });
         const ws = wb.Sheets[wb.SheetNames[0]];
         const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
-
         analyzeSheet(rows);
       } catch (err) {
         toast.error('No se pudo leer el archivo: ' + err.message);
@@ -82,12 +97,11 @@ export default function BudgetExcelImporter({ onClose }) {
     let detectedMonth = now.getMonth() + 1;
     let detectedYear = now.getFullYear();
 
-    // Intentar detectar mes/año en las primeras filas
-    for (let i = 0; i < Math.min(5, rows.length); i++) {
+    // Detectar mes/año en las primeras filas
+    const monthNames = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    for (let i = 0; i < Math.min(8, rows.length); i++) {
       for (const cell of rows[i]) {
-        const cellStr = cell?.toString() || '';
-        // Buscar patrón de fecha ej "Marzo 2026", "03/2026", "2026-03"
-        const monthNames = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+        const cellStr = String(cell || '');
         for (let m = 0; m < monthNames.length; m++) {
           if (normalize(cellStr).includes(monthNames[m])) {
             detectedMonth = m + 1;
@@ -96,52 +110,80 @@ export default function BudgetExcelImporter({ onClose }) {
             break;
           }
         }
-        // Formato numérico MM/YYYY o YYYY-MM
-        const numMatch = cellStr.match(/(?:(\d{1,2})\/|(\d{4})-(\d{2}))(20\d{2}|\d{2})/);
-        if (numMatch) {
-          // intentar extraer
-        }
       }
     }
 
     const daysInMonth = getDaysInMonth(new Date(detectedYear, detectedMonth - 1));
 
-    // Identificar columnas: buscamos cabeceras con "tienda", "store", "presupuesto", "mes", "dia", "diario"
+    // Identificar fila de encabezados y columnas relevantes
     let headerRowIdx = -1;
-    let colStore = -1, colMonthly = -1, colDaily = -1;
+    let colStore = -1, colMonthly = -1, colDaily = -1, colTicket = -1, colTransactions = -1;
 
-    for (let i = 0; i < Math.min(10, rows.length); i++) {
+    for (let i = 0; i < Math.min(15, rows.length); i++) {
       const row = rows[i];
+      let foundInRow = false;
       for (let j = 0; j < row.length; j++) {
-        const h = normalize(row[j]);
-        if (colStore === -1 && (h.includes('tienda') || h.includes('store') || h.includes('punto') || h.includes('local'))) {
-          colStore = j; headerRowIdx = i;
+        const h = normalize(String(row[j] || ''));
+        if (!h) continue;
+
+        if (colStore === -1 && (h.includes('tienda') || h.includes('store') || h.includes('punto') || h.includes('local') || h.includes('sede'))) {
+          colStore = j; foundInRow = true;
         }
-        if (colMonthly === -1 && (h.includes('mes') || h.includes('mensual') || h.includes('month') || h.includes('presupuesto') || h.includes('ppto') || h.includes('budget'))) {
-          colMonthly = j; if (headerRowIdx === -1) headerRowIdx = i;
+        // Presupuesto mensual de ventas
+        if (colMonthly === -1 && (
+          h.includes('ppto mes') || h.includes('ppt mes') || h.includes('presupuesto mes') ||
+          h.includes('budget mes') || h.includes('meta mes') || h.includes('ventas mes') ||
+          (h.includes('mes') && !h.includes('ticket') && !h.includes('trx') && !h.includes('trans')) ||
+          h === 'ppto' || h === 'presupuesto' || h === 'budget'
+        )) {
+          colMonthly = j; foundInRow = true;
         }
-        if (colDaily === -1 && (h.includes('dia') || h.includes('diario') || h.includes('daily') || h.includes('ppt dia') || h.includes('pptd'))) {
-          colDaily = j; if (headerRowIdx === -1) headerRowIdx = i;
+        // PPT diario de ventas
+        if (colDaily === -1 && (
+          h.includes('ppto dia') || h.includes('ppt dia') || h.includes('diario') || h.includes('daily') ||
+          h.includes('dia') && h.includes('venta')
+        )) {
+          colDaily = j; foundInRow = true;
+        }
+        // PPT Ticket promedio
+        if (colTicket === -1 && (
+          h.includes('ticket') || h.includes('tkt') || h.includes('promedio') && h.includes('venta')
+        )) {
+          colTicket = j; foundInRow = true;
+        }
+        // PPT Transacciones
+        if (colTransactions === -1 && (
+          h.includes('transacc') || h.includes('trx') || h.includes('txn') ||
+          h.includes('transac') || h.includes('operac')
+        )) {
+          colTransactions = j; foundInRow = true;
         }
       }
-      if (headerRowIdx !== -1) break;
+      if (foundInRow && headerRowIdx === -1) {
+        headerRowIdx = i;
+        break;
+      }
     }
 
-    // Si no encontramos cabeceras de columna, intentar estrategia por fila: cada fila = tienda
     const dataStartRow = headerRowIdx >= 0 ? headerRowIdx + 1 : 0;
 
+    // Escanear filas de datos
     for (let i = dataStartRow; i < rows.length; i++) {
       const row = rows[i];
-      if (!row || row.every(c => c === '' || c === null)) continue;
+      if (!row || row.every(c => c === '' || c === null || c === undefined)) continue;
 
+      // Buscar tienda en la fila
       let storeMatch = null;
-      let monthlyVal = null;
-      let dailyVal = null;
-
       if (colStore >= 0) {
         storeMatch = matchStore(row[colStore]);
+        // Si no matchea en la columna de tienda, buscar en toda la fila
+        if (!storeMatch) {
+          for (const cell of row) {
+            storeMatch = matchStore(cell);
+            if (storeMatch) break;
+          }
+        }
       } else {
-        // Buscar en cualquier celda de la fila una tienda
         for (const cell of row) {
           storeMatch = matchStore(cell);
           if (storeMatch) break;
@@ -150,70 +192,88 @@ export default function BudgetExcelImporter({ onClose }) {
 
       if (!storeMatch) continue;
 
-      // Presupuesto mensual
-      if (colMonthly >= 0) {
-        monthlyVal = parseNum(row[colMonthly]);
-      } else {
-        // Tomar el primer número grande de la fila (> 1M)
+      // Obtener valores numéricos
+      let monthlyVal = colMonthly >= 0 ? parseNum(row[colMonthly]) : null;
+      let dailyVal = colDaily >= 0 ? parseNum(row[colDaily]) : null;
+      let ticketVal = colTicket >= 0 ? parseNum(row[colTicket]) : null;
+      let transactionsVal = colTransactions >= 0 ? parseNum(row[colTransactions]) : null;
+
+      // Si no hay columnas identificadas, buscar números grandes en la fila
+      if (monthlyVal === null && dailyVal === null) {
+        const nums = [];
         for (const cell of row) {
           const n = parseNum(cell);
-          if (n && n > 1_000_000) { monthlyVal = n; break; }
+          if (n && n > 100_000) nums.push(n);
         }
-      }
-
-      // Presupuesto diario
-      if (colDaily >= 0) {
-        dailyVal = parseNum(row[colDaily]);
-      } else if (monthlyVal) {
-        // Calcular como mensual / días del mes
-        dailyVal = Math.round(monthlyVal / daysInMonth);
+        if (nums.length > 0) {
+          // El número más grande es el mensual
+          nums.sort((a, b) => b - a);
+          monthlyVal = nums[0];
+          if (nums.length > 1) dailyVal = nums[1];
+        }
       }
 
       if (!monthlyVal && !dailyVal) {
-        parseErrors.push(`Fila ${i + 1}: Se encontró "${storeMatch.displayName}" pero sin valores numéricos`);
+        parseErrors.push(`Fila ${i + 1}: "${storeMatch.displayName}" sin valores de ventas`);
         continue;
       }
 
-      // Si viene diario pero no mensual, calcular mensual
-      if (dailyVal && !monthlyVal) {
-        // Si viene diario, el mensual = diario × días del mes
-        monthlyVal = dailyVal * daysInMonth;
-      } else if (monthlyVal && !dailyVal) {
-        // Si viene mensual, el diario = mensual / días del mes
+      // Lógica de cálculo:
+      // - El presupuesto mensual se toma DIRECTAMENTE del Excel (no recalcular)
+      // - El PPT diario = mensual ÷ días del mes (siempre recalcular para consistencia)
+      if (monthlyVal && !dailyVal) {
         dailyVal = Math.round(monthlyVal / daysInMonth);
-      } else if (monthlyVal && dailyVal) {
-        // Si vienen ambos, recalcular mensual como diario × días (el diario es la fuente de verdad)
+      } else if (dailyVal && !monthlyVal) {
         monthlyVal = dailyVal * daysInMonth;
       }
+      // Si ambos vienen del Excel, respetar el mensual como fuente de verdad
+      // y recalcular diario para que sean consistentes
+      if (monthlyVal && dailyVal) {
+        dailyVal = Math.round(monthlyVal / daysInMonth);
+      }
 
-      // Evitar duplicados
+      // Calcular transacciones del mes si viene el diario
+      const transactionsMonthly = transactionsVal
+        ? (transactionsVal > 1000 ? transactionsVal : transactionsVal * daysInMonth) // si es pequeño, es diario
+        : null;
+
       const existing = foundStores.find(s => s.store.code === storeMatch.code);
       if (!existing) {
-        foundStores.push({ store: storeMatch, monthly: monthlyVal, daily: dailyVal });
+        foundStores.push({
+          store: storeMatch,
+          monthly: monthlyVal,
+          daily: dailyVal,
+          ticket: ticketVal,
+          transactions: transactionsMonthly,
+        });
       }
     }
 
-    // Si no encontramos nada por columnas, intentar modo "libre": escanear toda la hoja
-    if (foundStores.length === 0) {
+    // Modo libre: si no encontramos suficientes, escanear toda la hoja sin restricción de columnas
+    if (foundStores.length < 6) {
       for (let i = 0; i < rows.length; i++) {
         const row = rows[i];
         let storeFound = null;
-        let numFound = null;
+        const rowNums = [];
 
-        for (let j = 0; j < row.length; j++) {
-          const s = matchStore(row[j]);
+        for (const cell of row) {
+          const s = matchStore(cell);
           if (s) storeFound = s;
-          const n = parseNum(row[j]);
-          if (n && n > 500_000) numFound = n; // umbral mínimo de medio millón
+          const n = parseNum(cell);
+          if (n && n > 500_000) rowNums.push(n);
         }
 
-        if (storeFound && numFound) {
-          const existing = foundStores.find(s => s.store.code === storeFound.code);
-          if (!existing) {
+        if (storeFound && rowNums.length > 0) {
+          const alreadyFound = foundStores.find(s => s.store.code === storeFound.code);
+          if (!alreadyFound) {
+            rowNums.sort((a, b) => b - a);
+            const monthly = rowNums[0];
             foundStores.push({
               store: storeFound,
-              monthly: numFound,
-              daily: Math.round(numFound / daysInMonth)
+              monthly,
+              daily: Math.round(monthly / daysInMonth),
+              ticket: null,
+              transactions: null,
             });
           }
         }
@@ -225,6 +285,13 @@ export default function BudgetExcelImporter({ onClose }) {
       return;
     }
 
+    // Advertir si faltan tiendas
+    const foundCodes = new Set(foundStores.map(s => s.store.code));
+    const missing = BASE_STORES.filter(s => !foundCodes.has(s.code));
+    if (missing.length > 0) {
+      parseErrors.push(`⚠️ No se encontraron ${missing.length} tiendas: ${missing.map(s => s.displayName).join(', ')}`);
+    }
+
     setParsedData({ month: detectedMonth, year: detectedYear, daysInMonth, stores: foundStores });
     setErrors(parseErrors);
     setStep('preview');
@@ -233,29 +300,24 @@ export default function BudgetExcelImporter({ onClose }) {
   // ── GUARDAR EN BD ──────────────────────────────────────────────────────────
   const handleSave = async () => {
     if (!parsedData) return;
-    setSaving(true);
     setStep('saving');
     let count = 0;
 
     for (const item of parsedData.stores) {
       try {
-        // Buscar si ya existe presupuesto para esta tienda/mes/año
         const existing = await base44.entities.Budget.filter({
           store_id: item.store.code,
           month: parsedData.month,
           year: parsedData.year
         });
 
-        // El presupuesto mensual es siempre diario × días del mes (acumulado)
-        const accumulatedMonthly = item.daily * parsedData.daysInMonth;
-
         const budgetData = {
           store_id: item.store.code,
           month: parsedData.month,
           year: parsedData.year,
-          sales_budget: accumulatedMonthly,
-          tickets_budget: 0,
-          transactions_budget: 0,
+          sales_budget: item.monthly,                          // mensual directo del Excel
+          tickets_budget: item.ticket || 0,                   // PPT ticket promedio
+          transactions_budget: item.transactions || 0,         // PPT transacciones del mes
           suggested_budget: 0,
           is_active: true
         };
@@ -266,28 +328,17 @@ export default function BudgetExcelImporter({ onClose }) {
           await base44.entities.Budget.create(budgetData);
         }
 
-        // También guardar presupuesto diario en DailyBudget si existe la entidad
+        // Guardar DailyBudget
         try {
           const today = format(new Date(parsedData.year, parsedData.month - 1, new Date().getDate()), 'yyyy-MM-dd');
-          const existingDaily = await base44.entities.DailyBudget.filter({
-            store_id: item.store.code,
-            date: today
-          });
-          const dailyData = {
-            store_id: item.store.code,
-            date: today,
-            sales_budget: item.daily,
-            month: parsedData.month,
-            year: parsedData.year
-          };
+          const existingDaily = await base44.entities.DailyBudget.filter({ store_id: item.store.code, date: today });
+          const dailyData = { store_id: item.store.code, date: today, sales_budget: item.daily, month: parsedData.month, year: parsedData.year };
           if (existingDaily.length > 0) {
             await base44.entities.DailyBudget.update(existingDaily[0].id, dailyData);
           } else {
             await base44.entities.DailyBudget.create(dailyData);
           }
-        } catch (_) {
-          // DailyBudget puede no existir, continuar
-        }
+        } catch (_) {}
 
         count++;
         setSavedCount(count);
@@ -296,20 +347,22 @@ export default function BudgetExcelImporter({ onClose }) {
       }
     }
 
-    // Invalidar todas las queries relacionadas
     queryClient.invalidateQueries({ queryKey: ['allBudgets'] });
     queryClient.invalidateQueries({ queryKey: ['genesis_budgets'] });
     queryClient.invalidateQueries({ queryKey: ['gerenteHomeBudgets'] });
     queryClient.invalidateQueries({ queryKey: ['budgets'] });
     queryClient.invalidateQueries({ queryKey: ['dailyBudgets'] });
 
-    setSaving(false);
     setStep('done');
     toast.success(`✅ ${count} tiendas actualizadas con presupuesto`);
   };
 
   const fmtCOP = (v) => v ? `$${Math.round(v).toLocaleString('es-CO')}` : '–';
+  const fmtNum = (v) => v ? Math.round(v).toLocaleString('es-CO') : '–';
   const monthNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+  const hasTicket = parsedData?.stores.some(s => s.ticket);
+  const hasTransactions = parsedData?.stores.some(s => s.transactions);
 
   return (
     <motion.div
@@ -320,7 +373,7 @@ export default function BudgetExcelImporter({ onClose }) {
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
         onClick={e => e.stopPropagation()}
-        className="w-full max-w-3xl rounded-2xl border border-white/15 overflow-hidden max-h-[90vh] flex flex-col"
+        className="w-full max-w-4xl rounded-2xl border border-white/15 overflow-hidden max-h-[90vh] flex flex-col"
         style={{ background: '#0f172a' }}
       >
         {/* Header */}
@@ -332,7 +385,7 @@ export default function BudgetExcelImporter({ onClose }) {
             </div>
             <div>
               <p className="text-sm font-black text-white">Importar Presupuesto desde Excel</p>
-              <p className="text-[10px] text-slate-400">Carga el archivo y la app detecta las tiendas automáticamente</p>
+              <p className="text-[10px] text-slate-400">Detecta automáticamente las {BASE_STORES.length} tiendas</p>
             </div>
           </div>
           <button onClick={onClose} className="w-8 h-8 rounded-lg bg-white/8 hover:bg-white/15 flex items-center justify-center">
@@ -346,7 +399,6 @@ export default function BudgetExcelImporter({ onClose }) {
           {/* STEP: UPLOAD */}
           {step === 'upload' && (
             <div className="space-y-5">
-              {/* Zona de carga */}
               <div
                 onClick={() => fileInputRef.current?.click()}
                 className="border-2 border-dashed border-emerald-500/30 hover:border-emerald-400/60 rounded-2xl p-10 text-center cursor-pointer transition-all group"
@@ -370,18 +422,17 @@ export default function BudgetExcelImporter({ onClose }) {
                 />
               </div>
 
-              {/* Instrucciones de formato */}
               <div className="rounded-xl border border-white/8 p-4 space-y-2" style={{ background: 'rgba(255,255,255,0.03)' }}>
                 <div className="flex items-center gap-2 mb-2">
                   <Info className="w-4 h-4 text-blue-400 flex-shrink-0" />
-                  <p className="text-xs font-bold text-blue-300">Formatos aceptados</p>
+                  <p className="text-xs font-bold text-blue-300">Columnas reconocidas</p>
                 </div>
                 <div className="space-y-1.5 text-[11px] text-slate-400">
-                  <p>• <span className="text-white font-semibold">Columnas:</span> El archivo puede tener columnas "Tienda", "Presupuesto Mes" y opcionalmente "PPT Día"</p>
-                  <p>• <span className="text-white font-semibold">Nombres de tienda:</span> Puede usar el código (ej: BTA 62), nombre corto (ej: FONTANAR) o nombre completo</p>
-                  <p>• <span className="text-white font-semibold">Valores:</span> Los valores numéricos pueden incluir $, puntos o comas (ej: $12.500.000)</p>
-                  <p>• <span className="text-white font-semibold">PPT Diario:</span> Si no está en el archivo, se calcula como presupuesto mensual ÷ días del mes</p>
-                  <p>• <span className="text-white font-semibold">Mes:</span> Si el archivo dice "Marzo 2026" en alguna celda se detecta automáticamente</p>
+                  <p>• <span className="text-white font-semibold">Tienda:</span> Nombre, código (BTA 62), número (62) o alias (FONTANAR, COLINA…)</p>
+                  <p>• <span className="text-white font-semibold">Presupuesto Mes / PPT Mes:</span> Ventas totales del mes (se toma directo)</p>
+                  <p>• <span className="text-white font-semibold">PPT Día:</span> Si no está, se calcula automáticamente (mensual ÷ días)</p>
+                  <p>• <span className="text-white font-semibold">Ticket / TKT:</span> PPT ticket promedio mensual</p>
+                  <p>• <span className="text-white font-semibold">Transacciones / TRX:</span> Meta de transacciones del mes</p>
                 </div>
               </div>
             </div>
@@ -390,29 +441,24 @@ export default function BudgetExcelImporter({ onClose }) {
           {/* STEP: PREVIEW */}
           {step === 'preview' && parsedData && (
             <div className="space-y-4">
-              {/* Resumen de detección */}
+              {/* Resumen */}
               <div className="rounded-xl border border-emerald-500/25 p-4 flex items-center gap-3"
                 style={{ background: 'rgba(16,185,129,0.08)' }}>
                 <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" />
-                <div>
+                <div className="flex-1">
                   <p className="text-sm font-bold text-white">
-                    {parsedData.stores.length} tiendas detectadas · {monthNames[parsedData.month - 1]} {parsedData.year}
+                    {parsedData.stores.length} de {BASE_STORES.length} tiendas detectadas · {monthNames[parsedData.month - 1]} {parsedData.year}
                   </p>
                   <p className="text-[11px] text-slate-400">
-                    {parsedData.daysInMonth} días en el mes · PPT diario = mensual ÷ {parsedData.daysInMonth}
+                    {parsedData.daysInMonth} días · PPT diario = presupuesto mensual ÷ {parsedData.daysInMonth}
                   </p>
                 </div>
-              </div>
-
-              {/* Metodología redistribución */}
-              <div className="rounded-xl border border-indigo-500/20 p-4" style={{ background: 'rgba(99,102,241,0.07)' }}>
-                <p className="text-[11px] font-bold text-indigo-300 mb-1">📊 Metodología de análisis de brecha</p>
-                <p className="text-[10px] text-slate-400 leading-relaxed">
-                  Cuando una tienda tenga déficit (ventas &lt; meta), la app calculará automáticamente el
-                  <span className="text-white font-semibold"> PPT diario dinámico</span> como:
-                  <span className="text-amber-300"> (Presupuesto Mensual − Ventas acumuladas) ÷ Días restantes</span>.
-                  Así el objetivo se redistribuye cada día para que la tienda pueda cumplir al cierre del mes.
-                </p>
+                {parsedData.stores.length < BASE_STORES.length && (
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-500/25">
+                    <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
+                    <span className="text-[10px] font-bold text-amber-300">{BASE_STORES.length - parsedData.stores.length} faltantes</span>
+                  </div>
+                )}
               </div>
 
               {/* Errores / advertencias */}
@@ -420,7 +466,7 @@ export default function BudgetExcelImporter({ onClose }) {
                 <div className="rounded-xl border border-amber-500/25 p-4" style={{ background: 'rgba(245,158,11,0.07)' }}>
                   <div className="flex items-center gap-2 mb-2">
                     <AlertTriangle className="w-4 h-4 text-amber-400" />
-                    <p className="text-xs font-bold text-amber-300">Advertencias ({errors.length})</p>
+                    <p className="text-xs font-bold text-amber-300">Advertencias</p>
                   </div>
                   <div className="space-y-1">
                     {errors.map((e, i) => <p key={i} className="text-[10px] text-slate-400">{e}</p>)}
@@ -428,49 +474,66 @@ export default function BudgetExcelImporter({ onClose }) {
                 </div>
               )}
 
-              {/* Tabla de tiendas detectadas */}
+              {/* Tabla */}
               <div className="rounded-xl border border-white/8 overflow-hidden">
-                <div className="grid grid-cols-12 px-4 py-2 text-[10px] font-bold text-slate-500 uppercase tracking-wider border-b border-white/8">
-                  <span className="col-span-5">Tienda</span>
-                  <span className="col-span-4 text-right">Presupuesto Mes</span>
-                  <span className="col-span-3 text-right">PPT Día</span>
+                <div className="grid px-4 py-2 text-[10px] font-bold text-slate-500 uppercase tracking-wider border-b border-white/8"
+                  style={{ gridTemplateColumns: hasTransactions || hasTicket ? '3fr 2fr 1.5fr 1.5fr 1.5fr' : '4fr 3fr 2fr' }}>
+                  <span>Tienda</span>
+                  <span className="text-right">PPT Mes Ventas</span>
+                  <span className="text-right">PPT Día</span>
+                  {hasTicket && <span className="text-right">PPT Ticket</span>}
+                  {hasTransactions && <span className="text-right">PPT Trx Mes</span>}
                 </div>
-                <div className="max-h-72 overflow-y-auto divide-y divide-white/5">
+                <div className="max-h-80 overflow-y-auto divide-y divide-white/5">
                   {parsedData.stores.map((item, i) => (
                     <motion.div
                       key={item.store.code}
                       initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: i * 0.03 }}
-                      className="grid grid-cols-12 px-4 py-3 hover:bg-white/3 transition-colors"
+                      className="grid px-4 py-3 hover:bg-white/3 transition-colors"
+                      style={{ gridTemplateColumns: hasTransactions || hasTicket ? '3fr 2fr 1.5fr 1.5fr 1.5fr' : '4fr 3fr 2fr' }}
                     >
-                      <div className="col-span-5">
+                      <div>
                         <p className="text-xs font-bold text-white">{item.store.displayName}</p>
                         <p className="text-[9px] text-slate-500">{item.store.code}</p>
                       </div>
-                      <div className="col-span-4 text-right">
+                      <div className="text-right">
                         <p className="text-xs font-black text-emerald-400 tabular-nums">{fmtCOP(item.monthly)}</p>
                       </div>
-                      <div className="col-span-3 text-right">
+                      <div className="text-right">
                         <p className="text-xs font-bold text-amber-300 tabular-nums">{fmtCOP(item.daily)}</p>
                       </div>
+                      {hasTicket && (
+                        <div className="text-right">
+                          <p className="text-xs font-bold text-purple-300 tabular-nums">{fmtCOP(item.ticket)}</p>
+                        </div>
+                      )}
+                      {hasTransactions && (
+                        <div className="text-right">
+                          <p className="text-xs font-bold text-blue-300 tabular-nums">{fmtNum(item.transactions)}</p>
+                        </div>
+                      )}
                     </motion.div>
                   ))}
                 </div>
                 {/* Totales */}
-                <div className="grid grid-cols-12 px-4 py-3 border-t border-white/10 bg-white/3">
-                  <div className="col-span-5">
-                    <p className="text-xs font-black text-white">TOTAL ZONA</p>
-                  </div>
-                  <div className="col-span-4 text-right">
-                    <p className="text-xs font-black text-emerald-300 tabular-nums">
-                      {fmtCOP(parsedData.stores.reduce((s, x) => s + (x.monthly || 0), 0))}
+                <div className="grid px-4 py-3 border-t border-white/10 bg-white/3"
+                  style={{ gridTemplateColumns: hasTransactions || hasTicket ? '3fr 2fr 1.5fr 1.5fr 1.5fr' : '4fr 3fr 2fr' }}>
+                  <p className="text-xs font-black text-white">TOTAL ZONA ({parsedData.stores.length} tiendas)</p>
+                  <p className="text-xs font-black text-emerald-300 tabular-nums text-right">
+                    {fmtCOP(parsedData.stores.reduce((s, x) => s + (x.monthly || 0), 0))}
+                  </p>
+                  <p className="text-xs font-black text-amber-200 tabular-nums text-right">
+                    {fmtCOP(parsedData.stores.reduce((s, x) => s + (x.daily || 0), 0))}
+                  </p>
+                  {hasTicket && (
+                    <p className="text-xs font-black text-purple-200 tabular-nums text-right">–</p>
+                  )}
+                  {hasTransactions && (
+                    <p className="text-xs font-black text-blue-200 tabular-nums text-right">
+                      {fmtNum(parsedData.stores.reduce((s, x) => s + (x.transactions || 0), 0))}
                     </p>
-                  </div>
-                  <div className="col-span-3 text-right">
-                    <p className="text-xs font-black text-amber-200 tabular-nums">
-                      {fmtCOP(parsedData.stores.reduce((s, x) => s + (x.daily || 0), 0))}
-                    </p>
-                  </div>
+                  )}
                 </div>
               </div>
 
@@ -480,9 +543,13 @@ export default function BudgetExcelImporter({ onClose }) {
                 const missing = BASE_STORES.filter(s => !foundCodes.has(s.code));
                 if (!missing.length) return null;
                 return (
-                  <div className="rounded-xl border border-slate-700 p-3" style={{ background: 'rgba(255,255,255,0.02)' }}>
-                    <p className="text-[10px] text-slate-500 mb-1">Tiendas sin datos en el archivo ({missing.length}):</p>
-                    <p className="text-[10px] text-slate-600">{missing.map(s => s.displayName).join(' · ')}</p>
+                  <div className="rounded-xl border border-red-500/20 p-3" style={{ background: 'rgba(239,68,68,0.05)' }}>
+                    <p className="text-[10px] font-bold text-red-400 mb-1">Tiendas no encontradas en el archivo ({missing.length}):</p>
+                    <div className="flex flex-wrap gap-1.5 mt-1">
+                      {missing.map(s => (
+                        <span key={s.code} className="text-[10px] bg-red-500/10 border border-red-500/20 text-red-300 px-2 py-0.5 rounded">{s.displayName}</span>
+                      ))}
+                    </div>
                   </div>
                 );
               })()}
@@ -510,12 +577,7 @@ export default function BudgetExcelImporter({ onClose }) {
             <div className="py-16 text-center space-y-4">
               <CheckCircle2 className="w-16 h-16 text-emerald-400 mx-auto" />
               <p className="text-xl font-black text-white">¡Presupuestos actualizados!</p>
-              <p className="text-slate-400 text-sm">
-                {savedCount} tiendas con presupuesto mensual y PPT diario configurados
-              </p>
-              <p className="text-[11px] text-slate-500">
-                El dashboard ahora usará estos valores y redistribuirá automáticamente cuando haya déficit
-              </p>
+              <p className="text-slate-400 text-sm">{savedCount} tiendas guardadas</p>
             </div>
           )}
         </div>
@@ -531,8 +593,7 @@ export default function BudgetExcelImporter({ onClose }) {
                 className="text-sm text-slate-400 hover:text-white transition-colors">
                 ← Cargar otro archivo
               </button>
-              <Button onClick={handleSave}
-                className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-6">
+              <Button onClick={handleSave} className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-6">
                 Guardar {parsedData.stores.length} tiendas →
               </Button>
             </>
