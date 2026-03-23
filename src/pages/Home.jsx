@@ -1304,7 +1304,6 @@ export default function Home() {
                         <p className="text-[10px] lg:text-xs text-gray-500 mt-0.5">{item.description}</p>
                       </div>
                     </Link>
-                    )}
                   </button>
                 ))}
         )}
