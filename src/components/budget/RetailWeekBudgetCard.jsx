@@ -338,30 +338,20 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
     // Presupuesto restante a alcanzar (meta del 105%)
     const remainingBudget = adjustedMonthlyBudget - salesUntilYesterday - todayActualSales;
 
-    // Presupuesto del día ajustado según patrón histórico
-    let adjustedDailyBudget = getDailyBudget(now);
+    // META DEL DÍA: usar valor del Excel (DailyBudget) si existe, si no calcular
+    const todayStr = format(now, 'yyyy-MM-dd');
+    const excelDailyBudget = dailyBudgets?.find(db =>
+      db.store_id === storeId && (db.date?.split('T')[0] || db.date) === todayStr
+    );
+    let adjustedDailyBudget = excelDailyBudget?.sales_budget || getDailyBudget(now);
 
-    // Si hay brecha acumulada, redistribuir de forma conservadora
-    if (remainingDays > 0 && accumulatedGap > 0) {
+    // Solo redistribuir brecha si NO hay valor del Excel
+    if (!excelDailyBudget && remainingDays > 0 && accumulatedGap > 0) {
       const remainingDaysArray = eachDayOfInterval({ start: now, end: monthEnd });
-
-      // Calcular presupuesto base de días restantes según histórico
       const remainingBaseBudget = remainingDaysArray.reduce((sum, day) => sum + getDailyBudget(day), 0);
-
-      // Redistribuir solo el 50% de la brecha para ser más conservador y realista
-      const gapToRedistribute = accumulatedGap * 0.5;
-
-      // Calcular peso del día actual vs total de días restantes
       const todayBaseBudget = getDailyBudget(now);
       const todayWeight = remainingBaseBudget > 0 ? todayBaseBudget / remainingBaseBudget : 1 / remainingDays;
-
-      // Agregar proporción de la brecha al presupuesto base del día
-      const additionalBudget = gapToRedistribute * todayWeight;
-      adjustedDailyBudget = todayBaseBudget + additionalBudget;
-
-      // Limitar incremento máximo al 40% del presupuesto base histórico para evitar metas irrealistas
-      const maxIncrease = todayBaseBudget * 1.4;
-      adjustedDailyBudget = Math.min(adjustedDailyBudget, maxIncrease);
+      adjustedDailyBudget = Math.min(todayBaseBudget + (accumulatedGap * 0.5 * todayWeight), todayBaseBudget * 1.4);
     }
 
     // Calcular número de semana según modo
