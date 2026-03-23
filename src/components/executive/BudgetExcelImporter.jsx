@@ -589,11 +589,49 @@ export default function BudgetExcelImporter({ onClose }) {
             existingByDate[dateKey] = rec;
           }
 
-          // Formato PdV+FECHA: usar fechas exactas del Excel
+          // Formato PdV+FECHA: usar fechas exactas del Excel + ajustar por brecha
           if (parsedData.formatType === 'pdv-fecha' && item.dailyByDate) {
+            // Calcular ventas acumuladas hasta hoy vs presupuesto acumulado
+            const hoy = new Date();
+            const hoyStr = format(hoy, 'yyyy-MM-dd');
+            
+            let salesUntilToday = 0;
+            let budgetUntilToday = 0;
+            const datesSorted = Object.keys(item.dailyByDate).sort();
+            
+            // Buscar ventas reales hasta hoy
+            try {
+              const dailySalesRecs = await base44.entities.DailySales.filter({ store_id: item.store.code });
+              for (const rec of dailySalesRecs) {
+                const recDate = rec.date?.split('T')[0] || rec.date;
+                if (recDate <= hoyStr) {
+                  salesUntilToday += rec.total_sales || 0;
+                }
+              }
+            } catch (_) {}
+
+            // Calcular presupuesto acumulado hasta hoy
+            for (const dateStr of datesSorted) {
+              if (dateStr <= hoyStr) {
+                budgetUntilToday += item.dailyByDate[dateStr] || 0;
+              }
+            }
+
+            const gap = budgetUntilToday - salesUntilToday; // gap positivo = brecha
+            const remainingDays = datesSorted.filter(d => d > hoyStr).length;
+            const adjustmentPerDay = gap > 0 && remainingDays > 0 ? Math.ceil(gap / remainingDays) : 0;
+
+            console.log(`🔍 ${item.store.code}: ventas=${salesUntilToday}, presupuesto=${budgetUntilToday}, gap=${gap}, ajuste por día=${adjustmentPerDay}`);
+
+            // Guardar con ajuste si hay brecha
             for (const [dateStr, budgetAmount] of Object.entries(item.dailyByDate)) {
               if (!budgetAmount) continue;
-              const dailyData = { store_id: item.store.code, date: dateStr, budget_amount: budgetAmount };
+              
+              const finalAmount = dateStr > hoyStr && adjustmentPerDay > 0
+                ? budgetAmount + adjustmentPerDay
+                : budgetAmount;
+
+              const dailyData = { store_id: item.store.code, date: dateStr, budget_amount: Math.round(finalAmount) };
               if (existingByDate[dateStr]) {
                 await base44.entities.DailyBudget.update(existingByDate[dateStr].id, dailyData);
               } else {
@@ -615,7 +653,9 @@ export default function BudgetExcelImporter({ onClose }) {
               }
             }
           }
-        } catch (_) {}
+        } catch (e) {
+          console.warn(`Error guardando DailyBudget para ${item.store.code}:`, e);
+        }
 
         count++;
         setSavedCount(count);
