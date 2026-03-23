@@ -2390,11 +2390,9 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                         </div>
                       );
                     })()}
-                  </div>
-                </DialogContent>
-              </Dialog>
+                  </div>}
 
-              {/* Mensaje de estado - interactivo */}
+                  {/* Mensaje de estado - interactivo */}
               {needsRecovery ? (
                 <motion.button
                   initial={{ opacity: 0, x: -20 }}
