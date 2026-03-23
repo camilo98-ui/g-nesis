@@ -552,7 +552,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
               </div>
 
               <div className="grid grid-cols-2 gap-6 lg:gap-10 mb-6 lg:mb-5">
-                <div className="flex flex-col items-center justify-center text-center">
+                <div className="text-left">
                   <p className="text-sm lg:text-base text-white/90 mb-3 lg:mb-2 font-semibold">
                     {budgetData.gapRecoveryIncrement > 0
                       ? `PPT Excel + Brecha`
@@ -566,7 +566,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                   >
                     {formatCurrency(budgetData.adjustedDailyBudget)}
                   </motion.p>
-                  <div className="space-y-1 w-full">
+                  <div className="space-y-1">
                     <p className="text-xs lg:text-sm text-white/70">
                       {budgetData.gapRecoveryIncrement > 0
                         ? `Excel: ${formatCurrency(budgetData.excelBudgetForToday)} + ${formatCurrency(budgetData.gapRecoveryIncrement)} (brecha)`
@@ -581,7 +581,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                   
                   {/* Sparkline debajo del número */}
                   {budgetData.last7DaysSales?.length > 0 && (
-                    <div className="mt-4 h-16 w-full">
+                    <div className="mt-3 h-10">
                       <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={budgetData.last7DaysSales}>
                           <defs>
