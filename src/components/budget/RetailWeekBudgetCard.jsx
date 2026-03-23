@@ -1569,9 +1569,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                 formatCurrency={formatCurrency}
                 gregorianMode={gregorianMode}
               />
-              {/* Dead code removed */}
-                        
-                        {/* Lista de días restantes */}
+              {/* Dead code removed: false && block */}
                         <div className="bg-gradient-to-br from-emerald-50/50 to-green-50/50 rounded-lg p-3 mb-3 border border-emerald-200/40">
                           <p className="text-xs font-bold text-emerald-900 mb-2 flex items-center gap-1">
                             📅 Días restantes del mes:
