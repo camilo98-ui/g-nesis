@@ -558,25 +558,33 @@ export default function BudgetExcelImporter({ onClose }) {
     setStep('saving');
     let count = 0;
 
+    console.log(`🚀 Iniciando guardado de ${parsedData.stores.length} tiendas...`);
+
     for (let idx = 0; idx < parsedData.stores.length; idx++) {
       const item = parsedData.stores[idx];
-      // Agregar delay entre tiendas para evitar rate limit (500ms)
-      if (idx > 0) await new Promise(r => setTimeout(r, 500));
       
       try {
+        console.log(`⏳ Guardando tienda ${idx + 1}/${parsedData.stores.length}: ${item.store.code}`);
+        
+        // Delay de 1.5 segundos entre cada tienda para evitar rate limit
+        if (idx > 0) await new Promise(r => setTimeout(r, 1500));
+
+        // ── 1. Guardar/actualizar Budget
         const existing = await base44.entities.Budget.filter({
           store_id: item.store.code,
           month: parsedData.month,
           year: parsedData.year
         });
+        
+        await new Promise(r => setTimeout(r, 300));
 
         const budgetData = {
           store_id: item.store.code,
           month: parsedData.month,
           year: parsedData.year,
-          sales_budget: item.monthly,                          // mensual directo del Excel
-          tickets_budget: item.ticket || 0,                   // PPT ticket promedio
-          transactions_budget: item.transactions || 0,         // PPT transacciones del mes
+          sales_budget: item.monthly,
+          tickets_budget: item.ticket || 0,
+          transactions_budget: item.transactions || 0,
           suggested_budget: 0,
           is_active: true
         };
@@ -587,89 +595,78 @@ export default function BudgetExcelImporter({ onClose }) {
           await base44.entities.Budget.create(budgetData);
         }
 
-        // Guardar DailyBudget para TODOS los días del mes
-        try {
-          const existingDailyRecords = await base44.entities.DailyBudget.filter({ store_id: item.store.code });
-          const existingByDate = {};
-          for (const rec of existingDailyRecords) {
-            const dateKey = rec.date?.split('T')[0] || rec.date;
-            existingByDate[dateKey] = rec;
-          }
+        await new Promise(r => setTimeout(r, 300));
 
-          // Formato PdV+FECHA: usar fechas exactas del Excel + ajustar por brecha
-          if (parsedData.formatType === 'pdv-fecha' && item.dailyByDate) {
-            // Calcular ventas acumuladas hasta hoy vs presupuesto acumulado
-            const hoy = new Date();
-            const hoyStr = format(hoy, 'yyyy-MM-dd');
-            
-            let salesUntilToday = 0;
-            let budgetUntilToday = 0;
-            const datesSorted = Object.keys(item.dailyByDate).sort();
-            
-            // Buscar ventas reales hasta hoy
-            try {
-              const dailySalesRecs = await base44.entities.DailySales.filter({ store_id: item.store.code });
-              for (const rec of dailySalesRecs) {
-                const recDate = rec.date?.split('T')[0] || rec.date;
-                if (recDate <= hoyStr) {
-                  salesUntilToday += rec.total_sales || 0;
-                }
-              }
-            } catch (_) {}
+        // ── 2. Guardar DailyBudget
+        const existingDailyRecords = await base44.entities.DailyBudget.filter({ store_id: item.store.code });
+        await new Promise(r => setTimeout(r, 300));
+        
+        const existingByDate = {};
+        for (const rec of existingDailyRecords) {
+          const dateKey = rec.date?.split('T')[0] || rec.date;
+          existingByDate[dateKey] = rec;
+        }
 
-            // Calcular presupuesto acumulado hasta hoy
-            for (const dateStr of datesSorted) {
-              if (dateStr <= hoyStr) {
-                budgetUntilToday += item.dailyByDate[dateStr] || 0;
+        if (parsedData.formatType === 'pdv-fecha' && item.dailyByDate) {
+          const hoy = new Date();
+          const hoyStr = format(hoy, 'yyyy-MM-dd');
+          
+          let salesUntilToday = 0;
+          let budgetUntilToday = 0;
+          const datesSorted = Object.keys(item.dailyByDate).sort();
+          
+          // Buscar ventas reales
+          try {
+            const dailySalesRecs = await base44.entities.DailySales.filter({ store_id: item.store.code });
+            for (const rec of dailySalesRecs) {
+              const recDate = rec.date?.split('T')[0] || rec.date;
+              if (recDate <= hoyStr) {
+                salesUntilToday += rec.total_sales || 0;
               }
             }
+          } catch (_) {}
 
-            const gap = budgetUntilToday - salesUntilToday; // gap positivo = brecha
-            const remainingDays = datesSorted.filter(d => d > hoyStr).length;
-            const adjustmentPerDay = gap > 0 && remainingDays > 0 ? Math.ceil(gap / remainingDays) : 0;
+          await new Promise(r => setTimeout(r, 300));
 
-            console.log(`🔍 ${item.store.code}: ventas=${salesUntilToday}, presupuesto=${budgetUntilToday}, gap=${gap}, ajuste por día=${adjustmentPerDay}`);
-
-            // Guardar con ajuste si hay brecha
-            for (const [dateStr, budgetAmount] of Object.entries(item.dailyByDate)) {
-              if (!budgetAmount) continue;
-              
-              const finalAmount = dateStr > hoyStr && adjustmentPerDay > 0
-                ? budgetAmount + adjustmentPerDay
-                : budgetAmount;
-
-              const dailyData = { store_id: item.store.code, date: dateStr, budget_amount: Math.round(finalAmount) };
-              if (existingByDate[dateStr]) {
-                await base44.entities.DailyBudget.update(existingByDate[dateStr].id, dailyData);
-              } else {
-                await base44.entities.DailyBudget.create(dailyData);
-              }
-            }
-          } else {
-            // Formato genérico: iterar por número de día
-            for (let day = 1; day <= parsedData.daysInMonth; day++) {
-              const dateStr = format(new Date(parsedData.year, parsedData.month - 1, day), 'yyyy-MM-dd');
-              const budgetAmount = item.dailyAmounts?.[day] ?? item.daily;
-              if (!budgetAmount) continue;
-
-              const dailyData = { store_id: item.store.code, date: dateStr, budget_amount: budgetAmount };
-              if (existingByDate[dateStr]) {
-                await base44.entities.DailyBudget.update(existingByDate[dateStr].id, dailyData);
-              } else {
-                await base44.entities.DailyBudget.create(dailyData);
-              }
+          for (const dateStr of datesSorted) {
+            if (dateStr <= hoyStr) {
+              budgetUntilToday += item.dailyByDate[dateStr] || 0;
             }
           }
-        } catch (e) {
-          console.warn(`Error guardando DailyBudget para ${item.store.code}:`, e);
+
+          const gap = budgetUntilToday - salesUntilToday;
+          const remainingDays = datesSorted.filter(d => d > hoyStr).length;
+          const adjustmentPerDay = gap > 0 && remainingDays > 0 ? Math.ceil(gap / remainingDays) : 0;
+
+          // Guardar cada DailyBudget con delay
+          for (const [dateStr, budgetAmount] of Object.entries(item.dailyByDate)) {
+            if (!budgetAmount) continue;
+            
+            const finalAmount = dateStr > hoyStr && adjustmentPerDay > 0
+              ? budgetAmount + adjustmentPerDay
+              : budgetAmount;
+
+            const dailyData = { store_id: item.store.code, date: dateStr, budget_amount: Math.round(finalAmount) };
+            if (existingByDate[dateStr]) {
+              await base44.entities.DailyBudget.update(existingByDate[dateStr].id, dailyData);
+            } else {
+              await base44.entities.DailyBudget.create(dailyData);
+            }
+            // Pequeño delay entre cada DailyBudget
+            await new Promise(r => setTimeout(r, 50));
+          }
         }
 
         count++;
         setSavedCount(count);
+        console.log(`✅ ${item.store.code} guardada (${count}/${parsedData.stores.length})`);
+
       } catch (err) {
-        console.warn(`Error guardando ${item.store.code}:`, err);
+        console.error(`❌ Error guardando ${item.store.code}:`, err);
       }
     }
+
+    console.log(`🎉 Completado: ${count} tiendas guardadas de ${parsedData.stores.length}`);
 
     queryClient.invalidateQueries({ queryKey: ['allBudgets'] });
     queryClient.invalidateQueries({ queryKey: ['genesis_budgets'] });
