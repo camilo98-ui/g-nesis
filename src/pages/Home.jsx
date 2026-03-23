@@ -1305,7 +1305,7 @@ export default function Home() {
                     </div>
                   </div>
                   </Link>
-                  ) : null)}
+                  ) : null}
               </div>
             );
           })}
