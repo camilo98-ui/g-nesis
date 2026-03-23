@@ -1569,8 +1569,6 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                 formatCurrency={formatCurrency}
                 gregorianMode={gregorianMode}
               />
-              <></>
-          </AnimatePresence>
           )}
         </CardContent>
       </Card>
