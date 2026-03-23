@@ -511,9 +511,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
         .filter(d => d.count >= 2)
         .sort((a, b) => b.avg - a.avg)
         .slice(0, 3),
-      monthStart,
-      monthEnd,
-      getDailyBudget
+      monthStart, monthEnd, getDailyBudget, excelBudgetForToday, gapRecoveryIncrement
     };
   }, [dailySales, activeBudget, dailyBudgets, storeId, currentDateRange, gregorianMode]);
 
