@@ -17,16 +17,16 @@ const normalize = (str = '') =>
 
 // Palabras clave por tienda para matching robusto
 const STORE_KEYWORDS = {
-  'BTA 18': ['plaza imperial', 'imperial', 'bta 18', '18'],
-  'BTA 21': ['centro chia', 'chia', 'bta 21', '21'],
-  'BTA 96': ['av chile', 'chile', 'gran ahorrar', 'ahorrar', 'bta 96', '96', '27'],
-  'BTA 52': ['centro suba', 'suba', 'bta 52', '52'],
-  'BTA 94': ['eco plaza', 'ecoplaza', 'bta 94', '94', '56'],
-  'BTA 62': ['fontanar', 'bta 62', '62'],
-  'BTA 93': ['colina', 'parque la colina', 'bta 93', '93', '66'],
-  'BTA 95': ['casa blanca', 'casablanca', 'bta 95', '95', '71'],
-  'BTA 78': ['plaza imperial 2', 'imperial 2', 'bta 78', '78'],
-  'BTA 85': ['mansion cajica', 'cajica', 'bta 85', '85'],
+  'BTA 78': ['plaza imperial 2', 'imperial 2', 'bta 78', 'bogota 78', '78'],
+  'BTA 18': ['plaza imperial', 'imperial', 'bta 18', 'bogota 18', '18'],
+  'BTA 21': ['centro chia', 'chia', 'bta 21', 'bogota 21', '21'],
+  'BTA 96': ['av chile', 'chile', 'gran ahorrar', 'ahorrar', 'bta 96', 'bogota 96', 'bogota 27', '96', '27'],
+  'BTA 52': ['centro suba', 'suba', 'bta 52', 'bogota 52', '52'],
+  'BTA 94': ['eco plaza', 'ecoplaza', 'bta 94', 'bogota 94', 'bogota 56', '94', '56'],
+  'BTA 62': ['fontanar', 'bta 62', 'bogota 62', '62'],
+  'BTA 93': ['colina', 'parque la colina', 'bta 93', 'bogota 93', 'bogota 66', '93', '66'],
+  'BTA 95': ['casa blanca', 'casablanca', 'bta 95', 'bogota 95', 'bogota 71', '95', '71'],
+  'BTA 85': ['mansion cajica', 'cajica', 'bta 85', 'bogota 85', '85'],
   'TUNJA 1': ['unicentro', 'tunja 1', 'tunja1'],
   'TUNJA 2': ['viva tunja', 'biva tunja', 'tunja 2', 'tunja2'],
 };
