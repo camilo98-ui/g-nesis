@@ -209,61 +209,63 @@ export default function BudgetExcelImporter({ onClose }) {
 
       if (!storeMatch) continue;
 
-      // Obtener valores numéricos
-      let monthlyVal = colMonthly >= 0 ? parseNum(row[colMonthly]) : null;
-      let dailyVal = colDaily >= 0 ? parseNum(row[colDaily]) : null;
+      // Obtener valores numéricos de la fila
+      let rowSalesVal = colMonthly >= 0 ? parseNum(row[colMonthly]) : null;
+      let rowDailyVal = colDaily >= 0 ? parseNum(row[colDaily]) : null;
       let ticketVal = colTicket >= 0 ? parseNum(row[colTicket]) : null;
       let transactionsVal = colTransactions >= 0 ? parseNum(row[colTransactions]) : null;
 
-      // Si no hay columnas identificadas, buscar números grandes en la fila
-      if (monthlyVal === null && dailyVal === null) {
+      // Si no hay columnas identificadas, buscar el número más grande de la fila (>100k = ventas)
+      if (rowSalesVal === null && rowDailyVal === null) {
         const nums = [];
         for (const cell of row) {
           const n = parseNum(cell);
           if (n && n > 100_000) nums.push(n);
         }
         if (nums.length > 0) {
-          // El número más grande es el mensual
           nums.sort((a, b) => b - a);
-          monthlyVal = nums[0];
-          if (nums.length > 1) dailyVal = nums[1];
+          rowSalesVal = nums[0];
         }
       }
 
-      if (!monthlyVal && !dailyVal) {
-        parseErrors.push(`Fila ${i + 1}: "${storeMatch.displayName}" sin valores de ventas`);
-        continue;
-      }
+      if (!rowSalesVal && !rowDailyVal) continue;
 
-      // Lógica de cálculo:
-      // - El presupuesto mensual se toma DIRECTAMENTE del Excel (no recalcular)
-      // - El PPT diario = mensual ÷ días del mes (siempre recalcular para consistencia)
-      if (monthlyVal && !dailyVal) {
-        dailyVal = Math.round(monthlyVal / daysInMonth);
-      } else if (dailyVal && !monthlyVal) {
-        monthlyVal = dailyVal * daysInMonth;
-      }
-      // Si ambos vienen del Excel, respetar el mensual como fuente de verdad
-      // y recalcular diario para que sean consistentes
-      if (monthlyVal && dailyVal) {
-        dailyVal = Math.round(monthlyVal / daysInMonth);
-      }
-
-      // Calcular transacciones del mes si viene el diario
-      const transactionsMonthly = transactionsVal
-        ? (transactionsVal > 1000 ? transactionsVal : transactionsVal * daysInMonth) // si es pequeño, es diario
-        : null;
+      // El valor que viene puede ser diario o mensual.
+      // Si el valor es "pequeño" (< 2M para una tienda de ~$300K/día) probablemente es diario → sumar.
+      // Si es grande (> presupuesto de un solo día * 2) probablemente ya es mensual → usar directo.
+      const valueToAdd = rowSalesVal || rowDailyVal;
 
       const existing = foundStores.find(s => s.store.code === storeMatch.code);
       if (!existing) {
         foundStores.push({
           store: storeMatch,
-          monthly: monthlyVal,
-          daily: dailyVal,
+          accumulatedSales: valueToAdd,
+          rowCount: 1,
           ticket: ticketVal,
-          transactions: transactionsMonthly,
+          transactions: transactionsVal,
         });
+      } else {
+        // Acumular: si ya existe la tienda, sumar el valor (puede ser más de una fila por día)
+        existing.accumulatedSales = (existing.accumulatedSales || 0) + valueToAdd;
+        existing.rowCount = (existing.rowCount || 1) + 1;
+        if (ticketVal && !existing.ticket) existing.ticket = ticketVal;
+        if (transactionsVal) existing.transactions = (existing.transactions || 0) + transactionsVal;
       }
+    }
+
+    // Post-proceso: convertir accumulatedSales a monthly/daily
+    for (const item of foundStores) {
+      const accumulated = item.accumulatedSales || 0;
+      // Si acumulamos múltiples filas (días), es la suma de días → ese ES el mensual
+      // Si solo hay 1 fila y el valor parece diario (< 5M), multiplicar por días del mes
+      if (item.rowCount === 1 && accumulated < 5_000_000) {
+        // Parece valor de un solo día → multiplicar
+        item.monthly = Math.round(accumulated * daysInMonth);
+      } else {
+        // Ya es la suma de todos los días = mensual
+        item.monthly = Math.round(accumulated);
+      }
+      item.daily = Math.round(item.monthly / daysInMonth);
     }
 
     // Modo libre: si no encontramos suficientes, escanear toda la hoja sin restricción de columnas
