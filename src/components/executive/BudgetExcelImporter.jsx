@@ -566,8 +566,8 @@ export default function BudgetExcelImporter({ onClose }) {
       try {
         console.log(`⏳ Guardando tienda ${idx + 1}/${parsedData.stores.length}: ${item.store.code}`);
         
-        // Delay de 1.5 segundos entre cada tienda para evitar rate limit
-        if (idx > 0) await new Promise(r => setTimeout(r, 1500));
+        // Delay de 2.5 segundos entre cada tienda para evitar rate limit
+        if (idx > 0) await new Promise(r => setTimeout(r, 2500));
 
         // ── 1. Guardar/actualizar Budget
         const existing = await base44.entities.Budget.filter({
