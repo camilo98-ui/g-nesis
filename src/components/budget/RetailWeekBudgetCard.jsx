@@ -120,9 +120,9 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
     // Filtrar solo ventas de esta tienda
     dailySales = storeId ? dailySales.filter(s => s.store_id === storeId) : dailySales;
 
-    // Semana actual según modo
-    const currentWeekStart = gregorianMode ? startOfWeek(now, { weekStartsOn: 0 }) : startOfWeek(now, { weekStartsOn: 1 });
-    const currentWeekEnd = gregorianMode ? endOfWeek(now, { weekStartsOn: 0 }) : endOfWeek(now, { weekStartsOn: 1 });
+    // Semana actual (lunes a domingo)
+    const currentWeekStart = startOfWeek(now, { weekStartsOn: 1 });
+    const currentWeekEnd = endOfWeek(now, { weekStartsOn: 1 });
 
     // Para gráficas: usar filtro manual si existe, de lo contrario semana actual
     const displayWeekStart = currentDateRange?.from || currentWeekStart;
