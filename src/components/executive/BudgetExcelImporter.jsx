@@ -458,15 +458,26 @@ export default function BudgetExcelImporter({ onClose }) {
           await base44.entities.Budget.create(budgetData);
         }
 
-        // Guardar DailyBudget
+        // Guardar DailyBudget para TODOS los días del mes
         try {
-          const today = format(new Date(parsedData.year, parsedData.month - 1, new Date().getDate()), 'yyyy-MM-dd');
-          const existingDaily = await base44.entities.DailyBudget.filter({ store_id: item.store.code, date: today });
-          const dailyData = { store_id: item.store.code, date: today, budget_amount: item.daily, month: parsedData.month, year: parsedData.year };
-          if (existingDaily.length > 0) {
-            await base44.entities.DailyBudget.update(existingDaily[0].id, dailyData);
-          } else {
-            await base44.entities.DailyBudget.create(dailyData);
+          const existingDailyRecords = await base44.entities.DailyBudget.filter({ store_id: item.store.code });
+          const existingByDate = {};
+          for (const rec of existingDailyRecords) {
+            const dateKey = rec.date?.split('T')[0] || rec.date;
+            existingByDate[dateKey] = rec;
+          }
+
+          for (let day = 1; day <= parsedData.daysInMonth; day++) {
+            const dateStr = format(new Date(parsedData.year, parsedData.month - 1, day), 'yyyy-MM-dd');
+            const budgetAmount = item.dailyAmounts?.[day] ?? item.daily;
+            if (!budgetAmount) continue;
+
+            const dailyData = { store_id: item.store.code, date: dateStr, budget_amount: budgetAmount };
+            if (existingByDate[dateStr]) {
+              await base44.entities.DailyBudget.update(existingByDate[dateStr].id, dailyData);
+            } else {
+              await base44.entities.DailyBudget.create(dailyData);
+            }
           }
         } catch (_) {}
 
