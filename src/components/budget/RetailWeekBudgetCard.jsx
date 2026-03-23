@@ -608,15 +608,9 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
               <div className="grid grid-cols-2 gap-6 lg:gap-10 mb-6 lg:mb-5">
                 <div className="text-left">
                   <p className="text-sm lg:text-base text-white/90 mb-3 lg:mb-2 font-semibold">
-                    Meta del Día ({gregorianMode ? '100' : ((() => {
-                      const initialProjection = budgetData.monthProjection;
-                      const originalBudget = activeBudget.sales_budget;
-                      const projCompliance = originalBudget > 0 ? (initialProjection / originalBudget) : 0;
-                      if (projCompliance >= 1.1) return '110';
-                      if (projCompliance >= 1.0) return '105';
-                      if (projCompliance >= 0.9) return '102';
-                      return '100';
-                    })())}%)
+                    {budgetData.gapRecoveryIncrement > 0
+                      ? `PPT Excel + Brecha`
+                      : `PPT Excel del Día`}
                   </p>
                   <motion.p
                     key={`${budgetData.adjustedDailyBudget}-${gregorianMode}`}
