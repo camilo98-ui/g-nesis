@@ -1181,6 +1181,7 @@ export default function Dashboard() {
           <RetailWeekBudgetCard
           dailySales={dailySales}
           activeBudget={currentBudget}
+          dailyBudgets={dailyBudgets}
           storeId={selectedStore}
           formatCurrency={formatCurrency}
           currentDateRange={weekFilter || dateRange}
