@@ -620,17 +620,23 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                   </div>
 
                   {/* Brecha total visible debajo */}
-                  {(activeBudget?.sales_gap !== 0 && activeBudget?.sales_gap !== undefined) && (
-                    <div className={`mt-2 px-3 py-1.5 rounded-lg inline-flex items-center gap-2 ${
-                      activeBudget.sales_gap < 0 
-                        ? 'bg-red-500/30 border border-red-300/40' 
-                        : 'bg-emerald-500/30 border border-emerald-300/40'
-                    }`}>
-                      <span className="text-xs font-black text-white">
-                        {activeBudget.sales_gap < 0 ? '📉' : '📈'} Brecha mes: {activeBudget.sales_gap >= 0 ? '+' : ''}{formatCurrency(activeBudget.sales_gap)}
-                      </span>
-                    </div>
-                  )}
+                  {(() => {
+                    const gap = (activeBudget?.sales_gap !== undefined && activeBudget?.sales_gap !== null)
+                      ? activeBudget.sales_gap
+                      : -budgetData.accumulatedGap;
+                    if (gap === 0) return null;
+                    return (
+                      <div className={`mt-2 px-3 py-1.5 rounded-lg inline-flex items-center gap-2 ${
+                        gap < 0 
+                          ? 'bg-red-500/30 border border-red-300/40' 
+                          : 'bg-emerald-500/30 border border-emerald-300/40'
+                      }`}>
+                        <span className="text-xs font-black text-white">
+                          {gap < 0 ? '📉' : '📈'} Brecha mes: {gap >= 0 ? '+' : ''}{formatCurrency(gap)}
+                        </span>
+                      </div>
+                    );
+                  })()}
                   
                   {/* Sparkline debajo del número */}
                   {budgetData.last7DaysSales?.length > 0 && (
