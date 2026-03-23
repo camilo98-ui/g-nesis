@@ -104,7 +104,9 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
         totalWeeks: weeks.length,
         remainingDays: eachDayOfInterval({ start: now, end: monthEnd }).length,
         currentWeekStart,
-        currentWeekEnd
+        currentWeekEnd,
+        monthStart,
+        monthEnd
       };
     }
 
