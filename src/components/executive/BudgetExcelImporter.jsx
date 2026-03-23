@@ -246,11 +246,14 @@ export default function BudgetExcelImporter({ onClose }) {
           year: parsedData.year
         });
 
+        // El presupuesto mensual es siempre diario × días del mes (acumulado)
+        const accumulatedMonthly = item.daily * parsedData.daysInMonth;
+
         const budgetData = {
           store_id: item.store.code,
           month: parsedData.month,
           year: parsedData.year,
-          sales_budget: item.monthly,
+          sales_budget: accumulatedMonthly,
           tickets_budget: 0,
           transactions_budget: 0,
           suggested_budget: 0,
