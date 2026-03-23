@@ -1097,14 +1097,14 @@ export default function Home() {
         </>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 py-4 relative z-10">
+      <div className="max-w-7xl mx-auto px-6 lg:px-12 py-6 relative z-10">
 
         {/* Header */}
-        <div className="text-center mb-6">
+        <div className="text-center mb-8">
           <motion.img
             src={LOGO_URL}
             alt="Popsy"
-            className="h-20 sm:h-24 object-contain mx-auto mb-2 cursor-pointer drop-shadow-lg"
+            className="h-24 sm:h-28 lg:h-32 object-contain mx-auto mb-3 cursor-pointer drop-shadow-lg"
             animate={{ y: [0, -6, 0] }}
             transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
             onClick={() => setShowStory(true)}
