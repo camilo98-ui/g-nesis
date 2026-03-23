@@ -583,16 +583,30 @@ export default function BudgetExcelImporter({ onClose }) {
             existingByDate[dateKey] = rec;
           }
 
-          for (let day = 1; day <= parsedData.daysInMonth; day++) {
-            const dateStr = format(new Date(parsedData.year, parsedData.month - 1, day), 'yyyy-MM-dd');
-            const budgetAmount = item.dailyAmounts?.[day] ?? item.daily;
-            if (!budgetAmount) continue;
+          // Formato PdV+FECHA: usar fechas exactas del Excel
+          if (parsedData.formatType === 'pdv-fecha' && item.dailyByDate) {
+            for (const [dateStr, budgetAmount] of Object.entries(item.dailyByDate)) {
+              if (!budgetAmount) continue;
+              const dailyData = { store_id: item.store.code, date: dateStr, budget_amount: budgetAmount };
+              if (existingByDate[dateStr]) {
+                await base44.entities.DailyBudget.update(existingByDate[dateStr].id, dailyData);
+              } else {
+                await base44.entities.DailyBudget.create(dailyData);
+              }
+            }
+          } else {
+            // Formato genérico: iterar por número de día
+            for (let day = 1; day <= parsedData.daysInMonth; day++) {
+              const dateStr = format(new Date(parsedData.year, parsedData.month - 1, day), 'yyyy-MM-dd');
+              const budgetAmount = item.dailyAmounts?.[day] ?? item.daily;
+              if (!budgetAmount) continue;
 
-            const dailyData = { store_id: item.store.code, date: dateStr, budget_amount: budgetAmount };
-            if (existingByDate[dateStr]) {
-              await base44.entities.DailyBudget.update(existingByDate[dateStr].id, dailyData);
-            } else {
-              await base44.entities.DailyBudget.create(dailyData);
+              const dailyData = { store_id: item.store.code, date: dateStr, budget_amount: budgetAmount };
+              if (existingByDate[dateStr]) {
+                await base44.entities.DailyBudget.update(existingByDate[dateStr].id, dailyData);
+              } else {
+                await base44.entities.DailyBudget.create(dailyData);
+              }
             }
           }
         } catch (_) {}
