@@ -1153,6 +1153,17 @@ export default function Home() {
                 Presupuestos
               </Button>
             )}
+            {selectedRole === 'gerente' && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowBudgetImporter(true)}
+                className="text-gray-400 hover:text-emerald-600 hover:bg-emerald-50/50 transition-all text-xs"
+              >
+                <FileSpreadsheet className="w-3.5 h-3.5 mr-1" />
+                PPT Excel
+              </Button>
+            )}
             {selectedRole !== 'gerente' && (
               <Button
                 variant="ghost"
