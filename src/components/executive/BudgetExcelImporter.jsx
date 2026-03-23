@@ -652,8 +652,8 @@ export default function BudgetExcelImporter({ onClose }) {
             } else {
               await base44.entities.DailyBudget.create(dailyData);
             }
-            // Pequeño delay entre cada DailyBudget
-            await new Promise(r => setTimeout(r, 50));
+            // Delay entre cada DailyBudget
+            await new Promise(r => setTimeout(r, 100));
           }
         }
 
