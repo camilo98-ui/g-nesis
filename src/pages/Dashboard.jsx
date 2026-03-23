@@ -610,7 +610,7 @@ export default function Dashboard() {
 
   // Filtrar ventas según rango seleccionado (para gráficas)
   const filteredSales = useMemo(() => {
-    if (!dailySales.length) return [];
+    if (!dailySales.length) return dailySales; // Mostrar todos si no hay filtro específico
 
     const now = new Date();
     const currentYear = now.getFullYear();
@@ -635,7 +635,7 @@ export default function Dashboard() {
     const retailMonthStart = retailCalendar[currentMonth].start;
     const gregorianStart = startOfMonth(now);
     
-    // Determinar rango: si hay filtro usarlo, si no, según modo
+    // Determinar rango: si hay filtro usarlo, si no, mostrar mes actual
     let fromDate, toDate;
     
     if (weekFilter?.from && weekFilter?.to) {
@@ -645,9 +645,9 @@ export default function Dashboard() {
       fromDate = dateRange.from;
       toDate = dateRange.to;
     } else {
-      // Sin filtro: usar modo gregoriano o retail
-      fromDate = gregorianMode ? gregorianStart : retailMonthStart;
-      toDate = now;
+      // Sin filtro: mostrar TODO el mes actual (no limitar a hoy)
+      fromDate = gregorianStart;
+      toDate = endOfMonth(now);
     }
 
     const fromStr = format(fromDate, 'yyyy-MM-dd');
