@@ -555,7 +555,11 @@ export default function BudgetExcelImporter({ onClose }) {
     setStep('saving');
     let count = 0;
 
-    for (const item of parsedData.stores) {
+    for (let idx = 0; idx < parsedData.stores.length; idx++) {
+      const item = parsedData.stores[idx];
+      // Agregar delay entre tiendas para evitar rate limit (200ms)
+      if (idx > 0) await new Promise(r => setTimeout(r, 200));
+      
       try {
         const existing = await base44.entities.Budget.filter({
           store_id: item.store.code,
