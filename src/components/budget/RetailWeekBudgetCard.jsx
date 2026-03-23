@@ -569,9 +569,14 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                   <div className="space-y-1">
                     <p className="text-xs lg:text-sm text-white/70">
                       {budgetData.gapRecoveryIncrement > 0
-                        ? `Excel: ${formatCurrency(budgetData.excelBudgetForToday)} + ${formatCurrency(budgetData.gapRecoveryIncrement)}`
+                        ? `Excel: ${formatCurrency(budgetData.excelBudgetForToday)} + ${formatCurrency(budgetData.gapRecoveryIncrement)} (brecha)`
                         : `Valor exacto del Excel`}
                     </p>
+                    {budgetData.gapRecoveryIncrement > 0 && (
+                      <p className="text-[10px] lg:text-xs text-white/50 mt-1">
+                        📊 Se distribuye ${formatCurrency(budgetData.accumulatedGap)} entre {budgetData.remainingDays} días restantes
+                      </p>
+                    )}
                   </div>
                   
                   {/* Sparkline debajo del número */}
