@@ -568,19 +568,19 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
               <div className="grid grid-cols-2 gap-6 lg:gap-10 mb-6 lg:mb-5">
                 <div className="text-left">
                   <p className="text-sm lg:text-base text-white/90 mb-3 lg:mb-2 font-semibold">
-                    {currentDateFormatted === todayFormatted ? 'Venta del Día' : 'Venta del Mes'}
+                    Venta del Día
                   </p>
                   <motion.p
-                    key={`${budgetData.totalMonthSales}-${gregorianMode}`}
+                    key={`${budgetData.todayActualSales}-${gregorianMode}`}
                     initial={{ scale: 1.2, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     className="text-2xl md:text-3xl lg:text-5xl font-black text-white leading-none mb-2"
                   >
-                    {formatCurrency(budgetData.totalMonthSales)}
+                    {formatCurrency(budgetData.todayActualSales)}
                   </motion.p>
                   <div className="space-y-1">
                     <p className="text-xs lg:text-sm text-white/70">
-                      {currentDateFormatted === todayFormatted ? 'Del archivo importado' : 'Acumulado desde el 1º'}
+                      Acumulado mes: {formatCurrency(budgetData.totalMonthSales)}
                     </p>
                   </div>
                   
