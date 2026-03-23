@@ -175,9 +175,16 @@ export default function BudgetExcelImporter({ onClose }) {
       }
 
       // Si viene diario pero no mensual, calcular mensual
-      if (dailyVal && !monthlyVal) monthlyVal = dailyVal * daysInMonth;
-      // Si viene mensual pero no diario, calcular diario
-      if (monthlyVal && !dailyVal) dailyVal = Math.round(monthlyVal / daysInMonth);
+      if (dailyVal && !monthlyVal) {
+        // Si viene diario, el mensual = diario × días del mes
+        monthlyVal = dailyVal * daysInMonth;
+      } else if (monthlyVal && !dailyVal) {
+        // Si viene mensual, el diario = mensual / días del mes
+        dailyVal = Math.round(monthlyVal / daysInMonth);
+      } else if (monthlyVal && dailyVal) {
+        // Si vienen ambos, recalcular mensual como diario × días (el diario es la fuente de verdad)
+        monthlyVal = dailyVal * daysInMonth;
+      }
 
       // Evitar duplicados
       const existing = foundStores.find(s => s.store.code === storeMatch.code);
