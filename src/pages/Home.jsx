@@ -1322,7 +1322,7 @@ export default function Home() {
                    }
                    </div>
 
-      {/* Modales con Lazy Loading */}
+                   {/* Modales con Lazy Loading */}
       <Suspense fallback={null}>
         <AnimatePresence>
           {showNotifications && (
