@@ -622,57 +622,15 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                 </div>
                 
                 <div className="text-left">
-                  <p className="text-sm lg:text-base text-white/90 mb-3 lg:mb-2 font-semibold">Promedio Histórico</p>
-                  <p className="text-2xl md:text-3xl lg:text-5xl font-black text-white leading-none mb-2">
-                    {formatCurrency(budgetData.historicalAvgToday)}
+                  <p className="text-sm lg:text-base text-white/90 mb-3 lg:mb-2 font-semibold">Brecha vs PPT Mes</p>
+                  <p className="text-2xl md:text-3xl lg:text-5xl font-black leading-none mb-2" style={{
+                    color: budgetData.accumulatedGap > 0 ? '#fca5a5' : '#86efac'
+                  }}>
+                    {budgetData.accumulatedGap > 0 ? '+' : ''}{formatCurrency(budgetData.accumulatedGap)}
                   </p>
-                  <p className="text-xs lg:text-sm text-white/70">{format(new Date(), 'EEEE', { locale: es })}s anteriores</p>
-                  
-                  {/* Sparkline debajo del número */}
-                  {budgetData.last7DaysSales?.length > 0 && (
-                    <div className="mt-3 h-10">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={budgetData.last7DaysSales}>
-                          <defs>
-                            <filter id="glow2">
-                              <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-                              <feMerge>
-                                <feMergeNode in="coloredBlur"/>
-                                <feMergeNode in="SourceGraphic"/>
-                              </feMerge>
-                            </filter>
-                            <linearGradient id="lineGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
-                              <stop offset="-20%" stopColor="#fff" stopOpacity="0">
-                                <animate attributeName="offset" values="-0.5;-0.5;1.2" dur="3s" repeatCount="indefinite"/>
-                              </stop>
-                              <stop offset="0%" stopColor="#fff" stopOpacity="1">
-                                <animate attributeName="offset" values="-0.3;-0.3;1.4" dur="3s" repeatCount="indefinite"/>
-                              </stop>
-                              <stop offset="20%" stopColor="#fff" stopOpacity="0">
-                                <animate attributeName="offset" values="-0.1;-0.1;1.6" dur="3s" repeatCount="indefinite"/>
-                              </stop>
-                            </linearGradient>
-                          </defs>
-                          <Line 
-                            type="monotone" 
-                            dataKey="value" 
-                            stroke="#fff" 
-                            strokeWidth={1.5} 
-                            dot={false}
-                            strokeOpacity={0.3}
-                          />
-                          <Line 
-                            type="monotone" 
-                            dataKey="value" 
-                            stroke="url(#lineGrad2)" 
-                            strokeWidth={2.5} 
-                            dot={false}
-                            filter="url(#glow2)"
-                          />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    </div>
-                  )}
+                  <p className="text-xs lg:text-sm text-white/70">
+                    {budgetData.accumulatedGap > 0 ? '⚠️ Brecha negativa' : '✅ A favor'}
+                  </p>
                 </div>
               </div>
 
