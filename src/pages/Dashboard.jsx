@@ -1105,25 +1105,7 @@ export default function Dashboard() {
               }}
               buttonText={showComparison ? "📅 Período Actual" : undefined}
               buttonClassName={showComparison ? "border-blue-300 hover:border-blue-500" : undefined} />
-            {!showComparison && (
-              <Button
-                onClick={() => {
-                  setGregorianMode(!gregorianMode);
-                  if (!gregorianMode) {
-                    setWeekFilter(null);
-                    setDateRange(null);
-                  }
-                }}
-                className={`gap-2 transition-all ${
-                  gregorianMode
-                    ? 'bg-indigo-500 hover:bg-indigo-600 text-white border-indigo-400'
-                    : 'bg-white border-2 border-pink-200 hover:border-pink-300 text-gray-700'
-                }`}
-              >
-                <CalendarDays className={`w-4 h-4 ${gregorianMode ? 'text-white' : 'text-pink-500'}`} />
-                <span className="text-sm font-medium">Gregoriano</span>
-              </Button>
-            )}
+
 
             {showComparison && (
               <DateFilter
