@@ -1033,12 +1033,6 @@ export default function ExecutiveDashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative">
-      {/* Simplified Background - Static */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-1/2 -right-1/2 w-[1200px] h-[1200px] bg-gradient-to-br from-pink-500/15 via-purple-500/15 to-blue-500/15 rounded-full blur-3xl opacity-60" />
-        <div className="absolute -bottom-1/2 -left-1/2 w-[1000px] h-[1000px] bg-gradient-to-br from-blue-500/10 via-cyan-500/10 to-emerald-500/10 rounded-full blur-3xl opacity-50" />
-      </div>
-
       {/* Back Button - Siempre visible pero sutil */}
       <Link to={createPageUrl('Home')}>
         <div className="fixed left-4 top-4 w-9 h-9 rounded-lg bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/15 flex items-center justify-center transition-all cursor-pointer z-50 shadow-lg hover:shadow-xl">
