@@ -289,9 +289,9 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
     const gapRecoveryIncrement = 0;
     const adjustedDailyBudget = excelBudgetForToday;
 
-    // Calcular número de semana según modo
+    // Calcular número de semana del mes
     const currentWeekNumber = weeks.findIndex(w => {
-      const weekEnd = endOfWeek(w, { weekStartsOn: gregorianMode ? 0 : 1 });
+      const weekEnd = endOfWeek(w, { weekStartsOn: 1 });
       return isWithinInterval(currentWeekStart, { start: w, end: weekEnd });
     }) + 1;
 
