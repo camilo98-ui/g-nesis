@@ -128,10 +128,10 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
     const displayWeekStart = currentDateRange?.from || currentWeekStart;
     const displayWeekEnd = currentDateRange?.to || currentWeekEnd;
 
-    // Obtener todas las semanas según modo
+    // Obtener todas las semanas del mes (lunes a domingo)
     const weeks = eachWeekOfInterval(
       { start: monthStart, end: monthEnd },
-      { weekStartsOn: gregorianMode ? 0 : 1 }
+      { weekStartsOn: 1 }
     );
 
 
