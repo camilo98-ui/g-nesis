@@ -210,8 +210,14 @@ export default function BudgetExcelImporter({ onClose }) {
           // Convertir dailyAmounts de { 'yyyy-MM-dd': val } a { dayNum: val } para compatibilidad
           item.dailyByDate = daily;
           item.daily = item.monthly / Object.keys(daily).length || 1;
+          // Guardar rango de fechas del Excel para cálculo de brecha
+          const dates = Object.keys(daily).sort();
+          item.minDate = dates[0];
+          item.maxDate = dates[dates.length - 1];
           return item;
         });
+
+        console.log(`✅ Detectadas ${foundStores.length} tiendas en formato PdV+FECHA:`, foundStores.map(s => s.store.code));
 
         const daysInMonth = getDaysInMonth(new Date(detectedYear, detectedMonth - 1));
 
