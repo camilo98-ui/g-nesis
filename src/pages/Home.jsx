@@ -24,7 +24,7 @@ import {
   Award, Target, Bell, Phone, Download, FileText,
   Lock, Eye, EyeOff, Receipt, Snowflake, Settings as SettingsIcon, AlertTriangle, CheckCircle, Info, CalendarDays, LogOut, Sparkles, Palette, Trophy, FileSpreadsheet } from
 'lucide-react';
-import BudgetExcelImporter from '@/components/executive/BudgetExcelImporter';
+import BudgetExcelImporter from '@/components/executive/BudgetExcelImporter.jsx';
 import { Button } from "@/components/ui/button";
 import { toast } from 'sonner';
 
