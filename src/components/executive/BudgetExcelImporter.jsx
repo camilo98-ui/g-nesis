@@ -663,6 +663,38 @@ export default function BudgetExcelImporter({ onClose }) {
 
       } catch (err) {
         console.error(`❌ Error guardando ${item.store.code}:`, err);
+        // Reintentar una vez después de 3 segundos si falló por rate limit
+        if (err.message && err.message.includes('Rate limit')) {
+          console.log(`🔄 Reintentando ${item.store.code} en 3 segundos...`);
+          await new Promise(r => setTimeout(r, 3000));
+          try {
+            const budgetData = {
+              store_id: item.store.code,
+              month: parsedData.month,
+              year: parsedData.year,
+              sales_budget: item.monthly,
+              tickets_budget: item.ticket || 0,
+              transactions_budget: item.transactions || 0,
+              suggested_budget: 0,
+              is_active: true
+            };
+            const existing = await base44.entities.Budget.filter({
+              store_id: item.store.code,
+              month: parsedData.month,
+              year: parsedData.year
+            });
+            if (existing.length > 0) {
+              await base44.entities.Budget.update(existing[0].id, budgetData);
+            } else {
+              await base44.entities.Budget.create(budgetData);
+            }
+            count++;
+            setSavedCount(count);
+            console.log(`✅ ${item.store.code} guardada en reintento`);
+          } catch (retryErr) {
+            console.error(`❌ Reintento también falló para ${item.store.code}:`, retryErr);
+          }
+        }
       }
     }
 
