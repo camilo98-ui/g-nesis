@@ -1349,7 +1349,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                 
                 const futureWeeks = weeks
                   .map((weekStart, idx) => {
-                    const weekEnd = endOfWeek(weekStart, { weekStartsOn: gregorianMode ? 0 : 1 });
+                    const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
                     const daysInWeek = eachDayOfInterval({ start: weekStart, end: weekEnd })
                       .filter(d => d >= monthStartCalc && d <= monthEndCalc);
                     
