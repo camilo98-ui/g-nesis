@@ -557,8 +557,8 @@ export default function BudgetExcelImporter({ onClose }) {
 
     for (let idx = 0; idx < parsedData.stores.length; idx++) {
       const item = parsedData.stores[idx];
-      // Agregar delay entre tiendas para evitar rate limit (200ms)
-      if (idx > 0) await new Promise(r => setTimeout(r, 200));
+      // Agregar delay entre tiendas para evitar rate limit (500ms)
+      if (idx > 0) await new Promise(r => setTimeout(r, 500));
       
       try {
         const existing = await base44.entities.Budget.filter({
