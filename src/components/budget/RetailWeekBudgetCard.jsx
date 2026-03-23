@@ -415,6 +415,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
     return {
       dailyBaseBudget,
       adjustedDailyBudget,
+      gapRecoveryIncrement,
       todayActualSales,
       historicalAvgToday,
       accumulatedGap,
