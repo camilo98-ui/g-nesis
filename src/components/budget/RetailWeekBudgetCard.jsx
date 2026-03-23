@@ -1577,8 +1577,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
     </motion.div>
   );
 }
-// placeholder to remove duplicate below
-const _x = () => <div className="grid grid-cols-2 gap-3 mb-4">
+// end of dead code
                           <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-lg p-3 text-center border border-indigo-200/50">
                             <p className="text-xs text-indigo-600 mb-1">Proyección de Cierre</p>
                             <p className="text-xl font-black text-indigo-900">{formatCurrency(budgetData.monthProjection)}</p>
