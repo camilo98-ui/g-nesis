@@ -1097,14 +1097,14 @@ export default function Home() {
         </>
       </div>
 
-      <div className="min-h-screen flex flex-col items-center justify-center px-6 lg:px-12 relative z-10">
+      <div className="max-w-5xl mx-auto px-4 py-4 relative z-10">
 
         {/* Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-6">
           <motion.img
             src={LOGO_URL}
             alt="Popsy"
-            className="h-24 sm:h-28 lg:h-32 object-contain mx-auto mb-3 cursor-pointer drop-shadow-lg"
+            className="h-20 sm:h-24 object-contain mx-auto mb-2 cursor-pointer drop-shadow-lg"
             animate={{ y: [0, -6, 0] }}
             transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
             onClick={() => setShowStory(true)}
@@ -1127,7 +1127,7 @@ export default function Home() {
 
         {/* Quick Actions */}
         {(selectedStore || selectedRole === 'gerente') && (
-        <div className="mb-10 flex justify-center items-center gap-3 flex-wrap">
+        <div className="mb-4 flex justify-center gap-2 flex-wrap">
             <Button
               variant="ghost"
               size="sm"
@@ -1170,7 +1170,7 @@ export default function Home() {
 
         {/* Menu Grid - solo para no-gerente o gerente con tienda */}
         {(selectedStore || selectedRole === 'gerente') && (
-        <div className="w-full max-w-6xl grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-5 lg:gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
 
             {MENU_ITEMS.filter((item) => {
               // Restricciones: Panel Ejecutivo solo para gerente, otras opciones solo si hay tienda seleccionada
@@ -1211,22 +1211,22 @@ export default function Home() {
                       </div> :
                 item.isSpecialAction && item.specialAction === 'comparable' ?
                 <Link to={createPageUrl('ExecutiveDashboard') + '?comparison=true'}>
-                  <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-5 lg:p-6 h-full shadow-lg hover:shadow-2xl hover:bg-white/15 transition-all duration-300 group relative overflow-hidden border border-white/20 cursor-pointer">
+                  <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 h-full shadow-lg hover:shadow-2xl hover:bg-white/15 transition-all duration-300 group relative overflow-hidden border border-white/20 cursor-pointer">
                     
                     {/* Icon centered */}
                     <div className="flex flex-col items-center justify-center text-center relative z-10">
-                      <div className={`w-14 h-14 lg:w-16 lg:h-16 ${item.iconBg} backdrop-blur-sm rounded-2xl flex items-center justify-center mb-3`}>
-                        <Icon className={`w-7 h-7 lg:w-8 lg:h-8 ${item.iconColor}`} />
+                      <div className={`w-12 h-12 ${item.iconBg} backdrop-blur-sm rounded-xl flex items-center justify-center mb-2`}>
+                        <Icon className={`w-6 h-6 ${item.iconColor}`} />
                       </div>
-                      <h3 className={`font-bold ${item.textColor} text-sm lg:text-base`}>
+                      <h3 className={`font-bold ${item.textColor} text-sm`}>
                         {item.name}
                       </h3>
-                      <p className="text-[10px] lg:text-xs text-gray-500 mt-0.5">{item.description}</p>
-                      </div>
-                      </div>
-                      </Link> :
-                      item.isSpecialAction ?
-                <button
+                      <p className="text-[10px] text-gray-500 mt-0.5">{item.description}</p>
+                    </div>
+                    </div>
+                    </Link> :
+                item.isSpecialAction ?
+                <div
                   onClick={async () => {
                     if (item.specialAction === 'logout') {
                       localStorage.removeItem('selectedStore');
@@ -1276,43 +1276,49 @@ export default function Home() {
                       setShowStoreSales(true);
                     }
                   }}
-                  className="bg-white/10 backdrop-blur-xl rounded-2xl p-5 lg:p-6 h-full shadow-lg hover:shadow-2xl hover:bg-white/15 transition-all duration-300 group relative overflow-hidden border border-white/20 cursor-pointer"
+                  className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 h-full shadow-lg hover:shadow-2xl hover:bg-white/15 transition-all duration-300 group relative overflow-hidden border border-white/20 cursor-pointer"
                   >
-                  {item.specialAction ? (
-                    <div className="flex flex-col items-center justify-center text-center relative z-10">
-                      <div className="w-14 h-14 lg:w-16 lg:h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-3 shadow-sm">
-                        {item.icon ? (
-                          <Icon className={`w-7 h-7 lg:w-8 lg:h-8 ${item.iconColor}`} />
-                        ) : (
-                          <LogOut className={`w-7 h-7 lg:w-8 lg:h-8 ${item.iconColor}`} />
-                        )}
-                      </div>
-                      <h3 className={`font-bold ${item.textColor} text-sm lg:text-base`}>
-                        {item.specialAction === 'backup' && backupLoading ? 'Guardando...' : item.name}
-                      </h3>
-                      <p className="text-[10px] lg:text-xs text-gray-600 mt-0.5">{item.description}</p>
+                  {/* Icon centered */}
+                  {/* Icon centered */}
+                  <div className="flex flex-col items-center justify-center text-center relative z-10">
+                    <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mb-2 shadow-sm">
+                      {item.icon ? (
+                        <Icon className={`w-6 h-6 ${item.iconColor}`} />
+                      ) : (
+                        <LogOut className={`w-6 h-6 ${item.iconColor}`} />
+                      )}
                     </div>
-                  ) : (
-                   <Link to={createPageUrl(item.page)}>
-                     <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-5 lg:p-6 h-full shadow-lg hover:shadow-2xl hover:bg-white/15 transition-all duration-300 group relative overflow-hidden border border-white/20 cursor-pointer">
-                       <div className="flex flex-col items-center justify-center text-center relative z-10">
-                         <div className={`w-14 h-14 lg:w-16 lg:h-16 ${item.iconBg} backdrop-blur-sm rounded-2xl flex items-center justify-center mb-3`}>
-                           <Icon className={`w-7 h-7 lg:w-8 lg:h-8 ${item.iconColor}`} />
-                         </div>
-                         <h3 className={`font-bold ${item.textColor} text-sm lg:text-base`}>
-                           {item.name}
-                         </h3>
-                         <p className="text-[10px] lg:text-xs text-gray-500 mt-0.5">{item.description}</p>
-                       </div>
-                     </div>
-                   </Link>
-                  )}
-                  </button>
-                  ))}
+                    <h3 className={`font-bold ${item.textColor} text-sm`}>
+                      {item.specialAction === 'backup' && backupLoading ? 'Guardando...' : item.name}
+                    </h3>
+                    <p className="text-[10px] text-gray-600 mt-0.5">{item.description}</p>
                   </div>
+                  </div> :
 
-                  {/* Modales con Lazy Loading */}
-                   <Suspense fallback={null}>
+                <Link to={createPageUrl(item.page)}>
+                  <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 h-full shadow-lg hover:shadow-2xl hover:bg-white/15 transition-all duration-300 group relative overflow-hidden border border-white/20">
+                    {/* Icon centered */}
+                    <div className="flex flex-col items-center justify-center text-center relative z-10">
+                      <div className={`w-12 h-12 ${item.iconBg} backdrop-blur-sm rounded-xl flex items-center justify-center mb-2`}>
+                        <Icon className={`w-6 h-6 ${item.iconColor}`} />
+                      </div>
+                      <h3 className={`font-bold ${item.textColor} text-sm`}>
+                        {item.name}
+                      </h3>
+                      <p className="text-[10px] text-gray-500 mt-0.5">{item.description}</p>
+                    </div>
+                  </div>
+                </Link>
+                }
+              </div>
+            );
+          })}
+        </div>
+        )}
+      </div>
+
+      {/* Modales con Lazy Loading */}
+      <Suspense fallback={null}>
         <AnimatePresence>
           {showNotifications && (
             <NotificationSetup
