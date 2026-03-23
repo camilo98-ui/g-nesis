@@ -11,18 +11,18 @@ import { toast } from 'sonner';
 
 // Lista base de tiendas (hardcoded)
 const BASE_STORES = [
-  { code: "BOGOTA 18", name: "CC PLAZA IMPERIAL", displayName: "BOGOTA 18 (CC PLAZA IMPERIAL)" },
-  { code: "BOGOTA 21", name: "CC CENTRO CHIA", displayName: "BOGOTA 21 (CC CENTRO CHÍA)" },
-  { code: "BOGOTA 27", name: "CC GRANAHORRAR", displayName: "BOGOTA 27 (AV. CHILE)" },
-  { code: "BOGOTA 52", name: "CC CENTRO SUBA", displayName: "BOGOTA 52 (CC CENTRO SUBA)" },
-  { code: "BOGOTA 56", name: "CC ECO PLAZA", displayName: "BOGOTA 56 (CC ECO PLAZA)" },
-  { code: "BOGOTA 62", name: "CC FONTANAR", displayName: "BOGOTA 62 (CC FONTANAR)" },
-  { code: "BOGOTA 66", name: "CC PARQUE LA COLINA", displayName: "BOGOTA 66 (CC PARQUE LA COLINA)" },
-  { code: "BOGOTA 71", name: "CC CASABLANCA", displayName: "BOGOTA 71 (CC CASABLANCA)" },
-  { code: "BOGOTA 78", name: "CC PLAZA IMPERIAL 2", displayName: "BOGOTA 78 (CC PLAZA IMPERIAL 2)" },
-  { code: "BOGOTA 85", name: "MANSION CAJICA", displayName: "BOGOTA 85 (MANSIÓN CAJICÁ)" },
-  { code: "TUNJA 1", name: "CC UNICENTRO", displayName: "TUNJA 1 (CC UNICENTRO)" },
-  { code: "TUNJA 2", name: "CC VIVA TUNJA", displayName: "TUNJA 2 (CC VIVA TUNJA)" },
+  { code: "BTA 18", name: "CC PLAZA IMPERIAL",   displayName: "BOGOTA 18 (CC PLAZA IMPERIAL)" },
+  { code: "BTA 21", name: "CC CENTRO CHIA",       displayName: "BOGOTA 21 (CC CENTRO CHÍA)" },
+  { code: "BTA 96", name: "AV CHILE",             displayName: "BOGOTA 27 (CC GRAN AHORRAR - AV. CHILE)" },
+  { code: "BTA 52", name: "CC CENTRO SUBA",       displayName: "BOGOTA 52 (CC CENTRO SUBA)" },
+  { code: "BTA 94", name: "CC ECO PLAZA",         displayName: "BOGOTA 56 (CC ECO PLAZA)" },
+  { code: "BTA 62", name: "CC FONTANAR",          displayName: "BOGOTA 62 (CC FONTANAR)" },
+  { code: "BTA 93", name: "CC COLINA",            displayName: "BOGOTA 66 (CC PARQUE LA COLINA)" },
+  { code: "BTA 95", name: "CC CASA BLANCA",       displayName: "BOGOTA 71 (CC CASABLANCA)" },
+  { code: "BTA 78", name: "CC PLAZA IMPERIAL 2",  displayName: "BOGOTA 78 (CC PLAZA IMPERIAL 2)" },
+  { code: "BTA 85", name: "MANSION CAJICA",       displayName: "BOGOTA 85 (MANSIÓN CAJICÁ)" },
+  { code: "TUNJA 1", name: "CC UNICENTRO",        displayName: "TUNJA 1 (CC UNICENTRO)" },
+  { code: "TUNJA 2", name: "CC VIVA TUNJA",       displayName: "TUNJA 2 (CC VIVA TUNJA)" },
 ];
 
 export { BASE_STORES };
