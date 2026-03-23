@@ -766,11 +766,21 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                   </p>
                 </div>
 
-                {needsRecovery && (
-                <div className="bg-white/10 rounded-lg p-3 mb-3">
-                  <p className="text-xs text-white/70 flex items-center gap-1">
+                {gapRecoveryIncrement !== 0 && (
+                <div className={`rounded-lg p-3 mb-3 ${
+                  gapRecoveryIncrement > 0 
+                    ? 'bg-rose-400/20 border border-rose-300/50' 
+                    : 'bg-emerald-400/20 border border-emerald-300/50'
+                }`}>
+                  <p className={`text-xs flex items-center gap-1 ${
+                    gapRecoveryIncrement > 0 ? 'text-rose-100' : 'text-emerald-100'
+                  }`}>
                     <AlertTriangle className="w-3 h-3 flex-shrink-0" />
-                    <span className="truncate">Incluye recuperación de {formatCurrency(budgetData.accumulatedGap)}</span>
+                    <span className="truncate">
+                      {gapRecoveryIncrement > 0 
+                        ? `PPT ajustado: +${formatCurrency(gapRecoveryIncrement)}/día`
+                        : `Bonus: +${formatCurrency(Math.abs(gapRecoveryIncrement))}/día`}
+                    </span>
                   </p>
                 </div>
                 )}
