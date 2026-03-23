@@ -625,18 +625,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                     </div>
                   )}
                 </div>
-                
-                <div className="text-left">
-                  <p className="text-sm lg:text-base text-white/90 mb-3 lg:mb-2 font-semibold">Brecha vs PPT Mes</p>
-                  <p className="text-2xl md:text-3xl lg:text-5xl font-black leading-none mb-2" style={{
-                    color: budgetData.accumulatedGap > 0 ? '#fca5a5' : '#86efac'
-                  }}>
-                    {budgetData.accumulatedGap > 0 ? '+' : ''}{formatCurrency(budgetData.accumulatedGap)}
-                  </p>
-                  <p className="text-xs lg:text-sm text-white/70">
-                    {budgetData.accumulatedGap > 0 ? '⚠️ Brecha negativa' : '✅ A favor'}
-                  </p>
-                </div>
+
               </div>
 
               <div className="space-y-2 mb-4">
