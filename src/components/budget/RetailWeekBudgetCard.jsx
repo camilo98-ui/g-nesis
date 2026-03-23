@@ -1578,36 +1578,6 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
   );
 }
 // end of RetailWeekBudgetCard
-                      
-                      // Proyectar presupuestos de semanas futuras basado en el ritmo actual
-                      const futureWeeks = weeks
-                        .map((weekStart, idx) => {
-                          const weekEnd = endOfWeek(weekStart, { weekStartsOn: gregorianMode ? 0 : 1 });
-                          const daysInWeek = eachDayOfInterval({ start: weekStart, end: weekEnd })
-                            .filter(d => d >= monthStartCalc && d <= monthEndCalc);
-                          
-                          const weekBudget = daysInWeek.reduce((sum, day) => {
-                            const dayOfWeek = day.getDay();
-                            const avgByDayOfWeek = [0,0,0,0,0,0,0].map((_, i) => {
-                              const historicalForDay = dailySales.filter(s => {
-                                try {
-                                  const saleDate = parseISO(s.date);
-                                  return saleDate.getDay() === i && s.total_sales > 0;
-                                } catch {
-                                  return false;
-                                }
-                              });
-                              return historicalForDay.length > 0
-                                ? historicalForDay.reduce((s, sale) => s + sale.total_sales, 0) / historicalForDay.length
-                                : 0;
-                            });
-                            
-                            const totalWeeklyAvg = avgByDayOfWeek.reduce((a, b) => a + b, 0);
-                            if (totalWeeklyAvg === 0) return sum + (activeBudget.sales_budget * 1.05 / 30);
-                            
-                            const scaleFactor = (activeBudget.sales_budget * 1.05) / (totalWeeklyAvg * (30 / 7));
-                            return sum + (avgByDayOfWeek[dayOfWeek] * scaleFactor);
-                          }, 0);
                           
                           return {
                             semana: `S${idx + 1}`,
