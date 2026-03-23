@@ -1569,20 +1569,12 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                 formatCurrency={formatCurrency}
                 gregorianMode={gregorianMode}
               />
+              {false && <span><div>{selectedMetric}</div></span>}
               {false && <span>
-                    {selectedMetric === 'base' && (
+                    {selectedMetric === 'NEVER_SHOWN' && (
                       <div>
-                        <h4 className="text-sm md:text-base font-bold text-slate-900 mb-3">Presupuesto Base vs Ajustado</h4>
-                        <div className="grid grid-cols-2 gap-3 mb-3">
-                          <div className="bg-rose-50 rounded-lg p-3">
-                            <p className="text-xs text-rose-600 mb-1">Base Diaria</p>
-                            <p className="text-lg font-black text-rose-700">{formatCurrency(budgetData.dailyBaseBudget)}</p>
-                          </div>
-                          <div className="bg-amber-50 rounded-lg p-3">
-                            <p className="text-xs text-amber-600 mb-1">Meta Ajustada Hoy</p>
-                            <p className="text-lg font-black text-amber-700">{formatCurrency(budgetData.adjustedDailyBudget)}</p>
-                          </div>
-                        </div>
+                        <h4></h4>
+                        <div>
                         <ResponsiveContainer width="100%" height={150}>
                           <BarChart data={[
                             { name: 'Base', value: budgetData.dailyBaseBudget },
