@@ -586,15 +586,30 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                   <div className="space-y-1">
                     <p className="text-xs lg:text-sm text-white/70">
                       {budgetData.gapRecoveryIncrement > 0
-                        ? `Excel: ${formatCurrency(budgetData.excelBudgetForToday)} + ${formatCurrency(budgetData.gapRecoveryIncrement)} (brecha)`
-                        : `Valor exacto del Excel`}
+                        ? `Excel: ${formatCurrency(budgetData.excelBudgetForToday)} + ${formatCurrency(budgetData.gapRecoveryIncrement)}`
+                        : activeBudget?.sales_gap > 0
+                          ? `✅ A favor: ${formatCurrency(activeBudget.sales_gap)}`
+                          : `Valor exacto del Excel`}
                     </p>
                     {budgetData.gapRecoveryIncrement > 0 && (
                       <p className="text-[10px] lg:text-xs text-white/50 mt-1">
-                        📊 Se distribuye ${formatCurrency(budgetData.accumulatedGap)} entre {budgetData.remainingDays} días restantes
+                        ⚠️ Brecha total: {formatCurrency(Math.abs(activeBudget?.sales_gap || 0))} ÷ {budgetData.remainingDays} días
                       </p>
                     )}
                   </div>
+
+                  {/* Brecha total visible debajo */}
+                  {(activeBudget?.sales_gap !== 0 && activeBudget?.sales_gap !== undefined) && (
+                    <div className={`mt-2 px-3 py-1.5 rounded-lg inline-flex items-center gap-2 ${
+                      activeBudget.sales_gap < 0 
+                        ? 'bg-red-500/30 border border-red-300/40' 
+                        : 'bg-emerald-500/30 border border-emerald-300/40'
+                    }`}>
+                      <span className="text-xs font-black text-white">
+                        {activeBudget.sales_gap < 0 ? '📉' : '📈'} Brecha mes: {activeBudget.sales_gap >= 0 ? '+' : ''}{formatCurrency(activeBudget.sales_gap)}
+                      </span>
+                    </div>
+                  )}
                   
                   {/* Sparkline debajo del número */}
                   {budgetData.last7DaysSales?.length > 0 && (
