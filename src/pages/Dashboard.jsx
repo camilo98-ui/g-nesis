@@ -547,9 +547,10 @@ export default function Dashboard() {
       return allBudgets.filter(b => b.month === currentMonth && b.year === currentYear);
     },
     enabled: !!selectedStore,
-    staleTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 10 * 60 * 1000,
     gcTime: 15 * 60 * 1000
   });
+  const { data: dailyBudgets = [] } = useQuery({ queryKey: ['dailyBudgets', selectedStore], queryFn: () => base44.entities.DailyBudget.filter({ store_id: selectedStore }), enabled: !!selectedStore, staleTime: 10 * 60 * 1000 });
 
   const { data: shiftRecords = [] } = useQuery({
     queryKey: ['shiftRecords', selectedStore],
