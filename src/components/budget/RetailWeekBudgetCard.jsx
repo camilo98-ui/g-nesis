@@ -637,14 +637,14 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                 <div className="text-right space-y-2">
                   <p className="text-sm lg:text-base text-white/90 font-semibold">Brecha del Mes</p>
                   <motion.p
-                    key={`${budgetData.salesGap || 0}-brecha`}
+                    key={`${activeBudget?.sales_gap || 0}-brecha`}
                     initial={{ scale: 1.2, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     className={`text-2xl md:text-3xl lg:text-4xl font-black leading-none ${
-                      (budgetData.salesGap || 0) < 0 ? 'text-red-300' : 'text-emerald-300'
+                      (activeBudget?.sales_gap || 0) < 0 ? 'text-red-300' : 'text-emerald-300'
                     }`}
                   >
-                    {(budgetData.salesGap || 0) < 0 ? '📉' : '📈'} {formatCurrency(Math.abs(budgetData.salesGap || 0))}
+                    {(activeBudget?.sales_gap || 0) < 0 ? '📉' : '📈'} {formatCurrency(Math.abs(activeBudget?.sales_gap || 0))}
                   </motion.p>
                   
                   {/* % de impacto */}
@@ -655,18 +655,18 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                         initial={{ scale: 1.1, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         className={`text-xl md:text-2xl lg:text-3xl font-black ${
-                          (budgetData.salesGap || 0) < 0 ? 'text-red-200' : 'text-emerald-200'
+                          (activeBudget?.sales_gap || 0) < 0 ? 'text-red-200' : 'text-emerald-200'
                         }`}
                       >
-                        {((Math.abs(budgetData.salesGap || 0) / budgetData.monthlyBudget) * 100).toFixed(1)}%
+                        {((Math.abs(activeBudget?.sales_gap || 0) / budgetData.monthlyBudget) * 100).toFixed(1)}%
                       </motion.p>
                       <div className="w-full h-2 bg-white/20 rounded-full overflow-hidden mt-2">
                         <motion.div
                           initial={{ width: 0 }}
-                          animate={{ width: `${Math.min(((Math.abs(budgetData.salesGap || 0) / budgetData.monthlyBudget) * 100), 100)}%` }}
+                          animate={{ width: `${Math.min(((Math.abs(activeBudget?.sales_gap || 0) / budgetData.monthlyBudget) * 100), 100)}%` }}
                           transition={{ duration: 1.2, delay: 0.2 }}
                           className={`h-full rounded-full ${
-                            (budgetData.salesGap || 0) < 0 ? 'bg-red-400' : 'bg-emerald-400'
+                            (activeBudget?.sales_gap || 0) < 0 ? 'bg-red-400' : 'bg-emerald-400'
                           }`}
                         />
                       </div>
