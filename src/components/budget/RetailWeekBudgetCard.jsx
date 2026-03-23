@@ -1577,9 +1577,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
     </motion.div>
   );
 }
-// end
-                      const monthEndCalc = gregorianMode ? endOfMonth(now) : new Date(now.getFullYear(), now.getMonth(), 28);
-                      const weeks = eachWeekOfInterval({ start: monthStartCalc, end: monthEndCalc }, { weekStartsOn: gregorianMode ? 0 : 1 });
+// end of RetailWeekBudgetCard
                       
                       // Proyectar presupuestos de semanas futuras basado en el ritmo actual
                       const futureWeeks = weeks
