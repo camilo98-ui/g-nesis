@@ -109,7 +109,6 @@ export default function BudgetExcelImporter({ onClose }) {
   };
 
   const analyzeSheet = (rows) => {
-    const foundStores = [];
     const parseErrors = [];
     let detectedMonth = now.getMonth() + 1;
     let detectedYear = now.getFullYear();
@@ -132,181 +131,283 @@ export default function BudgetExcelImporter({ onClose }) {
 
     const daysInMonth = getDaysInMonth(new Date(detectedYear, detectedMonth - 1));
 
-    // Identificar fila de encabezados y columnas relevantes
+    // ── ESTRATEGIA 1: Formato HORIZONTAL (filas = tiendas, columnas = días)
+    // Detectar si hay una fila de encabezado con números del 1 al 31
     let headerRowIdx = -1;
-    let colStore = -1, colMonthly = -1, colDaily = -1, colTicket = -1, colTransactions = -1;
+    let dayColumns = {}; // { dayNumber: colIndex }
+    let storeCol = -1;
+    let monthlyCol = -1;
+    let ticketCol = -1;
+    let transactionsCol = -1;
 
     for (let i = 0; i < Math.min(15, rows.length); i++) {
       const row = rows[i];
-      let foundInRow = false;
-      for (let j = 0; j < row.length; j++) {
-        const h = normalize(String(row[j] || ''));
-        if (!h) continue;
+      const dayColsFound = {};
+      let dayCount = 0;
+      let storeColFound = -1;
+      let monthlyColFound = -1;
+      let ticketColFound = -1;
+      let transColFound = -1;
 
-        if (colStore === -1 && (h.includes('tienda') || h.includes('store') || h.includes('punto') || h.includes('local') || h.includes('sede'))) {
-          colStore = j; foundInRow = true;
+      for (let j = 0; j < row.length; j++) {
+        const cell = row[j];
+        const cellStr = String(cell || '').trim();
+        const cellNorm = normalize(cellStr);
+
+        // Detectar columna de tienda
+        if (storeColFound === -1 && (cellNorm.includes('tienda') || cellNorm.includes('punto') || cellNorm.includes('store') || cellNorm.includes('local') || cellNorm.includes('sede'))) {
+          storeColFound = j;
         }
-        // Presupuesto mensual de ventas
-        if (colMonthly === -1 && (
-          h.includes('ppto mes') || h.includes('ppt mes') || h.includes('presupuesto mes') ||
-          h.includes('budget mes') || h.includes('meta mes') || h.includes('ventas mes') ||
-          (h.includes('mes') && !h.includes('ticket') && !h.includes('trx') && !h.includes('trans')) ||
-          h === 'ppto' || h === 'presupuesto' || h === 'budget'
+
+        // Detectar columna de presupuesto mensual
+        if (monthlyColFound === -1 && (
+          cellNorm.includes('ppto mes') || cellNorm.includes('ppt mes') || cellNorm.includes('presupuesto mes') ||
+          cellNorm.includes('total mes') || cellNorm.includes('budget mes') || cellNorm.includes('meta mes') ||
+          cellNorm === 'ppto' || cellNorm === 'presupuesto' || cellNorm === 'budget' || cellNorm === 'total'
         )) {
-          colMonthly = j; foundInRow = true;
+          monthlyColFound = j;
         }
-        // PPT diario de ventas
-        if (colDaily === -1 && (
-          h.includes('ppto dia') || h.includes('ppt dia') || h.includes('diario') || h.includes('daily') ||
-          h.includes('dia') && h.includes('venta')
-        )) {
-          colDaily = j; foundInRow = true;
+
+        // Detectar columna de ticket
+        if (ticketColFound === -1 && (cellNorm.includes('ticket') || cellNorm.includes('tkt'))) {
+          ticketColFound = j;
         }
-        // PPT Ticket promedio
-        if (colTicket === -1 && (
-          h.includes('ticket') || h.includes('tkt') || h.includes('promedio') && h.includes('venta')
-        )) {
-          colTicket = j; foundInRow = true;
+
+        // Detectar columna de transacciones
+        if (transColFound === -1 && (cellNorm.includes('transacc') || cellNorm.includes('trx') || cellNorm.includes('txn'))) {
+          transColFound = j;
         }
-        // PPT Transacciones
-        if (colTransactions === -1 && (
-          h.includes('transacc') || h.includes('trx') || h.includes('txn') ||
-          h.includes('transac') || h.includes('operac')
-        )) {
-          colTransactions = j; foundInRow = true;
+
+        // Detectar columna de día (número entre 1 y 31, o fecha con el día)
+        const numVal = parseFloat(cellStr);
+        if (!isNaN(numVal) && numVal >= 1 && numVal <= 31 && Number.isInteger(numVal)) {
+          dayColsFound[numVal] = j;
+          dayCount++;
+        }
+        // También detectar fechas tipo "01/03/2026" o "2026-03-01"
+        const dateMatch = cellStr.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/) || cellStr.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
+        if (dateMatch) {
+          let d;
+          try {
+            d = new Date(cellStr);
+            if (!isNaN(d) && d.getMonth() + 1 === detectedMonth) {
+              dayColsFound[d.getDate()] = j;
+              dayCount++;
+            }
+          } catch {}
         }
       }
-      if (foundInRow && headerRowIdx === -1) {
+
+      // Si encontramos ≥15 columnas de días, es formato horizontal
+      if (dayCount >= 15) {
         headerRowIdx = i;
+        dayColumns = dayColsFound;
+        storeCol = storeColFound;
+        monthlyCol = monthlyColFound;
+        ticketCol = ticketColFound;
+        transactionsCol = transColFound;
         break;
       }
     }
 
-    const dataStartRow = headerRowIdx >= 0 ? headerRowIdx + 1 : 0;
+    // ── ESTRATEGIA 2: Formato VERTICAL (filas = días, columnas = tiendas)
+    // Detectar si hay una columna de fechas/días y columnas por tienda
+    let isVertical = false;
+    let verticalDayCol = -1;
+    let verticalStoreColumns = {}; // { storeCode: colIndex }
+    let verticalHeaderRow = -1;
 
-    // Escanear filas de datos
-    for (let i = dataStartRow; i < rows.length; i++) {
-      const row = rows[i];
-      if (!row || row.every(c => c === '' || c === null || c === undefined)) continue;
+    if (headerRowIdx === -1) {
+      // Buscar fila de encabezado que contenga nombres de tiendas
+      for (let i = 0; i < Math.min(15, rows.length); i++) {
+        const row = rows[i];
+        const storesInRow = {};
+        let storesFound = 0;
 
-      // Buscar tienda en la fila
-      let storeMatch = null;
-      if (colStore >= 0) {
-        storeMatch = matchStore(row[colStore]);
-        // Si no matchea en la columna de tienda, buscar en toda la fila
+        for (let j = 0; j < row.length; j++) {
+          const s = matchStore(row[j]);
+          if (s) {
+            storesInRow[s.code] = j;
+            storesFound++;
+          }
+        }
+
+        if (storesFound >= 3) {
+          verticalHeaderRow = i;
+          verticalStoreColumns = storesInRow;
+          isVertical = true;
+
+          // Buscar columna de día/fecha en esa fila o las anteriores
+          for (let j = 0; j < row.length; j++) {
+            const h = normalize(String(row[j] || ''));
+            if (h.includes('dia') || h.includes('fecha') || h.includes('day') || h.includes('date')) {
+              verticalDayCol = j;
+              break;
+            }
+          }
+          if (verticalDayCol === -1) verticalDayCol = 0; // asumir primera columna
+          break;
+        }
+      }
+    }
+
+    // ── PARSE según estrategia detectada
+    // { storeCode: { monthly, ticket, transactions, dailyAmounts: {1: val, 2: val, ...} } }
+    const storeData = {};
+
+    if (headerRowIdx !== -1 && Object.keys(dayColumns).length >= 15) {
+      // FORMATO HORIZONTAL: cada fila es una tienda, columnas son días
+      for (let i = headerRowIdx + 1; i < rows.length; i++) {
+        const row = rows[i];
+        if (!row || row.every(c => c === '' || c === null || c === undefined)) continue;
+
+        // Detectar tienda en la fila
+        let storeMatch = null;
+        if (storeCol >= 0) storeMatch = matchStore(row[storeCol]);
         if (!storeMatch) {
           for (const cell of row) {
             storeMatch = matchStore(cell);
             if (storeMatch) break;
           }
         }
-      } else {
-        for (const cell of row) {
-          storeMatch = matchStore(cell);
-          if (storeMatch) break;
+        if (!storeMatch) continue;
+
+        const code = storeMatch.code;
+        if (!storeData[code]) storeData[code] = { store: storeMatch, dailyAmounts: {}, monthly: 0, ticket: null, transactions: null };
+
+        // Leer presupuesto de cada día
+        for (const [dayNum, colIdx] of Object.entries(dayColumns)) {
+          const val = parseNum(row[colIdx]);
+          if (val && val > 0) {
+            storeData[code].dailyAmounts[dayNum] = val;
+          }
+        }
+
+        // Leer mensual, ticket, transacciones si existen
+        if (monthlyCol >= 0) {
+          const v = parseNum(row[monthlyCol]);
+          if (v) storeData[code].monthly = v;
+        }
+        if (ticketCol >= 0) {
+          const v = parseNum(row[ticketCol]);
+          if (v) storeData[code].ticket = v;
+        }
+        if (transactionsCol >= 0) {
+          const v = parseNum(row[transactionsCol]);
+          if (v) storeData[code].transactions = v;
         }
       }
+    } else if (isVertical) {
+      // FORMATO VERTICAL: cada fila es un día, columnas son tiendas
+      for (let i = verticalHeaderRow + 1; i < rows.length; i++) {
+        const row = rows[i];
+        if (!row || row.every(c => c === '' || c === null || c === undefined)) continue;
 
-      if (!storeMatch) continue;
+        // Detectar número de día en esta fila
+        const dayCell = String(row[verticalDayCol] || '').trim();
+        let dayNum = null;
 
-      // Obtener valores numéricos de la fila
-      let rowSalesVal = colMonthly >= 0 ? parseNum(row[colMonthly]) : null;
-      let rowDailyVal = colDaily >= 0 ? parseNum(row[colDaily]) : null;
-      let ticketVal = colTicket >= 0 ? parseNum(row[colTicket]) : null;
-      let transactionsVal = colTransactions >= 0 ? parseNum(row[colTransactions]) : null;
-
-      // Si no hay columnas identificadas, buscar el número más grande de la fila (>100k = ventas)
-      if (rowSalesVal === null && rowDailyVal === null) {
-        const nums = [];
-        for (const cell of row) {
-          const n = parseNum(cell);
-          if (n && n > 100_000) nums.push(n);
+        // Intentar parsear como número directo (1-31)
+        const numVal = parseFloat(dayCell);
+        if (!isNaN(numVal) && numVal >= 1 && numVal <= 31) {
+          dayNum = Math.round(numVal);
         }
-        if (nums.length > 0) {
-          nums.sort((a, b) => b - a);
-          rowSalesVal = nums[0];
+        // Intentar parsear como fecha
+        if (!dayNum) {
+          const dateMatch = dayCell.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);
+          if (dateMatch) {
+            try {
+              const d = new Date(dayCell);
+              if (!isNaN(d)) dayNum = d.getDate();
+            } catch {}
+          }
+        }
+        // Si la primera celda es un número Excel de fecha
+        if (!dayNum && typeof row[verticalDayCol] === 'number' && row[verticalDayCol] > 40000) {
+          try {
+            const d = new Date((row[verticalDayCol] - 25569) * 86400 * 1000);
+            if (d.getMonth() + 1 === detectedMonth) dayNum = d.getDate();
+          } catch {}
+        }
+
+        if (!dayNum) continue;
+
+        // Leer el valor de cada tienda en esta fila
+        for (const [code, colIdx] of Object.entries(verticalStoreColumns)) {
+          const val = parseNum(row[colIdx]);
+          if (val && val > 0) {
+            const storeObj = BASE_STORES.find(s => s.code === code);
+            if (!storeData[code]) storeData[code] = { store: storeObj, dailyAmounts: {}, monthly: 0, ticket: null, transactions: null };
+            storeData[code].dailyAmounts[dayNum] = val;
+          }
         }
       }
-
-      if (!rowSalesVal && !rowDailyVal) continue;
-
-      // El valor que viene puede ser diario o mensual.
-      // Si el valor es "pequeño" (< 2M para una tienda de ~$300K/día) probablemente es diario → sumar.
-      // Si es grande (> presupuesto de un solo día * 2) probablemente ya es mensual → usar directo.
-      const valueToAdd = rowSalesVal || rowDailyVal;
-
-      const existing = foundStores.find(s => s.store.code === storeMatch.code);
-      if (!existing) {
-        foundStores.push({
-          store: storeMatch,
-          accumulatedSales: valueToAdd,
-          rowCount: 1,
-          ticket: ticketVal,
-          transactions: transactionsVal,
-        });
-      } else {
-        // Acumular: si ya existe la tienda, sumar el valor (puede ser más de una fila por día)
-        existing.accumulatedSales = (existing.accumulatedSales || 0) + valueToAdd;
-        existing.rowCount = (existing.rowCount || 1) + 1;
-        if (ticketVal && !existing.ticket) existing.ticket = ticketVal;
-        if (transactionsVal) existing.transactions = (existing.transactions || 0) + transactionsVal;
-      }
-    }
-
-    // Post-proceso: convertir accumulatedSales a monthly/daily
-    for (const item of foundStores) {
-      const accumulated = item.accumulatedSales || 0;
-      // Si acumulamos múltiples filas (días), es la suma de días → ese ES el mensual
-      // Si solo hay 1 fila y el valor parece diario (< 5M), multiplicar por días del mes
-      if (item.rowCount === 1 && accumulated < 5_000_000) {
-        // Parece valor de un solo día → multiplicar
-        item.monthly = Math.round(accumulated * daysInMonth);
-      } else {
-        // Ya es la suma de todos los días = mensual
-        item.monthly = Math.round(accumulated);
-      }
-      item.daily = Math.round(item.monthly / daysInMonth);
-    }
-
-    // Modo libre: si no encontramos suficientes, escanear toda la hoja acumulando por tienda
-    if (foundStores.length < 6) {
-      const freeAccum = {};
+    } else {
+      // ESTRATEGIA 3: Fallback - acumular por tienda (comportamiento anterior)
+      const fallbackAccum = {};
       for (let i = 0; i < rows.length; i++) {
         const row = rows[i];
+        if (!row) continue;
         let storeFound = null;
         let rowVal = 0;
+        let ticketVal = null;
+        let transVal = null;
 
-        for (const cell of row) {
-          const s = matchStore(cell);
+        for (let j = 0; j < row.length; j++) {
+          const s = matchStore(row[j]);
           if (s) storeFound = s;
-          const n = parseNum(cell);
-          if (n && n > 100_000) rowVal = Math.max(rowVal, n);
+          const n = parseNum(row[j]);
+          if (n && n > 50_000) rowVal = Math.max(rowVal, n);
         }
 
         if (storeFound && rowVal > 0) {
-          if (!freeAccum[storeFound.code]) {
-            freeAccum[storeFound.code] = { store: storeFound, total: 0, rows: 0 };
+          if (!fallbackAccum[storeFound.code]) {
+            fallbackAccum[storeFound.code] = { store: storeFound, total: 0, rowCount: 0, ticket: null, transactions: null };
           }
-          freeAccum[storeFound.code].total += rowVal;
-          freeAccum[storeFound.code].rows += 1;
+          fallbackAccum[storeFound.code].total += rowVal;
+          fallbackAccum[storeFound.code].rowCount++;
         }
       }
 
-      for (const acc of Object.values(freeAccum)) {
-        const alreadyFound = foundStores.find(s => s.store.code === acc.store.code);
-        if (!alreadyFound) {
-          const monthly = acc.rows === 1 && acc.total < 5_000_000
-            ? Math.round(acc.total * daysInMonth)
-            : Math.round(acc.total);
-          foundStores.push({
-            store: acc.store,
-            monthly,
-            daily: Math.round(monthly / daysInMonth),
-            ticket: null,
-            transactions: null,
-          });
+      for (const acc of Object.values(fallbackAccum)) {
+        const monthly = acc.rowCount > 1 ? Math.round(acc.total) : Math.round(acc.total < 5_000_000 ? acc.total * daysInMonth : acc.total);
+        storeData[acc.store.code] = {
+          store: acc.store,
+          monthly,
+          ticket: acc.ticket,
+          transactions: acc.transactions,
+          dailyAmounts: {}
+        };
+      }
+    }
+
+    // ── Post-proceso: calcular monthly y daily para cada tienda
+    const foundStores = [];
+    for (const item of Object.values(storeData)) {
+      const dailyKeys = Object.keys(item.dailyAmounts);
+
+      if (dailyKeys.length >= 20) {
+        // Tenemos presupuestos diarios individuales del Excel ✅
+        item.monthly = item.monthly || Object.values(item.dailyAmounts).reduce((a, b) => a + b, 0);
+        item.hasDailyBreakdown = true;
+      } else {
+        // No tenemos diarios individuales - calcular con distribución uniforme
+        item.hasDailyBreakdown = false;
+        if (!item.monthly || item.monthly === 0) {
+          item.monthly = Object.values(item.dailyAmounts).reduce((a, b) => a + b, 0);
+          if (item.monthly < 5_000_000 && dailyKeys.length === 1) {
+            item.monthly = item.monthly * daysInMonth;
+          }
+        }
+        // Rellenar dailyAmounts con distribución uniforme
+        const dailyVal = Math.round(item.monthly / daysInMonth);
+        for (let d = 1; d <= daysInMonth; d++) {
+          if (!item.dailyAmounts[d]) item.dailyAmounts[d] = dailyVal;
         }
       }
+
+      item.daily = Math.round(item.monthly / daysInMonth);
+      foundStores.push(item);
     }
 
     if (foundStores.length === 0) {
@@ -314,14 +415,14 @@ export default function BudgetExcelImporter({ onClose }) {
       return;
     }
 
-    // Advertir si faltan tiendas
     const foundCodes = new Set(foundStores.map(s => s.store.code));
     const missing = BASE_STORES.filter(s => !foundCodes.has(s.code));
     if (missing.length > 0) {
       parseErrors.push(`⚠️ No se encontraron ${missing.length} tiendas: ${missing.map(s => s.displayName).join(', ')}`);
     }
 
-    setParsedData({ month: detectedMonth, year: detectedYear, daysInMonth, stores: foundStores });
+    const hasDailyBreakdown = foundStores.some(s => s.hasDailyBreakdown);
+    setParsedData({ month: detectedMonth, year: detectedYear, daysInMonth, stores: foundStores, hasDailyBreakdown });
     setErrors(parseErrors);
     setStep('preview');
   };
