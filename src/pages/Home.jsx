@@ -1127,7 +1127,7 @@ export default function Home() {
 
         {/* Quick Actions */}
         {(selectedStore || selectedRole === 'gerente') && (
-        <div className="mb-6 flex justify-center items-center gap-3 flex-wrap">
+        <div className="mb-10 flex justify-center items-center gap-3 flex-wrap">
             <Button
               variant="ghost"
               size="sm"
