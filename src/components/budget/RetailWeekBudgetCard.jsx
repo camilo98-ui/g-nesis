@@ -479,7 +479,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
   const smartRecommendation = getSmartRecommendation(budgetData);
 
   const isOnTrack = budgetData?.compliance >= 95;
-  const needsRecovery = budgetData?.accumulatedGap > 0;
+  const needsRecovery = activeBudget?.sales_gap < 0; // Brecha negativa del mes
 
   const toggleSection = (section) => {
     setExpandedSection(expandedSection === section ? null : section);
