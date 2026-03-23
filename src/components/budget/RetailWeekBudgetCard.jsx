@@ -1572,6 +1572,8 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
               </>
             )}
           </AnimatePresence>
+            </>
+          )}
         </CardContent>
       </Card>
     </motion.div>
