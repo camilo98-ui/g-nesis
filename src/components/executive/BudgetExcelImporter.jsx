@@ -626,7 +626,7 @@ export default function BudgetExcelImporter({ onClose }) {
             }
           } catch (_) {}
 
-          await new Promise(r => setTimeout(r, 300));
+          await new Promise(r => setTimeout(r, 600));
 
           for (const dateStr of datesSorted) {
             if (dateStr <= hoyStr) {
