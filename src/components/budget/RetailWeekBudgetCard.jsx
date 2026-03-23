@@ -288,8 +288,21 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
     const todayStr = format(now, 'yyyy-MM-dd');
     const excelRec = dailyBudgets?.find(db => db.store_id === storeId && (db.date?.split('T')[0] || db.date) === todayStr);
     const excelBudgetForToday = excelRec?.budget_amount > 0 ? excelRec.budget_amount : (activeBudget.sales_budget / daysInMonth);
-    const gapRecoveryIncrement = 0;
-    const adjustedDailyBudget = excelBudgetForToday;
+    
+    // Lógica de ajuste según brecha
+    let gapRecoveryIncrement = 0;
+    let adjustedDailyBudget = excelBudgetForToday;
+    
+    // Si hay brecha negativa, aumentar PPT del día para recuperar
+    if (accumulatedGap > 0) {
+      gapRecoveryIncrement = Math.ceil(accumulatedGap / remainingDays);
+      adjustedDailyBudget = excelBudgetForToday + gapRecoveryIncrement;
+    }
+    // Si hay brecha positiva, aplicar un incremento bonus (PPT por encima del 100%)
+    else if (accumulatedGap < 0) {
+      const bonusIncrement = Math.ceil(Math.abs(accumulatedGap) / remainingDays * 0.05); // 5% bonus
+      adjustedDailyBudget = excelBudgetForToday + bonusIncrement;
+    }
 
     // Calcular número de semana del mes
     const currentWeekNumber = weeks.findIndex(w => {
