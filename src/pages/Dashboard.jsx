@@ -488,7 +488,7 @@ export default function Dashboard() {
   const [showMonthlyBudget, setShowMonthlyBudget] = useState(false);
   const [showComparison, setShowComparison] = useState(false);
   const [comparisonRange, setComparisonRange] = useState(null);
-  const [gregorianMode, setGregorianMode] = useState(false);
+  const [gregorianMode, setGregorianMode] = useState(true);
 
   // Fetch weather data - historical para análisis
   useEffect(() => {
