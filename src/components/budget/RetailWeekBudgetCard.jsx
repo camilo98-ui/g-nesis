@@ -1569,48 +1569,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                 formatCurrency={formatCurrency}
                 gregorianMode={gregorianMode}
               />
-              {/* Dead code removed: false && block */}
-                        <div className="bg-gradient-to-br from-emerald-50/50 to-green-50/50 rounded-lg p-3 mb-3 border border-emerald-200/40">
-                          <p className="text-xs font-bold text-emerald-900 mb-2 flex items-center gap-1">
-                            📅 Días restantes del mes:
-                          </p>
-                          <div className="grid grid-cols-7 gap-1 max-h-32 overflow-y-auto">
-                            {eachDayOfInterval({ start: new Date(), end: endOfMonth(new Date()) }).map((day, idx) => (
-                              <div 
-                                key={idx}
-                                className={`text-center p-1.5 rounded-md text-[10px] font-semibold ${
-                                  isSameDay(day, new Date()) 
-                                    ? 'bg-emerald-500 text-white shadow-sm' 
-                                    : 'bg-white text-emerald-700 border border-emerald-200/50'
-                                }`}
-                              >
-                                <div className="text-[8px] opacity-70">{format(day, 'EEE', { locale: es })}</div>
-                                <div>{format(day, 'd')}</div>
-                              </div>
-                            ))}
-                          </div>
-                          <p className="text-[10px] text-emerald-600 mt-2 text-center">
-                            {isSameDay(new Date(), endOfMonth(new Date())) 
-                              ? '🎯 ¡Último día del mes!' 
-                              : `Quedan ${budgetData.remainingDays} días para alcanzar la meta`}
-                          </p>
-                        </div>
-                        <ResponsiveContainer width="100%" height={150}>
-                          <BarChart data={budgetData.dailyTrendData.slice(-7)}>
-                            <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
-                            <XAxis dataKey="date" fontSize={9} angle={-45} textAnchor="end" height={50} />
-                            <YAxis fontSize={10} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} />
-                            <Tooltip formatter={(v) => formatCurrency(v)} />
-                            <Bar dataKey="ventas" fill="#a7f3d0" radius={[6, 6, 0, 0]} />
-                          </BarChart>
-                        </ResponsiveContainer>
-                        <p className="text-xs text-slate-600 mt-2">
-                          📊 Últimos 7 días de ventas • Promedio: {formatCurrency(budgetData.dailyTrendData.slice(-7).reduce((a,b) => a + b.ventas, 0) / 7)}
-                        </p>
-                      </div>
-                    )}
-
-                    {selectedMetric === 'pending' && (
+              {selectedMetric === 'pending' && (
                       <div>
                         <h4 className="text-sm md:text-base font-bold text-slate-900 mb-3">Análisis de Venta Pendiente</h4>
                         <div className="grid grid-cols-2 gap-2 mb-3">
