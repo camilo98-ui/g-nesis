@@ -1305,10 +1305,10 @@ export default function Home() {
                       </div>
                     </Link>
                     )}
-                    </button>
-                    ))}
-                    )}
-                    </div>
+                  </button>
+                ))}
+        )}
+      </div>
 
       {/* Modales con Lazy Loading */}
       <Suspense fallback={null}>
