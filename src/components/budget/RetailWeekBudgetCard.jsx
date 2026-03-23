@@ -572,8 +572,8 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                 <div className="text-left">
                   <p className="text-sm lg:text-base text-white/90 mb-3 lg:mb-2 font-semibold">
                     {budgetData.gapRecoveryIncrement > 0
-                      ? `PPT Excel + Brecha`
-                      : `PPT Excel del Día`}
+                      ? `PPT del Día + Recuperación`
+                      : `PPT del Día`}
                   </p>
                   <motion.p
                     key={`${budgetData.adjustedDailyBudget}-${gregorianMode}`}
