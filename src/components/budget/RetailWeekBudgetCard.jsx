@@ -1570,11 +1570,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                 gregorianMode={gregorianMode}
               />
               {false && <span><div>{selectedMetric}</div></span>}
-              {false && <span>
-                    {selectedMetric === 'NEVER_SHOWN' && (
-                      <div>
-                        <h4></h4>
-                        <div>
+              {false && <span><div>
                         <ResponsiveContainer width="100%" height={150}>
                           <BarChart data={[
                             { name: 'Base', value: budgetData.dailyBaseBudget },
