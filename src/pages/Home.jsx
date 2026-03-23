@@ -1226,7 +1226,7 @@ export default function Home() {
                     </div>
                     </Link> :
                 item.isSpecialAction ?
-                <div
+                <button
                   onClick={async () => {
                     if (item.specialAction === 'logout') {
                       localStorage.removeItem('selectedStore');
