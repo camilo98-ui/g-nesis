@@ -288,21 +288,8 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
     const todayStr = format(now, 'yyyy-MM-dd');
     const excelRec = dailyBudgets?.find(db => db.store_id === storeId && (db.date?.split('T')[0] || db.date) === todayStr);
     const excelBudgetForToday = excelRec?.budget_amount > 0 ? excelRec.budget_amount : (activeBudget.sales_budget / daysInMonth);
-    
-    // Lógica de ajuste según brecha
-    let gapRecoveryIncrement = 0;
-    let adjustedDailyBudget = excelBudgetForToday;
-    
-    // Si hay brecha negativa, aumentar PPT del día para recuperar
-    if (accumulatedGap > 0) {
-      gapRecoveryIncrement = Math.ceil(accumulatedGap / remainingDays);
-      adjustedDailyBudget = excelBudgetForToday + gapRecoveryIncrement;
-    }
-    // Si hay brecha positiva, aplicar un incremento bonus (PPT por encima del 100%)
-    else if (accumulatedGap < 0) {
-      const bonusIncrement = Math.ceil(Math.abs(accumulatedGap) / remainingDays * 0.05); // 5% bonus
-      adjustedDailyBudget = excelBudgetForToday + bonusIncrement;
-    }
+    const gapRecoveryIncrement = 0;
+    const adjustedDailyBudget = excelBudgetForToday;
 
     // Calcular número de semana del mes
     const currentWeekNumber = weeks.findIndex(w => {
@@ -415,7 +402,6 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
     return {
       dailyBaseBudget,
       adjustedDailyBudget,
-      gapRecoveryIncrement,
       todayActualSales,
       historicalAvgToday,
       accumulatedGap,
@@ -568,19 +554,23 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
               <div className="grid grid-cols-2 gap-6 lg:gap-10 mb-6 lg:mb-5">
                 <div className="text-left">
                   <p className="text-sm lg:text-base text-white/90 mb-3 lg:mb-2 font-semibold">
-                    Venta del Día
+                    {budgetData.gapRecoveryIncrement > 0
+                      ? `PPT Excel + Brecha`
+                      : `PPT Excel del Día`}
                   </p>
                   <motion.p
-                    key={`${budgetData.todayActualSales}-${gregorianMode}`}
+                    key={`${budgetData.adjustedDailyBudget}-${gregorianMode}`}
                     initial={{ scale: 1.2, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     className="text-2xl md:text-3xl lg:text-5xl font-black text-white leading-none mb-2"
                   >
-                    {formatCurrency(budgetData.todayActualSales)}
+                    {formatCurrency(budgetData.adjustedDailyBudget)}
                   </motion.p>
                   <div className="space-y-1">
                     <p className="text-xs lg:text-sm text-white/70">
-                      Acumulado mes: {formatCurrency(budgetData.totalMonthSales)}
+                      {budgetData.gapRecoveryIncrement > 0
+                        ? `Excel: ${formatCurrency(budgetData.excelBudgetForToday)} + ${formatCurrency(budgetData.gapRecoveryIncrement)}`
+                        : `Valor exacto del Excel`}
                     </p>
                   </div>
                   
@@ -632,22 +622,11 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                 </div>
                 
                 <div className="text-left">
-                  <p className="text-sm lg:text-base text-white/90 mb-3 lg:mb-2 font-semibold">
-                    Brecha {budgetData.accumulatedGap >= 0 ? '📈 Positiva' : '📉 Negativa'}
+                  <p className="text-sm lg:text-base text-white/90 mb-3 lg:mb-2 font-semibold">Promedio Histórico</p>
+                  <p className="text-2xl md:text-3xl lg:text-5xl font-black text-white leading-none mb-2">
+                    {formatCurrency(budgetData.historicalAvgToday)}
                   </p>
-                  <motion.p
-                    key={`${budgetData.accumulatedGap}-${gregorianMode}`}
-                    initial={{ scale: 1.2, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    className={`text-2xl md:text-3xl lg:text-5xl font-black leading-none mb-2 ${
-                      budgetData.accumulatedGap >= 0 ? 'text-emerald-200' : 'text-rose-200'
-                    }`}
-                  >
-                    {formatCurrency(Math.abs(budgetData.accumulatedGap))}
-                  </motion.p>
-                  <p className={`text-xs lg:text-sm ${budgetData.accumulatedGap >= 0 ? 'text-emerald-100' : 'text-rose-100'}`}>
-                    {budgetData.accumulatedGap >= 0 ? 'Superando meta' : 'Recuperar'}
-                  </p>
+                  <p className="text-xs lg:text-sm text-white/70">{format(new Date(), 'EEEE', { locale: es })}s anteriores</p>
                   
                   {/* Sparkline debajo del número */}
                   {budgetData.last7DaysSales?.length > 0 && (
@@ -698,35 +677,37 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
               </div>
 
               <div className="space-y-2 mb-4">
-               <div className="flex items-center justify-between text-xs lg:text-sm">
-                 <span className="text-white/70">Proyección Mes</span>
-                 <span className="font-bold lg:font-black text-white lg:text-lg">{formatCurrency(budgetData.monthProjection)}</span>
-               </div>
-               <div className="relative h-3 lg:h-4 bg-white/20 rounded-full overflow-hidden">
-                 <motion.div
-                   initial={{ width: 0 }}
-                   animate={{ width: `${Math.min(budgetData.monthProjectionCompliance, 100)}%` }}
-                   transition={{ duration: 1.5, delay: 0.2 }}
-                   className={`h-full rounded-full relative overflow-hidden ${
-                     budgetData.monthProjectionCompliance >= 100 
-                       ? 'bg-emerald-300' 
-                       : budgetData.monthProjectionCompliance >= 85
-                       ? 'bg-amber-300'
-                       : 'bg-rose-300'
-                   }`}
-                 >
-                   <motion.div 
-                     className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-50"
-                     animate={{ x: ['-100%', '200%'] }}
-                     transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                     style={{ width: '50%' }}
-                   />
-                 </motion.div>
-               </div>
-               <p className="text-[10px] lg:text-xs text-white/50 lg:text-white/60">
-                 {budgetData.monthProjectionCompliance.toFixed(0)}% · ${budgetData.monthlyBudget.toLocaleString('es-CO')}
-               </p>
-               </div>
+                <div className="flex items-center justify-between text-xs lg:text-sm">
+                  <span className="text-white/70">Proyección Semanal</span>
+                  <span className="font-bold lg:font-black text-white lg:text-lg">{budgetData.projectionCompliance.toFixed(0)}%</span>
+                </div>
+                <div className="relative h-3 lg:h-4 bg-white/20 rounded-full overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${Math.min(budgetData.projectionCompliance, 100)}%` }}
+                    transition={{ duration: 1.5, delay: 0.2 }}
+                    className={`h-full rounded-full relative overflow-hidden ${
+                      budgetData.projectionCompliance >= 100 
+                        ? 'bg-emerald-300' 
+                        : budgetData.projectionCompliance >= 85
+                        ? 'bg-amber-300'
+                        : 'bg-rose-300'
+                    }`}
+                  >
+                    <motion.div 
+                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-50"
+                      animate={{ x: ['-100%', '200%'] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                      style={{ width: '50%' }}
+                    />
+                  </motion.div>
+                </div>
+                <p className="text-[10px] lg:text-xs text-white/50 lg:text-white/60">
+                  {budgetData.projectionCompliance >= 100 
+                    ? `🚀 Superando meta en ${(budgetData.projectionCompliance - 100).toFixed(0)}%`
+                    : `📈 ${formatCurrency(budgetData.weeklyBudget - budgetData.weekProjection)} para alcanzar meta`}
+                </p>
+                </div>
 
                 {/* Barra de Proyección Mensual */}
                 <div className="space-y-2 mb-4">
@@ -767,21 +748,11 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                   </p>
                 </div>
 
-                {budgetData.gapRecoveryIncrement !== 0 && (
-                <div className={`rounded-lg p-3 mb-3 ${
-                  budgetData.gapRecoveryIncrement > 0 
-                    ? 'bg-rose-400/20 border border-rose-300/50' 
-                    : 'bg-emerald-400/20 border border-emerald-300/50'
-                }`}>
-                  <p className={`text-xs flex items-center gap-1 ${
-                    budgetData.gapRecoveryIncrement > 0 ? 'text-rose-100' : 'text-emerald-100'
-                  }`}>
+                {needsRecovery && (
+                <div className="bg-white/10 rounded-lg p-3 mb-3">
+                  <p className="text-xs text-white/70 flex items-center gap-1">
                     <AlertTriangle className="w-3 h-3 flex-shrink-0" />
-                    <span className="truncate">
-                      {budgetData.gapRecoveryIncrement > 0 
-                        ? `PPT ajustado: +${formatCurrency(budgetData.gapRecoveryIncrement)}/día`
-                        : `Bonus: +${formatCurrency(Math.abs(budgetData.gapRecoveryIncrement))}/día`}
-                    </span>
+                    <span className="truncate">Incluye recuperación de {formatCurrency(budgetData.accumulatedGap)}</span>
                   </p>
                 </div>
                 )}
