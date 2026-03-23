@@ -338,12 +338,12 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
     // Presupuesto restante a alcanzar (meta del 105%)
     const remainingBudget = adjustedMonthlyBudget - salesUntilYesterday - todayActualSales;
 
-    // PPT del día = presupuesto mensual del Excel / días del mes (valor directo, sin ajuste histórico)
-    const excelBudgetForToday = activeBudget.sales_budget / daysInMonth;
-    const remArr = remainingDays > 0 && accumulatedGap > 0 ? eachDayOfInterval({ start: now, end: monthEnd }) : [];
-    const remBase = remArr.length * excelBudgetForToday;
-    const gapRecoveryIncrement = remBase > 0 && accumulatedGap > 0 ? Math.min(accumulatedGap * 0.5 * (excelBudgetForToday / remBase), excelBudgetForToday * 0.4) : 0;
-    const adjustedDailyBudget = excelBudgetForToday + gapRecoveryIncrement;
+    // PPT exacto del día desde el Excel (campo budget_amount en DailyBudget)
+    const todayStr = format(now, 'yyyy-MM-dd');
+    const excelRec = dailyBudgets?.find(db => db.store_id === storeId && (db.date?.split('T')[0] || db.date) === todayStr);
+    const excelBudgetForToday = excelRec?.budget_amount > 0 ? excelRec.budget_amount : (activeBudget.sales_budget / daysInMonth);
+    const gapRecoveryIncrement = 0;
+    const adjustedDailyBudget = excelBudgetForToday;
 
     // Calcular número de semana según modo
     const currentWeekNumber = weeks.findIndex(w => {
