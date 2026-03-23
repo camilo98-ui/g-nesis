@@ -1225,7 +1225,7 @@ export default function Home() {
                     </div>
                     </div>
                     </Link> :
-                item.isSpecialAction ?
+                (item.isSpecialAction ?
                 <div
                   onClick={async () => {
                     if (item.specialAction === 'logout') {
