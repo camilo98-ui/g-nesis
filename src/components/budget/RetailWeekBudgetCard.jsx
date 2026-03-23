@@ -616,7 +616,21 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                           ? `✅ A favor: ${formatCurrency(activeBudget.sales_gap)}`
                           : `Valor exacto del Excel`}
                     </p>
+
                   </div>
+
+                  {/* Brecha total visible debajo */}
+                  {(activeBudget?.sales_gap !== 0 && activeBudget?.sales_gap !== undefined) && (
+                    <div className={`mt-2 px-3 py-1.5 rounded-lg inline-flex items-center gap-2 ${
+                      activeBudget.sales_gap < 0 
+                        ? 'bg-red-500/30 border border-red-300/40' 
+                        : 'bg-emerald-500/30 border border-emerald-300/40'
+                    }`}>
+                      <span className="text-xs font-black text-white">
+                        {activeBudget.sales_gap < 0 ? '📉' : '📈'} Brecha mes: {activeBudget.sales_gap >= 0 ? '+' : ''}{formatCurrency(activeBudget.sales_gap)}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Panel derecho: Brecha total y % de impacto */}
