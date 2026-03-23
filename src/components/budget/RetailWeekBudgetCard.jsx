@@ -616,69 +616,49 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                           ? `✅ A favor: ${formatCurrency(activeBudget.sales_gap)}`
                           : `Valor exacto del Excel`}
                     </p>
-
                   </div>
+                </div>
 
-                  {/* Brecha total visible debajo */}
-                  {(activeBudget?.sales_gap !== 0 && activeBudget?.sales_gap !== undefined) && (
-                    <div className={`mt-2 px-3 py-1.5 rounded-lg inline-flex items-center gap-2 ${
-                      activeBudget.sales_gap < 0 
-                        ? 'bg-red-500/30 border border-red-300/40' 
-                        : 'bg-emerald-500/30 border border-emerald-300/40'
-                    }`}>
-                      <span className="text-xs font-black text-white">
-                        {activeBudget.sales_gap < 0 ? '📉' : '📈'} Brecha mes: {activeBudget.sales_gap >= 0 ? '+' : ''}{formatCurrency(activeBudget.sales_gap)}
-                      </span>
-                    </div>
-                  )}
+                {/* Panel derecho: Brecha total y % de impacto */}
+                <div className="text-right space-y-2">
+                  <p className="text-sm lg:text-base text-white/90 font-semibold">Brecha del Mes</p>
+                  <motion.p
+                    key={`${budgetData.salesGap || 0}-brecha`}
+                    initial={{ scale: 1.2, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className={`text-2xl md:text-3xl lg:text-4xl font-black leading-none ${
+                      (budgetData.salesGap || 0) < 0 ? 'text-red-300' : 'text-emerald-300'
+                    }`}
+                  >
+                    {(budgetData.salesGap || 0) < 0 ? '📉' : '📈'} {formatCurrency(Math.abs(budgetData.salesGap || 0))}
+                  </motion.p>
                   
-                  {/* Sparkline debajo del número */}
-                  {budgetData.last7DaysSales?.length > 0 && (
-                    <div className="mt-3 h-10">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={budgetData.last7DaysSales}>
-                          <defs>
-                            <filter id="glow1">
-                              <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-                              <feMerge>
-                                <feMergeNode in="coloredBlur"/>
-                                <feMergeNode in="SourceGraphic"/>
-                              </feMerge>
-                            </filter>
-                            <linearGradient id="lineGrad1" x1="0%" y1="0%" x2="100%" y2="0%">
-                              <stop offset="-20%" stopColor="#fff" stopOpacity="0">
-                                <animate attributeName="offset" values="-0.2;1.2;1.2" dur="3s" repeatCount="indefinite"/>
-                              </stop>
-                              <stop offset="0%" stopColor="#fff" stopOpacity="1">
-                                <animate attributeName="offset" values="0;1.4;1.4" dur="3s" repeatCount="indefinite"/>
-                              </stop>
-                              <stop offset="20%" stopColor="#fff" stopOpacity="0">
-                                <animate attributeName="offset" values="0.2;1.6;1.6" dur="3s" repeatCount="indefinite"/>
-                              </stop>
-                            </linearGradient>
-                          </defs>
-                          <Line 
-                            type="monotone" 
-                            dataKey="value" 
-                            stroke="#fff" 
-                            strokeWidth={1.5} 
-                            dot={false}
-                            strokeOpacity={0.3}
-                          />
-                          <Line 
-                            type="monotone" 
-                            dataKey="value" 
-                            stroke="url(#lineGrad1)" 
-                            strokeWidth={2.5} 
-                            dot={false}
-                            filter="url(#glow1)"
-                          />
-                        </LineChart>
-                      </ResponsiveContainer>
+                  {/* % de impacto */}
+                  {budgetData.monthlyBudget > 0 && (
+                    <div className="space-y-1.5">
+                      <p className="text-xs lg:text-sm text-white/70">Impacto en presupuesto</p>
+                      <motion.p
+                        initial={{ scale: 1.1, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        className={`text-xl md:text-2xl lg:text-3xl font-black ${
+                          (budgetData.salesGap || 0) < 0 ? 'text-red-200' : 'text-emerald-200'
+                        }`}
+                      >
+                        {((Math.abs(budgetData.salesGap || 0) / budgetData.monthlyBudget) * 100).toFixed(1)}%
+                      </motion.p>
+                      <div className="w-full h-2 bg-white/20 rounded-full overflow-hidden mt-2">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${Math.min(((Math.abs(budgetData.salesGap || 0) / budgetData.monthlyBudget) * 100), 100)}%` }}
+                          transition={{ duration: 1.2, delay: 0.2 }}
+                          className={`h-full rounded-full ${
+                            (budgetData.salesGap || 0) < 0 ? 'bg-red-400' : 'bg-emerald-400'
+                          }`}
+                        />
+                      </div>
                     </div>
                   )}
                 </div>
-
               </div>
 
               <div className="space-y-2 mb-4">
