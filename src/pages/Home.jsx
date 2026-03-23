@@ -1142,17 +1142,7 @@ export default function Home() {
               <LogOut className="w-3.5 h-3.5 mr-1" />
               Cerrar Sesión
             </Button>
-            {selectedRole !== 'gerente' && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowBudgetDashboard(true)}
-                className="text-gray-400 hover:text-sky-600 hover:bg-sky-50/50 transition-all text-xs"
-              >
-                <Target className="w-3.5 h-3.5 mr-1" />
-                Presupuestos
-              </Button>
-            )}
+
             {selectedRole === 'gerente' && (
               <Button
                 variant="ghost"
