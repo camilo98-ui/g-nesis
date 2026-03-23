@@ -1570,42 +1570,6 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                 gregorianMode={gregorianMode}
               />
               {false && <div>
-                    {selectedMetric === 'base' && (
-                      <div>
-                        <h4 className="text-sm md:text-base font-bold text-slate-900 mb-3">Presupuesto Base vs Ajustado</h4>
-                        <div className="grid grid-cols-2 gap-3 mb-3">
-                          <div className="bg-rose-50 rounded-lg p-3">
-                            <p className="text-xs text-rose-600 mb-1">Base Diaria</p>
-                            <p className="text-lg font-black text-rose-700">{formatCurrency(budgetData.dailyBaseBudget)}</p>
-                          </div>
-                          <div className="bg-amber-50 rounded-lg p-3">
-                            <p className="text-xs text-amber-600 mb-1">Meta Ajustada Hoy</p>
-                            <p className="text-lg font-black text-amber-700">{formatCurrency(budgetData.adjustedDailyBudget)}</p>
-                          </div>
-                        </div>
-                        <ResponsiveContainer width="100%" height={150}>
-                          <BarChart data={[
-                            { name: 'Base', value: budgetData.dailyBaseBudget },
-                            { name: 'Ajustado', value: budgetData.adjustedDailyBudget }
-                          ]}>
-                            <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
-                            <XAxis dataKey="name" fontSize={11} />
-                            <YAxis fontSize={11} tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`} />
-                            <Tooltip formatter={(v) => formatCurrency(v)} />
-                            <Bar dataKey="value" radius={[8, 8, 0, 0]}>
-                              <Cell fill="#fda4af" />
-                              <Cell fill="#fbbf24" />
-                            </Bar>
-                          </BarChart>
-                        </ResponsiveContainer>
-                        <p className="text-xs text-slate-600 mt-2">
-                          {budgetData.adjustedDailyBudget > budgetData.dailyBaseBudget 
-                            ? `⬆️ Meta ajustada ${((budgetData.adjustedDailyBudget/budgetData.dailyBaseBudget - 1) * 100).toFixed(0)}% más alta para recuperar brecha`
-                            : `✓ Meta base sin ajustes necesarios`}
-                        </p>
-                      </div>
-                    )}
-
                     {selectedMetric === 'remaining' && (
                       <div>
                         <h4 className="text-sm md:text-base font-bold text-slate-900 mb-3">Proyección de Días Restantes</h4>
