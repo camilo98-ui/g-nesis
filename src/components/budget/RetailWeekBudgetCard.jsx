@@ -1569,44 +1569,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                 formatCurrency={formatCurrency}
                 gregorianMode={gregorianMode}
               />
-              {false && selectedMetric === 'pending' && (
-                      <div>
-                        <h4 className="text-sm md:text-base font-bold text-slate-900 mb-3">Análisis de Venta Pendiente</h4>
-                        <div className="grid grid-cols-2 gap-2 mb-3">
-                          <div className="bg-slate-50 rounded-lg p-2">
-                            <p className="text-[10px] text-slate-600">Vendido</p>
-                            <p className="text-base font-bold text-slate-900">{formatCurrency(budgetData.salesUntilYesterday + budgetData.todayActualSales)}</p>
-                          </div>
-                          <div className="bg-rose-50 rounded-lg p-2">
-                            <p className="text-[10px] text-rose-600">Por Vender</p>
-                            <p className="text-base font-bold text-rose-900">{formatCurrency(budgetData.remainingBudget)}</p>
-                          </div>
-                        </div>
-                        <ResponsiveContainer width="100%" height={120}>
-                          <BarChart layout="vertical" data={[
-                            { name: 'Vendido', value: budgetData.salesUntilYesterday + budgetData.todayActualSales, fill: '#10b981' },
-                            { name: 'Por Vender', value: budgetData.remainingBudget, fill: '#fda4af' }
-                          ]}>
-                            <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
-                            <XAxis type="number" fontSize={10} tickFormatter={(v) => `$${(v/1000000).toFixed(0)}M`} />
-                            <YAxis type="category" dataKey="name" fontSize={11} width={70} />
-                            <Tooltip formatter={(v) => formatCurrency(v)} />
-                            <Bar dataKey="value" radius={[0, 8, 8, 0]}>
-                              {[{ fill: '#10b981' }, { fill: '#fda4af' }].map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={entry.fill} />
-                              ))}
-                            </Bar>
-                          </BarChart>
-                        </ResponsiveContainer>
-                        <p className="text-xs text-slate-600 mt-2">
-                          {budgetData.remainingBudget > 0 
-                            ? `💪 Faltan ${formatCurrency(budgetData.remainingBudget)} para alcanzar el presupuesto mensual` 
-                            : `🎉 ¡Presupuesto mensual alcanzado!`}
-                        </p>
-                      </div>
-                    )}
-
-                    {selectedMetric === 'compliance' && (
+              {false && selectedMetric === 'compliance' && (
                       <div>
                         <h4 className="text-sm md:text-base font-bold text-slate-900 mb-3">Evolución del Cumplimiento</h4>
                         <div className="bg-gradient-to-r from-rose-50 to-emerald-50 rounded-lg p-3 mb-3">
