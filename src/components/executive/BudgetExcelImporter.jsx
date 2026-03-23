@@ -111,10 +111,123 @@ export default function BudgetExcelImporter({ onClose }) {
     reader.readAsArrayBuffer(file);
   };
 
-  const analyzeSheet = (rows) => {
+  const analyzeSheet = (rows, rowsWithHeaders = []) => {
     const parseErrors = [];
     let detectedMonth = now.getMonth() + 1;
     let detectedYear = now.getFullYear();
+
+    // ── ESTRATEGIA 0: Formato PdV+FECHA+PRESUPUESTO DIA (el Excel real)
+    // Una fila por tienda por día: PdV, FECHA, PRESUPUESTO DIA, TRANSACCIONES DIA, TICKET PROMEDIO DIA
+    if (rowsWithHeaders.length > 0) {
+      const firstRow = rowsWithHeaders[0];
+      const keys = Object.keys(firstRow).map(k => normalize(k));
+      const hasPdv = keys.some(k => k.includes('pdv') || k.includes('punto') || k.includes('tienda'));
+      const hasFecha = keys.some(k => k.includes('fecha') || k.includes('date'));
+      const hasPpto = keys.some(k => k.includes('presupuesto') || k.includes('ppto') || k.includes('ppt'));
+
+      if (hasPdv && hasFecha && hasPpto) {
+        // Encontrar los nombres exactos de las columnas clave
+        const allKeys = Object.keys(firstRow);
+        const pdvKey = allKeys.find(k => normalize(k).includes('pdv') || normalize(k).includes('punto') || normalize(k).includes('tienda'));
+        const fechaKey = allKeys.find(k => normalize(k).includes('fecha') || normalize(k).includes('date'));
+        const pptoKey = allKeys.find(k => normalize(k).includes('presupuesto') || normalize(k).includes('ppto') || normalize(k).includes('ppt'));
+        const trxKey = allKeys.find(k => normalize(k).includes('transacc') || normalize(k).includes('trx') || normalize(k).includes('txn'));
+        const ticketKey = allKeys.find(k => normalize(k).includes('ticket') || normalize(k).includes('tkt'));
+
+        const storeData = {};
+
+        for (const row of rowsWithHeaders) {
+          const storeMatch = matchStore(row[pdvKey]);
+          if (!storeMatch) continue;
+
+          // Parsear fecha
+          let fechaVal = row[fechaKey];
+          let dateStr = null;
+          let dayNum = null;
+          let rowMonth = null;
+          let rowYear = null;
+
+          if (fechaVal instanceof Date) {
+            dateStr = format(fechaVal, 'yyyy-MM-dd');
+            dayNum = fechaVal.getDate();
+            rowMonth = fechaVal.getMonth() + 1;
+            rowYear = fechaVal.getFullYear();
+          } else if (typeof fechaVal === 'string') {
+            // "2026-03-23 00:00:00" o "2026-03-23"
+            const match = fechaVal.match(/(\d{4})-(\d{2})-(\d{2})/);
+            if (match) {
+              rowYear = parseInt(match[1]);
+              rowMonth = parseInt(match[2]);
+              dayNum = parseInt(match[3]);
+              dateStr = `${match[1]}-${match[2]}-${match[3]}`;
+            }
+          } else if (typeof fechaVal === 'number' && fechaVal > 40000) {
+            // Número de serie Excel
+            const d = new Date((fechaVal - 25569) * 86400 * 1000);
+            dateStr = format(d, 'yyyy-MM-dd');
+            dayNum = d.getDate();
+            rowMonth = d.getMonth() + 1;
+            rowYear = d.getFullYear();
+          }
+
+          if (!dateStr || !dayNum) continue;
+
+          // Actualizar mes/año detectado
+          if (rowMonth) detectedMonth = rowMonth;
+          if (rowYear) detectedYear = rowYear;
+
+          const pptoVal = parseNum(row[pptoKey]);
+          if (!pptoVal || pptoVal <= 0) continue;
+
+          const code = storeMatch.code;
+          if (!storeData[code]) {
+            storeData[code] = {
+              store: storeMatch,
+              dailyAmounts: {},    // { 'yyyy-MM-dd': amount }
+              ticket: null,
+              transactions: null,
+              monthly: 0
+            };
+          }
+
+          storeData[code].dailyAmounts[dateStr] = Math.round(pptoVal);
+
+          // Ticket y transacciones: guardar el del día de hoy o promedio
+          if (ticketKey && row[ticketKey]) {
+            const t = parseNum(row[ticketKey]);
+            if (t && !storeData[code].ticket) storeData[code].ticket = Math.round(t);
+          }
+          if (trxKey && row[trxKey]) {
+            const t = parseNum(row[trxKey]);
+            if (t) storeData[code].transactions = (storeData[code].transactions || 0) + Math.round(t);
+          }
+        }
+
+        const foundStores = Object.values(storeData).map(item => {
+          const daily = item.dailyAmounts;
+          item.monthly = Math.round(Object.values(daily).reduce((a, b) => a + b, 0));
+          item.hasDailyBreakdown = true;
+          // Convertir dailyAmounts de { 'yyyy-MM-dd': val } a { dayNum: val } para compatibilidad
+          item.dailyByDate = daily;
+          item.daily = item.monthly / Object.keys(daily).length || 1;
+          return item;
+        });
+
+        const daysInMonth = getDaysInMonth(new Date(detectedYear, detectedMonth - 1));
+
+        if (foundStores.length > 0) {
+          const foundCodes = new Set(foundStores.map(s => s.store.code));
+          const missing = BASE_STORES.filter(s => !foundCodes.has(s.code));
+          if (missing.length > 0) {
+            parseErrors.push(`⚠️ No se encontraron ${missing.length} tiendas: ${missing.map(s => s.displayName).join(', ')}`);
+          }
+          setParsedData({ month: detectedMonth, year: detectedYear, daysInMonth, stores: foundStores, hasDailyBreakdown: true, formatType: 'pdv-fecha' });
+          setErrors(parseErrors);
+          setStep('preview');
+          return; // ✅ Salir - ya tenemos los datos
+        }
+      }
+    }
 
     // Detectar mes/año en las primeras filas
     const monthNames = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
