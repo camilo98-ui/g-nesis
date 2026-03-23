@@ -576,7 +576,7 @@ export default function BudgetExcelImporter({ onClose }) {
           year: parsedData.year
         });
         
-        await new Promise(r => setTimeout(r, 300));
+        await new Promise(r => setTimeout(r, 500));
 
         const budgetData = {
           store_id: item.store.code,
