@@ -522,7 +522,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
       monthEnd,
       getDailyBudget
     };
-  }, [dailySales, activeBudget, currentDateRange, gregorianMode]);
+  }, [dailySales, activeBudget, dailyBudgets, storeId, currentDateRange, gregorianMode]);
 
   const smartRecommendation = getSmartRecommendation(budgetData);
 
