@@ -1581,24 +1581,17 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
               </div>
 
               {/* Modal de métricas */}
-              <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle className="text-xl font-bold text-slate-900">
-                      {selectedMetric === 'base' && '📊 Presupuesto Base vs Ajustado'}
-                      {selectedMetric === 'remaining' && '📅 Proyección de Días Restantes'}
-                      {selectedMetric === 'pending' && '💰 Análisis de Venta Pendiente'}
-                      {selectedMetric === 'compliance' && '📈 Evolución del Cumplimiento'}
-                      {selectedMetric === 'weekly-budget' && '🎯 Desglose de Meta Semanal'}
-                      {selectedMetric === 'weekly-sales' && '💵 Ventas de la Semana'}
-                      {selectedMetric === 'weekly-projection' && '🚀 Proyección de Cierre Semanal'}
-                      {selectedMetric === 'month-projection' && '📊 Proyección de Cierre Mensual'}
-                      {selectedMetric === 'recovery-plan' && '⚠️ Plan de Recuperación'}
-                      {selectedMetric === 'on-track' && '✅ Rendimiento en Meta'}
-                      {selectedMetric?.startsWith('top-day-') && `${budgetData.topDays[parseInt(selectedMetric.split('-')[2])]?.dayFull} - Día Estratégico`}
-                    </DialogTitle>
-                  </DialogHeader>
-                  <div className="mt-4">
+              <BudgetMetricsModal
+                isOpen={isModalOpen}
+                onClose={setIsModalOpen}
+                selectedMetric={selectedMetric}
+                budgetData={budgetData}
+                activeBudget={activeBudget}
+                dailySales={dailySales}
+                formatCurrency={formatCurrency}
+                gregorianMode={gregorianMode}
+              />
+              {false && <div className="mt-4">
                     {selectedMetric === 'base' && (
                       <div>
                         <h4 className="text-sm md:text-base font-bold text-slate-900 mb-3">Presupuesto Base vs Ajustado</h4>
