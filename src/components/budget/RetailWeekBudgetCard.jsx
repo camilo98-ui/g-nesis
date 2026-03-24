@@ -355,13 +355,13 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                     const monthGap = activeBudget?.sales_gap !== undefined && activeBudget?.sales_gap !== null ?
                     activeBudget.sales_gap : -budgetData.accumulatedGap;
                     return (
-                      <div className="text-right space-y-2">
-                      <p className="text-sm lg:text-base text-white/90 font-semibold">Brecha del Mes</p>
+                      <div className="text-right">
+                      <p className="text-sm lg:text-base text-white/90 mb-3 lg:mb-2 font-semibold">Brecha del Mes</p>
                       <motion.p
                           key={`${monthGap}-brecha-mes`}
                           initial={{ scale: 1.2, opacity: 0 }}
                           animate={{ scale: 1, opacity: 1 }}
-                          className="text-slate-50 text-2xl font-black leading-none md:text-3xl lg:text-4xl">
+                          className="text-slate-50 text-2xl md:text-3xl lg:text-5xl font-black leading-none mb-2">
                         {monthGap < 0 ? '📉' : '📈'} {formatCurrency(Math.abs(monthGap))}
                       </motion.p>
                       {budgetData.monthlyBudget > 0 &&
