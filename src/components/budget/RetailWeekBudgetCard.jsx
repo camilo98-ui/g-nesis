@@ -287,13 +287,13 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                   <Target className="w-6 h-6 lg:w-7 lg:h-7 text-white" />
                   <p className="text-sm lg:text-base text-white/90 font-semibold lg:font-bold">Meta del Día</p>
                 </div>
-                {budgetData.gapRecoveryIncrement > 0 &&
-                  <div className={`px-3 py-1 lg:px-4 lg:py-1.5 rounded-full ${needsRecovery ? 'bg-amber-100/70' : 'bg-emerald-100/70'}`}>
-                    <p className={`text-[10px] lg:text-xs font-black ${needsRecovery ? 'text-amber-700' : 'text-emerald-700'}`}>
-                      {needsRecovery ? '⚡ RECUPERANDO' : '🚀 SUBIDO'} +{budgetData.excelBudgetForToday > 0 ? (budgetData.gapRecoveryIncrement / budgetData.excelBudgetForToday * 100).toFixed(1) : 0}%
-                    </p>
-                  </div>
-                }
+                
+
+
+
+
+
+                  
               </div>
 
               <div className="grid grid-cols-2 gap-6 lg:gap-10 mb-6 lg:mb-5">
@@ -314,7 +314,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                       <p className="text-xs text-white/70">
                         Excel: {formatCurrency(budgetData.excelBudgetForToday)} + {formatCurrency(budgetData.gapRecoveryIncrement)} ({(budgetData.gapRecoveryIncrement / budgetData.excelBudgetForToday * 100).toFixed(1)}% {needsRecovery ? 'recuperación' : 'extra'})
                       </p>
-                    }
+                      }
                   </div>
 
                   {/* Sparkline debajo del número */}
@@ -347,15 +347,15 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                         </LineChart>
                       </ResponsiveContainer>
                     </div>
-                  }
+                    }
                 </div>
 
                 {/* Panel derecho: Brecha del Mes */}
                 {(() => {
-                  const monthGap = activeBudget?.sales_gap !== undefined && activeBudget?.sales_gap !== null ?
+                    const monthGap = activeBudget?.sales_gap !== undefined && activeBudget?.sales_gap !== null ?
                     activeBudget.sales_gap : -budgetData.accumulatedGap;
-                  return (
-                    <div className="text-right space-y-2">
+                    return (
+                      <div className="text-right space-y-2">
                       <p className="text-sm lg:text-base text-white/90 font-semibold">Brecha del Mes</p>
                       <motion.p
                           key={`${monthGap}-brecha-mes`}
@@ -374,7 +374,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                             {(Math.abs(monthGap) / budgetData.monthlyBudget * 100).toFixed(1)}%
                           </motion.p>
                           {budgetData.last7DaysSales?.length > 0 &&
-                            <div className="mt-3 h-10">
+                          <div className="mt-3 h-10">
                               <ResponsiveContainer width="100%" height="100%">
                                 <LineChart data={budgetData.last7DaysSales}>
                                   <defs>
@@ -404,10 +404,10 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                             </div>
                           }
                         </div>
-                      }
-                    </div>
-                  );
-                })()}
+                        }
+                    </div>);
+
+                  })()}
               </div>
 
               {/* Barra de Proyección Mensual */}
@@ -438,7 +438,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                     <span className="truncate">Incluye recuperación de {formatCurrency(budgetData.accumulatedGap)}</span>
                   </p>
                 </div>
-              }
+                }
 
               <div className="flex items-center justify-center gap-2 text-white/80 pt-2 border-t border-white/20 w-full">
                 {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -482,7 +482,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                   </div>
                   <p className="text-[10px] text-indigo-600 mt-3 text-center">📊 Basado en {budgetData.topDays[0]?.count || 0}+ registros históricos por día</p>
                 </motion.div>
-              }
+                }
 
               {/* Gráfico de Tendencia Diaria */}
               <motion.div
@@ -529,7 +529,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                     <Bar dataKey={(data) => data.ventas - data.presupuesto} fill="url(#barCumplido)" radius={[4, 4, 0, 0]} animationDuration={1000} filter="url(#barGlow)">
                       {budgetData.dailyTrendData.map((entry, index) =>
                         <Cell key={`cell-${index}`} fill={entry.cumplimiento >= 100 ? 'url(#barCumplido)' : 'url(#barNoCumplido)'} />
-                      )}
+                        )}
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
@@ -567,12 +567,12 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: '12px', height: '12px', background: 'linear-gradient(to bottom, #a7f3d0, #d1fae5)', borderRadius: '3px' }}></div><span style={{ color: '#059669' }}>✅ Meta superada</span></div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: '12px', height: '12px', background: 'linear-gradient(to bottom, #fda4af, #fecdd3)', borderRadius: '3px' }}></div><span style={{ color: '#dc2626' }}>❌ Meta no alcanzada</span></div>
                       </div>
-                    } />
+                      } />
                     <ReferenceLine y={0} stroke="#9ca3af" strokeDasharray="3 3" strokeWidth={1} />
                     <Bar dataKey={(data) => data.ventas - data.presupuesto} radius={[6, 6, 0, 0]} animationDuration={1200} animationEasing="ease-out" filter="url(#barGlowDesktop)">
                       {budgetData.dailyTrendData.map((entry, index) =>
                         <Cell key={`cell-${index}`} fill={entry.cumplimiento >= 100 ? 'url(#barCumplidoDesktop)' : 'url(#barNoCumplidoDesktop)'} />
-                      )}
+                        )}
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
@@ -699,7 +699,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: '12px', height: '12px', background: 'linear-gradient(to bottom, #a7f3d0, #d1fae5)', borderRadius: '3px' }}></div><span style={{ color: '#059669' }}>🎯 Meta</span></div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: '12px', height: '12px', background: 'linear-gradient(to bottom, #fda4af, #fecdd3)', borderRadius: '3px' }}></div><span style={{ color: '#dc2626' }}>💰 Venta</span></div>
                       </div>
-                    } />
+                      } />
                     <Bar dataKey="presupuesto" fill="url(#barPresupuesto)" radius={[8, 8, 0, 0]} filter="url(#barGlowWeekly)" animationDuration={1200} animationEasing="ease-out" />
                     <Bar dataKey="ventas" fill="url(#barVentas)" radius={[8, 8, 0, 0]} filter="url(#barGlowWeekly)" animationDuration={1500} animationEasing="ease-out" />
                   </BarChart>
@@ -708,34 +708,34 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
 
               {/* Proyección de Semanas Futuras */}
               {(() => {
-                const now = new Date();
-                const monthStartCalc = startOfMonth(now);
-                const monthEndCalc = endOfMonth(now);
-                const weeks = eachWeekOfInterval({ start: monthStartCalc, end: monthEndCalc }, { weekStartsOn: 1 });
-                const futureWeeks = weeks.map((weekStart, idx) => {
-                  const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
-                  const daysInWeek = eachDayOfInterval({ start: weekStart, end: weekEnd }).filter((d) => d >= monthStartCalc && d <= monthEndCalc);
-                  const weekBudget = daysInWeek.reduce((sum, day) => {
-                    const dayOfWeek = day.getDay();
-                    const avgByDayOfWeekLocal = [0, 0, 0, 0, 0, 0, 0].map((_, i) => {
-                      const historicalForDay = dailySales.filter((s) => {try {const sd = parseISO(s.date);return sd.getDay() === i && s.total_sales > 0;} catch {return false;}});
-                      return historicalForDay.length > 0 ? historicalForDay.reduce((s, sale) => s + sale.total_sales, 0) / historicalForDay.length : 0;
-                    });
-                    const totalWeeklyAvgLocal = avgByDayOfWeekLocal.reduce((a, b) => a + b, 0);
-                    if (totalWeeklyAvgLocal === 0) return sum + activeBudget.sales_budget * 1.05 / 30;
-                    const scaleFactor = activeBudget.sales_budget * 1.05 / (totalWeeklyAvgLocal * (30 / 7));
-                    return sum + avgByDayOfWeekLocal[dayOfWeek] * scaleFactor;
-                  }, 0);
-                  return { semana: `S${idx + 1}`, weekStart, weekEnd, presupuesto: weekBudget, isCurrent: idx + 1 === budgetData.currentWeekNumber, isFuture: idx + 1 > budgetData.currentWeekNumber };
-                }).filter((w) => w.isFuture);
+                  const now = new Date();
+                  const monthStartCalc = startOfMonth(now);
+                  const monthEndCalc = endOfMonth(now);
+                  const weeks = eachWeekOfInterval({ start: monthStartCalc, end: monthEndCalc }, { weekStartsOn: 1 });
+                  const futureWeeks = weeks.map((weekStart, idx) => {
+                    const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
+                    const daysInWeek = eachDayOfInterval({ start: weekStart, end: weekEnd }).filter((d) => d >= monthStartCalc && d <= monthEndCalc);
+                    const weekBudget = daysInWeek.reduce((sum, day) => {
+                      const dayOfWeek = day.getDay();
+                      const avgByDayOfWeekLocal = [0, 0, 0, 0, 0, 0, 0].map((_, i) => {
+                        const historicalForDay = dailySales.filter((s) => {try {const sd = parseISO(s.date);return sd.getDay() === i && s.total_sales > 0;} catch {return false;}});
+                        return historicalForDay.length > 0 ? historicalForDay.reduce((s, sale) => s + sale.total_sales, 0) / historicalForDay.length : 0;
+                      });
+                      const totalWeeklyAvgLocal = avgByDayOfWeekLocal.reduce((a, b) => a + b, 0);
+                      if (totalWeeklyAvgLocal === 0) return sum + activeBudget.sales_budget * 1.05 / 30;
+                      const scaleFactor = activeBudget.sales_budget * 1.05 / (totalWeeklyAvgLocal * (30 / 7));
+                      return sum + avgByDayOfWeekLocal[dayOfWeek] * scaleFactor;
+                    }, 0);
+                    return { semana: `S${idx + 1}`, weekStart, weekEnd, presupuesto: weekBudget, isCurrent: idx + 1 === budgetData.currentWeekNumber, isFuture: idx + 1 > budgetData.currentWeekNumber };
+                  }).filter((w) => w.isFuture);
 
-                if (futureWeeks.length === 0) return null;
-                return (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="bg-gradient-to-br from-purple-50/40 to-indigo-50/40 rounded-2xl p-4 border-2 border-purple-200/30 shadow-lg">
+                  if (futureWeeks.length === 0) return null;
+                  return (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="bg-gradient-to-br from-purple-50/40 to-indigo-50/40 rounded-2xl p-4 border-2 border-purple-200/30 shadow-lg">
                     <div className="flex items-center justify-between mb-3">
                       <h4 className="font-black text-purple-900 flex items-center gap-2 text-sm md:text-base">
                         <Calendar className="w-4 h-4 md:w-5 md:h-5 text-purple-400" />
@@ -752,12 +752,12 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                           </div>
                           <span className="font-black text-purple-900 text-base">{formatCurrency(week.presupuesto)}</span>
                         </motion.div>
-                      )}
+                        )}
                     </div>
                     <p className="text-[10px] text-purple-500 mt-3 text-center">💡 Proyecciones estimadas - ajusta según estrategia comercial</p>
-                  </motion.div>
-                );
-              })()}
+                  </motion.div>);
+
+                })()}
 
               {/* Grid de métricas resumidas */}
               <div className="grid grid-cols-2 gap-3">
@@ -790,12 +790,12 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                   formatCurrency={formatCurrency}
                   gregorianMode={gregorianMode} />
               </>
-            }
+              }
           </AnimatePresence>
           </>
           }
         </CardContent>
       </Card>
-    </motion.div>
-  );
+    </motion.div>);
+
 }
