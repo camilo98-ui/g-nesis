@@ -613,13 +613,13 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                     {formatCurrency(budgetData.excelBudgetForToday + budgetData.gapRecoveryIncrement)}
                   </motion.p>
                   <div className="space-y-1">
-                    <p className="text-xs lg:text-sm text-white/70">
-                      {budgetData.gapRecoveryIncrement > 0 ?
-                        `Excel: ${formatCurrency(budgetData.excelBudgetForToday)} + ${formatCurrency(budgetData.gapRecoveryIncrement)}` :
-                        activeBudget?.sales_gap > 0 ?
-                        `✅ A favor: ${formatCurrency(activeBudget.sales_gap)}` :
-                        `Valor exacto del Excel`}
-                    </p>
+                    
+
+
+
+
+
+                      
 
                   </div>
 
