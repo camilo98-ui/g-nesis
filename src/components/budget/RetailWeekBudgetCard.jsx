@@ -328,12 +328,12 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
       Math.abs(salesGap) * (todayWeight / totalWeight) :
       Math.abs(salesGap) / remainingDays;
 
-      // Factor agresivo: cuanto mayor sea la brecha, más alto el incremento (y también para brechas positivas)
-      // Multiplica por 1.2 para brechas negativas altas, y por 0.8 para positivas (mantener racha)
-      const aggressionFactor = salesGap < 0 ? 1.3 : 0.8;
+      // Factor agresivo: brechas negativas = recuperar más, brechas positivas = subir meta (ambición)
+      const aggressionFactor = salesGap < 0 ? 1.3 : 0.5;
       todayGapShare = todayGapShare * aggressionFactor;
 
-      gapRecoveryIncrement = salesGap < 0 ? todayGapShare : -todayGapShare;
+      // Brecha negativa: incremento para recuperar. Brecha positiva: también incremento para ser más ambiciosos
+      gapRecoveryIncrement = todayGapShare;
       adjustedDailyBudget = excelBudgetForToday + gapRecoveryIncrement;
     }
 
