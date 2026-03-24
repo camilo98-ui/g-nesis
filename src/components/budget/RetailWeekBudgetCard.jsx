@@ -374,7 +374,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                             {(Math.abs(monthGap) / budgetData.monthlyBudget * 100).toFixed(1)}%
                           </motion.p>
                           {budgetData.last7DaysSales?.length > 0 &&
-                            <div className="mt-2 h-8">
+                            <div className="mt-3 h-10">
                               <ResponsiveContainer width="100%" height="100%">
                                 <LineChart data={budgetData.last7DaysSales}>
                                   <defs>
@@ -385,9 +385,20 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                                         <feMergeNode in="SourceGraphic" />
                                       </feMerge>
                                     </filter>
+                                    <linearGradient id="lineGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
+                                      <stop offset="-20%" stopColor="#fff" stopOpacity="0">
+                                        <animate attributeName="offset" values="-0.2;1.2;1.2" dur="3s" repeatCount="indefinite" />
+                                      </stop>
+                                      <stop offset="0%" stopColor="#fff" stopOpacity="1">
+                                        <animate attributeName="offset" values="0;1.4;1.4" dur="3s" repeatCount="indefinite" />
+                                      </stop>
+                                      <stop offset="20%" stopColor="#fff" stopOpacity="0">
+                                        <animate attributeName="offset" values="0.2;1.6;1.6" dur="3s" repeatCount="indefinite" />
+                                      </stop>
+                                    </linearGradient>
                                   </defs>
                                   <Line type="monotone" dataKey="value" stroke="#fff" strokeWidth={1.5} dot={false} strokeOpacity={0.3} />
-                                  <Line type="monotone" dataKey="value" stroke="rgba(255,255,255,0.9)" strokeWidth={2.5} dot={false} filter="url(#glow2)" />
+                                  <Line type="monotone" dataKey="value" stroke="url(#lineGrad2)" strokeWidth={2.5} dot={false} filter="url(#glow2)" />
                                 </LineChart>
                               </ResponsiveContainer>
                             </div>
