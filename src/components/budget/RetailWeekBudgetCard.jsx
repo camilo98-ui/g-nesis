@@ -628,18 +628,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                       const gap = activeBudget?.sales_gap !== undefined && activeBudget?.sales_gap !== null ?
                       activeBudget.sales_gap :
                       -budgetData.accumulatedGap;
-                      if (gap === 0) return null;
-                      return (
-                        <div className={`mt-2 px-3 py-1.5 rounded-lg inline-flex items-center gap-2 ${
-                        gap < 0 ?
-                        'bg-red-500/30 border border-red-300/40' :
-                        'bg-emerald-500/30 border border-emerald-300/40'}`
-                        }>
-                        <span className="text-xs font-black text-white">
-                          {gap < 0 ? '📉' : '📈'} Brecha mes: {gap >= 0 ? '+' : ''}{formatCurrency(gap)}
-                        </span>
-                      </div>);
-
+                      return null;
                     })()}
                   
                   {/* Sparkline debajo del número */}
