@@ -296,7 +296,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                   
               </div>
 
-              <div className="grid grid-cols-2 gap-6 lg:gap-10 mb-6 lg:mb-5">
+              <div className="grid grid-cols-2 gap-6 lg:gap-10 mb-6 lg:mb-5 items-start">
                 {/* Panel izquierdo: PPT del Día */}
                 <div className="text-left">
                   <p className="text-sm lg:text-base text-white/90 mb-3 lg:mb-2 font-semibold">
