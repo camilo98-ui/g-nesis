@@ -786,6 +786,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
             </div>
           </motion.div>
 
+
           {/* Contenido expandible */}
           <AnimatePresence>
             {isExpanded &&
