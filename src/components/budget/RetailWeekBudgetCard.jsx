@@ -734,9 +734,6 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                     </div>);
 
                   })()}
-              </div>
-
-
 
                 {/* Barra de Proyección Mensual */}
                 <div className="space-y-2 mb-4">
