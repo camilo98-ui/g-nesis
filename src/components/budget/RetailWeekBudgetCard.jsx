@@ -590,19 +590,19 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                   <Target className="w-6 h-6 lg:w-7 lg:h-7 text-white" />
                   <p className="text-sm lg:text-base text-white/90 font-semibold lg:font-bold">Meta del Día</p>
                 </div>
-                {needsRecovery &&
-                  <div className="px-3 py-1 lg:px-4 lg:py-1.5 bg-amber-100/70 rounded-full">
-                    <p className="text-[10px] lg:text-xs font-black text-amber-700">AJUSTADO</p>
+                {budgetData.gapRecoveryIncrement > 0 &&
+                  <div className={`px-3 py-1 lg:px-4 lg:py-1.5 rounded-full ${needsRecovery ? 'bg-amber-100/70' : 'bg-emerald-100/70'}`}>
+                    <p className={`text-[10px] lg:text-xs font-black ${needsRecovery ? 'text-amber-700' : 'text-emerald-700'}`}>
+                      {needsRecovery ? '⚡ RECUPERANDO' : '🚀 SUBIDO'} +{budgetData.excelBudgetForToday > 0 ? (budgetData.gapRecoveryIncrement / budgetData.excelBudgetForToday * 100).toFixed(1) : 0}%
+                    </p>
                   </div>
-                  }
+                }
               </div>
 
               <div className="grid grid-cols-2 gap-6 lg:gap-10 mb-6 lg:mb-5">
                 <div className="text-left">
                   <p className="text-sm lg:text-base text-white/90 mb-3 lg:mb-2 font-semibold">
-                    {budgetData.gapRecoveryIncrement > 0 ?
-                      `PPT del Día + Recuperación` :
-                      `PPT del Día`}
+                    {needsRecovery ? `PPT del Día + Recuperación` : budgetData.gapRecoveryIncrement > 0 ? `PPT del Día + Ambición` : `PPT del Día`}
                   </p>
                   <motion.p
                       key={`${budgetData.excelBudgetForToday + budgetData.gapRecoveryIncrement}-${gregorianMode}`}
@@ -613,6 +613,12 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                     {formatCurrency(budgetData.excelBudgetForToday + budgetData.gapRecoveryIncrement)}
                   </motion.p>
                   <div className="space-y-1">
+                    {budgetData.gapRecoveryIncrement > 0 && budgetData.excelBudgetForToday > 0 && (
+                      <p className="text-xs text-white/70">
+                        Excel: {formatCurrency(budgetData.excelBudgetForToday)} + {formatCurrency(budgetData.gapRecoveryIncrement)} ({(budgetData.gapRecoveryIncrement / budgetData.excelBudgetForToday * 100).toFixed(1)}% {needsRecovery ? 'recuperación' : 'extra'})
+                      </p>
+                    )}
+                  </div>
                     
 
 
