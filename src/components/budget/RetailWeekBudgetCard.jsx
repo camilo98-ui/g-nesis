@@ -629,13 +629,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
 
                   </div>
 
-                  {/* Brecha total visible debajo */}
-                  {(() => {
-                      const gap = activeBudget?.sales_gap !== undefined && activeBudget?.sales_gap !== null ?
-                      activeBudget.sales_gap :
-                      -budgetData.accumulatedGap;
-                      return null;
-                    })()}
+
                   
                   {/* Sparkline debajo del número */}
                   {budgetData.last7DaysSales?.length > 0 &&
