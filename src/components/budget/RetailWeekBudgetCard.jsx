@@ -62,14 +62,14 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
         const saleDate = parseISO(s.date);
         if (saleDate < ninetyDaysAgoForAvg || saleDate >= now) return;
         const dayOfWeek = saleDate.getDay();
-        if (s.total_sales && s.total_sales > 0) { salesByDayOfWeek[dayOfWeek] += s.total_sales; countByDayOfWeek[dayOfWeek]++; }
+        if (s.total_sales && s.total_sales > 0) {salesByDayOfWeek[dayOfWeek] += s.total_sales;countByDayOfWeek[dayOfWeek]++;}
       } catch {}
     });
 
     const todayDayOfWeek = now.getDay();
     const ninetyDaysAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
     const historicalSalesForDay = dailySales.filter((s) => {
-      try { const saleDate = parseISO(s.date); return saleDate.getDay() === todayDayOfWeek && s.total_sales > 0 && saleDate >= ninetyDaysAgo && saleDate < now; } catch { return false; }
+      try {const saleDate = parseISO(s.date);return saleDate.getDay() === todayDayOfWeek && s.total_sales > 0 && saleDate >= ninetyDaysAgo && saleDate < now;} catch {return false;}
     });
     const _hSorted = historicalSalesForDay.map((s) => s.total_sales).sort((a, b) => a - b);
     const _hTrimmed = _hSorted.length >= 4 ? _hSorted.slice(1, -1) : _hSorted;
@@ -102,11 +102,11 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
       }
     };
 
-    const todaySales = dailySales.find((s) => { try { return isSameDay(parseISO(s.date), now); } catch { return false; } });
+    const todaySales = dailySales.find((s) => {try {return isSameDay(parseISO(s.date), now);} catch {return false;}});
     const todayActualSales = todaySales?.total_sales || 0;
 
     const salesUntilYesterday = dailySales.filter((s) => {
-      try { const saleDate = parseISO(s.date); return saleDate < now && saleDate >= monthStart && saleDate <= monthEnd; } catch { return false; }
+      try {const saleDate = parseISO(s.date);return saleDate < now && saleDate >= monthStart && saleDate <= monthEnd;} catch {return false;}
     }).reduce((sum, s) => sum + (s.total_sales || 0), 0);
 
     const yesterday = new Date(now);
@@ -154,7 +154,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
     }) + 1;
 
     const currentWeekSales = dailySales.filter((s) => {
-      try { return isWithinInterval(parseISO(s.date), { start: displayWeekStart, end: displayWeekEnd }); } catch { return false; }
+      try {return isWithinInterval(parseISO(s.date), { start: displayWeekStart, end: displayWeekEnd });} catch {return false;}
     }).reduce((sum, s) => sum + (s.total_sales || 0), 0);
 
     const weeklyBudget = fullCurrentRetailWeekDays.reduce((sum, day) => sum + getDailyBudget(day), 0);
@@ -169,7 +169,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
     const projectionCompliance = weeklyBudget > 0 ? weekProjection / weeklyBudget * 100 : 0;
 
     const dailyTrendData = fullDisplayWeekDays.map((day) => {
-      const sale = dailySales.find((s) => { try { return isSameDay(parseISO(s.date), day); } catch { return false; } });
+      const sale = dailySales.find((s) => {try {return isSameDay(parseISO(s.date), day);} catch {return false;}});
       const ventasDelDia = sale ? sale.total_sales || 0 : 0;
       const isDayToday = isSameDay(day, now);
       const presupuestoDia = isDayToday ? adjustedDailyBudget : getDailyBudget(day);
@@ -180,7 +180,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
     const weeklyData = displayWeeks.map((weekStart, idx) => {
       const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
       const daysInWeek = eachDayOfInterval({ start: weekStart, end: weekEnd });
-      const weekSales = dailySales.filter((s) => { try { const sd = parseISO(s.date); return sd >= weekStart && sd <= weekEnd; } catch { return false; } }).reduce((sum, s) => sum + (s.total_sales || 0), 0);
+      const weekSales = dailySales.filter((s) => {try {const sd = parseISO(s.date);return sd >= weekStart && sd <= weekEnd;} catch {return false;}}).reduce((sum, s) => sum + (s.total_sales || 0), 0);
       const weekBudget = daysInWeek.reduce((sum, day) => sum + getDailyBudget(day), 0);
       return { semana: `S${idx + 1}`, ventas: weekSales, presupuesto: weekBudget, cumplimiento: weekBudget > 0 ? weekSales / weekBudget * 100 : 0 };
     });
@@ -201,7 +201,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
       totalMonthSales, daysElapsed, avgDailySales: monthAvgDailySales, monthProjection, monthProjectionCompliance,
       monthlyBudget: adjustedMonthlyBudget,
       last7DaysSales: dailySales.filter((s) => {
-        try { const sd = parseISO(s.date); const ago = new Date(now); ago.setDate(ago.getDate() - 7); return sd >= ago && sd <= now && s.total_sales > 0; } catch { return false; }
+        try {const sd = parseISO(s.date);const ago = new Date(now);ago.setDate(ago.getDate() - 7);return sd >= ago && sd <= now && s.total_sales > 0;} catch {return false;}
       }).sort((a, b) => new Date(a.date) - new Date(b.date)).map((s) => ({ value: s.total_sales })),
       topDays: avgByDayOfWeek.map((avg, idx) => ({
         day: ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'][idx],
@@ -293,7 +293,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                       {needsRecovery ? '⚡ RECUPERANDO' : '🚀 SUBIDO'} +{budgetData.excelBudgetForToday > 0 ? (budgetData.gapRecoveryIncrement / budgetData.excelBudgetForToday * 100).toFixed(1) : 0}%
                     </p>
                   </div>
-                }
+                  }
               </div>
 
               <div className="grid grid-cols-2 gap-6 lg:gap-10 mb-6 lg:mb-5">
@@ -310,11 +310,11 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                     {formatCurrency(budgetData.excelBudgetForToday + budgetData.gapRecoveryIncrement)}
                   </motion.p>
                   <div className="space-y-1">
-                    {budgetData.gapRecoveryIncrement > 0 && budgetData.excelBudgetForToday > 0 && (
+                    {budgetData.gapRecoveryIncrement > 0 && budgetData.excelBudgetForToday > 0 &&
                       <p className="text-xs text-white/70">
                         Excel: {formatCurrency(budgetData.excelBudgetForToday)} + {formatCurrency(budgetData.gapRecoveryIncrement)} ({(budgetData.gapRecoveryIncrement / budgetData.excelBudgetForToday * 100).toFixed(1)}% {needsRecovery ? 'recuperación' : 'extra'})
                       </p>
-                    )}
+                      }
                   </div>
 
                   {/* Sparkline debajo del número */}
@@ -347,15 +347,15 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                         </LineChart>
                       </ResponsiveContainer>
                     </div>
-                  }
+                    }
                 </div>
 
                 {/* Panel derecho: Brecha del Mes */}
                 {(() => {
-                  const monthGap = activeBudget?.sales_gap !== undefined && activeBudget?.sales_gap !== null ?
+                    const monthGap = activeBudget?.sales_gap !== undefined && activeBudget?.sales_gap !== null ?
                     activeBudget.sales_gap : -budgetData.accumulatedGap;
-                  return (
-                    <div className="text-right space-y-2">
+                    return (
+                      <div className="text-right space-y-2">
                       <p className="text-sm lg:text-base text-white/90 font-semibold">Brecha del Mes</p>
                       <motion.p
                           key={`${monthGap}-brecha-mes`}
@@ -373,24 +373,24 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                             className={`text-xl md:text-2xl lg:text-3xl font-black ${monthGap < 0 ? 'text-red-300' : 'text-emerald-300'}`}>
                             {(Math.abs(monthGap) / budgetData.monthlyBudget * 100).toFixed(1)}%
                           </motion.p>
-                          <div className={`w-full h-3 rounded-full overflow-hidden mt-2 ${monthGap < 0 ? 'bg-red-600/40' : 'bg-emerald-600/40'}`}>
-                            <motion.div
-                              initial={{ width: 0 }}
-                              animate={{ width: `${Math.min(Math.abs(monthGap) / budgetData.monthlyBudget * 100, 100)}%` }}
-                              transition={{ duration: 1.2, delay: 0.2 }}
-                              className={`h-full rounded-full relative overflow-hidden ${monthGap < 0 ? 'bg-red-400' : 'bg-emerald-400'}`}>
-                              <motion.div
-                                className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-60"
-                                animate={{ x: ['-100%', '200%'] }}
-                                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                                style={{ width: '50%' }} />
-                            </motion.div>
-                          </div>
+                          
+
+
+
+
+
+
+
+
+
+
+
+                          
                         </div>
-                      }
-                    </div>
-                  );
-                })()}
+                        }
+                    </div>);
+
+                  })()}
               </div>
 
               {/* Barra de Proyección Mensual */}
@@ -399,29 +399,29 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                   <span className="text-white/70">Proyección Cierre Mes</span>
                   <span className="font-bold lg:font-black text-white lg:text-lg">{budgetData.monthProjectionCompliance.toFixed(0)}%</span>
                 </div>
-                <div className="relative h-3 lg:h-4 bg-white/20 rounded-full overflow-hidden cursor-pointer" onClick={() => { setSelectedMetric('month-projection'); setIsModalOpen(true); }}>
+                <div className="relative h-3 lg:h-4 bg-white/20 rounded-full overflow-hidden cursor-pointer" onClick={() => {setSelectedMetric('month-projection');setIsModalOpen(true);}}>
                   <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${Math.min(budgetData.monthProjectionCompliance, 100)}%` }}
-                    transition={{ duration: 1.5, delay: 0.5 }}
-                    className={`h-full rounded-full relative overflow-hidden ${budgetData.monthProjectionCompliance >= 100 ? 'bg-emerald-300' : budgetData.monthProjectionCompliance >= 90 ? 'bg-amber-300' : 'bg-rose-300'}`}>
+                      initial={{ width: 0 }}
+                      animate={{ width: `${Math.min(budgetData.monthProjectionCompliance, 100)}%` }}
+                      transition={{ duration: 1.5, delay: 0.5 }}
+                      className={`h-full rounded-full relative overflow-hidden ${budgetData.monthProjectionCompliance >= 100 ? 'bg-emerald-300' : budgetData.monthProjectionCompliance >= 90 ? 'bg-amber-300' : 'bg-rose-300'}`}>
                     <motion.div
-                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-50"
-                      animate={{ x: ['-100%', '200%'] }}
-                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                      style={{ width: '50%' }} />
+                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-50"
+                        animate={{ x: ['-100%', '200%'] }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                        style={{ width: '50%' }} />
                   </motion.div>
                 </div>
               </div>
 
               {needsRecovery &&
-              <div className="bg-white/10 rounded-lg p-3 mb-3">
+                <div className="bg-white/10 rounded-lg p-3 mb-3">
                 <p className="text-xs text-white/70 flex items-center gap-1">
                   <AlertTriangle className="w-3 h-3 flex-shrink-0" />
                   <span className="truncate">Incluye recuperación de {formatCurrency(budgetData.accumulatedGap)}</span>
                 </p>
               </div>
-              }
+                }
 
               <div className="flex items-center justify-center gap-2 text-white/80 pt-2 border-t border-white/20 w-full">
                 {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -454,7 +454,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                       transition={{ delay: idx * 0.1 }}
                       whileHover={{ scale: 1.05, y: -3 }}
                       whileTap={{ scale: 0.98 }}
-                      onClick={() => { setSelectedMetric(`top-day-${idx}`); setIsModalOpen(true); }}
+                      onClick={() => {setSelectedMetric(`top-day-${idx}`);setIsModalOpen(true);}}
                       className="bg-white/80 backdrop-blur-sm rounded-lg p-2 md:p-3 border border-indigo-200/40 text-center hover:border-indigo-400 hover:shadow-lg transition-all cursor-pointer">
                         <p className="text-lg md:text-2xl font-black text-indigo-600 mb-1">{idx === 0 ? '🥇' : idx === 1 ? '🥈' : '🥉'}</p>
                         <p className="text-xs md:text-sm font-bold text-indigo-900 mb-1">{day.dayFull}</p>
@@ -465,14 +465,14 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                   </div>
                   <p className="text-[10px] text-indigo-600 mt-3 text-center">📊 Basado en {budgetData.topDays[0]?.count || 0}+ registros históricos por día</p>
                 </motion.div>
-              }
+                }
 
               {/* Gráfico de Tendencia Diaria */}
               <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="bg-white rounded-xl p-3 md:p-4 border border-slate-200/60 shadow-sm">
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="bg-white rounded-xl p-3 md:p-4 border border-slate-200/60 shadow-sm">
                 <div className="flex items-center justify-between mb-2 md:mb-3">
                   <h4 className="text-sm md:text-base font-bold text-slate-900 flex items-center gap-1.5 md:gap-2">
                     <LineChartIcon className="w-4 h-4 md:w-5 md:h-5 text-rose-400/70" />
@@ -499,20 +499,20 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                     <XAxis dataKey="date" stroke="#9ca3af" fontSize={9} angle={-45} textAnchor="end" height={50} tick={{ fontWeight: 400 }} />
                     <YAxis stroke="#9ca3af" fontSize={9} tickFormatter={(value) => `$${(value / 1000000).toFixed(1)}M`} tick={{ fontWeight: 400 }} />
                     <Tooltip
-                      contentStyle={{ background: '#ffffff', border: '2px solid #e5e7eb', borderRadius: '12px', color: '#1e293b', padding: '10px 14px', boxShadow: '0 8px 24px rgba(0,0,0,0.15)', fontSize: '11px' }}
-                      labelStyle={{ color: '#64748b', fontSize: '10px', fontWeight: '700', marginBottom: '6px' }}
-                      labelFormatter={(label, payload) => { const data = payload?.[0]?.payload; return data?.fullDate || label; }}
-                      formatter={(value, name, props) => {
-                        const { ventas, presupuesto, cumplimiento } = props.payload;
-                        const diferencia = ventas - presupuesto;
-                        const cumplido = cumplimiento >= 100;
-                        return [<div key="info" style={{ fontSize: '11px' }}><div style={{ fontWeight: 'bold', color: '#0f172a', marginBottom: '4px' }}>💰 Venta: {formatCurrency(ventas)}</div><div style={{ fontWeight: 'bold', color: '#64748b', marginBottom: '4px' }}>🎯 Meta: {formatCurrency(presupuesto)}</div><div style={{ fontWeight: 'bold', color: cumplido ? '#059669' : '#dc2626', borderTop: '1px solid #e5e7eb', paddingTop: '4px', marginTop: '4px' }}>{cumplido ? '✅' : '❌'} {cumplimiento.toFixed(0)}% ({diferencia >= 0 ? '+' : ''}{formatCurrency(diferencia)})</div></div>, ''];
-                      }} />
+                        contentStyle={{ background: '#ffffff', border: '2px solid #e5e7eb', borderRadius: '12px', color: '#1e293b', padding: '10px 14px', boxShadow: '0 8px 24px rgba(0,0,0,0.15)', fontSize: '11px' }}
+                        labelStyle={{ color: '#64748b', fontSize: '10px', fontWeight: '700', marginBottom: '6px' }}
+                        labelFormatter={(label, payload) => {const data = payload?.[0]?.payload;return data?.fullDate || label;}}
+                        formatter={(value, name, props) => {
+                          const { ventas, presupuesto, cumplimiento } = props.payload;
+                          const diferencia = ventas - presupuesto;
+                          const cumplido = cumplimiento >= 100;
+                          return [<div key="info" style={{ fontSize: '11px' }}><div style={{ fontWeight: 'bold', color: '#0f172a', marginBottom: '4px' }}>💰 Venta: {formatCurrency(ventas)}</div><div style={{ fontWeight: 'bold', color: '#64748b', marginBottom: '4px' }}>🎯 Meta: {formatCurrency(presupuesto)}</div><div style={{ fontWeight: 'bold', color: cumplido ? '#059669' : '#dc2626', borderTop: '1px solid #e5e7eb', paddingTop: '4px', marginTop: '4px' }}>{cumplido ? '✅' : '❌'} {cumplimiento.toFixed(0)}% ({diferencia >= 0 ? '+' : ''}{formatCurrency(diferencia)})</div></div>, ''];
+                        }} />
                     <ReferenceLine y={0} stroke="#9ca3af" strokeDasharray="3 3" />
                     <Bar dataKey={(data) => data.ventas - data.presupuesto} fill="url(#barCumplido)" radius={[4, 4, 0, 0]} animationDuration={1000} filter="url(#barGlow)">
                       {budgetData.dailyTrendData.map((entry, index) =>
-                      <Cell key={`cell-${index}`} fill={entry.cumplimiento >= 100 ? 'url(#barCumplido)' : 'url(#barNoCumplido)'} />
-                      )}
+                        <Cell key={`cell-${index}`} fill={entry.cumplimiento >= 100 ? 'url(#barCumplido)' : 'url(#barNoCumplido)'} />
+                        )}
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
@@ -536,26 +536,26 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                     <XAxis dataKey="date" stroke="#9ca3af" fontSize={11} angle={-35} textAnchor="end" height={65} tick={{ fontWeight: 500 }} />
                     <YAxis stroke="#9ca3af" fontSize={11} tickFormatter={(value) => `$${(value / 1000000).toFixed(1)}M`} tick={{ fontWeight: 400 }} />
                     <Tooltip
-                      contentStyle={{ background: '#ffffff', border: '2px solid #e5e7eb', borderRadius: '14px', color: '#1e293b', padding: '14px 18px', boxShadow: '0 10px 30px rgba(0,0,0,0.12)', minWidth: '220px' }}
-                      labelStyle={{ color: '#64748b', fontSize: '12px', fontWeight: '700', marginBottom: '10px', paddingBottom: '8px', borderBottom: '1px solid #e5e7eb' }}
-                      labelFormatter={(label, payload) => { const data = payload?.[0]?.payload; return data?.fullDate || label; }}
-                      formatter={(value, name, props) => {
-                        const { ventas, presupuesto, cumplimiento } = props.payload;
-                        const diferencia = ventas - presupuesto;
-                        const cumplido = cumplimiento >= 100;
-                        return [<div key="info" style={{ fontSize: '13px' }}><div style={{ fontWeight: 'bold', color: '#0f172a', marginBottom: '6px' }}>💰 Venta: {formatCurrency(ventas)}</div><div style={{ fontWeight: 'bold', color: '#64748b', marginBottom: '8px' }}>🎯 Meta: {formatCurrency(presupuesto)}</div><div style={{ fontWeight: 'bold', color: cumplido ? '#059669' : '#dc2626', borderTop: '2px solid #e5e7eb', paddingTop: '8px', marginTop: '4px', fontSize: '14px' }}>{cumplido ? '✅ Cumplido' : '❌ No cumplido'}: {cumplimiento.toFixed(0)}%<div style={{ fontSize: '12px', marginTop: '4px', color: cumplido ? '#10b981' : '#ef4444' }}>Diferencia: {diferencia >= 0 ? '+' : ''}{formatCurrency(diferencia)}</div></div></div>, ''];
-                      }} />
+                        contentStyle={{ background: '#ffffff', border: '2px solid #e5e7eb', borderRadius: '14px', color: '#1e293b', padding: '14px 18px', boxShadow: '0 10px 30px rgba(0,0,0,0.12)', minWidth: '220px' }}
+                        labelStyle={{ color: '#64748b', fontSize: '12px', fontWeight: '700', marginBottom: '10px', paddingBottom: '8px', borderBottom: '1px solid #e5e7eb' }}
+                        labelFormatter={(label, payload) => {const data = payload?.[0]?.payload;return data?.fullDate || label;}}
+                        formatter={(value, name, props) => {
+                          const { ventas, presupuesto, cumplimiento } = props.payload;
+                          const diferencia = ventas - presupuesto;
+                          const cumplido = cumplimiento >= 100;
+                          return [<div key="info" style={{ fontSize: '13px' }}><div style={{ fontWeight: 'bold', color: '#0f172a', marginBottom: '6px' }}>💰 Venta: {formatCurrency(ventas)}</div><div style={{ fontWeight: 'bold', color: '#64748b', marginBottom: '8px' }}>🎯 Meta: {formatCurrency(presupuesto)}</div><div style={{ fontWeight: 'bold', color: cumplido ? '#059669' : '#dc2626', borderTop: '2px solid #e5e7eb', paddingTop: '8px', marginTop: '4px', fontSize: '14px' }}>{cumplido ? '✅ Cumplido' : '❌ No cumplido'}: {cumplimiento.toFixed(0)}%<div style={{ fontSize: '12px', marginTop: '4px', color: cumplido ? '#10b981' : '#ef4444' }}>Diferencia: {diferencia >= 0 ? '+' : ''}{formatCurrency(diferencia)}</div></div></div>, ''];
+                        }} />
                     <Legend wrapperStyle={{ paddingTop: '16px' }} content={() =>
                       <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', fontSize: '12px', fontWeight: '600' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: '12px', height: '12px', background: 'linear-gradient(to bottom, #a7f3d0, #d1fae5)', borderRadius: '3px' }}></div><span style={{ color: '#059669' }}>✅ Meta superada</span></div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: '12px', height: '12px', background: 'linear-gradient(to bottom, #fda4af, #fecdd3)', borderRadius: '3px' }}></div><span style={{ color: '#dc2626' }}>❌ Meta no alcanzada</span></div>
                       </div>
-                    } />
+                      } />
                     <ReferenceLine y={0} stroke="#9ca3af" strokeDasharray="3 3" strokeWidth={1} />
                     <Bar dataKey={(data) => data.ventas - data.presupuesto} radius={[6, 6, 0, 0]} animationDuration={1200} animationEasing="ease-out" filter="url(#barGlowDesktop)">
                       {budgetData.dailyTrendData.map((entry, index) =>
                         <Cell key={`cell-${index}`} fill={entry.cumplimiento >= 100 ? 'url(#barCumplidoDesktop)' : 'url(#barNoCumplidoDesktop)'} />
-                      )}
+                        )}
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
@@ -579,15 +579,15 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-2 md:gap-3">
-                  <motion.button whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.98 }} onClick={() => { setSelectedMetric('weekly-budget'); setIsModalOpen(true); }} className="bg-purple-50 rounded-lg p-2 md:p-3 border border-purple-200/40 transition-all text-left hover:border-purple-400">
+                  <motion.button whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.98 }} onClick={() => {setSelectedMetric('weekly-budget');setIsModalOpen(true);}} className="bg-purple-50 rounded-lg p-2 md:p-3 border border-purple-200/40 transition-all text-left hover:border-purple-400">
                     <p className="text-[10px] md:text-xs text-purple-500/70 mb-1">Meta Semanal</p>
                     <p className="text-sm md:text-lg font-black text-purple-600 leading-tight">{formatCurrency(budgetData.weeklyBudget)}</p>
                   </motion.button>
-                  <motion.button whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.98 }} onClick={() => { setSelectedMetric('weekly-sales'); setIsModalOpen(true); }} className="bg-purple-50 rounded-lg p-2 md:p-3 border border-purple-200/40 transition-all text-left hover:border-purple-400">
+                  <motion.button whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.98 }} onClick={() => {setSelectedMetric('weekly-sales');setIsModalOpen(true);}} className="bg-purple-50 rounded-lg p-2 md:p-3 border border-purple-200/40 transition-all text-left hover:border-purple-400">
                     <p className="text-[10px] md:text-xs text-purple-500/70 mb-1">Venta Actual</p>
                     <p className="text-sm md:text-lg font-black text-purple-600 leading-tight">{formatCurrency(budgetData.currentWeekSales)}</p>
                   </motion.button>
-                  <motion.button whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.98 }} onClick={() => { setSelectedMetric('weekly-projection'); setIsModalOpen(true); }} className="bg-pink-50 rounded-lg p-2 md:p-3 border border-pink-200/40 transition-all text-left hover:border-pink-400">
+                  <motion.button whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.98 }} onClick={() => {setSelectedMetric('weekly-projection');setIsModalOpen(true);}} className="bg-pink-50 rounded-lg p-2 md:p-3 border border-pink-200/40 transition-all text-left hover:border-pink-400">
                     <p className="text-[10px] md:text-xs text-pink-500/70 mb-1">Proyección</p>
                     <p className="text-sm md:text-lg font-black text-pink-600 leading-tight">{formatCurrency(budgetData.weekProjection)}</p>
                   </motion.button>
@@ -616,7 +616,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                   exit={{ opacity: 0, y: 10 }}
                   whileHover={{ scale: 1.01 }}
                   whileTap={{ scale: 0.99 }}
-                  onClick={() => { setSelectedMetric('month-projection'); setIsModalOpen(true); }}
+                  onClick={() => {setSelectedMetric('month-projection');setIsModalOpen(true);}}
                   className="w-full bg-white/40 rounded-xl p-3 md:p-4 border border-indigo-200/40 hover:border-indigo-400 transition-all cursor-pointer">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-xs lg:text-sm">
@@ -672,17 +672,17 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#fecdd3" opacity={0.3} />
                     <XAxis dataKey="semana" stroke="#9ca3af" fontSize={11} fontWeight={600} tick={{ fill: '#9ca3af' }} />
-                    <YAxis stroke="#9ca3af" fontSize={11} fontWeight={500} tickFormatter={(value) => { if (value >= 1000000) return `$${(value / 1000000).toFixed(1)}M`; if (value >= 1000) return `$${(value / 1000).toFixed(0)}K`; return `$${value.toLocaleString('es-CO')}`; }} tick={{ fill: '#9ca3af' }} />
+                    <YAxis stroke="#9ca3af" fontSize={11} fontWeight={500} tickFormatter={(value) => {if (value >= 1000000) return `$${(value / 1000000).toFixed(1)}M`;if (value >= 1000) return `$${(value / 1000).toFixed(0)}K`;return `$${value.toLocaleString('es-CO')}`;}} tick={{ fill: '#9ca3af' }} />
                     <Tooltip
-                      contentStyle={{ backgroundColor: '#fff', border: '2px solid #fda4af', borderRadius: '12px', color: '#0f172a', boxShadow: '0 8px 24px rgba(0,0,0,0.15)', padding: '12px 16px' }}
-                      labelStyle={{ color: '#64748b', fontSize: '12px', fontWeight: '700', marginBottom: '8px' }}
-                      formatter={(value, name) => [<span key={name} style={{ fontSize: '13px', fontWeight: 'bold', color: '#0f172a' }}>{formatCurrency(value)}</span>, name === 'presupuesto' ? '🎯 Meta' : '💰 Venta']} />
+                        contentStyle={{ backgroundColor: '#fff', border: '2px solid #fda4af', borderRadius: '12px', color: '#0f172a', boxShadow: '0 8px 24px rgba(0,0,0,0.15)', padding: '12px 16px' }}
+                        labelStyle={{ color: '#64748b', fontSize: '12px', fontWeight: '700', marginBottom: '8px' }}
+                        formatter={(value, name) => [<span key={name} style={{ fontSize: '13px', fontWeight: 'bold', color: '#0f172a' }}>{formatCurrency(value)}</span>, name === 'presupuesto' ? '🎯 Meta' : '💰 Venta']} />
                     <Legend wrapperStyle={{ paddingTop: '16px' }} content={() =>
                       <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', fontSize: '11px', fontWeight: '600' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: '12px', height: '12px', background: 'linear-gradient(to bottom, #a7f3d0, #d1fae5)', borderRadius: '3px' }}></div><span style={{ color: '#059669' }}>🎯 Meta</span></div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: '12px', height: '12px', background: 'linear-gradient(to bottom, #fda4af, #fecdd3)', borderRadius: '3px' }}></div><span style={{ color: '#dc2626' }}>💰 Venta</span></div>
                       </div>
-                    } />
+                      } />
                     <Bar dataKey="presupuesto" fill="url(#barPresupuesto)" radius={[8, 8, 0, 0]} filter="url(#barGlowWeekly)" animationDuration={1200} animationEasing="ease-out" />
                     <Bar dataKey="ventas" fill="url(#barVentas)" radius={[8, 8, 0, 0]} filter="url(#barGlowWeekly)" animationDuration={1500} animationEasing="ease-out" />
                   </BarChart>
@@ -691,34 +691,34 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
 
               {/* Proyección de Semanas Futuras */}
               {(() => {
-                const now = new Date();
-                const monthStartCalc = startOfMonth(now);
-                const monthEndCalc = endOfMonth(now);
-                const weeks = eachWeekOfInterval({ start: monthStartCalc, end: monthEndCalc }, { weekStartsOn: 1 });
-                const futureWeeks = weeks.map((weekStart, idx) => {
-                  const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
-                  const daysInWeek = eachDayOfInterval({ start: weekStart, end: weekEnd }).filter((d) => d >= monthStartCalc && d <= monthEndCalc);
-                  const weekBudget = daysInWeek.reduce((sum, day) => {
-                    const dayOfWeek = day.getDay();
-                    const avgByDayOfWeekLocal = [0, 0, 0, 0, 0, 0, 0].map((_, i) => {
-                      const historicalForDay = dailySales.filter((s) => { try { const sd = parseISO(s.date); return sd.getDay() === i && s.total_sales > 0; } catch { return false; } });
-                      return historicalForDay.length > 0 ? historicalForDay.reduce((s, sale) => s + sale.total_sales, 0) / historicalForDay.length : 0;
-                    });
-                    const totalWeeklyAvgLocal = avgByDayOfWeekLocal.reduce((a, b) => a + b, 0);
-                    if (totalWeeklyAvgLocal === 0) return sum + activeBudget.sales_budget * 1.05 / 30;
-                    const scaleFactor = activeBudget.sales_budget * 1.05 / (totalWeeklyAvgLocal * (30 / 7));
-                    return sum + avgByDayOfWeekLocal[dayOfWeek] * scaleFactor;
-                  }, 0);
-                  return { semana: `S${idx + 1}`, weekStart, weekEnd, presupuesto: weekBudget, isCurrent: idx + 1 === budgetData.currentWeekNumber, isFuture: idx + 1 > budgetData.currentWeekNumber };
-                }).filter((w) => w.isFuture);
+                  const now = new Date();
+                  const monthStartCalc = startOfMonth(now);
+                  const monthEndCalc = endOfMonth(now);
+                  const weeks = eachWeekOfInterval({ start: monthStartCalc, end: monthEndCalc }, { weekStartsOn: 1 });
+                  const futureWeeks = weeks.map((weekStart, idx) => {
+                    const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
+                    const daysInWeek = eachDayOfInterval({ start: weekStart, end: weekEnd }).filter((d) => d >= monthStartCalc && d <= monthEndCalc);
+                    const weekBudget = daysInWeek.reduce((sum, day) => {
+                      const dayOfWeek = day.getDay();
+                      const avgByDayOfWeekLocal = [0, 0, 0, 0, 0, 0, 0].map((_, i) => {
+                        const historicalForDay = dailySales.filter((s) => {try {const sd = parseISO(s.date);return sd.getDay() === i && s.total_sales > 0;} catch {return false;}});
+                        return historicalForDay.length > 0 ? historicalForDay.reduce((s, sale) => s + sale.total_sales, 0) / historicalForDay.length : 0;
+                      });
+                      const totalWeeklyAvgLocal = avgByDayOfWeekLocal.reduce((a, b) => a + b, 0);
+                      if (totalWeeklyAvgLocal === 0) return sum + activeBudget.sales_budget * 1.05 / 30;
+                      const scaleFactor = activeBudget.sales_budget * 1.05 / (totalWeeklyAvgLocal * (30 / 7));
+                      return sum + avgByDayOfWeekLocal[dayOfWeek] * scaleFactor;
+                    }, 0);
+                    return { semana: `S${idx + 1}`, weekStart, weekEnd, presupuesto: weekBudget, isCurrent: idx + 1 === budgetData.currentWeekNumber, isFuture: idx + 1 > budgetData.currentWeekNumber };
+                  }).filter((w) => w.isFuture);
 
-                if (futureWeeks.length === 0) return null;
-                return (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="bg-gradient-to-br from-purple-50/40 to-indigo-50/40 rounded-2xl p-4 border-2 border-purple-200/30 shadow-lg">
+                  if (futureWeeks.length === 0) return null;
+                  return (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="bg-gradient-to-br from-purple-50/40 to-indigo-50/40 rounded-2xl p-4 border-2 border-purple-200/30 shadow-lg">
                     <div className="flex items-center justify-between mb-3">
                       <h4 className="font-black text-purple-900 flex items-center gap-2 text-sm md:text-base">
                         <Calendar className="w-4 h-4 md:w-5 md:h-5 text-purple-400" />
@@ -735,28 +735,28 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                           </div>
                           <span className="font-black text-purple-900 text-base">{formatCurrency(week.presupuesto)}</span>
                         </motion.div>
-                      )}
+                        )}
                     </div>
                     <p className="text-[10px] text-purple-500 mt-3 text-center">💡 Proyecciones estimadas - ajusta según estrategia comercial</p>
-                  </motion.div>
-                );
-              })()}
+                  </motion.div>);
+
+                })()}
 
               {/* Grid de métricas resumidas */}
               <div className="grid grid-cols-2 gap-3">
-                <motion.button whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.98 }} onClick={() => { setSelectedMetric('base'); setIsModalOpen(true); }} className="bg-gradient-to-br from-rose-50/40 to-pink-50/40 rounded-lg p-3 border border-rose-200/40 transition-all text-left hover:border-rose-400">
+                <motion.button whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.98 }} onClick={() => {setSelectedMetric('base');setIsModalOpen(true);}} className="bg-gradient-to-br from-rose-50/40 to-pink-50/40 rounded-lg p-3 border border-rose-200/40 transition-all text-left hover:border-rose-400">
                   <p className="text-xs text-rose-500/70 mb-1">Base Diaria</p>
                   <p className="text-lg font-bold text-rose-600 leading-tight">{formatCurrency(budgetData.dailyBaseBudget)}</p>
                 </motion.button>
-                <motion.button whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.98 }} onClick={() => { setSelectedMetric('remaining'); setIsModalOpen(true); }} className="bg-gradient-to-br from-emerald-50/40 to-green-50/40 rounded-lg p-3 border border-emerald-200/40 transition-all text-left hover:border-emerald-400">
+                <motion.button whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.98 }} onClick={() => {setSelectedMetric('remaining');setIsModalOpen(true);}} className="bg-gradient-to-br from-emerald-50/40 to-green-50/40 rounded-lg p-3 border border-emerald-200/40 transition-all text-left hover:border-emerald-400">
                   <p className="text-xs text-emerald-500/70 mb-1">Días Restantes</p>
                   <p className="text-lg font-bold text-emerald-600">{budgetData.remainingDays}</p>
                 </motion.button>
-                <motion.button whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.98 }} onClick={() => { setSelectedMetric('pending'); setIsModalOpen(true); }} className="bg-gradient-to-br from-rose-50/40 to-pink-50/40 rounded-lg p-3 border border-rose-200/40 transition-all text-left hover:border-rose-400">
+                <motion.button whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.98 }} onClick={() => {setSelectedMetric('pending');setIsModalOpen(true);}} className="bg-gradient-to-br from-rose-50/40 to-pink-50/40 rounded-lg p-3 border border-rose-200/40 transition-all text-left hover:border-rose-400">
                   <p className="text-xs text-rose-500/70 mb-1">Por Vender</p>
                   <p className="text-lg font-bold text-rose-600 leading-tight">{formatCurrency(budgetData.remainingBudget)}</p>
                 </motion.button>
-                <motion.button whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.98 }} onClick={() => { setSelectedMetric('compliance'); setIsModalOpen(true); }} className={`rounded-lg p-3 border transition-all text-left ${isOnTrack ? 'bg-gradient-to-br from-emerald-50/40 to-green-50/40 border-emerald-200/40 hover:border-emerald-400' : 'bg-gradient-to-br from-rose-50/40 to-pink-50/40 border-rose-200/40 hover:border-rose-400'}`}>
+                <motion.button whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.98 }} onClick={() => {setSelectedMetric('compliance');setIsModalOpen(true);}} className={`rounded-lg p-3 border transition-all text-left ${isOnTrack ? 'bg-gradient-to-br from-emerald-50/40 to-green-50/40 border-emerald-200/40 hover:border-emerald-400' : 'bg-gradient-to-br from-rose-50/40 to-pink-50/40 border-rose-200/40 hover:border-rose-400'}`}>
                   <p className={`text-xs mb-1 ${isOnTrack ? 'text-emerald-500/70' : 'text-rose-500/70'}`}>Cumplimiento</p>
                   <p className={`text-lg font-bold ${isOnTrack ? 'text-emerald-600' : 'text-rose-600'}`}>{budgetData.compliance.toFixed(1)}%</p>
                 </motion.button>
@@ -773,12 +773,12 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                   formatCurrency={formatCurrency}
                   gregorianMode={gregorianMode} />
               </>
-            }
+              }
           </AnimatePresence>
           </>
           }
         </CardContent>
       </Card>
-    </motion.div>
-  );
+    </motion.div>);
+
 }
