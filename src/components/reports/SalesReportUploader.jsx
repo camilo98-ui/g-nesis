@@ -1,10 +1,9 @@
 import React, { useState, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { Upload, X, CheckCircle, AlertCircle, Loader2, FileSpreadsheet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import * as XLSX from 'xlsx';
-import { format } from 'date-fns';
 
 function parseStoreCodeFromHeader(headerText) {
   if (!headerText) return null;
@@ -27,67 +26,28 @@ function parseXlsx(file) {
   });
 }
 
-// Detecta si el archivo es formato "KPIs" (columnas = tiendas, filas = jerarquía)
-// vs formato "Participación" (filas = jerarquía, columnas = tiendas)
 function detectFormat(rows) {
   if (!rows || rows.length < 2) return 'unknown';
-  const firstRow = rows[0] || [];
-  const firstCell = String(firstRow[0] || '').toUpperCase();
-  // Formato KPIs: primera celda es null o vacía, col 0 = TIENDA en fila 2
-  // La primera columna de fila 0 es null y hay nombres de departamentos en las columnas
   const hasStoreName = (rows[2] || []).some(cell => {
     if (!cell) return false;
     const txt = String(cell).toUpperCase();
     return txt.includes('BTA') || txt.includes('TUNJA');
   });
-  if (hasStoreName) return 'kpis'; // columna 0 tiene tiendas en filas de datos
+  if (hasStoreName) return 'kpis';
 
-  // Formato participación: fila 1 tiene tiendas en cols 1,4,7...
   const headerRow = rows[1] || [];
   const storeInHeader = headerRow.some(cell => parseStoreCodeFromHeader(cell));
   if (storeInHeader) return 'participacion';
 
-  return 'kpis'; // fallback
+  return 'kpis';
 }
 
-// ─── Parser formato KPIs (ResumenKpis) ───────────────────────────────────────
-// Row 0: secciones por grupo (texto en primera col de cada grupo)
-// Row 1: nombres de producto por columna
-// Row 2+: datos por tienda
 function parseKpisFormat(rows) {
-  const sectionRow = rows[0] || [];   // secciones
-  const productRow = rows[1] || [];   // productos
-  const dataRows = rows.slice(2);     // filas de tiendas
+  const sectionRow = rows[0] || [];
+  const productRow = rows[1] || [];
+  const dataRows = rows.slice(2);
 
-  // Construir mapa de columnas: col -> { department, section, product }
-  // Los departamentos están en el header del xlsx como nombres de columna (ej: ADICIONES, HELADOS...)
-  // pero en este xlsx la fila 0 puede tener secciones y los departamentos están implícitos
-  // en las columnas "Total X" → retrocedemos para encontrar el departamento
-  
-  // Reconstruir la cabecera real leyendo el xlsx con header=0 para obtener nombres de columna
-  // En el xlsx: columna "ADICIONES" = departamento, luego cols sub = secciones/productos
-  // Usamos el objeto de la fila 0 para mapear
-
-  // Leer nombres de columna reales del xlsx (son los nombres que XLSX asignó)
-  // Los nombres de columna son: TIENDA, ADICIONES, col_2, col_3, ... Total ADICIONES, HELADOS, ...
-  // Necesitamos reconstruir desde las filas raw
-
-  // Estrategia: iterar columnas de la fila de datos
-  // Col 0 = TIENDA
-  // Cada vez que encontramos un "Total XXX" en sectionRow, sabemos que XXX es el departamento de las cols anteriores
-  // En fila 0: sección. En fila 1: producto
-
-  const colMeta = []; // { department, section, product } por índice de columna
-  let currentDept = '';
-  let currentSection = '';
-
-  // Primera pasada: detectar departamentos desde los nombres de columna implícitos
-  // Los dept están en los "Total DEPT" que aparecen en sectionRow
-  // Reconstruir: buscamos en sectionRow los textos "Total XXX" para saber el dept de las cols anteriores
-  
-  // Primero identificar los límites de departamentos
-  const deptBoundaries = []; // { name, startCol, endCol }
-  
+  const deptBoundaries = [];
   for (let c = 1; c < sectionRow.length; c++) {
     const cell = sectionRow[c];
     if (cell && String(cell).startsWith('Total ')) {
@@ -95,21 +55,19 @@ function parseKpisFormat(rows) {
       deptBoundaries.push({ name: deptName, endCol: c });
     }
   }
-  
-  // Asignar startCol
+
   let prevEnd = 0;
-  deptBoundaries.forEach((d, i) => {
+  deptBoundaries.forEach((d) => {
     d.startCol = prevEnd + 1;
     prevEnd = d.endCol;
   });
 
-  // Ahora para cada columna, determinar dept, section, product
+  const colMeta = [];
   for (let c = 1; c < productRow.length; c++) {
     const dept = deptBoundaries.find(d => c >= d.startCol && c <= d.endCol);
     const deptName = dept ? dept.name : '';
     const sectionCell = sectionRow[c];
     const productCell = productRow[c];
-    
     colMeta[c] = {
       department: deptName,
       section: (sectionCell && !String(sectionCell).startsWith('Total')) ? String(sectionCell).trim() : '',
@@ -118,23 +76,18 @@ function parseKpisFormat(rows) {
     };
   }
 
-  // Ahora construir los registros desde las filas de tiendas
   const records = [];
   const reportId = `report_${Date.now()}`;
   const uploadedAt = new Date().toISOString();
 
-  // Para cada tienda (fila de datos), extraer los valores
   dataRows.forEach(row => {
     if (!row || !row[0]) return;
     const storeRaw = String(row[0]).trim();
-    // Extraer código de tienda del texto "BTA 18 (CC PLAZA IMPERIAL)."
     const codeMatch = storeRaw.match(/\b(BTA\s*\d+|TUNJA\s*\d+)\b/i);
     if (!codeMatch) return;
     const storeCode = codeMatch[1].replace(/\s+/, ' ').toUpperCase();
 
-    // Agrupar valores por dept → section → products
     const deptMap = {};
-
     for (let c = 1; c < row.length; c++) {
       const meta = colMeta[c];
       if (!meta || meta.isTotal || !meta.department) continue;
@@ -154,58 +107,37 @@ function parseKpisFormat(rows) {
       }
     }
 
-    // Crear registros: department, section, product
     Object.entries(deptMap).forEach(([dept, sections]) => {
-      // Calcular totales de dept
       let deptTotal = 0;
       Object.values(sections).forEach(s => {
         s.products.forEach(p => deptTotal += p.participation);
       });
 
-      // Dept row
       records.push({
-        store_code: storeCode,
-        uploaded_at: uploadedAt,
-        report_id: reportId,
-        department: dept,
-        section: '',
-        product: '',
-        level: 'department',
-        total_sales: 0,
-        total_transactions: 0,
+        store_code: storeCode, uploaded_at: uploadedAt, report_id: reportId,
+        department: dept, section: '', product: '', level: 'department',
+        total_sales: 0, total_transactions: 0,
         participation: Math.round(deptTotal * 100) / 100,
       });
 
-      Object.entries(sections).forEach(([sectionKey, sData]) => {
+      Object.entries(sections).forEach(([, sData]) => {
         const sectionName = sData.section;
         const sectionTotal = sData.products.reduce((a, p) => a + p.participation, 0);
 
         if (sectionName) {
           records.push({
-            store_code: storeCode,
-            uploaded_at: uploadedAt,
-            report_id: reportId,
-            department: dept,
-            section: sectionName,
-            product: '',
-            level: 'section',
-            total_sales: 0,
-            total_transactions: 0,
+            store_code: storeCode, uploaded_at: uploadedAt, report_id: reportId,
+            department: dept, section: sectionName, product: '', level: 'section',
+            total_sales: 0, total_transactions: 0,
             participation: Math.round(sectionTotal * 100) / 100,
           });
         }
 
         sData.products.forEach(p => {
           records.push({
-            store_code: storeCode,
-            uploaded_at: uploadedAt,
-            report_id: reportId,
-            department: dept,
-            section: sectionName,
-            product: p.product,
-            level: 'product',
-            total_sales: 0,
-            total_transactions: 0,
+            store_code: storeCode, uploaded_at: uploadedAt, report_id: reportId,
+            department: dept, section: sectionName, product: p.product, level: 'product',
+            total_sales: 0, total_transactions: 0,
             participation: Math.round(p.participation * 10000) / 10000,
           });
         });
@@ -216,7 +148,6 @@ function parseKpisFormat(rows) {
   return records;
 }
 
-// ─── Parser formato Participación (formato original) ─────────────────────────
 function parseParticipacionFormat(rows) {
   const headerRow = rows[1] || [];
   const storeColumns = [];
@@ -269,17 +200,12 @@ function parseParticipacionFormat(rows) {
     else if (level === 'section') currentSection = label;
 
     for (const { colIndex, code } of storeColumns) {
-      const salesVal = row[colIndex];
-      const transVal = row[colIndex + 1];
-      const partVal = row[colIndex + 2];
-      const sales = parseFloat(salesVal) || 0;
-      const transactions = parseInt(transVal) || 0;
-      const participation = parseFloat(partVal) || 0;
+      const sales = parseFloat(row[colIndex]) || 0;
+      const transactions = parseInt(row[colIndex + 1]) || 0;
+      const participation = parseFloat(row[colIndex + 2]) || 0;
       if (sales === 0 && transactions === 0) continue;
       records.push({
-        store_code: code,
-        uploaded_at: uploadedAt,
-        report_id: reportId,
+        store_code: code, uploaded_at: uploadedAt, report_id: reportId,
         department: currentDept,
         section: level === 'section' ? label : (level === 'product' ? currentSection : ''),
         product: level === 'product' ? label : '',
@@ -295,7 +221,7 @@ function parseParticipacionFormat(rows) {
 
 export default function SalesReportUploader({ onClose, onSuccess }) {
   const [file, setFile] = useState(null);
-  const [status, setStatus] = useState('idle'); // idle, parsing, uploading, success, error
+  const [status, setStatus] = useState('idle');
   const [message, setMessage] = useState('');
   const [progress, setProgress] = useState({ current: 0, total: 0 });
   const fileRef = useRef();
@@ -315,15 +241,10 @@ export default function SalesReportUploader({ onClose, onSuccess }) {
     setMessage('Analizando archivo...');
 
     const rows = await parseXlsx(file);
-    const format = detectFormat(rows);
-    setMessage(`Formato detectado: ${format === 'kpis' ? 'Resumen KPIs' : 'Participación'}. Procesando...`);
+    const fmt = detectFormat(rows);
+    setMessage(`Formato detectado: ${fmt === 'kpis' ? 'Resumen KPIs' : 'Participación'}. Procesando...`);
 
-    let records = [];
-    if (format === 'kpis') {
-      records = parseKpisFormat(rows);
-    } else {
-      records = parseParticipacionFormat(rows);
-    }
+    let records = fmt === 'kpis' ? parseKpisFormat(rows) : parseParticipacionFormat(rows);
 
     if (records.length === 0) {
       setStatus('error');
@@ -331,28 +252,22 @@ export default function SalesReportUploader({ onClose, onSuccess }) {
       return;
     }
 
-    // Borrar registros anteriores y subir nuevos
     setStatus('uploading');
     setMessage('Eliminando datos anteriores...');
 
     try {
       const existing = await base44.entities.SalesReport.list();
-      if (existing.length > 0) {
-        // Borrar en chunks de 10
-        for (let i = 0; i < existing.length; i += 10) {
-          const chunk = existing.slice(i, i + 10);
-          await Promise.all(chunk.map(r => base44.entities.SalesReport.delete(r.id)));
-        }
+      for (let i = 0; i < existing.length; i += 10) {
+        const chunk = existing.slice(i, i + 10);
+        await Promise.all(chunk.map(r => base44.entities.SalesReport.delete(r.id)));
       }
 
       setMessage(`Guardando ${records.length} registros...`);
       setProgress({ current: 0, total: records.length });
 
-      // Subir en chunks de 50
       const chunkSize = 50;
       for (let i = 0; i < records.length; i += chunkSize) {
-        const chunk = records.slice(i, i + chunkSize);
-        await base44.entities.SalesReport.bulkCreate(chunk);
+        await base44.entities.SalesReport.bulkCreate(records.slice(i, i + chunkSize));
         setProgress({ current: Math.min(i + chunkSize, records.length), total: records.length });
       }
 
@@ -380,7 +295,6 @@ export default function SalesReportUploader({ onClose, onSuccess }) {
         onClick={e => e.stopPropagation()}
         className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden"
       >
-        {/* Header */}
         <div className="bg-gradient-to-r from-slate-700 to-slate-800 p-5 text-white flex items-center justify-between">
           <div className="flex items-center gap-3">
             <FileSpreadsheet className="w-6 h-6" />
@@ -395,20 +309,13 @@ export default function SalesReportUploader({ onClose, onSuccess }) {
         </div>
 
         <div className="p-6 space-y-4">
-          {/* Drop zone */}
           <div
             onClick={() => fileRef.current?.click()}
             className={`border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all ${
               file ? 'border-emerald-400 bg-emerald-50' : 'border-slate-300 hover:border-slate-400 bg-slate-50'
             }`}
           >
-            <input
-              ref={fileRef}
-              type="file"
-              accept=".xlsx"
-              className="hidden"
-              onChange={handleFileChange}
-            />
+            <input ref={fileRef} type="file" accept=".xlsx" className="hidden" onChange={handleFileChange} />
             {file ? (
               <div>
                 <CheckCircle className="w-10 h-10 text-emerald-500 mx-auto mb-2" />
@@ -424,7 +331,6 @@ export default function SalesReportUploader({ onClose, onSuccess }) {
             )}
           </div>
 
-          {/* Info */}
           <div className="bg-blue-50 rounded-xl p-3 text-xs text-blue-700">
             <p className="font-semibold mb-1">Formatos soportados:</p>
             <ul className="space-y-0.5 list-disc list-inside">
@@ -434,7 +340,6 @@ export default function SalesReportUploader({ onClose, onSuccess }) {
             <p className="mt-1 text-blue-500">El formato se detecta automáticamente.</p>
           </div>
 
-          {/* Status */}
           {message && (
             <motion.div
               initial={{ opacity: 0, y: 5 }}
@@ -445,14 +350,15 @@ export default function SalesReportUploader({ onClose, onSuccess }) {
                 'bg-blue-50 text-blue-700'
               }`}
             >
-              {status === 'uploading' || status === 'parsing' ? <Loader2 className="w-4 h-4 animate-spin flex-shrink-0 mt-0.5" /> :
-               status === 'success' ? <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5" /> :
-               <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />}
+              {status === 'uploading' || status === 'parsing'
+                ? <Loader2 className="w-4 h-4 animate-spin flex-shrink-0 mt-0.5" />
+                : status === 'success'
+                ? <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                : <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />}
               <span>{message}</span>
             </motion.div>
           )}
 
-          {/* Progress */}
           {status === 'uploading' && progress.total > 0 && (
             <div className="space-y-1">
               <div className="flex justify-between text-xs text-slate-500">
@@ -468,11 +374,8 @@ export default function SalesReportUploader({ onClose, onSuccess }) {
             </div>
           )}
 
-          {/* Buttons */}
           <div className="flex gap-3 pt-2">
-            <Button variant="outline" onClick={onClose} className="flex-1">
-              Cancelar
-            </Button>
+            <Button variant="outline" onClick={onClose} className="flex-1">Cancelar</Button>
             <Button
               onClick={handleUpload}
               disabled={!file || status === 'parsing' || status === 'uploading'}
