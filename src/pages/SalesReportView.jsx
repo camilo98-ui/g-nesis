@@ -17,112 +17,107 @@ function formatCurrency(val) {
   }).format(Math.round(val || 0));
 }
 
-function HierarchyRow({ dept, sections, filterSection }) {
-  const [expanded, setExpanded] = useState(false);
+// Tabla jerárquica tipo pivot: Departamento | Sección | Descripción Prod.
+function HierarchyTable({ hierarchy, filterDept, filterSection }) {
+  const [expandedDepts, setExpandedDepts] = useState({});
+  const [expandedSections, setExpandedSections] = useState({});
 
-  const filteredSections = filterSection && filterSection !== 'all'
-    ? sections.filter(s => s.name === filterSection)
-    : sections;
+  const toggleDept = (dept) => setExpandedDepts(p => ({ ...p, [dept]: !p[dept] }));
+  const toggleSection = (key) => setExpandedSections(p => ({ ...p, [key]: !p[key] }));
 
-  const deptTotals = sections.reduce((acc, s) => ({
-    sales: acc.sales + s.total_sales,
-    transactions: acc.transactions + s.total_transactions,
-    participation: acc.participation + s.participation,
-  }), { sales: 0, transactions: 0, participation: 0 });
+  const filtered = filterDept !== 'all'
+    ? hierarchy.filter(h => h.dept === filterDept)
+    : hierarchy;
 
-  if (filteredSections.length === 0) return null;
+  const rows = [];
+
+  filtered.forEach(({ dept, sections }) => {
+    const deptExpanded = expandedDepts[dept];
+    const filteredSections = filterSection !== 'all'
+      ? sections.filter(s => s.name === filterSection)
+      : sections;
+
+    if (filteredSections.length === 0) return;
+
+    // Dept row
+    rows.push(
+      <tr key={`dept-${dept}`} className="bg-slate-100 border-b border-slate-200">
+        <td className="py-2 px-3 w-8">
+          <button
+            onClick={() => toggleDept(dept)}
+            className="w-5 h-5 border border-slate-400 flex items-center justify-center text-slate-600 hover:bg-slate-200 rounded-sm text-xs font-bold"
+          >
+            {deptExpanded ? '−' : '+'}
+          </button>
+        </td>
+        <td className="py-2 px-3 font-semibold text-slate-800 text-sm uppercase tracking-wide" colSpan={3}>
+          {dept}
+        </td>
+      </tr>
+    );
+
+    if (!deptExpanded) return;
+
+    filteredSections.forEach((section) => {
+      const sectionKey = `${dept}__${section.name}`;
+      const sectionExpanded = expandedSections[sectionKey];
+      const hasProducts = section.products && section.products.length > 0;
+
+      // Section row — col Departamento vacía, col Sección con nombre
+      rows.push(
+        <tr key={`section-${sectionKey}`} className="border-b border-slate-100 bg-white hover:bg-slate-50">
+          <td className="py-1.5 px-3 w-8">
+            {hasProducts && (
+              <button
+                onClick={() => toggleSection(sectionKey)}
+                className="w-5 h-5 border border-slate-300 flex items-center justify-center text-slate-500 hover:bg-slate-100 rounded-sm text-xs font-bold"
+              >
+                {sectionExpanded ? '−' : '+'}
+              </button>
+            )}
+          </td>
+          <td className="py-1.5 px-3 text-slate-400 text-xs"></td>
+          <td className="py-1.5 px-3 font-medium text-slate-700 text-sm" colSpan={2}>
+            {section.name || '—'}
+          </td>
+        </tr>
+      );
+
+      if (!sectionExpanded || !hasProducts) return;
+
+      // Product rows — col Departamento vacía, col Sección vacía, col Producto con nombre
+      section.products.forEach((p, idx) => {
+        rows.push(
+          <tr key={`prod-${sectionKey}-${idx}`} className="border-b border-slate-50 bg-white hover:bg-pink-50/20">
+            <td className="py-1 px-3 w-8"></td>
+            <td className="py-1 px-3 text-slate-300 text-xs"></td>
+            <td className="py-1 px-3 text-slate-300 text-xs"></td>
+            <td className="py-1 px-3 text-slate-600 text-xs pl-6">{p.product}</td>
+          </tr>
+        );
+      });
+    });
+  });
 
   return (
-    <div className="border border-slate-200 rounded-xl overflow-hidden mb-2">
-      {/* Dept Row */}
-      <button
-        onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-between p-3 bg-gradient-to-r from-slate-700 to-slate-800 text-white hover:from-slate-600 hover:to-slate-700 transition-all"
-      >
-        <div className="flex items-center gap-2">
-          {expanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-          <span className="font-bold text-sm">{dept}</span>
-        </div>
-        <div className="flex items-center gap-4 text-xs text-white/80">
-          <span>{formatCurrency(deptTotals.sales)}</span>
-          <span>{deptTotals.transactions.toLocaleString()} trans.</span>
-          <span>{deptTotals.participation.toFixed(1)}%</span>
-        </div>
-      </button>
-
-      <AnimatePresence>
-        {expanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden"
-          >
-            {filteredSections.map((section) => (
-              <SectionRow key={section.name} section={section} />
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
-
-function SectionRow({ section }) {
-  const [expanded, setExpanded] = useState(false);
-  const hasProducts = section.products && section.products.length > 0;
-
-  return (
-    <div className="border-t border-slate-100">
-      <button
-        onClick={() => setExpanded(!expanded)}
-        disabled={!hasProducts}
-        className="w-full flex items-center justify-between p-3 bg-gradient-to-r from-slate-100 to-slate-50 hover:from-pink-50 hover:to-rose-50 transition-all"
-      >
-        <div className="flex items-center gap-2 pl-4">
-          {hasProducts ? (
-            expanded ? <ChevronDown className="w-3.5 h-3.5 text-slate-500" /> : <ChevronRight className="w-3.5 h-3.5 text-slate-500" />
-          ) : <div className="w-3.5" />}
-          <span className="font-semibold text-sm text-slate-700">{section.name || '—'}</span>
-        </div>
-        <div className="flex items-center gap-4 text-xs text-slate-500">
-          <span className="font-medium text-slate-700">{formatCurrency(section.total_sales)}</span>
-          <span>{section.total_transactions.toLocaleString()} trans.</span>
-          <span className="text-pink-600 font-semibold">{section.participation.toFixed(2)}%</span>
-        </div>
-      </button>
-
-      <AnimatePresence>
-        {expanded && hasProducts && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden bg-white"
-          >
-            <table className="w-full text-xs">
-              <thead>
-                <tr className="border-t border-slate-100 bg-slate-50 text-slate-500">
-                  <th className="text-left p-2 pl-12 font-medium">Producto</th>
-                  <th className="text-right p-2 font-medium">Venta Bruta</th>
-                  <th className="text-right p-2 font-medium"># Trans.</th>
-                  <th className="text-right p-2 font-medium pr-3">% Part.</th>
-                </tr>
-              </thead>
-              <tbody>
-                {section.products.map((p, idx) => (
-                  <tr key={idx} className="border-t border-slate-50 hover:bg-pink-50/30">
-                    <td className="p-2 pl-12 text-slate-700">{p.product}</td>
-                    <td className="p-2 text-right font-medium text-slate-800">{formatCurrency(p.total_sales)}</td>
-                    <td className="p-2 text-right text-slate-600">{p.total_transactions.toLocaleString()}</td>
-                    <td className="p-2 text-right text-pink-600 font-semibold pr-3">{p.participation.toFixed(2)}%</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </motion.div>
-        )}
-      </AnimatePresence>
+    <div className="overflow-x-auto">
+      <table className="w-full border-collapse text-sm">
+        <thead>
+          <tr className="bg-slate-700 text-white">
+            <th className="py-3 px-3 w-8"></th>
+            <th className="py-3 px-3 text-left font-semibold text-xs uppercase tracking-wider">Departamento</th>
+            <th className="py-3 px-3 text-left font-semibold text-xs uppercase tracking-wider">Sección</th>
+            <th className="py-3 px-3 text-left font-semibold text-xs uppercase tracking-wider">Descripción Prod.</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.length > 0 ? rows : (
+            <tr>
+              <td colSpan={4} className="py-8 text-center text-slate-400">No hay datos para los filtros seleccionados.</td>
+            </tr>
+          )}
+        </tbody>
+      </table>
     </div>
   );
 }
@@ -358,21 +353,13 @@ export default function SalesReportView() {
               <div className="bg-white rounded-2xl shadow-md border border-slate-100 overflow-hidden">
                 <div className="p-4 border-b border-slate-100 flex items-center justify-between">
                   <h3 className="font-bold text-slate-800">Tabla Jerárquica</h3>
-                  <span className="text-xs text-slate-400">Haz clic para expandir</span>
+                  <span className="text-xs text-slate-400">Haz clic en + para expandir</span>
                 </div>
-                <div className="p-4 space-y-2">
-                  {filteredHierarchy.map(({ dept, sections }) => (
-                    <HierarchyRow
-                      key={dept}
-                      dept={dept}
-                      sections={sections}
-                      filterSection={filterSection}
-                    />
-                  ))}
-                  {filteredHierarchy.length === 0 && (
-                    <p className="text-center text-slate-400 py-8">No hay datos para los filtros seleccionados.</p>
-                  )}
-                </div>
+                <HierarchyTable
+                  hierarchy={hierarchy}
+                  filterDept={filterDept}
+                  filterSection={filterSection}
+                />
               </div>
             </motion.div>
 
