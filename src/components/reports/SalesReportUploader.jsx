@@ -6,28 +6,10 @@ import { Button } from '@/components/ui/button';
 import * as XLSX from 'xlsx';
 import { format } from 'date-fns';
 
-// Mapa de columnas del xlsx a códigos de tienda
-// Row 1 (index 1): nombres de tiendas en cols 1,4,7,10,13,16,19,22,25,28,31,34
-const STORE_COL_MAP = [
-  { colIndex: 1, codeKey: 'BTA 18' },
-  { colIndex: 4, codeKey: 'BTA 21' },
-  { colIndex: 7, codeKey: 'BTA 27' },
-  { colIndex: 10, codeKey: 'BTA 52' },
-  { colIndex: 13, codeKey: 'BTA 56' },
-  { colIndex: 16, codeKey: 'BTA 62' },
-  { colIndex: 19, codeKey: 'BTA 66' },
-  { colIndex: 22, codeKey: 'BTA 71' },
-  { colIndex: 25, codeKey: 'BTA 78' },
-  { colIndex: 28, codeKey: 'BTA 85' },
-  { colIndex: 31, codeKey: 'TUNJA 1' },
-  { colIndex: 34, codeKey: 'TUNJA 2' },
-];
-
 function parseStoreCodeFromHeader(headerText) {
   if (!headerText) return null;
   const text = String(headerText).toUpperCase();
-  // Extraer código tipo "BTA 18", "TUNJA 1", etc.
-  const match = text.match(/\b(BTA\s*\d+|TUNJA\s*\d+)\b/);
+  const match = text.match(/\b(BTA\s*\d+|TUNJA\s*\d+|BOGOTA\s*\d+)\b/);
   return match ? match[1].replace(/\s+/, ' ') : null;
 }
 
@@ -45,17 +27,270 @@ function parseXlsx(file) {
   });
 }
 
-function determineLevel(rows, rowIdx) {
-  // Nivel basado en indentación/repetición de la misma fila en dos filas consecutivas
-  // Row[2] = headers de columnas
-  // Data starts at row[3] (index 3)
-  // Heurística: si la siguiente fila tiene el mismo texto en col[0], es departamento
-  // Verificamos con el patrón real del archivo:
-  // - Row aparece una vez con totales = Departamento
-  // - Row aparece repetida debajo = Sección
-  // - Rows con productos debajo = Producto
-  // Usaremos una lógica basada en si hay filas hijas con el mismo inicio
-  return 'product'; // se calculará en el parseado completo
+// Detecta si el archivo es formato "KPIs" (columnas = tiendas, filas = jerarquía)
+// vs formato "Participación" (filas = jerarquía, columnas = tiendas)
+function detectFormat(rows) {
+  if (!rows || rows.length < 2) return 'unknown';
+  const firstRow = rows[0] || [];
+  const firstCell = String(firstRow[0] || '').toUpperCase();
+  // Formato KPIs: primera celda es null o vacía, col 0 = TIENDA en fila 2
+  // La primera columna de fila 0 es null y hay nombres de departamentos en las columnas
+  const hasStoreName = (rows[2] || []).some(cell => {
+    if (!cell) return false;
+    const txt = String(cell).toUpperCase();
+    return txt.includes('BTA') || txt.includes('TUNJA');
+  });
+  if (hasStoreName) return 'kpis'; // columna 0 tiene tiendas en filas de datos
+
+  // Formato participación: fila 1 tiene tiendas en cols 1,4,7...
+  const headerRow = rows[1] || [];
+  const storeInHeader = headerRow.some(cell => parseStoreCodeFromHeader(cell));
+  if (storeInHeader) return 'participacion';
+
+  return 'kpis'; // fallback
+}
+
+// ─── Parser formato KPIs (ResumenKpis) ───────────────────────────────────────
+// Row 0: secciones por grupo (texto en primera col de cada grupo)
+// Row 1: nombres de producto por columna
+// Row 2+: datos por tienda
+function parseKpisFormat(rows) {
+  const sectionRow = rows[0] || [];   // secciones
+  const productRow = rows[1] || [];   // productos
+  const dataRows = rows.slice(2);     // filas de tiendas
+
+  // Construir mapa de columnas: col -> { department, section, product }
+  // Los departamentos están en el header del xlsx como nombres de columna (ej: ADICIONES, HELADOS...)
+  // pero en este xlsx la fila 0 puede tener secciones y los departamentos están implícitos
+  // en las columnas "Total X" → retrocedemos para encontrar el departamento
+  
+  // Reconstruir la cabecera real leyendo el xlsx con header=0 para obtener nombres de columna
+  // En el xlsx: columna "ADICIONES" = departamento, luego cols sub = secciones/productos
+  // Usamos el objeto de la fila 0 para mapear
+
+  // Leer nombres de columna reales del xlsx (son los nombres que XLSX asignó)
+  // Los nombres de columna son: TIENDA, ADICIONES, col_2, col_3, ... Total ADICIONES, HELADOS, ...
+  // Necesitamos reconstruir desde las filas raw
+
+  // Estrategia: iterar columnas de la fila de datos
+  // Col 0 = TIENDA
+  // Cada vez que encontramos un "Total XXX" en sectionRow, sabemos que XXX es el departamento de las cols anteriores
+  // En fila 0: sección. En fila 1: producto
+
+  const colMeta = []; // { department, section, product } por índice de columna
+  let currentDept = '';
+  let currentSection = '';
+
+  // Primera pasada: detectar departamentos desde los nombres de columna implícitos
+  // Los dept están en los "Total DEPT" que aparecen en sectionRow
+  // Reconstruir: buscamos en sectionRow los textos "Total XXX" para saber el dept de las cols anteriores
+  
+  // Primero identificar los límites de departamentos
+  const deptBoundaries = []; // { name, startCol, endCol }
+  
+  for (let c = 1; c < sectionRow.length; c++) {
+    const cell = sectionRow[c];
+    if (cell && String(cell).startsWith('Total ')) {
+      const deptName = String(cell).replace('Total ', '').trim();
+      deptBoundaries.push({ name: deptName, endCol: c });
+    }
+  }
+  
+  // Asignar startCol
+  let prevEnd = 0;
+  deptBoundaries.forEach((d, i) => {
+    d.startCol = prevEnd + 1;
+    prevEnd = d.endCol;
+  });
+
+  // Ahora para cada columna, determinar dept, section, product
+  for (let c = 1; c < productRow.length; c++) {
+    const dept = deptBoundaries.find(d => c >= d.startCol && c <= d.endCol);
+    const deptName = dept ? dept.name : '';
+    const sectionCell = sectionRow[c];
+    const productCell = productRow[c];
+    
+    colMeta[c] = {
+      department: deptName,
+      section: (sectionCell && !String(sectionCell).startsWith('Total')) ? String(sectionCell).trim() : '',
+      product: (productCell && !String(productCell).startsWith('Total')) ? String(productCell).trim() : '',
+      isTotal: (sectionCell && String(sectionCell).startsWith('Total')) || (productCell && String(productCell).startsWith('Total')),
+    };
+  }
+
+  // Ahora construir los registros desde las filas de tiendas
+  const records = [];
+  const reportId = `report_${Date.now()}`;
+  const uploadedAt = new Date().toISOString();
+
+  // Para cada tienda (fila de datos), extraer los valores
+  dataRows.forEach(row => {
+    if (!row || !row[0]) return;
+    const storeRaw = String(row[0]).trim();
+    // Extraer código de tienda del texto "BTA 18 (CC PLAZA IMPERIAL)."
+    const codeMatch = storeRaw.match(/\b(BTA\s*\d+|TUNJA\s*\d+)\b/i);
+    if (!codeMatch) return;
+    const storeCode = codeMatch[1].replace(/\s+/, ' ').toUpperCase();
+
+    // Agrupar valores por dept → section → products
+    const deptMap = {};
+
+    for (let c = 1; c < row.length; c++) {
+      const meta = colMeta[c];
+      if (!meta || meta.isTotal || !meta.department) continue;
+      const val = row[c];
+      if (val === null || val === undefined || val === '') continue;
+      const numVal = parseFloat(val);
+      if (isNaN(numVal) || numVal <= 0) continue;
+
+      const { department, section, product } = meta;
+      if (!deptMap[department]) deptMap[department] = {};
+      const sectionKey = section || '__root__';
+      if (!deptMap[department][sectionKey]) {
+        deptMap[department][sectionKey] = { section, products: [] };
+      }
+      if (product) {
+        deptMap[department][sectionKey].products.push({ product, participation: numVal * 100 });
+      }
+    }
+
+    // Crear registros: department, section, product
+    Object.entries(deptMap).forEach(([dept, sections]) => {
+      // Calcular totales de dept
+      let deptTotal = 0;
+      Object.values(sections).forEach(s => {
+        s.products.forEach(p => deptTotal += p.participation);
+      });
+
+      // Dept row
+      records.push({
+        store_code: storeCode,
+        uploaded_at: uploadedAt,
+        report_id: reportId,
+        department: dept,
+        section: '',
+        product: '',
+        level: 'department',
+        total_sales: 0,
+        total_transactions: 0,
+        participation: Math.round(deptTotal * 100) / 100,
+      });
+
+      Object.entries(sections).forEach(([sectionKey, sData]) => {
+        const sectionName = sData.section;
+        const sectionTotal = sData.products.reduce((a, p) => a + p.participation, 0);
+
+        if (sectionName) {
+          records.push({
+            store_code: storeCode,
+            uploaded_at: uploadedAt,
+            report_id: reportId,
+            department: dept,
+            section: sectionName,
+            product: '',
+            level: 'section',
+            total_sales: 0,
+            total_transactions: 0,
+            participation: Math.round(sectionTotal * 100) / 100,
+          });
+        }
+
+        sData.products.forEach(p => {
+          records.push({
+            store_code: storeCode,
+            uploaded_at: uploadedAt,
+            report_id: reportId,
+            department: dept,
+            section: sectionName,
+            product: p.product,
+            level: 'product',
+            total_sales: 0,
+            total_transactions: 0,
+            participation: Math.round(p.participation * 10000) / 10000,
+          });
+        });
+      });
+    });
+  });
+
+  return records;
+}
+
+// ─── Parser formato Participación (formato original) ─────────────────────────
+function parseParticipacionFormat(rows) {
+  const headerRow = rows[1] || [];
+  const storeColumns = [];
+  for (let c = 0; c < headerRow.length; c++) {
+    const code = parseStoreCodeFromHeader(headerRow[c]);
+    if (code) storeColumns.push({ colIndex: c, code });
+  }
+  if (storeColumns.length === 0) return [];
+
+  const dataRows = rows.slice(3);
+  const validRows = dataRows.filter(r => {
+    const label = r[0];
+    if (!label) return false;
+    if (String(label).toLowerCase().includes('total general')) return false;
+    return true;
+  });
+
+  const seen = {};
+  const levelMap = {};
+  for (let i = 0; i < validRows.length; i++) {
+    const label = String(validRows[i][0] || '').trim();
+    if (!label) continue;
+    seen[label] = (seen[label] || 0) + 1;
+  }
+
+  const firstOccurrence = {};
+  for (let i = 0; i < validRows.length; i++) {
+    const label = String(validRows[i][0] || '').trim();
+    if (!label) continue;
+    if (firstOccurrence[label] === undefined) {
+      firstOccurrence[label] = i;
+      levelMap[`${i}`] = seen[label] >= 2 ? 'department' : 'product';
+    } else {
+      levelMap[`${i}`] = 'section';
+    }
+  }
+
+  const records = [];
+  const reportId = `report_${Date.now()}`;
+  const uploadedAt = new Date().toISOString();
+  let currentDept = '';
+  let currentSection = '';
+
+  for (let i = 0; i < validRows.length; i++) {
+    const row = validRows[i];
+    const label = String(row[0] || '').trim();
+    if (!label) continue;
+    const level = levelMap[`${i}`];
+    if (level === 'department') currentDept = label;
+    else if (level === 'section') currentSection = label;
+
+    for (const { colIndex, code } of storeColumns) {
+      const salesVal = row[colIndex];
+      const transVal = row[colIndex + 1];
+      const partVal = row[colIndex + 2];
+      const sales = parseFloat(salesVal) || 0;
+      const transactions = parseInt(transVal) || 0;
+      const participation = parseFloat(partVal) || 0;
+      if (sales === 0 && transactions === 0) continue;
+      records.push({
+        store_code: code,
+        uploaded_at: uploadedAt,
+        report_id: reportId,
+        department: currentDept,
+        section: level === 'section' ? label : (level === 'product' ? currentSection : ''),
+        product: level === 'product' ? label : '',
+        level,
+        total_sales: Math.round(sales),
+        total_transactions: transactions,
+        participation: Math.round(participation * 100) / 100,
+      });
+    }
+  }
+  return records;
 }
 
 export default function SalesReportUploader({ onClose, onSuccess }) {
@@ -80,115 +315,19 @@ export default function SalesReportUploader({ onClose, onSuccess }) {
     setMessage('Analizando archivo...');
 
     const rows = await parseXlsx(file);
+    const format = detectFormat(rows);
+    setMessage(`Formato detectado: ${format === 'kpis' ? 'Resumen KPIs' : 'Participación'}. Procesando...`);
 
-    // Fila 1 (idx=1): tiendas en cols 1,4,7...
-    // Fila 2 (idx=2): "Etiquetas de fila", Suma de Venta, Suma de Transacciones, Suma de Participación (x12 tiendas)
-    // Fila 3+ (idx>=3): datos
-
-    // Detectar tiendas dinámicamente desde fila 1
-    const headerRow = rows[1] || [];
-    const storeColumns = [];
-    for (let c = 0; c < headerRow.length; c++) {
-      const code = parseStoreCodeFromHeader(headerRow[c]);
-      if (code) {
-        storeColumns.push({ colIndex: c, code });
-      }
-    }
-
-    if (storeColumns.length === 0) {
-      setStatus('error');
-      setMessage('No se encontraron tiendas en el archivo. Verifica el formato.');
-      return;
-    }
-
-    // Construir jerarquía de departamento/sección/producto
-    // La estructura del xlsx tiene: Departamento, Sección (repetida), Productos
-    // Determinamos nivel por: si la fila siguiente repite el mismo valor en col[0] = es Departamento
-    // Si la fila anterior con el mismo texto ya fue vista = Sección
-    // El resto = Producto
-    const dataRows = rows.slice(3); // skip rows 0,1,2
-    // Filtrar filas "Total general" o vacías
-    const validRows = dataRows.filter(r => {
-      const label = r[0];
-      if (!label) return false;
-      if (String(label).toLowerCase().includes('total general')) return false;
-      return true;
-    });
-
-    // Detectar jerarquía: en el xlsx original:
-    // Nivel Departamento: fila que se repite exactamente igual en la siguiente posición
-    // Nivel Sección: fila que aparece después de un departamento y se repite
-    // Nivel Producto: filas con datos únicos debajo de sección
-    // Simplificación: usamos el hecho de que departamentos y secciones se repiten 2 veces
-    const seen = {};
-    const levelMap = {};
-    for (let i = 0; i < validRows.length; i++) {
-      const label = String(validRows[i][0] || '').trim();
-      if (!label) continue;
-      seen[label] = (seen[label] || 0) + 1;
-    }
-
-    // Labels con count >= 2 son departamento o sección
-    // Labels con count == 1 son productos
-    // Para distinguir dept vs section: en el xlsx, la primera ocurrencia es dept, la segunda es section (repite el nombre)
-    const firstOccurrence = {};
-    for (let i = 0; i < validRows.length; i++) {
-      const label = String(validRows[i][0] || '').trim();
-      if (!label) continue;
-      if (firstOccurrence[label] === undefined) {
-        firstOccurrence[label] = i;
-        levelMap[`${i}`] = seen[label] >= 2 ? 'department' : 'product';
-      } else {
-        levelMap[`${i}`] = 'section';
-      }
-    }
-
-    // Ahora construir registros por tienda
-    const records = [];
-    const reportId = `report_${Date.now()}`;
-    const uploadedAt = new Date().toISOString();
-
-    let currentDept = '';
-    let currentSection = '';
-
-    for (let i = 0; i < validRows.length; i++) {
-      const row = validRows[i];
-      const label = String(row[0] || '').trim();
-      if (!label) continue;
-
-      const level = levelMap[`${i}`];
-      if (level === 'department') currentDept = label;
-      else if (level === 'section') currentSection = label;
-
-      for (const { colIndex, code } of storeColumns) {
-        const salesVal = row[colIndex];
-        const transVal = row[colIndex + 1];
-        const partVal = row[colIndex + 2];
-
-        const sales = parseFloat(salesVal) || 0;
-        const transactions = parseInt(transVal) || 0;
-        const participation = parseFloat(partVal) || 0;
-
-        if (sales === 0 && transactions === 0) continue;
-
-        records.push({
-          store_code: code,
-          uploaded_at: uploadedAt,
-          report_id: reportId,
-          department: currentDept,
-          section: level === 'section' ? label : (level === 'product' ? currentSection : ''),
-          product: level === 'product' ? label : '',
-          level,
-          total_sales: Math.round(sales),
-          total_transactions: transactions,
-          participation: Math.round(participation * 100) / 100,
-        });
-      }
+    let records = [];
+    if (format === 'kpis') {
+      records = parseKpisFormat(rows);
+    } else {
+      records = parseParticipacionFormat(rows);
     }
 
     if (records.length === 0) {
       setStatus('error');
-      setMessage('No se encontraron datos en el archivo.');
+      setMessage('No se encontraron datos en el archivo. Verifica el formato.');
       return;
     }
 
@@ -287,12 +426,12 @@ export default function SalesReportUploader({ onClose, onSuccess }) {
 
           {/* Info */}
           <div className="bg-blue-50 rounded-xl p-3 text-xs text-blue-700">
-            <p className="font-semibold mb-1">Formato esperado:</p>
+            <p className="font-semibold mb-1">Formatos soportados:</p>
             <ul className="space-y-0.5 list-disc list-inside">
-              <li>Fila 2: nombres de tiendas por columna</li>
-              <li>Fila 3: Venta, Transacciones, Participación por tienda</li>
-              <li>Datos desde fila 4: Departamento → Sección → Producto</li>
+              <li><strong>Resumen KPIs</strong>: filas = tiendas, columnas = productos/secciones</li>
+              <li><strong>Participación</strong>: filas = jerarquía, columnas = tiendas con venta/trans/%</li>
             </ul>
+            <p className="mt-1 text-blue-500">El formato se detecta automáticamente.</p>
           </div>
 
           {/* Status */}
