@@ -357,7 +357,7 @@ export default function SalesReportUploader({ onClose, onSuccess }) {
       }
 
       setStatus('success');
-      setMessage(`✅ ${records.length} registros cargados para ${storeColumns.length} tiendas.`);
+      setMessage(`✅ ${records.length} registros cargados exitosamente.`);
       onSuccess?.();
     } catch (err) {
       setStatus('error');
