@@ -1146,48 +1146,48 @@ export default function Home() {
             </Button>
 
             {selectedRole === 'gerente' && (
-              <>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowBudgetImporter(true)}
-                  className="text-gray-400 hover:text-emerald-600 hover:bg-emerald-50/50 transition-all text-xs"
-                >
-                  <FileSpreadsheet className="w-3.5 h-3.5 mr-1" />
-                  PPT Excel
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowSalesReportUploader(true)}
-                  className="text-gray-400 hover:text-slate-700 hover:bg-slate-100/50 transition-all text-xs"
-                >
-                  <FileSpreadsheet className="w-3.5 h-3.5 mr-1" />
-                  Cargar Reporte de Ventas
-                </Button>
-              </>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowBudgetImporter(true)}
+                className="text-gray-400 hover:text-emerald-600 hover:bg-emerald-50/50 transition-all text-xs"
+              >
+                <FileSpreadsheet className="w-3.5 h-3.5 mr-1" />
+                PPT Excel
+              </Button>
+            )}
+            {selectedRole === 'gerente' && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowSalesReportUploader(true)}
+                className="text-gray-400 hover:text-slate-700 hover:bg-slate-100/70 transition-all text-xs"
+              >
+                <FileSpreadsheet className="w-3.5 h-3.5 mr-1" />
+                Cargar Reporte de Ventas
+              </Button>
             )}
             {selectedRole !== 'gerente' && (
-              <>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowReport(true)}
-                  className="text-gray-400 hover:text-rose-500 hover:bg-rose-50/50 transition-all text-xs"
-                >
-                  <FileText className="w-3.5 h-3.5 mr-1" />
-                  Informe
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => window.location.href = '/SalesReportView'}
-                  className="text-gray-400 hover:text-slate-700 hover:bg-slate-100/50 transition-all text-xs"
-                >
-                  <BarChart3 className="w-3.5 h-3.5 mr-1" />
-                  Participación del negocio
-                </Button>
-              </>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowReport(true)}
+                className="text-gray-400 hover:text-rose-500 hover:bg-rose-50/50 transition-all text-xs"
+              >
+                <FileText className="w-3.5 h-3.5 mr-1" />
+                Informe
+              </Button>
+            )}
+            {selectedRole !== 'gerente' && selectedStore && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => window.location.href = '/SalesReportView'}
+                className="text-gray-400 hover:text-indigo-600 hover:bg-indigo-50/50 transition-all text-xs"
+              >
+                <BarChart3 className="w-3.5 h-3.5 mr-1" />
+                Participación del negocio
+              </Button>
             )}
           </div>
         )}
