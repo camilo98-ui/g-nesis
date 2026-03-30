@@ -1,0 +1,57 @@
+{
+  "name": "SalesReport",
+  "type": "object",
+  "properties": {
+    "store_code": {
+      "type": "string",
+      "description": "C\u00f3digo de la tienda (ej: BTA 18)"
+    },
+    "uploaded_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Fecha de carga del reporte"
+    },
+    "department": {
+      "type": "string",
+      "description": "Departamento"
+    },
+    "section": {
+      "type": "string",
+      "description": "Secci\u00f3n"
+    },
+    "product": {
+      "type": "string",
+      "description": "Nombre del producto"
+    },
+    "level": {
+      "type": "string",
+      "enum": [
+        "department",
+        "section",
+        "product"
+      ],
+      "description": "Nivel jer\u00e1rquico del registro"
+    },
+    "total_sales": {
+      "type": "number",
+      "description": "Venta bruta total"
+    },
+    "total_transactions": {
+      "type": "number",
+      "description": "N\u00famero de transacciones"
+    },
+    "participation": {
+      "type": "number",
+      "description": "% participaci\u00f3n en venta bruta"
+    },
+    "report_id": {
+      "type": "string",
+      "description": "ID \u00fanico del reporte cargado (para sobreescribir)"
+    }
+  },
+  "required": [
+    "store_code",
+    "level",
+    "total_sales"
+  ]
+}

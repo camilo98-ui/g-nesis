@@ -22,9 +22,10 @@ import GerenteHomePanel from '@/components/executive/GerenteHomePanel.jsx';
 import {
   LayoutDashboard, Users, TrendingUp, Activity,
   Award, Target, Bell, Phone, Download, FileText,
-  Lock, Eye, EyeOff, Receipt, Snowflake, Settings as SettingsIcon, AlertTriangle, CheckCircle, Info, CalendarDays, LogOut, Sparkles, Palette, Trophy, FileSpreadsheet } from
+  Lock, Eye, EyeOff, Receipt, Snowflake, Settings as SettingsIcon, AlertTriangle, CheckCircle, Info, CalendarDays, LogOut, Sparkles, Palette, Trophy, FileSpreadsheet, BarChart3 } from
 'lucide-react';
 import BudgetExcelImporter from '@/components/executive/BudgetExcelImporter.jsx';
+import SalesReportUploader from '@/components/reports/SalesReportUploader.jsx';
 import { Button } from "@/components/ui/button";
 import { toast } from 'sonner';
 
@@ -182,6 +183,7 @@ export default function Home() {
   const [showExperienciaPopsy, setShowExperienciaPopsy] = useState(false);
   const [showCustomerExperience, setShowCustomerExperience] = useState(false);
   const [showBudgetImporter, setShowBudgetImporter] = useState(false);
+  const [showSalesReportUploader, setShowSalesReportUploader] = useState(false);
 
 
   const ROLES = [
@@ -1144,26 +1146,48 @@ export default function Home() {
             </Button>
 
             {selectedRole === 'gerente' && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowBudgetImporter(true)}
-                className="text-gray-400 hover:text-emerald-600 hover:bg-emerald-50/50 transition-all text-xs"
-              >
-                <FileSpreadsheet className="w-3.5 h-3.5 mr-1" />
-                PPT Excel
-              </Button>
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowBudgetImporter(true)}
+                  className="text-gray-400 hover:text-emerald-600 hover:bg-emerald-50/50 transition-all text-xs"
+                >
+                  <FileSpreadsheet className="w-3.5 h-3.5 mr-1" />
+                  PPT Excel
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowSalesReportUploader(true)}
+                  className="text-gray-400 hover:text-slate-700 hover:bg-slate-100/50 transition-all text-xs"
+                >
+                  <FileSpreadsheet className="w-3.5 h-3.5 mr-1" />
+                  Cargar Reporte de Ventas
+                </Button>
+              </>
             )}
             {selectedRole !== 'gerente' && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowReport(true)}
-                className="text-gray-400 hover:text-rose-500 hover:bg-rose-50/50 transition-all text-xs"
-              >
-                <FileText className="w-3.5 h-3.5 mr-1" />
-                Informe
-              </Button>
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowReport(true)}
+                  className="text-gray-400 hover:text-rose-500 hover:bg-rose-50/50 transition-all text-xs"
+                >
+                  <FileText className="w-3.5 h-3.5 mr-1" />
+                  Informe
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => window.location.href = '/SalesReportView'}
+                  className="text-gray-400 hover:text-slate-700 hover:bg-slate-100/50 transition-all text-xs"
+                >
+                  <BarChart3 className="w-3.5 h-3.5 mr-1" />
+                  Participación del negocio
+                </Button>
+              </>
             )}
           </div>
         )}
@@ -1453,6 +1477,16 @@ export default function Home() {
       <AnimatePresence>
         {showBudgetImporter && (
           <BudgetExcelImporter onClose={() => setShowBudgetImporter(false)} />
+        )}
+      </AnimatePresence>
+
+      {/* Modal Cargar Reporte de Ventas */}
+      <AnimatePresence>
+        {showSalesReportUploader && (
+          <SalesReportUploader
+            onClose={() => setShowSalesReportUploader(false)}
+            onSuccess={() => setShowSalesReportUploader(false)}
+          />
         )}
       </AnimatePresence>
 
