@@ -520,7 +520,7 @@ export default function SalesReportView() {
       let records = await base44.entities.SalesReport.filter({ store_code: storeCode });
       // Si no hay resultados, intenta búsqueda flexible (case-insensitive, whitespace-insensitive)
       if (records.length === 0) {
-        const allRecords = await base44.entities.SalesReport.list();
+        const allRecords = await base44.entities.SalesReport.filter({});
         const normalizedSearch = storeCode.toUpperCase().replace(/\s+/g, '');
         records = allRecords.filter(r => 
           r.store_code?.toUpperCase().replace(/\s+/g, '') === normalizedSearch
