@@ -1171,17 +1171,7 @@ export default function Home() {
                 KPIs Participación
               </Button>
           }
-            {selectedRole === 'lider' && selectedStore &&
-            <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowParticipacion(true)}
-            className="text-gray-400 hover:text-indigo-600 hover:bg-indigo-50/50 transition-all text-xs">
 
-               <BarChart3 className="w-3.5 h-3.5 mr-1" />
-               Participación
-             </Button>
-            }
             {selectedRole !== 'gerente' && selectedStore &&
             <Button
             variant="ghost"
