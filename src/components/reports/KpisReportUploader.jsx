@@ -82,19 +82,29 @@ export default function KpisReportUploader({ onClose, onSuccess }) {
       setStatus('uploading');
       setMessage('Eliminando datos anteriores...');
 
+      const delay = (ms) => new Promise(res => setTimeout(res, ms));
+
       try {
-        const existing = await base44.entities.SalesReport.list();
-        for (let i = 0; i < existing.length; i += 20) {
-          await Promise.all(existing.slice(i, i + 20).map(r => base44.entities.SalesReport.delete(r.id)));
+        // Delete in small sequential batches with delay to avoid rate limit
+        let offset = 0;
+        while (true) {
+          const existing = await base44.entities.SalesReport.list(null, 50, offset);
+          if (!existing || existing.length === 0) break;
+          for (const r of existing) {
+            await base44.entities.SalesReport.delete(r.id);
+            await delay(30);
+          }
+          if (existing.length < 50) break;
         }
 
         setMessage(`Guardando ${records.length} registros...`);
         setProgress({ current: 0, total: records.length });
 
-        const chunkSize = 50;
+        const chunkSize = 20;
         for (let i = 0; i < records.length; i += chunkSize) {
           await base44.entities.SalesReport.bulkCreate(records.slice(i, i + chunkSize));
           setProgress({ current: Math.min(i + chunkSize, records.length), total: records.length });
+          await delay(200);
         }
 
         setStatus('success');
