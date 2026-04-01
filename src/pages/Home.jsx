@@ -33,28 +33,28 @@ const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/pub
 
 const MENU_ITEMS = [
 
-  {
-    name: 'Command Center',
-    page: 'GenesisCommandCenter',
-    icon: Activity,
-    description: 'Monitoreo Global',
-    bgColor: 'bg-gradient-to-br from-slate-800 to-slate-900',
-    iconBg: 'bg-cyan-500/20',
-    iconColor: 'text-cyan-400',
-    textColor: 'text-cyan-300',
-    requiredRole: 'gerente'
-  },
-  {
-    name: 'Experiencia Gerencial',
-    page: 'ExecutiveExperience',
-    icon: Sparkles,
-    description: 'NPS por tiendas',
-    bgColor: 'bg-gradient-to-br from-pink-100/90 to-purple-100/80',
-    iconBg: 'bg-pink-200/60',
-    iconColor: 'text-pink-500',
-    textColor: 'text-pink-700',
-    requiredRole: 'gerente'
-  },
+{
+  name: 'Command Center',
+  page: 'GenesisCommandCenter',
+  icon: Activity,
+  description: 'Monitoreo Global',
+  bgColor: 'bg-gradient-to-br from-slate-800 to-slate-900',
+  iconBg: 'bg-cyan-500/20',
+  iconColor: 'text-cyan-400',
+  textColor: 'text-cyan-300',
+  requiredRole: 'gerente'
+},
+{
+  name: 'Experiencia Gerencial',
+  page: 'ExecutiveExperience',
+  icon: Sparkles,
+  description: 'NPS por tiendas',
+  bgColor: 'bg-gradient-to-br from-pink-100/90 to-purple-100/80',
+  iconBg: 'bg-pink-200/60',
+  iconColor: 'text-pink-500',
+  textColor: 'text-pink-700',
+  requiredRole: 'gerente'
+},
 {
   name: 'Comparable',
   page: 'Comparable',
@@ -187,32 +187,32 @@ export default function Home() {
 
 
   const ROLES = [
-  { 
-    id: 'gerente', 
-    name: 'Gerente', 
-    icon: 'gerente', 
-    color: 'from-slate-600 to-gray-700', 
-    description: 'Visión completa del negocio y toma de decisiones', 
-    iconBaseColor: '#475569', 
+  {
+    id: 'gerente',
+    name: 'Gerente',
+    icon: 'gerente',
+    color: 'from-slate-600 to-gray-700',
+    description: 'Visión completa del negocio y toma de decisiones',
+    iconBaseColor: '#475569',
     hasExecutivePanel: true,
     buttonText: 'Ver métricas generales'
   },
-  { 
-    id: 'lider', 
-    name: 'Líder de Experiencia', 
-    icon: 'lider', 
-    color: 'from-amber-400 to-yellow-500', 
-    description: 'Control diario del punto, equipo y resultados', 
+  {
+    id: 'lider',
+    name: 'Líder de Experiencia',
+    icon: 'lider',
+    color: 'from-amber-400 to-yellow-500',
+    description: 'Control diario del punto, equipo y resultados',
     iconBaseColor: '#f59e0b',
     buttonText: 'Gestionar mi punto',
     isRecommended: true
   },
-  { 
-    id: 'embajador', 
-    name: 'Embajador', 
-    icon: 'embajador', 
-    color: 'from-pink-400 to-rose-500', 
-    description: 'Ejecución operativa y apoyo en ventas', 
+  {
+    id: 'embajador',
+    name: 'Embajador',
+    icon: 'embajador',
+    color: 'from-pink-400 to-rose-500',
+    description: 'Ejecución operativa y apoyo en ventas',
     iconBaseColor: '#ec4899',
     buttonText: 'Comenzar mi turno'
   }];
@@ -378,61 +378,61 @@ export default function Home() {
   };
 
   const handleLogin = async () => {
-      if (!selectedRole) {
-        setLoginError('Selecciona un rol');
+    if (!selectedRole) {
+      setLoginError('Selecciona un rol');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    // Simular delay mínimo para mostrar loading
+    await new Promise((resolve) => setTimeout(resolve, 400));
+
+    // Guardar último rol usado
+    localStorage.setItem('lastSelectedRole', selectedRole);
+
+    // Contraseña maestra 1998 - permite acceso a todo
+    if (loginPassword === '1998') {
+      localStorage.setItem('userRole', selectedRole);
+
+      // Si no hay tienda seleccionada y es gerente, ir al panel ejecutivo
+      if (!pendingStore && selectedRole === 'gerente') {
+        localStorage.setItem('popsySession', JSON.stringify({ role: selectedRole, time: Date.now() }));
+        setLoginSuccess(true);
+        setTimeout(() => {
+          window.location.href = createPageUrl('ExecutiveDashboard');
+        }, 800);
         return;
       }
 
-      setIsSubmitting(true);
-
-      // Simular delay mínimo para mostrar loading
-      await new Promise(resolve => setTimeout(resolve, 400));
-
-      // Guardar último rol usado
-      localStorage.setItem('lastSelectedRole', selectedRole);
-
-      // Contraseña maestra 1998 - permite acceso a todo
-      if (loginPassword === '1998') {
-        localStorage.setItem('userRole', selectedRole);
-        
-        // Si no hay tienda seleccionada y es gerente, ir al panel ejecutivo
-        if (!pendingStore && selectedRole === 'gerente') {
-          localStorage.setItem('popsySession', JSON.stringify({ role: selectedRole, time: Date.now() }));
-          setLoginSuccess(true);
-          setTimeout(() => {
-            window.location.href = createPageUrl('ExecutiveDashboard');
-          }, 800);
-          return;
-        }
-        
-        // Si hay tienda seleccionada, entrar a esa tienda
-        if (pendingStore) {
-          setLoginSuccess(true);
-          setTimeout(() => {
-            setSelectedStore(pendingStore);
-            setIsLoggedIn(true);
-            localStorage.setItem('selectedStore', pendingStore);
-            localStorage.setItem('popsySession', JSON.stringify({ store: pendingStore, role: selectedRole, time: Date.now() }));
-            setShowWelcome(true);
-            setPendingStore('');
-            setLoginPassword('');
-            setIsSubmitting(false);
-          }, 800);
-          return;
-        }
-        
-        // Si no hay tienda y no es gerente, pedir seleccionar tienda
-        setLoginError('Selecciona una tienda');
-        setIsSubmitting(false);
+      // Si hay tienda seleccionada, entrar a esa tienda
+      if (pendingStore) {
+        setLoginSuccess(true);
+        setTimeout(() => {
+          setSelectedStore(pendingStore);
+          setIsLoggedIn(true);
+          localStorage.setItem('selectedStore', pendingStore);
+          localStorage.setItem('popsySession', JSON.stringify({ store: pendingStore, role: selectedRole, time: Date.now() }));
+          setShowWelcome(true);
+          setPendingStore('');
+          setLoginPassword('');
+          setIsSubmitting(false);
+        }, 800);
         return;
       }
 
-      // Gerente sin contraseña maestra
-      if (selectedRole === 'gerente') {
-        setLoginError('Contraseña de gerente incorrecta');
-        setIsSubmitting(false);
-        return;
-      }
+      // Si no hay tienda y no es gerente, pedir seleccionar tienda
+      setLoginError('Selecciona una tienda');
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Gerente sin contraseña maestra
+    if (selectedRole === 'gerente') {
+      setLoginError('Contraseña de gerente incorrecta');
+      setIsSubmitting(false);
+      return;
+    }
 
     // Para otros roles: validar contraseña de tienda o rol
     if (!pendingStore) {
@@ -450,7 +450,7 @@ export default function Home() {
 
     if (!requiredPassword || loginPassword === requiredPassword) {
       setLoginSuccess(true);
-      
+
       setTimeout(() => {
         setSelectedStore(pendingStore);
         setIsLoggedIn(true);
@@ -501,8 +501,8 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-purple-50/40" />
           
           {/* Silueta principal superior derecha - relieve fuerte */}
-          <motion.div 
-            animate={{ 
+          <motion.div
+            animate={{
               x: [0, 40, 0],
               y: [0, -25, 0],
               rotateZ: [0, 8, 0]
@@ -513,12 +513,12 @@ export default function Home() {
               background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.12) 0%, rgba(244, 114, 182, 0.08) 50%, rgba(251, 207, 232, 0.04) 100%)',
               boxShadow: 'inset -15px -15px 40px rgba(255, 255, 255, 0.6), inset 15px 15px 40px rgba(0, 0, 0, 0.08), 0 25px 80px rgba(236, 72, 153, 0.15)',
               filter: 'blur(2px)'
-            }}
-          />
+            }} />
+          
           
           {/* Silueta inferior izquierda - relieve medio */}
-          <motion.div 
-            animate={{ 
+          <motion.div
+            animate={{
               x: [0, -35, 0],
               y: [0, 40, 0],
               rotateZ: [0, -10, 0]
@@ -529,12 +529,12 @@ export default function Home() {
               background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.10) 0%, rgba(192, 132, 252, 0.06) 50%, rgba(233, 213, 255, 0.03) 100%)',
               boxShadow: 'inset -12px -12px 35px rgba(255, 255, 255, 0.5), inset 12px 12px 35px rgba(0, 0, 0, 0.06), 0 20px 70px rgba(168, 85, 247, 0.12)',
               filter: 'blur(2px)'
-            }}
-          />
+            }} />
+          
           
           {/* Silueta central - efecto de profundidad */}
-          <motion.div 
-            animate={{ 
+          <motion.div
+            animate={{
               scale: [1, 1.15, 1],
               rotateZ: [0, 180, 360]
             }}
@@ -544,12 +544,12 @@ export default function Home() {
               background: 'linear-gradient(135deg, rgba(147, 51, 234, 0.08) 0%, rgba(236, 72, 153, 0.06) 50%, rgba(244, 114, 182, 0.04) 100%)',
               boxShadow: 'inset -10px -10px 30px rgba(255, 255, 255, 0.4), inset 10px 10px 30px rgba(0, 0, 0, 0.05), 0 15px 60px rgba(147, 51, 234, 0.1)',
               filter: 'blur(3px)'
-            }}
-          />
+            }} />
+          
 
           {/* Formas geométricas pequeñas con relieve - superior */}
           <motion.div
-            animate={{ 
+            animate={{
               rotate: 360,
               x: [0, 15, 0],
               y: [0, -10, 0]
@@ -561,11 +561,11 @@ export default function Home() {
               boxShadow: 'inset -6px -6px 20px rgba(255, 255, 255, 0.6), inset 6px 6px 20px rgba(0, 0, 0, 0.06)',
               transform: 'rotate(25deg)',
               filter: 'blur(1px)'
-            }}
-          />
+            }} />
+          
 
           <motion.div
-            animate={{ 
+            animate={{
               rotate: -360,
               scale: [1, 1.2, 1]
             }}
@@ -575,17 +575,17 @@ export default function Home() {
               background: 'linear-gradient(135deg, rgba(251, 113, 133, 0.08), rgba(253, 164, 175, 0.04))',
               boxShadow: 'inset -7px -7px 22px rgba(255, 255, 255, 0.5), inset 7px 7px 22px rgba(0, 0, 0, 0.05)',
               filter: 'blur(1.5px)'
-            }}
-          />
+            }} />
+          
 
           {/* Textura de puntos para profundidad */}
-          <div 
+          <div
             className="absolute inset-0 opacity-[0.015]"
             style={{
               backgroundImage: 'radial-gradient(circle, rgba(0,0,0,0.4) 1px, transparent 1px)',
               backgroundSize: '30px 30px'
-            }}
-          />
+            }} />
+          
         </div>
 
         {/* Mobile/Tablet View */}
@@ -593,13 +593,13 @@ export default function Home() {
           <div className="flex-1 flex flex-col justify-center px-4 py-4 overflow-y-auto">
             <div className="max-w-md mx-auto w-full bg-white/0 backdrop-blur-sm rounded-3xl shadow-2xl border-2 border-rose-200/40 p-5" style={{ boxShadow: '0 0 12px rgba(251, 113, 133, 0.25), 0 0 20px rgba(251, 113, 133, 0.15)' }}>
               <div className="mb-5 text-center">
-                <motion.img 
-                  src={LOGO_URL} 
-                  alt="Popsy" 
+                <motion.img
+                  src={LOGO_URL}
+                  alt="Popsy"
                   className="h-20 object-contain mx-auto mb-3"
                   initial={{ opacity: 0, scale: 0.8, y: -20 }}
-                  animate={{ 
-                    opacity: 1, 
+                  animate={{
+                    opacity: 1,
                     scale: 1,
                     y: [0, -8, 0]
                   }}
@@ -607,8 +607,8 @@ export default function Home() {
                     opacity: { duration: 0.6 },
                     scale: { duration: 0.6 },
                     y: { duration: 2.5, repeat: Infinity, ease: "easeInOut" }
-                  }}
-                />
+                  }} />
+                
                 <h1 className="text-xl font-black text-rose-300 mb-1">Iniciar sesión</h1>
                 <p className="text-slate-600 text-xs font-medium">Selecciona tu rol y comienza</p>
               </div>
@@ -618,7 +618,7 @@ export default function Home() {
                   const isSelected = selectedRole === role.id;
                   const lastUsedRole = localStorage.getItem('lastSelectedRole');
                   const isLastUsed = role.id === lastUsedRole && !isSelected;
-                  
+
                   return (
                     <button
                       key={role.id}
@@ -628,29 +628,29 @@ export default function Home() {
                         localStorage.setItem('lastSelectedRole', role.id);
                       }}
                       className={`relative w-full min-h-[60px] p-3 rounded-xl border-2 transition-all duration-300 text-left ${
-                       isSelected
-                         ? 'border-rose-300 bg-gradient-to-r from-rose-100/30 via-pink-100/20 to-purple-100/30 shadow-xl shadow-rose-200/40 scale-[1.02]'
-                         : 'border-slate-300/60 bg-white/8 backdrop-blur-md active:border-rose-200 hover:scale-[1.01] hover:shadow-lg'
-                      }`}
-                    >
-                      {isLastUsed && (
-                        <motion.div 
-                          animate={{ scale: [1, 1.1, 1] }}
-                          transition={{ duration: 2, repeat: Infinity }}
-                          className="absolute -top-1.5 right-2 px-2 py-0.5 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full text-[8px] font-bold text-white shadow-lg"
-                        >
+                      isSelected ?
+                      'border-rose-300 bg-gradient-to-r from-rose-100/30 via-pink-100/20 to-purple-100/30 shadow-xl shadow-rose-200/40 scale-[1.02]' :
+                      'border-slate-300/60 bg-white/8 backdrop-blur-md active:border-rose-200 hover:scale-[1.01] hover:shadow-lg'}`
+                      }>
+                      
+                      {isLastUsed &&
+                      <motion.div
+                        animate={{ scale: [1, 1.1, 1] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                        className="absolute -top-1.5 right-2 px-2 py-0.5 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full text-[8px] font-bold text-white shadow-lg">
+                        
                           ✨ Reciente
                         </motion.div>
-                      )}
+                      }
                       <div className="flex items-center gap-2">
-                        <motion.div 
+                        <motion.div
                           animate={isSelected ? { rotate: [0, 5, -5, 0] } : {}}
                           transition={{ duration: 2, repeat: Infinity }}
                           className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 shadow-md ${
-                          isSelected 
-                            ? 'bg-white/60 backdrop-blur-sm' 
-                            : 'bg-gradient-to-br from-rose-50 to-purple-50'
-                          }`}>
+                          isSelected ?
+                          'bg-white/60 backdrop-blur-sm' :
+                          'bg-gradient-to-br from-rose-50 to-purple-50'}`
+                          }>
                           <div className="w-4 h-4">
                             <RoleIcon roleId={role.id} isSelected={isSelected} />
                           </div>
@@ -659,91 +659,91 @@ export default function Home() {
                           <p className={`font-bold text-sm leading-tight ${isSelected ? 'text-slate-800' : 'text-slate-900'}`}>{role.name}</p>
                           <p className={`text-[10px] leading-tight mt-0.5 ${isSelected ? 'text-slate-600' : 'text-slate-600'}`}>{role.description}</p>
                         </div>
-                        {isSelected && (
-                          <motion.div 
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            className="w-4 h-4 rounded-full bg-white flex items-center justify-center flex-shrink-0 shadow-md"
-                          >
+                        {isSelected &&
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          className="w-4 h-4 rounded-full bg-white flex items-center justify-center flex-shrink-0 shadow-md">
+                          
                             <CheckCircle className="w-3 h-3 text-rose-500" strokeWidth={3} />
                           </motion.div>
-                        )}
+                        }
                       </div>
-                    </button>
-                  );
+                    </button>);
+
                 })}
               </div>
 
-              {selectedRole === 'gerente' && (
-                <div className="mb-3 p-2.5 bg-blue-50/60 backdrop-blur-sm border border-blue-200/40 rounded-lg">
+              {selectedRole === 'gerente' &&
+              <div className="mb-3 p-2.5 bg-blue-50/60 backdrop-blur-sm border border-blue-200/40 rounded-lg">
                   <p className="text-[10px] text-blue-700 flex items-center gap-1.5 font-medium">
                     <Info className="w-3 h-3 flex-shrink-0" />
                     Acceso a panel ejecutivo global
                   </p>
                 </div>
-              )}
+              }
 
-              {selectedRole && selectedRole !== 'gerente' && (
-                <div className="mb-3">
+              {selectedRole && selectedRole !== 'gerente' &&
+              <div className="mb-3">
                   <label className="block text-xs font-semibold text-slate-900 mb-2 text-center">Selecciona tu tienda</label>
                   <div className="max-w-sm mx-auto">
                     <StoreSelector selectedStore={pendingStore} onStoreChange={handleStoreSelect} />
                   </div>
                 </div>
-              )}
+              }
 
-              {selectedRole && (
-                <div className="mb-3">
+              {selectedRole &&
+              <div className="mb-3">
                   <label htmlFor="login-password" className="block text-xs font-semibold text-slate-900 mb-2">
                     Contraseña
                   </label>
                   <div className="relative">
                     <input
-                      id="login-password"
-                      type={showLoginPassword ? "text" : "password"}
-                      placeholder="••••••"
-                      value={loginPassword}
-                      onChange={(e) => {setLoginPassword(e.target.value);setLoginError('');}}
-                      onKeyDown={(e) => e.key === 'Enter' && !isSubmitting && handleLogin()}
-                      disabled={isSubmitting}
-                      autoComplete="current-password"
-                      className="w-full h-11 pl-4 pr-12 border-2 border-rose-200/60 rounded-xl focus:ring-2 focus:ring-pink-400/50 focus:border-pink-400/50 outline-none text-sm text-slate-900 placeholder:text-slate-400 disabled:opacity-50 disabled:cursor-not-allowed bg-white/80 backdrop-blur-sm"
-                    />
+                    id="login-password"
+                    type={showLoginPassword ? "text" : "password"}
+                    placeholder="••••••"
+                    value={loginPassword}
+                    onChange={(e) => {setLoginPassword(e.target.value);setLoginError('');}}
+                    onKeyDown={(e) => e.key === 'Enter' && !isSubmitting && handleLogin()}
+                    disabled={isSubmitting}
+                    autoComplete="current-password"
+                    className="w-full h-11 pl-4 pr-12 border-2 border-rose-200/60 rounded-xl focus:ring-2 focus:ring-pink-400/50 focus:border-pink-400/50 outline-none text-sm text-slate-900 placeholder:text-slate-400 disabled:opacity-50 disabled:cursor-not-allowed bg-white/80 backdrop-blur-sm" />
+                  
                     <button
-                      type="button"
-                      onClick={() => setShowLoginPassword(!showLoginPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 active:text-slate-600"
-                    >
+                    type="button"
+                    onClick={() => setShowLoginPassword(!showLoginPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 active:text-slate-600">
+                    
                       {showLoginPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
                   <p className="text-[10px] text-slate-500 mt-1">Contraseña asignada por la empresa</p>
                 </div>
-              )}
+              }
 
-              {loginError && (
-                <div className="mb-3 p-2.5 bg-red-50/60 backdrop-blur-sm border border-red-200/40 rounded-lg">
+              {loginError &&
+              <div className="mb-3 p-2.5 bg-red-50/60 backdrop-blur-sm border border-red-200/40 rounded-lg">
                   <p className="text-[10px] text-red-700 flex items-center gap-1.5 font-medium">
                     <AlertTriangle className="w-3 h-3 flex-shrink-0" />
                     {loginError}
                   </p>
                 </div>
-              )}
+              }
 
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button
                   onClick={handleLogin}
-                  disabled={(selectedRole !== 'gerente' && !pendingStore) || !selectedRole || isSubmitting}
-                  className="w-full h-12 bg-gradient-to-r from-rose-300 to-pink-300 hover:from-rose-400 hover:to-pink-400 text-white rounded-xl font-bold text-sm disabled:opacity-40 mt-4 shadow-xl shadow-rose-200/30"
-                >
-                {isSubmitting ? (
+                  disabled={selectedRole !== 'gerente' && !pendingStore || !selectedRole || isSubmitting}
+                  className="w-full h-12 bg-gradient-to-r from-rose-300 to-pink-300 hover:from-rose-400 hover:to-pink-400 text-white rounded-xl font-bold text-sm disabled:opacity-40 mt-4 shadow-xl shadow-rose-200/30">
+                  
+                {isSubmitting ?
                   <span className="flex items-center justify-center gap-2">
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     Entrando...
-                  </span>
-                ) : (
+                  </span> :
+
                   'Entrar 🚀'
-                )}
+                  }
               </Button>
               </motion.div>
 
@@ -768,18 +768,18 @@ export default function Home() {
                   className="h-28 xl:h-32 object-contain mx-auto drop-shadow-xl cursor-pointer"
                   animate={{ y: [0, -8, 0] }}
                   transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-                  onClick={() => setShowStory(true)}
-                />
+                  onClick={() => setShowStory(true)} />
+                
                 <p className="text-slate-400 text-sm mt-2">Sistema de Gestión</p>
               </div>
 
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 transition={{ duration: 0.5, ease: "easeOut" }}
                 className="bg-white/70 backdrop-blur-xl rounded-3xl p-8 xl:p-10 space-y-6"
-                style={{ 
-                  boxShadow: '0 0 0 1.5px rgba(251,113,133,0.25), 0 8px 40px rgba(236,72,153,0.12), 0 32px 80px rgba(168,85,247,0.10), inset 0 1px 0 rgba(255,255,255,0.8)',
+                style={{
+                  boxShadow: '0 0 0 1.5px rgba(251,113,133,0.25), 0 8px 40px rgba(236,72,153,0.12), 0 32px 80px rgba(168,85,247,0.10), inset 0 1px 0 rgba(255,255,255,0.8)'
                 }}>
                 
                 {/* Header */}
@@ -804,20 +804,20 @@ export default function Home() {
                           localStorage.setItem('lastSelectedRole', role.id);
                         }}
                         className={`relative w-full p-4 rounded-2xl border transition-all duration-200 text-left flex items-center gap-3.5 ${
-                          isSelected
-                            ? 'border-rose-300/60 bg-gradient-to-r from-rose-50 to-pink-50/80 shadow-md shadow-rose-100/60'
-                            : 'border-slate-200/80 bg-white/60 hover:border-rose-200 hover:bg-rose-50/30 hover:shadow-sm'
-                        }`}
-                        style={isSelected ? { boxShadow: '0 2px 16px rgba(251,113,133,0.18), inset 0 1px 0 rgba(255,255,255,0.9)' } : { boxShadow: '0 1px 6px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)' }}
-                      >
-                        {isLastUsed && (
-                          <div className="absolute -top-2 right-3 px-2 py-0.5 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full text-[9px] font-bold text-white shadow">
+                        isSelected ?
+                        'border-rose-300/60 bg-gradient-to-r from-rose-50 to-pink-50/80 shadow-md shadow-rose-100/60' :
+                        'border-slate-200/80 bg-white/60 hover:border-rose-200 hover:bg-rose-50/30 hover:shadow-sm'}`
+                        }
+                        style={isSelected ? { boxShadow: '0 2px 16px rgba(251,113,133,0.18), inset 0 1px 0 rgba(255,255,255,0.9)' } : { boxShadow: '0 1px 6px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)' }}>
+                        
+                        {isLastUsed &&
+                        <div className="absolute -top-2 right-3 px-2 py-0.5 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full text-[9px] font-bold text-white shadow">
                             ✨ Reciente
                           </div>
-                        )}
+                        }
                         <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                          isSelected ? 'bg-white shadow-sm' : 'bg-rose-50/80'
-                        }`}>
+                        isSelected ? 'bg-white shadow-sm' : 'bg-rose-50/80'}`
+                        }>
                           <div className="w-6 h-6">
                             <RoleIcon roleId={role.id} isSelected={isSelected} />
                           </div>
@@ -826,97 +826,97 @@ export default function Home() {
                           <p className="text-sm font-bold text-slate-800 mb-0.5">{role.name}</p>
                           <p className="text-xs text-slate-500 leading-snug">{role.description}</p>
                         </div>
-                        {isSelected && (
-                          <motion.div 
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            className="w-5 h-5 rounded-full bg-rose-400 flex items-center justify-center flex-shrink-0 shadow"
-                          >
+                        {isSelected &&
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          className="w-5 h-5 rounded-full bg-rose-400 flex items-center justify-center flex-shrink-0 shadow">
+                          
                             <CheckCircle className="w-3.5 h-3.5 text-white" strokeWidth={3} />
                           </motion.div>
-                        )}
-                      </button>
-                    );
+                        }
+                      </button>);
+
                   })}
                 </div>
 
                 {/* Gerente info */}
-                {selectedRole === 'gerente' && (
-                  <div className="px-3 py-2.5 bg-blue-50/80 border border-blue-200/60 rounded-xl">
+                {selectedRole === 'gerente' &&
+                <div className="px-3 py-2.5 bg-blue-50/80 border border-blue-200/60 rounded-xl">
                     <p className="text-xs text-blue-600 flex items-center gap-2 font-medium">
                       <Info className="w-3.5 h-3.5 flex-shrink-0" />
                       Acceso a panel ejecutivo global
                     </p>
                   </div>
-                )}
+                }
 
                 {/* Store Selector */}
-                {selectedRole && selectedRole !== 'gerente' && (
-                  <div className="space-y-1.5">
+                {selectedRole && selectedRole !== 'gerente' &&
+                <div className="space-y-1.5">
                     <label className="block text-sm font-semibold text-slate-700">Selecciona tu tienda</label>
                     <StoreSelector selectedStore={pendingStore} onStoreChange={handleStoreSelect} />
                   </div>
-                )}
+                }
 
                 {/* Password */}
-                {selectedRole && (
-                  <div className="space-y-1.5">
+                {selectedRole &&
+                <div className="space-y-1.5">
                     <label htmlFor="login-password-desktop" className="block text-sm font-semibold text-slate-700">
                       Contraseña
                     </label>
                     <div className="relative">
                       <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                       <input
-                        id="login-password-desktop"
-                        type={showLoginPassword ? "text" : "password"}
-                        placeholder="••••••"
-                        value={loginPassword}
-                        onChange={(e) => {setLoginPassword(e.target.value);setLoginError('');}}
-                        onKeyDown={(e) => e.key === 'Enter' && !isSubmitting && handleLogin()}
-                        disabled={isSubmitting}
-                        autoComplete="current-password"
-                        className="w-full pl-11 pr-11 py-3 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:border-rose-300 focus:ring-2 focus:ring-rose-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all bg-white/80"
-                        style={{ boxShadow: '0 1px 6px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.9)' }}
-                      />
+                      id="login-password-desktop"
+                      type={showLoginPassword ? "text" : "password"}
+                      placeholder="••••••"
+                      value={loginPassword}
+                      onChange={(e) => {setLoginPassword(e.target.value);setLoginError('');}}
+                      onKeyDown={(e) => e.key === 'Enter' && !isSubmitting && handleLogin()}
+                      disabled={isSubmitting}
+                      autoComplete="current-password"
+                      className="w-full pl-11 pr-11 py-3 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:border-rose-300 focus:ring-2 focus:ring-rose-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all bg-white/80"
+                      style={{ boxShadow: '0 1px 6px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.9)' }} />
+                    
                       <button
-                        type="button"
-                        onClick={() => setShowLoginPassword(!showLoginPassword)}
-                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
-                      >
+                      type="button"
+                      onClick={() => setShowLoginPassword(!showLoginPassword)}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors">
+                      
                         {showLoginPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
                     </div>
                     <p className="text-[11px] text-slate-400">Contraseña asignada por la empresa</p>
                   </div>
-                )}
+                }
 
                 {/* Error */}
-                {loginError && (
-                  <div className="px-3 py-2.5 bg-red-50/80 border border-red-200/60 rounded-xl">
+                {loginError &&
+                <div className="px-3 py-2.5 bg-red-50/80 border border-red-200/60 rounded-xl">
                     <p className="text-red-500 text-xs flex items-center gap-2 font-medium">
                       <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
                       {loginError}
                     </p>
                   </div>
-                )}
+                }
 
                 {/* Submit Button */}
                 <motion.div whileHover={{ scale: 1.015 }} whileTap={{ scale: 0.98 }}>
                   <Button
                     onClick={handleLogin}
-                    disabled={(selectedRole !== 'gerente' && !pendingStore) || !selectedRole || isSubmitting}
-                    className="w-full bg-gradient-to-r from-rose-400 to-pink-400 hover:from-rose-500 hover:to-pink-500 text-white py-3.5 rounded-2xl font-bold text-base shadow-lg shadow-rose-200/50 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 border-0"
-                  >
-                    {isSubmitting ? (
-                      <span className="flex items-center justify-center gap-2">
+                    disabled={selectedRole !== 'gerente' && !pendingStore || !selectedRole || isSubmitting}
+                    className="w-full bg-gradient-to-r from-rose-400 to-pink-400 hover:from-rose-500 hover:to-pink-500 text-white py-3.5 rounded-2xl font-bold text-base shadow-lg shadow-rose-200/50 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 border-0">
+                    
+                    {isSubmitting ?
+                    <span className="flex items-center justify-center gap-2">
                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                         Entrando...
-                      </span>
-                    ) : (
-                      <span className="flex items-center justify-center gap-2">
+                      </span> :
+
+                    <span className="flex items-center justify-center gap-2">
                         Entrar <span className="text-base">🚀</span>
                       </span>
-                    )}
+                    }
                   </Button>
                 </motion.div>
 
@@ -931,21 +931,21 @@ export default function Home() {
         </div>
 
         {/* Success Animation */}
-        {loginSuccess && (
-          <div className="fixed inset-0 bg-emerald-500/20 flex items-center justify-center z-50">
+        {loginSuccess &&
+        <div className="fixed inset-0 bg-emerald-500/20 flex items-center justify-center z-50">
             <div className="bg-white rounded-full p-6 shadow-2xl">
               <CheckCircle className="w-16 h-16 text-emerald-600" />
             </div>
           </div>
-        )}
+        }
 
         {/* Popsy Story Modal */}
         <Suspense fallback={null}>
           {showStory && <PopsyStoryModal onClose={() => setShowStory(false)} />}
         </Suspense>
-      </div>
-  );
-}
+      </div>);
+
+  }
 
   return (
     <div className="min-h-screen relative overflow-hidden">
@@ -954,148 +954,148 @@ export default function Home() {
         <div className="absolute inset-0 bg-white" />
         <>
         {/* Silueta principal superior derecha - relieve sofisticado */}
-        <motion.div 
-          animate={{ 
-            x: [0, 40, 0],
-            y: [0, -25, 0],
-            rotateZ: [0, 8, 0]
-          }}
-          transition={{ duration: 24, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute -top-48 -right-48 w-[480px] h-[480px]"
-          style={{
-            background: 'linear-gradient(145deg, rgba(236, 72, 153, 0.12), rgba(244, 114, 182, 0.07), rgba(251, 207, 232, 0.02))',
-            borderRadius: '42% 58% 45% 55% / 48% 62% 38% 52%',
-            boxShadow: `
+        <motion.div
+            animate={{
+              x: [0, 40, 0],
+              y: [0, -25, 0],
+              rotateZ: [0, 8, 0]
+            }}
+            transition={{ duration: 24, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute -top-48 -right-48 w-[480px] h-[480px]"
+            style={{
+              background: 'linear-gradient(145deg, rgba(236, 72, 153, 0.12), rgba(244, 114, 182, 0.07), rgba(251, 207, 232, 0.02))',
+              borderRadius: '42% 58% 45% 55% / 48% 62% 38% 52%',
+              boxShadow: `
               inset -22px -22px 55px rgba(255, 255, 255, 0.8),
               inset 22px 22px 55px rgba(236, 72, 153, 0.13),
               0 35px 100px rgba(236, 72, 153, 0.18),
               0 15px 40px rgba(236, 72, 153, 0.08)
             `,
-            filter: 'blur(1px)'
-          }}
-        />
+              filter: 'blur(1px)'
+            }} />
+          
         
         {/* Silueta inferior izquierda - profundidad intensa */}
-        <motion.div 
-          animate={{ 
-            x: [0, -50, 0],
-            y: [0, 40, 0],
-            rotateZ: [0, -10, 0]
-          }}
-          transition={{ duration: 28, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute -bottom-60 -left-60 w-[600px] h-[600px]"
-          style={{
-            background: 'linear-gradient(145deg, rgba(168, 85, 247, 0.11), rgba(192, 132, 252, 0.06), rgba(221, 214, 254, 0.02))',
-            borderRadius: '55% 45% 62% 38% / 45% 55% 45% 55%',
-            boxShadow: `
+        <motion.div
+            animate={{
+              x: [0, -50, 0],
+              y: [0, 40, 0],
+              rotateZ: [0, -10, 0]
+            }}
+            transition={{ duration: 28, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute -bottom-60 -left-60 w-[600px] h-[600px]"
+            style={{
+              background: 'linear-gradient(145deg, rgba(168, 85, 247, 0.11), rgba(192, 132, 252, 0.06), rgba(221, 214, 254, 0.02))',
+              borderRadius: '55% 45% 62% 38% / 45% 55% 45% 55%',
+              boxShadow: `
               inset -20px -20px 50px rgba(255, 255, 255, 0.7),
               inset 20px 20px 50px rgba(168, 85, 247, 0.11),
               0 30px 90px rgba(168, 85, 247, 0.16),
               0 12px 35px rgba(168, 85, 247, 0.07)
             `,
-            filter: 'blur(1.5px)'
-          }}
-        />
+              filter: 'blur(1.5px)'
+            }} />
+          
         
         {/* Silueta central rotante - efecto hipnótico */}
-        <motion.div 
-          animate={{ 
-            scale: [1, 1.18, 1],
-            rotateZ: [0, 180, 360]
-          }}
-          transition={{ duration: 35, repeat: Infinity, ease: "linear" }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[380px] h-[380px]"
-          style={{
-            background: 'linear-gradient(145deg, rgba(147, 51, 234, 0.08), rgba(236, 72, 153, 0.05), rgba(244, 114, 182, 0.02))',
-            borderRadius: '38% 62% 55% 45% / 62% 45% 55% 38%',
-            boxShadow: `
+        <motion.div
+            animate={{
+              scale: [1, 1.18, 1],
+              rotateZ: [0, 180, 360]
+            }}
+            transition={{ duration: 35, repeat: Infinity, ease: "linear" }}
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[380px] h-[380px]"
+            style={{
+              background: 'linear-gradient(145deg, rgba(147, 51, 234, 0.08), rgba(236, 72, 153, 0.05), rgba(244, 114, 182, 0.02))',
+              borderRadius: '38% 62% 55% 45% / 62% 45% 55% 38%',
+              boxShadow: `
               inset -15px -15px 40px rgba(255, 255, 255, 0.6),
               inset 15px 15px 40px rgba(147, 51, 234, 0.09),
               0 25px 75px rgba(147, 51, 234, 0.11)
             `,
-            filter: 'blur(2px)'
-          }}
-        />
+              filter: 'blur(2px)'
+            }} />
+          
 
         {/* Elemento superior izquierda - cristal */}
         <motion.div
-          animate={{ 
-            rotate: [0, 360],
-            x: [0, 25, 0],
-            y: [0, -18, 0],
-            scale: [1, 1.1, 1]
-          }}
-          transition={{ duration: 32, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-[18%] left-[12%] w-36 h-36"
-          style={{
-            background: 'linear-gradient(145deg, rgba(59, 130, 246, 0.10), rgba(96, 165, 250, 0.05), rgba(147, 197, 253, 0.02))',
-            borderRadius: '30% 70% 70% 30% / 30% 30% 70% 70%',
-            boxShadow: `
+            animate={{
+              rotate: [0, 360],
+              x: [0, 25, 0],
+              y: [0, -18, 0],
+              scale: [1, 1.1, 1]
+            }}
+            transition={{ duration: 32, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute top-[18%] left-[12%] w-36 h-36"
+            style={{
+              background: 'linear-gradient(145deg, rgba(59, 130, 246, 0.10), rgba(96, 165, 250, 0.05), rgba(147, 197, 253, 0.02))',
+              borderRadius: '30% 70% 70% 30% / 30% 30% 70% 70%',
+              boxShadow: `
               inset -10px -10px 30px rgba(255, 255, 255, 0.9),
               inset 10px 10px 30px rgba(59, 130, 246, 0.11),
               0 18px 55px rgba(59, 130, 246, 0.13)
             `,
-            transform: 'rotate(25deg)',
-            filter: 'blur(0.5px)'
-          }}
-        />
+              transform: 'rotate(25deg)',
+              filter: 'blur(0.5px)'
+            }} />
+          
 
         {/* Elemento inferior derecha - esfera suave */}
         <motion.div
-          animate={{ 
-            rotate: [0, -360],
-            scale: [1, 1.3, 1],
-            x: [0, -25, 0],
-            y: [0, 15, 0]
-          }}
-          transition={{ duration: 36, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute bottom-[22%] right-[15%] w-40 h-40"
-          style={{
-            background: 'linear-gradient(145deg, rgba(251, 113, 133, 0.09), rgba(253, 164, 175, 0.05), rgba(254, 205, 211, 0.02))',
-            borderRadius: '60% 40% 30% 70% / 60% 30% 70% 40%',
-            boxShadow: `
+            animate={{
+              rotate: [0, -360],
+              scale: [1, 1.3, 1],
+              x: [0, -25, 0],
+              y: [0, 15, 0]
+            }}
+            transition={{ duration: 36, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute bottom-[22%] right-[15%] w-40 h-40"
+            style={{
+              background: 'linear-gradient(145deg, rgba(251, 113, 133, 0.09), rgba(253, 164, 175, 0.05), rgba(254, 205, 211, 0.02))',
+              borderRadius: '60% 40% 30% 70% / 60% 30% 70% 40%',
+              boxShadow: `
               inset -12px -12px 35px rgba(255, 255, 255, 0.8),
               inset 12px 12px 35px rgba(251, 113, 133, 0.10),
               0 20px 65px rgba(251, 113, 133, 0.12)
             `,
-            filter: 'blur(1px)'
-          }}
-        />
+              filter: 'blur(1px)'
+            }} />
+          
 
         {/* Partículas de luz flotantes */}
         <motion.div
-          animate={{ 
-            opacity: [0.3, 0.6, 0.3],
-            scale: [1, 1.5, 1]
-          }}
-          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-[30%] right-[25%] w-2 h-2 rounded-full bg-pink-300/40 blur-sm"
-        />
+            animate={{
+              opacity: [0.3, 0.6, 0.3],
+              scale: [1, 1.5, 1]
+            }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute top-[30%] right-[25%] w-2 h-2 rounded-full bg-pink-300/40 blur-sm" />
+          
         <motion.div
-          animate={{ 
-            opacity: [0.2, 0.5, 0.2],
-            scale: [1, 1.3, 1]
-          }}
-          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-          className="absolute bottom-[35%] left-[30%] w-3 h-3 rounded-full bg-purple-300/30 blur-sm"
-        />
+            animate={{
+              opacity: [0.2, 0.5, 0.2],
+              scale: [1, 1.3, 1]
+            }}
+            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+            className="absolute bottom-[35%] left-[30%] w-3 h-3 rounded-full bg-purple-300/30 blur-sm" />
+          
 
         {/* Grid ultra sutil para textura */}
-        <div 
-          className="absolute inset-0 opacity-[0.015]"
-          style={{
-            backgroundImage: 'radial-gradient(circle, rgba(120, 120, 120, 0.4) 1px, transparent 1px)',
-            backgroundSize: '50px 50px'
-          }}
-        />
+        <div
+            className="absolute inset-0 opacity-[0.015]"
+            style={{
+              backgroundImage: 'radial-gradient(circle, rgba(120, 120, 120, 0.4) 1px, transparent 1px)',
+              backgroundSize: '50px 50px'
+            }} />
+          
 
         {/* Luz ambiental superior */}
-        <div 
-          className="absolute inset-0 opacity-40"
-          style={{
-            background: 'radial-gradient(circle at 30% 15%, rgba(255, 255, 255, 0.5), transparent 45%), radial-gradient(circle at 70% 85%, rgba(236, 72, 153, 0.06), transparent 50%)'
-          }}
-        />
+        <div
+            className="absolute inset-0 opacity-40"
+            style={{
+              background: 'radial-gradient(circle at 30% 15%, rgba(255, 255, 255, 0.5), transparent 45%), radial-gradient(circle at 70% 85%, rgba(236, 72, 153, 0.06), transparent 50%)'
+            }} />
+          
         </>
       </div>
 
@@ -1109,10 +1109,10 @@ export default function Home() {
             className="h-20 sm:h-24 object-contain mx-auto mb-2 cursor-pointer drop-shadow-lg"
             animate={{ y: [0, -6, 0] }}
             transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-            onClick={() => setShowStory(true)}
-          />
-          {selectedRole !== 'gerente' && (
-            <>
+            onClick={() => setShowStory(true)} />
+          
+          {selectedRole !== 'gerente' &&
+          <>
               <p className="text-gray-400 text-sm mb-3">Sistema de Gestión</p>
               <div className="flex flex-col items-center gap-2">
                 <p className="text-gray-600 font-medium text-sm">¿A qué tienda deseas ingresar?</p>
@@ -1121,82 +1121,92 @@ export default function Home() {
                 </div>
               </div>
             </>
-          )}
-          {selectedRole === 'gerente' && (
-            <p className="text-gray-400 text-sm">Sistema de Gestión · Gerencia</p>
-          )}
+          }
+          {selectedRole === 'gerente' &&
+          <p className="text-gray-400 text-sm">Sistema de Gestión · Gerencia</p>
+          }
         </div>
 
         {/* Quick Actions */}
-        {(selectedStore || selectedRole === 'gerente') && (
+        {(selectedStore || selectedRole === 'gerente') &&
         <div className="mb-4 flex justify-center gap-2 flex-wrap">
             <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                localStorage.removeItem('selectedStore');
-                localStorage.removeItem('popsySession');
-                localStorage.removeItem('userRole');
-                window.location.href = '/Home';
-              }}
-              className="text-gray-400 hover:text-red-500 hover:bg-red-50/50 transition-all text-xs"
-            >
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              localStorage.removeItem('selectedStore');
+              localStorage.removeItem('popsySession');
+              localStorage.removeItem('userRole');
+              window.location.href = '/Home';
+            }}
+            className="text-gray-400 hover:text-red-500 hover:bg-red-50/50 transition-all text-xs">
+            
               <LogOut className="w-3.5 h-3.5 mr-1" />
               Cerrar Sesión
             </Button>
 
-            {selectedRole === 'gerente' && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowBudgetImporter(true)}
-                className="text-gray-400 hover:text-emerald-600 hover:bg-emerald-50/50 transition-all text-xs"
-              >
+            {selectedRole === 'gerente' &&
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowBudgetImporter(true)}
+            className="text-gray-400 hover:text-emerald-600 hover:bg-emerald-50/50 transition-all text-xs">
+            
                 <FileSpreadsheet className="w-3.5 h-3.5 mr-1" />
                 PPT Excel
               </Button>
-            )}
-            {selectedRole === 'gerente' && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowSalesReportUploader(true)}
-                className="text-gray-400 hover:text-slate-700 hover:bg-slate-100/70 transition-all text-xs"
-              >
-                <FileSpreadsheet className="w-3.5 h-3.5 mr-1" />
-                Cargar Reporte de Ventas
-              </Button>
-            )}
-            {selectedRole !== 'gerente' && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowReport(true)}
-                className="text-gray-400 hover:text-rose-500 hover:bg-rose-50/50 transition-all text-xs"
-              >
+          }
+            
+
+
+
+
+
+
+
+
+
+          
+            {selectedRole !== 'gerente' &&
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowReport(true)}
+            className="text-gray-400 hover:text-rose-500 hover:bg-rose-50/50 transition-all text-xs">
+            
                 <FileText className="w-3.5 h-3.5 mr-1" />
                 Informe
               </Button>
-            )}
-
+          }
+            {selectedRole !== 'gerente' && selectedStore &&
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => window.location.href = '/SalesReportView'}
+            className="text-gray-400 hover:text-indigo-600 hover:bg-indigo-50/50 transition-all text-xs">
+            
+                <BarChart3 className="w-3.5 h-3.5 mr-1" />
+                Participación del negocio
+              </Button>
+          }
           </div>
-        )}
+        }
 
         {/* Menu Grid - solo para no-gerente o gerente con tienda */}
-        {(selectedStore || selectedRole === 'gerente') && (
+        {(selectedStore || selectedRole === 'gerente') &&
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
 
             {MENU_ITEMS.filter((item) => {
-              // Restricciones: Panel Ejecutivo solo para gerente, otras opciones solo si hay tienda seleccionada
-              const needsStore = item.page !== 'ExecutiveDashboard';
-              if (needsStore && !selectedStore && item.requiredRole !== 'gerente') return false;
-              if (item.requiredRole && selectedRole !== item.requiredRole) return false;
-              
-              // Restricción de tiendas específicas para Experiencia Popsy
-              if (item.restrictedStores && !item.restrictedStores.includes(selectedStore)) return false;
-              
-              return true;
-            }).map((item, index) => {
+            // Restricciones: Panel Ejecutivo solo para gerente, otras opciones solo si hay tienda seleccionada
+            const needsStore = item.page !== 'ExecutiveDashboard';
+            if (needsStore && !selectedStore && item.requiredRole !== 'gerente') return false;
+            if (item.requiredRole && selectedRole !== item.requiredRole) return false;
+
+            // Restricción de tiendas específicas para Experiencia Popsy
+            if (item.restrictedStores && !item.restrictedStores.includes(selectedStore)) return false;
+
+            return true;
+          }).map((item, index) => {
             const Icon = item.icon;
 
             // Restricciones por rol - solo embajador no ve Presupuestos
@@ -1206,7 +1216,7 @@ export default function Home() {
               <div key={item.name}>
 
                   {isLocked ?
-                  <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 h-full shadow-lg transition-all duration-300 group relative overflow-hidden border border-white/20 opacity-60 cursor-not-allowed">
+                <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 h-full shadow-lg transition-all duration-300 group relative overflow-hidden border border-white/20 opacity-60 cursor-not-allowed">
 
                       {/* Lock overlay */}
                       <div className="absolute inset-0 bg-gray-900/10 rounded-2xl flex items-center justify-center z-20">
@@ -1290,17 +1300,17 @@ export default function Home() {
                       setShowStoreSales(true);
                     }
                   }}
-                  className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 h-full shadow-lg hover:shadow-2xl hover:bg-white/15 transition-all duration-300 group relative overflow-hidden border border-white/20 cursor-pointer"
-                  >
+                  className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 h-full shadow-lg hover:shadow-2xl hover:bg-white/15 transition-all duration-300 group relative overflow-hidden border border-white/20 cursor-pointer">
+                  
                   {/* Icon centered */}
                   {/* Icon centered */}
                   <div className="flex flex-col items-center justify-center text-center relative z-10">
                     <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mb-2 shadow-sm">
-                      {item.icon ? (
-                        <Icon className={`w-6 h-6 ${item.iconColor}`} />
-                      ) : (
-                        <LogOut className={`w-6 h-6 ${item.iconColor}`} />
-                      )}
+                      {item.icon ?
+                      <Icon className={`w-6 h-6 ${item.iconColor}`} /> :
+
+                      <LogOut className={`w-6 h-6 ${item.iconColor}`} />
+                      }
                     </div>
                     <h3 className={`font-bold ${item.textColor} text-sm`}>
                       {item.specialAction === 'backup' && backupLoading ? 'Guardando...' : item.name}
@@ -1324,23 +1334,23 @@ export default function Home() {
                   </div>
                 </Link>
                 }
-              </div>
-            );
+              </div>);
+
           })}
         </div>
-        )}
+        }
       </div>
 
       {/* Modales con Lazy Loading */}
       <Suspense fallback={null}>
         <AnimatePresence>
-          {showNotifications && (
-            <NotificationSetup
-              storeId={selectedStore}
-              isOpen={showNotifications}
-              onClose={() => setShowNotifications(false)}
-            />
-          )}
+          {showNotifications &&
+          <NotificationSetup
+            storeId={selectedStore}
+            isOpen={showNotifications}
+            onClose={() => setShowNotifications(false)} />
+
+          }
         </AnimatePresence>
 
         <AnimatePresence>
@@ -1354,24 +1364,24 @@ export default function Home() {
 
 
         <AnimatePresence>
-          {showReport && (
-            <ManagerialReportModal
-              storeId={selectedStore}
-              storeName={selectedStoreName}
-              storeCode={selectedStore}
-              onClose={() => setShowReport(false)}
-            />
-          )}
-        </AnimatePresence>
-
-        {showBudgetDashboard && (
-          <MonthlyBudgetDashboard
+          {showReport &&
+          <ManagerialReportModal
             storeId={selectedStore}
             storeName={selectedStoreName}
-            isOpen={showBudgetDashboard}
-            onClose={() => setShowBudgetDashboard(false)}
-          />
-        )}
+            storeCode={selectedStore}
+            onClose={() => setShowReport(false)} />
+
+          }
+        </AnimatePresence>
+
+        {showBudgetDashboard &&
+        <MonthlyBudgetDashboard
+          storeId={selectedStore}
+          storeName={selectedStoreName}
+          isOpen={showBudgetDashboard}
+          onClose={() => setShowBudgetDashboard(false)} />
+
+        }
       </Suspense>
 
 
@@ -1379,14 +1389,14 @@ export default function Home() {
 
       {/* Store Sales Modal */}
       <Suspense fallback={null}>
-        {showStoreSales && (
-          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowStoreSales(false)}>
-            <motion.div 
+        {showStoreSales &&
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowStoreSales(false)}>
+            <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            onClick={(e) => e.stopPropagation()} 
-            className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden border-2 border-white/60"
-          >
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden border-2 border-white/60">
+            
               <div className="bg-gradient-to-r from-fuchsia-500 via-pink-500 to-violet-500 p-5 text-white text-center relative">
                 <button onClick={() => setShowStoreSales(false)} className="absolute top-4 right-4 text-white/80 hover:text-white">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1394,9 +1404,9 @@ export default function Home() {
                   </svg>
                 </button>
                 <motion.div
-                  animate={{ rotate: [0, 5, -5, 0] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
+                animate={{ rotate: [0, 5, -5, 0] }}
+                transition={{ duration: 2, repeat: Infinity }}>
+                
                   <TrendingUp className="w-10 h-10 mx-auto mb-2" />
                 </motion.div>
                 <h2 className="text-xl font-black">Registrar Ventas</h2>
@@ -1404,85 +1414,85 @@ export default function Home() {
 
               <div className="flex border-b-2 border-pink-200/50 bg-gradient-to-r from-pink-50/50 to-violet-50/50 backdrop-blur-sm">
                 <button
-                  onClick={() => setSalesTab('tienda')}
-                  className={`flex-1 py-4 px-6 font-bold text-sm transition-all relative ${
-                    salesTab === 'tienda' ? 'text-pink-600' : 'text-gray-500'
-                  }`}
-                >
+                onClick={() => setSalesTab('tienda')}
+                className={`flex-1 py-4 px-6 font-bold text-sm transition-all relative ${
+                salesTab === 'tienda' ? 'text-pink-600' : 'text-gray-500'}`
+                }>
+                
                   🏪 Venta de Tienda
-                  {salesTab === 'tienda' && (
-                    <motion.div 
-                      layoutId="activeTab"
-                      className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-pink-500 to-fuchsia-500 rounded-t-full" 
-                    />
-                  )}
+                  {salesTab === 'tienda' &&
+                <motion.div
+                  layoutId="activeTab"
+                  className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-pink-500 to-fuchsia-500 rounded-t-full" />
+
+                }
                 </button>
                 <button
-                  onClick={() => setSalesTab('cajero')}
-                  className={`flex-1 py-4 px-6 font-bold text-sm transition-all relative ${
-                    salesTab === 'cajero' ? 'text-violet-600' : 'text-gray-500'
-                  }`}
-                >
+                onClick={() => setSalesTab('cajero')}
+                className={`flex-1 py-4 px-6 font-bold text-sm transition-all relative ${
+                salesTab === 'cajero' ? 'text-violet-600' : 'text-gray-500'}`
+                }>
+                
                   👤 Venta de Cajero
-                  {salesTab === 'cajero' && (
-                    <motion.div 
-                      layoutId="activeTab"
-                      className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-violet-500 to-purple-500 rounded-t-full" 
-                    />
-                  )}
+                  {salesTab === 'cajero' &&
+                <motion.div
+                  layoutId="activeTab"
+                  className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-violet-500 to-purple-500 rounded-t-full" />
+
+                }
                 </button>
               </div>
 
               <div className="p-6 max-h-[70vh] overflow-y-auto">
-                {salesTab === 'tienda' ? (
-                  <DailySalesForm storeId={selectedStore} onSuccess={() => setShowStoreSales(false)} />
-                ) : (
-                  <ShiftRecordForm storeId={selectedStore} onSuccess={() => {}} />
-                )}
+                {salesTab === 'tienda' ?
+              <DailySalesForm storeId={selectedStore} onSuccess={() => setShowStoreSales(false)} /> :
+
+              <ShiftRecordForm storeId={selectedStore} onSuccess={() => {}} />
+              }
               </div>
             </motion.div>
           </div>
-        )}
+        }
 
-        {showExperienciaPopsy && (
-          <ExperienciaPopsyModal
-            onClose={() => setShowExperienciaPopsy(false)}
-            storeId={selectedStore}
-            userId="temp_user"
-            userName="Usuario"
-            userRole={selectedRole}
-          />
-        )}
+        {showExperienciaPopsy &&
+        <ExperienciaPopsyModal
+          onClose={() => setShowExperienciaPopsy(false)}
+          storeId={selectedStore}
+          userId="temp_user"
+          userName="Usuario"
+          userRole={selectedRole} />
 
-        {showCustomerExperience && (
-          <CustomerExperienceModal
-            onClose={() => setShowCustomerExperience(false)}
-            storeId={selectedStore}
-            userRole={selectedRole}
-          />
-        )}
+        }
+
+        {showCustomerExperience &&
+        <CustomerExperienceModal
+          onClose={() => setShowCustomerExperience(false)}
+          storeId={selectedStore}
+          userRole={selectedRole} />
+
+        }
       </Suspense>
 
       {/* Modal Importar Presupuesto Excel */}
       <AnimatePresence>
-        {showBudgetImporter && (
-          <BudgetExcelImporter onClose={() => setShowBudgetImporter(false)} />
-        )}
+        {showBudgetImporter &&
+        <BudgetExcelImporter onClose={() => setShowBudgetImporter(false)} />
+        }
       </AnimatePresence>
 
       {/* Modal Cargar Reporte de Ventas */}
       <AnimatePresence>
-        {showSalesReportUploader && (
-          <SalesReportUploader
-            onClose={() => setShowSalesReportUploader(false)}
-            onSuccess={() => setShowSalesReportUploader(false)}
-          />
-        )}
+        {showSalesReportUploader &&
+        <SalesReportUploader
+          onClose={() => setShowSalesReportUploader(false)}
+          onSuccess={() => setShowSalesReportUploader(false)} />
+
+        }
       </AnimatePresence>
 
 
 
 
-    </div>
-  );
+    </div>);
+
 }
