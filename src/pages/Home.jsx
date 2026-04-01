@@ -1205,19 +1205,15 @@ export default function Home() {
               </Button>
           }
             {selectedRole !== 'gerente' && selectedStore &&
-          <div
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => window.location.href = '/SalesReportView'}
-            className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 shadow-lg hover:shadow-2xl hover:bg-white/15 transition-all duration-300 cursor-pointer border border-white/20">
-            <div className="flex flex-col items-center justify-center text-center">
-              <div className="w-12 h-12 bg-indigo-500/20 backdrop-blur-sm rounded-xl flex items-center justify-center mb-2">
-                <BarChart3 className="w-6 h-6 text-indigo-400" />
-              </div>
-              <h3 className="font-bold text-indigo-300 text-sm">
+            className="text-gray-400 hover:text-indigo-600 hover:bg-indigo-50/50 transition-all text-xs">
+            
+                <BarChart3 className="w-3.5 h-3.5 mr-1" />
                 Participación del negocio
-              </h3>
-              <p className="text-[10px] text-gray-500 mt-0.5">Análisis de ventas</p>
-            </div>
-          </div>
+              </Button>
           }
           </div>
         }
