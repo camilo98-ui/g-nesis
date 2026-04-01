@@ -152,69 +152,51 @@ export default function SalesReportView() {
 
   const hasData = rawRecords.length > 0;
 
-  // Build hierarchy
-  const hierarchy = useMemo(() => {
+  // All records are product-level: build hierarchy by summing from products up
+  const { hierarchy, summary, top5 } = useMemo(() => {
+    // All records are product rows (level='product')
+    const products = rawRecords.filter(r => r.product && r.department);
+    const grandTotal = products.reduce((s, r) => s + (r.total_sales || 0), 0);
+
+    // Group by dept -> section -> products
     const deptMap = {};
-    rawRecords.forEach(r => {
-      if (!r.department) return;
-      if (!deptMap[r.department]) deptMap[r.department] = {};
-      const sectionKey = r.section || '__root__';
-      if (!deptMap[r.department][sectionKey]) {
-        deptMap[r.department][sectionKey] = {
-          name: r.section || '',
-          total_sales: 0,
-          total_transactions: 0,
-          participation: 0,
-          products: [],
-        };
-      }
-      if (r.level === 'section') {
-        deptMap[r.department][sectionKey].total_sales = r.total_sales;
-        deptMap[r.department][sectionKey].total_transactions = r.total_transactions;
-        deptMap[r.department][sectionKey].participation = r.participation;
-      } else if (r.level === 'product' && r.product) {
-        deptMap[r.department][sectionKey].products.push(r);
-        if (!deptMap[r.department][sectionKey].total_sales) {
-          deptMap[r.department][sectionKey].total_sales += r.total_sales;
-          deptMap[r.department][sectionKey].total_transactions += r.total_transactions;
-        }
-      }
+    products.forEach(r => {
+      const dept = r.department;
+      const sec = r.section || '';
+      if (!deptMap[dept]) deptMap[dept] = {};
+      if (!deptMap[dept][sec]) deptMap[dept][sec] = [];
+      deptMap[dept][sec].push(r);
     });
 
-    // Total store sales (sum of all product-level sales)
-    const allProducts = rawRecords.filter(r => r.level === 'product' && r.product);
-    const grandTotal = allProducts.reduce((s, r) => s + (r.total_sales || 0), 0);
-
-    return Object.entries(deptMap).map(([dept, sections]) => {
-      const sectionsArr = Object.values(sections).map(sec => {
-        const sectionSales = sec.products.reduce((s, p) => s + (p.total_sales || 0), 0) || sec.total_sales || 0;
+    const hierarchy = Object.entries(deptMap).map(([dept, sectionMap]) => {
+      const sections = Object.entries(sectionMap).map(([secName, prods]) => {
+        const sectionSales = prods.reduce((s, p) => s + (p.total_sales || 0), 0);
         const sectionPart = grandTotal > 0 ? (sectionSales / grandTotal) * 100 : 0;
-        return { ...sec, sectionSales, sectionPart };
+        // participation in DB is decimal (e.g. 0.9137) → multiply by 100 to display
+        const mappedProds = prods.map(p => ({
+          ...p,
+          participation: (p.participation || 0) * 100,
+        }));
+        return { name: secName, sectionSales, sectionPart, products: mappedProds };
       });
-      const deptSales = sectionsArr.reduce((s, sec) => s + sec.sectionSales, 0);
+      const deptSales = sections.reduce((s, sec) => s + sec.sectionSales, 0);
       const deptPart = grandTotal > 0 ? (deptSales / grandTotal) * 100 : 0;
-      return { dept, sections: sectionsArr, deptSales, deptPart };
+      return { dept, sections, deptSales, deptPart };
     });
-  }, [rawRecords]);
 
-  // Summary
-  const summary = useMemo(() => {
-    const deptRows = rawRecords.filter(r => r.level === 'department');
-    const totalSales = deptRows.reduce((s, r) => s + r.total_sales, 0);
-    const totalTransactions = deptRows.reduce((s, r) => s + r.total_transactions, 0);
+    const topProduct = [...products].sort((a, b) => b.total_sales - a.total_sales)[0];
+    const summary = {
+      totalSales: grandTotal,
+      totalTransactions: products.reduce((s, r) => s + (r.total_transactions || 0), 0),
+      topProduct: topProduct ? { ...topProduct, participation: (topProduct.participation || 0) * 100 } : null,
+    };
 
-    const products = rawRecords.filter(r => r.level === 'product' && r.product);
-    const topProduct = products.sort((a, b) => b.participation - a.participation)[0];
-
-    return { totalSales, totalTransactions, topProduct };
-  }, [rawRecords]);
-
-  // Top 5 products chart
-  const top5 = useMemo(() => {
-    return rawRecords
-      .filter(r => r.level === 'product' && r.product && r.total_sales > 0)
+    const top5 = [...products]
+      .filter(r => r.total_sales > 0)
       .sort((a, b) => b.total_sales - a.total_sales)
       .slice(0, 5);
+
+    return { hierarchy, summary, top5 };
   }, [rawRecords]);
 
   const depts = useMemo(() => [...new Set(rawRecords.map(r => r.department).filter(Boolean))], [rawRecords]);
@@ -222,11 +204,6 @@ export default function SalesReportView() {
     const filtered = filterDept === 'all' ? rawRecords : rawRecords.filter(r => r.department === filterDept);
     return [...new Set(filtered.map(r => r.section).filter(Boolean))];
   }, [rawRecords, filterDept]);
-
-  const filteredHierarchy = useMemo(() => {
-    if (filterDept === 'all') return hierarchy;
-    return hierarchy.filter(h => h.dept === filterDept);
-  }, [hierarchy, filterDept]);
 
   const handleBack = () => {
     window.history.back();
