@@ -735,22 +735,37 @@ export default function SalesReportView() {
 
             </div>
 
-            {/* Product analysis panel */}
+            {/* Product analysis modal */}
             <AnimatePresence>
               {selectedProduct && (
-                <div className="relative">
-                  <button
-                    onClick={() => setSelectedProduct(null)}
-                    className="absolute top-4 right-4 z-10 p-1.5 rounded-full bg-white/80 hover:bg-white shadow text-slate-500 hover:text-slate-800 transition-all"
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="fixed inset-0 z-50 flex items-center justify-center p-4"
+                  style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}
+                  onClick={() => setSelectedProduct(null)}
+                >
+                  <motion.div
+                    initial={{ scale: 0.95, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.95, opacity: 0 }}
+                    onClick={e => e.stopPropagation()}
+                    className="w-full max-w-2xl max-h-[90vh] overflow-y-auto relative"
                   >
-                    <X className="w-4 h-4" />
-                  </button>
-                  <ProductAnalysisPanel
-                    product={selectedProduct}
-                    hierarchy={hierarchy}
-                    grandTotal={summary.totalSales}
-                  />
-                </div>
+                    <button
+                      onClick={() => setSelectedProduct(null)}
+                      className="absolute top-4 right-4 z-10 p-1.5 rounded-full bg-white/90 hover:bg-white shadow text-slate-500 hover:text-slate-800 transition-all"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                    <ProductAnalysisPanel
+                      product={selectedProduct}
+                      hierarchy={hierarchy}
+                      grandTotal={summary.totalSales}
+                    />
+                  </motion.div>
+                </motion.div>
               )}
             </AnimatePresence>
 
