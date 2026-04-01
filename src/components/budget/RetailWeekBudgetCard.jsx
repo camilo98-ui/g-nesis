@@ -574,54 +574,6 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                 </ResponsiveContainer>
               </motion.div>
 
-              {/* Semana Retail */}
-              <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="w-full bg-gradient-to-r from-purple-50/40 to-pink-50/40 rounded-xl p-3 md:p-4 border border-purple-200/40">
-                <div className="flex flex-col md:flex-row md:items-center justify-between mb-3 gap-2">
-                  <div className="flex items-center gap-1.5 md:gap-2 min-w-0">
-                    <Calendar className="w-4 h-4 md:w-5 md:h-5 text-purple-400/70 flex-shrink-0" />
-                    <h4 className="text-xs md:text-sm font-bold text-purple-700/80 truncate">
-                      Semana Actual ({format(budgetData.currentWeekStart, 'dd MMM', { locale: es })} - {format(budgetData.currentWeekEnd, 'dd MMM', { locale: es })})
-                    </h4>
-                  </div>
-                  <div className={`px-2 md:px-3 py-0.5 md:py-1 rounded-full text-[10px] md:text-xs font-bold flex-shrink-0 self-start md:self-auto ${budgetData.weeklyCompliance >= 100 ? 'bg-emerald-100/60 text-emerald-600' : 'bg-amber-100/60 text-amber-600'}`}>
-                    {budgetData.weeklyCompliance.toFixed(0)}%
-                  </div>
-                </div>
-                <div className="grid grid-cols-3 gap-2 md:gap-3">
-                  <motion.button whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.98 }} onClick={() => {setSelectedMetric('weekly-budget');setIsModalOpen(true);}} className="bg-purple-50 rounded-lg p-2 md:p-3 border border-purple-200/40 transition-all text-left hover:border-purple-400">
-                    <p className="text-[10px] md:text-xs text-purple-500/70 mb-1">Meta Semanal</p>
-                    <p className="text-sm md:text-lg font-black text-purple-600 leading-tight">{formatCurrency(budgetData.weeklyBudget)}</p>
-                  </motion.button>
-                  <motion.button whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.98 }} onClick={() => {setSelectedMetric('weekly-sales');setIsModalOpen(true);}} className="bg-purple-50 rounded-lg p-2 md:p-3 border border-purple-200/40 transition-all text-left hover:border-purple-400">
-                    <p className="text-[10px] md:text-xs text-purple-500/70 mb-1">Venta Actual</p>
-                    <p className="text-sm md:text-lg font-black text-purple-600 leading-tight">{formatCurrency(budgetData.currentWeekSales)}</p>
-                  </motion.button>
-                  <motion.button whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.98 }} onClick={() => {setSelectedMetric('weekly-projection');setIsModalOpen(true);}} className="bg-pink-50 rounded-lg p-2 md:p-3 border border-pink-200/40 transition-all text-left hover:border-pink-400">
-                    <p className="text-[10px] md:text-xs text-pink-500/70 mb-1">Proyección</p>
-                    <p className="text-sm md:text-lg font-black text-pink-600 leading-tight">{formatCurrency(budgetData.weekProjection)}</p>
-                  </motion.button>
-                </div>
-                <div className="mt-3 space-y-1.5">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-purple-500/60">Cumplimiento actual</span>
-                    <span className="font-bold text-purple-600">{budgetData.weeklyCompliance.toFixed(0)}%</span>
-                  </div>
-                  <div className="h-2 bg-white/50 rounded-full overflow-hidden">
-                    <motion.div initial={{ width: 0 }} animate={{ width: `${Math.min(budgetData.weeklyCompliance, 100)}%` }} transition={{ duration: 1, delay: 0.2 }} className="h-full bg-gradient-to-r from-purple-400/60 to-pink-400/60 rounded-full" />
-                  </div>
-                  <div className="flex items-center justify-between text-xs pt-1">
-                    <span className="text-pink-500/60">Proyección de cierre</span>
-                    <span className={`font-bold ${budgetData.projectionCompliance >= 100 ? 'text-emerald-500' : 'text-amber-500'}`}>
-                      {budgetData.projectionCompliance.toFixed(0)}%
-                    </span>
-                  </div>
-                </div>
-              </motion.div>
-
               {/* Barra de Proyección Mensual */}
               <motion.button
                   initial={{ opacity: 0, y: 10 }}
