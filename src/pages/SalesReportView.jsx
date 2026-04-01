@@ -644,7 +644,7 @@ export default function SalesReportView() {
               <motion.div 
                 initial={{ opacity: 0, y: 10 }} 
                 animate={{ opacity: 1, y: 0 }}
-                className="rounded-2xl shadow-lg overflow-hidden border border-purple-100">
+                className="rounded-2xl shadow-lg overflow-hidden border border-purple-100 scroll-mt-20">
                 <button
                   onClick={() => setExpandedCharts(p => ({ ...p, pie: !p.pie }))}
                   className="w-full bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 px-5 py-4 text-white text-left hover:opacity-90 transition-opacity">
@@ -690,7 +690,7 @@ export default function SalesReportView() {
               <motion.div 
                 initial={{ opacity: 0, y: 10 }} 
                 animate={{ opacity: 1, y: 0 }}
-                className="rounded-2xl shadow-lg overflow-hidden border border-pink-100">
+                className="rounded-2xl shadow-lg overflow-hidden border border-pink-100 scroll-mt-20">
                 <button
                   onClick={() => setExpandedCharts(p => ({ ...p, top10: !p.top10 }))}
                   className="w-full bg-gradient-to-br from-pink-600 via-rose-500 to-orange-500 px-5 py-4 text-white text-left hover:opacity-90 transition-opacity">
