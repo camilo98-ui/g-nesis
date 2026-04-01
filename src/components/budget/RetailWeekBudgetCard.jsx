@@ -654,59 +654,6 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                 </ResponsiveContainer>
               </motion.div>
 
-              {/* Proyección de Semanas Futuras */}
-              {(() => {
-                  const now = new Date();
-                  const monthStartCalc = startOfMonth(now);
-                  const monthEndCalc = endOfMonth(now);
-                  const weeks = eachWeekOfInterval({ start: monthStartCalc, end: monthEndCalc }, { weekStartsOn: 1 });
-                  const futureWeeks = weeks.map((weekStart, idx) => {
-                    const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
-                    const daysInWeek = eachDayOfInterval({ start: weekStart, end: weekEnd }).filter((d) => d >= monthStartCalc && d <= monthEndCalc);
-                    const weekBudget = daysInWeek.reduce((sum, day) => {
-                      const dayOfWeek = day.getDay();
-                      const avgByDayOfWeekLocal = [0, 0, 0, 0, 0, 0, 0].map((_, i) => {
-                        const historicalForDay = dailySales.filter((s) => {try {const sd = parseISO(s.date);return sd.getDay() === i && s.total_sales > 0;} catch {return false;}});
-                        return historicalForDay.length > 0 ? historicalForDay.reduce((s, sale) => s + sale.total_sales, 0) / historicalForDay.length : 0;
-                      });
-                      const totalWeeklyAvgLocal = avgByDayOfWeekLocal.reduce((a, b) => a + b, 0);
-                      if (totalWeeklyAvgLocal === 0) return sum + activeBudget.sales_budget * 1.05 / 30;
-                      const scaleFactor = activeBudget.sales_budget * 1.05 / (totalWeeklyAvgLocal * (30 / 7));
-                      return sum + avgByDayOfWeekLocal[dayOfWeek] * scaleFactor;
-                    }, 0);
-                    return { semana: `S${idx + 1}`, weekStart, weekEnd, presupuesto: weekBudget, isCurrent: idx + 1 === budgetData.currentWeekNumber, isFuture: idx + 1 > budgetData.currentWeekNumber };
-                  }).filter((w) => w.isFuture);
-
-                  if (futureWeeks.length === 0) return null;
-                  return (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="bg-gradient-to-br from-purple-50/40 to-indigo-50/40 rounded-2xl p-4 border-2 border-purple-200/30 shadow-lg">
-                    <div className="flex items-center justify-between mb-3">
-                      <h4 className="font-black text-purple-900 flex items-center gap-2 text-sm md:text-base">
-                        <Calendar className="w-4 h-4 md:w-5 md:h-5 text-purple-400" />
-                        Presupuesto Proyectado Semanas Restantes
-                      </h4>
-                    </div>
-                    <p className="text-xs text-slate-600 mb-3">Estimación basada en patrones históricos de cada día de la semana</p>
-                    <div className="space-y-2">
-                      {futureWeeks.map((week, idx) =>
-                        <motion.div key={idx} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.1 }} className="flex justify-between items-center p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border border-purple-200/40 hover:border-purple-400 transition-all">
-                          <div>
-                            <span className="text-sm font-bold text-purple-700">{week.semana}</span>
-                            <span className="text-xs text-purple-600 ml-2">({format(week.weekStart, 'dd MMM', { locale: es })} - {format(week.weekEnd, 'dd MMM', { locale: es })})</span>
-                          </div>
-                          <span className="font-black text-purple-900 text-base">{formatCurrency(week.presupuesto)}</span>
-                        </motion.div>
-                        )}
-                    </div>
-                    <p className="text-[10px] text-purple-500 mt-3 text-center">💡 Proyecciones estimadas - ajusta según estrategia comercial</p>
-                  </motion.div>);
-
-                })()}
-
               {/* Grid de métricas resumidas */}
               <div className="grid grid-cols-2 gap-3">
                 <motion.button whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.98 }} onClick={() => {setSelectedMetric('base');setIsModalOpen(true);}} className="bg-gradient-to-br from-rose-50/40 to-pink-50/40 rounded-lg p-3 border border-rose-200/40 transition-all text-left hover:border-rose-400">
