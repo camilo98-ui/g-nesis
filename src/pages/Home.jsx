@@ -26,6 +26,8 @@ import {
 'lucide-react';
 import BudgetExcelImporter from '@/components/executive/BudgetExcelImporter.jsx';
 import SalesReportUploader from '@/components/reports/SalesReportUploader.jsx';
+import KpisReportUploader from '@/components/reports/KpisReportUploader.jsx';
+import ParticipacionModal from '@/components/reports/ParticipacionModal.jsx';
 import { Button } from "@/components/ui/button";
 import { toast } from 'sonner';
 
@@ -184,6 +186,8 @@ export default function Home() {
   const [showCustomerExperience, setShowCustomerExperience] = useState(false);
   const [showBudgetImporter, setShowBudgetImporter] = useState(false);
   const [showSalesReportUploader, setShowSalesReportUploader] = useState(false);
+  const [showKpisUploader, setShowKpisUploader] = useState(false);
+  const [showParticipacion, setShowParticipacion] = useState(false);
 
 
   const ROLES = [
@@ -1156,6 +1160,28 @@ export default function Home() {
                 PPT Excel
               </Button>
           }
+            {selectedRole === 'gerente' &&
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowKpisUploader(true)}
+            className="text-gray-400 hover:text-indigo-600 hover:bg-indigo-50/50 transition-all text-xs">
+            
+                <BarChart3 className="w-3.5 h-3.5 mr-1" />
+                KPIs Participación
+              </Button>
+          }
+            {selectedRole === 'lider' && selectedStore &&
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowParticipacion(true)}
+            className="text-gray-400 hover:text-indigo-600 hover:bg-indigo-50/50 transition-all text-xs">
+            
+                <BarChart3 className="w-3.5 h-3.5 mr-1" />
+                Participación
+              </Button>
+          }
             
 
 
@@ -1487,6 +1513,24 @@ export default function Home() {
           onClose={() => setShowSalesReportUploader(false)}
           onSuccess={() => setShowSalesReportUploader(false)} />
 
+        }
+      </AnimatePresence>
+
+      {/* Modal KPIs Participación (Gerente) */}
+      <AnimatePresence>
+        {showKpisUploader &&
+        <KpisReportUploader
+          onClose={() => setShowKpisUploader(false)}
+          onSuccess={() => setShowKpisUploader(false)} />
+        }
+      </AnimatePresence>
+
+      {/* Modal Participación (Líder) */}
+      <AnimatePresence>
+        {showParticipacion &&
+        <ParticipacionModal
+          onClose={() => setShowParticipacion(false)}
+          storeId={selectedStore} />
         }
       </AnimatePresence>
 
