@@ -28,7 +28,13 @@ export default function ParticipacionModal({ onClose, storeId }) {
     queryKey: ['salesReport', storeCode],
     queryFn: async () => {
       if (!storeCode) return [];
-      return base44.entities.SalesReport.filter({ store_code: storeCode });
+      // Get all records for this store, then filter to latest report_id
+      const all = await base44.entities.SalesReport.filter({ store_code: storeCode });
+      if (!all.length) return [];
+      // Find the most recent report_id by uploaded_at
+      const latestUploadedAt = all.reduce((max, r) => r.uploaded_at > max ? r.uploaded_at : max, '');
+      const latestReportId = all.find(r => r.uploaded_at === latestUploadedAt)?.report_id;
+      return latestReportId ? all.filter(r => r.report_id === latestReportId) : all;
     },
     enabled: !!storeCode,
   });

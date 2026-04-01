@@ -80,38 +80,14 @@ export default function KpisReportUploader({ onClose, onSuccess }) {
       }
 
       setStatus('uploading');
-      setMessage('Eliminando datos anteriores...');
-
-      const delay = (ms) => new Promise(res => setTimeout(res, ms));
+      setMessage(`Procesando ${records.length} registros en servidor...`);
+      setProgress({ current: 0, total: records.length });
 
       try {
-        // Delete all existing records in parallel batches of 10
-        let deleted = 0;
-        while (true) {
-          const existing = await base44.entities.SalesReport.list(null, 100);
-          if (!existing || existing.length === 0) break;
-          // Delete in parallel batches of 10
-          for (let i = 0; i < existing.length; i += 10) {
-            await Promise.all(existing.slice(i, i + 10).map(r => base44.entities.SalesReport.delete(r.id)));
-            await delay(150);
-          }
-          deleted += existing.length;
-          setMessage(`Eliminando... (${deleted} registros)`);
-          if (existing.length < 100) break;
-        }
-
-        setMessage(`Guardando ${records.length} registros...`);
-        setProgress({ current: 0, total: records.length });
-
-        const chunkSize = 50;
-        for (let i = 0; i < records.length; i += chunkSize) {
-          await base44.entities.SalesReport.bulkCreate(records.slice(i, i + chunkSize));
-          setProgress({ current: Math.min(i + chunkSize, records.length), total: records.length });
-          await delay(300);
-        }
-
+        const response = await base44.functions.invoke('uploadKpisReport', { records });
+        setProgress({ current: records.length, total: records.length });
         setStatus('success');
-        setMessage(`✅ ${records.length} productos cargados correctamente.`);
+        setMessage(`✅ ${response.data.inserted} productos cargados correctamente.`);
         onSuccess?.();
       } catch (err) {
         setStatus('error');
