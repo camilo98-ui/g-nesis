@@ -510,7 +510,7 @@ export default function SalesReportView() {
   const [filterDept, setFilterDept] = useState('all');
   const [filterSection, setFilterSection] = useState('all');
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [expandedCharts, setExpandedCharts] = useState({ pie: true, top10: true });
+  const [expandedCharts, setExpandedCharts] = useState({ pie: false, top10: false });
 
   const { data: rawRecords = [], isLoading } = useQuery({
     queryKey: ['salesReport', storeCode],
