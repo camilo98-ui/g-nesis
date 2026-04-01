@@ -1178,17 +1178,7 @@ export default function Home() {
                 Informe
               </Button>
             )}
-            {selectedRole !== 'gerente' && selectedStore && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => window.location.href = '/SalesReportView'}
-                className="text-gray-400 hover:text-indigo-600 hover:bg-indigo-50/50 transition-all text-xs"
-              >
-                <BarChart3 className="w-3.5 h-3.5 mr-1" />
-                Participación del negocio
-              </Button>
-            )}
+
           </div>
         )}
 
