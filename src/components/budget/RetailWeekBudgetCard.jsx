@@ -353,7 +353,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                 {/* Panel derecho: Brecha del Mes */}
                 {(() => {
                     const monthGap = activeBudget?.sales_gap !== undefined && activeBudget?.sales_gap !== null ?
-                    activeBudget.sales_gap : -budgetData.accumulatedGap;
+                    activeBudget.sales_gap : (budgetData.salesUntilYesterday > 0 ? -budgetData.accumulatedGap : 0);
                     return (
                       <div className="text-right">
                         <p className="text-sm lg:text-base text-white/90 mb-3 lg:mb-2 font-semibold">Brecha del Mes</p>
