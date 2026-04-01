@@ -17,8 +17,13 @@ function formatCurrency(val) {
   }).format(Math.round(val || 0));
 }
 
-// Tabla jerárquica tipo pivot: Departamento | Sección | Descripción Prod.
-function HierarchyTable({ hierarchy, filterDept, filterSection }) {
+function formatPart(val) {
+  if (val === null || val === undefined) return '—';
+  return val.toFixed(2).replace('.', ',') + ' %';
+}
+
+// Tabla jerárquica tipo pivot: Departamento | Sección | Descripción Prod. | % Part. | Venta Bruta
+function HierarchyTable({ hierarchy, filterDept, filterSection, totalSales }) {
   const [expandedDepts, setExpandedDepts] = useState({});
   const [expandedSections, setExpandedSections] = useState({});
 
@@ -31,7 +36,7 @@ function HierarchyTable({ hierarchy, filterDept, filterSection }) {
 
   const rows = [];
 
-  filtered.forEach(({ dept, sections }) => {
+  filtered.forEach(({ dept, sections, deptSales, deptPart }) => {
     const deptExpanded = expandedDepts[dept];
     const filteredSections = filterSection !== 'all'
       ? sections.filter(s => s.name === filterSection)
@@ -50,9 +55,11 @@ function HierarchyTable({ hierarchy, filterDept, filterSection }) {
             {deptExpanded ? '−' : '+'}
           </button>
         </td>
-        <td className="py-2 px-3 font-semibold text-slate-800 text-sm uppercase tracking-wide" colSpan={3}>
-          {dept}
-        </td>
+        <td className="py-2 px-3 font-semibold text-slate-800 text-sm uppercase tracking-wide">{dept}</td>
+        <td className="py-2 px-3"></td>
+        <td className="py-2 px-3"></td>
+        <td className="py-2 px-3 text-right font-semibold text-rose-500 text-sm whitespace-nowrap">{formatPart(deptPart)}</td>
+        <td className="py-2 px-3 text-right font-bold text-rose-500 text-sm whitespace-nowrap">{formatCurrency(deptSales)}</td>
       </tr>
     );
 
@@ -63,7 +70,6 @@ function HierarchyTable({ hierarchy, filterDept, filterSection }) {
       const sectionExpanded = expandedSections[sectionKey];
       const hasProducts = section.products && section.products.length > 0;
 
-      // Section row — col Departamento vacía, col Sección con nombre
       rows.push(
         <tr key={`section-${sectionKey}`} className="border-b border-slate-100 bg-white hover:bg-slate-50">
           <td className="py-1.5 px-3 w-8">
@@ -76,23 +82,25 @@ function HierarchyTable({ hierarchy, filterDept, filterSection }) {
               </button>
             )}
           </td>
-          <td className="py-1.5 px-3 text-slate-400 text-xs"></td>
-          <td className="py-1.5 px-3 font-medium text-slate-700 text-sm" colSpan={2}>
-            {section.name || '—'}
-          </td>
+          <td className="py-1.5 px-3"></td>
+          <td className="py-1.5 px-3 font-medium text-slate-700 text-sm pl-4">{section.name || '—'}</td>
+          <td className="py-1.5 px-3"></td>
+          <td className="py-1.5 px-3 text-right text-rose-400 font-medium text-sm whitespace-nowrap">{formatPart(section.sectionPart)}</td>
+          <td className="py-1.5 px-3 text-right font-bold text-rose-400 text-sm whitespace-nowrap">{formatCurrency(section.sectionSales)}</td>
         </tr>
       );
 
       if (!sectionExpanded || !hasProducts) return;
 
-      // Product rows — col Departamento vacía, col Sección vacía, col Producto con nombre
       section.products.forEach((p, idx) => {
         rows.push(
           <tr key={`prod-${sectionKey}-${idx}`} className="border-b border-slate-50 bg-white hover:bg-pink-50/20">
             <td className="py-1 px-3 w-8"></td>
-            <td className="py-1 px-3 text-slate-300 text-xs"></td>
-            <td className="py-1 px-3 text-slate-300 text-xs"></td>
-            <td className="py-1 px-3 text-slate-600 text-xs pl-6">{p.product}</td>
+            <td className="py-1 px-3"></td>
+            <td className="py-1 px-3"></td>
+            <td className="py-1 px-3 text-slate-600 text-xs pl-8">{p.product}</td>
+            <td className="py-1 px-3 text-right text-pink-400 text-xs whitespace-nowrap">{formatPart(p.participation)}</td>
+            <td className="py-1 px-3 text-right font-bold text-pink-500 text-xs whitespace-nowrap">{formatCurrency(p.total_sales)}</td>
           </tr>
         );
       });
@@ -108,12 +116,14 @@ function HierarchyTable({ hierarchy, filterDept, filterSection }) {
             <th className="py-3 px-3 text-left font-semibold text-xs uppercase tracking-wider">Departamento</th>
             <th className="py-3 px-3 text-left font-semibold text-xs uppercase tracking-wider">Sección</th>
             <th className="py-3 px-3 text-left font-semibold text-xs uppercase tracking-wider">Descripción Prod.</th>
+            <th className="py-3 px-3 text-right font-semibold text-xs uppercase tracking-wider whitespace-nowrap">% Part. Venta Bruta</th>
+            <th className="py-3 px-3 text-right font-semibold text-xs uppercase tracking-wider whitespace-nowrap">Venta Bruta</th>
           </tr>
         </thead>
         <tbody>
           {rows.length > 0 ? rows : (
             <tr>
-              <td colSpan={4} className="py-8 text-center text-slate-400">No hay datos para los filtros seleccionados.</td>
+              <td colSpan={6} className="py-8 text-center text-slate-400">No hay datos para los filtros seleccionados.</td>
             </tr>
           )}
         </tbody>
@@ -164,7 +174,6 @@ export default function SalesReportView() {
         deptMap[r.department][sectionKey].participation = r.participation;
       } else if (r.level === 'product' && r.product) {
         deptMap[r.department][sectionKey].products.push(r);
-        // Acumular si no hay fila de sección
         if (!deptMap[r.department][sectionKey].total_sales) {
           deptMap[r.department][sectionKey].total_sales += r.total_sales;
           deptMap[r.department][sectionKey].total_transactions += r.total_transactions;
@@ -172,10 +181,20 @@ export default function SalesReportView() {
       }
     });
 
-    return Object.entries(deptMap).map(([dept, sections]) => ({
-      dept,
-      sections: Object.values(sections),
-    }));
+    // Total store sales (sum of all product-level sales)
+    const allProducts = rawRecords.filter(r => r.level === 'product' && r.product);
+    const grandTotal = allProducts.reduce((s, r) => s + (r.total_sales || 0), 0);
+
+    return Object.entries(deptMap).map(([dept, sections]) => {
+      const sectionsArr = Object.values(sections).map(sec => {
+        const sectionSales = sec.products.reduce((s, p) => s + (p.total_sales || 0), 0) || sec.total_sales || 0;
+        const sectionPart = grandTotal > 0 ? (sectionSales / grandTotal) * 100 : 0;
+        return { ...sec, sectionSales, sectionPart };
+      });
+      const deptSales = sectionsArr.reduce((s, sec) => s + sec.sectionSales, 0);
+      const deptPart = grandTotal > 0 ? (deptSales / grandTotal) * 100 : 0;
+      return { dept, sections: sectionsArr, deptSales, deptPart };
+    });
   }, [rawRecords]);
 
   // Summary
@@ -359,6 +378,7 @@ export default function SalesReportView() {
                   hierarchy={hierarchy}
                   filterDept={filterDept}
                   filterSection={filterSection}
+                  totalSales={summary.totalSales}
                 />
               </div>
             </motion.div>
