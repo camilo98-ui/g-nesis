@@ -1172,17 +1172,27 @@ export default function Home() {
               </Button>
           }
             {selectedRole === 'lider' && selectedStore &&
-          <Button
+            <Button
             variant="ghost"
             size="sm"
             onClick={() => setShowParticipacion(true)}
             className="text-gray-400 hover:text-indigo-600 hover:bg-indigo-50/50 transition-all text-xs">
-            
-                <BarChart3 className="w-3.5 h-3.5 mr-1" />
-                Participación
-              </Button>
-          }
-            
+
+               <BarChart3 className="w-3.5 h-3.5 mr-1" />
+               Participación
+             </Button>
+            }
+            {selectedRole !== 'gerente' && selectedStore &&
+            <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => window.location.href = '/SalesReportView'}
+            className="text-gray-400 hover:text-indigo-600 hover:bg-indigo-50/50 transition-all text-xs">
+
+               <BarChart3 className="w-3.5 h-3.5 mr-1" />
+               Participación del negocio
+             </Button>
+            }
 
 
 
@@ -1202,17 +1212,6 @@ export default function Home() {
             
                 <FileText className="w-3.5 h-3.5 mr-1" />
                 Informe
-              </Button>
-          }
-            {selectedRole !== 'gerente' && selectedStore &&
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => window.location.href = '/SalesReportView'}
-            className="text-gray-400 hover:text-indigo-600 hover:bg-indigo-50/50 transition-all text-xs">
-            
-                <BarChart3 className="w-3.5 h-3.5 mr-1" />
-                Participación del negocio
               </Button>
           }
           </div>
