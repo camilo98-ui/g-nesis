@@ -8,7 +8,7 @@ import * as XLSX from 'xlsx';
 function extractStoreCode(tiendaStr) {
   if (!tiendaStr) return null;
   const str = String(tiendaStr).toUpperCase().trim();
-  const match = str.match(/^(BTA\s*\d+|TUNJA\s*\d+)/);
+  const match = str.match(/^(BTA\s*\d+|TUNJA\s*\d+|BOGOTA\s*\d+)/);
   return match ? match[1].replace(/\s+/, ' ') : null;
 }
 
