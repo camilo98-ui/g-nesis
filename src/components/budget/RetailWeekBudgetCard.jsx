@@ -352,8 +352,13 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
 
                 {/* Panel derecho: Brecha del Mes */}
                 {(() => {
-                    const monthGap = activeBudget?.sales_gap !== undefined && activeBudget?.sales_gap !== null ?
-                    activeBudget.sales_gap : (budgetData.salesUntilYesterday > 0 ? -budgetData.accumulatedGap : 0);
+                    // Brecha = ventas acumuladas - presupuesto acumulado (positivo = superando, negativo = por debajo)
+                    const realGap = budgetData.salesUntilYesterday > 0 
+                      ? budgetData.salesUntilYesterday - budgetData.budgetUntilYesterday 
+                      : 0;
+                    const monthGap = activeBudget?.sales_gap !== undefined && activeBudget?.sales_gap !== null
+                      ? activeBudget.sales_gap 
+                      : realGap;
                     return (
                       <div className="text-right">
                         <p className="text-sm lg:text-base text-white/90 mb-3 lg:mb-2 font-semibold">Brecha del Mes</p>
@@ -361,13 +366,13 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                             key={`${monthGap}-brecha-mes`}
                             initial={{ scale: 1.2, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
-                            className="text-2xl md:text-3xl lg:text-5xl font-black text-white leading-none mb-2">
-                          {monthGap < 0 ? '📉' : '📈'} {formatCurrency(Math.abs(monthGap))}
+                            className={`text-2xl md:text-3xl lg:text-5xl font-black leading-none mb-2 ${monthGap >= 0 ? 'text-emerald-200' : 'text-rose-200'}`}>
+                          {monthGap >= 0 ? '📈' : '📉'} {monthGap >= 0 ? '+' : '-'}{formatCurrency(Math.abs(monthGap))}
                         </motion.p>
                         <div className="space-y-1">
                           {budgetData.monthlyBudget > 0 &&
                             <p className="text-xs text-white/70">
-                              Impacto: {(Math.abs(monthGap) / budgetData.monthlyBudget * 100).toFixed(1)}% del presupuesto
+                              {monthGap >= 0 ? 'Sobre meta: ' : 'Bajo meta: '}{(Math.abs(monthGap) / budgetData.monthlyBudget * 100).toFixed(1)}% del presupuesto
                             </p>
                           }
                         </div>
