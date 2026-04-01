@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft, BarChart3, DollarSign, TrendingUp, Filter,
-  Search, X, Package, Layers, Star, Award, PieChart, Activity
+  Search, X, Package, Layers, Star, Award, PieChart, Activity, ChevronDown
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -510,6 +510,7 @@ export default function SalesReportView() {
   const [filterDept, setFilterDept] = useState('all');
   const [filterSection, setFilterSection] = useState('all');
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [expandedCharts, setExpandedCharts] = useState({ pie: true, top10: true });
 
   const { data: rawRecords = [], isLoading } = useQuery({
     queryKey: ['salesReport', storeCode],
@@ -636,28 +637,33 @@ export default function SalesReportView() {
               ))}
             </div>
 
-            {/* Charts Row */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Charts Row - Collapsible */}
+            <div className="space-y-4">
 
-              {/* Pie departamentos — card sofisticada */}
-              <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}
+              {/* Mix de Departamentos - Collapsible */}
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }} 
+                animate={{ opacity: 1, y: 0 }}
                 className="rounded-2xl shadow-lg overflow-hidden border border-purple-100">
-                {/* Card header con gradiente */}
-                <div className="bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 px-5 py-4 text-white">
+                <button
+                  onClick={() => setExpandedCharts(p => ({ ...p, pie: !p.pie }))}
+                  className="w-full bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 px-5 py-4 text-white text-left hover:opacity-90 transition-opacity">
                   <div className="flex items-center justify-between">
-                    <div>
+                    <div className="flex-1">
                       <div className="flex items-center gap-2 mb-0.5">
                         <PieChart className="w-4 h-4 text-purple-200" />
                         <h3 className="font-bold text-sm">Mix de Departamentos</h3>
                       </div>
                       <p className="text-purple-200 text-xs">Distribución de venta total por categoría</p>
                     </div>
-                    <div className="text-right bg-white/10 rounded-xl px-3 py-2">
+                    <div className="text-right bg-white/10 rounded-xl px-3 py-2 mr-3">
                       <p className="text-lg font-black">{hierarchy.length}</p>
                       <p className="text-purple-200 text-xs">deptos.</p>
                     </div>
+                    <motion.div animate={{ rotate: expandedCharts.pie ? 0 : -90 }} transition={{ duration: 0.2 }}>
+                      <ChevronDown className="w-5 h-5 text-purple-200" />
+                    </motion.div>
                   </div>
-                  {/* Mini stats strip */}
                   <div className="grid grid-cols-3 gap-2 mt-3">
                     {hierarchy.slice(0, 3).map((h, i) => (
                       <div key={i} className="bg-white/10 rounded-lg px-2 py-1.5 text-center">
@@ -666,31 +672,44 @@ export default function SalesReportView() {
                       </div>
                     ))}
                   </div>
-                </div>
-                <div className="bg-white p-5">
-                  <DeptPieChart hierarchy={hierarchy} />
-                </div>
+                </button>
+                <AnimatePresence>
+                  {expandedCharts.pie && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="bg-white p-5">
+                      <DeptPieChart hierarchy={hierarchy} />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.div>
 
-              {/* Top 10 — card sofisticada */}
-              <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
+              {/* Top 10 — Collapsible */}
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }} 
+                animate={{ opacity: 1, y: 0 }}
                 className="rounded-2xl shadow-lg overflow-hidden border border-pink-100">
-                {/* Card header con gradiente */}
-                <div className="bg-gradient-to-br from-pink-600 via-rose-500 to-orange-500 px-5 py-4 text-white">
+                <button
+                  onClick={() => setExpandedCharts(p => ({ ...p, top10: !p.top10 }))}
+                  className="w-full bg-gradient-to-br from-pink-600 via-rose-500 to-orange-500 px-5 py-4 text-white text-left hover:opacity-90 transition-opacity">
                   <div className="flex items-center justify-between">
-                    <div>
+                    <div className="flex-1">
                       <div className="flex items-center gap-2 mb-0.5">
                         <Activity className="w-4 h-4 text-pink-200" />
                         <h3 className="font-bold text-sm">Top 10 Productos</h3>
                       </div>
                       <p className="text-pink-100 text-xs">Ranking por venta bruta · clic para analizar</p>
                     </div>
-                    <div className="text-right bg-white/10 rounded-xl px-3 py-2">
+                    <div className="text-right bg-white/10 rounded-xl px-3 py-2 mr-3">
                       <p className="text-lg font-black">{allProducts.length}</p>
                       <p className="text-pink-200 text-xs">productos</p>
                     </div>
+                    <motion.div animate={{ rotate: expandedCharts.top10 ? 0 : -90 }} transition={{ duration: 0.2 }}>
+                      <ChevronDown className="w-5 h-5 text-pink-200" />
+                    </motion.div>
                   </div>
-                  {/* Top 3 mini badges */}
                   <div className="grid grid-cols-3 gap-2 mt-3">
                     {allProducts.filter(p => p.total_sales > 0).sort((a, b) => b.total_sales - a.total_sales).slice(0, 3).map((p, i) => (
                       <div key={i} className="bg-white/10 rounded-lg px-2 py-1.5 text-center">
@@ -700,10 +719,18 @@ export default function SalesReportView() {
                       </div>
                     ))}
                   </div>
-                </div>
-                <div className="bg-white p-4 overflow-y-auto max-h-[360px]">
-                  <Top10Chart products={allProducts} onSelectProduct={setSelectedProduct} selectedProduct={selectedProduct} />
-                </div>
+                </button>
+                <AnimatePresence>
+                  {expandedCharts.top10 && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="bg-white p-4 max-h-[360px] overflow-y-auto">
+                      <Top10Chart products={allProducts} onSelectProduct={setSelectedProduct} selectedProduct={selectedProduct} />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.div>
 
             </div>
