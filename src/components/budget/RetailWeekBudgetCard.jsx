@@ -654,26 +654,6 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                 </ResponsiveContainer>
               </motion.div>
 
-              {/* Grid de métricas resumidas */}
-              <div className="grid grid-cols-2 gap-3">
-                <motion.button whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.98 }} onClick={() => {setSelectedMetric('base');setIsModalOpen(true);}} className="bg-gradient-to-br from-rose-50/40 to-pink-50/40 rounded-lg p-3 border border-rose-200/40 transition-all text-left hover:border-rose-400">
-                  <p className="text-xs text-rose-500/70 mb-1">Base Diaria</p>
-                  <p className="text-lg font-bold text-rose-600 leading-tight">{formatCurrency(budgetData.dailyBaseBudget)}</p>
-                </motion.button>
-                <motion.button whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.98 }} onClick={() => {setSelectedMetric('remaining');setIsModalOpen(true);}} className="bg-gradient-to-br from-emerald-50/40 to-green-50/40 rounded-lg p-3 border border-emerald-200/40 transition-all text-left hover:border-emerald-400">
-                  <p className="text-xs text-emerald-500/70 mb-1">Días Restantes</p>
-                  <p className="text-lg font-bold text-emerald-600">{budgetData.remainingDays}</p>
-                </motion.button>
-                <motion.button whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.98 }} onClick={() => {setSelectedMetric('pending');setIsModalOpen(true);}} className="bg-gradient-to-br from-rose-50/40 to-pink-50/40 rounded-lg p-3 border border-rose-200/40 transition-all text-left hover:border-rose-400">
-                  <p className="text-xs text-rose-500/70 mb-1">Por Vender</p>
-                  <p className="text-lg font-bold text-rose-600 leading-tight">{formatCurrency(budgetData.remainingBudget)}</p>
-                </motion.button>
-                <motion.button whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.98 }} onClick={() => {setSelectedMetric('compliance');setIsModalOpen(true);}} className={`rounded-lg p-3 border transition-all text-left ${isOnTrack ? 'bg-gradient-to-br from-emerald-50/40 to-green-50/40 border-emerald-200/40 hover:border-emerald-400' : 'bg-gradient-to-br from-rose-50/40 to-pink-50/40 border-rose-200/40 hover:border-rose-400'}`}>
-                  <p className={`text-xs mb-1 ${isOnTrack ? 'text-emerald-500/70' : 'text-rose-500/70'}`}>Cumplimiento</p>
-                  <p className={`text-lg font-bold ${isOnTrack ? 'text-emerald-600' : 'text-rose-600'}`}>{budgetData.compliance.toFixed(1)}%</p>
-                </motion.button>
-              </div>
-
               {/* Modal de métricas */}
               <BudgetMetricsModal
                   isOpen={isModalOpen}
