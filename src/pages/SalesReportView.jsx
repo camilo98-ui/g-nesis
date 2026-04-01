@@ -10,8 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  Cell, PieChart as RechartsPie, Pie, RadialBarChart, RadialBar,
-  Legend, LineChart, Line, LabelList
+  Cell, PieChart as RechartsPie, Pie, RadialBarChart, RadialBar
 } from 'recharts';
 
 const COLORS = ['#ec4899', '#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#06b6d4', '#84cc16'];
@@ -391,25 +390,51 @@ function DeptPieChart({ hierarchy }) {
 // ─── Top 10 productos horizontal bar ─────────────────────────────────────────
 function Top10Chart({ products, onSelectProduct, selectedProduct }) {
   const top10 = [...products].filter(p => p.total_sales > 0).sort((a, b) => b.total_sales - a.total_sales).slice(0, 10);
+  const maxVal = top10[0]?.total_sales || 1;
+
   return (
-    <ResponsiveContainer width="100%" height={320}>
-      <BarChart data={top10} layout="vertical" margin={{ left: 10, right: 40, top: 5, bottom: 5 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" horizontal={false} />
-        <XAxis type="number" tickFormatter={v => `$${(v / 1000000).toFixed(1)}M`} tick={{ fontSize: 9 }} />
-        <YAxis type="category" dataKey="product" width={130} tick={{ fontSize: 9 }} tickFormatter={v => v?.length > 18 ? v.slice(0, 18) + '…' : v} />
-        <Tooltip content={<CustomBarTooltip />} />
-        <Bar dataKey="total_sales" radius={[0, 6, 6, 0]} onClick={(d) => onSelectProduct(d)}>
-          {top10.map((entry, idx) => (
-            <Cell
-              key={idx}
-              fill={COLORS[idx % COLORS.length]}
-              opacity={selectedProduct ? (selectedProduct.product === entry.product ? 1 : 0.4) : 1}
-            />
-          ))}
-          <LabelList dataKey="total_sales" position="right" formatter={v => `$${(v / 1000000).toFixed(1)}M`} style={{ fontSize: 9, fill: '#64748b' }} />
-        </Bar>
-      </BarChart>
-    </ResponsiveContainer>
+    <div className="space-y-2">
+      {top10.map((entry, idx) => {
+        const isSelected = selectedProduct?.product === entry.product;
+        const pct = (entry.total_sales / maxVal) * 100;
+        const color = COLORS[idx % COLORS.length];
+        return (
+          <motion.div
+            key={idx}
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
+            onClick={() => onSelectProduct(isSelected ? null : entry)}
+            className={`cursor-pointer rounded-xl px-4 py-3 transition-all border ${
+              isSelected
+                ? 'bg-pink-50 border-pink-300 shadow-md'
+                : 'bg-slate-50 border-transparent hover:border-slate-200 hover:bg-white hover:shadow-sm'
+            }`}
+          >
+            <div className="flex items-center justify-between mb-1.5">
+              <div className="flex items-center gap-2 min-w-0 flex-1">
+                <span className="text-xs font-black text-slate-400 w-5 flex-shrink-0">#{idx + 1}</span>
+                <span className={`text-sm font-semibold truncate ${isSelected ? 'text-pink-700' : 'text-slate-700'}`}>
+                  {entry.product}
+                </span>
+              </div>
+              <div className="text-right flex-shrink-0 ml-3">
+                <span className="text-sm font-black text-slate-800">{formatCurrency(entry.total_sales)}</span>
+                <span className="text-xs text-slate-400 ml-2">{formatPart(entry.participation)}</span>
+              </div>
+            </div>
+            <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${pct}%` }}
+                transition={{ duration: 0.6, delay: idx * 0.04 }}
+                className="h-full rounded-full"
+                style={{ background: color, opacity: isSelected ? 1 : 0.75 }}
+              />
+            </div>
+          </motion.div>
+        );
+      })}
+    </div>
   );
 }
 
@@ -571,8 +596,10 @@ export default function SalesReportView() {
                   <Activity className="w-5 h-5 text-pink-500" />
                   Top 10 Productos por Venta
                 </h3>
-                <p className="text-xs text-slate-400 mb-3">Haz clic en una barra para analizar el producto</p>
-                <Top10Chart products={allProducts} onSelectProduct={setSelectedProduct} selectedProduct={selectedProduct} />
+                <p className="text-xs text-slate-400 mb-4">Haz clic en un producto para ver su análisis detallado</p>
+                <div className="overflow-y-auto max-h-[380px] pr-1">
+                  <Top10Chart products={allProducts} onSelectProduct={setSelectedProduct} selectedProduct={selectedProduct} />
+                </div>
               </motion.div>
             </div>
 
