@@ -345,43 +345,103 @@ function ProductAnalysisPanel({ product, hierarchy, grandTotal }) {
   );
 }
 
-// ─── Gráfica de participación por departamento (Pie) ─────────────────────────
+// ─── Gráfica de participación por departamento (Donut + lista) ───────────────
 function DeptPieChart({ hierarchy }) {
+  const [activeDept, setActiveDept] = useState(null);
+
   const data = hierarchy
     .filter(h => h.deptSales > 0)
-    .map((h, i) => ({ name: h.dept, value: h.deptSales, pct: h.deptPart, fill: COLORS[i % COLORS.length] }))
+    .map((h, i) => ({
+      name: h.dept,
+      value: h.deptSales,
+      pct: h.deptPart,
+      fill: COLORS[i % COLORS.length],
+      sections: h.sections.length,
+      products: h.sections.reduce((s, sec) => s + sec.products.length, 0),
+    }))
     .sort((a, b) => b.value - a.value);
 
-  const CustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, pct, name }) => {
-    if (pct < 5) return null;
-    const RADIAN = Math.PI / 180;
-    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-    const x = cx + radius * Math.cos(-midAngle * RADIAN);
-    const y = cy + radius * Math.sin(-midAngle * RADIAN);
-    return (
-      <text x={x} y={y} fill="white" textAnchor="middle" dominantBaseline="central" fontSize={10} fontWeight="bold">
-        {pct.toFixed(1)}%
-      </text>
-    );
-  };
+  const active = activeDept ? data.find(d => d.name === activeDept) : null;
+  const total = data.reduce((s, d) => s + d.value, 0);
 
   return (
-    <div>
-      <ResponsiveContainer width="100%" height={240}>
-        <RechartsPie>
-          <Pie data={data} cx="50%" cy="50%" outerRadius={100} dataKey="value" labelLine={false} label={CustomLabel}>
-            {data.map((entry, idx) => <Cell key={idx} fill={entry.fill} />)}
-          </Pie>
-          <Tooltip formatter={(v, n, p) => [formatCurrency(v), p.payload.name]} />
-        </RechartsPie>
-      </ResponsiveContainer>
-      <div className="flex flex-wrap gap-2 justify-center mt-1">
-        {data.map((d, i) => (
-          <div key={i} className="flex items-center gap-1 text-xs text-slate-600">
-            <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: d.fill }} />
-            <span className="truncate max-w-[100px]">{d.name}</span>
+    <div className="space-y-4">
+      <div className="flex gap-4 items-center">
+        {/* Donut */}
+        <div className="relative flex-shrink-0">
+          <ResponsiveContainer width={160} height={160}>
+            <RechartsPie>
+              <Pie
+                data={data}
+                cx="50%" cy="50%"
+                innerRadius={50} outerRadius={75}
+                dataKey="value"
+                paddingAngle={2}
+                onMouseEnter={(_, idx) => setActiveDept(data[idx].name)}
+                onMouseLeave={() => setActiveDept(null)}
+              >
+                {data.map((entry, idx) => (
+                  <Cell
+                    key={idx}
+                    fill={entry.fill}
+                    opacity={activeDept && activeDept !== entry.name ? 0.35 : 1}
+                    stroke="white"
+                    strokeWidth={2}
+                    style={{ cursor: 'pointer' }}
+                  />
+                ))}
+              </Pie>
+              <Tooltip
+                formatter={(v, n, p) => [formatCurrency(v), p.payload.name]}
+                contentStyle={{ borderRadius: 12, fontSize: 11, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.15)' }}
+              />
+            </RechartsPie>
+          </ResponsiveContainer>
+          {/* Centro del donut */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+            {active ? (
+              <>
+                <p className="text-xs font-black text-slate-700" style={{ fontSize: 10 }}>{active.pct.toFixed(1)}%</p>
+                <p className="text-slate-400" style={{ fontSize: 8 }}>del total</p>
+              </>
+            ) : (
+              <>
+                <p className="text-xs font-black text-slate-700" style={{ fontSize: 9 }}>{data.length}</p>
+                <p className="text-slate-400" style={{ fontSize: 8 }}>deptos.</p>
+              </>
+            )}
           </div>
-        ))}
+        </div>
+
+        {/* Lista de departamentos */}
+        <div className="flex-1 space-y-2 min-w-0">
+          {data.map((d, i) => (
+            <div
+              key={i}
+              onMouseEnter={() => setActiveDept(d.name)}
+              onMouseLeave={() => setActiveDept(null)}
+              className={`rounded-xl p-2.5 transition-all cursor-default ${
+                activeDept === d.name ? 'bg-slate-100 shadow-sm' : 'hover:bg-slate-50'
+              }`}
+            >
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: d.fill }} />
+                <span className="text-xs font-bold text-slate-700 truncate flex-1">{d.name}</span>
+                <span className="text-xs font-black text-slate-800 flex-shrink-0">{d.pct.toFixed(1)}%</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="flex-1 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                  <div className="h-full rounded-full transition-all duration-500" style={{ width: `${d.pct}%`, background: d.fill }} />
+                </div>
+                <span className="text-[10px] text-slate-400 flex-shrink-0">{formatCurrency(d.value)}</span>
+              </div>
+              <div className="flex gap-3 mt-1">
+                <span className="text-[10px] text-slate-400">{d.sections} secciones</span>
+                <span className="text-[10px] text-slate-400">{d.products} productos</span>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -578,29 +638,74 @@ export default function SalesReportView() {
 
             {/* Charts Row */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Pie departamentos */}
+
+              {/* Pie departamentos — card sofisticada */}
               <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}
-                className="bg-white rounded-2xl shadow-md border border-slate-100 p-5">
-                <h3 className="font-bold text-slate-800 mb-1 flex items-center gap-2">
-                  <PieChart className="w-5 h-5 text-purple-500" />
-                  Distribución por Departamento
-                </h3>
-                <p className="text-xs text-slate-400 mb-3">Peso de cada departamento en la venta total</p>
-                <DeptPieChart hierarchy={hierarchy} />
+                className="rounded-2xl shadow-lg overflow-hidden border border-purple-100">
+                {/* Card header con gradiente */}
+                <div className="bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 px-5 py-4 text-white">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <PieChart className="w-4 h-4 text-purple-200" />
+                        <h3 className="font-bold text-sm">Mix de Departamentos</h3>
+                      </div>
+                      <p className="text-purple-200 text-xs">Distribución de venta total por categoría</p>
+                    </div>
+                    <div className="text-right bg-white/10 rounded-xl px-3 py-2">
+                      <p className="text-lg font-black">{hierarchy.length}</p>
+                      <p className="text-purple-200 text-xs">deptos.</p>
+                    </div>
+                  </div>
+                  {/* Mini stats strip */}
+                  <div className="grid grid-cols-3 gap-2 mt-3">
+                    {hierarchy.slice(0, 3).map((h, i) => (
+                      <div key={i} className="bg-white/10 rounded-lg px-2 py-1.5 text-center">
+                        <p className="text-xs font-black text-white">{h.deptPart.toFixed(1)}%</p>
+                        <p className="text-[9px] text-purple-200 truncate">{h.dept.split(' ')[0]}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="bg-white p-5">
+                  <DeptPieChart hierarchy={hierarchy} />
+                </div>
               </motion.div>
 
-              {/* Top 10 horizontal */}
+              {/* Top 10 — card sofisticada */}
               <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
-                className="bg-white rounded-2xl shadow-md border border-slate-100 p-5">
-                <h3 className="font-bold text-slate-800 mb-1 flex items-center gap-2">
-                  <Activity className="w-5 h-5 text-pink-500" />
-                  Top 10 Productos por Venta
-                </h3>
-                <p className="text-xs text-slate-400 mb-4">Haz clic en un producto para ver su análisis detallado</p>
-                <div className="overflow-y-auto max-h-[380px] pr-1">
+                className="rounded-2xl shadow-lg overflow-hidden border border-pink-100">
+                {/* Card header con gradiente */}
+                <div className="bg-gradient-to-br from-pink-600 via-rose-500 to-orange-500 px-5 py-4 text-white">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <Activity className="w-4 h-4 text-pink-200" />
+                        <h3 className="font-bold text-sm">Top 10 Productos</h3>
+                      </div>
+                      <p className="text-pink-100 text-xs">Ranking por venta bruta · clic para analizar</p>
+                    </div>
+                    <div className="text-right bg-white/10 rounded-xl px-3 py-2">
+                      <p className="text-lg font-black">{allProducts.length}</p>
+                      <p className="text-pink-200 text-xs">productos</p>
+                    </div>
+                  </div>
+                  {/* Top 3 mini badges */}
+                  <div className="grid grid-cols-3 gap-2 mt-3">
+                    {allProducts.filter(p => p.total_sales > 0).sort((a, b) => b.total_sales - a.total_sales).slice(0, 3).map((p, i) => (
+                      <div key={i} className="bg-white/10 rounded-lg px-2 py-1.5 text-center">
+                        <p className="text-[9px] text-pink-100">{['🥇', '🥈', '🥉'][i]}</p>
+                        <p className="text-[9px] text-white font-bold truncate">{p.product?.split(' ')[0]}</p>
+                        <p className="text-[9px] text-pink-200">{formatCurrency(p.total_sales).replace('$', '$')}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="bg-white p-4 overflow-y-auto max-h-[360px]">
                   <Top10Chart products={allProducts} onSelectProduct={setSelectedProduct} selectedProduct={selectedProduct} />
                 </div>
               </motion.div>
+
             </div>
 
             {/* Product analysis panel */}
