@@ -17,17 +17,25 @@ function parseKpisExcel(rows) {
   const reportId = `kpis_${Date.now()}`;
   const uploadedAt = new Date().toISOString();
 
-  for (const row of rows) {
-    const dept = row['Departamento'];
-    const seccion = row['Sección'];
-    const desc = row['Descripción'];
-    const tienda = row['Tienda'];
-    const participacion = row['Participación'];
-    const venta = row['Venta'];
+  // Read by column index (0-based): Departamento, Sección, Descripción, Tienda, Participación, Venta
+  // rows here are arrays (header: 1 mode), first row is the header row (index 0), data starts at index 1
+  for (let i = 1; i < rows.length; i++) {
+    const row = rows[i];
+    if (!row || row.length < 6) continue;
+
+    const dept = row[0];
+    const seccion = row[1];
+    const desc = row[2];
+    const tienda = row[3];
+    const participacion = row[4];
+    const venta = row[5];
 
     if (!dept || !tienda) continue;
     const storeCode = extractStoreCode(tienda);
     if (!storeCode) continue;
+
+    const ventaNum = parseFloat(String(venta).replace(/[^0-9.-]/g, '')) || 0;
+    const partNum = parseFloat(String(participacion).replace(/[^0-9.-]/g, '')) || 0;
 
     records.push({
       store_code: storeCode,
@@ -37,8 +45,8 @@ function parseKpisExcel(rows) {
       section: seccion ? String(seccion).trim() : '',
       product: desc ? String(desc).trim() : '',
       level: 'product',
-      participation: parseFloat(participacion) || 0,
-      total_sales: parseFloat(venta) || 0,
+      participation: partNum,   // stored as decimal e.g. 0.9137
+      total_sales: ventaNum,    // stored as full number e.g. 5367716
       total_transactions: 0,
     });
   }
@@ -70,7 +78,7 @@ export default function KpisReportUploader({ onClose, onSuccess }) {
     reader.onload = async (e) => {
       const workbook = XLSX.read(e.target.result, { type: 'array' });
       const sheet = workbook.Sheets[workbook.SheetNames[0]];
-      const rows = XLSX.utils.sheet_to_json(sheet, { defval: null });
+      const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null });
 
       const records = parseKpisExcel(rows);
       if (records.length === 0) {
