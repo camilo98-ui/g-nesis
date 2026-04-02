@@ -636,7 +636,8 @@ export default function BudgetExcelImporter({ onClose }) {
 
           const gap = budgetUntilToday - salesUntilToday;
           const remainingDays = datesSorted.filter(d => d > hoyStr).length;
-          const adjustmentPerDay = gap > 0 && remainingDays > 0 ? Math.ceil(gap / remainingDays) : 0;
+          // Ambición fuerte: si hay brecha positiva, multiplicar x2.5; si no, sin ajuste
+          const adjustmentPerDay = gap > 0 && remainingDays > 0 ? Math.ceil((gap / remainingDays) * 2.5) : 0;
 
           // Guardar cada DailyBudget con delay
           for (const [dateStr, budgetAmount] of Object.entries(item.dailyByDate)) {
