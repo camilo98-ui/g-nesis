@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { Upload, X, CheckCircle, AlertCircle, Loader2, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import * as XLSX from 'xlsx';
+// xlsx imported dynamically to avoid React conflicts
 
 function extractStoreCode(tiendaStr) {
   if (!tiendaStr) return null;
@@ -83,6 +83,7 @@ export default function KpisReportUploader({ onClose, onSuccess }) {
 
     const reader = new FileReader();
     reader.onload = async (e) => {
+      const XLSX = await import('xlsx');
       const workbook = XLSX.read(e.target.result, { type: 'array' });
       const sheet = workbook.Sheets[workbook.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null });
