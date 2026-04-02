@@ -516,17 +516,34 @@ export default function SalesReportView() {
     queryKey: ['salesReport', storeCode],
     queryFn: async () => {
       if (!storeCode) return [];
-      // Intenta búsqueda exacta primero
-      let records = await base44.entities.SalesReport.filter({ store_code: storeCode });
-      // Si no hay resultados, intenta búsqueda flexible (case-insensitive, whitespace-insensitive)
-      if (records.length === 0) {
-        const allRecords = await base44.entities.SalesReport.filter({});
-        const normalizedSearch = storeCode.toUpperCase().replace(/\s+/g, '');
-        records = allRecords.filter(r => 
-          r.store_code?.toUpperCase().replace(/\s+/g, '') === normalizedSearch
-        );
-      }
-      return records;
+      // Traer todos los registros del último report_id
+      const allRecords = await base44.entities.SalesReport.list('-uploaded_at', 2000);
+      if (allRecords.length === 0) return [];
+
+      // Normalizar el storeCode de sesión para comparar
+      const normalizeCode = (code) => {
+        if (!code) return '';
+        return code.toUpperCase()
+          .replace(/BOGOTA/g, 'BTA')
+          .replace(/\s+/g, ' ')
+          .trim();
+      };
+
+      const normalizedSearch = normalizeCode(storeCode);
+      
+      // Filtrar por el report_id más reciente
+      const latestReportId = allRecords[0]?.report_id;
+      const latestRecords = allRecords.filter(r => r.report_id === latestReportId);
+
+      // Buscar coincidencia flexible
+      const filtered = latestRecords.filter(r => {
+        const normalizedCode = normalizeCode(r.store_code);
+        return normalizedCode === normalizedSearch || 
+               r.store_code === storeCode ||
+               normalizedCode.replace(/\s/g, '') === normalizedSearch.replace(/\s/g, '');
+      });
+
+      return filtered;
     },
     enabled: !!storeCode,
   });

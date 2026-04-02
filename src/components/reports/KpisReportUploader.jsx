@@ -8,8 +8,15 @@ import * as XLSX from 'xlsx';
 function extractStoreCode(tiendaStr) {
   if (!tiendaStr) return null;
   const str = String(tiendaStr).toUpperCase().trim();
-  const match = str.match(/^(BTA\s*\d+|TUNJA\s*\d+|BOGOTA\s*\d+)/);
-  return match ? match[1].replace(/\s+/, ' ') : null;
+  // Extraer número de la tienda
+  const btaMatch = str.match(/BTA\s*(\d+)/);
+  if (btaMatch) return `BTA ${btaMatch[1]}`;
+  const tunjaMatch = str.match(/TUNJA\s*(\d+)/);
+  if (tunjaMatch) return `TUNJA ${tunjaMatch[1]}`;
+  // BOGOTA XX → guardar como BOGOTA XX (igual que el selector)
+  const bogotaMatch = str.match(/BOGOTA\s*(\d+)/);
+  if (bogotaMatch) return `BOGOTA ${bogotaMatch[1]}`;
+  return null;
 }
 
 function parseKpisExcel(rows) {
