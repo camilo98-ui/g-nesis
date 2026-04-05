@@ -22,10 +22,10 @@ const STORE_KEYWORDS = {
   'BTA 21': ['centro chia', 'chia', 'bta 21', 'bogota 21', '21'],
   'BTA 96': ['av chile', 'chile', 'gran ahorrar', 'ahorrar', 'granahorrar', 'bta 96', 'bogota 96', 'bogota 27', '96', '27'],
   'BTA 52': ['centro suba', 'suba', 'bta 52', 'bogota 52', '52'],
-  'BTA 94': ['eco plaza', 'ecoplaza', 'bta 94', 'bogota 94', 'bogota 56', '94', '56'],
+  'BOGOTA 56': ['eco plaza', 'ecoplaza', 'bogota 56', '56'],
   'BTA 62': ['fontanar', 'bta 62', 'bogota 62', '62'],
-  'BTA 93': ['colina', 'parque la colina', 'parquelacolina', 'bta 93', 'bogota 93', 'bogota 66', '93', '66'],
-  'BTA 95': ['casa blanca', 'casablanca', 'casablanca', 'bta 95', 'bogota 95', 'bogota 71', '95', '71'],
+  'BOGOTA 66': ['colina', 'parque la colina', 'parquelacolina', 'bogota 66', '66'],
+  'BOGOTA 71': ['casa blanca', 'casablanca', 'bogota 71', '71'],
   'BTA 85': ['mansion cajica', 'cajica', 'bta 85', 'bogota 85', '85'],
   'TUNJA 1': ['unicentro', 'tunja 1', 'tunja1'],
   'TUNJA 2': ['viva tunja', 'biva tunja', 'tunja 2', 'tunja2'],
@@ -36,24 +36,16 @@ const matchStore = (cellValue) => {
   const normalized = normalize(String(cellValue));
   if (!normalized) return null;
 
-  // Mapa de números alternativos del Excel → código interno del sistema
-  const ALT_NUM_MAP = {
-    '56': 'BTA 94',  // Eco Plaza
-    '66': 'BTA 93',  // Colina
-    '71': 'BTA 95',  // Casa Blanca
-    '27': 'BTA 96',  // Gran Ahorrar
-  };
-
   // Intentar extraer número de "BOGOTA XX" o "BTA XX" directamente del texto original
   const bogotaNumMatch = String(cellValue).match(/(?:bogota|bta)\s*(\d+)/i);
   if (bogotaNumMatch) {
     const num = bogotaNumMatch[1];
-    // Primero intentar mapeo alternativo
-    if (ALT_NUM_MAP[num]) {
-      const store = BASE_STORES.find(s => s.code === ALT_NUM_MAP[num]);
+    // BOGOTA 27 = Gran Ahorrar (BTA 96) — único caso donde el número del Excel no coincide con el código
+    if (num === '27') {
+      const store = BASE_STORES.find(s => s.code === 'BTA 96');
       if (store) return store;
     }
-    // Luego buscar por número directo en el código
+    // Para el resto buscar directamente por número en el código (BOGOTA 56 → code "BOGOTA 56", etc.)
     for (const store of BASE_STORES) {
       const storeNum = store.code.replace(/[^0-9]/g, '');
       if (storeNum === num) return store;
