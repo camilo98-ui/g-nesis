@@ -157,7 +157,11 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
       try {return isWithinInterval(parseISO(s.date), { start: displayWeekStart, end: displayWeekEnd });} catch {return false;}
     }).reduce((sum, s) => sum + (s.total_sales || 0), 0);
 
-    const weeklyBudget = fullCurrentRetailWeekDays.reduce((sum, day) => sum + getDailyBudget(day), 0);
+    const weeklyBudget = fullCurrentRetailWeekDays.reduce((sum, day) => {
+      const dayStr = format(day, 'yyyy-MM-dd');
+      const excelRec = dailyBudgets?.find((db) => (db.date?.split('T')[0] || db.date) === dayStr);
+      return sum + (excelRec?.budget_amount > 0 ? excelRec.budget_amount : getDailyBudget(day));
+    }, 0);
     const daysPassedInWeek = eachDayOfInterval({ start: displayWeekStart, end: now }).filter((d) => isWithinInterval(d, { start: displayWeekStart, end: displayWeekEnd }) && d <= now).length;
     const avgDailySales = daysPassedInWeek > 0 ? currentWeekSales / daysPassedInWeek : 0;
     const totalDaysInWeek = eachDayOfInterval({ start: displayWeekStart, end: displayWeekEnd }).length;
@@ -171,8 +175,12 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
     const dailyTrendData = fullDisplayWeekDays.map((day) => {
       const sale = dailySales.find((s) => {try {return isSameDay(parseISO(s.date), day);} catch {return false;}});
       const ventasDelDia = sale ? sale.total_sales || 0 : 0;
+      const dayStr = format(day, 'yyyy-MM-dd');
       const isDayToday = isSameDay(day, now);
-      const presupuestoDia = isDayToday ? adjustedDailyBudget : getDailyBudget(day);
+      // Usar el valor del Excel para cada día; solo hoy lleva ajuste de brecha
+      const excelRec = dailyBudgets?.find((db) => (db.date?.split('T')[0] || db.date) === dayStr);
+      const excelAmount = excelRec?.budget_amount > 0 ? excelRec.budget_amount : getDailyBudget(day);
+      const presupuestoDia = isDayToday ? excelAmount + gapRecoveryIncrement : excelAmount;
       return { date: format(day, 'dd MMM', { locale: es }), fullDate: format(day, 'EEEE dd MMM', { locale: es }), ventas: ventasDelDia, presupuesto: presupuestoDia, cumplimiento: presupuestoDia > 0 ? ventasDelDia / presupuestoDia * 100 : 0 };
     });
 
@@ -181,7 +189,11 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
       const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
       const daysInWeek = eachDayOfInterval({ start: weekStart, end: weekEnd });
       const weekSales = dailySales.filter((s) => {try {const sd = parseISO(s.date);return sd >= weekStart && sd <= weekEnd;} catch {return false;}}).reduce((sum, s) => sum + (s.total_sales || 0), 0);
-      const weekBudget = daysInWeek.reduce((sum, day) => sum + getDailyBudget(day), 0);
+      const weekBudget = daysInWeek.reduce((sum, day) => {
+        const dayStr = format(day, 'yyyy-MM-dd');
+        const excelRec = dailyBudgets?.find((db) => (db.date?.split('T')[0] || db.date) === dayStr);
+        return sum + (excelRec?.budget_amount > 0 ? excelRec.budget_amount : getDailyBudget(day));
+      }, 0);
       return { semana: `S${idx + 1}`, ventas: weekSales, presupuesto: weekBudget, cumplimiento: weekBudget > 0 ? weekSales / weekBudget * 100 : 0 };
     });
 
