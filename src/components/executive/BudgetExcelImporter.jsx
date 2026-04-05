@@ -36,10 +36,24 @@ const matchStore = (cellValue) => {
   const normalized = normalize(String(cellValue));
   if (!normalized) return null;
 
+  // Mapa de números alternativos del Excel → código interno del sistema
+  const ALT_NUM_MAP = {
+    '56': 'BTA 94',  // Eco Plaza
+    '66': 'BTA 93',  // Colina
+    '71': 'BTA 95',  // Casa Blanca
+    '27': 'BTA 96',  // Gran Ahorrar
+  };
+
   // Intentar extraer número de "BOGOTA XX" o "BTA XX" directamente del texto original
   const bogotaNumMatch = String(cellValue).match(/(?:bogota|bta)\s*(\d+)/i);
   if (bogotaNumMatch) {
     const num = bogotaNumMatch[1];
+    // Primero intentar mapeo alternativo
+    if (ALT_NUM_MAP[num]) {
+      const store = BASE_STORES.find(s => s.code === ALT_NUM_MAP[num]);
+      if (store) return store;
+    }
+    // Luego buscar por número directo en el código
     for (const store of BASE_STORES) {
       const storeNum = store.code.replace(/[^0-9]/g, '');
       if (storeNum === num) return store;
