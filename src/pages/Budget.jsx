@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
-import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import StoreSelector, { STORES } from '@/components/StoreSelector';
 import BudgetForm from '@/components/forms/BudgetForm';
 import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
-import { ArrowLeft, Target, DollarSign, Receipt, Zap, Gift, Calendar, Pencil, Trash2 } from 'lucide-react';
+import { ArrowLeft, Target, DollarSign, Receipt, Zap, Gift, Calendar, Pencil, Trash2, Search } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { format } from 'date-fns';
 
 const MONTHS = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
@@ -44,9 +45,23 @@ export default function Budget() {
     }).format(val || 0);
   };
 
+  const today = new Date();
+  const [selectedDate, setSelectedDate] = useState(format(today, 'yyyy-MM-dd'));
+
+  const { data: dailyBudgets = [] } = useQuery({
+    queryKey: ['dailyBudgets', selectedStore],
+    queryFn: () => base44.entities.DailyBudget.filter({ store_id: selectedStore }),
+    enabled: !!selectedStore
+  });
+
+  const selectedDailyBudget = dailyBudgets.find(db => {
+    const dbDate = db.date?.split('T')[0] || db.date;
+    return dbDate === selectedDate;
+  });
+
   const selectedStoreName = STORES.find(s => s.code === selectedStore)?.name || '';
-  const currentYear = new Date().getFullYear();
-  const currentMonth = new Date().getMonth() + 1;
+  const currentYear = today.getFullYear();
+  const currentMonth = today.getMonth() + 1;
 
   // Sort budgets by year and month
   const sortedBudgets = [...budgets].sort((a, b) => {
@@ -77,7 +92,43 @@ export default function Budget() {
         </div>
 
         {selectedStore ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="space-y-6">
+            {/* Consulta PPT por día */}
+            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
+              <Card className="bg-white/80 backdrop-blur-lg border-pink-100 shadow-lg">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-3 text-gray-800 text-base">
+                    <div className="p-2 bg-gradient-to-br from-pink-500 to-rose-500 rounded-xl text-white">
+                      <Search className="w-4 h-4" />
+                    </div>
+                    Consultar PPT de un día
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <input
+                      type="date"
+                      value={selectedDate}
+                      onChange={e => setSelectedDate(e.target.value)}
+                      className="border border-pink-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"
+                    />
+                    {selectedDailyBudget ? (
+                      <div className="flex items-center gap-2 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl px-4 py-2">
+                        <DollarSign className="w-5 h-5 text-emerald-500" />
+                        <span className="text-sm text-gray-600">PPT del día:</span>
+                        <span className="text-lg font-black text-emerald-700">
+                          {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(selectedDailyBudget.budget_amount || 0)}
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-sm text-gray-400 italic">Sin presupuesto diario registrado para esta fecha</span>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Form */}
             <BudgetForm storeId={selectedStore} editingBudget={editingBudget} onClearEdit={() => setEditingBudget(null)} />
 
@@ -185,6 +236,7 @@ export default function Budget() {
                 </CardContent>
               </Card>
             </motion.div>
+            </div>
           </div>
         ) : (
           <div className="text-center py-20">
