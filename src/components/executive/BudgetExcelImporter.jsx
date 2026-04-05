@@ -97,12 +97,13 @@ export default function BudgetExcelImporter({ onClose }) {
     reader.onload = (e) => {
       try {
         const data = new Uint8Array(e.target.result);
-        const wb = XLSX.read(data, { type: 'array', cellDates: true });
+        // Leer sin cellDates para manejar fechas manualmente y evitar desfase UTC
+        const wb = XLSX.read(data, { type: 'array', cellDates: false });
         const ws = wb.Sheets[wb.SheetNames[0]];
-        // Leer con encabezados para detectar columnas por nombre
-        const rowsWithHeaders = XLSX.utils.sheet_to_json(ws, { defval: null });
+        // Leer con encabezados, raw:true para mantener números como números
+        const rowsWithHeaders = XLSX.utils.sheet_to_json(ws, { defval: null, raw: true });
         // También leer como array para el parser genérico
-        const rowsRaw = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+        const rowsRaw = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: true });
         analyzeSheet(rowsRaw, rowsWithHeaders);
       } catch (err) {
         toast.error('No se pudo leer el archivo: ' + err.message);
