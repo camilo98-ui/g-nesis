@@ -117,8 +117,14 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
     const remainingDays = eachDayOfInterval({ start: now, end: monthEnd }).length;
     const remainingBudget = adjustedMonthlyBudget - salesUntilYesterday - todayActualSales;
 
+    // Si hay un día específico seleccionado, mostrar su presupuesto; si no, usar hoy
+    const selectedSingleDay = currentDateRange?.from && currentDateRange?.to &&
+      format(currentDateRange.from, 'yyyy-MM-dd') === format(currentDateRange.to, 'yyyy-MM-dd')
+      ? format(currentDateRange.from, 'yyyy-MM-dd') : null;
+
     const todayStr = format(now, 'yyyy-MM-dd');
-    const excelRec = dailyBudgets?.find((db) => db.store_id === storeId && (db.date?.split('T')[0] || db.date) === todayStr);
+    const targetDayStr = selectedSingleDay || todayStr;
+    const excelRec = dailyBudgets?.find((db) => db.store_id === storeId && (db.date?.split('T')[0] || db.date) === targetDayStr);
     const excelBudgetForToday = excelRec?.budget_amount > 0 ? excelRec.budget_amount : activeBudget.sales_budget / daysInMonth;
 
     const manualGap = activeBudget.sales_gap !== undefined && activeBudget.sales_gap !== null ? activeBudget.sales_gap : null;
@@ -220,7 +226,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
         dayFull: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'][idx],
         avg, weight: weightByDayOfWeek[idx], count: countByDayOfWeek[idx]
       })).filter((d) => d.count >= 2).sort((a, b) => b.avg - a.avg).slice(0, 3),
-      monthStart, monthEnd, getDailyBudget, excelBudgetForToday, gapRecoveryIncrement, salesGap
+      monthStart, monthEnd, getDailyBudget, excelBudgetForToday, gapRecoveryIncrement, salesGap, selectedSingleDay
     };
   }, [dailySales, activeBudget, dailyBudgets, storeId, currentDateRange, gregorianMode]);
 
@@ -312,7 +318,9 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                 {/* Panel izquierdo: PPT del Día */}
                 <div className="text-left">
                   <p className="text-sm lg:text-base text-white/90 mb-3 lg:mb-2 font-semibold">
-                    {needsRecovery ? `PPT del Día + Recuperación` : budgetData.gapRecoveryIncrement > 0 ? `PPT del Día + Ambición` : `PPT del Día`}
+                    {budgetData.selectedSingleDay && budgetData.selectedSingleDay !== format(new Date(), 'yyyy-MM-dd')
+                      ? `PPT — ${format(new Date(budgetData.selectedSingleDay + 'T12:00:00'), 'dd MMM', { locale: es })}`
+                      : needsRecovery ? `PPT del Día + Recuperación` : budgetData.gapRecoveryIncrement > 0 ? `PPT del Día + Ambición` : `PPT del Día`}
                   </p>
                   <motion.p
                       key={`${budgetData.excelBudgetForToday + budgetData.gapRecoveryIncrement}-${gregorianMode}`}
