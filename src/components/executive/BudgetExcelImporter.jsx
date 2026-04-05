@@ -151,10 +151,11 @@ export default function BudgetExcelImporter({ onClose }) {
           let rowYear = null;
 
           if (fechaVal instanceof Date) {
-            dateStr = format(fechaVal, 'yyyy-MM-dd');
-            dayNum = fechaVal.getDate();
-            rowMonth = fechaVal.getMonth() + 1;
+            // Usar getFullYear/getMonth/getDate (hora local, no UTC) para evitar desfase de zona horaria
             rowYear = fechaVal.getFullYear();
+            rowMonth = fechaVal.getMonth() + 1;
+            dayNum = fechaVal.getDate();
+            dateStr = `${rowYear}-${String(rowMonth).padStart(2,'0')}-${String(dayNum).padStart(2,'0')}`;
           } else if (typeof fechaVal === 'string') {
             // "2026-03-23 00:00:00" o "2026-03-23"
             const match = fechaVal.match(/(\d{4})-(\d{2})-(\d{2})/);
@@ -165,12 +166,14 @@ export default function BudgetExcelImporter({ onClose }) {
               dateStr = `${match[1]}-${match[2]}-${match[3]}`;
             }
           } else if (typeof fechaVal === 'number' && fechaVal > 40000) {
-            // Número de serie Excel
-            const d = new Date((fechaVal - 25569) * 86400 * 1000);
-            dateStr = format(d, 'yyyy-MM-dd');
-            dayNum = d.getDate();
-            rowMonth = d.getMonth() + 1;
+            // Número de serie Excel — interpretar en hora local, NO en UTC
+            // Excel serial: días desde 1900-01-00, ajustar por bug del año 1900
+            const excelEpoch = new Date(1899, 11, 30); // 30 dic 1899 local
+            const d = new Date(excelEpoch.getTime() + fechaVal * 86400 * 1000);
             rowYear = d.getFullYear();
+            rowMonth = d.getMonth() + 1;
+            dayNum = d.getDate();
+            dateStr = `${rowYear}-${String(rowMonth).padStart(2,'0')}-${String(dayNum).padStart(2,'0')}`;
           }
 
           if (!dateStr || !dayNum) continue;
