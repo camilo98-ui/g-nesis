@@ -618,52 +618,15 @@ export default function BudgetExcelImporter({ onClose }) {
         }
 
         if (parsedData.formatType === 'pdv-fecha' && item.dailyByDate) {
-          const hoy = new Date();
-          const hoyStr = format(hoy, 'yyyy-MM-dd');
-          
-          let salesUntilToday = 0;
-          let budgetUntilToday = 0;
-          const datesSorted = Object.keys(item.dailyByDate).sort();
-          
-          // Buscar ventas reales
-          try {
-            const dailySalesRecs = await base44.entities.DailySales.filter({ store_id: item.store.code });
-            for (const rec of dailySalesRecs) {
-              const recDate = rec.date?.split('T')[0] || rec.date;
-              if (recDate <= hoyStr) {
-                salesUntilToday += rec.total_sales || 0;
-              }
-            }
-          } catch (_) {}
-
-          await new Promise(r => setTimeout(r, 600));
-
-          for (const dateStr of datesSorted) {
-            if (dateStr <= hoyStr) {
-              budgetUntilToday += item.dailyByDate[dateStr] || 0;
-            }
-          }
-
-          const gap = budgetUntilToday - salesUntilToday;
-          const remainingDays = datesSorted.filter(d => d > hoyStr).length;
-          // Ambición muy agresiva: si hay brecha positiva, multiplicar x4; si no, sin ajuste
-          const adjustmentPerDay = gap > 0 && remainingDays > 0 ? Math.ceil((gap / remainingDays) * 4) : 0;
-
-          // Guardar cada DailyBudget con delay
+          // Guardar cada DailyBudget con el valor exacto del Excel, sin ajustes
           for (const [dateStr, budgetAmount] of Object.entries(item.dailyByDate)) {
             if (!budgetAmount) continue;
-            
-            const finalAmount = dateStr > hoyStr && adjustmentPerDay > 0
-              ? budgetAmount + adjustmentPerDay
-              : budgetAmount;
-
-            const dailyData = { store_id: item.store.code, date: dateStr, budget_amount: Math.round(finalAmount) };
+            const dailyData = { store_id: item.store.code, date: dateStr, budget_amount: Math.round(budgetAmount) };
             if (existingByDate[dateStr]) {
               await base44.entities.DailyBudget.update(existingByDate[dateStr].id, dailyData);
             } else {
               await base44.entities.DailyBudget.create(dailyData);
             }
-            // Delay entre cada DailyBudget
             await new Promise(r => setTimeout(r, 100));
           }
         }
