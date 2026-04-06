@@ -186,7 +186,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
       // Usar el valor del Excel para cada día; solo hoy lleva ajuste de brecha
       const excelRec = dailyBudgets?.find((db) => (db.date?.split('T')[0] || db.date) === dayStr);
       const excelAmount = excelRec?.budget_amount > 0 ? excelRec.budget_amount : getDailyBudget(day);
-      const presupuestoDia = isDayToday ? excelAmount + gapRecoveryIncrement : excelAmount;
+      const presupuestoDia = excelAmount;
       return { date: format(day, 'dd MMM', { locale: es }), fullDate: format(day, 'EEEE dd MMM', { locale: es }), ventas: ventasDelDia, presupuesto: presupuestoDia, cumplimiento: presupuestoDia > 0 ? ventasDelDia / presupuestoDia * 100 : 0 };
     });
 
@@ -320,22 +320,16 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                   <p className="text-sm lg:text-base text-white/90 mb-3 lg:mb-2 font-semibold">
                     {budgetData.selectedSingleDay && budgetData.selectedSingleDay !== format(new Date(), 'yyyy-MM-dd')
                       ? `PPT — ${format(new Date(budgetData.selectedSingleDay + 'T12:00:00'), 'dd MMM', { locale: es })}`
-                      : needsRecovery ? `PPT del Día + Recuperación` : budgetData.gapRecoveryIncrement > 0 ? `PPT del Día + Ambición` : `PPT del Día`}
+                      : `PPT del Día`}
                   </p>
                   <motion.p
-                      key={`${budgetData.excelBudgetForToday + budgetData.gapRecoveryIncrement}-${gregorianMode}`}
+                      key={`${budgetData.excelBudgetForToday}-${gregorianMode}`}
                       initial={{ scale: 1.2, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
                       className="text-2xl md:text-3xl lg:text-5xl font-black text-white leading-none mb-2">
-                    {formatCurrency(budgetData.excelBudgetForToday + budgetData.gapRecoveryIncrement)}
+                    {formatCurrency(budgetData.excelBudgetForToday)}
                   </motion.p>
-                  <div className="space-y-1">
-                    {budgetData.gapRecoveryIncrement > 0 && budgetData.excelBudgetForToday > 0 &&
-                      <p className="text-xs text-white/70">
-                        Excel: {formatCurrency(budgetData.excelBudgetForToday)} + {formatCurrency(budgetData.gapRecoveryIncrement)} ({(budgetData.gapRecoveryIncrement / budgetData.excelBudgetForToday * 100).toFixed(1)}% {needsRecovery ? 'recuperación' : 'extra'})
-                      </p>
-                      }
-                  </div>
+                  <div className="space-y-1" />
 
                   {/* Sparkline debajo del número */}
                   {budgetData.last7DaysSales?.length > 0 &&
@@ -452,14 +446,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                 </div>
               </div>
 
-              {needsRecovery &&
-                <div className="bg-white/10 rounded-lg p-3 mb-3">
-                  <p className="text-xs text-white/70 flex items-center gap-1">
-                    <AlertTriangle className="w-3 h-3 flex-shrink-0" />
-                    <span className="truncate">Incluye recuperación de {formatCurrency(budgetData.accumulatedGap)}</span>
-                  </p>
-                </div>
-                }
+
 
               <div className="flex items-center justify-center gap-2 text-white/80 pt-2 border-t border-white/20 w-full">
                 {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
