@@ -135,28 +135,9 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
     const effectiveGap = manualGap !== null ? manualGap : -accumulatedGap;
     const salesGap = effectiveGap;
 
-    let gapRecoveryIncrement = 0;
-    let adjustedDailyBudget = excelBudgetForToday;
-
-    if (salesGap !== 0 && remainingDays > 0) {
-      const remainingDaysList = eachDayOfInterval({ start: now, end: monthEnd });
-      const remainingWeights = remainingDaysList.map((day) => {
-        const dow = day.getDay();
-        const isWeekend = dow === 0 || dow === 5 || dow === 6;
-        const historicalAvg = avgByDayOfWeek[dow] || dailyBaseBudget;
-        return historicalAvg * (isWeekend ? 1.5 : 1.0);
-      });
-      const totalWeight = remainingWeights.reduce((a, b) => a + b, 0);
-      const todayDow = now.getDay();
-      const isWeekend = todayDow === 0 || todayDow === 5 || todayDow === 6;
-      const todayHistoricalAvg = avgByDayOfWeek[todayDow] || dailyBaseBudget;
-      const todayWeight = todayHistoricalAvg * (isWeekend ? 1.5 : 1.0);
-      let todayGapShare = totalWeight > 0 ? Math.abs(salesGap) * (todayWeight / totalWeight) : Math.abs(salesGap) / remainingDays;
-      const aggressionFactor = salesGap < 0 ? 1.3 : 0.5;
-      todayGapShare = todayGapShare * aggressionFactor;
-      gapRecoveryIncrement = todayGapShare;
-      adjustedDailyBudget = excelBudgetForToday + gapRecoveryIncrement;
-    }
+    // El presupuesto del día es EXACTAMENTE el del Excel, sin modificaciones
+    const gapRecoveryIncrement = 0;
+    const adjustedDailyBudget = excelBudgetForToday;
 
     const currentWeekNumber = weeks.findIndex((w) => {
       const weekEnd = endOfWeek(w, { weekStartsOn: 1 });
