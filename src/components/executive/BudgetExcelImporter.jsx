@@ -158,13 +158,14 @@ export default function BudgetExcelImporter({ onClose }) {
           let rowYear = null;
 
           if (fechaVal instanceof Date) {
-            // Usar getFullYear/getMonth/getDate (hora local, no UTC) para evitar desfase de zona horaria
-            rowYear = fechaVal.getFullYear();
-            rowMonth = fechaVal.getMonth() + 1;
-            dayNum = fechaVal.getDate();
+            // CRÍTICO: usar métodos UTC para evitar desfase por zona horaria (Bogotá UTC-5)
+            // El Excel guarda fechas como medianoche UTC; getDate() local daría el día anterior
+            rowYear = fechaVal.getUTCFullYear();
+            rowMonth = fechaVal.getUTCMonth() + 1;
+            dayNum = fechaVal.getUTCDate();
             dateStr = `${rowYear}-${String(rowMonth).padStart(2,'0')}-${String(dayNum).padStart(2,'0')}`;
           } else if (typeof fechaVal === 'string') {
-            // "2026-03-23 00:00:00" o "2026-03-23"
+            // "2026-03-23 00:00:00" o "2026-03-23" — el regex extrae directamente sin conversión
             const match = fechaVal.match(/(\d{4})-(\d{2})-(\d{2})/);
             if (match) {
               rowYear = parseInt(match[1]);
@@ -173,13 +174,12 @@ export default function BudgetExcelImporter({ onClose }) {
               dateStr = `${match[1]}-${match[2]}-${match[3]}`;
             }
           } else if (typeof fechaVal === 'number' && fechaVal > 40000) {
-            // Número de serie Excel — interpretar en hora local, NO en UTC
-            // Excel serial: días desde 1900-01-00, ajustar por bug del año 1900
-            const excelEpoch = new Date(1899, 11, 30); // 30 dic 1899 local
-            const d = new Date(excelEpoch.getTime() + fechaVal * 86400 * 1000);
-            rowYear = d.getFullYear();
-            rowMonth = d.getMonth() + 1;
-            dayNum = d.getDate();
+            // Número de serie Excel — usar UTC puro para evitar desfase de zona horaria
+            // Excel serial 0 = Dec 30, 1899; serial N = Dec 30, 1899 + N días (UTC)
+            const d = new Date(Date.UTC(1899, 11, 30) + Math.round(fechaVal) * 86400 * 1000);
+            rowYear = d.getUTCFullYear();
+            rowMonth = d.getUTCMonth() + 1;
+            dayNum = d.getUTCDate();
             dateStr = `${rowYear}-${String(rowMonth).padStart(2,'0')}-${String(dayNum).padStart(2,'0')}`;
           }
 
