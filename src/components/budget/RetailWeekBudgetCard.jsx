@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Target, TrendingUp, TrendingDown, Calendar, AlertTriangle, CheckCircle2, ChevronDown, ChevronUp, BarChart3, LineChart as LineChartIcon, ChevronRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -62,14 +62,14 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
         const saleDate = parseISO(s.date);
         if (saleDate < ninetyDaysAgoForAvg || saleDate >= now) return;
         const dayOfWeek = saleDate.getDay();
-        if (s.total_sales && s.total_sales > 0) {salesByDayOfWeek[dayOfWeek] += s.total_sales;countByDayOfWeek[dayOfWeek]++;}
+        if (s.total_sales && s.total_sales > 0) { salesByDayOfWeek[dayOfWeek] += s.total_sales; countByDayOfWeek[dayOfWeek]++; }
       } catch {}
     });
 
     const todayDayOfWeek = now.getDay();
     const ninetyDaysAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
     const historicalSalesForDay = dailySales.filter((s) => {
-      try {const saleDate = parseISO(s.date);return saleDate.getDay() === todayDayOfWeek && s.total_sales > 0 && saleDate >= ninetyDaysAgo && saleDate < now;} catch {return false;}
+      try { const saleDate = parseISO(s.date); return saleDate.getDay() === todayDayOfWeek && s.total_sales > 0 && saleDate >= ninetyDaysAgo && saleDate < now; } catch { return false; }
     });
     const _hSorted = historicalSalesForDay.map((s) => s.total_sales).sort((a, b) => a - b);
     const _hTrimmed = _hSorted.length >= 4 ? _hSorted.slice(1, -1) : _hSorted;
@@ -102,11 +102,11 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
       }
     };
 
-    const todaySales = dailySales.find((s) => {try {return isSameDay(parseISO(s.date), now);} catch {return false;}});
+    const todaySales = dailySales.find((s) => { try { return isSameDay(parseISO(s.date), now); } catch { return false; } });
     const todayActualSales = todaySales?.total_sales || 0;
 
     const salesUntilYesterday = dailySales.filter((s) => {
-      try {const saleDate = parseISO(s.date);return saleDate < now && saleDate >= monthStart && saleDate <= monthEnd;} catch {return false;}
+      try { const saleDate = parseISO(s.date); return saleDate < now && saleDate >= monthStart && saleDate <= monthEnd; } catch { return false; }
     }).reduce((sum, s) => sum + (s.total_sales || 0), 0);
 
     const yesterday = new Date(now);
@@ -121,7 +121,6 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
     const remainingDays = eachDayOfInterval({ start: now, end: monthEnd }).length;
     const remainingBudget = adjustedMonthlyBudget - salesUntilYesterday - todayActualSales;
 
-    // Si hay un día específico seleccionado, mostrar su presupuesto; si no, usar hoy
     const selectedSingleDay = currentDateRange?.from && currentDateRange?.to &&
       format(currentDateRange.from, 'yyyy-MM-dd') === format(currentDateRange.to, 'yyyy-MM-dd')
       ? format(currentDateRange.from, 'yyyy-MM-dd') : null;
@@ -135,9 +134,13 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
     const effectiveGap = manualGap !== null ? manualGap : -accumulatedGap;
     const salesGap = effectiveGap;
 
-    // El presupuesto del día es EXACTAMENTE el del Excel, sin modificaciones
-    const gapRecoveryIncrement = 0;
-    const adjustedDailyBudget = excelBudgetForToday;
+    // Incremento dinámico según brecha acumulada
+    const gapRatioVsMonthly = adjustedMonthlyBudget > 0 ? accumulatedGap / adjustedMonthlyBudget : 0;
+    let incrementPct = 0;
+    if (gapRatioVsMonthly > 0.05) incrementPct = 10;
+    else if (gapRatioVsMonthly > 0) incrementPct = 5;
+    const adjustedDailyBudget = excelBudgetForToday * (1 + incrementPct / 100);
+    const gapRecoveryIncrement = adjustedDailyBudget - excelBudgetForToday;
 
     const currentWeekNumber = weeks.findIndex((w) => {
       const weekEnd = endOfWeek(w, { weekStartsOn: 1 });
@@ -145,7 +148,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
     }) + 1;
 
     const currentWeekSales = dailySales.filter((s) => {
-      try {return isWithinInterval(parseISO(s.date), { start: displayWeekStart, end: displayWeekEnd });} catch {return false;}
+      try { return isWithinInterval(parseISO(s.date), { start: displayWeekStart, end: displayWeekEnd }); } catch { return false; }
     }).reduce((sum, s) => sum + (s.total_sales || 0), 0);
 
     const weeklyBudget = fullCurrentRetailWeekDays.reduce((sum, day) => {
@@ -164,11 +167,9 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
     const projectionCompliance = weeklyBudget > 0 ? weekProjection / weeklyBudget * 100 : 0;
 
     const dailyTrendData = fullDisplayWeekDays.map((day) => {
-      const sale = dailySales.find((s) => {try {return isSameDay(parseISO(s.date), day);} catch {return false;}});
+      const sale = dailySales.find((s) => { try { return isSameDay(parseISO(s.date), day); } catch { return false; } });
       const ventasDelDia = sale ? sale.total_sales || 0 : 0;
       const dayStr = format(day, 'yyyy-MM-dd');
-      const isDayToday = isSameDay(day, now);
-      // Usar el valor del Excel para cada día; solo hoy lleva ajuste de brecha
       const excelRec = dailyBudgets?.find((db) => (db.date?.split('T')[0] || db.date) === dayStr);
       const excelAmount = excelRec?.budget_amount > 0 ? excelRec.budget_amount : getDailyBudget(day);
       const presupuestoDia = excelAmount;
@@ -179,7 +180,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
     const weeklyData = displayWeeks.map((weekStart, idx) => {
       const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
       const daysInWeek = eachDayOfInterval({ start: weekStart, end: weekEnd });
-      const weekSales = dailySales.filter((s) => {try {const sd = parseISO(s.date);return sd >= weekStart && sd <= weekEnd;} catch {return false;}}).reduce((sum, s) => sum + (s.total_sales || 0), 0);
+      const weekSales = dailySales.filter((s) => { try { const sd = parseISO(s.date); return sd >= weekStart && sd <= weekEnd; } catch { return false; } }).reduce((sum, s) => sum + (s.total_sales || 0), 0);
       const weekBudget = daysInWeek.reduce((sum, day) => {
         const dayStr = format(day, 'yyyy-MM-dd');
         const excelRec = dailyBudgets?.find((db) => (db.date?.split('T')[0] || db.date) === dayStr);
@@ -195,7 +196,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
     const monthProjectionCompliance = adjustedMonthlyBudget > 0 ? monthProjection / adjustedMonthlyBudget * 100 : 0;
 
     return {
-      dailyBaseBudget, adjustedDailyBudget, todayActualSales, historicalAvgToday, accumulatedGap, remainingDays, remainingBudget, salesUntilYesterday, budgetUntilYesterday,
+      dailyBaseBudget, adjustedDailyBudget, todayActualSales, historicalAvgToday, accumulatedGap, remainingDays, remainingBudget, salesUntilYesterday, budgetUntilYesterday, incrementPct,
       compliance: budgetUntilYesterday > 0 ? salesUntilYesterday / budgetUntilYesterday * 100 : 0,
       todayCompliance: adjustedDailyBudget > 0 ? todayActualSales / adjustedDailyBudget * 100 : 0,
       currentWeekNumber, totalWeeks: weeks.length, currentWeekSales, weeklyBudget,
@@ -204,7 +205,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
       totalMonthSales, daysElapsed, avgDailySales: monthAvgDailySales, monthProjection, monthProjectionCompliance,
       monthlyBudget: adjustedMonthlyBudget,
       last7DaysSales: dailySales.filter((s) => {
-        try {const sd = parseISO(s.date);const ago = new Date(now);ago.setDate(ago.getDate() - 7);return sd >= ago && sd <= now && s.total_sales > 0;} catch {return false;}
+        try { const sd = parseISO(s.date); const ago = new Date(now); ago.setDate(ago.getDate() - 7); return sd >= ago && sd <= now && s.total_sales > 0; } catch { return false; }
       }).sort((a, b) => new Date(a.date) - new Date(b.date)).map((s) => ({ value: s.total_sales })),
       topDays: avgByDayOfWeek.map((avg, idx) => ({
         day: ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'][idx],
@@ -228,7 +229,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className="mb-6">
-      
+
       <Card className="bg-gradient-to-br from-rose-50/30 via-pink-50/20 to-purple-50/20 border border-rose-200/40 shadow-lg overflow-hidden">
         <CardHeader className="bg-gradient-to-r from-rose-100/20 to-pink-100/20 border-b border-rose-200/30 pb-4 px-4 md:px-6">
           <div className="flex items-center justify-between gap-4 md:gap-6">
@@ -243,8 +244,8 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                 <p className="text-xl md:text-2xl truncate">Presupuesto del Día</p>
                 <p className="text-xs text-slate-600 font-normal mt-0.5">
                   {budgetData.monthStart && budgetData.monthEnd ?
-                  `${format(budgetData.monthStart, 'dd MMM', { locale: es })} - ${format(budgetData.monthEnd, 'dd MMM', { locale: es })} · Semana ${budgetData.currentWeekNumber} de ${budgetData.totalWeeks}` :
-                  `Semana ${budgetData.currentWeekNumber} de ${budgetData.totalWeeks}`}
+                    `${format(budgetData.monthStart, 'dd MMM', { locale: es })} - ${format(budgetData.monthEnd, 'dd MMM', { locale: es })} · Semana ${budgetData.currentWeekNumber} de ${budgetData.totalWeeks}` :
+                    `Semana ${budgetData.currentWeekNumber} de ${budgetData.totalWeeks}`}
                 </p>
               </div>
             </CardTitle>
@@ -261,10 +262,10 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
 
         <CardContent className="p-4 md:p-6 space-y-4">
           {budgetData?.noBudget ?
-          <motion.div
-            whileHover={{ scale: 1.02, y: -2 }}
-            onClick={onConfigureBudget}
-            className="w-full bg-gradient-to-br from-amber-400/80 to-orange-400/80 rounded-xl md:rounded-2xl shadow-md p-4 md:p-6 border border-amber-300/40 relative overflow-hidden cursor-pointer">
+            <motion.div
+              whileHover={{ scale: 1.02, y: -2 }}
+              onClick={onConfigureBudget}
+              className="w-full bg-gradient-to-br from-amber-400/80 to-orange-400/80 rounded-xl md:rounded-2xl shadow-md p-4 md:p-6 border border-amber-300/40 relative overflow-hidden cursor-pointer">
               <div className="relative z-10 text-center">
                 <Target className="w-10 h-10 md:w-12 md:h-12 text-white mx-auto mb-3 md:mb-4" />
                 <p className="text-lg md:text-2xl font-black text-white mb-2">Configura el Presupuesto</p>
@@ -273,403 +274,403 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
               </div>
             </motion.div> :
 
-          <>
-          {/* Presupuesto del Día - DESTACADO */}
-          <motion.div
-              whileHover={{ scale: 1.02, y: -2 }}
-              onClick={() => {
-                const newExpanded = !isExpanded;
-                setIsExpanded(newExpanded);
-                onExpandChange?.(newExpanded);
-              }}
-              className="w-full bg-gradient-to-br from-rose-400/80 to-pink-400/80 rounded-2xl shadow-md p-6 lg:p-8 border border-rose-300/40 relative overflow-hidden cursor-pointer">
-              
-            <div className="relative z-10">
-              <div className="flex items-center justify-between mb-7 lg:mb-5">
-                <div className="flex items-center gap-2 lg:gap-3">
-                  <Target className="w-6 h-6 lg:w-7 lg:h-7 text-white" />
-                  <p className="text-sm lg:text-base text-white/90 font-semibold lg:font-bold">Meta del Día</p>
-                </div>
-                
+            <>
+              {/* Presupuesto del Día - DESTACADO */}
+              <motion.div
+                whileHover={{ scale: 1.02, y: -2 }}
+                onClick={() => {
+                  const newExpanded = !isExpanded;
+                  setIsExpanded(newExpanded);
+                  onExpandChange?.(newExpanded);
+                }}
+                className="w-full bg-gradient-to-br from-rose-400/80 to-pink-400/80 rounded-2xl shadow-md p-6 lg:p-8 border border-rose-300/40 relative overflow-hidden cursor-pointer">
 
-
-
-
-
-                  
-              </div>
-
-              <div className="grid grid-cols-2 gap-6 lg:gap-10 mb-6 lg:mb-5 items-start">
-                {/* Panel izquierdo: PPT del Día */}
-                <div className="text-left">
-                  <p className="text-sm lg:text-base text-white/90 mb-3 lg:mb-2 font-semibold">
-                    {budgetData.selectedSingleDay && budgetData.selectedSingleDay !== format(new Date(), 'yyyy-MM-dd')
-                      ? `PPT — ${format(new Date(budgetData.selectedSingleDay + 'T12:00:00'), 'dd MMM', { locale: es })}`
-                      : budgetData.accumulatedGap > 0 ? `PPT del Día + Recuperación` : `PPT del Día`}
-                  </p>
-                  <motion.p
-                      key={`${budgetData.adjustedDailyBudget}-${gregorianMode}`}
-                      initial={{ scale: 1.2, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      className="text-2xl md:text-3xl lg:text-5xl font-black text-white leading-none mb-2">
-                    {formatCurrency(budgetData.adjustedDailyBudget)}
-                  </motion.p>
-                  <div className="space-y-1">
-                    {budgetData.gapRecoveryIncrement > 0 && budgetData.excelBudgetForToday > 0 &&
-                      <p className="text-xs text-white/70">
-                        Excel: {formatCurrency(budgetData.excelBudgetForToday)} + {formatCurrency(budgetData.gapRecoveryIncrement)} ({(budgetData.gapRecoveryIncrement / budgetData.excelBudgetForToday * 100).toFixed(1)}% recuperación)
-                      </p>
-                    }
+                <div className="relative z-10">
+                  <div className="flex items-center justify-between mb-7 lg:mb-5">
+                    <div className="flex items-center gap-2 lg:gap-3">
+                      <Target className="w-6 h-6 lg:w-7 lg:h-7 text-white" />
+                      <p className="text-sm lg:text-base text-white/90 font-semibold lg:font-bold">Meta del Día</p>
+                    </div>
                   </div>
 
-                  {/* Sparkline debajo del número */}
-                  {budgetData.last7DaysSales?.length > 0 &&
-                    <div className="mt-3 h-10">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={budgetData.last7DaysSales}>
-                          <defs>
-                            <filter id="glow1">
-                              <feGaussianBlur stdDeviation="2" result="coloredBlur" />
-                              <feMerge>
-                                <feMergeNode in="coloredBlur" />
-                                <feMergeNode in="SourceGraphic" />
-                              </feMerge>
-                            </filter>
-                            <linearGradient id="lineGrad1" x1="0%" y1="0%" x2="100%" y2="0%">
-                              <stop offset="-20%" stopColor="#fff" stopOpacity="0">
-                                <animate attributeName="offset" values="-0.2;1.2;1.2" dur="3s" repeatCount="indefinite" />
-                              </stop>
-                              <stop offset="0%" stopColor="#fff" stopOpacity="1">
-                                <animate attributeName="offset" values="0;1.4;1.4" dur="3s" repeatCount="indefinite" />
-                              </stop>
-                              <stop offset="20%" stopColor="#fff" stopOpacity="0">
-                                <animate attributeName="offset" values="0.2;1.6;1.6" dur="3s" repeatCount="indefinite" />
-                              </stop>
-                            </linearGradient>
-                          </defs>
-                          <Line type="monotone" dataKey="value" stroke="#fff" strokeWidth={1.5} dot={false} strokeOpacity={0.3} />
-                          <Line type="monotone" dataKey="value" stroke="url(#lineGrad1)" strokeWidth={2.5} dot={false} filter="url(#glow1)" />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    </div>
-                    }
-                </div>
+                  <div className="grid grid-cols-2 gap-6 lg:gap-10 mb-6 lg:mb-5 items-start">
+                    {/* Panel izquierdo: PPT del Día */}
+                    <div className="text-left">
+                      <p className="text-sm lg:text-base text-white/90 mb-3 lg:mb-2 font-semibold">
+                        {budgetData.selectedSingleDay && budgetData.selectedSingleDay !== format(new Date(), 'yyyy-MM-dd')
+                          ? `PPT — ${format(new Date(budgetData.selectedSingleDay + 'T12:00:00'), 'dd MMM', { locale: es })}`
+                          : budgetData.incrementPct > 0 ? `PPT del Día ×${100 + budgetData.incrementPct}%` : `PPT del Día`}
+                      </p>
+                      <motion.p
+                        key={`${budgetData.adjustedDailyBudget}-${gregorianMode}`}
+                        initial={{ scale: 1.2, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        className="text-2xl md:text-3xl lg:text-5xl font-black text-white leading-none mb-2">
+                        {formatCurrency(budgetData.adjustedDailyBudget)}
+                      </motion.p>
+                      <div className="space-y-1">
+                        {budgetData.gapRecoveryIncrement > 0 && budgetData.excelBudgetForToday > 0 &&
+                          <p className="text-xs text-white/70">
+                            Base Excel: {formatCurrency(budgetData.excelBudgetForToday)} · +{budgetData.incrementPct}% para recuperar brecha
+                          </p>
+                        }
+                      </div>
 
-                {/* Panel derecho: Brecha del Mes */}
-                {(() => {
-                    // Brecha acumulada = ventas reales vs presupuesto diario Excel (se acumula día a día)
-                    const monthGap = budgetData.salesUntilYesterday - budgetData.budgetUntilYesterday;
-                    return (
-                      <div className="text-right">
-                        <p className="text-sm lg:text-base text-white/90 mb-3 lg:mb-2 font-semibold">Brecha del Mes</p>
-                        <motion.p
+                      {/* Sparkline debajo del número */}
+                      {budgetData.last7DaysSales?.length > 0 &&
+                        <div className="mt-3 h-10">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <LineChart data={budgetData.last7DaysSales}>
+                              <defs>
+                                <filter id="glow1">
+                                  <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+                                  <feMerge>
+                                    <feMergeNode in="coloredBlur" />
+                                    <feMergeNode in="SourceGraphic" />
+                                  </feMerge>
+                                </filter>
+                                <linearGradient id="lineGrad1" x1="0%" y1="0%" x2="100%" y2="0%">
+                                  <stop offset="-20%" stopColor="#fff" stopOpacity="0">
+                                    <animate attributeName="offset" values="-0.2;1.2;1.2" dur="3s" repeatCount="indefinite" />
+                                  </stop>
+                                  <stop offset="0%" stopColor="#fff" stopOpacity="1">
+                                    <animate attributeName="offset" values="0;1.4;1.4" dur="3s" repeatCount="indefinite" />
+                                  </stop>
+                                  <stop offset="20%" stopColor="#fff" stopOpacity="0">
+                                    <animate attributeName="offset" values="0.2;1.6;1.6" dur="3s" repeatCount="indefinite" />
+                                  </stop>
+                                </linearGradient>
+                              </defs>
+                              <Line type="monotone" dataKey="value" stroke="#fff" strokeWidth={1.5} dot={false} strokeOpacity={0.3} />
+                              <Line type="monotone" dataKey="value" stroke="url(#lineGrad1)" strokeWidth={2.5} dot={false} filter="url(#glow1)" />
+                            </LineChart>
+                          </ResponsiveContainer>
+                        </div>
+                      }
+                    </div>
+
+                    {/* Panel derecho: Brecha del Mes */}
+                    {(() => {
+                      const monthGap = budgetData.salesUntilYesterday - budgetData.budgetUntilYesterday;
+                      return (
+                        <div className="text-right">
+                          <p className="text-sm lg:text-base text-white/90 mb-3 lg:mb-2 font-semibold">Brecha del Mes</p>
+                          <motion.p
                             key={`${monthGap}-brecha-mes`}
                             initial={{ scale: 1.2, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             className={`text-2xl md:text-3xl lg:text-5xl font-black leading-none mb-2 ${monthGap >= 0 ? 'text-emerald-200' : 'text-rose-200'}`}>
-                          {monthGap >= 0 ? '📈' : '📉'} {monthGap >= 0 ? '+' : '-'}{formatCurrency(Math.abs(monthGap))}
-                        </motion.p>
-                        <div className="space-y-1">
-                          {budgetData.monthlyBudget > 0 &&
-                            <p className="text-xs text-white/70">
-                              {monthGap >= 0 ? 'Sobre meta: ' : 'Bajo meta: '}{(Math.abs(monthGap) / budgetData.monthlyBudget * 100).toFixed(1)}% del presupuesto
-                            </p>
+                            {monthGap >= 0 ? '📈' : '📉'} {monthGap >= 0 ? '+' : '-'}{formatCurrency(Math.abs(monthGap))}
+                          </motion.p>
+                          <div className="space-y-1">
+                            {budgetData.monthlyBudget > 0 &&
+                              <p className="text-xs text-white/70">
+                                {monthGap >= 0 ? 'Sobre meta: ' : 'Bajo meta: '}{(Math.abs(monthGap) / budgetData.monthlyBudget * 100).toFixed(1)}% del presupuesto
+                              </p>
+                            }
+                          </div>
+                          {budgetData.last7DaysSales?.length > 0 &&
+                            <div className="mt-3 h-10">
+                              <ResponsiveContainer width="100%" height="100%">
+                                <LineChart data={budgetData.last7DaysSales}>
+                                  <defs>
+                                    <filter id="glow2">
+                                      <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+                                      <feMerge>
+                                        <feMergeNode in="coloredBlur" />
+                                        <feMergeNode in="SourceGraphic" />
+                                      </feMerge>
+                                    </filter>
+                                    <linearGradient id="lineGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
+                                      <stop offset="-20%" stopColor="#fff" stopOpacity="0">
+                                        <animate attributeName="offset" values="-0.2;1.2;1.2" dur="3s" repeatCount="indefinite" />
+                                      </stop>
+                                      <stop offset="0%" stopColor="#fff" stopOpacity="1">
+                                        <animate attributeName="offset" values="0;1.4;1.4" dur="3s" repeatCount="indefinite" />
+                                      </stop>
+                                      <stop offset="20%" stopColor="#fff" stopOpacity="0">
+                                        <animate attributeName="offset" values="0.2;1.6;1.6" dur="3s" repeatCount="indefinite" />
+                                      </stop>
+                                    </linearGradient>
+                                  </defs>
+                                  <Line type="monotone" dataKey="value" stroke="#fff" strokeWidth={1.5} dot={false} strokeOpacity={0.3} />
+                                  <Line type="monotone" dataKey="value" stroke="url(#lineGrad2)" strokeWidth={2.5} dot={false} filter="url(#glow2)" />
+                                </LineChart>
+                              </ResponsiveContainer>
+                            </div>
                           }
                         </div>
-                        {budgetData.last7DaysSales?.length > 0 &&
-                          <div className="mt-3 h-10">
-                            <ResponsiveContainer width="100%" height="100%">
-                              <LineChart data={budgetData.last7DaysSales}>
-                                <defs>
-                                  <filter id="glow2">
-                                    <feGaussianBlur stdDeviation="2" result="coloredBlur" />
-                                    <feMerge>
-                                      <feMergeNode in="coloredBlur" />
-                                      <feMergeNode in="SourceGraphic" />
-                                    </feMerge>
-                                  </filter>
-                                  <linearGradient id="lineGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
-                                    <stop offset="-20%" stopColor="#fff" stopOpacity="0">
-                                      <animate attributeName="offset" values="-0.2;1.2;1.2" dur="3s" repeatCount="indefinite" />
-                                    </stop>
-                                    <stop offset="0%" stopColor="#fff" stopOpacity="1">
-                                      <animate attributeName="offset" values="0;1.4;1.4" dur="3s" repeatCount="indefinite" />
-                                    </stop>
-                                    <stop offset="20%" stopColor="#fff" stopOpacity="0">
-                                      <animate attributeName="offset" values="0.2;1.6;1.6" dur="3s" repeatCount="indefinite" />
-                                    </stop>
-                                  </linearGradient>
-                                </defs>
-                                <Line type="monotone" dataKey="value" stroke="#fff" strokeWidth={1.5} dot={false} strokeOpacity={0.3} />
-                                <Line type="monotone" dataKey="value" stroke="url(#lineGrad2)" strokeWidth={2.5} dot={false} filter="url(#glow2)" />
-                              </LineChart>
-                            </ResponsiveContainer>
-                          </div>
-                        }
-                      </div>);
-
-                  })()}
-              </div>
-
-              {/* Barra de Proyección Mensual */}
-              <div className="space-y-2 mb-4">
-                <div className="flex items-center justify-between text-xs lg:text-sm">
-                  <span className="text-white/70">Proyección Cierre Mes</span>
-                  <span className="font-bold lg:font-black text-white lg:text-lg">{budgetData.monthProjectionCompliance.toFixed(0)}%</span>
-                </div>
-                <div className="relative h-3 lg:h-4 bg-white/20 rounded-full overflow-hidden cursor-pointer" onClick={() => {setSelectedMetric('month-projection');setIsModalOpen(true);}}>
-                  <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${Math.min(budgetData.monthProjectionCompliance, 100)}%` }}
-                      transition={{ duration: 1.5, delay: 0.5 }}
-                      className={`h-full rounded-full relative overflow-hidden ${budgetData.monthProjectionCompliance >= 100 ? 'bg-emerald-300' : budgetData.monthProjectionCompliance >= 90 ? 'bg-amber-300' : 'bg-rose-300'}`}>
-                    <motion.div
-                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-50"
-                        animate={{ x: ['-100%', '200%'] }}
-                        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                        style={{ width: '50%' }} />
-                  </motion.div>
-                </div>
-              </div>
-
-
-
-              <div className="flex items-center justify-center gap-2 text-white/80 pt-2 border-t border-white/20 w-full">
-                {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                <span className="text-xs font-medium">{isExpanded ? 'Ver menos' : 'Ver más detalles'}</span>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Contenido expandible */}
-          <AnimatePresence>
-            {isExpanded &&
-              <>
-              <div id="budget-expanded-content" />
-
-              {/* Barra de Proyección Mensual */}
-              <motion.button
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.99 }}
-                  onClick={() => {setSelectedMetric('month-projection');setIsModalOpen(true);}}
-                  className="w-full bg-white/40 rounded-xl p-3 md:p-4 border border-indigo-200/40 hover:border-indigo-400 transition-all cursor-pointer">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-xs lg:text-sm">
-                    <span className="text-indigo-700/70 font-semibold">Proyección Cierre Mes</span>
-                    <span className="font-bold lg:font-black text-indigo-900 lg:text-lg">{budgetData.monthProjectionCompliance.toFixed(0)}%</span>
+                      );
+                    })()}
                   </div>
-                  <div className="relative h-3 lg:h-4 bg-white/50 rounded-full overflow-hidden shadow-inner">
-                    <motion.div
+
+                  {/* Barra de Proyección Mensual */}
+                  <div className="space-y-2 mb-4">
+                    <div className="flex items-center justify-between text-xs lg:text-sm">
+                      <span className="text-white/70">Proyección Cierre Mes</span>
+                      <div className="text-right">
+                        <span className="font-black text-white lg:text-lg">{budgetData.monthProjectionCompliance.toFixed(0)}%</span>
+                        <p className="text-[10px] text-white/60 leading-tight">
+                          {formatCurrency(budgetData.monthProjection)} <span className="opacity-50">/ {formatCurrency(budgetData.monthlyBudget)}</span>
+                        </p>
+                      </div>
+                    </div>
+                    <div className="relative h-3 lg:h-4 bg-white/20 rounded-full overflow-hidden cursor-pointer" onClick={(e) => { e.stopPropagation(); setSelectedMetric('month-projection'); setIsModalOpen(true); }}>
+                      <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${Math.min(budgetData.monthProjectionCompliance, 100)}%` }}
-                        transition={{ duration: 1.5, delay: 0.3 }}
-                        className={`h-full rounded-full relative ${budgetData.monthProjectionCompliance >= 100 ? 'bg-gradient-to-r from-emerald-400/80 to-green-300/80' : budgetData.monthProjectionCompliance >= 90 ? 'bg-gradient-to-r from-amber-400/80 to-orange-300/80' : 'bg-gradient-to-r from-rose-400/80 to-pink-400/80'}`}>
-                      <div className="absolute inset-0" style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.7) 50%, transparent 100%)', width: '40%', animation: 'slideRight 2.5s linear infinite' }} />
-                    </motion.div>
+                        transition={{ duration: 1.5, delay: 0.5 }}
+                        className={`h-full rounded-full relative overflow-hidden ${budgetData.monthProjectionCompliance >= 100 ? 'bg-emerald-300' : budgetData.monthProjectionCompliance >= 90 ? 'bg-amber-300' : 'bg-rose-300'}`}>
+                        <motion.div
+                          className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-50"
+                          animate={{ x: ['-100%', '200%'] }}
+                          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                          style={{ width: '50%' }} />
+                      </motion.div>
+                    </div>
                   </div>
-                  <p className="text-[10px] lg:text-xs text-indigo-600/60">
-                    {budgetData.monthProjectionCompliance >= 100 ?
-                      `🎉 Proyectas superar en ${formatCurrency(budgetData.monthProjection - budgetData.monthlyBudget)}` :
-                      `📊 Proyección: ${formatCurrency(budgetData.monthProjection)} • Falta: ${formatCurrency(budgetData.monthlyBudget - budgetData.monthProjection)}`}
-                  </p>
-                </div>
-              </motion.button>
 
-              {budgetData.topDays?.length > 0 &&
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="bg-gradient-to-br from-indigo-50/60 to-purple-50/60 rounded-xl p-3 md:p-4 border-2 border-indigo-200/50 shadow-md">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Calendar className="w-5 h-5 text-indigo-500" />
-                    <h4 className="text-sm md:text-base font-black text-indigo-900">Días Clave para Empuje de Ventas</h4>
+                  <div className="flex items-center justify-center gap-2 text-white/80 pt-2 border-t border-white/20 w-full">
+                    {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                    <span className="text-xs font-medium">{isExpanded ? 'Ver menos' : 'Ver más detalles'}</span>
                   </div>
-                  <div className="grid grid-cols-3 gap-2">
-                    {budgetData.topDays.map((day, idx) =>
+                </div>
+              </motion.div>
+
+              {/* Contenido expandible */}
+              <AnimatePresence>
+                {isExpanded &&
+                  <>
+                    <div id="budget-expanded-content" />
+
+                    {/* Proyección expandida */}
                     <motion.button
-                      key={day.day}
-                      initial={{ scale: 0, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      transition={{ delay: idx * 0.1 }}
-                      whileHover={{ scale: 1.05, y: -3 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => {setSelectedMetric(`top-day-${idx}`);setIsModalOpen(true);}}
-                      className="bg-white/80 backdrop-blur-sm rounded-lg p-2 md:p-3 border border-indigo-200/40 text-center hover:border-indigo-400 hover:shadow-lg transition-all cursor-pointer">
-                        <p className="text-lg md:text-2xl font-black text-indigo-600 mb-1">{idx === 0 ? '🥇' : idx === 1 ? '🥈' : '🥉'}</p>
-                        <p className="text-xs md:text-sm font-bold text-indigo-900 mb-1">{day.dayFull}</p>
-                        <p className="text-[10px] md:text-xs text-indigo-600 font-semibold">~{formatCurrency(day.avg)}</p>
-                        <p className="text-[8px] md:text-[10px] text-indigo-500 mt-1">{(day.weight * 100).toFixed(0)}% del total</p>
-                      </motion.button>
-                    )}
-                  </div>
-                  <p className="text-[10px] text-indigo-600 mt-3 text-center">📊 Basado en {budgetData.topDays[0]?.count || 0}+ registros históricos por día</p>
-                </motion.div>
-                }
-
-              {/* Gráfico de Tendencia Diaria */}
-              <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="bg-white rounded-xl p-3 md:p-4 border border-slate-200/60 shadow-sm">
-                <div className="flex items-center justify-between mb-2 md:mb-3">
-                  <h4 className="text-sm md:text-base font-bold text-slate-900 flex items-center gap-1.5 md:gap-2">
-                    <LineChartIcon className="w-4 h-4 md:w-5 md:h-5 text-rose-400/70" />
-                    Tendencia Diaria del Período
-                  </h4>
-                </div>
-                <ResponsiveContainer width="100%" height={200} className="md:hidden">
-                  <BarChart data={budgetData.dailyTrendData}>
-                    <defs>
-                      <linearGradient id="barCumplido" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#a7f3d0" stopOpacity={0.9}><animate attributeName="stopOpacity" values="0.9;1;0.9" dur="2s" repeatCount="indefinite" /></stop>
-                        <stop offset="100%" stopColor="#d1fae5" stopOpacity={0.6}><animate attributeName="stopOpacity" values="0.6;0.8;0.6" dur="2s" repeatCount="indefinite" /></stop>
-                      </linearGradient>
-                      <linearGradient id="barNoCumplido" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#fda4af" stopOpacity={0.9}><animate attributeName="stopOpacity" values="0.9;1;0.9" dur="2s" repeatCount="indefinite" /></stop>
-                        <stop offset="100%" stopColor="#fecdd3" stopOpacity={0.6}><animate attributeName="stopOpacity" values="0.6;0.8;0.6" dur="2s" repeatCount="indefinite" /></stop>
-                      </linearGradient>
-                      <filter id="barGlow">
-                        <feGaussianBlur stdDeviation="4" result="coloredBlur" />
-                        <feMerge><feMergeNode in="coloredBlur" /><feMergeNode in="SourceGraphic" /></feMerge>
-                      </filter>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.3} />
-                    <XAxis dataKey="date" stroke="#9ca3af" fontSize={9} angle={-45} textAnchor="end" height={50} tick={{ fontWeight: 400 }} />
-                    <YAxis stroke="#9ca3af" fontSize={9} tickFormatter={(value) => `$${(value / 1000000).toFixed(1)}M`} tick={{ fontWeight: 400 }} />
-                    <Tooltip
-                        contentStyle={{ background: '#ffffff', border: '2px solid #e5e7eb', borderRadius: '12px', color: '#1e293b', padding: '10px 14px', boxShadow: '0 8px 24px rgba(0,0,0,0.15)', fontSize: '11px' }}
-                        labelStyle={{ color: '#64748b', fontSize: '10px', fontWeight: '700', marginBottom: '6px' }}
-                        labelFormatter={(label, payload) => {const data = payload?.[0]?.payload;return data?.fullDate || label;}}
-                        formatter={(value, name, props) => {
-                          const { ventas, presupuesto, cumplimiento } = props.payload;
-                          const diferencia = ventas - presupuesto;
-                          const cumplido = cumplimiento >= 100;
-                          return [<div key="info" style={{ fontSize: '11px' }}><div style={{ fontWeight: 'bold', color: '#0f172a', marginBottom: '4px' }}>💰 Venta: {formatCurrency(ventas)}</div><div style={{ fontWeight: 'bold', color: '#64748b', marginBottom: '4px' }}>🎯 Meta: {formatCurrency(presupuesto)}</div><div style={{ fontWeight: 'bold', color: cumplido ? '#059669' : '#dc2626', borderTop: '1px solid #e5e7eb', paddingTop: '4px', marginTop: '4px' }}>{cumplido ? '✅' : '❌'} {cumplimiento.toFixed(0)}% ({diferencia >= 0 ? '+' : ''}{formatCurrency(diferencia)})</div></div>, ''];
-                        }} />
-                    <ReferenceLine y={0} stroke="#9ca3af" strokeDasharray="3 3" />
-                    <Bar dataKey={(data) => data.ventas - data.presupuesto} fill="url(#barCumplido)" radius={[4, 4, 0, 0]} animationDuration={1000} filter="url(#barGlow)">
-                      {budgetData.dailyTrendData.map((entry, index) =>
-                        <Cell key={`cell-${index}`} fill={entry.cumplimiento >= 100 ? 'url(#barCumplido)' : 'url(#barNoCumplido)'} />
-                        )}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-                <ResponsiveContainer width="100%" height={280} className="hidden md:block">
-                  <BarChart data={budgetData.dailyTrendData}>
-                    <defs>
-                      <linearGradient id="barCumplidoDesktop" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#a7f3d0" stopOpacity={0.9}><animate attributeName="stopOpacity" values="0.9;1;0.9" dur="2s" repeatCount="indefinite" /></stop>
-                        <stop offset="100%" stopColor="#d1fae5" stopOpacity={0.6}><animate attributeName="stopOpacity" values="0.6;0.8;0.6" dur="2s" repeatCount="indefinite" /></stop>
-                      </linearGradient>
-                      <linearGradient id="barNoCumplidoDesktop" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#fda4af" stopOpacity={0.9}><animate attributeName="stopOpacity" values="0.9;1;0.9" dur="2s" repeatCount="indefinite" /></stop>
-                        <stop offset="100%" stopColor="#fecdd3" stopOpacity={0.6}><animate attributeName="stopOpacity" values="0.6;0.8;0.6" dur="2s" repeatCount="indefinite" /></stop>
-                      </linearGradient>
-                      <filter id="barGlowDesktop">
-                        <feGaussianBlur stdDeviation="4" result="coloredBlur" />
-                        <feMerge><feMergeNode in="coloredBlur" /><feMergeNode in="SourceGraphic" /></feMerge>
-                      </filter>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.3} />
-                    <XAxis dataKey="date" stroke="#9ca3af" fontSize={11} angle={-35} textAnchor="end" height={65} tick={{ fontWeight: 500 }} />
-                    <YAxis stroke="#9ca3af" fontSize={11} tickFormatter={(value) => `$${(value / 1000000).toFixed(1)}M`} tick={{ fontWeight: 400 }} />
-                    <Tooltip
-                        contentStyle={{ background: '#ffffff', border: '2px solid #e5e7eb', borderRadius: '14px', color: '#1e293b', padding: '14px 18px', boxShadow: '0 10px 30px rgba(0,0,0,0.12)', minWidth: '220px' }}
-                        labelStyle={{ color: '#64748b', fontSize: '12px', fontWeight: '700', marginBottom: '10px', paddingBottom: '8px', borderBottom: '1px solid #e5e7eb' }}
-                        labelFormatter={(label, payload) => {const data = payload?.[0]?.payload;return data?.fullDate || label;}}
-                        formatter={(value, name, props) => {
-                          const { ventas, presupuesto, cumplimiento } = props.payload;
-                          const diferencia = ventas - presupuesto;
-                          const cumplido = cumplimiento >= 100;
-                          return [<div key="info" style={{ fontSize: '13px' }}><div style={{ fontWeight: 'bold', color: '#0f172a', marginBottom: '6px' }}>💰 Venta: {formatCurrency(ventas)}</div><div style={{ fontWeight: 'bold', color: '#64748b', marginBottom: '8px' }}>🎯 Meta: {formatCurrency(presupuesto)}</div><div style={{ fontWeight: 'bold', color: cumplido ? '#059669' : '#dc2626', borderTop: '2px solid #e5e7eb', paddingTop: '8px', marginTop: '4px', fontSize: '14px' }}>{cumplido ? '✅ Cumplido' : '❌ No cumplido'}: {cumplimiento.toFixed(0)}%<div style={{ fontSize: '12px', marginTop: '4px', color: cumplido ? '#10b981' : '#ef4444' }}>Diferencia: {diferencia >= 0 ? '+' : ''}{formatCurrency(diferencia)}</div></div></div>, ''];
-                        }} />
-                    <Legend wrapperStyle={{ paddingTop: '16px' }} content={() =>
-                      <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', fontSize: '12px', fontWeight: '600' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: '12px', height: '12px', background: 'linear-gradient(to bottom, #a7f3d0, #d1fae5)', borderRadius: '3px' }}></div><span style={{ color: '#059669' }}>✅ Meta superada</span></div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: '12px', height: '12px', background: 'linear-gradient(to bottom, #fda4af, #fecdd3)', borderRadius: '3px' }}></div><span style={{ color: '#dc2626' }}>❌ Meta no alcanzada</span></div>
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      whileHover={{ scale: 1.01 }}
+                      whileTap={{ scale: 0.99 }}
+                      onClick={() => { setSelectedMetric('month-projection'); setIsModalOpen(true); }}
+                      className="w-full bg-white/40 rounded-xl p-3 md:p-4 border border-indigo-200/40 hover:border-indigo-400 transition-all cursor-pointer">
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-xs lg:text-sm">
+                          <span className="text-indigo-700/70 font-semibold">Proyección Cierre Mes</span>
+                          <div className="text-right">
+                            <span className="font-bold lg:font-black text-indigo-900 lg:text-lg">{budgetData.monthProjectionCompliance.toFixed(0)}%</span>
+                            <p className="text-[10px] text-indigo-500 leading-tight">
+                              {formatCurrency(budgetData.monthProjection)} <span className="opacity-60">/ {formatCurrency(budgetData.monthlyBudget)}</span>
+                            </p>
+                          </div>
+                        </div>
+                        <div className="relative h-3 lg:h-4 bg-white/50 rounded-full overflow-hidden shadow-inner">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${Math.min(budgetData.monthProjectionCompliance, 100)}%` }}
+                            transition={{ duration: 1.5, delay: 0.3 }}
+                            className={`h-full rounded-full relative ${budgetData.monthProjectionCompliance >= 100 ? 'bg-gradient-to-r from-emerald-400/80 to-green-300/80' : budgetData.monthProjectionCompliance >= 90 ? 'bg-gradient-to-r from-amber-400/80 to-orange-300/80' : 'bg-gradient-to-r from-rose-400/80 to-pink-400/80'}`}>
+                            <div className="absolute inset-0" style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.7) 50%, transparent 100%)', width: '40%', animation: 'slideRight 2.5s linear infinite' }} />
+                          </motion.div>
+                        </div>
+                        <p className="text-[10px] lg:text-xs text-indigo-600/60">
+                          {budgetData.monthProjectionCompliance >= 100 ?
+                            `🎉 Proyectas superar en ${formatCurrency(budgetData.monthProjection - budgetData.monthlyBudget)}` :
+                            `📊 Proyección: ${formatCurrency(budgetData.monthProjection)} • Falta: ${formatCurrency(budgetData.monthlyBudget - budgetData.monthProjection)}`}
+                        </p>
                       </div>
-                      } />
-                    <ReferenceLine y={0} stroke="#9ca3af" strokeDasharray="3 3" strokeWidth={1} />
-                    <Bar dataKey={(data) => data.ventas - data.presupuesto} radius={[6, 6, 0, 0]} animationDuration={1200} animationEasing="ease-out" filter="url(#barGlowDesktop)">
-                      {budgetData.dailyTrendData.map((entry, index) =>
-                        <Cell key={`cell-${index}`} fill={entry.cumplimiento >= 100 ? 'url(#barCumplidoDesktop)' : 'url(#barNoCumplidoDesktop)'} />
-                        )}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </motion.div>
+                    </motion.button>
 
-              {/* Gráfico de Semanas */}
-              <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="bg-gradient-to-br from-rose-50/30 via-pink-50/20 to-purple-50/20 rounded-2xl p-4 border-2 border-rose-200/30 shadow-lg">
-                <div className="flex items-center justify-between mb-4">
-                  <h4 className="font-black text-rose-900 flex items-center gap-2 text-base">
-                    <motion.div animate={{ rotate: [0, 5, -5, 0] }} transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}>
-                      <BarChart3 className="w-5 h-5 text-rose-400" />
+                    {budgetData.topDays?.length > 0 &&
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="bg-gradient-to-br from-indigo-50/60 to-purple-50/60 rounded-xl p-3 md:p-4 border-2 border-indigo-200/50 shadow-md">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Calendar className="w-5 h-5 text-indigo-500" />
+                          <h4 className="text-sm md:text-base font-black text-indigo-900">Días Clave para Empuje de Ventas</h4>
+                        </div>
+                        <div className="grid grid-cols-3 gap-2">
+                          {budgetData.topDays.map((day, idx) =>
+                            <motion.button
+                              key={day.day}
+                              initial={{ scale: 0, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              transition={{ delay: idx * 0.1 }}
+                              whileHover={{ scale: 1.05, y: -3 }}
+                              whileTap={{ scale: 0.98 }}
+                              onClick={() => { setSelectedMetric(`top-day-${idx}`); setIsModalOpen(true); }}
+                              className="bg-white/80 backdrop-blur-sm rounded-lg p-2 md:p-3 border border-indigo-200/40 text-center hover:border-indigo-400 hover:shadow-lg transition-all cursor-pointer">
+                              <p className="text-lg md:text-2xl font-black text-indigo-600 mb-1">{idx === 0 ? '🥇' : idx === 1 ? '🥈' : '🥉'}</p>
+                              <p className="text-xs md:text-sm font-bold text-indigo-900 mb-1">{day.dayFull}</p>
+                              <p className="text-[10px] md:text-xs text-indigo-600 font-semibold">~{formatCurrency(day.avg)}</p>
+                              <p className="text-[8px] md:text-[10px] text-indigo-500 mt-1">{(day.weight * 100).toFixed(0)}% del total</p>
+                            </motion.button>
+                          )}
+                        </div>
+                        <p className="text-[10px] text-indigo-600 mt-3 text-center">📊 Basado en {budgetData.topDays[0]?.count || 0}+ registros históricos por día</p>
+                      </motion.div>
+                    }
+
+                    {/* Gráfico de Tendencia Diaria */}
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="bg-white rounded-xl p-3 md:p-4 border border-slate-200/60 shadow-sm">
+                      <div className="flex items-center justify-between mb-2 md:mb-3">
+                        <h4 className="text-sm md:text-base font-bold text-slate-900 flex items-center gap-1.5 md:gap-2">
+                          <LineChartIcon className="w-4 h-4 md:w-5 md:h-5 text-rose-400/70" />
+                          Tendencia Diaria del Período
+                        </h4>
+                      </div>
+                      <ResponsiveContainer width="100%" height={200} className="md:hidden">
+                        <BarChart data={budgetData.dailyTrendData}>
+                          <defs>
+                            <linearGradient id="barCumplido" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="#a7f3d0" stopOpacity={0.9}><animate attributeName="stopOpacity" values="0.9;1;0.9" dur="2s" repeatCount="indefinite" /></stop>
+                              <stop offset="100%" stopColor="#d1fae5" stopOpacity={0.6}><animate attributeName="stopOpacity" values="0.6;0.8;0.6" dur="2s" repeatCount="indefinite" /></stop>
+                            </linearGradient>
+                            <linearGradient id="barNoCumplido" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="#fda4af" stopOpacity={0.9}><animate attributeName="stopOpacity" values="0.9;1;0.9" dur="2s" repeatCount="indefinite" /></stop>
+                              <stop offset="100%" stopColor="#fecdd3" stopOpacity={0.6}><animate attributeName="stopOpacity" values="0.6;0.8;0.6" dur="2s" repeatCount="indefinite" /></stop>
+                            </linearGradient>
+                            <filter id="barGlow">
+                              <feGaussianBlur stdDeviation="4" result="coloredBlur" />
+                              <feMerge><feMergeNode in="coloredBlur" /><feMergeNode in="SourceGraphic" /></feMerge>
+                            </filter>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.3} />
+                          <XAxis dataKey="date" stroke="#9ca3af" fontSize={9} angle={-45} textAnchor="end" height={50} tick={{ fontWeight: 400 }} />
+                          <YAxis stroke="#9ca3af" fontSize={9} tickFormatter={(value) => `$${(value / 1000000).toFixed(1)}M`} tick={{ fontWeight: 400 }} />
+                          <Tooltip
+                            contentStyle={{ background: '#ffffff', border: '2px solid #e5e7eb', borderRadius: '12px', color: '#1e293b', padding: '10px 14px', boxShadow: '0 8px 24px rgba(0,0,0,0.15)', fontSize: '11px' }}
+                            labelStyle={{ color: '#64748b', fontSize: '10px', fontWeight: '700', marginBottom: '6px' }}
+                            labelFormatter={(label, payload) => { const data = payload?.[0]?.payload; return data?.fullDate || label; }}
+                            formatter={(value, name, props) => {
+                              const { ventas, presupuesto, cumplimiento } = props.payload;
+                              const diferencia = ventas - presupuesto;
+                              const cumplido = cumplimiento >= 100;
+                              return [<div key="info" style={{ fontSize: '11px' }}><div style={{ fontWeight: 'bold', color: '#0f172a', marginBottom: '4px' }}>💰 Venta: {formatCurrency(ventas)}</div><div style={{ fontWeight: 'bold', color: '#64748b', marginBottom: '4px' }}>🎯 Meta: {formatCurrency(presupuesto)}</div><div style={{ fontWeight: 'bold', color: cumplido ? '#059669' : '#dc2626', borderTop: '1px solid #e5e7eb', paddingTop: '4px', marginTop: '4px' }}>{cumplido ? '✅' : '❌'} {cumplimiento.toFixed(0)}% ({diferencia >= 0 ? '+' : ''}{formatCurrency(diferencia)})</div></div>, ''];
+                            }} />
+                          <ReferenceLine y={0} stroke="#9ca3af" strokeDasharray="3 3" />
+                          <Bar dataKey={(data) => data.ventas - data.presupuesto} fill="url(#barCumplido)" radius={[4, 4, 0, 0]} animationDuration={1000} filter="url(#barGlow)">
+                            {budgetData.dailyTrendData.map((entry, index) =>
+                              <Cell key={`cell-${index}`} fill={entry.cumplimiento >= 100 ? 'url(#barCumplido)' : 'url(#barNoCumplido)'} />
+                            )}
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                      <ResponsiveContainer width="100%" height={280} className="hidden md:block">
+                        <BarChart data={budgetData.dailyTrendData}>
+                          <defs>
+                            <linearGradient id="barCumplidoDesktop" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="#a7f3d0" stopOpacity={0.9}><animate attributeName="stopOpacity" values="0.9;1;0.9" dur="2s" repeatCount="indefinite" /></stop>
+                              <stop offset="100%" stopColor="#d1fae5" stopOpacity={0.6}><animate attributeName="stopOpacity" values="0.6;0.8;0.6" dur="2s" repeatCount="indefinite" /></stop>
+                            </linearGradient>
+                            <linearGradient id="barNoCumplidoDesktop" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="#fda4af" stopOpacity={0.9}><animate attributeName="stopOpacity" values="0.9;1;0.9" dur="2s" repeatCount="indefinite" /></stop>
+                              <stop offset="100%" stopColor="#fecdd3" stopOpacity={0.6}><animate attributeName="stopOpacity" values="0.6;0.8;0.6" dur="2s" repeatCount="indefinite" /></stop>
+                            </linearGradient>
+                            <filter id="barGlowDesktop">
+                              <feGaussianBlur stdDeviation="4" result="coloredBlur" />
+                              <feMerge><feMergeNode in="coloredBlur" /><feMergeNode in="SourceGraphic" /></feMerge>
+                            </filter>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.3} />
+                          <XAxis dataKey="date" stroke="#9ca3af" fontSize={11} angle={-35} textAnchor="end" height={65} tick={{ fontWeight: 500 }} />
+                          <YAxis stroke="#9ca3af" fontSize={11} tickFormatter={(value) => `$${(value / 1000000).toFixed(1)}M`} tick={{ fontWeight: 400 }} />
+                          <Tooltip
+                            contentStyle={{ background: '#ffffff', border: '2px solid #e5e7eb', borderRadius: '14px', color: '#1e293b', padding: '14px 18px', boxShadow: '0 10px 30px rgba(0,0,0,0.12)', minWidth: '220px' }}
+                            labelStyle={{ color: '#64748b', fontSize: '12px', fontWeight: '700', marginBottom: '10px', paddingBottom: '8px', borderBottom: '1px solid #e5e7eb' }}
+                            labelFormatter={(label, payload) => { const data = payload?.[0]?.payload; return data?.fullDate || label; }}
+                            formatter={(value, name, props) => {
+                              const { ventas, presupuesto, cumplimiento } = props.payload;
+                              const diferencia = ventas - presupuesto;
+                              const cumplido = cumplimiento >= 100;
+                              return [<div key="info" style={{ fontSize: '13px' }}><div style={{ fontWeight: 'bold', color: '#0f172a', marginBottom: '6px' }}>💰 Venta: {formatCurrency(ventas)}</div><div style={{ fontWeight: 'bold', color: '#64748b', marginBottom: '8px' }}>🎯 Meta: {formatCurrency(presupuesto)}</div><div style={{ fontWeight: 'bold', color: cumplido ? '#059669' : '#dc2626', borderTop: '2px solid #e5e7eb', paddingTop: '8px', marginTop: '4px', fontSize: '14px' }}>{cumplido ? '✅ Cumplido' : '❌ No cumplido'}: {cumplimiento.toFixed(0)}%<div style={{ fontSize: '12px', marginTop: '4px', color: cumplido ? '#10b981' : '#ef4444' }}>Diferencia: {diferencia >= 0 ? '+' : ''}{formatCurrency(diferencia)}</div></div></div>, ''];
+                            }} />
+                          <Legend wrapperStyle={{ paddingTop: '16px' }} content={() =>
+                            <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', fontSize: '12px', fontWeight: '600' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: '12px', height: '12px', background: 'linear-gradient(to bottom, #a7f3d0, #d1fae5)', borderRadius: '3px' }}></div><span style={{ color: '#059669' }}>✅ Meta superada</span></div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: '12px', height: '12px', background: 'linear-gradient(to bottom, #fda4af, #fecdd3)', borderRadius: '3px' }}></div><span style={{ color: '#dc2626' }}>❌ Meta no alcanzada</span></div>
+                            </div>
+                          } />
+                          <ReferenceLine y={0} stroke="#9ca3af" strokeDasharray="3 3" strokeWidth={1} />
+                          <Bar dataKey={(data) => data.ventas - data.presupuesto} radius={[6, 6, 0, 0]} animationDuration={1200} animationEasing="ease-out" filter="url(#barGlowDesktop)">
+                            {budgetData.dailyTrendData.map((entry, index) =>
+                              <Cell key={`cell-${index}`} fill={entry.cumplimiento >= 100 ? 'url(#barCumplidoDesktop)' : 'url(#barNoCumplidoDesktop)'} />
+                            )}
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
                     </motion.div>
-                    Comparativa Semanal
-                  </h4>
-                </div>
-                <ResponsiveContainer width="100%" height={240}>
-                  <BarChart data={budgetData.weeklyData} margin={{ top: 10, right: 10, left: 0, bottom: 5 }}>
-                    <defs>
-                      <linearGradient id="barPresupuesto" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#a7f3d0" stopOpacity={0.7}><animate attributeName="stopOpacity" values="0.7;1;0.7" dur="2.5s" repeatCount="indefinite" /></stop>
-                        <stop offset="100%" stopColor="#d1fae5" stopOpacity={0.4}><animate attributeName="stopOpacity" values="0.4;0.6;0.4" dur="2.5s" repeatCount="indefinite" /></stop>
-                      </linearGradient>
-                      <linearGradient id="barVentas" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#fda4af" stopOpacity={0.7}><animate attributeName="stopOpacity" values="0.7;1;0.7" dur="2.5s" repeatCount="indefinite" /></stop>
-                        <stop offset="100%" stopColor="#fecdd3" stopOpacity={0.4}><animate attributeName="stopOpacity" values="0.4;0.6;0.4" dur="2.5s" repeatCount="indefinite" /></stop>
-                      </linearGradient>
-                      <filter id="barGlowWeekly">
-                        <feGaussianBlur stdDeviation="5" result="coloredBlur" />
-                        <feMerge><feMergeNode in="coloredBlur" /><feMergeNode in="SourceGraphic" /></feMerge>
-                      </filter>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#fecdd3" opacity={0.3} />
-                    <XAxis dataKey="semana" stroke="#9ca3af" fontSize={11} fontWeight={600} tick={{ fill: '#9ca3af' }} />
-                    <YAxis stroke="#9ca3af" fontSize={11} fontWeight={500} tickFormatter={(value) => {if (value >= 1000000) return `$${(value / 1000000).toFixed(1)}M`;if (value >= 1000) return `$${(value / 1000).toFixed(0)}K`;return `$${value.toLocaleString('es-CO')}`;}} tick={{ fill: '#9ca3af' }} />
-                    <Tooltip
-                        contentStyle={{ backgroundColor: '#fff', border: '2px solid #fda4af', borderRadius: '12px', color: '#0f172a', boxShadow: '0 8px 24px rgba(0,0,0,0.15)', padding: '12px 16px' }}
-                        labelStyle={{ color: '#64748b', fontSize: '12px', fontWeight: '700', marginBottom: '8px' }}
-                        formatter={(value, name) => [<span key={name} style={{ fontSize: '13px', fontWeight: 'bold', color: '#0f172a' }}>{formatCurrency(value)}</span>, name === 'presupuesto' ? '🎯 Meta' : '💰 Venta']} />
-                    <Legend wrapperStyle={{ paddingTop: '16px' }} content={() =>
-                      <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', fontSize: '11px', fontWeight: '600' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: '12px', height: '12px', background: 'linear-gradient(to bottom, #a7f3d0, #d1fae5)', borderRadius: '3px' }}></div><span style={{ color: '#059669' }}>🎯 Meta</span></div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: '12px', height: '12px', background: 'linear-gradient(to bottom, #fda4af, #fecdd3)', borderRadius: '3px' }}></div><span style={{ color: '#dc2626' }}>💰 Venta</span></div>
-                      </div>
-                      } />
-                    <Bar dataKey="presupuesto" fill="url(#barPresupuesto)" radius={[8, 8, 0, 0]} filter="url(#barGlowWeekly)" animationDuration={1200} animationEasing="ease-out" />
-                    <Bar dataKey="ventas" fill="url(#barVentas)" radius={[8, 8, 0, 0]} filter="url(#barGlowWeekly)" animationDuration={1500} animationEasing="ease-out" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </motion.div>
 
-              {/* Modal de métricas */}
-              <BudgetMetricsModal
-                  isOpen={isModalOpen}
-                  onClose={setIsModalOpen}
-                  selectedMetric={selectedMetric}
-                  budgetData={budgetData}
-                  activeBudget={activeBudget}
-                  dailySales={dailySales}
-                  formatCurrency={formatCurrency}
-                  gregorianMode={gregorianMode} />
-              </>
-              }
-          </AnimatePresence>
-          </>
+                    {/* Gráfico de Semanas */}
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="bg-gradient-to-br from-rose-50/30 via-pink-50/20 to-purple-50/20 rounded-2xl p-4 border-2 border-rose-200/30 shadow-lg">
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="font-black text-rose-900 flex items-center gap-2 text-base">
+                          <motion.div animate={{ rotate: [0, 5, -5, 0] }} transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}>
+                            <BarChart3 className="w-5 h-5 text-rose-400" />
+                          </motion.div>
+                          Comparativa Semanal
+                        </h4>
+                      </div>
+                      <ResponsiveContainer width="100%" height={240}>
+                        <BarChart data={budgetData.weeklyData} margin={{ top: 10, right: 10, left: 0, bottom: 5 }}>
+                          <defs>
+                            <linearGradient id="barPresupuesto" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="#a7f3d0" stopOpacity={0.7}><animate attributeName="stopOpacity" values="0.7;1;0.7" dur="2.5s" repeatCount="indefinite" /></stop>
+                              <stop offset="100%" stopColor="#d1fae5" stopOpacity={0.4}><animate attributeName="stopOpacity" values="0.4;0.6;0.4" dur="2.5s" repeatCount="indefinite" /></stop>
+                            </linearGradient>
+                            <linearGradient id="barVentas" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="#fda4af" stopOpacity={0.7}><animate attributeName="stopOpacity" values="0.7;1;0.7" dur="2.5s" repeatCount="indefinite" /></stop>
+                              <stop offset="100%" stopColor="#fecdd3" stopOpacity={0.4}><animate attributeName="stopOpacity" values="0.4;0.6;0.4" dur="2.5s" repeatCount="indefinite" /></stop>
+                            </linearGradient>
+                            <filter id="barGlowWeekly">
+                              <feGaussianBlur stdDeviation="5" result="coloredBlur" />
+                              <feMerge><feMergeNode in="coloredBlur" /><feMergeNode in="SourceGraphic" /></feMerge>
+                            </filter>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#fecdd3" opacity={0.3} />
+                          <XAxis dataKey="semana" stroke="#9ca3af" fontSize={11} fontWeight={600} tick={{ fill: '#9ca3af' }} />
+                          <YAxis stroke="#9ca3af" fontSize={11} fontWeight={500} tickFormatter={(value) => { if (value >= 1000000) return `$${(value / 1000000).toFixed(1)}M`; if (value >= 1000) return `$${(value / 1000).toFixed(0)}K`; return `$${value.toLocaleString('es-CO')}`; }} tick={{ fill: '#9ca3af' }} />
+                          <Tooltip
+                            contentStyle={{ backgroundColor: '#fff', border: '2px solid #fda4af', borderRadius: '12px', color: '#0f172a', boxShadow: '0 8px 24px rgba(0,0,0,0.15)', padding: '12px 16px' }}
+                            labelStyle={{ color: '#64748b', fontSize: '12px', fontWeight: '700', marginBottom: '8px' }}
+                            formatter={(value, name) => [<span key={name} style={{ fontSize: '13px', fontWeight: 'bold', color: '#0f172a' }}>{formatCurrency(value)}</span>, name === 'presupuesto' ? '🎯 Meta' : '💰 Venta']} />
+                          <Legend wrapperStyle={{ paddingTop: '16px' }} content={() =>
+                            <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', fontSize: '11px', fontWeight: '600' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: '12px', height: '12px', background: 'linear-gradient(to bottom, #a7f3d0, #d1fae5)', borderRadius: '3px' }}></div><span style={{ color: '#059669' }}>🎯 Meta</span></div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: '12px', height: '12px', background: 'linear-gradient(to bottom, #fda4af, #fecdd3)', borderRadius: '3px' }}></div><span style={{ color: '#dc2626' }}>💰 Venta</span></div>
+                            </div>
+                          } />
+                          <Bar dataKey="presupuesto" fill="url(#barPresupuesto)" radius={[8, 8, 0, 0]} filter="url(#barGlowWeekly)" animationDuration={1200} animationEasing="ease-out" />
+                          <Bar dataKey="ventas" fill="url(#barVentas)" radius={[8, 8, 0, 0]} filter="url(#barGlowWeekly)" animationDuration={1500} animationEasing="ease-out" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </motion.div>
+
+                    {/* Modal de métricas */}
+                    <BudgetMetricsModal
+                      isOpen={isModalOpen}
+                      onClose={setIsModalOpen}
+                      selectedMetric={selectedMetric}
+                      budgetData={budgetData}
+                      activeBudget={activeBudget}
+                      dailySales={dailySales}
+                      formatCurrency={formatCurrency}
+                      gregorianMode={gregorianMode} />
+                  </>
+                }
+              </AnimatePresence>
+            </>
           }
         </CardContent>
       </Card>
-    </motion.div>);
-
+    </motion.div>
+  );
 }
