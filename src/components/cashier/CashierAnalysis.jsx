@@ -207,25 +207,12 @@ INSTRUCCIONES:
     style: 'currency', currency: 'COP', maximumFractionDigits: 0, minimumFractionDigits: 0 
   }).format(Math.round(val));
 
-  if (trendData.length === 0) {
-    return (
-      <Card className="border-none shadow-lg">
-        <CardContent className="py-8 text-center text-gray-400">
-          <BarChart3 className="w-10 h-10 mx-auto mb-2 opacity-50" />
-          <p>Sin datos de turnos registrados</p>
-        </CardContent>
-      </Card>
-    );
-  }
-
   // Calcular eficiencia del cajero
   const efficiencyData = useMemo(() => {
     if (!trendData.length) return [];
-    
-    // Calcular eficiencia diaria (ventas / transacciones) como proxy de productividad
     return trendData.map(d => ({
       ...d,
-      eficiencia: d.transacciones > 0 ? Math.min(100, (d.ticketPromedio / 50000) * 100) : 0, // Normalizado a 100%
+      eficiencia: d.transacciones > 0 ? Math.min(100, (d.ticketPromedio / 50000) * 100) : 0,
     }));
   }, [trendData]);
 
@@ -240,8 +227,6 @@ INSTRUCCIONES:
         return false;
       }
     });
-    
-    // Agrupar por cajero
     const cashierGroups = {};
     allRecords.forEach(r => {
       if (!cashierGroups[r.cashier_id]) {
@@ -251,13 +236,10 @@ INSTRUCCIONES:
       cashierGroups[r.cashier_id].transactions += r.transactions || 0;
       cashierGroups[r.cashier_id].days += 1;
     });
-
-    // Calcular métricas para cada cajero
     const comparison = Object.entries(cashierGroups).map(([id, data]) => {
       const cashierInfo = allCashiers.find(c => c.id === id);
       const avgTicket = data.transactions > 0 ? data.sales / data.transactions : 0;
       const avgDaily = data.days > 0 ? data.sales / data.days : 0;
-      
       return {
         id,
         name: cashierInfo?.name?.split(' ')[0] || 'N/A',
@@ -268,9 +250,19 @@ INSTRUCCIONES:
         isCurrentCashier: id === cashierId
       };
     }).sort((a, b) => b.sales - a.sales);
-
     return comparison;
   }, [shiftRecords, allCashiers, cashierId]);
+
+  if (trendData.length === 0) {
+    return (
+      <Card className="border-none shadow-lg">
+        <CardContent className="py-8 text-center text-gray-400">
+          <BarChart3 className="w-10 h-10 mx-auto mb-2 opacity-50" />
+          <p>Sin datos de turnos registrados</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   // Posición del cajero actual
   const currentPosition = cashierComparison.findIndex(c => c.isCurrentCashier) + 1;

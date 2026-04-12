@@ -112,7 +112,11 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
     const yesterday = new Date(now);
     yesterday.setDate(yesterday.getDate() - 1);
     const daysUntilYesterday = eachDayOfInterval({ start: monthStart, end: yesterday });
-    const budgetUntilYesterday = daysUntilYesterday.reduce((sum, day) => sum + getDailyBudget(day), 0);
+    const budgetUntilYesterday = daysUntilYesterday.reduce((sum, day) => {
+      const dayStr = format(day, 'yyyy-MM-dd');
+      const excelRec = dailyBudgets?.find((db) => (db.date?.split('T')[0] || db.date) === dayStr);
+      return sum + (excelRec?.budget_amount > 0 ? excelRec.budget_amount : getDailyBudget(day));
+    }, 0);
     const accumulatedGap = budgetUntilYesterday - salesUntilYesterday;
     const remainingDays = eachDayOfInterval({ start: now, end: monthEnd }).length;
     const remainingBudget = adjustedMonthlyBudget - salesUntilYesterday - todayActualSales;
@@ -320,16 +324,22 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                   <p className="text-sm lg:text-base text-white/90 mb-3 lg:mb-2 font-semibold">
                     {budgetData.selectedSingleDay && budgetData.selectedSingleDay !== format(new Date(), 'yyyy-MM-dd')
                       ? `PPT — ${format(new Date(budgetData.selectedSingleDay + 'T12:00:00'), 'dd MMM', { locale: es })}`
-                      : `PPT del Día`}
+                      : budgetData.accumulatedGap > 0 ? `PPT del Día + Recuperación` : `PPT del Día`}
                   </p>
                   <motion.p
-                      key={`${budgetData.excelBudgetForToday}-${gregorianMode}`}
+                      key={`${budgetData.adjustedDailyBudget}-${gregorianMode}`}
                       initial={{ scale: 1.2, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
                       className="text-2xl md:text-3xl lg:text-5xl font-black text-white leading-none mb-2">
-                    {formatCurrency(budgetData.excelBudgetForToday)}
+                    {formatCurrency(budgetData.adjustedDailyBudget)}
                   </motion.p>
-                  <div className="space-y-1" />
+                  <div className="space-y-1">
+                    {budgetData.gapRecoveryIncrement > 0 && budgetData.excelBudgetForToday > 0 &&
+                      <p className="text-xs text-white/70">
+                        Excel: {formatCurrency(budgetData.excelBudgetForToday)} + {formatCurrency(budgetData.gapRecoveryIncrement)} ({(budgetData.gapRecoveryIncrement / budgetData.excelBudgetForToday * 100).toFixed(1)}% recuperación)
+                      </p>
+                    }
+                  </div>
 
                   {/* Sparkline debajo del número */}
                   {budgetData.last7DaysSales?.length > 0 &&
@@ -366,13 +376,8 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
 
                 {/* Panel derecho: Brecha del Mes */}
                 {(() => {
-                    // Brecha = ventas acumuladas - presupuesto acumulado (positivo = superando, negativo = por debajo)
-                    const realGap = budgetData.salesUntilYesterday > 0 
-                      ? budgetData.salesUntilYesterday - budgetData.budgetUntilYesterday 
-                      : 0;
-                    const monthGap = activeBudget?.sales_gap !== undefined && activeBudget?.sales_gap !== null
-                      ? activeBudget.sales_gap 
-                      : realGap;
+                    // Brecha acumulada = ventas reales vs presupuesto diario Excel (se acumula día a día)
+                    const monthGap = budgetData.salesUntilYesterday - budgetData.budgetUntilYesterday;
                     return (
                       <div className="text-right">
                         <p className="text-sm lg:text-base text-white/90 mb-3 lg:mb-2 font-semibold">Brecha del Mes</p>

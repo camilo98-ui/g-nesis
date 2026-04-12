@@ -119,6 +119,7 @@ export default function MascotCone({ storeId, isOpen, onToggle }) {
     
     try {
       const formatCurrency = (v) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(v);
+      const now = new Date();
       
       const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
       const projectedSales = analysis.daysWorked > 0 ? (analysis.totals.sales / analysis.daysWorked) * daysInMonth : 0;

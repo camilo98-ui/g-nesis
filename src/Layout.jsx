@@ -4,7 +4,7 @@ import { createPageUrl } from '@/utils';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { DateFilterProvider, useDateFilter } from '@/components/DateFilterContext';
 import { base44 } from '@/api/base44Client';
-import { Calendar } from 'lucide-react';
+import { Calendar, CalendarDays } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";

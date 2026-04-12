@@ -1920,11 +1920,6 @@ export default function Dashboard() {
             }
             </AnimatePresence>
 
-
-
-
-          }
-
             {/* Resumen Ejecutivo */}
             <motion.div
             initial={{ opacity: 0, y: 20 }}

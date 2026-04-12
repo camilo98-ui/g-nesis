@@ -639,6 +639,40 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
     return `${format(dateRange.from, 'dd/MM')} - ${format(dateRange.to, 'dd/MM')}`;
   };
 
+  // Calcular métricas financieras clave
+  const financialMetrics = useMemo(() => {
+    if (!stats || !chartData.length) return null;
+
+    const withSales = chartData.filter(d => d.sales > 0 && !d.isForecast);
+    const rainyDays = withSales.filter(d => d.weatherType === 'rainy');
+    const sunnyDays = withSales.filter(d => d.weatherType === 'sunny');
+
+    const rainyLoss = rainyDays.reduce((sum, d) => {
+      const expected = stats.avgTotal;
+      const diff = d.sales - expected;
+      return diff < 0 ? sum + Math.abs(diff) : sum;
+    }, 0);
+
+    const sunnyGain = sunnyDays.reduce((sum, d) => {
+      const expected = stats.avgTotal;
+      const diff = d.sales - expected;
+      return diff > 0 ? sum + diff : sum;
+    }, 0);
+
+    const netImpact = sunnyGain - rainyLoss;
+
+    const forecastDays = chartData.filter(d => d.isForecast).slice(0, 7);
+    const forecastTotal = forecastDays.length > 0 ? forecastDays.reduce((s, d) => s + d.sales, 0) : 0;
+    const forecastAvg = forecastDays.length > 0 ? forecastTotal / forecastDays.length : 0;
+    const forecastVariation = stats.avgTotal > 0 && forecastAvg > 0 ? ((forecastAvg - stats.avgTotal) / stats.avgTotal * 100) : 0;
+
+    const rainyForecast = forecastDays.filter(d => d.weatherType === 'rainy').length;
+    const estimatedLoss = rainyForecast * (stats.avgTotal - stats.avgRainy);
+    const riskLevel = estimatedLoss > stats.avgTotal * 0.5 ? 'alto' : estimatedLoss > stats.avgTotal * 0.2 ? 'medio' : 'bajo';
+
+    return { netImpact, rainyLoss, sunnyGain, forecastTotal, forecastVariation, riskLevel, estimatedLoss, rainyForecast };
+  }, [stats, chartData]);
+
   if (!chartData.length) {
     return (
       <div className="bg-slate-900 rounded-3xl p-12 text-center">
@@ -655,52 +689,6 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
       ...d,
       sales: d.weatherType === viewMode ? d.sales : 0
     }));
-
-  // Calcular métricas financieras clave
-  const financialMetrics = useMemo(() => {
-    if (!stats || !chartData.length) return null;
-
-    const withSales = chartData.filter(d => d.sales > 0 && !d.isForecast);
-    const rainyDays = withSales.filter(d => d.weatherType === 'rainy');
-    const sunnyDays = withSales.filter(d => d.weatherType === 'sunny');
-
-    // Impacto neto en pesos
-    const rainyLoss = rainyDays.reduce((sum, d) => {
-      const expected = stats.avgTotal;
-      const diff = d.sales - expected;
-      return diff < 0 ? sum + Math.abs(diff) : sum;
-    }, 0);
-
-    const sunnyGain = sunnyDays.reduce((sum, d) => {
-      const expected = stats.avgTotal;
-      const diff = d.sales - expected;
-      return diff > 0 ? sum + diff : sum;
-    }, 0);
-
-    const netImpact = sunnyGain - rainyLoss;
-
-    // Proyección 7 días
-    const forecastDays = chartData.filter(d => d.isForecast).slice(0, 7);
-    const forecastTotal = forecastDays.length > 0 ? forecastDays.reduce((s, d) => s + d.sales, 0) : 0;
-    const forecastAvg = forecastDays.length > 0 ? forecastTotal / forecastDays.length : 0;
-    const forecastVariation = stats.avgTotal > 0 && forecastAvg > 0 ? ((forecastAvg - stats.avgTotal) / stats.avgTotal * 100) : 0;
-
-    // Riesgo climático
-    const rainyForecast = forecastDays.filter(d => d.weatherType === 'rainy').length;
-    const estimatedLoss = rainyForecast * (stats.avgTotal - stats.avgRainy);
-    const riskLevel = estimatedLoss > stats.avgTotal * 0.5 ? 'alto' : estimatedLoss > stats.avgTotal * 0.2 ? 'medio' : 'bajo';
-
-    return {
-      netImpact,
-      rainyLoss,
-      sunnyGain,
-      forecastTotal,
-      forecastVariation,
-      riskLevel,
-      estimatedLoss,
-      rainyForecast
-    };
-  }, [stats, chartData]);
 
   return (
     <div className="space-y-5">

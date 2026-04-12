@@ -40,7 +40,7 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
     queryFn: () => base44.entities.Cashier.filter({ store_id: storeId, is_active: true }),
     enabled: !!storeId,
     staleTime: 0,
-    cacheTime: 0,
+    gcTime: 0,
     refetchOnMount: 'always',
     refetchOnWindowFocus: true
   });
@@ -83,6 +83,13 @@ export default function ShiftRecordForm({ storeId, onSuccess }) {
       }));
     } else {
       setEditingRecord(null);
+      setFormData(prev => ({
+        ...prev,
+        sales: '',
+        tickets: '',
+        transactions: '',
+        suggested_sales: ''
+      }));
     }
   }, [existingRecords, formData.cashier_id, formData.date, formData.shift]);
 
