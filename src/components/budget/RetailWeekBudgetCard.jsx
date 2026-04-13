@@ -134,13 +134,19 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
     const effectiveGap = manualGap !== null ? manualGap : -accumulatedGap;
     const salesGap = effectiveGap;
 
-    // Incremento dinámico según brecha acumulada
-    const gapRatioVsMonthly = adjustedMonthlyBudget > 0 ? accumulatedGap / adjustedMonthlyBudget : 0;
-    let incrementPct = 0;
-    if (gapRatioVsMonthly > 0.05) incrementPct = 10;
-    else if (gapRatioVsMonthly > 0) incrementPct = 5;
-    const adjustedDailyBudget = excelBudgetForToday * (1 + incrementPct / 100);
-    const gapRecoveryIncrement = adjustedDailyBudget - excelBudgetForToday;
+    // Distribución inteligente de la brecha acumulada:
+    // Se reparte la brecha entre los días restantes, pero ponderada por el
+    // peso histórico del día (días de alta venta absorben más recuperación).
+    const targetDay = selectedSingleDay ? new Date(selectedSingleDay + 'T12:00:00') : now;
+    const targetDayOfWeek = targetDay.getDay();
+    const todayWeight = weightByDayOfWeek[targetDayOfWeek] || (1 / 7);
+    // Factor multiplicador: cuánto más (o menos) vende este día vs el promedio
+    const dayMultiplier = todayWeight * 7; // 1.0 = promedio, >1 = día fuerte, <1 = día débil
+    const gapPerDay = accumulatedGap > 0 && remainingDays > 0 ? accumulatedGap / remainingDays : 0;
+    const recoveryToday = gapPerDay * dayMultiplier;
+    const adjustedDailyBudget = excelBudgetForToday + recoveryToday;
+    const gapRecoveryIncrement = recoveryToday;
+    const incrementPct = excelBudgetForToday > 0 ? Math.round(recoveryToday / excelBudgetForToday * 100) : 0;
 
     const currentWeekNumber = weeks.findIndex((w) => {
       const weekEnd = endOfWeek(w, { weekStartsOn: 1 });
