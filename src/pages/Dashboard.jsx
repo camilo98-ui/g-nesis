@@ -162,7 +162,7 @@ function MetricCard({ title, value, budget, icon: Icon, bgColor, iconBg, iconCol
 }
 
 // Panel de detalle con gráficas avanzadas
-function DetailPanel({ metric, data, onClose, chartData, formatCurrency, shiftData }) {
+function DetailPanel({ metric, data, onClose, chartData, formatCurrency, shiftData, gregorianTotal }) {
   // Calcular estadísticas avanzadas
   const stats = useMemo(() => {
     const values = chartData.map((d) => d[metric === 'sales' ? 'ventas' : metric] || 0);
@@ -171,8 +171,10 @@ function DetailPanel({ metric, data, onClose, chartData, formatCurrency, shiftDa
     const min = Math.min(...(nonZero.length ? nonZero : [0]));
     const avg = values.reduce((a, b) => a + b, 0) / Math.max(values.length, 1);
     const trend = values.length > 1 ? (values[values.length - 1] - values[0]) / Math.max(values[0], 1) * 100 : 0;
+    // Para ventas: usar el total gregoriano del mes real, no el del rango filtrado
+    const total = values.reduce((a, b) => a + b, 0);
 
-    return { max, min, avg, trend, total: values.reduce((a, b) => a + b, 0) };
+    return { max, min, avg, trend, total };
   }, [chartData, metric]);
 
   // Datos para gráfica de distribución por turno
@@ -241,10 +243,10 @@ function DetailPanel({ metric, data, onClose, chartData, formatCurrency, shiftDa
                 <p className="text-xs text-gray-500 mt-2">Diario en período</p>
               </motion.div>
               <motion.div whileHover={{ scale: 1.03 }} className="bg-gradient-to-br from-blue-50 to-cyan-100 rounded-xl p-5 text-center cursor-pointer">
-                <p className="text-sm text-gray-600 mb-2 font-semibold">📊 Total</p>
-                <p className="text-xl md:text-2xl font-black text-blue-600 mb-1">{formatCurrency(stats.total)}</p>
-                <p className="text-xs text-gray-500 mt-2">Suma del período</p>
-              </motion.div>
+                 <p className="text-sm text-gray-600 mb-2 font-semibold">📊 Total Mes</p>
+                 <p className="text-xl md:text-2xl font-black text-blue-600 mb-1">{formatCurrency(gregorianTotal ?? stats.total)}</p>
+                 <p className="text-xs text-gray-500 mt-2">Acumulado mes actual</p>
+               </motion.div>
               <motion.div whileHover={{ scale: 1.03 }} className={`rounded-xl p-5 text-center cursor-pointer ${stats.trend >= 0 ? 'bg-gradient-to-br from-emerald-50 to-green-100' : 'bg-gradient-to-br from-red-50 to-rose-100'}`}>
                 <p className="text-sm text-gray-600 mb-2 font-semibold">{stats.trend >= 0 ? '📈' : '📉'} Crecimiento</p>
                 <p className={`text-xl md:text-2xl font-black ${stats.trend >= 0 ? 'text-green-600' : 'text-red-600'} mb-1`}>{stats.trend > 0 ? '+' : ''}{stats.trend.toFixed(1)}%</p>
@@ -1442,15 +1444,16 @@ export default function Dashboard() {
               {activeMetric && !activeMetric.includes('_comp') &&
             <div id="detail-panel">
                   <DetailPanel
-                metric={activeMetric}
-                data={totals}
-                chartData={chartData.map((d) => ({
-                  ...d,
-                  avgTicket: d.tickets > 0 ? d.ventas / d.tickets : 0
-                }))}
-                onClose={() => setActiveMetric(null)}
-                formatCurrency={formatCurrency}
-                shiftData={shiftRecords} />
+                  metric={activeMetric}
+                  data={totals}
+                  chartData={chartData.map((d) => ({
+                   ...d,
+                   avgTicket: d.tickets > 0 ? d.ventas / d.tickets : 0
+                  }))}
+                  onClose={() => setActiveMetric(null)}
+                  formatCurrency={formatCurrency}
+                  shiftData={shiftRecords}
+                  gregorianTotal={activeMetric === 'sales' ? gregorianMonthTotals.sales : undefined} />
 
                 </div>
             }
