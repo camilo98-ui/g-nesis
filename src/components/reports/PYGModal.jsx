@@ -87,11 +87,8 @@ export default function PYGModal({ onClose, storeId }) {
     queryFn: async () => {
       if (!storeCode) return [];
       const all = await base44.entities.PYGReport.filter({ year: currentYear });
-      const cleanInput = storeCode.toUpperCase().trim().replace(/\s+/g, ' ');
-      return all.filter(r => {
-        const rCode = String(r.store_code || '').toUpperCase().trim().replace(/\s+/g, ' ');
-        return rCode === cleanInput || rCode.replace(/\s/g, '') === cleanInput.replace(/\s/g, '');
-      });
+      const normalizedSearch = normalizeStoreCode(storeCode);
+      return all.filter(r => normalizeStoreCode(r.store_code) === normalizedSearch);
     },
     enabled: !!storeCode,
   });
@@ -142,7 +139,7 @@ export default function PYGModal({ onClose, storeId }) {
         Gastos: pctNum(rec.gastos_pct_venta),
       };
     }).filter(Boolean),
-    [allRecords]
+    [filteredByStore]
   );
 
   const gasteosData = useMemo(() => {
