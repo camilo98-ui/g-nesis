@@ -18,8 +18,10 @@ function extractStoreCode(headerStr) {
 }
 
 // Parsear el Excel de agregadores
-// Formato: fila 0 = encabezado de tiendas (BTA 21...), fila 1 = sub-encabezado (% Part. | Venta)
-// Por cada tienda hay DOS columnas: participación y venta bruta
+// Estructura esperada:
+//   Fila 0: [PdV / Canal, BTA 21, BTA 21, BTA 52, BTA 52, ...] ← tienda repetida 2 veces
+//   Fila 1: [Canal,       % Part., Venta,  % Part., Venta, ...]  ← sub-encabezado
+//   Fila 2+: datos
 function parseAggregatorsExcel(XLSX, arrayBuffer) {
   const workbook = XLSX.read(arrayBuffer, { type: 'array' });
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
@@ -27,37 +29,57 @@ function parseAggregatorsExcel(XLSX, arrayBuffer) {
 
   if (jsonRows.length < 2) return [];
 
-  const headerRow = jsonRows[0]; // Row 0: PdV, BTA 21..., BTA 21..., BTA 52..., BTA 52..., ...
+  const headerRow = jsonRows[0];
 
-  // Detectar si hay sub-fila con "% Part." y "Venta"
-  const subRow = jsonRows[1];
-  const hasSubHeader = subRow && typeof subRow[1] === 'string' &&
-    (String(subRow[1]).toLowerCase().includes('part') || String(subRow[1]).toLowerCase().includes('venta') || String(subRow[1]).toLowerCase().includes('%'));
+  // Detectar si la fila 1 es un sub-encabezado (contiene "part" o "venta" o "%")
+  const subRow = jsonRows[1] || [];
+  const isSubHeader = (val) => {
+    if (!val) return false;
+    const s = String(val).toLowerCase();
+    return s.includes('part') || s.includes('venta') || s.includes('%') || s.includes('bruta');
+  };
+  const hasSubHeader = subRow.slice(1).some(v => isSubHeader(v));
   const dataStartRow = hasSubHeader ? 2 : 1;
 
-  // Mapear columnas: por cada tienda detectada, guardar colPart y colVenta
-  // Cada tienda ocupa DOS columnas consecutivas: [part, venta]
-  const storeGroups = []; // { storeCode, colPart, colVenta }
+  // Construir mapa de columnas usando el sub-encabezado para distinguir % vs venta
+  // storeGroups: { storeCode, colPart, colVenta }
+  const storeGroups = [];
   let lastCode = null;
-  let lastCol = null;
 
   for (let col = 1; col < headerRow.length; col++) {
     const code = extractStoreCode(headerRow[col]);
+    const subLabel = String(subRow[col] || '').toLowerCase();
+    const isPartCol = subLabel.includes('part') || subLabel.includes('%') || subLabel === '';
+    const isVentaCol = subLabel.includes('venta') || subLabel.includes('bruta');
+
     if (code) {
-      if (code === lastCode) {
-        // Segunda columna de la misma tienda → es la venta
+      // Columna con código de tienda → siempre es la columna de participación
+      storeGroups.push({ storeCode: code, colPart: col, colVenta: null });
+      lastCode = code;
+    } else if (lastCode && storeGroups.length > 0) {
+      // Columna sin código justo después de una tienda → es la columna de venta
+      const last = storeGroups[storeGroups.length - 1];
+      if (last.colVenta === null) {
+        last.colVenta = col;
+      }
+      lastCode = null;
+    }
+  }
+
+  // Fallback: si no hay sub-encabezado y las tiendas se repiten en headerRow
+  // la segunda aparición del mismo código indica la columna de venta
+  if (!hasSubHeader) {
+    const seen = {};
+    for (let col = 1; col < headerRow.length; col++) {
+      const code = extractStoreCode(headerRow[col]);
+      if (!code) continue;
+      if (!seen[code]) {
+        seen[code] = col;
+      } else {
+        // Segunda vez que aparece → columna de venta
         const existing = storeGroups.find(g => g.storeCode === code && g.colVenta === null);
         if (existing) existing.colVenta = col;
-      } else {
-        // Nueva tienda
-        storeGroups.push({ storeCode: code, colPart: col, colVenta: null });
-        lastCode = code;
       }
-    } else if (lastCode && storeGroups.length > 0) {
-      // Columna sin código de tienda justo después de una tienda → puede ser la columna de venta
-      const last = storeGroups[storeGroups.length - 1];
-      if (last.colVenta === null) last.colVenta = col;
-      lastCode = null;
     }
   }
 
@@ -81,15 +103,18 @@ function parseAggregatorsExcel(XLSX, arrayBuffer) {
     if (!channel) continue;
 
     for (const { storeCode, colPart, colVenta } of storeGroups) {
-      const participation = parseNum(rowData[colPart]);
-      const total_sales = colVenta !== null ? parseNum(rowData[colVenta]) : null;
-      if (participation === null) continue;
+      const rawPart = parseNum(rowData[colPart]);
+      const rawVenta = colVenta !== null ? parseNum(rowData[colVenta]) : null;
+      if (rawPart === null) continue;
+
+      // Normalizar participación: si viene como 94.5 → 0.945, si viene como 0.945 → 0.945
+      const participation = rawPart > 1 ? rawPart / 100 : rawPart;
 
       records.push({
         store_code: storeCode,
         channel,
-        participation, // 0-1 e.g. 0.94
-        total_sales: total_sales || 0,
+        participation,            // siempre 0-1
+        total_sales: rawVenta || 0,
         report_id: reportId,
         uploaded_at: uploadedAt,
       });

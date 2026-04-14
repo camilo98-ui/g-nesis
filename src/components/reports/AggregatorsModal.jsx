@@ -47,11 +47,9 @@ export default function AggregatorsModal({ onClose, storeId }) {
     .filter(r => r.participation > 0)
     .sort((a, b) => b.participation - a.participation);
 
-  // Detectar si los valores están como 0-1 o como 0-100
-  const maxPart = Math.max(...channels.map(c => c.participation), 0);
-  const isDecimal = maxPart <= 1;
-
-  const toPct = (v) => isDecimal ? v * 100 : v;
+  // Normalizar participación a 0-100 para mostrar
+  // Si el valor es <= 1 asumimos decimal (0.94), si es > 1 asumimos porcentaje (94)
+  const toPct = (v) => v <= 1 ? v * 100 : v;
   const totalPct = channels.reduce((s, r) => s + toPct(r.participation), 0);
 
   return (
