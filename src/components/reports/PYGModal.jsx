@@ -18,13 +18,24 @@ const MONTHS_FULL  = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','
 const pctNum = (v) => v != null ? parseFloat((v * 100).toFixed(2)) : null;
 const fmt = (v) => v != null ? `${pctNum(v).toFixed(1)}%` : '—';
 
+// Normalizar código de tienda para comparación consistente
+function normalizeStoreCode(code) {
+  if (!code) return '';
+  return String(code)
+    .toUpperCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // quitar tildes
+    .replace(/\s+/g, ' ')             // espacios múltiples a uno
+    .trim();
+}
+
 function extractStoreCode(storeId) {
   if (!storeId) return null;
-  const upper = String(storeId).toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  const bta = upper.match(/\bBTA\s*(\d+)/);  if (bta) return `BTA ${bta[1]}`;
-  const tunja = upper.match(/\bTUNJA\s*(\d+)/); if (tunja) return `TUNJA ${tunja[1]}`;
-  const bog = upper.match(/\bBOGOTA\s*(\d+)/); if (bog) return `BOGOTA ${bog[1]}`;
-  return String(storeId).toUpperCase().trim();
+  const norm = normalizeStoreCode(storeId);
+  const bta = norm.match(/^BTA\s*(\d+)/);  if (bta) return `BTA ${bta[1]}`;
+  const tunja = norm.match(/^TUNJA\s*(\d+)/); if (tunja) return `TUNJA ${tunja[1]}`;
+  const bog = norm.match(/^BOGOTA\s*(\d+)/); if (bog) return `BOGOTA ${bog[1]}`;
+  return norm;
 }
 
 const ChartTooltip = ({ active, payload, label }) => {
@@ -94,14 +105,17 @@ export default function PYGModal({ onClose, storeId }) {
   const [selectedMonths, setSelectedMonths] = useState(() => [lastMonthWithData || 1]);
   const [monthDropdownOpen, setMonthDropdownOpen] = useState(false);
 
-  // Obtener lista de tiendas disponibles
+  // Obtener lista de tiendas disponibles (normalizadas)
   const availableStores = useMemo(() => {
     const stores = new Set();
-    allRecords.forEach(r => stores.add(String(r.store_code || '').trim()));
+    allRecords.forEach(r => {
+      const normalized = normalizeStoreCode(r.store_code);
+      if (normalized) stores.add(normalized);
+    });
     return Array.from(stores).sort();
   }, [allRecords]);
 
-  const filteredByStore = allRecords.filter(r => String(r.store_code || '').trim() === selectedStore);
+  const filteredByStore = allRecords.filter(r => normalizeStoreCode(r.store_code) === selectedStore);
   const primaryMonth = selectedMonths[selectedMonths.length - 1];
   const primaryRecord = filteredByStore.find(r => r.month === primaryMonth) || null;
   const prevMonth = primaryMonth > 1 ? primaryMonth - 1 : null;
