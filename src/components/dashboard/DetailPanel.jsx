@@ -87,33 +87,7 @@ export default function DetailPanel({ metric, data, onClose, chartData, formatCu
                 <p className="text-xs text-gray-500 mt-2">vs inicio período</p>
               </motion.div>
             </div>
-            {shiftDistribution.length > 0 &&
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h4 className="font-semibold text-gray-700 mb-3">🕐 Distribución por Turno</h4>
-                  <div className="h-48 bg-white rounded-xl p-2">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie data={shiftDistribution} cx="50%" cy="50%" innerRadius={40} outerRadius={70} paddingAngle={5} dataKey="value">
-                          {shiftDistribution.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.fill} />)}
-                        </Pie>
-                        <Tooltip formatter={(v) => formatCurrency(v)} />
-                        <Legend />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <h4 className="font-semibold text-gray-700">💡 Insights</h4>
-                  {shiftDistribution.map((shift, i) =>
-                    <div key={i} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <span className="text-sm">{shift.name}</span>
-                      <span className="font-bold text-gray-700">{(shift.value / stats.total * 100).toFixed(0)}%</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            }
+
           </div>
         );
 
