@@ -20,13 +20,16 @@ function getColor(channel) {
 
 function extractStoreCode(storeId) {
   if (!storeId) return null;
-  const upper = String(storeId).toUpperCase();
-  const bta = upper.match(/(BTA\s*\d+)/);
-  if (bta) return bta[1].replace(/\s+/, ' ');
-  const tunja = upper.match(/(TUNJA\s*\d+)/);
-  if (tunja) return tunja[1].replace(/\s+/, ' ');
-  const bogota = upper.match(/(BOGOTA\s*\d+)/);
-  if (bogota) return bogota[1].replace(/\s+/, ' ');
+  const upper = String(storeId).toUpperCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const bta = upper.match(/\bBTA\s*(\d+)/);
+  if (bta) return `BTA ${bta[1]}`;
+  const tunja = upper.match(/\bTUNJA\s*(\d+)/);
+  if (tunja) return `TUNJA ${tunja[1]}`;
+  const bogota = upper.match(/\bBOGOTA\s*(\d+)/);
+  if (bogota) return `BOGOTA ${bogota[1]}`;
+  const bog = upper.match(/\bBOG\s*(\d+)/);
+  if (bog) return `BOGOTA ${bog[1]}`;
   return null;
 }
 

@@ -4,16 +4,21 @@ import { base44 } from '@/api/base44Client';
 import { Upload, X, CheckCircle, AlertCircle, Loader2, Truck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-// Extraer código de tienda desde encabezados del Excel (e.g. "BTA 21 (CC CENTRO CHIA)." → "BTA 21")
+// Extraer código de tienda desde encabezados del Excel
+// Soporta: "BTA 21", "BOGOTA 66", "Bogotá 66", "BTA21", etc.
 function extractStoreCode(headerStr) {
   if (!headerStr) return null;
-  const str = String(headerStr).toUpperCase().trim();
-  const btaMatch = str.match(/BTA\s*(\d+)/);
+  const str = String(headerStr).toUpperCase().trim()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, ''); // quitar tildes
+  const btaMatch = str.match(/\bBTA\s*(\d+)/);
   if (btaMatch) return `BTA ${btaMatch[1]}`;
-  const tunjaMatch = str.match(/TUNJA\s*(\d+)/);
+  const tunjaMatch = str.match(/\bTUNJA\s*(\d+)/);
   if (tunjaMatch) return `TUNJA ${tunjaMatch[1]}`;
-  const bogotaMatch = str.match(/BOGOTA\s*(\d+)/);
+  // BOGOTA / BOG / BOGOTA con o sin tilde
+  const bogotaMatch = str.match(/\bBOGOTA\s*(\d+)/);
   if (bogotaMatch) return `BOGOTA ${bogotaMatch[1]}`;
+  const bogMatch = str.match(/\bBOG\s*(\d+)/);
+  if (bogMatch) return `BOGOTA ${bogMatch[1]}`;
   return null;
 }
 
@@ -150,8 +155,14 @@ export default function AggregatorsUploader({ onClose, onSuccess }) {
       const records = parseAggregatorsExcel(XLSX, e.target.result);
 
       if (records.length === 0) {
+        // Debug: mostrar qué encabezados encontró
+        const XLSX2 = await import('xlsx');
+        const wb = XLSX2.read(e.target.result, { type: 'array' });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const rows = XLSX2.utils.sheet_to_json(ws, { header: 1, defval: null });
+        const headers = (rows[0] || []).filter(Boolean).join(' | ');
         setStatus('error');
-        setMessage('No se encontraron datos válidos. El archivo debe tener: columna "PdV" con canales, y columnas por tienda con códigos BTA/TUNJA.');
+        setMessage(`No se detectaron tiendas. Encabezados encontrados: ${headers}`);
         return;
       }
 
@@ -174,8 +185,9 @@ export default function AggregatorsUploader({ onClose, onSuccess }) {
           setProgress({ current: inserted, total: records.length });
         }
 
+        const storesDetected = [...new Set(records.map(r => r.store_code))];
         setStatus('success');
-        setMessage(`✅ ${inserted} registros de ${[...new Set(records.map(r => r.store_code))].length} tiendas cargados.`);
+        setMessage(`✅ ${inserted} registros · Tiendas: ${storesDetected.join(', ')}`);
         onSuccess?.();
       } catch (err) {
         setStatus('error');
