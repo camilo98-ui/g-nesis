@@ -3,10 +3,14 @@ import { motion } from 'framer-motion';
 import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, Lightbulb } from 'lucide-react';
 
 export default function ChartInsight({ data, metric, formatCurrency, comparisonData = null }) {
-  // Siempre formatear como pesos COP colombianos completos
+  // Si la métrica es transacciones o sugeridos → número simple, si no → pesos COP
+  const isCurrency = !['transactions', 'suggested', 'tickets'].includes(metric);
   const fmt = (val) => {
-    if (!val && val !== 0) return '$0';
-    return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(Math.round(val));
+    if (!val && val !== 0) return isCurrency ? '$0' : '0';
+    if (isCurrency) {
+      return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(Math.round(val));
+    }
+    return Math.round(val).toLocaleString('es-CO') + ' tcs';
   };
 
   const insight = useMemo(() => {
