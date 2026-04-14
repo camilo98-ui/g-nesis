@@ -94,10 +94,18 @@ export default function PYGModal({ onClose, storeId }) {
   const [selectedMonths, setSelectedMonths] = useState(() => [lastMonthWithData || 1]);
   const [monthDropdownOpen, setMonthDropdownOpen] = useState(false);
 
+  // Obtener lista de tiendas disponibles
+  const availableStores = useMemo(() => {
+    const stores = new Set();
+    allRecords.forEach(r => stores.add(String(r.store_code || '').trim()));
+    return Array.from(stores).sort();
+  }, [allRecords]);
+
+  const filteredByStore = allRecords.filter(r => String(r.store_code || '').trim() === selectedStore);
   const primaryMonth = selectedMonths[selectedMonths.length - 1];
-  const primaryRecord = allRecords.find(r => r.month === primaryMonth) || null;
+  const primaryRecord = filteredByStore.find(r => r.month === primaryMonth) || null;
   const prevMonth = primaryMonth > 1 ? primaryMonth - 1 : null;
-  const prevRecord = prevMonth ? allRecords.find(r => r.month === prevMonth) : null;
+  const prevRecord = prevMonth ? filteredByStore.find(r => r.month === prevMonth) : null;
 
   const toggleMonth = (m) => {
     setSelectedMonths(prev =>
@@ -109,7 +117,7 @@ export default function PYGModal({ onClose, storeId }) {
 
   const trendData = useMemo(() =>
     MONTHS_SHORT.map((m, i) => {
-      const rec = allRecords.find(r => r.month === i + 1);
+      const rec = filteredByStore.find(r => r.month === i + 1);
       if (!rec) return null;
       return {
         mes: m, month: i + 1,
@@ -169,6 +177,9 @@ export default function PYGModal({ onClose, storeId }) {
     return insights;
   }, [primaryRecord]);
 
+  const [selectedStore, setSelectedStore] = useState(storeCode);
+  const [storeDropdownOpen, setStoreDropdownOpen] = useState(false);
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -186,7 +197,7 @@ export default function PYGModal({ onClose, storeId }) {
               </div>
               <div>
                 <h1 className="font-black text-2xl">P&G Dashboard</h1>
-                <p className="text-white/70 text-xs">{storeCode || 'Tienda'} · {selectedMonths.length === 1 ? MONTHS_FULL[primaryMonth - 1] : `Comparativo: ${selectedMonths.map(m => MONTHS_SHORT[m - 1]).join(' vs ')}`}</p>
+                <p className="text-white/70 text-xs">{selectedStore || 'Tienda'} · {selectedMonths.length === 1 ? MONTHS_FULL[primaryMonth - 1] : `Comparativo: ${selectedMonths.map(m => MONTHS_SHORT[m - 1]).join(' vs ')}`}</p>
               </div>
             </div>
             <button onClick={onClose} className="w-10 h-10 bg-white/15 hover:bg-white/30 rounded-xl flex items-center justify-center transition-colors">
@@ -194,39 +205,71 @@ export default function PYGModal({ onClose, storeId }) {
             </button>
           </div>
 
-          {/* Dropdown */}
-          <div className="relative inline-block">
-            <button
-              onClick={() => setMonthDropdownOpen(!monthDropdownOpen)}
-              className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2"
-            >
-              {selectedMonths.length === 1 ? '📅' : '📊'} {selectedMonths.map(m => MONTHS_SHORT[m - 1]).join(', ')}
-              <ChevronDown className={`w-4 h-4 transition-transform ${monthDropdownOpen ? 'rotate-180' : ''}`} />
-            </button>
-            {monthDropdownOpen && (
-              <div className="absolute top-full left-0 mt-2 bg-white rounded-xl shadow-2xl border border-pink-100 z-20 min-w-max p-3 grid grid-cols-3 gap-2">
-                {MONTHS_SHORT.map((m, i) => {
-                  const hasData = allRecords.some(r => r.month === i + 1);
-                  const active = selectedMonths.includes(i + 1);
-                  return (
+          {/* Dropdown Tiendas y Meses */}
+          <div className="flex gap-2">
+            <div className="relative inline-block">
+              <button
+                onClick={() => setStoreDropdownOpen(!storeDropdownOpen)}
+                className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2"
+              >
+                🏪 {selectedStore || 'Selecciona tienda'}
+                <ChevronDown className={`w-4 h-4 transition-transform ${storeDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {storeDropdownOpen && (
+                <div className="absolute top-full left-0 mt-2 bg-white rounded-xl shadow-2xl border border-pink-100 z-20 min-w-max p-3 max-h-64 overflow-y-auto">
+                  {availableStores.map(store => (
                     <button
-                      key={i}
-                      onClick={() => hasData && toggleMonth(i + 1)}
-                      disabled={!hasData}
-                      className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${
-                        active
+                      key={store}
+                      onClick={() => {
+                        setSelectedStore(store);
+                        setStoreDropdownOpen(false);
+                      }}
+                      className={`block w-full text-left px-3 py-2 rounded-lg text-xs font-bold transition-all ${
+                        selectedStore === store
                           ? 'bg-pink-600 text-white shadow-md'
-                          : hasData
-                          ? 'bg-pink-50 text-slate-700 hover:bg-pink-100'
-                          : 'bg-slate-50 text-slate-300 cursor-not-allowed'
+                          : 'bg-pink-50 text-slate-700 hover:bg-pink-100'
                       }`}
                     >
-                      {m}
+                      {store}
                     </button>
-                  );
-                })}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="relative inline-block">
+              <button
+                onClick={() => setMonthDropdownOpen(!monthDropdownOpen)}
+                className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2"
+              >
+                {selectedMonths.length === 1 ? '📅' : '📊'} {selectedMonths.map(m => MONTHS_SHORT[m - 1]).join(', ')}
+                <ChevronDown className={`w-4 h-4 transition-transform ${monthDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {monthDropdownOpen && (
+                <div className="absolute top-full left-0 mt-2 bg-white rounded-xl shadow-2xl border border-pink-100 z-20 min-w-max p-3 grid grid-cols-3 gap-2">
+                  {MONTHS_SHORT.map((m, i) => {
+                    const hasData = allRecords.some(r => r.month === i + 1);
+                    const active = selectedMonths.includes(i + 1);
+                    return (
+                      <button
+                        key={i}
+                        onClick={() => hasData && toggleMonth(i + 1)}
+                        disabled={!hasData}
+                        className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${
+                          active
+                            ? 'bg-pink-600 text-white shadow-md'
+                            : hasData
+                            ? 'bg-pink-50 text-slate-700 hover:bg-pink-100'
+                            : 'bg-slate-50 text-slate-300 cursor-not-allowed'
+                        }`}
+                      >
+                        {m}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
