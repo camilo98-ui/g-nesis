@@ -19,71 +19,22 @@ function extractStoreCode(headerStr) {
 
 // Parsear el Excel de agregadores
 // Estructura esperada:
-//   Fila 0: [PdV / Canal, BTA 21, BTA 21, BTA 52, BTA 52, ...] ← tienda repetida 2 veces
+//   Fila 0: [PdV / Canal, BTA 21, BTA 21, BTA 52, BTA 52, ...] ← tienda repetida 2 veces por canal
 //   Fila 1: [Canal,       % Part., Venta,  % Part., Venta, ...]  ← sub-encabezado
 //   Fila 2+: datos
+//
+// Por cada tienda hay DOS columnas: la primera es % participación, la segunda es venta bruta.
+// Se combinan en un solo registro por tienda+canal.
 function parseAggregatorsExcel(XLSX, arrayBuffer) {
   const workbook = XLSX.read(arrayBuffer, { type: 'array' });
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
   const jsonRows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null });
 
-  if (jsonRows.length < 2) return [];
+  if (jsonRows.length < 3) return [];
 
-  const headerRow = jsonRows[0];
-
-  // Detectar si la fila 1 es un sub-encabezado (contiene "part" o "venta" o "%")
-  const subRow = jsonRows[1] || [];
-  const isSubHeader = (val) => {
-    if (!val) return false;
-    const s = String(val).toLowerCase();
-    return s.includes('part') || s.includes('venta') || s.includes('%') || s.includes('bruta');
-  };
-  const hasSubHeader = subRow.slice(1).some(v => isSubHeader(v));
-  const dataStartRow = hasSubHeader ? 2 : 1;
-
-  // Construir mapa de columnas usando el sub-encabezado para distinguir % vs venta
-  // storeGroups: { storeCode, colPart, colVenta }
-  const storeGroups = [];
-  let lastCode = null;
-
-  for (let col = 1; col < headerRow.length; col++) {
-    const code = extractStoreCode(headerRow[col]);
-    const subLabel = String(subRow[col] || '').toLowerCase();
-    const isPartCol = subLabel.includes('part') || subLabel.includes('%') || subLabel === '';
-    const isVentaCol = subLabel.includes('venta') || subLabel.includes('bruta');
-
-    if (code) {
-      // Columna con código de tienda → siempre es la columna de participación
-      storeGroups.push({ storeCode: code, colPart: col, colVenta: null });
-      lastCode = code;
-    } else if (lastCode && storeGroups.length > 0) {
-      // Columna sin código justo después de una tienda → es la columna de venta
-      const last = storeGroups[storeGroups.length - 1];
-      if (last.colVenta === null) {
-        last.colVenta = col;
-      }
-      lastCode = null;
-    }
-  }
-
-  // Fallback: si no hay sub-encabezado y las tiendas se repiten en headerRow
-  // la segunda aparición del mismo código indica la columna de venta
-  if (!hasSubHeader) {
-    const seen = {};
-    for (let col = 1; col < headerRow.length; col++) {
-      const code = extractStoreCode(headerRow[col]);
-      if (!code) continue;
-      if (!seen[code]) {
-        seen[code] = col;
-      } else {
-        // Segunda vez que aparece → columna de venta
-        const existing = storeGroups.find(g => g.storeCode === code && g.colVenta === null);
-        if (existing) existing.colVenta = col;
-      }
-    }
-  }
-
-  if (storeGroups.length === 0) return [];
+  const headerRow = jsonRows[0]; // fila con códigos de tienda
+  const subRow = jsonRows[1];    // fila con "% Part." / "Venta Bruta"
+  const dataStartRow = 2;
 
   const parseNum = (val) => {
     if (val === null || val === undefined || val === '') return null;
@@ -91,6 +42,52 @@ function parseAggregatorsExcel(XLSX, arrayBuffer) {
     const n = parseFloat(String(val).replace(/[^0-9.-]/g, ''));
     return isNaN(n) ? null : n;
   };
+
+  const isPartLabel = (val) => {
+    if (!val) return false;
+    const s = String(val).toLowerCase();
+    return s.includes('part') || s.includes('%');
+  };
+
+  const isVentaLabel = (val) => {
+    if (!val) return false;
+    const s = String(val).toLowerCase();
+    return s.includes('venta') || s.includes('bruta') || s.includes('gros') || s.includes('vta');
+  };
+
+  // Construir grupos: para cada tienda encontrar su colPart y colVenta
+  // El header repite el código de tienda dos veces (una por columna)
+  const storeGroups = {}; // { storeCode: { colPart, colVenta } }
+  
+  for (let col = 1; col < headerRow.length; col++) {
+    const code = extractStoreCode(headerRow[col]);
+    if (!code) continue;
+
+    const subLabel = subRow[col];
+    
+    if (!storeGroups[code]) {
+      storeGroups[code] = { colPart: null, colVenta: null };
+    }
+
+    if (isVentaLabel(subLabel)) {
+      storeGroups[code].colVenta = col;
+    } else {
+      // % Part. o sin etiqueta → es la columna de participación
+      storeGroups[code].colPart = col;
+    }
+  }
+
+  // Fallback: si las etiquetas no ayudaron, asumir primera columna = %, segunda = venta
+  for (const code of Object.keys(storeGroups)) {
+    const g = storeGroups[code];
+    if (g.colPart !== null && g.colVenta === null) {
+      // Buscar la siguiente columna sin código de tienda como venta
+      const nextCol = g.colPart + 1;
+      if (nextCol < headerRow.length && !extractStoreCode(headerRow[nextCol])) {
+        g.colVenta = nextCol;
+      }
+    }
+  }
 
   const reportId = `agg_${Date.now()}`;
   const uploadedAt = new Date().toISOString();
@@ -102,18 +99,20 @@ function parseAggregatorsExcel(XLSX, arrayBuffer) {
     const channel = String(rowData[0]).trim();
     if (!channel) continue;
 
-    for (const { storeCode, colPart, colVenta } of storeGroups) {
+    for (const [storeCode, { colPart, colVenta }] of Object.entries(storeGroups)) {
+      if (colPart === null) continue;
+
       const rawPart = parseNum(rowData[colPart]);
       const rawVenta = colVenta !== null ? parseNum(rowData[colVenta]) : null;
-      if (rawPart === null) continue;
+      if (rawPart === null && rawVenta === null) continue;
 
-      // Normalizar participación: si viene como 94.5 → 0.945, si viene como 0.945 → 0.945
-      const participation = rawPart > 1 ? rawPart / 100 : rawPart;
+      // Normalizar participación: si viene como 94.5 → 0.945, si viene como 0.945 → dejarlo
+      const participation = rawPart !== null ? (rawPart > 1 ? rawPart / 100 : rawPart) : 0;
 
       records.push({
         store_code: storeCode,
         channel,
-        participation,            // siempre 0-1
+        participation,       // 0-1
         total_sales: rawVenta || 0,
         report_id: reportId,
         uploaded_at: uploadedAt,
