@@ -31,7 +31,9 @@ function normalizeStoreCode(code) {
 
 function extractStoreCode(storeId) {
   if (!storeId) return null;
-  const norm = normalizeStoreCode(storeId);
+  // Remover contenido entre paréntesis primero (ej: "BTA 66 (CC...)" -> "BTA 66")
+  const clean = String(storeId).replace(/\s*\([^)]*\)/g, '').trim();
+  const norm = normalizeStoreCode(clean);
   const bta = norm.match(/^BTA\s*(\d+)/);  if (bta) return `BTA ${bta[1]}`;
   const tunja = norm.match(/^TUNJA\s*(\d+)/); if (tunja) return `TUNJA ${tunja[1]}`;
   const bog = norm.match(/^BOGOTA\s*(\d+)/); if (bog) return `BOGOTA ${bog[1]}`;
