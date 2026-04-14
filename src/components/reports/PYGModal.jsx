@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import {
   X, TrendingUp, TrendingDown, Loader2, BarChart3,
-  ArrowUpRight, ArrowDownRight, Minus, GitCompare, CheckCircle2
+  ArrowUpRight, ArrowDownRight, Minus, GitCompare, CheckCircle2, ChevronDown
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -120,34 +120,7 @@ const ChartTooltip = ({ active, payload, label }) => {
 export default function PYGModal({ onClose, storeId }) {
   const storeCode = extractStoreCode(storeId);
   const now = new Date();
-  const currentMonth = now.getMonth() + 1;
-  const currentYear  = now.getFullYear();
-
-  const [comparableMode, setComparableMode] = useState(false);
-  const [selectedMonths, setSelectedMonths] = useState([currentMonth]);
-
-  const primaryMonth = selectedMonths[selectedMonths.length - 1];
-
-  const toggleMonth = (m) => {
-    if (!comparableMode) return;
-    setSelectedMonths(prev =>
-      prev.includes(m)
-        ? prev.length > 1 ? prev.filter(x => x !== m) : prev
-        : [...prev, m].sort((a, b) => a - b)
-    );
-  };
-
-  const enableComparable = () => {
-    setComparableMode(true);
-    // preselect current + previous month
-    const prev = currentMonth > 1 ? currentMonth - 1 : 12;
-    setSelectedMonths([prev, currentMonth]);
-  };
-
-  const disableComparable = () => {
-    setComparableMode(false);
-    setSelectedMonths([currentMonth]);
-  };
+  const currentYear = now.getFullYear();
 
   const { data: allRecords = [], isLoading } = useQuery({
     queryKey: ['pyg-modal', storeCode, currentYear],
@@ -158,6 +131,49 @@ export default function PYGModal({ onClose, storeId }) {
     },
     enabled: !!storeCode,
   });
+
+  // Detectar el último mes con datos disponibles
+  const lastMonthWithData = useMemo(() => {
+    if (allRecords.length === 0) return null;
+    const months = allRecords.map(r => r.month).sort((a, b) => b - a);
+    return months[0];
+  }, [allRecords]);
+
+  const [comparableMode, setComparableMode] = useState(false);
+  const [selectedMonths, setSelectedMonths] = useState(() => [lastMonthWithData || now.getMonth() + 1]);
+  const [monthDropdownOpen, setMonthDropdownOpen] = useState(false);
+
+  const primaryMonth = selectedMonths[selectedMonths.length - 1];
+
+  const toggleMonth = (m) => {
+    if (!comparableMode) {
+      // Si no estamos en modo comparable, solo seleccionar ese mes
+      setSelectedMonths([m]);
+      setMonthDropdownOpen(false);
+      return;
+    }
+    // En modo comparable, agregar/quitar meses
+    setSelectedMonths(prev =>
+      prev.includes(m)
+        ? prev.length > 1 ? prev.filter(x => x !== m) : prev
+        : [...prev, m].sort((a, b) => a - b)
+    );
+  };
+
+  const enableComparable = () => {
+    setComparableMode(true);
+    // Agregar el mes anterior si existe
+    const prevMonth = primaryMonth > 1 ? primaryMonth - 1 : 12;
+    if (!selectedMonths.includes(prevMonth)) {
+      setSelectedMonths(prev => [...prev, prevMonth].sort((a, b) => a - b));
+    }
+  };
+
+  const disableComparable = () => {
+    setComparableMode(false);
+    setSelectedMonths([primaryMonth]);
+    setMonthDropdownOpen(false);
+  };
 
   const primaryRecord = allRecords.find(r => r.month === primaryMonth) || null;
   const prevMonth = selectedMonths.length >= 2 ? selectedMonths[selectedMonths.length - 2] : (primaryMonth > 1 ? primaryMonth - 1 : null);
@@ -210,47 +226,17 @@ export default function PYGModal({ onClose, storeId }) {
                     : `${MONTHS_FULL[primaryMonth - 1]} ${currentYear}`}
                 </p>
               </div>
-            </div>
 
-            <div className="flex items-center gap-2">
-              {!comparableMode ? (
+              <div className="relative inline-block">
                 <button
-                  onClick={enableComparable}
-                  className="flex items-center gap-2 bg-white/20 hover:bg-white/30 transition-all px-4 py-2 rounded-xl text-sm font-bold"
+                  onClick={() => setMonthDropdownOpen(!monthDropdownOpen)}
+                  className="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-2"
                 >
-                  <GitCompare className="w-4 h-4" />
-                  Comparable
+                  {selectedMonths.length === 1 ? 'Cambiar mes' : 'Comparando'}: {selectedMonths.map(m => MONTHS_SHORT[m - 1]).join(', ')}
+                  <ChevronDown className={`w-3 h-3 transition-transform ${monthDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
-              ) : (
-                <button
-                  onClick={disableComparable}
-                  className="flex items-center gap-2 bg-white/20 hover:bg-white/30 transition-all px-4 py-2 rounded-xl text-sm font-bold"
-                >
-                  <X className="w-4 h-4" />
-                  Salir
-                </button>
-              )}
-              <button
-                onClick={onClose}
-                className="w-10 h-10 bg-white/15 hover:bg-white/30 rounded-xl flex items-center justify-center transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-
-          {/* Selector de meses (solo en comparable) */}
-          <AnimatePresence>
-            {comparableMode && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                className="overflow-hidden"
-              >
-                <div className="pt-3 pb-1">
-                  <p className="text-white/60 text-xs mb-2">Toca los meses que quieres comparar:</p>
-                  <div className="flex flex-wrap gap-2">
+                {monthDropdownOpen && (
+                  <div className="absolute top-full left-0 mt-1 bg-white rounded-xl shadow-xl border border-pink-100 z-20 min-w-max p-2">
                     {MONTHS_SHORT.map((m, i) => {
                       const hasData = allRecords.some(r => r.month === i + 1);
                       const active = selectedMonths.includes(i + 1);
@@ -259,23 +245,32 @@ export default function PYGModal({ onClose, storeId }) {
                           key={i}
                           onClick={() => hasData && toggleMonth(i + 1)}
                           disabled={!hasData}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                          className={`block w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${
                             active
-                              ? 'bg-white text-pink-600 shadow-md'
+                              ? 'bg-pink-600 text-white font-bold'
                               : hasData
-                              ? 'bg-white/20 text-white hover:bg-white/30'
-                              : 'bg-white/5 text-white/25 cursor-not-allowed'
+                              ? 'text-slate-700 hover:bg-pink-50'
+                              : 'text-slate-300 cursor-not-allowed'
                           }`}
                         >
-                          {m}
+                          {MONTHS_FULL[i]}
                         </button>
                       );
                     })}
                   </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                )}
+              </div>
+            </div>
+
+            <button
+              onClick={onClose}
+              className="w-10 h-10 bg-white/15 hover:bg-white/30 rounded-xl flex items-center justify-center transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+
         </div>
       </div>
 
@@ -394,9 +389,9 @@ export default function PYGModal({ onClose, storeId }) {
               </div>
             </motion.div>
 
-            {/* ── Tabla comparativa (modo comparable) ── */}
+            {/* ── Tabla comparativa ── */}
             <AnimatePresence>
-              {comparableMode && selectedMonths.length >= 2 && (
+              {selectedMonths.length >= 2 && (
                 <motion.div
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -473,7 +468,7 @@ export default function PYGModal({ onClose, storeId }) {
                   Evolución {currentYear}
                 </p>
                 <p className="text-xs text-slate-400 mb-4">
-                  {comparableMode ? 'Toca las barras para agregar meses al comparativo' : 'Presiona "Comparable" para seleccionar meses'}
+                  {selectedMonths.length >= 2 ? 'Toca las barras para cambiar la selección' : 'Abre el dropdown de arriba para seleccionar otro mes o comparar'}
                 </p>
                 <ResponsiveContainer width="100%" height={220}>
                   <BarChart data={trendData} margin={{ left: -10, right: 5 }}>
@@ -486,8 +481,8 @@ export default function PYGModal({ onClose, storeId }) {
                       {trendData.map((d, i) => (
                         <Cell key={i}
                           fill={selectedMonths.includes(d.month) ? '#db2777' : '#fbcfe8'}
-                          cursor={comparableMode ? 'pointer' : 'default'}
-                          onClick={() => comparableMode && toggleMonth(d.month)}
+                          cursor="pointer"
+                          onClick={() => toggleMonth(d.month)}
                         />
                       ))}
                     </Bar>
@@ -495,8 +490,8 @@ export default function PYGModal({ onClose, storeId }) {
                       {trendData.map((d, i) => (
                         <Cell key={i}
                           fill={selectedMonths.includes(d.month) ? '#9333ea' : '#e9d5ff'}
-                          cursor={comparableMode ? 'pointer' : 'default'}
-                          onClick={() => comparableMode && toggleMonth(d.month)}
+                          cursor="pointer"
+                          onClick={() => toggleMonth(d.month)}
                         />
                       ))}
                     </Bar>
@@ -504,8 +499,8 @@ export default function PYGModal({ onClose, storeId }) {
                       {trendData.map((d, i) => (
                         <Cell key={i}
                           fill={selectedMonths.includes(d.month) ? '#e11d48' : '#fecdd3'}
-                          cursor={comparableMode ? 'pointer' : 'default'}
-                          onClick={() => comparableMode && toggleMonth(d.month)}
+                          cursor="pointer"
+                          onClick={() => toggleMonth(d.month)}
                         />
                       ))}
                     </Bar>
