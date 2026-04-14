@@ -39,35 +39,119 @@ function findValue(row, ...keywords) {
 function parsePYGExcel(XLSX, arrayBuffer) {
   const workbook = XLSX.read(arrayBuffer, { type: 'array' });
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json(sheet, { defval: null });
 
+  // Leer con header:1 para tener control total (filas como arrays)
+  const rawRows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null });
+  if (rawRows.length < 2) return [];
+
+  // --- DETECTAR FORMATO ---
+  // Formato A (columnas = tiendas): fila 0 tiene códigos de tienda en cols 1+
+  // Formato B (filas = tiendas): col 0 tiene el nombre de la tienda
+
+  // Buscar si la fila 0 contiene algún código de tienda (formato columnas)
+  const headerRow = rawRows[0];
+  const storeCodesInHeader = headerRow.slice(1).map(h => extractStoreCode(h)).filter(Boolean);
+
+  if (storeCodesInHeader.length > 0) {
+    // === FORMATO COLUMNAS: filas=partidas, columnas=tiendas ===
+    // headerRow[0] = label col (ej: "Concepto"), headerRow[1..n] = nombres tiendas
+    const storeCols = []; // { index, code }
+    for (let c = 1; c < headerRow.length; c++) {
+      const code = extractStoreCode(headerRow[c]);
+      if (code) storeCols.push({ index: c, code });
+    }
+
+    // Mapear filas → partidas por tienda
+    // { storeCode: { partida: value, ... } }
+    const storeData = {};
+    storeCols.forEach(({ code }) => { storeData[code] = {}; });
+
+    for (let r = 1; r < rawRows.length; r++) {
+      const row = rawRows[r];
+      const label = cleanKey(row[0]);
+      if (!label) continue;
+      for (const { index, code } of storeCols) {
+        const val = row[index];
+        if (val !== null && val !== undefined && typeof val === 'number') {
+          storeData[code][label] = val;
+        }
+      }
+    }
+
+    const records = [];
+    for (const [code, data] of Object.entries(storeData)) {
+      if (Object.keys(data).length === 0) continue;
+
+      const findVal = (...kws) => {
+        for (const [k, v] of Object.entries(data)) {
+          if (kws.some(kw => k.includes(kw))) return v;
+        }
+        return null;
+      };
+
+      const costReal      = findVal('% costo real', 'costo real');
+      const costTeorico   = findVal('% costo te', 'costo teorico', 'costo teórico');
+      const margenEbitda  = findVal('margen ebitda', 'ebitda');
+      const gastosPct     = findVal('gastos % de venta', 'gastos %', 'gastos%');
+      const costoPersonal = findVal('costo personal', 'personal');
+      const arriendos     = findVal('arriendos', 'arriendo');
+      const admin         = findVal('administraci');
+      const servicios     = findVal('servicios p', 'servicios públicos', 'servicios publicos');
+      const impuestos     = findVal('impuestos');
+
+      const MAIN = ['% costo real', 'costo real', '% costo te', 'costo teorico', 'costo teórico',
+        'margen ebitda', 'ebitda', 'gastos % de venta', 'gastos %', 'gastos%',
+        'costo personal', 'personal', 'arriendos', 'arriendo', 'administraci',
+        'servicios p', 'servicios públicos', 'servicios publicos', 'impuestos'];
+
+      const otrosGastos = {};
+      for (const [k, v] of Object.entries(data)) {
+        if (!MAIN.some(mk => k.includes(mk))) otrosGastos[k] = v;
+      }
+
+      records.push({
+        store_code: code,
+        cost_real: costReal,
+        cost_teorico: costTeorico,
+        margen_ebitda: margenEbitda,
+        gastos_pct_venta: gastosPct,
+        costo_personal: costoPersonal,
+        arriendos,
+        administracion: admin,
+        servicios_publicos: servicios,
+        impuestos,
+        otros_gastos: JSON.stringify(otrosGastos),
+      });
+    }
+    return records;
+  }
+
+  // === FORMATO FILAS: cada fila = una tienda ===
+  const rows = XLSX.utils.sheet_to_json(sheet, { defval: null });
   const records = [];
   for (const row of rows) {
     const storeRaw = row['Nombre Punto de Venta'] || row['nombre punto de venta'] || Object.values(row)[0];
     const storeCode = extractStoreCode(storeRaw);
     if (!storeCode) continue;
 
-    // Extraer partidas principales
-    const costReal     = findValue(row, '% costo real');
-    const costTeorico  = findValue(row, '% costo te');
-    const margenEbitda = findValue(row, 'margen ebitda', 'ebitda');
-    const gastosPct    = findValue(row, 'gastos % de venta', 'gastos %');
+    const costReal      = findValue(row, '% costo real', 'costo real');
+    const costTeorico   = findValue(row, '% costo te');
+    const margenEbitda  = findValue(row, 'margen ebitda', 'ebitda');
+    const gastosPct     = findValue(row, 'gastos % de venta', 'gastos %');
     const costoPersonal = findValue(row, 'costo personal');
-    const arriendos    = findValue(row, 'arriendos');
-    const admin        = findValue(row, 'administraci');
-    const servicios    = findValue(row, 'servicios p');
-    const impuestos    = findValue(row, 'impuestos');
+    const arriendos     = findValue(row, 'arriendos');
+    const admin         = findValue(row, 'administraci');
+    const servicios     = findValue(row, 'servicios p');
+    const impuestos     = findValue(row, 'impuestos');
 
-    // Guardar el resto de partidas como JSON
-    const MAIN_KEYS = ['nombre punto de venta', '% costo real', '% costo te', 'margen ebitda', 'ebitda',
+    const MAIN_KEYS = ['nombre punto de venta', '% costo real', 'costo real', '% costo te', 'margen ebitda', 'ebitda',
       'gastos % de venta', 'gastos %', 'costo personal', 'arriendos', 'administraci', 'servicios p', 'impuestos'];
 
     const otrosGastos = {};
     for (const [key, val] of Object.entries(row)) {
       const k = cleanKey(key);
       if (val !== null && typeof val === 'number' && !MAIN_KEYS.some(mk => k.includes(mk))) {
-        const cleanName = String(key).replace(/\xa0/g, ' ').trim();
-        otrosGastos[cleanName] = val;
+        otrosGastos[String(key).replace(/\xa0/g, ' ').trim()] = val;
       }
     }
 
@@ -111,7 +195,7 @@ export default function PYGUploader({ onClose, onSuccess }) {
 
       if (records.length === 0) {
         setStatus('error');
-        setMessage('No se encontraron datos. Verifica que la primera columna tenga "Nombre Punto de Venta" con códigos tipo BTA 52.');
+        setMessage('No se encontraron datos. Asegúrate que la fila 1 o columna 1 contenga códigos de tienda tipo "BTA 52", "TUNJA 1", etc.');
         return;
       }
 
