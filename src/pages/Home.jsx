@@ -182,7 +182,6 @@ const MENU_ITEMS = [
   iconBg: 'bg-emerald-200/60',
   iconColor: 'text-emerald-600',
   textColor: 'text-emerald-700',
-  requiredRole: 'gerente',
   isSpecialAction: true,
   specialAction: 'verPYG'
 }];
