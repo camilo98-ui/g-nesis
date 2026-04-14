@@ -56,10 +56,8 @@ export default function AggregatorsModal({ onClose, storeId }) {
     .filter(r => r.participation > 0)
     .sort((a, b) => b.participation - a.participation);
 
-  // Normalizar participación a 0-100 para mostrar
-  // Si el valor es <= 1 asumimos decimal (0.94), si es > 1 asumimos porcentaje (94)
+  // Normalizar: si viene como 0.944 → 94.4%, si viene como 94.4 → 94.4%
   const toPct = (v) => v <= 1 ? v * 100 : v;
-  const totalPct = channels.reduce((s, r) => s + toPct(r.participation), 0);
 
   return (
     <motion.div
@@ -116,9 +114,9 @@ export default function AggregatorsModal({ onClose, storeId }) {
               </p>
 
               {channels.map((ch, idx) => {
-                const pct = toPct(ch.participation).toFixed(2);
+                const pct = toPct(ch.participation).toFixed(1);
                 const color = getColor(ch.channel);
-                const barWidth = totalPct > 0 ? (toPct(ch.participation) / totalPct) * 100 : 0;
+                const barWidth = Math.min(toPct(ch.participation), 100);
 
                 return (
                   <motion.div
@@ -154,8 +152,8 @@ export default function AggregatorsModal({ onClose, storeId }) {
               {/* Total */}
               <div className="mt-4 pt-4 border-t border-slate-200 space-y-1">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-slate-500 font-medium">Total participación</span>
-                  <span className="font-black text-slate-800">{totalPct.toFixed(2)}%</span>
+                  <span className="text-slate-500 font-medium">Total participación canales</span>
+                  <span className="font-black text-slate-800">{channels.reduce((s, r) => s + toPct(r.participation), 0).toFixed(1)}%</span>
                 </div>
                 {channels.some(c => c.total_sales > 0) && (
                   <div className="flex items-center justify-between text-sm">
