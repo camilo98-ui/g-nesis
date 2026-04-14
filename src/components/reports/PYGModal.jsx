@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
@@ -177,8 +177,15 @@ export default function PYGModal({ onClose, storeId }) {
     return insights;
   }, [primaryRecord]);
 
-  const [selectedStore, setSelectedStore] = useState(storeCode);
+  const [selectedStore, setSelectedStore] = useState(() => storeCode || '');
   const [storeDropdownOpen, setStoreDropdownOpen] = useState(false);
+
+  // Inicializar selectedStore con la primera tienda disponible si está vacío
+  useEffect(() => {
+    if (!selectedStore && availableStores.length > 0) {
+      setSelectedStore(availableStores[0]);
+    }
+  }, [availableStores, selectedStore]);
 
   return (
     <motion.div
@@ -498,7 +505,7 @@ export default function PYGModal({ onClose, storeId }) {
                           <tr key={key} className="border-b border-slate-100 hover:bg-pink-50/30">
                             <td className="py-2.5 font-medium text-slate-700">{labels[key]}</td>
                             {selectedMonths.map(m => {
-                              const rec = allRecords.find(r => r.month === m);
+                              const rec = filteredByStore.find(r => r.month === m);
                               return <td key={m} className="py-2.5 text-right px-3 font-black text-slate-800">{fmt(rec?.[key])}</td>;
                             })}
                           </tr>
