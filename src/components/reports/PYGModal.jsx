@@ -168,36 +168,36 @@ export default function PYGModal({ onClose, storeId }) {
   }, [primaryRecord]);
 
   const insights = useMemo(() => {
-    if (!primaryRecord || !prevRecord) return [];
+    if (!primaryRecord) return [];
     const insights = [];
     const ebitda = pctNum(primaryRecord.margen_ebitda);
-    const prevEbitda = pctNum(prevRecord.margen_ebitda);
+    const prevEbitda = prevRecord ? pctNum(prevRecord.margen_ebitda) : null;
     const costReal = pctNum(primaryRecord.cost_real);
-    const prevCostReal = pctNum(prevRecord.cost_real);
+    const prevCostReal = prevRecord ? pctNum(prevRecord.cost_real) : null;
     const costTeorico = pctNum(primaryRecord.cost_teorico);
     const personal = pctNum(primaryRecord.costo_personal);
-    const prevPersonal = pctNum(prevRecord.costo_personal);
+    const prevPersonal = prevRecord ? pctNum(prevRecord.costo_personal) : null;
     const gastos = pctNum(primaryRecord.gastos_pct_venta);
-    const prevGastos = pctNum(prevRecord.gastos_pct_venta);
-    const diffEbitda = ebitda - prevEbitda;
-    const diffCost = costReal - prevCostReal;
-    const diffPersonal = personal - prevPersonal;
-    const diffGastos = gastos - prevGastos;
+    const prevGastos = prevRecord ? pctNum(prevRecord.gastos_pct_venta) : null;
+    const diffEbitda = prevEbitda !== null ? ebitda - prevEbitda : null;
+    const diffCost = prevCostReal !== null ? costReal - prevCostReal : null;
+    const diffPersonal = prevPersonal !== null ? personal - prevPersonal : null;
+    const diffGastos = prevGastos !== null ? gastos - prevGastos : null;
 
-    if (ebitda >= 30) insights.push({ type: 'success', text: `EBITDA: ${ebitda.toFixed(1)}% (↑ ${diffEbitda.toFixed(2)}pp vs mes anterior). Excelente rentabilidad: por cada 100 pesos de venta, genera ${ebitda.toFixed(1)} de margen operacional.` });
-    else if (ebitda >= 20) insights.push({ type: 'info', text: `EBITDA: ${ebitda.toFixed(1)}% (${diffEbitda > 0 ? '↑' : '↓'} ${Math.abs(diffEbitda).toFixed(2)}pp). Dentro de rango, pero el ${diffEbitda < 0 ? 'deterioro' : 'crecimiento'} mes a mes requiere atención.` });
-    else insights.push({ type: 'warning', text: `EBITDA BAJO: ${ebitda.toFixed(1)}% (${diffEbitda > 0 ? 'mejora' : 'caída'} de ${Math.abs(diffEbitda).toFixed(2)}pp). Sobre 100 pesos vendidos, solo ${ebitda.toFixed(1)} quedan como margen operacional. Crítico.` });
+    if (ebitda >= 30) insights.push({ type: 'success', text: `EBITDA: ${ebitda.toFixed(1)}%${diffEbitda !== null ? ` (${diffEbitda > 0 ? '↑' : '↓'} ${Math.abs(diffEbitda).toFixed(2)}pp vs mes anterior)` : ''}. Excelente rentabilidad: por cada 100 pesos de venta, genera ${ebitda.toFixed(1)} de margen operacional.` });
+    else if (ebitda >= 20) insights.push({ type: 'info', text: `EBITDA: ${ebitda.toFixed(1)}%${diffEbitda !== null ? ` (${diffEbitda > 0 ? '↑' : '↓'} ${Math.abs(diffEbitda).toFixed(2)}pp)` : ''}. Dentro de rango. ${diffEbitda !== null && diffEbitda < 0 ? 'Deterioro mes a mes requiere atención.' : 'Mantener desempeño.'}` });
+    else insights.push({ type: 'warning', text: `EBITDA BAJO: ${ebitda.toFixed(1)}%${diffEbitda !== null ? ` (${diffEbitda > 0 ? 'mejora' : 'caída'} de ${Math.abs(diffEbitda).toFixed(2)}pp)` : ''}. Sobre 100 pesos vendidos, solo ${ebitda.toFixed(1)} quedan como margen operacional. Crítico.` });
 
     const brecha = Math.abs(costReal - costTeorico);
-    if (costReal <= costTeorico) insights.push({ type: 'success', text: `Costo Real vs Teórico: ${costReal.toFixed(1)}% vs ${costTeorico.toFixed(1)}% (${brecha.toFixed(2)}pp bajo presupuesto). ${prevCostReal > costReal ? `Mejora de ${(prevCostReal - costReal).toFixed(2)}pp vs mes anterior` : 'Control operacional excelente'}.` });
-    else insights.push({ type: 'warning', text: `Costo Real SUPERIOR: ${costReal.toFixed(1)}% vs ${costTeorico.toFixed(1)}% (${brecha.toFixed(2)}pp sobre presupuesto). ${diffCost > 0 ? `Empeora ${(diffCost).toFixed(2)}pp mes a mes` : 'Ineficiencias operacionales detectadas'}.` });
+    if (costReal <= costTeorico) insights.push({ type: 'success', text: `Costo Real vs Teórico: ${costReal.toFixed(1)}% vs ${costTeorico.toFixed(1)}% (${brecha.toFixed(2)}pp bajo presupuesto).${prevCostReal && prevCostReal > costReal ? ` Mejora de ${(prevCostReal - costReal).toFixed(2)}pp vs mes anterior.` : ' Control operacional excelente.'}` });
+    else insights.push({ type: 'warning', text: `Costo Real SUPERIOR: ${costReal.toFixed(1)}% vs ${costTeorico.toFixed(1)}% (${brecha.toFixed(2)}pp sobre presupuesto).${diffCost && diffCost > 0 ? ` Empeora ${diffCost.toFixed(2)}pp mes a mes.` : ' Ineficiencias operacionales detectadas.'}` });
 
-    if (personal <= 20) insights.push({ type: 'success', text: `Personal: ${personal.toFixed(1)}% (${diffPersonal < 0 ? '↓' : '↑'} ${Math.abs(diffPersonal).toFixed(2)}pp). Productividad óptima: equipo eficiente en generación de margen.` });
-    else if (personal <= 25) insights.push({ type: 'info', text: `Personal: ${personal.toFixed(1)}% (${diffPersonal > 0 ? 'aumento' : 'reducción'} de ${Math.abs(diffPersonal).toFixed(2)}pp). Normal pero requiere monitoreo continuo de productividad.` });
-    else insights.push({ type: 'warning', text: `Personal ALTO: ${personal.toFixed(1)}% (${diffPersonal > 0 ? '↑' : '↓'} ${Math.abs(diffPersonal).toFixed(2)}pp). Costo excesivo de nómina. Revisar estructura o incrementar ventas.` });
+    if (personal <= 20) insights.push({ type: 'success', text: `Personal: ${personal.toFixed(1)}%${diffPersonal !== null ? ` (${diffPersonal < 0 ? '↓' : '↑'} ${Math.abs(diffPersonal).toFixed(2)}pp)` : ''}. Productividad óptima: equipo eficiente en generación de margen.` });
+    else if (personal <= 25) insights.push({ type: 'info', text: `Personal: ${personal.toFixed(1)}%${diffPersonal !== null ? ` (${diffPersonal > 0 ? 'aumento' : 'reducción'} de ${Math.abs(diffPersonal).toFixed(2)}pp)` : ''}. Normal. Requiere monitoreo continuo de productividad.` });
+    else insights.push({ type: 'warning', text: `Personal ALTO: ${personal.toFixed(1)}%${diffPersonal !== null ? ` (${diffPersonal > 0 ? '↑' : '↓'} ${Math.abs(diffPersonal).toFixed(2)}pp)` : ''}. Costo excesivo de nómina. Revisar estructura o incrementar ventas.` });
 
-    if (gastos <= 40) insights.push({ type: 'success', text: `Gastos Operacionales: ${gastos.toFixed(1)}% (${diffGastos < 0 ? 'reducción' : 'aumento'} de ${Math.abs(diffGastos).toFixed(2)}pp). Gestión eficiente de arriendos, servicios y administración.` });
-    else insights.push({ type: 'warning', text: `Gastos ELEVADOS: ${gastos.toFixed(1)}% (${diffGastos > 0 ? 'aumento' : 'reducción'} de ${Math.abs(diffGastos).toFixed(2)}pp). Arriendos, servicios y administración consumen demasiado margen. Urgente optimizar.` });
+    if (gastos <= 40) insights.push({ type: 'success', text: `Gastos Operacionales: ${gastos.toFixed(1)}%${diffGastos !== null ? ` (${diffGastos < 0 ? 'reducción' : 'aumento'} de ${Math.abs(diffGastos).toFixed(2)}pp)` : ''}. Gestión eficiente de arriendos, servicios y administración.` });
+    else insights.push({ type: 'warning', text: `Gastos ELEVADOS: ${gastos.toFixed(1)}%${diffGastos !== null ? ` (${diffGastos > 0 ? 'aumento' : 'reducción'} de ${Math.abs(diffGastos).toFixed(2)}pp)` : ''}. Arriendos, servicios y administración consumen demasiado margen. Urgente optimizar.` });
 
     return insights;
   }, [primaryRecord, prevRecord]);
