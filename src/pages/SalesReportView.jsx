@@ -4,10 +4,11 @@ import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft, BarChart3, DollarSign, TrendingUp, Filter,
-  Search, X, Package, Layers, Star, Award, PieChart, Activity, ChevronDown
+  Search, X, Package, Layers, Star, Award, PieChart, Activity, ChevronDown, Truck
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import AggregatorsModal from '@/components/reports/AggregatorsModal';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   Cell, PieChart as RechartsPie, Pie, RadialBarChart, RadialBar
@@ -511,6 +512,7 @@ export default function SalesReportView() {
   const [filterSection, setFilterSection] = useState('all');
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [expandedCharts, setExpandedCharts] = useState({ pie: false, top10: false });
+  const [showAggregators, setShowAggregators] = useState(false);
 
   const { data: rawRecords = [], isLoading } = useQuery({
     queryKey: ['salesReport', storeCode],
@@ -623,14 +625,21 @@ export default function SalesReportView() {
             <h1 className="text-2xl font-black tracking-tight">Participación del Negocio</h1>
             <p className="text-white/60 text-sm">{storeCode} · Reporte de ventas por producto</p>
           </div>
-          {hasData && (
-            <div className="hidden md:flex items-center gap-4 text-right">
-              <div>
+          <div className="flex items-center gap-3 flex-shrink-0">
+            <Button
+              onClick={() => setShowAggregators(true)}
+              className="bg-orange-500 hover:bg-orange-600 text-white gap-2 h-9 px-4 text-sm font-semibold"
+            >
+              <Truck className="w-4 h-4" />
+              Agregadores
+            </Button>
+            {hasData && (
+              <div className="hidden md:block text-right">
                 <p className="text-2xl font-black text-emerald-300">{formatCurrency(summary.totalSales)}</p>
                 <p className="text-xs text-white/50">Venta Total</p>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
 
@@ -853,6 +862,15 @@ export default function SalesReportView() {
           </>
         )}
       </div>
+
+      <AnimatePresence>
+        {showAggregators && (
+          <AggregatorsModal
+            storeId={storeCode}
+            onClose={() => setShowAggregators(false)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

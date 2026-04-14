@@ -28,6 +28,7 @@ import BudgetExcelImporter from '@/components/executive/BudgetExcelImporter.jsx'
 import SalesReportUploader from '@/components/reports/SalesReportUploader.jsx';
 import KpisReportUploader from '@/components/reports/KpisReportUploader.jsx';
 import ParticipacionModal from '@/components/reports/ParticipacionModal.jsx';
+import AggregatorsUploader from '@/components/reports/AggregatorsUploader.jsx';
 import { Button } from "@/components/ui/button";
 import { toast } from 'sonner';
 
@@ -188,6 +189,7 @@ export default function Home() {
   const [showSalesReportUploader, setShowSalesReportUploader] = useState(false);
   const [showKpisUploader, setShowKpisUploader] = useState(false);
   const [showParticipacion, setShowParticipacion] = useState(false);
+  const [showAggregatorsUploader, setShowAggregatorsUploader] = useState(false);
 
 
   const ROLES = [
@@ -1171,6 +1173,16 @@ export default function Home() {
                 KPIs Participación
               </Button>
           }
+            {selectedRole === 'gerente' &&
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowAggregatorsUploader(true)}
+            className="text-gray-400 hover:text-orange-600 hover:bg-orange-50/50 transition-all text-xs">
+                <FileSpreadsheet className="w-3.5 h-3.5 mr-1" />
+                Agregadores
+              </Button>
+          }
 
             {selectedRole !== 'gerente' && selectedStore &&
             <Button
@@ -1511,6 +1523,15 @@ export default function Home() {
         <KpisReportUploader
           onClose={() => setShowKpisUploader(false)}
           onSuccess={() => setShowKpisUploader(false)} />
+        }
+      </AnimatePresence>
+
+      {/* Modal Agregadores (Gerente) */}
+      <AnimatePresence>
+        {showAggregatorsUploader &&
+        <AggregatorsUploader
+          onClose={() => setShowAggregatorsUploader(false)}
+          onSuccess={() => setShowAggregatorsUploader(false)} />
         }
       </AnimatePresence>
 

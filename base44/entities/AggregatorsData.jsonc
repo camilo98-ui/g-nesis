@@ -1,0 +1,32 @@
+{
+  "name": "AggregatorsData",
+  "type": "object",
+  "properties": {
+    "store_code": {
+      "type": "string",
+      "description": "C\u00f3digo de la tienda (ej: BTA 62)"
+    },
+    "channel": {
+      "type": "string",
+      "description": "Canal de venta (Al Paso, Rappi, Didi, Domicilios Propios, etc.)"
+    },
+    "participation": {
+      "type": "number",
+      "description": "% de participaci\u00f3n del canal en la venta bruta (0-1)"
+    },
+    "report_id": {
+      "type": "string",
+      "description": "ID \u00fanico del reporte cargado"
+    },
+    "uploaded_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Fecha de carga"
+    }
+  },
+  "required": [
+    "store_code",
+    "channel",
+    "participation"
+  ]
+}
