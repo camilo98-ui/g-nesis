@@ -1008,12 +1008,28 @@ export default function Dashboard() {
   comparisonTotals.sales / comparisonTotals.transactions :
   0;
 
-  // Métricas usando ACUMULADO DEL MES (siempre muestran el total del mes, NO el filtro)
+  // Totales SIEMPRE con mes gregoriano (para las tarjetas de resumen)
+  const gregorianMonthTotals = useMemo(() => {
+    const now = new Date();
+    const fromStr = format(startOfMonth(now), 'yyyy-MM-dd');
+    const toStr = format(now, 'yyyy-MM-dd');
+    return dailySales.filter(s => {
+      const d = s.date?.split('T')[0] || s.date;
+      return d >= fromStr && d <= toStr;
+    }).reduce((acc, s) => ({
+      sales: acc.sales + (s.total_sales || 0),
+      tickets: acc.tickets + (s.total_tickets || 0),
+      transactions: acc.transactions + (s.total_transactions || 0),
+      suggested: acc.suggested + (s.total_suggested || 0)
+    }), { sales: 0, tickets: 0, transactions: 0, suggested: 0 });
+  }, [dailySales]);
+
+  // Métricas usando ACUMULADO DEL MES GREGORIANO (siempre muestran el total real del mes)
   const metrics = [
   {
     id: 'sales',
     title: 'Ventas Totales',
-    value: monthTotals.sales,
+    value: gregorianMonthTotals.sales,
     comparisonValue: comparisonTotals?.sales,
     budget: currentBudget.sales_budget,
     icon: DollarSign,
@@ -1025,7 +1041,7 @@ export default function Dashboard() {
   {
     id: 'tickets',
     title: 'Ticket Promedio',
-    value: monthAvgTicket,
+    value: gregorianMonthTotals.transactions > 0 ? gregorianMonthTotals.sales / gregorianMonthTotals.transactions : 0,
     comparisonValue: comparisonAvgTicket,
     budget: currentBudget.tickets_budget,
     icon: Receipt,
@@ -1037,7 +1053,7 @@ export default function Dashboard() {
   {
     id: 'transactions',
     title: 'Transacciones',
-    value: monthTotals.transactions,
+    value: gregorianMonthTotals.transactions,
     comparisonValue: comparisonTotals?.transactions,
     budget: currentBudget.transactions_budget,
     icon: Zap,
@@ -1048,7 +1064,7 @@ export default function Dashboard() {
   {
     id: 'suggested',
     title: 'Sugeridos',
-    value: monthTotals.suggested,
+    value: gregorianMonthTotals.suggested,
     comparisonValue: comparisonTotals?.suggested,
     budget: currentBudget.suggested_budget,
     icon: Gift,
