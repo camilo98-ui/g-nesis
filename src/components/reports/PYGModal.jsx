@@ -36,7 +36,8 @@ function extractStoreCode(storeId) {
   const norm = normalizeStoreCode(clean);
   const bta = norm.match(/^BTA\s*(\d+)/);  if (bta) return `BTA ${bta[1]}`;
   const tunja = norm.match(/^TUNJA\s*(\d+)/); if (tunja) return `TUNJA ${tunja[1]}`;
-  const bog = norm.match(/^BOGOTA\s*(\d+)/); if (bog) return `BOGOTA ${bog[1]}`;
+  // BOGOTA también es BTA (mismo código de tienda)
+  const bog = norm.match(/^BOGOTA\s*(\d+)/); if (bog) return `BTA ${bog[1]}`;
   return norm;
 }
 
