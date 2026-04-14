@@ -5,6 +5,8 @@ import { useQuery } from '@tanstack/react-query';
 import { X, Truck, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
+const formatCOP = (v) => v ? new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(Math.round(v)) : '—';
+
 const CHANNEL_COLORS = {
   'Al Paso': '#10b981',
   'Rappi': '#ef4444',
@@ -113,13 +115,16 @@ export default function AggregatorsModal({ onClose, storeId }) {
                     transition={{ delay: idx * 0.06 }}
                     className="bg-slate-50 rounded-xl p-4 border border-slate-100"
                   >
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center justify-between mb-1">
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: color }} />
                         <span className="font-semibold text-slate-800 text-sm">{ch.channel}</span>
                       </div>
                       <span className="font-black text-slate-900 text-base">{pct}%</span>
                     </div>
+                    {ch.total_sales > 0 && (
+                      <p className="text-xs text-slate-500 mb-2 pl-5">{formatCOP(ch.total_sales)}</p>
+                    )}
                     <div className="h-2.5 bg-slate-200 rounded-full overflow-hidden">
                       <motion.div
                         initial={{ width: 0 }}
@@ -134,9 +139,17 @@ export default function AggregatorsModal({ onClose, storeId }) {
               })}
 
               {/* Total */}
-              <div className="mt-4 pt-4 border-t border-slate-200 flex items-center justify-between text-sm">
-                <span className="text-slate-500 font-medium">Total registrado</span>
-                <span className="font-black text-slate-800">{(totalPct * 100).toFixed(2)}%</span>
+              <div className="mt-4 pt-4 border-t border-slate-200 space-y-1">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-slate-500 font-medium">Total participación</span>
+                  <span className="font-black text-slate-800">{(totalPct * 100).toFixed(2)}%</span>
+                </div>
+                {channels.some(c => c.total_sales > 0) && (
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-slate-500 font-medium">Total venta canales</span>
+                    <span className="font-black text-emerald-700">{formatCOP(channels.reduce((s, c) => s + (c.total_sales || 0), 0))}</span>
+                  </div>
+                )}
               </div>
             </div>
           )}

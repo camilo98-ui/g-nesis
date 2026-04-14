@@ -18,34 +18,57 @@ function extractStoreCode(headerStr) {
 }
 
 // Parsear el Excel de agregadores
-// Formato: columna 0 = Canal, columnas 1+ = tiendas (una columna por tienda, header con código)
-// Cada dos columnas repiten la misma tienda (% Part. Venta Bruta Catálogo Prod)
+// Formato: fila 0 = encabezado de tiendas (BTA 21...), fila 1 = sub-encabezado (% Part. | Venta)
+// Por cada tienda hay DOS columnas: participación y venta bruta
 function parseAggregatorsExcel(XLSX, arrayBuffer) {
   const workbook = XLSX.read(arrayBuffer, { type: 'array' });
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
-  // Leer con headers para tener acceso a los nombres de columna
   const jsonRows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null });
 
   if (jsonRows.length < 2) return [];
 
-  const headerRow = jsonRows[0]; // Row 0: PdV, BTA 21 (CC CENTRO CHIA)., BTA 21..., BTA 52..., ...
-  const subHeaderRow = jsonRows[1] && typeof jsonRows[1][0] === 'string' && jsonRows[1][0] === 'Canal'
-    ? jsonRows[1]
-    : null;
+  const headerRow = jsonRows[0]; // Row 0: PdV, BTA 21..., BTA 21..., BTA 52..., BTA 52..., ...
 
-  // Determinar qué fila tiene los datos: si la fila 1 es "Canal", los datos empiezan en fila 2
-  const dataStartRow = subHeaderRow ? 2 : 1;
+  // Detectar si hay sub-fila con "% Part." y "Venta"
+  const subRow = jsonRows[1];
+  const hasSubHeader = subRow && typeof subRow[1] === 'string' &&
+    (String(subRow[1]).toLowerCase().includes('part') || String(subRow[1]).toLowerCase().includes('venta') || String(subRow[1]).toLowerCase().includes('%'));
+  const dataStartRow = hasSubHeader ? 2 : 1;
 
-  // Mapear columnas a store codes (solo las que tienen un código válido)
-  const storeColumns = {}; // colIndex → storeCode
+  // Mapear columnas: por cada tienda detectada, guardar colPart y colVenta
+  // Cada tienda ocupa DOS columnas consecutivas: [part, venta]
+  const storeGroups = []; // { storeCode, colPart, colVenta }
+  let lastCode = null;
+  let lastCol = null;
+
   for (let col = 1; col < headerRow.length; col++) {
     const code = extractStoreCode(headerRow[col]);
-    if (code && !Object.values(storeColumns).includes(code)) {
-      storeColumns[col] = code;
+    if (code) {
+      if (code === lastCode) {
+        // Segunda columna de la misma tienda → es la venta
+        const existing = storeGroups.find(g => g.storeCode === code && g.colVenta === null);
+        if (existing) existing.colVenta = col;
+      } else {
+        // Nueva tienda
+        storeGroups.push({ storeCode: code, colPart: col, colVenta: null });
+        lastCode = code;
+      }
+    } else if (lastCode && storeGroups.length > 0) {
+      // Columna sin código de tienda justo después de una tienda → puede ser la columna de venta
+      const last = storeGroups[storeGroups.length - 1];
+      if (last.colVenta === null) last.colVenta = col;
+      lastCode = null;
     }
   }
 
-  if (Object.keys(storeColumns).length === 0) return [];
+  if (storeGroups.length === 0) return [];
+
+  const parseNum = (val) => {
+    if (val === null || val === undefined || val === '') return null;
+    if (typeof val === 'number') return val;
+    const n = parseFloat(String(val).replace(/[^0-9.-]/g, ''));
+    return isNaN(n) ? null : n;
+  };
 
   const reportId = `agg_${Date.now()}`;
   const uploadedAt = new Date().toISOString();
@@ -54,21 +77,19 @@ function parseAggregatorsExcel(XLSX, arrayBuffer) {
   for (let row = dataStartRow; row < jsonRows.length; row++) {
     const rowData = jsonRows[row];
     if (!rowData || !rowData[0]) continue;
-
     const channel = String(rowData[0]).trim();
     if (!channel) continue;
 
-    for (const [colStr, storeCode] of Object.entries(storeColumns)) {
-      const col = parseInt(colStr);
-      const val = rowData[col];
-      if (val === null || val === undefined || val === '') continue;
-      const participation = typeof val === 'number' ? val : parseFloat(String(val).replace(/[^0-9.-]/g, ''));
-      if (isNaN(participation)) continue;
+    for (const { storeCode, colPart, colVenta } of storeGroups) {
+      const participation = parseNum(rowData[colPart]);
+      const total_sales = colVenta !== null ? parseNum(rowData[colVenta]) : null;
+      if (participation === null) continue;
 
       records.push({
         store_code: storeCode,
         channel,
-        participation, // 0-1 value e.g. 0.94
+        participation, // 0-1 e.g. 0.94
+        total_sales: total_sales || 0,
         report_id: reportId,
         uploaded_at: uploadedAt,
       });

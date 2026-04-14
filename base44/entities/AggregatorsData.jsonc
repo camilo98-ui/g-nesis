@@ -14,6 +14,10 @@
       "type": "number",
       "description": "% de participaci\u00f3n del canal en la venta bruta (0-1)"
     },
+    "total_sales": {
+      "type": "number",
+      "description": "Venta bruta del canal"
+    },
     "report_id": {
       "type": "string",
       "description": "ID \u00fanico del reporte cargado"
