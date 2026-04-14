@@ -3,14 +3,10 @@ import { motion } from 'framer-motion';
 import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, Lightbulb } from 'lucide-react';
 
 export default function ChartInsight({ data, metric, formatCurrency, comparisonData = null }) {
-  // Detectar si los valores son monetarios (ventas, ticket) o conteos (transacciones, sugeridos)
-  // Si el promedio supera 5000, asumimos que son pesos COP
+  // Siempre formatear como pesos COP colombianos completos
   const fmt = (val) => {
     if (!val && val !== 0) return '$0';
-    // Si formatCurrency produce algo que parece pesos (tiene $ y millones), úsalo directo
-    const test = formatCurrency(val);
-    if (test && test.includes('$')) return test;
-    return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(Math.round(val));
+    return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(Math.round(val));
   };
 
   const insight = useMemo(() => {
