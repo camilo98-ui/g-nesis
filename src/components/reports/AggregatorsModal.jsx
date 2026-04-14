@@ -47,7 +47,12 @@ export default function AggregatorsModal({ onClose, storeId }) {
     .filter(r => r.participation > 0)
     .sort((a, b) => b.participation - a.participation);
 
-  const totalPct = channels.reduce((s, r) => s + r.participation, 0);
+  // Detectar si los valores están como 0-1 o como 0-100
+  const maxPart = Math.max(...channels.map(c => c.participation), 0);
+  const isDecimal = maxPart <= 1;
+
+  const toPct = (v) => isDecimal ? v * 100 : v;
+  const totalPct = channels.reduce((s, r) => s + toPct(r.participation), 0);
 
   return (
     <motion.div
@@ -103,9 +108,9 @@ export default function AggregatorsModal({ onClose, storeId }) {
               </p>
 
               {channels.map((ch, idx) => {
-                const pct = (ch.participation * 100).toFixed(2);
+                const pct = toPct(ch.participation).toFixed(2);
                 const color = getColor(ch.channel);
-                const barWidth = totalPct > 0 ? (ch.participation / totalPct) * 100 : 0;
+                const barWidth = totalPct > 0 ? (toPct(ch.participation) / totalPct) * 100 : 0;
 
                 return (
                   <motion.div
@@ -123,7 +128,7 @@ export default function AggregatorsModal({ onClose, storeId }) {
                       <span className="font-black text-slate-900 text-base">{pct}%</span>
                     </div>
                     {ch.total_sales > 0 && (
-                      <p className="text-xs text-slate-500 mb-2 pl-5">{formatCOP(ch.total_sales)}</p>
+                      <p className="text-xs text-emerald-600 font-semibold mb-2 pl-5">{formatCOP(ch.total_sales)}</p>
                     )}
                     <div className="h-2.5 bg-slate-200 rounded-full overflow-hidden">
                       <motion.div
@@ -142,7 +147,7 @@ export default function AggregatorsModal({ onClose, storeId }) {
               <div className="mt-4 pt-4 border-t border-slate-200 space-y-1">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-slate-500 font-medium">Total participación</span>
-                  <span className="font-black text-slate-800">{(totalPct * 100).toFixed(2)}%</span>
+                  <span className="font-black text-slate-800">{totalPct.toFixed(2)}%</span>
                 </div>
                 {channels.some(c => c.total_sales > 0) && (
                   <div className="flex items-center justify-between text-sm">
