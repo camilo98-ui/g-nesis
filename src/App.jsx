@@ -9,6 +9,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import GenesisCommandCenter from './pages/GenesisCommandCenter';
 import SalesReportView from './pages/SalesReportView';
+import PYGDashboard from './pages/PYGDashboard';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
@@ -64,6 +65,7 @@ const AuthenticatedApp = () => {
       ))}
       <Route path="/GenesisCommandCenter" element={<LayoutWrapper currentPageName="GenesisCommandCenter"><GenesisCommandCenter /></LayoutWrapper>} />
       <Route path="/SalesReportView" element={<LayoutWrapper currentPageName="SalesReportView"><SalesReportView /></LayoutWrapper>} />
+      <Route path="/PYGDashboard" element={<LayoutWrapper currentPageName="PYGDashboard"><PYGDashboard /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

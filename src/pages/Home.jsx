@@ -139,6 +139,17 @@ const MENU_ITEMS = [
   specialAction: 'backup'
 },
 {
+  name: 'P&G Tiendas',
+  page: 'PYGDashboard',
+  icon: TrendingUp,
+  description: 'Profit & Loss por tienda',
+  bgColor: 'bg-gradient-to-br from-emerald-100/90 to-teal-100/80',
+  iconBg: 'bg-emerald-200/60',
+  iconColor: 'text-emerald-600',
+  textColor: 'text-emerald-700',
+  requiredRole: 'gerente'
+},
+{
   name: 'Configuración',
   page: 'Settings',
   icon: SettingsIcon,
