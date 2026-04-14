@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import {
   X, TrendingUp, TrendingDown, Loader2, BarChart3, Zap,
-  ArrowUpRight, ArrowDownRight, Minus, ChevronDown, CheckCircle2, AlertCircle
+  ArrowUpRight, ArrowDownRight, Minus, ChevronDown, CheckCircle2, AlertCircle, Activity
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -168,30 +168,39 @@ export default function PYGModal({ onClose, storeId }) {
   }, [primaryRecord]);
 
   const insights = useMemo(() => {
-    if (!primaryRecord) return [];
+    if (!primaryRecord || !prevRecord) return [];
     const insights = [];
     const ebitda = pctNum(primaryRecord.margen_ebitda);
+    const prevEbitda = pctNum(prevRecord.margen_ebitda);
     const costReal = pctNum(primaryRecord.cost_real);
+    const prevCostReal = pctNum(prevRecord.cost_real);
     const costTeorico = pctNum(primaryRecord.cost_teorico);
     const personal = pctNum(primaryRecord.costo_personal);
+    const prevPersonal = pctNum(prevRecord.costo_personal);
     const gastos = pctNum(primaryRecord.gastos_pct_venta);
+    const prevGastos = pctNum(prevRecord.gastos_pct_venta);
+    const diffEbitda = ebitda - prevEbitda;
+    const diffCost = costReal - prevCostReal;
+    const diffPersonal = personal - prevPersonal;
+    const diffGastos = gastos - prevGastos;
 
-    if (ebitda >= 30) insights.push({ type: 'success', text: `Margen EBITDA excelente (${ebitda.toFixed(1)}%) - Rentabilidad muy saludable 💚` });
-    else if (ebitda >= 20) insights.push({ type: 'info', text: `Margen EBITDA moderado (${ebitda.toFixed(1)}%) - Dentro de rango esperado` });
-    else insights.push({ type: 'warning', text: `Margen EBITDA bajo (${ebitda.toFixed(1)}%) - Requiere atención inmediata ⚠️` });
+    if (ebitda >= 30) insights.push({ type: 'success', text: `EBITDA: ${ebitda.toFixed(1)}% (↑ ${diffEbitda.toFixed(2)}pp vs mes anterior). Excelente rentabilidad: por cada 100 pesos de venta, genera ${ebitda.toFixed(1)} de margen operacional.` });
+    else if (ebitda >= 20) insights.push({ type: 'info', text: `EBITDA: ${ebitda.toFixed(1)}% (${diffEbitda > 0 ? '↑' : '↓'} ${Math.abs(diffEbitda).toFixed(2)}pp). Dentro de rango, pero el ${diffEbitda < 0 ? 'deterioro' : 'crecimiento'} mes a mes requiere atención.` });
+    else insights.push({ type: 'warning', text: `EBITDA BAJO: ${ebitda.toFixed(1)}% (${diffEbitda > 0 ? 'mejora' : 'caída'} de ${Math.abs(diffEbitda).toFixed(2)}pp). Sobre 100 pesos vendidos, solo ${ebitda.toFixed(1)} quedan como margen operacional. Crítico.` });
 
-    if (costReal <= costTeorico) insights.push({ type: 'success', text: `Costo Real bajo ${(costTeorico - costReal).toFixed(2)}pp vs teórico - Excelente control 🎯` });
-    else insights.push({ type: 'warning', text: `Costo Real supera teórico en ${(costReal - costTeorico).toFixed(2)}pp - Revisar ineficiencias` });
+    const brecha = Math.abs(costReal - costTeorico);
+    if (costReal <= costTeorico) insights.push({ type: 'success', text: `Costo Real vs Teórico: ${costReal.toFixed(1)}% vs ${costTeorico.toFixed(1)}% (${brecha.toFixed(2)}pp bajo presupuesto). ${prevCostReal > costReal ? `Mejora de ${(prevCostReal - costReal).toFixed(2)}pp vs mes anterior` : 'Control operacional excelente'}.` });
+    else insights.push({ type: 'warning', text: `Costo Real SUPERIOR: ${costReal.toFixed(1)}% vs ${costTeorico.toFixed(1)}% (${brecha.toFixed(2)}pp sobre presupuesto). ${diffCost > 0 ? `Empeora ${(diffCost).toFixed(2)}pp mes a mes` : 'Ineficiencias operacionales detectadas'}.` });
 
-    if (personal <= 20) insights.push({ type: 'success', text: `Costo Personal optimizado (${personal.toFixed(1)}%) - Buena productividad 📊` });
-    else if (personal <= 25) insights.push({ type: 'info', text: `Costo Personal normal (${personal.toFixed(1)}%)` });
-    else insights.push({ type: 'warning', text: `Costo Personal alto (${personal.toFixed(1)}%) - Considerar optimización` });
+    if (personal <= 20) insights.push({ type: 'success', text: `Personal: ${personal.toFixed(1)}% (${diffPersonal < 0 ? '↓' : '↑'} ${Math.abs(diffPersonal).toFixed(2)}pp). Productividad óptima: equipo eficiente en generación de margen.` });
+    else if (personal <= 25) insights.push({ type: 'info', text: `Personal: ${personal.toFixed(1)}% (${diffPersonal > 0 ? 'aumento' : 'reducción'} de ${Math.abs(diffPersonal).toFixed(2)}pp). Normal pero requiere monitoreo continuo de productividad.` });
+    else insights.push({ type: 'warning', text: `Personal ALTO: ${personal.toFixed(1)}% (${diffPersonal > 0 ? '↑' : '↓'} ${Math.abs(diffPersonal).toFixed(2)}pp). Costo excesivo de nómina. Revisar estructura o incrementar ventas.` });
 
-    if (gastos <= 40) insights.push({ type: 'success', text: `Gastos operacionales controlados (${gastos.toFixed(1)}%) - Buena gestión` });
-    else insights.push({ type: 'warning', text: `Gastos operacionales elevados (${gastos.toFixed(1)}%) - Oportunidad de mejora` });
+    if (gastos <= 40) insights.push({ type: 'success', text: `Gastos Operacionales: ${gastos.toFixed(1)}% (${diffGastos < 0 ? 'reducción' : 'aumento'} de ${Math.abs(diffGastos).toFixed(2)}pp). Gestión eficiente de arriendos, servicios y administración.` });
+    else insights.push({ type: 'warning', text: `Gastos ELEVADOS: ${gastos.toFixed(1)}% (${diffGastos > 0 ? 'aumento' : 'reducción'} de ${Math.abs(diffGastos).toFixed(2)}pp). Arriendos, servicios y administración consumen demasiado margen. Urgente optimizar.` });
 
     return insights;
-  }, [primaryRecord]);
+  }, [primaryRecord, prevRecord]);
 
   // Inicializar selectedStore con la primera tienda disponible si está vacío
   useEffect(() => {
@@ -331,9 +340,9 @@ export default function PYGModal({ onClose, storeId }) {
                   inverse
                 />
                 <InsightCard
-                  title="Costo Real"
-                  value={fmt(primaryRecord.cost_real)}
-                  prev={prevRecord ? fmt(prevRecord.cost_real) : null}
+                  title="Costo Real vs Teórico"
+                  value={`${fmt(primaryRecord.cost_real)} vs ${fmt(primaryRecord.cost_teorico)}`}
+                  prev={prevRecord ? `${fmt(prevRecord.cost_real)} vs ${fmt(prevRecord.cost_teorico)}` : null}
                   trend={prevRecord ? pctNum(primaryRecord.cost_real) - pctNum(prevRecord.cost_real) : null}
                   icon={TrendingDown}
                   color={{ border: 'border-blue-200', bg: 'bg-blue-50', text: 'text-blue-600', label: 'text-blue-500', muted: 'text-blue-400', icon: 'bg-blue-600' }}
@@ -384,15 +393,21 @@ export default function PYGModal({ onClose, storeId }) {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Evolución EBITDA */}
               {trendData.length >= 2 && (
-                <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl p-6 shadow-sm border border-pink-100">
-                  <h3 className="font-black text-slate-800 mb-4">Evolución EBITDA</h3>
-                  <ResponsiveContainer width="100%" height={200}>
-                    <LineChart data={trendData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#fce7f3" />
-                      <XAxis dataKey="mes" tick={{ fontSize: 11 }} />
-                      <YAxis tickFormatter={v => `${v}%`} tick={{ fontSize: 11 }} domain={[0, 'auto']} />
-                      <Tooltip content={<ChartTooltip />} />
-                      <Line type="monotone" dataKey="EBITDA" stroke="#db2777" strokeWidth={3} dot={{ fill: '#db2777', r: 4 }} />
+                <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="bg-gradient-to-br from-pink-50/50 to-white rounded-2xl p-6 shadow-md border border-pink-200 hover:shadow-lg transition-all">
+                  <h3 className="font-black text-slate-800 mb-4 flex items-center gap-2"><TrendingUp className="w-5 h-5 text-pink-600" />Evolución EBITDA</h3>
+                  <ResponsiveContainer width="100%" height={260}>
+                    <LineChart data={trendData} margin={{ top: 5, right: 20, left: -10, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="colorEBITDA" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#db2777" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="#db2777" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="4 4" stroke="#f1e5f5" vertical={false} />
+                      <XAxis dataKey="mes" tick={{ fontSize: 12, fill: '#64748b' }} />
+                      <YAxis tickFormatter={v => `${v}%`} tick={{ fontSize: 12, fill: '#64748b' }} domain={[0, 'auto']} />
+                      <Tooltip content={<ChartTooltip />} cursor={{ stroke: '#db2777', strokeOpacity: 0.3 }} />
+                      <Line type="natural" dataKey="EBITDA" stroke="#db2777" strokeWidth={3} dot={{ fill: '#db2777', r: 5, strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 7 }} fill="url(#colorEBITDA)" />
                     </LineChart>
                   </ResponsiveContainer>
                 </motion.div>
@@ -400,14 +415,15 @@ export default function PYGModal({ onClose, storeId }) {
 
               {/* Pie Chart Gastos */}
               {gasteosData.length > 0 && (
-                <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl p-6 shadow-sm border border-pink-100">
-                  <h3 className="font-black text-slate-800 mb-4">Distribución de Gastos</h3>
-                  <ResponsiveContainer width="100%" height={200}>
+                <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="bg-gradient-to-br from-rose-50/50 to-white rounded-2xl p-6 shadow-md border border-rose-200 hover:shadow-lg transition-all">
+                  <h3 className="font-black text-slate-800 mb-4 flex items-center gap-2"><AlertCircle className="w-5 h-5 text-rose-500" />Distribución de Gastos</h3>
+                  <ResponsiveContainer width="100%" height={260}>
                     <PieChart>
-                      <Pie data={gasteosData} dataKey="value" cx="50%" cy="50%" outerRadius={60} label={{ fontSize: 10 }}>
-                        {gasteosData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
+                      <Pie data={gasteosData} dataKey="value" cx="50%" cy="50%" innerRadius={55} outerRadius={90} paddingAngle={3}
+                        label={({ name, value }) => `${name.split(' ')[0]} ${value.toFixed(1)}%`} labelLine={{ stroke: '#64748b', strokeWidth: 1 }}>
+                        {gasteosData.map((entry, i) => <Cell key={i} fill={entry.color} stroke="white" strokeWidth={2} />)}
                       </Pie>
-                      <Tooltip formatter={v => `${v.toFixed(1)}%`} />
+                      <Tooltip formatter={(v, name) => [`${Number(v).toFixed(2)}%`, name]} contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.12)', fontSize: 12 }} />
                     </PieChart>
                   </ResponsiveContainer>
                 </motion.div>
@@ -415,36 +431,45 @@ export default function PYGModal({ onClose, storeId }) {
 
               {/* Costo Real vs Teórico */}
               {trendData.length >= 2 && (
-                <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl p-6 shadow-sm border border-pink-100">
-                  <h3 className="font-black text-slate-800 mb-4">Costo Real vs Teórico</h3>
-                  <ResponsiveContainer width="100%" height={200}>
-                    <BarChart data={trendData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#fce7f3" />
-                      <XAxis dataKey="mes" tick={{ fontSize: 11 }} />
-                      <YAxis tickFormatter={v => `${v}%`} tick={{ fontSize: 11 }} />
-                      <Tooltip content={<ChartTooltip />} />
-                      <Legend wrapperStyle={{ fontSize: 11 }} />
-                      <Bar dataKey="C.Real" fill="#3b82f6" radius={[4,4,0,0]} />
-                      <Bar dataKey="C.Teo" fill="#94a3b8" radius={[4,4,0,0]} />
+                <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="bg-gradient-to-br from-blue-50/50 to-white rounded-2xl p-6 shadow-md border border-blue-200 hover:shadow-lg transition-all">
+                  <h3 className="font-black text-slate-800 mb-4 flex items-center gap-2"><BarChart3 className="w-5 h-5 text-blue-600" />Costo Real vs Teórico</h3>
+                  <ResponsiveContainer width="100%" height={260}>
+                    <BarChart data={trendData} margin={{ top: 5, right: 20, left: -10, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="4 4" stroke="#e0e7ff" vertical={false} />
+                      <XAxis dataKey="mes" tick={{ fontSize: 12, fill: '#64748b' }} />
+                      <YAxis tickFormatter={v => `${v}%`} tick={{ fontSize: 12, fill: '#64748b' }} />
+                      <Tooltip content={<ChartTooltip />} cursor={{ fill: 'rgba(59, 130, 246, 0.08)' }} />
+                      <Legend wrapperStyle={{ fontSize: 12, paddingTop: 15 }} />
+                      <Bar dataKey="C.Real" fill="#3b82f6" radius={[8,8,0,0]} animationDuration={800} />
+                      <Bar dataKey="C.Teo" fill="#cbd5e1" radius={[8,8,0,0]} animationDuration={800} />
                     </BarChart>
                   </ResponsiveContainer>
+                  <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
+                    <div className="flex items-center gap-2"><div className="w-3 h-3 bg-blue-500 rounded-sm"></div><span className="text-slate-700">Real = Costo actual</span></div>
+                    <div className="flex items-center gap-2"><div className="w-3 h-3 bg-slate-300 rounded-sm"></div><span className="text-slate-700">Teórico = Meta</span></div>
+                  </div>
                 </motion.div>
               )}
 
               {/* Comparación de métricas */}
               {trendData.length >= 2 && (
-                <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl p-6 shadow-sm border border-pink-100">
-                  <h3 className="font-black text-slate-800 mb-4">Todas las Métricas</h3>
-                  <ResponsiveContainer width="100%" height={200}>
-                    <LineChart data={trendData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#fce7f3" />
-                      <XAxis dataKey="mes" tick={{ fontSize: 11 }} />
-                      <YAxis tickFormatter={v => `${v}%`} tick={{ fontSize: 11 }} domain={[0, 'auto']} />
-                      <Tooltip content={<ChartTooltip />} />
-                      <Legend wrapperStyle={{ fontSize: 10 }} />
-                      <Line type="monotone" dataKey="EBITDA" stroke="#db2777" strokeWidth={2} dot={false} />
-                      <Line type="monotone" dataKey="C.Real" stroke="#3b82f6" strokeWidth={2} dot={false} />
-                      <Line type="monotone" dataKey="Personal" stroke="#9333ea" strokeWidth={2} dot={false} />
+                <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="bg-gradient-to-br from-purple-50/50 to-white rounded-2xl p-6 shadow-md border border-purple-200 hover:shadow-lg transition-all col-span-1 lg:col-span-2">
+                  <h3 className="font-black text-slate-800 mb-4 flex items-center gap-2"><Activity className="w-5 h-5 text-purple-600" />Comparativa Completa de Métricas</h3>
+                  <ResponsiveContainer width="100%" height={280}>
+                    <LineChart data={trendData} margin={{ top: 5, right: 20, left: -10, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="gradEBITDA" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#db2777" stopOpacity={0.2}/><stop offset="95%" stopColor="#db2777" stopOpacity={0}/></linearGradient>
+                        <linearGradient id="gradCost" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#3b82f6" stopOpacity={0.2}/><stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/></linearGradient>
+                        <linearGradient id="gradPersonal" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#9333ea" stopOpacity={0.2}/><stop offset="95%" stopColor="#9333ea" stopOpacity={0}/></linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="4 4" stroke="#f3e8ff" vertical={false} />
+                      <XAxis dataKey="mes" tick={{ fontSize: 12, fill: '#64748b' }} />
+                      <YAxis tickFormatter={v => `${v}%`} tick={{ fontSize: 12, fill: '#64748b' }} domain={[0, 'auto']} />
+                      <Tooltip content={<ChartTooltip />} cursor={{ strokeWidth: 2, stroke: '#e5e7eb' }} />
+                      <Legend wrapperStyle={{ fontSize: 12, paddingTop: 15 }} />
+                      <Line type="natural" dataKey="EBITDA" stroke="#db2777" strokeWidth={3} dot={{ fill: '#db2777', r: 4 }} activeDot={{ r: 6 }} fill="url(#gradEBITDA)" />
+                      <Line type="natural" dataKey="C.Real" stroke="#3b82f6" strokeWidth={3} dot={{ fill: '#3b82f6', r: 4 }} activeDot={{ r: 6 }} fill="url(#gradCost)" />
+                      <Line type="natural" dataKey="Personal" stroke="#9333ea" strokeWidth={3} dot={{ fill: '#9333ea', r: 4 }} activeDot={{ r: 6 }} fill="url(#gradPersonal)" />
                     </LineChart>
                   </ResponsiveContainer>
                 </motion.div>
