@@ -23,8 +23,8 @@ function extractStoreCode(storeId) {
   const upper = String(storeId).toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   const bta = upper.match(/\bBTA\s*(\d+)/);  if (bta) return `BTA ${bta[1]}`;
   const tunja = upper.match(/\bTUNJA\s*(\d+)/); if (tunja) return `TUNJA ${tunja[1]}`;
-  const bog = upper.match(/\bBOGOTA?\s*(\d+)/); if (bog) return `BOGOTA ${bog[1]}`;
-  return storeId;
+  const bog = upper.match(/\bBOGOTA\s*(\d+)/); if (bog) return `BOGOTA ${bog[1]}`;
+  return String(storeId).toUpperCase().trim();
 }
 
 const ChartTooltip = ({ active, payload, label }) => {
