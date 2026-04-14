@@ -104,6 +104,8 @@ export default function PYGModal({ onClose, storeId }) {
 
   const [selectedMonths, setSelectedMonths] = useState(() => [lastMonthWithData || 1]);
   const [monthDropdownOpen, setMonthDropdownOpen] = useState(false);
+  const [selectedStore, setSelectedStore] = useState(() => storeCode || '');
+  const [storeDropdownOpen, setStoreDropdownOpen] = useState(false);
 
   // Obtener lista de tiendas disponibles (normalizadas)
   const availableStores = useMemo(() => {
@@ -190,9 +192,6 @@ export default function PYGModal({ onClose, storeId }) {
 
     return insights;
   }, [primaryRecord]);
-
-  const [selectedStore, setSelectedStore] = useState(() => storeCode || '');
-  const [storeDropdownOpen, setStoreDropdownOpen] = useState(false);
 
   // Inicializar selectedStore con la primera tienda disponible si está vacío
   useEffect(() => {
