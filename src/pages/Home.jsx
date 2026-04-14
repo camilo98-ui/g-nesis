@@ -30,6 +30,7 @@ import KpisReportUploader from '@/components/reports/KpisReportUploader.jsx';
 import ParticipacionModal from '@/components/reports/ParticipacionModal.jsx';
 import AggregatorsUploader from '@/components/reports/AggregatorsUploader.jsx';
 import PYGUploader from '@/components/reports/PYGUploader.jsx';
+import PYGModal from '@/components/reports/PYGModal.jsx';
 import { Button } from "@/components/ui/button";
 import { toast } from 'sonner';
 
@@ -171,6 +172,19 @@ const MENU_ITEMS = [
   textColor: 'text-purple-700',
   isSpecialAction: true,
   specialAction: 'customerFeedback'
+},
+{
+  name: 'Ver P&G',
+  page: '',
+  icon: TrendingUp,
+  description: 'Profit & Loss tienda',
+  bgColor: 'bg-gradient-to-br from-emerald-100/90 to-teal-100/80',
+  iconBg: 'bg-emerald-200/60',
+  iconColor: 'text-emerald-600',
+  textColor: 'text-emerald-700',
+  requiredRole: 'gerente',
+  isSpecialAction: true,
+  specialAction: 'verPYG'
 }];
 
 
@@ -203,6 +217,7 @@ export default function Home() {
   const [showParticipacion, setShowParticipacion] = useState(false);
   const [showAggregatorsUploader, setShowAggregatorsUploader] = useState(false);
   const [showPYGUploader, setShowPYGUploader] = useState(false);
+  const [showPYGModal, setShowPYGModal] = useState(false);
 
 
   const ROLES = [
@@ -1346,6 +1361,8 @@ export default function Home() {
                       setShowExperienciaPopsy(true);
                     } else if (item.specialAction === 'customerFeedback') {
                       setShowCustomerExperience(true);
+                    } else if (item.specialAction === 'verPYG') {
+                      setShowPYGModal(true);
                     } else {
                       setShowStoreSales(true);
                     }
@@ -1573,6 +1590,15 @@ export default function Home() {
         <ParticipacionModal
           onClose={() => setShowParticipacion(false)}
           storeId={selectedStore} />
+        }
+      </AnimatePresence>
+
+      {/* Modal P&G de tienda (Gerente con tienda seleccionada) */}
+      <AnimatePresence>
+        {showPYGModal &&
+        <PYGModal
+          storeId={selectedStore}
+          onClose={() => setShowPYGModal(false)} />
         }
       </AnimatePresence>
 
