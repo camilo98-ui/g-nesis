@@ -76,10 +76,10 @@ export default function PYGModal({ onClose, storeId }) {
     queryFn: async () => {
       if (!storeCode) return [];
       const all = await base44.entities.PYGReport.filter({ year: currentYear });
-      const normalized = storeCode.toUpperCase().trim();
+      const cleanInput = storeCode.toUpperCase().trim().replace(/\s+/g, ' ');
       return all.filter(r => {
-        const rCode = String(r.store_code || '').toUpperCase().trim();
-        return rCode === normalized || rCode.includes(normalized) || normalized.includes(rCode);
+        const rCode = String(r.store_code || '').toUpperCase().trim().replace(/\s+/g, ' ');
+        return rCode === cleanInput || rCode.replace(/\s/g, '') === cleanInput.replace(/\s/g, '');
       });
     },
     enabled: !!storeCode,
