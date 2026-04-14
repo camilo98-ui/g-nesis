@@ -52,13 +52,14 @@ const ChartTooltip = ({ active, payload, label }) => {
 };
 
 // Insight Card
-function InsightCard({ title, value, prev, trend, icon: Icon, color, inverse = false }) {
+function InsightCard({ title, value, prev, trend, icon: Icon, color, inverse = false, onClick }) {
   const improved = trend > 0 ? (inverse ? false : true) : (inverse ? true : false);
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`rounded-2xl p-4 border-2 ${color.border} ${color.bg}`}
+      onClick={onClick}
+      className={`rounded-2xl p-4 border-2 ${color.border} ${color.bg} ${onClick ? 'cursor-pointer hover:shadow-xl transition-all' : ''}`}
     >
       <div className="flex items-start justify-between">
         <div className="flex-1">
@@ -76,6 +77,7 @@ function InsightCard({ title, value, prev, trend, icon: Icon, color, inverse = f
           {trend > 0 ? '+' : ''}{trend.toFixed(2)}pp
         </div>
       )}
+      {onClick && <p className="text-[10px] text-slate-400 mt-2">Haz clic para ver detalles →</p>}
     </motion.div>
   );
 }
@@ -167,6 +169,8 @@ export default function PYGModal({ onClose, storeId }) {
     } catch { return []; }
   }, [primaryRecord]);
 
+  const [selectedKPI, setSelectedKPI] = useState(null);
+
   const insights = useMemo(() => {
     if (!primaryRecord) return [];
     const insights = [];
@@ -184,20 +188,40 @@ export default function PYGModal({ onClose, storeId }) {
     const diffPersonal = prevPersonal !== null ? personal - prevPersonal : null;
     const diffGastos = prevGastos !== null ? gastos - prevGastos : null;
 
-    if (ebitda >= 30) insights.push({ type: 'success', text: `EBITDA: ${ebitda.toFixed(1)}%${diffEbitda !== null ? ` (${diffEbitda > 0 ? '↑' : '↓'} ${Math.abs(diffEbitda).toFixed(2)}pp vs mes anterior)` : ''}. Excelente rentabilidad: por cada 100 pesos de venta, genera ${ebitda.toFixed(1)} de margen operacional.` });
-    else if (ebitda >= 20) insights.push({ type: 'info', text: `EBITDA: ${ebitda.toFixed(1)}%${diffEbitda !== null ? ` (${diffEbitda > 0 ? '↑' : '↓'} ${Math.abs(diffEbitda).toFixed(2)}pp)` : ''}. Dentro de rango. ${diffEbitda !== null && diffEbitda < 0 ? 'Deterioro mes a mes requiere atención.' : 'Mantener desempeño.'}` });
-    else insights.push({ type: 'warning', text: `EBITDA BAJO: ${ebitda.toFixed(1)}%${diffEbitda !== null ? ` (${diffEbitda > 0 ? 'mejora' : 'caída'} de ${Math.abs(diffEbitda).toFixed(2)}pp)` : ''}. Sobre 100 pesos vendidos, solo ${ebitda.toFixed(1)} quedan como margen operacional. Crítico.` });
+    // EBITDA análisis completo
+    let ebitdaText = '';
+    if (ebitda >= 30) ebitdaText = `Margen EBITDA de ${ebitda.toFixed(1)}% refleja excelente rentabilidad. En términos operacionales, cada 100 pesos de venta generan ${ebitda.toFixed(1)} pesos de margen. ${diffEbitda !== null ? `Variación mensual: ${diffEbitda > 0 ? '+' : ''}${diffEbitda.toFixed(2)}pp (${Math.abs(diffEbitda / prevEbitda * 100).toFixed(1)}% de cambio relativo).` : ''} Desempeño sostenible.`;
+    else if (ebitda >= 20) ebitdaText = `EBITDA de ${ebitda.toFixed(1)}% dentro del rango operacional normal. Capacidad de generación de valor: ${ebitda.toFixed(1)} pesos por cada 100 en ventas. ${diffEbitda !== null ? `${diffEbitda < 0 ? 'Tendencia negativa de ' : 'Crecimiento de '}${Math.abs(diffEbitda).toFixed(2)}pp mes a mes (cambio relativo: ${Math.abs(diffEbitda / prevEbitda * 100).toFixed(1)}%).` : ''} Requiere monitoreo continuo.`;
+    else ebitdaText = `EBITDA crítico de ${ebitda.toFixed(1)}%. Generación de margen muy limitada: solo ${ebitda.toFixed(1)} pesos por cada 100 vendidos. ${diffEbitda !== null ? `${diffEbitda < 0 ? 'Caída de ' : 'Recuperación de '}${Math.abs(diffEbitda).toFixed(2)}pp (${Math.abs(diffEbitda / prevEbitda * 100).toFixed(1)}% relativo).` : ''} Acción inmediata: analizar estructura de costos fijos y gastos operacionales.`;
+    insights.push({ type: ebitda >= 20 ? (ebitda >= 30 ? 'success' : 'info') : 'warning', text: ebitdaText, kpi: 'ebitda' });
 
+    // Costo análisis
     const brecha = Math.abs(costReal - costTeorico);
-    if (costReal <= costTeorico) insights.push({ type: 'success', text: `Costo Real vs Teórico: ${costReal.toFixed(1)}% vs ${costTeorico.toFixed(1)}% (${brecha.toFixed(2)}pp bajo presupuesto).${prevCostReal && prevCostReal > costReal ? ` Mejora de ${(prevCostReal - costReal).toFixed(2)}pp vs mes anterior.` : ' Control operacional excelente.'}` });
-    else insights.push({ type: 'warning', text: `Costo Real SUPERIOR: ${costReal.toFixed(1)}% vs ${costTeorico.toFixed(1)}% (${brecha.toFixed(2)}pp sobre presupuesto).${diffCost && diffCost > 0 ? ` Empeora ${diffCost.toFixed(2)}pp mes a mes.` : ' Ineficiencias operacionales detectadas.'}` });
+    const pctDesviacion = costTeorico > 0 ? (brecha / costTeorico * 100).toFixed(1) : 0;
+    let costoText = '';
+    if (costReal <= costTeorico) {
+      const ahorro = costTeorico - costReal;
+      const pctAhorro = (ahorro / costTeorico * 100).toFixed(1);
+      costoText = `Costo Real ${costReal.toFixed(1)}% vs Teórico ${costTeorico.toFixed(1)}% representa ahorro de ${brecha.toFixed(2)}pp (${pctAhorro}% relativo). ${diffCost !== null && prevCostReal ? `Mejora de ${(prevCostReal - costReal).toFixed(2)}pp vs mes anterior (${Math.abs(diffCost / prevCostReal * 100).toFixed(1)}% relativo).` : ''} Control operacional excelente.`;
+    } else {
+      const exceso = costReal - costTeorico;
+      const pctExceso = (exceso / costTeorico * 100).toFixed(1);
+      costoText = `Costo Real ${costReal.toFixed(1)}% SUPERIOR al Teórico ${costTeorico.toFixed(1)}%. Desviación: +${brecha.toFixed(2)}pp (+${pctExceso}%). ${diffCost !== null ? `${diffCost > 0 ? 'Empeoramiento de ' : 'Mejora de '}${Math.abs(diffCost).toFixed(2)}pp mes a mes (${Math.abs(diffCost / prevCostReal * 100).toFixed(1)}% relativo).` : ''} Requiere control inmediato de eficiencia operacional.`;
+    }
+    insights.push({ type: costReal <= costTeorico ? 'success' : 'warning', text: costoText, kpi: 'costo' });
 
-    if (personal <= 20) insights.push({ type: 'success', text: `Personal: ${personal.toFixed(1)}%${diffPersonal !== null ? ` (${diffPersonal < 0 ? '↓' : '↑'} ${Math.abs(diffPersonal).toFixed(2)}pp)` : ''}. Productividad óptima: equipo eficiente en generación de margen.` });
-    else if (personal <= 25) insights.push({ type: 'info', text: `Personal: ${personal.toFixed(1)}%${diffPersonal !== null ? ` (${diffPersonal > 0 ? 'aumento' : 'reducción'} de ${Math.abs(diffPersonal).toFixed(2)}pp)` : ''}. Normal. Requiere monitoreo continuo de productividad.` });
-    else insights.push({ type: 'warning', text: `Personal ALTO: ${personal.toFixed(1)}%${diffPersonal !== null ? ` (${diffPersonal > 0 ? '↑' : '↓'} ${Math.abs(diffPersonal).toFixed(2)}pp)` : ''}. Costo excesivo de nómina. Revisar estructura o incrementar ventas.` });
+    // Personal análisis detallado
+    let personalText = '';
+    if (personal <= 20) personalText = `Costo de Personal ${personal.toFixed(1)}% representa eficiencia óptima. Productividad: 100 pesos de venta soportan ${personal.toFixed(1)} pesos de nómina. ${diffPersonal !== null ? `${diffPersonal < 0 ? 'Reducción de ' : 'Aumento de '}${Math.abs(diffPersonal).toFixed(2)}pp mes a mes (${Math.abs(diffPersonal / prevPersonal * 100).toFixed(1)}% relativo).` : ''} Equipo muy eficiente en generación de margen.`;
+    else if (personal <= 25) personalText = `Costo de Personal ${personal.toFixed(1)}% dentro de rango normal. Por cada 100 pesos vendidos, ${personal.toFixed(1)} van a nómina. ${diffPersonal !== null ? `${diffPersonal > 0 ? 'Tendencia alcista' : 'Tendencia bajista'} de ${Math.abs(diffPersonal).toFixed(2)}pp (${Math.abs(diffPersonal / prevPersonal * 100).toFixed(1)}% relativo).` : ''} Mantener monitoreo de productividad y rotación.`;
+    else personalText = `Costo de Personal ELEVADO: ${personal.toFixed(1)}%. Porcentaje de nómina sobre ventas muy alto: ${personal.toFixed(1)} pesos por cada 100 vendidos. ${diffPersonal !== null ? `${diffPersonal > 0 ? 'Incremento' : 'Decremento'} de ${Math.abs(diffPersonal).toFixed(2)}pp (${Math.abs(diffPersonal / prevPersonal * 100).toFixed(1)}%).` : ''} Urgente: revisar niveles de empleo, rotación y productividad.`;
+    insights.push({ type: personal <= 20 ? 'success' : (personal <= 25 ? 'info' : 'warning'), text: personalText, kpi: 'personal' });
 
-    if (gastos <= 40) insights.push({ type: 'success', text: `Gastos Operacionales: ${gastos.toFixed(1)}%${diffGastos !== null ? ` (${diffGastos < 0 ? 'reducción' : 'aumento'} de ${Math.abs(diffGastos).toFixed(2)}pp)` : ''}. Gestión eficiente de arriendos, servicios y administración.` });
-    else insights.push({ type: 'warning', text: `Gastos ELEVADOS: ${gastos.toFixed(1)}%${diffGastos !== null ? ` (${diffGastos > 0 ? 'aumento' : 'reducción'} de ${Math.abs(diffGastos).toFixed(2)}pp)` : ''}. Arriendos, servicios y administración consumen demasiado margen. Urgente optimizar.` });
+    // Gastos análisis
+    let gastosText = '';
+    if (gastos <= 40) gastosText = `Gastos Operacionales ${gastos.toFixed(1)}% (arriendos, servicios, admin). Estructura: Personal ${personal.toFixed(1)}% + Costos ${costReal.toFixed(1)}% + Gastos ${gastos.toFixed(1)}% = ${(personal + costReal + gastos).toFixed(1)}% del total de ventas. ${diffGastos !== null ? `${diffGastos < 0 ? 'Reducción de ' : 'Aumento de '}${Math.abs(diffGastos).toFixed(2)}pp mes a mes (${Math.abs(diffGastos / prevGastos * 100).toFixed(1)}% relativo).` : ''} Gestión de costos fijos controlada.`;
+    else gastosText = `Gastos Operacionales ELEVADOS: ${gastos.toFixed(1)}%. Arriendos, servicios y administración consumen demasiado del margen bruto. ${diffGastos !== null ? `${diffGastos > 0 ? 'Tendencia al alza' : 'Tendencia a la baja'} de ${Math.abs(diffGastos).toFixed(2)}pp (${Math.abs(diffGastos / prevGastos * 100).toFixed(1)}% relativo).` : ''} Requiere renegociación de arriendos o automatización de procesos administrativos.`;
+    insights.push({ type: gastos <= 40 ? 'success' : 'warning', text: gastosText, kpi: 'gastos' });
 
     return insights;
   }, [primaryRecord, prevRecord]);
@@ -329,6 +353,7 @@ export default function PYGModal({ onClose, storeId }) {
                   trend={prevRecord ? pctNum(primaryRecord.margen_ebitda) - pctNum(prevRecord.margen_ebitda) : null}
                   icon={TrendingUp}
                   color={{ border: 'border-pink-200', bg: 'bg-pink-50', text: 'text-pink-600', label: 'text-pink-500', muted: 'text-pink-400', icon: 'bg-pink-600' }}
+                  onClick={() => setSelectedKPI('ebitda')}
                 />
                 <InsightCard
                   title="Costo Personal"
@@ -338,6 +363,7 @@ export default function PYGModal({ onClose, storeId }) {
                   icon={BarChart3}
                   color={{ border: 'border-fuchsia-200', bg: 'bg-fuchsia-50', text: 'text-fuchsia-600', label: 'text-fuchsia-500', muted: 'text-fuchsia-400', icon: 'bg-fuchsia-600' }}
                   inverse
+                  onClick={() => setSelectedKPI('personal')}
                 />
                 <InsightCard
                   title="Costo Real vs Teórico"
@@ -347,6 +373,7 @@ export default function PYGModal({ onClose, storeId }) {
                   icon={TrendingDown}
                   color={{ border: 'border-blue-200', bg: 'bg-blue-50', text: 'text-blue-600', label: 'text-blue-500', muted: 'text-blue-400', icon: 'bg-blue-600' }}
                   inverse
+                  onClick={() => setSelectedKPI('costo')}
                 />
                 <InsightCard
                   title="Gastos % Venta"
@@ -356,6 +383,7 @@ export default function PYGModal({ onClose, storeId }) {
                   icon={AlertCircle}
                   color={{ border: 'border-rose-200', bg: 'bg-rose-50', text: 'text-rose-600', label: 'text-rose-500', muted: 'text-rose-400', icon: 'bg-rose-600' }}
                   inverse
+                  onClick={() => setSelectedKPI('gastos')}
                 />
               </div>
             </div>
@@ -556,6 +584,119 @@ export default function PYGModal({ onClose, storeId }) {
             )}
           </>
         )}
+
+        {/* Modal KPI Detail */}
+        <AnimatePresence>
+          {selectedKPI && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedKPI(null)}
+              className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+            >
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.95, opacity: 0 }}
+                onClick={e => e.stopPropagation()}
+                className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto"
+              >
+                {selectedKPI === 'ebitda' && (
+                  <div className="p-8">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-12 h-12 bg-pink-600 rounded-xl flex items-center justify-center"><TrendingUp className="w-6 h-6 text-white" /></div>
+                      <div>
+                        <h2 className="text-2xl font-black text-slate-800">Margen EBITDA</h2>
+                        <p className="text-slate-500">{MONTHS_FULL[primaryMonth - 1]}</p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-4 mb-6">
+                      <div className="bg-pink-50 rounded-xl p-4"><p className="text-xs text-pink-600 font-bold">Actual</p><p className="text-2xl font-black text-pink-700">{fmt(primaryRecord.margen_ebitda)}</p></div>
+                      {prevRecord && <div className="bg-slate-100 rounded-xl p-4"><p className="text-xs text-slate-600 font-bold">Mes Anterior</p><p className="text-2xl font-black text-slate-700">{fmt(prevRecord.margen_ebitda)}</p></div>}
+                      {prevRecord && <div className={`rounded-xl p-4 ${pctNum(primaryRecord.margen_ebitda) > pctNum(prevRecord.margen_ebitda) ? 'bg-emerald-50' : 'bg-red-50'}`}><p className="text-xs font-bold">{pctNum(primaryRecord.margen_ebitda) > pctNum(prevRecord.margen_ebitda) ? 'Cambio Positivo' : 'Cambio Negativo'}</p><p className={`text-2xl font-black ${pctNum(primaryRecord.margen_ebitda) > pctNum(prevRecord.margen_ebitda) ? 'text-emerald-700' : 'text-red-700'}`}>{(pctNum(primaryRecord.margen_ebitda) - pctNum(prevRecord.margen_ebitda)).toFixed(2)}pp</p></div>}
+                    </div>
+                    <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
+                      <p className="text-sm text-blue-900 font-medium leading-relaxed">
+                        {insights.find(i => i.kpi === 'ebitda')?.text}
+                      </p>
+                    </div>
+                    <button onClick={() => setSelectedKPI(null)} className="mt-6 w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 px-4 rounded-xl transition-colors">Cerrar</button>
+                  </div>
+                )}
+
+                {selectedKPI === 'personal' && (
+                  <div className="p-8">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-12 h-12 bg-fuchsia-600 rounded-xl flex items-center justify-center"><BarChart3 className="w-6 h-6 text-white" /></div>
+                      <div>
+                        <h2 className="text-2xl font-black text-slate-800">Costo de Personal</h2>
+                        <p className="text-slate-500">{MONTHS_FULL[primaryMonth - 1]}</p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-4 mb-6">
+                      <div className="bg-fuchsia-50 rounded-xl p-4"><p className="text-xs text-fuchsia-600 font-bold">Actual</p><p className="text-2xl font-black text-fuchsia-700">{fmt(primaryRecord.costo_personal)}</p></div>
+                      {prevRecord && <div className="bg-slate-100 rounded-xl p-4"><p className="text-xs text-slate-600 font-bold">Mes Anterior</p><p className="text-2xl font-black text-slate-700">{fmt(prevRecord.costo_personal)}</p></div>}
+                      {prevRecord && <div className={`rounded-xl p-4 ${pctNum(primaryRecord.costo_personal) < pctNum(prevRecord.costo_personal) ? 'bg-emerald-50' : 'bg-red-50'}`}><p className="text-xs font-bold">{pctNum(primaryRecord.costo_personal) < pctNum(prevRecord.costo_personal) ? 'Mejora' : 'Empeora'}</p><p className={`text-2xl font-black ${pctNum(primaryRecord.costo_personal) < pctNum(prevRecord.costo_personal) ? 'text-emerald-700' : 'text-red-700'}`}>{Math.abs(pctNum(primaryRecord.costo_personal) - pctNum(prevRecord.costo_personal)).toFixed(2)}pp</p></div>}
+                    </div>
+                    <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
+                      <p className="text-sm text-blue-900 font-medium leading-relaxed">
+                        {insights.find(i => i.kpi === 'personal')?.text}
+                      </p>
+                    </div>
+                    <button onClick={() => setSelectedKPI(null)} className="mt-6 w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 px-4 rounded-xl transition-colors">Cerrar</button>
+                  </div>
+                )}
+
+                {selectedKPI === 'costo' && (
+                  <div className="p-8">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center"><TrendingDown className="w-6 h-6 text-white" /></div>
+                      <div>
+                        <h2 className="text-2xl font-black text-slate-800">Costo Real vs Teórico</h2>
+                        <p className="text-slate-500">{MONTHS_FULL[primaryMonth - 1]}</p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-4 mb-6">
+                      <div className="bg-blue-50 rounded-xl p-4"><p className="text-xs text-blue-600 font-bold">Real</p><p className="text-2xl font-black text-blue-700">{fmt(primaryRecord.cost_real)}</p></div>
+                      <div className="bg-slate-100 rounded-xl p-4"><p className="text-xs text-slate-600 font-bold">Teórico</p><p className="text-2xl font-black text-slate-700">{fmt(primaryRecord.cost_teorico)}</p></div>
+                      <div className={`rounded-xl p-4 ${pctNum(primaryRecord.cost_real) <= pctNum(primaryRecord.cost_teorico) ? 'bg-emerald-50' : 'bg-red-50'}`}><p className="text-xs font-bold">{pctNum(primaryRecord.cost_real) <= pctNum(primaryRecord.cost_teorico) ? 'Ahorro' : 'Exceso'}</p><p className={`text-2xl font-black ${pctNum(primaryRecord.cost_real) <= pctNum(primaryRecord.cost_teorico) ? 'text-emerald-700' : 'text-red-700'}`}>{Math.abs(pctNum(primaryRecord.cost_real) - pctNum(primaryRecord.cost_teorico)).toFixed(2)}pp</p></div>
+                    </div>
+                    <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
+                      <p className="text-sm text-blue-900 font-medium leading-relaxed">
+                        {insights.find(i => i.kpi === 'costo')?.text}
+                      </p>
+                    </div>
+                    <button onClick={() => setSelectedKPI(null)} className="mt-6 w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 px-4 rounded-xl transition-colors">Cerrar</button>
+                  </div>
+                )}
+
+                {selectedKPI === 'gastos' && (
+                  <div className="p-8">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-12 h-12 bg-rose-600 rounded-xl flex items-center justify-center"><AlertCircle className="w-6 h-6 text-white" /></div>
+                      <div>
+                        <h2 className="text-2xl font-black text-slate-800">Gastos Operacionales</h2>
+                        <p className="text-slate-500">{MONTHS_FULL[primaryMonth - 1]}</p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-4 mb-6">
+                      <div className="bg-rose-50 rounded-xl p-4"><p className="text-xs text-rose-600 font-bold">% Venta</p><p className="text-2xl font-black text-rose-700">{fmt(primaryRecord.gastos_pct_venta)}</p></div>
+                      {prevRecord && <div className="bg-slate-100 rounded-xl p-4"><p className="text-xs text-slate-600 font-bold">Mes Anterior</p><p className="text-2xl font-black text-slate-700">{fmt(prevRecord.gastos_pct_venta)}</p></div>}
+                      {prevRecord && <div className={`rounded-xl p-4 ${pctNum(primaryRecord.gastos_pct_venta) < pctNum(prevRecord.gastos_pct_venta) ? 'bg-emerald-50' : 'bg-red-50'}`}><p className="text-xs font-bold">{pctNum(primaryRecord.gastos_pct_venta) < pctNum(prevRecord.gastos_pct_venta) ? 'Reducción' : 'Aumento'}</p><p className={`text-2xl font-black ${pctNum(primaryRecord.gastos_pct_venta) < pctNum(prevRecord.gastos_pct_venta) ? 'text-emerald-700' : 'text-red-700'}`}>{Math.abs(pctNum(primaryRecord.gastos_pct_venta) - pctNum(prevRecord.gastos_pct_venta)).toFixed(2)}pp</p></div>}
+                    </div>
+                    <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
+                      <p className="text-sm text-blue-900 font-medium leading-relaxed">
+                        {insights.find(i => i.kpi === 'gastos')?.text}
+                      </p>
+                    </div>
+                    <button onClick={() => setSelectedKPI(null)} className="mt-6 w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 px-4 rounded-xl transition-colors">Cerrar</button>
+                  </div>
+                )}
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </motion.div>
   );
