@@ -208,18 +208,18 @@ export default function Budget() {
                               </div>
                               <div className="flex items-center gap-2 text-sm">
                                 <Receipt className="w-4 h-4 text-blue-500" />
-                                <span className="text-gray-500">Tickets:</span>
-                                <span className="font-medium text-gray-800">{budget.tickets_budget?.toLocaleString() || 0}</span>
+                                <span className="text-gray-500">Ticket:</span>
+                                <span className="font-medium text-gray-800">{formatCurrency(budget.tickets_budget)}</span>
                               </div>
                               <div className="flex items-center gap-2 text-sm">
                                 <Zap className="w-4 h-4 text-purple-500" />
                                 <span className="text-gray-500">Trans:</span>
-                                <span className="font-medium text-gray-800">{budget.transactions_budget?.toLocaleString() || 0}</span>
+                                <span className="font-medium text-gray-800">{(budget.transactions_budget || 0).toLocaleString('es-CO')}</span>
                               </div>
                               <div className="flex items-center gap-2 text-sm">
                                 <Gift className="w-4 h-4 text-pink-500" />
                                 <span className="text-gray-500">Sugeridos:</span>
-                                <span className="font-medium text-gray-800">{budget.suggested_budget?.toLocaleString() || 0}</span>
+                                <span className="font-medium text-gray-800">{(budget.suggested_budget || 0).toLocaleString('es-CO')}</span>
                               </div>
                             </div>
                           </motion.div>
