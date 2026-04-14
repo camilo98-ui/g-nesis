@@ -1,0 +1,67 @@
+{
+  "name": "PYGReport",
+  "type": "object",
+  "properties": {
+    "store_code": {
+      "type": "string",
+      "description": "C\u00f3digo de la tienda (ej: BTA 52)"
+    },
+    "month": {
+      "type": "number",
+      "description": "Mes del reporte (1-12)"
+    },
+    "year": {
+      "type": "number",
+      "description": "A\u00f1o del reporte"
+    },
+    "cost_real": {
+      "type": "number",
+      "description": "% Costo real (0-1)"
+    },
+    "cost_teorico": {
+      "type": "number",
+      "description": "% Costo Te\u00f3rico (0-1)"
+    },
+    "margen_ebitda": {
+      "type": "number",
+      "description": "Margen EBITDA (0-1)"
+    },
+    "gastos_pct_venta": {
+      "type": "number",
+      "description": "Gastos % de venta (0-1)"
+    },
+    "costo_personal": {
+      "type": "number",
+      "description": "Costo Personal % (0-1)"
+    },
+    "arriendos": {
+      "type": "number",
+      "description": "Arriendos % (0-1)"
+    },
+    "administracion": {
+      "type": "number",
+      "description": "Administraci\u00f3n % (0-1)"
+    },
+    "servicios_publicos": {
+      "type": "number",
+      "description": "Servicios P\u00fablicos % (0-1)"
+    },
+    "impuestos": {
+      "type": "number",
+      "description": "Impuestos % (0-1)"
+    },
+    "otros_gastos": {
+      "type": "string",
+      "description": "JSON con el resto de partidas de gastos"
+    },
+    "report_id": {
+      "type": "string",
+      "description": "ID \u00fanico del reporte cargado"
+    }
+  },
+  "required": [
+    "store_code",
+    "month",
+    "year"
+  ]
+}

@@ -9,6 +9,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AggregatorsModal from '@/components/reports/AggregatorsModal';
+import PYGModal from '@/components/reports/PYGModal';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   Cell, PieChart as RechartsPie, Pie, RadialBarChart, RadialBar
@@ -513,6 +514,7 @@ export default function SalesReportView() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [expandedCharts, setExpandedCharts] = useState({ pie: false, top10: false });
   const [showAggregators, setShowAggregators] = useState(false);
+  const [showPYG, setShowPYG] = useState(false);
 
   const { data: rawRecords = [], isLoading } = useQuery({
     queryKey: ['salesReport', storeCode],
@@ -626,6 +628,13 @@ export default function SalesReportView() {
             <p className="text-white/60 text-sm">{storeCode} · Reporte de ventas por producto</p>
           </div>
           <div className="flex items-center gap-3 flex-shrink-0">
+            <Button
+              onClick={() => setShowPYG(true)}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2 h-9 px-4 text-sm font-semibold"
+            >
+              <TrendingUp className="w-4 h-4" />
+              P&G
+            </Button>
             <Button
               onClick={() => setShowAggregators(true)}
               className="bg-orange-500 hover:bg-orange-600 text-white gap-2 h-9 px-4 text-sm font-semibold"
@@ -865,10 +874,13 @@ export default function SalesReportView() {
 
       <AnimatePresence>
         {showAggregators && (
-          <AggregatorsModal
-            storeId={storeCode}
-            onClose={() => setShowAggregators(false)}
-          />
+          <AggregatorsModal storeId={storeCode} onClose={() => setShowAggregators(false)} />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showPYG && (
+          <PYGModal storeId={storeCode} onClose={() => setShowPYG(false)} />
         )}
       </AnimatePresence>
     </div>

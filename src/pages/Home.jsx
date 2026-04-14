@@ -29,6 +29,7 @@ import SalesReportUploader from '@/components/reports/SalesReportUploader.jsx';
 import KpisReportUploader from '@/components/reports/KpisReportUploader.jsx';
 import ParticipacionModal from '@/components/reports/ParticipacionModal.jsx';
 import AggregatorsUploader from '@/components/reports/AggregatorsUploader.jsx';
+import PYGUploader from '@/components/reports/PYGUploader.jsx';
 import { Button } from "@/components/ui/button";
 import { toast } from 'sonner';
 
@@ -190,6 +191,7 @@ export default function Home() {
   const [showKpisUploader, setShowKpisUploader] = useState(false);
   const [showParticipacion, setShowParticipacion] = useState(false);
   const [showAggregatorsUploader, setShowAggregatorsUploader] = useState(false);
+  const [showPYGUploader, setShowPYGUploader] = useState(false);
 
 
   const ROLES = [
@@ -1183,6 +1185,16 @@ export default function Home() {
                 Agregadores
               </Button>
           }
+            {selectedRole === 'gerente' &&
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowPYGUploader(true)}
+            className="text-gray-400 hover:text-emerald-600 hover:bg-emerald-50/50 transition-all text-xs">
+                <TrendingUp className="w-3.5 h-3.5 mr-1" />
+                P&G
+              </Button>
+          }
 
             {selectedRole !== 'gerente' && selectedStore &&
             <Button
@@ -1532,6 +1544,15 @@ export default function Home() {
         <AggregatorsUploader
           onClose={() => setShowAggregatorsUploader(false)}
           onSuccess={() => setShowAggregatorsUploader(false)} />
+        }
+      </AnimatePresence>
+
+      {/* Modal P&G (Gerente) */}
+      <AnimatePresence>
+        {showPYGUploader &&
+        <PYGUploader
+          onClose={() => setShowPYGUploader(false)}
+          onSuccess={() => setShowPYGUploader(false)} />
         }
       </AnimatePresence>
 
