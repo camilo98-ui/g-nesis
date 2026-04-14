@@ -40,7 +40,13 @@ export default function AggregatorsModal({ onClose, storeId }) {
     queryKey: ['aggregators', storeCode],
     queryFn: async () => {
       if (!storeCode) return [];
-      return base44.entities.AggregatorsData.filter({ store_code: storeCode });
+      // Traer todos y filtrar en cliente para evitar problemas de case/espacios
+      const all = await base44.entities.AggregatorsData.list();
+      return all.filter(r => {
+        const rc = String(r.store_code || '').trim().toUpperCase();
+        const sc = String(storeCode).trim().toUpperCase();
+        return rc === sc;
+      });
     },
     enabled: !!storeCode,
   });
@@ -100,7 +106,8 @@ export default function AggregatorsModal({ onClose, storeId }) {
               <Truck className="w-12 h-12 mx-auto mb-3 opacity-30" />
               <p className="font-medium text-slate-700">Sin datos de agregadores</p>
               <p className="text-sm mt-1 text-slate-400">Esta tienda no tiene datos cargados aún</p>
-              <p className="text-xs mt-2 text-slate-400">El gerente puede cargarlos desde el menú principal</p>
+              <p className="text-xs mt-2 text-slate-400">Buscando: <strong>{storeCode}</strong></p>
+              <p className="text-xs mt-1 text-slate-400">El gerente puede cargarlos desde el menú principal</p>
             </div>
           ) : (
             <div className="space-y-3">
