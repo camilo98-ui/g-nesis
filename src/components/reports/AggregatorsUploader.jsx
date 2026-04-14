@@ -23,74 +23,72 @@ function extractStoreCode(headerStr) {
 }
 
 // Parsear el Excel de agregadores
-// Estructura esperada:
-//   Fila 0: [PdV / Canal, BTA 21, BTA 21, BTA 52, BTA 52, ...] ← tienda repetida 2 veces por canal
-//   Fila 1: [Canal,       % Part., Venta,  % Part., Venta, ...]  ← sub-encabezado
-//   Fila 2+: datos
+// Estructura real del archivo:
+//   Fila 0 (header via sheet_to_json): columnas con nombre de tienda "BTA 21 (CC...)"
+//                                       la primera columna es "PdV"
+//   Fila 0 datos: { PdV: 'Canal', 'BTA 21...': '% Part. Venta Bruta...' }  ← fila de sub-header
+//   Fila 1+: { PdV: 'Al Paso', 'BTA 21...': 0.944, ... }  ← datos reales
 //
-// Por cada tienda hay DOS columnas: la primera es % participación, la segunda es venta bruta.
-// Se combinan en un solo registro por tienda+canal.
+// Como sheet_to_json usa la fila 0 como keys, los datos empiezan en row index 0
+// donde row[PdV] === 'Canal' (sub-header) y row index 1+ son los datos reales.
 function parseAggregatorsExcel(XLSX, arrayBuffer) {
   const workbook = XLSX.read(arrayBuffer, { type: 'array' });
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
+
+  // Usar header:1 para tener control total de filas
   const jsonRows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null });
+  if (jsonRows.length < 2) return [];
 
-  if (jsonRows.length < 3) return [];
+  // Fila 0 = nombres de columna (PdV, BTA 21 (CC...), BTA 21 (CC...), ...)
+  const headerRow = jsonRows[0];
 
-  const headerRow = jsonRows[0]; // fila con códigos de tienda
-  const subRow = jsonRows[1];    // fila con "% Part." / "Venta Bruta"
-  const dataStartRow = 2;
+  // Detectar qué columnas son de participación vs venta
+  // Si hay una segunda fila con "Canal" en col 0, es el sub-header
+  let dataStartRow = 1;
+  if (jsonRows[1] && String(jsonRows[1][0] || '').toLowerCase().includes('canal')) {
+    dataStartRow = 2;
+  }
 
   const parseNum = (val) => {
     if (val === null || val === undefined || val === '') return null;
     if (typeof val === 'number') return val;
-    const n = parseFloat(String(val).replace(/[^0-9.-]/g, ''));
+    const n = parseFloat(String(val).replace(/[^0-9.,-]/g, '').replace(',', '.'));
     return isNaN(n) ? null : n;
   };
 
-  const isPartLabel = (val) => {
-    if (!val) return false;
-    const s = String(val).toLowerCase();
-    return s.includes('part') || s.includes('%');
-  };
-
-  const isVentaLabel = (val) => {
-    if (!val) return false;
-    const s = String(val).toLowerCase();
-    return s.includes('venta') || s.includes('bruta') || s.includes('gros') || s.includes('vta');
-  };
-
-  // Construir grupos: para cada tienda encontrar su colPart y colVenta
-  // El header repite el código de tienda dos veces (una por columna)
+  // Mapear columnas a tiendas
+  // El Excel repite el nombre de tienda para dos columnas: % y Venta Bruta
+  // Como XLSX lee celdas combinadas, la segunda aparición puede ser null
+  // Reconstruir: primera aparición de cada código = colPart, segunda = colVenta
   const storeGroups = {}; // { storeCode: { colPart, colVenta } }
-  
+  const storeSeen = {};   // cuántas veces se vio cada código
+
   for (let col = 1; col < headerRow.length; col++) {
     const code = extractStoreCode(headerRow[col]);
-    if (!code) continue;
+    if (!code) {
+      // Puede ser la segunda columna de la última tienda vista (col vacía)
+      // Buscar hacia atrás el último store y asignarle colVenta si no tiene
+      for (let back = col - 1; back >= 1; back--) {
+        const backCode = extractStoreCode(headerRow[back]);
+        if (backCode && storeGroups[backCode] && storeGroups[backCode].colVenta === null) {
+          storeGroups[backCode].colVenta = col;
+          break;
+        }
+        if (backCode) break; // ya tiene venta asignada, parar
+      }
+      continue;
+    }
 
-    const subLabel = subRow[col];
-    
-    if (!storeGroups[code]) {
+    if (!storeSeen[code]) {
+      storeSeen[code] = 0;
       storeGroups[code] = { colPart: null, colVenta: null };
     }
+    storeSeen[code]++;
 
-    if (isVentaLabel(subLabel)) {
-      storeGroups[code].colVenta = col;
-    } else {
-      // % Part. o sin etiqueta → es la columna de participación
+    if (storeSeen[code] === 1) {
       storeGroups[code].colPart = col;
-    }
-  }
-
-  // Fallback: si las etiquetas no ayudaron, asumir primera columna = %, segunda = venta
-  for (const code of Object.keys(storeGroups)) {
-    const g = storeGroups[code];
-    if (g.colPart !== null && g.colVenta === null) {
-      // Buscar la siguiente columna sin código de tienda como venta
-      const nextCol = g.colPart + 1;
-      if (nextCol < headerRow.length && !extractStoreCode(headerRow[nextCol])) {
-        g.colVenta = nextCol;
-      }
+    } else {
+      storeGroups[code].colVenta = col;
     }
   }
 
@@ -102,7 +100,7 @@ function parseAggregatorsExcel(XLSX, arrayBuffer) {
     const rowData = jsonRows[row];
     if (!rowData || !rowData[0]) continue;
     const channel = String(rowData[0]).trim();
-    if (!channel) continue;
+    if (!channel || channel.toLowerCase() === 'canal') continue;
 
     for (const [storeCode, { colPart, colVenta }] of Object.entries(storeGroups)) {
       if (colPart === null) continue;
@@ -111,13 +109,13 @@ function parseAggregatorsExcel(XLSX, arrayBuffer) {
       const rawVenta = colVenta !== null ? parseNum(rowData[colVenta]) : null;
       if (rawPart === null && rawVenta === null) continue;
 
-      // Normalizar participación: si viene como 94.5 → 0.945, si viene como 0.945 → dejarlo
+      // Normalizar: 0.944 → 0.944 (ya es decimal), 94.4 → 0.944
       const participation = rawPart !== null ? (rawPart > 1 ? rawPart / 100 : rawPart) : 0;
 
       records.push({
         store_code: storeCode,
         channel,
-        participation,       // 0-1
+        participation,
         total_sales: rawVenta || 0,
         report_id: reportId,
         uploaded_at: uploadedAt,
@@ -155,14 +153,8 @@ export default function AggregatorsUploader({ onClose, onSuccess }) {
       const records = parseAggregatorsExcel(XLSX, e.target.result);
 
       if (records.length === 0) {
-        // Debug: mostrar qué encabezados encontró
-        const XLSX2 = await import('xlsx');
-        const wb = XLSX2.read(e.target.result, { type: 'array' });
-        const ws = wb.Sheets[wb.SheetNames[0]];
-        const rows = XLSX2.utils.sheet_to_json(ws, { header: 1, defval: null });
-        const headers = (rows[0] || []).filter(Boolean).join(' | ');
         setStatus('error');
-        setMessage(`No se detectaron tiendas. Encabezados encontrados: ${headers}`);
+        setMessage('No se encontraron datos. Verifica que la primera fila tenga códigos de tienda (BTA 21, TUNJA 1, etc.) y la columna izquierda tenga los canales (Al Paso, Didi, Rappi...).');
         return;
       }
 
