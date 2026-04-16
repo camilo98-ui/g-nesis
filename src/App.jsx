@@ -10,6 +10,7 @@ import PageNotFound from './lib/PageNotFound';
 import GenesisCommandCenter from './pages/GenesisCommandCenter';
 import SalesReportView from './pages/SalesReportView';
 import PYGDashboard from './pages/PYGDashboard';
+import HourlyTransactions from './pages/HourlyTransactions';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
@@ -66,6 +67,7 @@ const AuthenticatedApp = () => {
       <Route path="/GenesisCommandCenter" element={<LayoutWrapper currentPageName="GenesisCommandCenter"><GenesisCommandCenter /></LayoutWrapper>} />
       <Route path="/SalesReportView" element={<LayoutWrapper currentPageName="SalesReportView"><SalesReportView /></LayoutWrapper>} />
       <Route path="/PYGDashboard" element={<LayoutWrapper currentPageName="PYGDashboard"><PYGDashboard /></LayoutWrapper>} />
+      <Route path="/HourlyTransactions" element={<HourlyTransactions />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

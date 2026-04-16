@@ -1,0 +1,77 @@
+{
+  "name": "StoreTransactions",
+  "type": "object",
+  "properties": {
+    "store_name": {
+      "type": "string",
+      "description": "Nombre del punto de venta"
+    },
+    "store_code": {
+      "type": "string",
+      "description": "C\u00f3digo extra\u00eddo (ej: BTA 18)"
+    },
+    "month": {
+      "type": "number",
+      "description": "Mes del reporte (1-12)"
+    },
+    "year": {
+      "type": "number",
+      "description": "A\u00f1o del reporte"
+    },
+    "hour_9": {
+      "type": "number"
+    },
+    "hour_10": {
+      "type": "number"
+    },
+    "hour_11": {
+      "type": "number"
+    },
+    "hour_12": {
+      "type": "number"
+    },
+    "hour_13": {
+      "type": "number"
+    },
+    "hour_14": {
+      "type": "number"
+    },
+    "hour_15": {
+      "type": "number"
+    },
+    "hour_16": {
+      "type": "number"
+    },
+    "hour_17": {
+      "type": "number"
+    },
+    "hour_18": {
+      "type": "number"
+    },
+    "hour_19": {
+      "type": "number"
+    },
+    "hour_20": {
+      "type": "number"
+    },
+    "hour_21": {
+      "type": "number"
+    },
+    "hour_22": {
+      "type": "number"
+    },
+    "total": {
+      "type": "number",
+      "description": "Total de transacciones del mes"
+    },
+    "uploaded_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "store_name",
+    "month",
+    "year"
+  ]
+}
