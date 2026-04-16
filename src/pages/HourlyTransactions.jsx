@@ -92,6 +92,11 @@ export default function HourlyTransactions() {
     }
   };
 
+  // Gerente con sesión → ir directo al panel de carga
+  if (isGerente) {
+    return <ManagerPanel onBack={() => window.history.back()} allRecords={allRecords} refetch={refetch} />;
+  }
+
   if (view === 'manager') {
     return <ManagerPanel onBack={() => setView('home')} allRecords={allRecords} refetch={refetch} />;
   }
