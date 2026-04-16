@@ -4,84 +4,432 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import {
   X, TrendingUp, TrendingDown, Loader2, BarChart3, Zap,
-  ArrowUpRight, ArrowDownRight, Minus, ChevronDown, CheckCircle2, AlertCircle, Activity
+  ArrowUpRight, ArrowDownRight, ChevronDown, AlertCircle, Activity,
+  Target, DollarSign, Users, Package, ChevronRight
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import {
-  BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, 
-  Tooltip, ResponsiveContainer, Cell, ReferenceLine, Legend, PieChart, Pie
+  AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis,
+  CartesianGrid, Tooltip, ResponsiveContainer, Cell, ReferenceLine,
+  Legend, ComposedChart, RadialBarChart, RadialBar
 } from 'recharts';
 
+// ─── Constantes ───────────────────────────────────────────────────────────────
 const MONTHS_SHORT = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 const MONTHS_FULL  = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const MAGENTA = '#e91e8c';
+const MAGENTA_DARK = '#c0156f';
+const MAGENTA_PALE = '#fce7f3';
+const MAGENTA_LIGHT = '#f472b6';
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 const pctNum = (v) => v != null ? parseFloat((v * 100).toFixed(2)) : null;
 const fmt = (v) => v != null ? `${pctNum(v).toFixed(1)}%` : '—';
+const fmtM = (v) => v != null ? `$${(v / 1_000_000).toFixed(1)}M` : '—';
 
-// Normalizar código de tienda para comparación consistente
 function normalizeStoreCode(code) {
   if (!code) return '';
-  return String(code)
-    .toUpperCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '') // quitar tildes
-    .replace(/\s+/g, ' ')             // espacios múltiples a uno
-    .trim();
+  return String(code).toUpperCase().normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim();
 }
 
 function extractStoreCode(storeId) {
   if (!storeId) return null;
-  // Remover contenido entre paréntesis primero (ej: "BTA 66 (CC...)" -> "BTA 66")
   const clean = String(storeId).replace(/\s*\([^)]*\)/g, '').trim();
   const norm = normalizeStoreCode(clean);
-  const bta = norm.match(/^BTA\s*(\d+)/);  if (bta) return `BTA ${bta[1]}`;
+  const bta = norm.match(/^BTA\s*(\d+)/); if (bta) return `BTA ${bta[1]}`;
   const tunja = norm.match(/^TUNJA\s*(\d+)/); if (tunja) return `TUNJA ${tunja[1]}`;
-  // BOGOTA también es BTA (mismo código de tienda)
   const bog = norm.match(/^BOGOTA\s*(\d+)/); if (bog) return `BTA ${bog[1]}`;
   return norm;
 }
 
-const ChartTooltip = ({ active, payload, label }) => {
+// ─── Tooltip premium ──────────────────────────────────────────────────────────
+const PremiumTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-slate-900 text-white px-3 py-2 rounded-xl text-xs shadow-xl space-y-1">
-      <p className="font-bold text-pink-300">{label}</p>
-      {payload.map((p, i) => <p key={i} style={{ color: p.color }}>{p.name}: {p.value?.toFixed(2)}%</p>)}
+    <div className="bg-slate-900/98 backdrop-blur-xl border border-slate-700 rounded-2xl px-4 py-3 shadow-2xl min-w-[180px]">
+      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">{label}</p>
+      {payload.map((p, i) => (
+        <div key={i} className="flex items-center justify-between gap-4 mb-1">
+          <span className="flex items-center gap-1.5 text-xs text-slate-300">
+            <span className="w-2 h-2 rounded-full" style={{ background: p.color }} />
+            {p.name}
+          </span>
+          <span className="font-black text-white text-sm">{typeof p.value === 'number' ? `${p.value?.toFixed(1)}%` : p.value}</span>
+        </div>
+      ))}
     </div>
   );
 };
 
-// Insight Card
-function InsightCard({ title, value, prev, trend, icon: Icon, color, inverse = false, onClick }) {
-  const improved = trend > 0 ? (inverse ? false : true) : (inverse ? true : false);
+// ─── KPI Card premium ─────────────────────────────────────────────────────────
+function KPICard({ label, value, prev, delta, icon: Icon, accent, inverse = false, onClick, badge }) {
+  const isGood = inverse ? (delta != null && delta <= 0) : (delta != null && delta >= 0);
+  const showDelta = delta != null;
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
+    <motion.button
+      initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -4, scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
       onClick={onClick}
-      className={`rounded-2xl p-4 border-2 ${color.border} ${color.bg} ${onClick ? 'cursor-pointer hover:shadow-xl transition-all' : ''}`}
+      className="text-left rounded-2xl p-5 border-2 transition-all w-full"
+      style={{ background: accent.bg, borderColor: accent.border }}
     >
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <p className={`text-xs font-bold ${color.label}`}>{title}</p>
-          <p className={`text-2xl font-black ${color.text} mt-1`}>{value}</p>
-          {prev && <p className={`text-xs ${color.muted} mt-1`}>Anterior: {prev}</p>}
-        </div>
-        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${color.icon}`}>
+      <div className="flex items-start justify-between mb-3">
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: accent.iconBg }}>
           <Icon className="w-5 h-5 text-white" />
         </div>
+        {showDelta && (
+          <span className={`flex items-center gap-0.5 text-[11px] font-black px-2 py-1 rounded-full ${isGood ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-600'}`}>
+            {isGood ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+            {delta > 0 ? '+' : ''}{delta?.toFixed(1)}pp
+          </span>
+        )}
       </div>
-      {trend != null && (
-        <div className={`mt-3 flex items-center gap-1 text-sm font-bold ${improved ? 'text-emerald-600' : 'text-red-500'}`}>
-          {trend > 0 ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
-          {trend > 0 ? '+' : ''}{trend.toFixed(2)}pp
-        </div>
-      )}
-      {onClick && <p className="text-[10px] text-slate-400 mt-2">Haz clic para ver detalles →</p>}
-    </motion.div>
+      <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: accent.label }}>{label}</p>
+      <p className="text-2xl font-black leading-tight" style={{ color: accent.value }}>{value}</p>
+      {prev && <p className="text-[11px] mt-1.5 font-medium" style={{ color: accent.label + 'aa' }}>Ant: {prev}</p>}
+      {badge && <div className="mt-2 text-[10px] font-bold px-2 py-0.5 rounded-full inline-block" style={{ background: accent.iconBg + '30', color: accent.iconBg }}>{badge}</div>}
+      <p className="text-[9px] mt-2 opacity-40" style={{ color: accent.value }}>Toca para análisis →</p>
+    </motion.button>
   );
 }
 
+// ─── Simulador EBITDA ─────────────────────────────────────────────────────────
+function EBITDASimulator({ primaryRecord, trendData }) {
+  const ebitda = pctNum(primaryRecord?.margen_ebitda);
+  const costReal = pctNum(primaryRecord?.cost_real);
+  const personal = pctNum(primaryRecord?.costo_personal);
+  const gastos = pctNum(primaryRecord?.gastos_pct_venta);
+  const arriendos = pctNum(primaryRecord?.arriendos);
+
+  // Estimación de venta mensual implícita basada en % de costos fijos
+  // gastos fijos ≈ arriendos + admin + serv. públicos (asumiendo que son fijos)
+  const gastosFijosEstimados = (arriendos || 0) + (pctNum(primaryRecord?.administracion) || 0) + (pctNum(primaryRecord?.servicios_publicos) || 0);
+
+  // Target EBITDA scenarios
+  const targets = [20, 25, 30].map(targetEbitda => {
+    // Si subiéramos el EBITDA al target manteniendo costos fijos,
+    // necesitamos reducir el gap. El gap = targetEbitda - ebitda
+    const gap = targetEbitda - ebitda;
+    // Para mejorar 1pp de EBITDA reduciendo personal: necesitas vender más o reducir nómina
+    // Incremento de venta necesario para compensar gap sin tocar costos:
+    // Si ventas aumentan X%, personal% baja proporcionalmente (costo fijo)
+    const incrementoVentaRequerido = gastosFijosEstimados > 0
+      ? (gap / gastosFijosEstimados * 100).toFixed(1)
+      : null;
+    return { target: targetEbitda, gap: gap.toFixed(1), incrementoVenta: incrementoVentaRequerido };
+  });
+
+  const avgEbitda = trendData.length > 0
+    ? (trendData.reduce((s, d) => s + (d.EBITDA || 0), 0) / trendData.length).toFixed(1)
+    : null;
+
+  const best = trendData.length > 0 ? Math.max(...trendData.map(d => d.EBITDA || 0)) : null;
+  const worst = trendData.length > 0 ? Math.min(...trendData.map(d => d.EBITDA || 0)) : null;
+
+  return (
+    <div className="rounded-2xl border-2 p-6 space-y-5" style={{ borderColor: MAGENTA + '30', background: 'linear-gradient(135deg, #fdf2f8 0%, #fff 100%)' }}>
+      <div className="flex items-center gap-3">
+        <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: MAGENTA }}>
+          <Target className="w-4 h-4 text-white" />
+        </div>
+        <div>
+          <h3 className="font-black text-slate-900 text-sm">Simulador EBITDA</h3>
+          <p className="text-[10px] text-slate-500">¿Cuánto necesito vender para mejorar?</p>
+        </div>
+      </div>
+
+      {/* Estado actual */}
+      <div className="grid grid-cols-3 gap-2 text-center">
+        <div className="rounded-xl p-3" style={{ background: MAGENTA_PALE }}>
+          <p className="text-[10px] text-slate-500 mb-0.5">EBITDA Actual</p>
+          <p className="font-black text-xl" style={{ color: MAGENTA }}>{ebitda?.toFixed(1)}%</p>
+        </div>
+        {avgEbitda && <div className="rounded-xl p-3 bg-slate-100">
+          <p className="text-[10px] text-slate-500 mb-0.5">Promedio Histórico</p>
+          <p className="font-black text-xl text-slate-700">{avgEbitda}%</p>
+        </div>}
+        {best && <div className="rounded-xl p-3 bg-emerald-50">
+          <p className="text-[10px] text-slate-500 mb-0.5">Mejor Mes</p>
+          <p className="font-black text-xl text-emerald-700">{best.toFixed(1)}%</p>
+        </div>}
+      </div>
+
+      {/* Análisis de brechas */}
+      <div className="space-y-2">
+        <p className="text-xs font-black text-slate-700 uppercase tracking-wide">Para llegar a…</p>
+        {targets.filter(t => t.gap > 0).map(t => (
+          <div key={t.target} className="flex items-center gap-3 rounded-xl p-3 bg-white border border-slate-100">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black text-white flex-shrink-0"
+              style={{ background: t.target >= 30 ? '#10b981' : t.target >= 25 ? '#f59e0b' : MAGENTA }}>
+              {t.target}%
+            </div>
+            <div className="flex-1">
+              <p className="text-xs font-black text-slate-800">EBITDA objetivo {t.target}%</p>
+              <p className="text-[10px] text-slate-500">Mejorar {t.gap}pp · {t.incrementoVenta ? `Incrementar venta ~${t.incrementoVenta}% ó reducir gastos fijos ${t.gap}pp` : 'Reducir gastos variables en ' + t.gap + 'pp'}</p>
+            </div>
+            <ChevronRight className="w-4 h-4 text-slate-300 flex-shrink-0" />
+          </div>
+        ))}
+        {targets.every(t => t.gap <= 0) && (
+          <div className="rounded-xl p-3 bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold text-center">
+            ✅ EBITDA por encima de todos los targets. ¡Excelente gestión!
+          </div>
+        )}
+      </div>
+
+      {/* Palancas de mejora */}
+      <div>
+        <p className="text-xs font-black text-slate-700 uppercase tracking-wide mb-2">Palancas de mejora</p>
+        <div className="grid grid-cols-2 gap-2">
+          {[
+            { label: 'Reducir Personal 1pp', impact: `+1pp EBITDA`, icon: Users },
+            { label: 'Reducir Gastos 1pp', impact: `+1pp EBITDA`, icon: Package },
+            { label: 'Reducir Costo Producto 1pp', impact: `+1pp EBITDA`, icon: DollarSign },
+            { label: 'Aumentar ventas 5%', impact: `+${((gastosFijosEstimados * 0.05)).toFixed(1)}pp EBITDA est.`, icon: TrendingUp },
+          ].map((p, i) => (
+            <div key={i} className="rounded-xl p-3 bg-white border border-slate-100 flex items-start gap-2">
+              <div className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: MAGENTA_PALE }}>
+                <p.icon className="w-3 h-3" style={{ color: MAGENTA }} />
+              </div>
+              <div>
+                <p className="text-[10px] font-bold text-slate-700">{p.label}</p>
+                <p className="text-[10px] font-black" style={{ color: MAGENTA }}>{p.impact}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Gráfica de tendencia Premium (Area + Referencia) ─────────────────────────
+function TrendChart({ data, title, metrics, height = 260 }) {
+  const colors = {
+    EBITDA: MAGENTA,
+    'C.Real': '#3b82f6',
+    'C.Teo': '#94a3b8',
+    Personal: '#8b5cf6',
+    Gastos: '#f59e0b',
+  };
+
+  return (
+    <ResponsiveContainer width="100%" height={height}>
+      <ComposedChart data={data} margin={{ top: 10, right: 20, left: -5, bottom: 0 }}>
+        <defs>
+          {metrics.map(m => (
+            <linearGradient key={m} id={`grad_${m}`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={colors[m]} stopOpacity={0.25} />
+              <stop offset="100%" stopColor={colors[m]} stopOpacity={0.02} />
+            </linearGradient>
+          ))}
+        </defs>
+        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+        <XAxis dataKey="mes" tick={{ fontSize: 11, fill: '#94a3b8', fontWeight: 700 }} axisLine={false} tickLine={false} />
+        <YAxis tickFormatter={v => `${v}%`} tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={42} />
+        <Tooltip content={<PremiumTooltip />} cursor={{ stroke: MAGENTA_LIGHT, strokeWidth: 1, strokeDasharray: '4 2' }} />
+        {metrics.map(m => (
+          <React.Fragment key={m}>
+            <Area type="monotone" dataKey={m} fill={`url(#grad_${m})`} stroke="none" />
+            <Line
+              type="monotone"
+              dataKey={m}
+              stroke={colors[m]}
+              strokeWidth={m === 'EBITDA' ? 3 : 2}
+              dot={{ r: 5, fill: colors[m], stroke: '#fff', strokeWidth: 2 }}
+              activeDot={{ r: 7, fill: colors[m], stroke: '#fff', strokeWidth: 2 }}
+            />
+          </React.Fragment>
+        ))}
+        {metrics.includes('EBITDA') && data.length > 0 && (
+          <ReferenceLine y={data.reduce((s, d) => s + (d.EBITDA || 0), 0) / data.length}
+            stroke={MAGENTA} strokeDasharray="6 3" strokeOpacity={0.4}
+            label={{ value: 'μ', position: 'right', fill: MAGENTA, fontSize: 10 }} />
+        )}
+      </ComposedChart>
+    </ResponsiveContainer>
+  );
+}
+
+// ─── Gráfica de barras comparativa ────────────────────────────────────────────
+function CostBarsChart({ data }) {
+  return (
+    <ResponsiveContainer width="100%" height={240}>
+      <BarChart data={data} margin={{ top: 10, right: 10, left: -5, bottom: 0 }}>
+        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+        <XAxis dataKey="mes" tick={{ fontSize: 11, fill: '#94a3b8', fontWeight: 700 }} axisLine={false} tickLine={false} />
+        <YAxis tickFormatter={v => `${v}%`} tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={42} />
+        <Tooltip content={<PremiumTooltip />} cursor={{ fill: MAGENTA_PALE }} />
+        <Bar dataKey="C.Real" name="Costo Real" fill={MAGENTA} radius={[6, 6, 0, 0]} maxBarSize={28} />
+        <Bar dataKey="C.Teo" name="Costo Teórico" fill="#e2e8f0" radius={[6, 6, 0, 0]} maxBarSize={28} />
+      </BarChart>
+    </ResponsiveContainer>
+  );
+}
+
+// ─── Panel de insights cuantitativos ──────────────────────────────────────────
+function QuantInsights({ primaryRecord, prevRecord, trendData }) {
+  if (!primaryRecord) return null;
+  const ebitda = pctNum(primaryRecord.margen_ebitda);
+  const prevEbitda = prevRecord ? pctNum(prevRecord.margen_ebitda) : null;
+  const costReal = pctNum(primaryRecord.cost_real);
+  const costTeo = pctNum(primaryRecord.cost_teorico);
+  const personal = pctNum(primaryRecord.costo_personal);
+  const prevPersonal = prevRecord ? pctNum(prevRecord.costo_personal) : null;
+  const gastos = pctNum(primaryRecord.gastos_pct_venta);
+  const arriendos = pctNum(primaryRecord.arriendos) || 0;
+
+  const items = [];
+
+  // EBITDA
+  if (prevEbitda !== null) {
+    const diff = ebitda - prevEbitda;
+    items.push({
+      type: diff >= 0 ? 'good' : 'bad',
+      emoji: diff >= 0 ? '📈' : '📉',
+      title: `EBITDA ${diff >= 0 ? 'mejoró' : 'cayó'} ${Math.abs(diff).toFixed(2)}pp vs mes anterior`,
+      detail: `De ${prevEbitda.toFixed(1)}% → ${ebitda.toFixed(1)}%. ${diff < 0 ? `Para recuperar estos ${Math.abs(diff).toFixed(2)}pp necesitas reducir gastos o aumentar ventas en ~${(Math.abs(diff) / (arriendos || 10) * 100).toFixed(0)}%.` : `Mantén la eficiencia actual.`}`,
+    });
+  }
+
+  // Costo vs Teórico
+  const brechaCosto = costReal - costTeo;
+  items.push({
+    type: brechaCosto > 0 ? 'bad' : 'good',
+    emoji: brechaCosto > 0 ? '⚠️' : '✅',
+    title: `Costo real ${brechaCosto > 0 ? 'EXCEDE' : 'está bajo'} el teórico en ${Math.abs(brechaCosto).toFixed(2)}pp`,
+    detail: `Real ${costReal.toFixed(1)}% vs Teórico ${costTeo.toFixed(1)}%. ${brechaCosto > 0 ? `Cada punto que bajas el costo real representa +1pp directo al EBITDA.` : `Ahorro de ${Math.abs(brechaCosto).toFixed(2)}pp respecto al presupuesto de costos.`}`,
+  });
+
+  // Personal
+  if (personal > 22) {
+    items.push({
+      type: 'warn',
+      emoji: '👥',
+      title: `Personal en ${personal.toFixed(1)}% — por encima del óptimo (20-22%)`,
+      detail: `Cada punto que reduces costo de personal = +1pp EBITDA. Para bajar al 22%: reducir ${(personal - 22).toFixed(1)}pp de nómina sobre venta. ${prevPersonal !== null ? `Vs mes anterior: ${(personal - prevPersonal) > 0 ? '+' : ''}${(personal - prevPersonal).toFixed(2)}pp.` : ''}`,
+    });
+  } else {
+    items.push({
+      type: 'good',
+      emoji: '✅',
+      title: `Personal eficiente al ${personal.toFixed(1)}% — dentro del rango óptimo`,
+      detail: `Rango recomendado: 20-22%. Estás ${(22 - personal).toFixed(1)}pp bajo el límite superior. Capacidad de ajuste si ventas caen.`,
+    });
+  }
+
+  // Estructura total de costos
+  const totalEgreso = (costReal || 0) + (personal || 0) + (gastos || 0);
+  items.push({
+    type: totalEgreso > 85 ? 'bad' : totalEgreso > 75 ? 'warn' : 'good',
+    emoji: totalEgreso > 85 ? '🔴' : '📊',
+    title: `Estructura de egresos: ${totalEgreso.toFixed(1)}% de la venta`,
+    detail: `Costo ${costReal?.toFixed(1)}% + Personal ${personal?.toFixed(1)}% + Gastos ${gastos?.toFixed(1)}% = ${totalEgreso.toFixed(1)}%. ${100 - totalEgreso > 0 ? `Margen operativo disponible: ${(100 - totalEgreso).toFixed(1)}% de la venta.` : 'Egresos superan el 100% — operación en pérdida operativa.'}`,
+  });
+
+  // Tendencia
+  if (trendData.length >= 3) {
+    const last3 = trendData.slice(-3);
+    const isImproving = last3[2].EBITDA > last3[0].EBITDA;
+    items.push({
+      type: isImproving ? 'good' : 'warn',
+      emoji: isImproving ? '📈' : '📉',
+      title: `Tendencia ${isImproving ? 'alcista' : 'bajista'} en EBITDA (últimos 3 meses)`,
+      detail: `${last3[0].mes}: ${last3[0].EBITDA?.toFixed(1)}% → ${last3[1].mes}: ${last3[1].EBITDA?.toFixed(1)}% → ${last3[2].mes}: ${last3[2].EBITDA?.toFixed(1)}%. ${isImproving ? 'Continúa con la estrategia actual.' : 'Revisión urgente de estructura de costos.'}`,
+    });
+  }
+
+  const colorMap = { good: { bg: '#f0fdf4', border: '#bbf7d0', text: '#166534', dot: '#22c55e' }, bad: { bg: '#fef2f2', border: '#fecaca', text: '#991b1b', dot: '#ef4444' }, warn: { bg: '#fffbeb', border: '#fde68a', text: '#92400e', dot: '#f59e0b' } };
+
+  return (
+    <div className="space-y-2.5">
+      {items.map((item, i) => {
+        const c = colorMap[item.type];
+        return (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, x: -12 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: i * 0.07 }}
+            className="rounded-2xl p-4 border-2 flex gap-3"
+            style={{ background: c.bg, borderColor: c.border }}
+          >
+            <span className="text-xl flex-shrink-0 mt-0.5">{item.emoji}</span>
+            <div>
+              <p className="font-black text-sm leading-tight mb-1" style={{ color: c.text }}>{item.title}</p>
+              <p className="text-xs leading-relaxed" style={{ color: c.text + 'cc' }}>{item.detail}</p>
+            </div>
+          </motion.div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── Tabla de desglose premium ────────────────────────────────────────────────
+function CostTable({ primaryRecord, prevRecord }) {
+  const rows = [
+    { label: 'Costo de Producto', key: 'cost_real', teo: 'cost_teorico', inverse: true },
+    { label: 'Costo Personal', key: 'costo_personal', inverse: true },
+    { label: 'Arriendos', key: 'arriendos', inverse: true },
+    { label: 'Servicios Públicos', key: 'servicios_publicos', inverse: true },
+    { label: 'Administración', key: 'administracion', inverse: true },
+    { label: 'Impuestos', key: 'impuestos', inverse: true },
+    { label: 'Gastos % Venta', key: 'gastos_pct_venta', inverse: true },
+    { label: 'Margen EBITDA', key: 'margen_ebitda', inverse: false, highlight: true },
+  ].filter(r => primaryRecord?.[r.key] != null);
+
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="rounded-xl overflow-hidden" style={{ background: MAGENTA_PALE }}>
+            <th className="text-left py-3 px-4 font-bold text-xs rounded-l-xl" style={{ color: MAGENTA_DARK }}>Partida</th>
+            <th className="text-right py-3 px-4 font-bold text-xs" style={{ color: MAGENTA_DARK }}>Actual</th>
+            {prevRecord && <th className="text-right py-3 px-4 font-bold text-xs" style={{ color: MAGENTA_DARK }}>Anterior</th>}
+            {prevRecord && <th className="text-right py-3 px-4 font-bold text-xs rounded-r-xl" style={{ color: MAGENTA_DARK }}>Δ</th>}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, i) => {
+            const curr = pctNum(primaryRecord?.[row.key]);
+            const prev = prevRecord ? pctNum(prevRecord?.[row.key]) : null;
+            const delta = prev != null ? curr - prev : null;
+            const isGood = delta == null ? null : (row.inverse ? delta < 0 : delta > 0);
+            return (
+              <tr key={i} className={`border-b border-slate-50 hover:bg-pink-50/30 transition-colors ${row.highlight ? 'font-black' : ''}`}>
+                <td className="py-3 px-4 text-slate-700 font-medium">
+                  {row.highlight && <span className="inline-block w-2 h-2 rounded-full mr-2 align-middle" style={{ background: MAGENTA }} />}
+                  {row.label}
+                  {row.teo && primaryRecord?.[row.teo] && (
+                    <span className="ml-2 text-[10px] text-slate-400">(teo: {fmt(primaryRecord[row.teo])})</span>
+                  )}
+                </td>
+                <td className="py-3 px-4 text-right font-black" style={{ color: row.highlight ? MAGENTA : '#0f172a' }}>
+                  {curr != null ? `${curr.toFixed(1)}%` : '—'}
+                </td>
+                {prevRecord && <td className="py-3 px-4 text-right text-slate-400 text-xs">{prev != null ? `${prev.toFixed(1)}%` : '—'}</td>}
+                {prevRecord && (
+                  <td className="py-3 px-4 text-right text-xs font-bold">
+                    {delta != null ? (
+                      <span className={isGood ? 'text-emerald-600' : 'text-red-500'}>
+                        {delta > 0 ? '+' : ''}{delta.toFixed(2)}pp
+                      </span>
+                    ) : '—'}
+                  </td>
+                )}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+// ─── Componente principal ─────────────────────────────────────────────────────
 export default function PYGModal({ onClose, storeId }) {
   const storeCode = extractStoreCode(storeId);
   const now = new Date();
@@ -92,53 +440,35 @@ export default function PYGModal({ onClose, storeId }) {
     queryFn: async () => {
       if (!storeCode) return [];
       const all = await base44.entities.PYGReport.filter({ year: currentYear });
-      const normalizedSearch = normalizeStoreCode(storeCode);
-      return all.filter(r => normalizeStoreCode(r.store_code) === normalizedSearch);
+      const ns = normalizeStoreCode(storeCode);
+      return all.filter(r => normalizeStoreCode(r.store_code) === ns);
     },
     enabled: !!storeCode,
   });
 
-  // Detectar el último mes con datos
   const lastMonthWithData = useMemo(() => {
-    if (allRecords.length === 0) return null;
+    if (!allRecords.length) return null;
     return Math.max(...allRecords.map(r => r.month));
   }, [allRecords]);
 
-  const [selectedMonths, setSelectedMonths] = useState(() => [lastMonthWithData || 1]);
+  const [selectedMonth, setSelectedMonth] = useState(null);
   const [monthDropdownOpen, setMonthDropdownOpen] = useState(false);
-  const [selectedStore, setSelectedStore] = useState(() => storeCode || '');
-  const [storeDropdownOpen, setStoreDropdownOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('overview');
 
-  // Obtener lista de tiendas disponibles (normalizadas)
-  const availableStores = useMemo(() => {
-    const stores = new Set();
-    allRecords.forEach(r => {
-      const normalized = normalizeStoreCode(r.store_code);
-      if (normalized) stores.add(normalized);
-    });
-    return Array.from(stores).sort();
-  }, [allRecords]);
+  useEffect(() => {
+    if (lastMonthWithData && !selectedMonth) setSelectedMonth(lastMonthWithData);
+  }, [lastMonthWithData]);
 
-  const filteredByStore = allRecords.filter(r => normalizeStoreCode(r.store_code) === selectedStore);
-  const primaryMonth = selectedMonths[selectedMonths.length - 1];
-  const primaryRecord = filteredByStore.find(r => r.month === primaryMonth) || null;
-  const prevMonth = primaryMonth > 1 ? primaryMonth - 1 : null;
-  const prevRecord = prevMonth ? filteredByStore.find(r => r.month === prevMonth) : null;
-
-  const toggleMonth = (m) => {
-    setSelectedMonths(prev =>
-      prev.includes(m)
-        ? prev.length > 1 ? prev.filter(x => x !== m) : prev
-        : [...prev, m].sort((a, b) => a - b)
-    );
-  };
+  const primaryRecord = allRecords.find(r => r.month === selectedMonth) || null;
+  const prevMonth = selectedMonth > 1 ? selectedMonth - 1 : null;
+  const prevRecord = prevMonth ? allRecords.find(r => r.month === prevMonth) : null;
 
   const trendData = useMemo(() =>
-    MONTHS_SHORT.map((m, i) => {
-      const rec = filteredByStore.find(r => r.month === i + 1);
+    MONTHS_SHORT.map((mes, i) => {
+      const rec = allRecords.find(r => r.month === i + 1);
       if (!rec) return null;
       return {
-        mes: m, month: i + 1,
+        mes, month: i + 1,
         EBITDA: pctNum(rec.margen_ebitda),
         'C.Real': pctNum(rec.cost_real),
         'C.Teo': pctNum(rec.cost_teorico),
@@ -146,176 +476,68 @@ export default function PYGModal({ onClose, storeId }) {
         Gastos: pctNum(rec.gastos_pct_venta),
       };
     }).filter(Boolean),
-    [filteredByStore]
+    [allRecords]
   );
 
-  const gasteosData = useMemo(() => {
-    if (!primaryRecord) return [];
-    return [
-      { name: 'Costo Personal', value: pctNum(primaryRecord.costo_personal), color: '#db2777' },
-      { name: 'Arriendos', value: pctNum(primaryRecord.arriendos), color: '#9333ea' },
-      { name: 'Gastos %', value: pctNum(primaryRecord.gastos_pct_venta), color: '#e11d48' },
-      { name: 'Otros', value: Math.max(0, 100 - pctNum(primaryRecord.costo_personal) - pctNum(primaryRecord.arriendos) - pctNum(primaryRecord.gastos_pct_venta)), color: '#f97316' },
-    ].filter(d => d.value > 0);
-  }, [primaryRecord]);
+  const tabs = [
+    { id: 'overview', label: 'Resumen' },
+    { id: 'trends', label: 'Tendencias' },
+    { id: 'simulator', label: 'Simulador' },
+    { id: 'breakdown', label: 'Desglose' },
+  ];
 
-  const otrosGastos = useMemo(() => {
-    if (!primaryRecord?.otros_gastos) return [];
-    try {
-      return Object.entries(JSON.parse(primaryRecord.otros_gastos))
-        .filter(([, v]) => v > 0)
-        .sort((a, b) => b[1] - a[1])
-        .map(([k, v]) => ({ name: k, value: pctNum(v) }));
-    } catch { return []; }
-  }, [primaryRecord]);
-
-  const [selectedKPI, setSelectedKPI] = useState(null);
-
-  const insights = useMemo(() => {
-    if (!primaryRecord) return [];
-    const insights = [];
-    const ebitda = pctNum(primaryRecord.margen_ebitda);
-    const prevEbitda = prevRecord ? pctNum(prevRecord.margen_ebitda) : null;
-    const costReal = pctNum(primaryRecord.cost_real);
-    const prevCostReal = prevRecord ? pctNum(prevRecord.cost_real) : null;
-    const costTeorico = pctNum(primaryRecord.cost_teorico);
-    const personal = pctNum(primaryRecord.costo_personal);
-    const prevPersonal = prevRecord ? pctNum(prevRecord.costo_personal) : null;
-    const gastos = pctNum(primaryRecord.gastos_pct_venta);
-    const prevGastos = prevRecord ? pctNum(prevRecord.gastos_pct_venta) : null;
-    const diffEbitda = prevEbitda !== null ? ebitda - prevEbitda : null;
-    const diffCost = prevCostReal !== null ? costReal - prevCostReal : null;
-    const diffPersonal = prevPersonal !== null ? personal - prevPersonal : null;
-    const diffGastos = prevGastos !== null ? gastos - prevGastos : null;
-
-    // EBITDA análisis completo
-    let ebitdaText = '';
-    if (ebitda >= 30) ebitdaText = `Margen EBITDA de ${ebitda.toFixed(1)}% refleja excelente rentabilidad. En términos operacionales, cada 100 pesos de venta generan ${ebitda.toFixed(1)} pesos de margen. ${diffEbitda !== null ? `Variación mensual: ${diffEbitda > 0 ? '+' : ''}${diffEbitda.toFixed(2)}pp (${Math.abs(diffEbitda / prevEbitda * 100).toFixed(1)}% de cambio relativo).` : ''} Desempeño sostenible.`;
-    else if (ebitda >= 20) ebitdaText = `EBITDA de ${ebitda.toFixed(1)}% dentro del rango operacional normal. Capacidad de generación de valor: ${ebitda.toFixed(1)} pesos por cada 100 en ventas. ${diffEbitda !== null ? `${diffEbitda < 0 ? 'Tendencia negativa de ' : 'Crecimiento de '}${Math.abs(diffEbitda).toFixed(2)}pp mes a mes (cambio relativo: ${Math.abs(diffEbitda / prevEbitda * 100).toFixed(1)}%).` : ''} Requiere monitoreo continuo.`;
-    else ebitdaText = `EBITDA crítico de ${ebitda.toFixed(1)}%. Generación de margen muy limitada: solo ${ebitda.toFixed(1)} pesos por cada 100 vendidos. ${diffEbitda !== null ? `${diffEbitda < 0 ? 'Caída de ' : 'Recuperación de '}${Math.abs(diffEbitda).toFixed(2)}pp (${Math.abs(diffEbitda / prevEbitda * 100).toFixed(1)}% relativo).` : ''} Acción inmediata: analizar estructura de costos fijos y gastos operacionales.`;
-    insights.push({ type: ebitda >= 20 ? (ebitda >= 30 ? 'success' : 'info') : 'warning', text: ebitdaText, kpi: 'ebitda' });
-
-    // Costo análisis
-    const brecha = Math.abs(costReal - costTeorico);
-    const pctDesviacion = costTeorico > 0 ? (brecha / costTeorico * 100).toFixed(1) : 0;
-    let costoText = '';
-    if (costReal <= costTeorico) {
-      const ahorro = costTeorico - costReal;
-      const pctAhorro = (ahorro / costTeorico * 100).toFixed(1);
-      costoText = `Costo Real ${costReal.toFixed(1)}% vs Teórico ${costTeorico.toFixed(1)}% representa ahorro de ${brecha.toFixed(2)}pp (${pctAhorro}% relativo). ${diffCost !== null && prevCostReal ? `Mejora de ${(prevCostReal - costReal).toFixed(2)}pp vs mes anterior (${Math.abs(diffCost / prevCostReal * 100).toFixed(1)}% relativo).` : ''} Control operacional excelente.`;
-    } else {
-      const exceso = costReal - costTeorico;
-      const pctExceso = (exceso / costTeorico * 100).toFixed(1);
-      costoText = `Costo Real ${costReal.toFixed(1)}% SUPERIOR al Teórico ${costTeorico.toFixed(1)}%. Desviación: +${brecha.toFixed(2)}pp (+${pctExceso}%). ${diffCost !== null ? `${diffCost > 0 ? 'Empeoramiento de ' : 'Mejora de '}${Math.abs(diffCost).toFixed(2)}pp mes a mes (${Math.abs(diffCost / prevCostReal * 100).toFixed(1)}% relativo).` : ''} Requiere control inmediato de eficiencia operacional.`;
-    }
-    insights.push({ type: costReal <= costTeorico ? 'success' : 'warning', text: costoText, kpi: 'costo' });
-
-    // Personal análisis detallado
-    let personalText = '';
-    if (personal <= 20) personalText = `Costo de Personal ${personal.toFixed(1)}% representa eficiencia óptima. Productividad: 100 pesos de venta soportan ${personal.toFixed(1)} pesos de nómina. ${diffPersonal !== null ? `${diffPersonal < 0 ? 'Reducción de ' : 'Aumento de '}${Math.abs(diffPersonal).toFixed(2)}pp mes a mes (${Math.abs(diffPersonal / prevPersonal * 100).toFixed(1)}% relativo).` : ''} Equipo muy eficiente en generación de margen.`;
-    else if (personal <= 25) personalText = `Costo de Personal ${personal.toFixed(1)}% dentro de rango normal. Por cada 100 pesos vendidos, ${personal.toFixed(1)} van a nómina. ${diffPersonal !== null ? `${diffPersonal > 0 ? 'Tendencia alcista' : 'Tendencia bajista'} de ${Math.abs(diffPersonal).toFixed(2)}pp (${Math.abs(diffPersonal / prevPersonal * 100).toFixed(1)}% relativo).` : ''} Mantener monitoreo de productividad y rotación.`;
-    else personalText = `Costo de Personal ELEVADO: ${personal.toFixed(1)}%. Porcentaje de nómina sobre ventas muy alto: ${personal.toFixed(1)} pesos por cada 100 vendidos. ${diffPersonal !== null ? `${diffPersonal > 0 ? 'Incremento' : 'Decremento'} de ${Math.abs(diffPersonal).toFixed(2)}pp (${Math.abs(diffPersonal / prevPersonal * 100).toFixed(1)}%).` : ''} Urgente: revisar niveles de empleo, rotación y productividad.`;
-    insights.push({ type: personal <= 20 ? 'success' : (personal <= 25 ? 'info' : 'warning'), text: personalText, kpi: 'personal' });
-
-    // Gastos análisis
-    let gastosText = '';
-    if (gastos <= 40) gastosText = `Gastos Operacionales ${gastos.toFixed(1)}% (arriendos, servicios, admin). Estructura: Personal ${personal.toFixed(1)}% + Costos ${costReal.toFixed(1)}% + Gastos ${gastos.toFixed(1)}% = ${(personal + costReal + gastos).toFixed(1)}% del total de ventas. ${diffGastos !== null ? `${diffGastos < 0 ? 'Reducción de ' : 'Aumento de '}${Math.abs(diffGastos).toFixed(2)}pp mes a mes (${Math.abs(diffGastos / prevGastos * 100).toFixed(1)}% relativo).` : ''} Gestión de costos fijos controlada.`;
-    else gastosText = `Gastos Operacionales ELEVADOS: ${gastos.toFixed(1)}%. Arriendos, servicios y administración consumen demasiado del margen bruto. ${diffGastos !== null ? `${diffGastos > 0 ? 'Tendencia al alza' : 'Tendencia a la baja'} de ${Math.abs(diffGastos).toFixed(2)}pp (${Math.abs(diffGastos / prevGastos * 100).toFixed(1)}% relativo).` : ''} Requiere renegociación de arriendos o automatización de procesos administrativos.`;
-    insights.push({ type: gastos <= 40 ? 'success' : 'warning', text: gastosText, kpi: 'gastos' });
-
-    return insights;
-  }, [primaryRecord, prevRecord]);
-
-  // Inicializar selectedStore con la primera tienda disponible si está vacío
-  useEffect(() => {
-    if (!selectedStore && availableStores.length > 0) {
-      setSelectedStore(availableStores[0]);
-    }
-  }, [availableStores, selectedStore]);
+  // Colores de los KPI cards
+  const ACCENTS = {
+    ebitda: { bg: MAGENTA_PALE, border: MAGENTA + '40', iconBg: MAGENTA, label: MAGENTA_DARK, value: MAGENTA },
+    personal: { bg: '#fdf4ff', border: '#e879f940', iconBg: '#a21caf', label: '#701a75', value: '#86198f' },
+    costo: { bg: '#eff6ff', border: '#93c5fd40', iconBg: '#2563eb', label: '#1e3a8a', value: '#1d4ed8' },
+    gastos: { bg: '#fef3c7', border: '#fcd34d40', iconBg: '#b45309', label: '#92400e', value: '#d97706' },
+  };
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 bg-gradient-to-br from-pink-50 via-white to-rose-50 overflow-y-auto"
+      className="fixed inset-0 z-50 overflow-y-auto"
+      style={{ background: 'linear-gradient(135deg, #fdf2f8 0%, #f8fafc 50%, #fef3c7 100%)' }}
     >
-      {/* Header */}
-      <div className="sticky top-0 z-10 bg-gradient-to-r from-pink-600 via-rose-500 to-fuchsia-600 text-white shadow-xl">
-        <div className="max-w-7xl mx-auto px-5 py-5">
+      {/* Header premium */}
+      <div className="sticky top-0 z-10 shadow-xl" style={{ background: `linear-gradient(135deg, ${MAGENTA} 0%, #c0156f 50%, #9d174d 100%)` }}>
+        <div className="max-w-7xl mx-auto px-5 py-4">
           <div className="flex items-center justify-between gap-4 mb-4">
-            <div className="flex items-center gap-3 flex-1">
-              <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-                <BarChart3 className="w-5 h-5" />
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+                <BarChart3 className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h1 className="font-black text-2xl">P&G Dashboard</h1>
-                <p className="text-white/70 text-xs">{selectedStore || 'Tienda'} · {selectedMonths.length === 1 ? MONTHS_FULL[primaryMonth - 1] : `Comparativo: ${selectedMonths.map(m => MONTHS_SHORT[m - 1]).join(' vs ')}`}</p>
+                <h1 className="font-black text-xl text-white leading-tight">P&G Dashboard</h1>
+                <p className="text-white/70 text-xs">{storeCode} · Año {currentYear} · {primaryRecord ? MONTHS_FULL[(selectedMonth || 1) - 1] : 'Sin datos'}</p>
               </div>
             </div>
             <button onClick={onClose} className="w-10 h-10 bg-white/15 hover:bg-white/30 rounded-xl flex items-center justify-center transition-colors">
-              <X className="w-5 h-5" />
+              <X className="w-5 h-5 text-white" />
             </button>
           </div>
 
-          {/* Dropdown Tiendas y Meses */}
-          <div className="flex gap-2">
-            <div className="relative inline-block">
-              <button
-                onClick={() => setStoreDropdownOpen(!storeDropdownOpen)}
-                className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2"
-              >
-                🏪 {selectedStore || 'Selecciona tienda'}
-                <ChevronDown className={`w-4 h-4 transition-transform ${storeDropdownOpen ? 'rotate-180' : ''}`} />
-              </button>
-              {storeDropdownOpen && (
-                <div className="absolute top-full left-0 mt-2 bg-white rounded-xl shadow-2xl border border-pink-100 z-20 min-w-max p-3 max-h-64 overflow-y-auto">
-                  {availableStores.map(store => (
-                    <button
-                      key={store}
-                      onClick={() => {
-                        setSelectedStore(store);
-                        setStoreDropdownOpen(false);
-                      }}
-                      className={`block w-full text-left px-3 py-2 rounded-lg text-xs font-bold transition-all ${
-                        selectedStore === store
-                          ? 'bg-pink-600 text-white shadow-md'
-                          : 'bg-pink-50 text-slate-700 hover:bg-pink-100'
-                      }`}
-                    >
-                      {store}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="relative inline-block">
+          {/* Selector de mes + tabs */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="relative">
               <button
                 onClick={() => setMonthDropdownOpen(!monthDropdownOpen)}
-                className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2"
+                className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 backdrop-blur-sm"
               >
-                {selectedMonths.length === 1 ? '📅' : '📊'} {selectedMonths.map(m => MONTHS_SHORT[m - 1]).join(', ')}
-                <ChevronDown className={`w-4 h-4 transition-transform ${monthDropdownOpen ? 'rotate-180' : ''}`} />
+                📅 {selectedMonth ? MONTHS_SHORT[selectedMonth - 1] : 'Mes'}
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform ${monthDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
               {monthDropdownOpen && (
-                <div className="absolute top-full left-0 mt-2 bg-white rounded-xl shadow-2xl border border-pink-100 z-20 min-w-max p-3 grid grid-cols-3 gap-2">
+                <div className="absolute top-full left-0 mt-2 bg-white rounded-2xl shadow-2xl border border-pink-100 z-20 p-3 grid grid-cols-4 gap-1.5">
                   {MONTHS_SHORT.map((m, i) => {
                     const hasData = allRecords.some(r => r.month === i + 1);
-                    const active = selectedMonths.includes(i + 1);
                     return (
-                      <button
-                        key={i}
-                        onClick={() => hasData && toggleMonth(i + 1)}
-                        disabled={!hasData}
-                        className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${
-                          active
-                            ? 'bg-pink-600 text-white shadow-md'
-                            : hasData
-                            ? 'bg-pink-50 text-slate-700 hover:bg-pink-100'
-                            : 'bg-slate-50 text-slate-300 cursor-not-allowed'
-                        }`}
-                      >
+                      <button key={i} disabled={!hasData} onClick={() => { setSelectedMonth(i + 1); setMonthDropdownOpen(false); }}
+                        className={`px-3 py-2 rounded-xl text-xs font-bold transition-all ${selectedMonth === i + 1 ? 'text-white shadow-md' : hasData ? 'bg-pink-50 text-slate-700 hover:bg-pink-100' : 'bg-slate-50 text-slate-300 cursor-not-allowed'}`}
+                        style={selectedMonth === i + 1 ? { background: MAGENTA } : {}}>
                         {m}
                       </button>
                     );
@@ -323,380 +545,238 @@ export default function PYGModal({ onClose, storeId }) {
                 </div>
               )}
             </div>
+
+            <div className="flex gap-1 bg-white/15 rounded-xl p-1 backdrop-blur-sm">
+              {tabs.map(tab => (
+                <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+                  className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${activeTab === tab.id ? 'bg-white text-slate-900 shadow-sm' : 'text-white/80 hover:text-white'}`}>
+                  {tab.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
       {/* Contenido */}
-      <div className="max-w-7xl mx-auto px-5 py-6 space-y-8">
+      <div className="max-w-7xl mx-auto px-5 py-6 space-y-6">
         {isLoading ? (
-          <div className="flex items-center justify-center py-32">
-            <Loader2 className="w-10 h-10 text-pink-500 animate-spin" />
+          <div className="flex flex-col items-center justify-center py-32 gap-4">
+            <Loader2 className="w-10 h-10 animate-spin" style={{ color: MAGENTA }} />
+            <p className="text-slate-500 font-medium">Cargando datos de P&G…</p>
           </div>
         ) : !primaryRecord ? (
           <div className="flex flex-col items-center justify-center py-32 text-slate-400">
             <BarChart3 className="w-20 h-20 mb-4 opacity-20" />
-            <p className="font-bold text-slate-600 text-xl">Sin datos para {MONTHS_FULL[primaryMonth - 1]}</p>
+            <p className="font-bold text-slate-600 text-xl">Sin datos para {MONTHS_FULL[(selectedMonth || 1) - 1]}</p>
+            <p className="text-sm mt-2">Meses disponibles: {allRecords.map(r => MONTHS_SHORT[r.month - 1]).join(', ')}</p>
           </div>
         ) : (
           <>
-            {/* KPIs principales */}
-            <div>
-              <h2 className="text-lg font-black text-slate-800 mb-4 flex items-center gap-2">
-                <Zap className="w-5 h-5 text-pink-600" /> Indicadores Clave
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <InsightCard
-                  title="Margen EBITDA"
-                  value={fmt(primaryRecord.margen_ebitda)}
-                  prev={prevRecord ? fmt(prevRecord.margen_ebitda) : null}
-                  trend={prevRecord ? pctNum(primaryRecord.margen_ebitda) - pctNum(prevRecord.margen_ebitda) : null}
-                  icon={TrendingUp}
-                  color={{ border: 'border-pink-200', bg: 'bg-pink-50', text: 'text-pink-600', label: 'text-pink-500', muted: 'text-pink-400', icon: 'bg-pink-600' }}
-                  onClick={() => setSelectedKPI('ebitda')}
-                />
-                <InsightCard
-                  title="Costo Personal"
-                  value={fmt(primaryRecord.costo_personal)}
-                  prev={prevRecord ? fmt(prevRecord.costo_personal) : null}
-                  trend={prevRecord ? pctNum(primaryRecord.costo_personal) - pctNum(prevRecord.costo_personal) : null}
-                  icon={BarChart3}
-                  color={{ border: 'border-fuchsia-200', bg: 'bg-fuchsia-50', text: 'text-fuchsia-600', label: 'text-fuchsia-500', muted: 'text-fuchsia-400', icon: 'bg-fuchsia-600' }}
-                  inverse
-                  onClick={() => setSelectedKPI('personal')}
-                />
-                <InsightCard
-                  title="Costo Real vs Teórico"
-                  value={`${fmt(primaryRecord.cost_real)} vs ${fmt(primaryRecord.cost_teorico)}`}
-                  prev={prevRecord ? `${fmt(prevRecord.cost_real)} vs ${fmt(prevRecord.cost_teorico)}` : null}
-                  trend={prevRecord ? pctNum(primaryRecord.cost_real) - pctNum(prevRecord.cost_real) : null}
-                  icon={TrendingDown}
-                  color={{ border: 'border-blue-200', bg: 'bg-blue-50', text: 'text-blue-600', label: 'text-blue-500', muted: 'text-blue-400', icon: 'bg-blue-600' }}
-                  inverse
-                  onClick={() => setSelectedKPI('costo')}
-                />
-                <InsightCard
-                  title="Gastos % Venta"
-                  value={fmt(primaryRecord.gastos_pct_venta)}
-                  prev={prevRecord ? fmt(prevRecord.gastos_pct_venta) : null}
-                  trend={prevRecord ? pctNum(primaryRecord.gastos_pct_venta) - pctNum(prevRecord.gastos_pct_venta) : null}
-                  icon={AlertCircle}
-                  color={{ border: 'border-rose-200', bg: 'bg-rose-50', text: 'text-rose-600', label: 'text-rose-500', muted: 'text-rose-400', icon: 'bg-rose-600' }}
-                  inverse
-                  onClick={() => setSelectedKPI('gastos')}
-                />
-              </div>
-            </div>
-
-            {/* Insights analíticos */}
-            {insights.length > 0 && (
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border-2 border-blue-100">
-                <h3 className="text-sm font-black text-slate-800 mb-4 flex items-center gap-2">
-                  <span className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold">💡</span> Análisis & Insights
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {insights.map((insight, i) => (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.1 }}
-                      className={`flex items-start gap-2 p-3 rounded-xl text-xs font-medium ${
-                        insight.type === 'success' ? 'bg-emerald-100 text-emerald-700' :
-                        insight.type === 'warning' ? 'bg-amber-100 text-amber-700' :
-                        'bg-blue-100 text-blue-700'
-                      }`}
-                    >
-                      <span className="text-lg flex-shrink-0 mt-0.5">
-                        {insight.type === 'success' ? '✅' : insight.type === 'warning' ? '⚠️' : 'ℹ️'}
-                      </span>
-                      <span>{insight.text}</span>
-                    </motion.div>
-                  ))}
+            {/* ── TAB: RESUMEN ────────────────────────────────────────── */}
+            {activeTab === 'overview' && (
+              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+                {/* KPI Cards */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                  <KPICard label="Margen EBITDA" value={fmt(primaryRecord.margen_ebitda)}
+                    prev={prevRecord ? fmt(prevRecord.margen_ebitda) : null}
+                    delta={prevRecord ? pctNum(primaryRecord.margen_ebitda) - pctNum(prevRecord.margen_ebitda) : null}
+                    icon={TrendingUp} accent={ACCENTS.ebitda} inverse={false}
+                    badge={pctNum(primaryRecord.margen_ebitda) >= 25 ? '🏆 Excelente' : pctNum(primaryRecord.margen_ebitda) >= 18 ? '✓ Normal' : '⚠ Crítico'}
+                    onClick={() => {}} />
+                  <KPICard label="Costo Personal" value={fmt(primaryRecord.costo_personal)}
+                    prev={prevRecord ? fmt(prevRecord.costo_personal) : null}
+                    delta={prevRecord ? pctNum(primaryRecord.costo_personal) - pctNum(prevRecord.costo_personal) : null}
+                    icon={Users} accent={ACCENTS.personal} inverse={true}
+                    badge={pctNum(primaryRecord.costo_personal) <= 22 ? '✓ Óptimo' : pctNum(primaryRecord.costo_personal) <= 25 ? '⚠ Revisar' : '🔴 Alto'}
+                    onClick={() => {}} />
+                  <KPICard label="Costo Real / Teórico" value={`${fmt(primaryRecord.cost_real)} / ${fmt(primaryRecord.cost_teorico)}`}
+                    prev={prevRecord ? `${fmt(prevRecord.cost_real)}` : null}
+                    delta={prevRecord ? pctNum(primaryRecord.cost_real) - pctNum(prevRecord.cost_real) : null}
+                    icon={Package} accent={ACCENTS.costo} inverse={true}
+                    badge={pctNum(primaryRecord.cost_real) <= pctNum(primaryRecord.cost_teorico) ? '✓ En presupuesto' : '⚠ Exceso'}
+                    onClick={() => {}} />
+                  <KPICard label="Gastos % Venta" value={fmt(primaryRecord.gastos_pct_venta)}
+                    prev={prevRecord ? fmt(prevRecord.gastos_pct_venta) : null}
+                    delta={prevRecord ? pctNum(primaryRecord.gastos_pct_venta) - pctNum(prevRecord.gastos_pct_venta) : null}
+                    icon={DollarSign} accent={ACCENTS.gastos} inverse={true}
+                    onClick={() => {}} />
                 </div>
-              </div>
-            )}
 
-            {/* Gráficas principales */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Evolución EBITDA */}
-              {trendData.length >= 2 && (
-                <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="bg-gradient-to-br from-pink-50/50 to-white rounded-2xl p-6 shadow-md border border-pink-200 hover:shadow-lg transition-all">
-                  <h3 className="font-black text-slate-800 mb-4 flex items-center gap-2"><TrendingUp className="w-5 h-5 text-pink-600" />Evolución EBITDA</h3>
-                  <ResponsiveContainer width="100%" height={260}>
-                    <LineChart data={trendData} margin={{ top: 5, right: 20, left: -10, bottom: 0 }}>
-                      <defs>
-                        <linearGradient id="colorEBITDA" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#db2777" stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor="#db2777" stopOpacity={0}/>
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="4 4" stroke="#f1e5f5" vertical={false} />
-                      <XAxis dataKey="mes" tick={{ fontSize: 12, fill: '#64748b' }} />
-                      <YAxis tickFormatter={v => `${v}%`} tick={{ fontSize: 12, fill: '#64748b' }} domain={[0, 'auto']} />
-                      <Tooltip content={<ChartTooltip />} cursor={{ stroke: '#db2777', strokeOpacity: 0.3 }} />
-                      <Line type="natural" dataKey="EBITDA" stroke="#db2777" strokeWidth={3} dot={{ fill: '#db2777', r: 5, strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 7 }} fill="url(#colorEBITDA)" />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </motion.div>
-              )}
-
-              {/* Pie Chart Gastos */}
-              {gasteosData.length > 0 && (
-                <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="bg-gradient-to-br from-rose-50/50 to-white rounded-2xl p-6 shadow-md border border-rose-200 hover:shadow-lg transition-all">
-                  <h3 className="font-black text-slate-800 mb-4 flex items-center gap-2"><AlertCircle className="w-5 h-5 text-rose-500" />Distribución de Gastos</h3>
-                  <ResponsiveContainer width="100%" height={260}>
-                    <PieChart>
-                      <Pie data={gasteosData} dataKey="value" cx="50%" cy="50%" innerRadius={55} outerRadius={90} paddingAngle={3}
-                        label={({ name, value }) => `${name.split(' ')[0]} ${value.toFixed(1)}%`} labelLine={{ stroke: '#64748b', strokeWidth: 1 }}>
-                        {gasteosData.map((entry, i) => <Cell key={i} fill={entry.color} stroke="white" strokeWidth={2} />)}
-                      </Pie>
-                      <Tooltip formatter={(v, name) => [`${Number(v).toFixed(2)}%`, name]} contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.12)', fontSize: 12 }} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </motion.div>
-              )}
-
-              {/* Costo Real vs Teórico */}
-              {trendData.length >= 2 && (
-                <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="bg-gradient-to-br from-blue-50/50 to-white rounded-2xl p-6 shadow-md border border-blue-200 hover:shadow-lg transition-all">
-                  <h3 className="font-black text-slate-800 mb-4 flex items-center gap-2"><BarChart3 className="w-5 h-5 text-blue-600" />Costo Real vs Teórico</h3>
-                  <ResponsiveContainer width="100%" height={260}>
-                    <BarChart data={trendData} margin={{ top: 5, right: 20, left: -10, bottom: 0 }}>
-                      <CartesianGrid strokeDasharray="4 4" stroke="#e0e7ff" vertical={false} />
-                      <XAxis dataKey="mes" tick={{ fontSize: 12, fill: '#64748b' }} />
-                      <YAxis tickFormatter={v => `${v}%`} tick={{ fontSize: 12, fill: '#64748b' }} />
-                      <Tooltip content={<ChartTooltip />} cursor={{ fill: 'rgba(59, 130, 246, 0.08)' }} />
-                      <Legend wrapperStyle={{ fontSize: 12, paddingTop: 15 }} />
-                      <Bar dataKey="C.Real" fill="#3b82f6" radius={[8,8,0,0]} animationDuration={800} />
-                      <Bar dataKey="C.Teo" fill="#cbd5e1" radius={[8,8,0,0]} animationDuration={800} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                  <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
-                    <div className="flex items-center gap-2"><div className="w-3 h-3 bg-blue-500 rounded-sm"></div><span className="text-slate-700">Real = Costo actual</span></div>
-                    <div className="flex items-center gap-2"><div className="w-3 h-3 bg-slate-300 rounded-sm"></div><span className="text-slate-700">Teórico = Meta</span></div>
-                  </div>
-                </motion.div>
-              )}
-
-              {/* Comparación de métricas */}
-              {trendData.length >= 2 && (
-                <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="bg-gradient-to-br from-purple-50/50 to-white rounded-2xl p-6 shadow-md border border-purple-200 hover:shadow-lg transition-all col-span-1 lg:col-span-2">
-                  <h3 className="font-black text-slate-800 mb-4 flex items-center gap-2"><Activity className="w-5 h-5 text-purple-600" />Comparativa Completa de Métricas</h3>
-                  <ResponsiveContainer width="100%" height={280}>
-                    <LineChart data={trendData} margin={{ top: 5, right: 20, left: -10, bottom: 0 }}>
-                      <defs>
-                        <linearGradient id="gradEBITDA" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#db2777" stopOpacity={0.2}/><stop offset="95%" stopColor="#db2777" stopOpacity={0}/></linearGradient>
-                        <linearGradient id="gradCost" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#3b82f6" stopOpacity={0.2}/><stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/></linearGradient>
-                        <linearGradient id="gradPersonal" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#9333ea" stopOpacity={0.2}/><stop offset="95%" stopColor="#9333ea" stopOpacity={0}/></linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="4 4" stroke="#f3e8ff" vertical={false} />
-                      <XAxis dataKey="mes" tick={{ fontSize: 12, fill: '#64748b' }} />
-                      <YAxis tickFormatter={v => `${v}%`} tick={{ fontSize: 12, fill: '#64748b' }} domain={[0, 'auto']} />
-                      <Tooltip content={<ChartTooltip />} cursor={{ strokeWidth: 2, stroke: '#e5e7eb' }} />
-                      <Legend wrapperStyle={{ fontSize: 12, paddingTop: 15 }} />
-                      <Line type="natural" dataKey="EBITDA" stroke="#db2777" strokeWidth={3} dot={{ fill: '#db2777', r: 4 }} activeDot={{ r: 6 }} fill="url(#gradEBITDA)" />
-                      <Line type="natural" dataKey="C.Real" stroke="#3b82f6" strokeWidth={3} dot={{ fill: '#3b82f6', r: 4 }} activeDot={{ r: 6 }} fill="url(#gradCost)" />
-                      <Line type="natural" dataKey="Personal" stroke="#9333ea" strokeWidth={3} dot={{ fill: '#9333ea', r: 4 }} activeDot={{ r: 6 }} fill="url(#gradPersonal)" />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </motion.div>
-              )}
-            </div>
-
-            {/* Tabla desglose completo */}
-            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl p-6 shadow-sm border border-pink-100">
-              <h3 className="font-black text-slate-800 mb-4">Desglose Completo de Gastos</h3>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <tbody>
-                    {[
-                      { label: 'Costo Personal', value: primaryRecord.costo_personal, prev: prevRecord?.costo_personal },
-                      { label: 'Arriendos', value: primaryRecord.arriendos, prev: prevRecord?.arriendos },
-                      { label: 'Servicios Públicos', value: primaryRecord.servicios_publicos, prev: prevRecord?.servicios_publicos },
-                      { label: 'Administración', value: primaryRecord.administracion, prev: prevRecord?.administracion },
-                      { label: 'Impuestos', value: primaryRecord.impuestos, prev: prevRecord?.impuestos },
-                    ].filter(r => r.value != null).map((row, i) => (
-                      <tr key={i} className="border-b border-slate-100 hover:bg-pink-50/50">
-                        <td className="py-3 text-slate-700 font-medium">{row.label}</td>
-                        <td className="py-3 text-right">
-                          <span className="font-black text-slate-800">{fmt(row.value)}</span>
-                          {row.prev && <span className="text-slate-400 ml-2 text-xs">({fmt(row.prev)})</span>}
-                        </td>
-                        {row.prev && (
-                          <td className="py-3 text-right text-xs font-bold">
-                            <span className={pctNum(row.value) <= pctNum(row.prev) ? 'text-emerald-600' : 'text-red-500'}>
-                              {(pctNum(row.value) - pctNum(row.prev)).toFixed(2)}pp
-                            </span>
-                          </td>
-                        )}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </motion.div>
-
-            {/* Otros gastos */}
-            {otrosGastos.length > 0 && (
-              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl p-6 shadow-sm border border-pink-100">
-                <h3 className="font-black text-slate-800 mb-4">Otros Gastos Detalllados</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {otrosGastos.map(({ name, value }) => (
-                    <div key={name} className="bg-gradient-to-br from-slate-50 to-pink-50 rounded-xl p-4 border border-slate-100">
-                      <p className="text-xs text-slate-600 font-medium truncate">{name}</p>
-                      <p className="text-lg font-black text-slate-800 mt-1">{value.toFixed(3)}%</p>
+                {/* Insights cuantitativos */}
+                <div className="rounded-2xl border-2 p-6 space-y-1" style={{ borderColor: MAGENTA + '20', background: 'linear-gradient(135deg, #fff 0%, #fdf2f8 100%)' }}>
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: MAGENTA }}>
+                      <Zap className="w-4 h-4 text-white" />
                     </div>
-                  ))}
+                    <h3 className="font-black text-slate-900">Análisis Cuantitativo & Acción</h3>
+                  </div>
+                  <QuantInsights primaryRecord={primaryRecord} prevRecord={prevRecord} trendData={trendData} />
                 </div>
+
+                {/* Mini trend EBITDA */}
+                {trendData.length >= 2 && (
+                  <div className="rounded-2xl border-2 p-6" style={{ borderColor: MAGENTA + '25', background: '#fff' }}>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="font-black text-slate-900">Evolución EBITDA {currentYear}</h3>
+                      <span className="text-xs text-slate-400">{trendData.length} meses</span>
+                    </div>
+                    <TrendChart data={trendData} metrics={['EBITDA']} height={220} />
+                  </div>
+                )}
               </motion.div>
             )}
 
-            {/* Comparativo multi-mes */}
-            {selectedMonths.length >= 2 && (
-              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl p-6 shadow-sm border border-pink-100">
-                <h3 className="font-black text-slate-800 mb-4">Tabla Comparativa</h3>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-xs">
-                    <thead>
-                      <tr className="border-b-2 border-pink-200">
-                        <th className="text-left py-3 font-black">Métrica</th>
-                        {selectedMonths.map(m => <th key={m} className="text-right py-3 font-black text-pink-600 px-3">{MONTHS_SHORT[m - 1]}</th>)}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {['margen_ebitda', 'cost_real', 'cost_teorico', 'costo_personal', 'gastos_pct_venta', 'arriendos'].map(key => {
-                        const labels = { margen_ebitda: 'EBITDA', cost_real: 'Costo Real', cost_teorico: 'Costo Teórico', costo_personal: 'Personal', gastos_pct_venta: 'Gastos %', arriendos: 'Arriendos' };
-                        return (
-                          <tr key={key} className="border-b border-slate-100 hover:bg-pink-50/30">
-                            <td className="py-2.5 font-medium text-slate-700">{labels[key]}</td>
-                            {selectedMonths.map(m => {
-                              const rec = filteredByStore.find(r => r.month === m);
-                              return <td key={m} className="py-2.5 text-right px-3 font-black text-slate-800">{fmt(rec?.[key])}</td>;
-                            })}
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+            {/* ── TAB: TENDENCIAS ─────────────────────────────────────── */}
+            {activeTab === 'trends' && (
+              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+                {trendData.length >= 2 ? (
+                  <>
+                    {/* EBITDA + Personal */}
+                    <div className="rounded-2xl border-2 p-6 bg-white" style={{ borderColor: MAGENTA + '25' }}>
+                      <h3 className="font-black text-slate-900 mb-1">EBITDA vs Costo Personal</h3>
+                      <p className="text-xs text-slate-400 mb-4">Relación inversa clave: personal sube → EBITDA baja</p>
+                      <TrendChart data={trendData} metrics={['EBITDA', 'Personal']} height={280} />
+                    </div>
+
+                    {/* Costo Real vs Teórico */}
+                    <div className="rounded-2xl border-2 p-6 bg-white" style={{ borderColor: '#93c5fd40' }}>
+                      <h3 className="font-black text-slate-900 mb-1">Costo Real vs Teórico</h3>
+                      <p className="text-xs text-slate-400 mb-4">Desvíos sobre el presupuesto de costo</p>
+                      <CostBarsChart data={trendData} />
+                      <div className="flex gap-4 mt-3 text-xs">
+                        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm inline-block" style={{ background: MAGENTA }} />Costo Real</span>
+                        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-slate-200 inline-block" />Costo Teórico</span>
+                      </div>
+                    </div>
+
+                    {/* Comparativa completa */}
+                    <div className="rounded-2xl border-2 p-6 bg-white" style={{ borderColor: '#8b5cf630' }}>
+                      <h3 className="font-black text-slate-900 mb-1">Panorama Completo de Métricas</h3>
+                      <p className="text-xs text-slate-400 mb-4">EBITDA · Costo Real · Personal · Gastos</p>
+                      <TrendChart data={trendData} metrics={['EBITDA', 'C.Real', 'Personal', 'Gastos']} height={300} />
+                    </div>
+
+                    {/* Tabla comparativa multi-mes */}
+                    <div className="rounded-2xl border-2 p-6 bg-white" style={{ borderColor: MAGENTA + '20' }}>
+                      <h3 className="font-black text-slate-900 mb-4">Tabla Histórica Completa</h3>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-xs min-w-[500px]">
+                          <thead>
+                            <tr style={{ background: MAGENTA_PALE }}>
+                              <th className="text-left py-3 px-3 font-bold rounded-l-xl" style={{ color: MAGENTA_DARK }}>Métrica</th>
+                              {trendData.map(d => (
+                                <th key={d.mes} className={`text-right py-3 px-3 font-bold ${d.month === selectedMonth ? 'text-white' : ''}`}
+                                  style={{ color: d.month === selectedMonth ? MAGENTA : MAGENTA_DARK, background: d.month === selectedMonth ? MAGENTA + '20' : 'transparent' }}>
+                                  {d.mes}
+                                </th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {['EBITDA', 'C.Real', 'C.Teo', 'Personal', 'Gastos'].map(k => (
+                              <tr key={k} className="border-b border-slate-50 hover:bg-pink-50/20">
+                                <td className="py-2.5 px-3 font-bold text-slate-700">{k === 'C.Real' ? 'Costo Real' : k === 'C.Teo' ? 'Costo Teórico' : k}</td>
+                                {trendData.map(d => {
+                                  const isKPIEbitda = k === 'EBITDA';
+                                  const isSelected = d.month === selectedMonth;
+                                  return (
+                                    <td key={d.mes} className={`py-2.5 px-3 text-right font-black ${isSelected ? '' : 'text-slate-700'}`}
+                                      style={{ color: isSelected && isKPIEbitda ? MAGENTA : undefined }}>
+                                      {d[k] != null ? `${d[k].toFixed(1)}%` : '—'}
+                                    </td>
+                                  );
+                                })}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-center py-16 text-slate-400">
+                    <Activity className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                    <p>Necesitas al menos 2 meses de datos para ver tendencias</p>
+                  </div>
+                )}
+              </motion.div>
+            )}
+
+            {/* ── TAB: SIMULADOR ──────────────────────────────────────── */}
+            {activeTab === 'simulator' && (
+              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+                <EBITDASimulator primaryRecord={primaryRecord} trendData={trendData} />
+
+                {/* Comparativo mes seleccionado vs mejor mes */}
+                {trendData.length >= 2 && (() => {
+                  const bestMonth = trendData.reduce((b, d) => (d.EBITDA || 0) > (b.EBITDA || 0) ? d : b, trendData[0]);
+                  const currentInTrend = trendData.find(d => d.month === selectedMonth);
+                  if (!currentInTrend || bestMonth.month === selectedMonth) return null;
+                  return (
+                    <div className="rounded-2xl border-2 p-6 bg-white" style={{ borderColor: MAGENTA + '25' }}>
+                      <h3 className="font-black text-slate-900 mb-1">¿Qué hiciste diferente en {bestMonth.mes}?</h3>
+                      <p className="text-xs text-slate-500 mb-4">Tu mejor mes vs el mes seleccionado</p>
+                      <div className="grid grid-cols-2 gap-4">
+                        {['EBITDA', 'C.Real', 'Personal', 'Gastos'].map(k => {
+                          const curr = currentInTrend[k];
+                          const best = bestMonth[k];
+                          const diff = curr != null && best != null ? curr - best : null;
+                          const isKpi = k === 'EBITDA';
+                          const isBetter = isKpi ? diff >= 0 : diff <= 0;
+                          return (
+                            <div key={k} className="rounded-xl p-4 border border-slate-100">
+                              <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">{k === 'C.Real' ? 'Costo Real' : k}</p>
+                              <div className="flex items-end gap-2">
+                                <span className="font-black text-xl text-slate-900">{curr?.toFixed(1)}%</span>
+                                <span className="text-sm text-slate-400 mb-0.5">vs {best?.toFixed(1)}%</span>
+                              </div>
+                              {diff != null && (
+                                <p className={`text-xs font-black mt-1 ${isBetter ? 'text-emerald-600' : 'text-red-500'}`}>
+                                  {diff > 0 ? '+' : ''}{diff.toFixed(1)}pp {isBetter ? '↑ mejor' : '↓ peor'} que {bestMonth.mes}
+                                </p>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })()}
+              </motion.div>
+            )}
+
+            {/* ── TAB: DESGLOSE ───────────────────────────────────────── */}
+            {activeTab === 'breakdown' && (
+              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+                <div className="rounded-2xl border-2 p-6 bg-white" style={{ borderColor: MAGENTA + '25' }}>
+                  <h3 className="font-black text-slate-900 mb-4">Desglose Completo de Costos — {MONTHS_FULL[(selectedMonth || 1) - 1]}</h3>
+                  <CostTable primaryRecord={primaryRecord} prevRecord={prevRecord} />
                 </div>
+
+                {/* Otros gastos */}
+                {primaryRecord?.otros_gastos && (() => {
+                  let others = [];
+                  try { others = Object.entries(JSON.parse(primaryRecord.otros_gastos)).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]); } catch {}
+                  if (!others.length) return null;
+                  return (
+                    <div className="rounded-2xl border-2 p-6 bg-white" style={{ borderColor: MAGENTA + '20' }}>
+                      <h3 className="font-black text-slate-900 mb-4">Otros Gastos Detallados</h3>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        {others.map(([k, v]) => (
+                          <div key={k} className="rounded-xl p-4 border border-slate-100" style={{ background: MAGENTA_PALE + '60' }}>
+                            <p className="text-[10px] text-slate-500 font-medium truncate mb-1">{k}</p>
+                            <p className="font-black text-lg" style={{ color: MAGENTA }}>{(v * 100).toFixed(2)}%</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
               </motion.div>
             )}
           </>
         )}
-
-        {/* Modal KPI Detail */}
-        <AnimatePresence>
-          {selectedKPI && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setSelectedKPI(null)}
-              className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
-            >
-              <motion.div
-                initial={{ scale: 0.95, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.95, opacity: 0 }}
-                onClick={e => e.stopPropagation()}
-                className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto"
-              >
-                {selectedKPI === 'ebitda' && (
-                  <div className="p-8">
-                    <div className="flex items-center gap-3 mb-6">
-                      <div className="w-12 h-12 bg-pink-600 rounded-xl flex items-center justify-center"><TrendingUp className="w-6 h-6 text-white" /></div>
-                      <div>
-                        <h2 className="text-2xl font-black text-slate-800">Margen EBITDA</h2>
-                        <p className="text-slate-500">{MONTHS_FULL[primaryMonth - 1]}</p>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-3 gap-4 mb-6">
-                      <div className="bg-pink-50 rounded-xl p-4"><p className="text-xs text-pink-600 font-bold">Actual</p><p className="text-2xl font-black text-pink-700">{fmt(primaryRecord.margen_ebitda)}</p></div>
-                      {prevRecord && <div className="bg-slate-100 rounded-xl p-4"><p className="text-xs text-slate-600 font-bold">Mes Anterior</p><p className="text-2xl font-black text-slate-700">{fmt(prevRecord.margen_ebitda)}</p></div>}
-                      {prevRecord && <div className={`rounded-xl p-4 ${pctNum(primaryRecord.margen_ebitda) > pctNum(prevRecord.margen_ebitda) ? 'bg-emerald-50' : 'bg-red-50'}`}><p className="text-xs font-bold">{pctNum(primaryRecord.margen_ebitda) > pctNum(prevRecord.margen_ebitda) ? 'Cambio Positivo' : 'Cambio Negativo'}</p><p className={`text-2xl font-black ${pctNum(primaryRecord.margen_ebitda) > pctNum(prevRecord.margen_ebitda) ? 'text-emerald-700' : 'text-red-700'}`}>{(pctNum(primaryRecord.margen_ebitda) - pctNum(prevRecord.margen_ebitda)).toFixed(2)}pp</p></div>}
-                    </div>
-                    <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
-                      <p className="text-sm text-blue-900 font-medium leading-relaxed">
-                        {insights.find(i => i.kpi === 'ebitda')?.text}
-                      </p>
-                    </div>
-                    <button onClick={() => setSelectedKPI(null)} className="mt-6 w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 px-4 rounded-xl transition-colors">Cerrar</button>
-                  </div>
-                )}
-
-                {selectedKPI === 'personal' && (
-                  <div className="p-8">
-                    <div className="flex items-center gap-3 mb-6">
-                      <div className="w-12 h-12 bg-fuchsia-600 rounded-xl flex items-center justify-center"><BarChart3 className="w-6 h-6 text-white" /></div>
-                      <div>
-                        <h2 className="text-2xl font-black text-slate-800">Costo de Personal</h2>
-                        <p className="text-slate-500">{MONTHS_FULL[primaryMonth - 1]}</p>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-3 gap-4 mb-6">
-                      <div className="bg-fuchsia-50 rounded-xl p-4"><p className="text-xs text-fuchsia-600 font-bold">Actual</p><p className="text-2xl font-black text-fuchsia-700">{fmt(primaryRecord.costo_personal)}</p></div>
-                      {prevRecord && <div className="bg-slate-100 rounded-xl p-4"><p className="text-xs text-slate-600 font-bold">Mes Anterior</p><p className="text-2xl font-black text-slate-700">{fmt(prevRecord.costo_personal)}</p></div>}
-                      {prevRecord && <div className={`rounded-xl p-4 ${pctNum(primaryRecord.costo_personal) < pctNum(prevRecord.costo_personal) ? 'bg-emerald-50' : 'bg-red-50'}`}><p className="text-xs font-bold">{pctNum(primaryRecord.costo_personal) < pctNum(prevRecord.costo_personal) ? 'Mejora' : 'Empeora'}</p><p className={`text-2xl font-black ${pctNum(primaryRecord.costo_personal) < pctNum(prevRecord.costo_personal) ? 'text-emerald-700' : 'text-red-700'}`}>{Math.abs(pctNum(primaryRecord.costo_personal) - pctNum(prevRecord.costo_personal)).toFixed(2)}pp</p></div>}
-                    </div>
-                    <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
-                      <p className="text-sm text-blue-900 font-medium leading-relaxed">
-                        {insights.find(i => i.kpi === 'personal')?.text}
-                      </p>
-                    </div>
-                    <button onClick={() => setSelectedKPI(null)} className="mt-6 w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 px-4 rounded-xl transition-colors">Cerrar</button>
-                  </div>
-                )}
-
-                {selectedKPI === 'costo' && (
-                  <div className="p-8">
-                    <div className="flex items-center gap-3 mb-6">
-                      <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center"><TrendingDown className="w-6 h-6 text-white" /></div>
-                      <div>
-                        <h2 className="text-2xl font-black text-slate-800">Costo Real vs Teórico</h2>
-                        <p className="text-slate-500">{MONTHS_FULL[primaryMonth - 1]}</p>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-3 gap-4 mb-6">
-                      <div className="bg-blue-50 rounded-xl p-4"><p className="text-xs text-blue-600 font-bold">Real</p><p className="text-2xl font-black text-blue-700">{fmt(primaryRecord.cost_real)}</p></div>
-                      <div className="bg-slate-100 rounded-xl p-4"><p className="text-xs text-slate-600 font-bold">Teórico</p><p className="text-2xl font-black text-slate-700">{fmt(primaryRecord.cost_teorico)}</p></div>
-                      <div className={`rounded-xl p-4 ${pctNum(primaryRecord.cost_real) <= pctNum(primaryRecord.cost_teorico) ? 'bg-emerald-50' : 'bg-red-50'}`}><p className="text-xs font-bold">{pctNum(primaryRecord.cost_real) <= pctNum(primaryRecord.cost_teorico) ? 'Ahorro' : 'Exceso'}</p><p className={`text-2xl font-black ${pctNum(primaryRecord.cost_real) <= pctNum(primaryRecord.cost_teorico) ? 'text-emerald-700' : 'text-red-700'}`}>{Math.abs(pctNum(primaryRecord.cost_real) - pctNum(primaryRecord.cost_teorico)).toFixed(2)}pp</p></div>
-                    </div>
-                    <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
-                      <p className="text-sm text-blue-900 font-medium leading-relaxed">
-                        {insights.find(i => i.kpi === 'costo')?.text}
-                      </p>
-                    </div>
-                    <button onClick={() => setSelectedKPI(null)} className="mt-6 w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 px-4 rounded-xl transition-colors">Cerrar</button>
-                  </div>
-                )}
-
-                {selectedKPI === 'gastos' && (
-                  <div className="p-8">
-                    <div className="flex items-center gap-3 mb-6">
-                      <div className="w-12 h-12 bg-rose-600 rounded-xl flex items-center justify-center"><AlertCircle className="w-6 h-6 text-white" /></div>
-                      <div>
-                        <h2 className="text-2xl font-black text-slate-800">Gastos Operacionales</h2>
-                        <p className="text-slate-500">{MONTHS_FULL[primaryMonth - 1]}</p>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-3 gap-4 mb-6">
-                      <div className="bg-rose-50 rounded-xl p-4"><p className="text-xs text-rose-600 font-bold">% Venta</p><p className="text-2xl font-black text-rose-700">{fmt(primaryRecord.gastos_pct_venta)}</p></div>
-                      {prevRecord && <div className="bg-slate-100 rounded-xl p-4"><p className="text-xs text-slate-600 font-bold">Mes Anterior</p><p className="text-2xl font-black text-slate-700">{fmt(prevRecord.gastos_pct_venta)}</p></div>}
-                      {prevRecord && <div className={`rounded-xl p-4 ${pctNum(primaryRecord.gastos_pct_venta) < pctNum(prevRecord.gastos_pct_venta) ? 'bg-emerald-50' : 'bg-red-50'}`}><p className="text-xs font-bold">{pctNum(primaryRecord.gastos_pct_venta) < pctNum(prevRecord.gastos_pct_venta) ? 'Reducción' : 'Aumento'}</p><p className={`text-2xl font-black ${pctNum(primaryRecord.gastos_pct_venta) < pctNum(prevRecord.gastos_pct_venta) ? 'text-emerald-700' : 'text-red-700'}`}>{Math.abs(pctNum(primaryRecord.gastos_pct_venta) - pctNum(prevRecord.gastos_pct_venta)).toFixed(2)}pp</p></div>}
-                    </div>
-                    <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
-                      <p className="text-sm text-blue-900 font-medium leading-relaxed">
-                        {insights.find(i => i.kpi === 'gastos')?.text}
-                      </p>
-                    </div>
-                    <button onClick={() => setSelectedKPI(null)} className="mt-6 w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 px-4 rounded-xl transition-colors">Cerrar</button>
-                  </div>
-                )}
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
     </motion.div>
   );
