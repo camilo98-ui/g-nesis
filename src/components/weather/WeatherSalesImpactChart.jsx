@@ -4,6 +4,7 @@ import {
   CloudRain, Sun, Cloud, Thermometer, TrendingUp, TrendingDown, 
   Zap, Calendar as CalendarIcon, BarChart3, Activity, X, Check, ChevronLeft, ChevronRight, Sparkles
 } from 'lucide-react';
+import ImpactDaysPanel from '@/components/weather/ImpactDaysPanel';
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { 
@@ -881,6 +882,9 @@ export default function WeatherSalesImpactChart({ weatherData, dailySales = [], 
           </motion.button>
         </div>
       )}
+
+      {/* Días con Mayor Impacto Climático */}
+      <ImpactDaysPanel chartData={chartData} stats={stats} formatCurrency={formatCurrency} />
 
       {/* Botón para desplegar análisis completo */}
       <div className="flex justify-center">
