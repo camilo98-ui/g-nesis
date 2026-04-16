@@ -271,9 +271,11 @@ export default function ExecutiveDashboard() {
       const monthTotalTransactions = monthSales.reduce((sum, s) => sum + (s.total_transactions || 0), 0);
 
       // PROYECCIONES con histórico
-      const daysPassedInWeek = eachDayOfInterval({ start: currentWeekStart, end: now }).filter(d => d <= now).length;
+      const safeWeekStart = currentWeekStart <= now ? currentWeekStart : now;
+      const daysPassedInWeek = eachDayOfInterval({ start: safeWeekStart, end: now }).filter(d => d <= now).length;
       const avgDailySalesWeek = daysPassedInWeek > 0 ? weekTotalSales / daysPassedInWeek : 0;
-      const totalDaysInWeek = eachDayOfInterval({ start: currentWeekStart, end: currentWeekEnd }).length;
+      const safeWeekEnd = currentWeekEnd >= currentWeekStart ? currentWeekEnd : currentWeekStart;
+      const totalDaysInWeek = eachDayOfInterval({ start: currentWeekStart, end: safeWeekEnd }).length;
       
       const historicalWeight = daysPassedInWeek <= 2 ? 0.8 : 0.4;
       const currentWeight = 1 - historicalWeight;
@@ -368,7 +370,8 @@ export default function ExecutiveDashboard() {
     const avgTicket = totalTransactions > 0 ? totalSales / totalTransactions : 0;
 
     // Calcular presupuesto del rango seleccionado
-    const daysInRange = eachDayOfInterval({ start: dateRange.from, end: dateRange.to });
+    const safeRangeEnd = dateRange.to >= dateRange.from ? dateRange.to : dateRange.from;
+    const daysInRange = eachDayOfInterval({ start: dateRange.from, end: safeRangeEnd });
     const totalBudgetInRange = storesAnalysis.reduce((sum, store) => {
       if (!store.hasData || !store.getDailyBudget) return sum;
       const storeBudget = daysInRange.reduce((daySum, day) => {
@@ -825,7 +828,8 @@ export default function ExecutiveDashboard() {
   // Datos para gráficas con diferentes vistas (días, semanas, meses) - ZONA O TIENDA ESPECÍFICA
   const dailySalesData = useMemo(() => {
     if (viewMode === 'day') {
-      const days = eachDayOfInterval({ start: dateRange.from, end: dateRange.to });
+      const safeTo = dateRange.to >= dateRange.from ? dateRange.to : dateRange.from;
+      const days = eachDayOfInterval({ start: dateRange.from, end: safeTo });
       const now = new Date();
       return days
         .filter(day => day <= now) // Solo días hasta hoy
