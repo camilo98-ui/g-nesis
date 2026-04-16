@@ -622,26 +622,39 @@ export default function StoreHourlyView({ storeCode, storeName, allRecords, onBa
           ) : (
             <>
               {/* Chips de variación por hora */}
-              <div className="flex gap-1.5 flex-wrap mb-5">
-                {lineData.map((d, i) => d.diff !== null && (
-                  <div key={i} className={`flex flex-col items-start text-[10px] font-bold px-2.5 py-1.5 rounded-xl border ${
-                    d.diff >= 5 ? 'border-emerald-200 bg-emerald-50 text-emerald-700' :
-                    d.diff >= 0 ? 'border-green-100 bg-green-50 text-green-600' :
-                    d.diff >= -10 ? 'border-amber-200 bg-amber-50 text-amber-700' :
-                    'border-red-200 bg-red-50 text-red-600'
-                  }`}>
-                    <span className="flex items-center gap-0.5">
-                      {d.diff >= 0 ? <ArrowUpRight className="w-2.5 h-2.5" /> : <ArrowDownRight className="w-2.5 h-2.5" />}
-                      <span className="font-black">{d.hour}</span>
-                    </span>
-                    <span className="text-[9px] font-black leading-tight">{d.diff >= 0 ? '+' : ''}{d.diff.toFixed(0)}%</span>
-                    <span className="text-[9px] font-normal opacity-75 leading-tight">
-                      {d.current != null && d.previous != null
-                        ? `${d.current - d.previous >= 0 ? '+' : ''}${(d.current - d.previous).toLocaleString('es-CO')} txn`
-                        : ''}
-                    </span>
-                  </div>
-                ))}
+              <div className="flex gap-2 flex-wrap mb-5">
+                {lineData.map((d, i) => {
+                  if (d.diff === null) return null;
+                  const absChange = d.current != null && d.previous != null ? d.current - d.previous : null;
+                  const isPos = d.diff >= 0;
+                  const colorCls = d.diff >= 5
+                    ? { pill: 'bg-emerald-500', bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-700', sub: 'text-emerald-500' }
+                    : d.diff >= 0
+                    ? { pill: 'bg-green-400', bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-700', sub: 'text-green-500' }
+                    : d.diff >= -10
+                    ? { pill: 'bg-amber-400', bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-700', sub: 'text-amber-500' }
+                    : { pill: 'bg-red-400', bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-600', sub: 'text-red-400' };
+                  return (
+                    <div key={i} className={`flex items-center gap-2 ${colorCls.bg} border ${colorCls.border} rounded-2xl px-3 py-2`}>
+                      {/* Hora */}
+                      <span className={`text-[11px] font-black ${colorCls.text}`}>{d.hour}</span>
+                      {/* Divisor */}
+                      <span className={`w-px h-5 opacity-20 ${colorCls.pill} rounded-full`} style={{ background: 'currentColor' }} />
+                      {/* Pct */}
+                      <div className="flex flex-col items-center leading-none">
+                        <span className={`text-[11px] font-black ${colorCls.text} flex items-center gap-0.5`}>
+                          {isPos ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                          {isPos ? '+' : ''}{d.diff.toFixed(0)}%
+                        </span>
+                        {absChange !== null && (
+                          <span className={`text-[9px] font-semibold ${colorCls.sub} mt-0.5`}>
+                            {absChange >= 0 ? '+' : ''}{absChange.toLocaleString('es-CO')} txn
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
 
               <ResponsiveContainer width="100%" height={280}>
