@@ -122,11 +122,17 @@ export default function HourlyTransactions() {
 
   if (view === 'store' && activeStore) {
     const storeCode = extractCode(activeStore.code);
+    // Filtro amplio: cualquier campo que contenga el código
     const storeRecords = allRecords.filter(r => {
-      const fieldCode = (r.store_code || '').trim();
-      const nameCode = extractCode(r.store_name);
-      return fieldCode === storeCode || nameCode === storeCode || extractCode(fieldCode) === storeCode;
+      const fc = (r.store_code || '').trim();
+      const fn = extractCode(r.store_name || '');
+      const fce = extractCode(fc);
+      return fc === storeCode || fn === storeCode || fce === storeCode
+        || fc.includes(storeCode) || (r.store_name || '').includes(storeCode);
     });
+
+    console.log('[HourlyTransactions] storeCode:', storeCode, '| allRecords:', allRecords.length, '| storeRecords:', storeRecords.length, '| sample:', allRecords.slice(0,2).map(r=>({sc:r.store_code,sn:r.store_name})));
+
     return (
       <StoreHourlyView
         key={storeCode}

@@ -245,9 +245,18 @@ export default function StoreHourlyView({ storeCode, storeName, allRecords, onBa
 
   if (!currentRecord) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-8">
         <BarChart3 className="w-16 h-16 text-slate-200 mb-4" />
-        <p className="text-slate-500">Sin datos disponibles para esta tienda</p>
+        <p className="text-slate-500 font-semibold mb-2">Sin datos disponibles para esta tienda</p>
+        <p className="text-xs text-slate-400 mb-1">storeCode: <code>{storeCode}</code></p>
+        <p className="text-xs text-slate-400 mb-1">allRecords recibidos: <code>{allRecords.length}</code></p>
+        <p className="text-xs text-slate-400 mb-1">availableMonths: <code>{JSON.stringify(availableMonths)}</code></p>
+        <p className="text-xs text-slate-400 mb-1">selectedPeriod: <code>{JSON.stringify(selectedPeriod)}</code></p>
+        {allRecords.length > 0 && (
+          <p className="text-xs text-slate-400 mb-4 max-w-md text-center break-all">
+            Primer record store_code: <code>{allRecords[0].store_code}</code> | month: <code>{allRecords[0].month}</code> | year: <code>{allRecords[0].year}</code>
+          </p>
+        )}
         <button onClick={onBack} className="mt-4 px-4 py-2 bg-slate-900 text-white rounded-xl text-sm">Volver</button>
       </div>
     );
