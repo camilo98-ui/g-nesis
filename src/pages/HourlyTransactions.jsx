@@ -106,19 +106,19 @@ export default function HourlyTransactions() {
     return <ManagerPanel onBack={() => setView('home')} allRecords={allRecords} refetch={refetch} />;
   }
 
-  // Vista de tienda: si viene de sesión, usar sessionStoreRecord; si viene del selector (gerente), usar selectedStore
-  const activeStore = (view === 'store' && !isGerente && sessionStoreRecord)
-    ? sessionStoreRecord
-    : selectedStore;
-
-  // Mostrar spinner mientras cargan los datos de tienda
-  if (view === 'store' && activeStore && isLoading) {
+  // Mostrar spinner mientras cargan los datos (siempre que estemos en vista tienda y cargando)
+  if (view === 'store' && isLoading) {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center gap-4">
         <div className="w-10 h-10 border-4 border-slate-200 border-t-slate-900 rounded-full animate-spin" />
       </div>
     );
   }
+
+  // Vista de tienda: si viene de sesión, usar sessionStoreRecord; si viene del selector (gerente), usar selectedStore
+  const activeStore = (view === 'store' && !isGerente && sessionStoreRecord)
+    ? sessionStoreRecord
+    : selectedStore;
 
   if (view === 'store' && activeStore) {
     const storeCode = extractCode(activeStore.code);
