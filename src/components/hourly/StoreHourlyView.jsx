@@ -624,14 +624,22 @@ export default function StoreHourlyView({ storeCode, storeName, allRecords, onBa
               {/* Chips de variación por hora */}
               <div className="flex gap-1.5 flex-wrap mb-5">
                 {lineData.map((d, i) => d.diff !== null && (
-                  <div key={i} className={`flex items-center gap-0.5 text-[10px] font-bold px-2 py-1 rounded-lg border ${
+                  <div key={i} className={`flex flex-col items-start text-[10px] font-bold px-2.5 py-1.5 rounded-xl border ${
                     d.diff >= 5 ? 'border-emerald-200 bg-emerald-50 text-emerald-700' :
                     d.diff >= 0 ? 'border-green-100 bg-green-50 text-green-600' :
                     d.diff >= -10 ? 'border-amber-200 bg-amber-50 text-amber-700' :
                     'border-red-200 bg-red-50 text-red-600'
                   }`}>
-                    {d.diff >= 0 ? <ArrowUpRight className="w-2.5 h-2.5" /> : <ArrowDownRight className="w-2.5 h-2.5" />}
-                    {d.hour} {d.diff >= 0 ? '+' : ''}{d.diff.toFixed(0)}%
+                    <span className="flex items-center gap-0.5">
+                      {d.diff >= 0 ? <ArrowUpRight className="w-2.5 h-2.5" /> : <ArrowDownRight className="w-2.5 h-2.5" />}
+                      <span className="font-black">{d.hour}</span>
+                    </span>
+                    <span className="text-[9px] font-black leading-tight">{d.diff >= 0 ? '+' : ''}{d.diff.toFixed(0)}%</span>
+                    <span className="text-[9px] font-normal opacity-75 leading-tight">
+                      {d.current != null && d.previous != null
+                        ? `${d.current - d.previous >= 0 ? '+' : ''}${(d.current - d.previous).toLocaleString('es-CO')} txn`
+                        : ''}
+                    </span>
                   </div>
                 ))}
               </div>
