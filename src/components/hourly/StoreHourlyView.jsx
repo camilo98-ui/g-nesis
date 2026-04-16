@@ -583,6 +583,27 @@ export default function StoreHourlyView({ storeCode, storeName, allRecords, onBa
               <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm inline-block bg-slate-200" /> Bajo</span>
             </div>
           </div>
+          {/* Resumen Distribución Horaria */}
+          {(() => {
+            const altoHours = barData.filter(d => getLabel(d.transactions, mean, sd) === 'Alto');
+            const bajoHours = barData.filter(d => getLabel(d.transactions, mean, sd) === 'Bajo' && d.transactions > 0);
+            const peakBar = barData.reduce((b, d) => d.transactions > b.transactions ? d : b, barData[0]);
+            return (
+              <div className="rounded-2xl px-4 py-3 mb-5 border flex flex-wrap gap-x-6 gap-y-1 text-sm"
+                style={{ background: MAGENTA_PALE, borderColor: MAGENTA + '30' }}>
+                <span className="text-slate-700">
+                  🕐 La hora con más clientes fue <strong style={{ color: MAGENTA }}>{peakBar?.hour}</strong> con <strong style={{ color: MAGENTA }}>{peakBar?.transactions.toLocaleString('es-CO')} transacciones</strong>.
+                  El promedio por hora es <strong>{mean.toFixed(0)} txn</strong>.
+                  La línea punteada marca ese promedio — las barras {altoHours.length > 0 ? `rosadas (${altoHours.map(h=>h.hour).join(', ')})` : ''} están por encima.
+                </span>
+                {bajoHours.length > 0 && (
+                  <span className="text-slate-500 text-xs self-end">
+                    Horas bajas: {bajoHours.map(h => h.hour).join(', ')} — considera reforzar o no abrir tan temprano.
+                  </span>
+                )}
+              </div>
+            );
+          })()}
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={barData} margin={{ top: 12, right: 12, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
@@ -737,6 +758,29 @@ export default function StoreHourlyView({ storeCode, storeName, allRecords, onBa
             </div>
           ) : (
             <>
+              {/* Resumen comparativo */}
+              {(() => {
+                const horasMejoraron = lineData.filter(d => d.diff !== null && d.diff > 0).length;
+                const horasCayeron = lineData.filter(d => d.diff !== null && d.diff < 0).length;
+                const mejorHora = lineData.filter(d => d.diff !== null).reduce((b, d) => d.diff > (b?.diff ?? -Infinity) ? d : b, null);
+                const peorHora = lineData.filter(d => d.diff !== null).reduce((b, d) => d.diff < (b?.diff ?? Infinity) ? d : b, null);
+                const absTotal = total - prevTotal;
+                return (
+                  <div className="rounded-2xl px-4 py-3 mb-5 border flex flex-wrap gap-x-6 gap-y-1 text-sm"
+                    style={{ background: MAGENTA_PALE, borderColor: MAGENTA + '30' }}>
+                    <span className="text-slate-700">
+                      {totalGrowth >= 0 ? '📈' : '📉'} Este mes hubo <strong style={{ color: totalGrowth >= 0 ? '#059669' : '#dc2626' }}>
+                        {absTotal >= 0 ? '+' : ''}{absTotal.toLocaleString('es-CO')} transacciones
+                      </strong> vs {prevName} ({totalGrowth >= 0 ? '+' : ''}{totalGrowth?.toFixed(1)}%).
+                      {horasMejoraron > 0 && ` ${horasMejoraron} horas mejoraron`}{horasCayeron > 0 && `, ${horasCayeron} cayeron`}.
+                    </span>
+                    <span className="text-slate-500 text-xs self-end">
+                      {mejorHora && `Mejor hora: ${mejorHora.hour} (+${mejorHora.diff?.toFixed(0)}%)`}
+                      {peorHora && peorHora.diff < 0 && ` · Peor hora: ${peorHora.hour} (${peorHora.diff?.toFixed(0)}%)`}
+                    </span>
+                  </div>
+                );
+              })()}
               {/* Chips de variación por hora */}
               <div className="flex gap-2 flex-wrap mb-5">
                 {lineData.map((d, i) => {
@@ -815,6 +859,32 @@ export default function StoreHourlyView({ storeCode, storeName, allRecords, onBa
                 </p>
               </div>
             </div>
+            {/* Resumen Tendencia Histórica */}
+            {(() => {
+              const vals = trendData.map(d => d.total).filter(v => v > 0);
+              if (vals.length < 2) return null;
+              const avg = vals.reduce((s, v) => s + v, 0) / vals.length;
+              const last = vals[vals.length - 1];
+              const first = vals[0];
+              const best = trendData.reduce((b, d) => d.total > (b?.total ?? 0) ? d : b, null);
+              const worst = trendData.filter(d => d.total > 0).reduce((b, d) => d.total < (b?.total ?? Infinity) ? d : b, null);
+              const trend = last >= first ? 'subiendo' : 'bajando';
+              const growthAcc = ((last - first) / first * 100);
+              return (
+                <div className="rounded-2xl px-4 py-3 mb-5 border flex flex-wrap gap-x-6 gap-y-1 text-sm"
+                  style={{ background: MAGENTA_PALE, borderColor: MAGENTA + '30' }}>
+                  <span className="text-slate-700">
+                    {last >= avg ? '📈' : '📉'} La tienda lleva <strong>{vals.length} meses</strong> con un promedio de <strong>{Math.round(avg).toLocaleString('es-CO')} txn/mes</strong>.
+                    El volumen está <strong style={{ color: trend === 'subiendo' ? '#059669' : '#dc2626' }}>{trend}</strong> — acumulado{' '}
+                    <strong style={{ color: growthAcc >= 0 ? '#059669' : '#dc2626' }}>{growthAcc >= 0 ? '+' : ''}{growthAcc.toFixed(1)}%</strong> desde {trendData[0]?.label}.
+                  </span>
+                  <span className="text-slate-500 text-xs self-end">
+                    Mejor mes: <strong>{best?.label}</strong> ({best?.total.toLocaleString('es-CO')} txn)
+                    {worst && ` · Mes más bajo: ${worst?.label} (${worst?.total.toLocaleString('es-CO')} txn)`}
+                  </span>
+                </div>
+              );
+            })()}
             <ResponsiveContainer width="100%" height={220}>
               <AreaChart data={trendData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
                 <defs>
@@ -859,7 +929,30 @@ export default function StoreHourlyView({ storeCode, storeName, allRecords, onBa
 
         {/* Ranking de horas */}
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 overflow-x-auto">
-          <h2 className="font-black text-slate-900 mb-4">Ranking de Franjas Horarias</h2>
+          <h2 className="font-black text-slate-900 mb-2">Ranking de Franjas Horarias</h2>
+          {/* Resumen Ranking */}
+          {(() => {
+            const sorted = [...sortedRanking];
+            const top = sorted[0];
+            const highHours = rankingData.filter(r => r.label === 'Alto');
+            const lowHours = rankingData.filter(r => r.label === 'Bajo' && r.transactions > 0);
+            const topVsPrev = rankingData.filter(r => r.vsPrev !== null).sort((a, b) => b.vsPrev - a.vsPrev)[0];
+            return (
+              <div className="rounded-2xl px-4 py-3 mb-4 border flex flex-wrap gap-x-6 gap-y-1 text-sm"
+                style={{ background: MAGENTA_PALE, borderColor: MAGENTA + '30' }}>
+                <span className="text-slate-700">
+                  🏆 La franja más productiva es <strong style={{ color: MAGENTA }}>{top?.hour}</strong> con <strong style={{ color: MAGENTA }}>{top?.transactions.toLocaleString('es-CO')} txn</strong> ({top?.pctTotal.toFixed(1)}% del día).
+                  {highHours.length > 0 && ` ${highHours.length} hora${highHours.length > 1 ? 's' : ''} en nivel alto: ${highHours.map(h => h.hour).join(', ')}.`}
+                </span>
+                {lowHours.length > 0 && (
+                  <span className="text-slate-500 text-xs self-end">
+                    Horas de bajo tráfico: {lowHours.map(h => h.hour).join(', ')} — evalúa si vale la pena mantener personal en esos horarios.
+                    {topVsPrev && topVsPrev.vsPrev > 0 && ` · Mayor mejora vs ${prevName}: ${topVsPrev.hour} (+${topVsPrev.vsPrev.toFixed(0)}%)`}
+                  </span>
+                )}
+              </div>
+            );
+          })()}
           <table className="w-full text-sm min-w-[520px]">
             <thead>
               <tr style={{ background: MAGENTA_PALE }}>
