@@ -598,66 +598,88 @@ export default function StoreHourlyView({ storeCode, storeName, allRecords, onBa
           </ResponsiveContainer>
         </div>
 
-        {/* Gráfica comparativa */}
+        {/* Panel hora a hora */}
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-          <div className="mb-4">
-            <h2 className="font-black text-slate-900">Comparativo vs {prevName}</h2>
-            <p className="text-xs text-slate-400 mt-0.5">
-              <span className="font-bold" style={{ color: MAGENTA }}>{MONTHS[(currentRecord.month||1)-1]} {currentRecord.year}</span>
-              {' vs '}
-              <span className="font-bold text-slate-500">{prevName}</span>
-              {totalGrowth !== null && (
-                <span className={`ml-2 font-black text-sm ${totalGrowth >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
-                  {totalGrowth >= 0 ? '+' : ''}{totalGrowth.toFixed(1)}% · {(totalGrowth >= 0 ? '+' : '') + (total - prevTotal).toLocaleString('es-CO')} txn
-                </span>
-              )}
-            </p>
+          <div className="flex items-start justify-between mb-5">
+            <div>
+              <h2 className="font-black text-slate-900">Transacciones por Hora</h2>
+              <p className="text-xs text-slate-400 mt-0.5">
+                {MONTHS[(currentRecord.month||1)-1]} {currentRecord.year}
+                {prevRecord && <> · <span className="text-slate-500">vs <strong>{prevName}</strong></span></>}
+                {totalGrowth !== null && (
+                  <span className={`ml-2 font-black ${totalGrowth >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+                    {totalGrowth >= 0 ? '+' : ''}{totalGrowth.toFixed(1)}% total
+                  </span>
+                )}
+              </p>
+            </div>
+            <div className="flex items-center gap-3 text-[10px] text-slate-400">
+              <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full inline-block" style={{ background: MAGENTA }} /> Actual</span>
+              {prevRecord && <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-slate-300 inline-block" /> {prevName}</span>}
+            </div>
           </div>
 
-          {!prevRecord ? (
-            <div className="flex flex-col items-center justify-center py-14">
-              <GitCompare className="w-10 h-10 text-slate-200 mb-3" />
-              <p className="text-slate-400 text-sm">Activa "Comparar" en el header para seleccionar otro período</p>
-            </div>
-          ) : (
-            <>
-              {/* Chips de variación por hora */}
-              <div className="flex gap-1.5 flex-wrap mb-5">
-                {lineData.map((d, i) => d.diff !== null && (
-                  <div key={i} className={`flex items-center gap-0.5 text-[10px] font-bold px-2 py-1 rounded-lg border ${
-                    d.diff >= 5 ? 'border-emerald-200 bg-emerald-50 text-emerald-700' :
-                    d.diff >= 0 ? 'border-green-100 bg-green-50 text-green-600' :
-                    d.diff >= -10 ? 'border-amber-200 bg-amber-50 text-amber-700' :
-                    'border-red-200 bg-red-50 text-red-600'
-                  }`}>
-                    {d.diff >= 0 ? <ArrowUpRight className="w-2.5 h-2.5" /> : <ArrowDownRight className="w-2.5 h-2.5" />}
-                    {d.hour} {d.diff >= 0 ? '+' : ''}{d.diff.toFixed(0)}%
-                  </div>
-                ))}
-              </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-2">
+            {lineData.map((d, i) => {
+              const curr = d.current || 0;
+              const prev = d.previous || 0;
+              const diffAbs = prevRecord ? curr - prev : null;
+              const diffPct = d.diff;
+              const isUp = diffAbs != null ? diffAbs >= 0 : null;
+              const barPct = total > 0 ? (curr / total * 100) : 0;
+              // Color de la barra según nivel
+              const barColor = curr >= mean + sd ? MAGENTA : curr >= mean ? '#f9a8d4' : '#e2e8f0';
 
-              <ResponsiveContainer width="100%" height={280}>
-                <ComposedChart data={lineData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="compGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={MAGENTA} stopOpacity={0.12} />
-                      <stop offset="95%" stopColor={MAGENTA} stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                  <XAxis dataKey="hour" tick={{ fontSize: 12, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                  <Tooltip content={(p) => <LineTip {...p} prevName={prevName} />} />
-                  <Legend wrapperStyle={{ fontSize: 12, paddingTop: 12 }}
-                    formatter={(v) => <span style={{ color: v === 'Actual' ? MAGENTA : '#94a3b8' }}>{v}</span>} />
-                  <Area type="monotone" dataKey="current" fill="url(#compGrad)" stroke="none" />
-                  <Line type="monotone" dataKey="current" name="Actual" stroke={MAGENTA} strokeWidth={3}
-                    dot={{ r: 5, fill: MAGENTA, strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 7 }} />
-                  <Line type="monotone" dataKey="previous" name={prevName} stroke="#cbd5e1" strokeWidth={2}
-                    strokeDasharray="6 3" dot={{ r: 3, fill: '#cbd5e1' }} activeDot={{ r: 5 }} />
-                </ComposedChart>
-              </ResponsiveContainer>
-            </>
+              return (
+                <div key={i} className="rounded-xl border p-3 flex flex-col gap-1.5"
+                  style={{ borderColor: curr >= mean + sd ? MAGENTA + '40' : '#f1f5f9', background: curr >= mean + sd ? '#fdf2f8' : '#fafafa' }}>
+                  
+                  {/* Hora */}
+                  <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">{d.hour}</p>
+
+                  {/* Barra de progreso visual */}
+                  <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                    <div className="h-full rounded-full transition-all" style={{ width: `${Math.min(barPct * 5, 100)}%`, background: barColor }} />
+                  </div>
+
+                  {/* Txn actuales */}
+                  <p className="text-xl font-black leading-none" style={{ color: curr >= mean + sd ? MAGENTA : '#0f172a' }}>
+                    {curr > 0 ? curr.toLocaleString('es-CO') : <span className="text-slate-200">—</span>}
+                  </p>
+                  <p className="text-[9px] text-slate-400 font-medium">{barPct > 0 ? `${barPct.toFixed(1)}% del día` : ''}</p>
+
+                  {/* Delta vs anterior */}
+                  {diffAbs !== null && curr > 0 && (
+                    <div className={`mt-0.5 flex items-center gap-0.5 text-[10px] font-bold ${isUp ? 'text-emerald-600' : 'text-red-500'}`}>
+                      {isUp ? <ArrowUpRight className="w-3 h-3 flex-shrink-0" /> : <ArrowDownRight className="w-3 h-3 flex-shrink-0" />}
+                      <span>{isUp ? '+' : ''}{diffAbs} txn</span>
+                      <span className="opacity-60 ml-0.5">({diffPct >= 0 ? '+' : ''}{diffPct?.toFixed(0)}%)</span>
+                    </div>
+                  )}
+                  {diffAbs !== null && curr === 0 && <div className="mt-0.5 h-4" />}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Resumen total */}
+          {prevRecord && (
+            <div className="mt-4 flex flex-wrap gap-3">
+              <div className="flex-1 min-w-[140px] rounded-xl p-3 text-center" style={{ background: MAGENTA_PALE }}>
+                <p className="text-[10px] text-slate-500 mb-0.5">Total actual</p>
+                <p className="font-black text-lg" style={{ color: MAGENTA }}>{total.toLocaleString('es-CO')} txn</p>
+              </div>
+              <div className="flex-1 min-w-[140px] rounded-xl p-3 text-center bg-slate-50">
+                <p className="text-[10px] text-slate-500 mb-0.5">Total {prevName}</p>
+                <p className="font-black text-lg text-slate-600">{prevTotal.toLocaleString('es-CO')} txn</p>
+              </div>
+              <div className={`flex-1 min-w-[140px] rounded-xl p-3 text-center ${totalGrowth >= 0 ? 'bg-emerald-50' : 'bg-red-50'}`}>
+                <p className="text-[10px] text-slate-500 mb-0.5">Diferencia</p>
+                <p className={`font-black text-lg ${totalGrowth >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+                  {totalGrowth >= 0 ? '+' : ''}{(total - prevTotal).toLocaleString('es-CO')} txn
+                </p>
+              </div>
+            </div>
           )}
         </div>
 
