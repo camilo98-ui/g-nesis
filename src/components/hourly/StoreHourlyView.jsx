@@ -519,24 +519,43 @@ export default function StoreHourlyView({ storeCode, storeName, allRecords, onBa
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.07 }}
                 onClick={() => setActiveCard(card.id)}
-                className="text-left rounded-2xl p-5 border-2 transition-all hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] cursor-pointer"
-                style={{ background: p.bg, borderColor: p.border + '80' }}
+                whileHover={{ y: -3, scale: 1.02 }}
+                whileTap={{ scale: 0.97 }}
+                className="text-left rounded-2xl overflow-hidden cursor-pointer shadow-sm"
+                style={{ background: p.bg, border: `1.5px solid ${p.border}55` }}
               >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: p.border + '50' }}>
-                    <card.icon className="w-4 h-4" style={{ color: p.icon }} />
+                {/* Barra de color superior */}
+                <div className="h-1.5 w-full" style={{ background: p.icon }} />
+
+                <div className="p-4">
+                  {/* Icono + badge delta */}
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: p.icon + '18' }}>
+                      <card.icon className="w-4 h-4" style={{ color: p.icon }} />
+                    </div>
+                    {card.delta != null && (
+                      <span className={`flex items-center gap-0.5 text-[10px] font-black px-2 py-0.5 rounded-full ${card.delta >= 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-600'}`}>
+                        {card.delta >= 0 ? <ArrowUpRight className="w-2.5 h-2.5" /> : <ArrowDownRight className="w-2.5 h-2.5" />}
+                        {Math.abs(card.delta).toFixed(1)}%
+                      </span>
+                    )}
                   </div>
-                  {card.delta != null && (
-                    <span className={`flex items-center gap-0.5 text-[11px] font-black px-2 py-0.5 rounded-full ${card.delta >= 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-600'}`}>
-                      {card.delta >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-                      {Math.abs(card.delta).toFixed(1)}%
-                    </span>
-                  )}
+
+                  {/* Label */}
+                  <p className="text-[10px] font-bold uppercase tracking-widest mb-0.5" style={{ color: p.sub + 'aa' }}>{card.label}</p>
+
+                  {/* Valor principal */}
+                  <p className="text-lg font-black leading-tight" style={{ color: p.text }}>{card.value}</p>
+
+                  {/* Sub */}
+                  <p className="text-[10px] mt-1.5 leading-snug" style={{ color: p.sub + 'bb' }}>{card.sub}</p>
+
+                  {/* Footer */}
+                  <div className="mt-3 pt-2.5 border-t flex items-center gap-1" style={{ borderColor: p.border + '40' }}>
+                    <span className="text-[9px] font-bold" style={{ color: p.icon + '99' }}>Ver análisis</span>
+                    <ArrowUpRight className="w-2.5 h-2.5" style={{ color: p.icon + '99' }} />
+                  </div>
                 </div>
-                <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: p.sub }}>{card.label}</p>
-                <p className="text-xl font-black leading-tight" style={{ color: p.text }}>{card.value}</p>
-                <p className="text-[11px] mt-1.5 leading-snug" style={{ color: p.sub + 'cc' }}>{card.sub}</p>
-                <p className="text-[10px] mt-2 opacity-50" style={{ color: p.text }}>Toca para detalles →</p>
               </motion.button>
             );
           })}
