@@ -45,11 +45,16 @@ export default function ZonePerformanceComparison({ storeId, formatCurrency, cur
           store_id: store.code 
         });
         
-        // Filtrar solo ventas del rango de fechas seleccionado
-        const periodSales = storeSales.filter(s => {
+        // Intentar filtrar por rango, si no hay datos usar todo lo disponible
+        let periodSales = storeSales.filter(s => {
           const saleDate = s.date?.split('T')[0] || s.date;
           return saleDate >= dateStart && saleDate <= dateEnd;
         });
+        
+        // Si no hay datos en el período, usar todos los registros disponibles
+        if (periodSales.length === 0 && storeSales.length > 0) {
+          periodSales = storeSales;
+        }
         
         if (periodSales.length > 0) {
           const total = periodSales.reduce((sum, s) => ({
@@ -76,7 +81,7 @@ export default function ZonePerformanceComparison({ storeId, formatCurrency, cur
   const analysisData = useMemo(() => {
     if (!allZoneSales.length) return null;
 
-    const currentStoreData = allZoneSales.find(s => s.storeCode === storeId);
+    const currentStoreData = allZoneSales.find(s => s.storeCode === storeId) || allZoneSales[0];
     if (!currentStoreData) return null;
 
     // Ordenar tiendas por ventas
