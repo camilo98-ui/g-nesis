@@ -17,8 +17,30 @@ function extractCode(name) {
   return String(name).replace(/\s*\([^)]*\)/g, '').trim();
 }
 
+// Obtener el código de tienda de la sesión activa
+function getSessionStoreCode() {
+  try {
+    const session = JSON.parse(localStorage.getItem('popsySession') || '{}');
+    return session.store || null;
+  } catch { return null; }
+}
+
+function getSessionRole() {
+  try {
+    return localStorage.getItem('userRole') || null;
+  } catch { return null; }
+}
+
 export default function HourlyTransactions() {
-  const [view, setView] = useState('home'); // 'home' | 'store' | 'manager'
+  const sessionStore = getSessionStoreCode();
+  const sessionRole = getSessionRole();
+  const isGerente = sessionRole === 'gerente';
+
+  const [view, setView] = useState(() => {
+    // Si hay tienda en sesión y NO es gerente → ir directo a la vista de tienda
+    if (sessionStore && !isGerente) return 'store';
+    return 'home';
+  });
   const [selectedStore, setSelectedStore] = useState(null);
   const [search, setSearch] = useState('');
   const [managerCode, setManagerCode] = useState('');
@@ -30,7 +52,16 @@ export default function HourlyTransactions() {
     queryFn: () => base44.entities.StoreTransactions.list('-uploaded_at', 1000),
   });
 
-  // Agrupar por tienda (única por store_name), tomar el mes más reciente
+  // Encontrar el store de sesión en los registros (para pasarle al StoreHourlyView)
+  const sessionStoreRecord = useMemo(() => {
+    if (!sessionStore) return null;
+    const sessionCode = extractCode(sessionStore);
+    const match = allRecords.find(r => extractCode(r.store_name) === sessionCode || extractCode(r.store_code || '') === sessionCode);
+    if (!match) return null;
+    return { code: sessionCode, name: match.store_name };
+  }, [allRecords, sessionStore]);
+
+  // Agrupar por tienda (solo para gerente)
   const stores = useMemo(() => {
     const map = {};
     allRecords.forEach(r => {
@@ -65,17 +96,49 @@ export default function HourlyTransactions() {
     return <ManagerPanel onBack={() => setView('home')} allRecords={allRecords} refetch={refetch} />;
   }
 
-  if (view === 'store' && selectedStore) {
+  // Vista de tienda: si viene de sesión, usar sessionStoreRecord; si viene del selector (gerente), usar selectedStore
+  const activeStore = (view === 'store' && !isGerente && sessionStoreRecord)
+    ? sessionStoreRecord
+    : selectedStore;
+
+  if (view === 'store' && activeStore) {
+    const storeCode = extractCode(activeStore.code);
+    const storeRecords = allRecords.filter(r => extractCode(r.store_name) === storeCode || extractCode(r.store_code || '') === storeCode);
     return (
       <StoreHourlyView
-        storeCode={selectedStore.code}
-        storeName={selectedStore.name}
-        allRecords={allRecords.filter(r => extractCode(r.store_name) === selectedStore.code)}
-        onBack={() => { setView('home'); setSelectedStore(null); }}
+        storeCode={storeCode}
+        storeName={activeStore.name}
+        allRecords={storeRecords}
+        onBack={() => {
+          if (isGerente) { setView('home'); setSelectedStore(null); }
+          else window.history.back();
+        }}
       />
     );
   }
 
+  // Si es tienda y no hay datos aún (cargando o sin coincidencia)
+  if (!isGerente && sessionStore) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center gap-4">
+        {isLoading ? (
+          <div className="w-10 h-10 border-4 border-slate-200 border-t-slate-900 rounded-full animate-spin" />
+        ) : (
+          <>
+            <BarChart3 className="w-16 h-16 text-slate-200" />
+            <p className="text-slate-500 font-medium text-center px-8">
+              Aún no hay datos de transacciones cargados para tu tienda.<br/>El gerente debe subir el reporte.
+            </p>
+            <button onClick={() => window.history.back()} className="px-4 py-2 bg-slate-900 text-white rounded-xl text-sm font-semibold">
+              Volver
+            </button>
+          </>
+        )}
+      </div>
+    );
+  }
+
+  // Vista gerente: selector de tiendas
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       {/* Header */}
@@ -141,7 +204,7 @@ export default function HourlyTransactions() {
         )}
       </AnimatePresence>
 
-      {/* Main Content */}
+      {/* Main Content — solo gerente llega aquí */}
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="mb-8">
           <h2 className="text-2xl font-black text-slate-900 mb-2">Tiendas Disponibles</h2>
