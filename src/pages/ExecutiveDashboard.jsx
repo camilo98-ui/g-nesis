@@ -1019,7 +1019,7 @@ export default function ExecutiveDashboard() {
   const zoneDataForTooltips = useMemo(() => ({
     zoneSales: zoneTotals.totalSales,
     zoneBudget: zoneTotals.totalBudget,
-    zoneCompliance: (zoneTotals.totalSales / zoneTotals.totalBudget) * 100,
+    zoneCompliance: zoneTotals.totalBudget > 0 ? (zoneTotals.totalSales / zoneTotals.totalBudget) * 100 : 0,
     storesAnalysis: storesAnalysis
   }), [zoneTotals, storesAnalysis]);
 
