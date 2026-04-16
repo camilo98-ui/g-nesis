@@ -25,15 +25,17 @@ export default function ZonePerformanceComparison({ storeId, formatCurrency, cur
     : format(monthEnd, 'yyyy-MM-dd');
 
   // Determinar zona basada en código de tienda
-  const currentStore = STORES.find(s => s.code === storeId);
-  const zone = currentStore?.code.startsWith('BTA') ? 'Bogotá' : currentStore?.code.startsWith('TUNJA') ? 'Tunja' : 'Otra';
+  const currentStore = STORES.find(s => s.code === storeId) || (storeId ? { code: storeId } : null);
+  const storeCodeUpper = (storeId || '').toUpperCase();
+  const zone = storeCodeUpper.startsWith('BTA') ? 'Bogotá' : storeCodeUpper.startsWith('TUNJA') ? 'Tunja' : 'Bogotá';
   
-  // Filtrar tiendas de la misma zona
-  const zoneStores = STORES.filter(s => {
+  // Filtrar tiendas de la misma zona — si no hay tiendas en STORES, al menos incluir la tienda actual
+  const zoneStoresFiltered = STORES.filter(s => {
     if (zone === 'Bogotá') return s.code.startsWith('BTA');
     if (zone === 'Tunja') return s.code.startsWith('TUNJA');
-    return false;
+    return true;
   });
+  const zoneStores = zoneStoresFiltered.length > 0 ? zoneStoresFiltered : (storeId ? [{ code: storeId, displayName: storeId }] : []);
 
   // Fetch ventas de todas las tiendas de la zona
   const { data: allZoneSales = [], isLoading } = useQuery({
@@ -74,7 +76,7 @@ export default function ZonePerformanceComparison({ storeId, formatCurrency, cur
       }
       return sales;
     },
-    enabled: !!storeId && zoneStores.length > 0,
+    enabled: !!storeId,
     staleTime: 5 * 60 * 1000
   });
 
@@ -203,9 +205,21 @@ export default function ZonePerformanceComparison({ storeId, formatCurrency, cur
 
   if (!analysisData) {
     return (
-      <div className="bg-gradient-to-br from-slate-50/40 to-gray-50/40 rounded-3xl border-2 border-slate-200/30 shadow-2xl p-8 text-center">
-        <MapPin className="w-12 h-12 text-slate-400 mx-auto mb-3" />
-        <p className="text-slate-600">No hay datos de la zona disponibles</p>
+      <div className="bg-white/80 backdrop-blur-sm rounded-2xl border-2 border-rose-200/50 shadow-xl overflow-hidden">
+        <div className="bg-gradient-to-r from-rose-500 to-pink-500 px-5 py-4">
+          <div className="flex items-center gap-3">
+            <Trophy className="w-6 h-6 text-white" />
+            <div>
+              <h3 className="text-base font-black text-white">Ranking Zonal</h3>
+              <p className="text-xs text-white/80">Zona {zone}</p>
+            </div>
+          </div>
+        </div>
+        <div className="p-8 text-center">
+          <MapPin className="w-12 h-12 text-rose-300 mx-auto mb-3" />
+          <p className="text-slate-600 font-medium">Cargando datos de la zona…</p>
+          <p className="text-slate-400 text-sm mt-1">Asegúrate de tener ventas registradas en DailySales</p>
+        </div>
       </div>
     );
   }
