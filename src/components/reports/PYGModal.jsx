@@ -448,6 +448,228 @@ function CostTable({ primaryRecord, prevRecord }) {
   );
 }
 
+// ─── Modal de detalle de KPI ──────────────────────────────────────────────────
+function KPIDetailModal({ kpiId, onClose, primaryRecord, prevRecord, trendData, selectedMonth }) {
+  if (!kpiId || !primaryRecord) return null;
+
+  const configs = {
+    ebitda: {
+      title: 'Margen EBITDA',
+      metric: 'EBITDA',
+      dataKey: 'margen_ebitda',
+      color: MAGENTA,
+      bg: MAGENTA_PALE,
+      inverse: false,
+      description: 'Ganancia operativa por cada peso de venta. Meta: ≥25%',
+      benchmarks: [
+        { label: 'Crítico', range: '< 15%', color: '#ef4444' },
+        { label: 'Normal', range: '15% – 24%', color: '#f59e0b' },
+        { label: 'Óptimo', range: '≥ 25%', color: '#10b981' },
+      ],
+      insight: (r, p) => {
+        const v = pctNum(r.margen_ebitda);
+        const pv = p ? pctNum(p.margen_ebitda) : null;
+        const gap25 = (25 - v).toFixed(1);
+        const gap30 = (30 - v).toFixed(1);
+        return v >= 25
+          ? `✅ EBITDA en zona óptima (${v.toFixed(1)}%). ${pv != null ? `Variación vs mes anterior: ${(v - pv) > 0 ? '+' : ''}${(v - pv).toFixed(2)}pp.` : ''} Mantén la estructura de costos.`
+          : `⚠️ EBITDA de ${v.toFixed(1)}%. Para llegar al 25% necesitas mejorar ${gap25}pp — equivale a reducir gastos variables en ${gap25}pp o aumentar ventas ~${(parseFloat(gap25) * 3).toFixed(0)}% manteniendo costos fijos. Para 30%: mejorar ${gap30}pp adicionales.`;
+      },
+    },
+    personal: {
+      title: 'Costo Personal',
+      metric: 'Personal',
+      dataKey: 'costo_personal',
+      color: '#a21caf',
+      bg: '#fdf4ff',
+      inverse: true,
+      description: '% de nómina sobre ventas. Meta: ≤22%. Cada 1pp que bajas = +1pp EBITDA directo.',
+      benchmarks: [
+        { label: 'Óptimo', range: '≤ 20%', color: '#10b981' },
+        { label: 'Normal', range: '20% – 25%', color: '#f59e0b' },
+        { label: 'Alto', range: '> 25%', color: '#ef4444' },
+      ],
+      insight: (r, p) => {
+        const v = pctNum(r.costo_personal);
+        const pv = p ? pctNum(p.costo_personal) : null;
+        const reducir = Math.max(0, v - 22).toFixed(1);
+        return v > 22
+          ? `⚠️ Personal en ${v.toFixed(1)}% — ${reducir}pp sobre el límite recomendado. Reducir ${reducir}pp de nómina/venta impacta directamente +${reducir}pp en EBITDA. ${pv != null ? `Tendencia vs mes anterior: ${(v - pv) > 0 ? '+' : ''}${(v - pv).toFixed(2)}pp.` : ''}`
+          : `✅ Personal eficiente en ${v.toFixed(1)}%. Tienes ${(22 - v).toFixed(1)}pp de margen antes del límite. ${pv != null ? `Variación: ${(v - pv) > 0 ? '+' : ''}${(v - pv).toFixed(2)}pp vs mes anterior.` : ''}`;
+      },
+    },
+    costo: {
+      title: 'Costo Real vs Teórico',
+      metric: 'C.Real',
+      dataKey: 'cost_real',
+      color: '#2563eb',
+      bg: '#eff6ff',
+      inverse: true,
+      description: 'Desviación del costo real sobre el presupuesto teórico. Exceso = pérdida directa de EBITDA.',
+      benchmarks: [
+        { label: 'Bajo presupuesto', range: 'Real < Teórico', color: '#10b981' },
+        { label: 'En presupuesto', range: 'Real = Teórico ±1%', color: '#f59e0b' },
+        { label: 'Exceso', range: 'Real > Teórico', color: '#ef4444' },
+      ],
+      insight: (r, p) => {
+        const v = pctNum(r.cost_real);
+        const teo = pctNum(r.cost_teorico);
+        const brecha = (v - teo).toFixed(2);
+        const pv = p ? pctNum(p.cost_real) : null;
+        return v > teo
+          ? `⚠️ Costo real ${v.toFixed(1)}% excede el teórico ${teo.toFixed(1)}% en +${brecha}pp. Cada punto de exceso = -1pp EBITDA. ${pv != null ? `Vs mes anterior: ${(v - pv) > 0 ? '+' : ''}${(v - pv).toFixed(2)}pp.` : ''} Revisar mermas, desperdicios y eficiencia operativa.`
+          : `✅ Costo real ${v.toFixed(1)}% bajo el teórico ${teo.toFixed(1)}%. Ahorro de ${Math.abs(parseFloat(brecha)).toFixed(2)}pp vs presupuesto. ${pv != null ? `Variación: ${(v - pv) > 0 ? '+' : ''}${(v - pv).toFixed(2)}pp.` : ''}`;
+      },
+    },
+    gastos: {
+      title: 'Gastos % Venta',
+      metric: 'Gastos',
+      dataKey: 'gastos_pct_venta',
+      color: '#b45309',
+      bg: '#fef3c7',
+      inverse: true,
+      description: 'Arriendos + servicios + admin como % de ventas. Meta: ≤40%. Costos semiFijos.',
+      benchmarks: [
+        { label: 'Óptimo', range: '≤ 35%', color: '#10b981' },
+        { label: 'Normal', range: '35% – 45%', color: '#f59e0b' },
+        { label: 'Elevado', range: '> 45%', color: '#ef4444' },
+      ],
+      insight: (r, p) => {
+        const v = pctNum(r.gastos_pct_venta);
+        const arr = pctNum(r.arriendos) || 0;
+        const adm = pctNum(r.administracion) || 0;
+        const serv = pctNum(r.servicios_publicos) || 0;
+        const pv = p ? pctNum(p.gastos_pct_venta) : null;
+        return `Gastos en ${v.toFixed(1)}% — Arriendos ${arr.toFixed(1)}%, Admin ${adm.toFixed(1)}%, Servicios ${serv.toFixed(1)}%. ${v > 40 ? `⚠️ Sobre el umbral recomendado (40%). Para bajar 1pp necesitas aumentar ventas ~${(1 / v * 100).toFixed(0)}% sin tocar gastos fijos.` : `✅ Dentro del rango aceptable.`} ${pv != null ? `Variación: ${(v - pv) > 0 ? '+' : ''}${(v - pv).toFixed(2)}pp.` : ''}`;
+      },
+    },
+  };
+
+  const cfg = configs[kpiId];
+  if (!cfg) return null;
+
+  const currentVal = pctNum(primaryRecord[cfg.dataKey]);
+  const prevVal = prevRecord ? pctNum(prevRecord[cfg.dataKey]) : null;
+  const delta = prevVal != null ? currentVal - prevVal : null;
+  const isGood = cfg.inverse ? (delta != null && delta <= 0) : (delta != null && delta >= 0);
+
+  // Datos para la barra del mes actual dentro del histórico
+  const chartData = trendData.map(d => ({
+    ...d,
+    isSelected: d.month === selectedMonth,
+  }));
+  const avg = trendData.length > 0 ? trendData.reduce((s, d) => s + (d[cfg.metric] || 0), 0) / trendData.length : 0;
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+        className="fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
+      >
+        <motion.div
+          initial={{ y: 60, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: 60, opacity: 0 }}
+          transition={{ type: 'spring', damping: 26, stiffness: 300 }}
+          onClick={e => e.stopPropagation()}
+          className="bg-white w-full sm:max-w-2xl rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto"
+        >
+          {/* Header */}
+          <div className="px-6 pt-6 pb-4 flex items-start justify-between" style={{ background: cfg.bg, borderBottom: `2px solid ${cfg.color}20` }}>
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: cfg.color }}>{cfg.title}</p>
+              <p className="text-3xl font-black" style={{ color: cfg.color }}>{currentVal?.toFixed(1)}%</p>
+              {delta != null && (
+                <span className={`inline-flex items-center gap-1 text-xs font-bold mt-1 ${isGood ? 'text-emerald-600' : 'text-red-500'}`}>
+                  {isGood ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                  {delta > 0 ? '+' : ''}{delta.toFixed(2)}pp vs mes anterior
+                </span>
+              )}
+            </div>
+            <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/60 flex items-center justify-center hover:bg-white transition-all">
+              <X className="w-4 h-4 text-slate-500" />
+            </button>
+          </div>
+
+          <div className="p-6 space-y-5">
+            {/* Descripción y benchmarks */}
+            <div>
+              <p className="text-xs text-slate-500 mb-3">{cfg.description}</p>
+              <div className="flex gap-2 flex-wrap">
+                {cfg.benchmarks.map(b => (
+                  <span key={b.label} className="px-3 py-1 rounded-full text-[10px] font-bold border"
+                    style={{ background: b.color + '15', color: b.color, borderColor: b.color + '40' }}>
+                    {b.label}: {b.range}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Gráfica de barras históricas */}
+            {chartData.length >= 1 && (
+              <div>
+                <p className="text-xs font-black text-slate-700 uppercase tracking-wide mb-3">Evolución Histórica</p>
+                <ResponsiveContainer width="100%" height={200}>
+                  <BarChart data={chartData} margin={{ top: 8, right: 10, left: -5, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                    <XAxis dataKey="mes" tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 700 }} axisLine={false} tickLine={false} />
+                    <YAxis tickFormatter={v => `${v}%`} tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={38} />
+                    <Tooltip content={<PremiumTooltip />} cursor={{ fill: cfg.bg }} />
+                    <ReferenceLine y={avg} stroke={cfg.color} strokeDasharray="5 3" strokeOpacity={0.5}
+                      label={{ value: `μ ${avg.toFixed(1)}%`, position: 'insideTopRight', fontSize: 9, fill: cfg.color }} />
+                    <Bar dataKey={cfg.metric} radius={[5, 5, 0, 0]} maxBarSize={36} animationDuration={600}>
+                      {chartData.map((entry, i) => (
+                        <Cell key={i}
+                          fill={entry.isSelected ? cfg.color : cfg.color + '50'}
+                          stroke={entry.isSelected ? cfg.color : 'none'}
+                          strokeWidth={entry.isSelected ? 2 : 0}
+                        />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+                <div className="flex items-center gap-3 mt-2 text-[10px] text-slate-400">
+                  <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ background: cfg.color }} />Mes seleccionado</span>
+                  <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ background: cfg.color + '50' }} />Otros meses</span>
+                </div>
+              </div>
+            )}
+
+            {/* Análisis e insight */}
+            <div className="rounded-2xl p-4 border-2" style={{ background: cfg.bg, borderColor: cfg.color + '30' }}>
+              <p className="text-xs font-black uppercase tracking-wide mb-2" style={{ color: cfg.color }}>Análisis & Acción</p>
+              <p className="text-sm leading-relaxed text-slate-700">{cfg.insight(primaryRecord, prevRecord)}</p>
+            </div>
+
+            {/* Comparativo actual vs anterior */}
+            {prevRecord && (
+              <div className="grid grid-cols-3 gap-3">
+                <div className="rounded-xl p-4 text-center" style={{ background: cfg.bg }}>
+                  <p className="text-[10px] text-slate-500 mb-1">Actual</p>
+                  <p className="font-black text-xl" style={{ color: cfg.color }}>{currentVal?.toFixed(1)}%</p>
+                </div>
+                <div className="rounded-xl p-4 text-center bg-slate-50">
+                  <p className="text-[10px] text-slate-500 mb-1">Mes Anterior</p>
+                  <p className="font-black text-xl text-slate-600">{prevVal?.toFixed(1)}%</p>
+                </div>
+                <div className={`rounded-xl p-4 text-center ${isGood ? 'bg-emerald-50' : 'bg-red-50'}`}>
+                  <p className="text-[10px] text-slate-500 mb-1">Variación</p>
+                  <p className={`font-black text-xl ${isGood ? 'text-emerald-600' : 'text-red-500'}`}>
+                    {delta > 0 ? '+' : ''}{delta?.toFixed(2)}pp
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
 // ─── Componente principal ─────────────────────────────────────────────────────
 export default function PYGModal({ onClose, storeId }) {
   const storeCode = extractStoreCode(storeId);
@@ -473,6 +695,7 @@ export default function PYGModal({ onClose, storeId }) {
   const [selectedMonth, setSelectedMonth] = useState(null);
   const [monthDropdownOpen, setMonthDropdownOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
+  const [activeKPI, setActiveKPI] = useState(null);
 
   useEffect(() => {
     if (lastMonthWithData && !selectedMonth) setSelectedMonth(lastMonthWithData);
@@ -602,24 +825,24 @@ export default function PYGModal({ onClose, storeId }) {
                     delta={prevRecord ? pctNum(primaryRecord.margen_ebitda) - pctNum(prevRecord.margen_ebitda) : null}
                     icon={TrendingUp} accent={ACCENTS.ebitda} inverse={false}
                     badge={pctNum(primaryRecord.margen_ebitda) >= 25 ? '🏆 Excelente' : pctNum(primaryRecord.margen_ebitda) >= 18 ? '✓ Normal' : '⚠ Crítico'}
-                    onClick={() => {}} />
+                    onClick={() => setActiveKPI('ebitda')} />
                   <KPICard label="Costo Personal" value={fmt(primaryRecord.costo_personal)}
                     prev={prevRecord ? fmt(prevRecord.costo_personal) : null}
                     delta={prevRecord ? pctNum(primaryRecord.costo_personal) - pctNum(prevRecord.costo_personal) : null}
                     icon={Users} accent={ACCENTS.personal} inverse={true}
                     badge={pctNum(primaryRecord.costo_personal) <= 22 ? '✓ Óptimo' : pctNum(primaryRecord.costo_personal) <= 25 ? '⚠ Revisar' : '🔴 Alto'}
-                    onClick={() => {}} />
+                    onClick={() => setActiveKPI('personal')} />
                   <KPICard label="Costo Real / Teórico" value={`${fmt(primaryRecord.cost_real)} / ${fmt(primaryRecord.cost_teorico)}`}
                     prev={prevRecord ? `${fmt(prevRecord.cost_real)}` : null}
                     delta={prevRecord ? pctNum(primaryRecord.cost_real) - pctNum(prevRecord.cost_real) : null}
                     icon={Package} accent={ACCENTS.costo} inverse={true}
                     badge={pctNum(primaryRecord.cost_real) <= pctNum(primaryRecord.cost_teorico) ? '✓ En presupuesto' : '⚠ Exceso'}
-                    onClick={() => {}} />
+                    onClick={() => setActiveKPI('costo')} />
                   <KPICard label="Gastos % Venta" value={fmt(primaryRecord.gastos_pct_venta)}
                     prev={prevRecord ? fmt(prevRecord.gastos_pct_venta) : null}
                     delta={prevRecord ? pctNum(primaryRecord.gastos_pct_venta) - pctNum(prevRecord.gastos_pct_venta) : null}
                     icon={DollarSign} accent={ACCENTS.gastos} inverse={true}
-                    onClick={() => {}} />
+                    onClick={() => setActiveKPI('gastos')} />
                 </div>
 
                 {/* Insights cuantitativos */}
@@ -797,6 +1020,18 @@ export default function PYGModal({ onClose, storeId }) {
           </>
         )}
       </div>
+
+      {/* Modal de detalle de KPI */}
+      {activeKPI && (
+        <KPIDetailModal
+          kpiId={activeKPI}
+          onClose={() => setActiveKPI(null)}
+          primaryRecord={primaryRecord}
+          prevRecord={prevRecord}
+          trendData={trendData}
+          selectedMonth={selectedMonth}
+        />
+      )}
     </motion.div>
   );
 }
