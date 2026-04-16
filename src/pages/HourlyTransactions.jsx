@@ -20,11 +20,12 @@ function extractCode(name) {
   return String(name).replace(/\s*\([^)]*\)/g, '').trim();
 }
 
-// Obtener el código de tienda de la sesión activa
+// Obtener el código de tienda de la sesión activa (siempre normalizado)
 function getSessionStoreCode() {
   try {
     const session = JSON.parse(localStorage.getItem('popsySession') || '{}');
-    return session.store || null;
+    const raw = session.store || null;
+    return raw ? extractCode(raw) : null;
   } catch { return null; }
 }
 

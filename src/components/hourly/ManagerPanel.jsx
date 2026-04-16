@@ -12,7 +12,10 @@ const HOURS = [9,10,11,12,13,14,15,16,17,18,19,20,21,22];
 function extractCode(name) {
   if (!name) return name;
   const m = String(name).toUpperCase().match(/(BTA|TUNJA|BOGOTA)\s*(\d+)/);
-  if (m) return `${m[1]} ${m[2]}`;
+  if (m) {
+    const prefix = m[1] === 'BOGOTA' ? 'BTA' : m[1];
+    return `${prefix} ${m[2]}`;
+  }
   return String(name).replace(/\s*\([^)]*\)/g, '').trim();
 }
 
