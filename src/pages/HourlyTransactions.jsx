@@ -65,7 +65,8 @@ export default function HourlyTransactions() {
   const stores = useMemo(() => {
     const map = {};
     allRecords.forEach(r => {
-      const code = extractCode(r.store_name);
+      // Prefer the clean store_code field; fall back to extracting from store_name
+      const code = (r.store_code && r.store_code.trim()) ? r.store_code.trim() : extractCode(r.store_name);
       if (!map[code]) {
         map[code] = { code, name: r.store_name, months: new Set(), latestTotal: 0 };
       }
@@ -108,7 +109,11 @@ export default function HourlyTransactions() {
 
   if (view === 'store' && activeStore) {
     const storeCode = extractCode(activeStore.code);
-    const storeRecords = allRecords.filter(r => extractCode(r.store_name) === storeCode || extractCode(r.store_code || '') === storeCode);
+    const storeRecords = allRecords.filter(r => {
+      const nameCode = extractCode(r.store_name);
+      const fieldCode = (r.store_code || '').trim();
+      return nameCode === storeCode || fieldCode === storeCode || extractCode(fieldCode) === storeCode;
+    });
     return (
       <StoreHourlyView
         storeCode={storeCode}
