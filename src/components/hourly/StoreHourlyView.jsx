@@ -609,73 +609,106 @@ export default function StoreHourlyView({ storeCode, storeName, allRecords, onBa
           }).filter(d => d.txn > 0);
 
           const maxTxn = Math.max(...rows.map(d => d.txn));
+          const growthRows = rows.filter(d => d.absChange != null);
+          const avgGrowth = growthRows.length > 0
+            ? growthRows.reduce((s, d) => s + d.absChange, 0) / growthRows.length
+            : 0;
+          const horasSubiendo = growthRows.filter(d => d.absChange > 0).length;
+          const horasBajando = growthRows.filter(d => d.absChange < 0).length;
+          const mejorCrecimiento = growthRows.reduce((best, d) => d.absChange > (best?.absChange ?? -Infinity) ? d : best, null);
+          const mayorCaida = growthRows.reduce((worst, d) => d.absChange < (worst?.absChange ?? Infinity) ? d : worst, null);
+
+          // Tooltip para la gráfica
+          const GrowthTip = ({ active, payload, label }) => {
+            if (!active || !payload?.length) return null;
+            const d = payload[0]?.payload;
+            return (
+              <div className="bg-white border border-pink-100 shadow-xl px-4 py-3 rounded-2xl text-xs min-w-[170px]">
+                <p className="font-black text-slate-700 mb-2">{label}</p>
+                <div className="flex justify-between mb-1">
+                  <span className="text-slate-400">Transacciones</span>
+                  <span className="font-black text-slate-900">{d.txn.toLocaleString('es-CO')}</span>
+                </div>
+                {d.absChange != null && (
+                  <div className="flex justify-between mt-1 pt-1 border-t border-slate-100">
+                    <span className="text-slate-400">vs hora anterior</span>
+                    <span className={`font-black ${d.absChange >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+                      {d.absChange >= 0 ? '+' : ''}{d.absChange.toLocaleString('es-CO')} txn
+                    </span>
+                  </div>
+                )}
+              </div>
+            );
+          };
+
+          // Datos para recharts: barras de txn + línea de absChange
+          const chartData = rows.map(d => ({
+            ...d,
+            // absChange puede ser negativo, para la línea lo usamos directo
+            change: d.absChange,
+          }));
 
           return (
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-              <div className="mb-5">
-                <h2 className="font-black text-slate-900">Transacciones por Hora</h2>
-                <p className="text-xs text-slate-400 mt-0.5">Cuántas transacciones hubo cada hora y cuánto cambió respecto a la hora anterior</p>
+              <div className="mb-2">
+                <h2 className="font-black text-slate-900">Transacciones por Hora + Crecimiento</h2>
+                <p className="text-xs text-slate-400 mt-0.5">Barras = volumen por hora · Línea = cuántas transacciones ganaste o perdiste vs la hora anterior</p>
               </div>
 
-              <div className="space-y-3">
-                {rows.map((d, i) => {
-                  const barW = maxTxn > 0 ? (d.txn / maxTxn * 100) : 0;
-                  const isUp = d.absChange != null && d.absChange > 0;
-                  const isDown = d.absChange != null && d.absChange < 0;
-                  const isFirst = d.prevTxn == null;
-
-                  return (
-                    <div key={i} className="flex items-center gap-3">
-                      {/* Hora */}
-                      <div className="w-10 flex-shrink-0 text-right">
-                        <span className="text-xs font-black text-slate-500">{d.hour}</span>
-                      </div>
-
-                      {/* Barra */}
-                      <div className="flex-1 relative h-9 bg-slate-50 rounded-xl overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${barW}%` }}
-                          transition={{ duration: 0.6, delay: i * 0.04, ease: 'easeOut' }}
-                          className="absolute inset-y-0 left-0 rounded-xl"
-                          style={{ background: isUp ? 'linear-gradient(90deg,#34d399,#10b981)' : isDown ? 'linear-gradient(90deg,#f87171,#ef4444)' : isFirst ? `linear-gradient(90deg,${MAGENTA_LIGHT},${MAGENTA})` : '#e2e8f0' }}
-                        />
-                        {/* Número de txn dentro de la barra */}
-                        <div className="absolute inset-0 flex items-center px-3">
-                          <span className="text-sm font-black text-white drop-shadow-sm z-10">
-                            {d.txn.toLocaleString('es-CO')} txn
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Badge de cambio */}
-                      <div className="w-28 flex-shrink-0">
-                        {isFirst ? (
-                          <span className="text-[10px] text-slate-300 italic">primera hora</span>
-                        ) : (
-                          <div className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-black ${isUp ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : isDown ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-slate-50 text-slate-400 border border-slate-200'}`}>
-                            <span className="text-base leading-none">{isUp ? '↑' : isDown ? '↓' : '→'}</span>
-                            <div className="flex flex-col leading-none">
-                              <span>{d.absChange > 0 ? '+' : ''}{d.absChange.toLocaleString('es-CO')} txn</span>
-                              {d.pct != null && (
-                                <span className="text-[9px] font-semibold opacity-70">
-                                  {d.pct > 0 ? '+' : ''}{d.pct.toFixed(0)}%
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
+              {/* Resumen en texto */}
+              <div className="rounded-2xl px-4 py-3 mb-5 mt-3 border flex flex-wrap gap-x-6 gap-y-1 text-sm"
+                style={{ background: MAGENTA_PALE, borderColor: MAGENTA + '30' }}>
+                <span className="text-slate-700">
+                  📈 En promedio, cada hora la tienda{' '}
+                  <strong style={{ color: avgGrowth >= 0 ? '#059669' : '#dc2626' }}>
+                    {avgGrowth >= 0 ? 'suma' : 'pierde'} {Math.abs(avgGrowth).toFixed(0)} transacciones
+                  </strong>{' '}
+                  respecto a la hora anterior.
+                </span>
+                <span className="text-slate-500 text-xs self-end">
+                  {horasSubiendo} horas subiendo · {horasBajando} horas bajando
+                  {mejorCrecimiento && ` · Mejor salto: ${mejorCrecimiento.hour} (+${mejorCrecimiento.absChange.toLocaleString('es-CO')} txn)`}
+                  {mayorCaida && mayorCaida.absChange < 0 && ` · Mayor caída: ${mayorCaida.hour} (${mayorCaida.absChange.toLocaleString('es-CO')} txn)`}
+                </span>
               </div>
 
-              {/* Leyenda bottom */}
-              <div className="mt-5 pt-4 border-t border-slate-50 flex items-center gap-5 text-[11px] text-slate-400">
-                <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-md inline-block" style={{ background: 'linear-gradient(90deg,#34d399,#10b981)' }} />Creció vs hora anterior</span>
-                <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-md inline-block" style={{ background: 'linear-gradient(90deg,#f87171,#ef4444)' }} />Bajó vs hora anterior</span>
-                <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-md inline-block" style={{ background: `linear-gradient(90deg,${MAGENTA_LIGHT},${MAGENTA})` }} />Primera hora</span>
+              {/* Gráfica combinada */}
+              <ResponsiveContainer width="100%" height={300}>
+                <ComposedChart data={chartData} margin={{ top: 16, right: 24, left: 0, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="txnBarGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={MAGENTA} stopOpacity={0.85} />
+                      <stop offset="100%" stopColor={MAGENTA_LIGHT} stopOpacity={0.5} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                  <XAxis dataKey="hour" tick={{ fontSize: 12, fill: '#94a3b8', fontWeight: 700 }} axisLine={false} tickLine={false} />
+                  {/* Eje izquierdo: txn absolutas */}
+                  <YAxis yAxisId="txn" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={40} />
+                  {/* Eje derecho: cambio absoluto */}
+                  <YAxis yAxisId="change" orientation="right" tick={{ fontSize: 11, fill: '#10b981' }} axisLine={false} tickLine={false} width={44}
+                    tickFormatter={v => v >= 0 ? `+${v}` : `${v}`} />
+                  <ReferenceLine yAxisId="change" y={0} stroke="#e2e8f0" strokeWidth={2} strokeDasharray="4 4" />
+                  <Tooltip content={<GrowthTip />} cursor={{ fill: '#fdf2f8' }} />
+                  {/* Barras de volumen */}
+                  <Bar yAxisId="txn" dataKey="txn" name="Transacciones" radius={[7, 7, 0, 0]} maxBarSize={46} animationDuration={700} fill="url(#txnBarGrad)" />
+                  {/* Línea de crecimiento */}
+                  <Line yAxisId="change" type="monotone" dataKey="change" name="Cambio vs hora ant."
+                    stroke="#10b981" strokeWidth={3}
+                    dot={(props) => {
+                      const { cx, cy, payload } = props;
+                      if (payload.change == null) return null;
+                      const color = payload.change >= 0 ? '#10b981' : '#ef4444';
+                      return <circle key={cx} cx={cx} cy={cy} r={5} fill={color} stroke="#fff" strokeWidth={2} />;
+                    }}
+                    activeDot={{ r: 7 }}
+                  />
+                </ComposedChart>
+              </ResponsiveContainer>
+
+              <div className="mt-3 flex items-center justify-center gap-6 text-[11px] text-slate-400">
+                <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm inline-block" style={{ background: MAGENTA }} />Transacciones por hora</span>
+                <span className="flex items-center gap-1.5"><span className="w-5 h-0.5 inline-block rounded-full bg-emerald-400" />Cambio vs hora anterior</span>
               </div>
             </div>
           );
