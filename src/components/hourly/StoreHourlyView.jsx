@@ -74,7 +74,7 @@ const CustomLineTooltip = ({ active, payload, label }) => {
 
 export default function StoreHourlyView({ storeCode, storeName, allRecords, onBack }) {
   const availableMonths = useMemo(() => {
-    return [...new Set(allRecords.map(r => `${r.year}-${r.month}`))]
+    return [...new Set(allRecords.map(r => `${Math.round(r.year)}-${Math.round(r.month)}`))]
       .map(key => {
         const [y, m] = key.split('-');
         return { year: parseInt(y), month: parseInt(m) };
@@ -88,7 +88,7 @@ export default function StoreHourlyView({ storeCode, storeName, allRecords, onBa
 
   const currentRecord = useMemo(() => {
     if (!selectedPeriod) return null;
-    return allRecords.find(r => r.month === selectedPeriod.month && r.year === selectedPeriod.year) || null;
+    return allRecords.find(r => Math.round(r.month) === selectedPeriod.month && Math.round(r.year) === selectedPeriod.year) || null;
   }, [allRecords, selectedPeriod]);
 
   const prevRecord = useMemo(() => {
@@ -96,7 +96,7 @@ export default function StoreHourlyView({ storeCode, storeName, allRecords, onBa
     let prevMonth = selectedPeriod.month - 1;
     let prevYear = selectedPeriod.year;
     if (prevMonth < 1) { prevMonth = 12; prevYear -= 1; }
-    return allRecords.find(r => r.month === prevMonth && r.year === prevYear) || null;
+    return allRecords.find(r => Math.round(r.month) === prevMonth && Math.round(r.year) === prevYear) || null;
   }, [allRecords, selectedPeriod]);
 
   const hourValues = useMemo(() => getHourValues(currentRecord), [currentRecord]);
