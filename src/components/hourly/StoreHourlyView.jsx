@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, TrendingUp, TrendingDown, Clock, Activity, BarChart3, AlertTriangle, ChevronUp, ChevronDown, Minus } from 'lucide-react';
 import {
@@ -82,9 +82,16 @@ export default function StoreHourlyView({ storeCode, storeName, allRecords, onBa
       .sort((a, b) => b.year - a.year || b.month - a.month);
   }, [allRecords]);
 
-  const [selectedPeriod, setSelectedPeriod] = useState(() => availableMonths[0] || null);
+  const [selectedPeriod, setSelectedPeriod] = useState(availableMonths[0] || null);
   const [sortKey, setSortKey] = useState('transactions');
   const [sortDir, setSortDir] = useState('desc');
+
+  // Actualizar selectedPeriod cuando llegan los datos (allRecords puede llegar tarde)
+  useEffect(() => {
+    if (availableMonths.length > 0 && !selectedPeriod) {
+      setSelectedPeriod(availableMonths[0]);
+    }
+  }, [availableMonths]);
 
   const currentRecord = useMemo(() => {
     if (!selectedPeriod) return null;
