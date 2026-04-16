@@ -598,124 +598,84 @@ export default function StoreHourlyView({ storeCode, storeName, allRecords, onBa
           </ResponsiveContainer>
         </div>
 
-        {/* Gráfica de Velocidad Hora a Hora */}
+        {/* Gráfica de Crecimiento Hora a Hora */}
         {(() => {
-          const momentumData = HOURS.map((h, i) => {
+          const rows = HOURS.map((h, i) => {
             const curr = hourValues[i] || 0;
-            const prev = i > 0 ? (hourValues[i - 1] || 0) : null;
-            const delta = prev != null && prev > 0 ? ((curr - prev) / prev * 100) : null;
-            const absChange = prev != null ? curr - prev : null;
-            return { hour: HOUR_LABELS[i], txn: curr, delta, absChange, prev };
+            const prevTxn = i > 0 ? (hourValues[i - 1] || 0) : null;
+            const absChange = prevTxn != null ? curr - prevTxn : null;
+            const pct = (prevTxn != null && prevTxn > 0) ? ((curr - prevTxn) / prevTxn * 100) : null;
+            return { hour: HOUR_LABELS[i], txn: curr, prevTxn, absChange, pct };
           }).filter(d => d.txn > 0);
 
-          const maxAbs = Math.max(...momentumData.map(d => Math.abs(d.delta ?? 0)));
-
-          const MomentumTip = ({ active, payload, label }) => {
-            if (!active || !payload?.length) return null;
-            const d = payload[0]?.payload;
-            return (
-              <div className="bg-white border border-pink-100 shadow-xl px-4 py-3 rounded-2xl text-xs min-w-[180px]">
-                <p className="font-bold text-slate-400 mb-2 uppercase tracking-wider">{label}</p>
-                <div className="flex justify-between mb-1">
-                  <span className="text-slate-500">Transacciones</span>
-                  <span className="font-black text-slate-900">{d.txn.toLocaleString('es-CO')}</span>
-                </div>
-                {d.delta != null && (
-                  <>
-                    <div className="flex justify-between mb-1">
-                      <span className="text-slate-500">vs hora anterior</span>
-                      <span className={`font-black ${d.delta >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
-                        {d.delta >= 0 ? '+' : ''}{d.delta.toFixed(1)}%
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-500">Diferencia</span>
-                      <span className={`font-black ${d.absChange >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
-                        {d.absChange >= 0 ? '+' : ''}{d.absChange.toLocaleString('es-CO')} txn
-                      </span>
-                    </div>
-                  </>
-                )}
-                {d.delta == null && <p className="text-slate-400 text-[10px] mt-1">Primera hora del día</p>}
-              </div>
-            );
-          };
+          const maxTxn = Math.max(...rows.map(d => d.txn));
 
           return (
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-              <div className="flex items-start justify-between mb-1">
-                <div>
-                  <h2 className="font-black text-slate-900">Aceleración Horaria</h2>
-                  <p className="text-xs text-slate-400 mt-0.5">Cuánto creció o cayó cada hora respecto a la anterior</p>
-                </div>
-                <div className="flex items-center gap-3 text-[10px] text-slate-400">
-                  <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm inline-block bg-emerald-400" /> Aceleró</span>
-                  <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm inline-block bg-red-400" /> Desaceleró</span>
-                </div>
+              <div className="mb-5">
+                <h2 className="font-black text-slate-900">Transacciones por Hora</h2>
+                <p className="text-xs text-slate-400 mt-0.5">Cuántas transacciones hubo cada hora y cuánto cambió respecto a la hora anterior</p>
               </div>
 
-              {/* Mini indicadores de velocidad */}
-              <div className="flex gap-2 flex-wrap mb-5 mt-4">
-                {momentumData.map((d, i) => {
-                  if (d.delta == null) return (
-                    <div key={i} className="flex flex-col items-center bg-slate-50 border border-slate-100 rounded-xl px-3 py-2 min-w-[52px]">
-                      <span className="text-[10px] font-black text-slate-400">{d.hour}</span>
-                      <span className="text-[10px] text-slate-300 mt-0.5">—</span>
-                    </div>
-                  );
-                  const intensity = maxAbs > 0 ? Math.abs(d.delta) / maxAbs : 0;
-                  const isPos = d.delta >= 0;
-                  const bgOpacity = Math.round(30 + intensity * 70);
+              <div className="space-y-3">
+                {rows.map((d, i) => {
+                  const barW = maxTxn > 0 ? (d.txn / maxTxn * 100) : 0;
+                  const isUp = d.absChange != null && d.absChange > 0;
+                  const isDown = d.absChange != null && d.absChange < 0;
+                  const isFirst = d.prevTxn == null;
+
                   return (
-                    <div key={i} className={`flex flex-col items-center rounded-xl px-3 py-2 min-w-[52px] border ${isPos ? 'border-emerald-200' : 'border-red-200'}`}
-                      style={{ background: isPos ? `rgba(52,211,153,${intensity * 0.18 + 0.04})` : `rgba(248,113,113,${intensity * 0.18 + 0.04})` }}>
-                      <span className={`text-[10px] font-black ${isPos ? 'text-emerald-700' : 'text-red-600'}`}>{d.hour}</span>
-                      <span className={`text-[11px] font-black mt-0.5 flex items-center gap-0.5 ${isPos ? 'text-emerald-600' : 'text-red-500'}`}>
-                        {isPos ? '▲' : '▼'}{Math.abs(d.delta).toFixed(0)}%
-                      </span>
-                      <span className={`text-[9px] font-semibold mt-0.5 ${isPos ? 'text-emerald-500' : 'text-red-400'}`}>
-                        {d.absChange >= 0 ? '+' : ''}{d.absChange.toLocaleString('es-CO')}
-                      </span>
+                    <div key={i} className="flex items-center gap-3">
+                      {/* Hora */}
+                      <div className="w-10 flex-shrink-0 text-right">
+                        <span className="text-xs font-black text-slate-500">{d.hour}</span>
+                      </div>
+
+                      {/* Barra */}
+                      <div className="flex-1 relative h-9 bg-slate-50 rounded-xl overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${barW}%` }}
+                          transition={{ duration: 0.6, delay: i * 0.04, ease: 'easeOut' }}
+                          className="absolute inset-y-0 left-0 rounded-xl"
+                          style={{ background: isUp ? 'linear-gradient(90deg,#34d399,#10b981)' : isDown ? 'linear-gradient(90deg,#f87171,#ef4444)' : isFirst ? `linear-gradient(90deg,${MAGENTA_LIGHT},${MAGENTA})` : '#e2e8f0' }}
+                        />
+                        {/* Número de txn dentro de la barra */}
+                        <div className="absolute inset-0 flex items-center px-3">
+                          <span className="text-sm font-black text-white drop-shadow-sm z-10">
+                            {d.txn.toLocaleString('es-CO')} txn
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Badge de cambio */}
+                      <div className="w-28 flex-shrink-0">
+                        {isFirst ? (
+                          <span className="text-[10px] text-slate-300 italic">primera hora</span>
+                        ) : (
+                          <div className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-black ${isUp ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : isDown ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-slate-50 text-slate-400 border border-slate-200'}`}>
+                            <span className="text-base leading-none">{isUp ? '↑' : isDown ? '↓' : '→'}</span>
+                            <div className="flex flex-col leading-none">
+                              <span>{d.absChange > 0 ? '+' : ''}{d.absChange.toLocaleString('es-CO')} txn</span>
+                              {d.pct != null && (
+                                <span className="text-[9px] font-semibold opacity-70">
+                                  {d.pct > 0 ? '+' : ''}{d.pct.toFixed(0)}%
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   );
                 })}
               </div>
 
-              {/* Gráfica de barras de delta con línea de txn superpuesta */}
-              <ResponsiveContainer width="100%" height={260}>
-                <ComposedChart data={momentumData} margin={{ top: 16, right: 20, left: 0, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="posGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#34d399" stopOpacity={0.9} />
-                      <stop offset="100%" stopColor="#34d399" stopOpacity={0.5} />
-                    </linearGradient>
-                    <linearGradient id="negGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#f87171" stopOpacity={0.9} />
-                      <stop offset="100%" stopColor="#f87171" stopOpacity={0.5} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                  <XAxis dataKey="hour" tick={{ fontSize: 12, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                  <YAxis yAxisId="delta" tickFormatter={v => `${v > 0 ? '+' : ''}${v.toFixed(0)}%`}
-                    tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={45} />
-                  <YAxis yAxisId="txn" orientation="right"
-                    tick={{ fontSize: 10, fill: MAGENTA + '99' }} axisLine={false} tickLine={false} width={40} />
-                  <ReferenceLine yAxisId="delta" y={0} stroke="#e2e8f0" strokeWidth={2} />
-                  <Tooltip content={<MomentumTip />} cursor={{ fill: '#fdf2f8' }} />
-                  <Bar yAxisId="delta" dataKey="delta" radius={[5, 5, 0, 0]} maxBarSize={40} animationDuration={800}>
-                    {momentumData.map((d, i) => (
-                      <Cell key={i} fill={d.delta == null ? '#e2e8f0' : d.delta >= 0 ? 'url(#posGrad)' : 'url(#negGrad)'} />
-                    ))}
-                  </Bar>
-                  <Line yAxisId="txn" type="monotone" dataKey="txn" name="Transacciones"
-                    stroke={MAGENTA} strokeWidth={2.5} dot={{ r: 4, fill: MAGENTA, stroke: '#fff', strokeWidth: 2 }}
-                    activeDot={{ r: 6 }} strokeDasharray="0" />
-                </ComposedChart>
-              </ResponsiveContainer>
-
-              <div className="mt-3 flex items-center justify-center gap-6 text-[11px] text-slate-400">
-                <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-emerald-400 inline-block" />Aceleración vs hora anterior (%)</span>
-                <span className="flex items-center gap-1.5"><span className="w-5 h-0.5 inline-block rounded-full" style={{ background: MAGENTA }} />Volumen de txn</span>
+              {/* Leyenda bottom */}
+              <div className="mt-5 pt-4 border-t border-slate-50 flex items-center gap-5 text-[11px] text-slate-400">
+                <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-md inline-block" style={{ background: 'linear-gradient(90deg,#34d399,#10b981)' }} />Creció vs hora anterior</span>
+                <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-md inline-block" style={{ background: 'linear-gradient(90deg,#f87171,#ef4444)' }} />Bajó vs hora anterior</span>
+                <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-md inline-block" style={{ background: `linear-gradient(90deg,${MAGENTA_LIGHT},${MAGENTA})` }} />Primera hora</span>
               </div>
             </div>
           );
