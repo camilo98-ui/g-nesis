@@ -598,6 +598,129 @@ export default function StoreHourlyView({ storeCode, storeName, allRecords, onBa
           </ResponsiveContainer>
         </div>
 
+        {/* Gráfica de Velocidad Hora a Hora */}
+        {(() => {
+          const momentumData = HOURS.map((h, i) => {
+            const curr = hourValues[i] || 0;
+            const prev = i > 0 ? (hourValues[i - 1] || 0) : null;
+            const delta = prev != null && prev > 0 ? ((curr - prev) / prev * 100) : null;
+            const absChange = prev != null ? curr - prev : null;
+            return { hour: HOUR_LABELS[i], txn: curr, delta, absChange, prev };
+          }).filter(d => d.txn > 0);
+
+          const maxAbs = Math.max(...momentumData.map(d => Math.abs(d.delta ?? 0)));
+
+          const MomentumTip = ({ active, payload, label }) => {
+            if (!active || !payload?.length) return null;
+            const d = payload[0]?.payload;
+            return (
+              <div className="bg-white border border-pink-100 shadow-xl px-4 py-3 rounded-2xl text-xs min-w-[180px]">
+                <p className="font-bold text-slate-400 mb-2 uppercase tracking-wider">{label}</p>
+                <div className="flex justify-between mb-1">
+                  <span className="text-slate-500">Transacciones</span>
+                  <span className="font-black text-slate-900">{d.txn.toLocaleString('es-CO')}</span>
+                </div>
+                {d.delta != null && (
+                  <>
+                    <div className="flex justify-between mb-1">
+                      <span className="text-slate-500">vs hora anterior</span>
+                      <span className={`font-black ${d.delta >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+                        {d.delta >= 0 ? '+' : ''}{d.delta.toFixed(1)}%
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Diferencia</span>
+                      <span className={`font-black ${d.absChange >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+                        {d.absChange >= 0 ? '+' : ''}{d.absChange.toLocaleString('es-CO')} txn
+                      </span>
+                    </div>
+                  </>
+                )}
+                {d.delta == null && <p className="text-slate-400 text-[10px] mt-1">Primera hora del día</p>}
+              </div>
+            );
+          };
+
+          return (
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+              <div className="flex items-start justify-between mb-1">
+                <div>
+                  <h2 className="font-black text-slate-900">Aceleración Horaria</h2>
+                  <p className="text-xs text-slate-400 mt-0.5">Cuánto creció o cayó cada hora respecto a la anterior</p>
+                </div>
+                <div className="flex items-center gap-3 text-[10px] text-slate-400">
+                  <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm inline-block bg-emerald-400" /> Aceleró</span>
+                  <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm inline-block bg-red-400" /> Desaceleró</span>
+                </div>
+              </div>
+
+              {/* Mini indicadores de velocidad */}
+              <div className="flex gap-2 flex-wrap mb-5 mt-4">
+                {momentumData.map((d, i) => {
+                  if (d.delta == null) return (
+                    <div key={i} className="flex flex-col items-center bg-slate-50 border border-slate-100 rounded-xl px-3 py-2 min-w-[52px]">
+                      <span className="text-[10px] font-black text-slate-400">{d.hour}</span>
+                      <span className="text-[10px] text-slate-300 mt-0.5">—</span>
+                    </div>
+                  );
+                  const intensity = maxAbs > 0 ? Math.abs(d.delta) / maxAbs : 0;
+                  const isPos = d.delta >= 0;
+                  const bgOpacity = Math.round(30 + intensity * 70);
+                  return (
+                    <div key={i} className={`flex flex-col items-center rounded-xl px-3 py-2 min-w-[52px] border ${isPos ? 'border-emerald-200' : 'border-red-200'}`}
+                      style={{ background: isPos ? `rgba(52,211,153,${intensity * 0.18 + 0.04})` : `rgba(248,113,113,${intensity * 0.18 + 0.04})` }}>
+                      <span className={`text-[10px] font-black ${isPos ? 'text-emerald-700' : 'text-red-600'}`}>{d.hour}</span>
+                      <span className={`text-[11px] font-black mt-0.5 flex items-center gap-0.5 ${isPos ? 'text-emerald-600' : 'text-red-500'}`}>
+                        {isPos ? '▲' : '▼'}{Math.abs(d.delta).toFixed(0)}%
+                      </span>
+                      <span className={`text-[9px] font-semibold mt-0.5 ${isPos ? 'text-emerald-500' : 'text-red-400'}`}>
+                        {d.absChange >= 0 ? '+' : ''}{d.absChange.toLocaleString('es-CO')}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Gráfica de barras de delta con línea de txn superpuesta */}
+              <ResponsiveContainer width="100%" height={260}>
+                <ComposedChart data={momentumData} margin={{ top: 16, right: 20, left: 0, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="posGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#34d399" stopOpacity={0.9} />
+                      <stop offset="100%" stopColor="#34d399" stopOpacity={0.5} />
+                    </linearGradient>
+                    <linearGradient id="negGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#f87171" stopOpacity={0.9} />
+                      <stop offset="100%" stopColor="#f87171" stopOpacity={0.5} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                  <XAxis dataKey="hour" tick={{ fontSize: 12, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                  <YAxis yAxisId="delta" tickFormatter={v => `${v > 0 ? '+' : ''}${v.toFixed(0)}%`}
+                    tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={45} />
+                  <YAxis yAxisId="txn" orientation="right"
+                    tick={{ fontSize: 10, fill: MAGENTA + '99' }} axisLine={false} tickLine={false} width={40} />
+                  <ReferenceLine yAxisId="delta" y={0} stroke="#e2e8f0" strokeWidth={2} />
+                  <Tooltip content={<MomentumTip />} cursor={{ fill: '#fdf2f8' }} />
+                  <Bar yAxisId="delta" dataKey="delta" radius={[5, 5, 0, 0]} maxBarSize={40} animationDuration={800}>
+                    {momentumData.map((d, i) => (
+                      <Cell key={i} fill={d.delta == null ? '#e2e8f0' : d.delta >= 0 ? 'url(#posGrad)' : 'url(#negGrad)'} />
+                    ))}
+                  </Bar>
+                  <Line yAxisId="txn" type="monotone" dataKey="txn" name="Transacciones"
+                    stroke={MAGENTA} strokeWidth={2.5} dot={{ r: 4, fill: MAGENTA, stroke: '#fff', strokeWidth: 2 }}
+                    activeDot={{ r: 6 }} strokeDasharray="0" />
+                </ComposedChart>
+              </ResponsiveContainer>
+
+              <div className="mt-3 flex items-center justify-center gap-6 text-[11px] text-slate-400">
+                <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-emerald-400 inline-block" />Aceleración vs hora anterior (%)</span>
+                <span className="flex items-center gap-1.5"><span className="w-5 h-0.5 inline-block rounded-full" style={{ background: MAGENTA }} />Volumen de txn</span>
+              </div>
+            </div>
+          );
+        })()}
+
         {/* Gráfica comparativa */}
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
           <div className="mb-4">
