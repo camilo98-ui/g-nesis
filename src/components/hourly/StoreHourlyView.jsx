@@ -1,28 +1,34 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  ArrowLeft, TrendingUp, TrendingDown, Clock, Activity, BarChart3,
-  ChevronUp, ChevronDown, Minus, GitCompare, Zap, AlertTriangle,
-  CheckCircle, Target, Users, ArrowUpRight, ArrowDownRight
+  ArrowLeft, TrendingUp, TrendingDown, Activity, BarChart3,
+  ChevronUp, ChevronDown, Minus, GitCompare, Zap, Target,
+  ArrowUpRight, ArrowDownRight, X, Clock
 } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  LineChart, Line, Legend, ReferenceLine, Cell, AreaChart, Area,
-  ComposedChart, Scatter
+  LineChart, Line, Legend, ReferenceLine, Cell, AreaChart, Area, ComposedChart
 } from 'recharts';
-import { base44 } from '@/api/base44Client';
-import { useQuery } from '@tanstack/react-query';
 
 const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const MONTHS_SHORT = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 const HOURS = [9,10,11,12,13,14,15,16,17,18,19,20,21,22];
 const HOUR_LABELS = HOURS.map(h => h < 12 ? `${h}am` : h === 12 ? '12pm' : `${h-12}pm`);
 
-// Paleta Popsy
 const MAGENTA = '#e91e8c';
 const MAGENTA_DARK = '#c0156f';
 const MAGENTA_LIGHT = '#f472b6';
 const MAGENTA_PALE = '#fce7f3';
+
+// Paleta de colores pastel Popsy para las tarjetas
+const CARD_PALETTES = [
+  { bg: '#fce7f3', border: '#f9a8d4', icon: MAGENTA, text: '#9d174d', sub: '#be185d' },       // Rosa
+  { bg: '#fdf4ff', border: '#e879f9', icon: '#a21caf', text: '#701a75', sub: '#86198f' },     // Violeta
+  { bg: '#fef3c7', border: '#fcd34d', icon: '#b45309', text: '#92400e', sub: '#d97706' },     // Ámbar
+  { bg: '#ecfdf5', border: '#6ee7b7', icon: '#059669', text: '#065f46', sub: '#047857' },     // Esmeralda
+  { bg: '#eff6ff', border: '#93c5fd', icon: '#2563eb', text: '#1e3a8a', sub: '#1d4ed8' },     // Azul
+  { bg: '#fdf2f8', border: '#f0abfc', icon: '#c026d3', text: '#701a75', sub: '#a21caf' },     // Fucsia
+];
 
 function getHourValues(rec) {
   return HOURS.map(h => Math.max(0, rec?.[`hour_${h}`] || 0));
@@ -31,8 +37,7 @@ function getHourValues(rec) {
 function stdDev(values) {
   if (!values.length) return 0;
   const mean = values.reduce((s, v) => s + v, 0) / values.length;
-  const variance = values.reduce((s, v) => s + Math.pow(v - mean, 2), 0) / values.length;
-  return Math.sqrt(variance);
+  return Math.sqrt(values.reduce((s, v) => s + Math.pow(v - mean, 2), 0) / values.length);
 }
 
 function getBarColor(val, mean, sd) {
@@ -47,136 +52,200 @@ function getLabel(val, mean, sd) {
   return 'Bajo';
 }
 
-// Tooltip barra
-const BarTooltip = ({ active, payload, label, mean, total }) => {
+// ── Tooltips ─────────────────────────────────────────────────────────────────
+
+const BarTip = ({ active, payload, label, mean, total }) => {
   if (!active || !payload?.length) return null;
   const val = payload[0]?.value || 0;
-  const pctVsAvg = mean > 0 ? ((val - mean) / mean * 100) : 0;
-  const pctOfDay = total > 0 ? (val / total * 100) : 0;
+  const pctAvg = mean > 0 ? ((val - mean) / mean * 100) : 0;
+  const pctDay = total > 0 ? (val / total * 100) : 0;
   return (
-    <div className="bg-white border border-pink-100 shadow-2xl px-4 py-3 rounded-2xl text-xs min-w-[170px]">
-      <p className="font-bold text-slate-500 mb-1 uppercase tracking-wider">{label}</p>
+    <div className="bg-white border border-pink-100 shadow-xl px-4 py-3 rounded-2xl text-xs min-w-[160px]">
+      <p className="font-bold text-slate-400 mb-1 uppercase tracking-wider">{label}</p>
       <p className="text-2xl font-black text-slate-900">{val.toLocaleString('es-CO')}</p>
-      <p className="text-xs text-slate-400 mt-0.5">transacciones</p>
+      <p className="text-slate-400 mt-0.5">transacciones</p>
       <div className="mt-2 pt-2 border-t border-slate-100 space-y-1">
-        <div className="flex justify-between">
+        <div className="flex justify-between gap-4">
           <span className="text-slate-400">vs promedio</span>
-          <span className={`font-bold ${pctVsAvg >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
-            {pctVsAvg >= 0 ? '+' : ''}{pctVsAvg.toFixed(1)}%
-          </span>
+          <span className={`font-bold ${pctAvg >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>{pctAvg >= 0 ? '+' : ''}{pctAvg.toFixed(1)}%</span>
         </div>
-        <div className="flex justify-between">
-          <span className="text-slate-400">% del día</span>
-          <span className="font-bold text-slate-700">{pctOfDay.toFixed(1)}%</span>
+        <div className="flex justify-between gap-4">
+          <span className="text-slate-400">del día</span>
+          <span className="font-bold text-slate-700">{pctDay.toFixed(1)}%</span>
         </div>
       </div>
     </div>
   );
 };
 
-// Tooltip línea comparativa
-const LineTooltip = ({ active, payload, label }) => {
+const LineTip = ({ active, payload, label, prevName }) => {
   if (!active || !payload?.length) return null;
   const curr = payload.find(p => p.dataKey === 'current')?.value;
   const prev = payload.find(p => p.dataKey === 'previous')?.value;
   const diff = (curr != null && prev != null && prev > 0) ? ((curr - prev) / prev * 100) : null;
   return (
-    <div className="bg-white border border-pink-100 shadow-2xl px-4 py-3 rounded-2xl text-xs min-w-[200px]">
-      <p className="font-bold text-slate-500 mb-2 uppercase tracking-wider">{label}</p>
-      {curr != null && (
-        <div className="flex items-center justify-between mb-1">
-          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-pink-500 inline-block" /> Actual</span>
-          <span className="font-black text-slate-900">{curr.toLocaleString('es-CO')}</span>
-        </div>
-      )}
-      {prev != null && (
-        <div className="flex items-center justify-between mb-1">
-          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-slate-300 inline-block" /> Anterior</span>
-          <span className="font-black text-slate-500">{prev.toLocaleString('es-CO')}</span>
-        </div>
-      )}
-      {diff != null && (
-        <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between">
-          <span className="text-slate-400">Variación</span>
-          <span className={`font-black text-base ${diff >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
-            {diff >= 0 ? '+' : ''}{diff.toFixed(1)}%
-          </span>
-        </div>
-      )}
+    <div className="bg-white border border-pink-100 shadow-xl px-4 py-3 rounded-2xl text-xs min-w-[190px]">
+      <p className="font-bold text-slate-400 mb-2 uppercase tracking-wider">{label}</p>
+      {curr != null && <div className="flex justify-between mb-1"><span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full inline-block" style={{ background: MAGENTA }} />Actual</span><span className="font-black text-slate-900">{curr.toLocaleString('es-CO')}</span></div>}
+      {prev != null && <div className="flex justify-between mb-1"><span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-slate-300 inline-block" />{prevName || 'Anterior'}</span><span className="font-black text-slate-500">{prev.toLocaleString('es-CO')}</span></div>}
+      {diff != null && <div className="mt-2 pt-2 border-t border-slate-100 flex justify-between"><span className="text-slate-400">Variación</span><span className={`font-black ${diff >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>{diff >= 0 ? '+' : ''}{diff.toFixed(1)}%</span></div>}
     </div>
   );
 };
 
-// Tooltip tendencia mensual
-const TrendTooltip = ({ active, payload, label }) => {
+const TrendTip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
-  const txn = payload.find(p => p.dataKey === 'total')?.value;
+  const val = payload.find(p => p.dataKey === 'total')?.value || 0;
   return (
-    <div className="bg-white border border-pink-100 shadow-2xl px-4 py-3 rounded-2xl text-xs min-w-[160px]">
-      <p className="font-bold text-slate-500 mb-1 uppercase tracking-wider">{label}</p>
-      <p className="text-xl font-black text-slate-900">{(txn || 0).toLocaleString('es-CO')}</p>
-      <p className="text-xs text-slate-400">transacciones totales</p>
+    <div className="bg-white border border-pink-100 shadow-xl px-4 py-3 rounded-2xl text-xs min-w-[150px]">
+      <p className="font-bold text-slate-400 mb-1 uppercase tracking-wider">{label}</p>
+      <p className="text-xl font-black text-slate-900">{val.toLocaleString('es-CO')}</p>
+      <p className="text-slate-400">transacciones</p>
     </div>
   );
 };
 
-// KPI Card con comparativo
-function KPICard({ label, value, sub, icon: Icon, delta, deltaLabel, accentColor, delay = 0 }) {
-  const isPositive = delta >= 0;
-  const hasDelta = delta != null;
+// ── Modal de detalle de KPI ───────────────────────────────────────────────────
+
+function KPIModal({ card, onClose, hourValues, prevValues, trendData, mean, sd, total, prevTotal, totalGrowth, prevName, lineData }) {
+  const palette = card.palette;
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, ease: 'easeOut' }}
-      className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all"
-    >
-      <div className="flex items-start justify-between mb-3">
-        <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: `${accentColor}18` }}>
-          <Icon className="w-4 h-4" style={{ color: accentColor }} />
-        </div>
-        {hasDelta && (
-          <div className={`flex items-center gap-0.5 text-xs font-bold px-2 py-1 rounded-full ${
-            isPositive ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'
-          }`}>
-            {isPositive ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-            {Math.abs(delta).toFixed(1)}%
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+        className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
+        onClick={onClose}
+      >
+        <motion.div
+          initial={{ y: 60, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 60, opacity: 0 }}
+          transition={{ type: 'spring', damping: 26, stiffness: 300 }}
+          onClick={e => e.stopPropagation()}
+          className="bg-white w-full sm:max-w-2xl rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto"
+        >
+          {/* Header del modal */}
+          <div className="px-6 pt-6 pb-4 flex items-start justify-between" style={{ background: palette.bg, borderBottom: `1px solid ${palette.border}` }}>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ background: palette.border + '60' }}>
+                <card.icon className="w-5 h-5" style={{ color: palette.icon }} />
+              </div>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-widest" style={{ color: palette.sub }}>{card.label}</p>
+                <p className="text-2xl font-black" style={{ color: palette.text }}>{card.value}</p>
+              </div>
+            </div>
+            <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/60 flex items-center justify-center hover:bg-white transition-all">
+              <X className="w-4 h-4 text-slate-500" />
+            </button>
           </div>
-        )}
-      </div>
-      <p className="text-xs text-slate-400 font-medium uppercase tracking-wider mb-1">{label}</p>
-      <p className="text-2xl font-black text-slate-900">{value}</p>
-      <p className="text-xs text-slate-400 mt-1">{sub}</p>
-      {hasDelta && (
-        <p className="text-[10px] text-slate-400 mt-1">{deltaLabel}</p>
-      )}
-    </motion.div>
+
+          <div className="p-6 space-y-5">
+            {/* Comparativo vs anterior */}
+            {card.delta != null && (
+              <div className="flex items-center gap-3 p-4 rounded-2xl" style={{ background: card.delta >= 0 ? '#ecfdf5' : '#fef2f2', border: `1px solid ${card.delta >= 0 ? '#6ee7b7' : '#fca5a5'}` }}>
+                {card.delta >= 0 ? <ArrowUpRight className="w-5 h-5 text-emerald-600 flex-shrink-0" /> : <ArrowDownRight className="w-5 h-5 text-red-500 flex-shrink-0" />}
+                <div>
+                  <p className={`font-black text-lg ${card.delta >= 0 ? 'text-emerald-700' : 'text-red-600'}`}>
+                    {card.delta >= 0 ? '+' : ''}{card.delta.toFixed(1)}% vs {prevName}
+                  </p>
+                  <p className={`text-xs ${card.delta >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+                    {card.deltaAbs && `${card.delta >= 0 ? '+' : ''}${card.deltaAbs.toLocaleString('es-CO')} transacciones`}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Gráfica específica por tipo de card */}
+            {card.chartType === 'hourly' && (
+              <div>
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Distribución Horaria</p>
+                <ResponsiveContainer width="100%" height={220}>
+                  <BarChart data={HOURS.map((h, i) => ({ hour: HOUR_LABELS[i], val: hourValues[i], color: getBarColor(hourValues[i], mean, sd) }))} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                    <XAxis dataKey="hour" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                    <ReferenceLine y={mean} stroke={MAGENTA_LIGHT} strokeDasharray="5 3" />
+                    <Bar dataKey="val" radius={[4, 4, 0, 0]} maxBarSize={36}>{HOURS.map((h, i) => <Cell key={i} fill={getBarColor(hourValues[i], mean, sd)} />)}</Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+
+            {card.chartType === 'compare' && lineData && (
+              <div>
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Comparativo hora a hora</p>
+                <ResponsiveContainer width="100%" height={220}>
+                  <ComposedChart data={lineData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="modalGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor={MAGENTA} stopOpacity={0.12} />
+                        <stop offset="95%" stopColor={MAGENTA} stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                    <XAxis dataKey="hour" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                    <Tooltip content={(p) => <LineTip {...p} prevName={prevName} />} />
+                    <Area type="monotone" dataKey="current" fill="url(#modalGrad)" stroke="none" />
+                    <Line type="monotone" dataKey="current" name="Actual" stroke={MAGENTA} strokeWidth={2.5} dot={false} />
+                    <Line type="monotone" dataKey="previous" name={prevName} stroke="#cbd5e1" strokeWidth={2} strokeDasharray="5 3" dot={false} />
+                  </ComposedChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+
+            {card.chartType === 'trend' && trendData && trendData.length >= 2 && (
+              <div>
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Evolución mensual</p>
+                <ResponsiveContainer width="100%" height={200}>
+                  <AreaChart data={trendData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="modalTrend" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor={palette.icon} stopOpacity={0.2} />
+                        <stop offset="95%" stopColor={palette.icon} stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                    <XAxis dataKey="label" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                    <Tooltip content={<TrendTip />} />
+                    <Area type="monotone" dataKey="total" stroke={palette.icon} strokeWidth={2.5} fill="url(#modalTrend)" dot={{ r: 3, fill: palette.icon, stroke: '#fff', strokeWidth: 1.5 }} />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+
+            {card.chartType === 'cv' && (
+              <div>
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Dispersión por hora</p>
+                <ResponsiveContainer width="100%" height={200}>
+                  <BarChart data={HOURS.map((h, i) => ({ hour: HOUR_LABELS[i], val: hourValues[i] }))} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                    <XAxis dataKey="hour" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                    <ReferenceLine y={mean} stroke={MAGENTA} strokeDasharray="5 3" label={{ value: 'μ', position: 'right', fontSize: 10, fill: MAGENTA }} />
+                    <Bar dataKey="val" fill={palette.border} radius={[3, 3, 0, 0]} maxBarSize={36} />
+                  </BarChart>
+                </ResponsiveContainer>
+                <p className="text-xs text-slate-500 mt-2">Línea = promedio ({mean.toFixed(0)} txn/h). CV = {(sd/mean*100).toFixed(1)}%</p>
+              </div>
+            )}
+
+            {/* Insight contextual */}
+            {card.insight && (
+              <div className="rounded-xl p-4" style={{ background: palette.bg, border: `1px solid ${palette.border}` }}>
+                <p className="text-xs font-black uppercase tracking-wider mb-1" style={{ color: palette.sub }}>Interpretación</p>
+                <p className="text-sm leading-relaxed" style={{ color: palette.text }} dangerouslySetInnerHTML={{ __html: card.insight }} />
+              </div>
+            )}
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
   );
 }
 
-// Insight card estructurado
-function InsightCard({ title, body, status, delay }) {
-  const styles = {
-    good: { border: 'border-emerald-200', bg: 'bg-emerald-50', icon: '✅', titleColor: 'text-emerald-800', bodyColor: 'text-emerald-700' },
-    warn: { border: 'border-amber-200', bg: 'bg-amber-50', icon: '⚠️', titleColor: 'text-amber-800', bodyColor: 'text-amber-700' },
-    alert: { border: 'border-red-200', bg: 'bg-red-50', icon: '🔴', titleColor: 'text-red-800', bodyColor: 'text-red-700' },
-    info: { border: 'border-pink-200', bg: 'bg-pink-50', icon: '📊', titleColor: 'text-pink-800', bodyColor: 'text-pink-700' },
-  }[status] || { border: 'border-slate-200', bg: 'bg-slate-50', icon: '📌', titleColor: 'text-slate-800', bodyColor: 'text-slate-600' };
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay }}
-      className={`border rounded-xl p-4 ${styles.border} ${styles.bg}`}
-    >
-      <p className={`text-xs font-black uppercase tracking-wider mb-1 flex items-center gap-1.5 ${styles.titleColor}`}>
-        <span>{styles.icon}</span> {title}
-      </p>
-      <p className={`text-sm leading-relaxed ${styles.bodyColor}`} dangerouslySetInnerHTML={{ __html: body }} />
-    </motion.div>
-  );
-}
+// ── Componente principal ──────────────────────────────────────────────────────
 
 export default function StoreHourlyView({ storeCode, storeName, allRecords, onBack }) {
   const availableMonths = useMemo(() => {
@@ -188,28 +257,23 @@ export default function StoreHourlyView({ storeCode, storeName, allRecords, onBa
   const [selectedPeriod, setSelectedPeriod] = useState(availableMonths[0] || null);
   const [compareMode, setCompareMode] = useState(false);
   const [comparePeriod, setComparePeriod] = useState(null);
+  const [activeCard, setActiveCard] = useState(null);
   const [sortKey, setSortKey] = useState('transactions');
   const [sortDir, setSortDir] = useState('desc');
 
   useEffect(() => {
-    if (availableMonths.length > 0 && !selectedPeriod) {
-      setSelectedPeriod(availableMonths[0]);
-    }
+    if (availableMonths.length > 0 && !selectedPeriod) setSelectedPeriod(availableMonths[0]);
   }, [availableMonths]);
 
-  // Inicializar comparePeriod en el segundo mes disponible
   useEffect(() => {
-    if (availableMonths.length > 1 && !comparePeriod) {
-      setComparePeriod(availableMonths[1]);
-    }
+    if (availableMonths.length > 1 && !comparePeriod) setComparePeriod(availableMonths[1]);
   }, [availableMonths]);
 
-  const currentRecord = useMemo(() => {
-    if (!selectedPeriod) return null;
-    return allRecords.find(r => Math.round(r.month) === selectedPeriod.month && Math.round(r.year) === selectedPeriod.year) || null;
-  }, [allRecords, selectedPeriod]);
+  const currentRecord = useMemo(() =>
+    !selectedPeriod ? null :
+    allRecords.find(r => Math.round(r.month) === selectedPeriod.month && Math.round(r.year) === selectedPeriod.year) || null,
+    [allRecords, selectedPeriod]);
 
-  // Mes anterior automático
   const autoPrevRecord = useMemo(() => {
     if (!selectedPeriod) return null;
     let pm = selectedPeriod.month - 1; let py = selectedPeriod.year;
@@ -217,17 +281,16 @@ export default function StoreHourlyView({ storeCode, storeName, allRecords, onBa
     return allRecords.find(r => Math.round(r.month) === pm && Math.round(r.year) === py) || null;
   }, [allRecords, selectedPeriod]);
 
-  // Mes comparado (modo manual)
-  const compareRecord = useMemo(() => {
-    if (!comparePeriod) return null;
-    return allRecords.find(r => Math.round(r.month) === comparePeriod.month && Math.round(r.year) === comparePeriod.year) || null;
-  }, [allRecords, comparePeriod]);
+  const compareRecord = useMemo(() =>
+    !comparePeriod ? null :
+    allRecords.find(r => Math.round(r.month) === comparePeriod.month && Math.round(r.year) === comparePeriod.year) || null,
+    [allRecords, comparePeriod]);
 
   const prevRecord = compareMode ? compareRecord : autoPrevRecord;
+  const prevName = prevRecord ? `${MONTHS_SHORT[(prevRecord.month || 1) - 1]} ${prevRecord.year}` : 'Mes ant.';
 
   const hourValues = useMemo(() => getHourValues(currentRecord), [currentRecord]);
   const prevValues = useMemo(() => getHourValues(prevRecord), [prevRecord]);
-
   const activeHours = useMemo(() => hourValues.filter(v => v > 0), [hourValues]);
   const mean = useMemo(() => activeHours.length ? activeHours.reduce((s, v) => s + v, 0) / activeHours.length : 0, [activeHours]);
   const sd = useMemo(() => stdDev(activeHours), [activeHours]);
@@ -238,7 +301,7 @@ export default function StoreHourlyView({ storeCode, storeName, allRecords, onBa
   const peakHour = useMemo(() => {
     const max = Math.max(...hourValues);
     const idx = hourValues.indexOf(max);
-    return { value: max, label: HOUR_LABELS[idx], hour: HOURS[idx] };
+    return { value: max, label: HOUR_LABELS[idx] };
   }, [hourValues]);
 
   const valleyHour = useMemo(() => {
@@ -252,7 +315,6 @@ export default function StoreHourlyView({ storeCode, storeName, allRecords, onBa
   const cv = useMemo(() => mean > 0 ? (sd / mean * 100) : 0, [sd, mean]);
   const peakConcentration = useMemo(() => total > 0 ? (peakHour.value / total * 100) : 0, [peakHour, total]);
 
-  // Bloque de 3 horas con mayor concentración
   const peakBlock = useMemo(() => {
     let maxSum = 0; let maxStart = 0;
     for (let s = 0; s <= HOURS.length - 3; s++) {
@@ -262,32 +324,19 @@ export default function StoreHourlyView({ storeCode, storeName, allRecords, onBa
     return { sum: maxSum, label1: HOUR_LABELS[maxStart], label2: HOUR_LABELS[maxStart + 2], pct: total > 0 ? (maxSum / total * 100) : 0 };
   }, [hourValues, total]);
 
-  // Comparativo por hora
-  const hourDiffs = useMemo(() => {
-    return HOURS.map((h, i) => ({
-      hour: HOUR_LABELS[i],
-      diff: (prevValues[i] > 0 && hourValues[i] > 0) ? ((hourValues[i] - prevValues[i]) / prevValues[i] * 100) : null,
-    })).filter(x => x.diff !== null);
-  }, [hourValues, prevValues]);
+  const prevMean = useMemo(() => {
+    const ph = prevValues.filter(v => v > 0);
+    return ph.length ? ph.reduce((s, v) => s + v, 0) / ph.length : 0;
+  }, [prevValues]);
 
-  // Tendencia histórica de todos los meses
-  const trendData = useMemo(() => {
-    return [...availableMonths]
+  const trendData = useMemo(() =>
+    [...availableMonths]
       .sort((a, b) => a.year - b.year || a.month - b.month)
       .map(p => {
         const rec = allRecords.find(r => Math.round(r.month) === p.month && Math.round(r.year) === p.year);
-        const t = rec ? HOURS.reduce((s, h) => s + Math.max(0, rec[`hour_${h}`] || 0), 0) : 0;
-        return { label: `${MONTHS_SHORT[p.month - 1]} ${p.year}`, total: t, month: p.month, year: p.year };
-      });
-  }, [availableMonths, allRecords]);
-
-  // Datos gráficas
-  const barData = HOURS.map((h, i) => ({
-    hour: HOUR_LABELS[i],
-    transactions: hourValues[i],
-    prev: prevValues[i] || 0,
-    color: getBarColor(hourValues[i], mean, sd),
-  }));
+        return { label: `${MONTHS_SHORT[p.month - 1]} ${p.year}`, total: rec ? HOURS.reduce((s, h) => s + Math.max(0, rec[`hour_${h}`] || 0), 0) : 0, month: p.month, year: p.year };
+      }),
+    [availableMonths, allRecords]);
 
   const lineData = HOURS.map((h, i) => ({
     hour: HOUR_LABELS[i],
@@ -296,160 +345,130 @@ export default function StoreHourlyView({ storeCode, storeName, allRecords, onBa
     diff: (prevValues[i] > 0 && hourValues[i] > 0) ? ((hourValues[i] - prevValues[i]) / prevValues[i] * 100) : null,
   }));
 
-  // Ranking table
+  const barData = HOURS.map((h, i) => ({
+    hour: HOUR_LABELS[i],
+    transactions: hourValues[i],
+    color: getBarColor(hourValues[i], mean, sd),
+  }));
+
+  // Ranking
   const rankingData = useMemo(() => HOURS.map((h, i) => ({
     hour: HOUR_LABELS[i],
     transactions: hourValues[i],
     pctTotal: total > 0 ? (hourValues[i] / total * 100) : 0,
     vsPrev: (prevValues[i] > 0 && hourValues[i] > 0) ? ((hourValues[i] - prevValues[i]) / prevValues[i] * 100) : null,
-    color: getBarColor(hourValues[i], mean, sd),
     label: getLabel(hourValues[i], mean, sd),
   })), [hourValues, prevValues, total, mean, sd]);
 
-  const sortedRanking = useMemo(() => {
-    return [...rankingData].sort((a, b) => {
-      let va = sortKey === 'vsPrev' ? (a.vsPrev ?? -Infinity) : a[sortKey];
-      let vb = sortKey === 'vsPrev' ? (b.vsPrev ?? -Infinity) : b[sortKey];
-      return sortDir === 'desc' ? vb - va : va - vb;
-    });
-  }, [rankingData, sortKey, sortDir]);
+  const sortedRanking = useMemo(() => [...rankingData].sort((a, b) => {
+    const va = sortKey === 'vsPrev' ? (a.vsPrev ?? -Infinity) : a[sortKey];
+    const vb = sortKey === 'vsPrev' ? (b.vsPrev ?? -Infinity) : b[sortKey];
+    return sortDir === 'desc' ? vb - va : va - vb;
+  }), [rankingData, sortKey, sortDir]);
 
-  // Insights económicos estructurados
-  const insights = useMemo(() => {
+  // Definición de las 4 tarjetas KPI
+  const kpiCards = useMemo(() => {
     if (!currentRecord) return [];
-    const items = [];
-    const prevName = prevRecord ? `${MONTHS[(prevRecord.month || 1) - 1]} ${prevRecord.year}` : 'mes anterior';
-    const currName = `${MONTHS[(currentRecord.month || 1) - 1]} ${currentRecord.year}`;
-
-    // 1. Volumen total y tendencia
-    if (totalGrowth !== null) {
-      const dir = totalGrowth >= 0 ? 'expansión' : 'contracción';
-      items.push({
-        title: 'Variación de Demanda',
-        body: `La tienda registró <strong>${total.toLocaleString('es-CO')} transacciones</strong> en ${currName}, frente a <strong>${prevTotal.toLocaleString('es-CO')}</strong> en ${prevName}. Esto representa una <strong>${dir} del ${Math.abs(totalGrowth).toFixed(1)}%</strong> en el volumen de clientes atendidos.`,
-        status: totalGrowth >= 5 ? 'good' : totalGrowth >= 0 ? 'info' : totalGrowth >= -10 ? 'warn' : 'alert',
-      });
-    }
-
-    // 2. Concentración horaria
-    items.push({
-      title: 'Ventana de Mayor Productividad',
-      body: `El bloque <strong>${peakBlock.label1} – ${peakBlock.label2}</strong> concentra el <strong>${peakBlock.pct.toFixed(1)}%</strong> del total de transacciones diarias (${peakBlock.sum.toLocaleString('es-CO')} txn). La asignación óptima del equipo en este intervalo tiene un impacto directo sobre el volumen de ventas.`,
-      status: peakBlock.pct > 60 ? 'warn' : 'info',
-    });
-
-    // 3. Hora pico y valle
-    items.push({
-      title: 'Eficiencia Horaria',
-      body: `La hora de máxima demanda es <strong>${peakHour.label}</strong> con <strong>${peakHour.value.toLocaleString('es-CO')} txn</strong> (${peakConcentration.toFixed(1)}% del día). En contraste, <strong>${valleyHour.label}</strong> es el momento de menor tráfico (${valleyHour.value.toLocaleString('es-CO')} txn) — idóneo para recepción de mercancía, capacitaciones o limpieza profunda sin afectar la experiencia del cliente.`,
-      status: 'info',
-    });
-
-    // 4. Coeficiente de variación
-    if (cv > 45) {
-      items.push({
-        title: 'Riesgo Operacional: Alta Concentración',
-        body: `El coeficiente de variación de <strong>${cv.toFixed(1)}%</strong> indica que la demanda está fuertemente concentrada en pocas horas. Esto eleva el riesgo de cuellos de botella, tiempos de espera prolongados y pérdida de ventas por capacidad insuficiente en horas pico.`,
-        status: 'alert',
-      });
-    } else if (cv > 28) {
-      items.push({
-        title: 'Distribución Moderada de Tráfico',
-        body: `Con un CV de <strong>${cv.toFixed(1)}%</strong>, la distribución de clientes presenta variabilidad moderada. Se recomienda un modelo de staffing dinámico que refuerce las horas pico sin sobredimensionar las horas valle, optimizando el costo de personal.`,
-        status: 'warn',
-      });
-    } else {
-      items.push({
-        title: 'Flujo de Clientes Estable',
-        body: `El CV de <strong>${cv.toFixed(1)}%</strong> evidencia una distribución de tráfico consistente a lo largo del día. Este patrón facilita la planificación operativa, el control de costos y la estandarización de la experiencia del cliente.`,
-        status: 'good',
-      });
-    }
-
-    // 5. Mejores y peores horas vs anterior
-    if (hourDiffs.length > 0) {
-      const best = [...hourDiffs].sort((a, b) => b.diff - a.diff)[0];
-      const worst = [...hourDiffs].sort((a, b) => a.diff - b.diff)[0];
-      if (best && worst && best.hour !== worst.hour) {
-        items.push({
-          title: 'Análisis de Variación Horaria',
-          body: `El mayor crecimiento se registró en <strong>${best.hour}</strong> (+${best.diff.toFixed(1)}% vs ${prevName}), mientras que la mayor caída ocurrió en <strong>${worst.hour}</strong> (${worst.diff.toFixed(1)}%). ${worst.diff < -20 ? 'Esta caída supera el umbral crítico del 20% y requiere revisión de causas operativas o de disponibilidad.' : 'La variación está dentro de rangos gestionables.'}`,
-          status: worst.diff < -20 ? 'alert' : worst.diff < -10 ? 'warn' : 'info',
-        });
-      }
-
-      // Horas con caída >15%
-      const bigDrops = hourDiffs.filter(x => x.diff < -15);
-      if (bigDrops.length > 0) {
-        items.push({
-          title: `${bigDrops.length} Hora${bigDrops.length > 1 ? 's' : ''} con Caída Significativa`,
-          body: `Las franjas <strong>${bigDrops.map(d => d.hour).join(', ')}</strong> registraron decrecimientos superiores al 15% vs ${prevName}. Se recomienda revisar factores de afluencia en estas ventanas: competencia local, condiciones climáticas, eventos externos o problemas de servicio.`,
-          status: 'alert',
-        });
-      }
-    }
-
-    return items;
-  }, [currentRecord, prevRecord, hourValues, prevValues, total, prevTotal, totalGrowth, peakHour, valleyHour, cv, peakBlock, peakConcentration, hourDiffs]);
+    return [
+      {
+        id: 'total',
+        label: 'Transacciones del Mes',
+        value: total.toLocaleString('es-CO'),
+        sub: `${prevRecord ? (totalGrowth >= 0 ? '▲' : '▼') + ' ' + Math.abs(totalGrowth).toFixed(1) + '% vs ' + prevName : 'Sin comparativo'}`,
+        icon: Activity,
+        palette: CARD_PALETTES[0],
+        delta: totalGrowth,
+        deltaAbs: prevRecord ? total - prevTotal : null,
+        deltaLabel: prevRecord ? `vs ${prevName}` : null,
+        chartType: 'hourly',
+        insight: `La tienda procesó <strong>${total.toLocaleString('es-CO')} transacciones</strong> en el período seleccionado.${totalGrowth !== null ? ` Respecto a ${prevName}, el volumen ${totalGrowth >= 0 ? 'creció' : 'cayó'} un <strong>${Math.abs(totalGrowth).toFixed(1)}%</strong> (${(totalGrowth >= 0 ? '+' : '') + (total - prevTotal).toLocaleString('es-CO')} txn).` : ''}`,
+      },
+      {
+        id: 'peak',
+        label: 'Hora Pico · Valle',
+        value: `${peakHour.label} / ${valleyHour.label}`,
+        sub: `Pico: ${peakHour.value.toLocaleString('es-CO')} txn (${peakConcentration.toFixed(1)}% del día)`,
+        icon: TrendingUp,
+        palette: CARD_PALETTES[1],
+        delta: prevRecord ? (() => { const pi = hourValues.indexOf(peakHour.value); const pv = prevValues[pi]; return pv > 0 ? (peakHour.value - pv) / pv * 100 : null; })() : null,
+        deltaLabel: prevRecord ? `hora pico vs ${prevName}` : null,
+        chartType: 'compare',
+        insight: `La franja de mayor demanda es <strong>${peakHour.label}</strong> con <strong>${peakHour.value.toLocaleString('es-CO')} txn</strong>, representando el ${peakConcentration.toFixed(1)}% del día. El bloque <strong>${peakBlock.label1}–${peakBlock.label2}</strong> acumula el ${peakBlock.pct.toFixed(1)}% del tráfico total — reforzar el equipo en ese intervalo maximiza el throughput de ventas.`,
+      },
+      {
+        id: 'avg',
+        label: 'Promedio / Hora',
+        value: `${mean.toFixed(0)} txn/h`,
+        sub: `${prevRecord && prevMean > 0 ? (mean >= prevMean ? '▲' : '▼') + ' ' + Math.abs(((mean - prevMean) / prevMean) * 100).toFixed(1) + '% vs ' + prevName : 'Sin comparativo'}`,
+        icon: BarChart3,
+        palette: CARD_PALETTES[4],
+        delta: prevRecord && prevMean > 0 ? (mean - prevMean) / prevMean * 100 : null,
+        deltaLabel: prevRecord ? `vs ${prevName}` : null,
+        chartType: 'cv',
+        insight: `La tienda promedió <strong>${mean.toFixed(1)} transacciones por hora activa</strong>.${prevRecord && prevMean > 0 ? ` Frente a ${prevName} (${prevMean.toFixed(1)} txn/h), la productividad horaria ${mean >= prevMean ? 'mejoró' : 'disminuyó'} un <strong>${Math.abs(((mean - prevMean) / prevMean) * 100).toFixed(1)}%</strong>.` : ''} El coeficiente de variación de <strong>${cv.toFixed(1)}%</strong> indica una distribución ${cv > 45 ? 'muy concentrada — riesgo de cuellos de botella' : cv > 28 ? 'moderada — staffing dinámico recomendado' : 'uniforme — operación estable'}.`,
+      },
+      {
+        id: 'trend',
+        label: 'Tendencia Histórica',
+        value: trendData.length >= 2 ? (() => { const f = trendData[0].total; const l = trendData[trendData.length - 1].total; return f > 0 ? `${((l - f) / f * 100) >= 0 ? '+' : ''}${((l - f) / f * 100).toFixed(1)}%` : '—'; })() : '—',
+        sub: `${trendData.length} meses · promedio ${trendData.length ? Math.round(trendData.map(d => d.total).filter(v => v > 0).reduce((s, v) => s + v, 0) / trendData.filter(d => d.total > 0).length).toLocaleString('es-CO') : 0} txn/mes`,
+        icon: TrendingUp,
+        palette: CARD_PALETTES[3],
+        delta: trendData.length >= 2 ? (() => { const f = trendData[0].total; const l = trendData[trendData.length - 1].total; return f > 0 ? (l - f) / f * 100 : null; })() : null,
+        deltaLabel: trendData.length >= 2 ? `${trendData[0].label} → ${trendData[trendData.length - 1].label}` : null,
+        chartType: 'trend',
+        insight: (() => {
+          if (trendData.length < 2) return 'Insuficientes datos para análisis de tendencia.';
+          const vals = trendData.map(d => d.total).filter(v => v > 0);
+          const avg = vals.reduce((s, v) => s + v, 0) / vals.length;
+          const last = vals[vals.length - 1];
+          const g = (trendData[trendData.length - 1].total - trendData[0].total) / trendData[0].total * 100;
+          return `A lo largo de <strong>${trendData.length} meses</strong>, la tienda promedió <strong>${Math.round(avg).toLocaleString('es-CO')} txn/mes</strong>. El mes más reciente registra <strong>${last.toLocaleString('es-CO')} txn</strong>, que es <strong>${last >= avg ? 'superior' : 'inferior'} al promedio histórico</strong>. La variación acumulada del período es <strong>${g >= 0 ? '+' : ''}${g.toFixed(1)}%</strong>.`;
+        })(),
+      },
+    ];
+  }, [currentRecord, total, prevTotal, totalGrowth, peakHour, valleyHour, mean, prevMean, cv, sd, peakBlock, peakConcentration, hourValues, prevValues, trendData, prevRecord, prevName]);
 
   const handleSort = (key) => {
     if (sortKey === key) setSortDir(d => d === 'desc' ? 'asc' : 'desc');
     else { setSortKey(key); setSortDir('desc'); }
   };
 
-  const SortIcon = ({ k }) => {
-    if (sortKey !== k) return <Minus className="w-3 h-3 text-slate-300" />;
-    return sortDir === 'desc' ? <ChevronDown className="w-3 h-3" style={{ color: MAGENTA }} /> : <ChevronUp className="w-3 h-3" style={{ color: MAGENTA }} />;
-  };
-
   if (!currentRecord) {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-8">
         <BarChart3 className="w-16 h-16 text-slate-200 mb-4" />
-        <p className="text-slate-500 font-semibold">Sin datos disponibles para esta tienda</p>
+        <p className="text-slate-500 font-semibold">Sin datos para esta tienda</p>
         <button onClick={onBack} className="mt-6 px-6 py-2.5 rounded-xl text-white text-sm font-bold" style={{ background: MAGENTA }}>Volver</button>
       </div>
     );
   }
 
-  const prevName = prevRecord
-    ? `${MONTHS[(prevRecord.month || 1) - 1]} ${prevRecord.year}`
-    : compareMode ? 'Período seleccionado' : 'Mes anterior';
+  const activeCardData = activeCard ? kpiCards.find(c => c.id === activeCard) : null;
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Header */}
+
+      {/* Header limpio */}
       <div className="bg-white border-b border-slate-100 shadow-sm sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between gap-3 flex-wrap">
+        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <button onClick={onBack} className="w-9 h-9 bg-slate-100 hover:bg-slate-200 rounded-xl flex items-center justify-center transition-all">
               <ArrowLeft className="w-4 h-4 text-slate-700" />
             </button>
             <div>
-              <h1 className="text-lg font-black text-slate-900">{storeCode}</h1>
-              <p className="text-xs text-slate-400 truncate max-w-[220px]">{storeName}</p>
+              <h1 className="font-black text-slate-900">{storeCode}</h1>
+              <p className="text-xs text-slate-400 truncate max-w-[200px]">{storeName}</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 flex-wrap">
-            {/* Botón Comparativo */}
-            <button
-              onClick={() => setCompareMode(m => !m)}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border-2 transition-all ${
-                compareMode ? 'text-white border-transparent' : 'border-pink-200 text-pink-600 bg-pink-50 hover:bg-pink-100'
-              }`}
-              style={compareMode ? { background: MAGENTA, borderColor: MAGENTA } : {}}
-            >
-              <GitCompare className="w-3.5 h-3.5" />
-              Comparar meses
-            </button>
-
-            {/* Selector período actual */}
+          <div className="flex items-center gap-2">
+            {/* Período actual */}
             <select
               value={selectedPeriod ? `${selectedPeriod.year}-${selectedPeriod.month}` : ''}
               onChange={e => { const [y, m] = e.target.value.split('-'); setSelectedPeriod({ year: parseInt(y), month: parseInt(m) }); }}
-              className="border-2 border-slate-200 rounded-xl px-3 py-2 text-sm font-bold focus:outline-none bg-white text-slate-900"
-              style={{ borderColor: MAGENTA + '44' }}
+              className="border-2 rounded-xl px-3 py-2 text-sm font-bold focus:outline-none bg-white text-slate-900"
+              style={{ borderColor: MAGENTA + '55' }}
             >
               {availableMonths.map(p => (
                 <option key={`${p.year}-${p.month}`} value={`${p.year}-${p.month}`}>
@@ -458,18 +477,28 @@ export default function StoreHourlyView({ storeCode, storeName, allRecords, onBa
               ))}
             </select>
 
-            {/* Selector período comparado (solo en modo comparar) */}
+            {/* Botón comparar */}
+            <button
+              onClick={() => setCompareMode(m => !m)}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all border-2"
+              style={compareMode
+                ? { background: MAGENTA, color: '#fff', borderColor: MAGENTA }
+                : { borderColor: MAGENTA + '44', color: MAGENTA, background: MAGENTA_PALE }}
+            >
+              <GitCompare className="w-3.5 h-3.5" />
+              {compareMode ? 'Comparando' : 'Comparar'}
+            </button>
+
+            {/* Selector de comparación */}
             {compareMode && availableMonths.length > 1 && (
               <select
                 value={comparePeriod ? `${comparePeriod.year}-${comparePeriod.month}` : ''}
                 onChange={e => { const [y, m] = e.target.value.split('-'); setComparePeriod({ year: parseInt(y), month: parseInt(m) }); }}
-                className="border-2 rounded-xl px-3 py-2 text-sm font-bold focus:outline-none bg-white text-pink-700"
-                style={{ borderColor: MAGENTA }}
+                className="border-2 rounded-xl px-3 py-2 text-sm font-bold focus:outline-none bg-white"
+                style={{ borderColor: MAGENTA, color: MAGENTA_DARK }}
               >
                 {availableMonths.filter(p => !(p.year === selectedPeriod?.year && p.month === selectedPeriod?.month)).map(p => (
-                  <option key={`${p.year}-${p.month}`} value={`${p.year}-${p.month}`}>
-                    {MONTHS[p.month - 1]} {p.year}
-                  </option>
+                  <option key={`${p.year}-${p.month}`} value={`${p.year}-${p.month}`}>{MONTHS[p.month - 1]} {p.year}</option>
                 ))}
               </select>
             )}
@@ -477,165 +506,134 @@ export default function StoreHourlyView({ storeCode, storeName, allRecords, onBa
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
+      <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
 
-        {/* KPI Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-          <KPICard
-            label="Transacciones Mes"
-            value={total.toLocaleString('es-CO')}
-            sub={`${MONTHS[(currentRecord.month || 1) - 1]} ${currentRecord.year}`}
-            icon={Activity}
-            delta={totalGrowth}
-            deltaLabel={prevRecord ? `vs ${prevName}` : null}
-            accentColor={MAGENTA}
-            delay={0}
-          />
-          <KPICard
-            label="Hora Pico"
-            value={peakHour.label}
-            sub={`${peakHour.value.toLocaleString('es-CO')} txn · ${peakConcentration.toFixed(1)}% del día`}
-            icon={TrendingUp}
-            delta={prevRecord ? ((peakHour.value - (prevValues[hourValues.indexOf(peakHour.value)] || 0)) / Math.max(1, prevValues[hourValues.indexOf(peakHour.value)]) * 100) : null}
-            deltaLabel="vs mes anterior"
-            accentColor="#10b981"
-            delay={0.05}
-          />
-          <KPICard
-            label="Hora Valle"
-            value={valleyHour.label}
-            sub={`${valleyHour.value.toLocaleString('es-CO')} txn · menor tráfico`}
-            icon={TrendingDown}
-            delta={null}
-            accentColor="#ef4444"
-            delay={0.1}
-          />
-          <KPICard
-            label="Promedio por Hora"
-            value={mean.toFixed(0)}
-            sub="transacciones/hora activa"
-            icon={BarChart3}
-            delta={prevRecord ? (() => { const pm = getHourValues(prevRecord).filter(v=>v>0); const pmean = pm.length ? pm.reduce((s,v)=>s+v,0)/pm.length : 0; return pmean > 0 ? (mean - pmean) / pmean * 100 : null; })() : null}
-            deltaLabel={prevRecord ? `vs ${prevName}` : null}
-            accentColor="#3b82f6"
-            delay={0.15}
-          />
-          <KPICard
-            label="Bloque Productivo"
-            value={`${peakBlock.label1}–${peakBlock.label2}`}
-            sub={`${peakBlock.pct.toFixed(1)}% de la demanda diaria`}
-            icon={Target}
-            delta={null}
-            accentColor="#f59e0b"
-            delay={0.2}
-          />
-          <KPICard
-            label="Concentración"
-            value={`${cv.toFixed(1)}%`}
-            sub={cv > 45 ? 'Demanda muy concentrada' : cv > 28 ? 'Variabilidad moderada' : 'Distribución uniforme'}
-            icon={Zap}
-            delta={null}
-            accentColor={cv > 45 ? '#ef4444' : cv > 28 ? '#f59e0b' : '#10b981'}
-            delay={0.25}
-          />
+        {/* KPI Cards — clic abre modal */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {kpiCards.map((card, i) => {
+            const p = card.palette;
+            return (
+              <motion.button
+                key={card.id}
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.07 }}
+                onClick={() => setActiveCard(card.id)}
+                className="text-left rounded-2xl p-5 border-2 transition-all hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] cursor-pointer"
+                style={{ background: p.bg, borderColor: p.border + '80' }}
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: p.border + '50' }}>
+                    <card.icon className="w-4 h-4" style={{ color: p.icon }} />
+                  </div>
+                  {card.delta != null && (
+                    <span className={`flex items-center gap-0.5 text-[11px] font-black px-2 py-0.5 rounded-full ${card.delta >= 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-600'}`}>
+                      {card.delta >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                      {Math.abs(card.delta).toFixed(1)}%
+                    </span>
+                  )}
+                </div>
+                <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: p.sub }}>{card.label}</p>
+                <p className="text-xl font-black leading-tight" style={{ color: p.text }}>{card.value}</p>
+                <p className="text-[11px] mt-1.5 leading-snug" style={{ color: p.sub + 'cc' }}>{card.sub}</p>
+                <p className="text-[10px] mt-2 opacity-50" style={{ color: p.text }}>Toca para detalles →</p>
+              </motion.button>
+            );
+          })}
         </div>
 
-        {/* Gráfica 1: Distribución horaria */}
+        {/* Gráfica principal: barras horarias */}
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-          <div className="flex items-start justify-between mb-1">
+          <div className="flex items-start justify-between mb-4">
             <div>
-              <h2 className="font-black text-slate-900 text-base">Distribución de Transacciones por Hora</h2>
+              <h2 className="font-black text-slate-900">Distribución Horaria de Transacciones</h2>
               <p className="text-xs text-slate-400 mt-0.5">
-                {MONTHS[(currentRecord.month||1)-1]} {currentRecord.year} · Promedio: <strong>{mean.toFixed(0)} txn/h</strong> · Total: <strong>{total.toLocaleString('es-CO')} txn</strong>
+                {MONTHS[(currentRecord.month||1)-1]} {currentRecord.year}
+                {' · '}<strong>{total.toLocaleString('es-CO')} txn</strong>
+                {' · '}Promedio <strong>{mean.toFixed(0)}/h</strong>
+                {totalGrowth !== null && (
+                  <span className={`ml-2 font-black ${totalGrowth >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+                    {totalGrowth >= 0 ? '+' : ''}{totalGrowth.toFixed(1)}% vs {prevName}
+                  </span>
+                )}
               </p>
             </div>
-            <div className="flex items-center gap-3 text-[10px] text-slate-500">
+            <div className="flex items-center gap-3 text-[10px] text-slate-400">
               <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ background: MAGENTA }} /> Alto</span>
               <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm inline-block bg-pink-200" /> Normal</span>
               <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm inline-block bg-slate-200" /> Bajo</span>
             </div>
           </div>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={barData} margin={{ top: 16, right: 12, left: 0, bottom: 0 }}>
-              <defs>
-                <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={MAGENTA} stopOpacity={1} />
-                  <stop offset="100%" stopColor={MAGENTA_DARK} stopOpacity={0.8} />
-                </linearGradient>
-              </defs>
+          <ResponsiveContainer width="100%" height={280}>
+            <BarChart data={barData} margin={{ top: 12, right: 12, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
               <XAxis dataKey="hour" tick={{ fontSize: 12, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-              <Tooltip content={<BarTooltip mean={mean} total={total} />} cursor={{ fill: '#f9fafb' }} />
+              <Tooltip content={<BarTip mean={mean} total={total} />} cursor={{ fill: '#fdf2f8' }} />
               <ReferenceLine y={mean} stroke={MAGENTA_LIGHT} strokeDasharray="6 3"
-                label={{ value: `Prom. ${mean.toFixed(0)}`, position: 'insideTopRight', fontSize: 10, fill: MAGENTA }} />
-              <Bar dataKey="transactions" radius={[6, 6, 0, 0]} maxBarSize={44} animationDuration={800}>
-                {barData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
+                label={{ value: `${mean.toFixed(0)}`, position: 'insideTopRight', fontSize: 10, fill: MAGENTA }} />
+              <Bar dataKey="transactions" radius={[6, 6, 0, 0]} maxBarSize={44} animationDuration={700}>
+                {barData.map((e, i) => <Cell key={i} fill={e.color} />)}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
 
-        {/* Gráfica 2: Comparativo premium */}
+        {/* Gráfica comparativa */}
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-          <div className="flex items-start justify-between mb-4">
-            <div>
-              <h2 className="font-black text-slate-900 text-base">
-                Análisis Comparativo de Demanda Horaria
-              </h2>
-              <p className="text-xs text-slate-400 mt-0.5">
-                <span className="font-semibold" style={{ color: MAGENTA }}>{MONTHS[(currentRecord.month||1)-1]} {currentRecord.year}</span>
-                {' '} vs {' '}
-                <span className="font-semibold text-slate-500">{prevName}</span>
-                {totalGrowth !== null && (
-                  <span className={`ml-2 font-black ${totalGrowth >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
-                    {totalGrowth >= 0 ? '+' : ''}{totalGrowth.toFixed(1)}% en total
-                  </span>
-                )}
-              </p>
-            </div>
+          <div className="mb-4">
+            <h2 className="font-black text-slate-900">Comparativo vs {prevName}</h2>
+            <p className="text-xs text-slate-400 mt-0.5">
+              <span className="font-bold" style={{ color: MAGENTA }}>{MONTHS[(currentRecord.month||1)-1]} {currentRecord.year}</span>
+              {' vs '}
+              <span className="font-bold text-slate-500">{prevName}</span>
+              {totalGrowth !== null && (
+                <span className={`ml-2 font-black text-sm ${totalGrowth >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+                  {totalGrowth >= 0 ? '+' : ''}{totalGrowth.toFixed(1)}% · {(totalGrowth >= 0 ? '+' : '') + (total - prevTotal).toLocaleString('es-CO')} txn
+                </span>
+              )}
+            </p>
           </div>
 
           {!prevRecord ? (
-            <div className="flex flex-col items-center justify-center py-12 text-slate-300">
-              <GitCompare className="w-12 h-12 mb-3" />
-              <p className="text-sm text-slate-400">
-                {compareMode ? 'Selecciona un período para comparar' : 'Sin datos del mes anterior para comparar'}
-              </p>
+            <div className="flex flex-col items-center justify-center py-14">
+              <GitCompare className="w-10 h-10 text-slate-200 mb-3" />
+              <p className="text-slate-400 text-sm">Activa "Comparar" en el header para seleccionar otro período</p>
             </div>
           ) : (
             <>
               {/* Chips de variación por hora */}
               <div className="flex gap-1.5 flex-wrap mb-5">
                 {lineData.map((d, i) => d.diff !== null && (
-                  <div key={i} className={`flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-lg border ${
-                    d.diff >= 0 ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-red-200 bg-red-50 text-red-600'
+                  <div key={i} className={`flex items-center gap-0.5 text-[10px] font-bold px-2 py-1 rounded-lg border ${
+                    d.diff >= 5 ? 'border-emerald-200 bg-emerald-50 text-emerald-700' :
+                    d.diff >= 0 ? 'border-green-100 bg-green-50 text-green-600' :
+                    d.diff >= -10 ? 'border-amber-200 bg-amber-50 text-amber-700' :
+                    'border-red-200 bg-red-50 text-red-600'
                   }`}>
                     {d.diff >= 0 ? <ArrowUpRight className="w-2.5 h-2.5" /> : <ArrowDownRight className="w-2.5 h-2.5" />}
-                    {d.hour} {d.diff >= 0 ? '+' : ''}{d.diff.toFixed(1)}%
+                    {d.hour} {d.diff >= 0 ? '+' : ''}{d.diff.toFixed(0)}%
                   </div>
                 ))}
               </div>
 
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={280}>
                 <ComposedChart data={lineData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
                   <defs>
-                    <linearGradient id="currentGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={MAGENTA} stopOpacity={0.15} />
+                    <linearGradient id="compGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={MAGENTA} stopOpacity={0.12} />
                       <stop offset="95%" stopColor={MAGENTA} stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
                   <XAxis dataKey="hour" tick={{ fontSize: 12, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                  <Tooltip content={<LineTooltip />} />
-                  <Legend
-                    wrapperStyle={{ fontSize: 12, paddingTop: 16 }}
-                    formatter={(value) => <span style={{ color: value === 'Actual' ? MAGENTA : '#94a3b8' }}>{value}</span>}
-                  />
-                  <Area type="monotone" dataKey="current" fill="url(#currentGrad)" stroke="none" />
+                  <Tooltip content={(p) => <LineTip {...p} prevName={prevName} />} />
+                  <Legend wrapperStyle={{ fontSize: 12, paddingTop: 12 }}
+                    formatter={(v) => <span style={{ color: v === 'Actual' ? MAGENTA : '#94a3b8' }}>{v}</span>} />
+                  <Area type="monotone" dataKey="current" fill="url(#compGrad)" stroke="none" />
                   <Line type="monotone" dataKey="current" name="Actual" stroke={MAGENTA} strokeWidth={3}
-                    dot={{ r: 5, fill: MAGENTA, strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 7, stroke: MAGENTA, strokeWidth: 2 }} />
+                    dot={{ r: 5, fill: MAGENTA, strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 7 }} />
                   <Line type="monotone" dataKey="previous" name={prevName} stroke="#cbd5e1" strokeWidth={2}
                     strokeDasharray="6 3" dot={{ r: 3, fill: '#cbd5e1' }} activeDot={{ r: 5 }} />
                 </ComposedChart>
@@ -644,99 +642,85 @@ export default function StoreHourlyView({ storeCode, storeName, allRecords, onBa
           )}
         </div>
 
-        {/* Gráfica 3: Tendencia histórica */}
+        {/* Tendencia histórica */}
         {trendData.length >= 2 && (
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-            <div className="mb-4">
-              <h2 className="font-black text-slate-900 text-base">Tendencia Histórica de Transacciones</h2>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Evolución mensual de la demanda total · {trendData.length} meses de datos
-                {trendData.length >= 2 && (() => {
-                  const first = trendData[0].total;
-                  const last = trendData[trendData.length - 1].total;
-                  const g = first > 0 ? ((last - first) / first * 100) : null;
-                  return g !== null ? (
-                    <span className={`ml-2 font-bold ${g >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
-                      {g >= 0 ? '+' : ''}{g.toFixed(1)}% acumulado
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <h2 className="font-black text-slate-900">Tendencia Histórica</h2>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  {trendData.length} meses · promedio {Math.round(trendData.map(d => d.total).filter(v => v > 0).reduce((s, v) => s + v, 0) / trendData.filter(d => d.total > 0).length).toLocaleString('es-CO')} txn/mes
+                  {trendData.length >= 2 && trendData[0].total > 0 && (
+                    <span className={`ml-2 font-black ${trendData[trendData.length-1].total >= trendData[0].total ? 'text-emerald-600' : 'text-red-500'}`}>
+                      {((trendData[trendData.length-1].total - trendData[0].total) / trendData[0].total * 100) >= 0 ? '+' : ''}
+                      {((trendData[trendData.length-1].total - trendData[0].total) / trendData[0].total * 100).toFixed(1)}% acumulado
                     </span>
-                  ) : null;
-                })()}
-              </p>
+                  )}
+                </p>
+              </div>
             </div>
-            <ResponsiveContainer width="100%" height={240}>
+            <ResponsiveContainer width="100%" height={220}>
               <AreaChart data={trendData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="trendGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={MAGENTA} stopOpacity={0.2} />
+                    <stop offset="5%" stopColor={MAGENTA} stopOpacity={0.18} />
                     <stop offset="95%" stopColor={MAGENTA} stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
                 <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                <Tooltip content={<TrendTooltip />} />
-                <Area type="monotone" dataKey="total" stroke={MAGENTA} strokeWidth={3}
-                  fill="url(#trendGrad)"
+                <Tooltip content={<TrendTip />} />
+                <Area type="monotone" dataKey="total" stroke={MAGENTA} strokeWidth={3} fill="url(#trendGrad)"
                   dot={(props) => {
                     const { cx, cy, payload } = props;
-                    const isSelected = payload.month === selectedPeriod?.month && payload.year === selectedPeriod?.year;
-                    return (
-                      <circle key={`dot-${cx}-${cy}`} cx={cx} cy={cy} r={isSelected ? 7 : 4}
-                        fill={isSelected ? MAGENTA : '#fff'} stroke={MAGENTA} strokeWidth={2} />
-                    );
+                    const isSel = payload.month === selectedPeriod?.month && payload.year === selectedPeriod?.year;
+                    return <circle key={`d${cx}${cy}`} cx={cx} cy={cy} r={isSel ? 7 : 4}
+                      fill={isSel ? MAGENTA : '#fff'} stroke={MAGENTA} strokeWidth={2} />;
                   }}
                   activeDot={{ r: 7, fill: MAGENTA, stroke: '#fff', strokeWidth: 2 }}
                 />
               </AreaChart>
             </ResponsiveContainer>
-            {/* Explicación de tendencia */}
-            {trendData.length >= 2 && (() => {
+            {(() => {
               const vals = trendData.map(d => d.total).filter(v => v > 0);
               const avg = vals.reduce((s, v) => s + v, 0) / vals.length;
               const last = vals[vals.length - 1];
-              const isAboveAvg = last > avg;
+              const isUp = last >= avg;
               return (
-                <div className={`mt-4 rounded-xl px-4 py-3 text-xs border ${isAboveAvg ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-amber-50 border-amber-200 text-amber-700'}`}>
-                  <strong>{isAboveAvg ? '↑ Mes actual por encima del promedio histórico' : '↓ Mes actual por debajo del promedio histórico'}</strong>
-                  {' · '}Promedio histórico: <strong>{Math.round(avg).toLocaleString('es-CO')} txn/mes</strong>
-                  {' · '}Período analizado: <strong>{trendData.length} meses</strong>
+                <div className={`mt-3 rounded-xl px-4 py-2.5 text-xs border flex items-center gap-2 ${isUp ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-amber-50 border-amber-200 text-amber-700'}`}>
+                  {isUp ? <TrendingUp className="w-4 h-4 flex-shrink-0" /> : <TrendingDown className="w-4 h-4 flex-shrink-0" />}
+                  <span>
+                    <strong>{isUp ? 'Mes actual sobre el promedio histórico' : 'Mes actual por debajo del promedio histórico'}</strong>
+                    {' · '}Histórico: <strong>{Math.round(avg).toLocaleString('es-CO')} txn/mes</strong>
+                    {' · '}<strong>{last.toLocaleString('es-CO')} txn</strong> este mes
+                  </span>
                 </div>
               );
             })()}
           </div>
         )}
 
-        {/* Insights */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-2 mb-1">
-            <h2 className="font-black text-slate-900 text-base">Análisis de Gestión</h2>
-            <span className="text-xs px-2 py-0.5 rounded-full font-bold text-white" style={{ background: MAGENTA }}>
-              {insights.length} indicadores
-            </span>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {insights.map((ins, i) => (
-              <InsightCard key={i} {...ins} delay={i * 0.06} />
-            ))}
-          </div>
-        </div>
-
-        {/* Ranking Table */}
+        {/* Ranking de horas */}
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 overflow-x-auto">
-          <h2 className="font-black text-slate-900 text-base mb-4">Ranking de Franjas Horarias</h2>
-          <table className="w-full text-sm min-w-[580px]">
+          <h2 className="font-black text-slate-900 mb-4">Ranking de Franjas Horarias</h2>
+          <table className="w-full text-sm min-w-[520px]">
             <thead>
               <tr style={{ background: MAGENTA_PALE }}>
                 <th className="text-left py-3 px-4 font-bold text-xs rounded-l-xl" style={{ color: MAGENTA_DARK }}>Hora</th>
                 {[
                   { key: 'transactions', label: 'Transacciones' },
-                  { key: 'pctTotal', label: '% del Total' },
+                  { key: 'pctTotal', label: '% Día' },
                   { key: 'vsPrev', label: `vs ${prevName}` },
                 ].map(col => (
                   <th key={col.key} onClick={() => handleSort(col.key)}
-                    className="text-right py-3 px-4 font-bold text-xs cursor-pointer select-none hover:opacity-80"
+                    className="text-right py-3 px-4 font-bold text-xs cursor-pointer hover:opacity-70 select-none"
                     style={{ color: MAGENTA_DARK }}>
-                    <span className="flex items-center justify-end gap-1">{col.label} <SortIcon k={col.key} /></span>
+                    <span className="flex items-center justify-end gap-1">{col.label}
+                      {sortKey === col.key
+                        ? (sortDir === 'desc' ? <ChevronDown className="w-3 h-3" style={{ color: MAGENTA }} /> : <ChevronUp className="w-3 h-3" style={{ color: MAGENTA }} />)
+                        : <Minus className="w-3 h-3 text-slate-300" />}
+                    </span>
                   </th>
                 ))}
                 <th className="text-center py-3 px-4 font-bold text-xs rounded-r-xl" style={{ color: MAGENTA_DARK }}>Nivel</th>
@@ -754,12 +738,15 @@ export default function StoreHourlyView({ storeCode, storeName, allRecords, onBa
                         {row.vsPrev >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
                         {row.vsPrev >= 0 ? '+' : ''}{row.vsPrev.toFixed(1)}%
                       </span>
-                    ) : <span className="text-slate-300 text-xs">—</span>}
+                    ) : <span className="text-slate-200">—</span>}
                   </td>
                   <td className="py-3 px-4 text-center">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                      row.label === 'Alto' ? 'text-white' : row.label === 'Normal' ? 'bg-pink-100 text-pink-700' : 'bg-slate-100 text-slate-500'
-                    }`} style={row.label === 'Alto' ? { background: MAGENTA } : {}}>
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold"
+                      style={row.label === 'Alto'
+                        ? { background: MAGENTA, color: '#fff' }
+                        : row.label === 'Normal'
+                        ? { background: MAGENTA_PALE, color: MAGENTA_DARK }
+                        : { background: '#f1f5f9', color: '#94a3b8' }}>
                       {row.label}
                     </span>
                   </td>
@@ -770,6 +757,24 @@ export default function StoreHourlyView({ storeCode, storeName, allRecords, onBa
         </div>
 
       </div>
+
+      {/* Modal de detalle de tarjeta */}
+      {activeCardData && (
+        <KPIModal
+          card={activeCardData}
+          onClose={() => setActiveCard(null)}
+          hourValues={hourValues}
+          prevValues={prevValues}
+          trendData={trendData}
+          mean={mean}
+          sd={sd}
+          total={total}
+          prevTotal={prevTotal}
+          totalGrowth={totalGrowth}
+          prevName={prevName}
+          lineData={lineData}
+        />
+      )}
     </div>
   );
 }
