@@ -56,9 +56,13 @@ export default function HourlyTransactions() {
   const sessionStoreRecord = useMemo(() => {
     if (!sessionStore) return null;
     const sessionCode = extractCode(sessionStore);
-    const match = allRecords.find(r => extractCode(r.store_name) === sessionCode || extractCode(r.store_code || '') === sessionCode);
-    if (!match) return null;
-    return { code: sessionCode, name: match.store_name };
+    // Buscar por store_code limpio, o por extractCode del store_name
+    const match = allRecords.find(r => {
+      const fieldCode = (r.store_code || '').trim();
+      return fieldCode === sessionCode || extractCode(r.store_name) === sessionCode || extractCode(fieldCode) === sessionCode;
+    });
+    // Si no hay match en records pero sí hay sessionStore, igual devolver el store para que intente filtrar
+    return { code: sessionCode, name: match?.store_name || sessionStore };
   }, [allRecords, sessionStore]);
 
   // Agrupar por tienda (solo para gerente)
@@ -127,23 +131,11 @@ export default function HourlyTransactions() {
     );
   }
 
-  // Si es tienda y no hay datos aún (cargando o sin coincidencia)
-  if (!isGerente && sessionStore) {
+  // Si es tienda y no hay datos aún (cargando)
+  if (!isGerente && sessionStore && isLoading) {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center gap-4">
-        {isLoading ? (
-          <div className="w-10 h-10 border-4 border-slate-200 border-t-slate-900 rounded-full animate-spin" />
-        ) : (
-          <>
-            <BarChart3 className="w-16 h-16 text-slate-200" />
-            <p className="text-slate-500 font-medium text-center px-8">
-              Aún no hay datos de transacciones cargados para tu tienda.<br/>El gerente debe subir el reporte.
-            </p>
-            <button onClick={() => window.history.back()} className="px-4 py-2 bg-slate-900 text-white rounded-xl text-sm font-semibold">
-              Volver
-            </button>
-          </>
-        )}
+        <div className="w-10 h-10 border-4 border-slate-200 border-t-slate-900 rounded-full animate-spin" />
       </div>
     );
   }
