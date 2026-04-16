@@ -111,15 +111,25 @@ export default function HourlyTransactions() {
     ? sessionStoreRecord
     : selectedStore;
 
+  // Mostrar spinner mientras cargan los datos de tienda
+  if (view === 'store' && activeStore && isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center gap-4">
+        <div className="w-10 h-10 border-4 border-slate-200 border-t-slate-900 rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   if (view === 'store' && activeStore) {
     const storeCode = extractCode(activeStore.code);
     const storeRecords = allRecords.filter(r => {
-      const nameCode = extractCode(r.store_name);
       const fieldCode = (r.store_code || '').trim();
-      return nameCode === storeCode || fieldCode === storeCode || extractCode(fieldCode) === storeCode;
+      const nameCode = extractCode(r.store_name);
+      return fieldCode === storeCode || nameCode === storeCode || extractCode(fieldCode) === storeCode;
     });
     return (
       <StoreHourlyView
+        key={storeCode}
         storeCode={storeCode}
         storeName={activeStore.name}
         allRecords={storeRecords}
@@ -128,15 +138,6 @@ export default function HourlyTransactions() {
           else window.history.back();
         }}
       />
-    );
-  }
-
-  // Si es tienda y no hay datos aún (cargando)
-  if (!isGerente && sessionStore && isLoading) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center gap-4">
-        <div className="w-10 h-10 border-4 border-slate-200 border-t-slate-900 rounded-full animate-spin" />
-      </div>
     );
   }
 
