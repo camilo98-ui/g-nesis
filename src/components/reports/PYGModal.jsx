@@ -205,65 +205,84 @@ function EBITDASimulator({ primaryRecord, trendData }) {
   );
 }
 
-// ─── Gráfica de tendencia Premium (Area + Referencia) ─────────────────────────
-function TrendChart({ data, title, metrics, height = 260 }) {
-  const colors = {
-    EBITDA: MAGENTA,
-    'C.Real': '#3b82f6',
-    'C.Teo': '#94a3b8',
-    Personal: '#8b5cf6',
-    Gastos: '#f59e0b',
-  };
+// ─── Gráfica de barras Premium ────────────────────────────────────────────────
+const BAR_COLORS = {
+  EBITDA: MAGENTA,
+  'C.Real': '#3b82f6',
+  'C.Teo': '#94a3b8',
+  Personal: '#8b5cf6',
+  Gastos: '#f59e0b',
+};
+
+function getBarFill(metric, value, data) {
+  if (metric !== 'EBITDA') return BAR_COLORS[metric];
+  const avg = data.reduce((s, d) => s + (d[metric] || 0), 0) / data.length;
+  if (value >= avg + 2) return MAGENTA;
+  if (value >= avg) return MAGENTA_LIGHT;
+  return '#f1f5f9';
+}
+
+function TrendChart({ data, metrics, height = 260 }) {
+  // Si solo hay una métrica usamos barras coloreadas dinámicamente (como StoreHourlyView)
+  // Si hay múltiples, agrupamos barras con color fijo por métrica
+  const single = metrics.length === 1;
+  const avg = single && data.length > 0
+    ? data.reduce((s, d) => s + (d[metrics[0]] || 0), 0) / data.length
+    : null;
 
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <ComposedChart data={data} margin={{ top: 10, right: 20, left: -5, bottom: 0 }}>
+      <BarChart data={data} margin={{ top: 10, right: 20, left: -5, bottom: 0 }}>
         <defs>
           {metrics.map(m => (
-            <linearGradient key={m} id={`grad_${m}`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={colors[m]} stopOpacity={0.25} />
-              <stop offset="100%" stopColor={colors[m]} stopOpacity={0.02} />
+            <linearGradient key={m} id={`bgrad_${m}`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={BAR_COLORS[m]} stopOpacity={1} />
+              <stop offset="100%" stopColor={BAR_COLORS[m]} stopOpacity={0.7} />
             </linearGradient>
           ))}
         </defs>
         <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
         <XAxis dataKey="mes" tick={{ fontSize: 11, fill: '#94a3b8', fontWeight: 700 }} axisLine={false} tickLine={false} />
         <YAxis tickFormatter={v => `${v}%`} tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={42} />
-        <Tooltip content={<PremiumTooltip />} cursor={{ stroke: MAGENTA_LIGHT, strokeWidth: 1, strokeDasharray: '4 2' }} />
-        {metrics.map(m => (
-          <React.Fragment key={m}>
-            <Area type="monotone" dataKey={m} fill={`url(#grad_${m})`} stroke="none" />
-            <Line
-              type="monotone"
-              dataKey={m}
-              stroke={colors[m]}
-              strokeWidth={m === 'EBITDA' ? 3 : 2}
-              dot={{ r: 5, fill: colors[m], stroke: '#fff', strokeWidth: 2 }}
-              activeDot={{ r: 7, fill: colors[m], stroke: '#fff', strokeWidth: 2 }}
-            />
-          </React.Fragment>
-        ))}
-        {metrics.includes('EBITDA') && data.length > 0 && (
-          <ReferenceLine y={data.reduce((s, d) => s + (d.EBITDA || 0), 0) / data.length}
-            stroke={MAGENTA} strokeDasharray="6 3" strokeOpacity={0.4}
-            label={{ value: 'μ', position: 'right', fill: MAGENTA, fontSize: 10 }} />
+        <Tooltip content={<PremiumTooltip />} cursor={{ fill: MAGENTA_PALE }} />
+        {avg != null && (
+          <ReferenceLine y={avg} stroke={MAGENTA_LIGHT} strokeDasharray="6 3"
+            label={{ value: `${avg.toFixed(1)}%`, position: 'insideTopRight', fontSize: 10, fill: MAGENTA }} />
         )}
-      </ComposedChart>
+        {metrics.map(m => (
+          <Bar key={m} dataKey={m} name={m === 'C.Real' ? 'Costo Real' : m === 'C.Teo' ? 'Costo Teórico' : m}
+            radius={[6, 6, 0, 0]} maxBarSize={single ? 44 : 20} animationDuration={700}
+            fill={single ? undefined : `url(#bgrad_${m})`}>
+            {single && data.map((entry, i) => (
+              <Cell key={i} fill={
+                (entry[m] || 0) >= (avg || 0) + 2 ? BAR_COLORS[m] :
+                (entry[m] || 0) >= (avg || 0) ? MAGENTA_LIGHT :
+                '#e2e8f0'
+              } />
+            ))}
+          </Bar>
+        ))}
+        {!single && <Legend wrapperStyle={{ fontSize: 11, paddingTop: 12 }} />}
+      </BarChart>
     </ResponsiveContainer>
   );
 }
 
-// ─── Gráfica de barras comparativa ────────────────────────────────────────────
+// ─── Gráfica de barras Costo Real vs Teórico ─────────────────────────────────
 function CostBarsChart({ data }) {
   return (
     <ResponsiveContainer width="100%" height={240}>
-      <BarChart data={data} margin={{ top: 10, right: 10, left: -5, bottom: 0 }}>
+      <BarChart data={data} margin={{ top: 10, right: 10, left: -5, bottom: 0 }} barGap={4}>
         <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
         <XAxis dataKey="mes" tick={{ fontSize: 11, fill: '#94a3b8', fontWeight: 700 }} axisLine={false} tickLine={false} />
         <YAxis tickFormatter={v => `${v}%`} tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={42} />
         <Tooltip content={<PremiumTooltip />} cursor={{ fill: MAGENTA_PALE }} />
-        <Bar dataKey="C.Real" name="Costo Real" fill={MAGENTA} radius={[6, 6, 0, 0]} maxBarSize={28} />
-        <Bar dataKey="C.Teo" name="Costo Teórico" fill="#e2e8f0" radius={[6, 6, 0, 0]} maxBarSize={28} />
+        <Bar dataKey="C.Real" name="Costo Real" radius={[6, 6, 0, 0]} maxBarSize={22} animationDuration={700}>
+          {data.map((entry, i) => (
+            <Cell key={i} fill={entry['C.Real'] > entry['C.Teo'] ? MAGENTA : '#f472b6'} />
+          ))}
+        </Bar>
+        <Bar dataKey="C.Teo" name="Costo Teórico" fill="#e2e8f0" radius={[6, 6, 0, 0]} maxBarSize={22} animationDuration={700} />
       </BarChart>
     </ResponsiveContainer>
   );
