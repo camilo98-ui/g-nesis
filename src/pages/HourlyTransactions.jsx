@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { Clock, TrendingUp, BarChart3, Store, ShieldCheck, ArrowLeft, Search } from 'lucide-react';
+import { Clock, TrendingUp, BarChart3, Store, ShieldCheck, ArrowLeft, Search, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import StoreHourlyView from '@/components/hourly/StoreHourlyView';
 import ManagerPanel from '@/components/hourly/ManagerPanel';
@@ -45,7 +45,14 @@ export default function HourlyTransactions() {
     if (sessionStore && !isGerente) return 'store';
     return 'home';
   });
-  const [selectedStore, setSelectedStore] = useState(null);
+  // Permitir que cualquier usuario (no solo gerente) seleccione tienda
+  const [selectedStore, setSelectedStore] = useState(() => {
+    // Si no hay sesión de tienda, intentar usar el último selectedStore del localStorage
+    if (!sessionStore) {
+      try { return JSON.parse(localStorage.getItem('hourlySelectedStore') || 'null'); } catch { return null; }
+    }
+    return null;
+  });
   const [search, setSearch] = useState('');
   const [managerCode, setManagerCode] = useState('');
   const [managerError, setManagerError] = useState('');
@@ -119,8 +126,8 @@ export default function HourlyTransactions() {
     );
   }
 
-  // Vista de tienda: si viene de sesión, usar sessionStoreRecord; si viene del selector (gerente), usar selectedStore
-  const activeStore = (view === 'store' && !isGerente && sessionStoreRecord)
+  // Vista de tienda: si viene de sesión, usar sessionStoreRecord; si viene del selector, usar selectedStore
+  const activeStore = (view === 'store' && sessionStoreRecord && !selectedStore)
     ? sessionStoreRecord
     : selectedStore;
 
@@ -135,7 +142,42 @@ export default function HourlyTransactions() {
         || fc.includes(storeCode) || (r.store_name || '').includes(storeCode);
     });
 
-    console.log('[HourlyTransactions] storeCode:', storeCode, '| allRecords:', allRecords.length, '| storeRecords:', storeRecords.length, '| sample:', allRecords.slice(0,2).map(r=>({sc:r.store_code,sn:r.store_name})));
+    // Si no hay datos para esta tienda pero sí hay otros registros, mostrar selector de tiendas
+    if (!isLoading && storeRecords.length === 0 && allRecords.length > 0) {
+      // Mostrar la vista de selección con mensaje informativo
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+          <div className="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-10">
+            <div className="max-w-6xl mx-auto px-4 py-4 flex items-center gap-3">
+              <button onClick={() => window.history.back()} className="w-9 h-9 bg-slate-100 hover:bg-slate-200 rounded-xl flex items-center justify-center transition-all">
+                <ArrowLeft className="w-4 h-4 text-slate-700" />
+              </button>
+              <div>
+                <h1 className="text-lg font-black text-slate-900">Transacciones por Hora</h1>
+                <p className="text-xs text-slate-500">{storeCode} — sin datos cargados aún</p>
+              </div>
+            </div>
+          </div>
+          <div className="max-w-6xl mx-auto px-4 py-12 text-center">
+            <BarChart3 className="w-16 h-16 text-slate-200 mx-auto mb-4" />
+            <p className="text-slate-600 font-semibold text-lg mb-2">No hay datos para {storeCode}</p>
+            <p className="text-slate-400 text-sm mb-8">El gerente debe cargar el reporte de transacciones. O selecciona otra tienda:</p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 max-w-3xl mx-auto">
+              {stores.map((store) => (
+                <button
+                  key={store.code}
+                  onClick={() => { setSelectedStore(store); localStorage.setItem('hourlySelectedStore', JSON.stringify(store)); }}
+                  className="bg-white rounded-xl border-2 border-slate-100 p-4 text-left hover:border-slate-900 hover:shadow-md transition-all"
+                >
+                  <p className="font-black text-slate-900">{store.code}</p>
+                  <p className="text-xs text-slate-400 mt-0.5">{store.months.size} meses</p>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    }
 
     return (
       <StoreHourlyView
@@ -144,7 +186,7 @@ export default function HourlyTransactions() {
         storeName={activeStore.name}
         allRecords={storeRecords}
         onBack={() => {
-          if (isGerente) { setView('home'); setSelectedStore(null); }
+          if (selectedStore) { setView('home'); setSelectedStore(null); }
           else window.history.back();
         }}
       />
@@ -255,7 +297,7 @@ export default function HourlyTransactions() {
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.04 }}
-                onClick={() => { setSelectedStore(store); setView('store'); }}
+                onClick={() => { setSelectedStore(store); localStorage.setItem('hourlySelectedStore', JSON.stringify(store)); setView('store'); }}
                 className="bg-white rounded-2xl border-2 border-slate-100 p-5 cursor-pointer hover:border-slate-900 hover:shadow-lg transition-all group"
               >
                 <div className="flex items-start justify-between mb-3">
