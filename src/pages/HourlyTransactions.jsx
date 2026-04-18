@@ -67,13 +67,19 @@ export default function HourlyTransactions() {
   const sessionStoreRecord = useMemo(() => {
     if (!sessionStore) return null;
     const sessionCode = extractCode(sessionStore);
-    // Buscar por store_code limpio, o por extractCode del store_name
+    const sessionCodeLower = sessionCode.toLowerCase();
+    // Buscar por código exacto, extractCode, o por nombre
     const match = allRecords.find(r => {
-      const fieldCode = (r.store_code || '').trim();
-      return fieldCode === sessionCode || extractCode(r.store_name) === sessionCode || extractCode(fieldCode) === sessionCode;
+      const fc = (r.store_code || '').trim();
+      const fn = (r.store_name || '').trim();
+      if (fc === sessionCode || extractCode(fn) === sessionCode || extractCode(fc) === sessionCode) return true;
+      if (fn.toLowerCase().includes(sessionCodeLower)) return true;
+      if (sessionCodeLower.includes(fn.toLowerCase()) && fn.length > 3) return true;
+      return false;
     });
-    // Si no hay match en records pero sí hay sessionStore, igual devolver el store para que intente filtrar
-    return { code: sessionCode, name: match?.store_name || sessionStore };
+    // Usar el store_code del registro encontrado para garantizar coincidencia exacta en el filtro posterior
+    const resolvedCode = match ? ((match.store_code || '').trim() || extractCode(match.store_name)) : sessionCode;
+    return { code: resolvedCode, name: match?.store_name || sessionStore };
   }, [allRecords, sessionStore]);
 
   // Agrupar por tienda (solo para gerente)
@@ -133,13 +139,23 @@ export default function HourlyTransactions() {
 
   if (view === 'store' && activeStore) {
     const storeCode = extractCode(activeStore.code);
-    // Filtro amplio: cualquier campo que contenga el código
+    const storeCodeLower = storeCode.toLowerCase();
+    // Filtro amplio: código exacto, extractCode del nombre, o nombre contiene alguna palabra del código
     const storeRecords = allRecords.filter(r => {
       const fc = (r.store_code || '').trim();
-      const fn = extractCode(r.store_name || '');
-      const fce = extractCode(fc);
-      return fc === storeCode || fn === storeCode || fce === storeCode
-        || fc.includes(storeCode) || (r.store_name || '').includes(storeCode);
+      const fn = (r.store_name || '').trim();
+      const fcExtracted = extractCode(fc);
+      const fnExtracted = extractCode(fn);
+      // Match exacto por código
+      if (fc === storeCode || fcExtracted === storeCode || fnExtracted === storeCode) return true;
+      // Match por nombre: el store_name contiene el código o viceversa
+      if (fn.toLowerCase().includes(storeCodeLower)) return true;
+      if (storeCodeLower.includes(fn.toLowerCase()) && fn.length > 3) return true;
+      // Match por palabras clave del nombre de sesión (ej: "COLINA" matchea "Colina Campestre")
+      const sessionName = (activeStore.name || '').toLowerCase();
+      if (sessionName.length > 3 && fn.toLowerCase().includes(sessionName)) return true;
+      if (sessionName.length > 3 && sessionName.includes(fn.toLowerCase()) && fn.length > 3) return true;
+      return false;
     });
 
     // Si no hay datos para esta tienda pero sí hay otros registros, mostrar selector de tiendas
