@@ -33,7 +33,16 @@ export default function Budget() {
 
   const { data: budgets = [], isLoading } = useQuery({
     queryKey: ['budgets', selectedStore],
-    queryFn: () => base44.entities.Budget.filter({ store_id: selectedStore }),
+    queryFn: async () => {
+      // Intentar con el código actual
+      let results = await base44.entities.Budget.filter({ store_id: selectedStore });
+      // Si no hay resultados, intentar con código antiguo (BOGOTA)
+      if (results.length === 0 && selectedStore.startsWith('BTA')) {
+        const oldCode = selectedStore.replace('BTA', 'BOGOTA');
+        results = await base44.entities.Budget.filter({ store_id: oldCode });
+      }
+      return results;
+    },
     enabled: !!selectedStore
   });
 
@@ -50,7 +59,16 @@ export default function Budget() {
 
   const { data: dailyBudgets = [] } = useQuery({
     queryKey: ['dailyBudgets', selectedStore],
-    queryFn: () => base44.entities.DailyBudget.filter({ store_id: selectedStore }),
+    queryFn: async () => {
+      // Intentar con el código actual
+      let results = await base44.entities.DailyBudget.filter({ store_id: selectedStore });
+      // Si no hay resultados, intentar con código antiguo (BOGOTA)
+      if (results.length === 0 && selectedStore.startsWith('BTA')) {
+        const oldCode = selectedStore.replace('BTA', 'BOGOTA');
+        results = await base44.entities.DailyBudget.filter({ store_id: oldCode });
+      }
+      return results;
+    },
     enabled: !!selectedStore
   });
 
