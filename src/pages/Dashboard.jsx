@@ -221,7 +221,12 @@ export default function Dashboard() {
   const { data: dailySales = [] } = useQuery({
     queryKey: ['dailySales', selectedStore],
     queryFn: async () => {
-      const allSales = await base44.entities.DailySales.filter({ store_id: selectedStore });
+      let allSales = await base44.entities.DailySales.filter({ store_id: selectedStore });
+      // Si no hay resultados, intentar con código antiguo (BOGOTA)
+      if (allSales.length === 0 && selectedStore.startsWith('BTA')) {
+        const oldCode = selectedStore.replace('BTA', 'BOGOTA');
+        allSales = await base44.entities.DailySales.filter({ store_id: oldCode });
+      }
       // Deduplicar por fecha: conservar el registro más recientemente actualizado
       const byDate = {};
       for (const s of allSales) {
@@ -243,21 +248,44 @@ export default function Dashboard() {
       const now = new Date();
       const currentMonth = now.getMonth() + 1;
       const currentYear = now.getFullYear();
-      const allBudgets = await base44.entities.Budget.filter({ store_id: selectedStore });
+      let allBudgets = await base44.entities.Budget.filter({ store_id: selectedStore });
+      // Si no hay resultados, intentar con código antiguo (BOGOTA)
+      if (allBudgets.length === 0 && selectedStore.startsWith('BTA')) {
+        const oldCode = selectedStore.replace('BTA', 'BOGOTA');
+        allBudgets = await base44.entities.Budget.filter({ store_id: oldCode });
+      }
       return allBudgets.filter(b => b.month === currentMonth && b.year === currentYear);
     },
     enabled: !!selectedStore,
     staleTime: 10 * 60 * 1000,
     gcTime: 15 * 60 * 1000
   });
-  const { data: dailyBudgets = [] } = useQuery({ queryKey: ['dailyBudgets', selectedStore], queryFn: () => base44.entities.DailyBudget.filter({ store_id: selectedStore }), enabled: !!selectedStore, staleTime: 10 * 60 * 1000 });
+  const { data: dailyBudgets = [] } = useQuery({
+    queryKey: ['dailyBudgets', selectedStore],
+    queryFn: async () => {
+      let results = await base44.entities.DailyBudget.filter({ store_id: selectedStore });
+      // Si no hay resultados, intentar con código antiguo (BOGOTA)
+      if (results.length === 0 && selectedStore.startsWith('BTA')) {
+        const oldCode = selectedStore.replace('BTA', 'BOGOTA');
+        results = await base44.entities.DailyBudget.filter({ store_id: oldCode });
+      }
+      return results;
+    },
+    enabled: !!selectedStore,
+    staleTime: 10 * 60 * 1000
+  });
 
   const { data: shiftRecords = [] } = useQuery({
     queryKey: ['shiftRecords', selectedStore],
     queryFn: async () => {
       const monthStart = format(startOfMonth(new Date()), 'yyyy-MM-dd');
       const monthEnd = format(endOfMonth(new Date()), 'yyyy-MM-dd');
-      const allRecords = await base44.entities.ShiftRecord.filter({ store_id: selectedStore });
+      let allRecords = await base44.entities.ShiftRecord.filter({ store_id: selectedStore });
+      // Si no hay resultados, intentar con código antiguo (BOGOTA)
+      if (allRecords.length === 0 && selectedStore.startsWith('BTA')) {
+        const oldCode = selectedStore.replace('BTA', 'BOGOTA');
+        allRecords = await base44.entities.ShiftRecord.filter({ store_id: oldCode });
+      }
       return allRecords.filter(record => {
         const recordDate = record.date?.split('T')[0] || record.date;
         return recordDate >= monthStart && recordDate <= monthEnd;
