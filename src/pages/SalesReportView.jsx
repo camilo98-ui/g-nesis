@@ -153,7 +153,7 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
             <td className="py-1.5 px-3 text-right text-pink-500 text-xs whitespace-nowrap font-medium">{formatPart(p.participation)}</td>
             <td className="py-1.5 px-3 text-right font-bold text-pink-600 text-xs whitespace-nowrap">{formatCurrency(p.total_sales)}</td>
             <td className="py-1.5 px-3 text-right text-slate-500 text-xs whitespace-nowrap font-medium">
-              {p.units_sold != null ? p.units_sold.toLocaleString('es-CO') : '—'}
+              {p.units_sold != null && p.units_sold > 0 ? p.units_sold.toLocaleString('es-CO') : '—'}
             </td>
             <td className="py-1.5 px-3 text-right text-xs whitespace-nowrap">
               {delta !== null ? (
@@ -945,6 +945,9 @@ export default function SalesReportView() {
                   </div>
                   <p className="text-xs text-slate-400 mt-1">
                     La columna <strong>"vs Mes Ant."</strong> compara vs <strong>{prevMonthLabel}</strong> · Clic en producto para análisis completo
+                    {prevRecords.length === 0 && (
+                      <span className="ml-2 text-amber-500 font-semibold">⚠ Sin datos de {prevMonthLabel} — carga ese mes para ver comparativo</span>
+                    )}
                   </p>
                 </div>
                 <HierarchyTable

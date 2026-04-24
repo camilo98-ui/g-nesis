@@ -51,7 +51,7 @@ function parseKpisExcel(rows, monthNum, yearNum) {
   const iTienda = findCol('TIENDA', 'PUNTO');
   const iPart   = findCol('PARTICIPACION', 'PARTICIPACIÓN', 'PART');
   const iVenta  = findCol('VENTA', 'MONTO', 'SALES');
-  const iUnits  = findCol('CANTIDAD', 'UNIDAD', 'UNIDADES', 'UNITS', 'QTY');
+  const iUnits  = findCol('CANTIDAD', 'UNIDADES', 'UNIDAD', 'UNITS', 'QTY', 'CANT');
 
   if (iTienda === -1 || iDept === -1) return records;
 
@@ -87,7 +87,7 @@ function parseKpisExcel(rows, monthNum, yearNum) {
       participation: partNum,
       total_sales: ventaNum,
       total_transactions: 0,
-      units_sold: units != null ? (parseFloat(String(units).replace(/[^0-9.-]/g, '')) || 0) : null,
+      units_sold: units != null && units !== '' ? (parseFloat(String(units).replace(/[^0-9.-]/g, '')) || null) : null,
       month: monthNum,
       year: yearNum,
     });
@@ -135,6 +135,14 @@ export default function KpisReportUploader({ onClose, onSuccess }) {
         setMessage(`No se encontraron datos válidos. Columnas detectadas: [${headers}]. Se necesitan: TIENDA, DEPARTAMENTO, DESCRIPCION, VENTA.`);
         return;
       }
+
+      // Debug: mostrar cuántos tienen units_sold
+      const withUnits = records.filter(r => r.units_sold != null && r.units_sold > 0).length;
+      const headers = rows[0]?.filter(Boolean).map(h => String(h).toUpperCase().trim()) || [];
+      console.log(`📊 Headers detectados:`, headers);
+      console.log(`📊 Registros: ${records.length} | Con unidades: ${withUnits} | Ejemplo:`, records[0]);
+      const unidadesCol = headers.find(h => ['CANTIDAD','UNIDADES','UNIDAD','UNITS','QTY','CANT'].some(k => h.includes(k)));
+      setMessage(`📊 ${records.length} filas · ${withUnits} con unidades (col: ${unidadesCol || 'NO ENCONTRADA'}) · procesando...`);
 
       setStatus('uploading');
       setMessage(`Procesando ${records.length} registros en servidor...`);
