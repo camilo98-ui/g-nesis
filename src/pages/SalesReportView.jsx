@@ -577,23 +577,26 @@ export default function SalesReportView() {
     enabled: !!storeCode,
   });
 
-  // Available months from data
+  // Available months from data (deduplicated)
   const availableMonths = useMemo(() => {
     const seen = new Set();
     const result = [];
     allRecords.forEach(r => {
       if (r.month && r.year) {
-        const key = `${r.year}-${r.month}`;
-        if (!seen.has(key)) { seen.add(key); result.push({ month: r.month, year: r.year }); }
+        const key = `${r.year}-${String(r.month).padStart(2,'0')}`;
+        if (!seen.has(key)) { seen.add(key); result.push({ month: Number(r.month), year: Number(r.year) }); }
       }
     });
-    // If no month info, group by report_id
+    // Fallback: group by report_id if no month fields
     if (result.length === 0) {
-      const ids = [...new Set(allRecords.map(r => r.report_id).filter(Boolean))];
-      ids.forEach((id, i) => {
-        const rec = allRecords.find(r => r.report_id === id);
-        const date = rec?.uploaded_at ? new Date(rec.uploaded_at) : new Date();
-        result.push({ month: date.getMonth() + 1, year: date.getFullYear(), reportId: id });
+      const seenIds = new Set();
+      allRecords.forEach(r => {
+        if (r.report_id && !seenIds.has(r.report_id)) {
+          seenIds.add(r.report_id);
+          const date = r.uploaded_at ? new Date(r.uploaded_at) : new Date();
+          const key = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}`;
+          if (!seen.has(key)) { seen.add(key); result.push({ month: date.getMonth() + 1, year: date.getFullYear() }); }
+        }
       });
     }
     return result.sort((a, b) => b.year - a.year || b.month - a.month);
