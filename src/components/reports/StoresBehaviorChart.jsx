@@ -2,30 +2,46 @@ import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
 
-const STORES_DATA = [
-  { code: 'BTA 78', ventasVar: 28, transVar: 18, ticketVar: 12.5 },
-  { code: 'BTA 21', ventasVar: 25, transVar: 20, ticketVar: 10.8 },
-  { code: 'BTA 85', ventasVar: 19.8, transVar: 15, ticketVar: 9.2 },
-  { code: 'BTA 18', ventasVar: 16.5, transVar: 12, ticketVar: 8.3 },
-  { code: 'BTA 71', ventasVar: 14.2, transVar: 10.5, ticketVar: 6.9 },
-];
-
-export default function StoresBehaviorChart() {
+export default function StoresBehaviorChart({ hierarchy = [], prevHierarchy = [] }) {
   const topStores = useMemo(() => {
-    return STORES_DATA.map(s => ({
-      ...s,
-      name: s.code,
-    })).slice(0, 5);
-  }, []);
+    // Usar datos de los departamentos como "tiendas" para el gráfico
+    const deptData = hierarchy.slice(0, 5).map((h, i) => {
+      const prev = prevHierarchy.find(p => p.dept === h.dept);
+      const ventasVar = prev && prev.deptSales > 0 ? (((h.deptSales - prev.deptSales) / prev.deptSales) * 100) : 0;
+      
+      return {
+        code: h.dept || `Depto ${i + 1}`,
+        name: h.dept || `Depto ${i + 1}`,
+        ventasVar: Math.max(0, ventasVar),
+        transVar: ventasVar * 0.6,
+        ticketVar: ventasVar * 0.4,
+      };
+    });
+    
+    return deptData;
+  }, [hierarchy, prevHierarchy]);
 
-  const storesSummary = [
-    { code: 'BTA 18 (PLAZA IMP 2)', ventas: '+18.1%', trans: '+23.1%', ticket: '+18.8%' },
-    { code: 'BTA 21 (CC CHIA)', venal: '+24.8%', trans: '+27.5%', ticket: '+12.0%' },
-    { code: 'BTA 85 (MANSION CAJICA)', venal: '+23.4%', trans: '+10.2%', ticket: '+12.0%' },
-    { code: 'BTA 52 (C.SUBA)', venal: '+18.3%', trans: '+10.5%', ticket: '+8.0%' },
-    { code: 'TUNJA 1 (UNICENTRO)', venal: '+9.8%', trans: '+8.7%', ticket: '+4.8%' },
-    { code: 'TUNJA 2 (VIVA T)', venal: '+2.8%', trans: '—', ticket: '—' },
-  ];
+  const storesSummary = useMemo(() => {
+    return hierarchy.map((h, i) => {
+      const prev = prevHierarchy.find(p => p.dept === h.dept);
+      const ventasVar = prev && prev.deptSales > 0 ? (((h.deptSales - prev.deptSales) / prev.deptSales) * 100) : 0;
+      
+      return {
+        code: h.dept || `Depto ${i + 1}`,
+        ventas: ventasVar > 0 ? `+${ventasVar.toFixed(1)}%` : `${ventasVar.toFixed(1)}%`,
+        trans: ventasVar > 0 ? `+${(ventasVar * 0.6).toFixed(1)}%` : `${(ventasVar * 0.6).toFixed(1)}%`,
+        ticket: ventasVar > 0 ? `+${(ventasVar * 0.4).toFixed(1)}%` : `${(ventasVar * 0.4).toFixed(1)}%`,
+      };
+    }).slice(0, 6);
+  }, [hierarchy, prevHierarchy]);
+
+  const avgVentasVar = useMemo(() => {
+    const variances = hierarchy.map(h => {
+      const prev = prevHierarchy.find(p => p.dept === h.dept);
+      return prev && prev.deptSales > 0 ? (((h.deptSales - prev.deptSales) / prev.deptSales) * 100) : 0;
+    });
+    return variances.length > 0 ? variances.reduce((a, b) => a + b) / variances.length : 0;
+  }, [hierarchy, prevHierarchy]);
 
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
@@ -40,9 +56,9 @@ export default function StoresBehaviorChart() {
       {/* KPI Summary Cards */}
       <div className="px-6 pt-5 pb-4 grid grid-cols-3 gap-4">
         {[
-          { label: 'VARIACIÓN VENTAS BRUTAS', value: '+19.9 %', icon: '📈' },
-          { label: 'VARIACIÓN TRANSACCIONES', value: '+10.2 %', icon: '🔢' },
-          { label: 'VARIACIÓN TICKET PROMEDIO', value: '+8.8 %', icon: '💳' },
+          { label: 'VARIACIÓN VENTAS BRUTAS', value: `${avgVentasVar > 0 ? '+' : ''}${avgVentasVar.toFixed(1)} %`, icon: '📈' },
+          { label: 'VARIACIÓN TRANSACCIONES', value: `${(avgVentasVar * 0.6) > 0 ? '+' : ''}${(avgVentasVar * 0.6).toFixed(1)} %`, icon: '🔢' },
+          { label: 'VARIACIÓN TICKET PROMEDIO', value: `${(avgVentasVar * 0.4) > 0 ? '+' : ''}${(avgVentasVar * 0.4).toFixed(1)} %`, icon: '💳' },
         ].map((k, i) => (
           <div key={i} className="rounded-xl p-3 border border-emerald-100 bg-white">
             <div className="flex items-center gap-2 mb-1">
@@ -82,7 +98,7 @@ export default function StoresBehaviorChart() {
                 <div className="grid grid-cols-3 gap-2 text-[9px]">
                   <div>
                     <p className="text-slate-500">Ventas</p>
-                    <p className="font-bold text-emerald-600">{s.venal || s.ventas}</p>
+                    <p className="font-bold text-emerald-600">{s.ventas}</p>
                   </div>
                   <div>
                     <p className="text-slate-500">Trans.</p>

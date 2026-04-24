@@ -1155,8 +1155,9 @@ export default function SalesReportView() {
                 hierarchy={hierarchy} 
                 prevHierarchy={prevHierarchy}
                 currentMonthLabel={currentMonthLabel}
+                allRecords={currentRecords}
               />
-              <StoresBehaviorChart />
+              <StoresBehaviorChart hierarchy={hierarchy} prevHierarchy={prevHierarchy} />
             </div>
 
             {/* Modal Comparativo */}
