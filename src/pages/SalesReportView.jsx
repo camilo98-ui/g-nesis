@@ -124,12 +124,13 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
         <td className="py-2.5 px-3 text-right" style={{ background: 'rgba(99,102,241,0.08)' }}>
           {(() => {
             const prevDept = prevHierarchy?.find(h => h.dept === dept);
-            if (!prevDept || prevDept.deptSales === 0) return <span className="text-xs" style={{ color: EXEC.textMuted }}>—</span>;
-            const delta = ((deptSales - prevDept.deptSales) / prevDept.deptSales) * 100;
+            if (!prevDept) return <span className="text-xs" style={{ color: EXEC.textMuted }}>—</span>;
+            // Diferencia en puntos porcentuales de participación
+            const delta = deptPart - prevDept.deptPart;
             return (
               <span className={`flex items-center justify-end gap-0.5 font-bold text-xs ${delta >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                 {delta >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-                {delta >= 0 ? '+' : ''}{delta.toFixed(1)}%
+                {delta >= 0 ? '+' : ''}{delta.toFixed(2)}pp
               </span>
             );
           })()}
@@ -175,12 +176,13 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
             {(() => {
               const prevDept = prevHierarchy?.find(h => h.dept === dept);
               const prevSection = prevDept?.sections.find(s => s.name === section.name);
-              if (!prevSection || prevSection.sectionSales === 0) return <span style={{ color: EXEC.textMuted }}>—</span>;
-              const delta = ((section.sectionSales - prevSection.sectionSales) / prevSection.sectionSales) * 100;
+              if (!prevSection) return <span style={{ color: EXEC.textMuted }}>—</span>;
+              // Diferencia en puntos porcentuales de participación
+              const delta = section.sectionPart - prevSection.sectionPart;
               return (
                 <span className={`flex items-center justify-end gap-0.5 font-bold ${delta >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                   {delta >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-                  {delta >= 0 ? '+' : ''}{delta.toFixed(1)}%
+                  {delta >= 0 ? '+' : ''}{delta.toFixed(2)}pp
                 </span>
               );
             })()}
@@ -194,7 +196,8 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
         const isSelected = selectedProduct?.product === p.product && selectedProduct?.section === p.section;
         const matchSearch = searchActive && p.product?.toLowerCase().includes(searchLower);
         const prev = prevProductMap[p.product];
-        const delta = prev && prev.total_sales > 0 ? ((p.total_sales - prev.total_sales) / prev.total_sales) * 100 : null;
+        // Diferencia en puntos porcentuales de participación
+        const delta = prev != null ? (p.participation - (prev.participation ?? 0)) : null;
 
         rows.push(
           <tr
@@ -223,7 +226,7 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
               {delta !== null ? (
                 <span className={`flex items-center justify-end gap-0.5 font-bold ${delta >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                   {delta >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-                  {delta >= 0 ? '+' : ''}{delta.toFixed(1)}%
+                  {delta >= 0 ? '+' : ''}{delta.toFixed(2)}pp
                 </span>
               ) : <span style={{ color: EXEC.textMuted }}>—</span>}
             </td>
@@ -269,7 +272,7 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
               <th className="py-3 px-3 text-right font-bold text-xs uppercase tracking-wider whitespace-nowrap" style={{ color: EXEC.accent1 }}>% Part.</th>
               <th className="py-3 px-3 text-right font-bold text-xs uppercase tracking-wider whitespace-nowrap" style={{ color: EXEC.textSecondary }}>Venta Bruta</th>
               <th className="py-3 px-3 text-right font-bold text-xs uppercase tracking-wider whitespace-nowrap" style={{ color: EXEC.textSecondary }}>Uds.</th>
-              <th className="py-3 px-3 text-right font-bold text-xs uppercase tracking-wider whitespace-nowrap" style={{ color: EXEC.textSecondary }}>vs Mes Ant.</th>
+              <th className="py-3 px-3 text-right font-bold text-xs uppercase tracking-wider whitespace-nowrap" style={{ color: EXEC.textSecondary }}>Δ Part. pp</th>
             </tr>
           </thead>
           <tbody>
@@ -1354,7 +1357,7 @@ export default function SalesReportView() {
                     </div>
                   </div>
                   <p className="text-xs mt-1" style={{ color: EXEC.textMuted }}>
-                    "vs Mes Ant." muestra variación vs <strong style={{ color: EXEC.textSecondary }}>{prevMonthLabel}</strong> · Clic en producto para análisis completo
+                    "Δ Part. pp" muestra diferencia en puntos porcentuales de participación vs <strong style={{ color: EXEC.textSecondary }}>{prevMonthLabel}</strong> · Clic en producto para análisis completo
                     {prevRecords.length === 0 && (
                       <span className="ml-2 font-semibold" style={{ color: EXEC.accent5 }}>⚠ Sin datos comparativos aún</span>
                     )}
