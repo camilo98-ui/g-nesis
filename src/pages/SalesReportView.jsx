@@ -991,14 +991,6 @@ export default function SalesReportView() {
               <p className="text-slate-400 text-xs font-medium">{storeCode} · {currentMonthLabel}</p>
             </div>
 
-            {/* Botón Comparable */}
-            <button onClick={() => setShowComparative(true)}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all"
-              style={{ background: 'rgba(99,102,241,0.2)', color: '#a5b4fc', border: '1px solid rgba(99,102,241,0.3)' }}>
-              <GitCompare className="w-3.5 h-3.5" />
-              Comparable
-            </button>
-
             {/* Selector de mes en header */}
             <div className="flex items-center gap-2 rounded-xl px-3 py-2" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
               <Calendar className="w-3.5 h-3.5 text-slate-400" />
