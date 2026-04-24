@@ -137,14 +137,39 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
             )}
           </td>
           <td className="py-2 px-3"></td>
-          <td colSpan={2} className="py-2 px-3 font-semibold text-indigo-700 text-sm pl-3 flex items-center gap-1.5">
-            <Layers className="w-3.5 h-3.5 text-indigo-400 flex-shrink-0" />
-            {section.name || '—'}
+          <td className="py-2 px-3 font-semibold text-indigo-700 text-sm">
+            <span className="flex items-center gap-1.5">
+              <Layers className="w-3.5 h-3.5 text-indigo-400 flex-shrink-0" />
+              {section.name || '—'}
+            </span>
           </td>
+          <td className="py-2 px-3"></td>
           <td className="py-2 px-3 text-right text-indigo-500 font-semibold text-sm whitespace-nowrap">{formatPart(section.sectionPart)}</td>
           <td className="py-2 px-3 text-right font-bold text-indigo-600 text-sm whitespace-nowrap">{formatCurrency(section.sectionSales)}</td>
-          <td className="py-2 px-3"></td>
-          <td className="py-2 px-3"></td>
+          <td className="py-2 px-3 text-right text-indigo-500 text-xs whitespace-nowrap font-semibold">
+            {(() => {
+              const total = section.products.reduce((sum, p) => sum + (p.units_sold || 0), 0);
+              return total > 0 ? total.toLocaleString('es-CO') : '—';
+            })()}
+          </td>
+          <td className="py-2 px-3 text-right text-xs whitespace-nowrap">
+            {(() => {
+              const pairs = section.products.map(p => {
+                const prev = prevProductMap[p.product];
+                return prev && prev.total_sales > 0 ? { curr: p.total_sales, prev: prev.total_sales } : null;
+              }).filter(Boolean);
+              if (pairs.length === 0) return <span className="text-slate-300">—</span>;
+              const currTotal = pairs.reduce((s, x) => s + x.curr, 0);
+              const prevTotal = pairs.reduce((s, x) => s + x.prev, 0);
+              const delta = ((currTotal - prevTotal) / prevTotal) * 100;
+              return (
+                <span className={`flex items-center justify-end gap-0.5 font-bold ${delta >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+                  {delta >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                  {delta >= 0 ? '+' : ''}{delta.toFixed(1)}%
+                </span>
+              );
+            })()}
+          </td>
         </tr>
       );
 
