@@ -1035,23 +1035,7 @@ export default function SalesReportView() {
             )}
           </div>
 
-          {/* Chips de meses disponibles */}
-          {availableMonths.length > 0 && (
-            <div className="flex gap-1.5 flex-wrap mt-3">
-              {availableMonths.slice(0, 8).map((m, i) => {
-                const isActive = m.month === selectedMonth && m.year === selectedYear;
-                return (
-                  <button key={i} onClick={() => { setSelectedMonth(m.month); setSelectedYear(m.year); setSelectedProduct(null); }}
-                    className="px-3 py-1 rounded-full text-xs font-bold transition-all"
-                    style={isActive
-                      ? { background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: '#fff', boxShadow: '0 2px 8px rgba(99,102,241,0.4)' }
-                      : { background: 'rgba(255,255,255,0.07)', color: '#94a3b8', border: '1px solid rgba(255,255,255,0.1)' }}>
-                    {MONTHS_NAMES[m.month - 1].slice(0, 3)} {m.year}
-                  </button>
-                );
-              })}
-            </div>
-          )}
+
         </div>
       </div>
 
