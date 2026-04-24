@@ -883,7 +883,6 @@ export default function SalesReportView() {
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
 
-  // Compare — se inicializa al mes anterior disponible automáticamente
   const [compareMonth, setCompareMonth] = useState(now.getMonth() === 0 ? 12 : now.getMonth());
   const [compareYear, setCompareYear] = useState(now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear());
   const [compareInitialized, setCompareInitialized] = useState(false);
@@ -940,41 +939,37 @@ export default function SalesReportView() {
     return allRecords.filter(r => r.report_id === latestReportId);
   }, [allRecords, effectiveMonth, effectiveYear]);
 
-  const prevRecords = useMemo(() => {
-    const withMonths = allRecords.filter(r => r.month && r.year);
-    if (withMonths.length > 0) {
-      return withMonths.filter(r => r.month === compareMonth && r.year === compareYear);
-    }
-    return [];
-  }, [allRecords, compareMonth, compareYear]);
-
-  const prevMonthLabel = useMemo(() => {
-    return `${MONTHS_NAMES[compareMonth - 1]} ${compareYear}`;
-  }, [compareMonth, compareYear]);
-
-  // Auto-seleccionar el mes comparativo: el mes disponible más reciente distinto al actual
-  const { hierarchy, summary, allProducts } = useMemo(() => buildHierarchy(currentRecords), [currentRecords]);
-
-  // Cuando se cargan los meses disponibles:
-  // 1. Auto-seleccionar el mes más reciente como mes actual
-  // 2. Auto-inicializar el comparativo al segundo mes más reciente
+  // Auto-inicializar al mes más reciente disponible (solo una vez)
   useEffect(() => {
     if (!compareInitialized && availableMonths.length >= 1) {
-      // Seleccionar el mes más reciente como mes actual
       const mostRecent = availableMonths[0];
       setSelectedMonth(mostRecent.month);
       setSelectedYear(mostRecent.year);
-
-      // Comparativo: el siguiente mes disponible distinto al actual
-      if (availableMonths.length >= 2) {
-        const second = availableMonths[1];
-        setCompareMonth(second.month);
-        setCompareYear(second.year);
-      }
       setCompareInitialized(true);
     }
   }, [availableMonths, compareInitialized]);
 
+  // El comparativo siempre es el mes disponible inmediatamente anterior al seleccionado
+  const autoCompare = useMemo(() => {
+    return availableMonths.find(m => !(m.month === effectiveMonth && m.year === effectiveYear)) || null;
+  }, [availableMonths, effectiveMonth, effectiveYear]);
+
+  const effectiveCompareMonth = autoCompare?.month ?? compareMonth;
+  const effectiveCompareYear = autoCompare?.year ?? compareYear;
+
+  const prevRecords = useMemo(() => {
+    const withMonths = allRecords.filter(r => r.month && r.year);
+    if (withMonths.length > 0) {
+      return withMonths.filter(r => r.month === effectiveCompareMonth && r.year === effectiveCompareYear);
+    }
+    return [];
+  }, [allRecords, effectiveCompareMonth, effectiveCompareYear]);
+
+  const prevMonthLabel = useMemo(() => {
+    return `${MONTHS_NAMES[effectiveCompareMonth - 1]} ${effectiveCompareYear}`;
+  }, [effectiveCompareMonth, effectiveCompareYear]);
+
+  const { hierarchy, summary, allProducts } = useMemo(() => buildHierarchy(currentRecords), [currentRecords]);
   const { hierarchy: prevHierarchy } = useMemo(() => buildHierarchy(prevRecords), [prevRecords]);
 
   const hasData = currentRecords.length > 0;
@@ -1208,8 +1203,8 @@ export default function SalesReportView() {
               availableMonths={availableMonths}
               currentMonth={effectiveMonth}
               currentYear={effectiveYear}
-              compareMonth={compareMonth}
-              compareYear={compareYear}
+              compareMonth={effectiveCompareMonth}
+              compareYear={effectiveCompareYear}
               setCompareMonth={setCompareMonth}
               setCompareYear={setCompareYear}
               prevHierarchy={prevHierarchy}
