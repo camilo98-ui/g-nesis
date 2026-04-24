@@ -99,14 +99,10 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
         </td>
         <td className="py-2.5 px-3 text-right" style={{ background: '#fdf2f8' }}>
           {(() => {
-            const prevDeptProds = sections.flatMap(s => s.products).map(p => {
-              const prev = prevProductMap[p.product];
-              return prev && prev.total_sales > 0 ? { curr: p.total_sales, prev: prev.total_sales } : null;
-            }).filter(Boolean);
-            if (prevDeptProds.length === 0) return <span className="text-slate-400 text-xs">—</span>;
-            const currTotal = prevDeptProds.reduce((s, x) => s + x.curr, 0);
-            const prevTotal = prevDeptProds.reduce((s, x) => s + x.prev, 0);
-            const delta = ((currTotal - prevTotal) / prevTotal) * 100;
+            // Buscar el departamento equivalente en prevHierarchy por nombre
+            const prevDept = prevHierarchy?.find(h => h.dept === dept);
+            if (!prevDept || prevDept.deptSales === 0) return <span className="text-slate-400 text-xs">—</span>;
+            const delta = ((deptSales - prevDept.deptSales) / prevDept.deptSales) * 100;
             return (
               <span className={`flex items-center justify-end gap-0.5 font-bold text-xs ${delta >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
                 {delta >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
@@ -154,14 +150,11 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
           </td>
           <td className="py-2 px-3 text-right text-xs whitespace-nowrap">
             {(() => {
-              const pairs = section.products.map(p => {
-                const prev = prevProductMap[p.product];
-                return prev && prev.total_sales > 0 ? { curr: p.total_sales, prev: prev.total_sales } : null;
-              }).filter(Boolean);
-              if (pairs.length === 0) return <span className="text-slate-300">—</span>;
-              const currTotal = pairs.reduce((s, x) => s + x.curr, 0);
-              const prevTotal = pairs.reduce((s, x) => s + x.prev, 0);
-              const delta = ((currTotal - prevTotal) / prevTotal) * 100;
+              // Buscar la sección equivalente en prevHierarchy por nombre de dept y sección
+              const prevDept = prevHierarchy?.find(h => h.dept === dept);
+              const prevSection = prevDept?.sections.find(s => s.name === section.name);
+              if (!prevSection || prevSection.sectionSales === 0) return <span className="text-slate-300">—</span>;
+              const delta = ((section.sectionSales - prevSection.sectionSales) / prevSection.sectionSales) * 100;
               return (
                 <span className={`flex items-center justify-end gap-0.5 font-bold ${delta >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
                   {delta >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
