@@ -3,12 +3,11 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  ArrowLeft, BarChart3, DollarSign, TrendingUp, TrendingDown,
+  ArrowLeft, BarChart3, DollarSign, TrendingUp,
   Filter, Search, X, Package, Layers, Star, Award, PieChart,
-  Activity, ChevronDown, Truck, Calendar, GitCompare, ArrowUpRight, ArrowDownRight, Minus
+  Activity, ChevronDown, Calendar, GitCompare, ArrowUpRight, ArrowDownRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import AggregatorsModal from '@/components/reports/AggregatorsModal';
 import PYGModal from '@/components/reports/PYGModal';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -93,6 +92,7 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
         <td colSpan={3} className="py-2.5 px-3 font-bold text-white text-sm uppercase tracking-wider bg-gradient-to-r from-slate-800 to-slate-700">{dept}</td>
         <td className="py-2.5 px-3 text-right font-bold text-pink-300 text-sm whitespace-nowrap bg-gradient-to-r from-slate-700 to-slate-800">{formatPart(deptPart)}</td>
         <td className="py-2.5 px-3 text-right font-bold text-emerald-300 text-sm whitespace-nowrap bg-gradient-to-r from-slate-700 to-slate-800">{formatCurrency(deptSales)}</td>
+        <td className="py-2.5 px-3 bg-gradient-to-r from-slate-700 to-slate-800"></td>
         <td className="py-2.5 px-3 w-20 bg-gradient-to-r from-slate-700 to-slate-800"></td>
       </tr>
     );
@@ -121,6 +121,7 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
           </td>
           <td className="py-2 px-3 text-right text-indigo-500 font-semibold text-sm whitespace-nowrap">{formatPart(section.sectionPart)}</td>
           <td className="py-2 px-3 text-right font-bold text-indigo-600 text-sm whitespace-nowrap">{formatCurrency(section.sectionSales)}</td>
+          <td className="py-2 px-3"></td>
           <td className="py-2 px-3"></td>
         </tr>
       );
@@ -151,6 +152,9 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
             </td>
             <td className="py-1.5 px-3 text-right text-pink-500 text-xs whitespace-nowrap font-medium">{formatPart(p.participation)}</td>
             <td className="py-1.5 px-3 text-right font-bold text-pink-600 text-xs whitespace-nowrap">{formatCurrency(p.total_sales)}</td>
+            <td className="py-1.5 px-3 text-right text-slate-500 text-xs whitespace-nowrap font-medium">
+              {p.units_sold != null ? p.units_sold.toLocaleString('es-CO') : '—'}
+            </td>
             <td className="py-1.5 px-3 text-right text-xs whitespace-nowrap">
               {delta !== null ? (
                 <span className={`flex items-center justify-end gap-0.5 font-bold ${delta >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
@@ -199,13 +203,14 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
               <th className="py-3 px-3 text-left font-semibold text-xs uppercase tracking-wider">Producto</th>
               <th className="py-3 px-3 text-right font-semibold text-xs uppercase tracking-wider whitespace-nowrap">% Part.</th>
               <th className="py-3 px-3 text-right font-semibold text-xs uppercase tracking-wider whitespace-nowrap">Venta Bruta</th>
+              <th className="py-3 px-3 text-right font-semibold text-xs uppercase tracking-wider whitespace-nowrap">Uds.</th>
               <th className="py-3 px-3 text-right font-semibold text-xs uppercase tracking-wider whitespace-nowrap">vs Mes Ant.</th>
             </tr>
           </thead>
           <tbody>
             {rows.length > 0 ? rows : (
               <tr>
-                <td colSpan={7} className="py-10 text-center text-slate-400">
+                <td colSpan={8} className="py-10 text-center text-slate-400">
                   <Search className="w-8 h-8 mx-auto mb-2 opacity-30" />
                   <p>No se encontraron resultados.</p>
                 </td>
@@ -549,7 +554,6 @@ export default function SalesReportView() {
   const [filterSection, setFilterSection] = useState('all');
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [expandedCharts, setExpandedCharts] = useState({ pie: false, top10: false });
-  const [showAggregators, setShowAggregators] = useState(false);
   const [showPYG, setShowPYG] = useState(false);
 
   // Month selector
@@ -679,9 +683,6 @@ export default function SalesReportView() {
           <div className="flex items-center gap-2 flex-wrap">
             <Button onClick={() => setShowPYG(true)} className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2 h-9 px-3 text-xs font-semibold">
               <TrendingUp className="w-4 h-4" /> P&G
-            </Button>
-            <Button onClick={() => setShowAggregators(true)} className="bg-orange-500 hover:bg-orange-600 text-white gap-2 h-9 px-3 text-xs font-semibold">
-              <Truck className="w-4 h-4" /> Agregadores
             </Button>
             {hasData && (
               <div className="hidden md:block text-right ml-2">
@@ -966,9 +967,6 @@ export default function SalesReportView() {
         )}
       </div>
 
-      <AnimatePresence>
-        {showAggregators && <AggregatorsModal storeId={storeCode} onClose={() => setShowAggregators(false)} />}
-      </AnimatePresence>
       <AnimatePresence>
         {showPYG && <PYGModal storeId={storeCode} onClose={() => setShowPYG(false)} />}
       </AnimatePresence>
