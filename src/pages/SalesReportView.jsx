@@ -460,6 +460,7 @@ function ProductAnalysisPanel({ product, hierarchy, grandTotal, prevHierarchy, p
 
 // ─── Informe Ejecutivo Gerencial PREMIUM ──────────────────────────────────────
 function ExecutiveReport({ hierarchy, allProducts, summary, prevHierarchy, currentMonthLabel, prevMonthLabel, storeCode }) {
+  const [collapsed, setCollapsed] = React.useState(true);
 
   const prevProductMap = useMemo(() => {
     const map = {};
@@ -555,6 +556,31 @@ Generado automáticamente · ${reportDate}
 
   return (
     <div className="rounded-3xl overflow-hidden shadow-2xl" style={{ background: EXEC.bgCard, border: `1px solid ${EXEC.border}` }}>
+      {/* Pestaña toggle — siempre visible */}
+      <button
+        onClick={() => setCollapsed(c => !c)}
+        className="w-full flex items-center justify-between px-6 py-4 transition-all"
+        style={{ background: EXEC.gradHero, borderBottom: collapsed ? 'none' : `1px solid ${EXEC.border}` }}
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: EXEC.grad1 }}>
+            <Crown className="w-5 h-5 text-white" />
+          </div>
+          <div className="text-left">
+            <p className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: EXEC.accent1 }}>INFORME EJECUTIVO</p>
+            <p className="text-sm font-black text-white">{storeCode} · {currentMonthLabel}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-bold px-3 py-1 rounded-full" style={{ background: 'rgba(255,255,255,0.1)', color: EXEC.textSecondary }}>
+            {collapsed ? 'Ver informe completo' : 'Ocultar'}
+          </span>
+          <ChevronDown className="w-5 h-5 text-white transition-transform" style={{ transform: collapsed ? 'rotate(0deg)' : 'rotate(180deg)' }} />
+        </div>
+      </button>
+
+      {/* Contenido colapsable */}
+      {!collapsed && <>
       {/* Header */}
       <div className="relative px-8 py-8 overflow-hidden" style={{ background: EXEC.gradHero }}>
         <div className="absolute inset-0 pointer-events-none">
@@ -792,6 +818,7 @@ Generado automáticamente · ${reportDate}
           </div>
         </div>
       </div>
+      </>}
     </div>
   );
 }
