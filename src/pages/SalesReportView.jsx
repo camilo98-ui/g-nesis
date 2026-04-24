@@ -949,9 +949,15 @@ export default function SalesReportView() {
     }
   }, [availableMonths, compareInitialized]);
 
-  // El comparativo siempre es el mes disponible inmediatamente anterior al seleccionado
+  // El comparativo es el mes disponible cronológicamente anterior al seleccionado
   const autoCompare = useMemo(() => {
-    return availableMonths.find(m => !(m.month === effectiveMonth && m.year === effectiveYear)) || null;
+    // Convertir el mes actual a un número comparable (año*12 + mes)
+    const currentKey = effectiveYear * 12 + effectiveMonth;
+    // Ordenar descendente y encontrar el primero que sea menor al actual
+    const sorted = [...availableMonths].sort((a, b) => (b.year * 12 + b.month) - (a.year * 12 + a.month));
+    const prev = sorted.find(m => (m.year * 12 + m.month) < currentKey);
+    // Si no hay mes anterior, tomar el siguiente más reciente diferente
+    return prev || sorted.find(m => !(m.month === effectiveMonth && m.year === effectiveYear)) || null;
   }, [availableMonths, effectiveMonth, effectiveYear]);
 
   const effectiveCompareMonth = autoCompare?.month ?? compareMonth;
