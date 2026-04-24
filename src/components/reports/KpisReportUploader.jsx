@@ -36,6 +36,9 @@ function parseKpisExcel(rows, monthNum, yearNum) {
   // Accept both Spanish and possible variants
   const findCol = (...keys) => {
     for (const k of keys) {
+      // exact match first
+      if (colMap[k] !== undefined) return colMap[k];
+      // partial match (trim already applied in colMap keys)
       const found = Object.keys(colMap).find(h => h.includes(k));
       if (found !== undefined) return colMap[found];
     }
@@ -48,7 +51,7 @@ function parseKpisExcel(rows, monthNum, yearNum) {
   const iTienda = findCol('TIENDA', 'PUNTO');
   const iPart   = findCol('PARTICIPACION', 'PARTICIPACIÓN', 'PART');
   const iVenta  = findCol('VENTA', 'MONTO', 'SALES');
-  const iUnits  = findCol('UNIDAD', 'UNIDADES', 'UNITS', 'CANTIDAD', 'QTY');
+  const iUnits  = findCol('CANTIDAD', 'UNIDAD', 'UNIDADES', 'UNITS', 'QTY');
 
   if (iTienda === -1 || iDept === -1) return records;
 
@@ -127,8 +130,9 @@ export default function KpisReportUploader({ onClose, onSuccess }) {
 
       const records = parseKpisExcel(rows, selectedMonth, selectedYear);
       if (records.length === 0) {
+        const headers = rows[0]?.filter(Boolean).join(', ') || 'ninguna';
         setStatus('error');
-        setMessage('No se encontraron datos válidos. Verifica que el archivo tenga las columnas: Departamento, Sección, Descripción, Tienda, Participación, Venta.');
+        setMessage(`No se encontraron datos válidos. Columnas detectadas: [${headers}]. Se necesitan: TIENDA, DEPARTAMENTO, DESCRIPCION, VENTA.`);
         return;
       }
 
