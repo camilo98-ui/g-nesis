@@ -24,25 +24,52 @@ function parseKpisExcel(rows, monthNum, yearNum) {
   const reportId = `kpis_${yearNum}_${monthNum}_${Date.now()}`;
   const uploadedAt = new Date().toISOString();
 
-  // Read by column index (0-based): Departamento, Sección, Descripción, Tienda, Participación, Venta
-  // rows here are arrays (header: 1 mode), first row is the header row (index 0), data starts at index 1
+  if (!rows || rows.length < 2) return records;
+
+  // Build header map (normalize: trim, uppercase) → column index
+  const headerRow = rows[0];
+  const colMap = {};
+  headerRow.forEach((h, idx) => {
+    if (h != null) colMap[String(h).toUpperCase().trim()] = idx;
+  });
+
+  // Accept both Spanish and possible variants
+  const findCol = (...keys) => {
+    for (const k of keys) {
+      const found = Object.keys(colMap).find(h => h.includes(k));
+      if (found !== undefined) return colMap[found];
+    }
+    return -1;
+  };
+
+  const iDept   = findCol('DEPARTAMENTO', 'DEPART');
+  const iSec    = findCol('SECCION', 'SECCIÓN', 'SECCI');
+  const iDesc   = findCol('DESCRIPCION', 'DESCRIPCIÓN', 'DESCRIP');
+  const iTienda = findCol('TIENDA', 'PUNTO');
+  const iPart   = findCol('PARTICIPACION', 'PARTICIPACIÓN', 'PART');
+  const iVenta  = findCol('VENTA', 'MONTO', 'SALES');
+
+  if (iTienda === -1 || iDept === -1) return records;
+
   for (let i = 1; i < rows.length; i++) {
     const row = rows[i];
-    if (!row || row.length < 6) continue;
+    if (!row) continue;
 
-    const dept = row[0];
-    const seccion = row[1];
-    const desc = row[2];
-    const tienda = row[3];
-    const participacion = row[4];
-    const venta = row[5];
+    const tienda = row[iTienda];
+    const dept   = iDept  !== -1 ? row[iDept]  : null;
+    const seccion= iSec   !== -1 ? row[iSec]   : null;
+    const desc   = iDesc  !== -1 ? row[iDesc]  : null;
+    const part   = iPart  !== -1 ? row[iPart]  : null;
+    const venta  = iVenta !== -1 ? row[iVenta] : null;
 
-    if (!dept || !tienda) continue;
+    if (!tienda || !dept) continue;
     const storeCode = extractStoreCode(tienda);
     if (!storeCode) continue;
 
-    const ventaNum = parseFloat(String(venta).replace(/[^0-9.-]/g, '')) || 0;
-    const partNum = parseFloat(String(participacion).replace(/[^0-9.-]/g, '')) || 0;
+    const ventaNum = parseFloat(String(venta ?? 0).replace(/[^0-9.-]/g, '')) || 0;
+    let partNum    = parseFloat(String(part  ?? 0).replace(/[^0-9.-]/g, '')) || 0;
+    // Si la participación viene como fracción (0..1), convertir a porcentaje
+    if (partNum > 0 && partNum <= 1) partNum = partNum * 100;
 
     records.push({
       store_code: storeCode,
