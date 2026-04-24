@@ -707,13 +707,16 @@ function ExecutiveReport({ hierarchy, allProducts, summary, prevHierarchy, curre
 }
 
 // ─── Modal Comparativo simple ─────────────────────────────────────────────────
-function ComparativeModal({ open, onClose, availableMonths, currentMonth, currentYear, compareMonth, compareYear, setCompareMonth, setCompareYear, prevRecords, summary, prevMonthLabel, currentMonthLabel }) {
+function ComparativeModal({ open, onClose, availableMonths, currentMonth, currentYear, compareMonth, compareYear, setCompareMonth, setCompareYear, prevHierarchy, summary, prevMonthLabel, currentMonthLabel }) {
+  // Usar el total calculado desde prevHierarchy (misma lógica que el mes actual)
   const prevTotal = useMemo(() => {
-    return prevRecords.filter(r => r.product && r.department).reduce((s, r) => s + (r.total_sales || 0), 0);
-  }, [prevRecords]);
+    if (!prevHierarchy || prevHierarchy.length === 0) return 0;
+    return prevHierarchy.reduce((s, h) => s + (h.deptSales || 0), 0);
+  }, [prevHierarchy]);
+
+  const hasPrevData = prevTotal > 0;
 
   const delta = prevTotal > 0 ? ((summary.totalSales - prevTotal) / prevTotal) * 100 : null;
-  const hasPrevData = prevRecords.length > 0;
 
   return (
     <AnimatePresence>
@@ -1210,7 +1213,7 @@ export default function SalesReportView() {
               compareYear={compareYear}
               setCompareMonth={setCompareMonth}
               setCompareYear={setCompareYear}
-              prevRecords={prevRecords}
+              prevHierarchy={prevHierarchy}
               summary={summary}
               prevMonthLabel={prevMonthLabel}
               currentMonthLabel={currentMonthLabel}
