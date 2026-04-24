@@ -565,14 +565,21 @@ function buildHierarchy(records) {
     const sections = Object.entries(sectionMap).map(([secName, prods]) => {
       const sectionSales = prods.reduce((s, p) => s + (p.total_sales || 0), 0);
       const sectionPart = grandTotal > 0 ? (sectionSales / grandTotal) * 100 : 0;
-      const mappedProds = prods.map(p => ({ ...p, participation: (p.participation || 0) * 100 }));
+      // Recalcular participación desde ventas reales para evitar valores absurdos del origen
+      const mappedProds = prods.map(p => ({
+        ...p,
+        participation: grandTotal > 0 ? (p.total_sales / grandTotal) * 100 : 0
+      }));
       return { name: secName, sectionSales, sectionPart, products: mappedProds };
     });
     const deptSales = sections.reduce((s, sec) => s + sec.sectionSales, 0);
     const deptPart = grandTotal > 0 ? (deptSales / grandTotal) * 100 : 0;
     return { dept, sections, deptSales, deptPart };
   }).sort((a, b) => b.deptSales - a.deptSales);
-  const allProducts = products.map(p => ({ ...p, participation: (p.participation || 0) * 100 }));
+  const allProducts = products.map(p => ({
+    ...p,
+    participation: grandTotal > 0 ? (p.total_sales / grandTotal) * 100 : 0
+  }));
   const topProduct = [...allProducts].sort((a, b) => b.total_sales - a.total_sales)[0];
   return {
     hierarchy, allProducts, grandTotal,
