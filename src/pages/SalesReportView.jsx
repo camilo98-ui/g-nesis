@@ -80,25 +80,26 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
     const deptExpanded = searchActive ? true : expandedDepts[dept];
 
     rows.push(
-      <tr key={`dept-${dept}`} className="border-b border-slate-200">
-        <td className="py-2.5 px-3 w-8 bg-gradient-to-r from-slate-800 to-slate-700">
+      <tr key={`dept-${dept}`} className="border-b border-rose-100">
+        <td className="py-2.5 px-3 w-8" style={{ background: '#fdf2f8' }}>
           {!searchActive && (
             <button onClick={() => toggleDept(dept)}
-              className="w-5 h-5 border border-slate-400 flex items-center justify-center text-white hover:bg-white/20 rounded-sm text-xs font-bold">
+              className="w-5 h-5 border flex items-center justify-center rounded-lg text-xs font-bold transition-all"
+              style={{ borderColor: '#f9a8d4', color: '#e91e8c', background: '#fff' }}>
               {deptExpanded ? '−' : '+'}
             </button>
           )}
         </td>
-        <td colSpan={3} className="py-2.5 px-3 font-bold text-white text-sm uppercase tracking-wider bg-gradient-to-r from-slate-800 to-slate-700">{dept}</td>
-        <td className="py-2.5 px-3 text-right font-bold text-pink-300 text-sm whitespace-nowrap bg-gradient-to-r from-slate-700 to-slate-800">{formatPart(deptPart)}</td>
-        <td className="py-2.5 px-3 text-right font-bold text-emerald-300 text-sm whitespace-nowrap bg-gradient-to-r from-slate-700 to-slate-800">{formatCurrency(deptSales)}</td>
-        <td className="py-2.5 px-3 text-right bg-gradient-to-r from-slate-700 to-slate-800">
+        <td colSpan={3} className="py-2.5 px-3 font-bold text-sm uppercase tracking-wider" style={{ background: '#fdf2f8', color: '#9d174d' }}>{dept}</td>
+        <td className="py-2.5 px-3 text-right font-bold text-sm whitespace-nowrap" style={{ background: '#fdf2f8', color: '#e91e8c' }}>{formatPart(deptPart)}</td>
+        <td className="py-2.5 px-3 text-right font-bold text-sm whitespace-nowrap" style={{ background: '#fdf2f8', color: '#be185d' }}>{formatCurrency(deptSales)}</td>
+        <td className="py-2.5 px-3 text-right" style={{ background: '#fdf2f8' }}>
           {(() => {
             const total = sections.flatMap(s => s.products).reduce((sum, p) => sum + (p.units_sold || 0), 0);
             return total > 0 ? <span className="text-slate-300 text-xs font-semibold">{total.toLocaleString('es-CO')}</span> : <span className="text-slate-500 text-xs">—</span>;
           })()}
         </td>
-        <td className="py-2.5 px-3 text-right bg-gradient-to-r from-slate-700 to-slate-800">
+        <td className="py-2.5 px-3 text-right" style={{ background: '#fdf2f8' }}>
           {(() => {
             const prevDeptProds = sections.flatMap(s => s.products).map(p => {
               const prev = prevProductMap[p.product];
@@ -127,25 +128,26 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
       const hasProducts = section.products && section.products.length > 0;
 
       rows.push(
-        <tr key={`section-${sectionKey}`} className="border-b border-indigo-100 bg-indigo-50/50 hover:bg-indigo-50">
+        <tr key={`section-${sectionKey}`} className="border-b border-rose-50 hover:bg-rose-50/30" style={{ background: '#fff9fb' }}>
           <td className="py-2 px-3 w-8">
             {hasProducts && !searchActive && (
               <button onClick={() => toggleSection(sectionKey)}
-                className="w-5 h-5 border border-indigo-300 flex items-center justify-center text-indigo-500 hover:bg-indigo-100 rounded-sm text-xs font-bold">
+                className="w-5 h-5 border flex items-center justify-center rounded-lg text-xs font-bold transition-all"
+                style={{ borderColor: '#fecdd3', color: '#f43f5e', background: '#fff' }}>
                 {sectionExpanded ? '−' : '+'}
               </button>
             )}
           </td>
           <td className="py-2 px-3"></td>
-          <td className="py-2 px-3 font-semibold text-indigo-700 text-sm">
+          <td className="py-2 px-3 font-semibold text-sm" style={{ color: '#be185d' }}>
             <span className="flex items-center gap-1.5">
-              <Layers className="w-3.5 h-3.5 text-indigo-400 flex-shrink-0" />
+              <Layers className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#f9a8d4' }} />
               {section.name || '—'}
             </span>
           </td>
           <td className="py-2 px-3"></td>
-          <td className="py-2 px-3 text-right text-indigo-500 font-semibold text-sm whitespace-nowrap">{formatPart(section.sectionPart)}</td>
-          <td className="py-2 px-3 text-right font-bold text-indigo-600 text-sm whitespace-nowrap">{formatCurrency(section.sectionSales)}</td>
+          <td className="py-2 px-3 text-right font-semibold text-sm whitespace-nowrap" style={{ color: '#e91e8c' }}>{formatPart(section.sectionPart)}</td>
+          <td className="py-2 px-3 text-right font-bold text-sm whitespace-nowrap text-slate-700">{formatCurrency(section.sectionSales)}</td>
           <td className="py-2 px-3 text-right text-indigo-500 text-xs whitespace-nowrap font-semibold">
             {(() => {
               const total = section.products.reduce((sum, p) => sum + (p.units_sold || 0), 0);
@@ -197,8 +199,8 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
               {isSelected && <Star className="w-3 h-3 text-pink-500 flex-shrink-0" />}
               <span className={isSelected ? 'font-bold text-pink-700' : ''}>{p.product}</span>
             </td>
-            <td className="py-1.5 px-3 text-right text-pink-500 text-xs whitespace-nowrap font-medium">{formatPart(p.participation)}</td>
-            <td className="py-1.5 px-3 text-right font-bold text-pink-600 text-xs whitespace-nowrap">{formatCurrency(p.total_sales)}</td>
+            <td className="py-1.5 px-3 text-right text-xs whitespace-nowrap font-semibold" style={{ color: '#e91e8c' }}>{formatPart(p.participation)}</td>
+            <td className="py-1.5 px-3 text-right font-bold text-slate-700 text-xs whitespace-nowrap">{formatCurrency(p.total_sales)}</td>
             <td className="py-1.5 px-3 text-right text-slate-500 text-xs whitespace-nowrap font-medium">
               {p.units_sold != null && p.units_sold > 0 ? p.units_sold.toLocaleString('es-CO') : '—'}
             </td>
@@ -218,15 +220,16 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
 
   return (
     <div>
-      <div className="p-3 border-b border-slate-100 bg-slate-50">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+      <div className="p-3 border-b border-rose-50" style={{ background: '#fff9fb' }}>
+      <div className="relative">
+      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: '#f9a8d4' }} />
           <input
             type="text"
             placeholder="Buscar producto..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full pl-9 pr-9 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-300 bg-white"
+            className="w-full pl-9 pr-9 py-2 text-sm border rounded-lg focus:outline-none bg-white"
+            style={{ borderColor: '#fce7f3' }}
           />
           {search && (
             <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
@@ -243,15 +246,15 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
       <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
         <table className="w-full border-collapse text-sm">
           <thead className="sticky top-0 z-10">
-            <tr className="bg-slate-900 text-white">
+            <tr style={{ background: '#fdf2f8' }}>
               <th className="py-3 px-3 w-8"></th>
-              <th className="py-3 px-3 text-left font-semibold text-xs uppercase tracking-wider">Departamento</th>
-              <th className="py-3 px-3 text-left font-semibold text-xs uppercase tracking-wider">Sección</th>
-              <th className="py-3 px-3 text-left font-semibold text-xs uppercase tracking-wider">Producto</th>
-              <th className="py-3 px-3 text-right font-semibold text-xs uppercase tracking-wider whitespace-nowrap">% Part.</th>
-              <th className="py-3 px-3 text-right font-semibold text-xs uppercase tracking-wider whitespace-nowrap">Venta Bruta</th>
-              <th className="py-3 px-3 text-right font-semibold text-xs uppercase tracking-wider whitespace-nowrap">Uds.</th>
-              <th className="py-3 px-3 text-right font-semibold text-xs uppercase tracking-wider whitespace-nowrap">vs Mes Ant.</th>
+              <th className="py-3 px-3 text-left font-bold text-xs uppercase tracking-wider text-slate-500">Departamento</th>
+              <th className="py-3 px-3 text-left font-bold text-xs uppercase tracking-wider text-slate-500">Sección</th>
+              <th className="py-3 px-3 text-left font-bold text-xs uppercase tracking-wider text-slate-500">Producto</th>
+              <th className="py-3 px-3 text-right font-bold text-xs uppercase tracking-wider whitespace-nowrap" style={{ color: '#e91e8c' }}>% Part.</th>
+              <th className="py-3 px-3 text-right font-bold text-xs uppercase tracking-wider whitespace-nowrap text-slate-500">Venta Bruta</th>
+              <th className="py-3 px-3 text-right font-bold text-xs uppercase tracking-wider whitespace-nowrap text-slate-500">Uds.</th>
+              <th className="py-3 px-3 text-right font-bold text-xs uppercase tracking-wider whitespace-nowrap text-slate-500">vs Mes Ant.</th>
             </tr>
           </thead>
           <tbody>
@@ -723,25 +726,25 @@ export default function SalesReportView() {
   const currentMonthLabel = `${MONTHS_NAMES[effectiveMonth - 1]} ${effectiveYear}`;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-pink-50">
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <div className="bg-gradient-to-r from-slate-800 via-slate-900 to-purple-900 text-white px-4 py-5 shadow-xl">
+      <div className="bg-white border-b border-rose-100 px-4 py-5 shadow-sm">
         <div className="max-w-6xl mx-auto flex items-center gap-4 flex-wrap">
-          <button onClick={handleBack} className="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-all">
-            <ArrowLeft className="w-5 h-5" />
+          <button onClick={handleBack} className="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 transition-all">
+            <ArrowLeft className="w-5 h-5 text-rose-400" />
           </button>
           <div className="flex-1 min-w-0">
-            <h1 className="text-xl font-black tracking-tight">Participación del Negocio</h1>
-            <p className="text-white/60 text-xs">{storeCode}</p>
+            <h1 className="text-xl font-black tracking-tight text-slate-800">Participación del Negocio</h1>
+            <p className="text-slate-400 text-xs">{storeCode}</p>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
-            <Button onClick={() => setShowPYG(true)} className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2 h-9 px-3 text-xs font-semibold">
+            <Button onClick={() => setShowPYG(true)} className="gap-2 h-9 px-3 text-xs font-semibold text-white" style={{ background: 'linear-gradient(135deg, #f472b6, #e91e8c)' }}>
               <TrendingUp className="w-4 h-4" /> P&G
             </Button>
             {hasData && (
-              <div className="hidden md:block text-right ml-2">
-                <p className="text-xl font-black text-emerald-300">{formatCurrency(summary.totalSales)}</p>
-                <p className="text-xs text-white/50">Venta Total</p>
+              <div className="hidden md:block text-right ml-2 bg-rose-50 rounded-xl px-4 py-2">
+                <p className="text-lg font-black" style={{ color: '#e91e8c' }}>{formatCurrency(summary.totalSales)}</p>
+                <p className="text-xs text-slate-400">Venta Total</p>
               </div>
             )}
           </div>
@@ -749,22 +752,22 @@ export default function SalesReportView() {
 
         {/* Month filter bar */}
         <div className="max-w-6xl mx-auto mt-4 flex items-center gap-3 flex-wrap">
-          <div className="flex items-center gap-2 bg-white/10 rounded-xl px-3 py-2">
-            <Calendar className="w-4 h-4 text-white/70" />
-            <span className="text-xs text-white/70 font-medium">Ver mes:</span>
+          <div className="flex items-center gap-2 bg-rose-50 border border-rose-100 rounded-xl px-3 py-2">
+            <Calendar className="w-4 h-4 text-rose-400" />
+            <span className="text-xs text-slate-500 font-medium">Ver mes:</span>
             <select
               value={selectedMonth}
               onChange={e => { setSelectedMonth(Number(e.target.value)); setSelectedProduct(null); }}
-              className="bg-transparent text-white text-sm font-bold border-none outline-none cursor-pointer"
+              className="bg-transparent text-slate-700 text-sm font-bold border-none outline-none cursor-pointer"
             >
-              {MONTHS_NAMES.map((m, i) => <option key={i+1} value={i+1} className="text-slate-900">{m}</option>)}
+              {MONTHS_NAMES.map((m, i) => <option key={i+1} value={i+1}>{m}</option>)}
             </select>
             <select
               value={selectedYear}
               onChange={e => { setSelectedYear(Number(e.target.value)); setSelectedProduct(null); }}
-              className="bg-transparent text-white text-sm font-bold border-none outline-none cursor-pointer"
+              className="bg-transparent text-slate-700 text-sm font-bold border-none outline-none cursor-pointer"
             >
-              {[2024, 2025, 2026].map(y => <option key={y} value={y} className="text-slate-900">{y}</option>)}
+              {[2024, 2025, 2026].map(y => <option key={y} value={y}>{y}</option>)}
             </select>
           </div>
 
@@ -775,7 +778,8 @@ export default function SalesReportView() {
                 const isActive = m.month === selectedMonth && m.year === selectedYear;
                 return (
                   <button key={i} onClick={() => { setSelectedMonth(m.month); setSelectedYear(m.year); setSelectedProduct(null); }}
-                    className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${isActive ? 'bg-pink-400 text-white' : 'bg-white/15 text-white/70 hover:bg-white/25'}`}>
+                    className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all border ${isActive ? 'text-white border-transparent' : 'bg-white border-slate-200 text-slate-500 hover:border-rose-200 hover:text-rose-500'}`}
+                    style={isActive ? { background: 'linear-gradient(135deg, #f9a8d4, #e91e8c)', border: 'none' } : {}}>
                     {MONTHS_NAMES[m.month - 1].slice(0, 3)} {m.year}
                   </button>
                 );
@@ -786,22 +790,23 @@ export default function SalesReportView() {
           {/* Compare toggle */}
           <button
             onClick={() => setCompareMode(m => !m)}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all border ${compareMode ? 'bg-pink-500 border-pink-400 text-white' : 'border-white/30 text-white/70 hover:bg-white/10'}`}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all border ${compareMode ? 'text-white border-transparent' : 'border-slate-200 text-slate-500 hover:border-rose-200 bg-white'}`}
+            style={compareMode ? { background: 'linear-gradient(135deg, #f9a8d4, #e91e8c)' } : {}}
           >
             <GitCompare className="w-3.5 h-3.5" />
             {compareMode ? 'Comparando' : 'Comparar meses'}
           </button>
 
           {compareMode && (
-            <div className="flex items-center gap-2 bg-pink-500/20 border border-pink-400/40 rounded-xl px-3 py-2">
-              <span className="text-xs text-pink-200 font-medium">vs</span>
+            <div className="flex items-center gap-2 bg-rose-50 border border-rose-200 rounded-xl px-3 py-2">
+              <span className="text-xs font-medium" style={{ color: '#e91e8c' }}>vs</span>
               <select value={compareMonth} onChange={e => setCompareMonth(Number(e.target.value))}
-                className="bg-transparent text-white text-xs font-bold border-none outline-none cursor-pointer">
-                {MONTHS_NAMES.map((m, i) => <option key={i+1} value={i+1} className="text-slate-900">{m}</option>)}
+                className="bg-transparent text-slate-700 text-xs font-bold border-none outline-none cursor-pointer">
+                {MONTHS_NAMES.map((m, i) => <option key={i+1} value={i+1}>{m}</option>)}
               </select>
               <select value={compareYear} onChange={e => setCompareYear(Number(e.target.value))}
-                className="bg-transparent text-white text-xs font-bold border-none outline-none cursor-pointer">
-                {[2024, 2025, 2026].map(y => <option key={y} value={y} className="text-slate-900">{y}</option>)}
+                className="bg-transparent text-slate-700 text-xs font-bold border-none outline-none cursor-pointer">
+                {[2024, 2025, 2026].map(y => <option key={y} value={y}>{y}</option>)}
               </select>
             </div>
           )}
@@ -830,16 +835,18 @@ export default function SalesReportView() {
               const delta = prevTotal > 0 ? ((summary.totalSales - prevTotal) / prevTotal) * 100 : null;
               return (
                 <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-                  className={`rounded-2xl border p-4 flex items-center gap-4 ${delta >= 0 ? 'bg-emerald-50 border-emerald-200' : 'bg-red-50 border-red-200'}`}>
-                  <GitCompare className={`w-5 h-5 flex-shrink-0 ${delta >= 0 ? 'text-emerald-600' : 'text-red-500'}`} />
+                  className="rounded-2xl border border-rose-100 bg-rose-50 p-4 flex items-center gap-4">
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: '#fdf2f8' }}>
+                    <GitCompare className="w-4 h-4" style={{ color: '#e91e8c' }} />
+                  </div>
                   <div className="flex-1">
-                    <p className="text-sm font-bold text-slate-800">Comparativo: <span className="text-pink-600">{currentMonthLabel}</span> vs <span className="text-slate-500">{prevMonthLabel}</span></p>
-                    <p className={`text-xs mt-0.5 ${delta >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
-                      Ventas: {formatCurrency(summary.totalSales)} vs {formatCurrency(prevTotal)}
-                      {delta !== null && ` · ${delta >= 0 ? '+' : ''}${delta.toFixed(1)}% en ventas totales`}
+                    <p className="text-sm font-bold text-slate-800">Comparativo: <span style={{ color: '#e91e8c' }}>{currentMonthLabel}</span> <span className="text-slate-400">vs</span> <span className="text-slate-500">{prevMonthLabel}</span></p>
+                    <p className="text-xs mt-0.5 text-slate-500">
+                      {formatCurrency(summary.totalSales)} vs {formatCurrency(prevTotal)}
+                      {delta !== null && ` · ${delta >= 0 ? '+' : ''}${delta.toFixed(1)}% variación`}
                     </p>
                   </div>
-                  <div className={`text-xl font-black ${delta >= 0 ? 'text-emerald-600' : 'text-red-500'} flex items-center gap-1`}>
+                  <div className={`text-lg font-black flex items-center gap-1 ${delta >= 0 ? 'text-emerald-600' : 'text-red-400'}`}>
                     {delta >= 0 ? <ArrowUpRight className="w-5 h-5" /> : <ArrowDownRight className="w-5 h-5" />}
                     {delta !== null ? `${delta >= 0 ? '+' : ''}${delta.toFixed(1)}%` : '—'}
                   </div>
@@ -850,20 +857,20 @@ export default function SalesReportView() {
             {/* KPI Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
-                { icon: DollarSign, label: 'Venta Total', value: formatCurrency(summary.totalSales), bg: 'from-emerald-500 to-teal-500', text: 'text-emerald-600', light: 'bg-emerald-50' },
-                { icon: Package, label: 'Productos', value: summary.totalProducts, bg: 'from-blue-500 to-indigo-500', text: 'text-blue-600', light: 'bg-blue-50' },
-                { icon: Layers, label: 'Departamentos', value: summary.totalDepts, bg: 'from-purple-500 to-violet-500', text: 'text-purple-600', light: 'bg-purple-50' },
-                { icon: Award, label: 'Top Producto', value: summary.topProduct?.product || '—', sub: formatCurrency(summary.topProduct?.total_sales), bg: 'from-pink-500 to-rose-500', text: 'text-pink-600', light: 'bg-pink-50' },
-              ].map(({ icon: Icon, label, value, sub, bg, text, light }, i) => (
+                { icon: DollarSign, label: 'Venta Total', value: formatCurrency(summary.totalSales), sub: null, accent: '#e91e8c', accentBg: '#fdf2f8' },
+                { icon: Package, label: 'Productos', value: summary.totalProducts, sub: null, accent: '#9d4edd', accentBg: '#f5f0ff' },
+                { icon: Layers, label: 'Departamentos', value: summary.totalDepts, sub: null, accent: '#6b7280', accentBg: '#f9fafb' },
+                { icon: Award, label: 'Top Producto', value: summary.topProduct?.product || '—', sub: formatCurrency(summary.topProduct?.total_sales), accent: '#e91e8c', accentBg: '#fdf2f8' },
+              ].map(({ icon: Icon, label, value, sub, accent, accentBg }, i) => (
                 <motion.div key={i} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}
-                  className="bg-white rounded-2xl shadow-md border border-slate-100 p-4 overflow-hidden relative">
-                  <div className={`absolute top-0 right-0 w-16 h-16 rounded-bl-3xl ${light} opacity-60`} />
-                  <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${bg} flex items-center justify-center mb-3 shadow-sm`}>
-                    <Icon className="w-4 h-4 text-white" />
+                  className="bg-white rounded-2xl border border-slate-100 p-4 overflow-hidden relative hover:shadow-md transition-shadow">
+                  <div className="absolute top-0 right-0 w-20 h-20 rounded-bl-[2rem] opacity-40" style={{ background: accentBg }} />
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-3 flex-shrink-0" style={{ background: accentBg }}>
+                    <Icon className="w-4 h-4" style={{ color: accent }} />
                   </div>
-                  <p className="text-xs text-slate-500 font-medium mb-1">{label}</p>
+                  <p className="text-xs text-slate-400 font-medium mb-1">{label}</p>
                   <p className={`font-black text-slate-800 ${typeof value === 'string' && value.length > 15 ? 'text-xs leading-tight' : 'text-xl'}`}>{value}</p>
-                  {sub && <p className={`text-xs ${text} font-semibold mt-0.5`}>{sub}</p>}
+                  {sub && <p className="text-xs font-semibold mt-0.5" style={{ color: accent }}>{sub}</p>}
                 </motion.div>
               ))}
             </div>
@@ -1034,10 +1041,10 @@ export default function SalesReportView() {
             {/* Tabla jerárquica */}
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
               <div className="bg-white rounded-2xl shadow-md border border-slate-100 overflow-hidden">
-                <div className="p-4 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white">
+                <div className="p-4 border-b border-rose-50" style={{ background: '#fff9fb' }}>
                   <div className="flex flex-wrap items-center gap-3">
                     <h3 className="font-bold text-slate-800 flex items-center gap-2">
-                      <BarChart3 className="w-4 h-4 text-pink-500" />
+                      <BarChart3 className="w-4 h-4" style={{ color: '#e91e8c' }} />
                       Tabla Jerárquica · {currentMonthLabel}
                     </h3>
                     <div className="flex items-center gap-2 ml-auto flex-wrap">
