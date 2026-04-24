@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -883,9 +883,10 @@ export default function SalesReportView() {
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
 
-  // Compare — siempre activo, sin toggle
+  // Compare — se inicializa al mes anterior disponible automáticamente
   const [compareMonth, setCompareMonth] = useState(now.getMonth() === 0 ? 12 : now.getMonth());
   const [compareYear, setCompareYear] = useState(now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear());
+  const [compareInitialized, setCompareInitialized] = useState(false);
 
   const { data: allRecords = [], isLoading } = useQuery({
     queryKey: ['salesReport', storeCode],
@@ -951,7 +952,29 @@ export default function SalesReportView() {
     return `${MONTHS_NAMES[compareMonth - 1]} ${compareYear}`;
   }, [compareMonth, compareYear]);
 
+  // Auto-seleccionar el mes comparativo: el mes disponible más reciente distinto al actual
   const { hierarchy, summary, allProducts } = useMemo(() => buildHierarchy(currentRecords), [currentRecords]);
+
+  // Cuando se cargan los meses disponibles:
+  // 1. Auto-seleccionar el mes más reciente como mes actual
+  // 2. Auto-inicializar el comparativo al segundo mes más reciente
+  useEffect(() => {
+    if (!compareInitialized && availableMonths.length >= 1) {
+      // Seleccionar el mes más reciente como mes actual
+      const mostRecent = availableMonths[0];
+      setSelectedMonth(mostRecent.month);
+      setSelectedYear(mostRecent.year);
+
+      // Comparativo: el siguiente mes disponible distinto al actual
+      if (availableMonths.length >= 2) {
+        const second = availableMonths[1];
+        setCompareMonth(second.month);
+        setCompareYear(second.year);
+      }
+      setCompareInitialized(true);
+    }
+  }, [availableMonths, compareInitialized]);
+
   const { hierarchy: prevHierarchy } = useMemo(() => buildHierarchy(prevRecords), [prevRecords]);
 
   const hasData = currentRecords.length > 0;
