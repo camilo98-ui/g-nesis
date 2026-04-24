@@ -6,16 +6,40 @@ import {
   ArrowLeft, BarChart3, DollarSign, TrendingUp, FileText,
   Filter, Search, X, Package, Layers, Star, Award,
   ChevronDown, Calendar, ArrowUpRight, ArrowDownRight,
-  AlertTriangle, CheckCircle, TrendingDown, Zap, Shield, GitCompare
+  AlertTriangle, CheckCircle, TrendingDown, Zap, Shield, GitCompare,
+  Download, Printer, Target, Activity, Crown
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PYGModal from '@/components/reports/PYGModal';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  Cell, RadialBarChart, RadialBar
+  Cell, RadialBarChart, RadialBar, LineChart, Line, PieChart, Pie
 } from 'recharts';
 
-const COLORS = ['#ec4899', '#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#06b6d4', '#84cc16'];
+// ─── Paleta ejecutiva oscura premium ─────────────────────────────────────────
+const EXEC = {
+  bg: '#080d1a',
+  bgCard: '#0e1629',
+  bgCardAlt: '#111827',
+  border: 'rgba(99,102,241,0.18)',
+  borderLight: 'rgba(255,255,255,0.06)',
+  accent1: '#6366f1',     // indigo
+  accent2: '#8b5cf6',     // violet
+  accent3: '#06b6d4',     // cyan
+  accent4: '#10b981',     // emerald
+  accent5: '#f59e0b',     // amber
+  danger: '#ef4444',
+  grad1: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+  grad2: 'linear-gradient(135deg, #06b6d4, #6366f1)',
+  grad3: 'linear-gradient(135deg, #10b981, #06b6d4)',
+  grad4: 'linear-gradient(135deg, #f59e0b, #f97316)',
+  gradHero: 'linear-gradient(135deg, #080d1a 0%, #0f172a 40%, #1e1b4b 100%)',
+  textPrimary: '#f1f5f9',
+  textSecondary: '#94a3b8',
+  textMuted: '#475569',
+};
+
+const COLORS = ['#6366f1','#8b5cf6','#06b6d4','#10b981','#f59e0b','#ef4444','#f472b6','#84cc16'];
 const MONTHS_NAMES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
 function formatCurrency(val) {
@@ -32,9 +56,9 @@ function formatPart(val) {
 const CustomBarTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl text-xs max-w-[200px]">
-      <p className="font-bold mb-1 text-pink-300 truncate">{label}</p>
-      <p className="text-emerald-400 font-semibold">{formatCurrency(payload[0]?.value)}</p>
+    <div style={{ background: EXEC.bgCard, border: `1px solid ${EXEC.border}` }} className="px-4 py-3 rounded-xl shadow-2xl text-xs max-w-[200px]">
+      <p className="font-bold mb-1 truncate" style={{ color: EXEC.accent1 }}>{label}</p>
+      <p className="font-semibold" style={{ color: EXEC.accent4 }}>{formatCurrency(payload[0]?.value)}</p>
     </div>
   );
 };
@@ -78,33 +102,32 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
     const deptExpanded = searchActive ? true : expandedDepts[dept];
 
     rows.push(
-      <tr key={`dept-${dept}`} className="border-b border-rose-100">
-        <td className="py-2.5 px-3 w-8" style={{ background: '#fdf2f8' }}>
+      <tr key={`dept-${dept}`} style={{ borderBottom: `1px solid rgba(99,102,241,0.15)` }}>
+        <td className="py-2.5 px-3 w-8" style={{ background: 'rgba(99,102,241,0.08)' }}>
           {!searchActive && (
             <button onClick={() => toggleDept(dept)}
-              className="w-5 h-5 border flex items-center justify-center rounded-lg text-xs font-bold transition-all"
-              style={{ borderColor: '#f9a8d4', color: '#e91e8c', background: '#fff' }}>
+              className="w-5 h-5 flex items-center justify-center rounded-lg text-xs font-bold transition-all"
+              style={{ border: `1px solid ${EXEC.border}`, color: EXEC.accent1, background: EXEC.bgCard }}>
               {deptExpanded ? '−' : '+'}
             </button>
           )}
         </td>
-        <td colSpan={3} className="py-2.5 px-3 font-bold text-sm uppercase tracking-wider" style={{ background: '#fdf2f8', color: '#9d174d' }}>{dept}</td>
-        <td className="py-2.5 px-3 text-right font-bold text-sm whitespace-nowrap" style={{ background: '#fdf2f8', color: '#e91e8c' }}>{formatPart(deptPart)}</td>
-        <td className="py-2.5 px-3 text-right font-bold text-sm whitespace-nowrap" style={{ background: '#fdf2f8', color: '#be185d' }}>{formatCurrency(deptSales)}</td>
-        <td className="py-2.5 px-3 text-right" style={{ background: '#fdf2f8' }}>
+        <td colSpan={3} className="py-2.5 px-3 font-bold text-sm uppercase tracking-wider" style={{ background: 'rgba(99,102,241,0.08)', color: EXEC.textPrimary }}>{dept}</td>
+        <td className="py-2.5 px-3 text-right font-bold text-sm whitespace-nowrap" style={{ background: 'rgba(99,102,241,0.08)', color: EXEC.accent1 }}>{formatPart(deptPart)}</td>
+        <td className="py-2.5 px-3 text-right font-bold text-sm whitespace-nowrap" style={{ background: 'rgba(99,102,241,0.08)', color: EXEC.accent3 }}>{formatCurrency(deptSales)}</td>
+        <td className="py-2.5 px-3 text-right" style={{ background: 'rgba(99,102,241,0.08)' }}>
           {(() => {
             const total = sections.flatMap(s => s.products).reduce((sum, p) => sum + (p.units_sold || 0), 0);
-            return total > 0 ? <span className="text-slate-500 text-xs font-semibold">{total.toLocaleString('es-CO')}</span> : <span className="text-slate-400 text-xs">—</span>;
+            return total > 0 ? <span className="text-xs font-semibold" style={{ color: EXEC.textSecondary }}>{total.toLocaleString('es-CO')}</span> : <span className="text-xs" style={{ color: EXEC.textMuted }}>—</span>;
           })()}
         </td>
-        <td className="py-2.5 px-3 text-right" style={{ background: '#fdf2f8' }}>
+        <td className="py-2.5 px-3 text-right" style={{ background: 'rgba(99,102,241,0.08)' }}>
           {(() => {
-            // Buscar el departamento equivalente en prevHierarchy por nombre
             const prevDept = prevHierarchy?.find(h => h.dept === dept);
-            if (!prevDept || prevDept.deptSales === 0) return <span className="text-slate-400 text-xs">—</span>;
+            if (!prevDept || prevDept.deptSales === 0) return <span className="text-xs" style={{ color: EXEC.textMuted }}>—</span>;
             const delta = ((deptSales - prevDept.deptSales) / prevDept.deptSales) * 100;
             return (
-              <span className={`flex items-center justify-end gap-0.5 font-bold text-xs ${delta >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+              <span className={`flex items-center justify-end gap-0.5 font-bold text-xs ${delta >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                 {delta >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
                 {delta >= 0 ? '+' : ''}{delta.toFixed(1)}%
               </span>
@@ -122,27 +145,27 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
       const hasProducts = section.products && section.products.length > 0;
 
       rows.push(
-        <tr key={`section-${sectionKey}`} className="border-b border-rose-50 hover:bg-rose-50/30" style={{ background: '#fff9fb' }}>
+        <tr key={`section-${sectionKey}`} style={{ background: 'rgba(255,255,255,0.02)', borderBottom: `1px solid ${EXEC.borderLight}` }}>
           <td className="py-2 px-3 w-8">
             {hasProducts && !searchActive && (
               <button onClick={() => toggleSection(sectionKey)}
-                className="w-5 h-5 border flex items-center justify-center rounded-lg text-xs font-bold transition-all"
-                style={{ borderColor: '#fecdd3', color: '#f43f5e', background: '#fff' }}>
+                className="w-5 h-5 flex items-center justify-center rounded-lg text-xs font-bold transition-all"
+                style={{ border: `1px solid rgba(139,92,246,0.3)`, color: EXEC.accent2, background: EXEC.bgCard }}>
                 {sectionExpanded ? '−' : '+'}
               </button>
             )}
           </td>
           <td className="py-2 px-3"></td>
-          <td className="py-2 px-3 font-semibold text-sm" style={{ color: '#be185d' }}>
+          <td className="py-2 px-3 font-semibold text-sm" style={{ color: EXEC.accent2 }}>
             <span className="flex items-center gap-1.5">
-              <Layers className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#f9a8d4' }} />
+              <Layers className="w-3.5 h-3.5 flex-shrink-0" style={{ color: EXEC.accent2 }} />
               {section.name || '—'}
             </span>
           </td>
           <td className="py-2 px-3"></td>
-          <td className="py-2 px-3 text-right font-semibold text-sm whitespace-nowrap" style={{ color: '#e91e8c' }}>{formatPart(section.sectionPart)}</td>
-          <td className="py-2 px-3 text-right font-bold text-sm whitespace-nowrap text-slate-700">{formatCurrency(section.sectionSales)}</td>
-          <td className="py-2 px-3 text-right text-slate-500 text-xs whitespace-nowrap font-semibold">
+          <td className="py-2 px-3 text-right font-semibold text-sm whitespace-nowrap" style={{ color: EXEC.accent1 }}>{formatPart(section.sectionPart)}</td>
+          <td className="py-2 px-3 text-right font-bold text-sm whitespace-nowrap" style={{ color: EXEC.textPrimary }}>{formatCurrency(section.sectionSales)}</td>
+          <td className="py-2 px-3 text-right text-xs whitespace-nowrap font-semibold" style={{ color: EXEC.textSecondary }}>
             {(() => {
               const total = section.products.reduce((sum, p) => sum + (p.units_sold || 0), 0);
               return total > 0 ? total.toLocaleString('es-CO') : '—';
@@ -150,13 +173,12 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
           </td>
           <td className="py-2 px-3 text-right text-xs whitespace-nowrap">
             {(() => {
-              // Buscar la sección equivalente en prevHierarchy por nombre de dept y sección
               const prevDept = prevHierarchy?.find(h => h.dept === dept);
               const prevSection = prevDept?.sections.find(s => s.name === section.name);
-              if (!prevSection || prevSection.sectionSales === 0) return <span className="text-slate-300">—</span>;
+              if (!prevSection || prevSection.sectionSales === 0) return <span style={{ color: EXEC.textMuted }}>—</span>;
               const delta = ((section.sectionSales - prevSection.sectionSales) / prevSection.sectionSales) * 100;
               return (
-                <span className={`flex items-center justify-end gap-0.5 font-bold ${delta >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+                <span className={`flex items-center justify-end gap-0.5 font-bold ${delta >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                   {delta >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
                   {delta >= 0 ? '+' : ''}{delta.toFixed(1)}%
                 </span>
@@ -178,29 +200,32 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
           <tr
             key={`prod-${sectionKey}-${idx}`}
             onClick={() => onSelectProduct(isSelected ? null : p)}
-            className={`border-b border-slate-50 cursor-pointer transition-all duration-150
-              ${isSelected ? 'bg-pink-100 border-pink-200' : 'bg-white hover:bg-pink-50/40'}
-              ${matchSearch ? 'ring-1 ring-inset ring-amber-300' : ''}`}
+            className="cursor-pointer transition-all duration-150"
+            style={{
+              background: isSelected ? 'rgba(99,102,241,0.15)' : matchSearch ? 'rgba(245,158,11,0.08)' : 'transparent',
+              borderBottom: `1px solid ${EXEC.borderLight}`,
+              outline: isSelected ? `1px solid rgba(99,102,241,0.4)` : 'none',
+            }}
           >
             <td className="py-1.5 px-3 w-8"></td>
             <td className="py-1.5 px-3"></td>
             <td className="py-1.5 px-3"></td>
-            <td className="py-1.5 px-3 text-slate-700 text-xs pl-8 flex items-center gap-1.5">
-              {isSelected && <Star className="w-3 h-3 text-pink-500 flex-shrink-0" />}
-              <span className={isSelected ? 'font-bold text-pink-700' : ''}>{p.product}</span>
+            <td className="py-1.5 px-3 text-xs pl-8 flex items-center gap-1.5" style={{ color: isSelected ? EXEC.accent1 : EXEC.textPrimary }}>
+              {isSelected && <Star className="w-3 h-3 flex-shrink-0" style={{ color: EXEC.accent1 }} />}
+              <span className={isSelected ? 'font-bold' : ''}>{p.product}</span>
             </td>
-            <td className="py-1.5 px-3 text-right text-xs whitespace-nowrap font-semibold" style={{ color: '#e91e8c' }}>{formatPart(p.participation)}</td>
-            <td className="py-1.5 px-3 text-right font-bold text-slate-700 text-xs whitespace-nowrap">{formatCurrency(p.total_sales)}</td>
-            <td className="py-1.5 px-3 text-right text-slate-500 text-xs whitespace-nowrap font-medium">
+            <td className="py-1.5 px-3 text-right text-xs whitespace-nowrap font-semibold" style={{ color: EXEC.accent1 }}>{formatPart(p.participation)}</td>
+            <td className="py-1.5 px-3 text-right font-bold text-xs whitespace-nowrap" style={{ color: EXEC.textPrimary }}>{formatCurrency(p.total_sales)}</td>
+            <td className="py-1.5 px-3 text-right text-xs whitespace-nowrap font-medium" style={{ color: EXEC.textSecondary }}>
               {p.units_sold != null && p.units_sold > 0 ? p.units_sold.toLocaleString('es-CO') : '—'}
             </td>
             <td className="py-1.5 px-3 text-right text-xs whitespace-nowrap">
               {delta !== null ? (
-                <span className={`flex items-center justify-end gap-0.5 font-bold ${delta >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+                <span className={`flex items-center justify-end gap-0.5 font-bold ${delta >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                   {delta >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
                   {delta >= 0 ? '+' : ''}{delta.toFixed(1)}%
                 </span>
-              ) : <span className="text-slate-300">—</span>}
+              ) : <span style={{ color: EXEC.textMuted }}>—</span>}
             </td>
           </tr>
         );
@@ -209,26 +234,26 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
   });
 
   return (
-    <div>
-      <div className="p-3 border-b border-rose-50" style={{ background: '#fff9fb' }}>
+    <div style={{ background: EXEC.bgCard }}>
+      <div className="p-3" style={{ borderBottom: `1px solid ${EXEC.border}` }}>
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: '#f9a8d4' }} />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: EXEC.textMuted }} />
           <input
             type="text"
             placeholder="Buscar producto..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full pl-9 pr-9 py-2 text-sm border rounded-lg focus:outline-none bg-white"
-            style={{ borderColor: '#fce7f3' }}
+            className="w-full pl-9 pr-9 py-2 text-sm rounded-lg focus:outline-none"
+            style={{ background: EXEC.bg, border: `1px solid ${EXEC.border}`, color: EXEC.textPrimary }}
           />
           {search && (
-            <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+            <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2" style={{ color: EXEC.textMuted }}>
               <X className="w-4 h-4" />
             </button>
           )}
         </div>
         {searchActive && (
-          <p className="text-xs text-amber-600 mt-1.5 pl-1">
+          <p className="text-xs mt-1.5 pl-1" style={{ color: EXEC.accent5 }}>
             🔍 Resultados para "<strong>{search}</strong>" — clic para analizar
           </p>
         )}
@@ -236,21 +261,21 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
       <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
         <table className="w-full border-collapse text-sm">
           <thead className="sticky top-0 z-10">
-            <tr style={{ background: '#fdf2f8' }}>
+            <tr style={{ background: EXEC.bg, borderBottom: `1px solid ${EXEC.border}` }}>
               <th className="py-3 px-3 w-8"></th>
-              <th className="py-3 px-3 text-left font-bold text-xs uppercase tracking-wider text-slate-500">Departamento</th>
-              <th className="py-3 px-3 text-left font-bold text-xs uppercase tracking-wider text-slate-500">Sección</th>
-              <th className="py-3 px-3 text-left font-bold text-xs uppercase tracking-wider text-slate-500">Producto</th>
-              <th className="py-3 px-3 text-right font-bold text-xs uppercase tracking-wider whitespace-nowrap" style={{ color: '#e91e8c' }}>% Part.</th>
-              <th className="py-3 px-3 text-right font-bold text-xs uppercase tracking-wider whitespace-nowrap text-slate-500">Venta Bruta</th>
-              <th className="py-3 px-3 text-right font-bold text-xs uppercase tracking-wider whitespace-nowrap text-slate-500">Uds.</th>
-              <th className="py-3 px-3 text-right font-bold text-xs uppercase tracking-wider whitespace-nowrap text-slate-500">vs Comparativo</th>
+              <th className="py-3 px-3 text-left font-bold text-xs uppercase tracking-wider" style={{ color: EXEC.textSecondary }}>Departamento</th>
+              <th className="py-3 px-3 text-left font-bold text-xs uppercase tracking-wider" style={{ color: EXEC.textSecondary }}>Sección</th>
+              <th className="py-3 px-3 text-left font-bold text-xs uppercase tracking-wider" style={{ color: EXEC.textSecondary }}>Producto</th>
+              <th className="py-3 px-3 text-right font-bold text-xs uppercase tracking-wider whitespace-nowrap" style={{ color: EXEC.accent1 }}>% Part.</th>
+              <th className="py-3 px-3 text-right font-bold text-xs uppercase tracking-wider whitespace-nowrap" style={{ color: EXEC.textSecondary }}>Venta Bruta</th>
+              <th className="py-3 px-3 text-right font-bold text-xs uppercase tracking-wider whitespace-nowrap" style={{ color: EXEC.textSecondary }}>Uds.</th>
+              <th className="py-3 px-3 text-right font-bold text-xs uppercase tracking-wider whitespace-nowrap" style={{ color: EXEC.textSecondary }}>vs Mes Ant.</th>
             </tr>
           </thead>
           <tbody>
             {rows.length > 0 ? rows : (
               <tr>
-                <td colSpan={8} className="py-10 text-center text-slate-400">
+                <td colSpan={8} className="py-10 text-center" style={{ color: EXEC.textMuted }}>
                   <Search className="w-8 h-8 mx-auto mb-2 opacity-30" />
                   <p>No se encontraron resultados.</p>
                 </td>
@@ -314,9 +339,10 @@ function ProductAnalysisPanel({ product, hierarchy, grandTotal, prevHierarchy, p
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
-      className="bg-white rounded-2xl shadow-2xl border border-pink-200 overflow-hidden"
+      className="rounded-2xl shadow-2xl overflow-hidden"
+      style={{ background: EXEC.bgCard, border: `1px solid ${EXEC.border}` }}
     >
-      <div className="p-5 text-white" style={{ background: 'linear-gradient(135deg, #be185d 0%, #e91e8c 50%, #7c3aed 100%)' }}>
+      <div className="p-5 text-white" style={{ background: EXEC.gradHero }}>
         <div className="flex items-start justify-between">
           <div className="flex-1 min-w-0">
             <p className="text-white/70 text-xs font-medium uppercase tracking-wider mb-1">Análisis de Producto</p>
@@ -357,22 +383,23 @@ function ProductAnalysisPanel({ product, hierarchy, grandTotal, prevHierarchy, p
 
       <div className="p-5 space-y-5">
         {delta !== null && (
-          <div className={`rounded-xl p-4 border flex items-center gap-3 ${delta >= 0 ? 'bg-emerald-50 border-emerald-200' : 'bg-red-50 border-red-200'}`}>
-            {delta >= 0 ? <ArrowUpRight className="w-5 h-5 text-emerald-600 flex-shrink-0" /> : <ArrowDownRight className="w-5 h-5 text-red-500 flex-shrink-0" />}
+          <div className="rounded-xl p-4 flex items-center gap-3"
+            style={{ background: delta >= 0 ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)', border: `1px solid ${delta >= 0 ? 'rgba(16,185,129,0.25)' : 'rgba(239,68,68,0.25)'}` }}>
+            {delta >= 0 ? <ArrowUpRight className="w-5 h-5 text-emerald-400 flex-shrink-0" /> : <ArrowDownRight className="w-5 h-5 text-red-400 flex-shrink-0" />}
             <div>
-              <p className={`font-black text-lg ${delta >= 0 ? 'text-emerald-700' : 'text-red-600'}`}>
+              <p className={`font-black text-lg ${delta >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                 {delta >= 0 ? '+' : ''}{delta.toFixed(1)}% vs {prevMonthLabel}
               </p>
-              <p className={`text-xs ${delta >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+              <p className={`text-xs ${delta >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
                 {absChange >= 0 ? '+' : ''}{formatCurrency(absChange)} en ventas
               </p>
             </div>
           </div>
         )}
 
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-          <p className="text-sm font-semibold text-amber-800 mb-1">💡 Insight</p>
-          <p className="text-sm text-amber-700" dangerouslySetInnerHTML={{ __html: getInsight() }} />
+        <div className="rounded-xl p-4" style={{ background: `${EXEC.accent5}10`, border: `1px solid ${EXEC.accent5}30` }}>
+          <p className="text-sm font-semibold mb-1" style={{ color: EXEC.accent5 }}>💡 Insight</p>
+          <p className="text-sm" style={{ color: EXEC.textSecondary }} dangerouslySetInnerHTML={{ __html: getInsight() }} />
         </div>
 
         {compChartData.length > 1 && (
@@ -428,9 +455,8 @@ function ProductAnalysisPanel({ product, hierarchy, grandTotal, prevHierarchy, p
   );
 }
 
-// ─── Informe Ejecutivo Gerencial ──────────────────────────────────────────────
+// ─── Informe Ejecutivo Gerencial PREMIUM ──────────────────────────────────────
 function ExecutiveReport({ hierarchy, allProducts, summary, prevHierarchy, currentMonthLabel, prevMonthLabel, storeCode }) {
-  const [open, setOpen] = useState(false);
 
   const prevProductMap = useMemo(() => {
     const map = {};
@@ -438,271 +464,332 @@ function ExecutiveReport({ hierarchy, allProducts, summary, prevHierarchy, curre
     return map;
   }, [prevHierarchy]);
 
-  // Métricas comparativas
   const prevTotal = useMemo(() => {
     return Object.values(prevProductMap).reduce((s, p) => s + (p.total_sales || 0), 0);
   }, [prevProductMap]);
 
   const totalDelta = prevTotal > 0 ? ((summary.totalSales - prevTotal) / prevTotal) * 100 : null;
 
-  // Top 3 ganadores y perdedores
   const withDelta = allProducts.map(p => {
     const prev = prevProductMap[p.product];
     return { ...p, delta: prev && prev.total_sales > 0 ? ((p.total_sales - prev.total_sales) / prev.total_sales) * 100 : null };
   }).filter(p => p.delta !== null);
 
-  const winners = [...withDelta].sort((a, b) => b.delta - a.delta).slice(0, 3);
-  const losers = [...withDelta].sort((a, b) => a.delta - b.delta).slice(0, 3);
-
-  // Departamento líder y rezagado
+  const winners = [...withDelta].sort((a, b) => b.delta - a.delta).slice(0, 5);
+  const losers = [...withDelta].sort((a, b) => a.delta - b.delta).slice(0, 5);
   const topDept = hierarchy[0];
-  const bottomDept = hierarchy[hierarchy.length - 1];
-
-  // Concentración: cuánto % aportan los top 3 productos
-  const top3Sales = [...allProducts].sort((a, b) => b.total_sales - a.total_sales).slice(0, 3).reduce((s, p) => s + p.total_sales, 0);
-  const concentracionPct = summary.totalSales > 0 ? (top3Sales / summary.totalSales) * 100 : 0;
+  const top5Sales = [...allProducts].sort((a, b) => b.total_sales - a.total_sales).slice(0, 5).reduce((s, p) => s + p.total_sales, 0);
+  const concentracionPct = summary.totalSales > 0 ? (top5Sales / summary.totalSales) * 100 : 0;
+  const top3 = [...allProducts].sort((a, b) => b.total_sales - a.total_sales).slice(0, 3);
 
   const now = new Date();
   const reportDate = now.toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' });
 
+  const statusColor = totalDelta === null ? EXEC.textSecondary : totalDelta >= 5 ? '#10b981' : totalDelta >= 0 ? '#f59e0b' : '#ef4444';
+  const statusLabel = totalDelta === null ? 'Sin comparativo' : totalDelta >= 5 ? 'Desempeño Sobresaliente' : totalDelta >= 0 ? 'Desempeño Estable' : 'Alerta: Caída en Ventas';
+
+  // Descargar como texto formateado (print)
+  const handleDownload = () => {
+    const content = `
+REPORTE EJECUTIVO DE PARTICIPACIÓN DEL NEGOCIO
+================================================
+Tienda: ${storeCode}
+Período: ${currentMonthLabel}
+Comparativo: ${prevMonthLabel}
+Emitido: ${reportDate}
+
+MÉTRICAS GENERALES
+------------------
+Venta Bruta Total: ${formatCurrency(summary.totalSales)}
+Variación vs ${prevMonthLabel}: ${totalDelta !== null ? `${totalDelta >= 0 ? '+' : ''}${totalDelta.toFixed(1)}%` : 'Sin datos'}
+Total Productos Activos: ${summary.totalProducts}
+Total Departamentos: ${summary.totalDepts}
+Concentración Top 5 productos: ${concentracionPct.toFixed(1)}%
+
+ESTADO GENERAL: ${statusLabel}
+
+RANKING DE DEPARTAMENTOS
+-------------------------
+${hierarchy.map((h, i) => {
+  const prevD = prevHierarchy?.find(ph => ph.dept === h.dept);
+  const dDelta = prevD && prevD.deptSales > 0 ? ((h.deptSales - prevD.deptSales) / prevD.deptSales * 100).toFixed(1) : '—';
+  return `${i + 1}. ${h.dept}: ${h.deptPart.toFixed(1)}% — ${formatCurrency(h.deptSales)} (${dDelta !== '—' ? `${Number(dDelta) >= 0 ? '+' : ''}${dDelta}% vs ant.` : 'sin comparativo'})`;
+}).join('\n')}
+
+TOP 5 PRODUCTOS
+----------------
+${top3.map((p, i) => `${i + 1}. ${p.product}: ${formatCurrency(p.total_sales)} (${p.participation.toFixed(1)}%)`).join('\n')}
+
+PRODUCTOS EN ALZA
+------------------
+${winners.map((p, i) => `${i + 1}. ${p.product}: +${p.delta.toFixed(1)}% — ${formatCurrency(p.total_sales)}`).join('\n')}
+
+PRODUCTOS EN BAJA
+------------------
+${losers.map((p, i) => `${i + 1}. ${p.product}: ${p.delta.toFixed(1)}% — ${formatCurrency(p.total_sales)}`).join('\n')}
+
+RECOMENDACIONES
+---------------
+${concentracionPct > 60 ? `⚠ Alta concentración (${concentracionPct.toFixed(0)}% en top 5). Diversificar mix.` : `✓ Mix saludable: concentración de ${concentracionPct.toFixed(0)}% en top 5.`}
+${topDept ? `★ Depto. líder "${topDept.dept}" (${topDept.deptPart.toFixed(1)}%): priorizar inventario y exhibición.` : ''}
+${winners[0] ? `↑ Impulsar "${winners[0].product}" (+${winners[0].delta.toFixed(1)}%). Asegurar stock.` : ''}
+${losers[0] && losers[0].delta < -10 ? `↓ Alerta en "${losers[0].product}" (${losers[0].delta.toFixed(1)}%). Revisar posicionamiento.` : ''}
+
+================================================
+Generado automáticamente · ${reportDate}
+    `.trim();
+
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Informe_${storeCode}_${currentMonthLabel.replace(' ', '_')}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handlePrint = () => window.print();
+
   return (
-    <>
-      {/* Botón de acceso */}
-      <motion.button
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        onClick={() => setOpen(true)}
-        className="w-full flex items-center justify-between px-6 py-4 rounded-2xl border-2 transition-all text-left"
-        style={{ borderColor: '#e91e8c22', background: 'linear-gradient(135deg, #fdf2f8 0%, #fff 60%, #f5f0ff 100%)' }}
-      >
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #e91e8c, #7c3aed)' }}>
-            <FileText className="w-5 h-5 text-white" />
+    <div className="rounded-3xl overflow-hidden shadow-2xl" style={{ background: EXEC.bgCard, border: `1px solid ${EXEC.border}` }}>
+      {/* Header */}
+      <div className="relative px-8 py-8 overflow-hidden" style={{ background: EXEC.gradHero }}>
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-0 right-0 w-96 h-96 rounded-full opacity-10" style={{ background: 'radial-gradient(circle, #6366f1, transparent)', transform: 'translate(30%, -40%)' }} />
+          <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full opacity-8" style={{ background: 'radial-gradient(circle, #06b6d4, transparent)', transform: 'translate(-30%, 40%)' }} />
+        </div>
+        <div className="relative flex items-start justify-between gap-4 flex-wrap">
+          <div className="flex items-start gap-4">
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: EXEC.grad1 }}>
+              <Crown className="w-7 h-7 text-white" />
+            </div>
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.25em] mb-1" style={{ color: EXEC.accent1 }}>INFORME EJECUTIVO CONFIDENCIAL</p>
+              <h2 className="text-2xl md:text-3xl font-black text-white leading-tight">Reporte de Participación</h2>
+              <p className="text-sm mt-1" style={{ color: EXEC.textSecondary }}>{storeCode} · {currentMonthLabel} · vs {prevMonthLabel}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <button onClick={handleDownload}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all hover:opacity-90"
+              style={{ background: EXEC.grad1, color: '#fff' }}>
+              <Download className="w-3.5 h-3.5" /> Descargar
+            </button>
+            <button onClick={handlePrint}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all"
+              style={{ background: 'rgba(255,255,255,0.08)', border: `1px solid ${EXEC.borderLight}`, color: EXEC.textSecondary }}>
+              <Printer className="w-3.5 h-3.5" /> Imprimir
+            </button>
+          </div>
+        </div>
+
+        {/* KPIs hero en header */}
+        <div className="relative grid grid-cols-2 md:grid-cols-4 gap-3 mt-7">
+          {[
+            { label: 'Venta Bruta', value: formatCurrency(summary.totalSales), color: EXEC.accent1 },
+            { label: `vs ${prevMonthLabel}`, value: totalDelta !== null ? `${totalDelta >= 0 ? '+' : ''}${totalDelta.toFixed(1)}%` : '—', color: totalDelta === null ? EXEC.textSecondary : totalDelta >= 0 ? '#10b981' : '#ef4444' },
+            { label: 'Productos Activos', value: summary.totalProducts, color: EXEC.accent3 },
+            { label: 'Departamentos', value: summary.totalDepts, color: EXEC.accent5 },
+          ].map((k, i) => (
+            <div key={i} className="rounded-2xl p-4 text-center" style={{ background: 'rgba(255,255,255,0.05)', border: `1px solid ${EXEC.borderLight}` }}>
+              <p className="font-black text-xl md:text-2xl" style={{ color: k.color }}>{k.value}</p>
+              <p className="text-[10px] font-medium mt-0.5" style={{ color: EXEC.textMuted }}>{k.label}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="p-6 md:p-8 space-y-8">
+
+        {/* Banner de estado */}
+        <div className="rounded-2xl p-5 flex items-start gap-4" style={{ background: `${statusColor}12`, border: `2px solid ${statusColor}30` }}>
+          <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: statusColor }}>
+            {totalDelta === null ? <Zap className="w-5 h-5 text-white" /> : totalDelta >= 5 ? <CheckCircle className="w-5 h-5 text-white" /> : totalDelta >= 0 ? <TrendingUp className="w-5 h-5 text-white" /> : <AlertTriangle className="w-5 h-5 text-white" />}
           </div>
           <div>
-            <p className="font-black text-slate-900 text-sm">Informe Ejecutivo</p>
-            <p className="text-xs text-slate-500">Resumen gerencial · {currentMonthLabel}</p>
+            <p className="font-black text-lg" style={{ color: statusColor }}>{statusLabel}</p>
+            <p className="text-sm mt-1 leading-relaxed" style={{ color: EXEC.textSecondary }}>
+              {totalDelta === null
+                ? `${storeCode} generó ${formatCurrency(summary.totalSales)} con ${summary.totalProducts} productos en ${summary.totalDepts} departamentos. Sin datos del período anterior para comparación.`
+                : totalDelta >= 5
+                ? `${storeCode} registró crecimiento de ${totalDelta.toFixed(1)}% vs ${prevMonthLabel}, alcanzando ${formatCurrency(summary.totalSales)}. Portafolio de ${summary.totalProducts} productos con dinamismo positivo.`
+                : totalDelta >= 0
+                ? `${storeCode} mantuvo estabilidad con ${totalDelta.toFixed(1)}% de variación vs ${prevMonthLabel}. Venta bruta de ${formatCurrency(summary.totalSales)} con espacio de crecimiento.`
+                : `${storeCode} presenta caída de ${Math.abs(totalDelta).toFixed(1)}% vs ${prevMonthLabel}. Se requiere revisión urgente del mix y estrategia de exhibición.`}
+            </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-bold px-3 py-1 rounded-full text-white" style={{ background: '#e91e8c' }}>Nuevo</span>
-          <ChevronDown className="w-4 h-4 text-slate-400" />
+
+        {/* Departamentos */}
+        <div>
+          <p className="text-[10px] font-black uppercase tracking-[0.18em] mb-4" style={{ color: EXEC.textMuted }}>Ranking de Departamentos</p>
+          <div className="space-y-3">
+            {hierarchy.map((h, i) => {
+              const prevD = prevHierarchy?.find(ph => ph.dept === h.dept);
+              const dDelta = prevD && prevD.deptSales > 0 ? ((h.deptSales - prevD.deptSales) / prevD.deptSales) * 100 : null;
+              const barColor = COLORS[i % COLORS.length];
+              return (
+                <div key={i} className="rounded-xl p-4" style={{ background: i === 0 ? `${EXEC.accent1}12` : 'rgba(255,255,255,0.03)', border: `1px solid ${i === 0 ? EXEC.border : EXEC.borderLight}` }}>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black text-white flex-shrink-0"
+                        style={{ background: i === 0 ? EXEC.grad1 : 'rgba(255,255,255,0.1)' }}>
+                        {i + 1}
+                      </div>
+                      <span className="text-sm font-bold" style={{ color: EXEC.textPrimary }}>{h.dept}</span>
+                      {i === 0 && <Crown className="w-3.5 h-3.5" style={{ color: EXEC.accent5 }} />}
+                    </div>
+                    <div className="flex items-center gap-3">
+                      {dDelta !== null && (
+                        <span className={`text-xs font-bold flex items-center gap-0.5 ${dDelta >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                          {dDelta >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                          {dDelta >= 0 ? '+' : ''}{dDelta.toFixed(1)}%
+                        </span>
+                      )}
+                      <span className="text-xs font-black" style={{ color: barColor }}>{h.deptPart.toFixed(1)}%</span>
+                      <span className="text-xs" style={{ color: EXEC.textSecondary }}>{formatCurrency(h.deptSales)}</span>
+                    </div>
+                  </div>
+                  <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                    <motion.div className="h-full rounded-full" style={{ background: barColor }}
+                      initial={{ width: 0 }} animate={{ width: `${h.deptPart}%` }} transition={{ duration: 1, delay: i * 0.08 }} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
-      </motion.button>
 
-      {/* Modal del informe */}
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 overflow-y-auto"
-            style={{ background: 'rgba(15,23,42,0.75)', backdropFilter: 'blur(6px)' }}
-            onClick={() => setOpen(false)}
-          >
-            <motion.div
-              initial={{ opacity: 0, y: 40, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 20, scale: 0.97 }}
-              onClick={e => e.stopPropagation()}
-              className="relative max-w-3xl mx-auto my-8 px-4"
-            >
-              <div className="bg-white rounded-3xl overflow-hidden shadow-2xl">
-                {/* Header del informe */}
-                <div className="px-8 py-7 text-white relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #4a044e 100%)' }}>
-                  <div className="absolute top-0 right-0 w-64 h-64 rounded-full opacity-10" style={{ background: 'radial-gradient(circle, #e91e8c, transparent)', transform: 'translate(30%, -30%)' }} />
-                  <button onClick={() => setOpen(false)} className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-all">
-                    <X className="w-4 h-4" />
-                  </button>
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(233,30,140,0.3)' }}>
-                      <Shield className="w-6 h-6 text-pink-300" />
+        {/* Top 5 Productos */}
+        <div>
+          <p className="text-[10px] font-black uppercase tracking-[0.18em] mb-4" style={{ color: EXEC.textMuted }}>Top 5 Productos Líderes</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {[...allProducts].sort((a, b) => b.total_sales - a.total_sales).slice(0, 6).map((p, i) => {
+              const prev = prevProductMap[p.product];
+              const pDelta = prev && prev.total_sales > 0 ? ((p.total_sales - prev.total_sales) / prev.total_sales) * 100 : null;
+              return (
+                <div key={i} className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${EXEC.borderLight}` }}>
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black text-white flex-shrink-0"
+                      style={{ background: i < 3 ? EXEC.grad1 : 'rgba(255,255,255,0.1)' }}>
+                      {i + 1}
                     </div>
-                    <div>
-                      <p className="text-white/50 text-[10px] uppercase tracking-[0.2em] font-bold">Informe Confidencial · Uso Gerencial</p>
-                      <h2 className="text-2xl font-black mt-1 leading-tight">Reporte de Participación</h2>
-                      <p className="text-white/70 text-sm mt-1">{storeCode} · {currentMonthLabel} · Emitido: {reportDate}</p>
-                    </div>
+                    {pDelta !== null && (
+                      <span className={`text-[10px] font-black ${pDelta >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                        {pDelta >= 0 ? '+' : ''}{pDelta.toFixed(1)}%
+                      </span>
+                    )}
                   </div>
-
-                  {/* Resumen rápido en header */}
-                  <div className="grid grid-cols-3 gap-3 mt-6">
-                    <div className="rounded-xl p-3 text-center" style={{ background: 'rgba(255,255,255,0.08)' }}>
-                      <p className="text-xl font-black text-white">{formatCurrency(summary.totalSales)}</p>
-                      <p className="text-white/60 text-[10px] font-medium mt-0.5">Venta Bruta Total</p>
-                    </div>
-                    <div className="rounded-xl p-3 text-center" style={{ background: 'rgba(255,255,255,0.08)' }}>
-                      <p className={`text-xl font-black ${totalDelta !== null ? (totalDelta >= 0 ? 'text-emerald-400' : 'text-red-400') : 'text-white'}`}>
-                        {totalDelta !== null ? `${totalDelta >= 0 ? '+' : ''}${totalDelta.toFixed(1)}%` : '—'}
-                      </p>
-                      <p className="text-white/60 text-[10px] font-medium mt-0.5">vs {prevMonthLabel}</p>
-                    </div>
-                    <div className="rounded-xl p-3 text-center" style={{ background: 'rgba(255,255,255,0.08)' }}>
-                      <p className="text-xl font-black text-white">{concentracionPct.toFixed(0)}%</p>
-                      <p className="text-white/60 text-[10px] font-medium mt-0.5">Concentración Top 3</p>
-                    </div>
-                  </div>
+                  <p className="text-xs font-bold leading-tight mb-1.5" style={{ color: EXEC.textPrimary }}>{p.product}</p>
+                  <p className="text-sm font-black" style={{ color: EXEC.accent1 }}>{formatCurrency(p.total_sales)}</p>
+                  <p className="text-[10px] mt-0.5" style={{ color: EXEC.textMuted }}>{p.participation.toFixed(2)}% del total</p>
                 </div>
+              );
+            })}
+          </div>
+        </div>
 
-                {/* Cuerpo del informe */}
-                <div className="px-8 py-6 space-y-6">
-
-                  {/* Valoración general */}
-                  <div>
-                    <p className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 mb-3">Valoración General</p>
-                    <div className={`rounded-2xl p-5 border-2 ${totalDelta === null ? 'border-slate-200 bg-slate-50' : totalDelta >= 5 ? 'border-emerald-300 bg-emerald-50' : totalDelta >= 0 ? 'border-amber-300 bg-amber-50' : 'border-red-300 bg-red-50'}`}>
-                      <div className="flex items-start gap-3">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${totalDelta === null ? 'bg-slate-200' : totalDelta >= 5 ? 'bg-emerald-500' : totalDelta >= 0 ? 'bg-amber-500' : 'bg-red-500'}`}>
-                          {totalDelta === null ? <Zap className="w-5 h-5 text-white" /> : totalDelta >= 5 ? <CheckCircle className="w-5 h-5 text-white" /> : totalDelta >= 0 ? <TrendingUp className="w-5 h-5 text-white" /> : <AlertTriangle className="w-5 h-5 text-white" />}
-                        </div>
-                        <div>
-                          <p className={`font-black text-lg ${totalDelta === null ? 'text-slate-700' : totalDelta >= 5 ? 'text-emerald-800' : totalDelta >= 0 ? 'text-amber-800' : 'text-red-800'}`}>
-                            {totalDelta === null ? 'Sin datos comparativos disponibles' : totalDelta >= 5 ? 'Desempeño Sobresaliente' : totalDelta >= 0 ? 'Desempeño Estable' : 'Alerta: Caída en Ventas'}
-                          </p>
-                          <p className={`text-sm mt-1 leading-relaxed ${totalDelta === null ? 'text-slate-600' : totalDelta >= 5 ? 'text-emerald-700' : totalDelta >= 0 ? 'text-amber-700' : 'text-red-700'}`}>
-                            {totalDelta === null
-                              ? `Durante ${currentMonthLabel}, la tienda ${storeCode} generó ${formatCurrency(summary.totalSales)} en venta bruta con ${summary.totalProducts} productos activos distribuidos en ${summary.totalDepts} departamentos. No se cuenta con datos del período anterior para comparación.`
-                              : totalDelta >= 5
-                              ? `La tienda ${storeCode} registró un crecimiento de ${totalDelta.toFixed(1)}% respecto a ${prevMonthLabel}, alcanzando ${formatCurrency(summary.totalSales)} en venta bruta. El portafolio muestra dinamismo positivo con ${summary.totalProducts} productos activos.`
-                              : totalDelta >= 0
-                              ? `La tienda ${storeCode} se mantuvo estable con ${totalDelta.toFixed(1)}% de variación vs ${prevMonthLabel}. La venta bruta de ${formatCurrency(summary.totalSales)} refleja consistencia operativa aunque hay espacio para impulsar el crecimiento.`
-                              : `La tienda ${storeCode} presenta una caída de ${Math.abs(totalDelta).toFixed(1)}% vs ${prevMonthLabel}. Se requiere revisión inmediata del mix de productos y estrategia de exhibición para recuperar el desempeño.`
-                            }
-                          </p>
-                        </div>
-                      </div>
+        {/* Ganadores y Perdedores */}
+        {withDelta.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] mb-4 flex items-center gap-2" style={{ color: EXEC.textMuted }}>
+                <TrendingUp className="w-3.5 h-3.5 text-emerald-400" /> Mayor Crecimiento vs {prevMonthLabel}
+              </p>
+              <div className="space-y-2">
+                {winners.map((p, i) => (
+                  <div key={i} className="flex items-center gap-3 rounded-xl p-3" style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)' }}>
+                    <div className="w-7 h-7 rounded-lg bg-emerald-500 flex items-center justify-center flex-shrink-0">
+                      <ArrowUpRight className="w-3.5 h-3.5 text-white" />
                     </div>
-                  </div>
-
-                  {/* Estructura del mix */}
-                  <div>
-                    <p className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 mb-3">Estructura del Mix de Producto</p>
-                    <div className="space-y-2.5">
-                      {hierarchy.slice(0, 5).map((h, i) => {
-                        const isLeader = i === 0;
-                        const prevDeptProds = (prevHierarchy || [])?.find(ph => ph.dept === h.dept);
-                        const prevDeptSales = prevDeptProds?.deptSales || 0;
-                        const deptDelta = prevDeptSales > 0 ? ((h.deptSales - prevDeptSales) / prevDeptSales) * 100 : null;
-                        return (
-                          <div key={i} className={`flex items-center gap-3 rounded-xl p-3.5 ${isLeader ? 'border-2' : 'border border-slate-100 bg-slate-50/50'}`}
-                            style={isLeader ? { borderColor: '#e91e8c40', background: '#fdf2f8' } : {}}>
-                            <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-black text-white"
-                              style={{ background: isLeader ? '#e91e8c' : '#94a3b8' }}>
-                              {i + 1}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center justify-between mb-1">
-                                <span className="text-sm font-bold text-slate-800 truncate">{h.dept}</span>
-                                <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-                                  {deptDelta !== null && (
-                                    <span className={`text-xs font-bold ${deptDelta >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
-                                      {deptDelta >= 0 ? '+' : ''}{deptDelta.toFixed(1)}%
-                                    </span>
-                                  )}
-                                  <span className="text-xs font-black" style={{ color: isLeader ? '#e91e8c' : '#64748b' }}>{h.deptPart.toFixed(1)}%</span>
-                                </div>
-                              </div>
-                              <div className="h-1.5 rounded-full bg-slate-200 overflow-hidden">
-                                <div className="h-full rounded-full" style={{ width: `${h.deptPart}%`, background: isLeader ? 'linear-gradient(90deg, #e91e8c, #f472b6)' : '#cbd5e1' }} />
-                              </div>
-                            </div>
-                            <span className="text-xs text-slate-500 flex-shrink-0">{formatCurrency(h.deptSales)}</span>
-                          </div>
-                        );
-                      })}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold truncate" style={{ color: EXEC.textPrimary }}>{p.product}</p>
+                      <p className="text-[10px] text-emerald-400">{formatCurrency(p.total_sales)}</p>
                     </div>
+                    <span className="text-sm font-black text-emerald-400 flex-shrink-0">+{p.delta.toFixed(1)}%</span>
                   </div>
-
-                  {/* Ganadores y Perdedores */}
-                  {withDelta.length > 0 && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 mb-3 flex items-center gap-1.5">
-                          <TrendingUp className="w-3 h-3 text-emerald-500" /> Productos con Mayor Crecimiento
-                        </p>
-                        <div className="space-y-2">
-                          {winners.map((p, i) => (
-                            <div key={i} className="flex items-center gap-2.5 rounded-xl p-3 bg-emerald-50 border border-emerald-100">
-                              <div className="w-6 h-6 rounded-lg bg-emerald-500 flex items-center justify-center flex-shrink-0">
-                                <ArrowUpRight className="w-3.5 h-3.5 text-white" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-xs font-bold text-emerald-900 truncate">{p.product}</p>
-                                <p className="text-[10px] text-emerald-700">{formatCurrency(p.total_sales)}</p>
-                              </div>
-                              <span className="text-sm font-black text-emerald-700 flex-shrink-0">+{p.delta.toFixed(1)}%</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                      <div>
-                        <p className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 mb-3 flex items-center gap-1.5">
-                          <TrendingDown className="w-3 h-3 text-red-500" /> Productos con Mayor Caída
-                        </p>
-                        <div className="space-y-2">
-                          {losers.map((p, i) => (
-                            <div key={i} className="flex items-center gap-2.5 rounded-xl p-3 bg-red-50 border border-red-100">
-                              <div className="w-6 h-6 rounded-lg bg-red-500 flex items-center justify-center flex-shrink-0">
-                                <ArrowDownRight className="w-3.5 h-3.5 text-white" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-xs font-bold text-red-900 truncate">{p.product}</p>
-                                <p className="text-[10px] text-red-700">{formatCurrency(p.total_sales)}</p>
-                              </div>
-                              <span className="text-sm font-black text-red-700 flex-shrink-0">{p.delta.toFixed(1)}%</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Conclusiones y recomendaciones */}
-                  <div className="rounded-2xl p-5 border-2" style={{ borderColor: '#e91e8c20', background: 'linear-gradient(135deg, #fdf2f8 0%, #fff 100%)' }}>
-                    <p className="text-[10px] font-black uppercase tracking-[0.15em] mb-3" style={{ color: '#be185d' }}>Conclusiones & Acciones Recomendadas</p>
-                    <div className="space-y-2.5">
-                      {[
-                        concentracionPct > 60
-                          ? { icon: AlertTriangle, color: 'text-amber-600', bg: 'bg-amber-50', text: `Alta concentración: el ${concentracionPct.toFixed(0)}% de las ventas proviene de solo 3 productos. Se recomienda diversificar el mix y potenciar productos de secciones secundarias.` }
-                          : { icon: CheckCircle, color: 'text-emerald-600', bg: 'bg-emerald-50', text: `Mix saludable: la concentración del ${concentracionPct.toFixed(0)}% en el top 3 indica un portafolio equilibrado. Continúa impulsando la variedad de exhibición.` },
-                        topDept
-                          ? { icon: Star, color: 'text-pink-600', bg: 'bg-pink-50', text: `El departamento líder "${topDept.dept}" concentra el ${topDept.deptPart.toFixed(1)}% de la venta. Prioriza la disponibilidad de inventario y la exhibición de sus productos estrella.` }
-                          : null,
-                        winners.length > 0
-                          ? { icon: Zap, color: 'text-purple-600', bg: 'bg-purple-50', text: `Producto en auge: "${winners[0]?.product}" creció ${winners[0]?.delta?.toFixed(1)}% — maximiza su visibilidad y asegura stock suficiente para el próximo período.` }
-                          : null,
-                        losers.length > 0 && losers[0]?.delta < -10
-                          ? { icon: TrendingDown, color: 'text-red-600', bg: 'bg-red-50', text: `Alerta de caída: "${losers[0]?.product}" cayó ${Math.abs(losers[0]?.delta || 0).toFixed(1)}% — evalúa su posicionamiento en nevera, precio y tácticas de impulso.` }
-                          : null,
-                      ].filter(Boolean).map((item, i) => {
-                        const Icon = item.icon;
-                        return (
-                          <div key={i} className={`flex items-start gap-2.5 rounded-xl p-3 ${item.bg}`}>
-                            <Icon className={`w-4 h-4 flex-shrink-0 mt-0.5 ${item.color}`} />
-                            <p className="text-xs text-slate-700 leading-relaxed">{item.text}</p>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Pie del informe */}
-                  <div className="border-t border-slate-100 pt-4 flex items-center justify-between">
-                    <p className="text-[10px] text-slate-400">Generado automáticamente · {reportDate} · {storeCode}</p>
-                    <button onClick={() => setOpen(false)}
-                      className="text-xs font-bold px-4 py-2 rounded-xl text-white transition-all"
-                      style={{ background: 'linear-gradient(135deg, #e91e8c, #7c3aed)' }}>
-                      Cerrar
-                    </button>
-                  </div>
-                </div>
+                ))}
               </div>
-            </motion.div>
-          </motion.div>
+            </div>
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] mb-4 flex items-center gap-2" style={{ color: EXEC.textMuted }}>
+                <TrendingDown className="w-3.5 h-3.5 text-red-400" /> Mayor Caída vs {prevMonthLabel}
+              </p>
+              <div className="space-y-2">
+                {losers.map((p, i) => (
+                  <div key={i} className="flex items-center gap-3 rounded-xl p-3" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)' }}>
+                    <div className="w-7 h-7 rounded-lg bg-red-500 flex items-center justify-center flex-shrink-0">
+                      <ArrowDownRight className="w-3.5 h-3.5 text-white" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold truncate" style={{ color: EXEC.textPrimary }}>{p.product}</p>
+                      <p className="text-[10px] text-red-400">{formatCurrency(p.total_sales)}</p>
+                    </div>
+                    <span className="text-sm font-black text-red-400 flex-shrink-0">{p.delta.toFixed(1)}%</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         )}
-      </AnimatePresence>
-    </>
+
+        {/* Concentración del negocio */}
+        <div className="rounded-2xl p-5" style={{ background: 'rgba(255,255,255,0.02)', border: `1px solid ${EXEC.border}` }}>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: EXEC.textMuted }}>Concentración del Portafolio</p>
+            <span className="text-xs font-black px-3 py-1 rounded-full" style={{ background: concentracionPct > 60 ? 'rgba(245,158,11,0.15)' : 'rgba(16,185,129,0.15)', color: concentracionPct > 60 ? EXEC.accent5 : EXEC.accent4 }}>
+              {concentracionPct.toFixed(0)}% en Top 5
+            </span>
+          </div>
+          <div className="h-2 rounded-full overflow-hidden mb-2" style={{ background: 'rgba(255,255,255,0.06)' }}>
+            <motion.div className="h-full rounded-full"
+              style={{ background: concentracionPct > 60 ? EXEC.grad4 : EXEC.grad3 }}
+              initial={{ width: 0 }} animate={{ width: `${Math.min(concentracionPct, 100)}%` }} transition={{ duration: 1.2 }} />
+          </div>
+          <p className="text-xs" style={{ color: EXEC.textSecondary }}>
+            {concentracionPct > 60
+              ? `⚠ Alta concentración: el ${concentracionPct.toFixed(0)}% de las ventas viene de solo 5 productos. Diversificar mix para reducir riesgo.`
+              : `✓ Portafolio balanceado: la concentración del ${concentracionPct.toFixed(0)}% en el top 5 refleja una distribución saludable.`}
+          </p>
+        </div>
+
+        {/* Acciones recomendadas */}
+        <div>
+          <p className="text-[10px] font-black uppercase tracking-[0.18em] mb-4" style={{ color: EXEC.textMuted }}>Acciones Recomendadas</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {[
+              concentracionPct > 60
+                ? { icon: AlertTriangle, color: EXEC.accent5, bg: `${EXEC.accent5}12`, border: `${EXEC.accent5}30`, text: `Diversificar: el ${concentracionPct.toFixed(0)}% se concentra en 5 productos. Potenciar secciones secundarias.` }
+                : { icon: CheckCircle, color: EXEC.accent4, bg: `${EXEC.accent4}12`, border: `${EXEC.accent4}30`, text: `Mix saludable (${concentracionPct.toFixed(0)}% top 5). Continuar impulsando variedad de exhibición.` },
+              topDept ? { icon: Target, color: EXEC.accent1, bg: `${EXEC.accent1}12`, border: `${EXEC.accent1}30`, text: `Depto. líder "${topDept.dept}" (${topDept.deptPart.toFixed(1)}%): priorizar inventario y exhibición estelar.` } : null,
+              winners[0] ? { icon: Zap, color: EXEC.accent2, bg: `${EXEC.accent2}12`, border: `${EXEC.accent2}30`, text: `Impulsar "${winners[0].product}" (+${winners[0].delta.toFixed(1)}%). Maximizar visibilidad y asegurar stock.` } : null,
+              losers[0] && losers[0].delta < -10 ? { icon: TrendingDown, color: EXEC.danger, bg: `${EXEC.danger}12`, border: `${EXEC.danger}30`, text: `Alerta en "${losers[0].product}" (${losers[0].delta.toFixed(1)}%). Revisar posicionamiento, precio y stock.` } : null,
+              { icon: Activity, color: EXEC.accent3, bg: `${EXEC.accent3}12`, border: `${EXEC.accent3}30`, text: `Con ${summary.totalProducts} productos activos en ${summary.totalDepts} departamentos, el portafolio tiene amplio margen de rotación y exhibición.` },
+            ].filter(Boolean).map((item, i) => {
+              const Icon = item.icon;
+              return (
+                <div key={i} className="flex items-start gap-3 rounded-xl p-4" style={{ background: item.bg, border: `1px solid ${item.border}` }}>
+                  <Icon className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: item.color }} />
+                  <p className="text-xs leading-relaxed" style={{ color: EXEC.textPrimary }}>{item.text}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-between pt-4" style={{ borderTop: `1px solid ${EXEC.borderLight}` }}>
+          <p className="text-[10px]" style={{ color: EXEC.textMuted }}>Generado automáticamente · {reportDate} · {storeCode} · Uso Confidencial Gerencial</p>
+          <div className="flex items-center gap-2">
+            <button onClick={handleDownload}
+              className="flex items-center gap-1.5 text-xs font-bold px-4 py-2 rounded-xl transition-all hover:opacity-90"
+              style={{ background: EXEC.grad1, color: '#fff' }}>
+              <Download className="w-3.5 h-3.5" /> Descargar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -1002,76 +1089,79 @@ export default function SalesReportView() {
   const currentMonthLabel = `${MONTHS_NAMES[effectiveMonth - 1]} ${effectiveYear}`;
 
   return (
-    <div className="min-h-screen" style={{ background: '#f8fafc' }}>
-      {/* Header Premium — oscuro con acento índigo */}
-      <div className="sticky top-0 z-30 shadow-lg" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)' }}>
+    <div className="min-h-screen" style={{ background: EXEC.bg }}>
+      {/* Header ejecutivo oscuro premium */}
+      <div className="sticky top-0 z-30" style={{ background: EXEC.bgCard, borderBottom: `1px solid ${EXEC.border}`, boxShadow: '0 4px 30px rgba(0,0,0,0.4)' }}>
         <div className="max-w-6xl mx-auto px-4 py-4">
           <div className="flex items-center gap-3 flex-wrap">
-            <button onClick={handleBack} className="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-all flex-shrink-0">
-              <ArrowLeft className="w-5 h-5 text-white" />
+            <button onClick={handleBack} className="p-2 rounded-xl transition-all flex-shrink-0"
+              style={{ background: 'rgba(255,255,255,0.06)', border: `1px solid ${EXEC.borderLight}` }}>
+              <ArrowLeft className="w-5 h-5" style={{ color: EXEC.textSecondary }} />
             </button>
             <div className="flex-1 min-w-0">
-              <h1 className="text-lg font-black tracking-tight text-white">Participación del Negocio</h1>
-              <p className="text-slate-400 text-xs font-medium">{storeCode} · {currentMonthLabel}</p>
+              <h1 className="text-lg font-black tracking-tight" style={{ color: EXEC.textPrimary }}>Participación del Negocio</h1>
+              <p className="text-xs font-medium" style={{ color: EXEC.textMuted }}>{storeCode} · {currentMonthLabel} · vs {prevMonthLabel}</p>
             </div>
 
-            {/* Selector de mes en header */}
-            <div className="flex items-center gap-2 rounded-xl px-3 py-2" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
-              <Calendar className="w-3.5 h-3.5 text-slate-400" />
+            {/* Selector de mes */}
+            <div className="flex items-center gap-2 rounded-xl px-3 py-2" style={{ background: 'rgba(99,102,241,0.1)', border: `1px solid ${EXEC.border}` }}>
+              <Calendar className="w-3.5 h-3.5" style={{ color: EXEC.accent1 }} />
               <select value={selectedMonth} onChange={e => { setSelectedMonth(Number(e.target.value)); setSelectedProduct(null); }}
-                className="bg-transparent text-white text-xs font-bold border-none outline-none cursor-pointer">
-                {MONTHS_NAMES.map((m, i) => <option key={i+1} value={i+1} className="bg-slate-900">{m}</option>)}
+                className="text-xs font-bold border-none outline-none cursor-pointer" style={{ background: 'transparent', color: EXEC.textPrimary }}>
+                {MONTHS_NAMES.map((m, i) => <option key={i+1} value={i+1} style={{ background: EXEC.bgCard }}>{m}</option>)}
               </select>
               <select value={selectedYear} onChange={e => { setSelectedYear(Number(e.target.value)); setSelectedProduct(null); }}
-                className="bg-transparent text-white text-xs font-bold border-none outline-none cursor-pointer">
-                {[2024, 2025, 2026].map(y => <option key={y} value={y} className="bg-slate-900">{y}</option>)}
+                className="text-xs font-bold border-none outline-none cursor-pointer" style={{ background: 'transparent', color: EXEC.textPrimary }}>
+                {[2024, 2025, 2026].map(y => <option key={y} value={y} style={{ background: EXEC.bgCard }}>{y}</option>)}
               </select>
             </div>
 
             {hasData && (
-              <div className="rounded-xl px-4 py-2 text-right flex-shrink-0" style={{ background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.25)' }}>
-                <p className="text-base font-black text-indigo-300">{formatCurrency(summary.totalSales)}</p>
-                <p className="text-[10px] text-slate-500">Venta Total</p>
+              <div className="rounded-xl px-4 py-2 text-right flex-shrink-0" style={{ background: 'rgba(99,102,241,0.12)', border: `1px solid ${EXEC.border}` }}>
+                <p className="text-base font-black" style={{ color: EXEC.accent1 }}>{formatCurrency(summary.totalSales)}</p>
+                <p className="text-[10px]" style={{ color: EXEC.textMuted }}>Venta Total</p>
               </div>
             )}
           </div>
-
-
         </div>
       </div>
 
       <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
         {!hasData ? (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-2xl shadow-lg p-12 text-center border border-slate-200">
+            className="rounded-2xl shadow-lg p-12 text-center" style={{ background: EXEC.bgCard, border: `1px solid ${EXEC.border}` }}>
             <div className="text-6xl mb-4">📊</div>
-            <h2 className="text-xl font-bold text-slate-700 mb-2">Sin datos para {currentMonthLabel}</h2>
-            <p className="text-slate-500 text-sm">
+            <h2 className="text-xl font-bold mb-2" style={{ color: EXEC.textPrimary }}>Sin datos para {currentMonthLabel}</h2>
+            <p className="text-sm" style={{ color: EXEC.textSecondary }}>
               {availableMonths.length > 0
                 ? `Selecciona otro mes. Meses disponibles: ${availableMonths.map(m => `${MONTHS_NAMES[m.month-1]} ${m.year}`).join(', ')}`
                 : 'El gerente debe cargar el reporte de participación para ver los datos.'}
             </p>
-            <Button onClick={handleBack} variant="outline" className="mt-6"><ArrowLeft className="w-4 h-4 mr-2" />Volver</Button>
+            <button onClick={handleBack} className="mt-6 flex items-center gap-2 mx-auto px-6 py-2.5 rounded-xl text-sm font-bold transition-all"
+              style={{ background: EXEC.grad1, color: '#fff' }}>
+              <ArrowLeft className="w-4 h-4" /> Volver
+            </button>
           </motion.div>
         ) : (
           <>
-            {/* KPI Cards */}
+            {/* KPI Cards ejecutivos */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
-                { icon: DollarSign, label: 'Venta Total', value: formatCurrency(summary.totalSales), sub: null, grad: 'linear-gradient(135deg, #6366f1, #8b5cf6)', light: '#f0f4ff' },
-                { icon: Package, label: 'Productos', value: summary.totalProducts, sub: null, grad: 'linear-gradient(135deg, #0ea5e9, #6366f1)', light: '#f0f9ff' },
-                { icon: Layers, label: 'Departamentos', value: summary.totalDepts, sub: null, grad: 'linear-gradient(135deg, #10b981, #0ea5e9)', light: '#f0fdf4' },
-                { icon: Award, label: 'Top Producto', value: summary.topProduct?.product || '—', sub: formatCurrency(summary.topProduct?.total_sales), grad: 'linear-gradient(135deg, #f59e0b, #f97316)', light: '#fffbeb' },
-              ].map(({ icon: Icon, label, value, sub, grad, light }, i) => (
+                { icon: DollarSign, label: 'Venta Total', value: formatCurrency(summary.totalSales), sub: null, grad: EXEC.grad1, accent: EXEC.accent1 },
+                { icon: Package, label: 'Productos', value: summary.totalProducts, sub: null, grad: EXEC.grad2, accent: EXEC.accent3 },
+                { icon: Layers, label: 'Departamentos', value: summary.totalDepts, sub: null, grad: EXEC.grad3, accent: EXEC.accent4 },
+                { icon: Award, label: 'Top Producto', value: summary.topProduct?.product || '—', sub: formatCurrency(summary.topProduct?.total_sales), grad: EXEC.grad4, accent: EXEC.accent5 },
+              ].map(({ icon: Icon, label, value, sub, grad, accent }, i) => (
                 <motion.div key={i} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07 }}
-                  className="bg-white rounded-2xl border border-slate-100 p-4 overflow-hidden relative hover:shadow-lg transition-shadow">
-                  <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full opacity-20" style={{ background: grad }} />
+                  className="rounded-2xl p-4 overflow-hidden relative hover:scale-[1.02] transition-transform"
+                  style={{ background: EXEC.bgCard, border: `1px solid ${EXEC.borderLight}` }}>
+                  <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full opacity-15" style={{ background: grad }} />
                   <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-3" style={{ background: grad }}>
                     <Icon className="w-4 h-4 text-white" />
                   </div>
-                  <p className="text-xs text-slate-400 font-medium mb-1">{label}</p>
-                  <p className={`font-black text-slate-900 ${typeof value === 'string' && value.length > 15 ? 'text-xs leading-tight' : 'text-xl'}`}>{value}</p>
-                  {sub && <p className="text-xs font-bold mt-0.5 text-slate-500">{sub}</p>}
+                  <p className="text-xs font-medium mb-1" style={{ color: EXEC.textMuted }}>{label}</p>
+                  <p className={`font-black ${typeof value === 'string' && value.length > 15 ? 'text-xs leading-tight' : 'text-xl'}`} style={{ color: EXEC.textPrimary }}>{value}</p>
+                  {sub && <p className="text-xs font-bold mt-0.5" style={{ color: accent }}>{sub}</p>}
                 </motion.div>
               ))}
             </div>
@@ -1080,49 +1170,42 @@ export default function SalesReportView() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
               {/* Mix de Departamentos */}
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-                className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                <div className="px-6 pt-5 pb-4 border-b border-slate-100">
+                className="rounded-2xl overflow-hidden" style={{ background: EXEC.bgCard, border: `1px solid ${EXEC.borderLight}` }}>
+                <div className="px-6 pt-5 pb-4" style={{ borderBottom: `1px solid ${EXEC.borderLight}` }}>
                   <div className="flex items-start justify-between">
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400 mb-0.5">Distribución</p>
-                      <h3 className="text-slate-900 font-black text-lg leading-tight">Mix de Departamentos</h3>
-                      <p className="text-slate-400 text-xs mt-0.5">{currentMonthLabel} · {hierarchy.length} categorías</p>
+                      <p className="text-[10px] font-bold uppercase tracking-[0.15em] mb-0.5" style={{ color: EXEC.textMuted }}>Distribución</p>
+                      <h3 className="font-black text-lg leading-tight" style={{ color: EXEC.textPrimary }}>Mix de Departamentos</h3>
+                      <p className="text-xs mt-0.5" style={{ color: EXEC.textMuted }}>{currentMonthLabel} · {hierarchy.length} categorías</p>
                     </div>
-                    <div className="text-right rounded-xl px-3 py-2" style={{ background: '#f0f4ff' }}>
-                      <p className="text-xl font-black text-indigo-700">{formatCurrency(summary.totalSales)}</p>
-                      <p className="text-indigo-400 text-[10px]">venta total</p>
+                    <div className="text-right rounded-xl px-3 py-2" style={{ background: `${EXEC.accent1}15` }}>
+                      <p className="text-xl font-black" style={{ color: EXEC.accent1 }}>{formatCurrency(summary.totalSales)}</p>
+                      <p className="text-[10px]" style={{ color: EXEC.textMuted }}>venta total</p>
                     </div>
                   </div>
                 </div>
                 <div className="px-6 py-4 space-y-3 max-h-80 overflow-y-auto">
                   {hierarchy.filter(h => h.deptSales > 0).map((h, i) => {
-                    const barColors = [
-                      'linear-gradient(90deg, #6366f1, #8b5cf6)',
-                      'linear-gradient(90deg, #0ea5e9, #6366f1)',
-                      'linear-gradient(90deg, #10b981, #0ea5e9)',
-                      'linear-gradient(90deg, #f59e0b, #f97316)',
-                      'linear-gradient(90deg, #ef4444, #f97316)',
-                    ];
-                    const isTop = i === 0;
+                    const color = COLORS[i % COLORS.length];
                     return (
-                      <div key={i} className="group">
+                      <div key={i}>
                         <div className="flex items-center justify-between mb-1.5">
                           <div className="flex items-center gap-2 min-w-0 flex-1">
-                            <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: barColors[i % barColors.length].split(',')[1]?.trim().split(')')[0] || '#6366f1' }} />
-                            <span className={`text-sm font-semibold truncate ${isTop ? 'text-slate-900' : 'text-slate-600'}`}>{h.dept}</span>
+                            <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: color }} />
+                            <span className="text-sm font-semibold truncate" style={{ color: i === 0 ? EXEC.textPrimary : EXEC.textSecondary }}>{h.dept}</span>
                           </div>
                           <div className="flex items-center gap-3 flex-shrink-0 ml-3">
-                            <span className="text-slate-400 text-xs">{formatCurrency(h.deptSales)}</span>
-                            <span className="text-sm font-black min-w-[3rem] text-right text-slate-700">{h.deptPart.toFixed(1)}%</span>
+                            <span className="text-xs" style={{ color: EXEC.textMuted }}>{formatCurrency(h.deptSales)}</span>
+                            <span className="text-sm font-black min-w-[3rem] text-right" style={{ color }}>{h.deptPart.toFixed(1)}%</span>
                           </div>
                         </div>
-                        <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+                        <div className="h-2 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.05)' }}>
                           <motion.div
                             initial={{ width: 0 }}
                             animate={{ width: `${Math.min(h.deptPart, 100)}%` }}
-                            transition={{ duration: 0.9, delay: i * 0.07, ease: [0.16, 1, 0.3, 1] }}
+                            transition={{ duration: 0.9, delay: i * 0.07 }}
                             className="h-full rounded-full"
-                            style={{ background: barColors[i % barColors.length] }}
+                            style={{ background: color }}
                           />
                         </div>
                       </div>
@@ -1133,17 +1216,17 @@ export default function SalesReportView() {
 
               {/* Top 10 Productos */}
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-                className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                <div className="px-6 pt-5 pb-4 border-b border-slate-100">
+                className="rounded-2xl overflow-hidden" style={{ background: EXEC.bgCard, border: `1px solid ${EXEC.borderLight}` }}>
+                <div className="px-6 pt-5 pb-4" style={{ borderBottom: `1px solid ${EXEC.borderLight}` }}>
                   <div className="flex items-start justify-between">
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400 mb-0.5">Ranking</p>
-                      <h3 className="text-slate-900 font-black text-lg leading-tight">Top 10 Productos</h3>
-                      <p className="text-slate-400 text-xs mt-0.5">{currentMonthLabel} · clic para análisis</p>
+                      <p className="text-[10px] font-bold uppercase tracking-[0.15em] mb-0.5" style={{ color: EXEC.textMuted }}>Ranking</p>
+                      <h3 className="font-black text-lg leading-tight" style={{ color: EXEC.textPrimary }}>Top 10 Productos</h3>
+                      <p className="text-xs mt-0.5" style={{ color: EXEC.textMuted }}>{currentMonthLabel} · clic para análisis</p>
                     </div>
-                    <div className="text-right rounded-xl px-3 py-2 bg-slate-50">
-                      <p className="text-xl font-black text-slate-700">{allProducts.length}</p>
-                      <p className="text-slate-400 text-[10px]">productos</p>
+                    <div className="text-right rounded-xl px-3 py-2" style={{ background: 'rgba(255,255,255,0.04)' }}>
+                      <p className="text-xl font-black" style={{ color: EXEC.textPrimary }}>{allProducts.length}</p>
+                      <p className="text-[10px]" style={{ color: EXEC.textMuted }}>productos</p>
                     </div>
                   </div>
                 </div>
@@ -1161,37 +1244,36 @@ export default function SalesReportView() {
                       const isTop3 = i < 3;
                       return (
                         <motion.div key={i}
-                          whileHover={{ backgroundColor: '#f8fafc' }}
                           whileTap={{ scale: 0.99 }}
                           onClick={() => setSelectedProduct(isSelected ? null : p)}
                           className="cursor-pointer rounded-xl px-3 py-2.5 transition-all"
-                          style={{ background: isSelected ? '#eef2ff' : 'transparent', border: isSelected ? '1px solid #c7d2fe' : '1px solid transparent' }}>
+                          style={{ background: isSelected ? `${EXEC.accent1}18` : 'transparent', border: isSelected ? `1px solid ${EXEC.accent1}40` : '1px solid transparent' }}>
                           <div className="flex items-center gap-2 mb-1.5">
                             <div className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 text-[10px] font-black"
                               style={{
-                                background: isTop3 ? (isSelected ? '#6366f1' : '#eef2ff') : '#f1f5f9',
-                                color: isTop3 ? (isSelected ? '#fff' : '#6366f1') : '#94a3b8'
+                                background: isTop3 ? (isSelected ? EXEC.accent1 : `${EXEC.accent1}20`) : 'rgba(255,255,255,0.06)',
+                                color: isTop3 ? (isSelected ? '#fff' : EXEC.accent1) : EXEC.textMuted
                               }}>
                               {i + 1}
                             </div>
-                            <span className="text-slate-800 text-xs font-semibold truncate flex-1">{p.product}</span>
+                            <span className="text-xs font-semibold truncate flex-1" style={{ color: EXEC.textPrimary }}>{p.product}</span>
                             <div className="flex items-center gap-2 flex-shrink-0">
                               {delta !== null && (
-                                <span className={`text-[10px] font-bold flex items-center gap-0.5 ${delta >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+                                <span className={`text-[10px] font-bold flex items-center gap-0.5 ${delta >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                                   {delta >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
                                   {delta >= 0 ? '+' : ''}{delta.toFixed(1)}%
                                 </span>
                               )}
-                              <span className="text-xs font-black text-slate-800">{formatCurrency(p.total_sales)}</span>
+                              <span className="text-xs font-black" style={{ color: EXEC.textPrimary }}>{formatCurrency(p.total_sales)}</span>
                             </div>
                           </div>
-                          <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden ml-8">
+                          <div className="h-1.5 rounded-full overflow-hidden ml-8" style={{ background: 'rgba(255,255,255,0.05)' }}>
                             <motion.div
                               initial={{ width: 0 }}
                               animate={{ width: `${pct}%` }}
-                              transition={{ duration: 0.8, delay: i * 0.05, ease: [0.16, 1, 0.3, 1] }}
+                              transition={{ duration: 0.8, delay: i * 0.05 }}
                               className="h-full rounded-full"
-                              style={{ background: isSelected ? '#6366f1' : isTop3 ? 'linear-gradient(90deg, #6366f1, #8b5cf6)' : '#e2e8f0' }}
+                              style={{ background: isSelected ? EXEC.accent1 : isTop3 ? EXEC.grad1 : 'rgba(255,255,255,0.15)' }}
                             />
                           </div>
                         </motion.div>
@@ -1219,30 +1301,20 @@ export default function SalesReportView() {
               currentMonthLabel={currentMonthLabel}
             />
 
-            {/* Informe Ejecutivo */}
-            <ExecutiveReport
-              hierarchy={hierarchy}
-              allProducts={allProducts}
-              summary={summary}
-              prevHierarchy={prevHierarchy}
-              currentMonthLabel={currentMonthLabel}
-              prevMonthLabel={prevMonthLabel}
-              storeCode={storeCode}
-            />
-
             {/* Product analysis modal */}
             <AnimatePresence>
               {selectedProduct && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                   className="fixed inset-0 z-50 flex items-center justify-center p-4"
-                  style={{ background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(6px)' }}
+                  style={{ background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)' }}
                   onClick={() => setSelectedProduct(null)}>
                   <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
                     onClick={e => e.stopPropagation()}
                     className="w-full max-w-2xl max-h-[90vh] overflow-y-auto relative">
                     <button onClick={() => setSelectedProduct(null)}
-                      className="absolute top-4 right-4 z-10 p-1.5 rounded-full bg-white/90 hover:bg-white shadow text-slate-500 hover:text-slate-800 transition-all">
-                      <X className="w-5 h-5" />
+                      className="absolute top-4 right-4 z-10 p-1.5 rounded-full shadow transition-all"
+                      style={{ background: EXEC.bgCard, border: `1px solid ${EXEC.border}` }}>
+                      <X className="w-5 h-5" style={{ color: EXEC.textSecondary }} />
                     </button>
                     <ProductAnalysisPanel
                       product={selectedProduct}
@@ -1258,31 +1330,33 @@ export default function SalesReportView() {
 
             {/* Tabla jerárquica */}
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-              <div className="bg-white rounded-2xl shadow-md border border-slate-100 overflow-hidden">
-                <div className="p-4 border-b border-slate-100 bg-slate-50">
+              <div className="rounded-2xl overflow-hidden" style={{ background: EXEC.bgCard, border: `1px solid ${EXEC.border}` }}>
+                <div className="p-4" style={{ borderBottom: `1px solid ${EXEC.border}` }}>
                   <div className="flex flex-wrap items-center gap-3">
-                    <h3 className="font-bold text-slate-800 flex items-center gap-2">
-                      <BarChart3 className="w-4 h-4 text-indigo-500" />
+                    <h3 className="font-bold flex items-center gap-2" style={{ color: EXEC.textPrimary }}>
+                      <BarChart3 className="w-4 h-4" style={{ color: EXEC.accent1 }} />
                       Tabla Jerárquica · {currentMonthLabel}
                     </h3>
                     <div className="flex items-center gap-2 ml-auto flex-wrap">
-                      <Filter className="w-3.5 h-3.5 text-slate-400" />
+                      <Filter className="w-3.5 h-3.5" style={{ color: EXEC.textMuted }} />
                       <select value={filterDept} onChange={e => { setFilterDept(e.target.value); setFilterSection('all'); }}
-                        className="h-8 px-2 text-xs border border-slate-200 rounded-lg bg-white focus:outline-none">
+                        className="h-8 px-2 text-xs rounded-lg focus:outline-none"
+                        style={{ background: EXEC.bg, border: `1px solid ${EXEC.border}`, color: EXEC.textPrimary }}>
                         <option value="all">Todos los deptos.</option>
                         {depts.map(d => <option key={d} value={d}>{d}</option>)}
                       </select>
                       <select value={filterSection} onChange={e => setFilterSection(e.target.value)}
-                        className="h-8 px-2 text-xs border border-slate-200 rounded-lg bg-white focus:outline-none">
+                        className="h-8 px-2 text-xs rounded-lg focus:outline-none"
+                        style={{ background: EXEC.bg, border: `1px solid ${EXEC.border}`, color: EXEC.textPrimary }}>
                         <option value="all">Todas las secciones</option>
                         {sections.map(s => <option key={s} value={s}>{s}</option>)}
                       </select>
                     </div>
                   </div>
-                  <p className="text-xs text-slate-400 mt-1">
-                    "vs Comparativo" muestra variación vs <strong>{prevMonthLabel}</strong> · Clic en producto para análisis completo
+                  <p className="text-xs mt-1" style={{ color: EXEC.textMuted }}>
+                    "vs Mes Ant." muestra variación vs <strong style={{ color: EXEC.textSecondary }}>{prevMonthLabel}</strong> · Clic en producto para análisis completo
                     {prevRecords.length === 0 && (
-                      <span className="ml-2 text-amber-500 font-semibold">⚠ Sin datos comparativos — usa el panel de comparativo para seleccionar un mes con datos</span>
+                      <span className="ml-2 font-semibold" style={{ color: EXEC.accent5 }}>⚠ Sin datos comparativos aún</span>
                     )}
                   </p>
                 </div>
@@ -1297,10 +1371,22 @@ export default function SalesReportView() {
               </div>
             </motion.div>
 
+            {/* INFORME EJECUTIVO — AL FINAL */}
+            <ExecutiveReport
+              hierarchy={hierarchy}
+              allProducts={allProducts}
+              summary={summary}
+              prevHierarchy={prevHierarchy}
+              currentMonthLabel={currentMonthLabel}
+              prevMonthLabel={prevMonthLabel}
+              storeCode={storeCode}
+            />
+
             <div className="flex justify-center pb-8">
-              <Button onClick={handleBack} variant="outline" className="gap-2 h-10 px-6 border-slate-200 text-slate-600 hover:bg-slate-50">
+              <button onClick={handleBack} className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all"
+                style={{ background: 'rgba(255,255,255,0.06)', border: `1px solid ${EXEC.borderLight}`, color: EXEC.textSecondary }}>
                 <ArrowLeft className="w-4 h-4" /> Volver al Panel
-              </Button>
+              </button>
             </div>
           </>
         )}
