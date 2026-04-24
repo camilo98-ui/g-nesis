@@ -3,15 +3,16 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  ArrowLeft, BarChart3, DollarSign, TrendingUp,
-  Filter, Search, X, Package, Layers, Star, Award, PieChart,
-  Activity, ChevronDown, Calendar, GitCompare, ArrowUpRight, ArrowDownRight
+  ArrowLeft, BarChart3, DollarSign, TrendingUp, FileText,
+  Filter, Search, X, Package, Layers, Star, Award,
+  ChevronDown, Calendar, ArrowUpRight, ArrowDownRight,
+  AlertTriangle, CheckCircle, TrendingDown, Zap, Shield
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PYGModal from '@/components/reports/PYGModal';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  Cell, PieChart as RechartsPie, Pie, RadialBarChart, RadialBar
+  Cell, RadialBarChart, RadialBar
 } from 'recharts';
 
 const COLORS = ['#ec4899', '#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#06b6d4', '#84cc16'];
@@ -43,7 +44,7 @@ function normalizeCode(code) {
   return code.toUpperCase().replace(/BOGOTA/g, 'BTA').replace(/\s+/g, ' ').trim();
 }
 
-// ─── Tabla jerárquica con buscador ───────────────────────────────────────────
+// ─── Tabla jerárquica ─────────────────────────────────────────────────────────
 function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct, selectedProduct, prevHierarchy }) {
   const [expandedDepts, setExpandedDepts] = useState({});
   const [expandedSections, setExpandedSections] = useState({});
@@ -55,12 +56,9 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
   const searchActive = search.trim().length > 0;
   const searchLower = search.toLowerCase();
 
-  // Build prev product map for quick lookup
   const prevProductMap = useMemo(() => {
     const map = {};
-    prevHierarchy?.forEach(h => h.sections.forEach(s => s.products.forEach(p => {
-      map[p.product] = p;
-    })));
+    prevHierarchy?.forEach(h => h.sections.forEach(s => s.products.forEach(p => { map[p.product] = p; })));
     return map;
   }, [prevHierarchy]);
 
@@ -96,7 +94,7 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
         <td className="py-2.5 px-3 text-right" style={{ background: '#fdf2f8' }}>
           {(() => {
             const total = sections.flatMap(s => s.products).reduce((sum, p) => sum + (p.units_sold || 0), 0);
-            return total > 0 ? <span className="text-slate-300 text-xs font-semibold">{total.toLocaleString('es-CO')}</span> : <span className="text-slate-500 text-xs">—</span>;
+            return total > 0 ? <span className="text-slate-500 text-xs font-semibold">{total.toLocaleString('es-CO')}</span> : <span className="text-slate-400 text-xs">—</span>;
           })()}
         </td>
         <td className="py-2.5 px-3 text-right" style={{ background: '#fdf2f8' }}>
@@ -105,12 +103,12 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
               const prev = prevProductMap[p.product];
               return prev && prev.total_sales > 0 ? { curr: p.total_sales, prev: prev.total_sales } : null;
             }).filter(Boolean);
-            if (prevDeptProds.length === 0) return <span className="text-slate-500 text-xs">—</span>;
+            if (prevDeptProds.length === 0) return <span className="text-slate-400 text-xs">—</span>;
             const currTotal = prevDeptProds.reduce((s, x) => s + x.curr, 0);
             const prevTotal = prevDeptProds.reduce((s, x) => s + x.prev, 0);
             const delta = ((currTotal - prevTotal) / prevTotal) * 100;
             return (
-              <span className={`flex items-center justify-end gap-0.5 font-bold text-xs ${delta >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+              <span className={`flex items-center justify-end gap-0.5 font-bold text-xs ${delta >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
                 {delta >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
                 {delta >= 0 ? '+' : ''}{delta.toFixed(1)}%
               </span>
@@ -148,7 +146,7 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
           <td className="py-2 px-3"></td>
           <td className="py-2 px-3 text-right font-semibold text-sm whitespace-nowrap" style={{ color: '#e91e8c' }}>{formatPart(section.sectionPart)}</td>
           <td className="py-2 px-3 text-right font-bold text-sm whitespace-nowrap text-slate-700">{formatCurrency(section.sectionSales)}</td>
-          <td className="py-2 px-3 text-right text-indigo-500 text-xs whitespace-nowrap font-semibold">
+          <td className="py-2 px-3 text-right text-slate-500 text-xs whitespace-nowrap font-semibold">
             {(() => {
               const total = section.products.reduce((sum, p) => sum + (p.units_sold || 0), 0);
               return total > 0 ? total.toLocaleString('es-CO') : '—';
@@ -181,8 +179,7 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
         const isSelected = selectedProduct?.product === p.product && selectedProduct?.section === p.section;
         const matchSearch = searchActive && p.product?.toLowerCase().includes(searchLower);
         const prev = prevProductMap[p.product];
-        const hasPrev = !!prev;
-        const delta = hasPrev && prev.total_sales > 0 ? ((p.total_sales - prev.total_sales) / prev.total_sales) * 100 : null;
+        const delta = prev && prev.total_sales > 0 ? ((p.total_sales - prev.total_sales) / prev.total_sales) * 100 : null;
 
         rows.push(
           <tr
@@ -221,8 +218,8 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
   return (
     <div>
       <div className="p-3 border-b border-rose-50" style={{ background: '#fff9fb' }}>
-      <div className="relative">
-      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: '#f9a8d4' }} />
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: '#f9a8d4' }} />
           <input
             type="text"
             placeholder="Buscar producto..."
@@ -254,7 +251,7 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
               <th className="py-3 px-3 text-right font-bold text-xs uppercase tracking-wider whitespace-nowrap" style={{ color: '#e91e8c' }}>% Part.</th>
               <th className="py-3 px-3 text-right font-bold text-xs uppercase tracking-wider whitespace-nowrap text-slate-500">Venta Bruta</th>
               <th className="py-3 px-3 text-right font-bold text-xs uppercase tracking-wider whitespace-nowrap text-slate-500">Uds.</th>
-              <th className="py-3 px-3 text-right font-bold text-xs uppercase tracking-wider whitespace-nowrap text-slate-500">vs Mes Ant.</th>
+              <th className="py-3 px-3 text-right font-bold text-xs uppercase tracking-wider whitespace-nowrap text-slate-500">vs Comparativo</th>
             </tr>
           </thead>
           <tbody>
@@ -273,7 +270,7 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
   );
 }
 
-// ─── Panel de análisis de producto seleccionado ───────────────────────────────
+// ─── Panel de análisis de producto ───────────────────────────────────────────
 function ProductAnalysisPanel({ product, hierarchy, grandTotal, prevHierarchy, prevMonthLabel }) {
   const dept = hierarchy.find(h => h.sections.some(s => s.products.some(p => p.product === product.product)));
   const section = dept?.sections.find(s => s.products.some(p => p.product === product.product));
@@ -283,7 +280,6 @@ function ProductAnalysisPanel({ product, hierarchy, grandTotal, prevHierarchy, p
   const rankInSection = [...siblingsInSection].sort((a, b) => b.total_sales - a.total_sales).findIndex(p => p.product === product.product) + 1;
   const rankInDept = [...siblingsInDept].sort((a, b) => b.total_sales - a.total_sales).findIndex(p => p.product === product.product) + 1;
 
-  // Previous month data
   const prevProductMap = {};
   prevHierarchy?.forEach(h => h.sections.forEach(s => s.products.forEach(p => { prevProductMap[p.product] = p; })));
   const prevData = prevProductMap[product.product];
@@ -305,7 +301,6 @@ function ProductAnalysisPanel({ product, hierarchy, grandTotal, prevHierarchy, p
     }))
   ];
 
-  // Insight
   const getInsight = () => {
     let insight = `<strong>${product.product}</strong> representa el <strong>${formatPart(product.participation)}</strong> de las ventas, siendo el <strong>#${rankInSection}</strong> en su sección y <strong>#${rankInDept}</strong> en el departamento.`;
     if (delta !== null) {
@@ -326,9 +321,9 @@ function ProductAnalysisPanel({ product, hierarchy, grandTotal, prevHierarchy, p
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
-      className="bg-white rounded-2xl shadow-lg border border-pink-200 overflow-hidden"
+      className="bg-white rounded-2xl shadow-2xl border border-pink-200 overflow-hidden"
     >
-      <div className="bg-gradient-to-r from-pink-600 via-rose-500 to-purple-600 p-5 text-white">
+      <div className="p-5 text-white" style={{ background: 'linear-gradient(135deg, #be185d 0%, #e91e8c 50%, #7c3aed 100%)' }}>
         <div className="flex items-start justify-between">
           <div className="flex-1 min-w-0">
             <p className="text-white/70 text-xs font-medium uppercase tracking-wider mb-1">Análisis de Producto</p>
@@ -340,7 +335,6 @@ function ProductAnalysisPanel({ product, hierarchy, grandTotal, prevHierarchy, p
             <p className="text-xs text-white/80">en sección</p>
           </div>
         </div>
-
         <div className="grid grid-cols-3 gap-3 mt-4">
           <div className="bg-white/15 rounded-xl p-3 text-center">
             <p className="text-lg font-black">{formatPart(product.participation)}</p>
@@ -369,7 +363,6 @@ function ProductAnalysisPanel({ product, hierarchy, grandTotal, prevHierarchy, p
       </div>
 
       <div className="p-5 space-y-5">
-        {/* Variación vs mes anterior */}
         {delta !== null && (
           <div className={`rounded-xl p-4 border flex items-center gap-3 ${delta >= 0 ? 'bg-emerald-50 border-emerald-200' : 'bg-red-50 border-red-200'}`}>
             {delta >= 0 ? <ArrowUpRight className="w-5 h-5 text-emerald-600 flex-shrink-0" /> : <ArrowDownRight className="w-5 h-5 text-red-500 flex-shrink-0" />}
@@ -384,13 +377,11 @@ function ProductAnalysisPanel({ product, hierarchy, grandTotal, prevHierarchy, p
           </div>
         )}
 
-        {/* Insight narrativo */}
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
           <p className="text-sm font-semibold text-amber-800 mb-1">💡 Insight</p>
           <p className="text-sm text-amber-700" dangerouslySetInnerHTML={{ __html: getInsight() }} />
         </div>
 
-        {/* Comparación vs sección */}
         {compChartData.length > 1 && (
           <div>
             <h4 className="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
@@ -413,7 +404,6 @@ function ProductAnalysisPanel({ product, hierarchy, grandTotal, prevHierarchy, p
           </div>
         )}
 
-        {/* Radial gauges */}
         <div className="grid grid-cols-2 gap-4">
           <div>
             <h4 className="text-xs font-bold text-slate-600 mb-2 text-center">% del Total Tienda</h4>
@@ -445,109 +435,383 @@ function ProductAnalysisPanel({ product, hierarchy, grandTotal, prevHierarchy, p
   );
 }
 
-// ─── Gráfica donut departamentos ──────────────────────────────────────────────
-function DeptPieChart({ hierarchy }) {
-  const [activeDept, setActiveDept] = useState(null);
-  const data = hierarchy.filter(h => h.deptSales > 0).map((h, i) => ({
-    name: h.dept, value: h.deptSales, pct: h.deptPart, fill: COLORS[i % COLORS.length],
-    sections: h.sections.length, products: h.sections.reduce((s, sec) => s + sec.products.length, 0),
-  })).sort((a, b) => b.value - a.value);
-  const active = activeDept ? data.find(d => d.name === activeDept) : null;
+// ─── Informe Ejecutivo Gerencial ──────────────────────────────────────────────
+function ExecutiveReport({ hierarchy, allProducts, summary, prevHierarchy, currentMonthLabel, prevMonthLabel, storeCode }) {
+  const [open, setOpen] = useState(false);
+
+  const prevProductMap = useMemo(() => {
+    const map = {};
+    prevHierarchy?.forEach(h => h.sections.forEach(s => s.products.forEach(p => { map[p.product] = p; })));
+    return map;
+  }, [prevHierarchy]);
+
+  // Métricas comparativas
+  const prevTotal = useMemo(() => {
+    return Object.values(prevProductMap).reduce((s, p) => s + (p.total_sales || 0), 0);
+  }, [prevProductMap]);
+
+  const totalDelta = prevTotal > 0 ? ((summary.totalSales - prevTotal) / prevTotal) * 100 : null;
+
+  // Top 3 ganadores y perdedores
+  const withDelta = allProducts.map(p => {
+    const prev = prevProductMap[p.product];
+    return { ...p, delta: prev && prev.total_sales > 0 ? ((p.total_sales - prev.total_sales) / prev.total_sales) * 100 : null };
+  }).filter(p => p.delta !== null);
+
+  const winners = [...withDelta].sort((a, b) => b.delta - a.delta).slice(0, 3);
+  const losers = [...withDelta].sort((a, b) => a.delta - b.delta).slice(0, 3);
+
+  // Departamento líder y rezagado
+  const topDept = hierarchy[0];
+  const bottomDept = hierarchy[hierarchy.length - 1];
+
+  // Concentración: cuánto % aportan los top 3 productos
+  const top3Sales = [...allProducts].sort((a, b) => b.total_sales - a.total_sales).slice(0, 3).reduce((s, p) => s + p.total_sales, 0);
+  const concentracionPct = summary.totalSales > 0 ? (top3Sales / summary.totalSales) * 100 : 0;
+
+  const now = new Date();
+  const reportDate = now.toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' });
 
   return (
-    <div className="space-y-4">
-      <div className="flex gap-4 items-center">
-        <div className="relative flex-shrink-0">
-          <ResponsiveContainer width={160} height={160}>
-            <RechartsPie>
-              <Pie data={data} cx="50%" cy="50%" innerRadius={50} outerRadius={75} dataKey="value" paddingAngle={2}
-                onMouseEnter={(_, idx) => setActiveDept(data[idx].name)}
-                onMouseLeave={() => setActiveDept(null)}>
-                {data.map((entry, idx) => (
-                  <Cell key={idx} fill={entry.fill} opacity={activeDept && activeDept !== entry.name ? 0.35 : 1} stroke="white" strokeWidth={2} style={{ cursor: 'pointer' }} />
-                ))}
-              </Pie>
-              <Tooltip formatter={(v, n, p) => [formatCurrency(v), p.payload.name]}
-                contentStyle={{ borderRadius: 12, fontSize: 11, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.15)' }} />
-            </RechartsPie>
-          </ResponsiveContainer>
-          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-            {active ? (
-              <><p style={{ fontSize: 10 }} className="text-xs font-black text-slate-700">{active.pct.toFixed(1)}%</p><p style={{ fontSize: 8 }} className="text-slate-400">del total</p></>
-            ) : (
-              <><p style={{ fontSize: 9 }} className="text-xs font-black text-slate-700">{data.length}</p><p style={{ fontSize: 8 }} className="text-slate-400">deptos.</p></>
-            )}
+    <>
+      {/* Botón de acceso */}
+      <motion.button
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        onClick={() => setOpen(true)}
+        className="w-full flex items-center justify-between px-6 py-4 rounded-2xl border-2 transition-all text-left"
+        style={{ borderColor: '#e91e8c22', background: 'linear-gradient(135deg, #fdf2f8 0%, #fff 60%, #f5f0ff 100%)' }}
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #e91e8c, #7c3aed)' }}>
+            <FileText className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <p className="font-black text-slate-900 text-sm">Informe Ejecutivo</p>
+            <p className="text-xs text-slate-500">Resumen gerencial · {currentMonthLabel}</p>
           </div>
         </div>
-        <div className="flex-1 space-y-2 min-w-0">
-          {data.map((d, i) => (
-            <div key={i} onMouseEnter={() => setActiveDept(d.name)} onMouseLeave={() => setActiveDept(null)}
-              className={`rounded-xl p-2.5 transition-all cursor-default ${activeDept === d.name ? 'bg-slate-100 shadow-sm' : 'hover:bg-slate-50'}`}>
-              <div className="flex items-center gap-2 mb-1">
-                <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: d.fill }} />
-                <span className="text-xs font-bold text-slate-700 truncate flex-1">{d.name}</span>
-                <span className="text-xs font-black text-slate-800 flex-shrink-0">{d.pct.toFixed(1)}%</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="flex-1 h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                  <div className="h-full rounded-full transition-all duration-500" style={{ width: `${d.pct}%`, background: d.fill }} />
-                </div>
-                <span className="text-[10px] text-slate-400 flex-shrink-0">{formatCurrency(d.value)}</span>
-              </div>
-            </div>
-          ))}
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-bold px-3 py-1 rounded-full text-white" style={{ background: '#e91e8c' }}>Nuevo</span>
+          <ChevronDown className="w-4 h-4 text-slate-400" />
         </div>
-      </div>
-    </div>
+      </motion.button>
+
+      {/* Modal del informe */}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 overflow-y-auto"
+            style={{ background: 'rgba(15,23,42,0.75)', backdropFilter: 'blur(6px)' }}
+            onClick={() => setOpen(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 40, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.97 }}
+              onClick={e => e.stopPropagation()}
+              className="relative max-w-3xl mx-auto my-8 px-4"
+            >
+              <div className="bg-white rounded-3xl overflow-hidden shadow-2xl">
+                {/* Header del informe */}
+                <div className="px-8 py-7 text-white relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #4a044e 100%)' }}>
+                  <div className="absolute top-0 right-0 w-64 h-64 rounded-full opacity-10" style={{ background: 'radial-gradient(circle, #e91e8c, transparent)', transform: 'translate(30%, -30%)' }} />
+                  <button onClick={() => setOpen(false)} className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-all">
+                    <X className="w-4 h-4" />
+                  </button>
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(233,30,140,0.3)' }}>
+                      <Shield className="w-6 h-6 text-pink-300" />
+                    </div>
+                    <div>
+                      <p className="text-white/50 text-[10px] uppercase tracking-[0.2em] font-bold">Informe Confidencial · Uso Gerencial</p>
+                      <h2 className="text-2xl font-black mt-1 leading-tight">Reporte de Participación</h2>
+                      <p className="text-white/70 text-sm mt-1">{storeCode} · {currentMonthLabel} · Emitido: {reportDate}</p>
+                    </div>
+                  </div>
+
+                  {/* Resumen rápido en header */}
+                  <div className="grid grid-cols-3 gap-3 mt-6">
+                    <div className="rounded-xl p-3 text-center" style={{ background: 'rgba(255,255,255,0.08)' }}>
+                      <p className="text-xl font-black text-white">{formatCurrency(summary.totalSales)}</p>
+                      <p className="text-white/60 text-[10px] font-medium mt-0.5">Venta Bruta Total</p>
+                    </div>
+                    <div className="rounded-xl p-3 text-center" style={{ background: 'rgba(255,255,255,0.08)' }}>
+                      <p className={`text-xl font-black ${totalDelta !== null ? (totalDelta >= 0 ? 'text-emerald-400' : 'text-red-400') : 'text-white'}`}>
+                        {totalDelta !== null ? `${totalDelta >= 0 ? '+' : ''}${totalDelta.toFixed(1)}%` : '—'}
+                      </p>
+                      <p className="text-white/60 text-[10px] font-medium mt-0.5">vs {prevMonthLabel}</p>
+                    </div>
+                    <div className="rounded-xl p-3 text-center" style={{ background: 'rgba(255,255,255,0.08)' }}>
+                      <p className="text-xl font-black text-white">{concentracionPct.toFixed(0)}%</p>
+                      <p className="text-white/60 text-[10px] font-medium mt-0.5">Concentración Top 3</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Cuerpo del informe */}
+                <div className="px-8 py-6 space-y-6">
+
+                  {/* Valoración general */}
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 mb-3">Valoración General</p>
+                    <div className={`rounded-2xl p-5 border-2 ${totalDelta === null ? 'border-slate-200 bg-slate-50' : totalDelta >= 5 ? 'border-emerald-300 bg-emerald-50' : totalDelta >= 0 ? 'border-amber-300 bg-amber-50' : 'border-red-300 bg-red-50'}`}>
+                      <div className="flex items-start gap-3">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${totalDelta === null ? 'bg-slate-200' : totalDelta >= 5 ? 'bg-emerald-500' : totalDelta >= 0 ? 'bg-amber-500' : 'bg-red-500'}`}>
+                          {totalDelta === null ? <Zap className="w-5 h-5 text-white" /> : totalDelta >= 5 ? <CheckCircle className="w-5 h-5 text-white" /> : totalDelta >= 0 ? <TrendingUp className="w-5 h-5 text-white" /> : <AlertTriangle className="w-5 h-5 text-white" />}
+                        </div>
+                        <div>
+                          <p className={`font-black text-lg ${totalDelta === null ? 'text-slate-700' : totalDelta >= 5 ? 'text-emerald-800' : totalDelta >= 0 ? 'text-amber-800' : 'text-red-800'}`}>
+                            {totalDelta === null ? 'Sin datos comparativos disponibles' : totalDelta >= 5 ? 'Desempeño Sobresaliente' : totalDelta >= 0 ? 'Desempeño Estable' : 'Alerta: Caída en Ventas'}
+                          </p>
+                          <p className={`text-sm mt-1 leading-relaxed ${totalDelta === null ? 'text-slate-600' : totalDelta >= 5 ? 'text-emerald-700' : totalDelta >= 0 ? 'text-amber-700' : 'text-red-700'}`}>
+                            {totalDelta === null
+                              ? `Durante ${currentMonthLabel}, la tienda ${storeCode} generó ${formatCurrency(summary.totalSales)} en venta bruta con ${summary.totalProducts} productos activos distribuidos en ${summary.totalDepts} departamentos. No se cuenta con datos del período anterior para comparación.`
+                              : totalDelta >= 5
+                              ? `La tienda ${storeCode} registró un crecimiento de ${totalDelta.toFixed(1)}% respecto a ${prevMonthLabel}, alcanzando ${formatCurrency(summary.totalSales)} en venta bruta. El portafolio muestra dinamismo positivo con ${summary.totalProducts} productos activos.`
+                              : totalDelta >= 0
+                              ? `La tienda ${storeCode} se mantuvo estable con ${totalDelta.toFixed(1)}% de variación vs ${prevMonthLabel}. La venta bruta de ${formatCurrency(summary.totalSales)} refleja consistencia operativa aunque hay espacio para impulsar el crecimiento.`
+                              : `La tienda ${storeCode} presenta una caída de ${Math.abs(totalDelta).toFixed(1)}% vs ${prevMonthLabel}. Se requiere revisión inmediata del mix de productos y estrategia de exhibición para recuperar el desempeño.`
+                            }
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Estructura del mix */}
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 mb-3">Estructura del Mix de Producto</p>
+                    <div className="space-y-2.5">
+                      {hierarchy.slice(0, 5).map((h, i) => {
+                        const isLeader = i === 0;
+                        const prevDeptProds = (prevHierarchy || [])?.find(ph => ph.dept === h.dept);
+                        const prevDeptSales = prevDeptProds?.deptSales || 0;
+                        const deptDelta = prevDeptSales > 0 ? ((h.deptSales - prevDeptSales) / prevDeptSales) * 100 : null;
+                        return (
+                          <div key={i} className={`flex items-center gap-3 rounded-xl p-3.5 ${isLeader ? 'border-2' : 'border border-slate-100 bg-slate-50/50'}`}
+                            style={isLeader ? { borderColor: '#e91e8c40', background: '#fdf2f8' } : {}}>
+                            <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-black text-white"
+                              style={{ background: isLeader ? '#e91e8c' : '#94a3b8' }}>
+                              {i + 1}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="text-sm font-bold text-slate-800 truncate">{h.dept}</span>
+                                <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                                  {deptDelta !== null && (
+                                    <span className={`text-xs font-bold ${deptDelta >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+                                      {deptDelta >= 0 ? '+' : ''}{deptDelta.toFixed(1)}%
+                                    </span>
+                                  )}
+                                  <span className="text-xs font-black" style={{ color: isLeader ? '#e91e8c' : '#64748b' }}>{h.deptPart.toFixed(1)}%</span>
+                                </div>
+                              </div>
+                              <div className="h-1.5 rounded-full bg-slate-200 overflow-hidden">
+                                <div className="h-full rounded-full" style={{ width: `${h.deptPart}%`, background: isLeader ? 'linear-gradient(90deg, #e91e8c, #f472b6)' : '#cbd5e1' }} />
+                              </div>
+                            </div>
+                            <span className="text-xs text-slate-500 flex-shrink-0">{formatCurrency(h.deptSales)}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Ganadores y Perdedores */}
+                  {withDelta.length > 0 && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 mb-3 flex items-center gap-1.5">
+                          <TrendingUp className="w-3 h-3 text-emerald-500" /> Productos con Mayor Crecimiento
+                        </p>
+                        <div className="space-y-2">
+                          {winners.map((p, i) => (
+                            <div key={i} className="flex items-center gap-2.5 rounded-xl p-3 bg-emerald-50 border border-emerald-100">
+                              <div className="w-6 h-6 rounded-lg bg-emerald-500 flex items-center justify-center flex-shrink-0">
+                                <ArrowUpRight className="w-3.5 h-3.5 text-white" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-bold text-emerald-900 truncate">{p.product}</p>
+                                <p className="text-[10px] text-emerald-700">{formatCurrency(p.total_sales)}</p>
+                              </div>
+                              <span className="text-sm font-black text-emerald-700 flex-shrink-0">+{p.delta.toFixed(1)}%</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 mb-3 flex items-center gap-1.5">
+                          <TrendingDown className="w-3 h-3 text-red-500" /> Productos con Mayor Caída
+                        </p>
+                        <div className="space-y-2">
+                          {losers.map((p, i) => (
+                            <div key={i} className="flex items-center gap-2.5 rounded-xl p-3 bg-red-50 border border-red-100">
+                              <div className="w-6 h-6 rounded-lg bg-red-500 flex items-center justify-center flex-shrink-0">
+                                <ArrowDownRight className="w-3.5 h-3.5 text-white" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-bold text-red-900 truncate">{p.product}</p>
+                                <p className="text-[10px] text-red-700">{formatCurrency(p.total_sales)}</p>
+                              </div>
+                              <span className="text-sm font-black text-red-700 flex-shrink-0">{p.delta.toFixed(1)}%</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Conclusiones y recomendaciones */}
+                  <div className="rounded-2xl p-5 border-2" style={{ borderColor: '#e91e8c20', background: 'linear-gradient(135deg, #fdf2f8 0%, #fff 100%)' }}>
+                    <p className="text-[10px] font-black uppercase tracking-[0.15em] mb-3" style={{ color: '#be185d' }}>Conclusiones & Acciones Recomendadas</p>
+                    <div className="space-y-2.5">
+                      {[
+                        concentracionPct > 60
+                          ? { icon: AlertTriangle, color: 'text-amber-600', bg: 'bg-amber-50', text: `Alta concentración: el ${concentracionPct.toFixed(0)}% de las ventas proviene de solo 3 productos. Se recomienda diversificar el mix y potenciar productos de secciones secundarias.` }
+                          : { icon: CheckCircle, color: 'text-emerald-600', bg: 'bg-emerald-50', text: `Mix saludable: la concentración del ${concentracionPct.toFixed(0)}% en el top 3 indica un portafolio equilibrado. Continúa impulsando la variedad de exhibición.` },
+                        topDept
+                          ? { icon: Star, color: 'text-pink-600', bg: 'bg-pink-50', text: `El departamento líder "${topDept.dept}" concentra el ${topDept.deptPart.toFixed(1)}% de la venta. Prioriza la disponibilidad de inventario y la exhibición de sus productos estrella.` }
+                          : null,
+                        winners.length > 0
+                          ? { icon: Zap, color: 'text-purple-600', bg: 'bg-purple-50', text: `Producto en auge: "${winners[0]?.product}" creció ${winners[0]?.delta?.toFixed(1)}% — maximiza su visibilidad y asegura stock suficiente para el próximo período.` }
+                          : null,
+                        losers.length > 0 && losers[0]?.delta < -10
+                          ? { icon: TrendingDown, color: 'text-red-600', bg: 'bg-red-50', text: `Alerta de caída: "${losers[0]?.product}" cayó ${Math.abs(losers[0]?.delta || 0).toFixed(1)}% — evalúa su posicionamiento en nevera, precio y tácticas de impulso.` }
+                          : null,
+                      ].filter(Boolean).map((item, i) => {
+                        const Icon = item.icon;
+                        return (
+                          <div key={i} className={`flex items-start gap-2.5 rounded-xl p-3 ${item.bg}`}>
+                            <Icon className={`w-4 h-4 flex-shrink-0 mt-0.5 ${item.color}`} />
+                            <p className="text-xs text-slate-700 leading-relaxed">{item.text}</p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Pie del informe */}
+                  <div className="border-t border-slate-100 pt-4 flex items-center justify-between">
+                    <p className="text-[10px] text-slate-400">Generado automáticamente · {reportDate} · {storeCode}</p>
+                    <button onClick={() => setOpen(false)}
+                      className="text-xs font-bold px-4 py-2 rounded-xl text-white transition-all"
+                      style={{ background: 'linear-gradient(135deg, #e91e8c, #7c3aed)' }}>
+                      Cerrar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
 
-// ─── Top 10 ───────────────────────────────────────────────────────────────────
-function Top10Chart({ products, onSelectProduct, selectedProduct, prevHierarchy }) {
-  const prevMap = {};
-  prevHierarchy?.forEach(h => h.sections.forEach(s => s.products.forEach(p => { prevMap[p.product] = p; })));
+// ─── Comparativo inline con selector de mes ───────────────────────────────────
+function MonthComparatorInline({ availableMonths, currentMonth, currentYear, compareMonth, compareYear, setCompareMonth, setCompareYear, prevRecords, summary, prevMonthLabel, currentMonthLabel }) {
+  const [open, setOpen] = useState(false);
 
-  const top10 = [...products].filter(p => p.total_sales > 0).sort((a, b) => b.total_sales - a.total_sales).slice(0, 10);
-  const maxVal = top10[0]?.total_sales || 1;
+  const prevTotal = useMemo(() => {
+    return prevRecords.filter(r => r.product && r.department).reduce((s, r) => s + (r.total_sales || 0), 0);
+  }, [prevRecords]);
+
+  const delta = prevTotal > 0 ? ((summary.totalSales - prevTotal) / prevTotal) * 100 : null;
+  const hasPrevData = prevRecords.length > 0;
 
   return (
-    <div className="space-y-2">
-      {top10.map((entry, idx) => {
-        const isSelected = selectedProduct?.product === entry.product;
-        const pct = (entry.total_sales / maxVal) * 100;
-        const color = COLORS[idx % COLORS.length];
-        const prev = prevMap[entry.product];
-        const delta = prev && prev.total_sales > 0 ? ((entry.total_sales - prev.total_sales) / prev.total_sales) * 100 : null;
-        return (
-          <motion.div key={idx} whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}
-            onClick={() => onSelectProduct(isSelected ? null : entry)}
-            className={`cursor-pointer rounded-xl px-4 py-3 transition-all border ${
-              isSelected ? 'bg-pink-50 border-pink-300 shadow-md' : 'bg-slate-50 border-transparent hover:border-slate-200 hover:bg-white hover:shadow-sm'
-            }`}
+    <div className="rounded-2xl border border-slate-100 bg-white shadow-sm overflow-hidden">
+      {/* Header clickeable */}
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center justify-between px-5 py-4 hover:bg-slate-50 transition-all"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: '#fdf2f8' }}>
+            <Calendar className="w-4 h-4" style={{ color: '#e91e8c' }} />
+          </div>
+          <div className="text-left">
+            <p className="text-sm font-black text-slate-900">Comparativo de Períodos</p>
+            <p className="text-xs text-slate-500">
+              {currentMonthLabel} <span className="text-slate-300 mx-1">vs</span> {prevMonthLabel}
+              {hasPrevData && delta !== null && (
+                <span className={`ml-2 font-bold ${delta >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+                  · {delta >= 0 ? '+' : ''}{delta.toFixed(1)}%
+                </span>
+              )}
+            </p>
+          </div>
+        </div>
+        <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            style={{ overflow: 'hidden' }}
           >
-            <div className="flex items-center justify-between mb-1.5">
-              <div className="flex items-center gap-2 min-w-0 flex-1">
-                <span className="text-xs font-black text-slate-400 w-5 flex-shrink-0">#{idx + 1}</span>
-                <span className={`text-sm font-semibold truncate ${isSelected ? 'text-pink-700' : 'text-slate-700'}`}>{entry.product}</span>
+            <div className="px-5 pb-5 border-t border-slate-50 space-y-4">
+              {/* Selector de mes a comparar */}
+              <div className="flex items-center gap-3 pt-4 flex-wrap">
+                <p className="text-xs font-bold text-slate-500">Comparar contra:</p>
+                <div className="flex items-center gap-2 bg-rose-50 border border-rose-100 rounded-xl px-3 py-2">
+                  <select value={compareMonth} onChange={e => setCompareMonth(Number(e.target.value))}
+                    className="bg-transparent text-slate-700 text-sm font-bold border-none outline-none cursor-pointer">
+                    {MONTHS_NAMES.map((m, i) => <option key={i+1} value={i+1}>{m}</option>)}
+                  </select>
+                  <select value={compareYear} onChange={e => setCompareYear(Number(e.target.value))}
+                    className="bg-transparent text-slate-700 text-sm font-bold border-none outline-none cursor-pointer">
+                    {[2024, 2025, 2026].map(y => <option key={y} value={y}>{y}</option>)}
+                  </select>
+                </div>
+                {availableMonths.map((m, i) => {
+                  const isActive = m.month === compareMonth && m.year === compareYear;
+                  const isCurrent = m.month === currentMonth && m.year === currentYear;
+                  if (isCurrent) return null;
+                  return (
+                    <button key={i} onClick={() => { setCompareMonth(m.month); setCompareYear(m.year); }}
+                      className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all border ${isActive ? 'text-white border-transparent' : 'bg-white border-slate-200 text-slate-500 hover:border-rose-200 hover:text-rose-500'}`}
+                      style={isActive ? { background: 'linear-gradient(135deg, #f9a8d4, #e91e8c)' } : {}}>
+                      {MONTHS_NAMES[m.month - 1].slice(0, 3)} {m.year}
+                    </button>
+                  );
+                })}
               </div>
-              <div className="flex items-center gap-3 flex-shrink-0 ml-3">
-                {delta !== null && (
-                  <span className={`text-xs font-bold flex items-center gap-0.5 ${delta >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
-                    {delta >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-                    {delta >= 0 ? '+' : ''}{delta.toFixed(1)}%
-                  </span>
-                )}
-                <span className="text-sm font-black text-slate-800">{formatCurrency(entry.total_sales)}</span>
-                <span className="text-xs text-slate-400">{formatPart(entry.participation)}</span>
-              </div>
-            </div>
-            <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
-              <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.6, delay: idx * 0.04 }}
-                className="h-full rounded-full" style={{ background: color, opacity: isSelected ? 1 : 0.75 }} />
+
+              {/* Panel comparativo */}
+              {!hasPrevData ? (
+                <div className="rounded-xl p-4 border border-amber-200 bg-amber-50 text-center">
+                  <p className="text-amber-700 text-sm font-semibold">⚠️ Sin datos para {prevMonthLabel}</p>
+                  <p className="text-amber-600 text-xs mt-1">Carga el reporte de ese mes para ver el comparativo</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {[
+                    { label: currentMonthLabel, value: formatCurrency(summary.totalSales), sub: 'Período actual', color: '#e91e8c', bg: '#fdf2f8' },
+                    { label: prevMonthLabel, value: formatCurrency(prevTotal), sub: 'Período comparado', color: '#6b7280', bg: '#f9fafb' },
+                    { label: 'Variación', value: delta !== null ? `${delta >= 0 ? '+' : ''}${delta.toFixed(1)}%` : '—', sub: 'Diferencia %', color: delta !== null ? (delta >= 0 ? '#059669' : '#dc2626') : '#94a3b8', bg: delta !== null ? (delta >= 0 ? '#f0fdf4' : '#fef2f2') : '#f9fafb' },
+                    { label: 'Diferencia', value: formatCurrency(summary.totalSales - prevTotal), sub: 'En pesos', color: (summary.totalSales - prevTotal) >= 0 ? '#059669' : '#dc2626', bg: (summary.totalSales - prevTotal) >= 0 ? '#f0fdf4' : '#fef2f2' },
+                  ].map((item, i) => (
+                    <div key={i} className="rounded-xl p-3.5 border" style={{ background: item.bg, borderColor: item.color + '20' }}>
+                      <p className="text-[10px] font-bold uppercase tracking-wide mb-1" style={{ color: item.color + 'aa' }}>{item.label}</p>
+                      <p className="font-black text-base leading-tight" style={{ color: item.color }}>{item.value}</p>
+                      <p className="text-[10px] text-slate-400 mt-0.5">{item.sub}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </motion.div>
-        );
-      })}
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -568,7 +832,6 @@ function buildHierarchy(records) {
     const sections = Object.entries(sectionMap).map(([secName, prods]) => {
       const sectionSales = prods.reduce((s, p) => s + (p.total_sales || 0), 0);
       const sectionPart = grandTotal > 0 ? (sectionSales / grandTotal) * 100 : 0;
-      // Recalcular participación desde ventas reales para evitar valores absurdos del origen
       const mappedProds = prods.map(p => ({
         ...p,
         participation: grandTotal > 0 ? (p.total_sales / grandTotal) * 100 : 0
@@ -604,21 +867,17 @@ export default function SalesReportView() {
     } catch { return ''; }
   })();
 
-  const userRole = localStorage.getItem('userRole') || '';
   const now = new Date();
 
   const [filterDept, setFilterDept] = useState('all');
   const [filterSection, setFilterSection] = useState('all');
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [expandedCharts, setExpandedCharts] = useState({ pie: false, top10: false });
   const [showPYG, setShowPYG] = useState(false);
 
-  // Month selector
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
 
-  // Compare mode
-  const [compareMode, setCompareMode] = useState(false);
+  // Compare — siempre activo, sin toggle
   const [compareMonth, setCompareMonth] = useState(now.getMonth() === 0 ? 12 : now.getMonth());
   const [compareYear, setCompareYear] = useState(now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear());
 
@@ -638,7 +897,6 @@ export default function SalesReportView() {
     enabled: !!storeCode,
   });
 
-  // Available months from data (deduplicated)
   const availableMonths = useMemo(() => {
     const seen = new Set();
     const result = [];
@@ -648,7 +906,6 @@ export default function SalesReportView() {
         if (!seen.has(key)) { seen.add(key); result.push({ month: Number(r.month), year: Number(r.year) }); }
       }
     });
-    // Fallback: group by report_id if no month fields
     if (result.length === 0) {
       const seenIds = new Set();
       allRecords.forEach(r => {
@@ -663,41 +920,30 @@ export default function SalesReportView() {
     return result.sort((a, b) => b.year - a.year || b.month - a.month);
   }, [allRecords]);
 
-  // Automatically select the latest available month
-  const latestAvailable = availableMonths[0];
   const effectiveMonth = availableMonths.length > 0 ? selectedMonth : (now.getMonth() + 1);
   const effectiveYear = availableMonths.length > 0 ? selectedYear : now.getFullYear();
 
-  // Filter records by selected month/year
   const currentRecords = useMemo(() => {
     if (allRecords.length === 0) return [];
-    // If records have month/year fields
     const withMonths = allRecords.filter(r => r.month && r.year);
     if (withMonths.length > 0) {
       return withMonths.filter(r => r.month === effectiveMonth && r.year === effectiveYear);
     }
-    // Fallback: use latest report_id
     const latestReportId = allRecords[0]?.report_id;
     return allRecords.filter(r => r.report_id === latestReportId);
   }, [allRecords, effectiveMonth, effectiveYear]);
 
-  // Previous month records
   const prevRecords = useMemo(() => {
     const withMonths = allRecords.filter(r => r.month && r.year);
     if (withMonths.length > 0) {
-      const pm = compareMode ? compareMonth : (effectiveMonth === 1 ? 12 : effectiveMonth - 1);
-      const py = compareMode ? compareYear : (effectiveMonth === 1 ? effectiveYear - 1 : effectiveYear);
-      return withMonths.filter(r => r.month === pm && r.year === py);
+      return withMonths.filter(r => r.month === compareMonth && r.year === compareYear);
     }
     return [];
-  }, [allRecords, effectiveMonth, effectiveYear, compareMode, compareMonth, compareYear]);
+  }, [allRecords, compareMonth, compareYear]);
 
   const prevMonthLabel = useMemo(() => {
-    if (compareMode) return `${MONTHS_NAMES[compareMonth - 1]} ${compareYear}`;
-    const pm = effectiveMonth === 1 ? 12 : effectiveMonth - 1;
-    const py = effectiveMonth === 1 ? effectiveYear - 1 : effectiveYear;
-    return `${MONTHS_NAMES[pm - 1]} ${py}`;
-  }, [compareMode, compareMonth, compareYear, effectiveMonth, effectiveYear]);
+    return `${MONTHS_NAMES[compareMonth - 1]} ${compareYear}`;
+  }, [compareMonth, compareYear]);
 
   const { hierarchy, summary, allProducts } = useMemo(() => buildHierarchy(currentRecords), [currentRecords]);
   const { hierarchy: prevHierarchy } = useMemo(() => buildHierarchy(prevRecords), [prevRecords]);
@@ -714,10 +960,10 @@ export default function SalesReportView() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 to-purple-50">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #fdf2f8, #f5f0ff)' }}>
         <div className="text-center">
-          <div className="w-10 h-10 border-4 border-pink-300 border-t-pink-600 rounded-full animate-spin mx-auto mb-3" />
-          <p className="text-slate-500 text-sm">Cargando datos...</p>
+          <div className="w-12 h-12 border-4 border-pink-200 border-t-pink-600 rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-slate-500 text-sm font-medium">Cargando datos...</p>
         </div>
       </div>
     );
@@ -727,94 +973,58 @@ export default function SalesReportView() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <div className="bg-white border-b border-rose-100 px-4 py-5 shadow-sm">
-        <div className="max-w-6xl mx-auto flex items-center gap-4 flex-wrap">
-          <button onClick={handleBack} className="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 transition-all">
-            <ArrowLeft className="w-5 h-5 text-rose-400" />
-          </button>
-          <div className="flex-1 min-w-0">
-            <h1 className="text-xl font-black tracking-tight text-slate-800">Participación del Negocio</h1>
-            <p className="text-slate-400 text-xs">{storeCode}</p>
-          </div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <Button onClick={() => setShowPYG(true)} className="gap-2 h-9 px-3 text-xs font-semibold text-white" style={{ background: 'linear-gradient(135deg, #f472b6, #e91e8c)' }}>
-              <TrendingUp className="w-4 h-4" /> P&G
-            </Button>
+      {/* Header Premium */}
+      <div className="bg-white border-b border-rose-100 shadow-sm sticky top-0 z-30">
+        <div className="max-w-6xl mx-auto px-4 py-4">
+          <div className="flex items-center gap-3 flex-wrap">
+            <button onClick={handleBack} className="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 transition-all flex-shrink-0">
+              <ArrowLeft className="w-5 h-5 text-rose-400" />
+            </button>
+            <div className="flex-1 min-w-0">
+              <h1 className="text-lg font-black tracking-tight text-slate-900">Participación del Negocio</h1>
+              <p className="text-slate-400 text-xs font-medium">{storeCode} · {currentMonthLabel}</p>
+            </div>
+
+            {/* Selector de mes en header */}
+            <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2">
+              <Calendar className="w-3.5 h-3.5 text-slate-400" />
+              <select value={selectedMonth} onChange={e => { setSelectedMonth(Number(e.target.value)); setSelectedProduct(null); }}
+                className="bg-transparent text-slate-700 text-xs font-bold border-none outline-none cursor-pointer">
+                {MONTHS_NAMES.map((m, i) => <option key={i+1} value={i+1}>{m}</option>)}
+              </select>
+              <select value={selectedYear} onChange={e => { setSelectedYear(Number(e.target.value)); setSelectedProduct(null); }}
+                className="bg-transparent text-slate-700 text-xs font-bold border-none outline-none cursor-pointer">
+                {[2024, 2025, 2026].map(y => <option key={y} value={y}>{y}</option>)}
+              </select>
+            </div>
+
             {hasData && (
-              <div className="hidden md:block text-right ml-2 bg-rose-50 rounded-xl px-4 py-2">
-                <p className="text-lg font-black" style={{ color: '#e91e8c' }}>{formatCurrency(summary.totalSales)}</p>
-                <p className="text-xs text-slate-400">Venta Total</p>
+              <div className="bg-rose-50 rounded-xl px-4 py-2 text-right flex-shrink-0">
+                <p className="text-base font-black" style={{ color: '#e91e8c' }}>{formatCurrency(summary.totalSales)}</p>
+                <p className="text-[10px] text-slate-400">Venta Total</p>
               </div>
             )}
           </div>
-        </div>
 
-        {/* Month filter bar */}
-        <div className="max-w-6xl mx-auto mt-4 flex items-center gap-3 flex-wrap">
-          <div className="flex items-center gap-2 bg-rose-50 border border-rose-100 rounded-xl px-3 py-2">
-            <Calendar className="w-4 h-4 text-rose-400" />
-            <span className="text-xs text-slate-500 font-medium">Ver mes:</span>
-            <select
-              value={selectedMonth}
-              onChange={e => { setSelectedMonth(Number(e.target.value)); setSelectedProduct(null); }}
-              className="bg-transparent text-slate-700 text-sm font-bold border-none outline-none cursor-pointer"
-            >
-              {MONTHS_NAMES.map((m, i) => <option key={i+1} value={i+1}>{m}</option>)}
-            </select>
-            <select
-              value={selectedYear}
-              onChange={e => { setSelectedYear(Number(e.target.value)); setSelectedProduct(null); }}
-              className="bg-transparent text-slate-700 text-sm font-bold border-none outline-none cursor-pointer"
-            >
-              {[2024, 2025, 2026].map(y => <option key={y} value={y}>{y}</option>)}
-            </select>
-          </div>
-
-          {/* Available months chips */}
+          {/* Chips de meses disponibles */}
           {availableMonths.length > 0 && (
-            <div className="flex gap-1.5 flex-wrap">
-              {availableMonths.slice(0, 6).map((m, i) => {
+            <div className="flex gap-1.5 flex-wrap mt-3">
+              {availableMonths.slice(0, 7).map((m, i) => {
                 const isActive = m.month === selectedMonth && m.year === selectedYear;
                 return (
                   <button key={i} onClick={() => { setSelectedMonth(m.month); setSelectedYear(m.year); setSelectedProduct(null); }}
-                    className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all border ${isActive ? 'text-white border-transparent' : 'bg-white border-slate-200 text-slate-500 hover:border-rose-200 hover:text-rose-500'}`}
-                    style={isActive ? { background: 'linear-gradient(135deg, #f9a8d4, #e91e8c)', border: 'none' } : {}}>
+                    className={`px-3 py-1 rounded-full text-xs font-bold transition-all border ${isActive ? 'text-white border-transparent shadow-sm' : 'bg-white border-slate-200 text-slate-500 hover:border-rose-200 hover:text-rose-500'}`}
+                    style={isActive ? { background: 'linear-gradient(135deg, #f9a8d4, #e91e8c)' } : {}}>
                     {MONTHS_NAMES[m.month - 1].slice(0, 3)} {m.year}
                   </button>
                 );
               })}
             </div>
           )}
-
-          {/* Compare toggle */}
-          <button
-            onClick={() => setCompareMode(m => !m)}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all border ${compareMode ? 'text-white border-transparent' : 'border-slate-200 text-slate-500 hover:border-rose-200 bg-white'}`}
-            style={compareMode ? { background: 'linear-gradient(135deg, #f9a8d4, #e91e8c)' } : {}}
-          >
-            <GitCompare className="w-3.5 h-3.5" />
-            {compareMode ? 'Comparando' : 'Comparar meses'}
-          </button>
-
-          {compareMode && (
-            <div className="flex items-center gap-2 bg-rose-50 border border-rose-200 rounded-xl px-3 py-2">
-              <span className="text-xs font-medium" style={{ color: '#e91e8c' }}>vs</span>
-              <select value={compareMonth} onChange={e => setCompareMonth(Number(e.target.value))}
-                className="bg-transparent text-slate-700 text-xs font-bold border-none outline-none cursor-pointer">
-                {MONTHS_NAMES.map((m, i) => <option key={i+1} value={i+1}>{m}</option>)}
-              </select>
-              <select value={compareYear} onChange={e => setCompareYear(Number(e.target.value))}
-                className="bg-transparent text-slate-700 text-xs font-bold border-none outline-none cursor-pointer">
-                {[2024, 2025, 2026].map(y => <option key={y} value={y}>{y}</option>)}
-              </select>
-            </div>
-          )}
         </div>
       </div>
 
       <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
-
         {!hasData ? (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
             className="bg-white rounded-2xl shadow-lg p-12 text-center border border-slate-200">
@@ -829,43 +1039,18 @@ export default function SalesReportView() {
           </motion.div>
         ) : (
           <>
-            {/* Compare summary banner */}
-            {compareMode && prevRecords.length > 0 && (() => {
-              const prevTotal = prevRecords.filter(r => r.product && r.department).reduce((s, r) => s + (r.total_sales || 0), 0);
-              const delta = prevTotal > 0 ? ((summary.totalSales - prevTotal) / prevTotal) * 100 : null;
-              return (
-                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-                  className="rounded-2xl border border-rose-100 bg-rose-50 p-4 flex items-center gap-4">
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: '#fdf2f8' }}>
-                    <GitCompare className="w-4 h-4" style={{ color: '#e91e8c' }} />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-bold text-slate-800">Comparativo: <span style={{ color: '#e91e8c' }}>{currentMonthLabel}</span> <span className="text-slate-400">vs</span> <span className="text-slate-500">{prevMonthLabel}</span></p>
-                    <p className="text-xs mt-0.5 text-slate-500">
-                      {formatCurrency(summary.totalSales)} vs {formatCurrency(prevTotal)}
-                      {delta !== null && ` · ${delta >= 0 ? '+' : ''}${delta.toFixed(1)}% variación`}
-                    </p>
-                  </div>
-                  <div className={`text-lg font-black flex items-center gap-1 ${delta >= 0 ? 'text-emerald-600' : 'text-red-400'}`}>
-                    {delta >= 0 ? <ArrowUpRight className="w-5 h-5" /> : <ArrowDownRight className="w-5 h-5" />}
-                    {delta !== null ? `${delta >= 0 ? '+' : ''}${delta.toFixed(1)}%` : '—'}
-                  </div>
-                </motion.div>
-              );
-            })()}
-
             {/* KPI Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
                 { icon: DollarSign, label: 'Venta Total', value: formatCurrency(summary.totalSales), sub: null, accent: '#e91e8c', accentBg: '#fdf2f8' },
-                { icon: Package, label: 'Productos', value: summary.totalProducts, sub: null, accent: '#9d4edd', accentBg: '#f5f0ff' },
+                { icon: Package, label: 'Productos', value: summary.totalProducts, sub: null, accent: '#7c3aed', accentBg: '#f5f0ff' },
                 { icon: Layers, label: 'Departamentos', value: summary.totalDepts, sub: null, accent: '#6b7280', accentBg: '#f9fafb' },
                 { icon: Award, label: 'Top Producto', value: summary.topProduct?.product || '—', sub: formatCurrency(summary.topProduct?.total_sales), accent: '#e91e8c', accentBg: '#fdf2f8' },
               ].map(({ icon: Icon, label, value, sub, accent, accentBg }, i) => (
-                <motion.div key={i} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}
+                <motion.div key={i} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07 }}
                   className="bg-white rounded-2xl border border-slate-100 p-4 overflow-hidden relative hover:shadow-md transition-shadow">
-                  <div className="absolute top-0 right-0 w-20 h-20 rounded-bl-[2rem] opacity-40" style={{ background: accentBg }} />
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-3 flex-shrink-0" style={{ background: accentBg }}>
+                  <div className="absolute top-0 right-0 w-20 h-20 rounded-bl-[2rem] opacity-30" style={{ background: accentBg }} />
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-3" style={{ background: accentBg }}>
                     <Icon className="w-4 h-4" style={{ color: accent }} />
                   </div>
                   <p className="text-xs text-slate-400 font-medium mb-1">{label}</p>
@@ -875,13 +1060,11 @@ export default function SalesReportView() {
               ))}
             </div>
 
-            {/* Charts Row — PRO White + Magenta Suave */}
+            {/* Charts Row */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-
               {/* Mix de Departamentos */}
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
                 className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                {/* Header con acento magenta */}
                 <div className="px-6 pt-5 pb-4 border-b border-slate-50">
                   <div className="flex items-start justify-between">
                     <div>
@@ -918,11 +1101,7 @@ export default function SalesReportView() {
                             animate={{ width: `${Math.min(h.deptPart, 100)}%` }}
                             transition={{ duration: 0.9, delay: i * 0.07, ease: [0.16, 1, 0.3, 1] }}
                             className="h-full rounded-full"
-                            style={{
-                              background: isTop
-                                ? 'linear-gradient(90deg, #e91e8c, #f472b6)'
-                                : 'linear-gradient(90deg, #cbd5e1, #e2e8f0)'
-                            }}
+                            style={{ background: isTop ? 'linear-gradient(90deg, #e91e8c, #f472b6)' : 'linear-gradient(90deg, #cbd5e1, #e2e8f0)' }}
                           />
                         </div>
                       </div>
@@ -965,17 +1144,10 @@ export default function SalesReportView() {
                           whileTap={{ scale: 0.99 }}
                           onClick={() => setSelectedProduct(isSelected ? null : p)}
                           className="cursor-pointer rounded-xl px-3 py-2.5 transition-all"
-                          style={{
-                            background: isSelected ? '#fce7f3' : 'transparent',
-                            border: isSelected ? '1px solid #f9a8d4' : '1px solid transparent',
-                          }}>
+                          style={{ background: isSelected ? '#fce7f3' : 'transparent', border: isSelected ? '1px solid #f9a8d4' : '1px solid transparent' }}>
                           <div className="flex items-center gap-2 mb-1.5">
-                            {/* Número */}
                             <div className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 text-[10px] font-black"
-                              style={{
-                                background: isTop3 ? (isSelected ? '#e91e8c' : '#fce7f3') : '#f1f5f9',
-                                color: isTop3 ? (isSelected ? '#fff' : '#e91e8c') : '#94a3b8'
-                              }}>
+                              style={{ background: isTop3 ? (isSelected ? '#e91e8c' : '#fce7f3') : '#f1f5f9', color: isTop3 ? (isSelected ? '#fff' : '#e91e8c') : '#94a3b8' }}>
                               {i + 1}
                             </div>
                             <span className="text-slate-800 text-xs font-semibold truncate flex-1">{p.product}</span>
@@ -995,13 +1167,7 @@ export default function SalesReportView() {
                               animate={{ width: `${pct}%` }}
                               transition={{ duration: 0.8, delay: i * 0.05, ease: [0.16, 1, 0.3, 1] }}
                               className="h-full rounded-full"
-                              style={{
-                                background: isSelected
-                                  ? '#e91e8c'
-                                  : isTop3
-                                  ? `linear-gradient(90deg, #e91e8c, #f9a8d4)`
-                                  : '#e2e8f0'
-                              }}
+                              style={{ background: isSelected ? '#e91e8c' : isTop3 ? 'linear-gradient(90deg, #e91e8c, #f9a8d4)' : '#e2e8f0' }}
                             />
                           </div>
                         </motion.div>
@@ -1012,12 +1178,38 @@ export default function SalesReportView() {
               </motion.div>
             </div>
 
+            {/* Comparativo de Períodos — siempre visible, expandible */}
+            <MonthComparatorInline
+              availableMonths={availableMonths}
+              currentMonth={effectiveMonth}
+              currentYear={effectiveYear}
+              compareMonth={compareMonth}
+              compareYear={compareYear}
+              setCompareMonth={setCompareMonth}
+              setCompareYear={setCompareYear}
+              prevRecords={prevRecords}
+              summary={summary}
+              prevMonthLabel={prevMonthLabel}
+              currentMonthLabel={currentMonthLabel}
+            />
+
+            {/* Informe Ejecutivo */}
+            <ExecutiveReport
+              hierarchy={hierarchy}
+              allProducts={allProducts}
+              summary={summary}
+              prevHierarchy={prevHierarchy}
+              currentMonthLabel={currentMonthLabel}
+              prevMonthLabel={prevMonthLabel}
+              storeCode={storeCode}
+            />
+
             {/* Product analysis modal */}
             <AnimatePresence>
               {selectedProduct && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                   className="fixed inset-0 z-50 flex items-center justify-center p-4"
-                  style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}
+                  style={{ background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(6px)' }}
                   onClick={() => setSelectedProduct(null)}>
                   <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
                     onClick={e => e.stopPropagation()}
@@ -1062,9 +1254,9 @@ export default function SalesReportView() {
                     </div>
                   </div>
                   <p className="text-xs text-slate-400 mt-1">
-                    La columna <strong>"vs Mes Ant."</strong> compara vs <strong>{prevMonthLabel}</strong> · Clic en producto para análisis completo
+                    "vs Comparativo" muestra variación vs <strong>{prevMonthLabel}</strong> · Clic en producto para análisis completo
                     {prevRecords.length === 0 && (
-                      <span className="ml-2 text-amber-500 font-semibold">⚠ Sin datos de {prevMonthLabel} — carga ese mes para ver comparativo</span>
+                      <span className="ml-2 text-amber-500 font-semibold">⚠ Sin datos comparativos — usa el panel de comparativo para seleccionar un mes con datos</span>
                     )}
                   </p>
                 </div>
@@ -1079,8 +1271,8 @@ export default function SalesReportView() {
               </div>
             </motion.div>
 
-            <div className="flex justify-center pb-6">
-              <Button onClick={handleBack} variant="outline" className="gap-2">
+            <div className="flex justify-center pb-8">
+              <Button onClick={handleBack} variant="outline" className="gap-2 h-10 px-6">
                 <ArrowLeft className="w-4 h-4" /> Volver al Panel
               </Button>
             </div>
