@@ -861,45 +861,54 @@ export default function SalesReportView() {
               ))}
             </div>
 
-            {/* Charts Row — Sofisticado Magenta & Gris */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Charts Row — PRO White + Magenta Suave */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
-              {/* Mix de Departamentos — Barras Horizontales Premium */}
+              {/* Mix de Departamentos */}
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-                className="rounded-2xl overflow-hidden border border-slate-200 shadow-xl"
-                style={{ background: 'linear-gradient(145deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)' }}>
-                <div className="px-5 pt-5 pb-3">
-                  <div className="flex items-center justify-between mb-1">
+                className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                {/* Header con acento magenta */}
+                <div className="px-6 pt-5 pb-4 border-b border-slate-50">
+                  <div className="flex items-start justify-between">
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#e91e8c' }}>Participación</p>
-                      <h3 className="text-white font-black text-base leading-tight">Mix de Departamentos</h3>
+                      <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400 mb-0.5">Distribución</p>
+                      <h3 className="text-slate-900 font-black text-lg leading-tight">Mix de Departamentos</h3>
+                      <p className="text-slate-400 text-xs mt-0.5">{currentMonthLabel} · {hierarchy.length} categorías</p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-2xl font-black text-white">{hierarchy.length}</p>
-                      <p className="text-slate-400 text-[10px]">categorías</p>
+                    <div className="text-right bg-rose-50 rounded-xl px-3 py-2">
+                      <p className="text-xl font-black" style={{ color: '#e91e8c' }}>{formatCurrency(summary.totalSales)}</p>
+                      <p className="text-slate-400 text-[10px]">venta total</p>
                     </div>
                   </div>
-                  <p className="text-slate-400 text-[10px] mt-0.5">{currentMonthLabel} · {formatCurrency(summary.totalSales)} total</p>
                 </div>
-                <div className="px-5 pb-5 space-y-2.5 max-h-72 overflow-y-auto">
+                <div className="px-6 py-4 space-y-3 max-h-80 overflow-y-auto">
                   {hierarchy.filter(h => h.deptSales > 0).map((h, i) => {
-                    const magentaOpacity = Math.max(0.25, 1 - i * 0.1);
+                    const isTop = i === 0;
                     return (
-                      <div key={i}>
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-white text-xs font-semibold truncate flex-1 mr-2">{h.dept}</span>
-                          <div className="flex items-center gap-2 flex-shrink-0">
-                            <span className="text-slate-300 text-[10px]">{formatCurrency(h.deptSales)}</span>
-                            <span className="text-xs font-black" style={{ color: '#e91e8c' }}>{h.deptPart.toFixed(1)}%</span>
+                      <div key={i} className="group">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <div className="flex items-center gap-2 min-w-0 flex-1">
+                            <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: isTop ? '#e91e8c' : '#cbd5e1' }} />
+                            <span className={`text-sm font-semibold truncate ${isTop ? 'text-slate-900' : 'text-slate-600'}`}>{h.dept}</span>
+                          </div>
+                          <div className="flex items-center gap-3 flex-shrink-0 ml-3">
+                            <span className="text-slate-400 text-xs">{formatCurrency(h.deptSales)}</span>
+                            <span className="text-sm font-black min-w-[3rem] text-right" style={{ color: isTop ? '#e91e8c' : '#94a3b8' }}>
+                              {h.deptPart.toFixed(1)}%
+                            </span>
                           </div>
                         </div>
-                        <div className="h-2 rounded-full bg-slate-700/60 overflow-hidden">
+                        <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
                           <motion.div
                             initial={{ width: 0 }}
                             animate={{ width: `${Math.min(h.deptPart, 100)}%` }}
-                            transition={{ duration: 0.8, delay: i * 0.06, ease: 'easeOut' }}
+                            transition={{ duration: 0.9, delay: i * 0.07, ease: [0.16, 1, 0.3, 1] }}
                             className="h-full rounded-full"
-                            style={{ background: i === 0 ? '#e91e8c' : `rgba(233,30,140,${magentaOpacity})` }}
+                            style={{
+                              background: isTop
+                                ? 'linear-gradient(90deg, #e91e8c, #f472b6)'
+                                : 'linear-gradient(90deg, #cbd5e1, #e2e8f0)'
+                            }}
                           />
                         </div>
                       </div>
@@ -908,24 +917,23 @@ export default function SalesReportView() {
                 </div>
               </motion.div>
 
-              {/* Top 10 Productos — Ranking Premium */}
+              {/* Top 10 Productos */}
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-                className="rounded-2xl overflow-hidden border border-slate-200 shadow-xl"
-                style={{ background: 'linear-gradient(145deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)' }}>
-                <div className="px-5 pt-5 pb-3">
-                  <div className="flex items-center justify-between mb-1">
+                className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                <div className="px-6 pt-5 pb-4 border-b border-slate-50">
+                  <div className="flex items-start justify-between">
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#e91e8c' }}>Ranking</p>
-                      <h3 className="text-white font-black text-base leading-tight">Top 10 Productos</h3>
+                      <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400 mb-0.5">Ranking</p>
+                      <h3 className="text-slate-900 font-black text-lg leading-tight">Top 10 Productos</h3>
+                      <p className="text-slate-400 text-xs mt-0.5">{currentMonthLabel} · clic para análisis</p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-2xl font-black text-white">{allProducts.length}</p>
+                    <div className="text-right bg-slate-50 rounded-xl px-3 py-2">
+                      <p className="text-xl font-black text-slate-700">{allProducts.length}</p>
                       <p className="text-slate-400 text-[10px]">productos</p>
                     </div>
                   </div>
-                  <p className="text-slate-400 text-[10px] mt-0.5">{currentMonthLabel} · clic para análisis detallado</p>
                 </div>
-                <div className="px-5 pb-5 space-y-1.5 max-h-72 overflow-y-auto">
+                <div className="px-6 py-4 space-y-2 max-h-80 overflow-y-auto">
                   {(() => {
                     const prevMap = {};
                     prevHierarchy?.forEach(h => h.sections.forEach(s => s.products.forEach(p => { prevMap[p.product] = p; })));
@@ -936,31 +944,50 @@ export default function SalesReportView() {
                       const prev = prevMap[p.product];
                       const delta = prev && prev.total_sales > 0 ? ((p.total_sales - prev.total_sales) / prev.total_sales) * 100 : null;
                       const isSelected = selectedProduct?.product === p.product;
+                      const isTop3 = i < 3;
                       return (
-                        <motion.div key={i} whileHover={{ x: 4 }} whileTap={{ scale: 0.98 }}
+                        <motion.div key={i}
+                          whileHover={{ backgroundColor: '#fdf2f8' }}
+                          whileTap={{ scale: 0.99 }}
                           onClick={() => setSelectedProduct(isSelected ? null : p)}
-                          className="cursor-pointer rounded-xl px-3 py-2 transition-all"
-                          style={{ background: isSelected ? 'rgba(233,30,140,0.18)' : 'rgba(255,255,255,0.04)', border: isSelected ? '1px solid rgba(233,30,140,0.5)' : '1px solid rgba(255,255,255,0.06)' }}>
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-[10px] font-black w-4 flex-shrink-0" style={{ color: i < 3 ? '#e91e8c' : '#64748b' }}>#{i+1}</span>
-                            <span className="text-white text-xs font-semibold truncate flex-1">{p.product}</span>
+                          className="cursor-pointer rounded-xl px-3 py-2.5 transition-all"
+                          style={{
+                            background: isSelected ? '#fce7f3' : 'transparent',
+                            border: isSelected ? '1px solid #f9a8d4' : '1px solid transparent',
+                          }}>
+                          <div className="flex items-center gap-2 mb-1.5">
+                            {/* Número */}
+                            <div className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 text-[10px] font-black"
+                              style={{
+                                background: isTop3 ? (isSelected ? '#e91e8c' : '#fce7f3') : '#f1f5f9',
+                                color: isTop3 ? (isSelected ? '#fff' : '#e91e8c') : '#94a3b8'
+                              }}>
+                              {i + 1}
+                            </div>
+                            <span className="text-slate-800 text-xs font-semibold truncate flex-1">{p.product}</span>
                             <div className="flex items-center gap-2 flex-shrink-0">
                               {delta !== null && (
-                                <span className={`text-[10px] font-black flex items-center gap-0.5 ${delta >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                                  {delta >= 0 ? <ArrowUpRight className="w-2.5 h-2.5" /> : <ArrowDownRight className="w-2.5 h-2.5" />}
+                                <span className={`text-[10px] font-bold flex items-center gap-0.5 ${delta >= 0 ? 'text-emerald-500' : 'text-red-400'}`}>
+                                  {delta >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
                                   {delta >= 0 ? '+' : ''}{delta.toFixed(1)}%
                                 </span>
                               )}
-                              <span className="text-[10px] font-black text-white">{formatCurrency(p.total_sales)}</span>
+                              <span className="text-xs font-black text-slate-800">{formatCurrency(p.total_sales)}</span>
                             </div>
                           </div>
-                          <div className="h-1 rounded-full bg-slate-700/60 overflow-hidden">
+                          <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden ml-8">
                             <motion.div
                               initial={{ width: 0 }}
                               animate={{ width: `${pct}%` }}
-                              transition={{ duration: 0.7, delay: i * 0.05 }}
+                              transition={{ duration: 0.8, delay: i * 0.05, ease: [0.16, 1, 0.3, 1] }}
                               className="h-full rounded-full"
-                              style={{ background: isSelected ? '#e91e8c' : i === 0 ? '#e91e8c' : 'rgba(233,30,140,0.5)' }}
+                              style={{
+                                background: isSelected
+                                  ? '#e91e8c'
+                                  : isTop3
+                                  ? `linear-gradient(90deg, #e91e8c, #f9a8d4)`
+                                  : '#e2e8f0'
+                              }}
                             />
                           </div>
                         </motion.div>
