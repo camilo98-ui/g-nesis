@@ -861,83 +861,113 @@ export default function SalesReportView() {
               ))}
             </div>
 
-            {/* Charts Row */}
-            <div className="space-y-4">
-              {/* Mix de Departamentos */}
-              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl shadow-lg overflow-hidden border border-purple-100">
-                <button onClick={() => setExpandedCharts(p => ({ ...p, pie: !p.pie }))}
-                  className="w-full bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 px-5 py-4 text-white text-left hover:opacity-90 transition-opacity">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-0.5">
-                        <PieChart className="w-4 h-4 text-purple-200" />
-                        <h3 className="font-bold text-sm">Mix de Departamentos</h3>
-                      </div>
-                      <p className="text-purple-200 text-xs">Distribución de venta por categoría · {currentMonthLabel}</p>
+            {/* Charts Row — Sofisticado Magenta & Gris */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+              {/* Mix de Departamentos — Barras Horizontales Premium */}
+              <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+                className="rounded-2xl overflow-hidden border border-slate-200 shadow-xl"
+                style={{ background: 'linear-gradient(145deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)' }}>
+                <div className="px-5 pt-5 pb-3">
+                  <div className="flex items-center justify-between mb-1">
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#e91e8c' }}>Participación</p>
+                      <h3 className="text-white font-black text-base leading-tight">Mix de Departamentos</h3>
                     </div>
-                    <div className="text-right bg-white/10 rounded-xl px-3 py-2 mr-3">
-                      <p className="text-lg font-black">{hierarchy.length}</p>
-                      <p className="text-purple-200 text-xs">deptos.</p>
+                    <div className="text-right">
+                      <p className="text-2xl font-black text-white">{hierarchy.length}</p>
+                      <p className="text-slate-400 text-[10px]">categorías</p>
                     </div>
-                    <motion.div animate={{ rotate: expandedCharts.pie ? 0 : -90 }} transition={{ duration: 0.2 }}>
-                      <ChevronDown className="w-5 h-5 text-purple-200" />
-                    </motion.div>
                   </div>
-                  <div className="grid grid-cols-3 gap-2 mt-3">
-                    {hierarchy.slice(0, 3).map((h, i) => (
-                      <div key={i} className="bg-white/10 rounded-lg px-2 py-1.5 text-center">
-                        <p className="text-xs font-black text-white">{h.deptPart.toFixed(1)}%</p>
-                        <p className="text-[9px] text-purple-200 truncate">{h.dept.split(' ')[0]}</p>
+                  <p className="text-slate-400 text-[10px] mt-0.5">{currentMonthLabel} · {formatCurrency(summary.totalSales)} total</p>
+                </div>
+                <div className="px-5 pb-5 space-y-2.5 max-h-72 overflow-y-auto">
+                  {hierarchy.filter(h => h.deptSales > 0).map((h, i) => {
+                    const magentaOpacity = Math.max(0.25, 1 - i * 0.1);
+                    return (
+                      <div key={i}>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-white text-xs font-semibold truncate flex-1 mr-2">{h.dept}</span>
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <span className="text-slate-300 text-[10px]">{formatCurrency(h.deptSales)}</span>
+                            <span className="text-xs font-black" style={{ color: '#e91e8c' }}>{h.deptPart.toFixed(1)}%</span>
+                          </div>
+                        </div>
+                        <div className="h-2 rounded-full bg-slate-700/60 overflow-hidden">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${Math.min(h.deptPart, 100)}%` }}
+                            transition={{ duration: 0.8, delay: i * 0.06, ease: 'easeOut' }}
+                            className="h-full rounded-full"
+                            style={{ background: i === 0 ? '#e91e8c' : `rgba(233,30,140,${magentaOpacity})` }}
+                          />
+                        </div>
                       </div>
-                    ))}
-                  </div>
-                </button>
-                <AnimatePresence>
-                  {expandedCharts.pie && (
-                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="bg-white p-5">
-                      <DeptPieChart hierarchy={hierarchy} />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                    );
+                  })}
+                </div>
               </motion.div>
 
-              {/* Top 10 */}
-              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl shadow-lg overflow-hidden border border-pink-100">
-                <button onClick={() => setExpandedCharts(p => ({ ...p, top10: !p.top10 }))}
-                  className="w-full bg-gradient-to-br from-pink-600 via-rose-500 to-orange-500 px-5 py-4 text-white text-left hover:opacity-90 transition-opacity">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-0.5">
-                        <Activity className="w-4 h-4 text-pink-200" />
-                        <h3 className="font-bold text-sm">Top 10 Productos</h3>
-                      </div>
-                      <p className="text-pink-100 text-xs">Ranking por venta bruta · con variación vs {prevMonthLabel}</p>
+              {/* Top 10 Productos — Ranking Premium */}
+              <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+                className="rounded-2xl overflow-hidden border border-slate-200 shadow-xl"
+                style={{ background: 'linear-gradient(145deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)' }}>
+                <div className="px-5 pt-5 pb-3">
+                  <div className="flex items-center justify-between mb-1">
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#e91e8c' }}>Ranking</p>
+                      <h3 className="text-white font-black text-base leading-tight">Top 10 Productos</h3>
                     </div>
-                    <div className="text-right bg-white/10 rounded-xl px-3 py-2 mr-3">
-                      <p className="text-lg font-black">{allProducts.length}</p>
-                      <p className="text-pink-200 text-xs">productos</p>
+                    <div className="text-right">
+                      <p className="text-2xl font-black text-white">{allProducts.length}</p>
+                      <p className="text-slate-400 text-[10px]">productos</p>
                     </div>
-                    <motion.div animate={{ rotate: expandedCharts.top10 ? 0 : -90 }} transition={{ duration: 0.2 }}>
-                      <ChevronDown className="w-5 h-5 text-pink-200" />
-                    </motion.div>
                   </div>
-                  <div className="grid grid-cols-3 gap-2 mt-3">
-                    {allProducts.filter(p => p.total_sales > 0).sort((a, b) => b.total_sales - a.total_sales).slice(0, 3).map((p, i) => (
-                      <div key={i} className="bg-white/10 rounded-lg px-2 py-1.5 text-center">
-                        <p className="text-[9px] text-pink-100">{['🥇', '🥈', '🥉'][i]}</p>
-                        <p className="text-[9px] text-white font-bold truncate">{p.product?.split(' ')[0]}</p>
-                      </div>
-                    ))}
-                  </div>
-                </button>
-                <AnimatePresence>
-                  {expandedCharts.top10 && (
-                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
-                      className="bg-white p-4 max-h-[360px] overflow-y-auto">
-                      <Top10Chart products={allProducts} onSelectProduct={setSelectedProduct} selectedProduct={selectedProduct} prevHierarchy={prevHierarchy} />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                  <p className="text-slate-400 text-[10px] mt-0.5">{currentMonthLabel} · clic para análisis detallado</p>
+                </div>
+                <div className="px-5 pb-5 space-y-1.5 max-h-72 overflow-y-auto">
+                  {(() => {
+                    const prevMap = {};
+                    prevHierarchy?.forEach(h => h.sections.forEach(s => s.products.forEach(p => { prevMap[p.product] = p; })));
+                    const top10 = [...allProducts].filter(p => p.total_sales > 0).sort((a, b) => b.total_sales - a.total_sales).slice(0, 10);
+                    const maxVal = top10[0]?.total_sales || 1;
+                    return top10.map((p, i) => {
+                      const pct = (p.total_sales / maxVal) * 100;
+                      const prev = prevMap[p.product];
+                      const delta = prev && prev.total_sales > 0 ? ((p.total_sales - prev.total_sales) / prev.total_sales) * 100 : null;
+                      const isSelected = selectedProduct?.product === p.product;
+                      return (
+                        <motion.div key={i} whileHover={{ x: 4 }} whileTap={{ scale: 0.98 }}
+                          onClick={() => setSelectedProduct(isSelected ? null : p)}
+                          className="cursor-pointer rounded-xl px-3 py-2 transition-all"
+                          style={{ background: isSelected ? 'rgba(233,30,140,0.18)' : 'rgba(255,255,255,0.04)', border: isSelected ? '1px solid rgba(233,30,140,0.5)' : '1px solid rgba(255,255,255,0.06)' }}>
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-[10px] font-black w-4 flex-shrink-0" style={{ color: i < 3 ? '#e91e8c' : '#64748b' }}>#{i+1}</span>
+                            <span className="text-white text-xs font-semibold truncate flex-1">{p.product}</span>
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              {delta !== null && (
+                                <span className={`text-[10px] font-black flex items-center gap-0.5 ${delta >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                  {delta >= 0 ? <ArrowUpRight className="w-2.5 h-2.5" /> : <ArrowDownRight className="w-2.5 h-2.5" />}
+                                  {delta >= 0 ? '+' : ''}{delta.toFixed(1)}%
+                                </span>
+                              )}
+                              <span className="text-[10px] font-black text-white">{formatCurrency(p.total_sales)}</span>
+                            </div>
+                          </div>
+                          <div className="h-1 rounded-full bg-slate-700/60 overflow-hidden">
+                            <motion.div
+                              initial={{ width: 0 }}
+                              animate={{ width: `${pct}%` }}
+                              transition={{ duration: 0.7, delay: i * 0.05 }}
+                              className="h-full rounded-full"
+                              style={{ background: isSelected ? '#e91e8c' : i === 0 ? '#e91e8c' : 'rgba(233,30,140,0.5)' }}
+                            />
+                          </div>
+                        </motion.div>
+                      );
+                    });
+                  })()}
+                </div>
               </motion.div>
             </div>
 
