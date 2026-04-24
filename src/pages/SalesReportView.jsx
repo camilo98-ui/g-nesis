@@ -580,55 +580,7 @@ Generado automáticamente · ${reportDate}
       </button>
 
       {/* Contenido colapsable */}
-      {!collapsed && <>
-      {/* Header */}
-      <div className="relative px-8 py-8 overflow-hidden" style={{ background: EXEC.gradHero }}>
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 right-0 w-96 h-96 rounded-full opacity-10" style={{ background: 'radial-gradient(circle, #6366f1, transparent)', transform: 'translate(30%, -40%)' }} />
-          <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full opacity-8" style={{ background: 'radial-gradient(circle, #06b6d4, transparent)', transform: 'translate(-30%, 40%)' }} />
-        </div>
-        <div className="relative flex items-start justify-between gap-4 flex-wrap">
-          <div className="flex items-start gap-4">
-            <div className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: EXEC.grad1 }}>
-              <Crown className="w-7 h-7 text-white" />
-            </div>
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.25em] mb-1" style={{ color: EXEC.accent1 }}>INFORME EJECUTIVO CONFIDENCIAL</p>
-              <h2 className="text-2xl md:text-3xl font-black text-white leading-tight">Reporte de Participación</h2>
-              <p className="text-sm mt-1" style={{ color: EXEC.textSecondary }}>{storeCode} · {currentMonthLabel} · vs {prevMonthLabel}</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <button onClick={handleDownload}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all hover:opacity-90"
-              style={{ background: EXEC.grad1, color: '#fff' }}>
-              <Download className="w-3.5 h-3.5" /> Descargar
-            </button>
-            <button onClick={handlePrint}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all"
-              style={{ background: 'rgba(255,255,255,0.08)', border: `1px solid ${EXEC.borderLight}`, color: EXEC.textSecondary }}>
-              <Printer className="w-3.5 h-3.5" /> Imprimir
-            </button>
-          </div>
-        </div>
-
-        {/* KPIs hero en header */}
-        <div className="relative grid grid-cols-2 md:grid-cols-4 gap-3 mt-7">
-          {[
-            { label: 'Venta Bruta', value: formatCurrency(summary.totalSales), color: EXEC.accent1 },
-            { label: `vs ${prevMonthLabel}`, value: totalDelta !== null ? `${totalDelta >= 0 ? '+' : ''}${totalDelta.toFixed(1)}%` : '—', color: totalDelta === null ? EXEC.textSecondary : totalDelta >= 0 ? '#10b981' : '#ef4444' },
-            { label: 'Productos Activos', value: summary.totalProducts, color: EXEC.accent3 },
-            { label: 'Departamentos', value: summary.totalDepts, color: EXEC.accent5 },
-          ].map((k, i) => (
-            <div key={i} className="rounded-2xl p-4 text-center" style={{ background: 'rgba(255,255,255,0.05)', border: `1px solid ${EXEC.borderLight}` }}>
-              <p className="font-black text-xl md:text-2xl" style={{ color: k.color }}>{k.value}</p>
-              <p className="text-[10px] font-medium mt-0.5" style={{ color: EXEC.textMuted }}>{k.label}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="p-6 md:p-8 space-y-8">
+      {!collapsed && <div className="p-6 md:p-8 space-y-8">
 
         {/* Banner de estado */}
         <div className="rounded-2xl p-5 flex items-start gap-4" style={{ background: `${statusColor}12`, border: `2px solid ${statusColor}30` }}>
@@ -817,8 +769,7 @@ Generado automáticamente · ${reportDate}
             </button>
           </div>
         </div>
-      </div>
-      </>}
+      </div>}
     </div>
   );
 }
