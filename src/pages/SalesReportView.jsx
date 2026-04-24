@@ -92,8 +92,30 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
         <td colSpan={3} className="py-2.5 px-3 font-bold text-white text-sm uppercase tracking-wider bg-gradient-to-r from-slate-800 to-slate-700">{dept}</td>
         <td className="py-2.5 px-3 text-right font-bold text-pink-300 text-sm whitespace-nowrap bg-gradient-to-r from-slate-700 to-slate-800">{formatPart(deptPart)}</td>
         <td className="py-2.5 px-3 text-right font-bold text-emerald-300 text-sm whitespace-nowrap bg-gradient-to-r from-slate-700 to-slate-800">{formatCurrency(deptSales)}</td>
-        <td className="py-2.5 px-3 bg-gradient-to-r from-slate-700 to-slate-800"></td>
-        <td className="py-2.5 px-3 w-20 bg-gradient-to-r from-slate-700 to-slate-800"></td>
+        <td className="py-2.5 px-3 text-right bg-gradient-to-r from-slate-700 to-slate-800">
+          {(() => {
+            const total = sections.flatMap(s => s.products).reduce((sum, p) => sum + (p.units_sold || 0), 0);
+            return total > 0 ? <span className="text-slate-300 text-xs font-semibold">{total.toLocaleString('es-CO')}</span> : <span className="text-slate-500 text-xs">—</span>;
+          })()}
+        </td>
+        <td className="py-2.5 px-3 text-right bg-gradient-to-r from-slate-700 to-slate-800">
+          {(() => {
+            const prevDeptProds = sections.flatMap(s => s.products).map(p => {
+              const prev = prevProductMap[p.product];
+              return prev && prev.total_sales > 0 ? { curr: p.total_sales, prev: prev.total_sales } : null;
+            }).filter(Boolean);
+            if (prevDeptProds.length === 0) return <span className="text-slate-500 text-xs">—</span>;
+            const currTotal = prevDeptProds.reduce((s, x) => s + x.curr, 0);
+            const prevTotal = prevDeptProds.reduce((s, x) => s + x.prev, 0);
+            const delta = ((currTotal - prevTotal) / prevTotal) * 100;
+            return (
+              <span className={`flex items-center justify-end gap-0.5 font-bold text-xs ${delta >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                {delta >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                {delta >= 0 ? '+' : ''}{delta.toFixed(1)}%
+              </span>
+            );
+          })()}
+        </td>
       </tr>
     );
 
