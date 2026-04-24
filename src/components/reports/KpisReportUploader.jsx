@@ -19,9 +19,9 @@ function extractStoreCode(tiendaStr) {
   return null;
 }
 
-function parseKpisExcel(rows) {
+function parseKpisExcel(rows, monthNum, yearNum) {
   const records = [];
-  const reportId = `kpis_${Date.now()}`;
+  const reportId = `kpis_${yearNum}_${monthNum}_${Date.now()}`;
   const uploadedAt = new Date().toISOString();
 
   // Read by column index (0-based): Departamento, Sección, Descripción, Tienda, Participación, Venta
@@ -52,19 +52,26 @@ function parseKpisExcel(rows) {
       section: seccion ? String(seccion).trim() : '',
       product: desc ? String(desc).trim() : '',
       level: 'product',
-      participation: partNum,   // stored as decimal e.g. 0.9137
-      total_sales: ventaNum,    // stored as full number e.g. 5367716
+      participation: partNum,
+      total_sales: ventaNum,
       total_transactions: 0,
+      month: monthNum,
+      year: yearNum,
     });
   }
   return records;
 }
 
+const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
 export default function KpisReportUploader({ onClose, onSuccess }) {
+  const now = new Date();
   const [file, setFile] = useState(null);
   const [status, setStatus] = useState('idle');
   const [message, setMessage] = useState('');
   const [progress, setProgress] = useState({ current: 0, total: 0 });
+  const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1);
+  const [selectedYear, setSelectedYear] = useState(now.getFullYear());
   const fileRef = useRef();
 
   const handleFileChange = (e) => {
@@ -88,7 +95,7 @@ export default function KpisReportUploader({ onClose, onSuccess }) {
       const sheet = workbook.Sheets[workbook.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null });
 
-      const records = parseKpisExcel(rows);
+      const records = parseKpisExcel(rows, selectedMonth, selectedYear);
       if (records.length === 0) {
         setStatus('error');
         setMessage('No se encontraron datos válidos. Verifica que el archivo tenga las columnas: Departamento, Sección, Descripción, Tienda, Participación, Venta.');
@@ -170,9 +177,30 @@ export default function KpisReportUploader({ onClose, onSuccess }) {
             )}
           </div>
 
-          <div className="bg-indigo-50 rounded-xl p-3 text-xs text-indigo-700">
-            <p className="font-semibold mb-1">Columnas requeridas:</p>
-            <p className="font-mono">Departamento · Sección · Descripción · Tienda · Participación · Venta</p>
+          {/* Selector Mes/Año */}
+          <div className="bg-indigo-50 rounded-xl p-4 space-y-2">
+            <p className="text-xs font-bold text-indigo-700">📅 ¿A qué mes corresponde este reporte?</p>
+            <div className="flex gap-2">
+              <select
+                value={selectedMonth}
+                onChange={e => setSelectedMonth(Number(e.target.value))}
+                className="flex-1 border border-indigo-200 rounded-lg px-3 py-2 text-sm text-indigo-800 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300"
+              >
+                {MONTHS.map((m, i) => (
+                  <option key={i+1} value={i+1}>{m}</option>
+                ))}
+              </select>
+              <select
+                value={selectedYear}
+                onChange={e => setSelectedYear(Number(e.target.value))}
+                className="w-28 border border-indigo-200 rounded-lg px-3 py-2 text-sm text-indigo-800 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300"
+              >
+                {[2024, 2025, 2026, 2027].map(y => (
+                  <option key={y} value={y}>{y}</option>
+                ))}
+              </select>
+            </div>
+            <p className="text-[10px] text-indigo-500">Columnas: Departamento · Sección · Descripción · Tienda · Participación · Venta</p>
           </div>
 
           {message && (
