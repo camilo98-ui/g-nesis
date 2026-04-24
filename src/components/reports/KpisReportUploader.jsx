@@ -48,6 +48,7 @@ function parseKpisExcel(rows, monthNum, yearNum) {
   const iTienda = findCol('TIENDA', 'PUNTO');
   const iPart   = findCol('PARTICIPACION', 'PARTICIPACIÓN', 'PART');
   const iVenta  = findCol('VENTA', 'MONTO', 'SALES');
+  const iUnits  = findCol('UNIDAD', 'UNIDADES', 'UNITS', 'CANTIDAD', 'QTY');
 
   if (iTienda === -1 || iDept === -1) return records;
 
@@ -61,6 +62,7 @@ function parseKpisExcel(rows, monthNum, yearNum) {
     const desc   = iDesc  !== -1 ? row[iDesc]  : null;
     const part   = iPart  !== -1 ? row[iPart]  : null;
     const venta  = iVenta !== -1 ? row[iVenta] : null;
+    const units  = iUnits !== -1 ? row[iUnits] : null;
 
     if (!tienda || !dept) continue;
     const storeCode = extractStoreCode(tienda);
@@ -82,6 +84,7 @@ function parseKpisExcel(rows, monthNum, yearNum) {
       participation: partNum,
       total_sales: ventaNum,
       total_transactions: 0,
+      units_sold: units != null ? (parseFloat(String(units).replace(/[^0-9.-]/g, '')) || 0) : null,
       month: monthNum,
       year: yearNum,
     });

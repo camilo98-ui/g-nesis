@@ -40,6 +40,10 @@
       "type": "number",
       "description": "N\u00famero de transacciones"
     },
+    "units_sold": {
+      "type": "number",
+      "description": "Unidades vendidas del producto"
+    },
     "participation": {
       "type": "number",
       "description": "% participaci\u00f3n en venta bruta"
