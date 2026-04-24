@@ -6,7 +6,7 @@ import {
   ArrowLeft, BarChart3, DollarSign, TrendingUp, FileText,
   Filter, Search, X, Package, Layers, Star, Award,
   ChevronDown, Calendar, ArrowUpRight, ArrowDownRight,
-  AlertTriangle, CheckCircle, TrendingDown, Zap, Shield
+  AlertTriangle, CheckCircle, TrendingDown, Zap, Shield, GitCompare
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PYGModal from '@/components/reports/PYGModal';
@@ -706,10 +706,8 @@ function ExecutiveReport({ hierarchy, allProducts, summary, prevHierarchy, curre
   );
 }
 
-// ─── Comparativo inline con selector de mes ───────────────────────────────────
-function MonthComparatorInline({ availableMonths, currentMonth, currentYear, compareMonth, compareYear, setCompareMonth, setCompareYear, prevRecords, summary, prevMonthLabel, currentMonthLabel }) {
-  const [open, setOpen] = useState(false);
-
+// ─── Modal Comparativo simple ─────────────────────────────────────────────────
+function ComparativeModal({ open, onClose, availableMonths, currentMonth, currentYear, compareMonth, compareYear, setCompareMonth, setCompareYear, prevRecords, summary, prevMonthLabel, currentMonthLabel }) {
   const prevTotal = useMemo(() => {
     return prevRecords.filter(r => r.product && r.department).reduce((s, r) => s + (r.total_sales || 0), 0);
   }, [prevRecords]);
@@ -718,94 +716,105 @@ function MonthComparatorInline({ availableMonths, currentMonth, currentYear, com
   const hasPrevData = prevRecords.length > 0;
 
   return (
-    <div className="rounded-2xl border border-slate-100 bg-white shadow-sm overflow-hidden">
-      {/* Header clickeable */}
-      <button
-        onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center justify-between px-5 py-4 hover:bg-slate-50 transition-all"
-      >
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: '#fdf2f8' }}>
-            <Calendar className="w-4 h-4" style={{ color: '#e91e8c' }} />
-          </div>
-          <div className="text-left">
-            <p className="text-sm font-black text-slate-900">Comparativo de Períodos</p>
-            <p className="text-xs text-slate-500">
-              {currentMonthLabel} <span className="text-slate-300 mx-1">vs</span> {prevMonthLabel}
-              {hasPrevData && delta !== null && (
-                <span className={`ml-2 font-bold ${delta >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
-                  · {delta >= 0 ? '+' : ''}{delta.toFixed(1)}%
-                </span>
-              )}
-            </p>
-          </div>
-        </div>
-        <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`} />
-      </button>
+    <AnimatePresence>
+      {open && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: 'rgba(10,15,30,0.7)', backdropFilter: 'blur(6px)' }}
+          onClick={onClose}>
+          <motion.div initial={{ scale: 0.95, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.96, opacity: 0, y: 10 }}
+            onClick={e => e.stopPropagation()}
+            className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden">
 
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            style={{ overflow: 'hidden' }}
-          >
-            <div className="px-5 pb-5 border-t border-slate-50 space-y-4">
-              {/* Selector de mes a comparar */}
-              <div className="flex items-center gap-3 pt-4 flex-wrap">
-                <p className="text-xs font-bold text-slate-500">Comparar contra:</p>
-                <div className="flex items-center gap-2 bg-rose-50 border border-rose-100 rounded-xl px-3 py-2">
+            {/* Header */}
+            <div className="px-6 py-5 flex items-center justify-between" style={{ background: 'linear-gradient(135deg, #1e1b4b, #312e81)' }}>
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center">
+                  <GitCompare className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <p className="text-white font-black text-sm">Comparativo</p>
+                  <p className="text-white/60 text-[10px]">{currentMonthLabel} vs {prevMonthLabel}</p>
+                </div>
+              </div>
+              <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all">
+                <X className="w-4 h-4 text-white" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-5">
+              {/* Selector de mes */}
+              <div>
+                <p className="text-xs font-black text-slate-500 uppercase tracking-wider mb-3">Selecciona el mes a comparar</p>
+                <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 mb-3">
+                  <Calendar className="w-4 h-4 text-slate-400" />
                   <select value={compareMonth} onChange={e => setCompareMonth(Number(e.target.value))}
-                    className="bg-transparent text-slate-700 text-sm font-bold border-none outline-none cursor-pointer">
+                    className="bg-transparent text-slate-800 text-sm font-bold border-none outline-none cursor-pointer flex-1">
                     {MONTHS_NAMES.map((m, i) => <option key={i+1} value={i+1}>{m}</option>)}
                   </select>
                   <select value={compareYear} onChange={e => setCompareYear(Number(e.target.value))}
-                    className="bg-transparent text-slate-700 text-sm font-bold border-none outline-none cursor-pointer">
+                    className="bg-transparent text-slate-800 text-sm font-bold border-none outline-none cursor-pointer">
                     {[2024, 2025, 2026].map(y => <option key={y} value={y}>{y}</option>)}
                   </select>
                 </div>
-                {availableMonths.map((m, i) => {
-                  const isActive = m.month === compareMonth && m.year === compareYear;
-                  const isCurrent = m.month === currentMonth && m.year === currentYear;
-                  if (isCurrent) return null;
-                  return (
-                    <button key={i} onClick={() => { setCompareMonth(m.month); setCompareYear(m.year); }}
-                      className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all border ${isActive ? 'text-white border-transparent' : 'bg-white border-slate-200 text-slate-500 hover:border-rose-200 hover:text-rose-500'}`}
-                      style={isActive ? { background: 'linear-gradient(135deg, #f9a8d4, #e91e8c)' } : {}}>
-                      {MONTHS_NAMES[m.month - 1].slice(0, 3)} {m.year}
-                    </button>
-                  );
-                })}
+                {/* Chips de meses disponibles */}
+                <div className="flex gap-1.5 flex-wrap">
+                  {availableMonths.filter(m => !(m.month === currentMonth && m.year === currentYear)).map((m, i) => {
+                    const isActive = m.month === compareMonth && m.year === compareYear;
+                    return (
+                      <button key={i} onClick={() => { setCompareMonth(m.month); setCompareYear(m.year); }}
+                        className="px-3 py-1.5 rounded-full text-xs font-bold transition-all border"
+                        style={isActive
+                          ? { background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', color: '#fff', border: 'none' }
+                          : { background: '#f8fafc', borderColor: '#e2e8f0', color: '#64748b' }}>
+                        {MONTHS_NAMES[m.month - 1].slice(0, 3)} {m.year}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
-              {/* Panel comparativo */}
+              {/* Resultados */}
               {!hasPrevData ? (
-                <div className="rounded-xl p-4 border border-amber-200 bg-amber-50 text-center">
-                  <p className="text-amber-700 text-sm font-semibold">⚠️ Sin datos para {prevMonthLabel}</p>
-                  <p className="text-amber-600 text-xs mt-1">Carga el reporte de ese mes para ver el comparativo</p>
+                <div className="rounded-2xl p-4 border border-amber-200 bg-amber-50 text-center">
+                  <p className="text-amber-800 text-sm font-bold">Sin datos para {prevMonthLabel}</p>
+                  <p className="text-amber-600 text-xs mt-1">Carga ese reporte para ver el comparativo</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {[
-                    { label: currentMonthLabel, value: formatCurrency(summary.totalSales), sub: 'Período actual', color: '#e91e8c', bg: '#fdf2f8' },
-                    { label: prevMonthLabel, value: formatCurrency(prevTotal), sub: 'Período comparado', color: '#6b7280', bg: '#f9fafb' },
-                    { label: 'Variación', value: delta !== null ? `${delta >= 0 ? '+' : ''}${delta.toFixed(1)}%` : '—', sub: 'Diferencia %', color: delta !== null ? (delta >= 0 ? '#059669' : '#dc2626') : '#94a3b8', bg: delta !== null ? (delta >= 0 ? '#f0fdf4' : '#fef2f2') : '#f9fafb' },
-                    { label: 'Diferencia', value: formatCurrency(summary.totalSales - prevTotal), sub: 'En pesos', color: (summary.totalSales - prevTotal) >= 0 ? '#059669' : '#dc2626', bg: (summary.totalSales - prevTotal) >= 0 ? '#f0fdf4' : '#fef2f2' },
-                  ].map((item, i) => (
-                    <div key={i} className="rounded-xl p-3.5 border" style={{ background: item.bg, borderColor: item.color + '20' }}>
-                      <p className="text-[10px] font-bold uppercase tracking-wide mb-1" style={{ color: item.color + 'aa' }}>{item.label}</p>
-                      <p className="font-black text-base leading-tight" style={{ color: item.color }}>{item.value}</p>
-                      <p className="text-[10px] text-slate-400 mt-0.5">{item.sub}</p>
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="rounded-2xl p-4 border" style={{ background: '#f0f4ff', borderColor: '#c7d2fe' }}>
+                      <p className="text-[10px] font-bold uppercase tracking-wide text-indigo-400 mb-1">{currentMonthLabel}</p>
+                      <p className="font-black text-lg text-indigo-900">{formatCurrency(summary.totalSales)}</p>
+                      <p className="text-[10px] text-indigo-400 mt-0.5">Período actual</p>
                     </div>
-                  ))}
+                    <div className="rounded-2xl p-4 border bg-slate-50 border-slate-200">
+                      <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400 mb-1">{prevMonthLabel}</p>
+                      <p className="font-black text-lg text-slate-700">{formatCurrency(prevTotal)}</p>
+                      <p className="text-[10px] text-slate-400 mt-0.5">Período comparado</p>
+                    </div>
+                  </div>
+                  <div className={`rounded-2xl p-4 border flex items-center gap-4 ${delta >= 0 ? 'border-emerald-200' : 'border-red-200'}`}
+                    style={{ background: delta >= 0 ? '#f0fdf4' : '#fef2f2' }}>
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${delta >= 0 ? 'bg-emerald-500' : 'bg-red-500'}`}>
+                      {delta >= 0 ? <ArrowUpRight className="w-5 h-5 text-white" /> : <ArrowDownRight className="w-5 h-5 text-white" />}
+                    </div>
+                    <div>
+                      <p className={`font-black text-2xl ${delta >= 0 ? 'text-emerald-700' : 'text-red-600'}`}>
+                        {delta >= 0 ? '+' : ''}{delta.toFixed(1)}%
+                      </p>
+                      <p className={`text-xs font-semibold ${delta >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+                        {formatCurrency(summary.totalSales - prevTotal)} vs {prevMonthLabel}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
           </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
 
@@ -866,6 +875,7 @@ export default function SalesReportView() {
   const [filterSection, setFilterSection] = useState('all');
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showPYG, setShowPYG] = useState(false);
+  const [showComparative, setShowComparative] = useState(false);
 
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
@@ -953,10 +963,10 @@ export default function SalesReportView() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #fdf2f8, #f5f0ff)' }}>
+      <div className="min-h-screen flex items-center justify-center bg-slate-950">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-pink-200 border-t-pink-600 rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-slate-500 text-sm font-medium">Cargando datos...</p>
+          <div className="w-12 h-12 border-4 border-indigo-800 border-t-indigo-400 rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-slate-400 text-sm font-medium">Cargando datos...</p>
         </div>
       </div>
     );
@@ -965,36 +975,44 @@ export default function SalesReportView() {
   const currentMonthLabel = `${MONTHS_NAMES[effectiveMonth - 1]} ${effectiveYear}`;
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header Premium */}
-      <div className="bg-white border-b border-rose-100 shadow-sm sticky top-0 z-30">
+    <div className="min-h-screen" style={{ background: '#f8fafc' }}>
+      {/* Header Premium — oscuro con acento índigo */}
+      <div className="sticky top-0 z-30 shadow-lg" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)' }}>
         <div className="max-w-6xl mx-auto px-4 py-4">
           <div className="flex items-center gap-3 flex-wrap">
-            <button onClick={handleBack} className="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 transition-all flex-shrink-0">
-              <ArrowLeft className="w-5 h-5 text-rose-400" />
+            <button onClick={handleBack} className="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-all flex-shrink-0">
+              <ArrowLeft className="w-5 h-5 text-white" />
             </button>
             <div className="flex-1 min-w-0">
-              <h1 className="text-lg font-black tracking-tight text-slate-900">Participación del Negocio</h1>
+              <h1 className="text-lg font-black tracking-tight text-white">Participación del Negocio</h1>
               <p className="text-slate-400 text-xs font-medium">{storeCode} · {currentMonthLabel}</p>
             </div>
 
+            {/* Botón Comparable */}
+            <button onClick={() => setShowComparative(true)}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all"
+              style={{ background: 'rgba(99,102,241,0.2)', color: '#a5b4fc', border: '1px solid rgba(99,102,241,0.3)' }}>
+              <GitCompare className="w-3.5 h-3.5" />
+              Comparable
+            </button>
+
             {/* Selector de mes en header */}
-            <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2">
+            <div className="flex items-center gap-2 rounded-xl px-3 py-2" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
               <Calendar className="w-3.5 h-3.5 text-slate-400" />
               <select value={selectedMonth} onChange={e => { setSelectedMonth(Number(e.target.value)); setSelectedProduct(null); }}
-                className="bg-transparent text-slate-700 text-xs font-bold border-none outline-none cursor-pointer">
-                {MONTHS_NAMES.map((m, i) => <option key={i+1} value={i+1}>{m}</option>)}
+                className="bg-transparent text-white text-xs font-bold border-none outline-none cursor-pointer">
+                {MONTHS_NAMES.map((m, i) => <option key={i+1} value={i+1} className="bg-slate-900">{m}</option>)}
               </select>
               <select value={selectedYear} onChange={e => { setSelectedYear(Number(e.target.value)); setSelectedProduct(null); }}
-                className="bg-transparent text-slate-700 text-xs font-bold border-none outline-none cursor-pointer">
-                {[2024, 2025, 2026].map(y => <option key={y} value={y}>{y}</option>)}
+                className="bg-transparent text-white text-xs font-bold border-none outline-none cursor-pointer">
+                {[2024, 2025, 2026].map(y => <option key={y} value={y} className="bg-slate-900">{y}</option>)}
               </select>
             </div>
 
             {hasData && (
-              <div className="bg-rose-50 rounded-xl px-4 py-2 text-right flex-shrink-0">
-                <p className="text-base font-black" style={{ color: '#e91e8c' }}>{formatCurrency(summary.totalSales)}</p>
-                <p className="text-[10px] text-slate-400">Venta Total</p>
+              <div className="rounded-xl px-4 py-2 text-right flex-shrink-0" style={{ background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.25)' }}>
+                <p className="text-base font-black text-indigo-300">{formatCurrency(summary.totalSales)}</p>
+                <p className="text-[10px] text-slate-500">Venta Total</p>
               </div>
             )}
           </div>
@@ -1002,12 +1020,14 @@ export default function SalesReportView() {
           {/* Chips de meses disponibles */}
           {availableMonths.length > 0 && (
             <div className="flex gap-1.5 flex-wrap mt-3">
-              {availableMonths.slice(0, 7).map((m, i) => {
+              {availableMonths.slice(0, 8).map((m, i) => {
                 const isActive = m.month === selectedMonth && m.year === selectedYear;
                 return (
                   <button key={i} onClick={() => { setSelectedMonth(m.month); setSelectedYear(m.year); setSelectedProduct(null); }}
-                    className={`px-3 py-1 rounded-full text-xs font-bold transition-all border ${isActive ? 'text-white border-transparent shadow-sm' : 'bg-white border-slate-200 text-slate-500 hover:border-rose-200 hover:text-rose-500'}`}
-                    style={isActive ? { background: 'linear-gradient(135deg, #f9a8d4, #e91e8c)' } : {}}>
+                    className="px-3 py-1 rounded-full text-xs font-bold transition-all"
+                    style={isActive
+                      ? { background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: '#fff', boxShadow: '0 2px 8px rgba(99,102,241,0.4)' }
+                      : { background: 'rgba(255,255,255,0.07)', color: '#94a3b8', border: '1px solid rgba(255,255,255,0.1)' }}>
                     {MONTHS_NAMES[m.month - 1].slice(0, 3)} {m.year}
                   </button>
                 );
@@ -1035,20 +1055,20 @@ export default function SalesReportView() {
             {/* KPI Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
-                { icon: DollarSign, label: 'Venta Total', value: formatCurrency(summary.totalSales), sub: null, accent: '#e91e8c', accentBg: '#fdf2f8' },
-                { icon: Package, label: 'Productos', value: summary.totalProducts, sub: null, accent: '#7c3aed', accentBg: '#f5f0ff' },
-                { icon: Layers, label: 'Departamentos', value: summary.totalDepts, sub: null, accent: '#6b7280', accentBg: '#f9fafb' },
-                { icon: Award, label: 'Top Producto', value: summary.topProduct?.product || '—', sub: formatCurrency(summary.topProduct?.total_sales), accent: '#e91e8c', accentBg: '#fdf2f8' },
-              ].map(({ icon: Icon, label, value, sub, accent, accentBg }, i) => (
+                { icon: DollarSign, label: 'Venta Total', value: formatCurrency(summary.totalSales), sub: null, grad: 'linear-gradient(135deg, #6366f1, #8b5cf6)', light: '#f0f4ff' },
+                { icon: Package, label: 'Productos', value: summary.totalProducts, sub: null, grad: 'linear-gradient(135deg, #0ea5e9, #6366f1)', light: '#f0f9ff' },
+                { icon: Layers, label: 'Departamentos', value: summary.totalDepts, sub: null, grad: 'linear-gradient(135deg, #10b981, #0ea5e9)', light: '#f0fdf4' },
+                { icon: Award, label: 'Top Producto', value: summary.topProduct?.product || '—', sub: formatCurrency(summary.topProduct?.total_sales), grad: 'linear-gradient(135deg, #f59e0b, #f97316)', light: '#fffbeb' },
+              ].map(({ icon: Icon, label, value, sub, grad, light }, i) => (
                 <motion.div key={i} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07 }}
-                  className="bg-white rounded-2xl border border-slate-100 p-4 overflow-hidden relative hover:shadow-md transition-shadow">
-                  <div className="absolute top-0 right-0 w-20 h-20 rounded-bl-[2rem] opacity-30" style={{ background: accentBg }} />
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-3" style={{ background: accentBg }}>
-                    <Icon className="w-4 h-4" style={{ color: accent }} />
+                  className="bg-white rounded-2xl border border-slate-100 p-4 overflow-hidden relative hover:shadow-lg transition-shadow">
+                  <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full opacity-20" style={{ background: grad }} />
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-3" style={{ background: grad }}>
+                    <Icon className="w-4 h-4 text-white" />
                   </div>
                   <p className="text-xs text-slate-400 font-medium mb-1">{label}</p>
-                  <p className={`font-black text-slate-800 ${typeof value === 'string' && value.length > 15 ? 'text-xs leading-tight' : 'text-xl'}`}>{value}</p>
-                  {sub && <p className="text-xs font-semibold mt-0.5" style={{ color: accent }}>{sub}</p>}
+                  <p className={`font-black text-slate-900 ${typeof value === 'string' && value.length > 15 ? 'text-xs leading-tight' : 'text-xl'}`}>{value}</p>
+                  {sub && <p className="text-xs font-bold mt-0.5 text-slate-500">{sub}</p>}
                 </motion.div>
               ))}
             </div>
@@ -1058,34 +1078,39 @@ export default function SalesReportView() {
               {/* Mix de Departamentos */}
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
                 className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                <div className="px-6 pt-5 pb-4 border-b border-slate-50">
+                <div className="px-6 pt-5 pb-4 border-b border-slate-100">
                   <div className="flex items-start justify-between">
                     <div>
                       <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400 mb-0.5">Distribución</p>
                       <h3 className="text-slate-900 font-black text-lg leading-tight">Mix de Departamentos</h3>
                       <p className="text-slate-400 text-xs mt-0.5">{currentMonthLabel} · {hierarchy.length} categorías</p>
                     </div>
-                    <div className="text-right bg-rose-50 rounded-xl px-3 py-2">
-                      <p className="text-xl font-black" style={{ color: '#e91e8c' }}>{formatCurrency(summary.totalSales)}</p>
-                      <p className="text-slate-400 text-[10px]">venta total</p>
+                    <div className="text-right rounded-xl px-3 py-2" style={{ background: '#f0f4ff' }}>
+                      <p className="text-xl font-black text-indigo-700">{formatCurrency(summary.totalSales)}</p>
+                      <p className="text-indigo-400 text-[10px]">venta total</p>
                     </div>
                   </div>
                 </div>
                 <div className="px-6 py-4 space-y-3 max-h-80 overflow-y-auto">
                   {hierarchy.filter(h => h.deptSales > 0).map((h, i) => {
+                    const barColors = [
+                      'linear-gradient(90deg, #6366f1, #8b5cf6)',
+                      'linear-gradient(90deg, #0ea5e9, #6366f1)',
+                      'linear-gradient(90deg, #10b981, #0ea5e9)',
+                      'linear-gradient(90deg, #f59e0b, #f97316)',
+                      'linear-gradient(90deg, #ef4444, #f97316)',
+                    ];
                     const isTop = i === 0;
                     return (
                       <div key={i} className="group">
                         <div className="flex items-center justify-between mb-1.5">
                           <div className="flex items-center gap-2 min-w-0 flex-1">
-                            <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: isTop ? '#e91e8c' : '#cbd5e1' }} />
+                            <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: barColors[i % barColors.length].split(',')[1]?.trim().split(')')[0] || '#6366f1' }} />
                             <span className={`text-sm font-semibold truncate ${isTop ? 'text-slate-900' : 'text-slate-600'}`}>{h.dept}</span>
                           </div>
                           <div className="flex items-center gap-3 flex-shrink-0 ml-3">
                             <span className="text-slate-400 text-xs">{formatCurrency(h.deptSales)}</span>
-                            <span className="text-sm font-black min-w-[3rem] text-right" style={{ color: isTop ? '#e91e8c' : '#94a3b8' }}>
-                              {h.deptPart.toFixed(1)}%
-                            </span>
+                            <span className="text-sm font-black min-w-[3rem] text-right text-slate-700">{h.deptPart.toFixed(1)}%</span>
                           </div>
                         </div>
                         <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
@@ -1094,7 +1119,7 @@ export default function SalesReportView() {
                             animate={{ width: `${Math.min(h.deptPart, 100)}%` }}
                             transition={{ duration: 0.9, delay: i * 0.07, ease: [0.16, 1, 0.3, 1] }}
                             className="h-full rounded-full"
-                            style={{ background: isTop ? 'linear-gradient(90deg, #e91e8c, #f472b6)' : 'linear-gradient(90deg, #cbd5e1, #e2e8f0)' }}
+                            style={{ background: barColors[i % barColors.length] }}
                           />
                         </div>
                       </div>
@@ -1106,14 +1131,14 @@ export default function SalesReportView() {
               {/* Top 10 Productos */}
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
                 className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                <div className="px-6 pt-5 pb-4 border-b border-slate-50">
+                <div className="px-6 pt-5 pb-4 border-b border-slate-100">
                   <div className="flex items-start justify-between">
                     <div>
                       <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400 mb-0.5">Ranking</p>
                       <h3 className="text-slate-900 font-black text-lg leading-tight">Top 10 Productos</h3>
                       <p className="text-slate-400 text-xs mt-0.5">{currentMonthLabel} · clic para análisis</p>
                     </div>
-                    <div className="text-right bg-slate-50 rounded-xl px-3 py-2">
+                    <div className="text-right rounded-xl px-3 py-2 bg-slate-50">
                       <p className="text-xl font-black text-slate-700">{allProducts.length}</p>
                       <p className="text-slate-400 text-[10px]">productos</p>
                     </div>
@@ -1133,20 +1158,23 @@ export default function SalesReportView() {
                       const isTop3 = i < 3;
                       return (
                         <motion.div key={i}
-                          whileHover={{ backgroundColor: '#fdf2f8' }}
+                          whileHover={{ backgroundColor: '#f8fafc' }}
                           whileTap={{ scale: 0.99 }}
                           onClick={() => setSelectedProduct(isSelected ? null : p)}
                           className="cursor-pointer rounded-xl px-3 py-2.5 transition-all"
-                          style={{ background: isSelected ? '#fce7f3' : 'transparent', border: isSelected ? '1px solid #f9a8d4' : '1px solid transparent' }}>
+                          style={{ background: isSelected ? '#eef2ff' : 'transparent', border: isSelected ? '1px solid #c7d2fe' : '1px solid transparent' }}>
                           <div className="flex items-center gap-2 mb-1.5">
                             <div className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 text-[10px] font-black"
-                              style={{ background: isTop3 ? (isSelected ? '#e91e8c' : '#fce7f3') : '#f1f5f9', color: isTop3 ? (isSelected ? '#fff' : '#e91e8c') : '#94a3b8' }}>
+                              style={{
+                                background: isTop3 ? (isSelected ? '#6366f1' : '#eef2ff') : '#f1f5f9',
+                                color: isTop3 ? (isSelected ? '#fff' : '#6366f1') : '#94a3b8'
+                              }}>
                               {i + 1}
                             </div>
                             <span className="text-slate-800 text-xs font-semibold truncate flex-1">{p.product}</span>
                             <div className="flex items-center gap-2 flex-shrink-0">
                               {delta !== null && (
-                                <span className={`text-[10px] font-bold flex items-center gap-0.5 ${delta >= 0 ? 'text-emerald-500' : 'text-red-400'}`}>
+                                <span className={`text-[10px] font-bold flex items-center gap-0.5 ${delta >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
                                   {delta >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
                                   {delta >= 0 ? '+' : ''}{delta.toFixed(1)}%
                                 </span>
@@ -1160,7 +1188,7 @@ export default function SalesReportView() {
                               animate={{ width: `${pct}%` }}
                               transition={{ duration: 0.8, delay: i * 0.05, ease: [0.16, 1, 0.3, 1] }}
                               className="h-full rounded-full"
-                              style={{ background: isSelected ? '#e91e8c' : isTop3 ? 'linear-gradient(90deg, #e91e8c, #f9a8d4)' : '#e2e8f0' }}
+                              style={{ background: isSelected ? '#6366f1' : isTop3 ? 'linear-gradient(90deg, #6366f1, #8b5cf6)' : '#e2e8f0' }}
                             />
                           </div>
                         </motion.div>
@@ -1171,8 +1199,10 @@ export default function SalesReportView() {
               </motion.div>
             </div>
 
-            {/* Comparativo de Períodos — siempre visible, expandible */}
-            <MonthComparatorInline
+            {/* Modal Comparativo */}
+            <ComparativeModal
+              open={showComparative}
+              onClose={() => setShowComparative(false)}
               availableMonths={availableMonths}
               currentMonth={effectiveMonth}
               currentYear={effectiveYear}
@@ -1226,10 +1256,10 @@ export default function SalesReportView() {
             {/* Tabla jerárquica */}
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
               <div className="bg-white rounded-2xl shadow-md border border-slate-100 overflow-hidden">
-                <div className="p-4 border-b border-rose-50" style={{ background: '#fff9fb' }}>
+                <div className="p-4 border-b border-slate-100 bg-slate-50">
                   <div className="flex flex-wrap items-center gap-3">
                     <h3 className="font-bold text-slate-800 flex items-center gap-2">
-                      <BarChart3 className="w-4 h-4" style={{ color: '#e91e8c' }} />
+                      <BarChart3 className="w-4 h-4 text-indigo-500" />
                       Tabla Jerárquica · {currentMonthLabel}
                     </h3>
                     <div className="flex items-center gap-2 ml-auto flex-wrap">
@@ -1265,7 +1295,7 @@ export default function SalesReportView() {
             </motion.div>
 
             <div className="flex justify-center pb-8">
-              <Button onClick={handleBack} variant="outline" className="gap-2 h-10 px-6">
+              <Button onClick={handleBack} variant="outline" className="gap-2 h-10 px-6 border-slate-200 text-slate-600 hover:bg-slate-50">
                 <ArrowLeft className="w-4 h-4" /> Volver al Panel
               </Button>
             </div>
