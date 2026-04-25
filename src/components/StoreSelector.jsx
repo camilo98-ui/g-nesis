@@ -209,7 +209,7 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
   }, [storeConfig, customStores]);
 
   const filteredStores = useMemo(() => {
-    if (!search.trim()) return [];
+    if (!search.trim()) return activeStores;
     const term = search.toLowerCase().trim();
     return activeStores.filter((s) => {
       const code = s.code.toLowerCase();
@@ -345,11 +345,7 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
                     </button>
                   </div>
                 ))}
-                {filteredStores.length === 0 && !search.trim() && (
-                  <div className="text-center py-8">
-                    <p className="text-gray-400 text-sm">Escribe para buscar una tienda</p>
-                  </div>
-                )}
+
                 {filteredStores.length === 0 && search.trim() && (
                   <div className="text-center py-8">
                     <p className="text-gray-400 text-sm">No se encontró "{search}"</p>
