@@ -77,6 +77,13 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
   const toggleDept = (dept) => setExpandedDepts(p => ({ ...p, [dept]: !p[dept] }));
   const toggleSection = (key) => setExpandedSections(p => ({ ...p, [key]: !p[key] }));
 
+  const fixDeltaDisplay = (delta) => delta !== null ? (
+    <span className={`flex items-center justify-end gap-0.5 font-bold ${delta >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+      {delta >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+      {delta >= 0 ? '+' : ''}{delta.toFixed(1)}%
+    </span>
+  ) : <span style={{ color: EXEC.textMuted }}>—</span>;
+
   const searchActive = search.trim().length > 0;
   const searchLower = search.toLowerCase();
 
@@ -227,14 +234,6 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
       });
     });
   });
-
-  // Fix product delta display
-  const fixDeltaDisplay = (delta) => delta !== null ? (
-    <span className={`flex items-center justify-end gap-0.5 font-bold ${delta >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-      {delta >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-      {delta >= 0 ? '+' : ''}{delta.toFixed(1)}%
-    </span>
-  ) : <span style={{ color: EXEC.textMuted }}>—</span>;
 
   return (
     <div style={{ background: EXEC.bgCard }}>
