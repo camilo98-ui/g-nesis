@@ -324,22 +324,20 @@ export default function Dashboard() {
 
 
   const currentBudget = useMemo(() => {
+    if (!budgets.length) return {};
+
     // Determinar qué mes/año mostrar según el filtro activo
     const activeDate = dateRange?.from || weekFilter?.from || new Date();
     const targetMonth = activeDate.getMonth() + 1;
     const targetYear = activeDate.getFullYear();
 
     // Buscar presupuesto del mes filtrado
-    const filteredBudget = budgets.find((b) => b.month === targetMonth && b.year === targetYear);
+    const filteredBudget = budgets.find((b) => Number(b.month) === targetMonth && Number(b.year) === targetYear);
     if (filteredBudget) return filteredBudget;
 
-    // Fallback al presupuesto activo
-    const activeBudget = budgets.find((b) => b.is_active === true);
-    if (activeBudget) return activeBudget;
-
-    // Fallback al mes actual
+    // Fallback al mes actual si no hay presupuesto para el mes filtrado
     const now = new Date();
-    return budgets.find((b) => b.month === now.getMonth() + 1 && b.year === now.getFullYear()) || {};
+    return budgets.find((b) => Number(b.month) === now.getMonth() + 1 && Number(b.year) === now.getFullYear()) || {};
   }, [budgets, dateRange, weekFilter]);
 
   // Filtrar ventas según rango seleccionado (para gráficas)
