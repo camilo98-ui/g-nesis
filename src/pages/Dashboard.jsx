@@ -245,16 +245,13 @@ export default function Dashboard() {
   const { data: budgets = [] } = useQuery({
     queryKey: ['budgets', selectedStore],
     queryFn: async () => {
-      const now = new Date();
-      const currentMonth = now.getMonth() + 1;
-      const currentYear = now.getFullYear();
       let allBudgets = await base44.entities.Budget.filter({ store_id: selectedStore });
       // Si no hay resultados, intentar con código antiguo (BOGOTA)
       if (allBudgets.length === 0 && selectedStore.startsWith('BTA')) {
         const oldCode = selectedStore.replace('BTA', 'BOGOTA');
         allBudgets = await base44.entities.Budget.filter({ store_id: oldCode });
       }
-      return allBudgets.filter(b => b.month === currentMonth && b.year === currentYear);
+      return allBudgets; // retornar todos, filtrar dinámicamente según dateRange
     },
     enabled: !!selectedStore,
     staleTime: 10 * 60 * 1000,
@@ -327,14 +324,23 @@ export default function Dashboard() {
 
 
   const currentBudget = useMemo(() => {
-    // Primero buscar el presupuesto activo
+    // Determinar qué mes/año mostrar según el filtro activo
+    const activeDate = dateRange?.from || weekFilter?.from || new Date();
+    const targetMonth = activeDate.getMonth() + 1;
+    const targetYear = activeDate.getFullYear();
+
+    // Buscar presupuesto del mes filtrado
+    const filteredBudget = budgets.find((b) => b.month === targetMonth && b.year === targetYear);
+    if (filteredBudget) return filteredBudget;
+
+    // Fallback al presupuesto activo
     const activeBudget = budgets.find((b) => b.is_active === true);
     if (activeBudget) return activeBudget;
-    
-    // Si no hay activo, usar el del mes/año actual
+
+    // Fallback al mes actual
     const now = new Date();
     return budgets.find((b) => b.month === now.getMonth() + 1 && b.year === now.getFullYear()) || {};
-  }, [budgets]);
+  }, [budgets, dateRange, weekFilter]);
 
   // Filtrar ventas según rango seleccionado (para gráficas)
   const filteredSales = useMemo(() => {
@@ -736,11 +742,22 @@ export default function Dashboard() {
   comparisonTotals.sales / comparisonTotals.transactions :
   0;
 
-  // Totales SIEMPRE con mes gregoriano (para las tarjetas de resumen)
+  // Totales para las tarjetas: si hay filtro activo, usar ese rango; si no, mes gregoriano actual
   const gregorianMonthTotals = useMemo(() => {
     const now = new Date();
-    const fromStr = format(startOfMonth(now), 'yyyy-MM-dd');
-    const toStr = format(now, 'yyyy-MM-dd');
+    let fromStr, toStr;
+
+    if (weekFilter?.from && weekFilter?.to) {
+      fromStr = format(weekFilter.from, 'yyyy-MM-dd');
+      toStr = format(weekFilter.to, 'yyyy-MM-dd');
+    } else if (dateRange?.from && dateRange?.to) {
+      fromStr = format(dateRange.from, 'yyyy-MM-dd');
+      toStr = format(dateRange.to, 'yyyy-MM-dd');
+    } else {
+      fromStr = format(startOfMonth(now), 'yyyy-MM-dd');
+      toStr = format(now, 'yyyy-MM-dd');
+    }
+
     return dailySales.filter(s => {
       const d = s.date?.split('T')[0] || s.date;
       return d >= fromStr && d <= toStr;
@@ -750,7 +767,7 @@ export default function Dashboard() {
       transactions: acc.transactions + (s.total_transactions || 0),
       suggested: acc.suggested + (s.total_suggested || 0)
     }), { sales: 0, tickets: 0, transactions: 0, suggested: 0 });
-  }, [dailySales]);
+  }, [dailySales, dateRange, weekFilter]);
 
   // Métricas usando ACUMULADO DEL MES GREGORIANO (siempre muestran el total real del mes)
   const metrics = [
