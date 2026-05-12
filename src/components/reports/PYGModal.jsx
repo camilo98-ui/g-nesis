@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
+import PYGTrendsPanel from './PYGTrendsPanel';
 import {
   X, TrendingUp, TrendingDown, Loader2, BarChart3, Zap,
   ArrowUpRight, ArrowDownRight, ChevronDown, Activity,
@@ -1434,87 +1435,8 @@ export default function PYGModal({ onClose, storeId }) {
 
             {/* ── TENDENCIAS ────────────────────────────────────────────── */}
             {activeTab === 'trends' && (
-              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
-                {trendData.length >= 2 ? (
-                  <>
-                    <div className="rounded-2xl p-5" style={{ background: 'rgba(148,163,184,0.04)', border: '1px solid rgba(148,163,184,0.1)' }}>
-                      <p className="text-xs font-black text-slate-300 uppercase tracking-widest mb-1">EBITDA vs Costo Personal</p>
-                      <p className="text-[10px] text-slate-600 mb-4">Relación inversa clave: personal ↑ → EBITDA ↓</p>
-                      <MultiLineTrend data={trendData} height={260} lines={[
-                        { key: 'EBITDA', name: 'EBITDA', color: MAGENTA },
-                        { key: 'Personal', name: 'Personal', color: NEON_PURPLE },
-                      ]} />
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                      <div className="rounded-2xl p-5" style={{ background: 'rgba(148,163,184,0.04)', border: '1px solid rgba(148,163,184,0.1)' }}>
-                        <p className="text-xs font-black text-slate-300 uppercase tracking-widest mb-1">Costo Real</p>
-                        <p className="text-[10px] text-slate-600 mb-4">Evolución del costo de producto</p>
-                        <AreaTrend data={trendData} dataKey="C.Real" color={NEON_BLUE} height={180} name="Costo Real" />
-                      </div>
-                      <div className="rounded-2xl p-5" style={{ background: 'rgba(148,163,184,0.04)', border: '1px solid rgba(148,163,184,0.1)' }}>
-                        <p className="text-xs font-black text-slate-300 uppercase tracking-widest mb-1">Gastos</p>
-                        <p className="text-[10px] text-slate-600 mb-4">Estructura de gastos fijos</p>
-                        <AreaTrend data={trendData} dataKey="Gastos" color={NEON_AMBER} height={180} name="Gastos" />
-                      </div>
-                    </div>
-
-                    <div className="rounded-2xl p-5" style={{ background: 'rgba(148,163,184,0.04)', border: '1px solid rgba(148,163,184,0.1)' }}>
-                      <p className="text-xs font-black text-slate-300 uppercase tracking-widest mb-4">Panorama Completo</p>
-                      <MultiLineTrend data={trendData} height={300} lines={[
-                        { key: 'EBITDA', name: 'EBITDA', color: MAGENTA },
-                        { key: 'C.Real', name: 'Costo Real', color: NEON_BLUE },
-                        { key: 'Personal', name: 'Personal', color: NEON_PURPLE },
-                        { key: 'Gastos', name: 'Gastos', color: NEON_AMBER },
-                      ]} />
-                    </div>
-
-                    {/* Tabla histórica */}
-                    <div className="rounded-2xl p-5" style={{ background: 'rgba(148,163,184,0.04)', border: '1px solid rgba(148,163,184,0.1)' }}>
-                      <p className="text-xs font-black text-slate-300 uppercase tracking-widest mb-4">Tabla Histórica Completa</p>
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-xs min-w-[500px]">
-                          <thead>
-                            <tr style={{ background: `${MAGENTA}10` }}>
-                              <th className="text-left py-3 px-3 font-black text-slate-400 rounded-l-xl">Métrica</th>
-                              {trendData.map(d => (
-                                <th key={d.mes} className="text-right py-3 px-3 font-black"
-                                  style={{ color: d.month === selectedMonth ? MAGENTA : '#64748b' }}>
-                                  {d.mes}
-                                </th>
-                              ))}
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {[
-                              { key: 'EBITDA', label: 'EBITDA', color: MAGENTA },
-                              { key: 'C.Real', label: 'Costo Real', color: NEON_BLUE },
-                              { key: 'C.Teo', label: 'Costo Teórico', color: '#64748b' },
-                              { key: 'Personal', label: 'Personal', color: NEON_PURPLE },
-                              { key: 'Gastos', label: 'Gastos', color: NEON_AMBER },
-                            ].map(row => (
-                              <tr key={row.key} className="border-b hover:bg-white/5 transition-colors"
-                                style={{ borderColor: 'rgba(148,163,184,0.06)' }}>
-                                <td className="py-2.5 px-3 font-black text-slate-400">{row.label}</td>
-                                {trendData.map(d => (
-                                  <td key={d.mes} className="py-2.5 px-3 text-right font-black"
-                                    style={{ color: d.month === selectedMonth ? row.color : '#475569' }}>
-                                    {d[row.key] != null ? `${d[row.key].toFixed(1)}%` : '—'}
-                                  </td>
-                                ))}
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <div className="text-center py-16 text-slate-600">
-                    <Activity className="w-12 h-12 mx-auto mb-3 opacity-20" />
-                    <p>Necesitas al menos 2 meses de datos</p>
-                  </div>
-                )}
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+                <PYGTrendsPanel trendData={trendData} selectedMonth={selectedMonth} />
               </motion.div>
             )}
 
