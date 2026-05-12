@@ -470,6 +470,7 @@ function KPIDetailModal({ kpiId, onClose, primaryRecord, prevRecord, trendData, 
       ],
       insight: (r, p) => {
         const v = pctNum(r.margen_ebitda);
+        if (v == null) return 'Sin datos suficientes para analizar EBITDA.';
         const pv = p ? pctNum(p.margen_ebitda) : null;
         const gap25 = (25 - v).toFixed(1);
         const gap30 = (30 - v).toFixed(1);
@@ -493,6 +494,7 @@ function KPIDetailModal({ kpiId, onClose, primaryRecord, prevRecord, trendData, 
       ],
       insight: (r, p) => {
         const v = pctNum(r.costo_personal);
+        if (v == null) return 'Sin datos suficientes para analizar costo personal.';
         const pv = p ? pctNum(p.costo_personal) : null;
         const reducir = Math.max(0, v - 22).toFixed(1);
         return v > 22
@@ -516,6 +518,7 @@ function KPIDetailModal({ kpiId, onClose, primaryRecord, prevRecord, trendData, 
       insight: (r, p) => {
         const v = pctNum(r.cost_real);
         const teo = pctNum(r.cost_teorico);
+        if (v == null || teo == null) return 'Sin datos suficientes para analizar costo real vs teórico.';
         const brecha = (v - teo).toFixed(2);
         const pv = p ? pctNum(p.cost_real) : null;
         return v > teo
@@ -538,6 +541,7 @@ function KPIDetailModal({ kpiId, onClose, primaryRecord, prevRecord, trendData, 
       ],
       insight: (r, p) => {
         const v = pctNum(r.gastos_pct_venta);
+        if (v == null) return 'Sin datos suficientes para analizar gastos.';
         const arr = pctNum(r.arriendos) || 0;
         const adm = pctNum(r.administracion) || 0;
         const serv = pctNum(r.servicios_publicos) || 0;
