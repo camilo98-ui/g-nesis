@@ -194,20 +194,131 @@ function GaugeKPI({ value, prevValue, max = 50, label, color, sublabel, status }
 
 // ─── Waterfall Bar ────────────────────────────────────────────────────────────
 function WaterfallChart({ data }) {
+  const [hovered, setHovered] = React.useState(null);
+  if (!data || data.length === 0) return null;
+
+  // Build bridge segments: each bar starts from where previous ended
+  const W = 560, H = 280, padL = 48, padR = 20, padT = 24, padB = 48;
+  const chartW = W - padL - padR;
+  const chartH = H - padT - padB;
+
+  // data: [{label, value, color}] — value can be negative (deductions) or positive
+  // Venta=100 is anchor at top; deductions go down; EBITDA is final result
+  const minV = -60, maxV = 110;
+  const range = maxV - minV;
+  const toY = (v) => padT + chartH * (1 - (v - minV) / range);
+  const barW = Math.min(52, chartW / data.length - 16);
+  const slotW = chartW / data.length;
+
+  let running = 0;
+  const bars = data.map((d, i) => {
+    const isFirst = i === 0;
+    const isLast = i === data.length - 1;
+    const startVal = isFirst || isLast ? 0 : running;
+    const endVal = isFirst ? d.value : isLast ? d.value : running + d.value;
+    if (!isLast) running = endVal;
+    const x = padL + slotW * i + (slotW - barW) / 2;
+    const top = toY(Math.max(startVal, endVal));
+    const bot = toY(Math.min(startVal, endVal));
+    const h = Math.max(bot - top, 3);
+    return { ...d, x, top, h, startVal, endVal, i };
+  });
+
+  // Y-axis ticks
+  const ticks = [0, 25, 50, 75, 100];
+
   return (
-    <ResponsiveContainer width="100%" height={220}>
-      <BarChart data={data} margin={{ top: 10, right: 10, left: -10, bottom: 0 }} barSize={28}>
-        <CartesianGrid strokeDasharray="2 4" stroke="rgba(148,163,184,0.08)" vertical={false} />
-        <XAxis dataKey="label" tick={{ fontSize: 10, fill: '#64748b', fontWeight: 700 }} axisLine={false} tickLine={false} />
-        <YAxis tickFormatter={v => `${v}%`} tick={{ fontSize: 10, fill: '#475569' }} axisLine={false} tickLine={false} width={36} />
-        <Tooltip content={<DarkTooltip />} cursor={{ fill: 'rgba(248,113,113,0.05)' }} />
-        <Bar dataKey="value" radius={[6, 6, 0, 0]} animationDuration={800}>
-          {data.map((entry, i) => (
-            <Cell key={i} fill={entry.color} />
+    <div className="w-full overflow-x-auto">
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ minWidth: 320 }}>
+        <defs>
+          {bars.map((b, i) => (
+            <linearGradient key={i} id={`wf_grad_${i}`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={b.color} stopOpacity="1" />
+              <stop offset="100%" stopColor={b.color} stopOpacity="0.6" />
+            </linearGradient>
           ))}
-        </Bar>
-      </BarChart>
-    </ResponsiveContainer>
+          {bars.map((b, i) => (
+            <filter key={i} id={`wf_glow_${i}`} x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="4" result="blur" />
+              <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+            </filter>
+          ))}
+        </defs>
+
+        {/* Grid lines */}
+        {ticks.map(t => (
+          <g key={t}>
+            <line x1={padL} y1={toY(t)} x2={W - padR} y2={toY(t)}
+              stroke={t === 0 ? 'rgba(148,163,184,0.2)' : 'rgba(148,163,184,0.07)'}
+              strokeWidth={t === 0 ? 1.5 : 1} strokeDasharray={t === 0 ? '' : '3 5'} />
+            <text x={padL - 6} y={toY(t) + 4} textAnchor="end" fontSize="9" fill="rgba(148,163,184,0.4)" fontWeight="600">
+              {t}%
+            </text>
+          </g>
+        ))}
+
+        {/* Connector lines between bars */}
+        {bars.map((b, i) => {
+          if (i === bars.length - 1) return null;
+          const next = bars[i + 1];
+          const connectY = toY(b.endVal);
+          return (
+            <line key={i}
+              x1={b.x + barW} y1={connectY}
+              x2={next.x} y2={connectY}
+              stroke="rgba(148,163,184,0.2)" strokeWidth="1.5" strokeDasharray="4 3" />
+          );
+        })}
+
+        {/* Bars */}
+        {bars.map((b, i) => {
+          const isHov = hovered === i;
+          return (
+            <g key={i} style={{ cursor: 'pointer' }}
+              onMouseEnter={() => setHovered(i)} onMouseLeave={() => setHovered(null)}>
+              {/* Shadow/glow */}
+              {isHov && (
+                <rect x={b.x - 2} y={b.top - 2} width={barW + 4} height={b.h + 4}
+                  rx="8" fill={b.color} opacity="0.15" filter={`url(#wf_glow_${i})`} />
+              )}
+              {/* Bar body */}
+              <rect x={b.x} y={b.top} width={barW} height={b.h}
+                rx="6" fill={`url(#wf_grad_${i})`}
+                opacity={hovered != null && !isHov ? 0.4 : 1}
+                style={{ transition: 'opacity 0.2s' }} />
+              {/* Top shine */}
+              <rect x={b.x + 3} y={b.top + 2} width={barW - 6} height={3}
+                rx="3" fill="white" opacity={isHov ? 0.25 : 0.1} />
+
+              {/* Value label on bar */}
+              <text x={b.x + barW / 2} y={b.top - 7}
+                textAnchor="middle" fontSize="10" fontWeight="900"
+                fill={isHov ? b.color : 'rgba(241,245,249,0.8)'}>
+                {b.value > 0 ? '+' : ''}{b.value.toFixed(1)}%
+              </text>
+
+              {/* X label */}
+              <text x={b.x + barW / 2} y={H - padB + 16}
+                textAnchor="middle" fontSize="10" fontWeight="800"
+                fill={isHov ? b.color : '#64748b'}>
+                {b.label}
+              </text>
+
+              {/* Hover tooltip */}
+              {isHov && (
+                <g>
+                  <rect x={b.x + barW / 2 - 44} y={b.top - 40} width={88} height={28} rx="7"
+                    fill="#0d1526" stroke={b.color} strokeWidth="1" strokeOpacity="0.5" />
+                  <text x={b.x + barW / 2} y={b.top - 22} textAnchor="middle" fontSize="10" fontWeight="900" fill={b.color}>
+                    {b.label}: {b.endVal.toFixed(1)}%
+                  </text>
+                </g>
+              )}
+            </g>
+          );
+        })}
+      </svg>
+    </div>
   );
 }
 
@@ -256,34 +367,121 @@ function MultiLineTrend({ data, lines, height = 280 }) {
 
 // ─── Donut Breakdown ──────────────────────────────────────────────────────────
 function DonutBreakdown({ ebitda, costReal, personal, gastos }) {
+  const [hovered, setHovered] = React.useState(null);
   const remainder = Math.max(0, 100 - (ebitda || 0) - (costReal || 0) - (personal || 0) - (gastos || 0));
-  const donutData = [
-    { name: 'EBITDA', value: ebitda || 0, color: MAGENTA },
-    { name: 'Costo Producto', value: costReal || 0, color: NEON_BLUE },
-    { name: 'Personal', value: personal || 0, color: NEON_PURPLE },
-    { name: 'Gastos', value: gastos || 0, color: NEON_AMBER },
-    { name: 'Otros', value: remainder, color: '#334155' },
+  const segments = [
+    { name: 'EBITDA', value: ebitda || 0, color: MAGENTA, icon: '💰', desc: 'Ganancia operativa' },
+    { name: 'C. Producto', value: costReal || 0, color: NEON_BLUE, icon: '🧁', desc: 'Costo de producto' },
+    { name: 'Personal', value: personal || 0, color: NEON_PURPLE, icon: '👥', desc: 'Nómina y salarios' },
+    { name: 'Gastos', value: gastos || 0, color: NEON_AMBER, icon: '🏢', desc: 'Arriendos y servicios' },
+    ...(remainder > 0.5 ? [{ name: 'Otros', value: remainder, color: '#334155', icon: '📦', desc: 'Sin clasificar' }] : []),
   ].filter(d => d.value > 0);
 
+  const hoveredSeg = hovered != null ? segments[hovered] : null;
+
   return (
-    <div className="flex flex-col items-center">
-      <ResponsiveContainer width="100%" height={180}>
-        <PieChart>
-          <Pie data={donutData} cx="50%" cy="50%" innerRadius={50} outerRadius={78} paddingAngle={3}
-            dataKey="value" animationDuration={800}>
-            {donutData.map((entry, i) => (
-              <Cell key={i} fill={entry.color} stroke="transparent" />
+    <div className="flex flex-col sm:flex-row items-center gap-6">
+      {/* Donut SVG custom */}
+      <div className="relative flex-shrink-0" style={{ width: 200, height: 200 }}>
+        <svg viewBox="0 0 200 200" width="200" height="200">
+          <defs>
+            {segments.map((s, i) => (
+              <filter key={i} id={`ds_glow_${i}`} x="-30%" y="-30%" width="160%" height="160%">
+                <feGaussianBlur stdDeviation="4" result="blur" />
+                <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+              </filter>
             ))}
-          </Pie>
-          <Tooltip content={<DarkTooltip />} />
-        </PieChart>
-      </ResponsiveContainer>
-      <div className="flex flex-wrap justify-center gap-2 mt-1">
-        {donutData.map((d, i) => (
-          <span key={i} className="flex items-center gap-1 text-[10px] text-slate-400">
-            <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: d.color }} />
-            {d.name}: <span className="font-black text-slate-200">{d.value.toFixed(1)}%</span>
-          </span>
+          </defs>
+          {(() => {
+            const cx = 100, cy = 100, r = 72, innerR = 46;
+            const gap = 0.035; // radians gap between segments
+            let cumAngle = -Math.PI / 2;
+            const total = segments.reduce((s, d) => s + d.value, 0);
+            return segments.map((seg, i) => {
+              const sweep = (seg.value / total) * 2 * Math.PI - gap;
+              const startA = cumAngle + gap / 2;
+              const endA = startA + sweep;
+              cumAngle += (seg.value / total) * 2 * Math.PI;
+              const midA = (startA + endA) / 2;
+              const isHov = hovered === i;
+              const scale = isHov ? 1.06 : 1;
+              const ox = isHov ? Math.cos(midA) * 6 : 0;
+              const oy = isHov ? Math.sin(midA) * 6 : 0;
+
+              const x1 = cx + ox + r * Math.cos(startA);
+              const y1 = cy + oy + r * Math.sin(startA);
+              const x2 = cx + ox + r * Math.cos(endA);
+              const y2 = cy + oy + r * Math.sin(endA);
+              const xi1 = cx + ox + innerR * Math.cos(endA);
+              const yi1 = cy + oy + innerR * Math.sin(endA);
+              const xi2 = cx + ox + innerR * Math.cos(startA);
+              const yi2 = cy + oy + innerR * Math.sin(startA);
+              const large = sweep > Math.PI ? 1 : 0;
+
+              const d = `M ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2} L ${xi1} ${yi1} A ${innerR} ${innerR} 0 ${large} 0 ${xi2} ${yi2} Z`;
+
+              // Label line
+              const lblR = r + 18;
+              const lx = cx + ox + lblR * Math.cos(midA);
+              const ly = cy + oy + lblR * Math.sin(midA);
+
+              return (
+                <g key={i} style={{ cursor: 'pointer', transition: 'all 0.25s ease' }}
+                  onMouseEnter={() => setHovered(i)} onMouseLeave={() => setHovered(null)}>
+                  <path d={d} fill={seg.color} opacity={hovered != null && !isHov ? 0.35 : 1}
+                    filter={isHov ? `url(#ds_glow_${i})` : undefined}
+                    style={{ transition: 'all 0.25s ease' }} />
+                </g>
+              );
+            });
+          })()}
+          {/* Center display */}
+          <circle cx="100" cy="100" r="40" fill="#060d1b" />
+          {hoveredSeg ? (
+            <>
+              <text x="100" y="95" textAnchor="middle" fontSize="18" fontWeight="900" fill={hoveredSeg.color}>
+                {hoveredSeg.value.toFixed(1)}%
+              </text>
+              <text x="100" y="112" textAnchor="middle" fontSize="8" fill="rgba(148,163,184,0.7)" fontWeight="700">
+                {hoveredSeg.name}
+              </text>
+            </>
+          ) : (
+            <>
+              <text x="100" y="96" textAnchor="middle" fontSize="11" fontWeight="900" fill="#f1f5f9">
+                100%
+              </text>
+              <text x="100" y="110" textAnchor="middle" fontSize="7.5" fill="rgba(148,163,184,0.5)" fontWeight="600">
+                venta
+              </text>
+            </>
+          )}
+        </svg>
+      </div>
+
+      {/* Legend */}
+      <div className="flex-1 space-y-2 w-full">
+        {segments.map((s, i) => (
+          <div key={i}
+            className="flex items-center gap-3 rounded-xl px-3 py-2.5 cursor-pointer transition-all"
+            style={{
+              background: hovered === i ? `${s.color}15` : 'rgba(148,163,184,0.04)',
+              border: `1px solid ${hovered === i ? s.color + '40' : 'rgba(148,163,184,0.08)'}`,
+            }}
+            onMouseEnter={() => setHovered(i)} onMouseLeave={() => setHovered(null)}>
+            <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: s.color, boxShadow: `0 0 8px ${s.color}80` }} />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-black text-slate-200">{s.name}</span>
+                <span className="text-sm font-black" style={{ color: s.color }}>{s.value.toFixed(1)}%</span>
+              </div>
+              {/* Mini bar */}
+              <div className="mt-1 h-1 rounded-full overflow-hidden" style={{ background: 'rgba(148,163,184,0.1)' }}>
+                <div className="h-full rounded-full transition-all duration-500"
+                  style={{ width: `${s.value}%`, background: `linear-gradient(90deg, ${s.color}80, ${s.color})` }} />
+              </div>
+            </div>
+          </div>
         ))}
       </div>
     </div>
