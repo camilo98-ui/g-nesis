@@ -1,0 +1,9 @@
+{
+  "name": "G\u00e9nesis",
+  "site": {
+    "installCommand": "npm install",
+    "buildCommand": "npm run build",
+    "serveCommand": "npm run dev",
+    "outputDirectory": "./dist"
+  }
+}
