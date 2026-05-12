@@ -833,22 +833,90 @@ export default function PYGModal({ onClose, storeId }) {
                 {/* Gauges */}
                 <div className="rounded-2xl p-6" style={{ background: 'rgba(148,163,184,0.04)', border: '1px solid rgba(148,163,184,0.1)' }}>
                   <div className="flex items-center justify-between mb-6">
-                    <p className="text-xs font-black text-slate-400 uppercase tracking-widest">KPIs Clave — {MONTHS_FULL[(selectedMonth || 1) - 1]}</p>
-                    <p className="text-[10px] text-slate-600">Toca para análisis →</p>
+                    <div>
+                      <p className="text-xs font-black text-slate-300 uppercase tracking-widest">KPIs Clave — {MONTHS_FULL[(selectedMonth || 1) - 1]}</p>
+                      {prevRecord && <p className="text-[10px] text-slate-500 mt-0.5">vs {MONTHS_FULL[(selectedMonth - 2 + 12) % 12]} · Toca para análisis detallado</p>}
+                    </div>
+                    {prevRecord && (
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black"
+                        style={{ background: 'rgba(148,163,184,0.08)', border: '1px solid rgba(148,163,184,0.12)', color: '#94a3b8' }}>
+                        <span style={{ color: '#34d399' }}>●</span> Actual &nbsp;
+                        <span style={{ color: '#475569' }}>●</span> Anterior
+                      </div>
+                    )}
                   </div>
-                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 justify-items-center">
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
                     {[
-                      { kpi: 'ebitda', value: ebitda, max: 50, label: 'EBITDA', color: MAGENTA, sublabel: 'Meta: ≥25%', status: ebitdaStatus },
-                      { kpi: 'personal', value: personal, max: 40, label: 'Personal', color: NEON_PURPLE, sublabel: 'Meta: ≤22%', status: personalStatus },
-                      { kpi: 'costo', value: costReal, max: 60, label: 'Costo Real', color: NEON_BLUE, sublabel: `Teo: ${costTeo != null ? costTeo.toFixed(1) + '%' : '—'}`, status: costoStatus },
-                      { kpi: 'gastos', value: gastos, max: 60, label: 'Gastos', color: NEON_AMBER, sublabel: 'Meta: ≤40%', status: gastosStatus },
-                    ].map(({ kpi, ...props }) => (
-                      <motion.button key={kpi} onClick={() => setActiveKPI(kpi)}
-                        whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
-                        className="w-full flex flex-col items-center cursor-pointer outline-none">
-                        <GaugeKPI {...props} />
-                      </motion.button>
-                    ))}
+                      {
+                        kpi: 'ebitda', value: ebitda, prevValue: prevRecord ? pctNum(prevRecord.margen_ebitda) : null,
+                        max: 50, label: 'EBITDA', color: MAGENTA, sublabel: 'Meta: ≥25%', status: ebitdaStatus, positiveIsGood: true
+                      },
+                      {
+                        kpi: 'personal', value: personal, prevValue: prevRecord ? pctNum(prevRecord.costo_personal) : null,
+                        max: 40, label: 'Personal', color: NEON_PURPLE, sublabel: 'Meta: ≤22%', status: personalStatus, positiveIsGood: false
+                      },
+                      {
+                        kpi: 'costo', value: costReal, prevValue: prevRecord ? pctNum(prevRecord.cost_real) : null,
+                        max: 60, label: 'Costo Real', color: NEON_BLUE, sublabel: `Teo: ${costTeo != null ? costTeo.toFixed(1) + '%' : '—'}`, status: costoStatus, positiveIsGood: false
+                      },
+                      {
+                        kpi: 'gastos', value: gastos, prevValue: prevRecord ? pctNum(prevRecord.gastos_pct_venta) : null,
+                        max: 60, label: 'Gastos', color: NEON_AMBER, sublabel: 'Meta: ≤40%', status: gastosStatus, positiveIsGood: false
+                      },
+                    ].map(({ kpi, value, prevValue, max, label, color, sublabel, status, positiveIsGood }) => {
+                      const delta = value != null && prevValue != null ? value - prevValue : null;
+                      const isGood = delta == null ? null : (positiveIsGood ? delta >= 0 : delta <= 0);
+                      const deltaColor = isGood == null ? '#64748b' : isGood ? '#34d399' : '#f87171';
+                      return (
+                        <motion.button key={kpi} onClick={() => setActiveKPI(kpi)}
+                          whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                          className="w-full flex flex-col items-center cursor-pointer outline-none rounded-2xl p-4 transition-all"
+                          style={{ background: 'rgba(148,163,184,0.03)', border: `1px solid ${color}20` }}>
+                          <GaugeKPI value={value} max={max} label={label} color={color} sublabel={sublabel} status={status} />
+
+                          {/* VS Anterior */}
+                          {prevValue != null && (
+                            <div className="w-full mt-3 space-y-2">
+                              {/* Delta badge */}
+                              <div className="flex items-center justify-center gap-1.5">
+                                <span className="text-[11px] font-black px-2.5 py-1 rounded-full"
+                                  style={{ background: `${deltaColor}18`, color: deltaColor, border: `1px solid ${deltaColor}35` }}>
+                                  {delta > 0 ? '▲' : delta < 0 ? '▼' : '='} {Math.abs(delta).toFixed(1)}pp vs anterior
+                                </span>
+                              </div>
+
+                              {/* Dual bar: anterior vs actual */}
+                              <div className="w-full space-y-1">
+                                {/* Anterior */}
+                                <div className="flex items-center gap-2">
+                                  <span className="text-[9px] text-slate-600 w-12 text-right shrink-0">
+                                    {prevRecord && MONTHS_SHORT[(selectedMonth - 2 + 12) % 12]}
+                                  </span>
+                                  <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: 'rgba(148,163,184,0.1)' }}>
+                                    <div className="h-full rounded-full transition-all duration-700"
+                                      style={{ width: `${Math.min(prevValue / max, 1) * 100}%`, background: 'rgba(148,163,184,0.3)' }} />
+                                  </div>
+                                  <span className="text-[9px] text-slate-500 w-8 shrink-0">{prevValue.toFixed(1)}%</span>
+                                </div>
+                                {/* Actual */}
+                                <div className="flex items-center gap-2">
+                                  <span className="text-[9px] font-black w-12 text-right shrink-0" style={{ color: color }}>
+                                    {MONTHS_SHORT[(selectedMonth - 1 + 12) % 12]}
+                                  </span>
+                                  <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: 'rgba(148,163,184,0.1)' }}>
+                                    <motion.div className="h-full rounded-full"
+                                      initial={{ width: 0 }} animate={{ width: `${Math.min((value ?? 0) / max, 1) * 100}%` }}
+                                      transition={{ duration: 0.8, ease: 'easeOut' }}
+                                      style={{ background: color }} />
+                                  </div>
+                                  <span className="text-[9px] font-black w-8 shrink-0" style={{ color }}>{value?.toFixed(1)}%</span>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </motion.button>
+                      );
+                    })}
                   </div>
                 </div>
 
