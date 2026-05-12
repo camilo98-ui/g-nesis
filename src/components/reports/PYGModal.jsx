@@ -322,46 +322,309 @@ function WaterfallChart({ data }) {
   );
 }
 
+// ─── SVG Path helpers ─────────────────────────────────────────────────────────
+function buildSmoothPath(points) {
+  if (points.length < 2) return '';
+  let d = `M ${points[0].x} ${points[0].y}`;
+  for (let i = 1; i < points.length; i++) {
+    const prev = points[i - 1], curr = points[i];
+    const cpx = (prev.x + curr.x) / 2;
+    d += ` C ${cpx} ${prev.y}, ${cpx} ${curr.y}, ${curr.x} ${curr.y}`;
+  }
+  return d;
+}
+
 // ─── Area Trend ───────────────────────────────────────────────────────────────
-function AreaTrend({ data, dataKey, color, height = 200, name }) {
+function AreaTrend({ data, dataKey, color, height = 200, name, targetLine }) {
+  const [hovIdx, setHovIdx] = React.useState(null);
+  const vals = data.map(d => d[dataKey]).filter(v => v != null);
+  if (vals.length === 0) return null;
+
+  const W = 560, H = height;
+  const padL = 42, padR = 24, padT = 20, padB = 36;
+  const chartW = W - padL - padR;
+  const chartH = H - padT - padB;
+
+  const minV = Math.max(0, Math.min(...vals) - 5);
+  const maxV = Math.max(...vals) + 8;
+  const toX = (i) => padL + (i / (data.length - 1)) * chartW;
+  const toY = (v) => padT + chartH * (1 - (v - minV) / (maxV - minV));
+
+  const points = data.map((d, i) => ({ x: toX(i), y: d[dataKey] != null ? toY(d[dataKey]) : null, val: d[dataKey], mes: d.mes })).filter(p => p.val != null);
+  const linePath = buildSmoothPath(points);
+  const areaPath = linePath + ` L ${points[points.length - 1].x} ${padT + chartH} L ${points[0].x} ${padT + chartH} Z`;
+
+  const gradId = `svgat_${dataKey.replace(/\W/g, '_')}`;
+  const glowId = `svgat_glow_${dataKey.replace(/\W/g, '_')}`;
+  const ticks = 4;
+
   return (
-    <ResponsiveContainer width="100%" height={height}>
-      <AreaChart data={data} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+    <div className="w-full" style={{ position: 'relative' }}>
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ display: 'block' }}>
         <defs>
-          <linearGradient id={`ag_${dataKey}`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={color} stopOpacity={0.4} />
-            <stop offset="100%" stopColor={color} stopOpacity={0} />
+          <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={color} stopOpacity="0.45" />
+            <stop offset="60%" stopColor={color} stopOpacity="0.12" />
+            <stop offset="100%" stopColor={color} stopOpacity="0" />
+          </linearGradient>
+          <filter id={glowId} x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="3.5" result="blur" />
+            <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+          </filter>
+          <linearGradient id={`${gradId}_line`} x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor={color} stopOpacity="0.5" />
+            <stop offset="50%" stopColor={color} stopOpacity="1" />
+            <stop offset="100%" stopColor={color} stopOpacity="0.6" />
           </linearGradient>
         </defs>
-        <CartesianGrid strokeDasharray="2 4" stroke="rgba(148,163,184,0.08)" vertical={false} />
-        <XAxis dataKey="mes" tick={{ fontSize: 10, fill: '#64748b', fontWeight: 700 }} axisLine={false} tickLine={false} />
-        <YAxis tickFormatter={v => `${v}%`} tick={{ fontSize: 10, fill: '#475569' }} axisLine={false} tickLine={false} width={36} />
-        <Tooltip content={<DarkTooltip />} cursor={{ stroke: color, strokeWidth: 1, strokeDasharray: '4 2' }} />
-        <Area type="monotone" dataKey={dataKey} name={name || dataKey} stroke={color} strokeWidth={2.5}
-          fill={`url(#ag_${dataKey})`} dot={{ fill: color, r: 4, strokeWidth: 2, stroke: '#0f172a' }}
-          activeDot={{ r: 6, fill: color, stroke: '#0f172a', strokeWidth: 2 }} animationDuration={900} />
-      </AreaChart>
-    </ResponsiveContainer>
+
+        {/* Grid */}
+        {Array.from({ length: ticks + 1 }, (_, i) => {
+          const v = minV + (maxV - minV) * (i / ticks);
+          const y = toY(v);
+          return (
+            <g key={i}>
+              <line x1={padL} y1={y} x2={W - padR} y2={y}
+                stroke="rgba(148,163,184,0.07)" strokeWidth="1" strokeDasharray="3 6" />
+              <text x={padL - 6} y={y + 4} textAnchor="end" fontSize="9" fill="rgba(148,163,184,0.35)" fontWeight="600">
+                {Math.round(v)}%
+              </text>
+            </g>
+          );
+        })}
+
+        {/* Target reference line */}
+        {targetLine != null && (
+          <g>
+            <line x1={padL} y1={toY(targetLine)} x2={W - padR} y2={toY(targetLine)}
+              stroke={color} strokeWidth="1" strokeDasharray="6 4" strokeOpacity="0.4" />
+            <text x={W - padR + 3} y={toY(targetLine) + 4} fontSize="8" fill={color} fontWeight="800" opacity="0.7">
+              {targetLine}%
+            </text>
+          </g>
+        )}
+
+        {/* Area fill */}
+        <path d={areaPath} fill={`url(#${gradId})`} />
+
+        {/* Min/Max bands — subtle glow under peaks */}
+        {points.map((p, i) => {
+          const isMax = p.val === Math.max(...vals);
+          if (!isMax) return null;
+          return (
+            <ellipse key={i} cx={p.x} cy={padT + chartH} rx="30" ry="8"
+              fill={color} opacity="0.06" />
+          );
+        })}
+
+        {/* Line */}
+        <path d={linePath} fill="none" stroke={`url(#${gradId}_line)`} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+          filter={`url(#${glowId})`} />
+
+        {/* X-axis labels */}
+        {data.map((d, i) => (
+          <text key={i} x={toX(i)} y={H - 6} textAnchor="middle" fontSize="9.5" fontWeight="700"
+            fill={hovIdx === i ? color : 'rgba(100,116,139,0.7)'}>
+            {d.mes}
+          </text>
+        ))}
+
+        {/* Vertical cursor + dots */}
+        {points.map((p, i) => {
+          const isHov = hovIdx === i;
+          return (
+            <g key={i}>
+              {isHov && (
+                <>
+                  <line x1={p.x} y1={padT} x2={p.x} y2={padT + chartH}
+                    stroke={color} strokeWidth="1" strokeDasharray="3 4" strokeOpacity="0.4" />
+                  {/* Tooltip box */}
+                  <rect x={p.x - 32} y={p.y - 38} width={64} height={26} rx="7"
+                    fill="#0a1628" stroke={color} strokeWidth="1.5" strokeOpacity="0.7" />
+                  <text x={p.x} y={p.y - 21} textAnchor="middle" fontSize="11" fontWeight="900" fill={color}>
+                    {p.val?.toFixed(1)}%
+                  </text>
+                  <text x={p.x} y={p.y - 10} textAnchor="middle" fontSize="8" fill="rgba(148,163,184,0.6)" fontWeight="600">
+                    {p.mes}
+                  </text>
+                  {/* Glow circle */}
+                  <circle cx={p.x} cy={p.y} r="10" fill={color} opacity="0.15" />
+                </>
+              )}
+              {/* Dot */}
+              <circle cx={p.x} cy={p.y} r={isHov ? 6 : 4} fill={isHov ? color : '#0f172a'}
+                stroke={color} strokeWidth={isHov ? 2.5 : 1.5}
+                style={{ transition: 'r 0.15s, fill 0.15s' }} />
+              {/* Hit area */}
+              <circle cx={p.x} cy={p.y} r="16" fill="transparent"
+                onMouseEnter={() => setHovIdx(i)} onMouseLeave={() => setHovIdx(null)} style={{ cursor: 'crosshair' }} />
+            </g>
+          );
+        })}
+      </svg>
+    </div>
   );
 }
 
 // ─── Multi-Line Trend ─────────────────────────────────────────────────────────
 function MultiLineTrend({ data, lines, height = 280 }) {
+  const [hovIdx, setHovIdx] = React.useState(null);
+  const [hiddenLines, setHiddenLines] = React.useState([]);
+
+  const allVals = lines.flatMap(l => data.map(d => d[l.key]).filter(v => v != null));
+  if (allVals.length === 0) return null;
+
+  const W = 640, H = height;
+  const padL = 44, padR = 28, padT = 24, padB = 48;
+  const chartW = W - padL - padR;
+  const chartH = H - padT - padB;
+
+  const minV = Math.max(0, Math.min(...allVals) - 4);
+  const maxV = Math.max(...allVals) + 6;
+  const toX = (i) => padL + (i / (data.length - 1)) * chartW;
+  const toY = (v) => padT + chartH * (1 - (v - minV) / (maxV - minV));
+  const ticks = 5;
+
+  const glowId = 'mlt_glow';
+
   return (
-    <ResponsiveContainer width="100%" height={height}>
-      <LineChart data={data} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
-        <CartesianGrid strokeDasharray="2 4" stroke="rgba(148,163,184,0.08)" vertical={false} />
-        <XAxis dataKey="mes" tick={{ fontSize: 10, fill: '#64748b', fontWeight: 700 }} axisLine={false} tickLine={false} />
-        <YAxis tickFormatter={v => `${v}%`} tick={{ fontSize: 10, fill: '#475569' }} axisLine={false} tickLine={false} width={36} />
-        <Tooltip content={<DarkTooltip />} />
-        <Legend wrapperStyle={{ fontSize: 10, paddingTop: 12, color: '#94a3b8' }} />
-        {lines.map(l => (
-          <Line key={l.key} type="monotone" dataKey={l.key} name={l.name} stroke={l.color} strokeWidth={2}
-            dot={{ fill: l.color, r: 3, strokeWidth: 0 }} activeDot={{ r: 5, fill: l.color, stroke: '#0f172a', strokeWidth: 2 }}
-            animationDuration={900} />
+    <div className="w-full">
+      {/* Legend */}
+      <div className="flex flex-wrap gap-3 mb-4 px-1">
+        {lines.map(l => {
+          const hidden = hiddenLines.includes(l.key);
+          const lastVal = [...data].reverse().find(d => d[l.key] != null)?.[l.key];
+          return (
+            <button key={l.key} onClick={() => setHiddenLines(h => h.includes(l.key) ? h.filter(k => k !== l.key) : [...h, l.key])}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-xl transition-all"
+              style={{
+                background: hidden ? 'rgba(148,163,184,0.05)' : `${l.color}12`,
+                border: `1px solid ${hidden ? 'rgba(148,163,184,0.1)' : l.color + '35'}`,
+                opacity: hidden ? 0.4 : 1,
+              }}>
+              <div className="w-2.5 h-2.5 rounded-full" style={{ background: hidden ? '#475569' : l.color, boxShadow: hidden ? 'none' : `0 0 6px ${l.color}` }} />
+              <span className="text-[10px] font-black" style={{ color: hidden ? '#475569' : l.color }}>{l.name}</span>
+              {lastVal != null && !hidden && (
+                <span className="text-[10px] font-black ml-1" style={{ color: l.color }}>{lastVal.toFixed(1)}%</span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ display: 'block' }}>
+        <defs>
+          <filter id={glowId} x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="3" result="blur" />
+            <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+          </filter>
+          {lines.map(l => (
+            <linearGradient key={l.key} id={`mlt_lg_${l.key.replace(/\W/g,'_')}`} x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor={l.color} stopOpacity="0.4" />
+              <stop offset="50%" stopColor={l.color} stopOpacity="1" />
+              <stop offset="100%" stopColor={l.color} stopOpacity="0.5" />
+            </linearGradient>
+          ))}
+        </defs>
+
+        {/* Grid */}
+        {Array.from({ length: ticks + 1 }, (_, i) => {
+          const v = minV + (maxV - minV) * (i / ticks);
+          const y = toY(v);
+          return (
+            <g key={i}>
+              <line x1={padL} y1={y} x2={W - padR} y2={y}
+                stroke="rgba(148,163,184,0.07)" strokeWidth="1" strokeDasharray="2 6" />
+              <text x={padL - 6} y={y + 4} textAnchor="end" fontSize="9" fill="rgba(148,163,184,0.35)" fontWeight="600">
+                {Math.round(v)}%
+              </text>
+            </g>
+          );
+        })}
+
+        {/* Vertical hover band */}
+        {hovIdx != null && (
+          <rect x={toX(hovIdx) - 20} y={padT} width={40} height={chartH}
+            fill="rgba(148,163,184,0.04)" rx="4" />
+        )}
+        {hovIdx != null && (
+          <line x1={toX(hovIdx)} y1={padT} x2={toX(hovIdx)} y2={padT + chartH}
+            stroke="rgba(148,163,184,0.2)" strokeWidth="1" strokeDasharray="3 4" />
+        )}
+
+        {/* Lines */}
+        {lines.map(l => {
+          if (hiddenLines.includes(l.key)) return null;
+          const pts = data.map((d, i) => ({ x: toX(i), y: d[l.key] != null ? toY(d[l.key]) : null, val: d[l.key] })).filter(p => p.val != null);
+          if (pts.length < 2) return null;
+          const path = buildSmoothPath(pts);
+          return (
+            <g key={l.key}>
+              {/* Glow line */}
+              <path d={path} fill="none" stroke={l.color} strokeWidth="5" strokeLinecap="round" strokeOpacity="0.15" />
+              {/* Main line */}
+              <path d={path} fill="none" stroke={`url(#mlt_lg_${l.key.replace(/\W/g,'_')})`}
+                strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+            </g>
+          );
+        })}
+
+        {/* Dots + hover tooltip */}
+        {lines.map(l => {
+          if (hiddenLines.includes(l.key)) return null;
+          return data.map((d, i) => {
+            if (d[l.key] == null) return null;
+            const x = toX(i), y = toY(d[l.key]);
+            const isHov = hovIdx === i;
+            return (
+              <circle key={`${l.key}_${i}`} cx={x} cy={y} r={isHov ? 5.5 : 3.5}
+                fill={isHov ? l.color : '#0f172a'} stroke={l.color}
+                strokeWidth={isHov ? 2.5 : 1.5}
+                style={{ transition: 'r 0.15s, fill 0.15s' }} />
+            );
+          });
+        })}
+
+        {/* X-axis */}
+        {data.map((d, i) => (
+          <text key={i} x={toX(i)} y={H - padB + 14} textAnchor="middle" fontSize="9.5" fontWeight="700"
+            fill={hovIdx === i ? '#f1f5f9' : 'rgba(100,116,139,0.7)'}>
+            {d.mes}
+          </text>
         ))}
-      </LineChart>
-    </ResponsiveContainer>
+
+        {/* Hover hit areas */}
+        {data.map((d, i) => (
+          <rect key={i} x={toX(i) - chartW / data.length / 2} y={padT} width={chartW / data.length} height={chartH + padB}
+            fill="transparent" style={{ cursor: 'crosshair' }}
+            onMouseEnter={() => setHovIdx(i)} onMouseLeave={() => setHovIdx(null)} />
+        ))}
+
+        {/* Hover tooltip panel */}
+        {hovIdx != null && (() => {
+          const x = toX(hovIdx);
+          const panelW = 110, panelH = 14 + lines.filter(l => !hiddenLines.includes(l.key) && data[hovIdx]?.[l.key] != null).length * 18 + 8;
+          const px = Math.min(x - panelW / 2, W - padR - panelW);
+          const py = padT - 4;
+          return (
+            <g>
+              <rect x={px} y={py} width={panelW} height={panelH} rx="8" fill="#0a1628" stroke="rgba(148,163,184,0.2)" strokeWidth="1" />
+              <text x={px + 10} y={py + 13} fontSize="8.5" fontWeight="900" fill="rgba(148,163,184,0.6)">{data[hovIdx]?.mes}</text>
+              {lines.filter(l => !hiddenLines.includes(l.key)).map((l, li) => {
+                const v = data[hovIdx]?.[l.key];
+                if (v == null) return null;
+                return (
+                  <g key={l.key}>
+                    <circle cx={px + 10} cy={py + 24 + li * 18} r="3" fill={l.color} />
+                    <text x={px + 18} y={py + 28 + li * 18} fontSize="9.5" fontWeight="700" fill={l.color}>{l.name}: {v.toFixed(1)}%</text>
+                  </g>
+                );
+              })}
+            </g>
+          );
+        })()}
+      </svg>
+    </div>
   );
 }
 
