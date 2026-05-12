@@ -314,23 +314,25 @@ function QuantInsights({ primaryRecord, prevRecord, trendData }) {
   }
 
   // Costo vs Teórico
-  const brechaCosto = costReal - costTeo;
-  items.push({
-    type: brechaCosto > 0 ? 'bad' : 'good',
-    emoji: brechaCosto > 0 ? '⚠️' : '✅',
-    title: `Costo real ${brechaCosto > 0 ? 'EXCEDE' : 'está bajo'} el teórico en ${Math.abs(brechaCosto).toFixed(2)}pp`,
-    detail: `Real ${costReal.toFixed(1)}% vs Teórico ${costTeo.toFixed(1)}%. ${brechaCosto > 0 ? `Cada punto que bajas el costo real representa +1pp directo al EBITDA.` : `Ahorro de ${Math.abs(brechaCosto).toFixed(2)}pp respecto al presupuesto de costos.`}`,
-  });
+  if (costReal != null && costTeo != null) {
+    const brechaCosto = costReal - costTeo;
+    items.push({
+      type: brechaCosto > 0 ? 'bad' : 'good',
+      emoji: brechaCosto > 0 ? '⚠️' : '✅',
+      title: `Costo real ${brechaCosto > 0 ? 'EXCEDE' : 'está bajo'} el teórico en ${Math.abs(brechaCosto).toFixed(2)}pp`,
+      detail: `Real ${costReal.toFixed(1)}% vs Teórico ${costTeo.toFixed(1)}%. ${brechaCosto > 0 ? `Cada punto que bajas el costo real representa +1pp directo al EBITDA.` : `Ahorro de ${Math.abs(brechaCosto).toFixed(2)}pp respecto al presupuesto de costos.`}`,
+    });
+  }
 
   // Personal
-  if (personal > 22) {
+  if (personal != null && personal > 22) {
     items.push({
       type: 'warn',
       emoji: '👥',
       title: `Personal en ${personal.toFixed(1)}% — por encima del óptimo (20-22%)`,
       detail: `Cada punto que reduces costo de personal = +1pp EBITDA. Para bajar al 22%: reducir ${(personal - 22).toFixed(1)}pp de nómina sobre venta. ${prevPersonal !== null ? `Vs mes anterior: ${(personal - prevPersonal) > 0 ? '+' : ''}${(personal - prevPersonal).toFixed(2)}pp.` : ''}`,
     });
-  } else {
+  } else if (personal != null) {
     items.push({
       type: 'good',
       emoji: '✅',
@@ -656,11 +658,11 @@ function KPIDetailModal({ kpiId, onClose, primaryRecord, prevRecord, trendData, 
                   <p className="font-black text-xl text-slate-600">{prevVal?.toFixed(1)}%</p>
                 </div>
                 <div className={`rounded-xl p-4 text-center ${isGood ? 'bg-emerald-50' : 'bg-red-50'}`}>
-                  <p className="text-[10px] text-slate-500 mb-1">Variación</p>
-                  <p className={`font-black text-xl ${isGood ? 'text-emerald-600' : 'text-red-500'}`}>
-                    {delta > 0 ? '+' : ''}{delta?.toFixed(2)}pp
-                  </p>
-                </div>
+                   <p className="text-[10px] text-slate-500 mb-1">Variación</p>
+                   <p className={`font-black text-xl ${isGood ? 'text-emerald-600' : 'text-red-500'}`}>
+                     {delta != null ? `${delta > 0 ? '+' : ''}${delta.toFixed(2)}pp` : '—'}
+                   </p>
+                 </div>
               </div>
             )}
           </div>
