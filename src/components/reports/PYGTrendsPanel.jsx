@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Minus, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 
@@ -475,128 +475,258 @@ function StackedPanorama({ data }) {
   );
 }
 
-// ─── EBITDA vs Costs Correlation ───────────────────────────────────────────────
+// ─── EBITDA Impact Decomposition ──────────────────────────────────────────────
+// Shows how each cost driver contributed to EBITDA change month over month
 function CorrelationPanel({ data }) {
-  const [hov, setHov] = React.useState(null);
+  const [selMonth, setSelMonth] = React.useState(null);
 
-  const pairs = [
-    { x: 'Personal', y: 'EBITDA', xLabel: 'Personal %', yLabel: 'EBITDA %',
-      xColor: NEON_PURPLE, yColor: MAGENTA,
-      desc: 'Correlación inversa — Personal ↑ presiona EBITDA ↓' },
-    { x: 'C.Real', y: 'EBITDA', xLabel: 'Costo Real %', yLabel: 'EBITDA %',
-      xColor: NEON_BLUE, yColor: MAGENTA,
-      desc: 'Cada punto de costo real reduce 1pp el EBITDA' },
+  React.useEffect(() => {
+    if (data.length >= 2) setSelMonth(data[data.length - 1].month);
+  }, [data]);
+
+  if (data.length < 2) return null;
+
+  // For the selected month, compute delta from previous
+  const selIdx = data.findIndex(d => d.month === selMonth);
+  const sel = selIdx >= 0 ? data[selIdx] : data[data.length - 1];
+  const prev = selIdx > 0 ? data[selIdx - 1] : data[0];
+
+  const drivers = [
+    { key: 'C.Real',   label: 'Costo Producto', color: NEON_BLUE,   lowerIsBetter: true,  icon: '🧁' },
+    { key: 'Personal', label: 'Personal',        color: NEON_PURPLE, lowerIsBetter: true,  icon: '👥' },
+    { key: 'Gastos',   label: 'Gastos Fijos',    color: NEON_AMBER,  lowerIsBetter: true,  icon: '🏢' },
   ];
 
+  // Impact = negative of delta (if cost goes up, EBITDA goes down by same amount)
+  const impacts = drivers.map(d => {
+    const curr = sel?.[d.key], prv = prev?.[d.key];
+    if (curr == null || prv == null) return { ...d, delta: null, impact: null };
+    const delta = curr - prv;
+    const impact = -delta; // cost increase → negative EBITDA impact
+    return { ...d, delta, impact };
+  });
+
+  // EBITDA actual delta
+  const ebitdaDelta = sel?.EBITDA != null && prev?.EBITDA != null ? sel.EBITDA - prev.EBITDA : null;
+  const explainedImpact = impacts.reduce((s, d) => s + (d.impact ?? 0), 0);
+  const unexplained = ebitdaDelta != null ? ebitdaDelta - explainedImpact : null;
+
+  // Max abs for bar scale
+  const maxAbs = Math.max(...impacts.map(d => Math.abs(d.impact ?? 0)), Math.abs(unexplained ?? 0), 0.1);
+
+  // ── Historical EBITDA bridge across all months ──────────────────────────────
+  // Show a bar for each month's EBITDA with color coding
+  const W = 680, H = 200;
+  const padL = 52, padR = 20, padT = 24, padB = 48;
+  const chartW = W - padL - padR, chartH = H - padT - padB;
+  const ebitdaVals = data.map(d => d.EBITDA).filter(v => v != null);
+  const eMin = Math.max(0, Math.min(...ebitdaVals) - 4);
+  const eMax = Math.max(...ebitdaVals) + 6;
+  const barW = Math.min(48, chartW / data.length - 10);
+  const slotW = chartW / data.length;
+  const toY = v => padT + chartH * (1 - (v - eMin) / (eMax - eMin));
+  const TARGET = 25;
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {pairs.map((pair, pi) => {
-        const pts = data.filter(d => d[pair.x] != null && d[pair.y] != null);
-        if (pts.length < 2) return null;
+    <div className="space-y-5">
 
-        const W = 260, H = 200, pad = 36;
-        const xVals = pts.map(p => p[pair.x]);
-        const yVals = pts.map(p => p[pair.y]);
-        const xMin = Math.min(...xVals) - 2, xMax = Math.max(...xVals) + 2;
-        const yMin = Math.min(...yVals) - 2, yMax = Math.max(...yVals) + 2;
-        const toX = v => pad + (v - xMin) / (xMax - xMin) * (W - pad * 2);
-        const toY = v => (H - pad) - (v - yMin) / (yMax - yMin) * (H - pad * 2);
+      {/* ── EBITDA History Bar Chart ── */}
+      <div className="rounded-2xl p-5" style={{ background: 'rgba(6,10,22,0.98)', border: '1px solid rgba(148,163,184,0.1)' }}>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 mb-0.5">Evolución EBITDA</p>
+            <p className="text-sm font-black text-slate-200">Rendimiento mensual vs meta <span style={{ color: NEON_GREEN }}>25%</span></p>
+          </div>
+          <div className="flex items-center gap-3 text-[9px]">
+            <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-sm inline-block" style={{ background: NEON_GREEN }} /> En meta</span>
+            <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-sm inline-block" style={{ background: NEON_AMBER }} /> Normal</span>
+            <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-sm inline-block" style={{ background: '#f87171' }} /> Crítico</span>
+          </div>
+        </div>
+        <svg viewBox={`0 0 ${W} ${H}`} width="100%">
+          <defs>
+            {data.map((d, i) => {
+              const v = d.EBITDA;
+              const c = v == null ? '#334155' : v >= 25 ? NEON_GREEN : v >= 15 ? NEON_AMBER : '#f87171';
+              return (
+                <linearGradient key={i} id={`eb_bar_${i}`} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={c} stopOpacity="0.95" />
+                  <stop offset="100%" stopColor={c} stopOpacity="0.4" />
+                </linearGradient>
+              );
+            })}
+            <filter id="eb_glow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="4" result="b" />
+              <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+            </filter>
+          </defs>
 
-        // Trend line (linear regression)
-        const n = pts.length;
-        const sumX = pts.reduce((s, p) => s + p[pair.x], 0);
-        const sumY = pts.reduce((s, p) => s + p[pair.y], 0);
-        const sumXY = pts.reduce((s, p) => s + p[pair.x] * p[pair.y], 0);
-        const sumXX = pts.reduce((s, p) => s + p[pair.x] ** 2, 0);
-        const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX ** 2);
-        const intercept = (sumY - slope * sumX) / n;
-        const regY1 = slope * xMin + intercept;
-        const regY2 = slope * xMax + intercept;
+          {/* Y grid */}
+          {[eMin, TARGET, eMax].map((v, i) => (
+            <g key={i}>
+              <line x1={padL} y1={toY(v)} x2={W - padR} y2={toY(v)}
+                stroke={v === TARGET ? `${NEON_GREEN}35` : 'rgba(148,163,184,0.06)'}
+                strokeWidth={v === TARGET ? 1.5 : 1} strokeDasharray={v === TARGET ? '6 4' : '3 7'} />
+              <text x={padL - 6} y={toY(v) + 4} textAnchor="end" fontSize="9" fontWeight="700"
+                fill={v === TARGET ? NEON_GREEN + '99' : 'rgba(148,163,184,0.3)'}>
+                {v.toFixed(0)}%
+              </text>
+            </g>
+          ))}
 
-        const corrColor = slope < 0 ? '#f87171' : NEON_GREEN;
+          {/* META label */}
+          <text x={W - padR + 2} y={toY(TARGET) + 4} fontSize="8" fontWeight="900" fill={NEON_GREEN + '80'}>
+            META
+          </text>
 
-        return (
-          <div key={pi} className="rounded-2xl p-4"
-            style={{ background: 'rgba(10,16,34,0.95)', border: '1px solid rgba(148,163,184,0.12)' }}>
-            <p className="text-[9px] font-black uppercase tracking-widest mb-0.5"
-              style={{ color: 'rgba(148,163,184,0.5)' }}>Correlación</p>
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-xs font-black" style={{ color: pair.xColor }}>{pair.xLabel}</span>
-              <span className="text-[10px] text-slate-600">→</span>
-              <span className="text-xs font-black" style={{ color: pair.yColor }}>{pair.yLabel}</span>
-            </div>
-
-            <svg viewBox={`0 0 ${W} ${H}`} width="100%">
-              <defs>
-                <filter id={`corr_glow_${pi}`} x="-20%" y="-20%" width="140%" height="140%">
-                  <feGaussianBlur stdDeviation="2" result="b" />
-                  <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
-                </filter>
-              </defs>
-
-              {/* Grid */}
-              {[0.25, 0.5, 0.75].map((t, i) => (
-                <g key={i}>
-                  <line x1={pad} y1={pad + (H - pad * 2) * t} x2={W - pad} y2={pad + (H - pad * 2) * t}
-                    stroke="rgba(148,163,184,0.06)" strokeWidth="1" />
-                  <line x1={pad + (W - pad * 2) * t} y1={pad} x2={pad + (W - pad * 2) * t} y2={H - pad}
-                    stroke="rgba(148,163,184,0.06)" strokeWidth="1" />
-                </g>
-              ))}
-
-              {/* Regression line */}
-              <line x1={toX(xMin)} y1={toY(regY1)} x2={toX(xMax)} y2={toY(regY2)}
-                stroke={corrColor} strokeWidth="1.5" strokeDasharray="4 3" strokeOpacity="0.5"
-                filter={`url(#corr_glow_${pi})`} />
-
-              {/* Data points */}
-              {pts.map((p, i) => {
-                const isH = hov === `${pi}_${i}`;
-                return (
-                  <g key={i} style={{ cursor: 'crosshair' }}
-                    onMouseEnter={() => setHov(`${pi}_${i}`)} onMouseLeave={() => setHov(null)}>
-                    {isH && <circle cx={toX(p[pair.x])} cy={toY(p[pair.y])} r="10" fill={MAGENTA} opacity="0.12" />}
-                    <circle cx={toX(p[pair.x])} cy={toY(p[pair.y])} r={isH ? 6 : 4}
-                      fill={isH ? MAGENTA : 'rgba(240,20,124,0.7)'} stroke={MAGENTA} strokeWidth={isH ? 2 : 1} />
-                    {isH && (
-                      <>
-                        <rect x={toX(p[pair.x]) - 30} y={toY(p[pair.y]) - 30} width={60} height={22} rx="5"
-                          fill="#060d1b" stroke={MAGENTA} strokeWidth="1" strokeOpacity="0.5" />
-                        <text x={toX(p[pair.x])} y={toY(p[pair.y]) - 14}
-                          textAnchor="middle" fontSize="8.5" fontWeight="900" fill={MAGENTA}>
-                          {p.mes}: {p[pair.y].toFixed(1)}%
-                        </text>
-                      </>
-                    )}
-                    {/* Mes label */}
-                    <text x={toX(p[pair.x])} y={toY(p[pair.y]) - 8}
-                      textAnchor="middle" fontSize="7" fill="rgba(148,163,184,0.35)" fontWeight="700">
-                      {p.mes}
+          {/* Bars */}
+          {data.map((d, i) => {
+            const v = d.EBITDA;
+            if (v == null) return null;
+            const x = padL + slotW * i + (slotW - barW) / 2;
+            const barH = Math.max(toY(eMin) - toY(v), 2);
+            const barTop = toY(v);
+            const color = v >= 25 ? NEON_GREEN : v >= 15 ? NEON_AMBER : '#f87171';
+            const isSel = d.month === selMonth;
+            return (
+              <g key={i} style={{ cursor: 'pointer' }} onClick={() => setSelMonth(d.month)}>
+                {/* Glow for selected */}
+                {isSel && (
+                  <rect x={x - 3} y={barTop - 3} width={barW + 6} height={barH + 6}
+                    rx="8" fill={color} opacity="0.15" filter="url(#eb_glow)" />
+                )}
+                {/* Bar */}
+                <rect x={x} y={barTop} width={barW} height={barH} rx="6"
+                  fill={`url(#eb_bar_${i})`} opacity={isSel ? 1 : 0.65} />
+                {/* Top cap shine */}
+                <rect x={x + 4} y={barTop + 3} width={barW - 8} height={3} rx="2"
+                  fill="white" opacity={isSel ? 0.2 : 0.07} />
+                {/* Value label */}
+                <text x={x + barW / 2} y={barTop - 6} textAnchor="middle" fontSize={isSel ? 11 : 9}
+                  fontWeight="900" fill={isSel ? color : `${color}aa`}>
+                  {v.toFixed(1)}%
+                </text>
+                {/* Delta arrow vs prev */}
+                {i > 0 && data[i - 1]?.EBITDA != null && (() => {
+                  const diff = v - data[i - 1].EBITDA;
+                  return (
+                    <text x={x + barW / 2} y={padT + chartH + 18} textAnchor="middle" fontSize="8" fontWeight="900"
+                      fill={diff >= 0 ? NEON_GREEN + 'bb' : '#f87171bb'}>
+                      {diff >= 0 ? '▲' : '▼'}{Math.abs(diff).toFixed(1)}
                     </text>
-                  </g>
-                );
-              })}
+                  );
+                })()}
+                {/* X label */}
+                <text x={x + barW / 2} y={H - 6} textAnchor="middle" fontSize="9.5" fontWeight="800"
+                  fill={isSel ? '#f1f5f9' : 'rgba(100,116,139,0.6)'}>
+                  {d.mes}
+                </text>
+                {/* Selected indicator */}
+                {isSel && (
+                  <rect x={x + barW / 2 - 3} y={H - padB + 28} width={6} height={3} rx="1.5" fill={color} />
+                )}
+              </g>
+            );
+          })}
+        </svg>
+        <p className="text-[9px] text-slate-600 mt-1">Haz clic en un mes para ver su análisis de impacto abajo</p>
+      </div>
 
-              {/* Axis labels */}
-              <text x={W / 2} y={H - 4} textAnchor="middle" fontSize="8.5" fill="rgba(148,163,184,0.4)" fontWeight="700">
-                {pair.xLabel}
-              </text>
-              <text x={10} y={H / 2} textAnchor="middle" fontSize="8.5" fill="rgba(148,163,184,0.4)" fontWeight="700"
-                transform={`rotate(-90, 10, ${H / 2})`}>
-                {pair.yLabel}
-              </text>
-            </svg>
-
-            <p className="text-[9px] text-slate-600 mt-2 leading-relaxed">{pair.desc}</p>
-            <div className="mt-1.5 flex items-center gap-1.5">
-              <div className="w-4 h-0.5 rounded-full" style={{ background: corrColor }} />
-              <p className="text-[9px] font-black" style={{ color: corrColor }}>
-                Pendiente: {slope.toFixed(2)} pp/pp
+      {/* ── Impact Decomposition for selected month ── */}
+      {sel && prev && (
+        <div className="rounded-2xl p-5" style={{ background: 'rgba(6,10,22,0.98)', border: '1px solid rgba(148,163,184,0.1)' }}>
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 mb-0.5">Descomposición de Impacto</p>
+              <p className="text-sm font-black text-slate-200">
+                {prev.mes} → <span style={{ color: MAGENTA }}>{sel.mes}</span>
+                {ebitdaDelta != null && (
+                  <span className="ml-3 text-sm font-black" style={{ color: ebitdaDelta >= 0 ? NEON_GREEN : '#f87171' }}>
+                    EBITDA {ebitdaDelta >= 0 ? '+' : ''}{ebitdaDelta.toFixed(2)}pp
+                  </span>
+                )}
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-[9px] text-slate-600">Explicado por costos:</p>
+              <p className="text-xs font-black" style={{ color: explainedImpact >= 0 ? NEON_GREEN : '#f87171' }}>
+                {explainedImpact >= 0 ? '+' : ''}{explainedImpact.toFixed(2)}pp
               </p>
             </div>
           </div>
-        );
-      })}
+
+          <div className="space-y-3">
+            {[...impacts, unexplained != null ? {
+              key: 'other', label: 'Otros factores', color: '#64748b', icon: '📦',
+              delta: null, impact: unexplained
+            } : null].filter(Boolean).map((d, i) => {
+              if (d.impact == null) return null;
+              const isPositive = d.impact >= 0;
+              const barPct = Math.abs(d.impact) / maxAbs * 100;
+              const cost = impacts.find(x => x.key === d.key);
+              return (
+                <motion.div key={d.key} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                  className="flex items-center gap-4">
+                  {/* Icon + Label */}
+                  <div className="w-36 flex-shrink-0">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm">{d.icon}</span>
+                      <div>
+                        <p className="text-[10px] font-black text-slate-300">{d.label}</p>
+                        {cost?.delta != null && (
+                          <p className="text-[9px]" style={{ color: d.color }}>
+                            {prev[d.key]?.toFixed(1)}% → {sel[d.key]?.toFixed(1)}%
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Bar */}
+                  <div className="flex-1 relative h-8 flex items-center">
+                    {/* Zero line */}
+                    <div className="absolute left-1/2 top-0 bottom-0 w-px" style={{ background: 'rgba(148,163,184,0.15)' }} />
+                    {/* Bar fill */}
+                    <div className="absolute"
+                      style={{
+                        height: 20, borderRadius: 6,
+                        width: `${barPct / 2}%`,
+                        left: isPositive ? '50%' : `calc(50% - ${barPct / 2}%)`,
+                        background: isPositive
+                          ? `linear-gradient(90deg, ${NEON_GREEN}40, ${NEON_GREEN})`
+                          : `linear-gradient(90deg, #f87171, #f8717140)`,
+                        boxShadow: `0 0 8px ${isPositive ? NEON_GREEN : '#f87171'}40`,
+                      }} />
+                    {/* Value label */}
+                    <span className="absolute text-[10px] font-black"
+                      style={{
+                        color: isPositive ? NEON_GREEN : '#f87171',
+                        left: isPositive ? `calc(50% + ${barPct / 2}% + 6px)` : `calc(50% - ${barPct / 2}% - 38px)`,
+                        whiteSpace: 'nowrap',
+                      }}>
+                      {isPositive ? '+' : ''}{d.impact.toFixed(2)}pp
+                    </span>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+
+          {/* Summary */}
+          <div className="mt-5 rounded-xl p-3.5 flex items-start gap-3"
+            style={{ background: 'rgba(148,163,184,0.04)', border: '1px solid rgba(148,163,184,0.08)' }}>
+            <span className="text-lg">{ebitdaDelta != null && ebitdaDelta >= 0 ? '📈' : '📉'}</span>
+            <p className="text-[11px] leading-relaxed text-slate-400">
+              {ebitdaDelta != null
+                ? ebitdaDelta >= 0
+                  ? `El EBITDA mejoró ${ebitdaDelta.toFixed(2)}pp en ${sel.mes}. Los cambios en estructura de costos explican ${explainedImpact.toFixed(2)}pp de ese movimiento.`
+                  : `El EBITDA cayó ${Math.abs(ebitdaDelta).toFixed(2)}pp en ${sel.mes}. Los cambios en costos explican ${Math.abs(explainedImpact).toFixed(2)}pp de esa caída.`
+                : 'Selecciona un mes con datos completos para ver el análisis.'}
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
