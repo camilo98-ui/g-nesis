@@ -881,7 +881,7 @@ export default function PYGModal({ onClose, storeId }) {
                               <div className="flex items-center justify-center gap-1.5">
                                 <span className="text-[11px] font-black px-2.5 py-1 rounded-full"
                                   style={{ background: `${deltaColor}18`, color: deltaColor, border: `1px solid ${deltaColor}35` }}>
-                                  {delta > 0 ? '▲' : delta < 0 ? '▼' : '='} {Math.abs(delta).toFixed(1)}pp vs anterior
+                                  {delta > 0 ? '▲' : delta < 0 ? '▼' : '='} {Math.abs(delta).toFixed(1)}% vs anterior
                                 </span>
                               </div>
 
