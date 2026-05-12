@@ -63,40 +63,104 @@ const DarkTooltip = ({ active, payload, label }) => {
 };
 
 // ─── Gauge Chart ──────────────────────────────────────────────────────────────
-function GaugeKPI({ value, max = 50, label, color, sublabel, benchmark, status }) {
+function GaugeKPI({ value, max = 50, label, color, sublabel, status }) {
   const safeVal = value ?? 0;
   const pct = Math.min(safeVal / max, 1);
-  const angle = -135 + pct * 270;
   const statusColors = { good: '#34d399', warn: '#fbbf24', bad: '#f87171' };
   const statusColor = statusColors[status] || color;
 
+  // Arc math: starts at -220deg, sweeps 260deg
+  const startAngleDeg = -220;
+  const sweepDeg = 260;
+  const toRad = (d) => (d * Math.PI) / 180;
+  const cx = 80, cy = 80, r = 58;
+
+  const arcPath = (startDeg, sweepD) => {
+    const s = toRad(startDeg);
+    const e = toRad(startDeg + sweepD);
+    const x1 = cx + r * Math.cos(s);
+    const y1 = cy + r * Math.sin(s);
+    const x2 = cx + r * Math.cos(e);
+    const y2 = cy + r * Math.sin(e);
+    const large = sweepD > 180 ? 1 : 0;
+    return `M ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2}`;
+  };
+
+  const fillSweep = pct * sweepDeg;
+  const needleAngle = startAngleDeg + fillSweep;
+  const needleRad = toRad(needleAngle);
+  const needleLen = 42;
+  const nx = cx + needleLen * Math.cos(needleRad);
+  const ny = cy + needleLen * Math.sin(needleRad);
+
+  const gradId = `gauge_grad_${label.replace(/\s/g, '_')}`;
+
   return (
-    <div className="flex flex-col items-center">
-      <div className="relative w-28 h-20 flex items-end justify-center">
-        <svg viewBox="0 0 120 70" className="w-28 h-20 absolute top-0 left-0">
+    <div className="flex flex-col items-center w-full">
+      <div className="relative" style={{ width: 160, height: 110 }}>
+        <svg viewBox="0 0 160 110" width="160" height="110">
           <defs>
-            <linearGradient id={`g_${label}`} x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor={color} stopOpacity="0.3" />
-              <stop offset="100%" stopColor={color} stopOpacity="1" />
+            <linearGradient id={gradId} x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor={color} stopOpacity="0.25" />
+              <stop offset="100%" stopColor={statusColor} stopOpacity="1" />
             </linearGradient>
+            {/* Glow filter */}
+            <filter id={`glow_${label.replace(/\s/g, '_')}`} x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="3" result="blur" />
+              <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+            </filter>
           </defs>
+
+          {/* Tick marks */}
+          {[0, 0.25, 0.5, 0.75, 1].map((t, i) => {
+            const a = toRad(startAngleDeg + t * sweepDeg);
+            const innerR = r - 10;
+            const outerR = r - 4;
+            return (
+              <line key={i}
+                x1={cx + innerR * Math.cos(a)} y1={cy + innerR * Math.sin(a)}
+                x2={cx + outerR * Math.cos(a)} y2={cy + outerR * Math.sin(a)}
+                stroke="rgba(148,163,184,0.25)" strokeWidth="1.5" strokeLinecap="round" />
+            );
+          })}
+
           {/* Track */}
-          <path d="M 10 65 A 50 50 0 0 1 110 65" fill="none" stroke="rgba(148,163,184,0.12)" strokeWidth="8" strokeLinecap="round" />
-          {/* Fill */}
-          <path d="M 10 65 A 50 50 0 0 1 110 65" fill="none" stroke={`url(#g_${label})`} strokeWidth="8" strokeLinecap="round"
-            strokeDasharray={`${pct * 157} 157`} />
+          <path d={arcPath(startAngleDeg, sweepDeg)}
+            fill="none" stroke="rgba(148,163,184,0.1)" strokeWidth="10" strokeLinecap="round" />
+
+          {/* Fill arc */}
+          {fillSweep > 2 && (
+            <path d={arcPath(startAngleDeg, fillSweep)}
+              fill="none" stroke={`url(#${gradId})`} strokeWidth="10" strokeLinecap="round"
+              filter={`url(#glow_${label.replace(/\s/g, '_')})`} />
+          )}
+
           {/* Needle */}
-          <g transform={`rotate(${-135 + pct * 270}, 60, 65)`}>
-            <line x1="60" y1="65" x2="60" y2="28" stroke={statusColor} strokeWidth="2.5" strokeLinecap="round" />
-            <circle cx="60" cy="65" r="4" fill={statusColor} />
-          </g>
+          <line x1={cx} y1={cy} x2={nx} y2={ny}
+            stroke={statusColor} strokeWidth="2.5" strokeLinecap="round"
+            filter={`url(#glow_${label.replace(/\s/g, '_')})`} />
+          {/* Needle pivot */}
+          <circle cx={cx} cy={cy} r="5" fill={statusColor} />
+          <circle cx={cx} cy={cy} r="2.5" fill="#060d1b" />
         </svg>
-        <div className="mb-1 text-center z-10">
-          <p className="text-xl font-black leading-none" style={{ color: statusColor }}>{value != null ? `${value.toFixed(1)}%` : '—'}</p>
+
+        {/* Value centered below pivot */}
+        <div className="absolute inset-0 flex flex-col items-center justify-end pb-1">
+          <p className="text-2xl font-black leading-none tracking-tight"
+            style={{ color: statusColor, textShadow: `0 0 12px ${statusColor}60` }}>
+            {value != null ? `${value.toFixed(1)}%` : '—'}
+          </p>
         </div>
       </div>
-      <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mt-0.5">{label}</p>
-      {sublabel && <p className="text-[9px] text-slate-500 mt-0.5">{sublabel}</p>}
+
+      <p className="text-[11px] font-black text-slate-200 uppercase tracking-widest mt-1">{label}</p>
+      {sublabel && <p className="text-[10px] font-medium mt-0.5" style={{ color: statusColor + 'aa' }}>{sublabel}</p>}
+
+      {/* Status pill */}
+      <div className="mt-2 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest"
+        style={{ background: `${statusColor}18`, color: statusColor, border: `1px solid ${statusColor}30` }}>
+        {status === 'good' ? '● Óptimo' : status === 'warn' ? '● Revisar' : '● Crítico'}
+      </div>
     </div>
   );
 }
@@ -768,22 +832,24 @@ export default function PYGModal({ onClose, storeId }) {
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
                 {/* Gauges */}
                 <div className="rounded-2xl p-6" style={{ background: 'rgba(148,163,184,0.04)', border: '1px solid rgba(148,163,184,0.1)' }}>
-                  <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-5">KPIs Clave — {MONTHS_FULL[(selectedMonth || 1) - 1]}</p>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 justify-items-center">
-                    <motion.button onClick={() => setActiveKPI('ebitda')} className="hover:scale-105 transition-transform cursor-pointer">
-                      <GaugeKPI value={ebitda} max={50} label="EBITDA" color={MAGENTA} sublabel="Meta: ≥25%" status={ebitdaStatus} />
-                    </motion.button>
-                    <motion.button onClick={() => setActiveKPI('personal')} className="hover:scale-105 transition-transform cursor-pointer">
-                      <GaugeKPI value={personal} max={40} label="Personal" color={NEON_PURPLE} sublabel="Meta: ≤22%" status={personalStatus} />
-                    </motion.button>
-                    <motion.button onClick={() => setActiveKPI('costo')} className="hover:scale-105 transition-transform cursor-pointer">
-                      <GaugeKPI value={costReal} max={60} label="Costo Real" color={NEON_BLUE} sublabel={`Teo: ${costTeo != null ? costTeo.toFixed(1) + '%' : '—'}`} status={costoStatus} />
-                    </motion.button>
-                    <motion.button onClick={() => setActiveKPI('gastos')} className="hover:scale-105 transition-transform cursor-pointer">
-                      <GaugeKPI value={gastos} max={60} label="Gastos" color={NEON_AMBER} sublabel="Meta: ≤40%" status={gastosStatus} />
-                    </motion.button>
+                  <div className="flex items-center justify-between mb-6">
+                    <p className="text-xs font-black text-slate-400 uppercase tracking-widest">KPIs Clave — {MONTHS_FULL[(selectedMonth || 1) - 1]}</p>
+                    <p className="text-[10px] text-slate-600">Toca para análisis →</p>
                   </div>
-                  <p className="text-center text-[10px] text-slate-600 mt-4">Toca un indicador para ver análisis detallado</p>
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 justify-items-center">
+                    {[
+                      { kpi: 'ebitda', value: ebitda, max: 50, label: 'EBITDA', color: MAGENTA, sublabel: 'Meta: ≥25%', status: ebitdaStatus },
+                      { kpi: 'personal', value: personal, max: 40, label: 'Personal', color: NEON_PURPLE, sublabel: 'Meta: ≤22%', status: personalStatus },
+                      { kpi: 'costo', value: costReal, max: 60, label: 'Costo Real', color: NEON_BLUE, sublabel: `Teo: ${costTeo != null ? costTeo.toFixed(1) + '%' : '—'}`, status: costoStatus },
+                      { kpi: 'gastos', value: gastos, max: 60, label: 'Gastos', color: NEON_AMBER, sublabel: 'Meta: ≤40%', status: gastosStatus },
+                    ].map(({ kpi, ...props }) => (
+                      <motion.button key={kpi} onClick={() => setActiveKPI(kpi)}
+                        whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
+                        className="w-full flex flex-col items-center cursor-pointer outline-none">
+                        <GaugeKPI {...props} />
+                      </motion.button>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Donut + Waterfall */}
