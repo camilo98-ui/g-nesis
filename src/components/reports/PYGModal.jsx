@@ -901,44 +901,13 @@ export default function PYGModal({ onClose, storeId }) {
                           style={{ background: 'rgba(148,163,184,0.03)', border: `1px solid ${color}20` }}>
                           <GaugeKPI value={value} prevValue={prevValue} max={max} label={label} color={color} sublabel={sublabel} status={status} />
 
-                          {/* VS Anterior */}
-                          {prevValue != null && (
-                            <div className="w-full mt-3 space-y-2">
-                              {/* Delta badge */}
-                              <div className="flex items-center justify-center gap-1.5">
-                                <span className="text-[11px] font-black px-2.5 py-1 rounded-full"
-                                  style={{ background: `${deltaColor}18`, color: deltaColor, border: `1px solid ${deltaColor}35` }}>
-                                  {delta > 0 ? '▲' : delta < 0 ? '▼' : '='} {Math.abs(delta).toFixed(1)}% vs anterior
-                                </span>
-                              </div>
-
-                              {/* Dual bar: anterior vs actual */}
-                              <div className="w-full space-y-1">
-                                {/* Anterior */}
-                                <div className="flex items-center gap-2">
-                                  <span className="text-[9px] text-slate-600 w-12 text-right shrink-0">
-                                    {prevRecord && MONTHS_SHORT[(selectedMonth - 2 + 12) % 12]}
-                                  </span>
-                                  <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: 'rgba(148,163,184,0.1)' }}>
-                                    <div className="h-full rounded-full transition-all duration-700"
-                                      style={{ width: `${Math.min(prevValue / max, 1) * 100}%`, background: 'rgba(148,163,184,0.3)' }} />
-                                  </div>
-                                  <span className="text-[9px] text-slate-500 w-8 shrink-0">{prevValue.toFixed(1)}%</span>
-                                </div>
-                                {/* Actual */}
-                                <div className="flex items-center gap-2">
-                                  <span className="text-[9px] font-black w-12 text-right shrink-0" style={{ color: color }}>
-                                    {MONTHS_SHORT[(selectedMonth - 1 + 12) % 12]}
-                                  </span>
-                                  <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: 'rgba(148,163,184,0.1)' }}>
-                                    <motion.div className="h-full rounded-full"
-                                      initial={{ width: 0 }} animate={{ width: `${Math.min((value ?? 0) / max, 1) * 100}%` }}
-                                      transition={{ duration: 0.8, ease: 'easeOut' }}
-                                      style={{ background: color }} />
-                                  </div>
-                                  <span className="text-[9px] font-black w-8 shrink-0" style={{ color }}>{value?.toFixed(1)}%</span>
-                                </div>
-                              </div>
+                          {/* Delta badge */}
+                          {delta != null && (
+                            <div className="flex items-center justify-center mt-2">
+                              <span className="text-[11px] font-black px-2.5 py-1 rounded-full"
+                                style={{ background: `${deltaColor}18`, color: deltaColor, border: `1px solid ${deltaColor}35` }}>
+                                {delta > 0 ? '▲' : delta < 0 ? '▼' : '='} {Math.abs(delta).toFixed(1)}% vs anterior
+                              </span>
                             </div>
                           )}
                         </motion.button>
