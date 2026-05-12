@@ -63,13 +63,12 @@ const DarkTooltip = ({ active, payload, label }) => {
 };
 
 // ─── Gauge Chart ──────────────────────────────────────────────────────────────
-function GaugeKPI({ value, max = 50, label, color, sublabel, status }) {
+function GaugeKPI({ value, prevValue, max = 50, label, color, sublabel, status }) {
   const safeVal = value ?? 0;
   const pct = Math.min(safeVal / max, 1);
   const statusColors = { good: '#34d399', warn: '#fbbf24', bad: '#f87171' };
   const statusColor = statusColors[status] || color;
 
-  // Arc math: starts at -220deg, sweeps 260deg
   const startAngleDeg = -220;
   const sweepDeg = 260;
   const toRad = (d) => (d * Math.PI) / 180;
@@ -93,7 +92,14 @@ function GaugeKPI({ value, max = 50, label, color, sublabel, status }) {
   const nx = cx + needleLen * Math.cos(needleRad);
   const ny = cy + needleLen * Math.sin(needleRad);
 
+  // Previous value marker
+  const prevPct = prevValue != null ? Math.min(prevValue / max, 1) : null;
+  const prevAngleRad = prevPct != null ? toRad(startAngleDeg + prevPct * sweepDeg) : null;
+  const prevMarkR1 = r - 14;
+  const prevMarkR2 = r + 2;
+
   const gradId = `gauge_grad_${label.replace(/\s/g, '_')}`;
+  const glowId = `glow_${label.replace(/\s/g, '_')}`;
 
   return (
     <div className="flex flex-col items-center w-full">
@@ -104,8 +110,7 @@ function GaugeKPI({ value, max = 50, label, color, sublabel, status }) {
               <stop offset="0%" stopColor={color} stopOpacity="0.25" />
               <stop offset="100%" stopColor={statusColor} stopOpacity="1" />
             </linearGradient>
-            {/* Glow filter */}
-            <filter id={`glow_${label.replace(/\s/g, '_')}`} x="-20%" y="-20%" width="140%" height="140%">
+            <filter id={glowId} x="-20%" y="-20%" width="140%" height="140%">
               <feGaussianBlur stdDeviation="3" result="blur" />
               <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
             </filter>
@@ -114,12 +119,10 @@ function GaugeKPI({ value, max = 50, label, color, sublabel, status }) {
           {/* Tick marks */}
           {[0, 0.25, 0.5, 0.75, 1].map((t, i) => {
             const a = toRad(startAngleDeg + t * sweepDeg);
-            const innerR = r - 10;
-            const outerR = r - 4;
             return (
               <line key={i}
-                x1={cx + innerR * Math.cos(a)} y1={cy + innerR * Math.sin(a)}
-                x2={cx + outerR * Math.cos(a)} y2={cy + outerR * Math.sin(a)}
+                x1={cx + (r - 10) * Math.cos(a)} y1={cy + (r - 10) * Math.sin(a)}
+                x2={cx + (r - 4) * Math.cos(a)} y2={cy + (r - 4) * Math.sin(a)}
                 stroke="rgba(148,163,184,0.25)" strokeWidth="1.5" strokeLinecap="round" />
             );
           })}
@@ -132,19 +135,44 @@ function GaugeKPI({ value, max = 50, label, color, sublabel, status }) {
           {fillSweep > 2 && (
             <path d={arcPath(startAngleDeg, fillSweep)}
               fill="none" stroke={`url(#${gradId})`} strokeWidth="10" strokeLinecap="round"
-              filter={`url(#glow_${label.replace(/\s/g, '_')})`} />
+              filter={`url(#${glowId})`} />
+          )}
+
+          {/* ── Previous month marker ── */}
+          {prevAngleRad != null && (
+            <>
+              {/* Tick line across the arc */}
+              <line
+                x1={cx + prevMarkR1 * Math.cos(prevAngleRad)}
+                y1={cy + prevMarkR1 * Math.sin(prevAngleRad)}
+                x2={cx + prevMarkR2 * Math.cos(prevAngleRad)}
+                y2={cy + prevMarkR2 * Math.sin(prevAngleRad)}
+                stroke="rgba(255,255,255,0.55)" strokeWidth="2.5" strokeLinecap="round" />
+              {/* Dot on arc */}
+              <circle
+                cx={cx + r * Math.cos(prevAngleRad)}
+                cy={cy + r * Math.sin(prevAngleRad)}
+                r="3.5" fill="white" fillOpacity="0.7" />
+              {/* Small label */}
+              <text
+                x={cx + (r + 12) * Math.cos(prevAngleRad)}
+                y={cy + (r + 12) * Math.sin(prevAngleRad)}
+                textAnchor="middle" dominantBaseline="middle"
+                fontSize="7" fill="rgba(148,163,184,0.7)" fontWeight="700">
+                {prevValue?.toFixed(1)}%
+              </text>
+            </>
           )}
 
           {/* Needle */}
           <line x1={cx} y1={cy} x2={nx} y2={ny}
             stroke={statusColor} strokeWidth="2.5" strokeLinecap="round"
-            filter={`url(#glow_${label.replace(/\s/g, '_')})`} />
-          {/* Needle pivot */}
+            filter={`url(#${glowId})`} />
           <circle cx={cx} cy={cy} r="5" fill={statusColor} />
           <circle cx={cx} cy={cy} r="2.5" fill="#060d1b" />
         </svg>
 
-        {/* Value centered below pivot */}
+        {/* Value */}
         <div className="absolute inset-0 flex flex-col items-center justify-end pb-1">
           <p className="text-2xl font-black leading-none tracking-tight"
             style={{ color: statusColor, textShadow: `0 0 12px ${statusColor}60` }}>
@@ -156,7 +184,6 @@ function GaugeKPI({ value, max = 50, label, color, sublabel, status }) {
       <p className="text-[11px] font-black text-slate-200 uppercase tracking-widest mt-1">{label}</p>
       {sublabel && <p className="text-[10px] font-medium mt-0.5" style={{ color: statusColor + 'aa' }}>{sublabel}</p>}
 
-      {/* Status pill */}
       <div className="mt-2 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest"
         style={{ background: `${statusColor}18`, color: statusColor, border: `1px solid ${statusColor}30` }}>
         {status === 'good' ? '● Óptimo' : status === 'warn' ? '● Revisar' : '● Crítico'}
@@ -872,7 +899,7 @@ export default function PYGModal({ onClose, storeId }) {
                           whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
                           className="w-full flex flex-col items-center cursor-pointer outline-none rounded-2xl p-4 transition-all"
                           style={{ background: 'rgba(148,163,184,0.03)', border: `1px solid ${color}20` }}>
-                          <GaugeKPI value={value} max={max} label={label} color={color} sublabel={sublabel} status={status} />
+                          <GaugeKPI value={value} prevValue={prevValue} max={max} label={label} color={color} sublabel={sublabel} status={status} />
 
                           {/* VS Anterior */}
                           {prevValue != null && (
