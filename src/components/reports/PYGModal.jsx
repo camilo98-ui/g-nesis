@@ -69,12 +69,14 @@ function GaugeKPI({ value, prevValue, max = 50, label, color, sublabel, status }
   const statusColors = { good: '#34d399', warn: '#fbbf24', bad: '#f87171' };
   const statusColor = statusColors[status] || color;
 
-  const startAngleDeg = -220;
-  const sweepDeg = 260;
+  const W = 200, H = 140;
+  const cx = 100, cy = 108, r = 74;
+  const startAngleDeg = -215;
+  const sweepDeg = 250;
   const toRad = (d) => (d * Math.PI) / 180;
-  const cx = 80, cy = 80, r = 58;
 
   const arcPath = (startDeg, sweepD) => {
+    if (sweepD <= 0) return '';
     const s = toRad(startDeg);
     const e = toRad(startDeg + sweepD);
     const x1 = cx + r * Math.cos(s);
@@ -88,106 +90,157 @@ function GaugeKPI({ value, prevValue, max = 50, label, color, sublabel, status }
   const fillSweep = pct * sweepDeg;
   const needleAngle = startAngleDeg + fillSweep;
   const needleRad = toRad(needleAngle);
-  const needleLen = 42;
+  const needleLen = 54;
   const nx = cx + needleLen * Math.cos(needleRad);
   const ny = cy + needleLen * Math.sin(needleRad);
 
-  // Previous value marker
   const prevPct = prevValue != null ? Math.min(prevValue / max, 1) : null;
-  const prevAngleRad = prevPct != null ? toRad(startAngleDeg + prevPct * sweepDeg) : null;
-  const prevMarkR1 = r - 14;
-  const prevMarkR2 = r + 2;
+  const prevFillSweep = prevPct != null ? prevPct * sweepDeg : null;
+  const prevAngleRad = prevPct != null ? toRad(startAngleDeg + prevFillSweep) : null;
 
-  const gradId = `gauge_grad_${label.replace(/\s/g, '_')}`;
-  const glowId = `glow_${label.replace(/\s/g, '_')}`;
+  const gradId = `gg_${label.replace(/\s/g, '_')}`;
+  const prevGradId = `gg_prev_${label.replace(/\s/g, '_')}`;
+  const glowId = `gw_${label.replace(/\s/g, '_')}`;
+  const glowSoftId = `gws_${label.replace(/\s/g, '_')}`;
+
+  // Zone colors on track
+  const zones = [
+    { start: 0, end: 0.33, color: '#f87171' },
+    { start: 0.33, end: 0.66, color: '#fbbf24' },
+    { start: 0.66, end: 1, color: '#34d399' },
+  ];
+
+  const delta = value != null && prevValue != null ? value - prevValue : null;
 
   return (
     <div className="flex flex-col items-center w-full">
-      <div className="relative" style={{ width: 160, height: 110 }}>
-        <svg viewBox="0 0 160 110" width="160" height="110">
+      <div className="relative" style={{ width: W, height: H }}>
+        <svg viewBox={`0 0 ${W} ${H}`} width={W} height={H}>
           <defs>
             <linearGradient id={gradId} x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor={color} stopOpacity="0.25" />
+              <stop offset="0%" stopColor={color} stopOpacity="0.4" />
               <stop offset="100%" stopColor={statusColor} stopOpacity="1" />
             </linearGradient>
-            <filter id={glowId} x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="3" result="blur" />
+            <linearGradient id={prevGradId} x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="rgba(255,255,255,0.15)" />
+              <stop offset="100%" stopColor="rgba(255,255,255,0.35)" />
+            </linearGradient>
+            <filter id={glowId} x="-30%" y="-30%" width="160%" height="160%">
+              <feGaussianBlur stdDeviation="4" result="blur" />
+              <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+            </filter>
+            <filter id={glowSoftId} x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="2" result="blur" />
               <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
             </filter>
           </defs>
 
-          {/* Tick marks */}
-          {[0, 0.25, 0.5, 0.75, 1].map((t, i) => {
-            const a = toRad(startAngleDeg + t * sweepDeg);
+          {/* Outer decorative ring */}
+          <path d={arcPath(startAngleDeg, sweepDeg)}
+            fill="none" stroke="rgba(148,163,184,0.06)" strokeWidth="18" strokeLinecap="round" />
+
+          {/* Colored zone track */}
+          {zones.map((z, i) => {
+            const zStart = startAngleDeg + z.start * sweepDeg;
+            const zSweep = (z.end - z.start) * sweepDeg - 2;
             return (
-              <line key={i}
-                x1={cx + (r - 10) * Math.cos(a)} y1={cy + (r - 10) * Math.sin(a)}
-                x2={cx + (r - 4) * Math.cos(a)} y2={cy + (r - 4) * Math.sin(a)}
-                stroke="rgba(148,163,184,0.25)" strokeWidth="1.5" strokeLinecap="round" />
+              <path key={i} d={arcPath(zStart, zSweep)}
+                fill="none" stroke={z.color} strokeWidth="3" strokeLinecap="round" opacity="0.18" />
             );
           })}
 
-          {/* Track */}
+          {/* Main track */}
           <path d={arcPath(startAngleDeg, sweepDeg)}
-            fill="none" stroke="rgba(148,163,184,0.1)" strokeWidth="10" strokeLinecap="round" />
+            fill="none" stroke="rgba(148,163,184,0.09)" strokeWidth="11" strokeLinecap="round" />
 
-          {/* Fill arc */}
+          {/* Previous month arc — subtle white/gray */}
+          {prevFillSweep != null && prevFillSweep > 2 && (
+            <path d={arcPath(startAngleDeg, prevFillSweep)}
+              fill="none" stroke={`url(#${prevGradId})`} strokeWidth="11" strokeLinecap="round" opacity="0.45" />
+          )}
+
+          {/* Current fill arc */}
           {fillSweep > 2 && (
             <path d={arcPath(startAngleDeg, fillSweep)}
-              fill="none" stroke={`url(#${gradId})`} strokeWidth="10" strokeLinecap="round"
+              fill="none" stroke={`url(#${gradId})`} strokeWidth="11" strokeLinecap="round"
               filter={`url(#${glowId})`} />
           )}
 
-          {/* ── Previous month marker ── */}
+          {/* Tick marks */}
+          {[0, 0.25, 0.5, 0.75, 1].map((t, i) => {
+            const a = toRad(startAngleDeg + t * sweepDeg);
+            const isMajor = t === 0 || t === 0.5 || t === 1;
+            return (
+              <line key={i}
+                x1={cx + (r - (isMajor ? 14 : 9)) * Math.cos(a)}
+                y1={cy + (r - (isMajor ? 14 : 9)) * Math.sin(a)}
+                x2={cx + (r - 2) * Math.cos(a)}
+                y2={cy + (r - 2) * Math.sin(a)}
+                stroke={isMajor ? 'rgba(148,163,184,0.4)' : 'rgba(148,163,184,0.2)'}
+                strokeWidth={isMajor ? 2 : 1.2} strokeLinecap="round" />
+            );
+          })}
+
+          {/* Previous month marker diamond */}
           {prevAngleRad != null && (
             <>
-              {/* Tick line across the arc */}
-              <line
-                x1={cx + prevMarkR1 * Math.cos(prevAngleRad)}
-                y1={cy + prevMarkR1 * Math.sin(prevAngleRad)}
-                x2={cx + prevMarkR2 * Math.cos(prevAngleRad)}
-                y2={cy + prevMarkR2 * Math.sin(prevAngleRad)}
-                stroke="rgba(255,255,255,0.55)" strokeWidth="2.5" strokeLinecap="round" />
-              {/* Dot on arc */}
               <circle
                 cx={cx + r * Math.cos(prevAngleRad)}
                 cy={cy + r * Math.sin(prevAngleRad)}
-                r="3.5" fill="white" fillOpacity="0.7" />
-              {/* Small label */}
-              <text
-                x={cx + (r + 12) * Math.cos(prevAngleRad)}
-                y={cy + (r + 12) * Math.sin(prevAngleRad)}
-                textAnchor="middle" dominantBaseline="middle"
-                fontSize="7" fill="rgba(148,163,184,0.7)" fontWeight="700">
-                {prevValue?.toFixed(1)}%
-              </text>
+                r="5.5" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5" />
+              <circle
+                cx={cx + r * Math.cos(prevAngleRad)}
+                cy={cy + r * Math.sin(prevAngleRad)}
+                r="2" fill="white" opacity="0.8" />
             </>
           )}
 
+          {/* Needle shadow */}
+          <line x1={cx} y1={cy} x2={nx + 1} y2={ny + 1}
+            stroke="rgba(0,0,0,0.4)" strokeWidth="3" strokeLinecap="round" />
           {/* Needle */}
           <line x1={cx} y1={cy} x2={nx} y2={ny}
             stroke={statusColor} strokeWidth="2.5" strokeLinecap="round"
-            filter={`url(#${glowId})`} />
-          <circle cx={cx} cy={cy} r="5" fill={statusColor} />
+            filter={`url(#${glowSoftId})`} />
+          {/* Pivot ring outer */}
+          <circle cx={cx} cy={cy} r="9" fill="rgba(6,13,27,0.9)" stroke={statusColor} strokeWidth="1.5" opacity="0.6" />
+          {/* Pivot ring inner */}
+          <circle cx={cx} cy={cy} r="5" fill={statusColor} filter={`url(#${glowSoftId})`} />
           <circle cx={cx} cy={cy} r="2.5" fill="#060d1b" />
         </svg>
 
-        {/* Value */}
-        <div className="absolute inset-0 flex flex-col items-center justify-end pb-1">
-          <p className="text-2xl font-black leading-none tracking-tight"
-            style={{ color: statusColor, textShadow: `0 0 12px ${statusColor}60` }}>
+        {/* Value overlay */}
+        <div className="absolute inset-0 flex flex-col items-center justify-end" style={{ paddingBottom: 6 }}>
+          <p className="text-3xl font-black leading-none tracking-tight tabular-nums"
+            style={{ color: statusColor, textShadow: `0 0 20px ${statusColor}70, 0 0 40px ${statusColor}30` }}>
             {value != null ? `${value.toFixed(1)}%` : '—'}
           </p>
         </div>
       </div>
 
-      <p className="text-[11px] font-black text-slate-200 uppercase tracking-widest mt-1">{label}</p>
-      {sublabel && <p className="text-[10px] font-medium mt-0.5" style={{ color: statusColor + 'aa' }}>{sublabel}</p>}
+      {/* Label + sublabel */}
+      <p className="text-[12px] font-black text-white uppercase tracking-widest mt-1 leading-tight">{label}</p>
+      {sublabel && <p className="text-[10px] mt-0.5 font-semibold" style={{ color: 'rgba(148,163,184,0.6)' }}>{sublabel}</p>}
 
-      <div className="mt-2 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest"
-        style={{ background: `${statusColor}18`, color: statusColor, border: `1px solid ${statusColor}30` }}>
-        {status === 'good' ? '● Óptimo' : status === 'warn' ? '● Revisar' : '● Crítico'}
+      {/* Status + delta row */}
+      <div className="flex items-center gap-2 mt-2">
+        <div className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest"
+          style={{ background: `${statusColor}18`, color: statusColor, border: `1px solid ${statusColor}35` }}>
+          {status === 'good' ? '✦ Óptimo' : status === 'warn' ? '⚠ Revisar' : '✖ Crítico'}
+        </div>
+        {delta != null && (
+          <div className="text-[10px] font-black" style={{ color: delta === 0 ? '#64748b' : delta > 0 ? '#34d399' : '#f87171' }}>
+            {delta > 0 ? '▲' : delta < 0 ? '▼' : '='}{Math.abs(delta).toFixed(1)}%
+          </div>
+        )}
       </div>
+
+      {/* Prev value label */}
+      {prevValue != null && (
+        <p className="text-[9px] mt-1 font-medium" style={{ color: 'rgba(148,163,184,0.4)' }}>
+          ● ant. {prevValue.toFixed(1)}%
+        </p>
+      )}
     </div>
   );
 }
@@ -896,9 +949,13 @@ export default function PYGModal({ onClose, storeId }) {
                       const deltaColor = isGood == null ? '#64748b' : isGood ? '#34d399' : '#f87171';
                       return (
                         <motion.button key={kpi} onClick={() => setActiveKPI(kpi)}
-                          whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-                          className="w-full flex flex-col items-center cursor-pointer outline-none rounded-2xl p-4 transition-all"
-                          style={{ background: 'rgba(148,163,184,0.03)', border: `1px solid ${color}20` }}>
+                          whileHover={{ scale: 1.02, boxShadow: `0 0 32px ${color}20` }} whileTap={{ scale: 0.97 }}
+                          className="w-full flex flex-col items-center cursor-pointer outline-none rounded-3xl p-5 transition-all relative overflow-hidden"
+                          style={{
+                            background: `radial-gradient(ellipse at 50% 0%, ${color}0a 0%, rgba(6,13,27,0.6) 70%)`,
+                            border: `1px solid ${color}25`,
+                            boxShadow: `inset 0 1px 0 ${color}15`,
+                          }}>
                           <GaugeKPI value={value} prevValue={prevValue} max={max} label={label} color={color} sublabel={sublabel} status={status} />
 
                           {/* VS Anterior */}
