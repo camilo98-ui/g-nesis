@@ -801,23 +801,34 @@ export default function PYGModal({ onClose, storeId }) {
                 <ChevronDown className={`w-3.5 h-3.5 transition-transform ${monthDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
               {monthDropdownOpen && (
-                <div className="absolute top-full left-0 mt-2 rounded-2xl shadow-2xl z-20 p-3 grid grid-cols-4 gap-1.5"
-                  style={{ background: '#0f172a', border: '1px solid rgba(148,163,184,0.15)' }}>
-                  {MONTHS_SHORT.map((m, i) => {
-                    const hasData = allRecords.some(r => r.month === i + 1);
-                    return (
-                      <button key={i} disabled={!hasData}
-                        onClick={() => { setSelectedMonth(i + 1); setMonthDropdownOpen(false); }}
-                        className="px-3 py-2 rounded-xl text-xs font-bold transition-all"
-                        style={{
-                          background: selectedMonth === i + 1 ? MAGENTA : hasData ? 'rgba(148,163,184,0.08)' : 'transparent',
-                          color: selectedMonth === i + 1 ? 'white' : hasData ? '#cbd5e1' : '#334155',
-                          cursor: hasData ? 'pointer' : 'not-allowed',
-                        }}>
-                        {m}
-                      </button>
-                    );
-                  })}
+                <div className="absolute top-full left-0 mt-3 rounded-2xl shadow-2xl z-20 p-4"
+                  style={{ background: '#0d1526', border: '1px solid rgba(148,163,184,0.18)', minWidth: 280, backdropFilter: 'blur(12px)' }}>
+                  <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-3 px-1">Seleccionar mes</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {MONTHS_SHORT.map((m, i) => {
+                      const hasData = allRecords.some(r => r.month === i + 1);
+                      const isSelected = selectedMonth === i + 1;
+                      return (
+                        <button key={i} disabled={!hasData}
+                          onClick={() => { setSelectedMonth(i + 1); setMonthDropdownOpen(false); }}
+                          className="flex flex-col items-center justify-center rounded-xl py-3 px-2 transition-all"
+                          style={{
+                            background: isSelected ? MAGENTA : hasData ? 'rgba(148,163,184,0.07)' : 'transparent',
+                            color: isSelected ? 'white' : hasData ? '#cbd5e1' : '#2d3748',
+                            cursor: hasData ? 'pointer' : 'not-allowed',
+                            border: isSelected ? `1px solid ${MAGENTA}` : '1px solid rgba(148,163,184,0.1)',
+                            boxShadow: isSelected ? `0 0 14px ${MAGENTA}50` : 'none',
+                          }}>
+                          <span className="text-sm font-black">{m}</span>
+                          {hasData && (
+                            <span className="text-[8px] mt-0.5 font-bold opacity-60">
+                              {isSelected ? '● activo' : '● datos'}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </div>
