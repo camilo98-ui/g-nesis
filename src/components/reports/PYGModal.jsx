@@ -69,42 +69,28 @@ function KPICard({ label, value, prev, delta, icon: Icon, accent, inverse = fals
     <motion.button
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -3, boxShadow: '0 20px 60px rgba(0,0,0,0.4)' }}
+      whileHover={{ y: -4, scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
-      className="text-left rounded-2xl p-5 w-full relative overflow-hidden group"
-      style={{
-        background: 'rgba(255,255,255,0.05)',
-        border: '1px solid rgba(255,255,255,0.1)',
-        backdropFilter: 'blur(20px)',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
-      }}
+      className="text-left rounded-2xl p-5 border-2 transition-all w-full"
+      style={{ background: accent.bg, borderColor: accent.border }}
     >
-      {/* Glow accent */}
-      <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full opacity-20 group-hover:opacity-30 transition-opacity"
-        style={{ background: accent.iconBg, filter: 'blur(20px)' }} />
-      <div className="flex items-start justify-between mb-4 relative">
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-          style={{ background: accent.iconBg + '25', border: `1px solid ${accent.iconBg}40` }}>
-          <Icon className="w-5 h-5" style={{ color: accent.iconBg }} />
+      <div className="flex items-start justify-between mb-3">
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: accent.iconBg }}>
+          <Icon className="w-5 h-5 text-white" />
         </div>
         {showDelta && (
-          <span className={`flex items-center gap-0.5 text-[10px] font-bold px-2 py-1 rounded-full backdrop-blur-sm ${isGood ? 'text-emerald-400' : 'text-red-400'}`}
-            style={{ background: isGood ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)', border: `1px solid ${isGood ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.3)'}` }}>
+          <span className={`flex items-center gap-0.5 text-[11px] font-black px-2 py-1 rounded-full ${isGood ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-600'}`}>
             {isGood ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
             {delta > 0 ? '+' : ''}{delta?.toFixed(1)}pp
           </span>
         )}
       </div>
-      <p className="text-[10px] font-semibold uppercase tracking-widest mb-1.5 relative" style={{ color: 'rgba(255,255,255,0.45)' }}>{label}</p>
-      <p className="text-2xl font-black leading-tight text-white relative">{value}</p>
-      {prev && <p className="text-[11px] mt-1.5 font-medium" style={{ color: 'rgba(255,255,255,0.35)' }}>Ant: {prev}</p>}
-      {badge && (
-        <div className="mt-3 text-[10px] font-bold px-2.5 py-1 rounded-full inline-block relative"
-          style={{ background: accent.iconBg + '20', color: accent.iconBg, border: `1px solid ${accent.iconBg}30` }}>
-          {badge}
-        </div>
-      )}
+      <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: accent.label }}>{label}</p>
+      <p className="text-2xl font-black leading-tight" style={{ color: accent.value }}>{value}</p>
+      {prev && <p className="text-[11px] mt-1.5 font-medium" style={{ color: accent.label + 'aa' }}>Ant: {prev}</p>}
+      {badge && <div className="mt-2 text-[10px] font-bold px-2 py-0.5 rounded-full inline-block" style={{ background: accent.iconBg + '30', color: accent.iconBg }}>{badge}</div>}
+      <p className="text-[9px] mt-2 opacity-40" style={{ color: accent.value }}>Toca para análisis →</p>
     </motion.button>
   );
 }
@@ -142,80 +128,74 @@ function EBITDASimulator({ primaryRecord, trendData }) {
   const best = trendData.length > 0 ? Math.max(...trendData.map(d => d.EBITDA || 0)) : null;
   const worst = trendData.length > 0 ? Math.min(...trendData.map(d => d.EBITDA || 0)) : null;
 
-  const GLASS = { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(20px)', boxShadow: '0 4px 24px rgba(0,0,0,0.3)' };
-
   return (
-    <div className="rounded-2xl p-6 space-y-5" style={GLASS}>
+    <div className="rounded-2xl border-2 p-6 space-y-5" style={{ borderColor: MAGENTA + '30', background: 'linear-gradient(135deg, #fdf2f8 0%, #fff 100%)' }}>
       <div className="flex items-center gap-3">
-        <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-          style={{ background: `linear-gradient(135deg, ${MAGENTA}, #6366f1)`, boxShadow: `0 0 16px ${MAGENTA}40` }}>
+        <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: MAGENTA }}>
           <Target className="w-4 h-4 text-white" />
         </div>
         <div>
-          <h3 className="font-bold text-white text-sm">Simulador EBITDA</h3>
-          <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.35)' }}>¿Cuánto necesito para mejorar?</p>
+          <h3 className="font-black text-slate-900 text-sm">Simulador EBITDA</h3>
+          <p className="text-[10px] text-slate-500">¿Cuánto necesito vender para mejorar?</p>
         </div>
       </div>
 
       {/* Estado actual */}
       <div className="grid grid-cols-3 gap-2 text-center">
-        <div className="rounded-xl p-3" style={{ background: `${MAGENTA}15`, border: `1px solid ${MAGENTA}25` }}>
-          <p className="text-[10px] mb-0.5" style={{ color: 'rgba(255,255,255,0.35)' }}>EBITDA Actual</p>
+        <div className="rounded-xl p-3" style={{ background: MAGENTA_PALE }}>
+          <p className="text-[10px] text-slate-500 mb-0.5">EBITDA Actual</p>
           <p className="font-black text-xl" style={{ color: MAGENTA }}>{ebitda?.toFixed(1)}%</p>
         </div>
-        {avgEbitda && (
-          <div className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)' }}>
-            <p className="text-[10px] mb-0.5" style={{ color: 'rgba(255,255,255,0.35)' }}>Promedio</p>
-            <p className="font-black text-xl text-white">{avgEbitda}%</p>
-          </div>
-        )}
-        {best && (
-          <div className="rounded-xl p-3" style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.2)' }}>
-            <p className="text-[10px] mb-0.5" style={{ color: 'rgba(255,255,255,0.35)' }}>Mejor Mes</p>
-            <p className="font-black text-xl text-emerald-400">{best.toFixed(1)}%</p>
-          </div>
-        )}
+        {avgEbitda && <div className="rounded-xl p-3 bg-slate-100">
+          <p className="text-[10px] text-slate-500 mb-0.5">Promedio Histórico</p>
+          <p className="font-black text-xl text-slate-700">{avgEbitda}%</p>
+        </div>}
+        {best && <div className="rounded-xl p-3 bg-emerald-50">
+          <p className="text-[10px] text-slate-500 mb-0.5">Mejor Mes</p>
+          <p className="font-black text-xl text-emerald-700">{best.toFixed(1)}%</p>
+        </div>}
       </div>
 
-      {/* Brechas */}
+      {/* Análisis de brechas */}
       <div className="space-y-2">
-        <p className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.35)' }}>Para llegar a…</p>
+        <p className="text-xs font-black text-slate-700 uppercase tracking-wide">Para llegar a…</p>
         {targets.filter(t => t.gap > 0).map(t => (
-          <div key={t.target} className="flex items-center gap-3 rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+          <div key={t.target} className="flex items-center gap-3 rounded-xl p-3 bg-white border border-slate-100">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black text-white flex-shrink-0"
               style={{ background: t.target >= 30 ? '#10b981' : t.target >= 25 ? '#f59e0b' : MAGENTA }}>
               {t.target}%
             </div>
             <div className="flex-1">
-              <p className="text-xs font-bold text-white">EBITDA objetivo {t.target}%</p>
-              <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.35)' }}>Mejorar {t.gap}pp · {t.incrementoVenta ? `Incrementar venta ~${t.incrementoVenta}%` : 'Reducir gastos ' + t.gap + 'pp'}</p>
+              <p className="text-xs font-black text-slate-800">EBITDA objetivo {t.target}%</p>
+              <p className="text-[10px] text-slate-500">Mejorar {t.gap}pp · {t.incrementoVenta ? `Incrementar venta ~${t.incrementoVenta}% ó reducir gastos fijos ${t.gap}pp` : 'Reducir gastos variables en ' + t.gap + 'pp'}</p>
             </div>
+            <ChevronRight className="w-4 h-4 text-slate-300 flex-shrink-0" />
           </div>
         ))}
         {targets.every(t => t.gap <= 0) && (
-          <div className="rounded-xl p-3 text-emerald-400 text-xs font-bold text-center" style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)' }}>
+          <div className="rounded-xl p-3 bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold text-center">
             ✅ EBITDA por encima de todos los targets. ¡Excelente gestión!
           </div>
         )}
       </div>
 
-      {/* Palancas */}
+      {/* Palancas de mejora */}
       <div>
-        <p className="text-[10px] font-semibold uppercase tracking-widest mb-2.5" style={{ color: 'rgba(255,255,255,0.35)' }}>Palancas de mejora</p>
+        <p className="text-xs font-black text-slate-700 uppercase tracking-wide mb-2">Palancas de mejora</p>
         <div className="grid grid-cols-2 gap-2">
           {[
-            { label: 'Reducir Personal 1pp', impact: '+1pp EBITDA', icon: Users },
-            { label: 'Reducir Gastos 1pp', impact: '+1pp EBITDA', icon: Package },
-            { label: 'Reducir Costo Producto 1pp', impact: '+1pp EBITDA', icon: DollarSign },
-            { label: 'Aumentar ventas 5%', impact: `+${(gastosFijosEstimados * 0.05).toFixed(1)}pp EBITDA est.`, icon: TrendingUp },
+            { label: 'Reducir Personal 1pp', impact: `+1pp EBITDA`, icon: Users },
+            { label: 'Reducir Gastos 1pp', impact: `+1pp EBITDA`, icon: Package },
+            { label: 'Reducir Costo Producto 1pp', impact: `+1pp EBITDA`, icon: DollarSign },
+            { label: 'Aumentar ventas 5%', impact: `+${((gastosFijosEstimados * 0.05)).toFixed(1)}pp EBITDA est.`, icon: TrendingUp },
           ].map((p, i) => (
-            <div key={i} className="rounded-xl p-3 flex items-start gap-2" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
-              <div className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `${MAGENTA}20` }}>
+            <div key={i} className="rounded-xl p-3 bg-white border border-slate-100 flex items-start gap-2">
+              <div className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: MAGENTA_PALE }}>
                 <p.icon className="w-3 h-3" style={{ color: MAGENTA }} />
               </div>
               <div>
-                <p className="text-[10px] font-medium" style={{ color: 'rgba(255,255,255,0.6)' }}>{p.label}</p>
-                <p className="text-[10px] font-bold" style={{ color: MAGENTA }}>{p.impact}</p>
+                <p className="text-[10px] font-bold text-slate-700">{p.label}</p>
+                <p className="text-[10px] font-black" style={{ color: MAGENTA }}>{p.impact}</p>
               </div>
             </div>
           ))}
@@ -243,6 +223,8 @@ function getBarFill(metric, value, data) {
 }
 
 function TrendChart({ data, metrics, height = 260 }) {
+  // Si solo hay una métrica usamos barras coloreadas dinámicamente (como StoreHourlyView)
+  // Si hay múltiples, agrupamos barras con color fijo por métrica
   const single = metrics.length === 1;
   const avg = single && data.length > 0
     ? data.reduce((s, d) => s + (d[metrics[0]] || 0), 0) / data.length
@@ -254,33 +236,33 @@ function TrendChart({ data, metrics, height = 260 }) {
         <defs>
           {metrics.map(m => (
             <linearGradient key={m} id={`bgrad_${m}`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={BAR_COLORS[m]} stopOpacity={0.9} />
-              <stop offset="100%" stopColor={BAR_COLORS[m]} stopOpacity={0.4} />
+              <stop offset="0%" stopColor={BAR_COLORS[m]} stopOpacity={1} />
+              <stop offset="100%" stopColor={BAR_COLORS[m]} stopOpacity={0.7} />
             </linearGradient>
           ))}
         </defs>
-        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" vertical={false} />
-        <XAxis dataKey="mes" tick={{ fontSize: 11, fill: 'rgba(255,255,255,0.35)', fontWeight: 600 }} axisLine={false} tickLine={false} />
-        <YAxis tickFormatter={v => `${v}%`} tick={{ fontSize: 11, fill: 'rgba(255,255,255,0.35)' }} axisLine={false} tickLine={false} width={42} />
-        <Tooltip content={<PremiumTooltip />} cursor={{ fill: 'rgba(255,255,255,0.04)' }} />
+        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+        <XAxis dataKey="mes" tick={{ fontSize: 11, fill: '#94a3b8', fontWeight: 700 }} axisLine={false} tickLine={false} />
+        <YAxis tickFormatter={v => `${v}%`} tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={42} />
+        <Tooltip content={<PremiumTooltip />} cursor={{ fill: MAGENTA_PALE }} />
         {avg != null && (
-          <ReferenceLine y={avg} stroke={MAGENTA} strokeDasharray="6 3" strokeOpacity={0.5}
+          <ReferenceLine y={avg} stroke={MAGENTA_LIGHT} strokeDasharray="6 3"
             label={{ value: `${avg.toFixed(1)}%`, position: 'insideTopRight', fontSize: 10, fill: MAGENTA }} />
         )}
         {metrics.map(m => (
           <Bar key={m} dataKey={m} name={m === 'C.Real' ? 'Costo Real' : m === 'C.Teo' ? 'Costo Teórico' : m}
-            radius={[5, 5, 0, 0]} maxBarSize={single ? 40 : 18} animationDuration={700}
+            radius={[6, 6, 0, 0]} maxBarSize={single ? 44 : 20} animationDuration={700}
             fill={single ? undefined : `url(#bgrad_${m})`}>
             {single && data.map((entry, i) => (
               <Cell key={i} fill={
                 (entry[m] || 0) >= (avg || 0) + 2 ? BAR_COLORS[m] :
-                (entry[m] || 0) >= (avg || 0) ? BAR_COLORS[m] + 'aa' :
-                'rgba(255,255,255,0.1)'
+                (entry[m] || 0) >= (avg || 0) ? MAGENTA_LIGHT :
+                '#e2e8f0'
               } />
             ))}
           </Bar>
         ))}
-        {!single && <Legend wrapperStyle={{ fontSize: 11, paddingTop: 12, color: 'rgba(255,255,255,0.5)' }} />}
+        {!single && <Legend wrapperStyle={{ fontSize: 11, paddingTop: 12 }} />}
       </BarChart>
     </ResponsiveContainer>
   );
@@ -291,16 +273,16 @@ function CostBarsChart({ data }) {
   return (
     <ResponsiveContainer width="100%" height={240}>
       <BarChart data={data} margin={{ top: 10, right: 10, left: -5, bottom: 0 }} barGap={4}>
-        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" vertical={false} />
-        <XAxis dataKey="mes" tick={{ fontSize: 11, fill: 'rgba(255,255,255,0.35)', fontWeight: 600 }} axisLine={false} tickLine={false} />
-        <YAxis tickFormatter={v => `${v}%`} tick={{ fontSize: 11, fill: 'rgba(255,255,255,0.35)' }} axisLine={false} tickLine={false} width={42} />
-        <Tooltip content={<PremiumTooltip />} cursor={{ fill: 'rgba(255,255,255,0.04)' }} />
-        <Bar dataKey="C.Real" name="Costo Real" radius={[5, 5, 0, 0]} maxBarSize={22} animationDuration={700}>
+        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+        <XAxis dataKey="mes" tick={{ fontSize: 11, fill: '#94a3b8', fontWeight: 700 }} axisLine={false} tickLine={false} />
+        <YAxis tickFormatter={v => `${v}%`} tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={42} />
+        <Tooltip content={<PremiumTooltip />} cursor={{ fill: MAGENTA_PALE }} />
+        <Bar dataKey="C.Real" name="Costo Real" radius={[6, 6, 0, 0]} maxBarSize={22} animationDuration={700}>
           {data.map((entry, i) => (
-            <Cell key={i} fill={entry['C.Real'] > entry['C.Teo'] ? MAGENTA : MAGENTA + '70'} />
+            <Cell key={i} fill={entry['C.Real'] > entry['C.Teo'] ? MAGENTA : '#f472b6'} />
           ))}
         </Bar>
-        <Bar dataKey="C.Teo" name="Costo Teórico" fill="rgba(255,255,255,0.15)" radius={[5, 5, 0, 0]} maxBarSize={22} animationDuration={700} />
+        <Bar dataKey="C.Teo" name="Costo Teórico" fill="#e2e8f0" radius={[6, 6, 0, 0]} maxBarSize={22} animationDuration={700} />
       </BarChart>
     </ResponsiveContainer>
   );
@@ -380,11 +362,7 @@ function QuantInsights({ primaryRecord, prevRecord, trendData }) {
     });
   }
 
-  const colorMap = {
-    good: { bg: 'rgba(16,185,129,0.08)', border: 'rgba(16,185,129,0.2)', text: '#34d399', dot: '#10b981' },
-    bad:  { bg: 'rgba(239,68,68,0.08)',  border: 'rgba(239,68,68,0.2)',  text: '#f87171', dot: '#ef4444' },
-    warn: { bg: 'rgba(245,158,11,0.08)', border: 'rgba(245,158,11,0.2)', text: '#fbbf24', dot: '#f59e0b' },
-  };
+  const colorMap = { good: { bg: '#f0fdf4', border: '#bbf7d0', text: '#166534', dot: '#22c55e' }, bad: { bg: '#fef2f2', border: '#fecaca', text: '#991b1b', dot: '#ef4444' }, warn: { bg: '#fffbeb', border: '#fde68a', text: '#92400e', dot: '#f59e0b' } };
 
   return (
     <div className="space-y-2.5">
@@ -396,13 +374,13 @@ function QuantInsights({ primaryRecord, prevRecord, trendData }) {
             initial={{ opacity: 0, x: -12 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: i * 0.07 }}
-            className="rounded-xl p-4 flex gap-3"
-            style={{ background: c.bg, border: `1px solid ${c.border}` }}
+            className="rounded-2xl p-4 border-2 flex gap-3"
+            style={{ background: c.bg, borderColor: c.border }}
           >
-            <span className="text-lg flex-shrink-0 mt-0.5">{item.emoji}</span>
+            <span className="text-xl flex-shrink-0 mt-0.5">{item.emoji}</span>
             <div>
-              <p className="font-bold text-sm leading-tight mb-1" style={{ color: c.text }}>{item.title}</p>
-              <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>{item.detail}</p>
+              <p className="font-black text-sm leading-tight mb-1" style={{ color: c.text }}>{item.title}</p>
+              <p className="text-xs leading-relaxed" style={{ color: c.text + 'cc' }}>{item.detail}</p>
             </div>
           </motion.div>
         );
@@ -428,11 +406,11 @@ function CostTable({ primaryRecord, prevRecord }) {
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
-            <th className="text-left py-3 px-4 font-semibold text-xs rounded-l-xl" style={{ color: 'rgba(255,255,255,0.4)' }}>Partida</th>
-            <th className="text-right py-3 px-4 font-semibold text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Actual</th>
-            {prevRecord && <th className="text-right py-3 px-4 font-semibold text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Anterior</th>}
-            {prevRecord && <th className="text-right py-3 px-4 font-semibold text-xs rounded-r-xl" style={{ color: 'rgba(255,255,255,0.4)' }}>Δ</th>}
+          <tr className="rounded-xl overflow-hidden" style={{ background: MAGENTA_PALE }}>
+            <th className="text-left py-3 px-4 font-bold text-xs rounded-l-xl" style={{ color: MAGENTA_DARK }}>Partida</th>
+            <th className="text-right py-3 px-4 font-bold text-xs" style={{ color: MAGENTA_DARK }}>Actual</th>
+            {prevRecord && <th className="text-right py-3 px-4 font-bold text-xs" style={{ color: MAGENTA_DARK }}>Anterior</th>}
+            {prevRecord && <th className="text-right py-3 px-4 font-bold text-xs rounded-r-xl" style={{ color: MAGENTA_DARK }}>Δ</th>}
           </tr>
         </thead>
         <tbody>
@@ -442,22 +420,22 @@ function CostTable({ primaryRecord, prevRecord }) {
             const delta = prev != null ? curr - prev : null;
             const isGood = delta == null ? null : (row.inverse ? delta < 0 : delta > 0);
             return (
-              <tr key={i} className="transition-colors" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                <td className="py-3 px-4 font-medium" style={{ color: row.highlight ? '#fff' : 'rgba(255,255,255,0.6)' }}>
+              <tr key={i} className={`border-b border-slate-50 hover:bg-pink-50/30 transition-colors ${row.highlight ? 'font-black' : ''}`}>
+                <td className="py-3 px-4 text-slate-700 font-medium">
                   {row.highlight && <span className="inline-block w-2 h-2 rounded-full mr-2 align-middle" style={{ background: MAGENTA }} />}
                   {row.label}
                   {row.teo && primaryRecord?.[row.teo] && (
-                    <span className="ml-2 text-[10px]" style={{ color: 'rgba(255,255,255,0.25)' }}>(teo: {fmt(primaryRecord[row.teo])})</span>
+                    <span className="ml-2 text-[10px] text-slate-400">(teo: {fmt(primaryRecord[row.teo])})</span>
                   )}
                 </td>
-                <td className="py-3 px-4 text-right font-bold" style={{ color: row.highlight ? MAGENTA : 'rgba(255,255,255,0.85)' }}>
+                <td className="py-3 px-4 text-right font-black" style={{ color: row.highlight ? MAGENTA : '#0f172a' }}>
                   {curr != null ? `${curr.toFixed(1)}%` : '—'}
                 </td>
-                {prevRecord && <td className="py-3 px-4 text-right text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>{prev != null ? `${prev.toFixed(1)}%` : '—'}</td>}
+                {prevRecord && <td className="py-3 px-4 text-right text-slate-400 text-xs">{prev != null ? `${prev.toFixed(1)}%` : '—'}</td>}
                 {prevRecord && (
                   <td className="py-3 px-4 text-right text-xs font-bold">
                     {delta != null ? (
-                      <span className={isGood ? 'text-emerald-400' : 'text-red-400'}>
+                      <span className={isGood ? 'text-emerald-600' : 'text-red-500'}>
                         {delta > 0 ? '+' : ''}{delta.toFixed(2)}pp
                       </span>
                     ) : '—'}
@@ -603,88 +581,92 @@ function KPIDetailModal({ kpiId, onClose, primaryRecord, prevRecord, trendData, 
           exit={{ y: 60, opacity: 0 }}
           transition={{ type: 'spring', damping: 26, stiffness: 300 }}
           onClick={e => e.stopPropagation()}
-          className="w-full sm:max-w-2xl rounded-t-3xl sm:rounded-3xl overflow-hidden max-h-[90vh] overflow-y-auto"
-          style={{ background: 'rgba(12,12,20,0.97)', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 40px 120px rgba(0,0,0,0.8)' }}
+          className="bg-white w-full sm:max-w-2xl rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto"
         >
           {/* Header */}
-          <div className="px-6 pt-6 pb-5 flex items-start justify-between"
-            style={{ borderBottom: '1px solid rgba(255,255,255,0.07)', background: `linear-gradient(135deg, ${cfg.color}15, transparent)` }}>
+          <div className="px-6 pt-6 pb-4 flex items-start justify-between" style={{ background: cfg.bg, borderBottom: `2px solid ${cfg.color}20` }}>
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-widest mb-2" style={{ color: cfg.color }}>{cfg.title}</p>
-              <p className="text-3xl font-black text-white">{currentVal?.toFixed(1)}%</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: cfg.color }}>{cfg.title}</p>
+              <p className="text-3xl font-black" style={{ color: cfg.color }}>{currentVal?.toFixed(1)}%</p>
               {delta != null && (
-                <span className={`inline-flex items-center gap-1 text-xs font-semibold mt-1.5 px-2.5 py-1 rounded-full ${isGood ? 'text-emerald-400' : 'text-red-400'}`}
-                  style={{ background: isGood ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)', border: `1px solid ${isGood ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.3)'}` }}>
+                <span className={`inline-flex items-center gap-1 text-xs font-bold mt-1 ${isGood ? 'text-emerald-600' : 'text-red-500'}`}>
                   {isGood ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
                   {delta > 0 ? '+' : ''}{delta.toFixed(2)}pp vs mes anterior
                 </span>
               )}
             </div>
-            <button onClick={onClose} className="w-8 h-8 rounded-xl flex items-center justify-center transition-colors"
-              style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)' }}>
-              <X className="w-4 h-4 text-white/50" />
+            <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/60 flex items-center justify-center hover:bg-white transition-all">
+              <X className="w-4 h-4 text-slate-500" />
             </button>
           </div>
 
           <div className="p-6 space-y-5">
-            {/* Benchmarks */}
+            {/* Descripción y benchmarks */}
             <div>
-              <p className="text-xs mb-3" style={{ color: 'rgba(255,255,255,0.4)' }}>{cfg.description}</p>
+              <p className="text-xs text-slate-500 mb-3">{cfg.description}</p>
               <div className="flex gap-2 flex-wrap">
                 {cfg.benchmarks.map(b => (
-                  <span key={b.label} className="px-3 py-1 rounded-full text-[10px] font-semibold"
-                    style={{ background: b.color + '15', color: b.color, border: `1px solid ${b.color}30` }}>
+                  <span key={b.label} className="px-3 py-1 rounded-full text-[10px] font-bold border"
+                    style={{ background: b.color + '15', color: b.color, borderColor: b.color + '40' }}>
                     {b.label}: {b.range}
                   </span>
                 ))}
               </div>
             </div>
 
-            {/* Histórico */}
+            {/* Gráfica de barras históricas */}
             {chartData.length >= 1 && (
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-widest mb-3" style={{ color: 'rgba(255,255,255,0.35)' }}>Evolución Histórica</p>
+                <p className="text-xs font-black text-slate-700 uppercase tracking-wide mb-3">Evolución Histórica</p>
                 <ResponsiveContainer width="100%" height={200}>
                   <BarChart data={chartData} margin={{ top: 8, right: 10, left: -5, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" vertical={false} />
-                    <XAxis dataKey="mes" tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.35)', fontWeight: 600 }} axisLine={false} tickLine={false} />
-                    <YAxis tickFormatter={v => `${v}%`} tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.35)' }} axisLine={false} tickLine={false} width={38} />
-                    <Tooltip content={<PremiumTooltip />} cursor={{ fill: 'rgba(255,255,255,0.04)' }} />
-                    <ReferenceLine y={avg} stroke={cfg.color} strokeDasharray="5 3" strokeOpacity={0.4}
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                    <XAxis dataKey="mes" tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 700 }} axisLine={false} tickLine={false} />
+                    <YAxis tickFormatter={v => `${v}%`} tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={38} />
+                    <Tooltip content={<PremiumTooltip />} cursor={{ fill: cfg.bg }} />
+                    <ReferenceLine y={avg} stroke={cfg.color} strokeDasharray="5 3" strokeOpacity={0.5}
                       label={{ value: `μ ${avg.toFixed(1)}%`, position: 'insideTopRight', fontSize: 9, fill: cfg.color }} />
                     <Bar dataKey={cfg.metric} radius={[5, 5, 0, 0]} maxBarSize={36} animationDuration={600}>
                       {chartData.map((entry, i) => (
-                        <Cell key={i} fill={entry.isSelected ? cfg.color : cfg.color + '40'} />
+                        <Cell key={i}
+                          fill={entry.isSelected ? cfg.color : cfg.color + '50'}
+                          stroke={entry.isSelected ? cfg.color : 'none'}
+                          strokeWidth={entry.isSelected ? 2 : 0}
+                        />
                       ))}
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
+                <div className="flex items-center gap-3 mt-2 text-[10px] text-slate-400">
+                  <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ background: cfg.color }} />Mes seleccionado</span>
+                  <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ background: cfg.color + '50' }} />Otros meses</span>
+                </div>
               </div>
             )}
 
-            {/* Insight */}
-            <div className="rounded-xl p-4" style={{ background: `${cfg.color}12`, border: `1px solid ${cfg.color}25` }}>
-              <p className="text-[10px] font-semibold uppercase tracking-widest mb-2" style={{ color: cfg.color }}>Análisis & Acción</p>
-              <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.75)' }}>{cfg.insight(primaryRecord, prevRecord)}</p>
+            {/* Análisis e insight */}
+            <div className="rounded-2xl p-4 border-2" style={{ background: cfg.bg, borderColor: cfg.color + '30' }}>
+              <p className="text-xs font-black uppercase tracking-wide mb-2" style={{ color: cfg.color }}>Análisis & Acción</p>
+              <p className="text-sm leading-relaxed text-slate-700">{cfg.insight(primaryRecord, prevRecord)}</p>
             </div>
 
-            {/* Comparativo */}
+            {/* Comparativo actual vs anterior */}
             {prevRecord && (
               <div className="grid grid-cols-3 gap-3">
-                <div className="rounded-xl p-4 text-center" style={{ background: `${cfg.color}12`, border: `1px solid ${cfg.color}20` }}>
-                  <p className="text-[10px] mb-1" style={{ color: 'rgba(255,255,255,0.35)' }}>Actual</p>
+                <div className="rounded-xl p-4 text-center" style={{ background: cfg.bg }}>
+                  <p className="text-[10px] text-slate-500 mb-1">Actual</p>
                   <p className="font-black text-xl" style={{ color: cfg.color }}>{currentVal?.toFixed(1)}%</p>
                 </div>
-                <div className="rounded-xl p-4 text-center" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                  <p className="text-[10px] mb-1" style={{ color: 'rgba(255,255,255,0.35)' }}>Anterior</p>
-                  <p className="font-black text-xl text-white">{prevVal?.toFixed(1)}%</p>
+                <div className="rounded-xl p-4 text-center bg-slate-50">
+                  <p className="text-[10px] text-slate-500 mb-1">Mes Anterior</p>
+                  <p className="font-black text-xl text-slate-600">{prevVal?.toFixed(1)}%</p>
                 </div>
-                <div className="rounded-xl p-4 text-center" style={{ background: isGood ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)', border: `1px solid ${isGood ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.2)'}` }}>
-                  <p className="text-[10px] mb-1" style={{ color: 'rgba(255,255,255,0.35)' }}>Variación</p>
-                  <p className={`font-black text-xl ${isGood ? 'text-emerald-400' : 'text-red-400'}`}>
-                    {delta != null ? `${delta > 0 ? '+' : ''}${delta.toFixed(2)}pp` : '—'}
-                  </p>
-                </div>
+                <div className={`rounded-xl p-4 text-center ${isGood ? 'bg-emerald-50' : 'bg-red-50'}`}>
+                   <p className="text-[10px] text-slate-500 mb-1">Variación</p>
+                   <p className={`font-black text-xl ${isGood ? 'text-emerald-600' : 'text-red-500'}`}>
+                     {delta != null ? `${delta > 0 ? '+' : ''}${delta.toFixed(2)}pp` : '—'}
+                   </p>
+                 </div>
               </div>
             )}
           </div>
@@ -752,17 +734,12 @@ export default function PYGModal({ onClose, storeId }) {
     { id: 'breakdown', label: 'Desglose' },
   ];
 
-  // Colores de los KPI cards — dark theme
+  // Colores de los KPI cards
   const ACCENTS = {
-    ebitda:   { iconBg: MAGENTA,    glow: MAGENTA },
-    personal: { iconBg: '#a855f7',  glow: '#a855f7' },
-    costo:    { iconBg: '#3b82f6',  glow: '#3b82f6' },
-    gastos:   { iconBg: '#f59e0b',  glow: '#f59e0b' },
-  };
-
-  const GLASS = {
-    card: { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(20px)', boxShadow: '0 4px 24px rgba(0,0,0,0.3)' },
-    cardHover: { background: 'rgba(255,255,255,0.07)' },
+    ebitda: { bg: MAGENTA_PALE, border: MAGENTA + '40', iconBg: MAGENTA, label: MAGENTA_DARK, value: MAGENTA },
+    personal: { bg: '#fdf4ff', border: '#e879f940', iconBg: '#a21caf', label: '#701a75', value: '#86198f' },
+    costo: { bg: '#eff6ff', border: '#93c5fd40', iconBg: '#2563eb', label: '#1e3a8a', value: '#1d4ed8' },
+    gastos: { bg: '#fef3c7', border: '#fcd34d40', iconBg: '#b45309', label: '#92400e', value: '#d97706' },
   };
 
   return (
@@ -771,68 +748,44 @@ export default function PYGModal({ onClose, storeId }) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-50 overflow-y-auto"
-      style={{ background: 'linear-gradient(135deg, #0a0a0f 0%, #0f0a1a 40%, #0a0f1a 100%)' }}
+      style={{ background: 'linear-gradient(135deg, #fdf2f8 0%, #f8fafc 50%, #fef3c7 100%)' }}
     >
-      {/* Ambient glow background */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
-        <div className="absolute top-0 left-1/4 w-96 h-96 rounded-full opacity-15" style={{ background: MAGENTA, filter: 'blur(120px)' }} />
-        <div className="absolute top-1/3 right-1/4 w-80 h-80 rounded-full opacity-10" style={{ background: '#6366f1', filter: 'blur(100px)' }} />
-        <div className="absolute bottom-0 left-1/2 w-72 h-72 rounded-full opacity-10" style={{ background: '#0ea5e9', filter: 'blur(100px)' }} />
-      </div>
-
-      {/* ── HEADER ─────────────────────────────────────────────────────── */}
-      <div className="sticky top-0 z-20" style={{ background: 'rgba(10,10,15,0.85)', backdropFilter: 'blur(24px)', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+      {/* Header premium */}
+      <div className="sticky top-0 z-10 shadow-xl" style={{ background: `linear-gradient(135deg, ${MAGENTA} 0%, #c0156f 50%, #9d174d 100%)` }}>
         <div className="max-w-7xl mx-auto px-5 py-4">
           <div className="flex items-center justify-between gap-4 mb-4">
-            <div className="flex items-center gap-3.5">
-              <div className="w-10 h-10 rounded-2xl flex items-center justify-center relative"
-                style={{ background: `linear-gradient(135deg, ${MAGENTA}, #6366f1)`, boxShadow: `0 0 20px ${MAGENTA}60` }}>
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
                 <BarChart3 className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h1 className="font-black text-lg text-white leading-tight tracking-tight">P&G Dashboard</h1>
-                <p className="text-[11px] font-medium" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                  {storeCode} · {currentYear} · {primaryRecord ? MONTHS_FULL[(selectedMonth || 1) - 1] : 'Sin datos'}
-                </p>
+                <h1 className="font-black text-xl text-white leading-tight">P&G Dashboard</h1>
+                <p className="text-white/70 text-xs">{storeCode} · Año {currentYear} · {primaryRecord ? MONTHS_FULL[(selectedMonth || 1) - 1] : 'Sin datos'}</p>
               </div>
             </div>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={onClose}
-              className="w-9 h-9 rounded-xl flex items-center justify-center transition-colors"
-              style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)' }}>
-              <X className="w-4 h-4 text-white/60" />
-            </motion.button>
+            <button onClick={onClose} className="w-10 h-10 bg-white/15 hover:bg-white/30 rounded-xl flex items-center justify-center transition-colors">
+              <X className="w-5 h-5 text-white" />
+            </button>
           </div>
 
-          {/* Selector mes + tabs */}
-          <div className="flex items-center gap-3 flex-wrap">
+          {/* Selector de mes + tabs */}
+          <div className="flex items-center gap-2 flex-wrap">
             <div className="relative">
               <button
                 onClick={() => setMonthDropdownOpen(!monthDropdownOpen)}
-                className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all"
-                style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.8)' }}
+                className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 backdrop-blur-sm"
               >
-                <span style={{ color: MAGENTA }}>●</span>
-                {selectedMonth ? MONTHS_SHORT[selectedMonth - 1] : 'Mes'}
-                <ChevronDown className={`w-3.5 h-3.5 transition-transform opacity-50 ${monthDropdownOpen ? 'rotate-180' : ''}`} />
+                📅 {selectedMonth ? MONTHS_SHORT[selectedMonth - 1] : 'Mes'}
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform ${monthDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
               {monthDropdownOpen && (
-                <div className="absolute top-full left-0 mt-2 rounded-2xl z-20 p-3 grid grid-cols-4 gap-1.5"
-                  style={{ background: 'rgba(15,15,25,0.97)', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(20px)', boxShadow: '0 20px 60px rgba(0,0,0,0.6)' }}>
+                <div className="absolute top-full left-0 mt-2 bg-white rounded-2xl shadow-2xl border border-pink-100 z-20 p-3 grid grid-cols-4 gap-1.5">
                   {MONTHS_SHORT.map((m, i) => {
                     const hasData = allRecords.some(r => r.month === i + 1);
                     return (
-                      <button key={i} disabled={!hasData}
-                        onClick={() => { setSelectedMonth(i + 1); setMonthDropdownOpen(false); }}
-                        className="px-3 py-2 rounded-xl text-xs font-bold transition-all"
-                        style={selectedMonth === i + 1
-                          ? { background: MAGENTA, color: '#fff', boxShadow: `0 0 12px ${MAGENTA}60` }
-                          : hasData
-                            ? { background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.7)' }
-                            : { color: 'rgba(255,255,255,0.2)', cursor: 'not-allowed' }
-                        }>
+                      <button key={i} disabled={!hasData} onClick={() => { setSelectedMonth(i + 1); setMonthDropdownOpen(false); }}
+                        className={`px-3 py-2 rounded-xl text-xs font-bold transition-all ${selectedMonth === i + 1 ? 'text-white shadow-md' : hasData ? 'bg-pink-50 text-slate-700 hover:bg-pink-100' : 'bg-slate-50 text-slate-300 cursor-not-allowed'}`}
+                        style={selectedMonth === i + 1 ? { background: MAGENTA } : {}}>
                         {m}
                       </button>
                     );
@@ -841,14 +794,10 @@ export default function PYGModal({ onClose, storeId }) {
               )}
             </div>
 
-            <div className="flex gap-1 p-1 rounded-xl" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+            <div className="flex gap-1 bg-white/15 rounded-xl p-1 backdrop-blur-sm">
               {tabs.map(tab => (
                 <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                  className="px-4 py-1.5 rounded-lg text-xs font-semibold transition-all"
-                  style={activeTab === tab.id
-                    ? { background: 'rgba(255,255,255,0.12)', color: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,0.3)' }
-                    : { color: 'rgba(255,255,255,0.45)' }
-                  }>
+                  className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${activeTab === tab.id ? 'bg-white text-slate-900 shadow-sm' : 'text-white/80 hover:text-white'}`}>
                   {tab.label}
                 </button>
               ))}
@@ -857,26 +806,24 @@ export default function PYGModal({ onClose, storeId }) {
         </div>
       </div>
 
-      {/* ── CONTENIDO ──────────────────────────────────────────────────── */}
-      <div className="max-w-7xl mx-auto px-5 py-6 space-y-5 relative z-10">
+      {/* Contenido */}
+      <div className="max-w-7xl mx-auto px-5 py-6 space-y-6">
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-32 gap-4">
-            <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: `${MAGENTA}20`, border: `1px solid ${MAGENTA}40` }}>
-              <Loader2 className="w-6 h-6 animate-spin" style={{ color: MAGENTA }} />
-            </div>
-            <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.4)' }}>Cargando datos de P&G…</p>
+            <Loader2 className="w-10 h-10 animate-spin" style={{ color: MAGENTA }} />
+            <p className="text-slate-500 font-medium">Cargando datos de P&G…</p>
           </div>
         ) : !primaryRecord ? (
-          <div className="flex flex-col items-center justify-center py-32" style={{ color: 'rgba(255,255,255,0.3)' }}>
-            <BarChart3 className="w-16 h-16 mb-4 opacity-20" />
-            <p className="font-bold text-white/60 text-xl">Sin datos para {MONTHS_FULL[(selectedMonth || 1) - 1]}</p>
-            <p className="text-sm mt-2 text-white/30">Meses disponibles: {allRecords.map(r => MONTHS_SHORT[r.month - 1]).join(', ')}</p>
+          <div className="flex flex-col items-center justify-center py-32 text-slate-400">
+            <BarChart3 className="w-20 h-20 mb-4 opacity-20" />
+            <p className="font-bold text-slate-600 text-xl">Sin datos para {MONTHS_FULL[(selectedMonth || 1) - 1]}</p>
+            <p className="text-sm mt-2">Meses disponibles: {allRecords.map(r => MONTHS_SHORT[r.month - 1]).join(', ')}</p>
           </div>
         ) : (
           <>
-            {/* ── TAB: RESUMEN ── */}
+            {/* ── TAB: RESUMEN ────────────────────────────────────────── */}
             {activeTab === 'overview' && (
-              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
+              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
                 {/* KPI Cards */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                   <KPICard label="Margen EBITDA" value={fmt(primaryRecord.margen_ebitda)}
@@ -905,73 +852,70 @@ export default function PYGModal({ onClose, storeId }) {
                 </div>
 
                 {/* Insights cuantitativos */}
-                <div className="rounded-2xl p-6" style={GLASS.card}>
-                  <div className="flex items-center gap-2.5 mb-5">
-                    <div className="w-8 h-8 rounded-xl flex items-center justify-center"
-                      style={{ background: `linear-gradient(135deg, ${MAGENTA}, #6366f1)`, boxShadow: `0 0 16px ${MAGENTA}40` }}>
+                <div className="rounded-2xl border-2 p-6 space-y-1" style={{ borderColor: MAGENTA + '20', background: 'linear-gradient(135deg, #fff 0%, #fdf2f8 100%)' }}>
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: MAGENTA }}>
                       <Zap className="w-4 h-4 text-white" />
                     </div>
-                    <div>
-                      <h3 className="font-bold text-white text-sm">Análisis Cuantitativo</h3>
-                      <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.35)' }}>Insights accionables basados en datos</p>
-                    </div>
+                    <h3 className="font-black text-slate-900">Análisis Cuantitativo & Acción</h3>
                   </div>
-                  <QuantInsights primaryRecord={primaryRecord} prevRecord={prevRecord} trendData={trendData} dark />
+                  <QuantInsights primaryRecord={primaryRecord} prevRecord={prevRecord} trendData={trendData} />
                 </div>
 
                 {/* Mini trend EBITDA */}
                 {trendData.length >= 2 && (
-                  <div className="rounded-2xl p-6" style={GLASS.card}>
-                    <div className="flex items-center justify-between mb-5">
-                      <div>
-                        <h3 className="font-bold text-white text-sm">Evolución EBITDA {currentYear}</h3>
-                        <p className="text-[10px] mt-0.5" style={{ color: 'rgba(255,255,255,0.35)' }}>{trendData.length} meses registrados</p>
-                      </div>
-                      <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold"
-                        style={{ background: `${MAGENTA}20`, color: MAGENTA, border: `1px solid ${MAGENTA}30` }}>
-                        EBITDA
-                      </span>
+                  <div className="rounded-2xl border-2 p-6" style={{ borderColor: MAGENTA + '25', background: '#fff' }}>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="font-black text-slate-900">Evolución EBITDA {currentYear}</h3>
+                      <span className="text-xs text-slate-400">{trendData.length} meses</span>
                     </div>
-                    <TrendChart data={trendData} metrics={['EBITDA']} height={220} dark />
+                    <TrendChart data={trendData} metrics={['EBITDA']} height={220} />
                   </div>
                 )}
               </motion.div>
             )}
 
-            {/* ── TAB: TENDENCIAS ── */}
+            {/* ── TAB: TENDENCIAS ─────────────────────────────────────── */}
             {activeTab === 'trends' && (
-              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
+              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
                 {trendData.length >= 2 ? (
                   <>
-                    <div className="rounded-2xl p-6" style={GLASS.card}>
-                      <h3 className="font-bold text-white text-sm mb-1">EBITDA vs Costo Personal</h3>
-                      <p className="text-[11px] mb-5" style={{ color: 'rgba(255,255,255,0.35)' }}>Relación inversa clave: personal sube → EBITDA baja</p>
-                      <TrendChart data={trendData} metrics={['EBITDA', 'Personal']} height={280} dark />
+                    {/* EBITDA + Personal */}
+                    <div className="rounded-2xl border-2 p-6 bg-white" style={{ borderColor: MAGENTA + '25' }}>
+                      <h3 className="font-black text-slate-900 mb-1">EBITDA vs Costo Personal</h3>
+                      <p className="text-xs text-slate-400 mb-4">Relación inversa clave: personal sube → EBITDA baja</p>
+                      <TrendChart data={trendData} metrics={['EBITDA', 'Personal']} height={280} />
                     </div>
-                    <div className="rounded-2xl p-6" style={GLASS.card}>
-                      <h3 className="font-bold text-white text-sm mb-1">Costo Real vs Teórico</h3>
-                      <p className="text-[11px] mb-5" style={{ color: 'rgba(255,255,255,0.35)' }}>Desvíos sobre el presupuesto de costo</p>
-                      <CostBarsChart data={trendData} dark />
-                      <div className="flex gap-4 mt-3 text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                        <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ background: MAGENTA }} />Costo Real</span>
-                        <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ background: 'rgba(255,255,255,0.2)' }} />Costo Teórico</span>
+
+                    {/* Costo Real vs Teórico */}
+                    <div className="rounded-2xl border-2 p-6 bg-white" style={{ borderColor: '#93c5fd40' }}>
+                      <h3 className="font-black text-slate-900 mb-1">Costo Real vs Teórico</h3>
+                      <p className="text-xs text-slate-400 mb-4">Desvíos sobre el presupuesto de costo</p>
+                      <CostBarsChart data={trendData} />
+                      <div className="flex gap-4 mt-3 text-xs">
+                        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm inline-block" style={{ background: MAGENTA }} />Costo Real</span>
+                        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-slate-200 inline-block" />Costo Teórico</span>
                       </div>
                     </div>
-                    <div className="rounded-2xl p-6" style={GLASS.card}>
-                      <h3 className="font-bold text-white text-sm mb-1">Panorama Completo de Métricas</h3>
-                      <p className="text-[11px] mb-5" style={{ color: 'rgba(255,255,255,0.35)' }}>EBITDA · Costo Real · Personal · Gastos</p>
-                      <TrendChart data={trendData} metrics={['EBITDA', 'C.Real', 'Personal', 'Gastos']} height={300} dark />
+
+                    {/* Comparativa completa */}
+                    <div className="rounded-2xl border-2 p-6 bg-white" style={{ borderColor: '#8b5cf630' }}>
+                      <h3 className="font-black text-slate-900 mb-1">Panorama Completo de Métricas</h3>
+                      <p className="text-xs text-slate-400 mb-4">EBITDA · Costo Real · Personal · Gastos</p>
+                      <TrendChart data={trendData} metrics={['EBITDA', 'C.Real', 'Personal', 'Gastos']} height={300} />
                     </div>
-                    <div className="rounded-2xl p-6" style={GLASS.card}>
-                      <h3 className="font-bold text-white text-sm mb-5">Tabla Histórica Completa</h3>
+
+                    {/* Tabla comparativa multi-mes */}
+                    <div className="rounded-2xl border-2 p-6 bg-white" style={{ borderColor: MAGENTA + '20' }}>
+                      <h3 className="font-black text-slate-900 mb-4">Tabla Histórica Completa</h3>
                       <div className="overflow-x-auto">
                         <table className="w-full text-xs min-w-[500px]">
                           <thead>
-                            <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
-                              <th className="text-left py-3 px-3 font-semibold rounded-l-xl" style={{ color: 'rgba(255,255,255,0.4)' }}>Métrica</th>
+                            <tr style={{ background: MAGENTA_PALE }}>
+                              <th className="text-left py-3 px-3 font-bold rounded-l-xl" style={{ color: MAGENTA_DARK }}>Métrica</th>
                               {trendData.map(d => (
-                                <th key={d.mes} className="text-right py-3 px-3 font-semibold"
-                                  style={{ color: d.month === selectedMonth ? MAGENTA : 'rgba(255,255,255,0.4)', background: d.month === selectedMonth ? `${MAGENTA}15` : 'transparent' }}>
+                                <th key={d.mes} className={`text-right py-3 px-3 font-bold ${d.month === selectedMonth ? 'text-white' : ''}`}
+                                  style={{ color: d.month === selectedMonth ? MAGENTA : MAGENTA_DARK, background: d.month === selectedMonth ? MAGENTA + '20' : 'transparent' }}>
                                   {d.mes}
                                 </th>
                               ))}
@@ -979,14 +923,18 @@ export default function PYGModal({ onClose, storeId }) {
                           </thead>
                           <tbody>
                             {['EBITDA', 'C.Real', 'C.Teo', 'Personal', 'Gastos'].map(k => (
-                              <tr key={k} className="border-b" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
-                                <td className="py-2.5 px-3 font-semibold" style={{ color: 'rgba(255,255,255,0.6)' }}>{k === 'C.Real' ? 'Costo Real' : k === 'C.Teo' ? 'Costo Teórico' : k}</td>
-                                {trendData.map(d => (
-                                  <td key={d.mes} className="py-2.5 px-3 text-right font-bold"
-                                    style={{ color: d.month === selectedMonth && k === 'EBITDA' ? MAGENTA : 'rgba(255,255,255,0.7)' }}>
-                                    {d[k] != null ? `${d[k].toFixed(1)}%` : '—'}
-                                  </td>
-                                ))}
+                              <tr key={k} className="border-b border-slate-50 hover:bg-pink-50/20">
+                                <td className="py-2.5 px-3 font-bold text-slate-700">{k === 'C.Real' ? 'Costo Real' : k === 'C.Teo' ? 'Costo Teórico' : k}</td>
+                                {trendData.map(d => {
+                                  const isKPIEbitda = k === 'EBITDA';
+                                  const isSelected = d.month === selectedMonth;
+                                  return (
+                                    <td key={d.mes} className={`py-2.5 px-3 text-right font-black ${isSelected ? '' : 'text-slate-700'}`}
+                                      style={{ color: isSelected && isKPIEbitda ? MAGENTA : undefined }}>
+                                      {d[k] != null ? `${d[k].toFixed(1)}%` : '—'}
+                                    </td>
+                                  );
+                                })}
                               </tr>
                             ))}
                           </tbody>
@@ -995,7 +943,7 @@ export default function PYGModal({ onClose, storeId }) {
                     </div>
                   </>
                 ) : (
-                  <div className="text-center py-16" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                  <div className="text-center py-16 text-slate-400">
                     <Activity className="w-12 h-12 mx-auto mb-3 opacity-30" />
                     <p>Necesitas al menos 2 meses de datos para ver tendencias</p>
                   </div>
@@ -1003,19 +951,21 @@ export default function PYGModal({ onClose, storeId }) {
               </motion.div>
             )}
 
-            {/* ── TAB: SIMULADOR ── */}
+            {/* ── TAB: SIMULADOR ──────────────────────────────────────── */}
             {activeTab === 'simulator' && (
-              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
-                <EBITDASimulator primaryRecord={primaryRecord} trendData={trendData} dark />
+              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+                <EBITDASimulator primaryRecord={primaryRecord} trendData={trendData} />
+
+                {/* Comparativo mes seleccionado vs mejor mes */}
                 {trendData.length >= 2 && (() => {
                   const bestMonth = trendData.reduce((b, d) => (d.EBITDA || 0) > (b.EBITDA || 0) ? d : b, trendData[0]);
                   const currentInTrend = trendData.find(d => d.month === selectedMonth);
                   if (!currentInTrend || bestMonth.month === selectedMonth) return null;
                   return (
-                    <div className="rounded-2xl p-6" style={GLASS.card}>
-                      <h3 className="font-bold text-white text-sm mb-1">¿Qué hiciste diferente en {bestMonth.mes}?</h3>
-                      <p className="text-[11px] mb-5" style={{ color: 'rgba(255,255,255,0.35)' }}>Tu mejor mes vs el mes seleccionado</p>
-                      <div className="grid grid-cols-2 gap-3">
+                    <div className="rounded-2xl border-2 p-6 bg-white" style={{ borderColor: MAGENTA + '25' }}>
+                      <h3 className="font-black text-slate-900 mb-1">¿Qué hiciste diferente en {bestMonth.mes}?</h3>
+                      <p className="text-xs text-slate-500 mb-4">Tu mejor mes vs el mes seleccionado</p>
+                      <div className="grid grid-cols-2 gap-4">
                         {['EBITDA', 'C.Real', 'Personal', 'Gastos'].map(k => {
                           const curr = currentInTrend[k];
                           const best = bestMonth[k];
@@ -1023,14 +973,14 @@ export default function PYGModal({ onClose, storeId }) {
                           const isKpi = k === 'EBITDA';
                           const isBetter = isKpi ? diff >= 0 : diff <= 0;
                           return (
-                            <div key={k} className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                              <p className="text-[10px] font-semibold uppercase mb-2" style={{ color: 'rgba(255,255,255,0.35)' }}>{k === 'C.Real' ? 'Costo Real' : k}</p>
+                            <div key={k} className="rounded-xl p-4 border border-slate-100">
+                              <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">{k === 'C.Real' ? 'Costo Real' : k}</p>
                               <div className="flex items-end gap-2">
-                                <span className="font-black text-xl text-white">{curr?.toFixed(1)}%</span>
-                                <span className="text-sm mb-0.5" style={{ color: 'rgba(255,255,255,0.3)' }}>vs {best?.toFixed(1)}%</span>
+                                <span className="font-black text-xl text-slate-900">{curr?.toFixed(1)}%</span>
+                                <span className="text-sm text-slate-400 mb-0.5">vs {best?.toFixed(1)}%</span>
                               </div>
                               {diff != null && (
-                                <p className={`text-xs font-bold mt-1.5 ${isBetter ? 'text-emerald-400' : 'text-red-400'}`}>
+                                <p className={`text-xs font-black mt-1 ${isBetter ? 'text-emerald-600' : 'text-red-500'}`}>
                                   {diff > 0 ? '+' : ''}{diff.toFixed(1)}pp {isBetter ? '↑ mejor' : '↓ peor'} que {bestMonth.mes}
                                 </p>
                               )}
@@ -1044,24 +994,26 @@ export default function PYGModal({ onClose, storeId }) {
               </motion.div>
             )}
 
-            {/* ── TAB: DESGLOSE ── */}
+            {/* ── TAB: DESGLOSE ───────────────────────────────────────── */}
             {activeTab === 'breakdown' && (
-              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
-                <div className="rounded-2xl p-6" style={GLASS.card}>
-                  <h3 className="font-bold text-white text-sm mb-5">Desglose de Costos — {MONTHS_FULL[(selectedMonth || 1) - 1]}</h3>
-                  <CostTable primaryRecord={primaryRecord} prevRecord={prevRecord} dark />
+              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+                <div className="rounded-2xl border-2 p-6 bg-white" style={{ borderColor: MAGENTA + '25' }}>
+                  <h3 className="font-black text-slate-900 mb-4">Desglose Completo de Costos — {MONTHS_FULL[(selectedMonth || 1) - 1]}</h3>
+                  <CostTable primaryRecord={primaryRecord} prevRecord={prevRecord} />
                 </div>
+
+                {/* Otros gastos */}
                 {primaryRecord?.otros_gastos && (() => {
                   let others = [];
                   try { others = Object.entries(JSON.parse(primaryRecord.otros_gastos)).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]); } catch {}
                   if (!others.length) return null;
                   return (
-                    <div className="rounded-2xl p-6" style={GLASS.card}>
-                      <h3 className="font-bold text-white text-sm mb-4">Otros Gastos Detallados</h3>
+                    <div className="rounded-2xl border-2 p-6 bg-white" style={{ borderColor: MAGENTA + '20' }}>
+                      <h3 className="font-black text-slate-900 mb-4">Otros Gastos Detallados</h3>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                         {others.map(([k, v]) => (
-                          <div key={k} className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                            <p className="text-[10px] font-medium truncate mb-1.5" style={{ color: 'rgba(255,255,255,0.4)' }}>{k}</p>
+                          <div key={k} className="rounded-xl p-4 border border-slate-100" style={{ background: MAGENTA_PALE + '60' }}>
+                            <p className="text-[10px] text-slate-500 font-medium truncate mb-1">{k}</p>
                             <p className="font-black text-lg" style={{ color: MAGENTA }}>{(v * 100).toFixed(2)}%</p>
                           </div>
                         ))}
@@ -1075,7 +1027,7 @@ export default function PYGModal({ onClose, storeId }) {
         )}
       </div>
 
-      {/* Modal detalle KPI */}
+      {/* Modal de detalle de KPI */}
       {activeKPI && (
         <KPIDetailModal
           kpiId={activeKPI}
