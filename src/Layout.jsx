@@ -111,9 +111,9 @@ export default function Layout({ children, currentPageName }) {
           <div className="w-full relative z-10 overflow-y-auto">
             {children}
           </div>
+          <MascotWidget />
           </main>
           </div>
-          <MascotWidget />
           </ErrorBoundary>
           </DateFilterProvider>
           );
