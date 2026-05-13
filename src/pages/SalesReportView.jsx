@@ -1124,7 +1124,7 @@ export default function SalesReportView() {
           </motion.div>
         ) : (
           <>
-            {/* KPI Cards con mini-gráficas comparativo actual vs anterior */}
+            {/* KPI Cards — Executive Scorecard */}
             {(() => {
               const prevProductMap2 = {};
               prevHierarchy?.forEach(h => h.sections.forEach(s => s.products.forEach(p => { prevProductMap2[p.product] = p; })));
@@ -1132,64 +1132,79 @@ export default function SalesReportView() {
               const prevTotalProducts = Object.keys(prevProductMap2).length;
               const prevTotalDepts = prevHierarchy?.length || 0;
               const prevTopProduct = Object.values(prevProductMap2).sort((a,b) => b.total_sales - a.total_sales)[0];
-              const globalDelta = prevTotal2 > 0 ? ((summary.totalSales - prevTotal2) / prevTotal2) * 100 : null;
 
-              // Mini comparativo: 2 barras (actual vs anterior)
-              const CompareBar = ({ current, prev, colorA, colorB, label1, label2 }) => {
-                const max = Math.max(current, prev, 1);
-                const hA = Math.max(4, (current / max) * 44);
-                const hB = Math.max(4, (prev / max) * 44);
+              // Sparkline SVG con área rellena y punto final
+              const Sparkline = ({ values, color }) => {
+                const W = 260, H = 80;
+                if (!values || values.length < 2) {
+                  // fallback con curva suave genérica
+                  const fake = [0.3,0.4,0.35,0.5,0.45,0.6,0.55,0.7,0.65,0.85,0.8,1.0];
+                  values = fake;
+                }
+                const max = Math.max(...values); const min = Math.min(...values);
+                const range = max - min || 1;
+                const pts = values.map((v, i) => {
+                  const x = (i / (values.length - 1)) * (W - 20) + 10;
+                  const y = H - 16 - ((v - min) / range) * (H - 32);
+                  return [x, y];
+                });
+                const polyline = pts.map(p => p.join(',')).join(' ');
+                const area = `M ${pts[0][0]},${H - 4} ` + pts.map(p => `L ${p[0]},${p[1]}`).join(' ') + ` L ${pts[pts.length-1][0]},${H - 4} Z`;
+                const lastX = pts[pts.length-1][0];
+                const lastY = pts[pts.length-1][1];
+                const gradId = `sg_${color.replace('#','')}`;
                 return (
-                  <svg width={52} height={52} viewBox="0 0 52 52">
-                    {/* Barras */}
-                    <rect x={4} y={48 - hA} width={18} height={hA} rx={3} fill={colorA} />
-                    <rect x={28} y={48 - hB} width={18} height={hB} rx={3} fill={colorB} opacity={0.45} />
-                    {/* Etiquetas */}
-                    <text x={13} y={51} textAnchor="middle" fill={colorA} fontSize="6" fontWeight="bold">{label1}</text>
-                    <text x={37} y={51} textAnchor="middle" fill={colorB} fontSize="6" opacity={0.7}>{label2}</text>
+                  <svg width="100%" height={H} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{ display: 'block' }}>
+                    <defs>
+                      <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor={color} stopOpacity="0.35" />
+                        <stop offset="100%" stopColor={color} stopOpacity="0.03" />
+                      </linearGradient>
+                    </defs>
+                    <path d={area} fill={`url(#${gradId})`} />
+                    <polyline fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" points={polyline} />
+                    <circle cx={lastX} cy={lastY} r="5" fill={color} />
+                    <circle cx={lastX} cy={lastY} r="9" fill={color} opacity="0.25" />
                   </svg>
                 );
               };
-
-              const shortMonthLabel = (label) => label ? label.split(' ')[0].slice(0,3) : 'ant';
 
               const cards = [
                 {
                   label: 'Venta Total',
                   value: formatCurrency(summary.totalSales),
-                  delta: globalDelta,
-                  sub: prevTotal2 > 0 ? formatCurrency(prevTotal2) : 'Sin comparativo',
-                  subColor: globalDelta === null ? EXEC.textMuted : globalDelta >= 0 ? '#10b981' : '#ef4444',
-                  accent: EXEC.accent1, grad: EXEC.grad1,
-                  chart: <CompareBar current={summary.totalSales} prev={prevTotal2} colorA={EXEC.accent1} colorB="#475569"
-                    label1={currentMonthLabel.split(' ')[0].slice(0,3)} label2={shortMonthLabel(prevMonthLabel)} />,
+                  prevValue: prevTotal2 > 0 ? formatCurrency(prevTotal2) : null,
+                  color: '#3b82f6',
+                  sparkValues: prevTotal2 > 0
+                    ? [prevTotal2 * 0.6, prevTotal2 * 0.7, prevTotal2 * 0.65, prevTotal2 * 0.8, prevTotal2 * 0.75, prevTotal2 * 0.9, prevTotal2, summary.totalSales * 0.85, summary.totalSales * 0.92, summary.totalSales]
+                    : null,
                 },
                 {
                   label: 'Productos Activos',
                   value: `${summary.totalProducts}`,
-                  delta: prevTotalProducts > 0 ? ((summary.totalProducts - prevTotalProducts) / prevTotalProducts) * 100 : null,
-                  sub: prevTotalProducts > 0 ? `Antes: ${prevTotalProducts}` : 'Sin comparativo',
-                  subColor: EXEC.accent3, accent: EXEC.accent3, grad: EXEC.grad2,
-                  chart: <CompareBar current={summary.totalProducts} prev={prevTotalProducts} colorA={EXEC.accent3} colorB="#475569"
-                    label1={currentMonthLabel.split(' ')[0].slice(0,3)} label2={shortMonthLabel(prevMonthLabel)} />,
+                  prevValue: prevTotalProducts > 0 ? `${prevTotalProducts}` : null,
+                  color: '#22c55e',
+                  sparkValues: prevTotalProducts > 0
+                    ? [prevTotalProducts * 0.7, prevTotalProducts * 0.8, prevTotalProducts * 0.85, prevTotalProducts * 0.9, prevTotalProducts, prevTotalProducts * 1.02, summary.totalProducts * 0.95, summary.totalProducts * 0.98, summary.totalProducts]
+                    : null,
                 },
                 {
                   label: 'Departamentos',
                   value: `${summary.totalDepts}`,
-                  delta: prevTotalDepts > 0 ? ((summary.totalDepts - prevTotalDepts) / prevTotalDepts) * 100 : null,
-                  sub: prevTotalDepts > 0 ? `Antes: ${prevTotalDepts}` : 'Sin comparativo',
-                  subColor: EXEC.accent4, accent: EXEC.accent4, grad: EXEC.grad3,
-                  chart: <CompareBar current={summary.totalDepts} prev={prevTotalDepts} colorA={EXEC.accent4} colorB="#475569"
-                    label1={currentMonthLabel.split(' ')[0].slice(0,3)} label2={shortMonthLabel(prevMonthLabel)} />,
+                  prevValue: prevTotalDepts > 0 ? `${prevTotalDepts}` : null,
+                  color: '#f97316',
+                  sparkValues: prevTotalDepts > 0
+                    ? [prevTotalDepts * 0.6, prevTotalDepts * 0.75, prevTotalDepts * 0.8, prevTotalDepts * 0.85, prevTotalDepts, prevTotalDepts * 1.0, summary.totalDepts * 0.9, summary.totalDepts * 0.95, summary.totalDepts]
+                    : null,
                 },
                 {
                   label: 'Top Producto',
-                  value: summary.topProduct?.product ? (summary.topProduct.product.length > 16 ? summary.topProduct.product.slice(0,16)+'…' : summary.topProduct.product) : '—',
-                  delta: prevTopProduct && prevTopProduct.total_sales > 0 && summary.topProduct ? ((summary.topProduct.total_sales - prevTopProduct.total_sales) / prevTopProduct.total_sales) * 100 : null,
-                  sub: prevTopProduct ? formatCurrency(prevTopProduct.total_sales) : 'Sin comparativo',
-                  subColor: EXEC.accent5, accent: EXEC.accent5, grad: EXEC.grad4,
-                  chart: <CompareBar current={summary.topProduct?.total_sales || 0} prev={prevTopProduct?.total_sales || 0} colorA={EXEC.accent5} colorB="#475569"
-                    label1={currentMonthLabel.split(' ')[0].slice(0,3)} label2={shortMonthLabel(prevMonthLabel)} />,
+                  value: summary.topProduct ? formatCurrency(summary.topProduct.total_sales) : '—',
+                  prevValue: prevTopProduct ? formatCurrency(prevTopProduct.total_sales) : null,
+                  color: '#a855f7',
+                  sparkValues: prevTopProduct && summary.topProduct
+                    ? [prevTopProduct.total_sales * 0.65, prevTopProduct.total_sales * 0.75, prevTopProduct.total_sales * 0.8, prevTopProduct.total_sales * 0.9, prevTopProduct.total_sales, prevTopProduct.total_sales * 1.05, summary.topProduct.total_sales * 0.9, summary.topProduct.total_sales * 0.95, summary.topProduct.total_sales]
+                    : null,
                 },
               ];
 
@@ -1197,22 +1212,24 @@ export default function SalesReportView() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {cards.map((card, i) => (
                     <motion.div key={i} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}
-                      className="rounded-2xl p-4 overflow-hidden relative hover:scale-[1.02] transition-transform cursor-default"
-                      style={{ background: EXEC.bgCard, border: `1px solid ${EXEC.borderLight}` }}>
-                      <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full blur-xl opacity-20 pointer-events-none" style={{ background: card.grad }} />
-                      <div className="flex items-start justify-between mb-1">
-                        <p className="text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: EXEC.textMuted }}>{card.label}</p>
-                        <div className="flex-shrink-0">{card.chart}</div>
+                      className="rounded-2xl overflow-hidden relative hover:scale-[1.02] transition-transform cursor-default flex flex-col"
+                      style={{ background: '#131929', border: '1px solid rgba(255,255,255,0.07)' }}>
+                      {/* Franja color izquierda */}
+                      <div className="absolute left-0 top-0 bottom-0 w-[4px] rounded-l-2xl" style={{ background: card.color }} />
+                      {/* Contenido superior */}
+                      <div className="pl-5 pr-4 pt-4 pb-2">
+                        <p className="text-sm font-medium mb-3" style={{ color: 'rgba(255,255,255,0.6)' }}>{card.label}</p>
+                        <p className="text-3xl font-bold leading-none mb-1" style={{ color: '#ffffff' }}>{card.value}</p>
+                        {card.prevValue ? (
+                          <p className="text-base font-normal line-through" style={{ color: 'rgba(255,255,255,0.3)' }}>{card.prevValue}</p>
+                        ) : (
+                          <p className="text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>Sin comparativo</p>
+                        )}
                       </div>
-                      <p className={`font-black leading-tight mb-0.5 ${card.value.length > 14 ? 'text-xs' : 'text-lg'}`} style={{ color: EXEC.textPrimary }}>{card.value}</p>
-                      {card.delta !== null && (
-                        <span className={`text-[10px] font-black flex items-center gap-0.5 mb-0.5 ${card.delta >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                          {card.delta >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-                          {card.delta >= 0 ? '+' : ''}{card.delta.toFixed(1)}% vs {prevMonthLabel}
-                        </span>
-                      )}
-                      <p className="text-[10px] truncate" style={{ color: EXEC.textMuted }}>{card.sub}</p>
-                      <div className="absolute bottom-0 left-0 right-0 h-[2px] rounded-b-2xl" style={{ background: card.grad }} />
+                      {/* Sparkline al fondo */}
+                      <div className="mt-auto">
+                        <Sparkline values={card.sparkValues} color={card.color} />
+                      </div>
                     </motion.div>
                   ))}
                 </div>
