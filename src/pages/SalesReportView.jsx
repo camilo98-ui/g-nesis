@@ -1124,27 +1124,143 @@ export default function SalesReportView() {
           </motion.div>
         ) : (
           <>
-            {/* KPI Cards ejecutivos */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {[
-                { icon: DollarSign, label: 'Venta Total', value: formatCurrency(summary.totalSales), sub: null, grad: EXEC.grad1, accent: EXEC.accent1 },
-                { icon: Package, label: 'Productos', value: summary.totalProducts, sub: null, grad: EXEC.grad2, accent: EXEC.accent3 },
-                { icon: Layers, label: 'Departamentos', value: summary.totalDepts, sub: null, grad: EXEC.grad3, accent: EXEC.accent4 },
-                { icon: Award, label: 'Top Producto', value: summary.topProduct?.product || '—', sub: formatCurrency(summary.topProduct?.total_sales), grad: EXEC.grad4, accent: EXEC.accent5 },
-              ].map(({ icon: Icon, label, value, sub, grad, accent }, i) => (
-                <motion.div key={i} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07 }}
-                  className="rounded-2xl p-4 overflow-hidden relative hover:scale-[1.02] transition-transform"
-                  style={{ background: EXEC.bgCard, border: `1px solid ${EXEC.borderLight}` }}>
-                  <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full opacity-15" style={{ background: grad }} />
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-3" style={{ background: grad }}>
-                    <Icon className="w-4 h-4 text-white" />
-                  </div>
-                  <p className="text-xs font-medium mb-1" style={{ color: EXEC.textMuted }}>{label}</p>
-                  <p className={`font-black ${typeof value === 'string' && value.length > 15 ? 'text-xs leading-tight' : 'text-xl'}`} style={{ color: EXEC.textPrimary }}>{value}</p>
-                  {sub && <p className="text-xs font-bold mt-0.5" style={{ color: accent }}>{sub}</p>}
-                </motion.div>
-              ))}
-            </div>
+            {/* KPI Cards con mini-gráficas */}
+            {(() => {
+              // Datos para mini gráficas
+              const topDepts = hierarchy.filter(h => h.deptSales > 0).slice(0, 6);
+              const top5Products = [...allProducts].sort((a,b) => b.total_sales - a.total_sales).slice(0, 5);
+              const prevProductMap2 = {};
+              prevHierarchy?.forEach(h => h.sections.forEach(s => s.products.forEach(p => { prevProductMap2[p.product] = p; })));
+              const prevTotal2 = prevHierarchy?.reduce((s, h) => s + (h.deptSales || 0), 0) || 0;
+              const globalDelta = prevTotal2 > 0 ? ((summary.totalSales - prevTotal2) / prevTotal2) * 100 : null;
+              const concentracionPct2 = summary.totalSales > 0 ? (top5Products.reduce((s,p)=>s+p.total_sales,0) / summary.totalSales) * 100 : 0;
+
+              // Sparkline SVG helper
+              const Sparkline = ({ values, color, height = 36, width = 80 }) => {
+                if (!values || values.length < 2) return null;
+                const max = Math.max(...values); const min = Math.min(...values);
+                const range = max - min || 1;
+                const pts = values.map((v, i) => {
+                  const x = (i / (values.length - 1)) * width;
+                  const y = height - ((v - min) / range) * (height - 4) - 2;
+                  return `${x},${y}`;
+                }).join(' ');
+                return (
+                  <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+                    <polyline fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" points={pts} />
+                    <circle cx={pts.split(' ').pop().split(',')[0]} cy={pts.split(' ').pop().split(',')[1]} r="3" fill={color} />
+                  </svg>
+                );
+              };
+
+              // Mini Donut SVG
+              const MiniDonut = ({ pct, color }) => {
+                const r = 18; const circ = 2 * Math.PI * r;
+                const dash = (pct / 100) * circ;
+                return (
+                  <svg width={44} height={44} viewBox="0 0 44 44">
+                    <circle cx={22} cy={22} r={r} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth={5} />
+                    <circle cx={22} cy={22} r={r} fill="none" stroke={color} strokeWidth={5}
+                      strokeDasharray={`${dash} ${circ}`} strokeLinecap="round"
+                      transform="rotate(-90 22 22)" />
+                    <text x={22} y={26} textAnchor="middle" fill={color} fontSize="9" fontWeight="bold">{Math.round(pct)}%</text>
+                  </svg>
+                );
+              };
+
+              // Mini Bar chart SVG
+              const MiniBars = ({ data, colorFn, height = 36, width = 80 }) => {
+                if (!data || data.length === 0) return null;
+                const max = Math.max(...data.map(d => d.val)) || 1;
+                const barW = (width / data.length) - 2;
+                return (
+                  <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+                    {data.map((d, i) => {
+                      const bh = Math.max(3, ((d.val / max) * (height - 4)));
+                      return (
+                        <rect key={i} x={i * (barW + 2)} y={height - bh} width={barW} height={bh}
+                          rx={2} fill={colorFn(i, d)} opacity={0.85} />
+                      );
+                    })}
+                  </svg>
+                );
+              };
+
+              const cards = [
+                {
+                  label: 'Venta Total',
+                  value: formatCurrency(summary.totalSales),
+                  sub: globalDelta !== null ? `${globalDelta >= 0 ? '+' : ''}${globalDelta.toFixed(1)}% vs ant.` : `${summary.totalProducts} productos`,
+                  subColor: globalDelta === null ? EXEC.textMuted : globalDelta >= 0 ? '#10b981' : '#ef4444',
+                  accent: EXEC.accent1,
+                  grad: EXEC.grad1,
+                  chart: (
+                    <MiniBars
+                      data={topDepts.map(h => ({ val: h.deptSales, dept: h.dept }))}
+                      colorFn={(i) => COLORS[i % COLORS.length]}
+                      width={84} height={38}
+                    />
+                  ),
+                },
+                {
+                  label: 'Mix Departamentos',
+                  value: `${summary.totalDepts} deptos.`,
+                  sub: topDepts[0] ? `Líder: ${topDepts[0].dept.length > 14 ? topDepts[0].dept.slice(0,14)+'…' : topDepts[0].dept}` : '—',
+                  subColor: EXEC.accent3,
+                  accent: EXEC.accent3,
+                  grad: EXEC.grad3,
+                  chart: <MiniDonut pct={topDepts[0]?.deptPart || 0} color={EXEC.accent3} />,
+                },
+                {
+                  label: 'Concentración Top 5',
+                  value: `${concentracionPct2.toFixed(1)}%`,
+                  sub: concentracionPct2 > 60 ? '⚠ Alta concentración' : '✓ Mix balanceado',
+                  subColor: concentracionPct2 > 60 ? EXEC.accent5 : EXEC.accent4,
+                  accent: concentracionPct2 > 60 ? EXEC.accent5 : EXEC.accent4,
+                  grad: concentracionPct2 > 60 ? EXEC.grad4 : EXEC.grad3,
+                  chart: <MiniDonut pct={concentracionPct2} color={concentracionPct2 > 60 ? EXEC.accent5 : EXEC.accent4} />,
+                },
+                {
+                  label: 'Top Producto',
+                  value: summary.topProduct?.product ? (summary.topProduct.product.length > 16 ? summary.topProduct.product.slice(0,16)+'…' : summary.topProduct.product) : '—',
+                  sub: summary.topProduct ? formatCurrency(summary.topProduct.total_sales) : '—',
+                  subColor: EXEC.accent5,
+                  accent: EXEC.accent5,
+                  grad: EXEC.grad4,
+                  chart: (
+                    <MiniBars
+                      data={top5Products.map(p => ({ val: p.total_sales }))}
+                      colorFn={(i) => i === 0 ? EXEC.accent5 : `rgba(245,158,11,${0.35 + (4-i)*0.1})`}
+                      width={84} height={38}
+                    />
+                  ),
+                },
+              ];
+
+              return (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {cards.map((card, i) => (
+                    <motion.div key={i} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}
+                      className="rounded-2xl p-4 overflow-hidden relative hover:scale-[1.02] transition-transform cursor-default"
+                      style={{ background: EXEC.bgCard, border: `1px solid ${EXEC.borderLight}` }}>
+                      {/* Glow top-right */}
+                      <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full blur-xl opacity-20 pointer-events-none" style={{ background: card.grad }} />
+                      {/* Label + chart en fila */}
+                      <div className="flex items-start justify-between mb-2">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.13em] leading-tight" style={{ color: EXEC.textMuted }}>{card.label}</p>
+                        <div className="flex-shrink-0 ml-1">{card.chart}</div>
+                      </div>
+                      {/* Valor principal */}
+                      <p className={`font-black leading-tight mb-1 ${card.value.length > 14 ? 'text-xs' : 'text-lg'}`} style={{ color: EXEC.textPrimary }}>{card.value}</p>
+                      {/* Sub */}
+                      <p className="text-[10px] font-semibold truncate" style={{ color: card.subColor }}>{card.sub}</p>
+                      {/* Accent bar bottom */}
+                      <div className="absolute bottom-0 left-0 right-0 h-[2px] rounded-b-2xl" style={{ background: card.grad }} />
+                    </motion.div>
+                  ))}
+                </div>
+              );
+            })()}
 
             {/* Charts Row */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
