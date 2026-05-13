@@ -1,7 +1,7 @@
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ComposedChart, LineChart, Line
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ComposedChart, LineChart, Line, BarChart, Bar
 } from
 'recharts';
 import { PieChart, Pie, Cell } from 'recharts';
@@ -436,105 +436,123 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3, staggerChildren: 0.1 }}>
 
-        {/* Tendencia de Ventas con Proyección */}
+        {/* Tendencia de Ventas con Proyección y Cierre Mes */}
         <AnalyticsCard
-          title="Tendencia de Ventas"
-          subtitle="Últimos 30 días + proyección futura"
+          title="Tendencia & Proyección"
+          subtitle="Últimos 30 días + proyección al cierre del mes"
           delay={0.18}
           colSpan="lg:col-span-3">
           
           {hasSalesData ? (
-            <ResponsiveContainer width="100%" height={160}>
-              <ComposedChart data={sorted30} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
-                <defs>
-                  <linearGradient id="ventasGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#FF4D8D" stopOpacity="0.35" />
-                    <stop offset="100%" stopColor="#FF4D8D" stopOpacity="0" />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="0" stroke="rgba(255, 77, 141, 0.08)" vertical={false} />
-                <XAxis dataKey="date" tick={{ fontSize: 7, fill: '#8F96A3' }} axisLine={false} tickLine={false} />
-                <YAxis hide />
-                <Tooltip content={<SalesTooltip />} />
-                <Area type="monotone" dataKey="ventas" stroke="#FF4D8D" strokeWidth={2.5} fill="url(#ventasGrad)" dot={false} />
-                <Line type="monotone" dataKey="proyeccion" stroke="#FFB4C9" strokeWidth={2} strokeDasharray="5,5" dot={false} />
-              </ComposedChart>
-            </ResponsiveContainer>
+            <>
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                <motion.div
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.22 }}
+                  className="p-3 rounded-xl group relative overflow-hidden"
+                  style={{ background: 'linear-gradient(135deg, rgba(255, 77, 141, 0.08), rgba(255, 182, 201, 0.04))' }}>
+                  
+                  <p className="text-[8px] text-[#8F96A3] font-semibold uppercase mb-1">Proyección EOD</p>
+                  <p className="text-[18px] font-black text-[#FF4D8D] mb-1" style={{ lineHeight: '1' }}>
+                    {fmt(todayEODProjection)}
+                  </p>
+                  <p className="text-[9px] font-bold" style={{ color: todayProjectedCompliancePercent >= 80 ? '#10b981' : '#f59e0b' }}>
+                    {todayProjectedCompliancePercent}% de PPT hoy
+                  </p>
+                </motion.div>
+                
+                <motion.div
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.25 }}
+                  className="p-3 rounded-xl group relative overflow-hidden"
+                  style={{ background: 'linear-gradient(135deg, rgba(255, 127, 165, 0.08), rgba(255, 182, 201, 0.04))' }}>
+                  
+                  <p className="text-[8px] text-[#8F96A3] font-semibold uppercase mb-1">Proyección Mes</p>
+                  <p className="text-[18px] font-black text-[#FF7FA5] mb-1" style={{ lineHeight: '1' }}>
+                    {fmt(todayEODProjection * 28)}
+                  </p>
+                  <p className="text-[9px] font-bold" style={{ color: Math.round((todayEODProjection * 28 / (activeBudget?.sales_budget || 1)) * 100) >= 100 ? '#10b981' : '#f59e0b' }}>
+                    {Math.round((todayEODProjection * 28 / (activeBudget?.sales_budget || 1)) * 100)}% de PPT mes
+                  </p>
+                </motion.div>
+              </div>
+
+              <ResponsiveContainer width="100%" height={140}>
+                <ComposedChart data={sorted30} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
+                  <defs>
+                    <linearGradient id="ventasGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#FF4D8D" stopOpacity="0.35" />
+                      <stop offset="100%" stopColor="#FF4D8D" stopOpacity="0" />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="0" stroke="rgba(255, 77, 141, 0.08)" vertical={false} />
+                  <XAxis dataKey="date" tick={{ fontSize: 7, fill: '#8F96A3' }} axisLine={false} tickLine={false} />
+                  <YAxis hide />
+                  <Tooltip content={<SalesTooltip />} />
+                  <Area type="monotone" dataKey="ventas" stroke="#FF4D8D" strokeWidth={2.5} fill="url(#ventasGrad)" dot={false} />
+                  <Line type="monotone" dataKey="proyeccion" stroke="#FFB4C9" strokeWidth={2.5} strokeDasharray="5,5" dot={false} name="Proyección" />
+                </ComposedChart>
+              </ResponsiveContainer>
+              
+              <div className="flex gap-6 mt-3 text-[10px]">
+                <div className="flex items-center gap-2">
+                  <div className="w-2.5 h-2.5 rounded-full" style={{ background: '#FF4D8D' }} />
+                  <span className="text-[#8F96A3]">Ventas Real</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2.5 h-2.5 rounded-full" style={{ background: '#FFB4C9' }} />
+                  <span className="text-[#8F96A3]">Proyección Diaria</span>
+                </div>
+              </div>
+            </>
           ) : (
-            <div className="h-[160px] flex items-center justify-center">
+            <div className="h-[200px] flex items-center justify-center">
               <p className="text-[11px] text-[#8F96A3]">Sin datos disponibles</p>
             </div>
           )}
-          
-          <div className="flex gap-6 mt-4 text-[10px]">
-            <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 rounded-full" style={{ background: '#FF4D8D' }} />
-              <span className="text-[#8F96A3]">Ventas Real</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 rounded-full" style={{ background: '#FFB4C9' }} />
-              <span className="text-[#8F96A3]">Proyección</span>
-            </div>
-          </div>
         </AnalyticsCard>
 
-        {/* Matriz de Desempeño por Tienda */}
+        {/* Desempeño de Tiendas - Gráfico Comparativo */}
         <AnalyticsCard
-          title="Matriz KPI"
-          subtitle="Desempeño tiendas en tiempo real"
+          title="Performance Stores"
+          subtitle="Análisis comparativo en tiempo real"
           delay={0.22}
           colSpan="lg:col-span-2">
           
-          <div className="space-y-2.5">
+          <ResponsiveContainer width="100%" height={140}>
+            <ComposedChart data={[
+              { name: 'BTA 11', sales: 92, ticket: 88, avg: 90 },
+              { name: 'BTA 08', sales: 85, ticket: 79, avg: 82 },
+              { name: 'BTA 15', sales: 78, ticket: 74, avg: 76 }
+            ]} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
+              <defs>
+                <linearGradient id="storeGrad1" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#FF4D8D" stopOpacity="0.4" />
+                  <stop offset="100%" stopColor="#FF4D8D" stopOpacity="0.1" />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="0" stroke="rgba(255, 77, 141, 0.08)" vertical={false} />
+              <XAxis dataKey="name" tick={{ fontSize: 8, fill: '#8F96A3' }} axisLine={false} tickLine={false} />
+              <YAxis hide domain={[0, 100]} />
+              <Tooltip content={makePremiumTooltip((val) => `${val}%`)} />
+              <Bar dataKey="sales" fill="#FF4D8D" radius={[4, 4, 0, 0]} />
+              <Line type="monotone" dataKey="avg" stroke="#FFB4C9" strokeWidth={2.5} dot={{ fill: '#FFB4C9', r: 4 }} />
+            </ComposedChart>
+          </ResponsiveContainer>
+          
+          <div className="grid grid-cols-3 gap-2 mt-3">
             {[
-              { name: 'BTA 11', sales: 92, ticket: 88, conversion: 86, trend: 'up' },
-              { name: 'BTA 08', sales: 85, ticket: 79, conversion: 72, trend: 'flat' },
-              { name: 'BTA 15', sales: 78, ticket: 74, conversion: 68, trend: 'down' }
-            ].map((store, i) => {
-              const avgScore = Math.round((store.sales + store.ticket + store.conversion) / 3);
-              const statusColor = avgScore >= 85 ? '#10b981' : avgScore >= 70 ? '#f59e0b' : '#ef4444';
-              
-              return (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, x: -12 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.28 + i * 0.06 }}
-                  className="p-2.5 rounded-xl"
-                  style={{ background: `rgba(255, 77, 141, 0.03)` }}>
-                  
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-[10px] font-semibold text-[#2A2A2A]">{store.name}</span>
-                    <div className="flex items-center gap-1">
-                      <div className="w-8 h-8 rounded-lg flex items-center justify-center text-[9px] font-bold"
-                        style={{ background: statusColor + '20', color: statusColor }}>
-                        {avgScore}%
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-3 gap-1.5">
-                    {[
-                      { label: 'S', val: store.sales },
-                      { label: 'T', val: store.ticket },
-                      { label: 'C', val: store.conversion }
-                    ].map((metric, j) => (
-                      <div key={j} className="relative">
-                        <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden">
-                          <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${metric.val}%` }}
-                            transition={{ delay: 0.35 + j * 0.05, duration: 0.6 }}
-                            className="h-full rounded-full"
-                            style={{ background: `rgb(255, ${77 + metric.val}, ${141 + metric.val * 0.3})` }} />
-                        </div>
-                        <span className="text-[7px] font-bold text-[#8F96A3] absolute -top-3.5 left-0">{metric.label}</span>
-                      </div>
-                    ))}
-                  </div>
-                </motion.div>
-              );
-            })}
+              { store: 'BTA 11', status: '✓ Líder', color: '#10b981' },
+              { store: 'BTA 08', status: '⚡ Activo', color: '#f59e0b' },
+              { store: 'BTA 15', status: '⚠ Alerta', color: '#ef4444' }
+            ].map((s, i) => (
+              <div key={i} className="text-center">
+                <p className="text-[9px] font-semibold text-[#2A2A2A]">{s.store}</p>
+                <p className="text-[8px] font-bold mt-1" style={{ color: s.color }}>{s.status}</p>
+              </div>
+            ))}
           </div>
         </AnalyticsCard>
       </motion.div>
@@ -549,7 +567,7 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
         {/* Hourly heatmap */}
         <AnalyticsCard title="Tráfico por Hora" subtitle="Transacciones · patrón semanal" delay={0.26}>
           <HourlyHeatmap data={heatmapData} />
-          <div className="flex items-center justify-between mt-4">
+          <div className="flex items-center justify-between mt-2.5">
             <span className="text-[8px] text-[#8F96A3] font-semibold uppercase">Bajo</span>
             <div className="flex gap-1.5 flex-1 mx-3">
               {[0.08, 0.22, 0.38, 0.54, 0.70, 0.86].map((a, i) =>
@@ -559,15 +577,45 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
             </div>
             <span className="text-[8px] text-[#8F96A3] font-semibold uppercase">Alto</span>
           </div>
+          
+          <div className="mt-3 pt-2.5 border-t border-slate-100">
+            <p className="text-[8px] text-[#8F96A3] font-semibold uppercase mb-2">Peak Hours</p>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="p-1.5 rounded-lg" style={{ background: 'rgba(255, 77, 141, 0.05)' }}>
+                <p className="text-[8px] text-[#8F96A3] font-medium">Mañana</p>
+                <p className="text-[10px] font-bold text-[#FF4D8D]">9am-11am</p>
+              </div>
+              <div className="p-1.5 rounded-lg" style={{ background: 'rgba(255, 77, 141, 0.05)' }}>
+                <p className="text-[8px] text-[#8F96A3] font-medium">Tarde</p>
+                <p className="text-[10px] font-bold text-[#FF4D8D]">1pm-3pm</p>
+              </div>
+            </div>
+          </div>
         </AnalyticsCard>
 
         {/* Participación */}
         <AnalyticsCard title="Participación" subtitle="Mix del negocio por categoría" delay={0.3}>
           <DonutChart data={PARTICIPATION_SEGMENTS} />
-          <div className="mt-4 pt-3" style={{ borderTop: '1px solid rgba(255, 77, 141, 0.1)' }}>
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] text-[#8F96A3] font-semibold uppercase tracking-wide">Mayor categoría</span>
-              <span className="text-[10px] font-black" style={{ color: '#FF4D8D' }}>Helados · 42%</span>
+          <div className="mt-3 pt-2.5" style={{ borderTop: '1px solid rgba(255, 77, 141, 0.1)' }}>
+            <p className="text-[8px] text-[#8F96A3] font-semibold uppercase mb-2">Top 2 Categorías</p>
+            <div className="space-y-1.5">
+              {[
+                { cat: 'Helados', pct: 42, growth: '+8%' },
+                { cat: 'Bebidas', pct: 23, growth: '+2%' }
+              ].map((item, i) => (
+                <div key={i} className="flex items-center justify-between">
+                  <div className="flex-1 h-1.5 rounded-full bg-slate-100 mr-2">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${item.pct}%` }}
+                      transition={{ delay: 0.35 + i * 0.1, duration: 0.7 }}
+                      className="h-full rounded-full"
+                      style={{ background: PARTICIPATION_COLORS[i] }} />
+                  </div>
+                  <span className="text-[8px] font-bold text-[#2A2A2A] w-12 text-right">{item.pct}%</span>
+                  <span className="text-[8px] font-bold text-emerald-600 w-8 text-right">{item.growth}</span>
+                </div>
+              ))}
             </div>
           </div>
         </AnalyticsCard>
