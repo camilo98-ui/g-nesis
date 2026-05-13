@@ -104,16 +104,7 @@ const MENU_ITEMS = [
   iconColor: 'text-cyan-500',
   textColor: 'text-cyan-700'
 },
-{
-  name: 'PopsyStars',
-  page: 'Rankings',
-  icon: Award,
-  description: 'Top cajeros',
-  bgColor: 'bg-gradient-to-br from-amber-100/90 to-yellow-100/80',
-  iconBg: 'bg-amber-200/60',
-  iconColor: 'text-amber-500',
-  textColor: 'text-amber-700'
-},
+
 {
   name: 'Ruleta Popsy',
   page: 'RoulettePopsy',
@@ -161,18 +152,7 @@ const MENU_ITEMS = [
   textColor: 'text-slate-700',
   requiredRole: 'gerente'
 },
-{
-  name: 'Experiencia Cliente',
-  page: 'CustomerExperience',
-  icon: Sparkles,
-  description: 'Feedback rápido',
-  bgColor: 'bg-gradient-to-br from-purple-100/90 to-fuchsia-100/80',
-  iconBg: 'bg-purple-200/60',
-  iconColor: 'text-purple-500',
-  textColor: 'text-purple-700',
-  isSpecialAction: true,
-  specialAction: 'customerFeedback'
-},
+
 {
   name: 'Ver P&G',
   page: '',
