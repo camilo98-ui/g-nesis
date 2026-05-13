@@ -5,15 +5,16 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import {
   LayoutDashboard, Users, TrendingUp, Activity, Target, Bell,
-  Download, FileText, Lock, Receipt, Snowflake, Settings as SettingsIcon,
-  CalendarDays, LogOut, Sparkles, Trophy, FileSpreadsheet, BarChart3, Clock,
-  ChevronRight, Zap, BarChart2, ArrowUpRight, ArrowDownRight, Minus,
-  Brain, Sun, Moon, Coffee, Send, Cpu, TrendingDown
+  Download, FileText, Snowflake, Settings as SettingsIcon,
+  LogOut, Trophy, FileSpreadsheet, BarChart3, Clock,
+  ChevronRight, BarChart2, ArrowUpRight, ArrowDownRight, Minus,
+  Brain, Sun, Moon, Coffee, Send, Cpu
 } from 'lucide-react';
 import { STORES } from '@/components/StoreSelector';
 import StoreSelector from '@/components/StoreSelector';
 import PremiumSparkline from './PremiumSparkline';
 import ExecutiveAnalyticsPanel from './ExecutiveAnalyticsPanel';
+import ExecutiveKPIStrip from './ExecutiveKPIStrip';
 
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/6a749247d_Capturadepantalla2025-11-251251441.png";
 const MASCOT_IMG = "https://media.base44.com/images/public/69283c2afdca20b432943911/6c55eb1bb_generated_image.png";
@@ -442,12 +443,18 @@ export default function HomeWorkspace({
 
           {/* ── KPI STRIP ── */}
           {!isGerente && (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-7">
-              <KPICard label="Ventas Hoy"      value={salesVal}               change={salesChange} icon={TrendingUp} color="#C21875" chartData={sparkSales}       delay={0}    />
-              <KPICard label="Transacciones"   value={txnVal}                 change={0}           icon={Receipt}   color="#6b7280" chartData={sparkTxn}          delay={0.06} />
-              <KPICard label="Ticket Promedio" value={ticketVal}              change={0}           icon={BarChart2} color="#6b7280" chartData={[5,6,5,7,8,7,8,9]} delay={0.12} />
-              <KPICard label="Cajeros Activos" value={cashiers.length || '—'} change={0}           icon={Users}     color="#6b7280" chartData={[4,4,5,5,5,6,5,6]} delay={0.18} />
-            </div>
+            <ExecutiveKPIStrip
+              latest={latest}
+              prev={prev}
+              salesVal={salesVal}
+              txnVal={txnVal}
+              ticketVal={ticketVal}
+              salesChange={salesChange}
+              cashiers={cashiers}
+              budget={budget}
+              sparkSales={sparkSales}
+              sparkTxn={sparkTxn}
+            />
           )}
 
           {/* ── EXECUTIVE ANALYTICS ── */}
