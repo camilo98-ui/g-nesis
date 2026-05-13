@@ -730,7 +730,7 @@ export default function Home() {
                 </div>
               }
 
-              {selectedRole && selectedRole !== 'gerente' &&
+              {selectedRole &&
               <div className="mb-3">
                   <label className="block text-xs font-semibold text-slate-900 mb-2 text-center">Selecciona tu tienda</label>
                   <div className="max-w-sm mx-auto">
@@ -898,7 +898,7 @@ export default function Home() {
                 }
 
                 {/* Store Selector */}
-                {selectedRole && selectedRole !== 'gerente' &&
+                {selectedRole &&
                 <div className="space-y-1.5">
                     <label className="block text-sm font-semibold text-slate-700">Selecciona tu tienda</label>
                     <StoreSelector selectedStore={pendingStore} onStoreChange={handleStoreSelect} />
