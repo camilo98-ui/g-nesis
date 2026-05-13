@@ -27,8 +27,9 @@ function getGreeting() {
 
 const NAV_ITEMS = [
   { icon: LayoutDashboard, label: 'Tienda',        path: 'Dashboard',          color: '#E91E63', roles: ['lider','embajador','gerente'] },
-  { icon: TrendingUp,      label: 'P&G',           path: 'PYGDashboard',       color: '#059669', roles: ['lider','embajador','gerente'] },
-  { icon: FileText,        label: 'Informe',        path: 'Reports',            color: '#6366f1', roles: ['lider','embajador','gerente'] },
+  { icon: TrendingUp,      label: 'P&G',           path: 'PYGDashboard',       color: '#059669', roles: ['gerente'] },
+  { icon: TrendingUp,      label: 'P&G Tienda',    path: null,                 color: '#059669', onClick: 'onShowPYGModal', roles: ['lider','embajador'] },
+  { icon: FileText,        label: 'Informe',        path: 'SalesReportView',    color: '#6366f1', roles: ['lider','embajador','gerente'] },
   { icon: Clock,           label: 'Txn por hora',  path: 'HourlyTransactions', color: '#8b5cf6', roles: ['lider','embajador','gerente'] },
   { icon: BarChart3,       label: 'Participación', path: 'SalesReportView',    color: '#f59e0b', roles: ['lider','embajador','gerente'] },
   { icon: Snowflake,       label: 'Mapa Nevera',   path: 'FreezerMap',         color: '#06b6d4', roles: ['lider','embajador','gerente'] },
