@@ -86,6 +86,26 @@ export default function Budget() {
     enabled: !!selectedStore
   });
 
+  const { data: allStoresData = [] } = useQuery({
+    queryKey: ['allStoresComparative'],
+    queryFn: async () => {
+      const storePromises = STORES.map(async (store) => {
+        try {
+          const sales = await base44.entities.DailySales.filter({ store_id: store.code }).catch(() => []);
+          const last30Days = sales.slice(-30);
+          const avgDaily = last30Days.reduce((sum, s) => sum + (s.total_sales || 0), 0) / (last30Days.length || 1);
+          const avgTickets = last30Days.reduce((sum, s) => sum + (s.total_tickets || 0), 0) / (last30Days.length || 1);
+          const avgTransactions = last30Days.reduce((sum, s) => sum + (s.total_transactions || 0), 0) / (last30Days.length || 1);
+          return { storeName: store.name, storeCode: store.code, avgDaily, avgTickets, avgTransactions };
+        } catch {
+          return null;
+        }
+      });
+      const results = await Promise.all(storePromises);
+      return results.filter(Boolean).sort((a, b) => b.avgDaily - a.avgDaily);
+    }
+  });
+
   const selectedDailyBudget = dailyBudgets.find(db => {
     const dbDate = db.date?.split('T')[0] || db.date;
     return dbDate === selectedDate;
@@ -125,85 +145,90 @@ export default function Budget() {
 
         {selectedStore ? (
           <div className="space-y-6">
-            {/* Analytics Section - Ventas vs Presupuesto */}
-            {salesData.length > 0 && budgets.length > 0 && (
+            {/* Comparative Benchmark - All Stores */}
+            {allStoresData.length > 0 && (
               <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-                <Card className="bg-gradient-to-br from-slate-900 to-slate-800 border-slate-700 shadow-2xl overflow-hidden">
+                <Card className="bg-gradient-to-br from-indigo-950 via-slate-900 to-slate-800 border-indigo-700 shadow-2xl overflow-hidden">
                   <CardHeader className="pb-4">
                     <CardTitle className="flex items-center gap-3 text-white text-lg">
-                      <div className="p-2 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-xl">
+                      <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl">
                         <BarChart3 className="w-5 h-5 text-white" />
                       </div>
-                      Análisis Dinámico: Ventas vs Presupuesto
+                      Ranking de Tiendas - Promedio Últimos 30 Días
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
-                      {/* KPI Cards */}
-                      <motion.div className="bg-gradient-to-br from-emerald-500/10 to-emerald-600/10 border border-emerald-500/30 rounded-2xl p-4" whileHover={{ scale: 1.02 }}>
-                        <p className="text-emerald-300 text-sm font-medium">Ventas Hoy</p>
-                        <p className="text-3xl font-black text-emerald-400 mt-2">
-                          ${(salesData[salesData.length - 1]?.total_sales / 1000000).toFixed(2)}M
-                        </p>
-                        <p className="text-emerald-300/70 text-xs mt-2">+{((salesData[salesData.length - 1]?.total_sales - (salesData[salesData.length - 2]?.total_sales || 0)) / (salesData[salesData.length - 2]?.total_sales || 1) * 100).toFixed(1)}% vs ayer</p>
-                      </motion.div>
-
-                      <motion.div className="bg-gradient-to-br from-blue-500/10 to-blue-600/10 border border-blue-500/30 rounded-2xl p-4" whileHover={{ scale: 1.02 }}>
-                        <p className="text-blue-300 text-sm font-medium">Promedio 7d</p>
-                        <p className="text-3xl font-black text-blue-400 mt-2">
-                          ${(salesData.slice(-7).reduce((s, d) => s + d.total_sales, 0) / 7 / 1000000).toFixed(2)}M
-                        </p>
-                        <p className="text-blue-300/70 text-xs mt-2">Rendimiento tendencial</p>
-                      </motion.div>
-
-                      <motion.div className="bg-gradient-to-br from-purple-500/10 to-purple-600/10 border border-purple-500/30 rounded-2xl p-4" whileHover={{ scale: 1.02 }}>
-                        <p className="text-purple-300 text-sm font-medium">Gap Presupuesto</p>
-                        <p className="text-3xl font-black text-purple-400 mt-2">
-                          {budgets[0]?.sales_gap ? `$${(budgets[0].sales_gap / 1000000).toFixed(2)}M` : '-'}
-                        </p>
-                        <p className="text-purple-300/70 text-xs mt-2">Vs meta mensual</p>
-                      </motion.div>
-                    </div>
-
-                    {/* Chart Area */}
-                    <ResponsiveContainer width="100%" height={300}>
-                      <ComposedChart data={salesData.slice(-15)} margin={{ top: 10, right: 30, left: 0, bottom: 5 }}>
+                    <ResponsiveContainer width="100%" height={350}>
+                      <BarChart data={allStoresData} margin={{ top: 20, right: 30, left: 100, bottom: 5 }}>
                         <defs>
-                          <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.8}/>
-                            <stop offset="95%" stopColor="#06b6d4" stopOpacity={0.1}/>
+                          <linearGradient id="gradVentas" x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="0%" stopColor="#818cf8" stopOpacity={1}/>
+                            <stop offset="100%" stopColor="#c4b5fd" stopOpacity={1}/>
                           </linearGradient>
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                         <XAxis 
-                          dataKey="date" 
+                          dataKey="storeName" 
                           stroke="#9ca3af"
-                          tick={{ fontSize: 12 }}
-                          tickFormatter={d => new Date(d).toLocaleDateString('es-CO', { month: 'short', day: 'numeric' })}
+                          tick={{ fontSize: 11 }}
+                          width={100}
                         />
                         <YAxis stroke="#9ca3af" tick={{ fontSize: 12 }} />
                         <Tooltip 
                           contentStyle={{ 
                             backgroundColor: '#1f2937', 
-                            border: '1px solid #374151',
+                            border: '1px solid #4f46e5',
                             borderRadius: '8px',
                             color: '#f3f4f6'
                           }}
                           formatter={(value) => `$${(value / 1000000).toFixed(2)}M`}
-                          labelFormatter={label => new Date(label).toLocaleDateString('es-CO')}
                         />
-                        <Legend wrapperStyle={{ color: '#d1d5db' }} />
-                        <Area 
-                          type="monotone" 
-                          dataKey="total_sales" 
-                          fillOpacity={1} 
-                          fill="url(#colorSales)"
-                          stroke="#06b6d4"
-                          strokeWidth={2}
-                          name="Ventas"
+                        <Bar 
+                          dataKey="avgDaily" 
+                          fill="url(#gradVentas)"
+                          radius={[8, 8, 0, 0]}
+                          name="Venta Diaria Promedio"
                         />
-                      </ComposedChart>
+                      </BarChart>
                     </ResponsiveContainer>
+
+                    {/* Store Rankings Table */}
+                    <div className="mt-6 space-y-2">
+                      {allStoresData.map((store, idx) => {
+                        const isSelected = store.storeCode === selectedStore;
+                        const topColor = idx === 0 ? 'from-amber-500/20 to-amber-600/10 border-amber-500/50' : idx === 1 ? 'from-slate-500/20 to-slate-600/10 border-slate-500/50' : idx === 2 ? 'from-orange-500/20 to-orange-600/10 border-orange-500/50' : 'from-indigo-500/10 to-indigo-600/10 border-indigo-500/30';
+                        const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : '';
+                        return (
+                          <motion.div 
+                            key={store.storeCode}
+                            className={`bg-gradient-to-r ${topColor} border rounded-xl p-3 flex items-center justify-between ${isSelected ? 'ring-2 ring-indigo-400' : ''}`}
+                            whileHover={{ scale: 1.02 }}
+                          >
+                            <div className="flex items-center gap-3">
+                              <span className="text-xl">{medal}</span>
+                              <div>
+                                <p className="text-white font-semibold">{store.storeName}</p>
+                                <p className="text-gray-400 text-xs">{store.storeCode}</p>
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-3 gap-4 text-right">
+                              <div>
+                                <p className="text-indigo-300 text-xs">Venta/día</p>
+                                <p className="text-white font-bold">${(store.avgDaily / 1000000).toFixed(2)}M</p>
+                              </div>
+                              <div>
+                                <p className="text-purple-300 text-xs">Tickets/día</p>
+                                <p className="text-white font-bold">{Math.round(store.avgTickets)}</p>
+                              </div>
+                              <div>
+                                <p className="text-blue-300 text-xs">Trans/día</p>
+                                <p className="text-white font-bold">{Math.round(store.avgTransactions)}</p>
+                              </div>
+                            </div>
+                          </motion.div>
+                        );
+                      })}
+                    </div>
                   </CardContent>
                 </Card>
               </motion.div>
