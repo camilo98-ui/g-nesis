@@ -1195,6 +1195,7 @@ export default function Home() {
             }} />
           
       <div className="max-w-5xl mx-auto px-4 py-4 relative z-10">
+        <>
 
         {/* Header */}
         <div className="text-center mb-6">
@@ -1609,8 +1610,8 @@ export default function Home() {
           onClose={() => setShowPYGModal(false)} />
         }
       </AnimatePresence>
-      </div>
       </>
+      </div>
     </Suspense>
   );
 }
