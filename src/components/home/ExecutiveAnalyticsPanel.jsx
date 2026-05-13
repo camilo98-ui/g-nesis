@@ -429,110 +429,112 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
 
       
 
-      {/* ── ROW 1: Store Rankings ── */}
+      {/* ── ROW 1: Tendencia de Ventas + Matriz de Desempeño ── */}
       <motion.div 
-        className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4"
+        className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-4"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3, staggerChildren: 0.1 }}>
 
-        {/* Ranking de Tiendas por Ventas */}
+        {/* Tendencia de Ventas con Proyección */}
         <AnalyticsCard
-          title="Top Tiendas"
-          subtitle="Ranking por ventas últimos 30 días"
-          delay={0.18}>
+          title="Tendencia de Ventas"
+          subtitle="Últimos 30 días + proyección futura"
+          delay={0.18}
+          colSpan="lg:col-span-3">
           
-          <div className="space-y-3">
-            {[
-              { rank: 1, name: 'BTA 11', sales: 45200000, compliance: 92 },
-              { rank: 2, name: 'BTA 08', sales: 38900000, compliance: 85 },
-              { rank: 3, name: 'BTA 15', sales: 36700000, compliance: 78 }
-            ].map((store, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, x: -15 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.25 + i * 0.08 }}
-                className="flex items-center gap-3 p-3 rounded-lg group cursor-pointer"
-                style={{ background: 'rgba(255, 77, 141, 0.04)' }}>
-                
-                <div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-black flex-shrink-0"
-                  style={{
-                    background: i === 0 ? 'linear-gradient(135deg, #FF4D8D, #FF7FA5)' : `rgba(255, 77, 141, ${0.1 + i * 0.05})`,
-                    color: i === 0 ? '#fff' : '#FF4D8D'
-                  }}>
-                  {i + 1}
-                </div>
-                
-                <div className="flex-1 min-w-0">
-                  <p className="text-[11px] font-semibold text-[#2A2A2A]">{store.name}</p>
-                  <p className="text-[9px] text-[#8F96A3] font-medium">{fmt(store.sales)}</p>
-                </div>
-                
-                <div className="text-right flex-shrink-0">
-                  <p className="text-[10px] font-bold" style={{ color: store.compliance >= 85 ? '#10b981' : store.compliance >= 70 ? '#f59e0b' : '#ef4444' }}>
-                    {store.compliance}%
-                  </p>
-                </div>
-              </motion.div>
-            ))}
+          {hasSalesData ? (
+            <ResponsiveContainer width="100%" height={160}>
+              <ComposedChart data={sorted30} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
+                <defs>
+                  <linearGradient id="ventasGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#FF4D8D" stopOpacity="0.35" />
+                    <stop offset="100%" stopColor="#FF4D8D" stopOpacity="0" />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="0" stroke="rgba(255, 77, 141, 0.08)" vertical={false} />
+                <XAxis dataKey="date" tick={{ fontSize: 7, fill: '#8F96A3' }} axisLine={false} tickLine={false} />
+                <YAxis hide />
+                <Tooltip content={<SalesTooltip />} />
+                <Area type="monotone" dataKey="ventas" stroke="#FF4D8D" strokeWidth={2.5} fill="url(#ventasGrad)" dot={false} />
+                <Line type="monotone" dataKey="proyeccion" stroke="#FFB4C9" strokeWidth={2} strokeDasharray="5,5" dot={false} />
+              </ComposedChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-[160px] flex items-center justify-center">
+              <p className="text-[11px] text-[#8F96A3]">Sin datos disponibles</p>
+            </div>
+          )}
+          
+          <div className="flex gap-6 mt-4 text-[10px]">
+            <div className="flex items-center gap-2">
+              <div className="w-2.5 h-2.5 rounded-full" style={{ background: '#FF4D8D' }} />
+              <span className="text-[#8F96A3]">Ventas Real</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2.5 h-2.5 rounded-full" style={{ background: '#FFB4C9' }} />
+              <span className="text-[#8F96A3]">Proyección</span>
+            </div>
           </div>
         </AnalyticsCard>
 
-        {/* Benchmarking de Métricas */}
+        {/* Matriz de Desempeño por Tienda */}
         <AnalyticsCard
-          title="Benchmarking"
-          subtitle="Promedios vs objetivo"
-          delay={0.22}>
+          title="Matriz KPI"
+          subtitle="Desempeño tiendas en tiempo real"
+          delay={0.22}
+          colSpan="lg:col-span-2">
           
-          <div className="space-y-4">
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[9px] font-semibold text-[#8F96A3] uppercase">Ticket Promedio</span>
-                <span className="text-[11px] font-bold text-[#FF4D8D]">$52.4K</span>
-              </div>
-              <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+          <div className="space-y-2.5">
+            {[
+              { name: 'BTA 11', sales: 92, ticket: 88, conversion: 86, trend: 'up' },
+              { name: 'BTA 08', sales: 85, ticket: 79, conversion: 72, trend: 'flat' },
+              { name: 'BTA 15', sales: 78, ticket: 74, conversion: 68, trend: 'down' }
+            ].map((store, i) => {
+              const avgScore = Math.round((store.sales + store.ticket + store.conversion) / 3);
+              const statusColor = avgScore >= 85 ? '#10b981' : avgScore >= 70 ? '#f59e0b' : '#ef4444';
+              
+              return (
                 <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: '78%' }}
-                  transition={{ delay: 0.3, duration: 0.8 }}
-                  className="h-full rounded-full"
-                  style={{ background: 'linear-gradient(90deg, #FF4D8D, #FF7FA5)' }} />
-              </div>
-              <p className="text-[8px] text-[#8F96A3] mt-1">Objetivo: $67K</p>
-            </div>
-            
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[9px] font-semibold text-[#8F96A3] uppercase">Tasa de Conversión</span>
-                <span className="text-[11px] font-bold text-[#FF4D8D]">68%</span>
-              </div>
-              <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: '68%' }}
-                  transition={{ delay: 0.35, duration: 0.8 }}
-                  className="h-full rounded-full"
-                  style={{ background: 'linear-gradient(90deg, #FF7FA5, #FFB4C9)' }} />
-              </div>
-              <p className="text-[8px] text-[#8F96A3] mt-1">Objetivo: 75%</p>
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[9px] font-semibold text-[#8F96A3] uppercase">Ventas por Sqm</span>
-                <span className="text-[11px] font-bold text-[#FF4D8D]">$847K</span>
-              </div>
-              <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: '88%' }}
-                  transition={{ delay: 0.4, duration: 0.8 }}
-                  className="h-full rounded-full"
-                  style={{ background: 'linear-gradient(90deg, #FF4D8D, #FF7FA5)' }} />
-              </div>
-              <p className="text-[8px] text-[#8F96A3] mt-1">Objetivo: $960K</p>
-            </div>
+                  key={i}
+                  initial={{ opacity: 0, x: -12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.28 + i * 0.06 }}
+                  className="p-2.5 rounded-xl"
+                  style={{ background: `rgba(255, 77, 141, 0.03)` }}>
+                  
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[10px] font-semibold text-[#2A2A2A]">{store.name}</span>
+                    <div className="flex items-center gap-1">
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center text-[9px] font-bold"
+                        style={{ background: statusColor + '20', color: statusColor }}>
+                        {avgScore}%
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {[
+                      { label: 'S', val: store.sales },
+                      { label: 'T', val: store.ticket },
+                      { label: 'C', val: store.conversion }
+                    ].map((metric, j) => (
+                      <div key={j} className="relative">
+                        <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${metric.val}%` }}
+                            transition={{ delay: 0.35 + j * 0.05, duration: 0.6 }}
+                            className="h-full rounded-full"
+                            style={{ background: `rgb(255, ${77 + metric.val}, ${141 + metric.val * 0.3})` }} />
+                        </div>
+                        <span className="text-[7px] font-bold text-[#8F96A3] absolute -top-3.5 left-0">{metric.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
         </AnalyticsCard>
       </motion.div>
