@@ -433,77 +433,77 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
           </div>
         </AnalyticsCard>
 
-        {/* Top Cajeros */}
-        <AnalyticsCard title="Equipo Activo" subtitle={`${cashiers.length} colaboradores`} delay={0.34}>
-          {cashiers.length > 0 ?
-          <div className="space-y-2.5">
-              {cashiers.slice(0, 5).map((c, i) => {
-              const barW = 85 - i * 14;
-              return (
-                <div key={c.id} className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-[9px] font-bold transition-all"
-                  style={{
-                    background: i === 0 ? 'linear-gradient(135deg, rgba(255, 77, 141, 0.15), rgba(255, 182, 201, 0.1))' : 'rgba(255, 182, 201, 0.08)',
-                    color: i === 0 ? '#FF4D8D' : '#FFB6C9',
-                    border: i === 0 ? '1px solid rgba(255, 77, 141, 0.2)' : '1px solid rgba(255, 182, 201, 0.1)'
-                  }}>
-                      {i + 1}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[11px] font-semibold text-[#2A2A2A] truncate">{c.name}</p>
-                      <div className="mt-1.5 h-1.5 rounded-full bg-slate-100 overflow-hidden">
-                        <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${barW}%` }}
-                        transition={{ delay: 0.5 + i * 0.1, duration: 0.8 }}
-                        className="h-full rounded-full transition-all"
-                        style={{
-                          background: i === 0 ?
-                          'linear-gradient(90deg, #FF4D8D, #FF7FA5)' :
-                          'linear-gradient(90deg, rgba(255, 77, 141, 0.3), rgba(255, 182, 201, 0.2))',
-                          boxShadow: i === 0 ? '0 0 12px rgba(255, 77, 141, 0.4)' : 'none'
-                        }} />
+        {/* Mejores Días de Venta */}
+        <AnalyticsCard title="Mejores Días" subtitle="Top días de venta del mes actual" delay={0.34}>
+          {todaySales && todaySales.length > 0 ? (() => {
+            const currentMonth = new Date().getMonth();
+            const currentYear = new Date().getFullYear();
+            const thisMonthSales = todaySales.filter(d => {
+              const date = new Date(d.date);
+              return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+            }).sort((a, b) => (b.total_sales || 0) - (a.total_sales || 0)).slice(0, 5);
+            
+            const maxSales = Math.max(...thisMonthSales.map(d => d.total_sales || 0), 1);
+            
+            return thisMonthSales.length > 0 ? (
+              <div className="space-y-3">
+                {thisMonthSales.map((d, i) => {
+                  const salesPercent = (d.total_sales / maxSales) * 100;
+                  const dateObj = new Date(d.date);
+                  const dateStr = dateObj.toLocaleDateString('es', { day: '2-digit', month: 'short' });
+                  return (
+                    <motion.div
+                      key={d.id}
+                      initial={{ opacity: 0, x: -15 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.5 + i * 0.06 }}
+                      className="group">
+                      <div className="flex items-center gap-3 mb-1.5">
+                        <div className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-black flex-shrink-0"
+                          style={{
+                            background: i === 0 ? 'linear-gradient(135deg, #FF4D8D, #FF7FA5)' : `rgba(255, 77, 141, ${0.08 + i * 0.02})`,
+                            color: i === 0 ? '#fff' : '#FF4D8D',
+                            boxShadow: i === 0 ? '0 0 12px rgba(255, 77, 141, 0.4)' : 'none'
+                          }}>
+                          {i + 1}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[11px] font-semibold text-[#2A2A2A]">{dateStr}</p>
+                          <p className="text-[9px] text-[#8F96A3] font-medium">{(d.total_transactions || 0).toLocaleString('es-CO')} txn</p>
+                        </div>
+                        <div className="text-right flex-shrink-0">
+                          <p className="text-[11px] font-black tabular-nums" style={{ color: '#FF4D8D' }}>
+                            {fmt(d.total_sales)}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                    <span className="text-[9px] text-[#FFB6C9] font-medium flex-shrink-0 capitalize">{c.position || 'cajero'}</span>
-                  </div>);
-
-            })}
-            </div> :
-
-          <div className="flex flex-col items-center justify-center h-20 gap-2">
-              <p className="text-[11px] text-[#8F96A3] font-medium">Sin cajeros registrados</p>
-            </div>
-          }
-
-          {/* Budget compliance bar */}
-          {compliance !== null &&
-          <div className="mt-4 pt-3" style={{ borderTop: '1px solid rgba(255, 77, 141, 0.1)' }}>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] text-[#8F96A3] font-semibold uppercase tracking-wide">Cumplimiento PPT</span>
-                <span className="text-[11px] font-black tabular-nums"
-              style={{ color: compliance >= 80 ? '#10B981' : compliance >= 60 ? '#F59E0B' : '#FF4D8D' }}>
-                  {compliance}%
-                </span>
+                      <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${salesPercent}%` }}
+                          transition={{ delay: 0.55 + i * 0.08, duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
+                          className="h-full rounded-full transition-all"
+                          style={{
+                            background: i === 0 
+                              ? 'linear-gradient(90deg, #FF4D8D, #FF7FA5)' 
+                              : `linear-gradient(90deg, rgba(255, 77, 141, ${0.4 - i * 0.08}), rgba(255, 182, 201, ${0.3 - i * 0.06}))`,
+                            boxShadow: i === 0 ? '0 0 12px rgba(255, 77, 141, 0.4)' : 'none'
+                          }} />
+                      </div>
+                    </motion.div>
+                  );
+                })}
               </div>
-              <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
-                <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${compliance}%` }}
-                transition={{ delay: 0.5, duration: 1, ease: [0.23, 1, 0.32, 1] }}
-                className="h-full rounded-full"
-                style={{
-                  background: compliance >= 80 ?
-                  'linear-gradient(90deg, #10B981, #34D399)' :
-                  compliance >= 60 ?
-                  'linear-gradient(90deg, #F59E0B, #FBBF24)' :
-                  'linear-gradient(90deg, #FF4D8D, #FF7FA5)',
-                  boxShadow: `0 0 12px ${compliance >= 80 ? 'rgba(16, 185, 129, 0.4)' : compliance >= 60 ? 'rgba(245, 158, 11, 0.4)' : 'rgba(255, 77, 141, 0.4)'}`
-                }} />
-              
+            ) : (
+              <div className="flex flex-col items-center justify-center h-20 gap-2">
+                <p className="text-[11px] text-[#8F96A3] font-medium">Sin registros en el mes actual</p>
               </div>
+            );
+          })() : (
+            <div className="flex flex-col items-center justify-center h-20 gap-2">
+              <p className="text-[11px] text-[#8F96A3] font-medium">Sin datos de ventas</p>
             </div>
-          }
+          )}
         </AnalyticsCard>
       </div>
     </motion.div>);
