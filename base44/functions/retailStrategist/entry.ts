@@ -46,6 +46,22 @@ Tu respuesta debe sentir como un verdadero sistema de BI de grandes retailers, N
 
 async function invokeAI(prompt, context = '') {
   try {
+    const systemWithEnforcement = `${SYSTEM_PROMPT}
+
+INSTRUCCIÓN CRÍTICA PARA CADA RESPUESTA:
+Tu respuesta DEBE contener OBLIGATORIAMENTE:
+1. Mínimo 3-5 números o porcentajes específicos
+2. Cálculos o proyecciones matemáticas
+3. Comparaciones cuantitativas
+4. Estimaciones de impacto en %, $ o unidades
+
+Si la pregunta es genérica SIN datos de tienda, IGUALMENTE debes dar ejemplos numéricos realistas basados en benchmarks retail estándar.
+NUNCA responder sin números. Prefiere decir "según benchmarks típicos, X %" si no tienes datos específicos.`;
+
+    const userMessage = context 
+      ? `DATOS DISPONIBLES:\n${context}\n\nPregunta: ${prompt}\n\n⚠️ CRÍTICO: Incluye números, porcentajes y cálculos. No responder sin métricas cuantitativas.`
+      : `${prompt}\n\n⚠️ CRÍTICO: Aunque no hay datos de tienda, responde CON números y benchmarks. Usa proyecciones y estimaciones realistas del retail colombiano.`;
+
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -55,11 +71,11 @@ async function invokeAI(prompt, context = '') {
       body: JSON.stringify({
         model: 'gpt-4',
         messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
-          { role: 'user', content: context ? `CONTEXTO DATOS:\n${context}\n\nPregunta del usuario: ${prompt}\n\nIMPORTANTE: Tu respuesta DEBE incluir números, porcentajes, cálculos específicos y métricas concretas. Sé muy específico con los datos.` : `${prompt}\n\nRecuerda: SIEMPRE incluye números, porcentajes y cálculos específicos.` }
+          { role: 'system', content: systemWithEnforcement },
+          { role: 'user', content: userMessage }
         ],
-        temperature: 0.6,
-        max_tokens: 1000
+        temperature: 0.5,
+        max_tokens: 1200
       })
     });
 
