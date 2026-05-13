@@ -263,10 +263,10 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
       className="mb-7">
       
       {/* Section header */}
-      <div className="flex items-center gap-3 mb-6 hidden">
-        <p className="text-[10px] font-black text-[#2A2A2A] uppercase tracking-[0.16em] letter-spacing">📊 Analytics</p>
-        <div className="flex-1 h-px" style={{ background: 'linear-gradient(90deg, rgba(255, 77, 141, 0.2), transparent)' }} />
-      </div>
+      
+
+
+      
 
       {/* ── ROW 1: Sales Trend + EBITDA ── */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-4">
