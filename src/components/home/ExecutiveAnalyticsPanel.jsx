@@ -1,8 +1,8 @@
 import React, { useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Line, LineChart,
+  PieChart, Pie, Cell, ComposedChart
 } from 'recharts';
 import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
 
@@ -168,25 +168,35 @@ function DonutChart({ data }) {
 
 // ── MAIN COMPONENT ────────────────────────────────────────────────────────────
 export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], cashiers = [] }) {
-  // Build 30-day sales trend from todaySales
+  // Build 30-day sales trend from todaySales with projection
   const sorted30 = useMemo(() => {
-    return [...todaySales]
+    const daily = [...todaySales]
       .sort((a, b) => new Date(a.date) - new Date(b.date))
-      .slice(-30)
-      .map(d => ({
-        date: new Date(d.date).toLocaleDateString('es', { day: 'numeric', month: 'short' }),
-        ventas: d.total_sales || 0,
-        txn: d.total_transactions || 0,
-      }));
+      .slice(-30);
+    
+    const baseSales = daily.length > 0 ? daily[0].total_sales || 2000000 : 2000000;
+    const growthRate = 0.015; // 1.5% daily growth
+    
+    return daily.map((d, i) => ({
+      date: new Date(d.date).toLocaleDateString('es', { day: 'numeric', month: 'short' }),
+      ventas: d.total_sales || baseSales,
+      proyeccion: Math.round(baseSales * Math.pow(1 + growthRate, i)),
+      txn: d.total_transactions || 0,
+    }));
   }, [todaySales]);
 
-  // EBITDA / margin trend (simulated from sales data with ~35% margin assumption)
+  // EBITDA acumulado trend
   const ebitdaData = useMemo(() => {
-    return sorted30.map(d => ({
-      date: d.date,
-      ebitda: Math.round(d.ventas * 0.34),
-      margen: d.ventas > 0 ? 34 : 0,
-    }));
+    let accumulated = 0;
+    return sorted30.map(d => {
+      accumulated += Math.round(d.ventas * 0.34);
+      return {
+        date: d.date,
+        ebitda: accumulated,
+        margen: d.ventas > 0 ? 34 : 0,
+        dailyEbitda: Math.round(d.ventas * 0.34),
+      };
+    });
   }, [sorted30]);
 
   // Hourly heatmap data — mock realistic pattern
@@ -239,52 +249,35 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
       {/* ── ROW 1: Sales Trend + EBITDA ── */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-4">
 
-        {/* Sales area chart */}
+        {/* Sales vs Projection chart */}
         <AnalyticsCard
-          title="Tendencia de Ventas"
+          title="Ventas vs Proyección"
           subtitle={hasSalesData ? `Últimos ${sorted30.length} registros` : 'Sin datos aún'}
           delay={0.18}
           colSpan="lg:col-span-3"
         >
-          <div className="flex items-center gap-6 mb-4">
+          <div className="flex items-center gap-6 mb-4 relative">
             <div>
               <p className="text-[22px] font-black text-slate-800 tabular-nums tracking-tight leading-none">
                 {fmt(today?.total_sales)}
               </p>
-              <div className="flex items-center gap-1.5 mt-1">
-                <Delta val={salesDelta} />
-                <span className="text-[10px] text-slate-300">vs ayer</span>
-              </div>
+              <p className="text-[11px] text-slate-400 mt-1 font-medium">Ventas actuales</p>
             </div>
             <div className="h-8 w-px bg-slate-100" />
             <div>
-              <p className="text-[16px] font-bold text-slate-600 tabular-nums leading-none">
-                {today?.total_transactions || '—'}
+              <p className="text-[16px] font-bold text-slate-500 tabular-nums leading-none">
+                {fmt(Math.round(today?.total_sales * 1.05) || 0)}
               </p>
-              <div className="flex items-center gap-1.5 mt-1">
-                <Delta val={txnDelta} />
-                <span className="text-[10px] text-slate-300">transacciones</span>
-              </div>
+              <p className="text-[11px] text-slate-400 mt-1 font-medium">Proyección EOD</p>
             </div>
-            {compliance !== null && (
-              <>
-                <div className="h-8 w-px bg-slate-100" />
-                <div>
-                  <p className="text-[16px] font-bold leading-none" style={{ color: compliance >= 80 ? '#059669' : compliance >= 60 ? '#d97706' : '#e11d48' }}>
-                    {compliance}%
-                  </p>
-                  <p className="text-[10px] text-slate-300 mt-1">cumpl. PPT</p>
-                </div>
-              </>
-            )}
           </div>
 
           {hasSalesData ? (
             <ResponsiveContainer width="100%" height={100}>
-              <AreaChart data={sorted30} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
+              <ComposedChart data={sorted30} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
                 <defs>
                   <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#C21875" stopOpacity="0.22" />
+                    <stop offset="0%" stopColor="#C21875" stopOpacity="0.2" />
                     <stop offset="100%" stopColor="#C21875" stopOpacity="0" />
                   </linearGradient>
                 </defs>
@@ -292,30 +285,45 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
                 <XAxis dataKey="date" tick={{ fontSize: 8, fill: '#cbd5e1', fontWeight: 400 }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
                 <YAxis hide />
                 <Tooltip content={<SalesTooltip />} />
+                {/* Ventas real (solid) */}
                 <Area type="monotone" dataKey="ventas" stroke="#C21875" strokeWidth={2.5}
-                  fill="url(#salesGrad)" dot={false} isAnimationActive={false}
-                  activeDot={{ r: 5, strokeWidth: 0, fill: '#C21875' }} />
-              </AreaChart>
+                  fill="url(#salesGrad)" dot={false} isAnimationActive={false} />
+                {/* Proyección (dashed) */}
+                <Line type="monotone" dataKey="proyeccion" stroke="#b0b8c0" strokeWidth={2} strokeDasharray="5 5"
+                  dot={false} isAnimationActive={false} />
+              </ComposedChart>
             </ResponsiveContainer>
           ) : (
             <div className="h-[100px] flex items-center justify-center">
               <p className="text-[11px] text-slate-300 font-medium">Registra ventas para ver la tendencia</p>
             </div>
           )}
+          
+          {/* Legend */}
+          <div className="flex items-center gap-4 mt-3 text-[10px]">
+            <div className="flex items-center gap-2">
+              <div className="w-2.5 h-0.5 rounded-full" style={{ background: '#C21875' }} />
+              <span className="text-slate-500 font-medium">Ventas</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2.5 h-0.5 rounded-full" style={{ background: '#b0b8c0', backgroundImage: 'repeating-linear-gradient(90deg, #b0b8c0 0px, #b0b8c0 5px, transparent 5px, transparent 10px)' }} />
+              <span className="text-slate-500 font-medium">Proyección</span>
+            </div>
+          </div>
         </AnalyticsCard>
 
-        {/* EBITDA / Margin */}
+        {/* EBITDA Acumulado */}
         <AnalyticsCard
-          title="EBITDA Est."
+          title="EBITDA (Acumulado)"
           subtitle="Margen operativo ~34%"
           delay={0.22}
           colSpan="lg:col-span-2"
         >
           <div className="mb-4">
             <p className="text-[22px] font-black text-slate-800 tabular-nums tracking-tight leading-none">
-              {fmt(today?.total_sales ? Math.round(today.total_sales * 0.34) : null)}
+              {fmt(ebitdaData[ebitdaData.length - 1]?.ebitda || 0)}
             </p>
-            <p className="text-[10px] text-slate-300 mt-1">estimado hoy · {today?.total_sales ? '34% de ventas' : 'sin datos'}</p>
+            <p className="text-[10px] text-slate-300 mt-1">acumulado período · 34% margen</p>
           </div>
 
           {hasSalesData ? (
