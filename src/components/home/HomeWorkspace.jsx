@@ -74,7 +74,7 @@ function KPICard({ label, value, change, icon: Icon, color, chartData, delay = 0
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
       whileHover={{ y: -4, transition: { duration: 0.2 } }}
-      className="relative overflow-hidden rounded-2xl p-4 cursor-default"
+      className="relative overflow-hidden rounded-2xl p-3 lg:p-4 cursor-default"
       style={{
         background: 'rgba(255,255,255,0.75)',
         backdropFilter: 'blur(24px)',
@@ -375,29 +375,23 @@ export default function HomeWorkspace({
       <main className="flex-1 min-w-0 flex overflow-hidden" style={{ height: '100vh' }}>
 
           {/* CENTER CONTENT — scrollable */}
-          <div className="flex-1 min-w-0 overflow-y-auto p-4 lg:p-6">
+          <div className="flex-1 min-w-0 overflow-y-auto p-3 lg:p-6">
 
-            {/* TOP BAR — fixed feel via sticky */}
+            {/* TOP BAR */}
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4 }}
-              className="flex items-center justify-between mb-5 gap-3"
+              className="mb-5"
             >
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 mb-0.5">
-                  <GreetIcon className="w-4 h-4 flex-shrink-0" style={{ color: greeting.color }} />
-                  <h1 className="text-base lg:text-lg font-black text-slate-800 truncate">
-                    {greeting.text}
-                  </h1>
-                </div>
-                <p className="text-[11px] text-slate-400 font-medium truncate">
-                  {isGerente ? 'Visión ejecutiva · Todas las tiendas' : `${storeName} · Cockpit operacional`}
-                </p>
-              </div>
-              <div className="flex items-center gap-2 flex-shrink-0">
+              {/* Greeting row */}
+              <div className="flex items-center gap-2 mb-1">
+                <GreetIcon className="w-4 h-4 flex-shrink-0" style={{ color: greeting.color }} />
+                <h1 className="text-base lg:text-lg font-black text-slate-800 truncate">
+                  {greeting.text}
+                </h1>
                 {isGerente && (
-                  <div className="hidden sm:flex items-center gap-1.5">
+                  <div className="hidden sm:flex items-center gap-1.5 ml-auto">
                     {[
                       { label: 'PPT', icon: FileSpreadsheet, onClick: onShowBudgetImporter, color: '#10b981' },
                       { label: 'KPIs', icon: BarChart3, onClick: onShowKpisUploader, color: '#6366f1' },
@@ -411,8 +405,14 @@ export default function HomeWorkspace({
                     ))}
                   </div>
                 )}
+              </div>
+              {/* Subtitle + store selector row */}
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-[11px] text-slate-400 font-medium truncate min-w-0">
+                  {isGerente ? 'Visión ejecutiva · Todas las tiendas' : 'Cockpit operacional'}
+                </p>
                 {!isGerente && (
-                  <div className="w-36 lg:w-44 flex-shrink-0">
+                  <div className="flex-shrink-0 max-w-[180px] w-full">
                     <StoreSelector selectedStore={selectedStore} onStoreChange={onStoreChange} />
                   </div>
                 )}
@@ -421,7 +421,7 @@ export default function HomeWorkspace({
 
             {/* ── KPI STRIP ── */}
             {!isGerente && (
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 mb-5">
                 <KPICard label="Ventas Hoy"      value={salesVal}               change={salesChange} icon={TrendingUp} color="#C21875" chartData={sparkSales}       delay={0}    />
                 <KPICard label="Transacciones"   value={txnVal}                 change={0}           icon={Receipt}   color="#A855F7" chartData={sparkTxn}          delay={0.06} />
                 <KPICard label="Ticket Promedio" value={ticketVal}              change={0}           icon={BarChart2} color="#6366f1" chartData={[5,6,5,7,8,7,8,9]} delay={0.12} />
@@ -447,7 +447,7 @@ export default function HomeWorkspace({
                   <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" style={{ boxShadow: '0 0 6px rgba(52,211,153,0.9)' }} />
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">Inteligencia operacional · ahora</p>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 gap-2">
                   {[
                     { emoji: '📈', text: salesVal !== '—' ? `Ventas hoy: ${salesVal} ${salesChange > 0 ? `(+${salesChange}% vs ayer)` : salesChange < 0 ? `(${salesChange}% vs ayer)` : ''}` : 'Sin datos de ventas aún hoy', type: salesChange >= 0 ? 'good' : 'warn' },
                     { emoji: '🧾', text: txnVal !== '—' ? `${txnVal} transacciones registradas hoy` : 'Sin transacciones registradas hoy', type: 'info' },
