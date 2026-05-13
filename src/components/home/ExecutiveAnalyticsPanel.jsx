@@ -58,18 +58,18 @@ function AnalyticsCard({ title, subtitle, children, delay = 0, colSpan = '' }) {
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.55, ease: [0.23, 1, 0.32, 1] }}
-      className={`rounded-2xl p-5 ${colSpan}`}
+      className={`rounded-3xl p-6 ${colSpan}`}
       style={{
-        background: 'rgba(255,255,255,0.85)',
-        backdropFilter: 'blur(24px)',
-        border: '1px solid rgba(0,0,0,0.06)',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 32px rgba(0,0,0,0.03)',
+        background: 'linear-gradient(135deg, rgba(233,30,99,0.08) 0%, rgba(233,30,99,0.04) 100%)',
+        backdropFilter: 'blur(32px)',
+        border: '1.5px solid rgba(233,30,99,0.25)',
+        boxShadow: '0 8px 32px rgba(233,30,99,0.12), inset 0 1px 1px rgba(255,255,255,0.3)',
       }}
     >
-      <div className="flex items-start justify-between mb-4">
+      <div className="flex items-start justify-between mb-5">
         <div>
-          <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-[0.13em]">{title}</p>
-          {subtitle && <p className="text-[11px] text-slate-300 mt-0.5 font-medium">{subtitle}</p>}
+          <p className="text-[10px] font-bold text-pink-500 uppercase tracking-[0.15em]">{title}</p>
+          {subtitle && <p className="text-[11px] text-pink-300 mt-1 font-medium">{subtitle}</p>}
         </div>
       </div>
       {children}
@@ -83,12 +83,12 @@ const DAYS  = ['L','M','X','J','V','S','D'];
 
 function HeatmapCell({ value, max }) {
   const intensity = max > 0 ? value / max : 0;
-  // From pearl white → soft pastel pink
-  const alpha = 0.08 + intensity * 0.78;
+  // Pearl white → vibrant hot pink
+  const alpha = 0.05 + intensity * 0.85;
   return (
     <div
-      className="rounded-md w-full aspect-square"
-      style={{ background: `rgba(245, 168, 160, ${alpha})` }}
+      className="rounded-lg w-full aspect-square transition-all"
+      style={{ background: `rgba(233, 30, 99, ${alpha})` }}
       title={`${value} txn`}
     />
   );
@@ -263,15 +263,15 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
           colSpan="lg:col-span-3"
         >
           <div className="grid grid-cols-2 gap-3 mb-4">
-            <div className="p-3 rounded-xl" style={{ background: '#FAE8E6' }}>
-              <p className="text-[10px] text-gray-500 font-medium mb-1">Ventas actuales</p>
-              <p className="text-[20px] font-black tabular-nums tracking-tight leading-none" style={{ color: '#F5A8A0' }}>
+            <div className="p-4 rounded-2xl" style={{ background: 'linear-gradient(135deg, rgba(233,30,99,0.15), rgba(233,30,99,0.08))' }}>
+              <p className="text-[9px] text-pink-400 font-bold uppercase tracking-wide mb-2">Ventas hoy</p>
+              <p className="text-[22px] font-black tabular-nums tracking-tight leading-none" style={{ color: '#E91E63' }}>
                 {fmt(today?.total_sales)}
               </p>
             </div>
-            <div className="p-3 rounded-xl" style={{ background: '#F3F3F3' }}>
-              <p className="text-[10px] text-gray-500 font-medium mb-1">Proyección EOD</p>
-              <p className="text-[20px] font-bold tabular-nums leading-none text-gray-600">
+            <div className="p-4 rounded-2xl" style={{ background: 'linear-gradient(135deg, rgba(233,30,99,0.08), rgba(233,30,99,0.04))' }}>
+              <p className="text-[9px] text-pink-300 font-bold uppercase tracking-wide mb-2">Proyección EOD</p>
+              <p className="text-[22px] font-bold tabular-nums leading-none" style={{ color: '#E91E63' }}>
                 {fmt(Math.round(today?.total_sales * 1.05) || 0)}
               </p>
             </div>
@@ -282,19 +282,19 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
               <ComposedChart data={sorted30} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
                 <defs>
                   <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#F5A8A0" stopOpacity="0.25" />
-                    <stop offset="100%" stopColor="#F5A8A0" stopOpacity="0" />
+                    <stop offset="0%" stopColor="#E91E63" stopOpacity="0.3" />
+                    <stop offset="100%" stopColor="#E91E63" stopOpacity="0" />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="0" stroke="rgba(0,0,0,0)" vertical={false} />
-                <XAxis dataKey="date" tick={{ fontSize: 8, fill: '#999', fontWeight: 400 }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
+                <CartesianGrid strokeDasharray="0" stroke="rgba(233,30,99,0.08)" vertical={false} />
+                <XAxis dataKey="date" tick={{ fontSize: 8, fill: '#b4a4a4', fontWeight: 500 }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
                 <YAxis hide />
                 <Tooltip content={<SalesTooltip />} />
                 {/* Ventas real (solid) */}
-                <Area type="monotone" dataKey="ventas" stroke="#F5A8A0" strokeWidth={2.5}
+                <Area type="monotone" dataKey="ventas" stroke="#E91E63" strokeWidth={3}
                   fill="url(#salesGrad)" dot={false} isAnimationActive={false} />
                 {/* Proyección (dashed) */}
-                <Line type="monotone" dataKey="proyeccion" stroke="#CCCCCC" strokeWidth={2} strokeDasharray="5 5"
+                <Line type="monotone" dataKey="proyeccion" stroke="#E91E63" strokeWidth={2} strokeDasharray="6 3" opacity={0.35}
                   dot={false} isAnimationActive={false} />
               </ComposedChart>
             </ResponsiveContainer>
@@ -307,12 +307,12 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
           {/* Legend */}
           <div className="flex items-center gap-4 mt-3 text-[10px]">
             <div className="flex items-center gap-2">
-              <div className="w-2.5 h-0.5 rounded-full" style={{ background: '#F5A8A0' }} />
-              <span className="text-gray-500 font-medium">Ventas</span>
+              <div className="w-2.5 h-0.5 rounded-full" style={{ background: '#E91E63' }} />
+              <span className="text-pink-300 font-medium">Ventas Real</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-2.5 h-0.5 rounded-full" style={{ background: '#CCCCCC', backgroundImage: 'repeating-linear-gradient(90deg, #CCCCCC 0px, #CCCCCC 5px, transparent 5px, transparent 10px)' }} />
-              <span className="text-gray-500 font-medium">Proyección</span>
+              <div className="w-2.5 h-0.5 rounded-full" style={{ background: '#E91E63', opacity: 0.35, backgroundImage: 'repeating-linear-gradient(90deg, #E91E63 0px, #E91E63 5px, transparent 5px, transparent 10px)' }} />
+              <span className="text-pink-300 font-medium">Proyección</span>
             </div>
           </div>
         </AnalyticsCard>
@@ -336,15 +336,15 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
               <AreaChart data={ebitdaData} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
                 <defs>
                   <linearGradient id="ebitdaGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#E91E63" stopOpacity="0.25" />
+                    <stop offset="0%" stopColor="#E91E63" stopOpacity="0.35" />
                     <stop offset="100%" stopColor="#E91E63" stopOpacity="0" />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="0" stroke="rgba(0,0,0,0)" vertical={false} />
-                <XAxis dataKey="date" tick={{ fontSize: 8, fill: '#999', fontWeight: 400 }} axisLine={false} tickLine={false} />
+                <CartesianGrid strokeDasharray="0" stroke="rgba(233,30,99,0.08)" vertical={false} />
+                <XAxis dataKey="date" tick={{ fontSize: 8, fill: '#b4a4a4', fontWeight: 500 }} axisLine={false} tickLine={false} />
                 <YAxis hide />
                 <Tooltip content={<EbitdaTooltip />} />
-                <Area type="monotone" dataKey="margen" stroke="#E91E63" strokeWidth={2.5}
+                <Area type="monotone" dataKey="margen" stroke="#E91E63" strokeWidth={3}
                   fill="url(#ebitdaGrad)" dot={false} isAnimationActive={false} />
               </AreaChart>
             </ResponsiveContainer>
@@ -362,15 +362,15 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
         {/* Hourly heatmap */}
         <AnalyticsCard title="Tráfico por Hora" subtitle="Transacciones · patrón semanal" delay={0.26}>
           <HourlyHeatmap data={heatmapData} />
-          <div className="flex items-center justify-between mt-3">
-            <span className="text-[9px] text-gray-400 font-medium">Bajo</span>
+          <div className="flex items-center justify-between mt-4">
+            <span className="text-[9px] text-pink-300 font-bold uppercase tracking-wide">Bajo</span>
             <div className="flex gap-1 flex-1 mx-3">
               {[0.08, 0.22, 0.38, 0.54, 0.70, 0.86].map((a, i) => (
-                <div key={i} className="flex-1 h-1.5 rounded-sm"
-                  style={{ background: `rgba(245,168,160,${a})` }} />
+                <div key={i} className="flex-1 h-2 rounded-sm"
+                  style={{ background: `rgba(233,30,99,${a})` }} />
               ))}
             </div>
-            <span className="text-[9px] text-gray-400 font-medium">Alto</span>
+            <span className="text-[9px] text-pink-300 font-bold uppercase tracking-wide">Alto</span>
           </div>
         </AnalyticsCard>
 
