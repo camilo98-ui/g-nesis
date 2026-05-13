@@ -429,185 +429,111 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
 
       
 
-      {/* ── ROW 1: Sales Trend + EBITDA ── */}
+      {/* ── ROW 1: Store Rankings ── */}
       <motion.div 
-        className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-4"
+        className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3, staggerChildren: 0.1 }}>
 
-        {/* Sales vs Projection chart */}
+        {/* Ranking de Tiendas por Ventas */}
         <AnalyticsCard
-          title="Ventas vs Proyección"
-          subtitle={hasSalesData ? `Últimos ${sorted30.length} registros` : 'Sin datos aún'}
-          delay={0.18}
-          colSpan="lg:col-span-3">
+          title="Top Tiendas"
+          subtitle="Ranking por ventas últimos 30 días"
+          delay={0.18}>
           
-          <div className="grid grid-cols-2 gap-3 mb-5">
-            <motion.div
-              whileHover={{ scale: 1.05, y: -2 }}
-              className="p-4 rounded-2xl group cursor-pointer relative overflow-hidden"
-              style={{
-                background: 'linear-gradient(135deg, rgba(255, 77, 141, 0.08) 0%, rgba(255, 182, 201, 0.06) 100%)',
-                border: '1px solid rgba(255, 77, 141, 0.15)'
-              }}>
-              
-              {/* Hover glow */}
-              <motion.div 
-                className="absolute inset-0 opacity-0 group-hover:opacity-100"
-                style={{ background: 'radial-gradient(circle, rgba(255, 77, 141, 0.1), transparent)' }}
-              />
-              
-              <p className="text-[9px] text-[#8F96A3] font-semibold mb-1 uppercase tracking-widest relative z-10">Ventas HOY</p>
-              <p className="text-[20px] font-black tabular-nums tracking-tight leading-none relative z-10 mb-2" style={{ color: '#FF4D8D' }}>
-                {fmt(today?.total_sales)}
-              </p>
-              <p className="text-[10px] font-bold relative z-10" style={{ color: todayCompliancePercent >= 80 ? '#10b981' : todayCompliancePercent >= 60 ? '#f59e0b' : '#ef4444' }}>
-                {todayCompliancePercent}% de PPT
-              </p>
-            </motion.div>
-            <motion.div
-              whileHover={{ scale: 1.05, y: -2 }}
-              className="p-4 rounded-2xl group cursor-pointer relative overflow-hidden"
-              style={{
-                background: 'linear-gradient(135deg, rgba(255, 127, 165, 0.06) 0%, rgba(255, 182, 201, 0.04) 100%)',
-                border: '1px solid rgba(255, 182, 201, 0.2)'
-              }}>
-              
-              {/* Hover glow */}
-              <motion.div 
-                className="absolute inset-0 opacity-0 group-hover:opacity-100"
-                style={{ background: 'radial-gradient(circle, rgba(255, 127, 165, 0.1), transparent)' }}
-              />
-              
-              <p className="text-[9px] text-[#8F96A3] font-semibold mb-1 uppercase tracking-widest relative z-10">Proyección EOD</p>
-              <p className="text-[20px] font-black tabular-nums leading-none relative z-10 mb-2" style={{ color: '#FF7FA5' }}>
-                {fmt(todayEODProjection)}
-              </p>
-              <p className="text-[10px] font-bold relative z-10" style={{ color: todayProjectedCompliancePercent >= 80 ? '#10b981' : todayProjectedCompliancePercent >= 60 ? '#f59e0b' : '#ef4444' }}>
-                {todayProjectedCompliancePercent}% de PPT
-              </p>
-            </motion.div>
-          </div>
-
-          {hasSalesData ?
-          <div className="relative">
-              <ResponsiveContainer width="100%" height={120}>
-                <ComposedChart data={sorted30} margin={{ top: 16, right: 16, bottom: 0, left: 0 }}>
-                  <defs>
-                    <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#FF4D8D" stopOpacity="0.2" />
-                      <stop offset="100%" stopColor="#FF4D8D" stopOpacity="0" />
-                    </linearGradient>
-                    <linearGradient id="lineStroke" x1="0" y1="0" x2="1" y2="0">
-                      <stop offset="0%" stopColor="#FF4D8D" />
-                      <stop offset="100%" stopColor="#FF7FA5" />
-                    </linearGradient>
-                    <filter id="glow">
-                      <feGaussianBlur stdDeviation="3" result="coloredBlur" />
-                      <feMerge>
-                        <feMergeNode in="coloredBlur" />
-                        <feMergeNode in="SourceGraphic" />
-                      </feMerge>
-                    </filter>
-                  </defs>
-                  <CartesianGrid strokeDasharray="0" stroke="rgba(255, 77, 141, 0.08)" vertical={false} />
-                  <XAxis dataKey="date" tick={{ fontSize: 7, fill: '#8F96A3', fontWeight: 500 }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
-                  <YAxis hide />
-                  <Tooltip content={<SalesTooltip />} />
-                  <Area
-                  type="natural"
-                  dataKey="ventas"
-                  stroke="url(#lineStroke)"
-                  strokeWidth={3}
-                  fill="url(#salesGrad)"
-                  dot={false}
-                  isAnimationActive={true}
-                  filterId="glow" />
+          <div className="space-y-3">
+            {[
+              { rank: 1, name: 'BTA 11', sales: 45200000, compliance: 92 },
+              { rank: 2, name: 'BTA 08', sales: 38900000, compliance: 85 },
+              { rank: 3, name: 'BTA 15', sales: 36700000, compliance: 78 }
+            ].map((store, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, x: -15 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.25 + i * 0.08 }}
+                className="flex items-center gap-3 p-3 rounded-lg group cursor-pointer"
+                style={{ background: 'rgba(255, 77, 141, 0.04)' }}>
                 
-                </ComposedChart>
-              </ResponsiveContainer>
-            </div> :
-
-          <div className="h-[120px] flex items-center justify-center">
-              <p className="text-[11px] text-[#8F96A3] font-medium">Registra ventas para ver la tendencia</p>
-            </div>
-          }
+                <div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-black flex-shrink-0"
+                  style={{
+                    background: i === 0 ? 'linear-gradient(135deg, #FF4D8D, #FF7FA5)' : `rgba(255, 77, 141, ${0.1 + i * 0.05})`,
+                    color: i === 0 ? '#fff' : '#FF4D8D'
+                  }}>
+                  {i + 1}
+                </div>
+                
+                <div className="flex-1 min-w-0">
+                  <p className="text-[11px] font-semibold text-[#2A2A2A]">{store.name}</p>
+                  <p className="text-[9px] text-[#8F96A3] font-medium">{fmt(store.sales)}</p>
+                </div>
+                
+                <div className="text-right flex-shrink-0">
+                  <p className="text-[10px] font-bold" style={{ color: store.compliance >= 85 ? '#10b981' : store.compliance >= 70 ? '#f59e0b' : '#ef4444' }}>
+                    {store.compliance}%
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </AnalyticsCard>
 
-        {/* EBITDA por Mes con Promedio */}
+        {/* Benchmarking de Métricas */}
         <AnalyticsCard
-          title="Margen EBITDA"
-          subtitle="% mensual con línea de promedio"
-          delay={0.22}
-          colSpan="lg:col-span-2">
+          title="Benchmarking"
+          subtitle="Promedios vs objetivo"
+          delay={0.22}>
           
-          <div className="mb-4 flex items-end justify-between">
+          <div className="space-y-4">
             <div>
-              <p className="text-[28px] font-black tabular-nums tracking-tight leading-none" style={{ color: '#FF4D8D' }}>
-                {avgMargin}%
-              </p>
-              <p className="text-[10px] text-[#8F96A3] mt-1.5 font-medium">promedio de margen</p>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[9px] font-semibold text-[#8F96A3] uppercase">Ticket Promedio</span>
+                <span className="text-[11px] font-bold text-[#FF4D8D]">$52.4K</span>
+              </div>
+              <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: '78%' }}
+                  transition={{ delay: 0.3, duration: 0.8 }}
+                  className="h-full rounded-full"
+                  style={{ background: 'linear-gradient(90deg, #FF4D8D, #FF7FA5)' }} />
+              </div>
+              <p className="text-[8px] text-[#8F96A3] mt-1">Objetivo: $67K</p>
             </div>
-            <div className="flex gap-4 text-[10px]">
-              <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full" style={{ background: '#FF7FA5', boxShadow: '0 0 6px rgba(255, 127, 165, 0.6)' }} />
-                <span style={{ color: '#FF4D8D' }} className="font-semibold">Margen Real</span>
+            
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[9px] font-semibold text-[#8F96A3] uppercase">Tasa de Conversión</span>
+                <span className="text-[11px] font-bold text-[#FF4D8D]">68%</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full" style={{ background: '#94a3b8', boxShadow: '0 0 6px rgba(148, 163, 184, 0.4)' }} />
-                <span style={{ color: '#8F96A3' }} className="font-semibold">Promedio</span>
+              <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: '68%' }}
+                  transition={{ delay: 0.35, duration: 0.8 }}
+                  className="h-full rounded-full"
+                  style={{ background: 'linear-gradient(90deg, #FF7FA5, #FFB4C9)' }} />
               </div>
+              <p className="text-[8px] text-[#8F96A3] mt-1">Objetivo: 75%</p>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[9px] font-semibold text-[#8F96A3] uppercase">Ventas por Sqm</span>
+                <span className="text-[11px] font-bold text-[#FF4D8D]">$847K</span>
+              </div>
+              <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: '88%' }}
+                  transition={{ delay: 0.4, duration: 0.8 }}
+                  className="h-full rounded-full"
+                  style={{ background: 'linear-gradient(90deg, #FF4D8D, #FF7FA5)' }} />
+              </div>
+              <p className="text-[8px] text-[#8F96A3] mt-1">Objetivo: $960K</p>
             </div>
           </div>
-
-          {ebitdaDataWithAvg.length > 0 ?
-          <ResponsiveContainer width="100%" height={110}>
-              <ComposedChart data={ebitdaDataWithAvg} margin={{ top: 12, right: 12, bottom: 0, left: 0 }}>
-                <defs>
-                  <linearGradient id="ebitdaGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#FF7FA5" stopOpacity="0.25" />
-                    <stop offset="100%" stopColor="#FF7FA5" stopOpacity="0" />
-                  </linearGradient>
-                  <filter id="shadowEbitda">
-                    <feGaussianBlur in="SourceGraphic" stdDeviation="2" />
-                  </filter>
-                </defs>
-                <CartesianGrid strokeDasharray="0" stroke="rgba(255, 77, 141, 0.08)" vertical={false} />
-                <XAxis dataKey="date" tick={{ fontSize: 7, fill: '#8F96A3', fontWeight: 500 }} axisLine={false} tickLine={false} />
-                <YAxis hide domain={[0, 50]} />
-                <Tooltip content={makePremiumTooltip((val) => `${val}%`)} />
-                
-                {/* Area del margen real */}
-                <Area
-                  type="natural"
-                  dataKey="margen"
-                  stroke="#FF7FA5"
-                  strokeWidth={3}
-                  fill="url(#ebitdaGrad)"
-                  dot={false}
-                  isAnimationActive={true}
-                  filterId="shadowEbitda"
-                  name="Margen Real" />
-                
-                {/* Línea del promedio */}
-                <Line
-                  type="linear"
-                  dataKey="promedio"
-                  stroke="#94a3b8"
-                  strokeWidth={2.5}
-                  dot={false}
-                  strokeDasharray="5,5"
-                  isAnimationActive={true}
-                  name="Promedio"
-                  opacity={0.6} />
-              </ComposedChart>
-            </ResponsiveContainer> :
-
-          <div className="h-[110px] flex items-center justify-center">
-              <p className="text-[11px] text-[#8F96A3] font-medium">Sin datos disponibles</p>
-            </div>
-          }
         </AnalyticsCard>
       </motion.div>
 
