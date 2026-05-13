@@ -1,10 +1,10 @@
 import React, { useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Line, LineChart,
-  PieChart, Pie, Cell, ComposedChart
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ComposedChart,
+  PieChart, Pie, Cell
 } from 'recharts';
-import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, TrendingUp } from 'lucide-react';
 
 // ── HELPERS ──────────────────────────────────────────────────────────────────
 function fmt(n) {
@@ -49,27 +49,29 @@ function makePremiumTooltip(formatter) {
 }
 
 const SalesTooltip = makePremiumTooltip(fmt);
-const EbitdaTooltip = makePremiumTooltip(fmt);
+const EbitdaTooltip = makePremiumTooltip((val) => `${val}%`);
 
 // Card wrapper
 function AnalyticsCard({ title, subtitle, children, delay = 0, colSpan = '' }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 14 }}
+      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.55, ease: [0.23, 1, 0.32, 1] }}
-      className={`rounded-2xl p-5 ${colSpan}`}
+      transition={{ delay, duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
+      whileHover={{ y: -2 }}
+      className={`rounded-3xl p-6 ${colSpan} group`}
       style={{
-        background: 'rgba(255,255,255,0.85)',
-        backdropFilter: 'blur(24px)',
-        border: '1px solid rgba(0,0,0,0.06)',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 32px rgba(0,0,0,0.03)',
+        background: 'linear-gradient(135deg, rgba(255,248,250,0.95) 0%, rgba(255,255,255,0.9) 100%)',
+        backdropFilter: 'blur(32px)',
+        border: '1px solid rgba(255, 77, 141, 0.12)',
+        boxShadow: '0 2px 8px rgba(255, 77, 141, 0.08), 0 16px 48px rgba(0,0,0,0.04)',
+        transition: 'all 0.3s cubic-bezier(0.23, 1, 0.32, 1)',
       }}
     >
-      <div className="flex items-start justify-between mb-4">
+      <div className="flex items-start justify-between mb-5">
         <div>
-          <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-[0.13em]">{title}</p>
-          {subtitle && <p className="text-[11px] text-slate-300 mt-0.5 font-medium">{subtitle}</p>}
+          <p className="text-[9px] font-semibold text-[#8F96A3] uppercase tracking-[0.15em] letter-spacing">{title}</p>
+          {subtitle && <p className="text-[12px] text-[#8F96A3] mt-1.5 font-medium">{subtitle}</p>}
         </div>
       </div>
       {children}
@@ -83,12 +85,15 @@ const DAYS  = ['L','M','X','J','V','S','D'];
 
 function HeatmapCell({ value, max }) {
   const intensity = max > 0 ? value / max : 0;
-  // From pearl white → soft pastel pink
-  const alpha = 0.08 + intensity * 0.78;
+  const alpha = 0.06 + intensity * 0.85;
   return (
-    <div
-      className="rounded-md w-full aspect-square"
-      style={{ background: `rgba(245, 168, 160, ${alpha})` }}
+    <motion.div
+      whileHover={{ scale: 1.05 }}
+      className="rounded-lg w-full aspect-square cursor-pointer transition-all"
+      style={{ 
+        background: `rgba(255, 77, 141, ${alpha})`,
+        boxShadow: intensity > 0.6 ? `0 0 8px rgba(255, 77, 141, ${intensity * 0.3})` : 'none'
+      }}
       title={`${value} txn`}
     />
   );
@@ -131,8 +136,13 @@ const PARTICIPATION_SEGMENTS = [
 
 function DonutChart({ data }) {
   return (
-    <div className="flex items-center gap-4">
-      <div className="flex-shrink-0" style={{ width: 110, height: 110 }}>
+    <div className="flex items-center gap-5">
+      <motion.div 
+        className="flex-shrink-0"
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.6 }}
+        style={{ width: 110, height: 110 }}>
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -151,15 +161,21 @@ function DonutChart({ data }) {
             </Pie>
           </PieChart>
         </ResponsiveContainer>
-      </div>
-      <div className="flex-1 space-y-1.5">
+      </motion.div>
+      <div className="flex-1 space-y-2">
         {data.map((item, i) => (
-          <div key={item.name} className="flex items-center gap-2">
-            <div className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-              style={{ background: PARTICIPATION_COLORS[i % PARTICIPATION_COLORS.length] }} />
-            <span className="text-[10.5px] text-slate-500 flex-1 font-medium">{item.name}</span>
-            <span className="text-[10.5px] font-bold text-slate-700 tabular-nums">{item.value}%</span>
-          </div>
+          <motion.div 
+            key={item.name} 
+            className="flex items-center gap-2.5"
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: i * 0.05 }}
+          >
+            <div className="w-2 h-2 rounded-full flex-shrink-0"
+              style={{ background: PARTICIPATION_COLORS[i % PARTICIPATION_COLORS.length], boxShadow: `0 0 8px ${PARTICIPATION_COLORS[i % PARTICIPATION_COLORS.length]}40` }} />
+            <span className="text-[10px] text-[#8F96A3] flex-1 font-medium">{item.name}</span>
+            <span className="text-[10px] font-bold text-[#2A2A2A] tabular-nums">{item.value}%</span>
+          </motion.div>
         ))}
       </div>
     </div>
@@ -247,9 +263,9 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
       className="mb-7"
     >
       {/* Section header */}
-      <div className="flex items-center gap-2 mb-4">
-        <p className="text-[9px] font-semibold text-slate-300 uppercase tracking-[0.14em]">Analytics</p>
-        <div className="flex-1 h-px" style={{ background: 'linear-gradient(90deg, rgba(0,0,0,0.06), transparent)' }} />
+      <div className="flex items-center gap-3 mb-6">
+        <p className="text-[10px] font-black text-[#2A2A2A] uppercase tracking-[0.16em] letter-spacing">📊 Analytics</p>
+        <div className="flex-1 h-px" style={{ background: 'linear-gradient(90deg, rgba(255, 77, 141, 0.2), transparent)' }} />
       </div>
 
       {/* ── ROW 1: Sales Trend + EBITDA ── */}
@@ -262,59 +278,78 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
           delay={0.18}
           colSpan="lg:col-span-3"
         >
-          <div className="grid grid-cols-2 gap-3 mb-4">
-            <div className="p-3 rounded-xl" style={{ background: '#FAE8E6' }}>
-              <p className="text-[10px] text-gray-500 font-medium mb-1">Ventas actuales</p>
-              <p className="text-[20px] font-black tabular-nums tracking-tight leading-none" style={{ color: '#F5A8A0' }}>
+          <div className="grid grid-cols-2 gap-3 mb-5">
+            <motion.div 
+              whileHover={{ scale: 1.02 }}
+              className="p-4 rounded-2xl transition-all"
+              style={{ 
+                background: 'linear-gradient(135deg, rgba(255, 77, 141, 0.08) 0%, rgba(255, 182, 201, 0.06) 100%)',
+                border: '1px solid rgba(255, 77, 141, 0.15)',
+              }}
+            >
+              <p className="text-[9px] text-[#8F96A3] font-semibold mb-2 uppercase tracking-wide">Ventas hoy</p>
+              <p className="text-[22px] font-black tabular-nums tracking-tight leading-none" style={{ color: '#FF4D8D' }}>
                 {fmt(today?.total_sales)}
               </p>
-            </div>
-            <div className="p-3 rounded-xl" style={{ background: '#F3F3F3' }}>
-              <p className="text-[10px] text-gray-500 font-medium mb-1">Proyección EOD</p>
-              <p className="text-[20px] font-bold tabular-nums leading-none text-gray-600">
+            </motion.div>
+            <motion.div 
+              whileHover={{ scale: 1.02 }}
+              className="p-4 rounded-2xl transition-all"
+              style={{ 
+                background: 'linear-gradient(135deg, rgba(255, 127, 165, 0.06) 0%, rgba(255, 182, 201, 0.04) 100%)',
+                border: '1px solid rgba(255, 182, 201, 0.2)',
+              }}
+            >
+              <p className="text-[9px] text-[#8F96A3] font-semibold mb-2 uppercase tracking-wide">Proyección EOD</p>
+              <p className="text-[22px] font-black tabular-nums leading-none" style={{ color: '#FF7FA5' }}>
                 {fmt(Math.round(today?.total_sales * 1.05) || 0)}
               </p>
-            </div>
+            </motion.div>
           </div>
 
           {hasSalesData ? (
-            <ResponsiveContainer width="100%" height={100}>
-              <ComposedChart data={sorted30} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
-                <defs>
-                  <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#F5A8A0" stopOpacity="0.25" />
-                    <stop offset="100%" stopColor="#F5A8A0" stopOpacity="0" />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="0" stroke="rgba(0,0,0,0)" vertical={false} />
-                <XAxis dataKey="date" tick={{ fontSize: 8, fill: '#999', fontWeight: 400 }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
-                <YAxis hide />
-                <Tooltip content={<SalesTooltip />} />
-                {/* Ventas real (solid) */}
-                <Area type="monotone" dataKey="ventas" stroke="#F5A8A0" strokeWidth={2.5}
-                  fill="url(#salesGrad)" dot={false} isAnimationActive={false} />
-                {/* Proyección (dashed) */}
-                <Line type="monotone" dataKey="proyeccion" stroke="#CCCCCC" strokeWidth={2} strokeDasharray="5 5"
-                  dot={false} isAnimationActive={false} />
-              </ComposedChart>
-            </ResponsiveContainer>
+            <div className="relative">
+              <ResponsiveContainer width="100%" height={120}>
+                <ComposedChart data={sorted30} margin={{ top: 16, right: 16, bottom: 0, left: 0 }}>
+                  <defs>
+                    <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#FF4D8D" stopOpacity="0.2" />
+                      <stop offset="100%" stopColor="#FF4D8D" stopOpacity="0" />
+                    </linearGradient>
+                    <linearGradient id="lineStroke" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stopColor="#FF4D8D" />
+                      <stop offset="100%" stopColor="#FF7FA5" />
+                    </linearGradient>
+                    <filter id="glow">
+                      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                      <feMerge>
+                        <feMergeNode in="coloredBlur"/>
+                        <feMergeNode in="SourceGraphic"/>
+                      </feMerge>
+                    </filter>
+                  </defs>
+                  <CartesianGrid strokeDasharray="0" stroke="rgba(255, 77, 141, 0.08)" vertical={false} />
+                  <XAxis dataKey="date" tick={{ fontSize: 7, fill: '#8F96A3', fontWeight: 500 }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
+                  <YAxis hide />
+                  <Tooltip content={<SalesTooltip />} />
+                  <Area 
+                    type="natural" 
+                    dataKey="ventas" 
+                    stroke="url(#lineStroke)" 
+                    strokeWidth={3}
+                    fill="url(#salesGrad)" 
+                    dot={false} 
+                    isAnimationActive={true}
+                    filterId="glow"
+                  />
+                </ComposedChart>
+              </ResponsiveContainer>
+            </div>
           ) : (
-            <div className="h-[100px] flex items-center justify-center">
-              <p className="text-[11px] text-slate-300 font-medium">Registra ventas para ver la tendencia</p>
+            <div className="h-[120px] flex items-center justify-center">
+              <p className="text-[11px] text-[#8F96A3] font-medium">Registra ventas para ver la tendencia</p>
             </div>
           )}
-          
-          {/* Legend */}
-          <div className="flex items-center gap-4 mt-3 text-[10px]">
-            <div className="flex items-center gap-2">
-              <div className="w-2.5 h-0.5 rounded-full" style={{ background: '#F5A8A0' }} />
-              <span className="text-gray-500 font-medium">Ventas</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2.5 h-0.5 rounded-full" style={{ background: '#CCCCCC', backgroundImage: 'repeating-linear-gradient(90deg, #CCCCCC 0px, #CCCCCC 5px, transparent 5px, transparent 10px)' }} />
-              <span className="text-gray-500 font-medium">Proyección</span>
-            </div>
-          </div>
         </AnalyticsCard>
 
         {/* EBITDA por Mes */}
@@ -324,11 +359,17 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
           delay={0.22}
           colSpan="lg:col-span-2"
         >
-          <div className="mb-4">
-            <p className="text-[28px] font-black tabular-nums tracking-tight leading-none" style={{ color: '#E91E63' }}>
-              {ebitdaData[ebitdaData.length - 1]?.margen || 34}%
-            </p>
-            <p className="text-[10px] text-slate-400 mt-1">margen promedio · mes actual</p>
+          <div className="mb-5 flex items-end justify-between">
+            <div>
+              <p className="text-[28px] font-black tabular-nums tracking-tight leading-none" style={{ color: '#FF4D8D' }}>
+                {ebitdaData[ebitdaData.length - 1]?.margen || 34}%
+              </p>
+              <p className="text-[10px] text-[#8F96A3] mt-2 font-medium">margen promedio</p>
+            </div>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl" style={{ background: 'rgba(255, 77, 141, 0.08)' }}>
+              <TrendingUp className="w-3.5 h-3.5" style={{ color: '#FF4D8D' }} />
+              <span className="text-[10px] font-semibold" style={{ color: '#FF4D8D' }}>+2.1%</span>
+            </div>
           </div>
 
           {ebitdaData.length > 0 ? (
@@ -336,21 +377,28 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
               <AreaChart data={ebitdaData} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
                 <defs>
                   <linearGradient id="ebitdaGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#E91E63" stopOpacity="0.25" />
-                    <stop offset="100%" stopColor="#E91E63" stopOpacity="0" />
+                    <stop offset="0%" stopColor="#FF7FA5" stopOpacity="0.2" />
+                    <stop offset="100%" stopColor="#FF7FA5" stopOpacity="0" />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="0" stroke="rgba(0,0,0,0)" vertical={false} />
-                <XAxis dataKey="date" tick={{ fontSize: 8, fill: '#999', fontWeight: 400 }} axisLine={false} tickLine={false} />
+                <CartesianGrid strokeDasharray="0" stroke="rgba(255, 77, 141, 0.08)" vertical={false} />
+                <XAxis dataKey="date" tick={{ fontSize: 7, fill: '#8F96A3', fontWeight: 500 }} axisLine={false} tickLine={false} />
                 <YAxis hide />
                 <Tooltip content={<EbitdaTooltip />} />
-                <Area type="monotone" dataKey="margen" stroke="#E91E63" strokeWidth={2.5}
-                  fill="url(#ebitdaGrad)" dot={false} isAnimationActive={false} />
+                <Area 
+                  type="natural" 
+                  dataKey="margen" 
+                  stroke="#FF7FA5" 
+                  strokeWidth={2.5}
+                  fill="url(#ebitdaGrad)" 
+                  dot={false} 
+                  isAnimationActive={true}
+                />
               </AreaChart>
             </ResponsiveContainer>
           ) : (
             <div className="h-[100px] flex items-center justify-center">
-              <p className="text-[11px] text-slate-300 font-medium">Sin datos</p>
+              <p className="text-[11px] text-[#8F96A3] font-medium">Sin datos</p>
             </div>
           )}
         </AnalyticsCard>
@@ -362,25 +410,25 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
         {/* Hourly heatmap */}
         <AnalyticsCard title="Tráfico por Hora" subtitle="Transacciones · patrón semanal" delay={0.26}>
           <HourlyHeatmap data={heatmapData} />
-          <div className="flex items-center justify-between mt-3">
-            <span className="text-[9px] text-gray-400 font-medium">Bajo</span>
-            <div className="flex gap-1 flex-1 mx-3">
+          <div className="flex items-center justify-between mt-4">
+            <span className="text-[8px] text-[#8F96A3] font-semibold uppercase">Bajo</span>
+            <div className="flex gap-1.5 flex-1 mx-3">
               {[0.08, 0.22, 0.38, 0.54, 0.70, 0.86].map((a, i) => (
-                <div key={i} className="flex-1 h-1.5 rounded-sm"
-                  style={{ background: `rgba(245,168,160,${a})` }} />
+                <div key={i} className="flex-1 h-2 rounded-lg transition-all"
+                  style={{ background: `rgba(255, 77, 141, ${a})`, boxShadow: a > 0.6 ? `0 0 6px rgba(255, 77, 141, ${a * 0.4})` : 'none' }} />
               ))}
             </div>
-            <span className="text-[9px] text-gray-400 font-medium">Alto</span>
+            <span className="text-[8px] text-[#8F96A3] font-semibold uppercase">Alto</span>
           </div>
         </AnalyticsCard>
 
         {/* Participación */}
         <AnalyticsCard title="Participación" subtitle="Mix del negocio por categoría" delay={0.3}>
           <DonutChart data={PARTICIPATION_SEGMENTS} />
-          <div className="mt-4 pt-3" style={{ borderTop: '1px solid rgba(0,0,0,0.05)' }}>
+          <div className="mt-4 pt-3" style={{ borderTop: '1px solid rgba(255, 77, 141, 0.1)' }}>
             <div className="flex items-center justify-between">
-              <span className="text-[10px] text-slate-400 font-medium">Mayor categoría</span>
-              <span className="text-[10px] font-bold text-slate-700">Helados · 42%</span>
+              <span className="text-[10px] text-[#8F96A3] font-semibold uppercase tracking-wide">Mayor categoría</span>
+              <span className="text-[10px] font-black" style={{ color: '#FF4D8D' }}>Helados · 42%</span>
             </div>
           </div>
         </AnalyticsCard>
@@ -393,47 +441,52 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
                 const barW = 85 - i * 14;
                 return (
                   <div key={c.id} className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-[9px] font-bold"
+                    <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-[9px] font-bold transition-all"
                       style={{
-                        background: i === 0 ? 'rgba(194,24,117,0.1)' : 'rgba(0,0,0,0.04)',
-                        color: i === 0 ? '#C21875' : '#94a3b8',
+                        background: i === 0 ? 'linear-gradient(135deg, rgba(255, 77, 141, 0.15), rgba(255, 182, 201, 0.1))' : 'rgba(255, 182, 201, 0.08)',
+                        color: i === 0 ? '#FF4D8D' : '#FFB6C9',
+                        border: i === 0 ? '1px solid rgba(255, 77, 141, 0.2)' : '1px solid rgba(255, 182, 201, 0.1)',
                       }}>
                       {i + 1}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[11px] font-semibold text-slate-600 truncate">{c.name}</p>
-                      <div className="mt-1 h-1 rounded-full bg-slate-100 overflow-hidden">
-                        <div className="h-full rounded-full transition-all"
+                      <p className="text-[11px] font-semibold text-[#2A2A2A] truncate">{c.name}</p>
+                      <div className="mt-1.5 h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${barW}%` }}
+                          transition={{ delay: 0.5 + i * 0.1, duration: 0.8 }}
+                          className="h-full rounded-full transition-all"
                           style={{
-                            width: `${barW}%`,
                             background: i === 0
-                              ? 'linear-gradient(90deg, #C21875, #e11d48)'
-                              : 'rgba(100,116,139,0.3)',
+                              ? 'linear-gradient(90deg, #FF4D8D, #FF7FA5)'
+                              : 'linear-gradient(90deg, rgba(255, 77, 141, 0.3), rgba(255, 182, 201, 0.2))',
+                            boxShadow: i === 0 ? '0 0 12px rgba(255, 77, 141, 0.4)' : 'none'
                           }} />
                       </div>
                     </div>
-                    <span className="text-[9px] text-slate-300 font-medium flex-shrink-0 capitalize">{c.position || 'cajero'}</span>
+                    <span className="text-[9px] text-[#FFB6C9] font-medium flex-shrink-0 capitalize">{c.position || 'cajero'}</span>
                   </div>
                 );
               })}
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center h-20 gap-2">
-              <p className="text-[11px] text-slate-300 font-medium">Sin cajeros registrados</p>
+              <p className="text-[11px] text-[#8F96A3] font-medium">Sin cajeros registrados</p>
             </div>
           )}
 
           {/* Budget compliance bar */}
           {compliance !== null && (
-            <div className="mt-4 pt-3" style={{ borderTop: '1px solid rgba(0,0,0,0.05)' }}>
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-[10px] text-slate-400 font-medium">Cumplimiento PPT</span>
-                <span className="text-[10px] font-bold tabular-nums"
-                  style={{ color: compliance >= 80 ? '#059669' : compliance >= 60 ? '#d97706' : '#e11d48' }}>
+            <div className="mt-4 pt-3" style={{ borderTop: '1px solid rgba(255, 77, 141, 0.1)' }}>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[10px] text-[#8F96A3] font-semibold uppercase tracking-wide">Cumplimiento PPT</span>
+                <span className="text-[11px] font-black tabular-nums"
+                  style={{ color: compliance >= 80 ? '#10B981' : compliance >= 60 ? '#F59E0B' : '#FF4D8D' }}>
                   {compliance}%
                 </span>
               </div>
-              <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden">
+              <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${compliance}%` }}
@@ -441,10 +494,11 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
                   className="h-full rounded-full"
                   style={{
                     background: compliance >= 80
-                      ? 'linear-gradient(90deg, #059669, #10b981)'
+                      ? 'linear-gradient(90deg, #10B981, #34D399)'
                       : compliance >= 60
-                      ? 'linear-gradient(90deg, #d97706, #f59e0b)'
-                      : 'linear-gradient(90deg, #e11d48, #f43f5e)',
+                      ? 'linear-gradient(90deg, #F59E0B, #FBBF24)'
+                      : 'linear-gradient(90deg, #FF4D8D, #FF7FA5)',
+                    boxShadow: `0 0 12px ${compliance >= 80 ? 'rgba(16, 185, 129, 0.4)' : compliance >= 60 ? 'rgba(245, 158, 11, 0.4)' : 'rgba(255, 77, 141, 0.4)'}`
                   }}
                 />
               </div>
