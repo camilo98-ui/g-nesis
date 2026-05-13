@@ -407,7 +407,7 @@ export default function HomeWorkspace({
                 )}
               </div>
               {!isGerente && (
-                <div className="flex-shrink-0 max-w-[180px] w-full">
+                <div className="w-full max-w-xs">
                   <StoreSelector selectedStore={selectedStore} onStoreChange={onStoreChange} />
                 </div>
               )}
