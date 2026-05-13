@@ -1,10 +1,35 @@
-import React, { useMemo, useCallback } from 'react';
-import { motion } from 'framer-motion';
+import React, { useMemo, useCallback, useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ComposedChart,
   PieChart, Pie, Cell } from
 'recharts';
 import { ArrowUpRight, ArrowDownRight, TrendingUp } from 'lucide-react';
+
+// ── ANIMATED COUNTER ──────────────────────────────────────────────────────────
+function AnimatedCounter({ value, format = (v) => v, delay = 0, duration = 2 }) {
+  const [displayValue, setDisplayValue] = useState(0);
+  
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const increment = value / (duration * 60);
+      let current = 0;
+      const interval = setInterval(() => {
+        current += increment;
+        if (current >= value) {
+          setDisplayValue(value);
+          clearInterval(interval);
+        } else {
+          setDisplayValue(Math.floor(current));
+        }
+      }, 16);
+      return () => clearInterval(interval);
+    }, delay * 1000);
+    return () => clearTimeout(timer);
+  }, [value, delay, duration]);
+  
+  return format(displayValue);
+}
 
 // ── HELPERS ──────────────────────────────────────────────────────────────────
 function fmt(n) {
@@ -51,30 +76,81 @@ function makePremiumTooltip(formatter) {
 const SalesTooltip = makePremiumTooltip(fmt);
 const EbitdaTooltip = makePremiumTooltip((val) => `${val}%`);
 
-// Card wrapper
+// ── PREMIUM ANALYTICS CARD ────────────────────────────────────────────────────
 function AnalyticsCard({ title, subtitle, children, delay = 0, colSpan = '' }) {
+  const [isHovered, setIsHovered] = useState(false);
+  
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
-      whileHover={{ y: -2 }}
-      className={`rounded-3xl p-6 ${colSpan} group`}
+      initial={{ opacity: 0, y: 24, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ delay, duration: 0.7, ease: [0.165, 0.84, 0.44, 1] }}
+      onHoverStart={() => setIsHovered(true)}
+      onHoverEnd={() => setIsHovered(false)}
+      whileHover={{ y: -4, transition: { duration: 0.4 } }}
+      className={`rounded-3xl p-6 ${colSpan} group relative overflow-hidden`}
       style={{
-        background: 'linear-gradient(135deg, rgba(255,248,250,0.95) 0%, rgba(255,255,255,0.9) 100%)',
-        backdropFilter: 'blur(32px)',
-        border: '1px solid rgba(255, 77, 141, 0.12)',
-        boxShadow: '0 2px 8px rgba(255, 77, 141, 0.08), 0 16px 48px rgba(0,0,0,0.04)',
-        transition: 'all 0.3s cubic-bezier(0.23, 1, 0.32, 1)'
+        background: 'linear-gradient(135deg, rgba(255,248,250,0.98) 0%, rgba(255,255,255,0.93) 100%)',
+        backdropFilter: 'blur(40px)',
+        border: '1px solid rgba(255, 77, 141, 0.15)',
       }}>
       
-      <div className="flex items-start justify-between mb-5">
+      {/* Animated glow effect on hover */}
+      <motion.div
+        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
+        animate={isHovered ? { opacity: 0.03 } : { opacity: 0 }}
+        transition={{ duration: 0.4 }}
+        style={{
+          background: 'radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 77, 141, 0.1), transparent 80%)',
+          pointerEvents: 'none'
+        }}
+      />
+      
+      {/* Animated border glow */}
+      <motion.div
+        className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 pointer-events-none"
+        animate={isHovered ? { opacity: 0.5 } : { opacity: 0 }}
+        transition={{ duration: 0.4 }}
+        style={{
+          background: 'linear-gradient(135deg, rgba(255, 77, 141, 0.2), rgba(255, 182, 201, 0.1))',
+          boxShadow: '0 0 20px rgba(255, 77, 141, 0.2), inset 0 0 20px rgba(255, 77, 141, 0.08)',
+          filter: 'blur(1px)'
+        }}
+      />
+      
+      {/* Dynamic shadow */}
+      <motion.div
+        className="absolute inset-0 rounded-3xl opacity-0 pointer-events-none"
+        animate={isHovered ? { opacity: 1 } : { opacity: 0.5 }}
+        transition={{ duration: 0.4 }}
+        style={{
+          boxShadow: isHovered 
+            ? '0 20px 40px rgba(255, 77, 141, 0.12), 0 8px 16px rgba(0,0,0,0.06)'
+            : '0 2px 8px rgba(255, 77, 141, 0.08), 0 16px 48px rgba(0,0,0,0.04)'
+        }}
+      />
+      
+      <div className="relative z-10 flex items-start justify-between mb-5">
         <div>
-          <p className="text-[9px] font-semibold text-[#8F96A3] uppercase tracking-[0.15em] letter-spacing">{title}</p>
-          {subtitle && <p className="text-[12px] text-[#8F96A3] mt-1.5 font-medium">{subtitle}</p>}
+          <motion.p 
+            className="text-[9px] font-semibold text-[#8F96A3] uppercase tracking-[0.15em]"
+            animate={isHovered ? { letterSpacing: '0.2em' } : { letterSpacing: '0.15em' }}
+            transition={{ duration: 0.3 }}>
+            {title}
+          </motion.p>
+          {subtitle && (
+            <motion.p 
+              className="text-[12px] text-[#8F96A3] mt-1.5 font-medium"
+              animate={isHovered ? { color: '#FF4D8D' } : { color: '#8F96A3' }}
+              transition={{ duration: 0.3 }}>
+              {subtitle}
+            </motion.p>
+          )}
         </div>
       </div>
-      {children}
+      <div className="relative z-10">
+        {children}
+      </div>
     </motion.div>);
 
 }
@@ -86,16 +162,27 @@ const DAYS = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
 function HeatmapCell({ value, max }) {
   const intensity = max > 0 ? value / max : 0;
   const alpha = 0.06 + intensity * 0.85;
+  
   return (
     <motion.div
-      whileHover={{ scale: 1.05 }}
-      className="rounded-lg w-full aspect-square cursor-pointer transition-all"
+      whileHover={{ scale: 1.15, transition: { duration: 0.3 } }}
+      whileTap={{ scale: 0.95 }}
+      className="rounded-lg w-full aspect-square cursor-pointer"
+      animate={{
+        opacity: [0.8, 1, 0.8],
+      }}
+      transition={{
+        duration: 3 + Math.random() * 2,
+        repeat: Infinity,
+        ease: 'easeInOut'
+      }}
       style={{
         background: `rgba(255, 77, 141, ${alpha})`,
-        boxShadow: intensity > 0.6 ? `0 0 8px rgba(255, 77, 141, ${intensity * 0.3})` : 'none'
+        boxShadow: intensity > 0.6 
+          ? `0 0 12px rgba(255, 77, 141, ${intensity * 0.4})` 
+          : `0 0 4px rgba(255, 77, 141, ${intensity * 0.15})`
       }}
       title={`${value} txn`} />);
-
 
 }
 
@@ -135,14 +222,28 @@ const PARTICIPATION_SEGMENTS = [
 
 
 function DonutChart({ data }) {
+  const [isHovered, setIsHovered] = useState(null);
+  
   return (
     <div className="flex items-center gap-5">
-      <motion.div
-        className="flex-shrink-0"
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.6 }}
+      <motion.div 
+        className="flex-shrink-0 relative"
+        initial={{ opacity: 0, scale: 0.8, rotateZ: -10 }}
+        animate={{ opacity: 1, scale: 1, rotateZ: 0 }}
+        transition={{ duration: 0.8, ease: [0.165, 0.84, 0.44, 1] }}
         style={{ width: 110, height: 110 }}>
+        {/* Pulsing halo */}
+        <motion.div
+          className="absolute inset-0 rounded-full"
+          animate={{ 
+            boxShadow: [
+              '0 0 20px rgba(255, 77, 141, 0)',
+              '0 0 30px rgba(255, 77, 141, 0.15)',
+              '0 0 20px rgba(255, 77, 141, 0)'
+            ]
+          }}
+          transition={{ duration: 3, repeat: Infinity }}
+        />
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -153,7 +254,9 @@ function DonutChart({ data }) {
               outerRadius={50}
               paddingAngle={2}
               dataKey="value"
-              strokeWidth={0}>
+              strokeWidth={0}
+              animationDuration={1000}
+              animationEasing="ease-out">
               
               {data.map((_, i) =>
               <Cell key={i} fill={PARTICIPATION_COLORS[i % PARTICIPATION_COLORS.length]} />
@@ -166,15 +269,31 @@ function DonutChart({ data }) {
         {data.map((item, i) =>
         <motion.div
           key={item.name}
-          className="flex items-center gap-2.5"
-          initial={{ opacity: 0, x: -10 }}
+          className="flex items-center gap-2.5 group cursor-pointer"
+          onHoverStart={() => setIsHovered(i)}
+          onHoverEnd={() => setIsHovered(null)}
+          initial={{ opacity: 0, x: -12 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: i * 0.05 }}>
+          transition={{ delay: 0.4 + i * 0.08, ease: [0.165, 0.84, 0.44, 1] }}
+          whileHover={{ x: 4 }}>
           
-            <div className="w-2 h-2 rounded-full flex-shrink-0"
-          style={{ background: PARTICIPATION_COLORS[i % PARTICIPATION_COLORS.length], boxShadow: `0 0 8px ${PARTICIPATION_COLORS[i % PARTICIPATION_COLORS.length]}40` }} />
-            <span className="text-[10px] text-[#8F96A3] flex-1 font-medium">{item.name}</span>
-            <span className="text-[10px] font-bold text-[#2A2A2A] tabular-nums">{item.value}%</span>
+            <motion.div 
+              className="w-2.5 h-2.5 rounded-full flex-shrink-0 transition-all"
+              animate={{
+                scale: isHovered === i ? 1.4 : 1,
+                boxShadow: isHovered === i 
+                  ? `0 0 16px ${PARTICIPATION_COLORS[i % PARTICIPATION_COLORS.length]}80`
+                  : `0 0 8px ${PARTICIPATION_COLORS[i % PARTICIPATION_COLORS.length]}40`
+              }}
+              transition={{ duration: 0.3 }}
+              style={{ background: PARTICIPATION_COLORS[i % PARTICIPATION_COLORS.length] }} />
+            <span className="text-[10px] text-[#8F96A3] flex-1 font-medium group-hover:text-[#FF4D8D] transition-colors duration-300">{item.name}</span>
+            <motion.span 
+              className="text-[10px] font-bold text-[#2A2A2A] tabular-nums"
+              animate={{ scale: isHovered === i ? 1.1 : 1 }}
+              transition={{ duration: 0.2 }}>
+              {item.value}%
+            </motion.span>
           </motion.div>
         )}
       </div>
@@ -269,7 +388,11 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
       
 
       {/* ── ROW 1: Sales Trend + EBITDA ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-4">
+      <motion.div 
+        className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-4"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3, staggerChildren: 0.1 }}>
 
         {/* Sales vs Projection chart */}
         <AnalyticsCard
@@ -280,28 +403,40 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
           
           <div className="grid grid-cols-2 gap-3 mb-5">
             <motion.div
-              whileHover={{ scale: 1.02 }}
-              className="p-4 rounded-2xl transition-all"
+              whileHover={{ scale: 1.05, y: -2 }}
+              className="p-4 rounded-2xl group cursor-pointer relative overflow-hidden"
               style={{
                 background: 'linear-gradient(135deg, rgba(255, 77, 141, 0.08) 0%, rgba(255, 182, 201, 0.06) 100%)',
                 border: '1px solid rgba(255, 77, 141, 0.15)'
               }}>
               
-              <p className="text-[9px] text-[#8F96A3] font-semibold mb-2 uppercase tracking-wide">Ventas hoy</p>
-              <p className="text-[22px] font-black tabular-nums tracking-tight leading-none" style={{ color: '#FF4D8D' }}>
+              {/* Hover glow */}
+              <motion.div 
+                className="absolute inset-0 opacity-0 group-hover:opacity-100"
+                style={{ background: 'radial-gradient(circle, rgba(255, 77, 141, 0.1), transparent)' }}
+              />
+              
+              <p className="text-[9px] text-[#8F96A3] font-semibold mb-2 uppercase tracking-widest relative z-10">Ventas hoy</p>
+              <p className="text-[22px] font-black tabular-nums tracking-tight leading-none relative z-10" style={{ color: '#FF4D8D' }}>
                 {fmt(today?.total_sales)}
               </p>
             </motion.div>
             <motion.div
-              whileHover={{ scale: 1.02 }}
-              className="p-4 rounded-2xl transition-all"
+              whileHover={{ scale: 1.05, y: -2 }}
+              className="p-4 rounded-2xl group cursor-pointer relative overflow-hidden"
               style={{
                 background: 'linear-gradient(135deg, rgba(255, 127, 165, 0.06) 0%, rgba(255, 182, 201, 0.04) 100%)',
                 border: '1px solid rgba(255, 182, 201, 0.2)'
               }}>
               
-              <p className="text-[9px] text-[#8F96A3] font-semibold mb-2 uppercase tracking-wide">Proyección EOD</p>
-              <p className="text-[22px] font-black tabular-nums leading-none" style={{ color: '#FF7FA5' }}>
+              {/* Hover glow */}
+              <motion.div 
+                className="absolute inset-0 opacity-0 group-hover:opacity-100"
+                style={{ background: 'radial-gradient(circle, rgba(255, 127, 165, 0.1), transparent)' }}
+              />
+              
+              <p className="text-[9px] text-[#8F96A3] font-semibold mb-2 uppercase tracking-widest relative z-10">Proyección EOD</p>
+              <p className="text-[22px] font-black tabular-nums leading-none relative z-10" style={{ color: '#FF7FA5' }}>
                 {fmt(Math.round(today?.total_sales * 1.05) || 0)}
               </p>
             </motion.div>
@@ -402,10 +537,14 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
             </div>
           }
         </AnalyticsCard>
-      </div>
+      </motion.div>
 
       {/* ── ROW 2: TXN Heatmap + Participación + Cajeros ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <motion.div 
+        className="grid grid-cols-1 lg:grid-cols-3 gap-4"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3, staggerChildren: 0.1, delayChildren: 0.2 }}>
 
         {/* Hourly heatmap */}
         <AnalyticsCard title="Tráfico por Hora" subtitle="Transacciones · patrón semanal" delay={0.26}>
@@ -514,7 +653,7 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
             </div>
           )}
         </AnalyticsCard>
-      </div>
+      </motion.div>
     </motion.div>);
 
 }
