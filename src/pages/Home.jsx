@@ -1050,6 +1050,7 @@ export default function Home() {
 
     {/* ── Modales ── */}
     <Suspense fallback={null}>
+        <>
         {/* Silueta principal superior derecha - relieve sofisticado */}
         <motion.div
             animate={{
@@ -1608,6 +1609,8 @@ export default function Home() {
           onClose={() => setShowPYGModal(false)} />
         }
       </AnimatePresence>
+        </>
     </div>
+    </Suspense>
   );
 }
