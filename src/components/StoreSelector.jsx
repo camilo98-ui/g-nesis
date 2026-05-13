@@ -272,11 +272,12 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
     <>
       <div className="relative">
         <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-          
-
-
-
-
+          <button
+            onClick={() => setOpen(!open)}
+            className="w-full px-4 py-3 h-11 text-left rounded-xl border-2 border-rose-200/60 bg-white/80 backdrop-blur-sm text-sm font-medium text-slate-700 hover:border-rose-400 transition-all flex items-center justify-between">
+            <span>{selectedStoreName || 'Selecciona una tienda'}</span>
+            <MapPin className="w-4 h-4 text-pink-400 flex-shrink-0" />
+          </button>
 
 
 
