@@ -281,19 +281,20 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
 
           {hasSalesData ? (
             <ResponsiveContainer width="100%" height={100}>
-              <AreaChart data={sorted30} margin={{ top: 2, right: 2, bottom: 0, left: 0 }}>
+              <AreaChart data={sorted30} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
                 <defs>
                   <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#C21875" stopOpacity="0.18" />
+                    <stop offset="0%" stopColor="#C21875" stopOpacity="0.22" />
                     <stop offset="100%" stopColor="#C21875" stopOpacity="0" />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.04)" vertical={false} />
-                <XAxis dataKey="date" tick={{ fontSize: 9, fill: '#94a3b8', fontWeight: 500 }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
+                <CartesianGrid strokeDasharray="0" stroke="rgba(0,0,0,0)" vertical={false} />
+                <XAxis dataKey="date" tick={{ fontSize: 8, fill: '#cbd5e1', fontWeight: 400 }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
                 <YAxis hide />
                 <Tooltip content={<SalesTooltip />} />
-                <Area type="monotone" dataKey="ventas" stroke="#C21875" strokeWidth={1.5}
-                  fill="url(#salesGrad)" dot={false} activeDot={{ r: 3, strokeWidth: 0, fill: '#C21875' }} />
+                <Area type="monotone" dataKey="ventas" stroke="#C21875" strokeWidth={2.5}
+                  fill="url(#salesGrad)" dot={false} isAnimationActive={false}
+                  activeDot={{ r: 5, strokeWidth: 0, fill: '#C21875' }} />
               </AreaChart>
             </ResponsiveContainer>
           ) : (
@@ -319,19 +320,20 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
 
           {hasSalesData ? (
             <ResponsiveContainer width="100%" height={100}>
-              <AreaChart data={ebitdaData} margin={{ top: 2, right: 2, bottom: 0, left: 0 }}>
+              <AreaChart data={ebitdaData} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
                 <defs>
                   <linearGradient id="ebitdaGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#6366f1" stopOpacity="0.15" />
+                    <stop offset="0%" stopColor="#6366f1" stopOpacity="0.2" />
                     <stop offset="100%" stopColor="#6366f1" stopOpacity="0" />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.04)" vertical={false} />
-                <XAxis dataKey="date" tick={{ fontSize: 9, fill: '#94a3b8', fontWeight: 500 }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
+                <CartesianGrid strokeDasharray="0" stroke="rgba(0,0,0,0)" vertical={false} />
+                <XAxis dataKey="date" tick={{ fontSize: 8, fill: '#cbd5e1', fontWeight: 400 }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
                 <YAxis hide />
                 <Tooltip content={<EbitdaTooltip />} />
-                <Area type="monotone" dataKey="ebitda" stroke="#6366f1" strokeWidth={1.5}
-                  fill="url(#ebitdaGrad)" dot={false} activeDot={{ r: 3, strokeWidth: 0, fill: '#6366f1' }} />
+                <Area type="monotone" dataKey="ebitda" stroke="#6366f1" strokeWidth={2.5}
+                  fill="url(#ebitdaGrad)" dot={false} isAnimationActive={false}
+                  activeDot={{ r: 5, strokeWidth: 0, fill: '#6366f1' }} />
               </AreaChart>
             </ResponsiveContainer>
           ) : (
