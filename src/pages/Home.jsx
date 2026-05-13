@@ -1609,8 +1609,8 @@ export default function Home() {
           onClose={() => setShowPYGModal(false)} />
         }
       </AnimatePresence>
-        </>
-    </div>
+      </div>
+      </>
     </Suspense>
   );
 }
