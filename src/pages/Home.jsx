@@ -1452,7 +1452,7 @@ export default function Home() {
           })}
         </div>
         }
-      </div>
+      </>
       <Suspense fallback={null}>
         <AnimatePresence>
           {showNotifications &&
@@ -1610,8 +1610,7 @@ export default function Home() {
           onClose={() => setShowPYGModal(false)} />
         }
       </AnimatePresence>
-      </>
+      </Suspense>
       </div>
-    </Suspense>
   );
 }
