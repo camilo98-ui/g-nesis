@@ -328,10 +328,21 @@ export default function HomeWorkspace({
 
         <div className="flex-1 px-2.5 space-y-0.5 overflow-y-auto py-1">
           <p className="text-[9px] font-black text-slate-300 uppercase tracking-[0.15em] px-3 mb-2">Módulos</p>
-          {filteredNav.map(item => (
-            <NavItem key={item.path} item={item} isActive={activeNav === item.path}
-              onClick={() => { setActiveNav(item.path); window.location.href = `/${item.path}`; }} />
-          ))}
+          {filteredNav.map(item => {
+            const handleClick = () => {
+              if (!item.path) {
+                // Modal actions
+                if (item.onClick === 'onShowPYGModal') onShowPYGModal?.();
+                return;
+              }
+              setActiveNav(item.path);
+              window.location.href = `/${item.path}`;
+            };
+            return (
+              <NavItem key={item.label} item={item} isActive={activeNav === item.path}
+                onClick={handleClick} />
+            );
+          })}
         </div>
 
         <div className="p-3">
