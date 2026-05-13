@@ -26,18 +26,12 @@ function getGreeting() {
 }
 
 const NAV_ITEMS = [
-  { icon: LayoutDashboard, label: 'Tienda',      path: 'Dashboard',            color: '#E91E63', roles: ['lider','embajador','gerente'] },
-  { icon: Users,           label: 'Cajeros',      path: 'CashiersDashboard',    color: '#A855F7', roles: ['lider','embajador','gerente'] },
-  { icon: TrendingUp,      label: 'Ventas',       path: 'Sales',                color: '#C21875', roles: ['lider','embajador','gerente'] },
-  { icon: Target,          label: 'Presupuesto',  path: 'Budget',               color: '#10b981', roles: ['lider','gerente'] },
-  { icon: Snowflake,       label: 'Nevera',       path: 'FreezerMap',           color: '#06b6d4', roles: ['lider','embajador','gerente'] },
-  { icon: BarChart3,       label: 'Rankings',     path: 'Rankings',             color: '#f59e0b', roles: ['lider','embajador','gerente'] },
-  { icon: Clock,           label: 'Horarios',     path: 'PopsyPlanner',         color: '#8b5cf6', roles: ['lider','gerente'] },
-  { icon: ShieldCheck,     label: 'Calidad',      path: 'Quality',              color: '#14b8a6', roles: ['lider','gerente'] },
-  { icon: Activity,        label: 'CMD Center',   path: 'GenesisCommandCenter', color: '#64748b', roles: ['gerente'] },
-  { icon: TrendingUp,      label: 'P&G',          path: 'PYGDashboard',         color: '#059669', roles: ['gerente'] },
-  { icon: Trophy,          label: 'Ruleta',       path: 'RoulettePopsy',        color: '#d97706', roles: ['gerente'] },
-  { icon: SettingsIcon,    label: 'Config',       path: 'Settings',             color: '#6b7280', roles: ['gerente'] },
+  { icon: LayoutDashboard, label: 'Tienda',        path: 'Dashboard',          color: '#E91E63', roles: ['lider','embajador','gerente'] },
+  { icon: TrendingUp,      label: 'P&G',           path: 'PYGDashboard',       color: '#059669', roles: ['lider','embajador','gerente'] },
+  { icon: FileText,        label: 'Informe',        path: 'Reports',            color: '#6366f1', roles: ['lider','embajador','gerente'] },
+  { icon: Clock,           label: 'Txn por hora',  path: 'HourlyTransactions', color: '#8b5cf6', roles: ['lider','embajador','gerente'] },
+  { icon: BarChart3,       label: 'Participación', path: 'SalesReportView',    color: '#f59e0b', roles: ['lider','embajador','gerente'] },
+  { icon: Snowflake,       label: 'Mapa Nevera',   path: 'FreezerMap',         color: '#06b6d4', roles: ['lider','embajador','gerente'] },
 ];
 
 // Mini sparkline path generator
