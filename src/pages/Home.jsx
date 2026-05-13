@@ -1039,8 +1039,7 @@ export default function Home() {
     />
 
     {/* ── OLD DASHBOARD REMOVED ── */}
-    <div style={{display:'none'}}>
-      <div>
+    {false && <div>
         {/* Silueta principal superior derecha - relieve sofisticado */}
         <motion.div
             animate={{
@@ -1605,7 +1604,7 @@ export default function Home() {
 
 
 
-    </div>
+    </div>}
 
     {/* ── MODALES ACTIVOS (fuera del div hidden) ── */}
     <Suspense fallback={null}>
