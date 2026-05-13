@@ -361,28 +361,27 @@ export default function HomeWorkspace({
       </motion.aside>
 
       {/* ── MAIN CONTENT ── */}
-      <main className="flex-1 min-w-0 flex flex-col overflow-hidden">
-        <div className="flex flex-1 overflow-hidden">
+      <main className="flex-1 min-w-0 flex overflow-hidden" style={{ height: '100vh' }}>
 
-          {/* CENTER CONTENT */}
+          {/* CENTER CONTENT — scrollable */}
           <div className="flex-1 min-w-0 overflow-y-auto p-4 lg:p-6">
 
-            {/* TOP BAR */}
+            {/* TOP BAR — fixed feel via sticky */}
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4 }}
-              className="flex items-center justify-between mb-5 gap-4"
+              className="flex items-center justify-between mb-5 gap-3"
             >
-              <div>
+              <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 mb-0.5">
-                  <GreetIcon className="w-4 h-4" style={{ color: greeting.color }} />
-                  <h1 className="text-lg lg:text-xl font-black text-slate-800">
+                  <GreetIcon className="w-4 h-4 flex-shrink-0" style={{ color: greeting.color }} />
+                  <h1 className="text-base lg:text-lg font-black text-slate-800 truncate">
                     {greeting.text}
                   </h1>
                 </div>
-                <p className="text-xs text-slate-400 font-medium">
-                  {isGerente ? 'Visión ejecutiva · Todas las tiendas' : `${storeName} · Resumen operacional`}
+                <p className="text-[11px] text-slate-400 font-medium truncate">
+                  {isGerente ? 'Visión ejecutiva · Todas las tiendas' : `${storeName} · Cockpit operacional`}
                 </p>
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
@@ -402,47 +401,115 @@ export default function HomeWorkspace({
                   </div>
                 )}
                 {!isGerente && (
-                  <div className="w-36 lg:w-44">
+                  <div className="w-36 lg:w-44 flex-shrink-0">
                     <StoreSelector selectedStore={selectedStore} onStoreChange={onStoreChange} />
                   </div>
                 )}
               </div>
             </motion.div>
 
-            {/* KPI STRIP */}
+            {/* ── KPI STRIP ── */}
             {!isGerente && (
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
-                <KPICard label="Ventas Hoy"      value={salesVal}             change={salesChange} icon={TrendingUp} color="#C21875" chartData={sparkSales} delay={0}    />
-                <KPICard label="Transacciones"   value={txnVal}               change={0}           icon={Receipt}   color="#A855F7" chartData={sparkTxn}   delay={0.06} />
-                <KPICard label="Ticket Promedio" value={ticketVal}            change={0}           icon={BarChart2} color="#6366f1" chartData={[5,6,5,7,8,7,8,9]} delay={0.12} />
-                <KPICard label="Cajeros Activos" value={cashiers.length || '—'} change={0}        icon={Users}     color="#10b981" chartData={[4,4,5,5,5,6,5,6]} delay={0.18} />
+                <KPICard label="Ventas Hoy"      value={salesVal}               change={salesChange} icon={TrendingUp} color="#C21875" chartData={sparkSales}       delay={0}    />
+                <KPICard label="Transacciones"   value={txnVal}                 change={0}           icon={Receipt}   color="#A855F7" chartData={sparkTxn}          delay={0.06} />
+                <KPICard label="Ticket Promedio" value={ticketVal}              change={0}           icon={BarChart2} color="#6366f1" chartData={[5,6,5,7,8,7,8,9]} delay={0.12} />
+                <KPICard label="Cajeros Activos" value={cashiers.length || '—'} change={0}           icon={Users}     color="#10b981" chartData={[4,4,5,5,5,6,5,6]} delay={0.18} />
               </div>
             )}
 
-            {/* MODULE GRID */}
+            {/* ── LIVE INTELLIGENCE FEED ── */}
+            {!isGerente && (
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.22, duration: 0.5 }}
+                className="rounded-2xl p-4 mb-5"
+                style={{
+                  background: 'rgba(255,255,255,0.78)',
+                  backdropFilter: 'blur(24px)',
+                  border: '1px solid rgba(255,255,255,0.95)',
+                  boxShadow: '0 4px 24px rgba(0,0,0,0.05)',
+                }}
+              >
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" style={{ boxShadow: '0 0 6px rgba(52,211,153,0.9)' }} />
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">Inteligencia operacional · ahora</p>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {[
+                    { emoji: '📈', text: salesVal !== '—' ? `Ventas hoy: ${salesVal} ${salesChange > 0 ? `(+${salesChange}% vs ayer)` : salesChange < 0 ? `(${salesChange}% vs ayer)` : ''}` : 'Sin datos de ventas aún hoy', type: salesChange >= 0 ? 'good' : 'warn' },
+                    { emoji: '🧾', text: txnVal !== '—' ? `${txnVal} transacciones registradas hoy` : 'Sin transacciones registradas hoy', type: 'info' },
+                    { emoji: '👥', text: `${cashiers.length} cajeros activos en tienda`, type: 'info' },
+                    { emoji: '🎯', text: ticketVal !== '—' ? `Ticket promedio: ${ticketVal} por transacción` : 'Ingresa ventas para ver el ticket promedio', type: 'good' },
+                    { emoji: '⚠️', text: 'Revisa el nivel de stock en la nevera hoy', type: 'warn' },
+                    { emoji: '✨', text: 'Registra las ventas del turno para mantener el análisis actualizado', type: 'action' },
+                  ].map((item, i) => (
+                    <motion.div key={i}
+                      initial={{ opacity: 0, x: -6 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.28 + i * 0.06 }}
+                      className="flex items-start gap-2.5 px-3 py-2.5 rounded-xl"
+                      style={{
+                        background: item.type === 'warn' ? 'rgba(245,158,11,0.05)' :
+                                    item.type === 'good' ? 'rgba(16,185,129,0.05)' :
+                                    item.type === 'action' ? 'rgba(194,24,117,0.05)' : 'rgba(0,0,0,0.02)',
+                        border: item.type === 'warn' ? '1px solid rgba(245,158,11,0.15)' :
+                                item.type === 'good' ? '1px solid rgba(16,185,129,0.12)' :
+                                item.type === 'action' ? '1px solid rgba(194,24,117,0.12)' : '1px solid rgba(0,0,0,0.04)',
+                      }}>
+                      <span className="text-sm flex-shrink-0 mt-0.5">{item.emoji}</span>
+                      <p className="text-[11px] font-medium text-slate-600 leading-snug">{item.text}</p>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {/* ── QUICK ACTIONS (lider) ── */}
+            {!isGerente && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                className="flex flex-wrap gap-2 mb-5"
+              >
+                {[
+                  { label: 'Registrar Ventas',    icon: TrendingUp, onClick: onShowStoreSales,      color: '#C21875' },
+                  { label: 'Presupuesto Mensual', icon: Target,     onClick: onShowBudgetDashboard, color: '#10b981' },
+                  { label: 'Informe Gerencial',   icon: FileText,   onClick: onShowReport,          color: '#6366f1' },
+                ].map(({ label, icon: I, onClick, color }) => (
+                  <button key={label} onClick={onClick}
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all hover:scale-105 active:scale-95"
+                    style={{ background: `${color}10`, color, border: `1px solid ${color}20` }}>
+                    <I style={{ width: 13, height: 13 }} />{label}
+                  </button>
+                ))}
+              </motion.div>
+            )}
+
+            {/* ── MODULE GRID (secondary) ── */}
             <div className="mb-5">
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.15em]">Acceso rápido</p>
-              </div>
+              <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.15em] mb-3">Módulos</p>
               <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
                 {QUICK_MODULES.map((m, i) => (
                   <motion.div key={m.label}
                     initial={{ opacity: 0, scale: 0.92 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.1 + i * 0.04, duration: 0.4, ease: [0.23,1,0.32,1] }}
+                    transition={{ delay: 0.12 + i * 0.04, duration: 0.4, ease: [0.23,1,0.32,1] }}
                     whileHover={{ y: -3, transition: { duration: 0.15 } }}
                     whileTap={{ scale: 0.96 }}
                   >
                     <Link to={`/${m.path}`}>
                       <div className="relative overflow-hidden rounded-2xl p-3 cursor-pointer text-center"
                         style={{
-                          background: 'rgba(255,255,255,0.8)',
+                          background: 'rgba(255,255,255,0.78)',
                           backdropFilter: 'blur(16px)',
                           border: `1px solid ${m.color}15`,
-                          boxShadow: `0 2px 16px rgba(0,0,0,0.04), 0 0 0 1px rgba(255,255,255,0.8)`,
+                          boxShadow: `0 2px 16px rgba(0,0,0,0.04)`,
                         }}>
-                        <div className="absolute -bottom-3 -right-3 w-12 h-12 rounded-full blur-xl pointer-events-none"
-                          style={{ background: m.color, opacity: 0.1 }} />
+                        <div className="absolute -bottom-3 -right-3 w-10 h-10 rounded-full blur-xl pointer-events-none"
+                          style={{ background: m.color, opacity: 0.08 }} />
                         <div className="w-8 h-8 rounded-xl flex items-center justify-center mx-auto mb-2"
                           style={{ background: `${m.color}12` }}>
                           <m.icon style={{ color: m.color, width: 16, height: 16 }} />
@@ -456,36 +523,23 @@ export default function HomeWorkspace({
               </div>
             </div>
 
-            {/* GERENTE MODULES */}
+            {/* ── GERENTE PANEL ── */}
             {isGerente && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3 }}
-                className="mb-5"
-              >
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="mb-5">
                 <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.15em] mb-3">Panel ejecutivo</p>
-                <div className="grid grid-cols-3 sm:grid-cols-5 gap-2.5">
+                <div className="grid grid-cols-3 sm:grid-cols-5 gap-2.5 mb-3">
                   {[
-                    { icon: Activity,     label: 'CMD Center',    sublabel: 'Global',        color: '#64748b', path: 'GenesisCommandCenter' },
-                    { icon: TrendingUp,   label: 'P&G',           sublabel: 'Rentabilidad',  color: '#059669', path: 'PYGDashboard' },
-                    { icon: Trophy,       label: 'Ruleta',        sublabel: 'Premios',       color: '#d97706', path: 'RoulettePopsy' },
-                    { icon: BarChart3,    label: 'Participación', sublabel: 'Mix negocio',   color: '#6366f1', path: 'SalesReportView' },
-                    { icon: SettingsIcon, label: 'Config',        sublabel: 'Ajustes',       color: '#6b7280', path: 'Settings' },
-                  ].map((m, i) => (
-                    <motion.div key={m.label}
-                      whileHover={{ y: -3, transition: { duration: 0.15 } }}
-                      whileTap={{ scale: 0.96 }}>
+                    { icon: Activity,     label: 'CMD Center',    sublabel: 'Global',       color: '#64748b', path: 'GenesisCommandCenter' },
+                    { icon: TrendingUp,   label: 'P&G',           sublabel: 'Rentabilidad', color: '#059669', path: 'PYGDashboard' },
+                    { icon: Trophy,       label: 'Ruleta',        sublabel: 'Premios',      color: '#d97706', path: 'RoulettePopsy' },
+                    { icon: BarChart3,    label: 'Participación', sublabel: 'Mix negocio',  color: '#6366f1', path: 'SalesReportView' },
+                    { icon: SettingsIcon, label: 'Config',        sublabel: 'Ajustes',      color: '#6b7280', path: 'Settings' },
+                  ].map((m) => (
+                    <motion.div key={m.label} whileHover={{ y: -3 }} whileTap={{ scale: 0.96 }}>
                       <Link to={`/${m.path}`}>
                         <div className="relative overflow-hidden rounded-2xl p-3 cursor-pointer text-center"
-                          style={{
-                            background: 'rgba(255,255,255,0.75)',
-                            backdropFilter: 'blur(16px)',
-                            border: `1px solid ${m.color}15`,
-                            boxShadow: `0 2px 16px rgba(0,0,0,0.04)`,
-                          }}>
-                          <div className="w-8 h-8 rounded-xl flex items-center justify-center mx-auto mb-2"
-                            style={{ background: `${m.color}12` }}>
+                          style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)', border: `1px solid ${m.color}15`, boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
+                          <div className="w-8 h-8 rounded-xl flex items-center justify-center mx-auto mb-2" style={{ background: `${m.color}12` }}>
                             <m.icon style={{ color: m.color, width: 16, height: 16 }} />
                           </div>
                           <p className="text-[11px] font-bold text-slate-700">{m.label}</p>
@@ -495,15 +549,14 @@ export default function HomeWorkspace({
                     </motion.div>
                   ))}
                 </div>
-                {/* Gerente actions */}
-                <div className="flex flex-wrap gap-2 mt-3">
+                <div className="flex flex-wrap gap-2">
                   {[
-                    { label: 'Importar PPT Excel', icon: FileSpreadsheet, onClick: onShowBudgetImporter, color: '#10b981' },
-                    { label: 'Subir KPIs',         icon: BarChart3,       onClick: onShowKpisUploader,   color: '#6366f1' },
-                    { label: 'Agregadores',        icon: FileSpreadsheet, onClick: onShowAggregatorsUploader, color: '#f59e0b' },
-                    { label: 'Subir P&G',          icon: TrendingUp,      onClick: onShowPYGUploader,    color: '#059669' },
-                    { label: 'Ver P&G Tienda',     icon: TrendingUp,      onClick: onShowPYGModal,       color: '#C21875' },
-                    { label: 'Backup',             icon: Download,        onClick: onBackup,             color: '#64748b' },
+                    { label: 'Importar PPT', icon: FileSpreadsheet, onClick: onShowBudgetImporter,       color: '#10b981' },
+                    { label: 'Subir KPIs',   icon: BarChart3,       onClick: onShowKpisUploader,         color: '#6366f1' },
+                    { label: 'Agregadores',  icon: FileSpreadsheet, onClick: onShowAggregatorsUploader,  color: '#f59e0b' },
+                    { label: 'Subir P&G',    icon: TrendingUp,      onClick: onShowPYGUploader,          color: '#059669' },
+                    { label: 'Ver P&G',      icon: TrendingUp,      onClick: onShowPYGModal,             color: '#C21875' },
+                    { label: 'Backup',       icon: Download,        onClick: onBackup,                   color: '#64748b' },
                   ].map(({ label, icon: I, onClick, color }) => (
                     <button key={label} onClick={onClick}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all hover:scale-105 active:scale-95"
@@ -515,41 +568,22 @@ export default function HomeWorkspace({
               </motion.div>
             )}
 
-            {/* LIDER QUICK ACTIONS */}
-            {!isGerente && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.35 }}
-                className="flex flex-wrap gap-2 mb-5"
-              >
-                {[
-                  { label: 'Registrar Ventas',    icon: TrendingUp, onClick: onShowStoreSales,    color: '#C21875' },
-                  { label: 'Presupuesto Mensual', icon: Target,     onClick: onShowBudgetDashboard, color: '#10b981' },
-                  { label: 'Informe Gerencial',   icon: FileText,   onClick: onShowReport,         color: '#6366f1' },
-                ].map(({ label, icon: I, onClick, color }) => (
-                  <button key={label} onClick={onClick}
-                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all hover:scale-105 active:scale-95"
-                    style={{ background: `${color}10`, color, border: `1px solid ${color}20` }}>
-                    <I style={{ width: 13, height: 13 }} />{label}
-                  </button>
-                ))}
-              </motion.div>
-            )}
-
             <p className="text-center text-[9px] font-bold tracking-widest uppercase mt-6 mb-2"
-              style={{ color: 'rgba(194,24,117,0.18)' }}>
+              style={{ color: 'rgba(194,24,117,0.15)' }}>
               Popsy AI Workspace · Todos los derechos reservados
             </p>
           </div>
 
-          {/* ── RIGHT AI PANEL ── */}
+          {/* ── RIGHT AI PANEL — fixed height, internal scroll ── */}
           <motion.aside
             initial={{ x: 32, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
-            className="hidden xl:flex flex-col w-80 min-h-screen flex-shrink-0 sticky top-0"
+            className="hidden xl:flex flex-col w-80 flex-shrink-0"
             style={{
+              height: '100vh',
+              position: 'sticky',
+              top: 0,
               background: 'rgba(255,255,255,0.65)',
               backdropFilter: 'blur(40px)',
               borderLeft: '1px solid rgba(0,0,0,0.05)',
@@ -669,7 +703,6 @@ export default function HomeWorkspace({
               </div>
             </div>
           </motion.aside>
-        </div>
       </main>
     </div>
   );
