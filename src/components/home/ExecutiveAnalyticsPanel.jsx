@@ -5,7 +5,6 @@ import {
   PieChart, Pie, Cell, ComposedChart
 } from 'recharts';
 import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
-import ProjectionCard from './ProjectionCard';
 
 // ── HELPERS ──────────────────────────────────────────────────────────────────
 function fmt(n) {
@@ -253,15 +252,15 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
         <div className="flex-1 h-px" style={{ background: 'linear-gradient(90deg, rgba(0,0,0,0.06), transparent)' }} />
       </div>
 
-      {/* ── ROW 1: Sales Trend + EBITDA + Projection ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-6 gap-4 mb-4">
+      {/* ── ROW 1: Sales Trend + EBITDA ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-4">
 
         {/* Sales vs Projection chart */}
         <AnalyticsCard
           title="Ventas vs Proyección"
           subtitle={hasSalesData ? `Últimos ${sorted30.length} registros` : 'Sin datos aún'}
           delay={0.18}
-          colSpan="lg:col-span-2"
+          colSpan="lg:col-span-3"
         >
           <div className="grid grid-cols-2 gap-3 mb-4">
             <div className="p-3 rounded-xl" style={{ background: '#FAE8E6' }}>
@@ -321,15 +320,15 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
         {/* EBITDA por Mes */}
         <AnalyticsCard
           title="EBITDA Por Mes"
-          subtitle="Margen operativo ~34%"
+          subtitle="Margen operativo"
           delay={0.22}
-          colSpan="lg:col-span-1"
+          colSpan="lg:col-span-2"
         >
           <div className="mb-4">
-            <p className="text-[22px] font-black tabular-nums tracking-tight leading-none" style={{ color: '#F5D5D1' }}>
-              {fmt(ebitdaData[ebitdaData.length - 1]?.ebitda || 0)}
+            <p className="text-[28px] font-black tabular-nums tracking-tight leading-none" style={{ color: '#E91E63' }}>
+              {ebitdaData[ebitdaData.length - 1]?.margen || 34}%
             </p>
-            <p className="text-[10px] text-slate-400 mt-1">mes actual · 34% margen</p>
+            <p className="text-[10px] text-slate-400 mt-1">margen promedio · mes actual</p>
           </div>
 
           {ebitdaData.length > 0 ? (
@@ -337,15 +336,15 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
               <AreaChart data={ebitdaData} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
                 <defs>
                   <linearGradient id="ebitdaGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#F5D5D1" stopOpacity="0.3" />
-                    <stop offset="100%" stopColor="#F5D5D1" stopOpacity="0" />
+                    <stop offset="0%" stopColor="#E91E63" stopOpacity="0.25" />
+                    <stop offset="100%" stopColor="#E91E63" stopOpacity="0" />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="0" stroke="rgba(0,0,0,0)" vertical={false} />
                 <XAxis dataKey="date" tick={{ fontSize: 8, fill: '#999', fontWeight: 400 }} axisLine={false} tickLine={false} />
                 <YAxis hide />
                 <Tooltip content={<EbitdaTooltip />} />
-                <Area type="monotone" dataKey="ebitda" stroke="#F5A8A0" strokeWidth={2.5}
+                <Area type="monotone" dataKey="margen" stroke="#E91E63" strokeWidth={2.5}
                   fill="url(#ebitdaGrad)" dot={false} isAnimationActive={false} />
               </AreaChart>
             </ResponsiveContainer>
@@ -355,13 +354,6 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
             </div>
           )}
         </AnalyticsCard>
-
-        {/* Projection Card */}
-        <ProjectionCard
-          currentSales={today?.total_sales || 1700000}
-          targetSales={1800000}
-          delay={0.26}
-        />
       </div>
 
       {/* ── ROW 2: TXN Heatmap + Participación + Cajeros ── */}
