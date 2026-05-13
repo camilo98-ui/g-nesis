@@ -444,6 +444,7 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
             }).sort((a, b) => (b.total_sales || 0) - (a.total_sales || 0)).slice(0, 5);
             
             const maxSales = Math.max(...thisMonthSales.map(d => d.total_sales || 0), 1);
+            const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
             
             return thisMonthSales.length > 0 ? (
               <div className="space-y-3">
@@ -451,6 +452,9 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
                   const salesPercent = (d.total_sales / maxSales) * 100;
                   const dateObj = new Date(d.date);
                   const dateStr = dateObj.toLocaleDateString('es', { day: '2-digit', month: 'short' });
+                  const dayName = dayNames[dateObj.getDay()];
+                  const pptCompliance = activeBudget?.sales_budget ? Math.round((d.total_sales / activeBudget.sales_budget) * 100) : null;
+                  
                   return (
                     <motion.div
                       key={d.id}
@@ -458,7 +462,7 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.5 + i * 0.06 }}
                       className="group">
-                      <div className="flex items-center gap-3 mb-1.5">
+                      <div className="flex items-center gap-3 mb-2">
                         <div className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-black flex-shrink-0"
                           style={{
                             background: i === 0 ? 'linear-gradient(135deg, #FF4D8D, #FF7FA5)' : `rgba(255, 77, 141, ${0.08 + i * 0.02})`,
@@ -468,13 +472,18 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
                           {i + 1}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-[11px] font-semibold text-[#2A2A2A]">{dateStr}</p>
+                          <p className="text-[11px] font-semibold text-[#2A2A2A]">{dateStr} · <span className="text-[#8F96A3] font-medium">{dayName}</span></p>
                           <p className="text-[9px] text-[#8F96A3] font-medium">{(d.total_transactions || 0).toLocaleString('es-CO')} txn</p>
                         </div>
                         <div className="text-right flex-shrink-0">
                           <p className="text-[11px] font-black tabular-nums" style={{ color: '#FF4D8D' }}>
                             {fmt(d.total_sales)}
                           </p>
+                          {pptCompliance !== null && (
+                            <p className={`text-[9px] font-bold tabular-nums mt-1 ${pptCompliance >= 80 ? 'text-emerald-600' : pptCompliance >= 60 ? 'text-amber-600' : 'text-rose-500'}`}>
+                              {pptCompliance}% PPT
+                            </p>
+                          )}
                         </div>
                       </div>
                       <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
