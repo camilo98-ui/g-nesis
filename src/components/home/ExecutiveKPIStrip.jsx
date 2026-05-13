@@ -524,76 +524,94 @@ export default function ExecutiveKPIStrip({
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.24, duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-          className="rounded-2xl p-4"
+          className="rounded-2xl p-5"
           style={{
-            background: 'rgba(255,255,255,0.9)',
+            background: 'rgba(255,255,255,0.93)',
             border: '1px solid rgba(0,0,0,0.06)',
             boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
             backdropFilter: 'blur(20px)',
           }}
         >
-          <div className="flex items-center justify-between mb-3">
+          {/* Header */}
+          <div className="flex items-start justify-between mb-4">
             <div>
-              <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-[0.14em]">Ventas diarias del mes vs PPT</p>
-              <p className="text-[10.5px] font-medium text-slate-500 mt-0.5">
+              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.16em] mb-0.5">
+                Ventas diarias del mes
+              </p>
+              <p className="text-[13px] font-bold text-slate-700">
                 {new Date(currentYear, currentMonth - 1, 1).toLocaleDateString('es', { month: 'long', year: 'numeric' })}
-                {acumMes > 0 && ` · Acumulado: ${fmt(acumMes)}`}
               </p>
             </div>
-            {pptMensualpct != null && (
-              <div className="text-right">
-                <p className="text-[18px] font-black tabular-nums"
-                  style={{ color: pptMensualpct >= 95 ? '#10b981' : pptMensualpct >= 75 ? '#f59e0b' : '#e11d48' }}>
-                  {pptMensualpct}%
-                </p>
-                <p className="text-[8.5px] text-slate-300 font-medium">avance PPT</p>
-              </div>
-            )}
+            <div className="flex items-center gap-4">
+              {acumMes > 0 && (
+                <div className="text-right">
+                  <p className="text-[11px] font-bold text-slate-700 tabular-nums">{fmt(acumMes)}</p>
+                  <p className="text-[8px] text-slate-400 font-medium">acumulado</p>
+                </div>
+              )}
+              {pptMensualpct != null && (
+                <div className="text-right pl-4" style={{ borderLeft: '1px solid rgba(0,0,0,0.08)' }}>
+                  <p className="text-[20px] font-black tabular-nums leading-none text-slate-800">
+                    {pptMensualpct}<span className="text-[12px] text-slate-400 font-semibold">%</span>
+                  </p>
+                  <p className="text-[8px] text-slate-400 font-medium">avance PPT</p>
+                </div>
+              )}
+            </div>
           </div>
 
-          <ResponsiveContainer width="100%" height={100}>
-            <BarChart data={chartData} margin={{ top: 4, right: 4, bottom: 0, left: 0 }} barSize={14}>
+          <ResponsiveContainer width="100%" height={110}>
+            <BarChart data={chartData} margin={{ top: 8, right: 4, bottom: 0, left: 0 }} barSize={16}>
+              <defs>
+                <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#C21875" stopOpacity="0.9" />
+                  <stop offset="100%" stopColor="#C21875" stopOpacity="0.4" />
+                </linearGradient>
+                <linearGradient id="barGradFail" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#94a3b8" stopOpacity="0.5" />
+                  <stop offset="100%" stopColor="#94a3b8" stopOpacity="0.2" />
+                </linearGradient>
+              </defs>
               <XAxis dataKey="day" tick={{ fontSize: 8, fill: '#94a3b8', fontWeight: 500 }}
                 axisLine={false} tickLine={false} />
               <YAxis hide />
-              <Tooltip content={<ChartTooltip />} />
+              <Tooltip content={<ChartTooltip />} cursor={{ fill: 'rgba(0,0,0,0.03)', radius: 4 }} />
               {dailyPPT && (
-                <ReferenceLine y={dailyPPT} stroke="#C21875" strokeDasharray="4 3" strokeWidth={1.5}
-                  label={{ value: 'PPT', position: 'insideTopRight', fontSize: 8, fill: '#C21875' }} />
+                <ReferenceLine
+                  y={dailyPPT}
+                  stroke="rgba(194,24,117,0.35)"
+                  strokeDasharray="5 3"
+                  strokeWidth={1.5}
+                  label={{ value: `PPT ${fmt(dailyPPT)}`, position: 'insideTopRight', fontSize: 7.5, fill: '#C21875', fontWeight: 700 }}
+                />
               )}
               <Bar dataKey="ventas" radius={[3, 3, 0, 0]}>
                 {chartData.map((entry, index) => (
                   <Cell
                     key={index}
-                    fill={dailyPPT
-                      ? entry.ventas >= dailyPPT
-                        ? '#10b981'
-                        : entry.ventas >= dailyPPT * 0.75
-                        ? '#f59e0b'
-                        : '#f43f5e'
-                      : '#C21875'}
-                    fillOpacity={0.85}
+                    fill={dailyPPT && entry.ventas >= dailyPPT ? 'url(#barGrad)' : 'url(#barGradFail)'}
                   />
                 ))}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
 
-          {/* Leyenda */}
-          <div className="flex items-center gap-4 mt-2">
-            {[
-              { color: '#10b981', label: '≥ PPT' },
-              { color: '#f59e0b', label: '75–99%' },
-              { color: '#f43f5e', label: '< 75%' },
-              { color: '#C21875', label: 'Meta PPT', dash: true },
-            ].map(l => (
-              <div key={l.label} className="flex items-center gap-1.5">
-                {l.dash
-                  ? <div className="w-4 h-px border-t border-dashed" style={{ borderColor: l.color }} />
-                  : <div className="w-2 h-2 rounded-sm" style={{ background: l.color }} />}
-                <span className="text-[8.5px] text-slate-300 font-medium">{l.label}</span>
+          {/* Leyenda limpia */}
+          <div className="flex items-center gap-5 mt-3 pt-3" style={{ borderTop: '1px solid rgba(0,0,0,0.05)' }}>
+            <div className="flex items-center gap-1.5">
+              <div className="w-2.5 h-2.5 rounded-sm" style={{ background: '#C21875', opacity: 0.75 }} />
+              <span className="text-[9px] text-slate-400 font-medium">Cumplió PPT</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-2.5 h-2.5 rounded-sm" style={{ background: '#94a3b8', opacity: 0.4 }} />
+              <span className="text-[9px] text-slate-400 font-medium">Bajo PPT</span>
+            </div>
+            {dailyPPT && (
+              <div className="flex items-center gap-1.5">
+                <div className="w-4 border-t border-dashed" style={{ borderColor: 'rgba(194,24,117,0.4)' }} />
+                <span className="text-[9px] text-slate-400 font-medium">Línea PPT {fmt(dailyPPT)}</span>
               </div>
-            ))}
+            )}
           </div>
         </motion.div>
       )}
