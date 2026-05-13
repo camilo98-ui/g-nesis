@@ -406,17 +406,11 @@ export default function HomeWorkspace({
                   </div>
                 )}
               </div>
-              {/* Subtitle + store selector row */}
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-[11px] text-slate-400 font-medium truncate min-w-0">
-                  {isGerente ? 'Visión ejecutiva · Todas las tiendas' : 'Cockpit operacional'}
-                </p>
-                {!isGerente && (
-                  <div className="flex-shrink-0 max-w-[180px] w-full">
-                    <StoreSelector selectedStore={selectedStore} onStoreChange={onStoreChange} />
-                  </div>
-                )}
-              </div>
+              {!isGerente && (
+                <div className="flex-shrink-0 max-w-[180px] w-full">
+                  <StoreSelector selectedStore={selectedStore} onStoreChange={onStoreChange} />
+                </div>
+              )}
             </motion.div>
 
             {/* ── KPI STRIP ── */}
