@@ -12,6 +12,7 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { motion } from 'framer-motion';
+import MascotWidget from '@/components/MascotWidget';
 
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/6a749247d_Capturadepantalla2025-11-251251441.png";
 
@@ -112,6 +113,7 @@ export default function Layout({ children, currentPageName }) {
           </div>
           </main>
           </div>
+          <MascotWidget />
           </ErrorBoundary>
           </DateFilterProvider>
           );
